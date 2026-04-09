@@ -1,4 +1,4 @@
-services:
+﻿services:
   git:
     image: alpine/git:2.47.1
     container_name: bd_git
@@ -167,7 +167,7 @@ services:
       - "8786:8786"
       - "8787:8787"
     volumes:
-      - C:/Users/nib1l/Documents/bigdata-course/dask/jobs:/app
+      - C:/Users/nib1l/Documents/diplocopia/BigData2026/infraestructura/dask/jobs:/app
 
   dask-worker:
     image: daskdev/dask:latest
@@ -178,7 +178,7 @@ services:
     environment:
       - DASK_DISTRIBUTED__WORKER__MEMORY__TARGET=0.8
     volumes:
-      - C:/Users/nib1l/Documents/bigdata-course/dask/jobs:/app   # 👈 TAMBIÉN AQUÍ
+      - C:/Users/nib1l/Documents/diplocopia/BigData2026/infraestructura/dask/jobs:/app
   jupyter:
     build:
       context: .
@@ -204,3 +204,5 @@ volumes:
   airflow_logs:
   airflow_plugins:
   es_data:
+
+
