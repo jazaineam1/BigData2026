@@ -293,8 +293,12 @@ import tempfile
 import kuzu
 
 base_dir = os.path.join(tempfile.gettempdir(), "kuzu_secop_clase")
-if os.path.exists(base_dir):
+# La ruta temporal debe quedar limpia para que la celda sea re-ejecutable.
+# En algunos entornos puede existir como carpeta y en otros como archivo.
+if os.path.isdir(base_dir):
     shutil.rmtree(base_dir)
+elif os.path.exists(base_dir):
+    os.remove(base_dir)
 
 db = kuzu.Database(base_dir)
 conn = kuzu.Connection(db)
