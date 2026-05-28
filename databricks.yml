@@ -1,0 +1,19 @@
+# Plantilla para convertir este repositorio en proyecto Databricks desde VS Code.
+# Copia este archivo como `databricks.yml` y cambia el host por la URL real
+# de tu workspace Free Edition.
+
+bundle:
+  name: bigdata2026-vscode
+
+variables:
+  databricks_host:
+    description: URL del workspace Databricks Free Edition.
+    default: "https://dbc-2b7e1aba-276f.cloud.databricks.com"
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: ${var.databricks_host}
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}

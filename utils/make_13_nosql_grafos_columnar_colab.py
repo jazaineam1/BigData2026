@@ -388,17 +388,17 @@ La pregunta cambia: ya no queremos solo contar filas. Queremos encontrar caminos
         ),
         code('''
 import os
-import shutil
 import tempfile
+import uuid
 import kuzu
 
-base_dir = os.path.join(tempfile.gettempdir(), "kuzu_secop_clase")
-# La ruta temporal debe quedar limpia para que la celda sea re-ejecutable.
-# En algunos entornos puede existir como carpeta y en otros como archivo.
-if os.path.isdir(base_dir):
-    shutil.rmtree(base_dir)
-elif os.path.exists(base_dir):
-    os.remove(base_dir)
+# Kuzu espera una ruta de base que todavia no exista.
+# Usamos un nombre unico por ejecucion para evitar choques si Colab mantiene
+# una conexion anterior viva en memoria.
+base_dir = os.path.join(
+    tempfile.gettempdir(),
+    "kuzu_secop_clase_" + uuid.uuid4().hex,
+)
 
 db = kuzu.Database(base_dir)
 conn = kuzu.Connection(db)
@@ -416,13 +416,14 @@ conn.execute(
 )
 conn.execute("CREATE REL TABLE TRABAJA_EN(FROM Proveedor TO Sector)")
 
-print("Esquema de grafo creado.")
+print("Esquema de grafo creado en:", base_dir)
 '''),
         interp(
             "esquema de grafo",
             [
                 "El esquema separa actores y relaciones; esto evita repetir la entidad o el proveedor en cada fila como si todo fuera una tabla plana.",
                 "La relacion `CONTRATA` guarda propiedades del vinculo, no solo de los nodos. Ese detalle es clave en grafos: una relacion tambien puede tener datos.",
+                "La ruta de Kuzu cambia en cada ejecucion para que Colab no choque con una base anterior que todavia exista en memoria.",
                 "Todavia no hemos probado ninguna hipotesis; solo preparamos una representacion adecuada para preguntas relacionales.",
             ],
         ),

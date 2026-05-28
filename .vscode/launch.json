@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Databricks Connect: smoke test SECOP",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/databricks_vscode_smoke_test.py",
+      "console": "integratedTerminal",
+      "databricks": true,
+      "justMyCode": true
+    }
+  ]
+}

@@ -14,7 +14,7 @@ if __package__ in (None, ""):
 from utils.make_notebook import md, code, save, validate, uce_header, section_header
 
 
-TOTAL_Q = 14
+TOTAL_Q = 12
 
 
 def pregunta(num, tema, contexto, pregunta_texto, opciones, correcta, explicacion):
@@ -85,9 +85,10 @@ ejecuta Spark dentro de Databricks y como se construye un flujo reproducible.
 ## Alcance de la sesion
 
 Trabajaremos con Databricks en su edicion gratuita 2026, que usa computo
-serverless y Unity Catalog. Por eso evitaremos patrones legacy como depender de
-DBFS root o de `sparkContext`, y usaremos Spark SQL, PySpark DataFrames, tablas,
-Volumes cuando esten disponibles, Parquet y Delta Lake.
+serverless y Unity Catalog. El punto de entrada de la clase sera el objeto
+`spark`: con el leeremos tablas, ejecutaremos SQL, crearemos DataFrames y
+guardaremos resultados. Tambien veremos Volumes cuando esten disponibles,
+Parquet y Delta Lake.
 
 ## Agenda sugerida
 
@@ -113,7 +114,7 @@ def _toc():
 
 - 0. Databricks Free/Community 2026: serverless y plataforma moderna
 - 1. Magic commands y dbutils
-- 2. SparkSession y Spark Connect
+- 2. SparkSession y el objeto spark
 - 3. Catalogos, tablas y Volumes
 - 4. Spark SQL completo: TempViews, DDL y DML
 - 5. Tipos de datos y schemas
@@ -139,10 +140,10 @@ def _correspondencia():
 |---|---|
 | Hadoop y YARN explican la administracion de recursos | Databricks serverless abstrae gran parte de esa administracion |
 | Spark como motor distribuido | Spark se usa con SQL, DataFrames y PySpark |
-| Clusters y ejecucion distribuida | SparkSession, Spark Connect, Jobs, Stages y Tasks |
+| Clusters y ejecucion distribuida | SparkSession, SparkSession, Jobs, Stages y Tasks |
 | Archivos y almacenamiento | Unity Catalog, Volumes y tablas administradas |
 
-Conservamos la intuicion distribuida de la sesion 7, pero la llevamos al flujo
+Conservamos la idea de procesamiento distribuido de la sesion 7, pero la llevamos al flujo
 actual de Databricks.
     """)
 
@@ -158,7 +159,7 @@ estudiantes, docentes y personas que estan aprendiendo. En 2026 reemplaza a la
 antigua Community Edition y funciona en un entorno **serverless**, con cuotas y
 algunas limitaciones.
 
-## Intuicion
+## Explicacion paso a paso
 
 En este entorno no administramos nodos manualmente. El estudiante abre un
 notebook y Databricks conecta compute serverless. Esto hace mas simple la clase,
@@ -169,7 +170,6 @@ y Volumes cuando esten disponibles.
 |---|---|
 | Compute | Serverless administrado |
 | Infraestructura | No se eligen nodos manualmente |
-| `sparkContext` | Puede no estar disponible por Spark Connect |
 | Archivos | Preferir Volumes, tablas o archivos del workspace |
 | DBFS root / FileStore | Legacy o acceso limitado |
 | Observabilidad | Query Profile / query insights |
@@ -189,16 +189,7 @@ print(f"Python: {sys.version}")
 print(f"Spark : {spark.version}")
 
 IS_SERVERLESS = False
-HAS_SPARK_CONTEXT = False
 HAS_UNITY_CATALOG = False
-
-try:
-    print("sparkContext.master:", spark.sparkContext.master)
-    HAS_SPARK_CONTEXT = True
-except Exception as exc:
-    IS_SERVERLESS = True
-    print("sparkContext no disponible directamente. Probable Spark Connect / Serverless.")
-    print(f"Detalle: {type(exc).__name__}: {exc}")
 
 try:
     current_cat = "hive_metastore"
@@ -217,7 +208,10 @@ try:
 except Exception:
     photon = "no detectable"
 
-print(f"IS_SERVERLESS={IS_SERVERLESS}, UC={HAS_UNITY_CATALOG}, Photon={photon}")
+print(f"Catalogo detectado: {current_cat}")
+print(f"Schema detectado  : {current_schema}")
+print(f"Unity Catalog     : {HAS_UNITY_CATALOG}")
+print(f"Photon            : {photon}")
 
 def nombre_tabla(nombre):
     if HAS_UNITY_CATALOG:
@@ -225,9 +219,9 @@ def nombre_tabla(nombre):
     return f"{current_schema}.{nombre}"
         """),
         interp("deteccion del entorno", [
-            "En Databricks Free/Community 2026 es normal que `sparkContext` no este disponible directamente.",
-            "Si hay Unity Catalog, conviene trabajar con tablas y Volumes gobernados.",
-            "La funcion `nombre_tabla` permite usar dos o tres niveles segun el entorno."
+            "El catalogo indica el espacio principal donde Databricks organiza datos.",
+            "El schema es una carpeta logica dentro del catalogo; alli viven tablas, vistas y otros objetos.",
+            "Durante la clase usaremos el objeto `spark` para consultar y crear datos sin entrar en detalles internos del motor."
         ]),
         md("""
 ## Nota sobre instalacion de librerias
@@ -256,17 +250,27 @@ interactuar con archivos, widgets, secretos y ejecuciones de notebooks.
 |---|---|
 | `%python` | Ejecutar Python |
 | `%sql` | Ejecutar SQL |
-| `%md` | Escribir Markdown |
+| `%md` | Escribir texto formateado dentro del notebook |
 | `%pip` | Instalar librerias en el entorno del notebook |
 | `%run` | Incluir otro notebook |
 | `%fs` | Comandos de archivos Databricks |
 | `%sh` | Shell del entorno; puede estar limitado en serverless |
 
-## Intuicion
+## Explicacion paso a paso
 
-Un notebook puede combinar explicacion, SQL y Python. Para una primera clase,
-conviene aprender el equivalente Python de casi todo, porque permite copiar el
-codigo dentro de funciones o jobs.
+Un notebook de Databricks no es solo una hoja para escribir codigo. Es una mezcla
+de explicacion, consultas, resultados y pequenas herramientas de ejecucion.
+
+- Si una celda empieza con `%python`, Databricks interpreta el contenido como Python.
+- Si empieza con `%sql`, interpreta el contenido como una consulta SQL.
+- Si empieza con `%md`, la celda se vuelve texto enriquecido: titulos, tablas,
+  listas, enlaces y explicaciones.
+- Si no escribimos ningun magic, normalmente la celda usa el lenguaje por defecto
+  del notebook.
+
+En este cuaderno usaremos sobre todo Python y `spark.sql(...)`, porque asi el
+estudiante ve una forma uniforme de ejecutar SQL desde Python sin saltar entre
+lenguajes todo el tiempo.
         """),
         code("""
 # SQL desde Python: equivalente portable a una celda %sql
@@ -281,21 +285,37 @@ consulta.show(truncate=False)
         interp("magic SQL desde Python", [
             "La salida confirma el catalogo y schema activos.",
             "`spark.sql` permite usar SQL multi-linea dentro de una celda Python.",
-            "Esto sera util cuando necesitemos DDL, DML o consultas con CTEs."
+            "Mas adelante usaremos SQL para tres cosas distintas: crear objetos, insertar datos y escribir consultas mas legibles.",
+            "DDL significa lenguaje para definir objetos de datos, por ejemplo crear una tabla.",
+            "DML significa lenguaje para modificar o insertar datos, por ejemplo agregar filas a una tabla.",
+            "Una CTE es una consulta temporal con nombre dentro de un `WITH`; ayuda a dividir una consulta larga en pasos."
         ]),
         md("""
-## Modulos frecuentes de `dbutils`
+## Que es `dbutils`
+
+`dbutils` significa **Databricks Utilities**. Es un conjunto de herramientas que
+Databricks entrega dentro del notebook para resolver tareas practicas que no son
+exactamente transformaciones de datos.
+
+No debes memorizar todos sus modulos al inicio. Lo importante es reconocer para
+que tipo de problema sirve cada uno:
 
 | Modulo | Para que sirve |
 |---|---|
-| `dbutils.fs` | Listar y manipular archivos accesibles por Databricks |
-| `dbutils.widgets` | Parametrizar notebooks |
-| `dbutils.secrets` | Leer credenciales almacenadas en secret scopes |
-| `dbutils.notebook` | Ejecutar o terminar notebooks desde codigo |
+| `dbutils.fs` | Trabajar con archivos que Databricks puede ver. En serverless puede tener limites; para datos gobernados se prefieren tablas y Volumes. |
+| `dbutils.widgets` | Crear parametros visibles en la parte superior del notebook. Sirven para cambiar valores sin editar el codigo. |
+| `dbutils.secrets` | Leer credenciales guardadas de forma segura. Se usa para no escribir claves o tokens directamente en el notebook. |
+| `dbutils.notebook` | Ejecutar otro notebook o terminar el notebook actual devolviendo un resultado. Es util en workflows. |
 
 En Databricks Free/Community 2026 el compute es serverless. El acceso a DBFS
 root o FileStore puede estar limitado, por eso el patron recomendado es:
 tablas, Volumes de Unity Catalog o archivos del workspace.
+
+En esta primera clase solo veremos ejemplos simples. La idea es que, cuando veas
+`dbutils.widgets`, entiendas que se esta parametrizando el notebook; cuando veas
+`dbutils.secrets`, entiendas que se esta evitando exponer credenciales; y cuando
+veas `dbutils.fs`, recuerdes que no todas las rutas estan disponibles en
+serverless.
         """),
         code("""
 # Explorar ubicaciones de forma segura en Databricks serverless
@@ -354,28 +374,38 @@ print("dbutils.notebook.run('/Repos/proyecto/otro_notebook', 300, {'fecha': '202
 
 def _seccion_2():
     return [
-        section_header("2", "SparkSession y Spark Connect"),
+        section_header("2", "SparkSession y el objeto spark"),
         md("""
-## Definicion formal
+## Que es `spark`
 
-**SparkSession** es la puerta principal para usar Spark desde PySpark.
-**Spark Connect** es el modelo cliente-servidor usado por el compute serverless:
-el notebook envia planes al servidor Spark, y Spark los analiza, optimiza y
-ejecuta.
+En Databricks, el objeto `spark` ya viene creado cuando abres un notebook con
+compute conectado. Ese objeto es una **SparkSession**.
 
-## Intuicion
+Una SparkSession es la entrada principal para trabajar con Spark desde Python.
+Con `spark` podemos hacer cuatro cosas fundamentales:
 
-En Databricks Free/Community 2026 no conviene depender de `sparkContext` ni de
-RDDs. Para aprender bien Databricks, usa `SparkSession`, DataFrames y SQL.
-
-| API | Recomendacion para esta clase |
+| Necesidad | Ejemplo |
 |---|---|
-| `spark.sql(...)` | Usar |
-| `spark.read.table(...)` | Usar |
-| DataFrame API | Usar |
-| `spark.sparkContext.parallelize(...)` | Evitar en serverless |
-| RDDs | No usarlos como patron de clase |
-| Global temp views | Evitar en clase; usar temp views o tablas |
+| Ejecutar SQL | `spark.sql("SELECT 1")` |
+| Leer una tabla | `spark.read.table("samples.nyctaxi.trips")` |
+| Crear un DataFrame pequeno | `spark.createDataFrame([...], columnas)` |
+| Crear rangos de prueba | `spark.range(10)` |
+
+## Como pensar en Spark dentro de Databricks
+
+Cuando escribes codigo PySpark, Python no procesa todas las filas una por una en
+tu navegador. Python construye instrucciones de alto nivel: leer esta tabla,
+filtrar estas filas, crear esta columna, agrupar por esta variable. Spark toma
+esas instrucciones, arma un plan de ejecucion y lo ejecuta en el compute de
+Databricks.
+
+Por eso, en esta clase trabajaremos con tres herramientas principales:
+
+- `spark`, para entrar a Spark.
+- DataFrames, para representar tablas dentro de PySpark.
+- Spark SQL, para escribir consultas en lenguaje SQL.
+
+No necesitamos usar APIs internas ni antiguas para aprender Databricks.
         """),
         code("""
 # Lo que funciona bien: SparkSession, SQL y DataFrames
@@ -386,15 +416,50 @@ df.show()
 
 spark.sql("SELECT 1 + 1 AS suma").show()
 
-# Alternativa moderna a sparkContext.parallelize(...)
+# Crear un DataFrame pequeno directamente desde datos escritos en Python
 df_local = spark.createDataFrame([(1,), (2,), (3,)], ["valor"])
 df_local.show()
         """),
-        interp("SparkSession y SparkContext", [
+        interp("SparkSession y el objeto spark", [
             "El ejemplo muestra tres patrones compatibles: `spark.range`, `spark.sql` y `spark.createDataFrame`.",
-            "Para una introduccion, basta pensar que Python describe un plan y Spark lo ejecuta en el cluster.",
-            "Aunque algunos ejemplos antiguos usen RDDs, los DataFrames son el patron central del curso."
+            "La salida de `show()` no significa que Python guardo todas las filas localmente; significa que Spark ejecuto una accion y mostro una muestra.",
+            "A partir de aqui, cuando aparezca `spark`, debe leerse como la entrada principal al motor Spark dentro de Databricks."
         ]),
+        md("""
+## Funciones de `pyspark.sql.functions`
+
+La linea:
+
+```python
+from pyspark.sql import functions as F
+```
+
+importa muchas funciones nativas de Spark para trabajar con columnas. Usamos el
+alias `F` para escribir expresiones como `F.col("fare_amount")`, `F.avg(...)`,
+`F.hour(...)` o `F.when(...)`.
+
+Estas funciones son preferibles a escribir bucles de Python porque Spark puede
+entenderlas, optimizarlas y ejecutarlas dentro de su motor distribuido.
+        """),
+        code("""
+# Inventario de funciones disponibles en pyspark.sql.functions
+from pyspark.sql import functions as F
+
+funciones_f = sorted([
+    nombre for nombre in dir(F)
+    if not nombre.startswith("_")
+])
+
+print(f"Total de nombres disponibles en F: {len(funciones_f)}")
+
+(
+    spark.createDataFrame(
+        [(i + 1, nombre) for i, nombre in enumerate(funciones_f)],
+        ["n", "funcion"]
+    )
+    .show(300, truncate=False)
+)
+        """),
     ]
 
 
@@ -404,10 +469,25 @@ def _seccion_3():
         md("""
 ## Definicion formal
 
-Databricks organiza tablas en catalogos y schemas. En Databricks Free/Community
-2026 se trabaja con Unity Catalog y nombres como `catalog.schema.table` cuando
-estan disponibles. Los **Volumes** son el lugar recomendado para archivos no
-tabulares, como CSV, JSON, Parquet suelto o imagenes.
+Databricks organiza los datos con una jerarquia parecida a una biblioteca:
+
+- Un **catalogo** es el nivel mas alto. Agrupa datos de una organizacion,
+  proyecto o entorno.
+- Un **schema** es una division dentro del catalogo. En otros sistemas tambien
+  puede llamarse base de datos.
+- Una **tabla** es un conjunto de datos estructurado con filas y columnas.
+- Una **vista** es una consulta guardada que se comporta como una tabla logica.
+- Un **Volume** es una ubicacion gobernada para archivos, no necesariamente
+  tablas: CSV, JSON, Parquet, imagenes, documentos u otros archivos.
+
+Cuando una tabla se escribe como `catalog.schema.table`, cada parte responde una
+pregunta:
+
+| Parte | Pregunta que responde | Ejemplo |
+|---|---|---|
+| `catalog` | En que gran espacio de datos estoy trabajando | `samples` |
+| `schema` | En que grupo o tema dentro del catalogo | `nyctaxi` |
+| `table` | Que tabla concreta quiero leer | `trips` |
 
 ```
 catalog
@@ -415,10 +495,22 @@ catalog
     table | view | function | volume
 ```
 
-## Intuicion
+## Como usar esta idea en la clase
 
-La pregunta correcta es: "en que catalogo, schema, tabla o Volume vive el dato".
-No asumimos que `dbfs:/FileStore` existe o que se puede listar desde serverless.
+En un notebook local uno suele pensar en rutas como `C:\\Users\\...` o
+`Downloads\\archivo.csv`. En Databricks esa no es la forma correcta de razonar.
+El notebook corre dentro de Databricks, no dentro del disco del estudiante.
+
+Por eso, antes de leer datos, hacemos estas preguntas:
+
+1. Si el dato ya esta como tabla: cual es su nombre completo.
+2. Si el dato es un archivo: en que Volume o ubicacion del workspace fue subido.
+3. Si el dato es temporal: si basta con crearlo como DataFrame dentro del notebook.
+
+En esta sesion usaremos principalmente la tabla `samples.nyctaxi.trips`, que esta
+visible en el catalogo de ejemplo de Databricks. Tambien mostraremos la forma de
+consultar Volumes, pero no asumiremos que todos los estudiantes tengan Volumes
+creados.
         """),
         code("""
 # Explorar catalogos, schema y tablas de ejemplo
@@ -513,8 +605,10 @@ objetos; **DML** inserta, actualiza o elimina datos.
 | DML | `INSERT INTO`, `MERGE`, `DELETE`, `UPDATE` |
 
 Para compartir resultados entre sesiones, prefiere tablas en el metastore
-(`catalog.schema.mi_tabla` cuando Unity Catalog esta disponible). Si tu workspace
-usa un metastore legacy, el notebook ajusta el nombre con la funcion `nombre_tabla`.
+(`catalog.schema.mi_tabla` cuando Unity Catalog esta disponible). En este
+cuaderno usaremos una pequeña ayuda interna para construir nombres compatibles
+con el entorno, pero el concepto importante para el estudiante es el nombre
+organizado de la tabla.
         """),
         code("""
 # Crear TempView desde un DataFrame y consultarla con SQL
@@ -613,7 +707,7 @@ Spark puede inferirlo, pero en pipelines reales conviene declararlo.
 | `DateType`, `TimestampType` | Fechas y tiempos |
 | `ArrayType`, `MapType`, `StructType` | Datos semiestructurados |
 
-## Intuicion
+## Explicacion paso a paso
 
 El schema es el contrato del dato. Si el contrato cambia sin control, los
 resultados dejan de ser confiables.
@@ -827,7 +921,7 @@ ejecutan trabajo hasta que aparece una accion. **Catalyst** optimiza ese plan.
 Codigo PySpark -> Logical plan -> Optimized plan -> Physical plan -> Jobs/Stages/Tasks
 ```
 
-## Intuicion
+## Explicacion paso a paso
 
 Cuando escribes `filter`, `select` o `withColumn`, Spark todavia esta planeando.
 Cuando escribes `count`, `show`, `collect`, `toPandas` o `write`, Spark ejecuta.
@@ -886,7 +980,7 @@ print(f"Filas resultantes: {plan_con_filtro.count():,}")
         """),
         code("""
 # repartition vs coalesce sin usar APIs RDD
-# En serverless/Spark Connect evitamos APIs de bajo nivel de RDD.
+# En serverless evitamos APIs de bajo nivel de RDD.
 pequeno = spark.range(0, 1000)
 
 reparticionado = pequeno.repartition(8)
@@ -1604,7 +1698,7 @@ Un **Job** ejecuta una tarea de forma reproducible. Un **Workflow** puede conten
 varias tareas conectadas como DAG: notebooks, Python scripts, SQL, pipelines
 Lakeflow, dbt u otros tipos.
 
-## Intuicion
+## Explicacion paso a paso
 
 El notebook interactivo sirve para aprender y explorar. El Job sirve para operar:
 programar, parametrizar, monitorear, reintentar y notificar.
@@ -1755,35 +1849,33 @@ def build_cells():
         _correspondencia(),
         _toc(),
         *_seccion_0(),
-        pregunta(1, "Databricks", "En esta clase se trabaja con Databricks Free/Community 2026 sobre serverless.", "Que idea describe mejor este entorno?", ["Spark desaparece", "Permite practicar notebooks, Spark SQL y PySpark con recursos serverless", "Solo se puede usar Pandas", "No existen tablas"], "B", "Databricks gratuito/serverless es suficiente para aprender el flujo base de Spark y tablas."),
         *_seccion_1(),
-        pregunta(2, "dbutils", "Los notebooks se parametrizan para jobs.", "Que modulo permite crear parametros visibles en el notebook?", ["dbutils.widgets", "dbutils.fs", "dbutils.secrets", "spark.catalog"], "A", "`dbutils.widgets` crea parametros de entrada."),
         *_seccion_2(),
-        pregunta(3, "Spark", "En serverless se usa Spark Connect y no conviene depender de RDDs.", "Que API conviene priorizar?", ["RDDs", "sparkContext.parallelize", "DataFrames y Spark SQL", "Loops locales con collect"], "C", "DataFrames y SQL son el patron principal y optimizable."),
+        pregunta(1, "Spark", "En esta clase el punto de entrada sera el objeto `spark`.", "Que herramienta conviene priorizar para trabajar con tablas en Databricks?", ["DataFrames y Spark SQL", "Bucles locales sobre listas", "Archivos del computador sin subirlos", "Variables sueltas sin tabla"], "A", "DataFrames y Spark SQL son el patron principal para leer, transformar y guardar datos."),
         *_seccion_3(),
-        pregunta(4, "Tablas", "Databricks serverless no ve directamente el disco local del estudiante.", "Cual ruta NO debe usarse dentro de Databricks para leer datos del computador local?", ["catalog.schema.table", "/Volumes/catalog/schema/volume/datos.csv", "archivo subido al workspace", "C:/datos/trips.csv"], "D", "Databricks no ve directamente el disco local; se debe subir el archivo o usar Volumes/tablas."),
+        pregunta(2, "Tablas", "Databricks serverless no ve directamente el disco local del estudiante.", "Cual ruta NO debe usarse dentro de Databricks para leer datos del computador local?", ["catalog.schema.table", "/Volumes/catalog/schema/volume/datos.csv", "archivo subido al workspace", "C:/datos/trips.csv"], "D", "Databricks no ve directamente el disco local; se debe subir el archivo o usar Volumes/tablas."),
         *_seccion_4(),
-        pregunta(5, "Spark SQL", "Una TempView vive durante la sesion.", "Que conviene usar para persistir resultados?", ["TempView", "Tabla administrada", "Variable Python", "print"], "B", "Una tabla administrada permanece disponible despues de la celda."),
+        pregunta(3, "Spark SQL", "Una TempView vive durante la sesion.", "Que conviene usar para persistir resultados?", ["TempView", "Tabla administrada", "Variable Python", "print"], "B", "Una tabla administrada permanece disponible despues de la celda."),
         *_seccion_5(),
-        pregunta(6, "Schemas", "El schema es el contrato del dato.", "Por que declarar schema ayuda?", ["Evita toda ejecucion", "Reduce errores de inferencia y cambios silenciosos", "Convierte todo a texto", "Elimina permisos"], "B", "Un contrato explicito mejora confiabilidad."),
+        pregunta(4, "Schemas", "El schema es el contrato del dato.", "Por que declarar schema ayuda?", ["Evita toda ejecucion", "Reduce errores de inferencia y cambios silenciosos", "Convierte todo a texto", "Elimina permisos"], "B", "Un contrato explicito mejora confiabilidad."),
         *_seccion_6(),
-        pregunta(7, "Parquet", "Parquet es columnar y Delta agrega log transaccional.", "Que afirmacion es correcta?", ["Parquet y Delta son identicos", "Delta usa Parquet mas transaction log", "CSV siempre es mas eficiente", "Delta solo sirve para imagenes"], "B", "Delta agrega ACID, historial y MERGE sobre datos Parquet."),
+        pregunta(5, "Parquet", "Parquet es columnar y Delta agrega log transaccional.", "Que afirmacion es correcta?", ["Parquet y Delta son identicos", "Delta usa Parquet mas transaction log", "CSV siempre es mas eficiente", "Delta solo sirve para imagenes"], "B", "Delta agrega ACID, historial y MERGE sobre datos Parquet."),
         *_seccion_7(),
-        pregunta(8, "Lazy evaluation", "Spark no ejecuta transformaciones hasta una accion.", "Cual es una accion?", ["filter", "select", "withColumn", "count"], "D", "`count` dispara ejecucion."),
+        pregunta(6, "Lazy evaluation", "Spark no ejecuta transformaciones hasta una accion.", "Cual es una accion?", ["filter", "select", "withColumn", "count"], "D", "`count` dispara ejecucion."),
         *_seccion_8(),
-        pregunta(9, "Photon", "Photon acelera consultas compatibles sin cambiar codigo.", "Donde se verifica el rendimiento?", ["Query Profile", "Nombre del archivo", "Ruta C:/Users", "Markdown"], "A", "Query Profile muestra detalles de ejecucion."),
+        pregunta(7, "Photon", "Photon acelera consultas compatibles sin cambiar codigo.", "Donde se verifica el rendimiento?", ["Query Profile", "Nombre del archivo", "Ruta C:/Users", "Markdown"], "A", "Query Profile muestra detalles de ejecucion."),
         *_seccion_9(),
-        pregunta(10, "Funciones", "Las funciones nativas son optimizables.", "Que conviene preferir?", ["UDF Python siempre", "Funciones nativas de PySpark", "collect y for", "Pandas para todo"], "B", "Las funciones nativas permanecen dentro del motor Spark."),
+        pregunta(8, "Funciones", "Las funciones nativas son optimizables.", "Que conviene preferir?", ["UDF Python siempre", "Funciones nativas de PySpark", "collect y for", "Pandas para todo"], "B", "Las funciones nativas permanecen dentro del motor Spark."),
         *_seccion_10(),
         *_seccion_11(),
-        pregunta(11, "Spark vs Pandas", "Pandas es excelente si todo cabe en RAM.", "Cuando suele ganar Spark?", ["Datos grandes y pipelines reproducibles", "Cinco filas locales", "Editar a mano", "Sin SQL ni crecimiento"], "A", "Spark gana por escala, SQL distribuido y operacion."),
+        pregunta(9, "Spark vs Pandas", "Pandas es excelente si todo cabe en RAM.", "Cuando suele ganar Spark?", ["Datos grandes y pipelines reproducibles", "Cinco filas locales", "Editar a mano", "Sin SQL ni crecimiento"], "A", "Spark gana por escala, SQL distribuido y operacion."),
         *_seccion_12(),
-        pregunta(12, "Spark vs Dask", "Dask escala Python; Spark optimiza planes SQL/DataFrame.", "Que ventaja es clara de Spark?", ["Catalyst y SQL distribuido", "Editar Excel", "No usar tablas", "Solo numpy local"], "A", "Catalyst optimiza consultas antes de ejecutarlas."),
+        pregunta(10, "Spark vs Dask", "Dask escala Python; Spark optimiza planes SQL/DataFrame.", "Que ventaja es clara de Spark?", ["Catalyst y SQL distribuido", "Editar Excel", "No usar tablas", "Solo numpy local"], "A", "Catalyst optimiza consultas antes de ejecutarlas."),
         *_seccion_13(),
-        pregunta(13, "Delta Lake", "Delta tiene transaction log.", "Que habilita?", ["MERGE, time travel y ACID", "Leer disco local C:", "Eliminar schemas", "Evitar todos los jobs"], "A", "El log permite control transaccional e historial."),
+        pregunta(11, "Delta Lake", "Delta tiene transaction log.", "Que habilita?", ["MERGE, time travel y ACID", "Leer disco local C:", "Eliminar schemas", "Evitar todos los jobs"], "A", "El log permite control transaccional e historial."),
         *_seccion_14(),
         *_seccion_15(),
-        pregunta(14, "Workflows", "Un Job operacionaliza un notebook.", "Que pregunta resume la sesion?", ["Como traigo todo al driver?", "Donde vive el dato, que plan ejecuta Spark y como lo opero?", "Como evito tablas?", "Como reemplazo Spark con for loops?"], "B", "La mentalidad correcta conecta datos, motor, tablas y operacion."),
+        pregunta(12, "Workflows", "Un Job operacionaliza un notebook.", "Que pregunta resume la sesion?", ["Como traigo todo al driver?", "Donde vive el dato, que plan ejecuta Spark y como lo opero?", "Como evito tablas?", "Como reemplazo Spark con for loops?"], "B", "La mentalidad correcta conecta datos, motor, tablas y operacion."),
         *_seccion_16(),
     ]
     return cells
