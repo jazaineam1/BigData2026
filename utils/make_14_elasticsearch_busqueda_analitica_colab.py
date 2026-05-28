@@ -67,6 +67,35 @@ print("Entorno listo: pandas y cliente oficial de Elasticsearch disponibles.")
 ''')
 
 
+def elastic_free_tier_cells():
+    return [
+        md("""
+## Verificacion de nivel gratis y costos
+
+Para esta sesion hay una advertencia importante: **Elastic Cloud no debe presentarse como un plan gratuito permanente**. La ruta cloud se debe manejar como **trial/creditos/allowance sujeto a condiciones**, y el profesor debe verificar la cuenta antes de clase.
+
+Segun la documentacion oficial vigente para 2026:
+
+| Opcion | Que permite | Estado para clase | Advertencia |
+|---|---|---|---|
+| Elastic Cloud Hosted/Serverless | Elasticsearch + Kibana administrados | Ruta recomendada si se tiene trial o cuenta institucional | Puede generar cargos despues del trial o si se exceden condiciones. |
+| Trial desde Elastic | Acceso temporal para probar Elastic Cloud | Util para laboratorio corto | Confirmar duracion y restricciones antes de la sesion. |
+| AWS Marketplace trial | Trial de 7 dias indicado por Elastic FAQ | Alternativa si se usa AWS Marketplace | Despues del trial, los cargos pasan a la cuenta AWS. |
+| Self-managed Basic | Elasticsearch autogestionado con funcionalidades gratuitas | No se usa en este cuaderno | Se omite porque la instruccion del curso fue trabajar solo con Colab y cloud. |
+
+Decision para esta clase: el cuaderno deja **Elastic Cloud como ruta principal si la cuenta esta lista**, pero las celdas estan escritas como plantillas seguras. Si no hay trial activo, la clase puede explicar mapping, queries, bulk, agregaciones y Kibana sin ejecutar contra un cluster.
+"""),
+        interp(
+            "Elastic y facturacion",
+            [
+                "No se debe pedir a estudiantes crear recursos sin explicar riesgo de costos.",
+                "Elasticsearch es el tema del PDA, pero la ejecucion cloud debe prepararse con trial activo o cuenta institucional.",
+                "El cuaderno evita servicios locales y credenciales guardadas; por eso la ruta de ejecucion real depende de Elastic Cloud.",
+            ],
+        ),
+    ]
+
+
 def data_cell():
     return code('''
 import pandas as pd
@@ -153,6 +182,35 @@ Elastic Cloud permite crear una instancia administrada de Elasticsearch y Kibana
 
 Este cuaderno no guarda secretos. Si el estudiante no tiene cuenta lista, puede leer la plantilla, revisar el modelo de consulta y ejecutar las secciones conceptuales.
 """),
+        md("""
+### Guia del cliente oficial de Elasticsearch en Python
+
+El cliente `elasticsearch` es un cliente de bajo nivel: expone casi toda la API de Elasticsearch como metodos Python. Conviene aprenderlo por namespaces:
+
+| Pieza del cliente | Que hace | Ejemplo de uso |
+|---|---|---|
+| `Elasticsearch(...)` | Crea el cliente conectado al cluster. | `Elasticsearch(cloud_id=..., api_key=...)` |
+| `client.info()` | Consulta informacion del cluster. | Diagnostico inicial de conexion. |
+| `client.indices.exists()` | Verifica si un indice existe. | Evitar crear dos veces el mismo indice. |
+| `client.indices.create()` | Crea indice con settings y mapping. | Preparar campos `text`, `keyword`, `integer`. |
+| `client.indices.delete()` | Elimina un indice. | Reiniciar laboratorio pequeno. |
+| `client.index()` | Inserta o reemplaza un documento. | Carga individual. |
+| `helpers.bulk()` | Carga muchos documentos. | Carga por lotes para datasets. |
+| `client.search()` | Ejecuta busquedas y agregaciones. | `match`, `bool`, `filter`, `aggs`. |
+| `client.get()` | Recupera documento por `_id`. | Verificar una carga especifica. |
+| `client.update()` | Actualiza parcialmente un documento. | Corregir un campo sin reindexar todo. |
+| `client.delete()` | Elimina un documento por `_id`. | Limpieza puntual. |
+| `client.options(...)` | Crea una variante del cliente con opciones. | Timeouts, headers o parametros por llamada. |
+
+Lectura clave: `indices.*` administra indices; `index/get/update/delete` trabaja documentos; `search` recupera y resume informacion.
+"""),
+        ficha(
+            "client.search()",
+            "envia una consulta de busqueda o agregacion al cluster.",
+            "`index`, `query`, `aggs`, `size`, `sort` y otros parametros segun la API.",
+            "un diccionario con `hits`, `_score`, `_source`, `aggregations` y metadatos.",
+            "los resultados se leen separando documentos recuperados (`hits`) de resumenes calculados (`aggregations`).",
+        ),
         ficha(
             "Elasticsearch()",
             "crea un cliente Python para enviar operaciones al cluster.",
@@ -184,6 +242,18 @@ else:
                 "Si no hay conexion en clase, la teoria y las plantillas siguen siendo validas para explicar el flujo.",
             ],
         ),
+        code('''
+# Plantilla de diagnostico del cliente Elasticsearch.
+# Ejecuta esta celda despues de crear `client`.
+
+if client is not None:
+    print("Ping:", client.ping())
+    info = client.info()
+    print("Nombre del cluster:", info.get("cluster_name"))
+    print("Version:", info.get("version", {}).get("number"))
+else:
+    print("Sin cliente conectado. Revisa cloud_id, API key y estado del trial.")
+'''),
     ]
 
 
@@ -589,6 +659,7 @@ Al finalizar la clase deberias poder:
 | Kibana | 25 min | Data View, Discover y dashboard basico |
 | Cierre | 15 min | Comparacion con Atlas Search y proyecto final |
 """),
+        *elastic_free_tier_cells(),
         toc([
             "Seccion 1 -- Por que Elasticsearch importa",
             "Seccion 2 -- Conceptos base",

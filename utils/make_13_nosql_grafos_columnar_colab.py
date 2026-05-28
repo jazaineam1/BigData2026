@@ -69,6 +69,32 @@ print("Entorno listo: pandas, KuzuDB, Neo4j driver y Cassandra driver disponible
 ''')
 
 
+def free_tier_cells():
+    return [
+        md("""
+## Verificacion de niveles gratis para esta clase
+
+Antes de pedir cuentas a estudiantes, conviene separar **gratis permanente**, **plan free con limites** y **creditos/trial**. Revisado con documentacion oficial vigente para 2026:
+
+| Herramienta | Que se puede usar en clase | Estado del nivel gratis | Advertencia docente |
+|---|---|---|---|
+| KuzuDB | Practica local en Colab con `pip install kuzu` | Libre y open source, licencia MIT | No requiere cuenta ni servicio cloud. |
+| Neo4j AuraDB | Base de grafos administrada | Tiene plan Free para aprender y prototipar | Tiene limites de nodos/relaciones; bases Free inactivas pueden eliminarse. |
+| Astra DB Serverless | Cassandra/Astra como servicio | Tiene plan Free con creditos mensuales | Al consumir creditos la base puede hibernar; maximo 5 bases serverless en Free. |
+
+Decision para esta sesion: **KuzuDB sera la practica garantizada en Colab**. Neo4j Aura y Astra DB se usan como rutas cloud opcionales para ver clientes reales administrados.
+"""),
+        interp(
+            "costos y ejecucion en clase",
+            [
+                "La practica no depende de tarjeta de credito: KuzuDB cubre el laboratorio ejecutable en Colab.",
+                "Aura y Astra son valiosos para conocer clientes reales, pero deben prepararse antes de clase y revisar limites actuales.",
+                "Si una cuenta gratuita hiberna, se elimina o bloquea operaciones por creditos, el aprendizaje no se pierde: se continua con la ruta local y la plantilla del cliente.",
+            ],
+        ),
+    ]
+
+
 def data_cell():
     return code('''
 import pandas as pd
@@ -130,6 +156,69 @@ contratos
 ''')
 
 
+def kuzu_client_guide_cells():
+    return [
+        md("""
+### Guia del cliente KuzuDB en Python
+
+KuzuDB es una base de grafos embebida: el proceso de Python abre la base directamente, sin servidor intermedio. Eso la hace muy conveniente para Colab y para aprender el modelo de grafos antes de usar una plataforma administrada.
+
+| Pieza del cliente | Que hace | Cuando la usamos |
+|---|---|---|
+| `kuzu.Database(ruta)` | Crea o abre una base de datos embebida. | Al inicio de la practica local. |
+| `kuzu.Connection(db)` | Abre un canal de ejecucion contra la base. | Antes de crear tablas, cargar nodos o consultar. |
+| `conn.execute(cypher, parametros)` | Ejecuta Cypher con parametros opcionales. | Para DDL, carga y consultas. |
+| `QueryResult.get_as_df()` | Convierte el resultado a Pandas. | Cuando queremos interpretar una tabla en clase. |
+| `QueryResult.get_all()` | Devuelve todas las filas como lista. | Para inspecciones pequenas o depuracion. |
+| `QueryResult.has_next()` / `get_next()` | Lee resultados fila por fila. | Util cuando no queremos materializar todo. |
+
+La idea clave: **KuzuDB se usa como una libreria Python**, pero internamente ejecuta Cypher sobre un modelo de grafo.
+"""),
+        ficha(
+            "conn.execute(cypher, parametros)",
+            "envia una instruccion Cypher a KuzuDB.",
+            "texto Cypher y, opcionalmente, un diccionario de parametros como `{'nombre': entidad}`.",
+            "un `QueryResult` si la instruccion produce filas, o una confirmacion interna si modifica el grafo.",
+            "si devuelve filas, conviene pasarlas a `get_as_df()` para leerlas como tabla; si modifica datos, conviene imprimir una confirmacion y luego consultar.",
+        ),
+        md("""
+#### Flujo mental del cliente Kuzu
+
+1. **Abrir base:** `db = kuzu.Database(ruta)`.
+2. **Abrir conexion:** `conn = kuzu.Connection(db)`.
+3. **Definir esquema:** `CREATE NODE TABLE`, `CREATE REL TABLE`.
+4. **Cargar datos:** `MERGE` para cargas pequenas re-ejecutables o `COPY` para volumenes grandes.
+5. **Consultar patrones:** `MATCH ... RETURN ...`.
+6. **Interpretar:** convertir resultados a DataFrame y leerlos con una pregunta de negocio.
+
+En esta clase usamos `MERGE` porque el dataset es pequeno y porque ayuda a que la celda sea re-ejecutable. Para cargas masivas, la documentacion de Kuzu recomienda `COPY` o cargas desde archivos.
+"""),
+        code('''
+# Plantilla minima de uso del cliente KuzuDB.
+# Esta celda es de lectura: resume el patron que usaremos abajo.
+
+plantilla_kuzu = {
+    "abrir_base": "db = kuzu.Database(ruta)",
+    "abrir_conexion": "conn = kuzu.Connection(db)",
+    "crear_tabla_nodo": "conn.execute('CREATE NODE TABLE Entidad(nombre STRING, PRIMARY KEY(nombre))')",
+    "crear_tabla_relacion": "conn.execute('CREATE REL TABLE CONTRATA(FROM Entidad TO Proveedor, contrato_id STRING)')",
+    "insertar_o_reusar": "conn.execute('MERGE (:Entidad {nombre: $nombre})', {'nombre': 'Alcaldia'})",
+    "consultar": "conn.execute('MATCH (e:Entidad) RETURN e.nombre AS entidad').get_as_df()",
+}
+
+plantilla_kuzu
+'''),
+        interp(
+            "cliente KuzuDB",
+            [
+                "La conexion no apunta a una URL externa; apunta a una base embebida en el entorno de Colab.",
+                "Los parametros evitan construir strings manualmente y hacen mas claro que datos cambian en cada ejecucion.",
+                "`get_as_df()` no es la consulta: solo transforma el resultado para leerlo mejor en clase.",
+            ],
+        ),
+    ]
+
+
 def kuzu_cells():
     return [
         section_header("4", "Practica de grafos en Colab con KuzuDB"),
@@ -148,6 +237,7 @@ En esta practica convertiremos la tabla de contratos en un grafo:
 
 La pregunta cambia: ya no queremos solo contar filas. Queremos encontrar caminos, proveedores compartidos y concentraciones relacionales.
 """),
+        *kuzu_client_guide_cells(),
         ficha(
             "kuzu.Database()",
             "crea o abre una base de grafos embebida.",
@@ -204,18 +294,18 @@ proveedores = sorted(contratos["proveedor"].unique())
 sectores = sorted(contratos["sector"].unique())
 
 for entidad in entidades:
-    conn.execute("CREATE (:Entidad {nombre: $nombre})", {"nombre": entidad})
+    conn.execute("MERGE (:Entidad {nombre: $nombre})", {"nombre": entidad})
 
 for proveedor in proveedores:
-    conn.execute("CREATE (:Proveedor {nombre: $nombre})", {"nombre": proveedor})
+    conn.execute("MERGE (:Proveedor {nombre: $nombre})", {"nombre": proveedor})
 
 for sector in sectores:
-    conn.execute("CREATE (:Sector {nombre: $nombre})", {"nombre": sector})
+    conn.execute("MERGE (:Sector {nombre: $nombre})", {"nombre": sector})
 
 for fila in contratos.to_dict("records"):
     conn.execute(
         "MATCH (e:Entidad {nombre: $entidad}), (p:Proveedor {nombre: $proveedor}) "
-        "CREATE (e)-[:CONTRATA {"
+        "MERGE (e)-[:CONTRATA {"
         "contrato_id: $contrato_id, "
         "valor_millones: $valor_millones, "
         "estado: $estado, "
@@ -298,6 +388,23 @@ Neo4j Aura permite trabajar con un motor de grafos administrado. En Colab se usa
 
 En esta seccion no se dejan credenciales en el cuaderno. El estudiante las pega durante la ejecucion.
 """),
+        md("""
+### Guia del cliente Neo4j en Python
+
+El driver oficial de Neo4j trabaja con tres ideas:
+
+| Pieza del cliente | Que hace | Lectura docente |
+|---|---|---|
+| `GraphDatabase.driver(uri, auth=...)` | Crea el objeto principal de conexion. | No ejecuta consultas por si solo; prepara el canal hacia Aura. |
+| `driver.verify_connectivity()` | Prueba que las credenciales y la red funcionen. | Es una celda de diagnostico antes de cargar datos. |
+| `driver.session()` | Abre una sesion de trabajo contra la base. | La sesion es el canal por donde viajan consultas Cypher. |
+| `session.run(cypher, **params)` | Ejecuta una consulta dentro de la sesion. | En clase sirve para cargar y consultar patrones. |
+| `driver.execute_query(...)` | Ejecuta consultas simples con transaccion automatica. | Es comodo para consultas puntuales; `session.run` deja ver mejor el flujo pedagogico. |
+| `record.data()` | Convierte un registro Neo4j en diccionario Python. | Facilita construir DataFrames con resultados. |
+| `driver.close()` | Cierra recursos del cliente. | Buena practica al final de scripts largos. |
+
+En Aura, el cliente no guarda datos localmente: envia Cypher a un servicio administrado. Por eso hay que cuidar credenciales, red y permisos.
+"""),
         ficha(
             "GraphDatabase.driver()",
             "crea una conexion hacia una instancia Neo4j.",
@@ -321,6 +428,14 @@ else:
     driver = None
     print("Practica cloud omitida. Continua con la practica local de KuzuDB.")
 '''),
+        interp(
+            "diagnostico de conexion Neo4j",
+            [
+                "`GraphDatabase.driver()` construye el cliente; `verify_connectivity()` confirma que realmente puede comunicarse con Aura.",
+                "La contrasena se solicita con `getpass()` para que no quede escrita en el cuaderno.",
+                "Si esta celda falla, no significa que el modelo de grafos este mal; suele ser un problema de URI, credenciales o permisos.",
+            ],
+        ),
         md("""
 La siguiente celda muestra el patron recomendado: crear constraints, cargar nodos con `MERGE` y cargar relaciones con propiedades. Si se omitio la conexion, la celda no hace cambios.
 """),
@@ -346,6 +461,34 @@ if driver is not None:
     print("Datos cargados en Neo4j Aura.")
 else:
     print("Sin conexion Aura: no se ejecuto carga cloud.")
+'''),
+        md("""
+### Como leer resultados desde Neo4j
+
+Cuando una consulta devuelve filas, Neo4j entrega objetos `Record`. Para llevarlos a Pandas se suele hacer:
+
+```python
+with driver.session() as session:
+    resultado = session.run("MATCH (p:Proveedor) RETURN p.nombre AS proveedor")
+    filas = [record.data() for record in resultado]
+    pd.DataFrame(filas)
+```
+
+La parte importante no es Pandas: es que cada `record` representa una fila de la respuesta Cypher. `record.data()` la vuelve diccionario para que sea facil de inspeccionar.
+"""),
+        code('''
+if driver is not None:
+    with driver.session() as session:
+        resultado = session.run(
+            "MATCH (e:Entidad)-[c:CONTRATA]->(p:Proveedor) "
+            "RETURN e.nombre AS entidad, p.nombre AS proveedor, c.valor_millones AS valor "
+            "ORDER BY valor DESC"
+        )
+        filas = [record.data() for record in resultado]
+        neo4j_resumen = pd.DataFrame(filas)
+        display(neo4j_resumen)
+else:
+    print("Sin conexion Aura: revisa el patron record.data() como plantilla.")
 '''),
         interp(
             "Neo4j Aura",
@@ -455,6 +598,23 @@ DataStax Astra DB permite practicar Cassandra como servicio administrado. La ide
 
 La celda siguiente es una plantilla segura: no contiene secretos. Si no tienes credenciales durante la clase, estudia el flujo y continua con la practica local de modelado.
 """),
+        md("""
+### Guia del cliente Cassandra/Astra en Python
+
+El driver de Cassandra se usa distinto a un cliente SQL tradicional porque el modelo esta orientado a consultas por clave.
+
+| Pieza del cliente | Que hace | Para que importa |
+|---|---|---|
+| `PlainTextAuthProvider(client_id, client_secret)` | Prepara autenticacion con token de Astra. | Separa credenciales del codigo. |
+| `Cluster(cloud=..., auth_provider=...)` | Crea el objeto cluster usando el Secure Connect Bundle. | El SCB contiene informacion de conexion segura. |
+| `cluster.connect()` | Abre una sesion CQL. | A partir de aqui se ejecutan comandos. |
+| `session.set_keyspace(...)` | Selecciona el espacio logico de tablas. | Evita repetir el keyspace en cada consulta. |
+| `session.execute(cql)` | Ejecuta CQL. | Sirve para DDL, inserciones y consultas pequenas. |
+| `session.prepare(cql)` | Precompila una consulta parametrizada. | Recomendado para consultas repetidas con distintos valores. |
+| `cluster.shutdown()` | Cierra conexiones. | Buena practica en scripts y notebooks largos. |
+
+El concepto clave es que `session.execute()` no debe usarse para explorar cualquier cosa sin clave. En Cassandra, la consulta debe respetar el diseno de particiones.
+"""),
         ficha(
             "Cluster(cloud={...}, auth_provider=...)",
             "crea una conexion del driver Cassandra hacia Astra DB.",
@@ -484,6 +644,14 @@ else:
     session = None
     print("Ruta Astra omitida. Se mantiene la practica conceptual/local.")
 '''),
+        interp(
+            "conexion Astra",
+            [
+                "El Secure Connect Bundle no es un dataset; es un paquete de configuracion y certificados para conectarse de forma segura.",
+                "`cluster.connect()` abre la sesion CQL. Desde ese momento, el cuaderno puede enviar instrucciones a Astra.",
+                "Si la conexion falla, revisa que el bundle corresponda a la base correcta y que el token tenga permisos.",
+            ],
+        ),
         code('''
 if session is not None:
     session.execute(
@@ -505,6 +673,34 @@ if session is not None:
     print("Keyspace y tabla preparados.")
 else:
     print("Sin sesion Astra: revisa el CQL como plantilla de diseno.")
+'''),
+        md("""
+### Prepared statements en Cassandra
+
+Cuando una consulta se ejecuta muchas veces con distintos valores, se recomienda prepararla:
+
+```python
+stmt = session.prepare(
+    "SELECT * FROM contratos_por_entidad_anio WHERE entidad=? AND anio=?"
+)
+filas = session.execute(stmt, ["Alcaldia de Cali", 2026])
+```
+
+La consulta se define una vez y luego solo cambian los valores. Esto reduce parseo repetido y deja mas claro que la consulta esta disenada para una clave concreta.
+"""),
+        code('''
+if session is not None:
+    consulta = session.prepare(
+        "SELECT contrato_id, proveedor, valor_millones, estado "
+        "FROM contratos_por_entidad_anio "
+        "WHERE entidad=? AND anio=?"
+    )
+    print("Prepared statement creado para consultar por entidad y anio.")
+    # Ejecucion esperada:
+    # filas = session.execute(consulta, ["Alcaldia de Cali", 2026])
+    # pd.DataFrame(list(filas))
+else:
+    print("Plantilla prepared statement: WHERE entidad=? AND anio=?")
 '''),
         interp(
             "Astra y CQL",
@@ -625,6 +821,7 @@ Al finalizar la clase deberias poder:
 | Caso aplicado | 25 min | Contratos publicos vistos desde tres modelos |
 | Cierre | 10 min | Comparacion, errores comunes y preparacion para Elasticsearch |
 """),
+        *free_tier_cells(),
         toc([
             "Seccion 1 -- Por que NoSQL no es una sola tecnologia",
             "Seccion 2 -- Repaso documental: lo que ya cubrio MongoDB",
