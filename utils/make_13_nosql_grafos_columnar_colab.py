@@ -288,11 +288,29 @@ print("Esquema de grafo creado.")
                 "Todavia no hemos probado ninguna hipotesis; solo preparamos una representacion adecuada para preguntas relacionales.",
             ],
         ),
+        md("""
+### Como cargar el grafo paso a paso
+
+La siguiente celda hace tres tareas separadas:
+
+1. Construye catalogos unicos de entidades, proveedores y sectores.
+2. Crea o reutiliza nodos con `MERGE`.
+3. Crea relaciones con parametros especificos para cada consulta.
+
+Nota tecnica importante: KuzuDB valida los parametros con rigor. Por eso no pasamos toda la fila a todas las consultas; cada `conn.execute()` recibe solo las llaves que realmente usa.
+"""),
         code('''
+# 1. Catalogos de nodos: evitamos crear el mismo nodo varias veces.
 entidades = sorted(contratos["entidad"].unique())
 proveedores = sorted(contratos["proveedor"].unique())
 sectores = sorted(contratos["sector"].unique())
 
+print("Entidades:", len(entidades))
+print("Proveedores:", len(proveedores))
+print("Sectores:", len(sectores))
+
+# 2. Crear o reutilizar nodos.
+# MERGE significa: si el patron existe, reutilizalo; si no existe, crealo.
 for entidad in entidades:
     conn.execute("MERGE (:Entidad {nombre: $nombre})", {"nombre": entidad})
 
@@ -302,7 +320,17 @@ for proveedor in proveedores:
 for sector in sectores:
     conn.execute("MERGE (:Sector {nombre: $nombre})", {"nombre": sector})
 
+# 3. Crear relaciones.
+# Importante: cada consulta recibe solo los parametros que usa.
 for fila in contratos.to_dict("records"):
+    parametros_contrato = {
+        "entidad": fila["entidad"],
+        "proveedor": fila["proveedor"],
+        "contrato_id": fila["contrato_id"],
+        "valor_millones": int(fila["valor_millones"]),
+        "estado": fila["estado"],
+        "anio": int(fila["anio"]),
+    }
     conn.execute(
         "MATCH (e:Entidad {nombre: $entidad}), (p:Proveedor {nombre: $proveedor}) "
         "MERGE (e)-[:CONTRATA {"
@@ -311,12 +339,17 @@ for fila in contratos.to_dict("records"):
         "estado: $estado, "
         "anio: $anio"
         "}]->(p)",
-        fila,
+        parametros_contrato,
     )
+
+    parametros_sector = {
+        "proveedor": fila["proveedor"],
+        "sector": fila["sector"],
+    }
     conn.execute(
         "MATCH (p:Proveedor {nombre: $proveedor}), (s:Sector {nombre: $sector}) "
         "MERGE (p)-[:TRABAJA_EN]->(s)",
-        fila,
+        parametros_sector,
     )
 
 print("Datos cargados al grafo.")
