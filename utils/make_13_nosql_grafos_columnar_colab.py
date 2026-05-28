@@ -95,6 +95,40 @@ Decision para esta sesion: **KuzuDB sera la practica garantizada en Colab**. Neo
     ]
 
 
+def learning_route_cells():
+    return [
+        md("""
+## Ruta de aprendizaje sin asumir experiencia previa
+
+Esta clase se lee en cuatro movimientos:
+
+1. **Entender la pregunta:** no elegimos una base por moda, sino por el tipo de consulta.
+2. **Ver el modelo en pequeno:** primero usamos pocos contratos para que nodos, relaciones, particiones y claves sean visibles.
+3. **Ejecutar en Colab:** KuzuDB corre dentro del notebook y garantiza practica sin cuentas externas.
+4. **Reconocer la ruta cloud:** Neo4j Aura y Astra muestran como se conectaria el mismo concepto a servicios administrados.
+
+### Que debe poder explicar el estudiante al final
+
+| Tema | Explicacion esperada |
+|---|---|
+| Documental | Guarda el contrato como unidad con su contexto cercano. |
+| Grafo | Pone el foco en conexiones: entidad, proveedor, sector y contrato. |
+| Wide-column | Disena tablas desde la consulta frecuente y la clave de particion. |
+| Cliente Python | Es el puente entre Colab y la base: abre conexion, ejecuta comandos y devuelve resultados. |
+
+No se espera que el estudiante memorice todas las APIs. Si entiende **que pregunta responde cada modelo** y **como se verifica una conexion**, la clase cumplio su objetivo.
+"""),
+        interp(
+            "como estudiar este cuaderno",
+            [
+                "Primero lee la pregunta de negocio; despues mira el codigo.",
+                "Cuando aparezca una funcion nueva, revisa la mini ficha antes de ejecutar.",
+                "Cuando una celda devuelva una tabla, lee la interpretacion docente antes de seguir.",
+            ],
+        ),
+    ]
+
+
 def before_cloud_accounts_cells():
     return [
         md("""
@@ -130,7 +164,34 @@ Primero ejecuta KuzuDB. Despues, si la cuenta cloud esta lista, repite la misma 
 
 
 def data_cell():
-    return code('''
+    return [
+        md("""
+## Caso de clase: contratos, entidades, proveedores y sectores
+
+Antes de hablar de herramientas, miremos el problema. Tenemos contratos publicos y queremos responder preguntas distintas:
+
+| Pregunta | Modelo que ayuda |
+|---|---|
+| Que contiene cada contrato? | Documental |
+| Que proveedores conectan varias entidades? | Grafo |
+| Como consultar rapido contratos por entidad y ano? | Wide-column |
+
+Usamos un dataset pequeno y controlado para que el estudiante vea la estructura sin perderse en volumen. La idea no es simular todo SECOP, sino aprender a cambiar de mirada: de filas a relaciones y de relaciones a claves de consulta.
+
+### Diccionario del caso
+
+| Campo | Significado | Como se usara |
+|---|---|---|
+| `contrato_id` | Identificador del contrato | propiedad de la relacion `CONTRATA` |
+| `entidad` | comprador publico | nodo `Entidad` y clave de particion columnar |
+| `proveedor` | contratista | nodo `Proveedor` |
+| `sector` | dominio del contrato | nodo `Sector` y categoria analitica |
+| `valor_millones` | valor aproximado | propiedad, metrica y filtro |
+| `estado` | estado del contrato | propiedad y posible filtro |
+| `objeto` | descripcion corta | contexto del contrato |
+| `anio` | ano de referencia | parte de la clave de consulta |
+"""),
+        code('''
 import pandas as pd
 
 contratos = pd.DataFrame([
@@ -184,10 +245,49 @@ contratos = pd.DataFrame([
         "objeto": "Plataforma de analitica academica y permanencia estudiantil",
         "anio": 2026,
     },
+    {
+        "contrato_id": "C-006",
+        "entidad": "Gobernacion de Antioquia",
+        "proveedor": "Analitica Publica SAS",
+        "sector": "Tecnologia",
+        "valor_millones": 760,
+        "estado": "En ejecucion",
+        "objeto": "Integracion de datos territoriales para seguimiento de proyectos",
+        "anio": 2026,
+    },
+    {
+        "contrato_id": "C-007",
+        "entidad": "Secretaria de Salud de Bogota",
+        "proveedor": "Infraestructura Datos LTDA",
+        "sector": "Salud",
+        "valor_millones": 540,
+        "estado": "Adjudicado",
+        "objeto": "Interventoria tecnica de plataforma de informacion en salud",
+        "anio": 2026,
+    },
+    {
+        "contrato_id": "C-008",
+        "entidad": "Universidad Publica del Caribe",
+        "proveedor": "Educacion Digital SAS",
+        "sector": "Educacion",
+        "valor_millones": 290,
+        "estado": "Publicado",
+        "objeto": "Acompanamiento a procesos de analitica academica",
+        "anio": 2025,
+    },
 ])
 
 contratos
-''')
+'''),
+        interp(
+            "lectura del dataset",
+            [
+                "El mismo proveedor aparece en varias entidades: eso crea un patron relacional para grafo.",
+                "La misma entidad puede tener contratos en mas de un ano: eso permite explicar claves de particion.",
+                "El dataset es pequeno por diseno; el objetivo es que la estructura sea visible antes de escalar.",
+            ],
+        ),
+    ]
 
 
 def kuzu_client_guide_cells():
@@ -398,6 +498,25 @@ print("Datos cargados al grafo.")
                 "El mismo dataset ahora permite hacer preguntas de red: quien conecta con quien, a traves de que proveedor y en que sector.",
                 "La instruccion `MERGE` evita duplicar la relacion proveedor-sector cuando el proveedor aparece en varios contratos del mismo sector.",
                 "Un error comun es cargar todo como nodos sin pensar las relaciones. En grafos, la relacion suele ser la parte analitica mas valiosa.",
+            ],
+        ),
+        code('''
+conteos_grafo = {
+    "entidades": conn.execute("MATCH (e:Entidad) RETURN count(e) AS n").get_as_df()["n"][0],
+    "proveedores": conn.execute("MATCH (p:Proveedor) RETURN count(p) AS n").get_as_df()["n"][0],
+    "sectores": conn.execute("MATCH (s:Sector) RETURN count(s) AS n").get_as_df()["n"][0],
+    "relaciones_contrata": conn.execute("MATCH ()-[c:CONTRATA]->() RETURN count(c) AS n").get_as_df()["n"][0],
+    "relaciones_trabaja_en": conn.execute("MATCH ()-[r:TRABAJA_EN]->() RETURN count(r) AS n").get_as_df()["n"][0],
+}
+
+conteos_grafo
+'''),
+        interp(
+            "verificacion del grafo",
+            [
+                "Esta celda comprueba que la carga realmente creo nodos y relaciones.",
+                "En una clase para principiantes, contar despues de cargar evita avanzar con una base vacia sin darse cuenta.",
+                "Si algun conteo sale en cero, el problema esta en la carga anterior, no en las consultas analiticas.",
             ],
         ),
         code('''
@@ -695,6 +814,19 @@ vista_columnar
                 "Si la consulta principal cambia, probablemente necesitaremos otra tabla orientada a esa consulta.",
             ],
         ),
+        md("""
+### Como leer esta simulacion
+
+Piensa en `particion` como una direccion. Si la direccion es `alcaldia_de_cali#2026`, Cassandra puede ir directamente al grupo de filas de esa entidad y ese ano. Eso es muy diferente a pedirle que revise toda la base.
+
+| Decision | Consecuencia |
+|---|---|
+| Particionar por `entidad + anio` | Muy bueno para consultar historico de una entidad por ano |
+| Ordenar por `contrato_id` | Los contratos quedan organizados dentro de la particion |
+| Preguntar por proveedor sin tabla adicional | No es natural para esta tabla |
+
+La regla pedagogica es simple: en wide-column, **primero escribo la consulta que debo responder y luego diseno la tabla**.
+"""),
         code('''
 consulta_cali_2026 = vista_columnar[vista_columnar["particion"] == "alcaldia_de_cali#2026"]
 consulta_cali_2026
@@ -715,6 +847,42 @@ consulta_cali_2026
                 "Por que duplicar una tabla puede ser aceptable en Cassandra pero peligroso si no se gobierna?",
             ],
         ),
+        md("""
+### Ejercicio guiado: disenar otra tabla Cassandra
+
+Supongamos que la oficina de control quiere responder rapido:
+
+```text
+Mostrar contratos por proveedor y estado.
+```
+
+Completa mentalmente el diseno:
+
+| Elemento | Tu decision |
+|---|---|
+| Consulta principal | contratos de un proveedor en un estado |
+| Clave de particion sugerida | `(proveedor, estado)` |
+| Clustering key sugerida | `anio`, `contrato_id` |
+| Campos utiles | entidad, sector, valor_millones, objeto |
+
+Una posible tabla seria:
+
+```sql
+CREATE TABLE contratos_por_proveedor_estado (
+    proveedor text,
+    estado text,
+    anio int,
+    contrato_id text,
+    entidad text,
+    sector text,
+    valor_millones int,
+    objeto text,
+    PRIMARY KEY ((proveedor, estado), anio, contrato_id)
+);
+```
+
+Interpretacion: esta tabla no reemplaza la anterior. Es otra vista fisica para otra pregunta frecuente.
+"""),
         section_header("7", "Ruta cloud: Astra DB y CQL"),
         md("""
 DataStax Astra DB permite practicar Cassandra como servicio administrado. La idea para Colab es descargar el **secure connect bundle** desde la consola de Astra y usar el driver de Python. Esta ruta requiere cuenta gratuita y credenciales temporales.
@@ -921,11 +1089,25 @@ La decision no es religiosa. En arquitecturas reales pueden convivir: MongoDB pa
         ),
         section_header("9", "Ejercicios guiados"),
         md("""
-1. Agrega dos contratos nuevos al DataFrame inicial: uno con un proveedor ya existente y otro con una entidad nueva.
-2. Recarga el grafo local y consulta que proveedores conectan mas de una entidad.
-3. Disena una tabla wide-column para la consulta: "contratos por proveedor y estado".
-4. Explica que campos pondrias en la clave de particion y cuales como clustering keys.
-5. Redacta una conclusion descriptiva: que aprendiste sobre relaciones, particiones y documentos?
+### Entrega esperada
+
+El estudiante debe entregar respuestas cortas y capturas/tablas de evidencia. No basta con decir "funciono": debe mostrar que entendio que pregunta responde cada modelo.
+
+| Ejercicio | Que debe hacer | Evidencia minima |
+|---|---|---|
+| 1. Ampliar el caso | Agrega dos contratos: uno con proveedor existente y otro con entidad nueva. | DataFrame actualizado con los nuevos contratos |
+| 2. Recargar grafo | Ejecuta de nuevo esquema/carga KuzuDB. | Conteos de nodos y relaciones despues de cargar |
+| 3. Consultar relaciones | Encuentra proveedores que conectan mas de una entidad. | Tabla con proveedor y entidades conectadas |
+| 4. Disenar tabla columnar | Propone tabla para "contratos por proveedor y estado". | `PRIMARY KEY` explicada en palabras |
+| 5. Comparar modelos | Decide entre documental, grafo y wide-column para dos preguntas nuevas. | Dos decisiones justificadas |
+
+### Preguntas de cierre para responder
+
+1. Que informacion se perdia si solo veiamos contratos como filas?
+2. Que ventaja tuvo el grafo para encontrar proveedores compartidos?
+3. Por que Cassandra/Astra no se disena desde normalizacion sino desde consultas?
+4. Que parte ejecutaste en Colab sin cuenta externa?
+5. Que parte requiere credenciales cloud y como se verifica que funciono?
 """),
         section_header("10", "Cierre de sesion"),
         md("""
@@ -993,20 +1175,8 @@ Al finalizar la clase deberias poder:
 5. Disenar una clave de particion y clustering key para una consulta frecuente.
 6. Elegir responsablemente entre documental, grafo y columnar para un caso aplicado.
 """),
-        md("""
-## Agenda sugerida de 3 horas
-
-| Momento | Tiempo | Actividad |
-|---|---:|---|
-| Apertura y conexion con MongoDB | 20 min | Que queda cubierto del PDA y por que faltan grafos/columnares |
-| Modelo de grafos | 45 min | Teoria breve, ejemplo manual y practica KuzuDB |
-| Neo4j Aura | 25 min | Ruta cloud, credenciales seguras y plantilla de carga |
-| Descanso corto | 10 min | Pausa |
-| Modelo wide-column | 45 min | Cassandra/Astra, particiones, clustering y CQL |
-| Caso aplicado | 25 min | Contratos publicos vistos desde tres modelos |
-| Cierre | 10 min | Comparacion, errores comunes y preparacion para Elasticsearch |
-"""),
         *free_tier_cells(),
+        *learning_route_cells(),
         *before_cloud_accounts_cells(),
         toc([
             "Seccion 1 -- Por que NoSQL no es una sola tecnologia",
@@ -1101,15 +1271,7 @@ Si el dato importante vive en la conexion, el grafo suele ser mas natural que un
 La lectura no es una fila: es un camino.
 """),
         install_cell(),
-        data_cell(),
-        interp(
-            "dataset de clase",
-            [
-                "El dataset es pequeno a proposito: permite ver la estructura antes de pensar en volumen.",
-                "Cada fila parece un contrato, pero tambien contiene entidades, proveedores, sectores y relaciones posibles.",
-                "No estamos probando causalidad; estamos preparando datos para aprender modelos NoSQL.",
-            ],
-        ),
+        *data_cell(),
         *kuzu_cells(),
         *neo4j_cells(),
         *columnar_cells(),

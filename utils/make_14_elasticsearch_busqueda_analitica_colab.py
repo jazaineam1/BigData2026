@@ -55,6 +55,7 @@ import sys
 paquetes = []
 for paquete, modulo in [
     ("pandas", "pandas"),
+    ("requests", "requests"),
     ("elasticsearch", "elasticsearch"),
 ]:
     if importlib.util.find_spec(modulo) is None:
@@ -78,7 +79,7 @@ Segun la documentacion oficial vigente para 2026:
 
 | Opcion | Que permite | Estado para clase | Advertencia |
 |---|---|---|---|
-| Elastic Cloud Hosted/Serverless | Elasticsearch + Kibana administrados | Ruta recomendada si se tiene trial o cuenta institucional | Puede generar cargos despues del trial o si se exceden condiciones. |
+| Elastic Cloud Serverless | Elasticsearch + Kibana administrados sin administrar servidores | Ruta recomendada para este tutorial | Puede generar cargos despues del trial o si se exceden condiciones. |
 | Trial desde Elastic | Acceso temporal para probar Elastic Cloud | Util para laboratorio corto | Confirmar duracion y restricciones antes de la sesion. |
 | AWS Marketplace trial | Trial de 7 dias indicado por Elastic FAQ | Alternativa si se usa AWS Marketplace | Despues del trial, los cargos pasan a la cuenta AWS. |
 | Self-managed Basic | Elasticsearch autogestionado con funcionalidades gratuitas | No se usa en este cuaderno | Se omite porque la instruccion del curso fue trabajar solo con Colab y cloud. |
@@ -105,16 +106,16 @@ Antes de ejecutar codigo, el estudiante debe salir de Elastic Cloud con dos dato
 
 | Que necesito antes de ejecutar | Donde se consigue | Como se llama en Elastic | Donde se pega en Colab | Como verifico que funciono |
 |---|---|---|---|---|
-| Cuenta Elastic Cloud con trial activo o cuenta institucional | https://cloud.elastic.co | Elastic Cloud account | No se pega; solo se usa para entrar al portal | El portal permite abrir el deployment/proyecto |
-| Recurso de Elasticsearch listo | Elastic Cloud Console | Deployment, hosted deployment o serverless project | No se pega; debe estar en estado listo | Kibana abre sin errores |
-| Identificador del recurso | Overview o Manage deployment | Cloud ID | Variable `ELASTIC_CLOUD_ID` | `client.info()` responde |
+| Cuenta Elastic Cloud con trial activo o cuenta institucional | https://cloud.elastic.co | Elastic Cloud account | No se pega; solo se usa para entrar al portal | El portal permite abrir el proyecto |
+| Proyecto de Elasticsearch listo | Elastic Cloud Console | Serverless project | No se pega; debe estar en estado listo | Kibana abre sin errores |
+| Direccion del recurso | Pantalla Getting started o Connection details | Elasticsearch endpoint | Variable `ELASTIC_ENDPOINT` | `client.info()` responde |
 | Llave para consultar Elasticsearch | Kibana: Stack Management / API keys, o ruta de API keys del proyecto serverless | Elasticsearch API key | `getpass()` como `ELASTIC_API_KEY` | `client.ping()` y `client.info()` responden |
 
 ### Vocabulario minimo antes de pegar claves
 
 | Palabra | Explicacion sin jerga |
 |---|---|
-| `Cloud ID` | Identificador largo que le dice al cliente Python a que despliegue de Elastic Cloud conectarse. No es una contrasena. |
+| `Endpoint URL` | Direccion web del proyecto Serverless. Suele empezar por `https://...elastic.cloud`. Es el dato que se pega en Colab. |
 | `API key` | Llave secreta que autoriza operaciones. Debe copiarse completa y no debe guardarse en el cuaderno. |
 | `Kibana` | Interfaz web para administrar, explorar datos y crear visualizaciones. |
 | `Data View` | Vista de Kibana que apunta a uno o varios indices para explorarlos en Discover y Lens. |
@@ -127,31 +128,37 @@ Antes de ejecutar codigo, el estudiante debe salir de Elastic Cloud con dos dato
 1. Entra a https://cloud.elastic.co.
 2. Crea cuenta o inicia sesion con la cuenta institucional indicada por el profesor.
 3. Verifica si tienes trial activo, creditos o permiso institucional. Si la cuenta pide tarjeta, confirma con el profesor antes de crear recursos.
-4. Crea un **deployment** de Elastic Cloud Hosted o un **serverless project** de Elasticsearch, segun lo que muestre la consola de Elastic en tu cuenta.
+4. Crea un **serverless project** de Elasticsearch.
 5. Usa un nombre reconocible, por ejemplo `bigdata-u-central-secops`.
 6. Elige una region cercana o la region sugerida por la institucion.
 7. Espera hasta que el recurso aparezca como listo. No copies claves mientras el recurso esta creando componentes.
-8. En la pagina de **Overview** o **Manage deployment**, copia el **Cloud ID**. Ese valor se pega en Colab cuando la celda pregunte por `ELASTIC_CLOUD_ID`.
-9. Abre **Kibana** desde el boton del deployment/proyecto.
-10. Para Elastic Cloud Hosted: entra a **Stack Management** > **Security** > **API keys** y crea una API key para Elasticsearch.
-11. Para Elastic Cloud Serverless: entra a la ruta de **API keys** del proyecto y crea una key con permiso para leer/escribir indices del laboratorio.
-12. Copia la API key una sola vez y guardala temporalmente en un lugar seguro. En Colab se pega con `getpass()`, por eso no queda visible en pantalla.
+8. Copia el **Elasticsearch endpoint** que empieza por `https://...elastic.cloud`.
+9. Copia la **API key** visible en Getting started o entra a la ruta de **API keys** del proyecto y crea una key con permiso para leer/escribir indices del laboratorio.
+10. Abre **Kibana** desde el boton del proyecto.
+11. Guarda temporalmente el endpoint y la API key en un lugar seguro. En Colab la API key se pega con `getpass()`, por eso no queda visible en pantalla.
 
 ### Distincion critica: no todas las llaves sirven para lo mismo
 
 Elastic tiene dos familias de llaves que se confunden facil:
 
-| Llave | Para que sirve | Sirve para `Elasticsearch(cloud_id=..., api_key=...)` en esta clase? |
+| Llave | Para que sirve | Sirve para `Elasticsearch(endpoint, api_key=...)` en esta clase? |
 |---|---|---|
-| Elastic Cloud API key | Administrar la organizacion, despliegues y proyectos desde la API de Elastic Cloud. | En Hosted, no. Esa llave no consulta documentos de Elasticsearch. |
+| Elastic Cloud API key | Administrar la organizacion y proyectos desde la API de Elastic Cloud. | No. Esa llave no es la que se usa para consultar documentos desde Python. |
 | Elasticsearch API key | Leer, escribir, buscar y administrar indices dentro de Elasticsearch. | Si. Esta es la llave que debe pegarse en Colab. |
 
-Si usas una **Elastic Cloud API key** donde Python espera una **Elasticsearch API key**, el recurso existe pero la autenticacion falla. Ese error no significa que Elasticsearch este danado; significa que la llave no es la correcta para consultar datos.
+Si usas una **Elastic Cloud API key** donde Python espera una **Elasticsearch API key**, el proyecto existe pero la autenticacion falla. Ese error no significa que Elasticsearch este danado; significa que la llave no es la correcta para consultar datos.
+
+### Cual dato pego segun tu pantalla
+
+| Si tu pantalla muestra | Que pegas en Colab | Como conecta Python |
+|---|---|---|
+| `Elasticsearch endpoint: https://...elastic.cloud` | La URL completa | `Elasticsearch(endpoint, api_key=...)` |
+| API key del proyecto | La cadena completa, pegada con `getpass()` | `api_key=ELASTIC_API_KEY` |
 """),
         interp(
             "preparacion antes del codigo",
             [
-                "La conexion no empieza en Python: empieza verificando cuenta, recurso, Cloud ID y llave correcta.",
+                "La conexion no empieza en Python: empieza verificando cuenta, proyecto Serverless, endpoint y llave correcta.",
                 "Un error de autenticacion casi siempre se resuelve revisando que la llave sea de Elasticsearch, no de administracion de Elastic Cloud.",
                 "El estudiante no debe compartir la API key por chat ni dejarla escrita en una celda.",
             ],
@@ -160,90 +167,177 @@ Si usas una **Elastic Cloud API key** donde Python espera una **Elasticsearch AP
 
 
 def data_cell():
-    return code('''
-import pandas as pd
+    return [
+        md("""
+## Dataset real de clase: SECOP II - Contratos Electronicos
 
-documentos = [
-    {
-        "id": "secop-001",
-        "entidad": "Alcaldia de Cali",
-        "departamento": "Valle del Cauca",
-        "sector": "Tecnologia",
-        "valor_millones": 880,
-        "anio": 2025,
-        "estado": "Adjudicado",
-        "objeto": "Implementacion de tablero de seguimiento contractual y analitica publica",
-        "descripcion": "Servicios para integrar fuentes de datos, generar indicadores y alertas de gestion contractual.",
-    },
-    {
-        "id": "secop-002",
-        "entidad": "Gobernacion de Antioquia",
-        "departamento": "Antioquia",
-        "sector": "Infraestructura",
-        "valor_millones": 1450,
-        "anio": 2025,
-        "estado": "Adjudicado",
-        "objeto": "Interventoria de obras viales con reportes de avance",
-        "descripcion": "Seguimiento tecnico, financiero y documental de contratos de infraestructura vial.",
-    },
-    {
-        "id": "secop-003",
-        "entidad": "Secretaria de Salud de Bogota",
-        "departamento": "Bogota",
-        "sector": "Salud",
-        "valor_millones": 620,
-        "anio": 2026,
-        "estado": "En ejecucion",
-        "objeto": "Analitica de oportunidad en atencion ciudadana",
-        "descripcion": "Procesamiento de solicitudes, tiempos de respuesta y deteccion de demoras en servicios.",
-    },
-    {
-        "id": "secop-004",
-        "entidad": "Alcaldia de Cali",
-        "departamento": "Valle del Cauca",
-        "sector": "Salud",
-        "valor_millones": 310,
-        "anio": 2026,
-        "estado": "Publicado",
-        "objeto": "Interoperabilidad de datos sociales y salud publica",
-        "descripcion": "Integracion de datos sociales para priorizar poblacion vulnerable y monitorear cobertura.",
-    },
-    {
-        "id": "secop-005",
-        "entidad": "Universidad Publica del Caribe",
-        "departamento": "Atlantico",
-        "sector": "Educacion",
-        "valor_millones": 410,
-        "anio": 2026,
-        "estado": "Adjudicado",
-        "objeto": "Plataforma de analitica academica y permanencia estudiantil",
-        "descripcion": "Modelos descriptivos para seguimiento de riesgo academico, permanencia y graduacion.",
-    },
-    {
-        "id": "secop-006",
-        "entidad": "Empresa de Servicios Publicos de Medellin",
-        "departamento": "Antioquia",
-        "sector": "Servicios publicos",
-        "valor_millones": 990,
-        "anio": 2026,
-        "estado": "Adjudicado",
-        "objeto": "Busqueda documental y trazabilidad de peticiones ciudadanas",
-        "descripcion": "Motor de busqueda para expedientes, reclamos, respuestas y trazabilidad de atencion.",
-    },
+Para que Elasticsearch tenga sentido pedagogico, trabajaremos con contratos reales publicados en Datos Abiertos Colombia. La fuente es **SECOP II - Contratos Electronicos** (`jbjy-vk9h`), consultada mediante la API publica de Socrata.
+
+La celda descarga al menos **10.000 contratos** con texto contractual real. Usaremos:
+
+| Campo original SECOP II | Campo en el cuaderno | Uso en Elasticsearch |
+|---|---|---|
+| `id_contrato` | `id` | identificador del documento |
+| `nombre_entidad` | `entidad` | filtro/agregacion |
+| `departamento` | `departamento` | filtro/agregacion |
+| `sector` | `sector` | filtro/agregacion |
+| `estado_contrato` | `estado` | filtro/agregacion |
+| `valor_del_contrato` | `valor_pesos`, `valor_millones` | metricas y rangos |
+| `fecha_de_firma` | `fecha_firma`, `anio` | filtros temporales |
+| `objeto_del_contrato` | `objeto` | busqueda textual |
+| `descripcion_del_proceso` | `descripcion` | busqueda textual |
+
+Comentario docente: ya no estamos probando con frases inventadas. Ahora el reto real es limpiar campos, controlar nulos, conservar texto util y preparar documentos para busqueda.
+"""),
+        code('''
+import pandas as pd
+import requests
+
+SECOP_API = "https://www.datos.gov.co/resource/jbjy-vk9h.json"
+N_CONTRATOS_OBJETIVO = 10_000
+N_DESCARGA = 30_000
+
+columnas_secop = [
+    "id_contrato",
+    "nombre_entidad",
+    "departamento",
+    "sector",
+    "estado_contrato",
+    "descripcion_del_proceso",
+    "objeto_del_contrato",
+    "tipo_de_contrato",
+    "modalidad_de_contratacion",
+    "valor_del_contrato",
+    "fecha_de_firma",
+    "proveedor_adjudicado",
+    "urlproceso",
 ]
 
-df = pd.DataFrame(documentos)
-df
-''')
+params = {
+    "$limit": N_DESCARGA,
+    "$select": ",".join(columnas_secop),
+    "$where": (
+        "fecha_de_firma IS NOT NULL "
+        "AND descripcion_del_proceso IS NOT NULL "
+        "AND objeto_del_contrato IS NOT NULL "
+        "AND valor_del_contrato IS NOT NULL"
+    ),
+    "$order": "fecha_de_firma DESC",
+}
+
+respuesta = requests.get(SECOP_API, params=params, timeout=90)
+if not respuesta.ok:
+    print("URL consultada:", respuesta.url)
+    respuesta.raise_for_status()
+
+datos_json = respuesta.json()
+if not isinstance(datos_json, list):
+    raise RuntimeError(f"La API no devolvio una lista de contratos: {datos_json}")
+
+raw = pd.DataFrame(datos_json)
+print("Registros descargados desde SECOP II:", len(raw))
+
+def columna(nombre, default=""):
+    if nombre in raw.columns:
+        return raw[nombre]
+    return pd.Series([default] * len(raw))
+
+def texto_limpio(serie, default="Sin dato"):
+    return (
+        serie.fillna(default)
+        .astype(str)
+        .str.replace(r"\\s+", " ", regex=True)
+        .str.strip()
+    )
+
+def extraer_url(valor):
+    if isinstance(valor, dict):
+        return valor.get("url", "")
+    if pd.isna(valor):
+        return ""
+    return str(valor)
+
+ids = texto_limpio(columna("id_contrato"), "")
+ids = ids.mask(ids.eq(""), [f"secop-ii-{i}" for i in range(len(ids))])
+
+valor_pesos = pd.to_numeric(columna("valor_del_contrato"), errors="coerce").fillna(0)
+fecha_firma = pd.to_datetime(columna("fecha_de_firma"), errors="coerce")
+fecha_firma_texto = fecha_firma.dt.strftime("%Y-%m-%d")
+
+df = pd.DataFrame({
+    "id": ids,
+    "entidad": texto_limpio(columna("nombre_entidad")),
+    "departamento": texto_limpio(columna("departamento")),
+    "sector": texto_limpio(columna("sector")),
+    "estado": texto_limpio(columna("estado_contrato")),
+    "valor_pesos": valor_pesos.round(0).astype("int64"),
+    "valor_millones": (valor_pesos / 1_000_000).round(2),
+    "fecha_firma": fecha_firma_texto.where(fecha_firma_texto.notna(), None),
+    "anio": fecha_firma.dt.year.fillna(0).astype("int64"),
+    "proveedor": texto_limpio(columna("proveedor_adjudicado")),
+    "tipo_contrato": texto_limpio(columna("tipo_de_contrato")),
+    "modalidad": texto_limpio(columna("modalidad_de_contratacion")),
+    "objeto": texto_limpio(columna("objeto_del_contrato")),
+    "descripcion": texto_limpio(columna("descripcion_del_proceso")),
+    "urlproceso": columna("urlproceso").apply(extraer_url),
+})
+
+df = (
+    df[
+        (df["id"].str.len() > 0)
+        & (df["objeto"].str.len() > 20)
+        & (df["descripcion"].str.len() > 20)
+    ]
+    .drop_duplicates("id")
+    .head(N_CONTRATOS_OBJETIVO)
+    .reset_index(drop=True)
+)
+
+if len(df) < N_CONTRATOS_OBJETIVO:
+    raise RuntimeError(
+        f"Solo quedaron {len(df)} contratos limpios. "
+        "Aumenta N_DESCARGA o revisa disponibilidad de la API."
+    )
+
+documentos = df.to_dict("records")
+
+print("Contratos listos para Elasticsearch:", len(documentos))
+print("Periodo cubierto:", int(df["anio"].min()), "-", int(df["anio"].max()))
+print("Departamentos:", df["departamento"].nunique())
+print("Sectores:", df["sector"].nunique())
+
+df[[
+    "id",
+    "entidad",
+    "departamento",
+    "sector",
+    "estado",
+    "valor_millones",
+    "anio",
+    "objeto",
+]].head(10)
+'''),
+        interp(
+            "lectura inicial de SECOP II",
+            [
+                "Cada fila representa un contrato electronico publicado en SECOP II.",
+                "Los campos `objeto` y `descripcion` son texto real: por eso son utiles para busqueda textual.",
+                "Los campos `departamento`, `sector`, `estado`, `anio` y `valor_millones` permiten filtros y agregaciones.",
+                "Este dataset sirve para ensenar busqueda; no debe leerse como auditoria completa sin controles adicionales de calidad y cobertura.",
+            ],
+        ),
+    ]
 
 
 def cloud_connection_cells():
     return [
         section_header("4", "Conexion segura a Elastic Cloud desde Colab"),
         md("""
-Elastic Cloud permite crear una instancia administrada de Elasticsearch y Kibana. En Colab se recomienda usar el cliente oficial de Python con `cloud_id` y una **Elasticsearch API key**.
+Elastic Cloud Serverless permite crear un proyecto administrado de Elasticsearch y Kibana sin configurar servidores, nodos ni shards. En Colab usaremos el cliente oficial de Python con el **Elasticsearch endpoint** y una **Elasticsearch API key**.
 
 Este cuaderno no guarda secretos. Si el estudiante no tiene cuenta lista, puede leer la plantilla, revisar el modelo de consulta y ejecutar las secciones conceptuales.
+
+En este tutorial usaremos solo la ruta **Serverless**. Si tu pantalla muestra `Elasticsearch endpoint: https://...elastic.cloud`, ese es el valor que debes copiar.
 """),
         md("""
 ### Antes de ejecutar esta celda
@@ -251,9 +345,9 @@ Este cuaderno no guarda secretos. Si el estudiante no tiene cuenta lista, puede 
 | Que reviso | Como se ve cuando esta bien | Que hago si no esta listo |
 |---|---|---|
 | Cuenta o trial | Puedo entrar a Elastic Cloud Console | No ejecuto conexion; pido apoyo al profesor |
-| Deployment/proyecto | Estado listo y Kibana abre | Espero o reviso facturacion/permisos |
-| Cloud ID | Valor largo copiado desde Overview/Manage deployment | No uso URL de Kibana ni endpoint HTTP |
-| Elasticsearch API key | Llave creada en Kibana o en el proyecto serverless | No uso una Elastic Cloud API key |
+| Proyecto Serverless | Estado listo y Kibana abre | Espero o reviso facturacion/permisos |
+| Elasticsearch endpoint | URL que empieza por `https://...elastic.cloud` | No uso la URL de Kibana |
+| Elasticsearch API key | Llave visible en Getting started o creada en API keys del proyecto | No uso una Elastic Cloud API key |
 
 La celda hace dos pruebas:
 
@@ -267,7 +361,7 @@ El cliente `elasticsearch` es un cliente de bajo nivel: expone casi toda la API 
 
 | Pieza del cliente | Que hace | Ejemplo de uso |
 |---|---|---|
-| `Elasticsearch(...)` | Crea el cliente conectado al cluster. | `Elasticsearch(cloud_id=..., api_key=...)` |
+| `Elasticsearch(...)` | Crea el cliente conectado al proyecto Serverless. | `Elasticsearch(endpoint, api_key=...)` |
 | `client.info()` | Consulta informacion del cluster. | Diagnostico inicial de conexion. |
 | `client.indices.exists()` | Verifica si un indice existe. | Evitar crear dos veces el mismo indice. |
 | `client.indices.create()` | Crea indice con settings y mapping. | Preparar campos `text`, `keyword`, `integer`. |
@@ -292,7 +386,7 @@ Lectura clave: `indices.*` administra indices; `index/get/update/delete` trabaja
         ficha(
             "Elasticsearch()",
             "crea un cliente Python para enviar operaciones al cluster.",
-            "`cloud_id` copiado desde Elastic Cloud y `api_key` creada para Elasticsearch.",
+            "`endpoint` copiado de la pantalla Getting started y `api_key` creada para Elasticsearch.",
             "un objeto cliente con metodos como `index`, `search`, `indices.create` y `ping`.",
             "si `client.info()` responde, Colab esta conectado al servicio.",
         ),
@@ -302,17 +396,20 @@ from elasticsearch import Elasticsearch
 
 print("Antes de pegar datos revisa:")
 print("1. El recurso de Elastic Cloud esta listo.")
-print("2. Tienes el Cloud ID, no una URL.")
+print("2. Tienes el Elasticsearch endpoint que empieza por https://.")
 print("3. Tienes una Elasticsearch API key, no una Elastic Cloud API key.")
 
-ELASTIC_CLOUD_ID = input("Pega el Cloud ID de Elastic Cloud (vacio para omitir conexion): ").strip()
+ELASTIC_ENDPOINT = input("Pega el Elasticsearch endpoint (vacio para omitir conexion): ").strip()
 
-if ELASTIC_CLOUD_ID:
-    ELASTIC_API_KEY = getpass("Pega la Elasticsearch API key creada en Kibana o en el proyecto: ").strip()
+if ELASTIC_ENDPOINT:
+    ELASTIC_API_KEY = getpass("Pega la Elasticsearch API key: ").strip()
 
     try:
+        if not ELASTIC_ENDPOINT.startswith("https://"):
+            raise ValueError("El endpoint de Serverless debe empezar por https://")
+
         client = Elasticsearch(
-            cloud_id=ELASTIC_CLOUD_ID,
+            ELASTIC_ENDPOINT,
             api_key=ELASTIC_API_KEY,
             request_timeout=30,
         )
@@ -325,12 +422,14 @@ if ELASTIC_CLOUD_ID:
         print("Detalle corto:", str(exc)[:500])
         print()
         print("Revision sugerida:")
-        print("- Si pegaste una Elastic Cloud API key, crea una Elasticsearch API key.")
-        print("- Si pegaste una URL, vuelve a Overview y copia el Cloud ID.")
-        print("- Si el deployment no esta listo o el trial expiro, corrige eso antes de reintentar.")
+        print("- Pega el Elasticsearch endpoint, no la URL de Kibana.")
+        print("- El endpoint debe empezar por https:// y terminar normalmente en elastic.cloud:443.")
+        print("- Si pegaste una Elastic Cloud API key, crea o copia una Elasticsearch API key.")
+        print("- Si el proyecto no esta listo o el trial expiro, corrige eso antes de reintentar.")
         print("- Si la key no tiene permisos de indices, crea una key con permisos de lectura/escritura para el laboratorio.")
     else:
         print("Conexion activa con Elasticsearch.")
+        print("Tipo de conexion: endpoint URL Serverless")
         print("Ping:", ping_ok)
         print("Cluster:", info.get("cluster_name", "sin nombre visible"))
         print("Version:", info.get("version", {}).get("number"))
@@ -341,7 +440,8 @@ else:
         interp(
             "conexion cloud",
             [
-                "El `cloud_id` identifica el despliegue administrado; la Elasticsearch API key autoriza consultas e indexacion.",
+                "Serverless trabaja con endpoint URL; en este tutorial esa es la unica forma de conexion.",
+                "La Elasticsearch API key autoriza consultas e indexacion; el endpoint solo indica a que proyecto conectarse.",
                 "No debe escribirse la API key directamente en el notebook, porque el cuaderno puede compartirse o subirse al repositorio.",
                 "Si no hay conexion en clase, la teoria y las plantillas siguen siendo validas para explicar el flujo.",
             ],
@@ -351,11 +451,12 @@ else:
 
 | Mensaje o sintoma | Causa frecuente | Que hacer |
 |---|---|---|
-| `AuthenticationException` o `401` | Pegaste una llave incorrecta o incompleta | Crea una Elasticsearch API key nueva y pegala completa |
+| `ValueError` por formato de conexion | Pegaste un dato que no es el endpoint completo | Copia la URL completa del campo Elasticsearch endpoint |
+| `El endpoint de Serverless debe empezar por https://` | Pegaste un nombre corto o un dato incompleto | Copia la URL completa del campo Elasticsearch endpoint |
+| `AuthenticationException` o `401` | Pegaste una llave incorrecta o incompleta | Crea o copia una Elasticsearch API key nueva y pegala completa |
 | `403` o permiso denegado | La llave existe pero no tiene permisos sobre indices | Crea una key con permisos para leer/escribir el indice `secop_texto_clase` |
-| `Cloud ID` invalido | Copiaste una URL de Kibana o endpoint HTTP | Copia el campo llamado Cloud ID desde Overview/Manage deployment |
-| `ConnectionError` | Deployment no esta listo, red temporal o trial vencido | Abre Elastic Cloud Console y verifica estado/facturacion |
-| `client.ping()` devuelve `False` | El servicio no respondio a la prueba rapida | Ejecuta `client.info()` para ver detalle o revisa Cloud ID y permisos |
+| `ConnectionError` | Proyecto no esta listo, red temporal o trial vencido | Abre Elastic Cloud Console y verifica estado/facturacion |
+| `client.ping()` devuelve `False` | El servicio no respondio a la prueba rapida | Ejecuta `client.info()` para ver detalle o revisa direccion y permisos |
 """),
         code('''
 # Plantilla de diagnostico del cliente Elasticsearch.
@@ -373,7 +474,7 @@ if client is not None:
         print("Tipo de error:", type(exc).__name__)
         print("Detalle corto:", str(exc)[:500])
 else:
-    print("No hay cliente conectado. Vuelve a la celda anterior y revisa Cloud ID, API key y estado del trial.")
+    print("No hay cliente conectado. Vuelve a la celda anterior y revisa endpoint, API key y estado del trial.")
 '''),
     ]
 
@@ -417,10 +518,16 @@ mapping = {
             "departamento": {"type": "keyword"},
             "sector": {"type": "keyword"},
             "estado": {"type": "keyword"},
-            "valor_millones": {"type": "integer"},
+            "proveedor": {"type": "keyword"},
+            "tipo_contrato": {"type": "keyword"},
+            "modalidad": {"type": "keyword"},
+            "valor_pesos": {"type": "double"},
+            "valor_millones": {"type": "double"},
+            "fecha_firma": {"type": "date"},
             "anio": {"type": "integer"},
             "objeto": {"type": "text", "analyzer": "texto_espanol_basico"},
             "descripcion": {"type": "text", "analyzer": "texto_espanol_basico"},
+            "urlproceso": {"type": "keyword", "index": False},
         }
     }
 }
@@ -461,9 +568,18 @@ acciones = [
 ]
 
 if client is not None:
-    ok, errores = bulk(client, acciones, refresh=True)
+    ok, errores = bulk(
+        client,
+        acciones,
+        refresh=True,
+        chunk_size=500,
+        request_timeout=120,
+        raise_on_error=False,
+    )
     print("Documentos cargados:", ok)
-    print("Errores:", errores)
+    print("Errores:", len(errores))
+    if errores:
+        print("Primer error:", errores[0])
 else:
     print("Acciones preparadas para bulk:")
     print(acciones[0])
@@ -471,7 +587,7 @@ else:
         interp(
             "carga bulk",
             [
-                "La carga masiva es la forma normal de indexar lotes de documentos.",
+                "La carga masiva es la forma normal de indexar lotes grandes como los 10.000 contratos de SECOP II.",
                 "Indexar no es solo guardar: es preparar estructuras para buscar rapido por texto, filtros y agregaciones.",
                 "Todavia no hay conclusion analitica; apenas dejamos el indice listo para preguntar.",
             ],
@@ -489,7 +605,7 @@ Una consulta `match` busca texto analizado. Elasticsearch calcula una puntuacion
 
 ## Intuicion
 
-Buscar "analitica ciudadana" no es igual a filtrar `sector = Salud`. La busqueda textual intenta encontrar documentos relevantes por palabras; el filtro exige una condicion exacta.
+Buscar "servicios profesionales apoyo gestion" no es igual a filtrar `sector = defensa`. La busqueda textual intenta encontrar documentos relevantes por palabras; el filtro exige una condicion exacta.
 """),
         ficha(
             "search()",
@@ -502,7 +618,7 @@ Buscar "analitica ciudadana" no es igual a filtrar `sector = Salud`. La busqueda
 consulta_match = {
     "query": {
         "multi_match": {
-            "query": "analitica ciudadana",
+            "query": "servicios profesionales apoyo gestion",
             "fields": ["objeto^2", "descripcion"]
         }
     }
@@ -514,6 +630,8 @@ if client is not None:
         {
             "score": hit["_score"],
             "entidad": hit["_source"]["entidad"],
+            "departamento": hit["_source"]["departamento"],
+            "valor_millones": hit["_source"]["valor_millones"],
             "objeto": hit["_source"]["objeto"],
             "sector": hit["_source"]["sector"],
         }
@@ -532,15 +650,21 @@ else:
             ],
         ),
         code('''
+departamento_objetivo = df["departamento"].value_counts().index[0]
+umbral_valor = float(df["valor_millones"].quantile(0.75))
+
+print("Departamento usado en el filtro:", departamento_objetivo)
+print("Umbral de valor en millones:", round(umbral_valor, 2))
+
 consulta_filtrada = {
     "query": {
         "bool": {
             "must": [
-                {"match": {"descripcion": "datos"}}
+                {"match": {"descripcion": "servicios"}}
             ],
             "filter": [
-                {"term": {"departamento": "Valle del Cauca"}},
-                {"range": {"valor_millones": {"gte": 300}}}
+                {"term": {"departamento": departamento_objetivo}},
+                {"range": {"valor_millones": {"gte": umbral_valor}}}
             ]
         }
     }
@@ -551,10 +675,11 @@ if client is not None:
     pd.DataFrame([
         {
             "score": hit["_score"],
-            "entidad": hit["_source"]["entidad"],
-            "valor_millones": hit["_source"]["valor_millones"],
-            "objeto": hit["_source"]["objeto"],
-        }
+                "entidad": hit["_source"]["entidad"],
+                "departamento": hit["_source"]["departamento"],
+                "valor_millones": hit["_source"]["valor_millones"],
+                "objeto": hit["_source"]["objeto"],
+            }
         for hit in resp["hits"]["hits"]
     ])
 else:
@@ -616,7 +741,7 @@ else:
             "agregaciones",
             [
                 "La agregacion resume los documentos indexados por sector.",
-                "Con pocos documentos solo vemos la mecanica; con SECOP real este patron permite tableros y filtros exploratorios.",
+                "Con 10.000 contratos reales, este patron ya permite una exploracion inicial para tableros y filtros.",
                 "Una agregacion no prueba causalidad ni desempeno; describe distribuciones dentro del indice.",
             ],
         ),
@@ -642,21 +767,21 @@ Kibana es la interfaz visual del ecosistema Elastic. En esta clase no se usa com
 | Que necesito | Donde se consigue | Como se llama en Elastic | Como verifico que funciono |
 |---|---|---|---|
 | Indice cargado desde Colab | Celda de bulk indexing | `secop_texto_clase` | `client.indices.exists(index=INDEX_NAME)` devuelve `True` |
-| Acceso web a Kibana | Boton Open Kibana del deployment/proyecto | Kibana | La pantalla principal abre sin error |
+| Acceso web a Kibana | Boton Open Kibana del proyecto | Kibana | La pantalla principal abre sin error |
 | Vista sobre el indice | Kibana > Stack Management > Data Views | Data View | Discover muestra documentos |
 
 ### Tutorial paso a paso: crear Data View y explorar
 
-1. En Elastic Cloud Console abre el deployment/proyecto usado en Colab.
+1. En Elastic Cloud Console abre el proyecto Serverless usado en Colab.
 2. Haz clic en **Open Kibana**.
 3. En Kibana entra a **Stack Management**.
 4. Abre **Data Views**.
 5. Crea un Data View con el patron `secop_texto_clase`.
-6. Si Kibana pide campo de tiempo y el indice no tiene fecha real, elige la opcion de crear el Data View sin campo temporal, o deja el campo temporal sin configurar si la interfaz lo permite.
+6. Si Kibana pide campo de tiempo, selecciona `fecha_firma`.
 7. Abre **Discover**.
 8. Selecciona el Data View `secop_texto_clase`.
 9. Revisa que aparezcan documentos con campos como `entidad`, `sector`, `estado`, `objeto`, `descripcion`, `valor_millones` y `anio`.
-10. Prueba una busqueda textual, por ejemplo `analitica` o `interventoria`.
+10. Prueba una busqueda textual, por ejemplo `servicios profesionales` o `interventoria`.
 11. Agrega filtros por `sector` o `estado` para ver como cambia la lista.
 
 ### Tutorial paso a paso: visualizacion basica
@@ -728,12 +853,12 @@ La decision depende de arquitectura: si el documento operacional esta en MongoDB
         ),
         section_header("10", "Ejercicios guiados"),
         md("""
-1. Agrega tres documentos nuevos con objetos contractuales parecidos pero sectores distintos.
-2. Ejecuta una consulta `multi_match` y observa como cambia el ranking.
-3. Crea un filtro por valor superior a 800 millones.
-4. Agrega una agregacion por departamento.
-5. En Kibana, crea un Data View y una visualizacion de conteo por sector.
-6. Escribe una conclusion: que encontro la busqueda textual que un filtro exacto no habria encontrado?
+1. Selecciona tres contratos recuperados por busqueda textual y compara sus `objeto`, `descripcion`, `sector` y `valor_millones`.
+2. Ejecuta una consulta `multi_match` con otra frase real, por ejemplo `mantenimiento infraestructura educativa`.
+3. Crea un filtro con el departamento mas frecuente y contratos por encima del percentil 90 de valor.
+4. Agrega una agregacion por departamento y otra por modalidad.
+5. En Kibana, crea un Data View con `fecha_firma` como campo temporal y una visualizacion de conteo por sector.
+6. Escribe una conclusion: que encontro la busqueda textual en 10.000 contratos que un filtro exacto no habria encontrado?
 """),
         section_header("11", "Cierre de sesion"),
         md("""
@@ -746,6 +871,7 @@ La decision depende de arquitectura: si el documento operacional esta en MongoDB
 - Los filtros restringen por condiciones exactas.
 - Las agregaciones resumen documentos y alimentan tableros.
 - Kibana permite explorar, visualizar y comunicar resultados.
+- La clase uso datos reales de SECOP II, no ejemplos inventados.
 
 ## Idea mas importante
 
@@ -757,6 +883,7 @@ Buscar texto no es lo mismo que filtrar columnas. Un motor de busqueda construye
 - Creer que el score equivale a importancia institucional.
 - Guardar claves o secretos en el cuaderno.
 - Crear dashboards sin revisar primero el mapping y la calidad del texto.
+- Concluir irregularidades solo por frecuencia, valor o ranking textual.
 
 ## Conexion con el proyecto final
 
@@ -772,6 +899,8 @@ El proyecto final puede usar una base documental para guardar contratos y un mot
 - Elasticsearch query DSL: https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl
 - Elasticsearch aggregations: https://www.elastic.co/docs/explore-analyze/query-filter/aggregations
 - Kibana Data Views: https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views
+- Datos Abiertos Colombia - SECOP II Contratos Electronicos: https://www.datos.gov.co/Gastos-Gubernamentales/SECOP-II-Contratos-Electr-nicos/jbjy-vk9h
+- Socrata API - SoQL queries: https://dev.socrata.com/docs/queries/
 - MongoDB Atlas Search: https://www.mongodb.com/docs/atlas/atlas-search/
 
 Documentacion revisada para la version vigente del curso 2026.
@@ -802,30 +931,16 @@ Al finalizar la clase deberias poder:
 1. Explicar que son indice, documento, mapping y analyzer.
 2. Conectar Colab con Elastic Cloud sin exponer credenciales.
 3. Crear un indice con campos de texto, categorias y metricas.
-4. Cargar documentos con `bulk`.
+4. Cargar al menos 10.000 contratos reales de SECOP II con `bulk`.
 5. Ejecutar busquedas `match`, filtros y consultas booleanas.
 6. Construir agregaciones para resumen analitico.
 7. Entender el papel de Kibana en exploracion y dashboards.
 8. Comparar Elasticsearch con MongoDB Atlas Search.
 """),
-        md("""
-## Agenda sugerida de 3 horas
-
-| Momento | Tiempo | Actividad |
-|---|---:|---|
-| Apertura | 20 min | Por que busqueda no es lo mismo que filtro |
-| Conceptos base | 30 min | Indice, documento, mapping, analyzer |
-| Conexion cloud | 20 min | Cliente Python y credenciales seguras |
-| Carga de datos | 30 min | Dataset SECOP reducido, mapping y bulk |
-| Busquedas | 35 min | Match, filtros, ranking y lectura de resultados |
-| Agregaciones | 25 min | Resumen por sector/departamento/valor |
-| Kibana | 25 min | Data View, Discover y dashboard basico |
-| Cierre | 15 min | Comparacion con Atlas Search y proyecto final |
-"""),
         *elastic_free_tier_cells(),
         *elastic_platform_tutorial_cells(),
         toc([
-            "Antes de programar -- Cuenta, recurso, Cloud ID y API key",
+            "Antes de programar -- Cuenta, endpoint y API key",
             "Seccion 1 -- Por que Elasticsearch importa",
             "Seccion 2 -- Conceptos base",
             "Seccion 3 -- Dataset de clase",
@@ -882,15 +997,7 @@ Elasticsearch no guarda texto como una lista simple. Construye estructuras de bu
 """),
         install_cell(),
         section_header("3", "Dataset de clase"),
-        data_cell(),
-        interp(
-            "dataset textual",
-            [
-                "Cada fila representa un documento tipo SECOP reducido.",
-                "Los campos `objeto` y `descripcion` son candidatos a busqueda textual.",
-                "Los campos `sector`, `departamento`, `estado`, `anio` y `valor_millones` son mejores para filtros o agregaciones.",
-            ],
-        ),
+        *data_cell(),
         *cloud_connection_cells(),
         *index_cells(),
         *query_cells(),
