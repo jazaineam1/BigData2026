@@ -95,6 +95,40 @@ Decision para esta sesion: **KuzuDB sera la practica garantizada en Colab**. Neo
     ]
 
 
+def before_cloud_accounts_cells():
+    return [
+        md("""
+## Antes de programar: que debe tener listo cada estudiante
+
+Esta clase tiene una ruta segura:
+
+- **KuzuDB**: se ejecuta en Colab y no necesita cuenta.
+- **Neo4j Aura**: requiere crear una instancia Free y copiar credenciales.
+- **Astra DB**: requiere crear una base Cassandra/CQL, descargar un archivo `.zip` y generar un token.
+
+No avances a las celdas de conexion cloud si no tienes estos datos. El objetivo pedagogico no es adivinar credenciales, sino entender el flujo completo de una plataforma real.
+
+| Plataforma | Que necesitas | Donde se consigue | Como se llama alli | Donde se pega en Colab | Como sabes que funciono |
+|---|---|---|---|---|---|
+| Neo4j Aura | URI, usuario y password | Aura Console, al crear o ver la instancia | Connection URI, Username, Password | Celdas `input()` y `getpass()` | `driver.verify_connectivity()` no falla |
+| Astra DB | Bundle `.zip` y token | Astra Portal, seccion Connect / Tokens | Secure Connect Bundle, Application Token | `files.upload()` y `getpass()` | `cluster.connect()` abre sesion |
+| KuzuDB | Nada externo | Se instala con `pip` | Paquete `kuzu` | No aplica | La base embebida crea tablas y responde consultas |
+
+### Recomendacion para la clase
+
+Primero ejecuta KuzuDB. Despues, si la cuenta cloud esta lista, repite la misma idea en Aura o Astra. Asi el aprendizaje no depende de que una plataforma externa este perfecta en el minuto de clase.
+"""),
+        interp(
+            "preparacion de credenciales",
+            [
+                "Una credencial no es teoria: es una llave operacional. Si falta, el codigo no puede conectarse aunque este bien escrito.",
+                "La ruta local garantiza la practica; las rutas cloud muestran como se ve el mismo concepto en servicios reales.",
+                "Nunca pegues contrasenas directamente en una celda de codigo compartida.",
+            ],
+        ),
+    ]
+
+
 def data_cell():
     return code('''
 import pandas as pd
@@ -422,6 +456,35 @@ Neo4j Aura permite trabajar con un motor de grafos administrado. En Colab se usa
 En esta seccion no se dejan credenciales en el cuaderno. El estudiante las pega durante la ejecucion.
 """),
         md("""
+### Tutorial paso a paso: crear AuraDB Free y obtener credenciales
+
+Haz esto antes de ejecutar la celda de conexion:
+
+1. Entra a **Neo4j Aura** desde la consola oficial: `https://console.neo4j.io`.
+2. Inicia sesion o crea cuenta con tu correo institucional o personal.
+3. Crea un proyecto si la consola lo solicita.
+4. Elige **Create instance** o **Create database**.
+5. Selecciona **AuraDB** y el tier **Free**.
+6. Asigna un nombre reconocible, por ejemplo `bigdata-u-central-grafos`.
+7. Crea la instancia y espera a que quede en estado listo.
+8. Cuando Aura muestre las credenciales, descarga el archivo o copia estos valores:
+   - **Connection URI**: suele verse como `neo4j+s://...databases.neo4j.io`.
+   - **Username**: normalmente `neo4j`, salvo que hayas creado otro usuario.
+   - **Password**: la contrasena generada para la instancia.
+9. Guarda el archivo de credenciales en un lugar seguro. Aura advierte que la contrasena generada debe copiarse o descargarse durante la creacion.
+10. Vuelve a Colab y pega cada valor cuando la celda lo pida.
+
+### Traduccion de nombres
+
+| En la plataforma | En este cuaderno | Que significa |
+|---|---|---|
+| Connection URI | `NEO4J_URI` | Direccion segura de la base AuraDB |
+| Username | `NEO4J_USER` | Usuario de la base |
+| Password | `NEO4J_PASSWORD` | Contrasena del usuario |
+| Instance / Database | Instancia AuraDB | Base administrada donde viven nodos y relaciones |
+| Connect / Drivers | Conexion externa | Lugar donde se copia la informacion para Python |
+"""),
+        md("""
 ### Guia del cliente Neo4j en Python
 
 El driver oficial de Neo4j trabaja con tres ideas:
@@ -449,14 +512,26 @@ En Aura, el cliente no guarda datos localmente: envia Cypher a un servicio admin
 from getpass import getpass
 from neo4j import GraphDatabase
 
-NEO4J_URI = input("Neo4j Aura URI (deja vacio para omitir esta practica): ").strip()
+print("Antes de continuar, confirma que tienes:")
+print("1. Connection URI de AuraDB")
+print("2. Username")
+print("3. Password descargado o copiado al crear la instancia")
+
+NEO4J_URI = input("Pega Connection URI de Neo4j Aura (deja vacio para omitir): ").strip()
 
 if NEO4J_URI:
-    NEO4J_USER = input("Usuario Neo4j: ").strip()
-    NEO4J_PASSWORD = getpass("Password Neo4j: ")
-    driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-    driver.verify_connectivity()
-    print("Conexion a Neo4j Aura verificada.")
+    NEO4J_USER = input("Pega Username de AuraDB: ").strip()
+    NEO4J_PASSWORD = getpass("Pega Password de AuraDB: ")
+
+    try:
+        driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+        driver.verify_connectivity()
+        print("Conexion a Neo4j Aura verificada.")
+    except Exception as exc:
+        driver = None
+        print("No se pudo conectar a Neo4j Aura.")
+        print("Detalle tecnico:", str(exc)[:500])
+        print("Revisa URI, usuario, password y estado de la instancia.")
 else:
     driver = None
     print("Practica cloud omitida. Continua con la practica local de KuzuDB.")
@@ -469,6 +544,17 @@ else:
                 "Si esta celda falla, no significa que el modelo de grafos este mal; suele ser un problema de URI, credenciales o permisos.",
             ],
         ),
+        md("""
+### Si te sale un error en Neo4j Aura
+
+| Sintoma | Causa probable | Que hacer |
+|---|---|---|
+| `Unable to retrieve routing information` | URI mal copiada o instancia no disponible | Copia de nuevo el **Connection URI** desde Aura y revisa que la instancia este activa |
+| `Unauthorized` o `Authentication failed` | Usuario o password incorrectos | Usa el archivo de credenciales descargado; si perdiste el password, crea/rota credenciales desde Aura |
+| La URI no empieza por `neo4j+s://` | Se copio otra URL de la consola | Busca la seccion de conexion para drivers, no la URL del navegador |
+| La instancia Free no aparece | Puede estar pausada o eliminada por inactividad | Entra a Aura y verifica el estado de la instancia antes de ejecutar Colab |
+| Funciona en la consola pero no en Colab | Red, permisos o valor pegado con espacios | Quita espacios al inicio/final y vuelve a correr la celda |
+"""),
         md("""
 La siguiente celda muestra el patron recomendado: crear constraints, cargar nodos con `MERGE` y cargar relaciones con propiedades. Si se omitio la conexion, la celda no hace cambios.
 """),
@@ -632,13 +718,42 @@ DataStax Astra DB permite practicar Cassandra como servicio administrado. La ide
 La celda siguiente es una plantilla segura: no contiene secretos. Si no tienes credenciales durante la clase, estudia el flujo y continua con la practica local de modelado.
 """),
         md("""
+### Tutorial paso a paso: crear Astra DB y traer las llaves a Colab
+
+Haz esto antes de ejecutar la celda de conexion:
+
+1. Entra al portal de **DataStax Astra**.
+2. Crea una cuenta o inicia sesion.
+3. Crea una base **Astra DB Serverless** compatible con Cassandra/CQL.
+4. Ponle un nombre de clase, por ejemplo `bigdata_uce_cassandra`.
+5. Elige proveedor y region disponibles en el plan Free.
+6. Espera a que la base quede activa. Si aparece hibernada, reanudala antes de conectarte.
+7. Abre la base y entra a la seccion **Connect**.
+8. Descarga el **Secure Connect Bundle**. Es un archivo `.zip`; no lo descomprimas.
+9. Crea un **Application Token** desde la seccion de tokens o settings.
+10. Copia el token completo. Suele empezar por `AstraCS:`.
+11. En Colab, la celda usara `files.upload()` para subir el `.zip` del bundle.
+12. Cuando la celda pida el token, pegalo con `getpass()`.
+
+### Traduccion de nombres
+
+| En Astra | En este cuaderno | Que significa |
+|---|---|---|
+| Secure Connect Bundle | `bundle_path` | Archivo `.zip` con certificados y datos de conexion |
+| Application Token | `ASTRA_TOKEN` | Secreto de autenticacion para el driver |
+| Username recomendado | `"token"` | Literal que recomienda DataStax para drivers |
+| Password | valor de `ASTRA_TOKEN` | El token completo, no una contrasena inventada |
+| Keyspace | `bigdata_uce` | Espacio logico donde se crean tablas |
+| CQL Console / Drivers | Cliente CQL | Forma de ejecutar Cassandra Query Language |
+"""),
+        md("""
 ### Guia del cliente Cassandra/Astra en Python
 
 El driver de Cassandra se usa distinto a un cliente SQL tradicional porque el modelo esta orientado a consultas por clave.
 
 | Pieza del cliente | Que hace | Para que importa |
 |---|---|---|
-| `PlainTextAuthProvider(client_id, client_secret)` | Prepara autenticacion con token de Astra. | Separa credenciales del codigo. |
+| `PlainTextAuthProvider("token", ASTRA_TOKEN)` | Prepara autenticacion con Application Token. | DataStax recomienda usuario literal `token` y password igual al token. |
 | `Cluster(cloud=..., auth_provider=...)` | Crea el objeto cluster usando el Secure Connect Bundle. | El SCB contiene informacion de conexion segura. |
 | `cluster.connect()` | Abre una sesion CQL. | A partir de aqui se ejecutan comandos. |
 | `session.set_keyspace(...)` | Selecciona el espacio logico de tablas. | Evita repetir el keyspace en cada consulta. |
@@ -651,7 +766,7 @@ El concepto clave es que `session.execute()` no debe usarse para explorar cualqu
         ficha(
             "Cluster(cloud={...}, auth_provider=...)",
             "crea una conexion del driver Cassandra hacia Astra DB.",
-            "ruta del secure connect bundle, client id y client secret.",
+            "ruta del secure connect bundle y Application Token.",
             "un objeto cluster desde el cual se abre una sesion CQL.",
             "si la sesion abre, puedes crear keyspaces/tablas y ejecutar CQL desde Colab.",
         ),
@@ -664,16 +779,38 @@ if usar_astra == "si":
     from cassandra.cluster import Cluster
     from cassandra.auth import PlainTextAuthProvider
 
-    bundle_path = input("Ruta del secure connect bundle subido a Colab: ").strip()
-    client_id = input("Client ID: ").strip()
-    client_secret = getpass("Client Secret: ")
+    print("Sube el archivo .zip del Secure Connect Bundle.")
+    print("No lo descomprimas. Debe quedar disponible en el entorno de Colab.")
 
-    cloud_config = {"secure_connect_bundle": bundle_path}
-    auth_provider = PlainTextAuthProvider(client_id, client_secret)
-    cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
-    session = cluster.connect()
-    print("Conexion a Astra DB abierta.")
+    try:
+        from google.colab import files
+        uploaded = files.upload()
+        zip_files = [name for name in uploaded if name.lower().endswith(".zip")]
+        if not zip_files:
+            raise ValueError("No se subio ningun archivo .zip.")
+        bundle_path = zip_files[0]
+        print("Bundle recibido:", bundle_path)
+    except Exception as exc:
+        print("No se pudo usar files.upload().")
+        print("Detalle:", str(exc)[:300])
+        bundle_path = input("Escribe la ruta del Secure Connect Bundle .zip: ").strip()
+
+    ASTRA_TOKEN = getpass("Pega el Application Token completo (empieza por AstraCS:): ")
+
+    try:
+        cloud_config = {"secure_connect_bundle": bundle_path}
+        auth_provider = PlainTextAuthProvider("token", ASTRA_TOKEN)
+        cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
+        session = cluster.connect()
+        print("Conexion a Astra DB abierta.")
+    except Exception as exc:
+        cluster = None
+        session = None
+        print("No se pudo conectar a Astra DB.")
+        print("Detalle tecnico:", str(exc)[:500])
+        print("Revisa bundle, token, estado de la base y region.")
 else:
+    cluster = None
     session = None
     print("Ruta Astra omitida. Se mantiene la practica conceptual/local.")
 '''),
@@ -682,9 +819,20 @@ else:
             [
                 "El Secure Connect Bundle no es un dataset; es un paquete de configuracion y certificados para conectarse de forma segura.",
                 "`cluster.connect()` abre la sesion CQL. Desde ese momento, el cuaderno puede enviar instrucciones a Astra.",
-                "Si la conexion falla, revisa que el bundle corresponda a la base correcta y que el token tenga permisos.",
+                "El usuario del driver es el literal `token`; la contrasena es el Application Token completo.",
             ],
         ),
+        md("""
+### Si te sale un error en Astra DB
+
+| Sintoma | Causa probable | Que hacer |
+|---|---|---|
+| `No se subio ningun archivo .zip` | Subiste otro archivo o cancelaste la carga | Vuelve a descargar el Secure Connect Bundle y subelo completo |
+| Error de autenticacion | Token incompleto, vencido o mal copiado | Genera un nuevo Application Token y pegalo completo, incluyendo `AstraCS:` |
+| Timeout o no conecta | Base hibernada o region no disponible | Entra al portal de Astra, abre la base y confirma que este activa |
+| Error con certificados | Bundle incorrecto para esa base | Descarga de nuevo el bundle desde la misma base que quieres usar |
+| CQL falla pero conexion abre | Keyspace o tabla no existen todavia | Ejecuta primero la celda que crea `bigdata_uce` y la tabla |
+"""),
         code('''
 if session is not None:
     session.execute(
@@ -806,7 +954,7 @@ La siguiente clase toma una necesidad complementaria: buscar texto por relevanci
 - KuzuDB Python API: https://docs.kuzudb.com/client-apis/python/
 - Apache Cassandra - Data modeling: https://cassandra.apache.org/doc/latest/cassandra/developing/data-modeling/intro.html
 - Apache Cassandra - CREATE TABLE: https://cassandra.apache.org/doc/latest/cassandra/reference/cql-commands/create-table.html
-- DataStax Astra DB - Connect with Python: https://docs.datastax.com/en/astra-db-classic/databases/connect-python.html
+- DataStax Astra DB Serverless - Python driver: https://docs.datastax.com/en/astra-db-serverless/drivers/python-driver.html
 - MongoDB Manual - Data modeling: https://www.mongodb.com/docs/manual/data-modeling/
 
 Documentacion revisada para la version vigente del curso 2026.
@@ -855,6 +1003,7 @@ Al finalizar la clase deberias poder:
 | Cierre | 10 min | Comparacion, errores comunes y preparacion para Elasticsearch |
 """),
         *free_tier_cells(),
+        *before_cloud_accounts_cells(),
         toc([
             "Seccion 1 -- Por que NoSQL no es una sola tecnologia",
             "Seccion 2 -- Repaso documental: lo que ya cubrio MongoDB",

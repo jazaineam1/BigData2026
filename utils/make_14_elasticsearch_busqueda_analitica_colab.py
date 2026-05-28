@@ -96,6 +96,69 @@ Decision para esta clase: el cuaderno deja **Elastic Cloud como ruta principal s
     ]
 
 
+def elastic_platform_tutorial_cells():
+    return [
+        md("""
+## Antes de programar: que cuenta necesito y que clave debo traer
+
+Antes de ejecutar codigo, el estudiante debe salir de Elastic Cloud con dos datos claros. Si esos datos no estan listos, la celda de Python no tiene forma de adivinar la conexion.
+
+| Que necesito antes de ejecutar | Donde se consigue | Como se llama en Elastic | Donde se pega en Colab | Como verifico que funciono |
+|---|---|---|---|---|
+| Cuenta Elastic Cloud con trial activo o cuenta institucional | https://cloud.elastic.co | Elastic Cloud account | No se pega; solo se usa para entrar al portal | El portal permite abrir el deployment/proyecto |
+| Recurso de Elasticsearch listo | Elastic Cloud Console | Deployment, hosted deployment o serverless project | No se pega; debe estar en estado listo | Kibana abre sin errores |
+| Identificador del recurso | Overview o Manage deployment | Cloud ID | Variable `ELASTIC_CLOUD_ID` | `client.info()` responde |
+| Llave para consultar Elasticsearch | Kibana: Stack Management / API keys, o ruta de API keys del proyecto serverless | Elasticsearch API key | `getpass()` como `ELASTIC_API_KEY` | `client.ping()` y `client.info()` responden |
+
+### Vocabulario minimo antes de pegar claves
+
+| Palabra | Explicacion sin jerga |
+|---|---|
+| `Cloud ID` | Identificador largo que le dice al cliente Python a que despliegue de Elastic Cloud conectarse. No es una contrasena. |
+| `API key` | Llave secreta que autoriza operaciones. Debe copiarse completa y no debe guardarse en el cuaderno. |
+| `Kibana` | Interfaz web para administrar, explorar datos y crear visualizaciones. |
+| `Data View` | Vista de Kibana que apunta a uno o varios indices para explorarlos en Discover y Lens. |
+| `client` | Objeto Python que envia solicitudes a Elasticsearch. Si el cliente no conecta, ninguna busqueda funcionara. |
+| `index` | Coleccion de documentos preparada para busqueda. En esta clase se llama `secop_texto_clase`. |
+"""),
+        md("""
+### Tutorial paso a paso: crear el recurso y traer las claves
+
+1. Entra a https://cloud.elastic.co.
+2. Crea cuenta o inicia sesion con la cuenta institucional indicada por el profesor.
+3. Verifica si tienes trial activo, creditos o permiso institucional. Si la cuenta pide tarjeta, confirma con el profesor antes de crear recursos.
+4. Crea un **deployment** de Elastic Cloud Hosted o un **serverless project** de Elasticsearch, segun lo que muestre la consola de Elastic en tu cuenta.
+5. Usa un nombre reconocible, por ejemplo `bigdata-u-central-secops`.
+6. Elige una region cercana o la region sugerida por la institucion.
+7. Espera hasta que el recurso aparezca como listo. No copies claves mientras el recurso esta creando componentes.
+8. En la pagina de **Overview** o **Manage deployment**, copia el **Cloud ID**. Ese valor se pega en Colab cuando la celda pregunte por `ELASTIC_CLOUD_ID`.
+9. Abre **Kibana** desde el boton del deployment/proyecto.
+10. Para Elastic Cloud Hosted: entra a **Stack Management** > **Security** > **API keys** y crea una API key para Elasticsearch.
+11. Para Elastic Cloud Serverless: entra a la ruta de **API keys** del proyecto y crea una key con permiso para leer/escribir indices del laboratorio.
+12. Copia la API key una sola vez y guardala temporalmente en un lugar seguro. En Colab se pega con `getpass()`, por eso no queda visible en pantalla.
+
+### Distincion critica: no todas las llaves sirven para lo mismo
+
+Elastic tiene dos familias de llaves que se confunden facil:
+
+| Llave | Para que sirve | Sirve para `Elasticsearch(cloud_id=..., api_key=...)` en esta clase? |
+|---|---|---|
+| Elastic Cloud API key | Administrar la organizacion, despliegues y proyectos desde la API de Elastic Cloud. | En Hosted, no. Esa llave no consulta documentos de Elasticsearch. |
+| Elasticsearch API key | Leer, escribir, buscar y administrar indices dentro de Elasticsearch. | Si. Esta es la llave que debe pegarse en Colab. |
+
+Si usas una **Elastic Cloud API key** donde Python espera una **Elasticsearch API key**, el recurso existe pero la autenticacion falla. Ese error no significa que Elasticsearch este danado; significa que la llave no es la correcta para consultar datos.
+"""),
+        interp(
+            "preparacion antes del codigo",
+            [
+                "La conexion no empieza en Python: empieza verificando cuenta, recurso, Cloud ID y llave correcta.",
+                "Un error de autenticacion casi siempre se resuelve revisando que la llave sea de Elasticsearch, no de administracion de Elastic Cloud.",
+                "El estudiante no debe compartir la API key por chat ni dejarla escrita en una celda.",
+            ],
+        ),
+    ]
+
+
 def data_cell():
     return code('''
 import pandas as pd
@@ -178,14 +241,29 @@ def cloud_connection_cells():
     return [
         section_header("4", "Conexion segura a Elastic Cloud desde Colab"),
         md("""
-Elastic Cloud permite crear una instancia administrada de Elasticsearch y Kibana. En Colab se recomienda usar el cliente oficial de Python con `cloud_id` y una API key o credenciales temporales.
+Elastic Cloud permite crear una instancia administrada de Elasticsearch y Kibana. En Colab se recomienda usar el cliente oficial de Python con `cloud_id` y una **Elasticsearch API key**.
 
 Este cuaderno no guarda secretos. Si el estudiante no tiene cuenta lista, puede leer la plantilla, revisar el modelo de consulta y ejecutar las secciones conceptuales.
 """),
         md("""
+### Antes de ejecutar esta celda
+
+| Que reviso | Como se ve cuando esta bien | Que hago si no esta listo |
+|---|---|---|
+| Cuenta o trial | Puedo entrar a Elastic Cloud Console | No ejecuto conexion; pido apoyo al profesor |
+| Deployment/proyecto | Estado listo y Kibana abre | Espero o reviso facturacion/permisos |
+| Cloud ID | Valor largo copiado desde Overview/Manage deployment | No uso URL de Kibana ni endpoint HTTP |
+| Elasticsearch API key | Llave creada en Kibana o en el proyecto serverless | No uso una Elastic Cloud API key |
+
+La celda hace dos pruebas:
+
+1. `client.ping()`: pregunta rapido si el servicio responde.
+2. `client.info()`: solicita informacion del cluster. Si esta llamada responde, la conexion y la autenticacion funcionan.
+"""),
+        md("""
 ### Guia del cliente oficial de Elasticsearch en Python
 
-El cliente `elasticsearch` es un cliente de bajo nivel: expone casi toda la API de Elasticsearch como metodos Python. Conviene aprenderlo por namespaces:
+El cliente `elasticsearch` es un cliente de bajo nivel: expone casi toda la API de Elasticsearch como metodos Python. En palabras simples, `client` es el mensajero entre Colab y Elasticsearch. Conviene aprenderlo por namespaces:
 
 | Pieza del cliente | Que hace | Ejemplo de uso |
 |---|---|---|
@@ -214,7 +292,7 @@ Lectura clave: `indices.*` administra indices; `index/get/update/delete` trabaja
         ficha(
             "Elasticsearch()",
             "crea un cliente Python para enviar operaciones al cluster.",
-            "`cloud_id` y `api_key`, o alternativamente URL y credenciales seguras.",
+            "`cloud_id` copiado desde Elastic Cloud y `api_key` creada para Elasticsearch.",
             "un objeto cliente con metodos como `index`, `search`, `indices.create` y `ping`.",
             "si `client.info()` responde, Colab esta conectado al servicio.",
         ),
@@ -222,14 +300,40 @@ Lectura clave: `indices.*` administra indices; `index/get/update/delete` trabaja
 from getpass import getpass
 from elasticsearch import Elasticsearch
 
-ELASTIC_CLOUD_ID = input("Elastic Cloud ID (deja vacio para omitir conexion): ").strip()
+print("Antes de pegar datos revisa:")
+print("1. El recurso de Elastic Cloud esta listo.")
+print("2. Tienes el Cloud ID, no una URL.")
+print("3. Tienes una Elasticsearch API key, no una Elastic Cloud API key.")
+
+ELASTIC_CLOUD_ID = input("Pega el Cloud ID de Elastic Cloud (vacio para omitir conexion): ").strip()
 
 if ELASTIC_CLOUD_ID:
-    ELASTIC_API_KEY = getpass("Elastic API key: ")
-    client = Elasticsearch(cloud_id=ELASTIC_CLOUD_ID, api_key=ELASTIC_API_KEY)
-    info = client.info()
-    print("Conexion activa con Elasticsearch.")
-    print("Cluster:", info.get("cluster_name", "sin nombre visible"))
+    ELASTIC_API_KEY = getpass("Pega la Elasticsearch API key creada en Kibana o en el proyecto: ").strip()
+
+    try:
+        client = Elasticsearch(
+            cloud_id=ELASTIC_CLOUD_ID,
+            api_key=ELASTIC_API_KEY,
+            request_timeout=30,
+        )
+        ping_ok = client.ping()
+        info = client.info()
+    except Exception as exc:
+        client = None
+        print("No se pudo conectar con Elasticsearch.")
+        print("Tipo de error:", type(exc).__name__)
+        print("Detalle corto:", str(exc)[:500])
+        print()
+        print("Revision sugerida:")
+        print("- Si pegaste una Elastic Cloud API key, crea una Elasticsearch API key.")
+        print("- Si pegaste una URL, vuelve a Overview y copia el Cloud ID.")
+        print("- Si el deployment no esta listo o el trial expiro, corrige eso antes de reintentar.")
+        print("- Si la key no tiene permisos de indices, crea una key con permisos de lectura/escritura para el laboratorio.")
+    else:
+        print("Conexion activa con Elasticsearch.")
+        print("Ping:", ping_ok)
+        print("Cluster:", info.get("cluster_name", "sin nombre visible"))
+        print("Version:", info.get("version", {}).get("number"))
 else:
     client = None
     print("Conexion omitida. Las celdas de consulta quedan como plantilla guiada.")
@@ -237,22 +341,39 @@ else:
         interp(
             "conexion cloud",
             [
-                "El `cloud_id` identifica el despliegue administrado; la API key autoriza operaciones.",
+                "El `cloud_id` identifica el despliegue administrado; la Elasticsearch API key autoriza consultas e indexacion.",
                 "No debe escribirse la API key directamente en el notebook, porque el cuaderno puede compartirse o subirse al repositorio.",
                 "Si no hay conexion en clase, la teoria y las plantillas siguen siendo validas para explicar el flujo.",
             ],
         ),
+        md("""
+### Si te sale este error en Elastic Cloud
+
+| Mensaje o sintoma | Causa frecuente | Que hacer |
+|---|---|---|
+| `AuthenticationException` o `401` | Pegaste una llave incorrecta o incompleta | Crea una Elasticsearch API key nueva y pegala completa |
+| `403` o permiso denegado | La llave existe pero no tiene permisos sobre indices | Crea una key con permisos para leer/escribir el indice `secop_texto_clase` |
+| `Cloud ID` invalido | Copiaste una URL de Kibana o endpoint HTTP | Copia el campo llamado Cloud ID desde Overview/Manage deployment |
+| `ConnectionError` | Deployment no esta listo, red temporal o trial vencido | Abre Elastic Cloud Console y verifica estado/facturacion |
+| `client.ping()` devuelve `False` | El servicio no respondio a la prueba rapida | Ejecuta `client.info()` para ver detalle o revisa Cloud ID y permisos |
+"""),
         code('''
 # Plantilla de diagnostico del cliente Elasticsearch.
 # Ejecuta esta celda despues de crear `client`.
 
 if client is not None:
-    print("Ping:", client.ping())
-    info = client.info()
-    print("Nombre del cluster:", info.get("cluster_name"))
-    print("Version:", info.get("version", {}).get("number"))
+    try:
+        print("client.ping() =>", client.ping())
+        info = client.info()
+        print("Nombre del cluster:", info.get("cluster_name"))
+        print("Version:", info.get("version", {}).get("number"))
+        print("Conexion lista para crear indices y cargar documentos.")
+    except Exception as exc:
+        print("El cliente existe, pero la prueba fallo.")
+        print("Tipo de error:", type(exc).__name__)
+        print("Detalle corto:", str(exc)[:500])
 else:
-    print("Sin cliente conectado. Revisa cloud_id, API key y estado del trial.")
+    print("No hay cliente conectado. Vuelve a la celda anterior y revisa Cloud ID, API key y estado del trial.")
 '''),
     ]
 
@@ -514,21 +635,52 @@ def kibana_cells():
     return [
         section_header("8", "Kibana: Data Views y dashboard basico"),
         md("""
-Kibana es la interfaz visual del ecosistema Elastic. Para esta sesion interesa usarlo de forma concreta:
+Kibana es la interfaz visual del ecosistema Elastic. En esta clase no se usa como adorno: se usa para comprobar que el indice existe, explorar documentos y construir un tablero inicial.
 
-1. Abrir Kibana desde Elastic Cloud.
-2. Crear un **Data View** sobre el indice `secop_texto_clase`.
-3. Explorar documentos en Discover.
-4. Crear visualizaciones basicas:
-   - conteo por sector,
-   - suma de valor por departamento,
-   - tabla de entidades con mas documentos,
-   - busqueda de texto en `objeto` o `descripcion`.
-5. Guardar un dashboard simple.
+### Antes de entrar a Kibana
+
+| Que necesito | Donde se consigue | Como se llama en Elastic | Como verifico que funciono |
+|---|---|---|---|
+| Indice cargado desde Colab | Celda de bulk indexing | `secop_texto_clase` | `client.indices.exists(index=INDEX_NAME)` devuelve `True` |
+| Acceso web a Kibana | Boton Open Kibana del deployment/proyecto | Kibana | La pantalla principal abre sin error |
+| Vista sobre el indice | Kibana > Stack Management > Data Views | Data View | Discover muestra documentos |
+
+### Tutorial paso a paso: crear Data View y explorar
+
+1. En Elastic Cloud Console abre el deployment/proyecto usado en Colab.
+2. Haz clic en **Open Kibana**.
+3. En Kibana entra a **Stack Management**.
+4. Abre **Data Views**.
+5. Crea un Data View con el patron `secop_texto_clase`.
+6. Si Kibana pide campo de tiempo y el indice no tiene fecha real, elige la opcion de crear el Data View sin campo temporal, o deja el campo temporal sin configurar si la interfaz lo permite.
+7. Abre **Discover**.
+8. Selecciona el Data View `secop_texto_clase`.
+9. Revisa que aparezcan documentos con campos como `entidad`, `sector`, `estado`, `objeto`, `descripcion`, `valor_millones` y `anio`.
+10. Prueba una busqueda textual, por ejemplo `analitica` o `interventoria`.
+11. Agrega filtros por `sector` o `estado` para ver como cambia la lista.
+
+### Tutorial paso a paso: visualizacion basica
+
+1. Entra a **Visualize Library** o **Dashboard** y crea una visualizacion nueva con Lens.
+2. Usa `secop_texto_clase` como fuente.
+3. Crea una barra con conteo de documentos por `sector.keyword` si el mapping creo subcampo keyword, o por `sector` si aparece disponible como categoria.
+4. Crea otra visualizacion con suma de `valor_millones` por `departamento`.
+5. Agrega una tabla con `entidad` y conteo de documentos.
+6. Guarda cada visualizacion con nombres claros, por ejemplo `Conteo por sector - SECOP clase`.
+7. Crea un dashboard y agrega las visualizaciones.
 
 ## Interpretacion docente
 
 Kibana no reemplaza el modelado del indice. Si el mapping esta mal, el dashboard tambien queda limitado. La visualizacion es la ultima capa de una cadena: documento, indice, mapping, consulta, agregacion y lectura.
+
+### Que se puede y que no se puede concluir
+
+| Lectura del dashboard | Conclusion responsable |
+|---|---|
+| Un sector tiene mas documentos | Hay mas registros cargados para ese sector en este dataset de clase |
+| Un departamento suma mas valor | En los documentos cargados, ese departamento concentra mayor valor registrado |
+| Una palabra aparece en varios objetos | Esa palabra es relevante para explorar, pero no prueba causalidad ni irregularidad |
+| Un proveedor o entidad aparece varias veces | Puede ser un patron de participacion, no una evidencia por si sola |
 """),
         reflection(
             "lectura del dashboard",
@@ -538,6 +690,16 @@ Kibana no reemplaza el modelado del indice. Si el mapping esta mal, el dashboard
                 "Que no podemos concluir solo con este dashboard?",
             ],
         ),
+        md("""
+### Si algo no aparece en Kibana
+
+| Sintoma | Causa frecuente | Accion sugerida |
+|---|---|---|
+| No aparece el indice | La carga desde Colab no se ejecuto o fallo | Vuelve a la celda de carga y verifica `client.indices.exists()` |
+| Discover muestra cero documentos | El Data View apunta a otro patron o hay filtro activo | Revisa el patron y limpia filtros |
+| No puedo agrupar por una columna de texto | El campo quedo como `text` sin variante exacta | Usa campos `keyword` para categorias o revisa el mapping |
+| Las cifras no coinciden con lo esperado | El dataset es reducido y pedagogico | Interpreta como ejemplo de clase, no como auditoria real |
+"""),
     ]
 
 
@@ -604,6 +766,7 @@ El proyecto final puede usar una base documental para guardar contratos y un mot
         md("""
 - Elasticsearch Python client: https://www.elastic.co/docs/reference/elasticsearch/clients/python/
 - Elasticsearch Python client - connecting: https://www.elastic.co/docs/reference/elasticsearch/clients/python/connecting
+- Elastic Cloud API keys: https://www.elastic.co/docs/deploy-manage/api-keys/elastic-cloud-api-keys
 - Elasticsearch mapping: https://www.elastic.co/docs/manage-data/data-store/mapping
 - Elasticsearch analysis: https://www.elastic.co/docs/manage-data/data-store/text-analysis
 - Elasticsearch query DSL: https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl
@@ -660,7 +823,9 @@ Al finalizar la clase deberias poder:
 | Cierre | 15 min | Comparacion con Atlas Search y proyecto final |
 """),
         *elastic_free_tier_cells(),
+        *elastic_platform_tutorial_cells(),
         toc([
+            "Antes de programar -- Cuenta, recurso, Cloud ID y API key",
             "Seccion 1 -- Por que Elasticsearch importa",
             "Seccion 2 -- Conceptos base",
             "Seccion 3 -- Dataset de clase",
