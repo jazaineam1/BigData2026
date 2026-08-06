@@ -708,7 +708,7 @@ def build_cells():
         ),
         md(
             """
-**¿Qué nos dice este resultado?** Creó una raíz `empleados`, añadió ocho nodos `empleado` y guardó el árbol
+            **¿Qué nos dice este resultado?** Creó una raíz `empleados`, añadió ocho nodos `empleado` y guardó el árbol
             en UTF-8. Todavía no hay un resumen: la siguiente etapa vuelve a leer el archivo y convierte explícitamente
             cada nodo en una fila.
             """
@@ -1086,7 +1086,7 @@ def build_cells():
             """
             ## Referencias y recursos
 
-- [Página web del curso](https://jazaineam1.github.io/BigData2026/)
+            - [Página web del curso](https://jazaineam1.github.io/BigData2026/)
             - [Documentación de pandas: `read_csv`](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
             - [Python: módulo `json`](https://docs.python.org/3/library/json.html)
             - [Python: procesamiento XML](https://docs.python.org/3/library/xml.etree.elementtree.html)
