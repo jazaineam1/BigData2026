@@ -2,8 +2,23 @@
 <title id="title">Pull Request revisable de Compras Claras</title>
 <desc id="desc">Vista de ramas, descripción, archivos, reviewers y check con guía de lectura crítica.</desc>
 <defs>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
-                <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#17324D" flood-opacity=".12"/>
+              <linearGradient id="header-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#0D273E"/>
+                <stop offset="100%" stop-color="#1D4F73"/>
+              </linearGradient>
+              <linearGradient id="navy-card-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#184368"/>
+                <stop offset="100%" stop-color="#0F2B48"/>
+              </linearGradient>
+              <linearGradient id="hub-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1C4B72"/>
+                <stop offset="100%" stop-color="#0A2238"/>
+              </linearGradient>
+              <filter id="shadow" x="-10%" y="-10%" width="125%" height="130%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F2B48" flood-opacity="0.09"/>
+              </filter>
+              <filter id="shadow-lg" x="-15%" y="-15%" width="135%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F2B48" flood-opacity="0.14"/>
               </filter>
               <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
                 <path d="M0,0 L0,6 L9,3 z" fill="#2F6FB0"/>
@@ -17,17 +32,30 @@
               <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
                 <path d="M0,0 L0,6 L9,3 z" fill="#6C5AA7"/>
               </marker>
+              <marker id="arrow-orange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#E95C3A"/>
+              </marker>
+              <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#C98500"/>
+              </marker>
+              <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#167C80"/>
+              </marker>
+              <marker id="arrow-ink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#17324D"/>
+              </marker>
             </defs>
 <rect width="1600" height="900" fill="#F3F7FA"/>
-<rect x="0" y="0" width="1600" height="112" rx="0" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
-<rect x="1376" y="24" width="176" height="38" rx="19" fill="#2A5878" stroke="#2A5878" stroke-width="1" opacity="1"/>
-<text x="1464.0" y="49" fill="#D9EFFB" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
+<rect x="0" y="0" width="1600" height="114" rx="0" fill="url(#header-grad)" stroke="#0D273E" stroke-width="0" opacity="1"/>
+<line x1="0" y1="114" x2="1600" y2="114" stroke="#2F6FB0" stroke-width="2" fill="none" stroke-linecap="round"/>
+<rect x="1376" y="24" width="176" height="36" rx="18" fill="#214E6D" stroke="#3F769C" stroke-width="1.5" opacity="1"/>
+<text x="1464.0" y="47" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="middle" style="">
 <tspan x="1464.0" dy="0">GUÍA GIT 3 DE 4</tspan>
 </text>
-<text x="48" y="50" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" text-anchor="start" style="">
+<text x="48" y="48" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" text-anchor="start" style="">
 <tspan x="48" dy="0">Pull Request: transformar commits en una explicación</tspan>
 </text>
-<text x="48" y="82" fill="#CFE4F2" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start" style="">
+<text x="48" y="80" fill="#D1E6F5" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="400" text-anchor="start" style="">
 <tspan x="48" dy="0">Un PR de calidad permite reconstruir propósito, evidencia, límites y forma de verificación</tspan>
 </text>
 <rect x="34" y="140" width="1130" height="660" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
@@ -36,143 +64,144 @@
 <circle cx="58" cy="163" r="6" fill="#FF625A" stroke="#FF625A" stroke-width="0"/>
 <circle cx="82" cy="163" r="6" fill="#FFC04A" stroke="#FFC04A" stroke-width="0"/>
 <circle cx="106" cy="163" r="6" fill="#2BCB4B" stroke="#2BCB4B" stroke-width="0"/>
-<text x="599.0" y="169" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle" style="">
+<text x="599.0" y="169" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle" style="">
 <tspan x="599.0" dy="0">github.com · Pull Request #1</tspan>
 </text>
-<text x="64" y="214" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" text-anchor="start" style="">
+<text x="64" y="214" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" text-anchor="start" style="">
 <tspan x="64" dy="0">Pull requests / #1</tspan>
 </text>
-<text x="64" y="258" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="26" font-weight="800" text-anchor="start" style="">
+<text x="64" y="258" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="25" font-weight="800" text-anchor="start" style="">
 <tspan x="64" dy="0">Compras Claras · arquitectura y ciclo analítico</tspan>
 </text>
-<rect x="64" y="278" width="84" height="38" rx="19" fill="#24855A" stroke="#24855A" stroke-width="1" opacity="1"/>
-<text x="106.0" y="303" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<rect x="64" y="278" width="84" height="36" rx="18" fill="#24855A" stroke="#24855A" stroke-width="1.5" opacity="1"/>
+<text x="106.0" y="301" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
 <tspan x="106.0" dy="0">Open</tspan>
 </text>
-<text x="166" y="304" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
-<tspan x="166" dy="0">entrega/sesion2 quiere combinar 2 commits en main</tspan>
+<text x="166" y="304" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
+<tspan x="166" dy="0">hito/s02-blueprint quiere combinar 2 commits en main</tspan>
 </text>
 <line x1="64" y1="330" x2="1134" y2="330" stroke="#B8C8D6" stroke-width="1" fill="none" stroke-linecap="round"/>
-<text x="64" y="365" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
+<text x="64" y="365" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
 <tspan x="64" dy="0">Conversation</tspan>
 </text>
-<text x="185" y="365" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
+<text x="185" y="365" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
 <tspan x="185" dy="0">Commits 2</tspan>
 </text>
-<text x="284" y="365" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
+<text x="284" y="365" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
 <tspan x="284" dy="0">Checks 1</tspan>
 </text>
-<text x="380" y="365" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
+<text x="380" y="365" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
 <tspan x="380" dy="0">Files changed 4</tspan>
 </text>
 <line x1="64" y1="380" x2="1134" y2="380" stroke="#B8C8D6" stroke-width="1" fill="none" stroke-linecap="round"/>
 <rect x="64" y="402" width="750" height="340" rx="12" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.2" opacity="1"/>
 <rect x="64" y="402" width="750" height="46" rx="12" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
-<text x="88" y="432" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" text-anchor="start" style="">
+<text x="88" y="432" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" text-anchor="start" style="">
 <tspan x="88" dy="0">Descripción de la pareja</tspan>
 </text>
-<text x="90" y="480" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<text x="90" y="480" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
 <tspan x="90" dy="0">Qué se hizo</tspan>
 </text>
-<text x="90" y="508" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
+<text x="90" y="508" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
 <tspan x="90" dy="0">Proceso AS-IS, arquitectura TO-BE y ciclo NIST.</tspan>
 </text>
-<text x="90" y="545" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<text x="90" y="545" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
 <tspan x="90" dy="0">Por qué</tspan>
 </text>
-<text x="90" y="573" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
+<text x="90" y="573" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
 <tspan x="90" dy="0">Reducir consolidación manual y explicar la prioridad.</tspan>
 </text>
-<text x="90" y="610" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<text x="90" y="610" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
 <tspan x="90" dy="0">Cómo se verificó</tspan>
 </text>
-<text x="90" y="638" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
+<text x="90" y="638" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
 <tspan x="90" dy="0">✓ perfilador  ✓ validador  ✓ dos autores</tspan>
 </text>
-<text x="90" y="675" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<text x="90" y="675" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
 <tspan x="90" dy="0">Límite</tspan>
 </text>
-<text x="90" y="703" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
+<text x="90" y="703" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
 <tspan x="90" dy="0">Una alerta prioriza revisión; no demuestra fraude.</tspan>
 </text>
 <rect x="844" y="402" width="290" height="92" rx="11" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
-<text x="866" y="430" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
+<text x="866" y="430" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
 <tspan x="866" dy="0">Reviewers</tspan>
 </text>
-<text x="866" y="462" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
+<text x="866" y="462" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
 <tspan x="866" dy="0">compañero · docente</tspan>
 </text>
 <rect x="844" y="510" width="290" height="112" rx="11" fill="#E7F5ED" stroke="#24855A" stroke-width="1" opacity="1"/>
-<text x="866" y="540" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
+<text x="866" y="540" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
 <tspan x="866" dy="0">Checks</tspan>
 </text>
 <circle cx="878" cy="576" r="12" fill="#24855A" stroke="#24855A" stroke-width="0"/>
-<text x="878" y="582" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="middle" style="">
+<text x="878" y="582" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="middle" style="">
 <tspan x="878" dy="0">✓</tspan>
 </text>
-<text x="902" y="582" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="start" style="">
+<text x="902" y="582" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="start" style="">
 <tspan x="902" dy="0">validar · aprobado</tspan>
 </text>
 <rect x="844" y="640" width="290" height="102" rx="11" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1" opacity="1"/>
-<text x="866" y="671" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
+<text x="866" y="671" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
 <tspan x="866" dy="0">Files changed</tspan>
 </text>
-<text x="866" y="706" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" text-anchor="start" style="">
+<text x="866" y="706" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" text-anchor="start" style="">
 <tspan x="866" dy="0">4 archivos · +86 −12</tspan>
 </text>
 <rect x="1190" y="140" width="374" height="660" rx="18" fill="#FFFFFF" stroke="#12395B" stroke-width="1.5" opacity="1"/>
-<text x="1218" y="184" fill="#12395B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
+<text x="1218" y="184" fill="#12395B" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
 <tspan x="1218" dy="0">CUATRO LECTURAS</tspan>
 </text>
 <rect x="1218" y="220" width="318" height="110" rx="13" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
 <circle cx="1252" cy="254" r="19" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
-<text x="1252" y="262" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<text x="1252" y="260" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
 <tspan x="1252" dy="0">1</tspan>
 </text>
-<text x="1282" y="254" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<text x="1282" y="254" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
 <tspan x="1282" dy="0">Ramas correctas</tspan>
 </text>
-<text x="1282" y="287" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
-<tspan x="1282" dy="0">main ← entrega/sesion2</tspan>
+<text x="1282" y="287" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<tspan x="1282" dy="0">main ← hito/s02-blueprint</tspan>
 </text>
 <rect x="1218" y="354" width="318" height="110" rx="13" fill="#FDE9E3" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
 <circle cx="1252" cy="388" r="19" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
-<text x="1252" y="396" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<text x="1252" y="394" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
 <tspan x="1252" dy="0">2</tspan>
 </text>
-<text x="1282" y="388" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<text x="1282" y="388" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
 <tspan x="1282" dy="0">Propósito reconstruible</tspan>
 </text>
-<text x="1282" y="421" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<text x="1282" y="421" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
 <tspan x="1282" dy="0">qué · por qué · límite</tspan>
 </text>
 <rect x="1218" y="488" width="318" height="110" rx="13" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
 <circle cx="1252" cy="522" r="19" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="1"/>
-<text x="1252" y="530" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<text x="1252" y="528" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
 <tspan x="1252" dy="0">3</tspan>
 </text>
-<text x="1282" y="522" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<text x="1282" y="522" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
 <tspan x="1282" dy="0">Diff revisable</tspan>
 </text>
-<text x="1282" y="555" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<text x="1282" y="555" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
 <tspan x="1282" dy="0">sin secretos ni COMPLETAR</tspan>
 </text>
 <rect x="1218" y="622" width="318" height="110" rx="13" fill="#E7F5ED" stroke="#24855A" stroke-width="1.5" opacity="1"/>
 <circle cx="1252" cy="656" r="19" fill="#24855A" stroke="#24855A" stroke-width="1"/>
-<text x="1252" y="664" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<text x="1252" y="662" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
 <tspan x="1252" dy="0">4</tspan>
 </text>
-<text x="1282" y="656" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<text x="1282" y="656" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
 <tspan x="1282" dy="0">Revisión atribuible</tspan>
 </text>
-<text x="1282" y="689" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<text x="1282" y="689" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
 <tspan x="1282" dy="0">comentario + check verde</tspan>
 </text>
-<rect x="48" y="838" width="1504" height="42" rx="13" fill="#E7EFF5" stroke="#E7EFF5" stroke-width="0" opacity="1"/>
-<text x="70" y="865" fill="#12395B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" text-anchor="start" style="">
-<tspan x="70" dy="0">CRITERIO DOCENTE</tspan>
+<rect x="48" y="836" width="1504" height="44" rx="14" fill="#E7EFF5" stroke="#D0DFEA" stroke-width="1.5" opacity="1"/>
+<rect x="52" y="840" width="206" height="36" rx="11" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
+<text x="155.0" y="863" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="900" text-anchor="middle" style="">
+<tspan x="155.0" dy="0">CRITERIO DOCENTE</tspan>
 </text>
-<text x="256.0" y="865" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="start" style="">
-<tspan x="256.0" dy="0">El check verde no reemplaza leer Files changed ni discutir la decisión arquitectónica.</tspan>
+<text x="273" y="863" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
+<tspan x="273" dy="0">El check verde no reemplaza leer Files changed ni discutir la decisión arquitectónica.</tspan>
 </text>
 </svg>
