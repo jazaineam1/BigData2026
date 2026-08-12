@@ -64,13 +64,18 @@ def build_cells():
             # Sesión 1 — Introducción a Big Data e ingesta de datos con Python
 
             ## Universidad Central
+            <div align="center">
+              <img src="https://universidad.ucentral.edu.co/tulengua/wp-content/themes/tulengua/images/logo-ucentral.png"
+                   width="340" alt="Logo de la Universidad Central">
+            </div>
+
             > ### Facultad de Ingeniería y Ciencias Básicas
             > ### Maestría en Analítica de Datos — BIG DATA (64491093), Grupo 2
 
             **Docente:** Julio Antonino Zainea Maya<br>
             **Periodo:** 2026-2S<br>
             **Duración sugerida:** 3 horas, incluida una pausa de 15 minutos<br>
-            **Última actualización:** 6 de agosto de 2026
+            **Última actualización:** 11 de agosto de 2026
 
             Esta sesión abre el curso con una pregunta profesional: **¿cómo reconocer que un problema de datos
             necesita algo más que una hoja de cálculo o un único archivo cargado en memoria?**
@@ -241,6 +246,66 @@ def build_cells():
         ),
         md(
             """
+            ## Lectura visual 1 — La escala cotidiana de Internet
+
+            <div align="center">
+              <img src="https://st3.idealista.com/news/archivos/styles/fullwidth_xl/public/2025-04/images/daily_internet_activity-site.jpg?VersionId=hchx_9ZCUNAS20RtwuZs904ZwF66wuZJ&itok=8AS0dwkK"
+                   width="620" alt="Estimaciones de actividad mundial en Internet durante un día">
+            </div>
+
+            **¿Cómo se lee?** La infografía estima, para un día, 333 mil millones de correos, 24 mil millones
+            de mensajes de texto, 8,5 mil millones de búsquedas de Google y 500 millones de publicaciones en X.
+            Las cifras ilustran **volumen** y **velocidad**, pero también **variedad**: mensajes, búsquedas,
+            publicaciones, reuniones y reproducciones requieren estructuras y decisiones distintas.
+
+            **Qué respalda:** Internet produce flujos masivos y heterogéneos. **Qué no prueba:** no indica que
+            todos esos datos sean accesibles, confiables, útiles o éticamente utilizables por una organización.
+
+            *Fuente visual: Voronoi / Visual Capitalist, cifras redondeadas a febrero de 2025.*
+            """
+        ),
+        md(
+            """
+            ## De la adopción lenta a la difusión digital
+
+            <div align="center">
+              <img src="https://pbs.twimg.com/media/EFz4Xl2XUAA4G8z?format=jpg&name=900x900"
+                   width="620" alt="Comparación histórica del tiempo requerido por distintos productos para alcanzar 50 millones de usuarios">
+            </div>
+
+            La imagen compara el tiempo que distintas tecnologías habrían tardado en alcanzar 50 millones de
+            usuarios: 68 años para las aerolíneas, 7 para Internet, 3 para Facebook y 19 días para Pokémon Go.
+            Sirve para discutir cómo las plataformas digitales pueden escalar con rapidez y generar datos desde su
+            adopción inicial.
+
+            **Advertencia de lectura:** la imagen no documenta metodología, geografía ni definición de “usuario”.
+            Por eso funciona como detonante de preguntas, no como evidencia suficiente para comparar innovaciones.
+            """
+        ),
+        md(
+            """
+            ## Datos personales, plataformas y responsabilidad
+
+            El crecimiento digital también obliga a preguntar **quién produce los datos y con qué autorización**.
+            Una misma persona puede dejar trazas de búsquedas, ubicación, reproducciones, compras, publicaciones e
+            interacciones. Google, Meta, X, YouTube y Amazon son ejemplos para revisar en clase, pero el alcance real
+            depende del servicio utilizado, la configuración, los permisos y la política aplicable.
+
+            Antes de analizar estos datos debemos verificar:
+
+            1. finalidad y base de autorización;
+            2. minimización: recolectar solo lo necesario;
+            3. acceso, retención y posibilidad de eliminación;
+            4. sesgos de representación y de comportamiento;
+            5. consecuencias para las personas si una inferencia es incorrecta.
+
+            **Corrección conceptual importante:** una característica física de un dispositivo —como tener una
+            batería no removible— no demuestra por sí sola que transmita datos cuando está apagado. Esa afirmación
+            necesitaría evidencia técnica independiente.
+            """
+        ),
+        md(
+            """
             ### Definición formal, intuición y ejemplo pequeño
 
             **Definición formal de trabajo.** Un problema es Big Data cuando una o varias características de los datos
@@ -289,6 +354,25 @@ def build_cells():
         ),
         md(
             """
+            ### Ocho formas de convertir datos en una decisión
+
+            | Aplicación | Pregunta profesional | Evidencia necesaria |
+            |---|---|---|
+            | Decisiones informadas | ¿Qué alternativa presenta mejor resultado esperado? | Indicadores comparables y contexto |
+            | Personalización | ¿Qué oferta es pertinente para cada segmento? | Preferencias, consentimiento y respuesta |
+            | Optimización de procesos | ¿Dónde se concentra el tiempo o el costo? | Tiempos, colas, errores y capacidad |
+            | Innovación | ¿Qué necesidad no atendida aparece en los datos? | Patrones reproducibles y validación con usuarios |
+            | Predicción y prevención | ¿Qué riesgo requiere una acción anticipada? | Historial, horizonte temporal y costo del error |
+            | Experiencia del cliente | ¿En qué punto se deteriora el recorrido? | Eventos, quejas y resultados del servicio |
+            | Investigación y desarrollo | ¿Qué hipótesis merece un experimento? | Datos trazables y diseño de validación |
+            | Competitividad | ¿Qué capacidad diferencial puede sostenerse? | Mercado, operación, costos y gobernanza |
+
+            **Lectura docente:** la tabla conserva los beneficios empresariales del tema original, pero hace visible
+            qué pregunta responde cada uno. Ninguna aplicación surge automáticamente por acumular más datos.
+            """
+        ),
+        md(
+            """
             ---
             # Bloque 2 — Las 5 V y la elección de infraestructura
 
@@ -304,6 +388,23 @@ def build_cells():
 
             **Qué no prueban las 5 V:** no garantizan que una solución sea rentable, ética o causalmente efectiva.
             Funcionan como diagnóstico inicial, no como receta automática.
+            """
+        ),
+        md(
+            """
+            ### Lectura visual 2 — Las 5 V como diagnóstico conjunto
+
+            <div align="center">
+              <img src="https://datascience.uc.cl/images/las-5-v-bigdata.png"
+                   width="600" alt="Diagrama circular de volumen, velocidad, variedad, veracidad y valor">
+            </div>
+
+            La figura coloca las cinco dimensiones alrededor del mismo problema. No significa que todas deban ser
+            “altas”: una arquitectura puede estar condicionada principalmente por velocidad, mientras otra lo está por
+            variedad o veracidad. **Valor** obliga a regresar a la decisión; **veracidad** recuerda que una gran escala
+            también puede amplificar errores.
+
+            *Fuente visual: [Data Science UC Chile](https://datascience.uc.cl/images/las-5-v-bigdata.png).*
             """
         ),
         question_cell(
@@ -337,6 +438,86 @@ def build_cells():
 
             **Error común:** afirmar que la nube siempre es más barata o más segura. Ambas propiedades dependen del
             diseño, la operación, el uso y el modelo de responsabilidad.
+            """
+        ),
+        md(
+            """
+            ### Lectura visual 3 — ¿Qué aporta la nube?
+
+            <div align="center">
+              <img src="https://edteam-media.s3.amazonaws.com/blogs/original/def59e91-b472-40dd-b9c4-cda7f79a3515.png"
+                   width="650" alt="Infografía sobre virtualización, uso bajo demanda y escalabilidad de la nube">
+            </div>
+
+            La imagen destaca tres ideas: **virtualización**, **uso bajo demanda** y **despliegue rápido y
+            escalable**. En el caso logístico, esto permitiría aumentar capacidad durante un pico de pedidos sin
+            comprar primero toda la infraestructura física.
+
+            **Qué no debemos concluir:** elasticidad no significa costo ilimitadamente bajo. Si los recursos quedan
+            encendidos, se mueven grandes volúmenes o no existen controles de presupuesto, la factura puede crecer.
+
+            *Fuente visual: [EDteam](https://edteam-media.s3.amazonaws.com/blogs/original/def59e91-b472-40dd-b9c4-cda7f79a3515.png).*
+            """
+        ),
+        md(
+            """
+            ### Proveedores y servicios que conviene reconocer
+
+            Los cuatro proveedores del cuaderno original se mantienen porque permiten reconocer familias de
+            servicios. Los nombres no son una recomendación de compra; sirven para traducir una necesidad de
+            arquitectura a opciones concretas.
+
+            **[Amazon Web Services (AWS)](https://aws.amazon.com/es/)**
+
+            - `Amazon EC2`: máquinas virtuales.
+            - `Amazon S3`: almacenamiento de objetos.
+            - `Amazon RDS`: bases de datos relacionales administradas.
+            - `Amazon VPC`: redes virtuales aisladas.
+            - `AWS Lambda`: ejecución de funciones por eventos.
+            - `Amazon EBS`: volúmenes de almacenamiento para instancias.
+
+            **[Microsoft Azure](https://azure.microsoft.com/es-es/products/)**
+
+            - `Azure Virtual Machines`: cómputo virtual.
+            - `Azure Storage`: objetos, archivos, colas y tablas.
+            - `Azure SQL Database`: base relacional administrada.
+            - `Azure App Service`: alojamiento administrado de aplicaciones.
+            - `Azure Cosmos DB`: base de datos distribuida multimodelo.
+
+            **[Google Cloud Platform (GCP)](https://cloud.google.com/products?hl=es)**
+
+            - `Compute Engine`: máquinas virtuales.
+            - `Cloud Storage`: almacenamiento de objetos.
+            - `Cloud SQL`: bases relacionales administradas.
+            - `BigQuery`: almacén analítico administrado.
+
+            **[IBM Cloud](https://www.ibm.com/products/cloud)**
+
+            - `IBM Watson Studio`: entorno para análisis y ciencia de datos.
+            - `IBM Cloud Pak for Data`: plataforma integrada de datos e IA.
+            - `IBM Cloud Pak for Security`: integración y análisis de seguridad.
+
+            **Criterio docente:** compara primero función, gobierno, región, costo total, portabilidad y habilidades
+            del equipo. El nombre del proveedor viene después.
+            """
+        ),
+        md(
+            """
+            ### Lectura visual 4 — Participación histórica del mercado de nube
+
+            <div align="center">
+              <img src="https://holori.com/wp-content/uploads/2024/06/cloud-provider-market-share-up-to-Q2-2024-1024x691.jpg"
+                   width="700" alt="Tendencia histórica de participación de proveedores de nube hasta el segundo trimestre de 2024">
+            </div>
+
+            En el segundo trimestre de 2024, la figura ubica aproximadamente a AWS en 31–32 %, Microsoft en 23–24 %
+            y Google en 12 %. También muestra una tendencia: Microsoft y Google aumentaron su participación desde
+            2018, mientras AWS conservó el primer lugar dentro del periodo mostrado.
+
+            **Límite:** es una fotografía histórica de ingresos de IaaS, PaaS y nube privada alojada; no mide calidad,
+            precio para nuestro caso ni participación actual en agosto de 2026. No debe usarse como ranking vigente.
+
+            *Fuente visual: Holori, con datos atribuidos a Synergy Research Group, hasta Q2 de 2024.*
             """
         ),
         question_cell(
@@ -379,6 +560,25 @@ def build_cells():
 
             **Advertencia:** CSV suele tratarse como estructurado por su forma tabular, aunque no impone tipos ni reglas
             tan fuertes como una base de datos.
+            """
+        ),
+        md(
+            """
+            ### Lectura visual 5 — Tres formas de organizar el contenido
+
+            <div align="center">
+              <img src="https://dgcloud.com.br/wp-content/uploads/2022/01/Estruturado-vs-Desestruturado.png"
+                   width="720" alt="Comparación visual de datos estructurados, no estructurados y semiestructurados">
+            </div>
+
+            La imagen usa etiquetas en portugués: `Estruturado`, `Não Estruturado` y `Semi Estruturado`. La primera
+            columna representa campos regulares; la segunda mezcla correos, texto, audio e imágenes; la tercera muestra
+            contenido diverso con marcas o metadatos que aportan organización parcial.
+
+            **Conexión con el laboratorio:** CSV representará el caso estructurado; JSON y XML, el semiestructurado;
+            y un párrafo libre, el no estructurado. La clasificación define cómo leer y transformar cada fuente.
+
+            *Fuente visual: [DGCloud](https://dgcloud.com.br/wp-content/uploads/2022/01/Estruturado-vs-Desestruturado.png).*
             """
         ),
         question_cell(
@@ -1067,10 +1267,12 @@ def build_cells():
 
             | Contenido conservado | Nueva ubicación |
             |---|---|
-            | Motivación e impacto de la era de datos | Bloque 1 |
-            | 5 V de Big Data | Bloque 2 |
-            | On-premise, nube y proveedores | Bloque 2 |
-            | Tipos de datos | Bloque 3 |
+            | Logo y encabezado institucional | Apertura de la sesión |
+            | Actividad diaria de Internet y adopción tecnológica | Lecturas visuales del bloque 1 |
+            | Privacidad, plataformas y beneficios empresariales | Bloque 1 |
+            | 5 V y su infografía | Bloque 2 |
+            | On-premise, nube, proveedores, servicios y gráfico de mercado | Bloque 2 |
+            | Tipos de datos y comparación visual | Bloque 3 |
             | Ejemplo de empleados con pandas | Bloque 4 |
             | `chunksize` e ICFES | Bloque 5, con control de completitud |
             | Paralelismo con pandas | Extensión opcional del bloque 5 |
@@ -1078,8 +1280,9 @@ def build_cells():
             | Texto no estructurado | Bloque 7 |
             | API Socrata y SECOP | Bloque 8 y ejercicio guiado |
 
-            La reorganización conserva los temas centrales, corrige los ejemplos que podían inducir pérdidas o
-            comparaciones inválidas y añade objetivos, preguntas, interpretaciones y cierre.
+            La reorganización conserva los temas, ejemplos y siete recursos visuales del cuaderno base. Las imágenes
+            ahora incluyen una lectura guiada y una advertencia sobre lo que respaldan y lo que no demuestran. Los
+            ejemplos técnicos que podían perder filas o comparar tareas diferentes quedaron corregidos.
             """
         ),
         md(
@@ -1087,6 +1290,17 @@ def build_cells():
             ## Referencias y recursos
 
             - [Página web del curso](https://jazaineam1.github.io/BigData2026/)
+            - [Logo institucional de la Universidad Central](https://universidad.ucentral.edu.co/tulengua/wp-content/themes/tulengua/images/logo-ucentral.png)
+            - [Actividad diaria de Internet — recurso visual](https://st3.idealista.com/news/archivos/styles/fullwidth_xl/public/2025-04/images/daily_internet_activity-site.jpg?VersionId=hchx_9ZCUNAS20RtwuZs904ZwF66wuZJ&itok=8AS0dwkK)
+            - [Adopción histórica de tecnologías — recurso visual](https://pbs.twimg.com/media/EFz4Xl2XUAA4G8z?format=jpg&name=900x900)
+            - [Conceptos de nube — EDteam](https://edteam-media.s3.amazonaws.com/blogs/original/def59e91-b472-40dd-b9c4-cda7f79a3515.png)
+            - [Participación histórica de proveedores — Holori/Synergy](https://holori.com/wp-content/uploads/2024/06/cloud-provider-market-share-up-to-Q2-2024-1024x691.jpg)
+            - [Las 5 V de Big Data — Data Science UC](https://datascience.uc.cl/images/las-5-v-bigdata.png)
+            - [Tipos de datos — DGCloud](https://dgcloud.com.br/wp-content/uploads/2022/01/Estruturado-vs-Desestruturado.png)
+            - [Productos de AWS](https://aws.amazon.com/es/products/)
+            - [Productos de Microsoft Azure](https://azure.microsoft.com/es-es/products/)
+            - [Productos de Google Cloud](https://cloud.google.com/products?hl=es)
+            - [Productos de IBM Cloud](https://www.ibm.com/products/cloud)
             - [Documentación de pandas: `read_csv`](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
             - [Python: módulo `json`](https://docs.python.org/3/library/json.html)
             - [Python: procesamiento XML](https://docs.python.org/3/library/xml.etree.elementtree.html)
