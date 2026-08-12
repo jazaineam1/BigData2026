@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">Elección de entorno gratuito para la sesión 2</title>
+  <desc id="desc">Tres rutas desde el repositorio privado: Git local, Codespaces con cuota personal y github.dev como contingencia.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity=".12"/></filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#31577c"/></marker>
+  </defs>
+  <rect width="1200" height="650" rx="24" fill="#f5f8fb"/>
+  <rect width="1200" height="86" rx="24" fill="#12395b"/><rect y="62" width="1200" height="24" fill="#12395b"/>
+  <text x="56" y="39" fill="#fff" font-family="Segoe UI,Arial" font-size="25" font-weight="700">Paso 1 · Elegir un entorno sin activar facturación</text>
+  <text x="56" y="68" fill="#cfe7f6" font-family="Segoe UI,Arial" font-size="15">Vista guiada · repositorio demo privado · datos sensibles omitidos</text>
+  <g filter="url(#shadow)">
+    <rect x="350" y="118" width="500" height="110" rx="18" fill="#fff" stroke="#b8c9d9"/>
+    <circle cx="402" cy="173" r="27" fill="#e7f2fa"/><path d="M391 173h22m-11-11v22" stroke="#1769aa" stroke-width="4" stroke-linecap="round"/>
+    <text x="447" y="159" fill="#14324a" font-family="Segoe UI,Arial" font-size="18" font-weight="700">compras-claras-pareja-XX</text>
+    <text x="447" y="187" fill="#52697c" font-family="Segoe UI,Arial" font-size="15">Repositorio privado de la pareja</text>
+    <rect x="702" y="145" width="110" height="48" rx="9" fill="#1f7a44"/><text x="757" y="176" text-anchor="middle" fill="#fff" font-family="Segoe UI,Arial" font-size="17" font-weight="700">Code ▾</text>
+  </g>
+  <path d="M600 228v42" fill="none" stroke="#31577c" stroke-width="3"/>
+  <path d="M600 270H212v38" fill="none" stroke="#31577c" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M600 270v38" fill="none" stroke="#31577c" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M600 270h388v38" fill="none" stroke="#31577c" stroke-width="3" marker-end="url(#arrow)"/>
+  <g filter="url(#shadow)">
+    <rect x="54" y="312" width="316" height="236" rx="18" fill="#fff" stroke="#7bb58f" stroke-width="2"/>
+    <circle cx="96" cy="355" r="23" fill="#dbf2e3"/><text x="96" y="363" text-anchor="middle" fill="#17643a" font-family="Segoe UI,Arial" font-size="22" font-weight="700">1</text>
+    <text x="133" y="350" fill="#153b2a" font-family="Segoe UI,Arial" font-size="20" font-weight="700">Git local</text>
+    <text x="133" y="374" fill="#23744a" font-family="Segoe UI,Arial" font-size="14" font-weight="700">RUTA RECOMENDADA · GRATIS</text>
+    <text x="82" y="417" fill="#394d5c" font-family="Segoe UI,Arial" font-size="15">Code → Local → HTTPS</text>
+    <rect x="80" y="438" width="264" height="44" rx="8" fill="#15232e"/><text x="96" y="466" fill="#e8f1f7" font-family="Consolas,monospace" font-size="14">git clone URL-PRIVADA</text>
+    <text x="82" y="516" fill="#52697c" font-family="Segoe UI,Arial" font-size="14">Terminal, Python, Git y archivos locales.</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="442" y="312" width="316" height="236" rx="18" fill="#fff" stroke="#7ea9cf" stroke-width="2"/>
+    <circle cx="484" cy="355" r="23" fill="#e3eff9"/><text x="484" y="363" text-anchor="middle" fill="#155c91" font-family="Segoe UI,Arial" font-size="22" font-weight="700">2</text>
+    <text x="521" y="350" fill="#163c59" font-family="Segoe UI,Arial" font-size="20" font-weight="700">Codespaces</text>
+    <text x="521" y="374" fill="#3174a6" font-family="Segoe UI,Arial" font-size="14" font-weight="700">SOLO CON CUOTA PERSONAL</text>
+    <text x="470" y="417" fill="#394d5c" font-family="Segoe UI,Arial" font-size="15">Code → Codespaces → Create</text>
+    <rect x="470" y="438" width="260" height="44" rx="8" fill="#edf5fb" stroke="#a9c7df"/><text x="600" y="466" text-anchor="middle" fill="#245d86" font-family="Segoe UI,Arial" font-size="14" font-weight="700">No habilitar billing de la org.</text>
+    <text x="470" y="516" fill="#52697c" font-family="Segoe UI,Arial" font-size="14">Mismo laboratorio desde el navegador.</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="830" y="312" width="316" height="236" rx="18" fill="#fff" stroke="#d5a15a" stroke-width="2"/>
+    <circle cx="872" cy="355" r="23" fill="#fff1dc"/><text x="872" y="363" text-anchor="middle" fill="#95570b" font-family="Segoe UI,Arial" font-size="22" font-weight="700">3</text>
+    <text x="909" y="350" fill="#593c17" font-family="Segoe UI,Arial" font-size="20" font-weight="700">github.dev</text>
+    <text x="909" y="374" fill="#a76817" font-family="Segoe UI,Arial" font-size="14" font-weight="700">CONTINGENCIA WEB</text>
+    <text x="858" y="417" fill="#394d5c" font-family="Segoe UI,Arial" font-size="15">En el repositorio, pulsa la tecla</text>
+    <rect x="858" y="438" width="66" height="44" rx="8" fill="#fff" stroke="#8a98a5"/><text x="891" y="468" text-anchor="middle" fill="#253746" font-family="Segoe UI,Arial" font-size="25" font-weight="700">.</text>
+    <text x="940" y="465" fill="#52697c" font-family="Segoe UI,Arial" font-size="14">Sin terminal</text>
+    <text x="858" y="516" fill="#52697c" font-family="Segoe UI,Arial" font-size="14">Editar y confirmar desde Source Control.</text>
+  </g>
+  <rect x="122" y="581" width="956" height="42" rx="12" fill="#e8f0f6"/>
+  <text x="600" y="607" text-anchor="middle" fill="#244963" font-family="Segoe UI,Arial" font-size="15" font-weight="600">Antes de editar: confirma la pareja, el repositorio y la rama. No hagas un fork público.</text>
+</svg>

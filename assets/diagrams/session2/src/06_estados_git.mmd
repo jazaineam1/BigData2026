@@ -1,0 +1,36 @@
+%% Sesion 2 - Estados Git, Pull Request y CI
+flowchart LR
+  R["<b>1. REPOSITORIO</b><br/>main sincronizada"]
+  B["<b>2. RAMA</b><br/>entrega/sesion2"]
+  W["<b>3. WORKING TREE</b><br/>archivo modificado"]
+  S["<b>4. STAGING</b><br/>cambio seleccionado"]
+  C["<b>5. COMMIT</b><br/>instantánea con autor"]
+  P["<b>6. PUSH</b><br/>rama publicada"]
+  PR["<b>7. PULL REQUEST</b><br/>conversación y revisión"]
+  CI{"<b>8. CI</b><br/>¿validador verde?"}
+  M["<b>9. LISTO PARA INTEGRAR</b><br/>evidencia revisada"]
+  F["Corregir archivo<br/>y crear otro commit"]
+
+  R -->|git switch -c| B
+  B -->|editar Markdown| W
+  W -->|git add| S
+  S -->|git commit| C
+  C -->|git push -u origin| P
+  P -->|Compare & pull request| PR
+  PR --> CI
+  CI -->|Sí| M
+  CI -->|No| F
+  F -. "mismo ciclo, sin borrar historial" .-> W
+
+  classDef base fill:#E8F1FB,color:#17324D,stroke:#1E5AA8,stroke-width:2px;
+  classDef stage fill:#FFF4D6,color:#573F00,stroke:#D89B00,stroke-width:3px;
+  classDef published fill:#EAF6EE,color:#174C2B,stroke:#2E8B57,stroke-width:2px;
+  classDef review fill:#EDE8F7,color:#382D59,stroke:#7156A5,stroke-width:3px;
+  classDef done fill:#F4623A,color:#FFFFFF,stroke:#B73B1F,stroke-width:3px;
+  classDef fix fill:#FDE2DC,color:#6E1C0C,stroke:#F4623A,stroke-width:2px;
+  class R,B,W base;
+  class S,C stage;
+  class P published;
+  class PR,CI review;
+  class M done;
+  class F fix;

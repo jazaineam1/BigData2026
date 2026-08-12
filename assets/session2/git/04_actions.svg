@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">GitHub Actions aprobado en el Pull Request</title>
+  <desc id="desc">Vista guiada del check validar aprobado y del comentario de revisión docente.</desc>
+  <rect width="1200" height="650" rx="24" fill="#f6f8fa"/>
+  <rect width="1200" height="86" rx="24" fill="#12395b"/><rect y="62" width="1200" height="24" fill="#12395b"/>
+  <text x="56" y="39" fill="#fff" font-family="Segoe UI,Arial" font-size="25" font-weight="700">Paso 9 · CI verde + revisión humana</text>
+  <text x="56" y="68" fill="#cfe7f6" font-family="Segoe UI,Arial" font-size="15">Evidencia real de la prueba: workflow “validar” aprobado en 10 segundos</text>
+  <rect x="62" y="122" width="1076" height="176" rx="14" fill="#fff" stroke="#d0d7de"/>
+  <circle cx="112" cy="175" r="26" fill="#1a7f37"/><path d="M99 175l9 9 18-23" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="158" y="164" fill="#24292f" font-family="Segoe UI,Arial" font-size="21" font-weight="700">All checks have passed</text>
+  <text x="158" y="190" fill="#57606a" font-family="Segoe UI,Arial" font-size="15">1 successful check · rama entrega/sesion2 · Pull Request #1</text>
+  <line x1="92" y1="218" x2="1106" y2="218" stroke="#d8dee4"/>
+  <circle cx="112" cy="256" r="11" fill="#1a7f37"/><path d="M107 256l4 4 7-9" fill="none" stroke="#fff" stroke-width="2"/>
+  <text x="140" y="261" fill="#24292f" font-family="Segoe UI,Arial" font-size="16" font-weight="600">validar</text>
+  <text x="1034" y="261" text-anchor="end" fill="#57606a" font-family="Segoe UI,Arial" font-size="14">10 s</text>
+  <rect x="62" y="326" width="1076" height="236" rx="14" fill="#fff" stroke="#d0d7de"/>
+  <rect x="62" y="326" width="1076" height="48" rx="14" fill="#f6f8fa"/><rect x="62" y="360" width="1076" height="14" fill="#f6f8fa"/>
+  <circle cx="98" cy="350" r="15" fill="#31577c"/><text x="98" y="355" text-anchor="middle" fill="#fff" font-family="Segoe UI,Arial" font-size="13" font-weight="700">D</text>
+  <text x="124" y="355" fill="#24292f" font-family="Segoe UI,Arial" font-size="15" font-weight="600">Revisión docente de demostración</text>
+  <text x="92" y="414" fill="#24292f" font-family="Segoe UI,Arial" font-size="16">La propuesta conecta la decisión, el proceso AS-IS, las fuentes SECOP y el ciclo analítico.</text>
+  <text x="92" y="451" fill="#57606a" font-family="Segoe UI,Arial" font-size="15">Mejora solicitada: explicitar la regla para normalizar la unidad de duración y asignar</text>
+  <text x="92" y="476" fill="#57606a" font-family="Segoe UI,Arial" font-size="15">responsabilidad sobre fechas o estados incompletos.</text>
+  <rect x="92" y="506" width="964" height="35" rx="8" fill="#fff8c5" stroke="#d4a72c"/>
+  <text x="574" y="529" text-anchor="middle" fill="#5d4a00" font-family="Segoe UI,Arial" font-size="14" font-weight="600">El CI comprueba estructura; una persona evalúa sentido empresarial, trazabilidad y límites.</text>
+  <rect x="138" y="595" width="924" height="34" rx="10" fill="#dafbe1"/><text x="600" y="618" text-anchor="middle" fill="#116329" font-family="Segoe UI,Arial" font-size="14" font-weight="700">Resultado esperado: validador local aprobado + check verde + comentario sustantivo.</text>
+</svg>

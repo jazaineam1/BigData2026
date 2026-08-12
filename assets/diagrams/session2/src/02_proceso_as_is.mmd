@@ -1,0 +1,47 @@
+%% Sesion 2 - Proceso AS-IS con carriles y retrabajo
+flowchart TB
+  subgraph L1["CARRIL 1 · Entidad contratante"]
+    direction LR
+    S(("1<br/>Inicio")) --> N["2. Definir<br/>necesidad"]
+    N --> PB["3. Preparar y<br/>publicar proceso"]
+    PB --> EV["4. Evaluar<br/>ofertas"]
+    EV --> FC["5. Formalizar<br/>contrato"]
+    FC --> RE["6. Reportar<br/>ejecución"]
+  end
+
+  subgraph L2["CARRIL 2 · Plataforma SECOP"]
+    direction LR
+    REG[("7. Registro<br/>operacional")]
+    VAL{"8. ¿Campos y<br/>fechas completos?"}
+  end
+
+  subgraph L3["CARRIL 3 · Oficina de seguimiento"]
+    direction LR
+    COR["Retrabajo:<br/>solicitar corrección<br/>y volver al paso 6"]
+    CON["9. Descargar y unir<br/>archivos manualmente"]
+    PRI["10. Priorizar<br/>casos"]
+    FIN(("11<br/>Revisión"))
+    BOT["CUELLO DE BOTELLA<br/>Consolidación tardía y manual"]
+  end
+
+  RE -->|estado, fecha, avance| REG
+  REG --> VAL
+  VAL -->|Sí| CON
+  CON --> PRI --> FIN
+  VAL -->|No · retrabajo| COR
+  BOT -. "ocurre aquí" .-> CON
+  L1 ~~~ L2
+  L2 ~~~ L3
+
+  classDef start fill:#17324D,color:#FFFFFF,stroke:#0D2133,stroke-width:3px;
+  classDef activity fill:#E8F1FB,color:#17324D,stroke:#1E5AA8,stroke-width:2px;
+  classDef store fill:#FFF4D6,color:#573F00,stroke:#D89B00,stroke-width:2px;
+  classDef gateway fill:#FFF4D6,color:#573F00,stroke:#D89B00,stroke-width:3px;
+  classDef bottleneck fill:#FDE2DC,color:#6E1C0C,stroke:#F4623A,stroke-width:4px;
+  classDef rework fill:#FDE2DC,color:#6E1C0C,stroke:#F4623A,stroke-width:2px;
+  class S,FIN start;
+  class N,PB,EV,FC,RE,PRI activity;
+  class REG store;
+  class VAL gateway;
+  class CON,BOT bottleneck;
+  class COR rework;

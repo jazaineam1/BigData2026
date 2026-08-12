@@ -1,0 +1,31 @@
+%% Sesion 2 - Puente de la operacion a la analitica
+flowchart LR
+  O["<b>1. OLTP</b><br/>Registrar cada evento<br/><i>PostgreSQL · SECOP/Socrata</i>"]
+  E["<b>2. ETL / ELT</b><br/>Extraer, validar y transformar<br/><i>Python · Airbyte</i>"]
+  W[("<b>3. DATA WAREHOUSE</b><br/>Historia integrada<br/><i>BigQuery o equivalente</i>")]
+  M[("<b>4. DATA MART</b><br/>Vista de seguimiento<br/><i>Contratos y calidad</i>")]
+  C["<b>5. OLAP / BI</b><br/>Comparar, resumir y explorar<br/><i>Power BI · Looker · Tableau</i>"]
+  X["<b>6. ACCIÓN</b><br/>Cola priorizada<br/>para revisión humana"]
+
+  O -->|transacciones| E
+  E -->|datos trazables| W
+  W -->|subconjunto gobernado| M
+  M -->|métricas y dimensiones| C
+  C -->|evidencia descriptiva| X
+  X -. "nueva decisión o corrección" .-> O
+
+  Q["CONTROLES TRANSVERSALES<br/>Calidad · linaje · acceso · seguridad · observabilidad · costos"]
+  Q -. "aplican en todo el recorrido" .-> W
+
+  classDef operational fill:#E8F1FB,color:#17324D,stroke:#1E5AA8,stroke-width:3px;
+  classDef movement fill:#FFF4D6,color:#573F00,stroke:#D89B00,stroke-width:3px;
+  classDef storage fill:#EAF6EE,color:#174C2B,stroke:#2E8B57,stroke-width:3px;
+  classDef consume fill:#EDE8F7,color:#382D59,stroke:#7156A5,stroke-width:3px;
+  classDef action fill:#F4623A,color:#FFFFFF,stroke:#B73B1F,stroke-width:3px;
+  classDef control fill:#FFFFFF,color:#435160,stroke:#7F8C98,stroke-dasharray:5 4;
+  class O operational;
+  class E movement;
+  class W,M storage;
+  class C consume;
+  class X action;
+  class Q control;

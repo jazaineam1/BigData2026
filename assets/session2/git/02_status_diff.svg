@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">Lectura guiada de git status y git diff</title>
+  <desc id="desc">Una terminal muestra dos archivos modificados en la rama entrega/sesion2 y un diff aún no seleccionado.</desc>
+  <rect width="1200" height="650" rx="24" fill="#f5f8fb"/>
+  <rect width="1200" height="86" rx="24" fill="#12395b"/><rect y="62" width="1200" height="24" fill="#12395b"/>
+  <text x="56" y="39" fill="#fff" font-family="Segoe UI,Arial" font-size="25" font-weight="700">Paso 4 · Observar antes de seleccionar</text>
+  <text x="56" y="68" fill="#cfe7f6" font-family="Segoe UI,Arial" font-size="15">Vista guiada · el cambio todavía está en el working tree</text>
+  <rect x="52" y="118" width="1096" height="454" rx="16" fill="#111b22"/>
+  <circle cx="82" cy="145" r="7" fill="#ff6b62"/><circle cx="106" cy="145" r="7" fill="#ffbd45"/><circle cx="130" cy="145" r="7" fill="#26c940"/>
+  <text x="600" y="151" text-anchor="middle" fill="#9fb2c1" font-family="Segoe UI,Arial" font-size="14">compras-claras-pareja-XX — terminal</text>
+  <g font-family="Consolas,monospace" font-size="17">
+    <text x="78" y="198" fill="#79c7ff">$ git branch --show-current</text><text x="78" y="224" fill="#e5eef5">entrega/sesion2</text>
+    <text x="78" y="266" fill="#79c7ff">$ git status --short</text><text x="78" y="292" fill="#ffd479"> M docs/01_proceso_as_is.md</text><text x="78" y="318" fill="#ffd479"> M resultados/perfil_secop.md</text>
+    <text x="78" y="360" fill="#79c7ff">$ git diff -- docs/01_proceso_as_is.md</text>
+    <text x="78" y="388" fill="#9fb2c1">@@ Proceso AS-IS @@</text>
+    <text x="78" y="416" fill="#ff8a85">- COMPLETAR: cuello de botella</text>
+    <text x="78" y="444" fill="#7ee2a8">+ Consolidación manual: 3 días promedio y 18 % de registros incompletos.</text>
+    <text x="78" y="486" fill="#79c7ff">$ git diff --check</text><text x="78" y="514" fill="#9fb2c1"># Sin salida: no se detectaron problemas de espacios.</text>
+  </g>
+  <rect x="76" y="590" width="1048" height="42" rx="10" fill="#e8f0f6"/>
+  <text x="600" y="616" text-anchor="middle" fill="#244963" font-family="Segoe UI,Arial" font-size="15" font-weight="600">Lectura: dos archivos cambiaron; aún no hay staging, commit, push ni Pull Request.</text>
+</svg>

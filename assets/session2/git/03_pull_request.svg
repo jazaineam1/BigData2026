@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">Pull Request de demostración de Compras Claras</title>
+  <desc id="desc">Vista guiada de un Pull Request desde entrega/sesion2 hacia main con descripción y archivos revisables.</desc>
+  <rect width="1200" height="650" rx="24" fill="#f6f8fa"/>
+  <rect width="1200" height="86" rx="24" fill="#12395b"/><rect y="62" width="1200" height="24" fill="#12395b"/>
+  <text x="56" y="39" fill="#fff" font-family="Segoe UI,Arial" font-size="25" font-weight="700">Paso 8 · Convertir commits en una conversación revisable</text>
+  <text x="56" y="68" fill="#cfe7f6" font-family="Segoe UI,Arial" font-size="15">Vista guiada basada en el Pull Request docente #1 · datos sensibles omitidos</text>
+  <rect x="48" y="112" width="1104" height="478" rx="14" fill="#fff" stroke="#d0d7de"/>
+  <text x="78" y="153" fill="#0969da" font-family="Segoe UI,Arial" font-size="15">Pull requests</text><text x="184" y="153" fill="#57606a" font-family="Segoe UI,Arial" font-size="15">/ #1</text>
+  <text x="78" y="194" fill="#24292f" font-family="Segoe UI,Arial" font-size="27" font-weight="600">Demostración docente — Compras Claras</text>
+  <rect x="78" y="216" width="78" height="30" rx="15" fill="#1a7f37"/><text x="117" y="237" text-anchor="middle" fill="#fff" font-family="Segoe UI,Arial" font-size="14" font-weight="700">Open</text>
+  <text x="172" y="237" fill="#57606a" font-family="Segoe UI,Arial" font-size="14">entrega/sesion2 quiere combinar 3 commits en main</text>
+  <line x1="78" y1="266" x2="1122" y2="266" stroke="#d8dee4"/>
+  <g font-family="Segoe UI,Arial">
+    <rect x="78" y="292" width="690" height="245" rx="10" fill="#fff" stroke="#d0d7de"/>
+    <rect x="78" y="292" width="690" height="44" rx="10" fill="#f6f8fa"/><rect x="78" y="326" width="690" height="10" fill="#f6f8fa"/>
+    <text x="100" y="320" fill="#24292f" font-size="15" font-weight="600">Descripción de la entrega</text>
+    <text x="102" y="370" fill="#24292f" font-size="16" font-weight="700">Qué se hizo</text>
+    <text x="102" y="397" fill="#57606a" font-size="15">Proceso AS-IS, arquitectura TO-BE y ciclo analítico SECOP.</text>
+    <text x="102" y="437" fill="#24292f" font-size="16" font-weight="700">Cómo se verificó</text>
+    <text x="102" y="466" fill="#1a7f37" font-size="16">✓ Perfilador ejecutado   ✓ Validador local   ✓ Dos autores</text>
+    <text x="102" y="505" fill="#57606a" font-size="14">Límite: prioriza revisión humana; no prueba fraude ni causalidad.</text>
+    <rect x="802" y="292" width="292" height="62" rx="10" fill="#f6f8fa" stroke="#d0d7de"/>
+    <text x="825" y="318" fill="#24292f" font-size="14" font-weight="600">Reviewers</text><text x="825" y="342" fill="#57606a" font-size="14">Compañero + docente</text>
+    <rect x="802" y="372" width="292" height="92" rx="10" fill="#f6f8fa" stroke="#d0d7de"/>
+    <text x="825" y="398" fill="#24292f" font-size="14" font-weight="600">Checks</text><circle cx="833" cy="428" r="10" fill="#1a7f37"/><path d="M828 428l4 4 7-9" fill="none" stroke="#fff" stroke-width="2"/><text x="852" y="433" fill="#1a7f37" font-size="14">validar — aprobado</text>
+    <rect x="802" y="482" width="292" height="55" rx="10" fill="#fff" stroke="#d0d7de"/><text x="948" y="515" text-anchor="middle" fill="#0969da" font-size="15" font-weight="600">4 files changed</text>
+  </g>
+  <rect x="136" y="605" width="928" height="30" rx="10" fill="#e8f0f6"/><text x="600" y="626" text-anchor="middle" fill="#244963" font-family="Segoe UI,Arial" font-size="14" font-weight="600">Revisa Files changed: contenido, límites y diagramas; no basta con que el check sea verde.</text>
+</svg>
