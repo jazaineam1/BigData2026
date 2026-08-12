@@ -322,8 +322,9 @@ def build_cells():
 
             {diagram('01_hilo_decision', 'Hilo decisión, proceso, datos, herramientas, KPI y acción humana')}
 
-            **Cómo leerlo.** Avanza de izquierda a derecha: cada pieza existe porque la anterior la justifica. La
-            flecha de retorno recuerda que una corrección modifica el proceso y genera nuevos datos.
+            **Cómo leerlo.** Laura formula la decisión en la columna izquierda. Sigue las tarjetas numeradas:
+            proceso, datos, capacidades, KPI y acción humana. El recuadro rojo muestra el atajo que rompe la
+            trazabilidad; la flecha punteada devuelve el resultado al proceso como un nuevo dato.
 
             **Conclusión.** Una herramienta sin decisión, proceso y KPI es un componente aislado, no una solución.
 
@@ -413,9 +414,10 @@ def build_cells():
 
             {diagram('02_proceso_as_is', 'Proceso AS-IS de contratación con carriles, gateway, retrabajo y cuello de botella')}
 
-            **Cómo leerlo.** Los carriles asignan responsabilidad. Los círculos marcan eventos, los rectángulos
-            actividades, el cilindro un registro y el rombo una decisión. La ruta roja vuelve a reportar cuando
-            faltan datos. El bloque resaltado identifica la consolidación manual.
+            **Cómo leerlo.** Los tres carriles asignan responsabilidad. En la parte superior, cada actividad muestra
+            también el dato que produce. SECOP recibe, guarda y expone registros; la oficina descarga y consolida.
+            El rombo pregunta por completitud, la ruta roja devuelve el caso a “Reportar ejecución” y el contorno
+            discontinuo identifica el cuello de botella. Los tres KPI inferiores indican cómo comprobar la mejora.
 
             **Conclusión.** El retraso no nace en un algoritmo: aparece cuando la oficina descarga, une y verifica
             archivos después de que el proceso operacional ya ocurrió.
@@ -616,9 +618,10 @@ def build_cells():
 
             {diagram('03_puente_analitico', 'Flujo OLTP, ETL, Data Warehouse, Data Mart, OLAP y acción')}
 
-            **Cómo leerlo.** De izquierda a derecha cambia el propósito: registrar, mover con control, integrar,
-            especializar, explorar y actuar. Las cajas inferiores recuerdan que calidad, linaje y acceso deben estar
-            presentes durante el recorrido.
+            **Cómo leerlo.** La banda superior separa mundo operacional y analítico. Las seis tarjetas cambian de
+            propósito: registrar, mover con control, integrar, especializar, explorar y actuar. Bajo cada flecha se
+            nombra el artefacto que viaja; la línea punteada demuestra que una acción crea una nueva transacción. La
+            franja inferior conserva calidad, linaje, acceso, seguridad, observabilidad, costos y responsables.
 
             **Conclusión.** OLTP, ETL, DW, Data Mart y OLAP no son definiciones aisladas: son responsabilidades
             consecutivas que evitan pedirle al sistema operacional todo el trabajo analítico.
@@ -725,9 +728,10 @@ def build_cells():
 
             {diagram('04_arquitectura_to_be', 'Arquitectura TO-BE con cuatro dominios y controles transversales')}
 
-            **Cómo leerlo.** De arriba hacia abajo, el negocio define requisitos de información; la información
-            alimenta aplicaciones; las aplicaciones se ejecutan sobre tecnología. La flecha de retorno recuerda que
-            restricciones de costo, seguridad o capacidad pueden obligar a renegociar el diseño.
+            **Cómo leerlo.** Recorre las cuatro capas de arriba hacia abajo. La primera tarjeta numerada forma una
+            traza completa: decisión → fuente → integración → conectividad. Las demás columnas amplían proceso,
+            entidades, reglas, responsables, KPI, aplicaciones y componentes técnicos. La banda superior recuerda
+            que gobierno, seguridad, privacidad, observabilidad, costos, calidad y linaje condicionan cada capa.
 
             **Conclusión.** La cola priorizada solo tiene valor si existe responsable, dato con significado,
             aplicación explicable, tecnología sostenible y controles transversales.
@@ -795,8 +799,10 @@ def build_cells():
             | Visualización | resultados | presentar razón de prioridad, filtros y calidad | BI / analista | tablero o reporte | accesibilidad y contexto | tiempo para comprender un caso |
             | Acción | cola explicable | revisar, corregir, escalar o descartar alerta | responsable humano | decisión registrada | separación de funciones | % casos atendidos en SLA |
 
-            **Cómo leer el diagrama.** Las etapas avanzan hacia la decisión y vuelven con nuevas preguntas. Los
-            controles transversales no son una sexta fase: condicionan todas.
+            **Cómo leer el diagrama.** Sigue el ciclo en sentido horario. Cada tarjeta declara entrada o actividad,
+            artefacto y responsable; los rótulos sobre las flechas muestran qué cambia entre etapas. La decisión
+            humana permanece en el centro porque todas las fases deben poder justificarla. Los controles
+            transversales no son una sexta fase: condicionan las cinco.
 
             **Conclusión.** Visualizar no es actuar. Una gráfica se vuelve útil cuando alguien tiene autoridad,
             criterio y canal para registrar la respuesta.
@@ -943,8 +949,10 @@ def build_cells():
 
             {diagram('06_estados_git', 'Estados Git desde repositorio, rama y staging hasta Pull Request y CI')}
 
-            **Cómo leerlo.** Cada flecha tiene el comando o acción que cambia de estado. Si CI falla, no se borra el
-            historial: se corrige en la misma rama y se crea otro commit.
+            **Cómo leerlo.** Primero distingue las tres zonas: local, remoto y colaboración. Dentro de la zona local,
+            cada tarjeta explica qué sabe Git del archivo; los comandos cambian working tree → staging → commit. El
+            push publica la misma historia, y el PR agrega revisión y CI. La ruta roja vuelve al working tree cuando
+            el validador falla: no borra lo anterior, añade un commit correctivo.
 
             **Conclusión.** Un commit pequeño y deliberado es una unidad de explicación. Un PR reúne propósito,
             evidencia, conversación y validación automática.
@@ -1022,6 +1030,10 @@ def build_cells():
 
             <div align="center"><img src="../assets/session2/git/01_entorno_gratuito.svg" width="920"
             alt="Vista guiada para elegir Git local, Codespaces con cuota personal o github.dev"></div>
+
+            **Cómo leer la vista.** A la izquierda aparece el repositorio correcto y el menú **Code** abierto; a la
+            derecha se comparan las tres rutas por capacidad y restricción. Git local es la ruta gratuita completa,
+            Codespaces depende de cuota personal y `github.dev` sirve cuando solo se necesita editar y confirmar.
             """
         ),
         bash_commands(
@@ -1101,6 +1113,10 @@ def build_cells():
 
             <div align="center"><img src="../assets/session2/git/02_status_diff.svg" width="920"
             alt="Vista guiada de terminal mostrando git status y git diff en la rama de entrega"></div>
+
+            **Cómo leer la vista.** La terminal aporta la evidencia y el panel derecho traduce su significado: hay
+            dos archivos en working tree, mientras staging, commit y remoto siguen sin cambios. Antes de `git add`,
+            confirma que ambos archivos pertenecen al mismo propósito y que la cifra está explicada y limitada.
             """
         ),
         bash_commands(
@@ -1209,6 +1225,10 @@ def build_cells():
             <div align="center"><img src="../assets/session2/git/03_pull_request.svg" width="920"
             alt="Pull Request docente de demostración con descripción y archivos revisables"></div>
 
+            **Cómo leer la vista.** Comprueba ramas, propósito, verificación, límites, archivos cambiados y revisores
+            en ese orden. Un check verde prueba reglas observables; la pestaña **Files changed** permite evaluar el
+            contenido y la conversación explica las decisiones.
+
             **Error probable.** Si Mermaid no renderiza, revisa la sintaxis en la vista previa de GitHub. No reemplaces
             el diagrama por una captura: el producto del estudiante debe continuar editable y versionable.
             """
@@ -1222,6 +1242,10 @@ def build_cells():
 
             <div align="center"><img src="../assets/session2/git/04_actions.svg" width="920"
             alt="Comprobación de GitHub Actions aprobada en el Pull Request docente"></div>
+
+            **Cómo leer la vista.** La columna verde enumera lo que puede comprobar CI; la naranja enumera lo que
+            requiere juicio humano. La entrega solo cruza la puerta de calidad cuando coinciden validador local,
+            check verde y comentario sustantivo.
 
             **Resultado esperado.** PR con plantilla completa, comentario de revisión y check verde. No se exige hacer
             merge durante la clase.

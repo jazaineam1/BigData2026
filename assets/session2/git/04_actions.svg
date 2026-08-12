@@ -1,26 +1,196 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
-  <title id="title">GitHub Actions aprobado en el Pull Request</title>
-  <desc id="desc">Vista guiada del check validar aprobado y del comentario de revisión docente.</desc>
-  <rect width="1200" height="650" rx="24" fill="#f6f8fa"/>
-  <rect width="1200" height="86" rx="24" fill="#12395b"/><rect y="62" width="1200" height="24" fill="#12395b"/>
-  <text x="56" y="39" fill="#fff" font-family="Segoe UI,Arial" font-size="25" font-weight="700">Paso 9 · CI verde + revisión humana</text>
-  <text x="56" y="68" fill="#cfe7f6" font-family="Segoe UI,Arial" font-size="15">Evidencia real de la prueba: workflow “validar” aprobado en 10 segundos</text>
-  <rect x="62" y="122" width="1076" height="176" rx="14" fill="#fff" stroke="#d0d7de"/>
-  <circle cx="112" cy="175" r="26" fill="#1a7f37"/><path d="M99 175l9 9 18-23" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="158" y="164" fill="#24292f" font-family="Segoe UI,Arial" font-size="21" font-weight="700">All checks have passed</text>
-  <text x="158" y="190" fill="#57606a" font-family="Segoe UI,Arial" font-size="15">1 successful check · rama entrega/sesion2 · Pull Request #1</text>
-  <line x1="92" y1="218" x2="1106" y2="218" stroke="#d8dee4"/>
-  <circle cx="112" cy="256" r="11" fill="#1a7f37"/><path d="M107 256l4 4 7-9" fill="none" stroke="#fff" stroke-width="2"/>
-  <text x="140" y="261" fill="#24292f" font-family="Segoe UI,Arial" font-size="16" font-weight="600">validar</text>
-  <text x="1034" y="261" text-anchor="end" fill="#57606a" font-family="Segoe UI,Arial" font-size="14">10 s</text>
-  <rect x="62" y="326" width="1076" height="236" rx="14" fill="#fff" stroke="#d0d7de"/>
-  <rect x="62" y="326" width="1076" height="48" rx="14" fill="#f6f8fa"/><rect x="62" y="360" width="1076" height="14" fill="#f6f8fa"/>
-  <circle cx="98" cy="350" r="15" fill="#31577c"/><text x="98" y="355" text-anchor="middle" fill="#fff" font-family="Segoe UI,Arial" font-size="13" font-weight="700">D</text>
-  <text x="124" y="355" fill="#24292f" font-family="Segoe UI,Arial" font-size="15" font-weight="600">Revisión docente de demostración</text>
-  <text x="92" y="414" fill="#24292f" font-family="Segoe UI,Arial" font-size="16">La propuesta conecta la decisión, el proceso AS-IS, las fuentes SECOP y el ciclo analítico.</text>
-  <text x="92" y="451" fill="#57606a" font-family="Segoe UI,Arial" font-size="15">Mejora solicitada: explicitar la regla para normalizar la unidad de duración y asignar</text>
-  <text x="92" y="476" fill="#57606a" font-family="Segoe UI,Arial" font-size="15">responsabilidad sobre fechas o estados incompletos.</text>
-  <rect x="92" y="506" width="964" height="35" rx="8" fill="#fff8c5" stroke="#d4a72c"/>
-  <text x="574" y="529" text-anchor="middle" fill="#5d4a00" font-family="Segoe UI,Arial" font-size="14" font-weight="600">El CI comprueba estructura; una persona evalúa sentido empresarial, trazabilidad y límites.</text>
-  <rect x="138" y="595" width="924" height="34" rx="10" fill="#dafbe1"/><text x="600" y="618" text-anchor="middle" fill="#116329" font-family="Segoe UI,Arial" font-size="14" font-weight="700">Resultado esperado: validador local aprobado + check verde + comentario sustantivo.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">CI verde y revisión humana</title>
+<desc id="desc">Separación entre validación automática de estructura y evaluación humana del sentido empresarial.</desc>
+<defs>
+              <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+                <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#17324D" flood-opacity=".12"/>
+              </filter>
+              <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#2F6FB0"/>
+              </marker>
+              <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#C93F34"/>
+              </marker>
+              <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#24855A"/>
+              </marker>
+              <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#6C5AA7"/>
+              </marker>
+            </defs>
+<rect width="1600" height="900" fill="#F3F7FA"/>
+<rect x="0" y="0" width="1600" height="112" rx="0" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
+<rect x="1376" y="24" width="176" height="38" rx="19" fill="#2A5878" stroke="#2A5878" stroke-width="1" opacity="1"/>
+<text x="1464.0" y="49" fill="#D9EFFB" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
+<tspan x="1464.0" dy="0">GUÍA GIT 4 DE 4</tspan>
+</text>
+<text x="48" y="50" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" text-anchor="start" style="">
+<tspan x="48" dy="0">CI verde + revisión humana: dos controles complementarios</tspan>
+</text>
+<text x="48" y="82" fill="#CFE4F2" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" text-anchor="start" style="">
+<tspan x="48" dy="0">La automatización detecta incumplimientos observables; una persona evalúa sentido, contexto y límites</tspan>
+</text>
+<rect x="58" y="140" width="220" height="76" rx="14" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<circle cx="92" cy="178" r="20" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
+<text x="92" y="186" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="92" dy="0">1</tspan>
+</text>
+<text x="126" y="185" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="126" dy="0">Push</tspan>
+</text>
+<rect x="310" y="140" width="220" height="76" rx="14" fill="#FFFFFF" stroke="#6C5AA7" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<circle cx="344" cy="178" r="20" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="1"/>
+<text x="344" y="186" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="344" dy="0">2</tspan>
+</text>
+<text x="378" y="185" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="378" dy="0">Workflow</tspan>
+</text>
+<rect x="562" y="140" width="220" height="76" rx="14" fill="#FFFFFF" stroke="#24855A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<circle cx="596" cy="178" r="20" fill="#24855A" stroke="#24855A" stroke-width="1"/>
+<text x="596" y="186" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="596" dy="0">3</tspan>
+</text>
+<text x="630" y="185" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="630" dy="0">Validador</tspan>
+</text>
+<rect x="814" y="140" width="220" height="76" rx="14" fill="#FFFFFF" stroke="#E95C3A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<circle cx="848" cy="178" r="20" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
+<text x="848" y="186" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="848" dy="0">4</tspan>
+</text>
+<text x="882" y="185" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="882" dy="0">Revisión</tspan>
+</text>
+<rect x="1066" y="140" width="220" height="76" rx="14" fill="#FFFFFF" stroke="#1D4F73" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<circle cx="1100" cy="178" r="20" fill="#1D4F73" stroke="#1D4F73" stroke-width="1"/>
+<text x="1100" y="186" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="1100" dy="0">5</tspan>
+</text>
+<text x="1134" y="185" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="1134" dy="0">Listo para integrar</tspan>
+</text>
+<line x1="278" y1="178" x2="310" y2="178" stroke="#6C5AA7" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-purple)"/>
+<line x1="530" y1="178" x2="562" y2="178" stroke="#24855A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-green)"/>
+<line x1="782" y1="178" x2="814" y2="178" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-red)"/>
+<line x1="1034" y1="178" x2="1066" y2="178" stroke="#1D4F73" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
+<rect x="1320" y="159" width="220" height="38" rx="19" fill="#E7F5ED" stroke="#E7F5ED" stroke-width="1" opacity="1"/>
+<text x="1430.0" y="184" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" style="">
+<tspan x="1430.0" dy="0">EVIDENCIA REVISADA</tspan>
+</text>
+<rect x="42" y="258" width="730" height="520" rx="18" fill="#FFFFFF" stroke="#24855A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="42" y="258" width="730" height="70" rx="18" fill="#E7F5ED" stroke="#24855A" stroke-width="1" opacity="1"/>
+<text x="72" y="300" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21" font-weight="900" text-anchor="start" style="">
+<tspan x="72" dy="0">A · VALIDACIÓN AUTOMÁTICA</tspan>
+</text>
+<rect x="548" y="276" width="190" height="38" rx="19" fill="#24855A" stroke="#24855A" stroke-width="1" opacity="1"/>
+<text x="643.0" y="301" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="643.0" dy="0">validar · 8 s · PASS</tspan>
+</text>
+<circle cx="84" cy="358" r="18" fill="#24855A" stroke="#24855A" stroke-width="0"/>
+<text x="84" y="365" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" text-anchor="middle" style="">
+<tspan x="84" dy="0">✓</tspan>
+</text>
+<text x="118" y="360" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="118" dy="0">Estructura requerida</tspan>
+</text>
+<text x="118" y="389" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="118" dy="0">README + 3 documentos + perfil</tspan>
+</text>
+<circle cx="84" cy="438" r="18" fill="#24855A" stroke="#24855A" stroke-width="0"/>
+<text x="84" y="445" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" text-anchor="middle" style="">
+<tspan x="84" dy="0">✓</tspan>
+</text>
+<text x="118" y="440" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="118" dy="0">Plantillas completas</tspan>
+</text>
+<text x="118" y="469" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="118" dy="0">no quedan marcadores COMPLETAR</tspan>
+</text>
+<circle cx="84" cy="518" r="18" fill="#24855A" stroke="#24855A" stroke-width="0"/>
+<text x="84" y="525" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" text-anchor="middle" style="">
+<tspan x="84" dy="0">✓</tspan>
+</text>
+<text x="118" y="520" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="118" dy="0">Historia mínima</tspan>
+</text>
+<text x="118" y="549" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="118" dy="0">rama + dos autores + dos commits</tspan>
+</text>
+<circle cx="84" cy="598" r="18" fill="#24855A" stroke="#24855A" stroke-width="0"/>
+<text x="84" y="605" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" text-anchor="middle" style="">
+<tspan x="84" dy="0">✓</tspan>
+</text>
+<text x="118" y="600" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="118" dy="0">Controles básicos</tspan>
+</text>
+<text x="118" y="629" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="118" dy="0">sin secretos evidentes · Mermaid válido</tspan>
+</text>
+<rect x="72" y="682" width="670" height="66" rx="12" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
+<text x="407" y="709" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="middle" style="">
+<tspan x="407" dy="0">Puede responder: ¿cumple reglas observables?</tspan>
+</text>
+<text x="407" y="735" fill="#C93F34" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
+<tspan x="407" dy="0">No puede decidir si la arquitectura tiene sentido.</tspan>
+</text>
+<rect x="804" y="258" width="754" height="520" rx="18" fill="#FFFFFF" stroke="#E95C3A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="804" y="258" width="754" height="70" rx="18" fill="#FDE9E3" stroke="#E95C3A" stroke-width="1" opacity="1"/>
+<text x="834" y="300" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21" font-weight="900" text-anchor="start" style="">
+<tspan x="834" dy="0">B · REVISIÓN HUMANA</tspan>
+</text>
+<circle cx="846" cy="357" r="18" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
+<text x="846" y="365" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="846" dy="0">1</tspan>
+</text>
+<text x="878" y="360" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="878" dy="0">Trazabilidad</tspan>
+</text>
+<text x="878" y="389" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="878" dy="0">¿la herramienta responde a proceso, dato y KPI?</tspan>
+</text>
+<circle cx="846" cy="437" r="18" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
+<text x="846" y="445" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="846" dy="0">2</tspan>
+</text>
+<text x="878" y="440" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="878" dy="0">Plausibilidad</tspan>
+</text>
+<text x="878" y="469" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="878" dy="0">¿el cuello y la mejora reflejan el caso?</tspan>
+</text>
+<circle cx="846" cy="517" r="18" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
+<text x="846" y="525" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="846" dy="0">3</tspan>
+</text>
+<text x="878" y="520" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="878" dy="0">Responsabilidad</tspan>
+</text>
+<text x="878" y="549" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="878" dy="0">¿quién valida, decide y registra la acción?</tspan>
+</text>
+<circle cx="846" cy="597" r="18" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
+<text x="846" y="605" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="846" dy="0">4</tspan>
+</text>
+<text x="878" y="600" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="878" dy="0">Límites</tspan>
+</text>
+<text x="878" y="629" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="878" dy="0">¿evita causalidad o acusaciones no sustentadas?</tspan>
+</text>
+<rect x="834" y="682" width="694" height="66" rx="12" fill="#FFF3D2" stroke="#C98500" stroke-width="1" opacity="1"/>
+<text x="1181" y="709" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="middle" style="">
+<tspan x="1181" dy="0">Comentario útil: pide una mejora verificable</tspan>
+</text>
+<text x="1181" y="735" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
+<tspan x="1181" dy="0">y explica por qué afecta la decisión.</tspan>
+</text>
+<rect x="48" y="838" width="1504" height="42" rx="13" fill="#E7EFF5" stroke="#E7EFF5" stroke-width="0" opacity="1"/>
+<text x="70" y="865" fill="#12395B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" text-anchor="start" style="">
+<tspan x="70" dy="0">PUERTA DE CALIDAD</tspan>
+</text>
+<text x="265.5" y="865" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="start" style="">
+<tspan x="265.5" dy="0">Validador local + CI verde + comentario sustantivo; ninguno sustituye a los otros.</tspan>
+</text>
 </svg>

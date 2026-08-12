@@ -5,11 +5,39 @@ from __future__ import annotations
 
 import json
 import re
+import struct
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOK = ROOT / "Cuadernos" / "2_Definiciones_gcp.ipynb"
+VISUAL_BASES = [
+    ROOT / "assets" / "diagrams" / "session2" / name
+    for name in [
+        "01_hilo_decision",
+        "02_proceso_as_is",
+        "03_puente_analitico",
+        "04_arquitectura_to_be",
+        "05_ciclo_nist",
+        "06_estados_git",
+    ]
+] + [
+    ROOT / "assets" / "session2" / "git" / name
+    for name in [
+        "01_entorno_gratuito",
+        "02_status_diff",
+        "03_pull_request",
+        "04_actions",
+    ]
+]
+
+
+def png_dimensions(path: Path) -> tuple[int, int]:
+    with path.open("rb") as handle:
+        signature = handle.read(24)
+    if signature[:8] != b"\x89PNG\r\n\x1a\n":
+        raise ValueError(f"firma PNG inválida: {path}")
+    return struct.unpack(">II", signature[16:24])
 
 
 def main() -> None:
@@ -59,6 +87,29 @@ def main() -> None:
     if "GitHub Classroom" in source:
         errors.append("el cuaderno todavía menciona GitHub Classroom")
 
+    for base in VISUAL_BASES:
+        svg_path = base.with_suffix(".svg")
+        png_path = base.with_suffix(".png")
+        if not svg_path.exists() or not png_path.exists():
+            errors.append(f"falta una versión SVG o PNG de {base.relative_to(ROOT)}")
+            continue
+        svg = svg_path.read_text(encoding="utf-8")
+        if 'viewBox="0 0 1600 900"' not in svg:
+            errors.append(f"lienzo SVG inesperado: {svg_path.relative_to(ROOT)}")
+        if "<title" not in svg or "<desc" not in svg:
+            errors.append(f"faltan título o descripción accesible: {svg_path.relative_to(ROOT)}")
+        if "foreignObject" in svg or "flowchart" in svg:
+            errors.append(f"la lámina conserva una dependencia o fuente impropia: {svg_path.relative_to(ROOT)}")
+        try:
+            dimensions = png_dimensions(png_path)
+        except ValueError as exc:
+            errors.append(str(exc))
+        else:
+            if dimensions != (1600, 900):
+                errors.append(
+                    f"PNG {png_path.relative_to(ROOT)} mide {dimensions}, se esperaba (1600, 900)"
+                )
+
     if errors:
         raise SystemExit("[ERROR] " + "\n[ERROR] ".join(errors))
 
@@ -67,7 +118,7 @@ def main() -> None:
         f"{len(cells)} celdas,",
         f"{len(questions)} preguntas,",
         f"{len(hidden)} celdas de código plegadas,",
-        f"{len(references)} referencias locales verificadas.",
+        f"{len(references)} referencias locales y {len(VISUAL_BASES)} láminas SVG/PNG verificadas.",
     )
 
 

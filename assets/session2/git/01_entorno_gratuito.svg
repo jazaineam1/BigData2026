@@ -1,53 +1,201 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
-  <title id="title">Elección de entorno gratuito para la sesión 2</title>
-  <desc id="desc">Tres rutas desde el repositorio privado: Git local, Codespaces con cuota personal y github.dev como contingencia.</desc>
-  <defs>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity=".12"/></filter>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#31577c"/></marker>
-  </defs>
-  <rect width="1200" height="650" rx="24" fill="#f5f8fb"/>
-  <rect width="1200" height="86" rx="24" fill="#12395b"/><rect y="62" width="1200" height="24" fill="#12395b"/>
-  <text x="56" y="39" fill="#fff" font-family="Segoe UI,Arial" font-size="25" font-weight="700">Paso 1 · Elegir un entorno sin activar facturación</text>
-  <text x="56" y="68" fill="#cfe7f6" font-family="Segoe UI,Arial" font-size="15">Vista guiada · repositorio demo privado · datos sensibles omitidos</text>
-  <g filter="url(#shadow)">
-    <rect x="350" y="118" width="500" height="110" rx="18" fill="#fff" stroke="#b8c9d9"/>
-    <circle cx="402" cy="173" r="27" fill="#e7f2fa"/><path d="M391 173h22m-11-11v22" stroke="#1769aa" stroke-width="4" stroke-linecap="round"/>
-    <text x="447" y="159" fill="#14324a" font-family="Segoe UI,Arial" font-size="18" font-weight="700">compras-claras-pareja-XX</text>
-    <text x="447" y="187" fill="#52697c" font-family="Segoe UI,Arial" font-size="15">Repositorio privado de la pareja</text>
-    <rect x="702" y="145" width="110" height="48" rx="9" fill="#1f7a44"/><text x="757" y="176" text-anchor="middle" fill="#fff" font-family="Segoe UI,Arial" font-size="17" font-weight="700">Code ▾</text>
-  </g>
-  <path d="M600 228v42" fill="none" stroke="#31577c" stroke-width="3"/>
-  <path d="M600 270H212v38" fill="none" stroke="#31577c" stroke-width="3" marker-end="url(#arrow)"/>
-  <path d="M600 270v38" fill="none" stroke="#31577c" stroke-width="3" marker-end="url(#arrow)"/>
-  <path d="M600 270h388v38" fill="none" stroke="#31577c" stroke-width="3" marker-end="url(#arrow)"/>
-  <g filter="url(#shadow)">
-    <rect x="54" y="312" width="316" height="236" rx="18" fill="#fff" stroke="#7bb58f" stroke-width="2"/>
-    <circle cx="96" cy="355" r="23" fill="#dbf2e3"/><text x="96" y="363" text-anchor="middle" fill="#17643a" font-family="Segoe UI,Arial" font-size="22" font-weight="700">1</text>
-    <text x="133" y="350" fill="#153b2a" font-family="Segoe UI,Arial" font-size="20" font-weight="700">Git local</text>
-    <text x="133" y="374" fill="#23744a" font-family="Segoe UI,Arial" font-size="14" font-weight="700">RUTA RECOMENDADA · GRATIS</text>
-    <text x="82" y="417" fill="#394d5c" font-family="Segoe UI,Arial" font-size="15">Code → Local → HTTPS</text>
-    <rect x="80" y="438" width="264" height="44" rx="8" fill="#15232e"/><text x="96" y="466" fill="#e8f1f7" font-family="Consolas,monospace" font-size="14">git clone URL-PRIVADA</text>
-    <text x="82" y="516" fill="#52697c" font-family="Segoe UI,Arial" font-size="14">Terminal, Python, Git y archivos locales.</text>
-  </g>
-  <g filter="url(#shadow)">
-    <rect x="442" y="312" width="316" height="236" rx="18" fill="#fff" stroke="#7ea9cf" stroke-width="2"/>
-    <circle cx="484" cy="355" r="23" fill="#e3eff9"/><text x="484" y="363" text-anchor="middle" fill="#155c91" font-family="Segoe UI,Arial" font-size="22" font-weight="700">2</text>
-    <text x="521" y="350" fill="#163c59" font-family="Segoe UI,Arial" font-size="20" font-weight="700">Codespaces</text>
-    <text x="521" y="374" fill="#3174a6" font-family="Segoe UI,Arial" font-size="14" font-weight="700">SOLO CON CUOTA PERSONAL</text>
-    <text x="470" y="417" fill="#394d5c" font-family="Segoe UI,Arial" font-size="15">Code → Codespaces → Create</text>
-    <rect x="470" y="438" width="260" height="44" rx="8" fill="#edf5fb" stroke="#a9c7df"/><text x="600" y="466" text-anchor="middle" fill="#245d86" font-family="Segoe UI,Arial" font-size="14" font-weight="700">No habilitar billing de la org.</text>
-    <text x="470" y="516" fill="#52697c" font-family="Segoe UI,Arial" font-size="14">Mismo laboratorio desde el navegador.</text>
-  </g>
-  <g filter="url(#shadow)">
-    <rect x="830" y="312" width="316" height="236" rx="18" fill="#fff" stroke="#d5a15a" stroke-width="2"/>
-    <circle cx="872" cy="355" r="23" fill="#fff1dc"/><text x="872" y="363" text-anchor="middle" fill="#95570b" font-family="Segoe UI,Arial" font-size="22" font-weight="700">3</text>
-    <text x="909" y="350" fill="#593c17" font-family="Segoe UI,Arial" font-size="20" font-weight="700">github.dev</text>
-    <text x="909" y="374" fill="#a76817" font-family="Segoe UI,Arial" font-size="14" font-weight="700">CONTINGENCIA WEB</text>
-    <text x="858" y="417" fill="#394d5c" font-family="Segoe UI,Arial" font-size="15">En el repositorio, pulsa la tecla</text>
-    <rect x="858" y="438" width="66" height="44" rx="8" fill="#fff" stroke="#8a98a5"/><text x="891" y="468" text-anchor="middle" fill="#253746" font-family="Segoe UI,Arial" font-size="25" font-weight="700">.</text>
-    <text x="940" y="465" fill="#52697c" font-family="Segoe UI,Arial" font-size="14">Sin terminal</text>
-    <text x="858" y="516" fill="#52697c" font-family="Segoe UI,Arial" font-size="14">Editar y confirmar desde Source Control.</text>
-  </g>
-  <rect x="122" y="581" width="956" height="42" rx="12" fill="#e8f0f6"/>
-  <text x="600" y="607" text-anchor="middle" fill="#244963" font-family="Segoe UI,Arial" font-size="15" font-weight="600">Antes de editar: confirma la pareja, el repositorio y la rama. No hagas un fork público.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">Elección del entorno gratuito</title>
+<desc id="desc">Vista de un repositorio privado con rutas de Git local, Codespaces con cuota personal y github.dev.</desc>
+<defs>
+              <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+                <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#17324D" flood-opacity=".12"/>
+              </filter>
+              <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#2F6FB0"/>
+              </marker>
+              <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#C93F34"/>
+              </marker>
+              <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#24855A"/>
+              </marker>
+              <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#6C5AA7"/>
+              </marker>
+            </defs>
+<rect width="1600" height="900" fill="#F3F7FA"/>
+<rect x="0" y="0" width="1600" height="112" rx="0" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
+<rect x="1376" y="24" width="176" height="38" rx="19" fill="#2A5878" stroke="#2A5878" stroke-width="1" opacity="1"/>
+<text x="1464.0" y="49" fill="#D9EFFB" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
+<tspan x="1464.0" dy="0">GUÍA GIT 1 DE 4</tspan>
+</text>
+<text x="48" y="50" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="31" font-weight="800" text-anchor="start" style="">
+<tspan x="48" dy="0">Abrir el repositorio y elegir una ruta sostenible</tspan>
+</text>
+<text x="48" y="82" fill="#CFE4F2" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start" style="">
+<tspan x="48" dy="0">Primero verifica acceso y propietario; después decide dónde editar y ejecutar</tspan>
+</text>
+<rect x="42" y="142" width="1030" height="650" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
+<rect x="42" y="142" width="1030" height="46" rx="16" fill="#EFF3F6" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
+<rect x="42" y="174" width="1030" height="14" rx="0" fill="#EFF3F6" stroke="#EFF3F6" stroke-width="0" opacity="1"/>
+<circle cx="66" cy="165" r="6" fill="#FF625A" stroke="#FF625A" stroke-width="0"/>
+<circle cx="90" cy="165" r="6" fill="#FFC04A" stroke="#FFC04A" stroke-width="0"/>
+<circle cx="114" cy="165" r="6" fill="#2BCB4B" stroke="#2BCB4B" stroke-width="0"/>
+<text x="557.0" y="171" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle" style="">
+<tspan x="557.0" dy="0">github.com · compras-claras-pareja-XX</tspan>
+</text>
+<text x="72" y="222" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" text-anchor="start" style="">
+<tspan x="72" dy="0">ucentral-bigdata-2026-2 / compras-claras-pareja-XX</tspan>
+</text>
+<rect x="72" y="246" width="90" height="38" rx="19" fill="#E9EEF2" stroke="#E9EEF2" stroke-width="1" opacity="1"/>
+<text x="117.0" y="271" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="117.0" dy="0">Private</tspan>
+</text>
+<text x="72" y="310" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="start" style="">
+<tspan x="72" dy="0">Code</tspan>
+</text>
+<text x="160" y="310" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="start" style="">
+<tspan x="160" dy="0">Issues</tspan>
+</text>
+<text x="245" y="310" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="start" style="">
+<tspan x="245" dy="0">Pull requests</tspan>
+</text>
+<text x="380" y="310" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="start" style="">
+<tspan x="380" dy="0">Actions</tspan>
+</text>
+<line x1="62" y1="330" x2="1048" y2="330" stroke="#B8C8D6" stroke-width="1" fill="none" stroke-linecap="round"/>
+<rect x="72" y="354" width="610" height="250" rx="10" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
+<text x="94" y="388" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="94" dy="0">Files</tspan>
+</text>
+<text x="98" y="420" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
+<tspan x="98" dy="0">▣</tspan>
+</text>
+<text x="124" y="420" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<tspan x="124" dy="0">.devcontainer/</tspan>
+</text>
+<text x="98" y="445" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
+<tspan x="98" dy="0">▣</tspan>
+</text>
+<text x="124" y="445" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<tspan x="124" dy="0">.github/</tspan>
+</text>
+<text x="98" y="470" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
+<tspan x="98" dy="0">▣</tspan>
+</text>
+<text x="124" y="470" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<tspan x="124" dy="0">data/</tspan>
+</text>
+<text x="98" y="495" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
+<tspan x="98" dy="0">▣</tspan>
+</text>
+<text x="124" y="495" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<tspan x="124" dy="0">docs/</tspan>
+</text>
+<text x="98" y="520" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
+<tspan x="98" dy="0">▣</tspan>
+</text>
+<text x="124" y="520" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<tspan x="124" dy="0">resultados/</tspan>
+</text>
+<text x="98" y="545" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
+<tspan x="98" dy="0">▣</tspan>
+</text>
+<text x="124" y="545" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<tspan x="124" dy="0">scripts/</tspan>
+</text>
+<text x="98" y="570" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
+<tspan x="98" dy="0">▣</tspan>
+</text>
+<text x="124" y="570" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
+<tspan x="124" dy="0">README.md</tspan>
+</text>
+<rect x="742" y="350" width="285" height="50" rx="10" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
+<text x="884" y="382" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" style="">
+<tspan x="884" dy="0">Code ▾</tspan>
+</text>
+<rect x="696" y="414" width="350" height="330" rx="12" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
+<text x="720" y="450" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
+<tspan x="720" dy="0">Clone</tspan>
+</text>
+<rect x="720" y="468" width="92" height="38" rx="19" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1" opacity="1"/>
+<text x="766.0" y="493" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="766.0" dy="0">HTTPS</tspan>
+</text>
+<rect x="820" y="468" width="110" height="38" rx="19" fill="#EEF1F4" stroke="#EEF1F4" stroke-width="1" opacity="1"/>
+<text x="875.0" y="493" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="875.0" dy="0">Codespaces</tspan>
+</text>
+<text x="720" y="535" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
+<tspan x="720" dy="0">Clone using the web URL</tspan>
+</text>
+<rect x="720" y="552" width="300" height="44" rx="7" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
+<text x="734" y="580" fill="#17324D" font-family="Consolas, monospace" font-size="12" font-weight="500" text-anchor="start" style="">
+<tspan x="734" dy="0">https://github.com/.../pareja-XX.git</tspan>
+</text>
+<rect x="720" y="622" width="300" height="38" rx="19" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
+<text x="870.0" y="647" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="870.0" dy="0">Open with GitHub Desktop</tspan>
+</text>
+<text x="720" y="694" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
+<tspan x="720" dy="0">Tip: pulsa . para abrir github.dev</tspan>
+</text>
+<rect x="1100" y="142" width="458" height="650" rx="18" fill="#FFFFFF" stroke="#12395B" stroke-width="1.5" opacity="1"/>
+<text x="1130" y="186" fill="#12395B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
+<tspan x="1130" dy="0">ÁRBOL DE DECISIÓN</tspan>
+</text>
+<rect x="1128" y="218" width="402" height="128" rx="14" fill="#E7F5ED" stroke="#24855A" stroke-width="1.5" opacity="1"/>
+<circle cx="1162" cy="254" r="20" fill="#24855A" stroke="#24855A" stroke-width="1"/>
+<text x="1162" y="262" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="1162" dy="0">1</tspan>
+</text>
+<text x="1196" y="256" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" text-anchor="start" style="">
+<tspan x="1196" dy="0">Git local</tspan>
+</text>
+<text x="1196" y="287" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start" style="">
+<tspan x="1196" dy="0">Terminal + Python</tspan>
+</text>
+<rect x="1196" y="300" width="230" height="38" rx="19" fill="#FFFFFF" stroke="#24855A" stroke-width="1" opacity="1"/>
+<text x="1311.0" y="325" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle" style="">
+<tspan x="1311.0" dy="0">siempre gratuito</tspan>
+</text>
+<rect x="1128" y="372" width="402" height="128" rx="14" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<circle cx="1162" cy="408" r="20" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
+<text x="1162" y="416" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="1162" dy="0">2</tspan>
+</text>
+<text x="1196" y="410" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" text-anchor="start" style="">
+<tspan x="1196" dy="0">Codespaces</tspan>
+</text>
+<text x="1196" y="441" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start" style="">
+<tspan x="1196" dy="0">Entorno completo</tspan>
+</text>
+<rect x="1196" y="454" width="230" height="38" rx="19" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="1" opacity="1"/>
+<text x="1311.0" y="479" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle" style="">
+<tspan x="1311.0" dy="0">solo cuota personal</tspan>
+</text>
+<rect x="1128" y="526" width="402" height="128" rx="14" fill="#FFF3D2" stroke="#C98500" stroke-width="1.5" opacity="1"/>
+<circle cx="1162" cy="562" r="20" fill="#C98500" stroke="#C98500" stroke-width="1"/>
+<text x="1162" y="570" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="1162" dy="0">3</tspan>
+</text>
+<text x="1196" y="564" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" text-anchor="start" style="">
+<tspan x="1196" dy="0">github.dev</tspan>
+</text>
+<text x="1196" y="595" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start" style="">
+<tspan x="1196" dy="0">Editor + Source Control</tspan>
+</text>
+<rect x="1196" y="608" width="230" height="38" rx="19" fill="#FFFFFF" stroke="#C98500" stroke-width="1" opacity="1"/>
+<text x="1311.0" y="633" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle" style="">
+<tspan x="1311.0" dy="0">sin terminal</tspan>
+</text>
+<rect x="1128" y="690" width="402" height="70" rx="12" fill="#FCE8E6" stroke="#C93F34" stroke-width="1.5" opacity="1"/>
+<text x="1329" y="718" fill="#C93F34" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="middle" style="">
+<tspan x="1329" dy="0">NO HAGAS UN FORK PÚBLICO</tspan>
+</text>
+<text x="1329" y="744" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle" style="">
+<tspan x="1329" dy="0">confirma cuenta, pareja y repositorio</tspan>
+</text>
+<rect x="48" y="838" width="1504" height="42" rx="13" fill="#E7EFF5" stroke="#E7EFF5" stroke-width="0" opacity="1"/>
+<text x="70" y="865" fill="#12395B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" text-anchor="start" style="">
+<tspan x="70" dy="0">RESULTADO ESPERADO</tspan>
+</text>
+<text x="275.0" y="865" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="start" style="">
+<tspan x="275.0" dy="0">La URL termina en tu pareja y puedes crear una rama; no estás en la plantilla ni en el demo.</tspan>
+</text>
 </svg>
