@@ -70,8 +70,8 @@ def main() -> None:
     ]
 
     errors = []
-    if len(cells) != 67:
-        errors.append(f"se esperaban 67 celdas y se encontraron {len(cells)}")
+    if len(cells) != 70:
+        errors.append(f"se esperaban 70 celdas y se encontraron {len(cells)}")
     if len(questions) != 12:
         errors.append(f"se esperaban 12 preguntas y se encontraron {len(questions)}")
     if len(hidden) != len(code_cells):
@@ -86,6 +86,15 @@ def main() -> None:
         errors.append("el cuaderno todavía contiene Mermaid visible")
     if "GitHub Classroom" in source:
         errors.append("el cuaderno todavía menciona GitHub Classroom")
+    required_snippets = [
+        "ETL — Extract, Transform, Load",
+        "ELT — Extract, Load, Transform",
+        "el orden y el lugar de la T",
+        "Apoyo de terminal — cuatro ideas antes de usar Git",
+    ]
+    for snippet in required_snippets:
+        if snippet not in source:
+            errors.append(f"falta el apoyo pedagógico obligatorio: {snippet}")
 
     for base in VISUAL_BASES:
         svg_path = base.with_suffix(".svg")

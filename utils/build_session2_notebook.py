@@ -128,7 +128,7 @@ def build_cells():
 
             1. conectar una decisión con su proceso, datos, aplicaciones, infraestructura y KPI;
             2. distinguir proceso, tarea, procedimiento y proyecto, y representar un AS-IS con elementos BPMN;
-            3. explicar por qué OLTP aparece antes que ETL, Data Warehouse, Data Mart y OLAP;
+            3. explicar por qué OLTP aparece primero y decidir entre ETL y ELT según dónde conviene transformar;
             4. diferenciar arquitectura empresarial, arquitectura de datos y arquitectura técnica;
             5. aplicar captura, preparación, análisis, visualización y acción al caso SECOP;
             6. elegir capacidades tecnológicas según el problema y no por popularidad del producto;
@@ -141,6 +141,32 @@ def build_cells():
         ),
         md(
             """
+            ## Propósito del hilo: convertir una operación en una decisión confiable
+
+            Esta sesión no busca memorizar una lista de siglas. Busca responder una pregunta más útil:
+
+            > ¿Cómo pasa un hecho registrado durante la contratación a convertirse en evidencia que una analista
+            > puede usar, explicar y devolver al proceso como una acción?
+
+            El orden de la clase sigue el viaje real de esa evidencia:
+
+            1. **La decisión** define para qué necesitamos información y qué KPI permitirá evaluar la mejora.
+            2. **El proceso BPM** muestra quién trabaja, dónde se decide y en qué actividad nace cada dato.
+            3. **OLTP** conserva los eventos operacionales sin detener la contratación.
+            4. **ETL o ELT** mueve la evidencia y decide si la transformación ocurre antes o después de cargarla.
+            5. **Data Warehouse, Data Mart y OLAP** integran historia, enfocan el análisis y permiten comparar.
+            6. **La arquitectura y el ciclo NIST** asignan capacidades, controles y responsables de extremo a extremo.
+            7. **Git** conserva por qué cambió el blueprint, quién lo revisó y qué validación superó.
+
+            **Punto de partida.** No se presupone experiencia previa en Bash, Git, nube o contenedores. Los comandos
+            obligatorios se presentan uno a uno y siempre se explica la salida esperada. Python se usa como una
+            herramienta visible y guiada; el razonamiento estadístico se aprovecha para interpretar evidencia, no
+            para saltar pasos de arquitectura. El recuadro de profundización es opcional para quien avance más
+            rápido.
+            """
+        ),
+        md(
+            """
             ## Agenda: una historia en nueve decisiones
 
             ### Primeros 90 minutos — comprender el sistema
@@ -148,13 +174,14 @@ def build_cells():
             | Minutos | Pregunta que conduce el bloque | Resultado |
             |---:|---|---|
             | 0–10 | ¿Qué debe decidir la analista y cómo sabrá si mejora? | responsable, alcance y KPI |
-            | 10–28 | ¿Qué ocurre hoy antes de esa decisión? | proceso AS-IS y cuello de botella |
-            | 28–38 | ¿Qué dato nace en cada actividad? | trazabilidad proceso–dato |
-            | 38–52 | ¿Dónde se registran las operaciones? | OLTP y sistema fuente |
-            | 52–65 | ¿Cómo se convierte operación en análisis? | ETL, DW, Data Mart y OLAP |
-            | 65–75 | ¿Cómo se alinean todas las piezas? | arquitectura empresarial TO-BE |
-            | 75–84 | ¿Cómo recorre la evidencia el ciclo analítico? | cinco etapas de NIST |
-            | 84–90 | ¿Cómo se diseña y revisa sin perder trazabilidad? | capacidades, herramientas y Git |
+            | 10–26 | ¿Qué ocurre hoy antes de esa decisión? | proceso AS-IS y cuello de botella |
+            | 26–36 | ¿Qué dato nace en cada actividad? | trazabilidad proceso–dato |
+            | 36–47 | ¿Dónde se registran las operaciones? | OLTP y sistema fuente |
+            | 47–62 | ¿Transformamos antes o después de cargar? | comparación ETL–ELT y decisión de diseño |
+            | 62–71 | ¿Cómo se organiza la historia para analizarla? | DW, Data Mart y OLAP |
+            | 71–79 | ¿Cómo se alinean todas las piezas? | arquitectura empresarial TO-BE |
+            | 79–85 | ¿Cómo recorre la evidencia el ciclo analítico? | cinco etapas de NIST |
+            | 85–90 | ¿Cómo se diseña y revisa sin perder trazabilidad? | capacidades, herramientas y Git |
 
             ### Últimos 90 minutos — construir evidencia
 
@@ -563,26 +590,86 @@ def build_cells():
         md(
             """
             ---
-            # 4. El puente analítico: ETL, Data Warehouse, Data Mart y OLAP
+            # 4. El puente analítico: elegir ETL o ELT antes de diseñar el consumo
 
             Si OLTP protege la operación, necesitamos un puente que copie de manera controlada la evidencia,
-            verifique su calidad, preserve historia y prepare preguntas analíticas.
+            verifique su calidad, preserve historia y prepare preguntas analíticas. Aquí aparece una decisión que
+            no puede resolverse repitiendo siglas: **¿la transformación debe ocurrir antes o después de cargar los
+            datos en la plataforma analítica?**
 
-            ## ETL / ELT
+            ## ETL y ELT comparten una responsabilidad, pero no el mismo orden
 
-            **Definición formal.** ETL extrae datos de fuentes, los transforma según reglas y los carga al destino.
-            ELT carga primero y transforma dentro de una plataforma con capacidad suficiente.
+            **Motivo.** Los datos operacionales llegan con unidades, fechas, nombres y niveles de calidad distintos.
+            Además, ejecutar análisis pesados directamente sobre OLTP puede competir con el proceso que debe seguir
+            registrando contratos. ETL y ELT separan esos trabajos y hacen explícitos sus controles.
 
-            **Intuición.** Es una aduana: recibe paquetes de distintas fuentes, verifica formato y procedencia,
-            normaliza lo necesario y registra qué entró, cuándo y bajo qué regla.
+            **Definición formal.**
 
-            **Ejemplo manual.** Convertir `2 meses` y `60 días` a una unidad comparable, conservando también el valor
-            original y la regla aplicada.
+            - **ETL — Extract, Transform, Load:** extrae desde la fuente, transforma en un motor o zona de integración
+              y carga al destino analítico el resultado preparado.
+            - **ELT — Extract, Load, Transform:** extrae, carga primero en una plataforma analítica o zona *raw* y
+              transforma allí aprovechando su almacenamiento y cómputo.
 
-            **Aplicación SECOP.** Python o Airbyte puede extraer por API o archivo; las transformaciones validan
-            fechas, tipos, duplicados y unidades; el resultado se almacena con fecha de corte y linaje.
+            La diferencia esencial es **el orden y el lugar de la T**. Ambos enfoques necesitan calidad, seguridad,
+            linaje, pruebas y responsables; ELT no significa “cargar sin gobierno” y ETL no significa “tecnología
+            antigua”.
 
-            **Error frecuente:** “limpiar” borrando filas problemáticas sin contar cuántas fueron excluidas ni por qué.
+            | Criterio | ETL: transformar antes de cargar | ELT: cargar antes de transformar |
+            |---|---|---|
+            | Secuencia | fuente → extracción → **transformación** → destino curado | fuente → extracción → **zona raw** → transformación en destino |
+            | Dónde ocurre la T | Python, Spark, Dataflow, SSIS u otro motor de integración | SQL, dbt o procesamiento dentro del warehouse/lakehouse |
+            | Qué llega primero al destino compartido | datos validados, estandarizados o enmascarados | copia cercana al origen con metadatos de ingestión |
+            | Conviene cuando | datos sensibles no deben aterrizar en crudo; reglas estables; destino limitado | plataforma escalable; varias transformaciones; se necesita reutilizar el original |
+            | Riesgo principal | perder detalle o flexibilidad si se transforma sin conservar linaje y excepciones | exponer datos crudos, elevar costo o crear copias sin control de acceso y retención |
+            | Ejemplo pequeño | API SECOP → Python/Pandas → tabla curada | archivo SECOP → DuckDB/BigQuery raw → SQL de transformación |
+
+            ### Un mismo dato, dos recorridos
+
+            Supongamos que la extracción trae tres valores de duración:
+
+            | id_contrato | duración_original | problema que debe resolverse |
+            |---|---|---|
+            | C-101 | `2 meses` | convertir con una regla explícita |
+            | C-102 | `60 días` | ya tiene unidad diaria |
+            | C-103 | vacío | no inventar una duración; registrar excepción |
+
+            **Recorrido ETL.**
+
+            1. **Extract:** Python descarga el snapshot de SECOP y registra URL, fecha de corte y parámetros.
+            2. **Transform:** antes de cargar la tabla analítica convierte `2 meses` según una regla documentada,
+               mantiene `duración_original`, crea `duración_días` y marca C-103 en una tabla de excepciones.
+            3. **Load:** carga al warehouse o archivo Parquet la tabla curada y el reporte de calidad.
+
+            **Recorrido ELT.**
+
+            1. **Extract:** se obtiene exactamente el mismo snapshot y los mismos metadatos.
+            2. **Load:** se conserva primero en una zona `raw` con acceso restringido y fecha de ingestión.
+            3. **Transform:** SQL o dbt dentro de DuckDB, BigQuery o un lakehouse crea la tabla curada, preserva la
+               columna original y produce la misma excepción para C-103.
+
+            **Qué nos dice el ejemplo.** La tabla analítica final puede ser equivalente; lo que cambia es dónde se
+            usa el cómputo, qué dato aterriza primero y qué controles deben activarse antes. La elección es una
+            decisión de arquitectura, no un concurso entre herramientas.
+
+            ### Aplicación a Compras Claras
+
+            - Elegiríamos **ETL** si identificadores sensibles deben enmascararse antes de entrar al destino
+              compartido o si una rutina Python pequeña puede producir una tabla estable y verificable.
+            - Elegiríamos **ELT** si conservamos snapshots autorizados para varias preguntas y una plataforma
+              escalable ejecuta versiones distintas de la lógica con SQL, pruebas y control de costos.
+            - Un diseño **híbrido** es frecuente: aplica controles irreversibles antes de cargar, conserva una zona
+              raw protegida y realiza el resto de transformaciones dentro de la plataforma.
+
+            > **Profundización opcional.** Si auditoría, finanzas y ciencia de datos necesitan reutilizar el mismo
+            > snapshot con reglas diferentes, argumenta por qué ELT o un híbrido puede preservar más flexibilidad.
+            > Tu respuesta solo es completa si también define acceso a `raw`, retención, prueba de calidad y control
+            > de costo. “Hay mucho volumen” no basta para decidir.
+
+            **Error frecuente:** llamar ETL a cualquier movimiento de archivos, suponer que ELT elimina la limpieza
+            o borrar filas problemáticas sin contar cuántas fueron excluidas, por qué y bajo qué versión de la regla.
+
+            **Puente al siguiente concepto.** ETL o ELT explica cómo viaja y se prepara la evidencia. Todavía falta
+            decidir dónde se integra la historia y cómo se sirve una vista estable a la oficina de seguimiento.
 
             ## Data Warehouse
 
@@ -616,15 +703,16 @@ def build_cells():
             f"""
             ## Vista completa: de la transacción a la acción
 
-            {diagram('03_puente_analitico', 'Flujo OLTP, ETL, Data Warehouse, Data Mart, OLAP y acción')}
+            {diagram('03_puente_analitico', 'Dos rutas desde OLTP: ETL transforma antes de cargar y ELT carga antes de transformar; ambas convergen en consumo analítico y acción')}
 
-            **Cómo leerlo.** La banda superior separa mundo operacional y analítico. Las seis tarjetas cambian de
-            propósito: registrar, mover con control, integrar, especializar, explorar y actuar. Bajo cada flecha se
-            nombra el artefacto que viaja; la línea punteada demuestra que una acción crea una nueva transacción. La
-            franja inferior conserva calidad, linaje, acceso, seguridad, observabilidad, costos y responsables.
+            **Cómo leerlo.** La fuente OLTP aparece una sola vez. En el centro, la ruta ETL ejecuta `T` antes de `L`,
+            mientras la ruta ELT aterriza una copia `raw` antes de ejecutar `T` dentro de la plataforma. Las dos
+            pueden producir datos curados para Warehouse, Data Mart y OLAP. La acción humana vuelve al proceso como
+            una nueva transacción; los controles de la franja inferior no desaparecen en ninguna ruta.
 
-            **Conclusión.** OLTP, ETL, DW, Data Mart y OLAP no son definiciones aisladas: son responsabilidades
-            consecutivas que evitan pedirle al sistema operacional todo el trabajo analítico.
+            **Conclusión.** OLTP, integración, almacenamiento histórico y consumo no son definiciones aisladas. ETL
+            y ELT son dos órdenes posibles para el tramo de integración; la restricción del caso determina cuál
+            conviene o qué combinación híbrida se necesita.
 
             **Limitación.** En una solución pequeña varias responsabilidades pueden vivir en la misma herramienta;
             la separación conceptual sigue siendo útil para no perder controles.
@@ -634,21 +722,21 @@ def build_cells():
         ),
         question_cell(
             6,
-            "ETL y calidad",
-            "Una duración aparece como 2 meses y otra como 60 días.",
-            "¿Cuál tratamiento es más trazable?",
+            "Elegir entre ETL y ELT",
+            "Una política exige que identificadores personales no lleguen en crudo al destino analítico compartido. La tabla cargada debe estar enmascarada y la regla debe quedar versionada.",
+            "¿Qué diseño responde directamente a esa restricción?",
             [
-                "Borrar ambos registros para evitar diferencias.",
-                "Convertir a una unidad comparable, conservar el original y registrar la regla.",
-                "Cambiar manualmente solo el valor que parezca extraño.",
-                "Sumar los números ignorando la unidad.",
+                "ELT sin controles, porque cargar primero siempre reduce el riesgo.",
+                "ETL —o un tramo híbrido equivalente— que enmascara antes de cargar al destino compartido.",
+                "OLAP, porque una agregación reemplaza el control de privacidad.",
+                "Cualquiera sin documentarlo, porque ETL y ELT solo cambian el nombre de la herramienta.",
             ],
             1,
             [
-                "Excluir sin diagnóstico pierde evidencia y oculta el alcance del problema de calidad.",
-                "La transformación hace comparable el dato y preserva linaje para auditar cómo se obtuvo.",
-                "Una corrección informal no es reproducible ni explica quién cambió qué.",
-                "Dos y sesenta no representan la misma escala sin interpretar su unidad.",
+                "Cargar primero el dato crudo contradice la política si el destino compartido no puede recibir esos identificadores; ELT necesita controles previos o una zona raw autorizada.",
+                "La T ocurre antes de la L hacia el destino compartido: el enmascaramiento, su prueba y su versión quedan como parte del tramo ETL o híbrido.",
+                "OLAP resume y explora medidas; no evita que el identificador crudo haya aterrizado ni sustituye una política de acceso.",
+                "La diferencia sí afecta el orden, la ubicación del cómputo y el momento en que actúan privacidad y calidad; debe quedar documentada.",
             ],
         ),
         question_cell(
@@ -1010,6 +1098,30 @@ def build_cells():
         ),
         md(
             """
+            ## Apoyo de terminal — cuatro ideas antes de usar Git
+
+            No necesitas conocer Bash para comenzar. En Git Bash, Codespaces y PowerShell usaremos instrucciones
+            equivalentes y cortas:
+
+            | Elemento | Qué significa | Cómo comprobarlo |
+            |---|---|---|
+            | *prompt* | la línea donde la terminal espera; no se copia el símbolo inicial | escribe un comando y pulsa Enter |
+            | carpeta actual | lugar sobre el que actuará Git | `pwd` debe terminar en el repositorio de la pareja |
+            | contenido | archivos y carpetas disponibles | `ls` debe mostrar `README.md`, `docs` y `scripts` |
+            | salida | respuesta del comando; se lee, no se vuelve a escribir | compara con el resultado esperado del paso |
+
+            **Regla de seguridad.** Ejecuta una línea a la vez, lee la salida y detente si la ruta o el repositorio
+            no coincide. La flecha arriba recupera el último comando para corregirlo sin volver a escribirlo.
+            """
+        ),
+        bash_commands(
+            """
+            pwd
+            ls
+            """
+        ),
+        md(
+            """
             ## Paso 1 — Abrir el repositorio privado y elegir el entorno
 
             **Acción.** Inicia sesión con la cuenta que informaste al docente y abre la URL privada de tu pareja.
@@ -1282,10 +1394,11 @@ def build_cells():
 
             1. Definimos una decisión, responsable y KPI antes de elegir tecnología.
             2. BPM reveló actividades, datos, gateway, retrabajo y cuello de botella.
-            3. OLTP registró la operación; ETL, DW, Data Mart y OLAP construyeron el puente analítico.
-            4. La arquitectura alineó negocio, información, aplicaciones, tecnología y controles.
-            5. NIST llevó la evidencia de captura a acción y retroalimentación.
-            6. Git convirtió el blueprint en una decisión versionada, revisada y verificable.
+            3. OLTP registró la operación; ETL y ELT ofrecieron órdenes distintos para transformar y cargar.
+            4. Warehouse, Data Mart y OLAP integraron historia, enfocaron el consumo y permitieron comparar.
+            5. La arquitectura alineó negocio, información, aplicaciones, tecnología y controles.
+            6. NIST llevó la evidencia de captura a acción y retroalimentación.
+            7. Git convirtió el blueprint en una decisión versionada, revisada y verificable.
 
             **Idea más importante.** Big Data crea valor cuando una evidencia trazable regresa al proceso como una
             acción responsable. La colección de herramientas es secundaria a esa cadena.
@@ -1309,7 +1422,7 @@ def build_cells():
             |---|---|
             | definición y motivación de Big Data empresarial | decisión, proceso y ciclo analítico |
             | OLTP y OLAP | sección 3, como origen y consumo de la evidencia |
-            | ETL | sección 4, como puente controlado |
+            | ETL | sección 4, contrastado con ELT mediante el orden, el lugar de transformación y dos recorridos aplicados |
             | Data Warehouse y Data Mart | sección 4, integrados en el flujo completo |
             | arquitectura empresarial `Images/2.1.png` | sección 5, cuatro dominios |
             | arquitecturas `Images/GCP/5.png` y `6.png` | sección 7, lectura por capacidades |
@@ -1330,6 +1443,8 @@ def build_cells():
             - [TOGAF Standard — The Open Group](https://publications.opengroup.org/standards/togaf)
             - [BPMN 2.0.2 — Object Management Group](https://www.omg.org/spec/BPMN/)
             - [CRISP-DM — IBM](https://www.ibm.com/docs/en/spss-modeler/saas?topic=dm-crisp-help-overview)
+            - [ETL y ELT — AWS](https://aws.amazon.com/es/what-is/etl/)
+            - [Qué es ELT — Google Cloud](https://cloud.google.com/discover/what-is-elt)
             - [SECOP Integrado — Datos Abiertos Colombia](https://www.datos.gov.co/Gastos-Gubernamentales/SECOP-Integrado/rpmr-utcd)
             - [API Socrata de SECOP Integrado](https://dev.socrata.com/foundry/www.datos.gov.co/rpmr-utcd)
             - [Diagramas Mermaid en GitHub](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams)

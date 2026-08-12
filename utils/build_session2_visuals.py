@@ -312,58 +312,126 @@ def make_as_is() -> Canvas:
 def make_bridge() -> Canvas:
     c = Canvas(
         "Puente entre operación y analítica",
-        "Responsabilidades consecutivas desde OLTP hasta la acción humana con controles transversales.",
+        "ETL y ELT resuelven la misma integración con distinto orden, ubicación de cómputo y momento de control.",
     )
-    c.header("Mapa 3 de 6", "De registrar transacciones a sostener una decisión", "OLTP, ETL/ELT, Data Warehouse, Data Mart y OLAP cumplen trabajos distintos")
+    c.header(
+        "Mapa 3 de 6",
+        "La T cambia de lugar: dos rutas desde el mismo evento",
+        "Compare la secuencia, el artefacto que aterriza primero y el control que debe actuar antes",
+    )
+    c.raw(
+        """<defs>
+          <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#C98500"/>
+          </marker>
+          <marker id="arrow-ink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#17324D"/>
+          </marker>
+        </defs>"""
+    )
 
-    c.rect(40, 136, 480, 86, fill=BLUE_L, stroke=BLUE, sw=1.5, rx=16)
-    c.text(68, 170, "MUNDO OPERACIONAL", size=18, fill=BLUE, weight=900)
-    c.text(68, 200, "grano: evento · objetivo: registrar · latencia: inmediata", size=16, fill=MUTED, weight=500)
-    c.rect(540, 136, 1018, 86, fill=PURPLE_L, stroke=PURPLE, sw=1.5, rx=16)
-    c.text(568, 170, "MUNDO ANALÍTICO", size=18, fill=PURPLE, weight=900)
-    c.text(568, 200, "grano: resumen histórico · objetivo: comparar y decidir · latencia: acordada", size=16, fill=MUTED, weight=500)
+    # Reading zones
+    c.rect(40, 136, 248, 78, fill=BLUE_L, stroke=BLUE, sw=1.5, rx=16)
+    c.text(64, 168, "1 · OPERACIÓN", size=18, fill=BLUE, weight=900)
+    c.text(64, 197, "registrar sin detener el proceso", size=14, fill=MUTED, weight=600)
+    c.rect(308, 136, 674, 78, fill=AMBER_L, stroke=AMBER, sw=1.5, rx=16)
+    c.text(332, 168, "2 · INTEGRACIÓN", size=18, fill=AMBER, weight=900)
+    c.text(332, 197, "elegir ETL, ELT o un híbrido según la restricción", size=14, fill=MUTED, weight=600)
+    c.rect(1002, 136, 556, 78, fill=PURPLE_L, stroke=PURPLE, sw=1.5, rx=16)
+    c.text(1026, 168, "3 · CONSUMO Y ACCIÓN", size=18, fill=PURPLE, weight=900)
+    c.text(1026, 197, "integrar historia, comparar y decidir", size=14, fill=MUTED, weight=600)
 
-    stages = [
-        (40, "1", "OLTP", BLUE, BLUE_L, [["Registra cada", "evento"], ["Contrato + cambio", "de estado"], "PostgreSQL · SECOP"]),
-        (300, "2", "ETL / ELT", AMBER, AMBER_L, [["Extrae, valida", "y transforma"], ["Snapshot +", "excepciones"], "Python · Airbyte"]),
-        (560, "3", "Data Warehouse", GREEN, GREEN_L, [["Integra historia", "común"], ["Hechos +", "dimensiones"], "BigQuery · equivalente"]),
-        (820, "4", "Data Mart", TEAL, TEAL_L, [["Recorta para", "seguimiento"], ["Contratos +", "calidad"], "Vista gobernada"]),
-        (1080, "5", "OLAP / BI", PURPLE, PURPLE_L, [["Compara", "y explora"], ["Métricas por", "dimensión"], "Power BI · Looker"]),
-        (1340, "6", "Acción", ORANGE, ORANGE_L, [["Prioriza", "revisión"], ["Motivo", "explicable"], "Decisión humana"]),
+    # OLTP source
+    c.rect(40, 250, 248, 396, fill=WHITE, stroke=BLUE, sw=2.5, rx=20, shadow=True)
+    c.pill(62, 272, 84, "OLTP", fill=BLUE, color=WHITE, size=16)
+    c.text(62, 336, ["Evento operacional", "que no puede esperar"], size=20, fill=NAVY, weight=900, line_height=1.2)
+    c.text(62, 430, ["• contrato publicado", "• estado actualizado", "• avance reportado"], size=16, fill=INK, weight=600, line_height=1.55)
+    c.rect(62, 550, 204, 66, fill=BLUE_L, stroke=BLUE, sw=1, rx=12)
+    c.text(78, 578, "ARTEFACTO", size=12, fill=BLUE, weight=900)
+    c.text(78, 603, "transacción + versión", size=15, fill=INK, weight=700)
+
+    # Integration frame and decision statement
+    c.rect(308, 234, 674, 430, fill=WHITE, stroke=LINE, sw=1.5, rx=20)
+    c.pill(410, 250, 470, "MISMA E · DISTINTO ORDEN DE T Y L", fill=NAVY, color=WHITE, size=15)
+
+    # ETL lane
+    c.rect(330, 306, 630, 148, fill="#FFFBEB", stroke=AMBER, sw=2, rx=16)
+    c.pill(348, 326, 82, "ETL", fill=AMBER, color=WHITE, size=16)
+    etl_steps = [
+        (456, "E", "extraer", "snapshot + metadatos", BLUE, BLUE_L),
+        (622, "T", "transformar", "validar · enmascarar", ORANGE, ORANGE_L),
+        (788, "L", "cargar", "tabla curada", GREEN, GREEN_L),
     ]
-    for x, number, title, color, fill, body in stages:
-        c.rect(x, 262, 220, 310, fill=WHITE, stroke=color, sw=2, rx=18, shadow=True)
-        c.rect(x, 262, 220, 58, fill=color, stroke=color, sw=0, rx=18)
-        c.rect(x, 302, 220, 18, fill=color, stroke=color, sw=0, rx=0)
-        c.number_badge(x + 34, 291, number, fill=WHITE, radius=19)
-        c.text(x + 34, 299, number, size=17, fill=color, weight=900, anchor="middle")
-        c.text(x + 66, 299, title, size=18, fill=WHITE, weight=800)
-        c.text(x + 22, 354, body[0], size=17, fill=INK, weight=800, line_height=1.25)
-        c.text(x + 22, 420, body[1], size=16, fill=MUTED, weight=500, line_height=1.25)
-        c.pill(x + 18, 475, 184, body[2], fill=fill, color=color, size=13)
-        c.text(x + 22, 540, "ARTEFACTO CONTROLABLE", size=13, fill=color, weight=900)
-    labels = ["eventos", "datos válidos", "historia integrada", "vista curada", "evidencia"]
-    for index, x in enumerate([260, 520, 780, 1040, 1300]):
-        c.line(x, 415, x + 40, 415, stroke=INK, sw=2)
-        c.pill(x - 20, 585, 120, labels[index], fill="#E9EEF2", color=MUTED, size=12)
+    for x, letter, title, artefact, color, fill in etl_steps:
+        c.rect(x, 322, 140, 112, fill=fill, stroke=color, sw=1.5, rx=14)
+        c.number_badge(x + 24, 348, letter, fill=color, radius=18)
+        c.text(x + 24, 355, letter, size=15, fill=WHITE, weight=900, anchor="middle")
+        c.text(x + 48, 350, title, size=13, fill=color, weight=900)
+        c.text(x + 16, 394, artefact, size=11, fill=INK, weight=600)
+    c.line(596, 378, 620, 378, stroke=AMBER, sw=2.5, arrow=True, marker="amber")
+    c.line(762, 378, 786, 378, stroke=AMBER, sw=2.5, arrow=True, marker="amber")
+    c.text(348, 438, "La política actúa antes de que el dato llegue al destino compartido.", size=13, fill=MUTED, weight=600)
 
-    c.rect(40, 640, 1518, 148, fill=WHITE, stroke=LINE, sw=1.5, rx=18)
-    c.text(68, 680, "CONTROLES QUE VIAJAN CON EL DATO", size=18, fill=NAVY, weight=900)
+    # ELT lane
+    c.rect(330, 482, 630, 162, fill="#F5F3FF", stroke=PURPLE, sw=2, rx=16)
+    c.pill(348, 502, 82, "ELT", fill=PURPLE, color=WHITE, size=16)
+    elt_steps = [
+        (456, "E", "extraer", "snapshot + metadatos", BLUE, BLUE_L),
+        (622, "L", "cargar", "zona raw protegida", PURPLE, PURPLE_L),
+        (788, "T", "transformar", ["SQL dentro", "del destino"], TEAL, TEAL_L),
+    ]
+    for x, letter, title, artefact, color, fill in elt_steps:
+        c.rect(x, 498, 140, 118, fill=fill, stroke=color, sw=1.5, rx=14)
+        c.number_badge(x + 24, 525, letter, fill=color, radius=18)
+        c.text(x + 24, 532, letter, size=15, fill=WHITE, weight=900, anchor="middle")
+        c.text(x + 48, 527, title, size=13, fill=color, weight=900)
+        c.text(x + 16, 566, artefact, size=11, fill=INK, weight=600, line_height=1.2)
+    c.line(596, 557, 620, 557, stroke=PURPLE, sw=2.5, arrow=True, marker="purple")
+    c.line(762, 557, 786, 557, stroke=PURPLE, sw=2.5, arrow=True, marker="purple")
+    c.text(348, 630, "El acceso y la retención protegen lo raw antes de ejecutar la T.", size=13, fill=MUTED, weight=600)
+
+    # Branch from OLTP to both routes
+    c.path("M288 448 C330 448 330 378 454 378", stroke=BLUE, sw=2.5, arrow=True, marker="blue")
+    c.path("M288 448 C330 448 330 557 454 557", stroke=BLUE, sw=2.5, arrow=True, marker="blue")
+
+    # Analytical responsibility chain
+    analytic_cards = [
+        (1012, 250, 250, 170, "Warehouse", "historia integrada", "hechos + dimensiones", GREEN, GREEN_L),
+        (1292, 250, 250, 170, "Data Mart", "vista de seguimiento", "métricas aprobadas", TEAL, TEAL_L),
+        (1012, 470, 250, 170, "OLAP / BI", "comparar y explorar", "medida × dimensión", PURPLE, PURPLE_L),
+        (1292, 470, 250, 170, "Acción humana", "priorizar revisión", "motivo explicable", ORANGE, ORANGE_L),
+    ]
+    for x, y, w, h, title, purpose, artefact, color, fill in analytic_cards:
+        c.rect(x, y, w, h, fill=WHITE, stroke=color, sw=2, rx=18, shadow=True)
+        c.rect(x, y, w, 48, fill=color, stroke=color, sw=0, rx=18)
+        c.rect(x, y + 34, w, 14, fill=color, stroke=color, sw=0, rx=0)
+        c.text(x + 20, y + 31, title, size=17, fill=WHITE, weight=900)
+        c.text(x + 20, y + 84, purpose, size=16, fill=INK, weight=800)
+        c.pill(x + 18, y + 112, w - 36, artefact, fill=fill, color=color, size=13)
+    c.line(1262, 334, 1290, 334, stroke=INK, sw=2.5, arrow=True, marker="ink")
+    c.path("M1417 420 C1417 446 1250 448 1137 468", stroke=INK, sw=2.5, arrow=True, marker="ink")
+    c.line(1262, 554, 1290, 554, stroke=INK, sw=2.5, arrow=True, marker="ink")
+    c.path("M928 378 C972 378 980 334 1010 334", stroke=AMBER, sw=2.5, arrow=True, marker="amber")
+    c.path("M928 557 C976 557 978 382 1010 360", stroke=PURPLE, sw=2.5, arrow=True, marker="purple")
+
+    # Feedback and controls
+    c.path("M1417 640 C1417 682 1180 688 854 688 L176 688 C110 688 108 652 108 620", stroke=ORANGE, sw=2.5, arrow=True, dash="8 6", marker="red")
+    c.pill(626, 671, 348, "acción → nueva transacción OLTP", fill=ORANGE_L, color=ORANGE, size=14)
+    c.rect(40, 720, 1518, 70, fill=WHITE, stroke=LINE, sw=1.5, rx=16)
+    c.text(64, 748, "CONTROLES EN AMBAS RUTAS", size=15, fill=NAVY, weight=900)
     controls = [
-        (68, 180, "calidad", AMBER_L, AMBER),
-        (264, 180, "linaje", BLUE_L, BLUE),
-        (460, 180, "acceso", PURPLE_L, PURPLE),
-        (656, 180, "seguridad", RED_L, RED),
-        (852, 210, "observabilidad", TEAL_L, TEAL),
-        (1078, 180, "costos", GREEN_L, GREEN),
-        (1274, 250, "regla + responsable", ORANGE_L, ORANGE),
+        (326, 148, "calidad", AMBER_L, AMBER),
+        (488, 148, "linaje", BLUE_L, BLUE),
+        (650, 166, "privacidad", RED_L, RED),
+        (830, 150, "acceso", PURPLE_L, PURPLE),
+        (994, 192, "observabilidad", TEAL_L, TEAL),
+        (1200, 140, "costos", GREEN_L, GREEN),
+        (1354, 180, "responsable", ORANGE_L, ORANGE),
     ]
     for x, width, label, fill, color in controls:
-        c.pill(x, 706, width, label, fill=fill, color=color, size=15)
-    c.path("M1450 572 C1450 625 1370 626 1320 626 L250 626 C150 626 110 610 110 572", stroke=ORANGE, sw=2.5, arrow=True, dash="7 6", marker="red")
-    c.pill(665, 607, 300, "acción → nueva transacción", fill=ORANGE_L, color=ORANGE, size=13)
+        c.pill(x, 736, width, label, fill=fill, color=color, size=13)
 
-    c.footer("Lectura clave", "Una herramienta puede asumir varias etapas, pero no elimina sus responsabilidades ni controles.")
+    c.footer("Decisión de diseño", "ETL si T debe ocurrir antes del destino; ELT si el destino puede gobernar raw y ejecutar T; híbrido cuando la restricción lo exige.")
     return c
 
 

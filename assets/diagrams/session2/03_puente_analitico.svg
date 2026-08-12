@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
 <title id="title">Puente entre operación y analítica</title>
-<desc id="desc">Responsabilidades consecutivas desde OLTP hasta la acción humana con controles transversales.</desc>
+<desc id="desc">ETL y ELT resuelven la misma integración con distinto orden, ubicación de cómputo y momento de control.</desc>
 <defs>
               <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
                 <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#17324D" flood-opacity=".12"/>
@@ -24,261 +24,273 @@
 <text x="1464.0" y="49" fill="#D9EFFB" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
 <tspan x="1464.0" dy="0">MAPA 3 DE 6</tspan>
 </text>
-<text x="48" y="50" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="31" font-weight="800" text-anchor="start" style="">
-<tspan x="48" dy="0">De registrar transacciones a sostener una decisión</tspan>
+<text x="48" y="50" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" text-anchor="start" style="">
+<tspan x="48" dy="0">La T cambia de lugar: dos rutas desde el mismo evento</tspan>
 </text>
 <text x="48" y="82" fill="#CFE4F2" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start" style="">
-<tspan x="48" dy="0">OLTP, ETL/ELT, Data Warehouse, Data Mart y OLAP cumplen trabajos distintos</tspan>
+<tspan x="48" dy="0">Compare la secuencia, el artefacto que aterriza primero y el control que debe actuar antes</tspan>
 </text>
-<rect x="40" y="136" width="480" height="86" rx="16" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
-<text x="68" y="170" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
-<tspan x="68" dy="0">MUNDO OPERACIONAL</tspan>
+<defs>
+          <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#C98500"/>
+          </marker>
+          <marker id="arrow-ink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#17324D"/>
+          </marker>
+        </defs>
+<rect x="40" y="136" width="248" height="78" rx="16" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<text x="64" y="168" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
+<tspan x="64" dy="0">1 · OPERACIÓN</tspan>
 </text>
-<text x="68" y="200" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="68" dy="0">grano: evento · objetivo: registrar · latencia: inmediata</tspan>
+<text x="64" y="197" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
+<tspan x="64" dy="0">registrar sin detener el proceso</tspan>
 </text>
-<rect x="540" y="136" width="1018" height="86" rx="16" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
-<text x="568" y="170" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
-<tspan x="568" dy="0">MUNDO ANALÍTICO</tspan>
+<rect x="308" y="136" width="674" height="78" rx="16" fill="#FFF3D2" stroke="#C98500" stroke-width="1.5" opacity="1"/>
+<text x="332" y="168" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
+<tspan x="332" dy="0">2 · INTEGRACIÓN</tspan>
 </text>
-<text x="568" y="200" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="568" dy="0">grano: resumen histórico · objetivo: comparar y decidir · latencia: acordada</tspan>
+<text x="332" y="197" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
+<tspan x="332" dy="0">elegir ETL, ELT o un híbrido según la restricción</tspan>
 </text>
-<rect x="40" y="262" width="220" height="310" rx="18" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<rect x="40" y="262" width="220" height="58" rx="18" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="0" opacity="1"/>
-<rect x="40" y="302" width="220" height="18" rx="0" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="0" opacity="1"/>
-<circle cx="74" cy="291" r="19" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1"/>
-<text x="74" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="74" dy="0">1</tspan>
+<rect x="1002" y="136" width="556" height="78" rx="16" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
+<text x="1026" y="168" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
+<tspan x="1026" dy="0">3 · CONSUMO Y ACCIÓN</tspan>
 </text>
-<text x="74" y="299" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="middle" style="">
-<tspan x="74" dy="0">1</tspan>
+<text x="1026" y="197" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
+<tspan x="1026" dy="0">integrar historia, comparar y decidir</tspan>
 </text>
-<text x="106" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="106" dy="0">OLTP</tspan>
+<rect x="40" y="250" width="248" height="396" rx="20" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="2.5" opacity="1" filter="url(#shadow)"/>
+<rect x="62" y="272" width="84" height="38" rx="19" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1" opacity="1"/>
+<text x="104.0" y="297" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" style="">
+<tspan x="104.0" dy="0">OLTP</tspan>
 </text>
-<text x="62" y="354" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="62" dy="0">Registra cada</tspan>
-<tspan x="62" dy="21.25">evento</tspan>
+<text x="62" y="336" fill="#12395B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" text-anchor="start" style="">
+<tspan x="62" dy="0">Evento operacional</tspan>
+<tspan x="62" dy="24.0">que no puede esperar</tspan>
 </text>
-<text x="62" y="420" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="62" dy="0">Contrato + cambio</tspan>
-<tspan x="62" dy="20.0">de estado</tspan>
+<text x="62" y="430" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
+<tspan x="62" dy="0">• contrato publicado</tspan>
+<tspan x="62" dy="24.8">• estado actualizado</tspan>
+<tspan x="62" dy="24.8">• avance reportado</tspan>
 </text>
-<rect x="58" y="475" width="184" height="38" rx="19" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1" opacity="1"/>
-<text x="150.0" y="500" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
-<tspan x="150.0" dy="0">PostgreSQL · SECOP</tspan>
+<rect x="62" y="550" width="204" height="66" rx="12" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1" opacity="1"/>
+<text x="78" y="578" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="900" text-anchor="start" style="">
+<tspan x="78" dy="0">ARTEFACTO</tspan>
 </text>
-<text x="62" y="540" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
-<tspan x="62" dy="0">ARTEFACTO CONTROLABLE</tspan>
+<text x="78" y="603" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="start" style="">
+<tspan x="78" dy="0">transacción + versión</tspan>
 </text>
-<rect x="300" y="262" width="220" height="310" rx="18" fill="#FFFFFF" stroke="#C98500" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<rect x="300" y="262" width="220" height="58" rx="18" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
-<rect x="300" y="302" width="220" height="18" rx="0" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
-<circle cx="334" cy="291" r="19" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1"/>
-<text x="334" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="334" dy="0">2</tspan>
+<rect x="308" y="234" width="674" height="430" rx="20" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
+<rect x="410" y="250" width="470" height="38" rx="19" fill="#12395B" stroke="#12395B" stroke-width="1" opacity="1"/>
+<text x="645.0" y="275" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
+<tspan x="645.0" dy="0">MISMA E · DISTINTO ORDEN DE T Y L</tspan>
 </text>
-<text x="334" y="299" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="middle" style="">
-<tspan x="334" dy="0">2</tspan>
+<rect x="330" y="306" width="630" height="148" rx="16" fill="#FFFBEB" stroke="#C98500" stroke-width="2" opacity="1"/>
+<rect x="348" y="326" width="82" height="38" rx="19" fill="#C98500" stroke="#C98500" stroke-width="1" opacity="1"/>
+<text x="389.0" y="351" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" style="">
+<tspan x="389.0" dy="0">ETL</tspan>
 </text>
-<text x="366" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="366" dy="0">ETL / ELT</tspan>
+<rect x="456" y="322" width="140" height="112" rx="14" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<circle cx="480" cy="348" r="18" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
+<text x="480" y="356" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="480" dy="0">E</tspan>
 </text>
-<text x="322" y="354" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="322" dy="0">Extrae, valida</tspan>
-<tspan x="322" dy="21.25">y transforma</tspan>
+<text x="480" y="355" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="middle" style="">
+<tspan x="480" dy="0">E</tspan>
 </text>
-<text x="322" y="420" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="322" dy="0">Snapshot +</tspan>
-<tspan x="322" dy="20.0">excepciones</tspan>
+<text x="504" y="350" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
+<tspan x="504" dy="0">extraer</tspan>
 </text>
-<rect x="318" y="475" width="184" height="38" rx="19" fill="#FFF3D2" stroke="#FFF3D2" stroke-width="1" opacity="1"/>
-<text x="410.0" y="500" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
-<tspan x="410.0" dy="0">Python · Airbyte</tspan>
+<text x="472" y="394" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="start" style="">
+<tspan x="472" dy="0">snapshot + metadatos</tspan>
 </text>
-<text x="322" y="540" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
-<tspan x="322" dy="0">ARTEFACTO CONTROLABLE</tspan>
+<rect x="622" y="322" width="140" height="112" rx="14" fill="#FDE9E3" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
+<circle cx="646" cy="348" r="18" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
+<text x="646" y="356" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="646" dy="0">T</tspan>
 </text>
-<rect x="560" y="262" width="220" height="310" rx="18" fill="#FFFFFF" stroke="#24855A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<rect x="560" y="262" width="220" height="58" rx="18" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
-<rect x="560" y="302" width="220" height="18" rx="0" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
-<circle cx="594" cy="291" r="19" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1"/>
-<text x="594" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="594" dy="0">3</tspan>
+<text x="646" y="355" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="middle" style="">
+<tspan x="646" dy="0">T</tspan>
 </text>
-<text x="594" y="299" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="middle" style="">
-<tspan x="594" dy="0">3</tspan>
+<text x="670" y="350" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
+<tspan x="670" dy="0">transformar</tspan>
 </text>
-<text x="626" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="626" dy="0">Data Warehouse</tspan>
+<text x="638" y="394" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="start" style="">
+<tspan x="638" dy="0">validar · enmascarar</tspan>
 </text>
-<text x="582" y="354" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="582" dy="0">Integra historia</tspan>
-<tspan x="582" dy="21.25">común</tspan>
+<rect x="788" y="322" width="140" height="112" rx="14" fill="#E7F5ED" stroke="#24855A" stroke-width="1.5" opacity="1"/>
+<circle cx="812" cy="348" r="18" fill="#24855A" stroke="#24855A" stroke-width="1"/>
+<text x="812" y="356" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="812" dy="0">L</tspan>
 </text>
-<text x="582" y="420" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="582" dy="0">Hechos +</tspan>
-<tspan x="582" dy="20.0">dimensiones</tspan>
+<text x="812" y="355" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="middle" style="">
+<tspan x="812" dy="0">L</tspan>
 </text>
-<rect x="578" y="475" width="184" height="38" rx="19" fill="#E7F5ED" stroke="#E7F5ED" stroke-width="1" opacity="1"/>
-<text x="670.0" y="500" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
-<tspan x="670.0" dy="0">BigQuery · equivalente</tspan>
+<text x="836" y="350" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
+<tspan x="836" dy="0">cargar</tspan>
 </text>
-<text x="582" y="540" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
-<tspan x="582" dy="0">ARTEFACTO CONTROLABLE</tspan>
+<text x="804" y="394" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="start" style="">
+<tspan x="804" dy="0">tabla curada</tspan>
 </text>
-<rect x="820" y="262" width="220" height="310" rx="18" fill="#FFFFFF" stroke="#167C80" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<rect x="820" y="262" width="220" height="58" rx="18" fill="#167C80" stroke="#167C80" stroke-width="0" opacity="1"/>
-<rect x="820" y="302" width="220" height="18" rx="0" fill="#167C80" stroke="#167C80" stroke-width="0" opacity="1"/>
-<circle cx="854" cy="291" r="19" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1"/>
-<text x="854" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="854" dy="0">4</tspan>
+<line x1="596" y1="378" x2="620" y2="378" stroke="#C98500" stroke-width="2.5" fill="none" stroke-linecap="round" marker-end="url(#arrow-amber)"/>
+<line x1="762" y1="378" x2="786" y2="378" stroke="#C98500" stroke-width="2.5" fill="none" stroke-linecap="round" marker-end="url(#arrow-amber)"/>
+<text x="348" y="438" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="start" style="">
+<tspan x="348" dy="0">La política actúa antes de que el dato llegue al destino compartido.</tspan>
 </text>
-<text x="854" y="299" fill="#167C80" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="middle" style="">
-<tspan x="854" dy="0">4</tspan>
+<rect x="330" y="482" width="630" height="162" rx="16" fill="#F5F3FF" stroke="#6C5AA7" stroke-width="2" opacity="1"/>
+<rect x="348" y="502" width="82" height="38" rx="19" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="1" opacity="1"/>
+<text x="389.0" y="527" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" style="">
+<tspan x="389.0" dy="0">ELT</tspan>
 </text>
-<text x="886" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="886" dy="0">Data Mart</tspan>
+<rect x="456" y="498" width="140" height="118" rx="14" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<circle cx="480" cy="525" r="18" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
+<text x="480" y="533" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="480" dy="0">E</tspan>
 </text>
-<text x="842" y="354" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="842" dy="0">Recorta para</tspan>
-<tspan x="842" dy="21.25">seguimiento</tspan>
+<text x="480" y="532" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="middle" style="">
+<tspan x="480" dy="0">E</tspan>
 </text>
-<text x="842" y="420" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="842" dy="0">Contratos +</tspan>
-<tspan x="842" dy="20.0">calidad</tspan>
+<text x="504" y="527" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
+<tspan x="504" dy="0">extraer</tspan>
 </text>
-<rect x="838" y="475" width="184" height="38" rx="19" fill="#E3F5F5" stroke="#E3F5F5" stroke-width="1" opacity="1"/>
-<text x="930.0" y="500" fill="#167C80" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
-<tspan x="930.0" dy="0">Vista gobernada</tspan>
+<text x="472" y="566" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="start" style="">
+<tspan x="472" dy="0">snapshot + metadatos</tspan>
 </text>
-<text x="842" y="540" fill="#167C80" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
-<tspan x="842" dy="0">ARTEFACTO CONTROLABLE</tspan>
+<rect x="622" y="498" width="140" height="118" rx="14" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
+<circle cx="646" cy="525" r="18" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="1"/>
+<text x="646" y="533" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="646" dy="0">L</tspan>
 </text>
-<rect x="1080" y="262" width="220" height="310" rx="18" fill="#FFFFFF" stroke="#6C5AA7" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<rect x="1080" y="262" width="220" height="58" rx="18" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
-<rect x="1080" y="302" width="220" height="18" rx="0" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
-<circle cx="1114" cy="291" r="19" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1"/>
-<text x="1114" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="1114" dy="0">5</tspan>
+<text x="646" y="532" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="middle" style="">
+<tspan x="646" dy="0">L</tspan>
 </text>
-<text x="1114" y="299" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="middle" style="">
-<tspan x="1114" dy="0">5</tspan>
+<text x="670" y="527" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
+<tspan x="670" dy="0">cargar</tspan>
 </text>
-<text x="1146" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="1146" dy="0">OLAP / BI</tspan>
+<text x="638" y="566" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="start" style="">
+<tspan x="638" dy="0">zona raw protegida</tspan>
 </text>
-<text x="1102" y="354" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="1102" dy="0">Compara</tspan>
-<tspan x="1102" dy="21.25">y explora</tspan>
+<rect x="788" y="498" width="140" height="118" rx="14" fill="#E3F5F5" stroke="#167C80" stroke-width="1.5" opacity="1"/>
+<circle cx="812" cy="525" r="18" fill="#167C80" stroke="#167C80" stroke-width="1"/>
+<text x="812" y="533" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
+<tspan x="812" dy="0">T</tspan>
 </text>
-<text x="1102" y="420" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="1102" dy="0">Métricas por</tspan>
-<tspan x="1102" dy="20.0">dimensión</tspan>
+<text x="812" y="532" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="middle" style="">
+<tspan x="812" dy="0">T</tspan>
 </text>
-<rect x="1098" y="475" width="184" height="38" rx="19" fill="#EEEAF8" stroke="#EEEAF8" stroke-width="1" opacity="1"/>
-<text x="1190.0" y="500" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
-<tspan x="1190.0" dy="0">Power BI · Looker</tspan>
+<text x="836" y="527" fill="#167C80" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
+<tspan x="836" dy="0">transformar</tspan>
 </text>
-<text x="1102" y="540" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
-<tspan x="1102" dy="0">ARTEFACTO CONTROLABLE</tspan>
+<text x="804" y="566" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="start" style="">
+<tspan x="804" dy="0">SQL dentro</tspan>
+<tspan x="804" dy="13.2">del destino</tspan>
 </text>
-<rect x="1340" y="262" width="220" height="310" rx="18" fill="#FFFFFF" stroke="#E95C3A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<rect x="1340" y="262" width="220" height="58" rx="18" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
-<rect x="1340" y="302" width="220" height="18" rx="0" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
-<circle cx="1374" cy="291" r="19" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1"/>
-<text x="1374" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="1374" dy="0">6</tspan>
+<line x1="596" y1="557" x2="620" y2="557" stroke="#6C5AA7" stroke-width="2.5" fill="none" stroke-linecap="round" marker-end="url(#arrow-purple)"/>
+<line x1="762" y1="557" x2="786" y2="557" stroke="#6C5AA7" stroke-width="2.5" fill="none" stroke-linecap="round" marker-end="url(#arrow-purple)"/>
+<text x="348" y="630" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="start" style="">
+<tspan x="348" dy="0">El acceso y la retención protegen lo raw antes de ejecutar la T.</tspan>
 </text>
-<text x="1374" y="299" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="middle" style="">
-<tspan x="1374" dy="0">6</tspan>
+<path d="M288 448 C330 448 330 378 454 378" stroke="#2F6FB0" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path d="M288 448 C330 448 330 557 454 557" stroke="#2F6FB0" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<rect x="1012" y="250" width="250" height="170" rx="18" fill="#FFFFFF" stroke="#24855A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="1012" y="250" width="250" height="48" rx="18" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
+<rect x="1012" y="284" width="250" height="14" rx="0" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
+<text x="1032" y="281" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="start" style="">
+<tspan x="1032" dy="0">Warehouse</tspan>
 </text>
-<text x="1406" y="299" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="1406" dy="0">Acción</tspan>
+<text x="1032" y="334" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="1032" dy="0">historia integrada</tspan>
 </text>
-<text x="1362" y="354" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="1362" dy="0">Prioriza</tspan>
-<tspan x="1362" dy="21.25">revisión</tspan>
+<rect x="1030" y="362" width="214" height="38" rx="19" fill="#E7F5ED" stroke="#E7F5ED" stroke-width="1" opacity="1"/>
+<text x="1137.0" y="387" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="1137.0" dy="0">hechos + dimensiones</tspan>
 </text>
-<text x="1362" y="420" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="1362" dy="0">Motivo</tspan>
-<tspan x="1362" dy="20.0">explicable</tspan>
+<rect x="1292" y="250" width="250" height="170" rx="18" fill="#FFFFFF" stroke="#167C80" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="1292" y="250" width="250" height="48" rx="18" fill="#167C80" stroke="#167C80" stroke-width="0" opacity="1"/>
+<rect x="1292" y="284" width="250" height="14" rx="0" fill="#167C80" stroke="#167C80" stroke-width="0" opacity="1"/>
+<text x="1312" y="281" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="start" style="">
+<tspan x="1312" dy="0">Data Mart</tspan>
 </text>
-<rect x="1358" y="475" width="184" height="38" rx="19" fill="#FDE9E3" stroke="#FDE9E3" stroke-width="1" opacity="1"/>
-<text x="1450.0" y="500" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
-<tspan x="1450.0" dy="0">Decisión humana</tspan>
+<text x="1312" y="334" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="1312" dy="0">vista de seguimiento</tspan>
 </text>
-<text x="1362" y="540" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="900" text-anchor="start" style="">
-<tspan x="1362" dy="0">ARTEFACTO CONTROLABLE</tspan>
+<rect x="1310" y="362" width="214" height="38" rx="19" fill="#E3F5F5" stroke="#E3F5F5" stroke-width="1" opacity="1"/>
+<text x="1417.0" y="387" fill="#167C80" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="1417.0" dy="0">métricas aprobadas</tspan>
 </text>
-<line x1="260" y1="415" x2="300" y2="415" stroke="#17324D" stroke-width="2" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
-<rect x="240" y="585" width="120" height="38" rx="19" fill="#E9EEF2" stroke="#E9EEF2" stroke-width="1" opacity="1"/>
-<text x="300.0" y="610" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle" style="">
-<tspan x="300.0" dy="0">eventos</tspan>
+<rect x="1012" y="470" width="250" height="170" rx="18" fill="#FFFFFF" stroke="#6C5AA7" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="1012" y="470" width="250" height="48" rx="18" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
+<rect x="1012" y="504" width="250" height="14" rx="0" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
+<text x="1032" y="501" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="start" style="">
+<tspan x="1032" dy="0">OLAP / BI</tspan>
 </text>
-<line x1="520" y1="415" x2="560" y2="415" stroke="#17324D" stroke-width="2" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
-<rect x="500" y="585" width="120" height="38" rx="19" fill="#E9EEF2" stroke="#E9EEF2" stroke-width="1" opacity="1"/>
-<text x="560.0" y="610" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle" style="">
-<tspan x="560.0" dy="0">datos válidos</tspan>
+<text x="1032" y="554" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="1032" dy="0">comparar y explorar</tspan>
 </text>
-<line x1="780" y1="415" x2="820" y2="415" stroke="#17324D" stroke-width="2" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
-<rect x="760" y="585" width="120" height="38" rx="19" fill="#E9EEF2" stroke="#E9EEF2" stroke-width="1" opacity="1"/>
-<text x="820.0" y="610" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle" style="">
-<tspan x="820.0" dy="0">historia integrada</tspan>
+<rect x="1030" y="582" width="214" height="38" rx="19" fill="#EEEAF8" stroke="#EEEAF8" stroke-width="1" opacity="1"/>
+<text x="1137.0" y="607" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="1137.0" dy="0">medida × dimensión</tspan>
 </text>
-<line x1="1040" y1="415" x2="1080" y2="415" stroke="#17324D" stroke-width="2" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
-<rect x="1020" y="585" width="120" height="38" rx="19" fill="#E9EEF2" stroke="#E9EEF2" stroke-width="1" opacity="1"/>
-<text x="1080.0" y="610" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle" style="">
-<tspan x="1080.0" dy="0">vista curada</tspan>
+<rect x="1292" y="470" width="250" height="170" rx="18" fill="#FFFFFF" stroke="#E95C3A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="1292" y="470" width="250" height="48" rx="18" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
+<rect x="1292" y="504" width="250" height="14" rx="0" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
+<text x="1312" y="501" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="start" style="">
+<tspan x="1312" dy="0">Acción humana</tspan>
 </text>
-<line x1="1300" y1="415" x2="1340" y2="415" stroke="#17324D" stroke-width="2" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
-<rect x="1280" y="585" width="120" height="38" rx="19" fill="#E9EEF2" stroke="#E9EEF2" stroke-width="1" opacity="1"/>
-<text x="1340.0" y="610" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle" style="">
-<tspan x="1340.0" dy="0">evidencia</tspan>
+<text x="1312" y="554" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="1312" dy="0">priorizar revisión</tspan>
 </text>
-<rect x="40" y="640" width="1518" height="148" rx="18" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
-<text x="68" y="680" fill="#12395B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
-<tspan x="68" dy="0">CONTROLES QUE VIAJAN CON EL DATO</tspan>
+<rect x="1310" y="582" width="214" height="38" rx="19" fill="#FDE9E3" stroke="#FDE9E3" stroke-width="1" opacity="1"/>
+<text x="1417.0" y="607" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="1417.0" dy="0">motivo explicable</tspan>
 </text>
-<rect x="68" y="706" width="180" height="38" rx="19" fill="#FFF3D2" stroke="#FFF3D2" stroke-width="1" opacity="1"/>
-<text x="158.0" y="731" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
-<tspan x="158.0" dy="0">calidad</tspan>
+<line x1="1262" y1="334" x2="1290" y2="334" stroke="#17324D" stroke-width="2.5" fill="none" stroke-linecap="round" marker-end="url(#arrow-ink)"/>
+<path d="M1417 420 C1417 446 1250 448 1137 468" stroke="#17324D" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-ink)"/>
+<line x1="1262" y1="554" x2="1290" y2="554" stroke="#17324D" stroke-width="2.5" fill="none" stroke-linecap="round" marker-end="url(#arrow-ink)"/>
+<path d="M928 378 C972 378 980 334 1010 334" stroke="#C98500" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-amber)"/>
+<path d="M928 557 C976 557 978 382 1010 360" stroke="#6C5AA7" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>
+<path d="M1417 640 C1417 682 1180 688 854 688 L176 688 C110 688 108 652 108 620" stroke="#E95C3A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-red)" stroke-dasharray="8 6"/>
+<rect x="626" y="671" width="348" height="38" rx="19" fill="#FDE9E3" stroke="#FDE9E3" stroke-width="1" opacity="1"/>
+<text x="800.0" y="696" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" style="">
+<tspan x="800.0" dy="0">acción → nueva transacción OLTP</tspan>
 </text>
-<rect x="264" y="706" width="180" height="38" rx="19" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1" opacity="1"/>
-<text x="354.0" y="731" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
-<tspan x="354.0" dy="0">linaje</tspan>
+<rect x="40" y="720" width="1518" height="70" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
+<text x="64" y="748" fill="#12395B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="start" style="">
+<tspan x="64" dy="0">CONTROLES EN AMBAS RUTAS</tspan>
 </text>
-<rect x="460" y="706" width="180" height="38" rx="19" fill="#EEEAF8" stroke="#EEEAF8" stroke-width="1" opacity="1"/>
-<text x="550.0" y="731" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
-<tspan x="550.0" dy="0">acceso</tspan>
+<rect x="326" y="736" width="148" height="38" rx="19" fill="#FFF3D2" stroke="#FFF3D2" stroke-width="1" opacity="1"/>
+<text x="400.0" y="761" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="400.0" dy="0">calidad</tspan>
 </text>
-<rect x="656" y="706" width="180" height="38" rx="19" fill="#FCE8E6" stroke="#FCE8E6" stroke-width="1" opacity="1"/>
-<text x="746.0" y="731" fill="#C93F34" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
-<tspan x="746.0" dy="0">seguridad</tspan>
+<rect x="488" y="736" width="148" height="38" rx="19" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1" opacity="1"/>
+<text x="562.0" y="761" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="562.0" dy="0">linaje</tspan>
 </text>
-<rect x="852" y="706" width="210" height="38" rx="19" fill="#E3F5F5" stroke="#E3F5F5" stroke-width="1" opacity="1"/>
-<text x="957.0" y="731" fill="#167C80" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
-<tspan x="957.0" dy="0">observabilidad</tspan>
+<rect x="650" y="736" width="166" height="38" rx="19" fill="#FCE8E6" stroke="#FCE8E6" stroke-width="1" opacity="1"/>
+<text x="733.0" y="761" fill="#C93F34" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="733.0" dy="0">privacidad</tspan>
 </text>
-<rect x="1078" y="706" width="180" height="38" rx="19" fill="#E7F5ED" stroke="#E7F5ED" stroke-width="1" opacity="1"/>
-<text x="1168.0" y="731" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
-<tspan x="1168.0" dy="0">costos</tspan>
+<rect x="830" y="736" width="150" height="38" rx="19" fill="#EEEAF8" stroke="#EEEAF8" stroke-width="1" opacity="1"/>
+<text x="905.0" y="761" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="905.0" dy="0">acceso</tspan>
 </text>
-<rect x="1274" y="706" width="250" height="38" rx="19" fill="#FDE9E3" stroke="#FDE9E3" stroke-width="1" opacity="1"/>
-<text x="1399.0" y="731" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
-<tspan x="1399.0" dy="0">regla + responsable</tspan>
+<rect x="994" y="736" width="192" height="38" rx="19" fill="#E3F5F5" stroke="#E3F5F5" stroke-width="1" opacity="1"/>
+<text x="1090.0" y="761" fill="#167C80" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="1090.0" dy="0">observabilidad</tspan>
 </text>
-<path d="M1450 572 C1450 625 1370 626 1320 626 L250 626 C150 626 110 610 110 572" stroke="#E95C3A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-red)" stroke-dasharray="7 6"/>
-<rect x="665" y="607" width="300" height="38" rx="19" fill="#FDE9E3" stroke="#FDE9E3" stroke-width="1" opacity="1"/>
-<text x="815.0" y="632" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
-<tspan x="815.0" dy="0">acción → nueva transacción</tspan>
+<rect x="1200" y="736" width="140" height="38" rx="19" fill="#E7F5ED" stroke="#E7F5ED" stroke-width="1" opacity="1"/>
+<text x="1270.0" y="761" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="1270.0" dy="0">costos</tspan>
+</text>
+<rect x="1354" y="736" width="180" height="38" rx="19" fill="#FDE9E3" stroke="#FDE9E3" stroke-width="1" opacity="1"/>
+<text x="1444.0" y="761" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<tspan x="1444.0" dy="0">responsable</tspan>
 </text>
 <rect x="48" y="838" width="1504" height="42" rx="13" fill="#E7EFF5" stroke="#E7EFF5" stroke-width="0" opacity="1"/>
 <text x="70" y="865" fill="#12395B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" text-anchor="start" style="">
-<tspan x="70" dy="0">LECTURA CLAVE</tspan>
+<tspan x="70" dy="0">DECISIÓN DE DISEÑO</tspan>
 </text>
-<text x="230" y="865" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="start" style="">
-<tspan x="230" dy="0">Una herramienta puede asumir varias etapas, pero no elimina sus responsabilidades ni controles.</tspan>
+<text x="275.0" y="865" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="start" style="">
+<tspan x="275.0" dy="0">ETL si T debe ocurrir antes del destino; ELT si el destino puede gobernar raw y ejecutar T; híbrido cuando la restricción lo exige.</tspan>
 </text>
 </svg>
