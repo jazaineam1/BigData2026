@@ -1,123 +1,63 @@
-# 🧭 Módulo 0: Onboarding (arranque del curso)
+# Módulo 0: onboarding de Git y GitHub
 
-## 🎯 Objetivo
+## Objetivo
 
-Dejar el entorno listo para trabajar desde el primer ejercicio, evitando bloqueos típicos de estudiantes que recién empiezan.
+Dejar la identidad y el repositorio listos para trabajar sin mezclar dos rutas distintas: GitHub Codespaces, recomendado para la sesión 2, e instalación local, opcional para quien prefiera su propio equipo.
 
-Si todavía no instalaste Docker, inicia por `INSTALACION_DESDE_CERO.md` y `docker/README.md`.
+## Ruta A — GitHub Codespaces
 
-## 🌍 Contexto
+Codespaces abre el repositorio ya clonado y usa autenticación HTTPS para el repositorio que originó el entorno. En esta ruta no es necesario crear claves SSH ni levantar Docker manualmente.
 
-Muchos errores de Git al inicio no son conceptuales, sino de entorno:
-
-- abrir el repositorio equivocado
-- no saber en qué rama se está trabajando
-- no tener configurado nombre/correo en Git
-- no entender dónde ejecutar los comandos
-
-Este módulo corrige eso antes de entrar a contenidos técnicos.
-
-## ✅ Checklist de inicio
-
-Antes de comenzar el curso, cada estudiante debe confirmar:
-
-- tiene Docker Desktop funcionando
-- levantó contenedores del curso (`airflow`, `dask`, `git`)
-- tiene cuenta de GitHub activa
-- entró al repositorio correcto de la clase
-- abrió su workspace (Codespaces o local)
-- ve la terminal y puede ejecutar comandos
-- configuró identidad de Git (`user.name`, `user.email`)
-
-## 🖥 Flujo recomendado para clase
-
-### 1. Levantar entorno Docker del curso
+1. Entra al repositorio asignado por GitHub Classroom.
+2. Selecciona `Code > Codespaces > Create codespace`.
+3. Abre la terminal y ejecuta:
 
 ```bash
-cd docker
-docker compose up -d
-docker compose ps
-```
-
-Si `docker compose` no funciona, vuelve a la guía de instalación en `docker/README.md`.
-
-### 2. Entrar al repositorio asignado
-
-El estudiante debe entrar por el enlace entregado por el profesor.
-
-### 3. Abrir Codespaces
-
-Desde GitHub:
-
-1. botón `Code`
-2. pestaña `Codespaces`
-3. opción `Create codespace`
-
-### 4. Verificar identidad en Git
-
-```bash
-git config --global user.name "Tu Nombre"
-git config --global user.email "tu-correo@ejemplo.com"
-```
-
-### 5. Confirmar configuración
-
-```bash
-git config --global --get user.name
-git config --global --get user.email
-```
-
-### 6. Revisar estado del repositorio
-
-```bash
+python --version
+git --version
 git status
 git branch --show-current
+git remote -v
+git config --get user.name
+git config --get user.email
 ```
 
-### 7. Validar herramientas dentro de contenedor
+Si falta la identidad, configúrala solo para este repositorio:
 
 ```bash
-docker compose exec git git --version
-docker compose exec airflow airflow version
-docker compose exec dask-scheduler dask --version
+git config user.name "Tu Nombre"
+git config user.email "tu-correo@ejemplo.com"
 ```
 
-## ⚠️ Errores comunes y solución
+## Ruta B — Instalación local opcional
 
-### Error: "Please tell me who you are"
-
-Causa: Git no tiene nombre/correo configurado.
-
-Solución:
+En un equipo propio puedes clonar por HTTPS y autenticarte con Git Credential Manager:
 
 ```bash
-git config --global user.name "Tu Nombre"
-git config --global user.email "tu-correo@ejemplo.com"
+git clone https://github.com/ORGANIZACION/REPOSITORIO.git
+cd REPOSITORIO
+git status
 ```
 
-### Error: "not a git repository"
+SSH es una alternativa local, no un requisito. Si la eliges, sigue la [documentación oficial de GitHub](https://docs.github.com/es/authentication/connecting-to-github-with-ssh) y nunca publiques la clave privada.
 
-Causa: la terminal está abierta en la carpeta equivocada.
+## Flujo que debes comprender
 
-Solución: moverse a la carpeta del repositorio correcto.
+```text
+working tree --git add--> staging --git commit--> historial local --git push--> remoto
+                                                       |
+                                                       └── Pull Request para revisar
+```
 
-### Error: cambios en `main` por accidente
+La sesión 2 usa este flujo para versionar arquitectura como código. Docker, Airflow y los demás servicios de infraestructura empiezan en sesiones posteriores.
 
-Causa: no se creó rama antes de trabajar.
+## Errores comunes
 
-Solución: crear rama de trabajo antes de editar archivos.
+- `Please tell me who you are`: configura `user.name` y `user.email`.
+- `not a git repository`: abre la terminal en la raíz del repositorio.
+- cambios en `main`: crea primero `git switch -c entrega/sesion2`.
+- autenticación fallida en Codespaces: confirma el repositorio de origen y `git remote -v`; no cambies inmediatamente a SSH.
 
-### Error: "Cannot connect to the Docker daemon"
+## Resultado esperado
 
-Causa: Docker Desktop no está iniciado o el daemon no está disponible.
-
-Solución: iniciar Docker Desktop y volver a ejecutar `docker compose up -d`.
-
-## 🧠 Resultado esperado del módulo
-
-Al finalizar, el estudiante puede:
-
-- ubicarse en el repositorio correcto
-- usar terminal sin bloqueo inicial
-- verificar su configuración de Git
-- comenzar los ejercicios del curso con flujo ordenado
+Puedes identificar repositorio y rama, distinguir working tree, staging, commit y remoto, y publicar una rama sin crear credenciales innecesarias.

@@ -1,159 +1,90 @@
-# 🧭 Módulo 0: Onboarding (arranque del curso)
+# Módulo 0: onboarding de Git y GitHub
 
-## 🎯 Objetivo
+## Objetivo
 
-Dejar el entorno listo para trabajar desde el primer ejercicio, evitando bloqueos típicos de estudiantes que recién empiezan.
+Dejar la identidad y el repositorio listos para trabajar sin mezclar dos rutas distintas: GitHub Codespaces, recomendado para la sesión 2, e instalación local, opcional para quien prefiera su propio equipo.
 
-## 🌍 Contexto
+## Ruta A — GitHub Codespaces
 
-Muchos errores de Git al inicio no son conceptuales, sino de entorno:
+Codespaces abre el repositorio ya clonado y usa autenticación HTTPS para el repositorio que originó el entorno. En esta ruta no es necesario crear claves SSH.
 
-- abrir el repositorio equivocado
-- no saber en qué rama se está trabajando
-- no tener configurado nombre/correo en Git
-- no entender dónde ejecutar los comandos
-
-Este módulo corrige eso antes de entrar a contenidos técnicos.
-
-## ✅ Checklist de inicio
-
-Antes de comenzar el curso, cada estudiante debe confirmar:
-
-- tiene cuenta de GitHub activa
-- entró al repositorio correcto de la clase
-- abrió su workspace (Codespaces o local)
-- ve la terminal y puede ejecutar comandos
-- configuró identidad de Git (`user.name`, `user.email`)
-
-## 🖥 Flujo recomendado para clase
-
-### 1. Entrar al repositorio asignado
-
-El estudiante debe entrar por el enlace entregado por el profesor.
-
-### 2. Abrir Codespaces
-
-Desde GitHub:
-
-1. botón `Code`
-2. pestaña `Codespaces`
-3. opción `Create codespace`
-
-### 3. Verificar identidad en Git
+1. Entra al repositorio asignado por GitHub Classroom.
+2. Selecciona `Code > Codespaces > Create codespace`.
+3. Abre la terminal y verifica:
 
 ```bash
-git config --global user.name "Tu Nombre"
-git config --global user.email "tu-correo@ejemplo.com"
-```
-
-### 4. Confirmar configuración
-
-```bash
-git config --global --get user.name
-git config --global --get user.email
-```
-
-### 4.5. 🔐 Conectar a GitHub con SSH (Importante)
-
-Para hacer push y pull sin escribir contraseña, necesitas una clave SSH.
-
-#### Generar clave SSH:
-
-```bash
-ssh-keygen -t rsa -b 4096 -C "tu-correo@ejemplo.com"
-```
-
-Presiona `Enter` tres veces (sin agregar passphrase es más simple para empezar).
-
-#### Ver tu clave pública:
-
-```bash
-cat ~/.ssh/id_rsa.pub
-```
-
-**Copia TODA la salida** (empieza con `ssh-rsa` y termina con tu correo).
-
-#### Agregar clave a GitHub:
-
-1. Ve a: https://github.com/settings/keys
-2. Click en **"New SSH key"**
-3. Título: `Mi computadora` o `Docker Git`
-4. Pega tu clave pública en el campo **Key**
-5. Click en **"Add SSH key"**
-
-#### Verificar que funcionó:
-
-```bash
-ssh -T git@github.com
-```
-
-Deberías ver algo como:
-```
-Hi jazaineam1! You've successfully authenticated...
-```
-
-### 5. Revisar estado del repositorio
-
-```bash
+python --version
+git --version
 git status
 git branch --show-current
+git remote -v
 ```
 
-## ⚠️ Errores comunes y solución
-
-### Error: "Please tell me who you are"
-
-Causa: Git no tiene nombre/correo configurado.
-
-Solución:
+4. Comprueba tu identidad:
 
 ```bash
-git config --global user.name "Tu Nombre"
-git config --global user.email "tu-correo@ejemplo.com"
+git config --get user.name
+git config --get user.email
 ```
 
-### Error: "not a git repository"
-
-Causa: la terminal está abierta en la carpeta equivocada.
-
-Solución: moverse a la carpeta del repositorio correcto.
-
-### Error: cambios en `main` por accidente
-
-Causa: no se creó rama antes de trabajar.
-
-Solución: crear rama de trabajo antes de editar archivos.
-
-### Error: "Permission denied (publickey)" en push
-
-Causa: SSH no está configurado o no está agregada en GitHub.
-
-Solución:
+Si falta algún valor, configúralo para este repositorio:
 
 ```bash
-# Crear clave SSH si no la tienes
-ssh-keygen -t rsa -b 4096 -C "tu-correo@ejemplo.com"
-
-# Ver tu clave pública
-cat ~/.ssh/id_rsa.pub
-
-# Agregar en https://github.com/settings/keys
-
-# Verificar conexión
-ssh -T git@github.com
+git config user.name "Tu Nombre"
+git config user.email "tu-correo@ejemplo.com"
 ```
 
-### Error: "Key is invalid. You must supply a key in OpenSSH public key format"
+Usar configuración local evita cambiar por accidente la identidad de otros repositorios o usuarios del equipo.
 
-Causa: copiaste solo parte de la clave o formato incorrecto.
+## Ruta B — Instalación local opcional
 
-Solución: copia TODA la salida de `cat ~/.ssh/id_rsa.pub` (desde `ssh-rsa` hasta el correo).
+En un equipo propio puedes clonar por HTTPS y autenticarte con Git Credential Manager. SSH es otra alternativa, no un requisito de la sesión.
 
-## 🧠 Resultado esperado del módulo
+```bash
+git clone https://github.com/ORGANIZACION/REPOSITORIO.git
+cd REPOSITORIO
+git status
+```
 
-Al finalizar, el estudiante puede:
+Si eliges SSH, sigue la [documentación oficial de conexión con SSH](https://docs.github.com/es/authentication/connecting-to-github-with-ssh). Nunca compartas la clave privada; GitHub recibe únicamente la clave pública.
 
-- ubicarse en el repositorio correcto
-- usar terminal sin bloqueo inicial
-- verificar su configuración de Git
-- comenzar los ejercicios del curso con flujo ordenado
+## Mapa mental del flujo
+
+```text
+working tree --git add--> staging --git commit--> historial local --git push--> remoto
+                                                       |
+                                                       └── Pull Request para revisar
+```
+
+- `git status`: explica dónde está cada cambio.
+- `git diff`: muestra cambios todavía no enviados a staging.
+- `git add archivo`: selecciona evidencia para el próximo commit.
+- `git commit`: registra una unidad de trabajo con autor y mensaje.
+- `git push`: publica los commits de la rama.
+- Pull Request: permite explicar, revisar y validar antes de integrar.
+
+## Errores comunes
+
+### `Please tell me who you are`
+
+Git no encuentra nombre o correo. Configura `user.name` y `user.email` como se mostró arriba.
+
+### `not a git repository`
+
+La terminal está en otra carpeta. En Codespaces vuelve al explorador y abre una terminal desde la raíz del repositorio.
+
+### Cambios en `main` por accidente
+
+Crea la rama antes de editar:
+
+```bash
+git switch -c entrega/sesion2
+```
+
+### Error de autenticación en Codespaces
+
+Primero confirma que abriste el Codespace desde el repositorio asignado y revisa `git remote -v`. No cambies el remoto a SSH como primera solución. Si persiste, vuelve a autorizar Codespaces desde GitHub o solicita apoyo docente.
+
+## Resultado esperado
+
+Al finalizar puedes identificar el repositorio y la rama, explicar los cuatro estados básicos de un cambio y publicar un commit sin crear credenciales innecesarias.

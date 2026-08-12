@@ -1,70 +1,63 @@
-# 🧪 Ejercicio 0: Validar entorno de trabajo
+# Ejercicio 0: validar Git en Codespaces
 
 ## Objetivo
 
-Comprobar que tu entorno está listo para iniciar el curso sin errores de configuración.
+Recorrer por primera vez working tree, staging, commit y remoto. La sesión 2 no requiere Docker ni claves SSH.
 
 ## Pasos
 
-1. Levantar servicios Docker:
+1. Verifica el entorno:
 
 ```bash
-cd docker
-docker compose up -d
-docker compose ps
-```
-
-2. Verificar nombre en Git:
-
-```bash
-git config --global --get user.name
-```
-
-3. Verificar correo en Git:
-
-```bash
-git config --global --get user.email
-```
-
-4. Revisar estado del repositorio:
-
-```bash
+python --version
+git --version
+git config --get user.name
+git config --get user.email
 git status
-```
-
-5. Confirmar rama actual:
-
-```bash
 git branch --show-current
+git remote -v
 ```
 
-6. Validar herramientas en contenedores:
+2. Si falta la identidad, configúrala para este repositorio:
 
 ```bash
-docker compose exec git git --version
-docker compose exec airflow airflow version
-docker compose exec dask-scheduler dask --version
+git config user.name "Tu Nombre"
+git config user.email "tu-correo@ejemplo.com"
 ```
 
-7. Crear archivo `entorno-listo.txt` con tu nombre y fecha.
-8. Crear una rama para este ejercicio:
+3. Crea una rama:
 
 ```bash
 git switch -c feature/onboarding
 ```
 
-9. Hacer commit y push:
+4. Crea `entorno-listo.txt` con tu nombre, fecha y una frase que explique `git add`.
+5. Observa y selecciona únicamente ese archivo:
 
 ```bash
-git add .
-git commit -m "Valida entorno inicial del curso"
-git push origin feature/onboarding
+git status
+git diff
+git add entorno-listo.txt
+git status
+git diff --staged
 ```
+
+6. Registra y publica:
+
+```bash
+git commit -m "Valida entorno inicial del curso"
+git push -u origin feature/onboarding
+git log --oneline --decorate -3
+```
+
+7. Abre un Pull Request desde GitHub y explica la verificación realizada.
 
 ## Qué se evalúa
 
-- entorno Docker levantado
-- entorno configurado correctamente
-- uso de rama de trabajo
-- commit claro
-- push exitoso
+- identidad atribuible;
+- rama distinta de `main`;
+- selección consciente del archivo en staging;
+- commit claro;
+- push y Pull Request exitosos.
+
+Si trabajas localmente, usa HTTPS con Git Credential Manager o configura SSH como alternativa siguiendo la documentación oficial.

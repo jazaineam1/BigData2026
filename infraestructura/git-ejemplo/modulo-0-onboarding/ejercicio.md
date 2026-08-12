@@ -1,72 +1,65 @@
-# 🧪 Ejercicio 0: Validar entorno de trabajo
+# Ejercicio 0: validar Git en Codespaces
 
 ## Objetivo
 
-Comprobar que tu entorno está listo para iniciar el curso sin errores de configuración.
+Comprobar el entorno y recorrer por primera vez working tree, staging, commit y remoto. La sesión 2 no requiere Docker ni claves SSH.
 
 ## Pasos
 
-1. Verificar nombre en Git:
+1. Verifica entorno, identidad, repositorio y rama:
 
 ```bash
-git config --global --get user.name
-```
-
-2. Verificar correo en Git:
-
-```bash
-git config --global --get user.email
-```
-
-3. **[IMPORTANTE] Conectar a GitHub con SSH:**
-
-Para hacer push exitoso, necesitas una clave SSH configurada.
-
-```bash
-# Generar clave SSH
-ssh-keygen -t rsa -b 4096 -C "tu-correo@ejemplo.com"
-```
-
-Presiona `Enter` tres veces cuando te lo pida.
-
-```bash
-# Ver tu clave pública
-cat ~/.ssh/id_rsa.pub
-```
-
-Copia TODA esa salida y agrégala en: https://github.com/settings/keys
-
-4. Revisar estado del repositorio:
-
-```bash
+python --version
+git --version
+git config --get user.name
+git config --get user.email
 git status
+git branch --show-current
+git remote -v
 ```
 
-5. Confirmar rama actual:
+2. Si falta la identidad, configúrala para este repositorio:
 
 ```bash
-git branch --show-current
+git config user.name "Tu Nombre"
+git config user.email "tu-correo@ejemplo.com"
 ```
 
-6. Crear archivo `entorno-listo.txt` con tu nombre y fecha.
-7. Crear una rama para este ejercicio:
+3. Crea una rama antes de editar:
 
 ```bash
 git switch -c feature/onboarding
 ```
 
-8. Hacer commit y push:
+4. Crea `entorno-listo.txt` con tu nombre, fecha y una frase que explique qué hace `git add`.
+5. Observa el cambio y selecciona solamente ese archivo:
 
 ```bash
-git add .
-git commit -m "Valida entorno inicial del curso"
-git push origin feature/onboarding
+git status
+git diff
+git add entorno-listo.txt
+git status
+git diff --staged
 ```
+
+6. Registra y publica la evidencia:
+
+```bash
+git commit -m "Valida entorno inicial del curso"
+git push -u origin feature/onboarding
+git log --oneline --decorate -3
+```
+
+7. Abre un Pull Request desde GitHub y describe qué verificaste.
 
 ## Qué se evalúa
 
-- entorno configurado correctamente
-- conexión SSH a GitHub funcionando
-- uso de rama de trabajo
-- commit claro
-- push exitoso
+- identidad atribuible;
+- rama distinta de `main`;
+- uso consciente de staging;
+- commit claro y acotado;
+- push y Pull Request exitosos.
+
+## Ruta local opcional
+
+Si trabajas fuera de Codespaces, usa HTTPS con Git Credential Manager o configura SSH siguiendo la documentación oficial. El producto y los comandos Git del ejercicio son los mismos.
