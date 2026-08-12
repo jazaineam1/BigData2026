@@ -2,8 +2,23 @@
 <title id="title">Proceso AS-IS de seguimiento contractual</title>
 <desc id="desc">Proceso con tres carriles, datos producidos, validación, cuello de botella y bucle de retrabajo.</desc>
 <defs>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
-                <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#17324D" flood-opacity=".12"/>
+              <linearGradient id="header-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#0D273E"/>
+                <stop offset="100%" stop-color="#1D4F73"/>
+              </linearGradient>
+              <linearGradient id="navy-card-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#184368"/>
+                <stop offset="100%" stop-color="#0F2B48"/>
+              </linearGradient>
+              <linearGradient id="hub-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1C4B72"/>
+                <stop offset="100%" stop-color="#0A2238"/>
+              </linearGradient>
+              <filter id="shadow" x="-10%" y="-10%" width="125%" height="130%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F2B48" flood-opacity="0.09"/>
+              </filter>
+              <filter id="shadow-lg" x="-15%" y="-15%" width="135%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F2B48" flood-opacity="0.14"/>
               </filter>
               <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
                 <path d="M0,0 L0,6 L9,3 z" fill="#2F6FB0"/>
@@ -17,221 +32,243 @@
               <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
                 <path d="M0,0 L0,6 L9,3 z" fill="#6C5AA7"/>
               </marker>
+              <marker id="arrow-orange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#E95C3A"/>
+              </marker>
+              <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#C98500"/>
+              </marker>
+              <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#167C80"/>
+              </marker>
+              <marker id="arrow-ink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#17324D"/>
+              </marker>
             </defs>
 <rect width="1600" height="900" fill="#F3F7FA"/>
-<rect x="0" y="0" width="1600" height="112" rx="0" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
-<rect x="1376" y="24" width="176" height="38" rx="19" fill="#2A5878" stroke="#2A5878" stroke-width="1" opacity="1"/>
-<text x="1464.0" y="49" fill="#D9EFFB" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" style="">
+<rect x="0" y="0" width="1600" height="114" rx="0" fill="url(#header-grad)" stroke="#0D273E" stroke-width="0" opacity="1"/>
+<line x1="0" y1="114" x2="1600" y2="114" stroke="#2F6FB0" stroke-width="2" fill="none" stroke-linecap="round"/>
+<rect x="1376" y="24" width="176" height="36" rx="18" fill="#214E6D" stroke="#3F769C" stroke-width="1.5" opacity="1"/>
+<text x="1464.0" y="47" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="middle" style="">
 <tspan x="1464.0" dy="0">MAPA 2 DE 6</tspan>
 </text>
-<text x="48" y="50" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="31" font-weight="800" text-anchor="start" style="">
+<text x="48" y="48" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="31" font-weight="800" text-anchor="start" style="">
 <tspan x="48" dy="0">Proceso AS-IS: dónde nace el retraso</tspan>
 </text>
-<text x="48" y="82" fill="#CFE4F2" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" text-anchor="start" style="">
+<text x="48" y="80" fill="#D1E6F5" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" text-anchor="start" style="">
 <tspan x="48" dy="0">Carriles por responsable · artefactos de datos · decisión de completitud · retrabajo explícito</tspan>
 </text>
 <rect x="34" y="140" width="1532" height="235" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
-<rect x="34" y="140" width="198" height="235" rx="16" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
-<text x="58" y="186" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
-<tspan x="58" dy="0">ENTIDAD CONTRATANTE</tspan>
+<rect x="34" y="140" width="204" height="235" rx="16" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<text x="56" y="182" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="start" style="">
+<tspan x="56" dy="0">ENTIDAD</tspan>
+<tspan x="56" dy="18.0">CONTRATANTE</tspan>
 </text>
-<text x="58" y="220" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="58" dy="0">Origina y actualiza</tspan>
-<tspan x="58" dy="20.0">el proceso</tspan>
+<text x="56" y="226" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="500" text-anchor="start" style="">
+<tspan x="56" dy="0">Origina y actualiza</tspan>
+<tspan x="56" dy="17.5">el proceso</tspan>
 </text>
 <rect x="34" y="390" width="1532" height="185" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
-<rect x="34" y="390" width="198" height="185" rx="16" fill="#FFF3D2" stroke="#C98500" stroke-width="1.5" opacity="1"/>
-<text x="58" y="436" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
-<tspan x="58" dy="0">PLATAFORMA SECOP</tspan>
+<rect x="34" y="390" width="204" height="185" rx="16" fill="#FFF3D2" stroke="#C98500" stroke-width="1.5" opacity="1"/>
+<text x="56" y="432" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="start" style="">
+<tspan x="56" dy="0">PLATAFORMA</tspan>
+<tspan x="56" dy="18.0">SECOP</tspan>
 </text>
-<text x="58" y="470" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="58" dy="0">Registra y publica</tspan>
-<tspan x="58" dy="20.0">eventos</tspan>
+<text x="56" y="476" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="500" text-anchor="start" style="">
+<tspan x="56" dy="0">Registra y publica</tspan>
+<tspan x="56" dy="17.5">eventos</tspan>
 </text>
 <rect x="34" y="590" width="1532" height="225" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
-<rect x="34" y="590" width="198" height="225" rx="16" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
-<text x="58" y="636" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
-<tspan x="58" dy="0">OFICINA DE SEGUIMIENTO</tspan>
+<rect x="34" y="590" width="204" height="225" rx="16" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
+<text x="56" y="632" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="start" style="">
+<tspan x="56" dy="0">OFICINA DE</tspan>
+<tspan x="56" dy="18.0">SEGUIMIENTO</tspan>
 </text>
-<text x="58" y="670" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="58" dy="0">Consolida, prioriza</tspan>
-<tspan x="58" dy="20.0">y revisa</tspan>
+<text x="56" y="676" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="500" text-anchor="start" style="">
+<tspan x="56" dy="0">Consolida, prioriza</tspan>
+<tspan x="56" dy="17.5">y revisa</tspan>
 </text>
 <rect x="268" y="180" width="218" height="112" rx="14" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<circle cx="300" cy="208" r="19" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
-<text x="300" y="216" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="300" dy="0">1</tspan>
+<circle cx="296" cy="208" r="16" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
+<text x="296" y="214" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="296" dy="0">1</tspan>
 </text>
-<text x="330" y="216" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="330" dy="0">Definir necesidad</tspan>
+<text x="320" y="214" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="800" text-anchor="start" style="">
+<tspan x="320" dy="0">Definir necesidad</tspan>
 </text>
-<rect x="286" y="242" width="182" height="38" rx="19" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1" opacity="1"/>
-<text x="377.0" y="267" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<rect x="282" y="244" width="190" height="36" rx="18" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1.5" opacity="1"/>
+<text x="377.0" y="267" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="377.0" dy="0">objeto + responsable</tspan>
 </text>
 <rect x="520" y="180" width="218" height="112" rx="14" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<circle cx="552" cy="208" r="19" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
-<text x="552" y="216" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="552" dy="0">2</tspan>
+<circle cx="548" cy="208" r="16" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
+<text x="548" y="214" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="548" dy="0">2</tspan>
 </text>
-<text x="582" y="216" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="582" dy="0">Publicar proceso</tspan>
+<text x="572" y="214" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="800" text-anchor="start" style="">
+<tspan x="572" dy="0">Publicar proceso</tspan>
 </text>
-<rect x="538" y="242" width="182" height="38" rx="19" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1" opacity="1"/>
-<text x="629.0" y="267" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<rect x="534" y="244" width="190" height="36" rx="18" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1.5" opacity="1"/>
+<text x="629.0" y="267" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="629.0" dy="0">fecha + modalidad</tspan>
 </text>
 <rect x="772" y="180" width="218" height="112" rx="14" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<circle cx="804" cy="208" r="19" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
-<text x="804" y="216" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="804" dy="0">3</tspan>
+<circle cx="800" cy="208" r="16" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
+<text x="800" y="214" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="800" dy="0">3</tspan>
 </text>
-<text x="834" y="216" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="834" dy="0">Evaluar ofertas</tspan>
+<text x="824" y="214" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="800" text-anchor="start" style="">
+<tspan x="824" dy="0">Evaluar ofertas</tspan>
 </text>
-<rect x="790" y="242" width="182" height="38" rx="19" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1" opacity="1"/>
-<text x="881.0" y="267" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<rect x="786" y="244" width="190" height="36" rx="18" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1.5" opacity="1"/>
+<text x="881.0" y="267" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="881.0" dy="0">criterios + resultado</tspan>
 </text>
 <rect x="1024" y="180" width="218" height="112" rx="14" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<circle cx="1056" cy="208" r="19" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
-<text x="1056" y="216" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="1056" dy="0">4</tspan>
+<circle cx="1052" cy="208" r="16" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
+<text x="1052" y="214" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="1052" dy="0">4</tspan>
 </text>
-<text x="1086" y="216" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="1086" dy="0">Formalizar contrato</tspan>
+<text x="1076" y="214" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="800" text-anchor="start" style="">
+<tspan x="1076" dy="0">Formalizar contrato</tspan>
 </text>
-<rect x="1042" y="242" width="182" height="38" rx="19" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1" opacity="1"/>
-<text x="1133.0" y="267" fill="#2F6FB0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<rect x="1038" y="244" width="190" height="36" rx="18" fill="#E8F2FB" stroke="#E8F2FB" stroke-width="1.5" opacity="1"/>
+<text x="1133.0" y="267" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="1133.0" dy="0">proveedor + valor</tspan>
 </text>
 <rect x="1276" y="180" width="218" height="112" rx="14" fill="#FFFFFF" stroke="#E95C3A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
-<circle cx="1308" cy="208" r="19" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
-<text x="1308" y="216" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle" style="">
-<tspan x="1308" dy="0">5</tspan>
+<circle cx="1304" cy="208" r="16" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
+<text x="1304" y="214" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="1304" dy="0">5</tspan>
 </text>
-<text x="1338" y="216" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="1338" dy="0">Reportar ejecución</tspan>
+<text x="1328" y="214" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="800" text-anchor="start" style="">
+<tspan x="1328" dy="0">Reportar ejecución</tspan>
 </text>
-<rect x="1294" y="242" width="182" height="38" rx="19" fill="#FDE9E3" stroke="#FDE9E3" stroke-width="1" opacity="1"/>
-<text x="1385.0" y="267" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" style="">
+<rect x="1290" y="244" width="190" height="36" rx="18" fill="#FDE9E3" stroke="#FDE9E3" stroke-width="1.5" opacity="1"/>
+<text x="1385.0" y="267" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="1385.0" dy="0">estado + fechas</tspan>
 </text>
 <line x1="486" y1="236" x2="520" y2="236" stroke="#2F6FB0" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
 <line x1="738" y1="236" x2="772" y2="236" stroke="#2F6FB0" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
 <line x1="990" y1="236" x2="1024" y2="236" stroke="#2F6FB0" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
 <line x1="1242" y1="236" x2="1276" y2="236" stroke="#2F6FB0" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
-<rect x="300" y="423" width="300" height="118" rx="18" fill="#FFFFFF" stroke="#C98500" stroke-width="2" opacity="1"/>
-<rect x="300" y="423" width="9" height="118" rx="9" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
-<text x="330" y="466" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="330" dy="0">6 · Recibir evento</tspan>
+<rect x="290" y="423" width="310" height="118" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="290" y="423" width="8" height="118" rx="4" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
+<text x="314" y="465" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="314" dy="0">6 · Recibir evento</tspan>
 </text>
-<text x="330" y="505" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="330" dy="0">API / formulario</tspan>
-<tspan x="330" dy="21.6">marca de tiempo</tspan>
+<text x="314" y="501" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
+<tspan x="314" dy="0">API / formulario</tspan>
+<tspan x="314" dy="19.575000000000003">marca de tiempo operacional</tspan>
 </text>
-<rect x="690" y="423" width="300" height="118" rx="18" fill="#FFFFFF" stroke="#C98500" stroke-width="2" opacity="1"/>
-<rect x="690" y="423" width="9" height="118" rx="9" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
-<text x="720" y="466" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="720" dy="0">7 · Guardar registro</tspan>
+<rect x="680" y="423" width="310" height="118" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="680" y="423" width="8" height="118" rx="4" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
+<text x="704" y="465" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="704" dy="0">7 · Guardar registro</tspan>
 </text>
-<text x="720" y="505" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="720" dy="0">fila operacional</tspan>
-<tspan x="720" dy="21.6">historial publicado</tspan>
+<text x="704" y="501" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
+<tspan x="704" dy="0">fila operacional</tspan>
+<tspan x="704" dy="19.575000000000003">historial publicado</tspan>
 </text>
-<rect x="1080" y="423" width="330" height="118" rx="18" fill="#FFFFFF" stroke="#C98500" stroke-width="2" opacity="1"/>
-<rect x="1080" y="423" width="9" height="118" rx="9" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
-<text x="1110" y="466" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="1110" dy="0">8 · Exponer consulta</tspan>
+<rect x="1070" y="423" width="340" height="118" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="1070" y="423" width="8" height="118" rx="4" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
+<text x="1094" y="465" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="1094" dy="0">8 · Exponer consulta</tspan>
 </text>
-<text x="1110" y="505" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="start" style="">
-<tspan x="1110" dy="0">archivos / API</tspan>
-<tspan x="1110" dy="21.6">sin vista integrada</tspan>
+<text x="1094" y="501" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
+<tspan x="1094" dy="0">archivos / API pública</tspan>
+<tspan x="1094" dy="19.575000000000003">sin vista consolidada</tspan>
 </text>
-<line x1="600" y1="482" x2="690" y2="482" stroke="#C98500" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
-<line x1="990" y1="482" x2="1080" y2="482" stroke="#C98500" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
-<path d="M1385 292 L1385 382 C1385 405 1370 423 1345 423" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-red)"/>
-<rect x="1226" y="342" width="260" height="38" rx="19" fill="#FDE9E3" stroke="#FDE9E3" stroke-width="1" opacity="1"/>
-<text x="1356.0" y="367" fill="#E95C3A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" style="">
-<tspan x="1356.0" dy="0">estado · fecha · avance</tspan>
+<line x1="600" y1="482" x2="680" y2="482" stroke="#C98500" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-amber)"/>
+<line x1="990" y1="482" x2="1070" y2="482" stroke="#C98500" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-amber)"/>
+<path d="M1385 292 L1385 382 C1385 405 1370 423 1345 423" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-orange)"/>
+<rect x="1200" y="342" width="285" height="36" rx="18" fill="#FDE9E3" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
+<text x="1342.5" y="365" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
+<tspan x="1342.5" dy="0">reportes periódicos y novedades</tspan>
 </text>
-<rect x="270" y="640" width="210" height="125" rx="18" fill="#FFFFFF" stroke="#6C5AA7" stroke-width="2" opacity="1"/>
-<rect x="270" y="640" width="9" height="125" rx="9" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
-<text x="300" y="683" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="300" dy="0">9 · Descargar</tspan>
+<rect x="270" y="640" width="210" height="125" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="270" y="640" width="8" height="125" rx="4" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
+<text x="294" y="682" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="294" dy="0">9 · Descargar</tspan>
 </text>
-<text x="300" y="722" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="300" dy="0">CSV por fuente</tspan>
-<tspan x="300" dy="20.25">cortes diferentes</tspan>
+<text x="294" y="718" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="500" text-anchor="start" style="">
+<tspan x="294" dy="0">CSV por fuente</tspan>
+<tspan x="294" dy="18.900000000000002">cortes desarticulados</tspan>
 </text>
-<rect x="520" y="640" width="210" height="125" rx="18" fill="#FFFFFF" stroke="#C93F34" stroke-width="2" opacity="1"/>
-<rect x="520" y="640" width="9" height="125" rx="9" fill="#C93F34" stroke="#C93F34" stroke-width="0" opacity="1"/>
-<text x="550" y="683" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="550" dy="0">10 · Consolidar</tspan>
+<rect x="520" y="640" width="210" height="125" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="520" y="640" width="8" height="125" rx="4" fill="#C93F34" stroke="#C93F34" stroke-width="0" opacity="1"/>
+<text x="544" y="682" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="544" dy="0">10 · Consolidar</tspan>
 </text>
-<text x="550" y="722" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="550" dy="0">unir + limpiar</tspan>
-<tspan x="550" dy="20.25">trabajo manual</tspan>
+<text x="544" y="718" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="500" text-anchor="start" style="">
+<tspan x="544" dy="0">unir + limpiar</tspan>
+<tspan x="544" dy="18.900000000000002">trabajo manual lento</tspan>
 </text>
-<rect x="1070" y="640" width="210" height="125" rx="18" fill="#FFFFFF" stroke="#24855A" stroke-width="2" opacity="1"/>
-<rect x="1070" y="640" width="9" height="125" rx="9" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
-<text x="1100" y="683" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="1100" dy="0">12 · Priorizar</tspan>
+<rect x="1070" y="640" width="210" height="125" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="1070" y="640" width="8" height="125" rx="4" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
+<text x="1094" y="682" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="1094" dy="0">12 · Priorizar</tspan>
 </text>
-<text x="1100" y="722" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="1100" dy="0">lista preliminar</tspan>
-<tspan x="1100" dy="20.25">reglas locales</tspan>
+<text x="1094" y="718" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="500" text-anchor="start" style="">
+<tspan x="1094" dy="0">lista preliminar</tspan>
+<tspan x="1094" dy="18.900000000000002">reglas locales</tspan>
 </text>
-<rect x="1320" y="640" width="210" height="125" rx="18" fill="#FFFFFF" stroke="#E95C3A" stroke-width="2" opacity="1"/>
-<rect x="1320" y="640" width="9" height="125" rx="9" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
-<text x="1350" y="683" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="1350" dy="0">13 · Revisar</tspan>
+<rect x="1320" y="640" width="210" height="125" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="1320" y="640" width="8" height="125" rx="4" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
+<text x="1344" y="682" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="1344" dy="0">13 · Revisar</tspan>
 </text>
-<text x="1350" y="722" fill="#52697C" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="1350" dy="0">contexto + decisión</tspan>
-<tspan x="1350" dy="20.25">resultado registrado</tspan>
+<text x="1344" y="718" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="500" text-anchor="start" style="">
+<tspan x="1344" dy="0">contexto + decisión</tspan>
+<tspan x="1344" dy="18.900000000000002">resultado registrado</tspan>
 </text>
 <line x1="480" y1="702" x2="520" y2="702" stroke="#6C5AA7" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-purple)"/>
 <line x1="730" y1="702" x2="785" y2="702" stroke="#C93F34" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-red)"/>
 <line x1="995" y1="702" x2="1070" y2="702" stroke="#24855A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-green)"/>
 <line x1="1280" y1="702" x2="1320" y2="702" stroke="#24855A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-green)"/>
-<path d="M890 622 L995 702 L890 782 L785 702 Z" stroke="#C98500" stroke-width="3" fill="#FFF3D2" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="890" y="684" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="middle" style="">
-<tspan x="890" dy="0">11 · ¿Fechas y</tspan>
-<tspan x="890" dy="21.599999999999998">campos completos?</tspan>
+<path d="M1240 541 C1240 580 430 540 375 640" stroke="#6C5AA7" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-purple)" stroke-dasharray="6 5"/>
+<rect x="580" y="562" width="290" height="36" rx="18" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
+<text x="725.0" y="585" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
+<tspan x="725.0" dy="0">descarga de CSVs desarticulados</tspan>
 </text>
-<rect x="985" y="655" width="65" height="38" rx="19" fill="#E7F5ED" stroke="#E7F5ED" stroke-width="1" opacity="1"/>
-<text x="1017.5" y="680" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" style="">
+<path d="M890 622 L995 702 L890 782 L785 702 Z" stroke="#C98500" stroke-width="3" fill="#FFF3D2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="890" y="684" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="middle" style="">
+<tspan x="890" dy="0">11 · ¿Fechas y</tspan>
+<tspan x="890" dy="19.2">campos completos?</tspan>
+</text>
+<rect x="985" y="655" width="65" height="36" rx="18" fill="#E7F5ED" stroke="#24855A" stroke-width="1.5" opacity="1"/>
+<text x="1017.5" y="678" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
 <tspan x="1017.5" dy="0">SÍ</tspan>
 </text>
 <path d="M890 622 C890 570 850 555 820 541" stroke="#C93F34" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-red)" stroke-dasharray="8 6"/>
 <path d="M820 541 C820 360 1390 365 1390 292" stroke="#C93F34" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-red)" stroke-dasharray="8 6"/>
-<rect x="620" y="550" width="385" height="38" rx="19" fill="#FCE8E6" stroke="#FCE8E6" stroke-width="1" opacity="1"/>
-<text x="812.5" y="575" fill="#C93F34" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" style="">
-<tspan x="812.5" dy="0">NO · solicitar corrección y volver a reportar</tspan>
+<rect x="820" y="375" width="360" height="36" rx="18" fill="#FCE8E6" stroke="#C93F34" stroke-width="1.5" opacity="1"/>
+<text x="1000.0" y="398" fill="#C93F34" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
+<tspan x="1000.0" dy="0">NO · solicitar corrección y esperar nuevo corte</tspan>
 </text>
-<rect x="505" y="606" width="240" height="180" rx="20" fill="none" stroke="#C93F34" stroke-width="4" opacity="1" stroke-dasharray="10 6"/>
-<rect x="500" y="592" width="250" height="38" rx="19" fill="#C93F34" stroke="#C93F34" stroke-width="1" opacity="1"/>
-<text x="625.0" y="617" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" style="">
-<tspan x="625.0" dy="0">CUELLO DE BOTELLA</tspan>
+<rect x="505" y="606" width="240" height="180" rx="18" fill="none" stroke="#C93F34" stroke-width="3.5" opacity="1" stroke-dasharray="10 6"/>
+<rect x="495" y="590" width="260" height="36" rx="18" fill="#C93F34" stroke="#C93F34" stroke-width="1.5" opacity="1"/>
+<text x="625.0" y="613" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="625.0" dy="0">CUELLO DE BOTELLA MANUAL</tspan>
 </text>
-<rect x="270" y="786" width="275" height="38" rx="19" fill="#EEEAF8" stroke="#EEEAF8" stroke-width="1" opacity="1"/>
-<text x="407.5" y="811" fill="#6C5AA7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" style="">
+<rect x="270" y="786" width="275" height="36" rx="18" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
+<text x="407.5" y="809" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="407.5" dy="0">KPI · tiempo de consolidación</tspan>
 </text>
-<rect x="566" y="786" width="270" height="38" rx="19" fill="#FFF3D2" stroke="#FFF3D2" stroke-width="1" opacity="1"/>
-<text x="701.0" y="811" fill="#C98500" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" style="">
+<rect x="566" y="786" width="270" height="36" rx="18" fill="#FFF3D2" stroke="#C98500" stroke-width="1.5" opacity="1"/>
+<text x="701.0" y="809" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="701.0" dy="0">KPI · % datos completos</tspan>
 </text>
-<rect x="857" y="786" width="260" height="38" rx="19" fill="#E7F5ED" stroke="#E7F5ED" stroke-width="1" opacity="1"/>
-<text x="987.0" y="811" fill="#24855A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" style="">
+<rect x="857" y="786" width="260" height="36" rx="18" fill="#E7F5ED" stroke="#24855A" stroke-width="1.5" opacity="1"/>
+<text x="987.0" y="809" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="987.0" dy="0">KPI · casos priorizados</tspan>
 </text>
-<rect x="48" y="838" width="1504" height="42" rx="13" fill="#E7EFF5" stroke="#E7EFF5" stroke-width="0" opacity="1"/>
-<text x="70" y="865" fill="#12395B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" text-anchor="start" style="">
-<tspan x="70" dy="0">DIAGNÓSTICO</tspan>
+<rect x="48" y="836" width="1504" height="44" rx="14" fill="#E7EFF5" stroke="#D0DFEA" stroke-width="1.5" opacity="1"/>
+<rect x="52" y="840" width="170" height="36" rx="11" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
+<text x="137.0" y="863" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="900" text-anchor="middle" style="">
+<tspan x="137.0" dy="0">DIAGNÓSTICO</tspan>
 </text>
-<text x="230" y="865" fill="#17324D" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="start" style="">
-<tspan x="230" dy="0">El cuello de botella está en descargar, unir y volver a pedir datos; todavía no en el algoritmo.</tspan>
+<text x="240" y="863" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
+<tspan x="240" dy="0">El cuello de botella está en descargar, unir y volver a pedir datos; todavía no en el algoritmo.</tspan>
 </text>
 </svg>

@@ -66,6 +66,14 @@ def diagram(name, alt, width=980):
     )
 
 
+def git_diagram(name, alt, width=920):
+    """Inserta PNG compatible con Colab y enlaza el SVG para ampliación."""
+    return (
+        f'<div align="center"><a href="{GIT_CAPTURES}/{name}.svg" target="_blank">'
+        f'<img src="{GIT_CAPTURES}/{name}.png" width="{width}" alt="{alt}"></a></div>'
+    )
+
+
 def bash_commands(text):
     """Presenta comandos copiables para Codespaces sin ejecutarlos en Colab."""
     return md("```bash\n" + text.strip() + "\n```")
@@ -1078,7 +1086,7 @@ def build_cells():
 
             ## Roles y regla de colaboración
 
-            Cada pareja trabaja secuencialmente sobre `entrega/sesion2` para comprender el historial antes de
+            Cada pareja trabaja secuencialmente sobre `hito/s02-blueprint` para comprender el historial antes de
             introducir conflictos. Estudiante A documenta AS-IS; estudiante B completa TO-BE y ciclo analítico.
             Ambos revisan el Pull Request.
 
@@ -1140,8 +1148,7 @@ def build_cells():
             **Error probable.** Un mensaje 404 normalmente significa que abriste la URL con otra cuenta o que el
             nombre de usuario aún no fue agregado. No crees un fork público: solicita al docente verificar el acceso.
 
-            <div align="center"><img src="../assets/session2/git/01_entorno_gratuito.svg" width="920"
-            alt="Vista guiada para elegir Git local, Codespaces con cuota personal o github.dev"></div>
+            {git_diagram('01_entorno_gratuito', 'Vista guiada para elegir Git local, Codespaces con cuota personal o github.dev')}
 
             **Cómo leer la vista.** A la izquierda aparece el repositorio correcto y el menú **Code** abierto; a la
             derecha se comparan las tres rutas por capacidad y restricción. Git local es la ruta gratuita completa,
@@ -1178,14 +1185,14 @@ def build_cells():
             git config --local user.email "tu-correo-asociado-a-github"
             git config --local --get user.name
             git config --local --get user.email
-            git switch -c entrega/sesion2
+            git switch -c hito/s02-blueprint
             git branch --show-current
             """
         ),
         md(
             """
-            **Resultado esperado.** La última línea muestra `entrega/sesion2`. Si Git responde que la rama ya existe,
-            usa `git switch entrega/sesion2`; no crees nombres alternativos sin avisar a tu pareja.
+            **Resultado esperado.** La última línea muestra `hito/s02-blueprint`. Si Git responde que la rama ya
+            existe, usa `git switch hito/s02-blueprint`; no crees nombres alternativos sin avisar a tu pareja.
             """
         ),
         md(
@@ -1223,8 +1230,7 @@ def build_cells():
             Edita `docs/01_proceso_as_is.md` y `resultados/perfil_secop.md`. Sustituye todos los marcadores
             `COMPLETAR` con evidencia del caso. Luego observa el estado y el diff.
 
-            <div align="center"><img src="../assets/session2/git/02_status_diff.svg" width="920"
-            alt="Vista guiada de terminal mostrando git status y git diff en la rama de entrega"></div>
+            {git_diagram('02_status_diff', 'Vista guiada de terminal mostrando git status y git diff en la rama de entrega')}
 
             **Cómo leer la vista.** La terminal aporta la evidencia y el panel derecho traduce su significado: hay
             dos archivos en working tree, mientras staging, commit y remoto siguen sin cambios. Antes de `git add`,
@@ -1280,12 +1286,12 @@ def build_cells():
         ),
         bash_commands(
             """
-            git push -u origin entrega/sesion2
+            git push -u origin hito/s02-blueprint
             """
         ),
         md(
             """
-            **Resultado esperado.** Git confirma que la rama local rastrea `origin/entrega/sesion2` y muestra una URL
+            **Resultado esperado.** Git confirma que la rama local rastrea `origin/hito/s02-blueprint` y muestra una URL
             para crear el PR. Si aparece 403, revisa que estés autenticado como integrante del repositorio asignado;
             no pegues tokens en la terminal ni en el chat.
 
@@ -1295,7 +1301,7 @@ def build_cells():
         bash_commands(
             """
             git fetch origin
-            git switch --track origin/entrega/sesion2
+            git switch --track origin/hito/s02-blueprint
             git pull --ff-only
             git log --oneline --decorate -3
             """
@@ -1322,7 +1328,7 @@ def build_cells():
         md(
             """
             **Resultado esperado.** El validador termina con aprobación, el log muestra dos commits con autores
-            distintos y `origin/entrega/sesion2` apunta al último. Si el validador falla, lee cada sección señalada,
+            distintos y `origin/hito/s02-blueprint` apunta al último. Si el validador falla, lee cada sección señalada,
             corrige el Markdown y vuelve a validar antes de confirmar.
             """
         ),
@@ -1330,12 +1336,11 @@ def build_cells():
             """
             ## Paso 8 — Abrir el Pull Request y revisar Mermaid
 
-            En GitHub selecciona **Compare & pull request**. Base: `main`; compare: `entrega/sesion2`. Completa qué
+            En GitHub selecciona **Compare & pull request**. Base: `main`; compare: `hito/s02-blueprint`. Completa qué
             se hizo, por qué, cómo se verificó y qué limitaciones conserva. Abre la pestaña **Files changed** y
             confirma que los diagramas Mermaid renderizan y que no quedan marcadores.
 
-            <div align="center"><img src="../assets/session2/git/03_pull_request.svg" width="920"
-            alt="Pull Request docente de demostración con descripción y archivos revisables"></div>
+            {git_diagram('03_pull_request', 'Pull Request docente de demostración con descripción y archivos revisables')}
 
             **Cómo leer la vista.** Comprueba ramas, propósito, verificación, límites, archivos cambiados y revisores
             en ese orden. Un check verde prueba reglas observables; la pestaña **Files changed** permite evaluar el
@@ -1352,8 +1357,7 @@ def build_cells():
             El compañero deja al menos un comentario sustantivo: pregunta por una decisión, señala una ambigüedad o
             propone una mejora verificable. Después abre **Checks** y confirma el validador.
 
-            <div align="center"><img src="../assets/session2/git/04_actions.svg" width="920"
-            alt="Comprobación de GitHub Actions aprobada en el Pull Request docente"></div>
+            {git_diagram('04_actions', 'Comprobación de GitHub Actions aprobada en el Pull Request docente')}
 
             **Cómo leer la vista.** La columna verde enumera lo que puede comprobar CI; la naranja enumera lo que
             requiere juicio humano. La entrega solo cruza la puerta de calidad cuando coinciden validador local,

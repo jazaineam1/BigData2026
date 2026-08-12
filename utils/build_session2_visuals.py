@@ -2,7 +2,8 @@
 """Genera las diez láminas visuales de la sesión 2 en SVG y PNG.
 
 El SVG es la fuente pedagógica: usa una gramática visual común, tipografía
-legible y relaciones explícitas. El PNG se renderiza con Chrome para Colab.
+legible, márgenes seguros sin desbordes de texto y relaciones explícitas.
+El PNG se renderiza con Chrome para Colab.
 """
 
 from __future__ import annotations
@@ -21,10 +22,12 @@ GIT_DIR = ROOT / "assets" / "session2" / "git"
 W, H = 1600, 900
 
 NAVY = "#12395B"
+NAVY_DARK = "#0D273E"
 NAVY_2 = "#1D4F73"
 INK = "#17324D"
 MUTED = "#52697C"
 LINE = "#B8C8D6"
+LINE_LIGHT = "#D4E1EB"
 BG = "#F3F7FA"
 WHITE = "#FFFFFF"
 BLUE = "#2F6FB0"
@@ -44,7 +47,7 @@ TEAL_L = "#E3F5F5"
 
 
 class Canvas:
-    """Constructor SVG mínimo con componentes reutilizables."""
+    """Constructor SVG con estética enriquecida y componentes reutilizables."""
 
     def __init__(self, title: str, desc: str):
         self.parts = [
@@ -52,21 +55,48 @@ class Canvas:
             f'viewBox="0 0 {W} {H}" role="img" aria-labelledby="title desc">',
             f"<title id=\"title\">{html.escape(title)}</title>",
             f"<desc id=\"desc\">{html.escape(desc)}</desc>",
-            """<defs>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
-                <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#17324D" flood-opacity=".12"/>
+            f"""<defs>
+              <linearGradient id="header-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="{NAVY_DARK}"/>
+                <stop offset="100%" stop-color="{NAVY_2}"/>
+              </linearGradient>
+              <linearGradient id="navy-card-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#184368"/>
+                <stop offset="100%" stop-color="#0F2B48"/>
+              </linearGradient>
+              <linearGradient id="hub-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1C4B72"/>
+                <stop offset="100%" stop-color="#0A2238"/>
+              </linearGradient>
+              <filter id="shadow" x="-10%" y="-10%" width="125%" height="130%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F2B48" flood-opacity="0.09"/>
+              </filter>
+              <filter id="shadow-lg" x="-15%" y="-15%" width="135%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F2B48" flood-opacity="0.14"/>
               </filter>
               <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L9,3 z" fill="#2F6FB0"/>
+                <path d="M0,0 L0,6 L9,3 z" fill="{BLUE}"/>
               </marker>
               <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L9,3 z" fill="#C93F34"/>
+                <path d="M0,0 L0,6 L9,3 z" fill="{RED}"/>
               </marker>
               <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L9,3 z" fill="#24855A"/>
+                <path d="M0,0 L0,6 L9,3 z" fill="{GREEN}"/>
               </marker>
               <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L9,3 z" fill="#6C5AA7"/>
+                <path d="M0,0 L0,6 L9,3 z" fill="{PURPLE}"/>
+              </marker>
+              <marker id="arrow-orange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="{ORANGE}"/>
+              </marker>
+              <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="{AMBER}"/>
+              </marker>
+              <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="{TEAL}"/>
+              </marker>
+              <marker id="arrow-ink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="{INK}"/>
               </marker>
             </defs>""",
             f'<rect width="{W}" height="{H}" fill="{BG}"/>',
@@ -128,7 +158,7 @@ class Canvas:
 
     def text(
         self, x, y, lines, size=22, fill=INK, weight=400, anchor="start",
-        line_height=1.25, family="Inter, Segoe UI, Arial, sans-serif", italic=False,
+        line_height=1.25, family="Inter, -apple-system, Segoe UI, Arial, sans-serif", italic=False,
     ) -> None:
         if isinstance(lines, str):
             lines = [lines]
@@ -147,45 +177,48 @@ class Canvas:
             )
         self.parts.append("</text>")
 
-    def pill(self, x, y, w, label, fill=BLUE_L, color=BLUE, stroke=None, size=17) -> None:
-        self.rect(x, y, w, 38, fill=fill, stroke=stroke or fill, sw=1, rx=19)
-        self.text(x + w / 2, y + 25, label, size=size, fill=color, weight=700, anchor="middle")
+    def pill(self, x, y, w, label, fill=BLUE_L, color=BLUE, stroke=None, size=13) -> None:
+        self.rect(x, y, w, 36, fill=fill, stroke=stroke or fill, sw=1.5, rx=18)
+        self.text(x + w / 2, y + 23, label, size=size, fill=color, weight=800, anchor="middle")
 
-    def number_badge(self, cx, cy, number, fill=BLUE, radius=25) -> None:
+    def number_badge(self, cx, cy, number, fill=BLUE, radius=20) -> None:
         self.circle(cx, cy, radius, fill=fill, stroke=fill, sw=1)
-        self.text(cx, cy + 8, str(number), size=22, fill=WHITE, weight=800, anchor="middle")
+        self.text(cx, cy + 6, str(number), size=18, fill=WHITE, weight=900, anchor="middle")
 
     def header(self, index: str, title: str, subtitle: str) -> None:
-        self.rect(0, 0, W, 112, fill=NAVY, stroke=NAVY, sw=0, rx=0)
-        self.pill(1376, 24, 176, index.upper(), fill="#2A5878", color="#D9EFFB", size=15)
+        self.rect(0, 0, W, 114, fill="url(#header-grad)", stroke=NAVY_DARK, sw=0, rx=0)
+        self.line(0, 114, W, 114, stroke="#2F6FB0", sw=2, arrow=False)
+        self.pill(1376, 24, 176, index.upper(), fill="#214E6D", color="#D9EFFB", stroke="#3F769C", size=14)
         title_size = 26 if len(title) > 62 else 28 if len(title) > 50 else 31
-        subtitle_size = 16 if len(subtitle) > 92 else 18
-        self.text(48, 50, title, size=title_size, fill=WHITE, weight=800)
-        self.text(48, 82, subtitle, size=subtitle_size, fill="#CFE4F2", weight=400)
+        subtitle_size = 15 if len(subtitle) > 92 else 17
+        self.text(48, 48, title, size=title_size, fill=WHITE, weight=800)
+        self.text(48, 80, subtitle, size=subtitle_size, fill="#D1E6F5", weight=400)
 
     def footer(self, label: str, text: str, color=NAVY, fill="#E7EFF5") -> None:
-        self.rect(48, 838, 1504, 42, fill=fill, stroke=fill, sw=0, rx=13)
-        self.text(70, 865, label.upper(), size=15, fill=color, weight=800)
-        text_x = max(230, 70 + len(label) * 9.5 + 34)
-        self.text(text_x, 865, text, size=17, fill=INK, weight=600)
+        self.rect(48, 836, 1504, 44, fill=fill, stroke="#D0DFEA", sw=1.5, rx=14)
+        self.rect(52, 840, max(170, len(label) * 11 + 30), 36, fill=color, stroke=color, sw=0, rx=11)
+        self.text(52 + max(170, len(label) * 11 + 30) / 2, 863, label.upper(), size=14, fill=WHITE, weight=900, anchor="middle")
+        text_x = max(240, 52 + len(label) * 11 + 45)
+        self.text(text_x, 863, text, size=16, fill=INK, weight=600)
 
     def card(
         self, x, y, w, h, title, body, accent=BLUE, fill=WHITE, number=None,
-        tag=None, shadow=True, title_size=21, body_size=18,
+        tag=None, shadow=True, title_size=18, body_size=15,
     ) -> None:
-        self.rect(x, y, w, h, fill=fill, stroke=accent, sw=2, rx=18, shadow=shadow)
-        self.rect(x, y, 9, h, fill=accent, stroke=accent, sw=0, rx=9)
-        title_x = x + 30
+        self.rect(x, y, w, h, fill=fill, stroke=LINE_LIGHT, sw=1.5, rx=16, shadow=shadow)
+        self.rect(x, y, 8, h, fill=accent, stroke=accent, sw=0, rx=4)
+        title_x = x + 24
         if number is not None:
-            self.number_badge(x + 40, y + 40, number, fill=accent, radius=22)
-            title_x = x + 75
-        self.text(title_x, y + 43, title, size=title_size, fill=INK, weight=800)
+            self.number_badge(x + 30, y + 36, number, fill=accent, radius=17)
+            title_x = x + 58
+        self.text(title_x, y + 42, title, size=title_size, fill=INK, weight=800)
         if tag:
-            self.pill(x + 28, y + 67, min(w - 56, 240), tag, fill=fill, color=accent, stroke=accent, size=14)
-            body_y = y + 130
+            tag_w = min(w - 44, max(180, len(tag) * 8 + 24))
+            self.pill(x + 22, y + 62, tag_w, tag, fill=fill, color=accent, stroke=accent, size=11.5)
+            body_y = y + 124
         else:
-            body_y = y + 82
-        self.text(x + 30, body_y, body, size=body_size, fill=MUTED, weight=500, line_height=1.35)
+            body_y = y + 78
+        self.text(x + 24, body_y, body, size=body_size, fill=MUTED, weight=500, line_height=1.35)
 
     def save(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -199,35 +232,46 @@ def make_hilo() -> Canvas:
     )
     c.header("Mapa 1 de 6", "La historia completa: de la decisión a la mejora", "Cada componente existe porque responde una pregunta anterior del negocio")
 
-    c.rect(42, 142, 320, 660, fill=NAVY, stroke=NAVY, sw=0, rx=24, shadow=True)
-    c.pill(70, 172, 145, "PUNTO DE PARTIDA", fill="#2A5878", color="#D9EFFB", size=14)
-    c.text(70, 240, ["Laura", "Analista de", "seguimiento"], size=25, fill=WHITE, weight=800, line_height=1.15)
-    c.text(70, 325, ["Necesita decidir:", "¿qué contratos", "revisar primero?"], size=26, fill="#FFFFFF", weight=700, line_height=1.18)
-    c.rect(70, 458, 264, 145, fill="#214E6D", stroke="#4E7B99", sw=1, rx=16)
-    c.text(92, 493, "Criterio de éxito", size=17, fill="#BFE4F6", weight=800)
-    c.text(92, 532, ["menos tiempo para priorizar", "sin acusar ni automatizar", "la decisión humana"], size=18, fill=WHITE, weight=500, line_height=1.35)
-    c.rect(70, 637, 264, 112, fill="#153149", stroke="#4E7B99", sw=1, rx=16)
-    c.text(92, 672, "Regla de diseño", size=17, fill="#F7CCBE", weight=800)
-    c.text(92, 706, ["primero propósito;", "después herramienta"], size=19, fill=WHITE, weight=600, line_height=1.3)
+    # Columna izquierda: Punto de partida (Laura)
+    c.rect(42, 140, 324, 664, fill="url(#navy-card-grad)", stroke="#2A5878", sw=1.5, rx=22, shadow=True)
+    c.pill(70, 168, 165, "PUNTO DE PARTIDA", fill="#214E6D", color="#D9EFFB", stroke="#4E7B99", size=13)
+    c.text(70, 236, ["Laura", "Analista de", "seguimiento"], size=25, fill=WHITE, weight=800, line_height=1.18)
+    c.text(70, 322, ["Necesita decidir:", "¿qué contratos", "revisar primero?"], size=23, fill="#FFFFFF", weight=700, line_height=1.2)
 
-    c.card(408, 152, 330, 230, "Proceso AS-IS", ["Seguimiento contractual", "Actores + tareas + decisiones", "Cuello: consolidación manual"], BLUE, number=1, tag="¿DÓNDE SE DEMORA?")
-    c.card(786, 152, 330, 230, "Datos necesarios", ["Contrato · entidad · estado", "Fechas · duración · calidad", "Responsable y regla por campo"], AMBER, number=2, tag="¿QUÉ EVIDENCIA NACE?")
-    c.card(1164, 152, 388, 230, "Capacidades y herramientas", ["Ingerir → validar → integrar", "analizar → explicar → alertar", "Productos solo como candidatos"], PURPLE, number=3, tag="¿QUÉ DEBE HACER EL SISTEMA?")
+    c.rect(66, 452, 276, 150, fill="#153650", stroke="#3F6B8A", sw=1, rx=14)
+    c.text(86, 484, "Criterio de éxito", size=16, fill="#BFE4F6", weight=800)
+    c.text(86, 520, ["menos tiempo para priorizar", "sin acusar ni automatizar", "la decisión humana"], size=15, fill=WHITE, weight=500, line_height=1.35)
 
-    c.card(1164, 500, 388, 230, "KPI verificable", ["Tiempo para priorizar", "% de registros completos", "% de casos atendidos en SLA"], GREEN, number=4, tag="¿CÓMO SABEMOS SI MEJORA?")
-    c.card(786, 500, 330, 230, "Acción humana", ["Revisar contexto", "Corregir · escalar · descartar", "Registrar motivo y resultado"], ORANGE, number=5, tag="¿QUIÉN DECIDE?")
-    c.rect(408, 500, 330, 230, fill=WHITE, stroke=RED, sw=2, rx=18, shadow=True)
-    c.text(438, 543, "Atajo que debemos evitar", size=21, fill=RED, weight=800)
-    c.text(438, 592, ["“Instalemos una herramienta", "y luego busquemos el problema”"], size=20, fill=INK, weight=600, italic=True, line_height=1.35)
-    c.pill(438, 672, 270, "ROMPE LA TRAZABILIDAD", fill=RED_L, color=RED, size=14)
+    c.rect(66, 626, 276, 126, fill="#10263A", stroke="#3F6B8A", sw=1, rx=14)
+    c.text(86, 658, "Regla de diseño", size=16, fill="#F7CCBE", weight=800)
+    c.text(86, 694, ["primero propósito;", "después herramienta"], size=17, fill=WHITE, weight=700, line_height=1.3)
 
-    c.line(362, 280, 408, 280)
-    c.line(738, 267, 786, 267)
-    c.line(1116, 267, 1164, 267)
-    c.line(1358, 382, 1358, 500, stroke=PURPLE, marker="purple")
-    c.line(1164, 615, 1116, 615, stroke=GREEN, marker="green")
-    c.path("M786 615 C740 615 752 780 573 780 C405 780 392 430 510 382", stroke=ORANGE, sw=3, arrow=True, dash="8 7", marker="red")
-    c.pill(487, 761, 276, "RESULTADO → NUEVO DATO", fill=ORANGE_L, color=RED, size=14)
+    # Fila superior de tarjetas 1, 2, 3
+    c.card(406, 150, 334, 232, "Proceso AS-IS", ["Seguimiento contractual", "Actores + tareas + decisiones", "Cuello: consolidación manual"], BLUE, number=1, tag="¿DÓNDE SE DEMORA?")
+    c.card(784, 150, 334, 232, "Datos necesarios", ["Contrato · entidad · estado", "Fechas · duración · calidad", "Responsable y regla por campo"], AMBER, number=2, tag="¿QUÉ EVIDENCIA NACE?")
+    c.card(1162, 150, 392, 232, "Capacidades y herramientas", ["Ingerir → validar → integrar", "analizar → explicar → alertar", "Productos solo como candidatos"], PURPLE, number=3, tag="¿QUÉ DEBE HACER EL SISTEMA?", title_size=18)
+
+    # Fila inferior de tarjetas 4, 5 y Atajo
+    c.card(1162, 498, 392, 232, "KPI verificable", ["Tiempo para priorizar", "% de registros completos", "% de casos atendidos en SLA"], GREEN, number=4, tag="¿CÓMO SABEMOS SI MEJORA?")
+    c.card(784, 498, 334, 232, "Acción humana", ["Revisar contexto contractual", "Corregir · escalar · descartar", "Registrar motivo y resultado"], ORANGE, number=5, tag="¿QUIÉN DECIDE?")
+
+    # Tarjeta de alerta (atajo a evitar)
+    c.rect(406, 498, 334, 232, fill="#FFFDFD", stroke=RED, sw=2, rx=16, shadow=True)
+    c.rect(406, 498, 8, 232, fill=RED, stroke=RED, sw=0, rx=4)
+    c.text(434, 540, "Atajo que debemos evitar", size=19, fill=RED, weight=800)
+    c.text(434, 588, ["“Instalemos una herramienta", "y luego busquemos el problema”"], size=17, fill=INK, weight=600, italic=True, line_height=1.35)
+    c.pill(434, 668, 276, "ROMPE LA TRAZABILIDAD", fill=RED_L, color=RED, stroke=RED, size=12.5)
+
+    # Conectores y flechas
+    c.line(366, 274, 406, 274, stroke=BLUE, marker="blue")
+    c.line(740, 266, 784, 266, stroke=BLUE, marker="blue")
+    c.line(1118, 266, 1162, 266, stroke=AMBER, marker="amber")
+    c.line(1358, 382, 1358, 498, stroke=PURPLE, marker="purple")
+    c.line(1162, 614, 1118, 614, stroke=GREEN, marker="green")
+
+    # Bucle de retroalimentación
+    c.path("M784 614 C736 614 748 780 573 780 C405 780 390 430 508 382", stroke=ORANGE, sw=3, arrow=True, dash="8 6", marker="orange")
+    c.pill(450, 762, 330, "REGISTRO DE DECISIÓN → NUEVO DATO", fill=ORANGE_L, color=ORANGE, stroke=ORANGE, size=12.5)
 
     c.footer("Lectura clave", "La arquitectura es una cadena de justificaciones, no una colección de productos.")
     return c
@@ -240,18 +284,19 @@ def make_as_is() -> Canvas:
     )
     c.header("Mapa 2 de 6", "Proceso AS-IS: dónde nace el retraso", "Carriles por responsable · artefactos de datos · decisión de completitud · retrabajo explícito")
 
+    # Carriles con títulos divididos en dos líneas para evitar desborde
     lanes = [
-        (140, 235, "ENTIDAD CONTRATANTE", ["Origina y actualiza", "el proceso"], BLUE, BLUE_L),
-        (390, 185, "PLATAFORMA SECOP", ["Registra y publica", "eventos"], AMBER, AMBER_L),
-        (590, 225, "OFICINA DE SEGUIMIENTO", ["Consolida, prioriza", "y revisa"], PURPLE, PURPLE_L),
+        (140, 235, ["ENTIDAD", "CONTRATANTE"], ["Origina y actualiza", "el proceso"], BLUE, BLUE_L),
+        (390, 185, ["PLATAFORMA", "SECOP"], ["Registra y publica", "eventos"], AMBER, AMBER_L),
+        (590, 225, ["OFICINA DE", "SEGUIMIENTO"], ["Consolida, prioriza", "y revisa"], PURPLE, PURPLE_L),
     ]
     for y, h, title, subtitle, color, fill in lanes:
         c.rect(34, y, 1532, h, fill=WHITE, stroke=LINE, sw=1.5, rx=16)
-        c.rect(34, y, 198, h, fill=fill, stroke=color, sw=1.5, rx=16)
-        c.text(58, y + 46, title, size=18, fill=color, weight=900)
-        c.text(58, y + 80, subtitle, size=16, fill=MUTED, weight=500, line_height=1.25)
+        c.rect(34, y, 204, h, fill=fill, stroke=color, sw=1.5, rx=16)
+        c.text(56, y + 42, title, size=15, fill=color, weight=900, line_height=1.2)
+        c.text(56, y + 86, subtitle, size=14, fill=MUTED, weight=500, line_height=1.25)
 
-    # Entidad contratante
+    # Entidad contratante (Paso 1 a 5)
     steps = [
         (268, "1", "Definir necesidad", "objeto + responsable", BLUE),
         (520, "2", "Publicar proceso", "fecha + modalidad", BLUE),
@@ -261,49 +306,60 @@ def make_as_is() -> Canvas:
     ]
     for x, num, title, artifact, color in steps:
         c.rect(x, 180, 218, 112, fill=WHITE, stroke=color, sw=2, rx=14, shadow=True)
-        c.number_badge(x + 32, 208, num, fill=color, radius=19)
-        c.text(x + 62, 216, title, size=17, fill=INK, weight=800)
-        c.pill(x + 18, 242, 182, artifact, fill=BLUE_L if color == BLUE else ORANGE_L, color=color, size=13)
+        c.number_badge(x + 28, 208, num, fill=color, radius=16)
+        c.text(x + 52, 214, title, size=14.5, fill=INK, weight=800)
+        c.pill(x + 14, 244, 190, artifact, fill=BLUE_L if color == BLUE else ORANGE_L, color=color, size=11.5)
     for x in [486, 738, 990, 1242]:
-        c.line(x, 236, x + 34, 236)
+        c.line(x, 236, x + 34, 236, stroke=BLUE, marker="blue")
 
-    # Plataforma SECOP
-    c.card(300, 423, 300, 118, "6 · Recibir evento", ["API / formulario", "marca de tiempo"], AMBER, shadow=False, title_size=18, body_size=16)
-    c.card(690, 423, 300, 118, "7 · Guardar registro", ["fila operacional", "historial publicado"], AMBER, shadow=False, title_size=18, body_size=16)
-    c.card(1080, 423, 330, 118, "8 · Exponer consulta", ["archivos / API", "sin vista integrada"], AMBER, shadow=False, title_size=18, body_size=16)
-    c.line(600, 482, 690, 482, stroke=AMBER)
-    c.line(990, 482, 1080, 482, stroke=AMBER)
-    c.path("M1385 292 L1385 382 C1385 405 1370 423 1345 423", stroke=ORANGE, marker="red")
-    c.pill(1226, 342, 260, "estado · fecha · avance", fill=ORANGE_L, color=ORANGE, size=14)
+    # Plataforma SECOP (Paso 6 a 8)
+    c.card(290, 423, 310, 118, "6 · Recibir evento", ["API / formulario", "marca de tiempo operacional"], AMBER, shadow=False, title_size=17, body_size=14.5)
+    c.card(680, 423, 310, 118, "7 · Guardar registro", ["fila operacional", "historial publicado"], AMBER, shadow=False, title_size=17, body_size=14.5)
+    c.card(1070, 423, 340, 118, "8 · Exponer consulta", ["archivos / API pública", "sin vista consolidada"], AMBER, shadow=False, title_size=17, body_size=14.5)
+    c.line(600, 482, 680, 482, stroke=AMBER, marker="amber")
+    c.line(990, 482, 1070, 482, stroke=AMBER, marker="amber")
 
-    # Oficina de seguimiento
+    # Flecha Paso 5 -> SECOP
+    c.path("M1385 292 L1385 382 C1385 405 1370 423 1345 423", stroke=ORANGE, marker="orange")
+    c.pill(1200, 342, 285, "reportes periódicos y novedades", fill=ORANGE_L, color=ORANGE, stroke=ORANGE, size=12)
+
+    # Oficina de seguimiento (Paso 9 a 13)
     office_cards = [
-        (270, "9 · Descargar", ["CSV por fuente", "cortes diferentes"], PURPLE),
-        (520, "10 · Consolidar", ["unir + limpiar", "trabajo manual"], RED),
+        (270, "9 · Descargar", ["CSV por fuente", "cortes desarticulados"], PURPLE),
+        (520, "10 · Consolidar", ["unir + limpiar", "trabajo manual lento"], RED),
         (1070, "12 · Priorizar", ["lista preliminar", "reglas locales"], GREEN),
         (1320, "13 · Revisar", ["contexto + decisión", "resultado registrado"], ORANGE),
     ]
     for x, title, body, color in office_cards:
-        c.card(x, 640, 210, 125, title, body, color, shadow=False, title_size=17, body_size=15)
+        c.card(x, 640, 210, 125, title, body, color, shadow=False, title_size=16, body_size=14)
+
     c.line(480, 702, 520, 702, stroke=PURPLE, marker="purple")
     c.line(730, 702, 785, 702, stroke=RED, marker="red")
     c.line(995, 702, 1070, 702, stroke=GREEN, marker="green")
     c.line(1280, 702, 1320, 702, stroke=GREEN, marker="green")
 
-    # Gateway de completitud
+    # Flujo de datos SECOP 8 -> Oficina 9
+    c.path("M1240 541 C1240 580 430 540 375 640", stroke=PURPLE, sw=2.5, arrow=True, dash="6 5", marker="purple")
+    c.pill(580, 562, 290, "descarga de CSVs desarticulados", fill=PURPLE_L, color=PURPLE, stroke=PURPLE, size=12)
+
+    # Gateway de completitud (Paso 11)
     c.path("M890 622 L995 702 L890 782 L785 702 Z", stroke=AMBER, sw=3, arrow=False, fill=AMBER_L)
-    c.text(890, 684, ["11 · ¿Fechas y", "campos completos?"], size=18, fill=INK, weight=800, anchor="middle", line_height=1.2)
-    c.pill(985, 655, 65, "SÍ", fill=GREEN_L, color=GREEN, size=14)
+    c.text(890, 684, ["11 · ¿Fechas y", "campos completos?"], size=16, fill=INK, weight=800, anchor="middle", line_height=1.2)
+    c.pill(985, 655, 65, "SÍ", fill=GREEN_L, color=GREEN, stroke=GREEN, size=13)
+
+    # Bucle de retrabajo: NO -> devolver a entidad
     c.path("M890 622 C890 570 850 555 820 541", stroke=RED, sw=3, arrow=True, dash="8 6", marker="red")
     c.path("M820 541 C820 360 1390 365 1390 292", stroke=RED, sw=3, arrow=True, dash="8 6", marker="red")
-    c.pill(620, 550, 385, "NO · solicitar corrección y volver a reportar", fill=RED_L, color=RED, size=14)
+    c.pill(820, 375, 360, "NO · solicitar corrección y esperar nuevo corte", fill=RED_L, color=RED, stroke=RED, size=12)
 
-    # Bottleneck and metrics
-    c.rect(505, 606, 240, 180, fill="none", stroke=RED, sw=4, rx=20, dash="10 6")
-    c.pill(500, 592, 250, "CUELLO DE BOTELLA", fill=RED, color=WHITE, size=14)
-    c.pill(270, 786, 275, "KPI · tiempo de consolidación", fill=PURPLE_L, color=PURPLE, size=14)
-    c.pill(566, 786, 270, "KPI · % datos completos", fill=AMBER_L, color=AMBER, size=14)
-    c.pill(857, 786, 260, "KPI · casos priorizados", fill=GREEN_L, color=GREEN, size=14)
+    # Destaque de cuello de botella
+    c.rect(505, 606, 240, 180, fill="none", stroke=RED, sw=3.5, rx=18, dash="10 6")
+    c.pill(495, 590, 260, "CUELLO DE BOTELLA MANUAL", fill=RED, color=WHITE, size=12.5)
+
+    # Métricas y KPIs inferiores
+    c.pill(270, 786, 275, "KPI · tiempo de consolidación", fill=PURPLE_L, color=PURPLE, stroke=PURPLE, size=12.5)
+    c.pill(566, 786, 270, "KPI · % datos completos", fill=AMBER_L, color=AMBER, stroke=AMBER, size=12.5)
+    c.pill(857, 786, 260, "KPI · casos priorizados", fill=GREEN_L, color=GREEN, stroke=GREEN, size=12.5)
 
     c.footer("Diagnóstico", "El cuello de botella está en descargar, unir y volver a pedir datos; todavía no en el algoritmo.")
     return c
@@ -319,106 +375,100 @@ def make_bridge() -> Canvas:
         "La T cambia de lugar: dos rutas desde el mismo evento",
         "Compare la secuencia, el artefacto que aterriza primero y el control que debe actuar antes",
     )
-    c.raw(
-        """<defs>
-          <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L9,3 z" fill="#C98500"/>
-          </marker>
-          <marker id="arrow-ink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L9,3 z" fill="#17324D"/>
-          </marker>
-        </defs>"""
-    )
 
-    # Reading zones
+    # 3 Zonas de lectura superiores
     c.rect(40, 136, 248, 78, fill=BLUE_L, stroke=BLUE, sw=1.5, rx=16)
-    c.text(64, 168, "1 · OPERACIÓN", size=18, fill=BLUE, weight=900)
-    c.text(64, 197, "registrar sin detener el proceso", size=14, fill=MUTED, weight=600)
+    c.text(60, 164, "1 · OPERACIÓN", size=17, fill=BLUE, weight=900)
+    c.text(60, 192, ["registrar sin detener", "el proceso"], size=13, fill=MUTED, weight=600, line_height=1.2)
+
     c.rect(308, 136, 674, 78, fill=AMBER_L, stroke=AMBER, sw=1.5, rx=16)
-    c.text(332, 168, "2 · INTEGRACIÓN", size=18, fill=AMBER, weight=900)
-    c.text(332, 197, "elegir ETL, ELT o un híbrido según la restricción", size=14, fill=MUTED, weight=600)
+    c.text(330, 166, "2 · INTEGRACIÓN", size=17, fill=AMBER, weight=900)
+    c.text(330, 194, "elegir ETL, ELT o un híbrido según la restricción", size=13.5, fill=MUTED, weight=600)
+
     c.rect(1002, 136, 556, 78, fill=PURPLE_L, stroke=PURPLE, sw=1.5, rx=16)
-    c.text(1026, 168, "3 · CONSUMO Y ACCIÓN", size=18, fill=PURPLE, weight=900)
-    c.text(1026, 197, "integrar historia, comparar y decidir", size=14, fill=MUTED, weight=600)
+    c.text(1024, 166, "3 · CONSUMO Y ACCIÓN", size=17, fill=PURPLE, weight=900)
+    c.text(1024, 194, "integrar historia, comparar y decidir", size=13.5, fill=MUTED, weight=600)
 
-    # OLTP source
-    c.rect(40, 250, 248, 396, fill=WHITE, stroke=BLUE, sw=2.5, rx=20, shadow=True)
-    c.pill(62, 272, 84, "OLTP", fill=BLUE, color=WHITE, size=16)
-    c.text(62, 336, ["Evento operacional", "que no puede esperar"], size=20, fill=NAVY, weight=900, line_height=1.2)
-    c.text(62, 430, ["• contrato publicado", "• estado actualizado", "• avance reportado"], size=16, fill=INK, weight=600, line_height=1.55)
-    c.rect(62, 550, 204, 66, fill=BLUE_L, stroke=BLUE, sw=1, rx=12)
-    c.text(78, 578, "ARTEFACTO", size=12, fill=BLUE, weight=900)
-    c.text(78, 603, "transacción + versión", size=15, fill=INK, weight=700)
+    # Fuente OLTP
+    c.rect(40, 244, 248, 404, fill=WHITE, stroke=BLUE, sw=2.5, rx=18, shadow=True)
+    c.pill(62, 266, 84, "OLTP", fill=BLUE, color=WHITE, size=15)
+    c.text(62, 330, ["Evento operacional", "que no puede esperar"], size=18, fill=NAVY, weight=900, line_height=1.2)
+    c.text(62, 420, ["• contrato publicado", "• estado actualizado", "• avance reportado"], size=14.5, fill=INK, weight=600, line_height=1.55)
+    c.rect(62, 542, 204, 82, fill=BLUE_L, stroke=BLUE, sw=1, rx=12)
+    c.text(76, 568, "ARTEFACTO ORIGEN", size=11.5, fill=BLUE, weight=900)
+    c.text(76, 592, "transacción + versión", size=14.5, fill=INK, weight=800)
+    c.text(76, 612, "alta concurrencia", size=12.5, fill=MUTED, weight=500)
 
-    # Integration frame and decision statement
-    c.rect(308, 234, 674, 430, fill=WHITE, stroke=LINE, sw=1.5, rx=20)
-    c.pill(410, 250, 470, "MISMA E · DISTINTO ORDEN DE T Y L", fill=NAVY, color=WHITE, size=15)
+    # Marco central de Integración
+    c.rect(308, 234, 674, 430, fill=WHITE, stroke=LINE, sw=1.5, rx=18)
+    c.pill(410, 248, 470, "MISMA E · DISTINTO ORDEN DE T Y L", fill=NAVY, color=WHITE, size=13.5)
 
-    # ETL lane
-    c.rect(330, 306, 630, 148, fill="#FFFBEB", stroke=AMBER, sw=2, rx=16)
-    c.pill(348, 326, 82, "ETL", fill=AMBER, color=WHITE, size=16)
+    # Carril ETL (Amber)
+    c.rect(328, 298, 634, 156, fill="#FFFDF5", stroke=AMBER, sw=2, rx=16)
+    c.pill(346, 318, 82, "ETL", fill=AMBER, color=WHITE, size=15)
     etl_steps = [
-        (456, "E", "extraer", "snapshot + metadatos", BLUE, BLUE_L),
-        (622, "T", "transformar", "validar · enmascarar", ORANGE, ORANGE_L),
-        (788, "L", "cargar", "tabla curada", GREEN, GREEN_L),
+        (452, "E", "Extraer", ["snapshot +", "metadatos"], BLUE, BLUE_L),
+        (618, "T", "Transformar", ["validar y", "enmascarar"], ORANGE, ORANGE_L),
+        (784, "L", "Cargar", ["tabla curada", "final"], GREEN, GREEN_L),
     ]
     for x, letter, title, artefact, color, fill in etl_steps:
-        c.rect(x, 322, 140, 112, fill=fill, stroke=color, sw=1.5, rx=14)
-        c.number_badge(x + 24, 348, letter, fill=color, radius=18)
-        c.text(x + 24, 355, letter, size=15, fill=WHITE, weight=900, anchor="middle")
-        c.text(x + 48, 350, title, size=13, fill=color, weight=900)
-        c.text(x + 16, 394, artefact, size=11, fill=INK, weight=600)
-    c.line(596, 378, 620, 378, stroke=AMBER, sw=2.5, arrow=True, marker="amber")
-    c.line(762, 378, 786, 378, stroke=AMBER, sw=2.5, arrow=True, marker="amber")
-    c.text(348, 438, "La política actúa antes de que el dato llegue al destino compartido.", size=13, fill=MUTED, weight=600)
+        c.rect(x, 314, 144, 114, fill=fill, stroke=color, sw=1.5, rx=14)
+        c.number_badge(x + 22, 338, letter, fill=color, radius=16)
+        c.text(x + 44, 342, title, size=13, fill=color, weight=900)
+        c.text(x + 14, 384, artefact, size=11, fill=INK, weight=600, line_height=1.2)
+    c.line(596, 370, 618, 370, stroke=AMBER, sw=2.5, arrow=True, marker="amber")
+    c.line(762, 370, 784, 370, stroke=AMBER, sw=2.5, arrow=True, marker="amber")
+    c.text(346, 436, "La política y limpieza actúan ANTES de llegar al destino compartido.", size=12, fill=MUTED, weight=600)
 
-    # ELT lane
-    c.rect(330, 482, 630, 162, fill="#F5F3FF", stroke=PURPLE, sw=2, rx=16)
-    c.pill(348, 502, 82, "ELT", fill=PURPLE, color=WHITE, size=16)
+    # Carril ELT (Purple)
+    c.rect(328, 474, 634, 172, fill="#F8F6FF", stroke=PURPLE, sw=2, rx=16)
+    c.pill(346, 494, 82, "ELT", fill=PURPLE, color=WHITE, size=15)
     elt_steps = [
-        (456, "E", "extraer", "snapshot + metadatos", BLUE, BLUE_L),
-        (622, "L", "cargar", "zona raw protegida", PURPLE, PURPLE_L),
-        (788, "T", "transformar", ["SQL dentro", "del destino"], TEAL, TEAL_L),
+        (452, "E", "Extraer", ["snapshot +", "metadatos"], BLUE, BLUE_L),
+        (618, "L", "Cargar", ["Raw / Bronze", "(zona protegida)"], PURPLE, PURPLE_L),
+        (784, "T", "Transformar", ["SQL en destino", "(Silver / Gold)"], TEAL, TEAL_L),
     ]
     for x, letter, title, artefact, color, fill in elt_steps:
-        c.rect(x, 498, 140, 118, fill=fill, stroke=color, sw=1.5, rx=14)
-        c.number_badge(x + 24, 525, letter, fill=color, radius=18)
-        c.text(x + 24, 532, letter, size=15, fill=WHITE, weight=900, anchor="middle")
-        c.text(x + 48, 527, title, size=13, fill=color, weight=900)
-        c.text(x + 16, 566, artefact, size=11, fill=INK, weight=600, line_height=1.2)
-    c.line(596, 557, 620, 557, stroke=PURPLE, sw=2.5, arrow=True, marker="purple")
-    c.line(762, 557, 786, 557, stroke=PURPLE, sw=2.5, arrow=True, marker="purple")
-    c.text(348, 630, "El acceso y la retención protegen lo raw antes de ejecutar la T.", size=13, fill=MUTED, weight=600)
+        c.rect(x, 490, 144, 120, fill=fill, stroke=color, sw=1.5, rx=14)
+        c.number_badge(x + 22, 514, letter, fill=color, radius=16)
+        c.text(x + 44, 518, title, size=13, fill=color, weight=900)
+        c.text(x + 14, 558, artefact, size=11, fill=INK, weight=600, line_height=1.2)
+    c.line(596, 548, 618, 548, stroke=PURPLE, sw=2.5, arrow=True, marker="purple")
+    c.line(762, 548, 784, 548, stroke=PURPLE, sw=2.5, arrow=True, marker="purple")
+    c.text(346, 628, "Acceso gobernado y retención protegen lo Raw; la T se ejecuta in-engine.", size=12, fill=MUTED, weight=600)
 
-    # Branch from OLTP to both routes
-    c.path("M288 448 C330 448 330 378 454 378", stroke=BLUE, sw=2.5, arrow=True, marker="blue")
-    c.path("M288 448 C330 448 330 557 454 557", stroke=BLUE, sw=2.5, arrow=True, marker="blue")
+    # Bifurcación desde OLTP
+    c.path("M288 446 C330 446 330 370 450 370", stroke=BLUE, sw=2.5, arrow=True, marker="blue")
+    c.path("M288 446 C330 446 330 548 450 548", stroke=BLUE, sw=2.5, arrow=True, marker="blue")
 
-    # Analytical responsibility chain
+    # Cadena analítica derecha
     analytic_cards = [
-        (1012, 250, 250, 170, "Warehouse", "historia integrada", "hechos + dimensiones", GREEN, GREEN_L),
-        (1292, 250, 250, 170, "Data Mart", "vista de seguimiento", "métricas aprobadas", TEAL, TEAL_L),
-        (1012, 470, 250, 170, "OLAP / BI", "comparar y explorar", "medida × dimensión", PURPLE, PURPLE_L),
-        (1292, 470, 250, 170, "Acción humana", "priorizar revisión", "motivo explicable", ORANGE, ORANGE_L),
+        (1012, 244, 250, 172, "Warehouse", "historia integrada", "hechos + dimensiones", GREEN, GREEN_L),
+        (1292, 244, 250, 172, "Data Mart", "vista de seguimiento", "métricas aprobadas", TEAL, TEAL_L),
+        (1012, 464, 250, 172, "OLAP / BI", "comparar y explorar", "medida × dimensión", PURPLE, PURPLE_L),
+        (1292, 464, 250, 172, "Acción humana", "priorizar revisión", "motivo explicable", ORANGE, ORANGE_L),
     ]
     for x, y, w, h, title, purpose, artefact, color, fill in analytic_cards:
-        c.rect(x, y, w, h, fill=WHITE, stroke=color, sw=2, rx=18, shadow=True)
-        c.rect(x, y, w, 48, fill=color, stroke=color, sw=0, rx=18)
-        c.rect(x, y + 34, w, 14, fill=color, stroke=color, sw=0, rx=0)
-        c.text(x + 20, y + 31, title, size=17, fill=WHITE, weight=900)
-        c.text(x + 20, y + 84, purpose, size=16, fill=INK, weight=800)
-        c.pill(x + 18, y + 112, w - 36, artefact, fill=fill, color=color, size=13)
-    c.line(1262, 334, 1290, 334, stroke=INK, sw=2.5, arrow=True, marker="ink")
-    c.path("M1417 420 C1417 446 1250 448 1137 468", stroke=INK, sw=2.5, arrow=True, marker="ink")
-    c.line(1262, 554, 1290, 554, stroke=INK, sw=2.5, arrow=True, marker="ink")
-    c.path("M928 378 C972 378 980 334 1010 334", stroke=AMBER, sw=2.5, arrow=True, marker="amber")
-    c.path("M928 557 C976 557 978 382 1010 360", stroke=PURPLE, sw=2.5, arrow=True, marker="purple")
+        c.rect(x, y, w, h, fill=WHITE, stroke=color, sw=2, rx=16, shadow=True)
+        c.rect(x, y, w, 46, fill=color, stroke=color, sw=0, rx=16)
+        c.rect(x, y + 32, w, 14, fill=color, stroke=color, sw=0, rx=0)
+        c.text(x + 20, y + 30, title, size=16.5, fill=WHITE, weight=900)
+        c.text(x + 20, y + 80, purpose, size=14.5, fill=INK, weight=800)
+        c.pill(x + 18, y + 108, w - 36, artefact, fill=fill, color=color, stroke=color, size=11.5)
 
-    # Feedback and controls
-    c.path("M1417 640 C1417 682 1180 688 854 688 L176 688 C110 688 108 652 108 620", stroke=ORANGE, sw=2.5, arrow=True, dash="8 6", marker="red")
-    c.pill(626, 671, 348, "acción → nueva transacción OLTP", fill=ORANGE_L, color=ORANGE, size=14)
-    c.rect(40, 720, 1518, 70, fill=WHITE, stroke=LINE, sw=1.5, rx=16)
-    c.text(64, 748, "CONTROLES EN AMBAS RUTAS", size=15, fill=NAVY, weight=900)
+    c.line(1262, 330, 1290, 330, stroke=INK, sw=2.5, arrow=True, marker="ink")
+    c.path("M1417 416 C1417 442 1250 444 1137 464", stroke=INK, sw=2.5, arrow=True, marker="ink")
+    c.line(1262, 550, 1290, 550, stroke=INK, sw=2.5, arrow=True, marker="ink")
+    c.path("M928 370 C972 370 980 330 1010 330", stroke=AMBER, sw=2.5, arrow=True, marker="amber")
+    c.path("M928 548 C976 548 978 376 1010 354", stroke=PURPLE, sw=2.5, arrow=True, marker="purple")
+
+    # Retroalimentación a OLTP
+    c.path("M1417 636 C1417 682 1180 688 854 688 L176 688 C108 688 106 652 106 648", stroke=ORANGE, sw=2.5, arrow=True, dash="8 6", marker="orange")
+    c.pill(626, 671, 348, "acción → nueva transacción OLTP", fill=ORANGE_L, color=ORANGE, stroke=ORANGE, size=12.5)
+
+    # Barra de Controles transversales
+    c.rect(40, 716, 1518, 74, fill=WHITE, stroke=LINE, sw=1.5, rx=16)
+    c.text(64, 748, "CONTROLES EN AMBAS RUTAS", size=14, fill=NAVY, weight=900)
     controls = [
         (326, 148, "calidad", AMBER_L, AMBER),
         (488, 148, "linaje", BLUE_L, BLUE),
@@ -429,7 +479,7 @@ def make_bridge() -> Canvas:
         (1354, 180, "responsable", ORANGE_L, ORANGE),
     ]
     for x, width, label, fill, color in controls:
-        c.pill(x, 736, width, label, fill=fill, color=color, size=13)
+        c.pill(x, 734, width, label, fill=fill, color=color, stroke=color, size=12.5)
 
     c.footer("Decisión de diseño", "ETL si T debe ocurrir antes del destino; ELT si el destino puede gobernar raw y ejecutar T; híbrido cuando la restricción lo exige.")
     return c
@@ -442,7 +492,8 @@ def make_architecture() -> Canvas:
     )
     c.header("Mapa 4 de 6", "Arquitectura TO-BE: cuatro dominios, una misma decisión", "La trazabilidad baja desde negocio hasta tecnología y vuelve con restricciones verificables")
 
-    c.text(48, 144, "CONTROLES TRANSVERSALES", size=16, fill=NAVY, weight=900)
+    # Controles transversales superiores
+    c.text(48, 144, "CONTROLES TRANSVERSALES", size=15, fill=NAVY, weight=900)
     controls = [
         (306, 174, "gobierno", PURPLE_L, PURPLE),
         (496, 174, "seguridad", RED_L, RED),
@@ -452,7 +503,7 @@ def make_architecture() -> Canvas:
         (1292, 246, "calidad + linaje", AMBER_L, AMBER),
     ]
     for x, w, label, fill, color in controls:
-        c.pill(x, 123, w, label, fill=fill, color=color, size=15)
+        c.pill(x, 124, w, label, fill=fill, color=color, stroke=color, size=13)
 
     layers = [
         (184, 140, "1 · NEGOCIO", "por qué y quién", ORANGE, ORANGE_L),
@@ -478,35 +529,38 @@ def make_architecture() -> Canvas:
             ("Procesamiento", "Pandas · Spark"), ("Entrega", "BI · CI · monitoreo"),
         ],
     ]
-    colors = [ORANGE, AMBER, BLUE, GREEN]
-    fills = [ORANGE_L, AMBER_L, BLUE_L, GREEN_L]
+
+    # Guías verticales tenues
+    for gx in [744, 1054, 1364]:
+        c.line(gx, 184, gx, 810, stroke=LINE_LIGHT, sw=1, arrow=False, dash="4 4")
+
     for idx, (y, h, title, subtitle, color, fill) in enumerate(layers):
         c.rect(36, y, 1528, h, fill=WHITE, stroke=LINE, sw=1.5, rx=16)
         c.rect(36, y, 230, h, fill=fill, stroke=color, sw=1.5, rx=16)
-        c.text(60, y + 48, title, size=19, fill=color, weight=900)
-        c.text(60, y + 82, subtitle, size=16, fill=MUTED, weight=600)
+        c.text(60, y + 48, title, size=17.5, fill=color, weight=900)
+        c.text(60, y + 80, subtitle, size=14.5, fill=MUTED, weight=600)
         for card_idx, (card_title, card_body) in enumerate(layer_cards[idx]):
             x = 294 + card_idx * 310
             c.rect(x, y + 24, 278, h - 48, fill=WHITE, stroke=color, sw=1.8, rx=13, shadow=True)
             if card_idx == 0:
-                c.number_badge(x + 32, y + 51, idx + 1, fill=color, radius=18)
-                title_x = x + 58
+                c.number_badge(x + 30, y + 50, idx + 1, fill=color, radius=16)
+                title_x = x + 54
             else:
                 title_x = x + 22
-            c.text(title_x, y + 57, card_title, size=17, fill=INK, weight=800)
-            c.text(x + 22, y + 94, card_body, size=16, fill=MUTED, weight=500)
+            c.text(title_x, y + 56, card_title, size=16.5, fill=INK, weight=800)
+            c.text(x + 22, y + 92, card_body, size=14.5, fill=MUTED, weight=500)
 
-    # Trazabilidad explícita por el primer componente de cada capa.
+    # Trazabilidad explícita por la columna 1
     for y1, y2, color, marker in [
-        (324, 362, ORANGE, "red"), (478, 516, AMBER, "red"), (632, 670, BLUE, "blue")
+        (324, 362, ORANGE, "orange"), (478, 516, AMBER, "amber"), (632, 670, BLUE, "blue")
     ]:
         c.line(433, y1, 433, y2, stroke=color, sw=3, marker=marker)
-    c.pill(500, 310, 300, "define información requerida", fill=ORANGE_L, color=ORANGE, size=14)
-    c.pill(500, 464, 300, "habilita capacidades", fill=AMBER_L, color=AMBER, size=14)
-    c.pill(500, 618, 300, "impone requisitos técnicos", fill=BLUE_L, color=BLUE, size=14)
+    c.pill(490, 310, 300, "define información requerida", fill=ORANGE_L, color=ORANGE, stroke=ORANGE, size=12.5)
+    c.pill(490, 464, 300, "habilita capacidades", fill=AMBER_L, color=AMBER, stroke=AMBER, size=12.5)
+    c.pill(490, 618, 300, "impone requisitos técnicos", fill=BLUE_L, color=BLUE, stroke=BLUE, size=12.5)
 
     c.rect(1120, 800, 432, 30, fill=RED_L, stroke=RED, sw=1, rx=12)
-    c.text(1336, 821, "TO-BE ≠ automatizar la decisión humana", size=14, fill=RED, weight=800, anchor="middle")
+    c.text(1336, 820, "TO-BE ≠ automatizar la decisión humana", size=13, fill=RED, weight=800, anchor="middle")
     c.footer("Prueba de diseño", "Cada componente técnico debe señalar qué dato, capacidad, proceso y KPI justifica su existencia.")
     return c
 
@@ -518,38 +572,41 @@ def make_nist() -> Canvas:
     )
     c.header("Mapa 5 de 6", "Ciclo analítico: la evidencia debe volver al proceso", "Captura → preparación → análisis → visualización → acción; después aparecen nuevas preguntas")
 
-    c.rect(450, 128, 700, 48, fill=WHITE, stroke=LINE, sw=1, rx=18)
-    c.text(800, 159, "GOBIERNO · SEGURIDAD · PRIVACIDAD · CALIDAD · TRAZABILIDAD", size=17, fill=NAVY, weight=900, anchor="middle")
+    c.rect(450, 126, 700, 46, fill=WHITE, stroke=LINE, sw=1.5, rx=16)
+    c.text(800, 155, "GOBIERNO · SEGURIDAD · PRIVACIDAD · CALIDAD · TRAZABILIDAD", size=14.5, fill=NAVY, weight=900, anchor="middle")
 
     cards = [
-        (650, 185, "1", "CAPTURA", BLUE, BLUE_L, ["Entrada: API o muestra", "Artefacto: snapshot + fuente", "Responsable: ingeniería"]),
-        (1120, 290, "2", "PREPARACIÓN", AMBER, AMBER_L, ["Tipar fechas y unidades", "Artefacto: tabla + excepciones", "Responsable: datos"]),
-        (1010, 600, "3", "ANÁLISIS", PURPLE, PURPLE_L, ["Perfil + reglas descriptivas", "Artefacto: métricas + cola", "Responsable: analista"]),
-        (290, 600, "4", "VISUALIZACIÓN", TEAL, TEAL_L, ["Razón de prioridad + contexto", "Artefacto: reporte / tablero", "Responsable: BI"]),
-        (180, 290, "5", "ACCIÓN", ORANGE, ORANGE_L, ["Revisar · corregir · escalar", "Artefacto: decisión registrada", "Responsable: negocio"]),
+        (650, 182, "1", "CAPTURA", BLUE, BLUE_L, ["Entrada: API o muestra local", "Artefacto: snapshot + metadatos", "Responsable: ingeniería de datos"]),
+        (1120, 288, "2", "PREPARACIÓN", AMBER, AMBER_L, ["Tipar fechas y duraciones", "Artefacto: tabla curada + excepciones", "Responsable: equipo de datos"]),
+        (1010, 600, "3", "ANÁLISIS", PURPLE, PURPLE_L, ["Perfil descriptivo + reglas", "Artefacto: cola priorizada con motivos", "Responsable: analista de seguimiento"]),
+        (290, 600, "4", "VISUALIZACIÓN", TEAL, TEAL_L, ["Contexto de prioridad y filtros", "Artefacto: reporte / tablero analítico", "Responsable: especialista BI"]),
+        (180, 288, "5", "ACCIÓN", ORANGE, ORANGE_L, ["Revisar contexto · corregir · escalar", "Artefacto: registro de decisión auditable", "Responsable: analista + director"]),
     ]
     for x, y, number, title, color, fill, body in cards:
-        c.rect(x, y, 300, 165, fill=WHITE, stroke=color, sw=2, rx=18, shadow=True)
-        c.number_badge(x + 38, y + 42, number, fill=color, radius=23)
-        c.text(x + 75, y + 49, title, size=20, fill=color, weight=900)
-        c.text(x + 24, y + 88, body, size=15, fill=MUTED, weight=550, line_height=1.32)
+        c.rect(x, y, 310, 168, fill=WHITE, stroke=color, sw=2, rx=18, shadow=True)
+        c.number_badge(x + 36, y + 42, number, fill=color, radius=20)
+        c.text(x + 68, y + 48, title, size=18.5, fill=color, weight=900)
+        c.text(x + 20, y + 86, body, size=13.5, fill=MUTED, weight=550, line_height=1.35)
 
-    c.circle(800, 492, 135, fill=NAVY, stroke="#0D2B43", sw=3, shadow=True)
-    c.text(800, 452, "DECISIÓN SOPORTADA", size=17, fill="#BFE4F6", weight=900, anchor="middle")
-    c.text(800, 494, ["¿qué contrato revisar", "primero y por qué?"], size=23, fill=WHITE, weight=800, anchor="middle", line_height=1.15)
-    c.pill(682, 562, 236, "humana · explicable · trazable", fill="#2A5878", color=WHITE, size=12)
+    # Núcleo central
+    c.circle(800, 492, 138, fill="url(#hub-grad)", stroke="#2F6FB0", sw=3, shadow=True)
+    c.text(800, 450, "DECISIÓN SOPORTADA", size=15.5, fill="#BFE4F6", weight=900, anchor="middle")
+    c.text(800, 492, ["¿qué contrato revisar", "primero y por qué?"], size=21, fill=WHITE, weight=800, anchor="middle", line_height=1.18)
+    c.pill(678, 560, 244, "humana · explicable · trazable", fill="#214E6D", color=WHITE, stroke="#4E7B99", size=12)
 
-    # Recorrido circular.
-    c.path("M950 260 C1040 245 1110 270 1140 315", stroke=BLUE, sw=3, marker="blue")
-    c.path("M1370 455 C1410 530 1320 620 1260 635", stroke=AMBER, sw=3, marker="red")
-    c.path("M1010 682 C850 800 600 800 590 682", stroke=PURPLE, sw=3, marker="purple")
-    c.path("M290 635 C190 615 135 520 205 455", stroke=TEAL, sw=3, marker="green")
-    c.path("M330 290 C430 170 590 165 650 230", stroke=ORANGE, sw=3, marker="red")
+    # Recorrido circular
+    c.path("M960 260 C1040 245 1110 270 1135 310", stroke=BLUE, sw=3, marker="blue")
+    c.path("M1370 455 C1410 530 1320 620 1260 635", stroke=AMBER, sw=3, marker="amber")
+    c.path("M1010 682 C850 795 600 795 590 682", stroke=PURPLE, sw=3, marker="purple")
+    c.path("M290 635 C190 615 135 520 205 455", stroke=TEAL, sw=3, marker="teal")
+    c.path("M330 288 C430 170 590 165 650 226", stroke=ORANGE, sw=3, marker="orange")
 
-    c.pill(1040, 205, 155, "datos crudos", fill=BLUE_L, color=BLUE, size=13)
-    c.pill(1350, 520, 180, "datos preparados", fill=AMBER_L, color=AMBER, size=13)
-    c.pill(710, 770, 180, "resultado explicado", fill=PURPLE_L, color=PURPLE, size=13)
-    c.pill(70, 520, 190, "decisión registrada", fill=ORANGE_L, color=ORANGE, size=13)
+    # Píldoras de transición
+    c.pill(1040, 204, 150, "datos crudos", fill=BLUE_L, color=BLUE, stroke=BLUE, size=12)
+    c.pill(1346, 520, 185, "datos preparados", fill=AMBER_L, color=AMBER, stroke=AMBER, size=12)
+    c.pill(710, 765, 180, "alertas y motivos", fill=PURPLE_L, color=PURPLE, stroke=PURPLE, size=12)
+    c.pill(60, 520, 200, "evidencia priorizada", fill=TEAL_L, color=TEAL, stroke=TEAL, size=12)
+    c.pill(390, 172, 260, "decisión → nuevo dato", fill=ORANGE_L, color=ORANGE, stroke=ORANGE, size=12)
 
     c.footer("Distinción esencial", "Visualizar muestra evidencia; actuar exige autoridad, criterio, registro y retroalimentación.")
     return c
@@ -569,39 +626,43 @@ def make_git_states() -> Canvas:
     ]
     for x, y, w, h, title, subtitle, color, fill in zones:
         c.rect(x, y, w, h, fill=WHITE, stroke=color, sw=1.5, rx=20)
-        c.rect(x, y, w, 72, fill=fill, stroke=color, sw=1.5, rx=20)
-        c.rect(x, y + 55, w, 17, fill=fill, stroke=fill, sw=0, rx=0)
-        c.text(x + 24, y + 32, title, size=20, fill=color, weight=900)
-        c.text(x + 24, y + 58, subtitle, size=15, fill=MUTED, weight=500)
+        c.rect(x, y, w, 70, fill=fill, stroke=color, sw=1.5, rx=20)
+        c.rect(x, y + 54, w, 16, fill=fill, stroke=fill, sw=0, rx=0)
+        c.text(x + 24, y + 32, title, size=18.5, fill=color, weight=900)
+        c.text(x + 24, y + 56, subtitle, size=14, fill=MUTED, weight=500)
 
     local = [
         (70, 266, 210, 170, "1", "Working tree", ["archivo modificado", "Git ve: M"], BLUE, "editar Markdown"),
-        (321, 266, 210, 170, "2", "Staging", ["cambio seleccionado", "Git ve: staged"], AMBER, "git add"),
-        (572, 266, 210, 170, "3", "Commit", ["instantánea + autor", "Git ve: hash"], NAVY_2, "git commit"),
+        (321, 266, 210, 170, "2", "Staging", ["cambio seleccionado", "Git ve: staged"], AMBER, "git add <archivo>"),
+        (572, 266, 210, 170, "3", "Commit", ["instantánea + autor", "Git ve: hash"], NAVY_2, 'git commit -m "..."'),
     ]
     for x, y, w, h, num, title, body, color, command in local:
-        c.card(x, y, w, h, title, body, color, number=num, shadow=True, title_size=18, body_size=16)
-        c.pill(x + 20, y + 115, w - 40, command, fill="#EEF3F7", color=color, size=13)
-    c.line(280, 351, 321, 351, stroke=AMBER, marker="red")
-    c.line(531, 351, 572, 351, stroke=NAVY_2)
-    c.card(195, 492, 430, 174, "Rama entrega/sesion2", ["Aísla el trabajo de main", "Conserva una historia revisable"], BLUE, number="0", tag="git switch -c", shadow=False, title_size=19, body_size=16)
-    c.line(410, 492, 410, 436, stroke=BLUE, arrow=True)
+        c.card(x, y, w, h, title, body, color, number=num, shadow=True, title_size=17, body_size=14.5)
+        c.pill(x + 14, y + 115, w - 28, command, fill="#EEF3F7", color=color, stroke=LINE, size=11.5)
 
-    c.card(870, 286, 232, 190, "Rama remota", ["origin/entrega/sesion2", "mismos commits publicados"], GREEN, number=4, tag="git push -u", shadow=True, title_size=18, body_size=16)
+    c.line(280, 351, 321, 351, stroke=AMBER, marker="amber")
+    c.line(531, 351, 572, 351, stroke=NAVY_2, marker="blue")
+
+    c.card(195, 492, 430, 174, "Rama hito/s02-blueprint", ["Aísla el trabajo de main", "Conserva una historia auditable"], BLUE, number="0", tag="git switch -c hito/s02-blueprint", shadow=False, title_size=18, body_size=15)
+    c.line(410, 492, 410, 436, stroke=BLUE, marker="blue")
+
+    c.card(870, 286, 232, 190, "Rama remota", ["origin/hito/s02-blueprint", "mismos commits publicados"], GREEN, number=4, tag="git push -u origin", shadow=True, title_size=16.5, body_size=13)
     c.line(782, 351, 870, 351, stroke=GREEN, marker="green")
-    c.card(870, 548, 232, 110, "No es entrega final", ["Todavía falta revisión"], GREEN, shadow=False, title_size=17, body_size=15)
+    c.card(870, 548, 232, 110, "No es entrega final", ["Todavía falta revisión"], GREEN, shadow=False, title_size=16, body_size=13.5)
 
-    c.card(1190, 238, 340, 135, "Pull Request", ["propósito + diff + contexto", "base main ← rama"], PURPLE, number=5, shadow=True, title_size=18, body_size=16)
-    c.card(1190, 410, 340, 120, "Revisión humana", ["pregunta · ambigüedad · límite"], ORANGE, number=6, shadow=False, title_size=18, body_size=16)
+    c.card(1190, 238, 340, 135, "Pull Request", ["propósito + diff + contexto", "base main ← rama"], PURPLE, number=5, shadow=True, title_size=17.5, body_size=14.5)
+    c.card(1190, 410, 340, 120, "Revisión humana", ["pregunta · ambigüedad · límite"], ORANGE, number=6, shadow=False, title_size=17.5, body_size=14.5)
+
     c.path("M1360 563 L1435 623 L1360 683 L1285 623 Z", stroke=PURPLE, sw=2.5, arrow=False, fill=PURPLE_L)
-    c.text(1360, 609, ["7 · CI", "¿validador verde?"], size=17, fill=PURPLE, weight=900, anchor="middle", line_height=1.2)
-    c.line(986, 286, 1190, 306, stroke=PURPLE, marker="purple")
-    c.line(1360, 373, 1360, 410, stroke=ORANGE, marker="red")
+    c.text(1360, 609, ["7 · CI", "¿validador verde?"], size=15.5, fill=PURPLE, weight=900, anchor="middle", line_height=1.2)
+    c.line(1102, 351, 1190, 306, stroke=PURPLE, marker="purple")
+    c.line(1360, 373, 1360, 410, stroke=ORANGE, marker="orange")
     c.line(1360, 530, 1360, 563, stroke=PURPLE, marker="purple")
 
+    # Bucle de corrección si CI falla
     c.path("M1285 623 C1190 748 1080 750 980 750 L230 750 C135 750 125 520 175 436", stroke=RED, sw=3, arrow=True, dash="10 7", marker="red")
-    c.pill(560, 775, 430, "SI FALLA: corregir → nuevo commit → push", fill=RED_L, color=RED, size=15)
-    c.pill(1435, 604, 105, "SÍ", fill=GREEN_L, color=GREEN, size=14)
+    c.pill(540, 775, 470, "SI FALLA CI: corregir localmente → git commit → git push", fill=RED_L, color=RED, stroke=RED, size=12)
+    c.pill(1435, 604, 105, "SÍ", fill=GREEN_L, color=GREEN, stroke=GREEN, size=13)
 
     c.footer("Lectura clave", "El historial no se borra cuando hay un error: la corrección agrega nueva evidencia a la misma rama.")
     return c
@@ -623,8 +684,8 @@ def make_environment() -> Canvas:
     )
     c.header("Guía Git 1 de 4", "Abrir el repositorio y elegir una ruta sostenible", "Primero verifica acceso y propietario; después decide dónde editar y ejecutar")
     browser_shell(c, 42, 142, 1030, 650, "github.com · compras-claras-pareja-XX")
-    c.text(72, 222, "ucentral-bigdata-2026-2 / compras-claras-pareja-XX", size=19, fill=INK, weight=800)
-    c.pill(72, 246, 90, "Private", fill="#E9EEF2", color=MUTED, size=13)
+    c.text(72, 222, "ucentral-bigdata-2026-2 / compras-claras-pareja-XX", size=18.5, fill=INK, weight=800)
+    c.pill(72, 246, 90, "Private", fill="#E9EEF2", color=MUTED, stroke="#D0DFEA", size=13)
     for x, label in [(72, "Code"), (160, "Issues"), (245, "Pull requests"), (380, "Actions")]:
         c.text(x, 310, label, size=15, fill=BLUE if label == "Code" else MUTED, weight=700)
     c.line(62, 330, 1048, 330, stroke=LINE, sw=1, arrow=False)
@@ -639,8 +700,8 @@ def make_environment() -> Canvas:
     c.text(884, 382, "Code ▾", size=17, fill=WHITE, weight=800, anchor="middle")
     c.rect(696, 414, 350, 330, fill=WHITE, stroke=LINE, sw=1.5, rx=12, shadow=True)
     c.text(720, 450, "Clone", size=18, fill=INK, weight=800)
-    c.pill(720, 468, 92, "HTTPS", fill=BLUE_L, color=BLUE, size=13)
-    c.pill(820, 468, 110, "Codespaces", fill="#EEF1F4", color=MUTED, size=13)
+    c.pill(720, 468, 92, "HTTPS", fill=BLUE_L, color=BLUE, stroke=BLUE, size=13)
+    c.pill(820, 468, 110, "Codespaces", fill="#EEF1F4", color=MUTED, stroke="#D0DFEA", size=13)
     c.text(720, 535, "Clone using the web URL", size=14, fill=MUTED, weight=600)
     c.rect(720, 552, 300, 44, fill="#F6F8FA", stroke=LINE, sw=1, rx=7)
     c.text(734, 580, "https://github.com/.../pareja-XX.git", size=12, fill=INK, weight=500, family="Consolas, monospace")
@@ -675,11 +736,11 @@ def make_status_diff() -> Canvas:
     )
     c.header("Guía Git 2 de 4", "Observar antes de seleccionar: status y diff", "El objetivo no es memorizar colores: es comprobar qué archivo cambió y qué evidencia contiene")
 
-    browser_shell(c, 42, 142, 980, 650, "VS Code · terminal · entrega/sesion2")
+    browser_shell(c, 42, 142, 980, 650, "VS Code · terminal · hito/s02-blueprint")
     c.rect(60, 198, 944, 568, fill="#101A22", stroke="#101A22", sw=0, rx=10)
     terminal = [
         (238, "$ git branch --show-current", "#75C7FF"),
-        (270, "entrega/sesion2", "#EAF1F6"),
+        (270, "hito/s02-blueprint", "#EAF1F6"),
         (318, "$ git status --short", "#75C7FF"),
         (350, " M docs/01_proceso_as_is.md", "#FFD166"),
         (380, " M resultados/perfil_secop.md", "#FFD166"),
@@ -693,7 +754,7 @@ def make_status_diff() -> Canvas:
     ]
     for y, line, color in terminal:
         c.text(88, y, line, size=17, fill=color, weight=500, family="Consolas, Cascadia Mono, monospace")
-    c.pill(82, 690, 220, "working tree · MODIFICADO", fill="#213746", color="#9EDAFF", size=13)
+    c.pill(82, 690, 220, "working tree · MODIFICADO", fill="#213746", color="#9EDAFF", stroke="#2A5878", size=13)
 
     c.rect(1050, 142, 508, 650, fill=WHITE, stroke=NAVY, sw=1.5, rx=18)
     c.text(1080, 186, "¿QUÉ SABE GIT AHORA?", size=18, fill=NAVY, weight=900)
@@ -730,9 +791,9 @@ def make_pull_request() -> Canvas:
 
     browser_shell(c, 34, 140, 1130, 660, "github.com · Pull Request #1")
     c.text(64, 214, "Pull requests / #1", size=16, fill=BLUE, weight=700)
-    c.text(64, 258, "Compras Claras · arquitectura y ciclo analítico", size=26, fill=INK, weight=800)
+    c.text(64, 258, "Compras Claras · arquitectura y ciclo analítico", size=25, fill=INK, weight=800)
     c.pill(64, 278, 84, "Open", fill=GREEN, color=WHITE, size=13)
-    c.text(166, 304, "entrega/sesion2 quiere combinar 2 commits en main", size=15, fill=MUTED, weight=550)
+    c.text(166, 304, "hito/s02-blueprint quiere combinar 2 commits en main", size=15, fill=MUTED, weight=550)
     c.line(64, 330, 1134, 330, stroke=LINE, sw=1, arrow=False)
 
     tabs = [(64, "Conversation"), (185, "Commits 2"), (284, "Checks 1"), (380, "Files changed 4")]
@@ -768,7 +829,7 @@ def make_pull_request() -> Canvas:
     c.rect(1190, 140, 374, 660, fill=WHITE, stroke=NAVY, sw=1.5, rx=18)
     c.text(1218, 184, "CUATRO LECTURAS", size=18, fill=NAVY, weight=900)
     checks = [
-        (220, "1", "Ramas correctas", "main ← entrega/sesion2", BLUE, BLUE_L),
+        (220, "1", "Ramas correctas", "main ← hito/s02-blueprint", BLUE, BLUE_L),
         (354, "2", "Propósito reconstruible", "qué · por qué · límite", ORANGE, ORANGE_L),
         (488, "3", "Diff revisable", "sin secretos ni COMPLETAR", PURPLE, PURPLE_L),
         (622, "4", "Revisión atribuible", "comentario + check verde", GREEN, GREEN_L),
@@ -799,9 +860,9 @@ def make_actions() -> Canvas:
         c.rect(x, 140, 220, 76, fill=WHITE, stroke=color, sw=2, rx=14, shadow=True)
         c.number_badge(x + 34, 178, num, fill=color, radius=20)
         c.text(x + 68, 185, label, size=17, fill=INK, weight=800)
-    for x, color, marker in [(278, PURPLE, "purple"), (530, GREEN, "green"), (782, ORANGE, "red"), (1034, NAVY_2, "blue")]:
+    for x, color, marker in [(278, PURPLE, "purple"), (530, GREEN, "green"), (782, ORANGE, "orange"), (1034, NAVY_2, "blue")]:
         c.line(x, 178, x + 32, 178, stroke=color, sw=3, marker=marker)
-    c.pill(1320, 159, 220, "EVIDENCIA REVISADA", fill=GREEN_L, color=GREEN, size=14)
+    c.pill(1320, 159, 220, "EVIDENCIA REVISADA", fill=GREEN_L, color=GREEN, stroke=GREEN, size=13)
 
     c.rect(42, 258, 730, 520, fill=WHITE, stroke=GREEN, sw=2, rx=18, shadow=True)
     c.rect(42, 258, 730, 70, fill=GREEN_L, stroke=GREEN, sw=1, rx=18)

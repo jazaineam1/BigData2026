@@ -2,15 +2,41 @@
 
 ## Objetivo
 
-Dejar la identidad y el repositorio listos para trabajar sin mezclar dos rutas distintas: GitHub Codespaces, recomendado para la sesión 2, e instalación local, opcional para quien prefiera su propio equipo.
+Preparar el repositorio privado y la identidad Git para trabajar durante todo el semestre sobre un único proyecto
+acumulativo. Cada pareja recibirá `compras-claras-pareja-XX`; las nuevas actividades llegarán mediante Pull Requests
+del docente y no mediante GitHub Classroom o forks.
 
-## Ruta A — GitHub Codespaces
+## Antes de empezar
 
-Codespaces abre el repositorio ya clonado y usa autenticación HTTPS para el repositorio que originó el entorno. En esta ruta no es necesario crear claves SSH.
+- Entra únicamente al repositorio que el docente asignó a tu pareja.
+- Comprueba que no estás en la plantilla, la solución o el repositorio de otro equipo.
+- No habilites Copilot, presupuestos ni facturación de Codespaces para esta actividad.
+- No publiques la URL privada ni agregues colaboradores por tu cuenta.
 
-1. Entra al repositorio asignado por GitHub Classroom.
-2. Selecciona `Code > Codespaces > Create codespace`.
-3. Abre la terminal y verifica:
+## Ruta A — Git y Python locales
+
+Es la opción recomendada porque no depende de cuota de nube. En **Code → Local → HTTPS** copia la URL y ejecuta:
+
+```bash
+git clone URL_DEL_REPOSITORIO_ASIGNADO
+cd compras-claras-pareja-XX
+python scripts/configurar_entorno.py
+git status
+git remote -v
+```
+
+Usa Git Credential Manager o el inicio de sesión que ofrezca tu instalación. SSH es opcional; si lo eliges, sigue la
+[documentación oficial de GitHub](https://docs.github.com/es/authentication/connecting-to-github-with-ssh) y nunca
+compartas la clave privada.
+
+## Ruta B — Codespaces con cuota personal
+
+Codespaces abre el repositorio ya clonado y usa autenticación HTTPS. Úsalo solo si tu cuenta muestra cuota personal
+disponible; la organización no pagará consumo adicional.
+
+1. Selecciona **Code → Codespaces → Create codespace**.
+2. Espera a que termine `postCreateCommand`.
+3. Verifica:
 
 ```bash
 python --version
@@ -20,71 +46,57 @@ git branch --show-current
 git remote -v
 ```
 
-4. Comprueba tu identidad:
+No es necesario crear claves SSH ni levantar Docker para S02.
+
+## Ruta C — github.dev como contingencia
+
+Pulsa `.` en el repositorio para abrir el editor web gratuito. Permite editar, confirmar y sincronizar desde
+**Source Control**, pero no ofrece terminal. Usa entonces los resultados precomputados indicados por el docente.
+
+## Configurar identidad
 
 ```bash
 git config --get user.name
 git config --get user.email
 ```
 
-Si falta algún valor, configúralo para este repositorio:
+Si falta un valor, configúralo solo para este repositorio:
 
 ```bash
 git config user.name "Tu Nombre"
-git config user.email "tu-correo@ejemplo.com"
+git config user.email "correo-verificado-o-noreply-de-github"
 ```
 
-Usar configuración local evita cambiar por accidente la identidad de otros repositorios o usuarios del equipo.
+## Flujo semanal
 
-## Ruta B — Instalación local opcional
+1. Leer y fusionar el PR docente `docente/sXX-kit`.
+2. Actualizar `main` con `git pull --ff-only`.
+3. Crear `hito/sXX-descripcion`; para S02 usa:
 
-En un equipo propio puedes clonar por HTTPS y autenticarte con Git Credential Manager. SSH es otra alternativa, no un requisito de la sesión.
+   ```bash
+   git switch -c hito/s02-blueprint
+   ```
 
-```bash
-git clone https://github.com/ORGANIZACION/REPOSITORIO.git
-cd REPOSITORIO
-git status
-```
-
-Si eliges SSH, sigue la [documentación oficial de conexión con SSH](https://docs.github.com/es/authentication/connecting-to-github-with-ssh). Nunca compartas la clave privada; GitHub recibe únicamente la clave pública.
-
-## Mapa mental del flujo
+4. Revisar `git status`, `git diff`, `git add` y `git diff --staged` antes de cada commit.
+5. Publicar la rama, abrir PR hacia `main`, revisar y esperar CI verde.
+6. Fusionar con merge commit y eliminar la rama al terminar.
 
 ```text
 working tree --git add--> staging --git commit--> historial local --git push--> remoto
                                                        |
-                                                       └── Pull Request para revisar
+                                                       └── Pull Request → revisión → CI → main
 ```
-
-- `git status`: explica dónde está cada cambio.
-- `git diff`: muestra cambios todavía no enviados a staging.
-- `git add archivo`: selecciona evidencia para el próximo commit.
-- `git commit`: registra una unidad de trabajo con autor y mensaje.
-- `git push`: publica los commits de la rama.
-- Pull Request: permite explicar, revisar y validar antes de integrar.
 
 ## Errores comunes
 
-### `Please tell me who you are`
-
-Git no encuentra nombre o correo. Configura `user.name` y `user.email` como se mostró arriba.
-
-### `not a git repository`
-
-La terminal está en otra carpeta. En Codespaces vuelve al explorador y abre una terminal desde la raíz del repositorio.
-
-### Cambios en `main` por accidente
-
-Crea la rama antes de editar:
-
-```bash
-git switch -c entrega/sesion2
-```
-
-### Error de autenticación en Codespaces
-
-Primero confirma que abriste el Codespace desde el repositorio asignado y revisa `git remote -v`. No cambies el remoto a SSH como primera solución. Si persiste, vuelve a autorizar Codespaces desde GitHub o solicita apoyo docente.
+- `Please tell me who you are`: configura `user.name` y `user.email` localmente.
+- `not a git repository`: abre la terminal en la raíz del clon.
+- cambios directos en `main`: crea la rama del hito antes de editar.
+- rama ya existente: usa `git switch hito/s02-blueprint` en lugar de crear otro nombre.
+- autenticación fallida en Codespaces: revisa `git remote -v`; no cambies inmediatamente a SSH.
+- validador bloquea un commit: corrige el archivo o posible secreto indicado; no desactives el hook.
 
 ## Resultado esperado
 
-Al finalizar puedes identificar el repositorio y la rama, explicar los cuatro estados básicos de un cambio y publicar un commit sin crear credenciales innecesarias.
+Puedes identificar el repositorio y la rama correctos, distinguir working tree, staging, commit y remoto, y explicar
+por qué el mismo repositorio conserva la evolución completa del proyecto.
