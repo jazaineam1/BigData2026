@@ -212,11 +212,11 @@ def build_cells():
 
             | Minutos | Actividad | Evidencia observable |
             |---:|---|---|
-            | 90–98 | Abrir el repositorio y reconocer artefactos | archivos y roles temporales identificados |
+            | 90–98 | Abrir el repositorio y reconocer artefactos | archivos y dos perspectivas identificadas |
             | 98–118 | Analizar decisión, evidencia, proceso y KPI | primer artefacto argumentado |
             | 118–138 | Formular caso y veredicto BI/Big Data | suficiencia sustentada con requisitos |
             | 138–153 | Organizar la solución, el recorrido de la evidencia y las responsabilidades | segundo artefacto coherente |
-            | 153–165 | Revisar desde el rol contrario | objeción y corrección justificadas |
+            | 153–165 | Revisar desde la perspectiva complementaria | objeción y corrección justificadas |
             | 165–175 | Observar comentario, cambio y versión compartida | conversación conservada para revisión |
             | 175–180 | Ticket de salida | decisión, rol crítico y límite |
             """
@@ -266,8 +266,9 @@ def build_cells():
             repositorio es, por tanto, una buena herramienta para conservar el aprendizaje acumulado, no el fin del
             curso.
 
-            > **Situación actual.** Los grupos todavía no están definidos. En esta sesión usaremos roles temporales y
-            > un repositorio de práctica. Cuando existan equipos estables, cada grupo decidirá con el docente cómo
+            > **Situación actual.** Los grupos todavía no están definidos. En esta sesión trabajaremos desde dos
+            > perspectivas pedagógicas —negocio/dominio y datos/analítica— en un repositorio de práctica. Cuando
+            > existan equipos estables, cada grupo decidirá con el docente cómo
             > aplicar este flujo a su proyecto.
             """
         ),
@@ -1391,8 +1392,8 @@ def build_cells():
             **Limitación.** Un Pull Request conserva conversación, pero no garantiza que las personas correctas hayan
             participado ni que la evidencia sea suficiente.
 
-            **Conexión.** En el laboratorio asumiremos roles temporales y construiremos esa conversación sobre dos
-            artefactos conectados.
+            **Conexión.** En el laboratorio alternaremos las perspectivas de negocio/dominio y datos/analítica para
+            construir esa conversación sobre dos artefactos conectados.
             """
         ),
         question_cell(
