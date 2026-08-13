@@ -78,20 +78,20 @@
 <tspan x="106.0" dy="0">Open</tspan>
 </text>
 <text x="166" y="304" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
-<tspan x="166" dy="0">hito/s02-blueprint quiere combinar 2 commits en main</tspan>
+<tspan x="166" dy="0">hito/s02-negocio propone cambios sobre main</tspan>
 </text>
 <line x1="64" y1="330" x2="1134" y2="330" stroke="#B8C8D6" stroke-width="1" fill="none" stroke-linecap="round"/>
 <text x="64" y="365" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
 <tspan x="64" dy="0">Conversation</tspan>
 </text>
 <text x="185" y="365" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
-<tspan x="185" dy="0">Commits 2</tspan>
+<tspan x="185" dy="0">Commits</tspan>
 </text>
 <text x="284" y="365" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
 <tspan x="284" dy="0">Checks 1</tspan>
 </text>
 <text x="380" y="365" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
-<tspan x="380" dy="0">Files changed 4</tspan>
+<tspan x="380" dy="0">Files changed 2</tspan>
 </text>
 <line x1="64" y1="380" x2="1134" y2="380" stroke="#B8C8D6" stroke-width="1" fill="none" stroke-linecap="round"/>
 <rect x="64" y="402" width="750" height="340" rx="12" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.2" opacity="1"/>
@@ -103,7 +103,7 @@
 <tspan x="90" dy="0">Qué se hizo</tspan>
 </text>
 <text x="90" y="508" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
-<tspan x="90" dy="0">Proceso AS-IS, arquitectura TO-BE y ciclo NIST.</tspan>
+<tspan x="90" dy="0">Decisión/proceso + caso/arquitectura/acción.</tspan>
 </text>
 <text x="90" y="545" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
 <tspan x="90" dy="0">Por qué</tspan>
@@ -115,7 +115,7 @@
 <tspan x="90" dy="0">Cómo se verificó</tspan>
 </text>
 <text x="90" y="638" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
-<tspan x="90" dy="0">✓ perfilador  ✓ validador  ✓ dos autores</tspan>
+<tspan x="90" dy="0">✓ estructura  ✓ revisión  ✓ límites</tspan>
 </text>
 <text x="90" y="675" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
 <tspan x="90" dy="0">Límite</tspan>
@@ -145,8 +145,8 @@
 <text x="866" y="671" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
 <tspan x="866" dy="0">Files changed</tspan>
 </text>
-<text x="866" y="706" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" text-anchor="start" style="">
-<tspan x="866" dy="0">4 archivos · +86 −12</tspan>
+<text x="866" y="706" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="start" style="">
+<tspan x="866" dy="0">2 artefactos · cambios visibles</tspan>
 </text>
 <rect x="1190" y="140" width="374" height="660" rx="18" fill="#FFFFFF" stroke="#12395B" stroke-width="1.5" opacity="1"/>
 <text x="1218" y="184" fill="#12395B" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
@@ -161,7 +161,7 @@
 <tspan x="1282" dy="0">Ramas correctas</tspan>
 </text>
 <text x="1282" y="287" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
-<tspan x="1282" dy="0">main ← hito/s02-blueprint</tspan>
+<tspan x="1282" dy="0">main ← hito/s02-negocio</tspan>
 </text>
 <rect x="1218" y="354" width="318" height="110" rx="13" fill="#FDE9E3" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
 <circle cx="1252" cy="388" r="19" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>

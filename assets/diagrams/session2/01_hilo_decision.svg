@@ -50,7 +50,7 @@
 <line x1="0" y1="114" x2="1600" y2="114" stroke="#2F6FB0" stroke-width="2" fill="none" stroke-linecap="round"/>
 <rect x="1376" y="24" width="176" height="36" rx="18" fill="#214E6D" stroke="#3F769C" stroke-width="1.5" opacity="1"/>
 <text x="1464.0" y="47" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="middle" style="">
-<tspan x="1464.0" dy="0">MAPA 1 DE 6</tspan>
+<tspan x="1464.0" dy="0">MAPA 1 DE 7</tspan>
 </text>
 <text x="48" y="48" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="31" font-weight="800" text-anchor="start" style="">
 <tspan x="48" dy="0">La historia completa: de la decisión a la mejora</tspan>
@@ -115,16 +115,16 @@
 <tspan x="814" dy="0">2</tspan>
 </text>
 <text x="842" y="192" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="842" dy="0">Datos necesarios</tspan>
+<tspan x="842" dy="0">Roles y relevos</tspan>
 </text>
-<rect x="806" y="212" width="184" height="36" rx="18" fill="#FFFFFF" stroke="#C98500" stroke-width="1.5" opacity="1"/>
-<text x="898.0" y="235" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
-<tspan x="898.0" dy="0">¿QUÉ EVIDENCIA NACE?</tspan>
+<rect x="806" y="212" width="180" height="36" rx="18" fill="#FFFFFF" stroke="#C98500" stroke-width="1.5" opacity="1"/>
+<text x="896.0" y="235" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="896.0" dy="0">¿QUIÉN RESPONDE?</tspan>
 </text>
 <text x="808" y="274" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="808" dy="0">Contrato · entidad · estado</tspan>
-<tspan x="808" dy="20.25">Fechas · duración · calidad</tspan>
-<tspan x="808" dy="20.25">Responsable y regla por campo</tspan>
+<tspan x="808" dy="0">Negocio define valor</tspan>
+<tspan x="808" dy="20.25">Gobierno protege significado</tspan>
+<tspan x="808" dy="20.25">Datos y BI construyen evidencia</tspan>
 </text>
 <rect x="1162" y="150" width="392" height="232" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
 <rect x="1162" y="150" width="8" height="232" rx="4" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
@@ -133,16 +133,16 @@
 <tspan x="1192" dy="0">3</tspan>
 </text>
 <text x="1220" y="192" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="1220" dy="0">Capacidades y herramientas</tspan>
+<tspan x="1220" dy="0">Datos y evidencia</tspan>
 </text>
-<rect x="1184" y="212" width="240" height="36" rx="18" fill="#FFFFFF" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
-<text x="1304.0" y="235" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
-<tspan x="1304.0" dy="0">¿QUÉ DEBE HACER EL SISTEMA?</tspan>
+<rect x="1184" y="212" width="208" height="36" rx="18" fill="#FFFFFF" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
+<text x="1288.0" y="235" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="1288.0" dy="0">¿QUÉ NECESITAMOS SABER?</tspan>
 </text>
 <text x="1186" y="274" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="1186" dy="0">Ingerir → validar → integrar</tspan>
-<tspan x="1186" dy="20.25">analizar → explicar → alertar</tspan>
-<tspan x="1186" dy="20.25">Productos solo como candidatos</tspan>
+<tspan x="1186" dy="0">Origen + significado + calidad</tspan>
+<tspan x="1186" dy="20.25">SECOP + perfil reproducible</tspan>
+<tspan x="1186" dy="20.25">Cada campo tiene responsable</tspan>
 </text>
 <rect x="1162" y="498" width="392" height="232" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
 <rect x="1162" y="498" width="8" height="232" rx="4" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
@@ -151,16 +151,16 @@
 <tspan x="1192" dy="0">4</tspan>
 </text>
 <text x="1220" y="540" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="1220" dy="0">KPI verificable</tspan>
+<tspan x="1220" dy="0">Ciclo de evidencia</tspan>
 </text>
 <rect x="1184" y="560" width="216" height="36" rx="18" fill="#FFFFFF" stroke="#24855A" stroke-width="1.5" opacity="1"/>
 <text x="1292.0" y="583" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
-<tspan x="1292.0" dy="0">¿CÓMO SABEMOS SI MEJORA?</tspan>
+<tspan x="1292.0" dy="0">¿CÓMO LLEGA A LA ACCIÓN?</tspan>
 </text>
 <text x="1186" y="622" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="1186" dy="0">Tiempo para priorizar</tspan>
-<tspan x="1186" dy="20.25">% de registros completos</tspan>
-<tspan x="1186" dy="20.25">% de casos atendidos en SLA</tspan>
+<tspan x="1186" dy="0">Capturar · preparar · analizar</tspan>
+<tspan x="1186" dy="20.25">Visualizar · actuar · registrar</tspan>
+<tspan x="1186" dy="20.25">KPI y controles en cada etapa</tspan>
 </text>
 <rect x="784" y="498" width="334" height="232" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
 <rect x="784" y="498" width="8" height="232" rx="4" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
@@ -180,28 +180,34 @@
 <tspan x="808" dy="20.25">Corregir · escalar · descartar</tspan>
 <tspan x="808" dy="20.25">Registrar motivo y resultado</tspan>
 </text>
-<rect x="406" y="498" width="334" height="232" rx="16" fill="#FFFDFD" stroke="#C93F34" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="406" y="498" width="334" height="232" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
 <rect x="406" y="498" width="8" height="232" rx="4" fill="#C93F34" stroke="#C93F34" stroke-width="0" opacity="1"/>
-<text x="434" y="540" fill="#C93F34" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" text-anchor="start" style="">
-<tspan x="434" dy="0">Atajo que debemos evitar</tspan>
+<circle cx="436" cy="534" r="17" fill="#C93F34" stroke="#C93F34" stroke-width="1"/>
+<text x="436" y="540" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="436" dy="0">6</tspan>
 </text>
-<text x="434" y="588" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="start" style="font-style:italic;">
-<tspan x="434" dy="0">“Instalemos una herramienta</tspan>
-<tspan x="434" dy="22.950000000000003">y luego busquemos el problema”</tspan>
+<text x="464" y="540" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
+<tspan x="464" dy="0">Conversación versionada</tspan>
 </text>
-<rect x="434" y="668" width="276" height="36" rx="18" fill="#FCE8E6" stroke="#C93F34" stroke-width="1.5" opacity="1"/>
-<text x="572.0" y="691" fill="#C93F34" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
-<tspan x="572.0" dy="0">ROMPE LA TRAZABILIDAD</tspan>
+<rect x="428" y="560" width="216" height="36" rx="18" fill="#FFFFFF" stroke="#C93F34" stroke-width="1.5" opacity="1"/>
+<text x="536.0" y="583" fill="#C93F34" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="536.0" dy="0">¿CÓMO APRENDE EL EQUIPO?</tspan>
+</text>
+<text x="430" y="622" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="430" dy="0">Propuesta + objeción + corrección</tspan>
+<tspan x="430" dy="20.25">PR conserva el porqué</tspan>
+<tspan x="430" dy="20.25">CI ayuda; personas validan</tspan>
 </text>
 <line x1="366" y1="274" x2="406" y2="274" stroke="#2F6FB0" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
 <line x1="740" y1="266" x2="784" y2="266" stroke="#2F6FB0" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
 <line x1="1118" y1="266" x2="1162" y2="266" stroke="#C98500" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-amber)"/>
 <line x1="1358" y1="382" x2="1358" y2="498" stroke="#6C5AA7" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-purple)"/>
 <line x1="1162" y1="614" x2="1118" y2="614" stroke="#24855A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-green)"/>
-<path d="M784 614 C736 614 748 780 573 780 C405 780 390 430 508 382" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-orange)" stroke-dasharray="8 6"/>
+<line x1="784" y1="614" x2="740" y2="614" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-orange)"/>
+<path d="M406 614 C370 614 390 780 573 780 C748 780 748 430 508 382" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-orange)" stroke-dasharray="8 6"/>
 <rect x="450" y="762" width="330" height="36" rx="18" fill="#FDE9E3" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
 <text x="615.0" y="785" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
-<tspan x="615.0" dy="0">REGISTRO DE DECISIÓN → NUEVO DATO</tspan>
+<tspan x="615.0" dy="0">CONVERSACIÓN → PROCESO MEJORADO</tspan>
 </text>
 <rect x="48" y="836" width="1504" height="44" rx="14" fill="#E7EFF5" stroke="#D0DFEA" stroke-width="1.5" opacity="1"/>
 <rect x="52" y="840" width="173" height="36" rx="11" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>

@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">Ciclo analítico NIST aplicado a SECOP</title>
+<desc id="desc">Cinco etapas conectadas alrededor de una decisión humana con artefactos, responsables y controles.</desc>
+<defs>
+              <linearGradient id="header-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#0D273E"/>
+                <stop offset="100%" stop-color="#1D4F73"/>
+              </linearGradient>
+              <linearGradient id="navy-card-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#184368"/>
+                <stop offset="100%" stop-color="#0F2B48"/>
+              </linearGradient>
+              <linearGradient id="hub-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1C4B72"/>
+                <stop offset="100%" stop-color="#0A2238"/>
+              </linearGradient>
+              <filter id="shadow" x="-10%" y="-10%" width="125%" height="130%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F2B48" flood-opacity="0.09"/>
+              </filter>
+              <filter id="shadow-lg" x="-15%" y="-15%" width="135%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F2B48" flood-opacity="0.14"/>
+              </filter>
+              <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#2F6FB0"/>
+              </marker>
+              <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#C93F34"/>
+              </marker>
+              <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#24855A"/>
+              </marker>
+              <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#6C5AA7"/>
+              </marker>
+              <marker id="arrow-orange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#E95C3A"/>
+              </marker>
+              <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#C98500"/>
+              </marker>
+              <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#167C80"/>
+              </marker>
+              <marker id="arrow-ink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#17324D"/>
+              </marker>
+            </defs>
+<rect width="1600" height="900" fill="#F3F7FA"/>
+<rect x="0" y="0" width="1600" height="114" rx="0" fill="url(#header-grad)" stroke="#0D273E" stroke-width="0" opacity="1"/>
+<line x1="0" y1="114" x2="1600" y2="114" stroke="#2F6FB0" stroke-width="2" fill="none" stroke-linecap="round"/>
+<rect x="1376" y="24" width="176" height="36" rx="18" fill="#214E6D" stroke="#3F769C" stroke-width="1.5" opacity="1"/>
+<text x="1464.0" y="47" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="middle" style="">
+<tspan x="1464.0" dy="0">MAPA 6 DE 7</tspan>
+</text>
+<text x="48" y="48" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" text-anchor="start" style="">
+<tspan x="48" dy="0">Ciclo analítico: la evidencia debe volver al proceso</tspan>
+</text>
+<text x="48" y="80" fill="#D1E6F5" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="400" text-anchor="start" style="">
+<tspan x="48" dy="0">Captura → preparación → análisis → visualización → acción; después aparecen nuevas preguntas</tspan>
+</text>
+<rect x="450" y="126" width="700" height="46" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
+<text x="800" y="155" fill="#12395B" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="900" text-anchor="middle" style="">
+<tspan x="800" dy="0">GOBIERNO · SEGURIDAD · PRIVACIDAD · CALIDAD · TRAZABILIDAD</tspan>
+</text>
+<rect x="650" y="182" width="310" height="168" rx="18" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<circle cx="686" cy="224" r="20" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
+<text x="686" y="230" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="686" dy="0">1</tspan>
+</text>
+<text x="718" y="230" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18.5" font-weight="900" text-anchor="start" style="">
+<tspan x="718" dy="0">CAPTURA</tspan>
+</text>
+<text x="670" y="268" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13.5" font-weight="550" text-anchor="start" style="">
+<tspan x="670" dy="0">Entrada: API o muestra local</tspan>
+<tspan x="670" dy="18.225">Artefacto: snapshot + metadatos</tspan>
+<tspan x="670" dy="18.225">Rol: ingeniero de datos + data owner</tspan>
+</text>
+<rect x="1120" y="288" width="310" height="168" rx="18" fill="#FFFFFF" stroke="#C98500" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<circle cx="1156" cy="330" r="20" fill="#C98500" stroke="#C98500" stroke-width="1"/>
+<text x="1156" y="336" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="1156" dy="0">2</tspan>
+</text>
+<text x="1188" y="336" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18.5" font-weight="900" text-anchor="start" style="">
+<tspan x="1188" dy="0">PREPARACIÓN</tspan>
+</text>
+<text x="1140" y="374" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13.5" font-weight="550" text-anchor="start" style="">
+<tspan x="1140" dy="0">Tipar fechas y duraciones</tspan>
+<tspan x="1140" dy="18.225">Artefacto: tabla curada + excepciones</tspan>
+<tspan x="1140" dy="18.225">Roles: ingeniería + data steward</tspan>
+</text>
+<rect x="1010" y="600" width="310" height="168" rx="18" fill="#FFFFFF" stroke="#6C5AA7" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<circle cx="1046" cy="642" r="20" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="1"/>
+<text x="1046" y="648" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="1046" dy="0">3</tspan>
+</text>
+<text x="1078" y="648" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18.5" font-weight="900" text-anchor="start" style="">
+<tspan x="1078" dy="0">ANÁLISIS</tspan>
+</text>
+<text x="1030" y="686" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13.5" font-weight="550" text-anchor="start" style="">
+<tspan x="1030" dy="0">Perfil descriptivo + reglas</tspan>
+<tspan x="1030" dy="18.225">Artefacto: cola priorizada con motivos</tspan>
+<tspan x="1030" dy="18.225">Roles: BI/datos + experto de dominio</tspan>
+</text>
+<rect x="290" y="600" width="310" height="168" rx="18" fill="#FFFFFF" stroke="#167C80" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<circle cx="326" cy="642" r="20" fill="#167C80" stroke="#167C80" stroke-width="1"/>
+<text x="326" y="648" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="326" dy="0">4</tspan>
+</text>
+<text x="358" y="648" fill="#167C80" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18.5" font-weight="900" text-anchor="start" style="">
+<tspan x="358" dy="0">VISUALIZACIÓN</tspan>
+</text>
+<text x="310" y="686" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13.5" font-weight="550" text-anchor="start" style="">
+<tspan x="310" dy="0">Contexto de prioridad y filtros</tspan>
+<tspan x="310" dy="18.225">Artefacto: reporte / tablero analítico</tspan>
+<tspan x="310" dy="18.225">Roles: analista BI + usuario</tspan>
+</text>
+<rect x="180" y="288" width="310" height="168" rx="18" fill="#FFFFFF" stroke="#E95C3A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<circle cx="216" cy="330" r="20" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
+<text x="216" y="336" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="216" dy="0">5</tspan>
+</text>
+<text x="248" y="336" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18.5" font-weight="900" text-anchor="start" style="">
+<tspan x="248" dy="0">ACCIÓN</tspan>
+</text>
+<text x="200" y="374" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13.5" font-weight="550" text-anchor="start" style="">
+<tspan x="200" dy="0">Revisar contexto · corregir · escalar</tspan>
+<tspan x="200" dy="18.225">Artefacto: registro de decisión auditable</tspan>
+<tspan x="200" dy="18.225">Roles: usuario + dueño del proceso</tspan>
+</text>
+<circle cx="800" cy="492" r="138" fill="url(#hub-grad)" stroke="#2F6FB0" stroke-width="3" filter="url(#shadow)"/>
+<text x="800" y="450" fill="#BFE4F6" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15.5" font-weight="900" text-anchor="middle" style="">
+<tspan x="800" dy="0">DECISIÓN SOPORTADA</tspan>
+</text>
+<text x="800" y="492" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="21" font-weight="800" text-anchor="middle" style="">
+<tspan x="800" dy="0">¿qué contrato revisar</tspan>
+<tspan x="800" dy="24.779999999999998">primero y por qué?</tspan>
+</text>
+<rect x="678" y="560" width="244" height="36" rx="18" fill="#214E6D" stroke="#4E7B99" stroke-width="1.5" opacity="1"/>
+<text x="800.0" y="583" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
+<tspan x="800.0" dy="0">humana · explicable · trazable</tspan>
+</text>
+<path d="M960 260 C1040 245 1110 270 1135 310" stroke="#2F6FB0" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path d="M1370 455 C1410 530 1320 620 1260 635" stroke="#C98500" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-amber)"/>
+<path d="M1010 682 C850 795 600 795 590 682" stroke="#6C5AA7" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>
+<path d="M290 635 C190 615 135 520 205 455" stroke="#167C80" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<path d="M330 288 C430 170 590 165 650 226" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-orange)"/>
+<rect x="1040" y="204" width="150" height="36" rx="18" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<text x="1115.0" y="227" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
+<tspan x="1115.0" dy="0">datos crudos</tspan>
+</text>
+<rect x="1346" y="520" width="185" height="36" rx="18" fill="#FFF3D2" stroke="#C98500" stroke-width="1.5" opacity="1"/>
+<text x="1438.5" y="543" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
+<tspan x="1438.5" dy="0">datos preparados</tspan>
+</text>
+<rect x="710" y="765" width="180" height="36" rx="18" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
+<text x="800.0" y="788" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
+<tspan x="800.0" dy="0">alertas y motivos</tspan>
+</text>
+<rect x="60" y="520" width="200" height="36" rx="18" fill="#E3F5F5" stroke="#167C80" stroke-width="1.5" opacity="1"/>
+<text x="160.0" y="543" fill="#167C80" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
+<tspan x="160.0" dy="0">evidencia priorizada</tspan>
+</text>
+<rect x="390" y="172" width="260" height="36" rx="18" fill="#FDE9E3" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
+<text x="520.0" y="195" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
+<tspan x="520.0" dy="0">decisión → nuevo dato</tspan>
+</text>
+<rect x="48" y="836" width="1504" height="44" rx="14" fill="#E7EFF5" stroke="#D0DFEA" stroke-width="1.5" opacity="1"/>
+<rect x="52" y="840" width="239" height="36" rx="11" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
+<text x="171.5" y="863" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="900" text-anchor="middle" style="">
+<tspan x="171.5" dy="0">DISTINCIÓN ESENCIAL</tspan>
+</text>
+<text x="306" y="863" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
+<tspan x="306" dy="0">Visualizar muestra evidencia; actuar exige autoridad, criterio, registro y retroalimentación.</tspan>
+</text>
+</svg>

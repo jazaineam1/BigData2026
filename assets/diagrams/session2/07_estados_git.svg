@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">Git y GitHub como conversación entre roles</title>
+<desc id="desc">Propuesta, objeciones profesionales, corrección, CI y decisión humana conservadas en un Pull Request.</desc>
+<defs>
+              <linearGradient id="header-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#0D273E"/>
+                <stop offset="100%" stop-color="#1D4F73"/>
+              </linearGradient>
+              <linearGradient id="navy-card-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#184368"/>
+                <stop offset="100%" stop-color="#0F2B48"/>
+              </linearGradient>
+              <linearGradient id="hub-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1C4B72"/>
+                <stop offset="100%" stop-color="#0A2238"/>
+              </linearGradient>
+              <filter id="shadow" x="-10%" y="-10%" width="125%" height="130%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F2B48" flood-opacity="0.09"/>
+              </filter>
+              <filter id="shadow-lg" x="-15%" y="-15%" width="135%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F2B48" flood-opacity="0.14"/>
+              </filter>
+              <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#2F6FB0"/>
+              </marker>
+              <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#C93F34"/>
+              </marker>
+              <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#24855A"/>
+              </marker>
+              <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#6C5AA7"/>
+              </marker>
+              <marker id="arrow-orange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#E95C3A"/>
+              </marker>
+              <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#C98500"/>
+              </marker>
+              <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#167C80"/>
+              </marker>
+              <marker id="arrow-ink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#17324D"/>
+              </marker>
+            </defs>
+<rect width="1600" height="900" fill="#F3F7FA"/>
+<rect x="0" y="0" width="1600" height="114" rx="0" fill="url(#header-grad)" stroke="#0D273E" stroke-width="0" opacity="1"/>
+<line x1="0" y1="114" x2="1600" y2="114" stroke="#2F6FB0" stroke-width="2" fill="none" stroke-linecap="round"/>
+<rect x="1376" y="24" width="176" height="36" rx="18" fill="#214E6D" stroke="#3F769C" stroke-width="1.5" opacity="1"/>
+<text x="1464.0" y="47" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="middle" style="">
+<tspan x="1464.0" dy="0">MAPA 7 DE 7</tspan>
+</text>
+<text x="48" y="48" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" text-anchor="start" style="">
+<tspan x="48" dy="0">Git como puente: conservar la conversación profesional</tspan>
+</text>
+<text x="48" y="80" fill="#D1E6F5" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" text-anchor="start" style="">
+<tspan x="48" dy="0">La rama contiene una propuesta; el Pull Request relaciona objeciones, correcciones y validaciones</tspan>
+</text>
+<rect x="42" y="176" width="300" height="168" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
+<rect x="42" y="176" width="8" height="168" rx="4" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
+<circle cx="72" cy="212" r="17" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
+<text x="72" y="218" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="72" dy="0">1</tspan>
+</text>
+<text x="100" y="218" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="100" dy="0">Necesidad del proceso</tspan>
+</text>
+<rect x="64" y="238" width="180" height="36" rx="18" fill="#FFFFFF" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
+<text x="154.0" y="261" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="154.0" dy="0">VALOR + CRITERIO</tspan>
+</text>
+<text x="66" y="300" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="66" dy="0">Priorizar cada 24 horas</tspan>
+<tspan x="66" dy="20.25">Dueño: ¿es un SLA validado?</tspan>
+</text>
+<rect x="42" y="438" width="300" height="194" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
+<rect x="42" y="438" width="8" height="194" rx="4" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="0" opacity="1"/>
+<circle cx="72" cy="474" r="17" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
+<text x="72" y="480" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="72" dy="0">2</tspan>
+</text>
+<text x="100" y="480" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="100" dy="0">Propuesta en una rama</tspan>
+</text>
+<rect x="64" y="500" width="180" height="36" rx="18" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<text x="154.0" y="523" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="154.0" dy="0">NO CAMBIA MAIN</tspan>
+</text>
+<text x="66" y="562" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="66" dy="0">Arquitectura diaria</tspan>
+<tspan x="66" dy="20.25">Reglas + datos + controles</tspan>
+<tspan x="66" dy="20.25">hito/s02-negocio</tspan>
+</text>
+<line x1="192" y1="344" x2="192" y2="438" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-orange)"/>
+<rect x="398" y="166" width="322" height="150" rx="16" fill="#FFFFFF" stroke="#E95C3A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="398" y="166" width="322" height="44" rx="16" fill="#FDE9E3" stroke="#E95C3A" stroke-width="1" opacity="1"/>
+<text x="418" y="195" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="900" text-anchor="start" style="">
+<tspan x="418" dy="0">Dueño del proceso</tspan>
+</text>
+<text x="418" y="238" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
+<tspan x="418" dy="0">¿de dónde sale el SLA?</tspan>
+<tspan x="418" dy="18.900000000000002">¿qué acción mejora?</tspan>
+</text>
+<rect x="768" y="166" width="322" height="150" rx="16" fill="#FFFFFF" stroke="#C98500" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="768" y="166" width="322" height="44" rx="16" fill="#FFF3D2" stroke="#C98500" stroke-width="1" opacity="1"/>
+<text x="788" y="195" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="900" text-anchor="start" style="">
+<tspan x="788" dy="0">Steward + dominio</tspan>
+</text>
+<text x="788" y="238" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
+<tspan x="788" dy="0">¿qué significa fecha?</tspan>
+<tspan x="788" dy="18.900000000000002">¿cómo tratamos faltantes?</tspan>
+</text>
+<rect x="1138" y="166" width="322" height="150" rx="16" fill="#FFFFFF" stroke="#C93F34" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="1138" y="166" width="322" height="44" rx="16" fill="#FCE8E6" stroke="#C93F34" stroke-width="1" opacity="1"/>
+<text x="1158" y="195" fill="#C93F34" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="900" text-anchor="start" style="">
+<tspan x="1158" dy="0">Seguridad y privacidad</tspan>
+</text>
+<text x="1158" y="238" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
+<tspan x="1158" dy="0">¿qué dato sobra?</tspan>
+<tspan x="1158" dy="18.900000000000002">¿quién puede verlo?</tspan>
+</text>
+<rect x="430" y="400" width="420" height="236" rx="22" fill="url(#hub-grad)" stroke="#2F6FB0" stroke-width="2.5" opacity="1" filter="url(#shadow)"/>
+<rect x="535" y="424" width="210" height="36" rx="18" fill="#214E6D" stroke="#4E7B99" stroke-width="1.5" opacity="1"/>
+<text x="640.0" y="447" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
+<tspan x="640.0" dy="0">PULL REQUEST</tspan>
+</text>
+<text x="640" y="492" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="22" font-weight="850" text-anchor="middle" style="">
+<tspan x="640" dy="0">Propósito + diferencia</tspan>
+<tspan x="640" dy="26.84">+ preguntas + límites</tspan>
+</text>
+<text x="640" y="572" fill="#D7EBF7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="600" text-anchor="middle" style="">
+<tspan x="640" dy="0">No es una aprobación automática</tspan>
+<tspan x="640" dy="18.85">Es el lugar de la conversación</tspan>
+</text>
+<line x1="342" y1="535" x2="430" y2="535" stroke="#2F6FB0" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
+<path d="M559 316 C559 354 590 370 610 400" stroke="#E95C3A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-orange)"/>
+<path d="M929 316 C900 354 790 370 760 400" stroke="#C98500" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-amber)"/>
+<path d="M1299 316 C1180 350 900 360 840 438" stroke="#C93F34" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-red)"/>
+<rect x="928" y="402" width="298" height="190" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
+<rect x="928" y="402" width="8" height="190" rx="4" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
+<circle cx="958" cy="438" r="17" fill="#24855A" stroke="#24855A" stroke-width="1"/>
+<text x="958" y="444" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="958" dy="0">3</tspan>
+</text>
+<text x="986" y="444" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="986" dy="0">Corrección explicada</tspan>
+</text>
+<rect x="950" y="464" width="180" height="36" rx="18" fill="#FFFFFF" stroke="#24855A" stroke-width="1.5" opacity="1"/>
+<text x="1040.0" y="487" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="1040.0" dy="0">OBJECIÓN → CAMBIO</tspan>
+</text>
+<text x="952" y="526" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="952" dy="0">Arquitectura + ingeniería</tspan>
+<tspan x="952" dy="20.25">cambian la misma rama</tspan>
+<tspan x="952" dy="20.25">nueva versión responde al PR</tspan>
+</text>
+<line x1="850" y1="518" x2="928" y2="500" stroke="#24855A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-green)"/>
+<path d="M928 560 C890 650 780 690 700 636" stroke="#24855A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)" stroke-dasharray="7 5"/>
+<rect x="928" y="660" width="298" height="116" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="928" y="660" width="8" height="116" rx="4" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
+<circle cx="958" cy="696" r="17" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="1"/>
+<text x="958" y="702" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="958" dy="0">4</tspan>
+</text>
+<text x="986" y="702" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="986" dy="0">CI · asistente</tspan>
+</text>
+<text x="952" y="738" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13.5" font-weight="500" text-anchor="start" style="">
+<tspan x="952" dy="0">estructura · marcadores · secretos</tspan>
+</text>
+<line x1="1077" y1="592" x2="1077" y2="660" stroke="#6C5AA7" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-purple)"/>
+<rect x="1280" y="402" width="278" height="190" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
+<rect x="1280" y="402" width="8" height="190" rx="4" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
+<circle cx="1310" cy="438" r="17" fill="#E95C3A" stroke="#E95C3A" stroke-width="1"/>
+<text x="1310" y="444" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="1310" dy="0">5</tspan>
+</text>
+<text x="1338" y="444" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="1338" dy="0">Juicio humano</tspan>
+</text>
+<rect x="1302" y="464" width="180" height="36" rx="18" fill="#FFFFFF" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
+<text x="1392.0" y="487" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="1392.0" dy="0">NO LO HACE CI</tspan>
+</text>
+<text x="1304" y="526" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
+<tspan x="1304" dy="0">Proceso: ¿sirve?</tspan>
+<tspan x="1304" dy="20.25">Dominio: ¿es válido?</tspan>
+<tspan x="1304" dy="20.25">Seguridad: ¿es aceptable?</tspan>
+</text>
+<line x1="1226" y1="500" x2="1280" y2="500" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-orange)"/>
+<path d="M1226 718 C1290 718 1300 594 1350 570" stroke="#6C5AA7" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>
+<rect x="1280" y="660" width="278" height="116" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="1280" y="660" width="8" height="116" rx="4" fill="#167C80" stroke="#167C80" stroke-width="0" opacity="1"/>
+<circle cx="1310" cy="696" r="17" fill="#167C80" stroke="#167C80" stroke-width="1"/>
+<text x="1310" y="702" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
+<tspan x="1310" dy="0">6</tspan>
+</text>
+<text x="1338" y="702" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="1338" dy="0">Acción del usuario</tspan>
+</text>
+<text x="1304" y="738" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start" style="">
+<tspan x="1304" dy="0">revisar · corregir · escalar</tspan>
+<tspan x="1304" dy="17.55">registrar resultado</tspan>
+</text>
+<line x1="1419" y1="592" x2="1419" y2="660" stroke="#167C80" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-teal)"/>
+<path d="M1280 718 C1180 820 260 820 192 632" stroke="#167C80" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)" stroke-dasharray="8 6"/>
+<rect x="510" y="790" width="570" height="36" rx="18" fill="#E3F5F5" stroke="#167C80" stroke-width="1.5" opacity="1"/>
+<text x="795.0" y="813" fill="#167C80" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="795.0" dy="0">ACCIÓN REGISTRADA → NUEVA EVIDENCIA → NUEVA CONVERSACIÓN</tspan>
+</text>
+<rect x="48" y="836" width="1504" height="44" rx="14" fill="#E7EFF5" stroke="#D0DFEA" stroke-width="1.5" opacity="1"/>
+<rect x="52" y="840" width="173" height="36" rx="11" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
+<text x="138.5" y="863" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="900" text-anchor="middle" style="">
+<tspan x="138.5" dy="0">LECTURA CLAVE</tspan>
+</text>
+<text x="240" y="863" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
+<tspan x="240" dy="0">Git conserva versiones; GitHub conserva la conversación; las personas conservan la responsabilidad.</tspan>
+</text>
+</svg>

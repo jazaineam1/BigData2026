@@ -16,10 +16,11 @@ VISUAL_BASES = [
     for name in [
         "01_hilo_decision",
         "02_proceso_as_is",
-        "03_puente_analitico",
-        "04_arquitectura_to_be",
-        "05_ciclo_nist",
-        "06_estados_git",
+        "03_adopcion_valor",
+        "04_casos_bi",
+        "05_arquitectura_to_be",
+        "06_ciclo_nist",
+        "07_estados_git",
     ]
 ] + [
     ROOT / "assets" / "session2" / "git" / name
@@ -62,6 +63,11 @@ def main() -> None:
         and cell.get("metadata", {}).get("colab", {}).get("formView") == "both"
     ]
     source = "\n".join("".join(cell.get("source", [])) for cell in cells)
+    question_numbers = sorted(
+        int(match)
+        for cell in questions
+        for match in re.findall(r"# Pregunta (\d+) de 14", "".join(cell.get("source", [])))
+    )
     references = re.findall(r'(?:src|href)="(\.\./(?:assets|Images)/[^"]+)', source)
     missing = [
         reference
@@ -70,31 +76,59 @@ def main() -> None:
     ]
 
     errors = []
-    if len(cells) != 70:
-        errors.append(f"se esperaban 70 celdas y se encontraron {len(cells)}")
-    if len(questions) != 12:
-        errors.append(f"se esperaban 12 preguntas y se encontraron {len(questions)}")
+    if len(cells) < 55:
+        errors.append(f"se esperaba una clase robusta y solo se encontraron {len(cells)} celdas")
+    if len(questions) != 14:
+        errors.append(f"se esperaban 14 preguntas y se encontraron {len(questions)}")
+    if question_numbers != list(range(1, 15)):
+        errors.append(f"numeración de preguntas inesperada: {question_numbers}")
     if len(hidden) != len(code_cells):
         errors.append(
             f"solo {len(hidden)} de {len(code_cells)} celdas de código tienen metadatos de plegado"
         )
+    for index, cell in enumerate(code_cells):
+        cell_source = "".join(cell.get("source", []))
+        if not cell_source.startswith("#@title") or 'display-mode: "form"' not in cell_source.splitlines()[0]:
+            errors.append(f"la celda de código {index} no tiene un título de formulario plegado")
+        try:
+            compile(cell_source, f"notebook-cell-{index}", "exec")
+        except SyntaxError as exc:
+            errors.append(f"la celda de código {index} no compila: {exc.msg}")
     if empty:
         errors.append(f"hay celdas vacías en los índices {empty}")
     if missing:
         errors.append("faltan recursos locales: " + ", ".join(missing))
     if "flowchart " in source or "```mermaid" in source:
         errors.append("el cuaderno todavía contiene Mermaid visible")
-    if "GitHub Classroom" in source:
-        errors.append("el cuaderno todavía menciona GitHub Classroom")
     required_snippets = [
-        "ETL — Extract, Transform, Load",
-        "ELT — Extract, Load, Transform",
-        "el orden y el lugar de la T",
-        "Apoyo de terminal — cuatro ideas antes de usar Git",
+        "Sesión 2 — De la necesidad empresarial al caso de uso de Big Data",
+        "Motivaciones y planificación de la adopción de Big Data",
+        "BI tradicional y BI apoyada por capacidades Big Data",
+        "Reserva curricular",
+        "Matriz RACI compacta de Compras Claras",
+        "Responsabilidades profesionales",
+        "Git como relevo entre roles",
+        "hitos/s02/01_decision_proceso.md",
+        "hitos/s02/02_caso_arquitectura_accion.md",
+        "Git no decide si la arquitectura es correcta",
+        "TOTAL_QUESTIONS = 14",
     ]
     for snippet in required_snippets:
         if snippet not in source:
             errors.append(f"falta el apoyo pedagógico obligatorio: {snippet}")
+
+    for forbidden in [
+        "ETL — Extract, Transform, Load",
+        "## OLTP —",
+        "## Data Warehouse",
+        "## Correspondencia con los cuadernos de referencia",
+        "# Sesiones 2 y 3",
+        "hito/s02-03-negocio",
+        "Presentación relámpago",
+        "| flujo Git, commits, PR y revisión |",
+    ]:
+        if forbidden in source:
+            errors.append(f"el cuaderno adelanta contenido formal de la sesión 4: {forbidden}")
 
     for base in VISUAL_BASES:
         svg_path = base.with_suffix(".svg")

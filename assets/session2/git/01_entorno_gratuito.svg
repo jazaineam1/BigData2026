@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
-<title id="title">Elección del entorno gratuito</title>
-<desc id="desc">Vista de un repositorio privado con rutas de Git local, Codespaces con cuota personal y github.dev.</desc>
+<title id="title">Inicio del laboratorio desde GitHub.com</title>
+<desc id="desc">Vista conceptual del repositorio semestral, sus artefactos y la creación de una rama desde el navegador.</desc>
 <defs>
               <linearGradient id="header-grad" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stop-color="#0D273E"/>
@@ -53,10 +53,10 @@
 <tspan x="1464.0" dy="0">GUÍA GIT 1 DE 4</tspan>
 </text>
 <text x="48" y="48" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="31" font-weight="800" text-anchor="start" style="">
-<tspan x="48" dy="0">Abrir el repositorio y elegir una ruta sostenible</tspan>
+<tspan x="48" dy="0">Abrir el repositorio y reconocer la historia</tspan>
 </text>
 <text x="48" y="80" fill="#D1E6F5" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="400" text-anchor="start" style="">
-<tspan x="48" dy="0">Primero verifica acceso y propietario; después decide dónde editar y ejecutar</tspan>
+<tspan x="48" dy="0">Primero verifica acceso y propietario; después ubica los dos artefactos conectados</tspan>
 </text>
 <rect x="42" y="142" width="1030" height="650" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
 <rect x="42" y="142" width="1030" height="46" rx="16" fill="#EFF3F6" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
@@ -95,25 +95,25 @@
 <tspan x="98" dy="0">▣</tspan>
 </text>
 <text x="124" y="420" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
-<tspan x="124" dy="0">.devcontainer/</tspan>
+<tspan x="124" dy="0">.github/</tspan>
 </text>
 <text x="98" y="445" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
 <tspan x="98" dy="0">▣</tspan>
 </text>
 <text x="124" y="445" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
-<tspan x="124" dy="0">.github/</tspan>
+<tspan x="124" dy="0">data/</tspan>
 </text>
 <text x="98" y="470" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
 <tspan x="98" dy="0">▣</tspan>
 </text>
 <text x="124" y="470" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
-<tspan x="124" dy="0">data/</tspan>
+<tspan x="124" dy="0">hitos/</tspan>
 </text>
 <text x="98" y="495" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
 <tspan x="98" dy="0">▣</tspan>
 </text>
 <text x="124" y="495" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="550" text-anchor="start" style="">
-<tspan x="124" dy="0">docs/</tspan>
+<tspan x="124" dy="0">hitos/s02/</tspan>
 </text>
 <text x="98" y="520" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="start" style="">
 <tspan x="98" dy="0">▣</tspan>
@@ -139,33 +139,31 @@
 </text>
 <rect x="696" y="414" width="350" height="330" rx="12" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
 <text x="720" y="450" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="720" dy="0">Clone</tspan>
+<tspan x="720" dy="0">Editar desde el navegador</tspan>
 </text>
-<rect x="720" y="468" width="92" height="36" rx="18" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
-<text x="766.0" y="491" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
-<tspan x="766.0" dy="0">HTTPS</tspan>
+<rect x="720" y="468" width="180" height="36" rx="18" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<text x="810.0" y="491" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
+<tspan x="810.0" dy="0">RUTA PRINCIPAL</tspan>
 </text>
-<rect x="820" y="468" width="110" height="36" rx="18" fill="#EEF1F4" stroke="#D0DFEA" stroke-width="1.5" opacity="1"/>
-<text x="875.0" y="491" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
-<tspan x="875.0" dy="0">Codespaces</tspan>
+<text x="720" y="535" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="650" text-anchor="start" style="">
+<tspan x="720" dy="0">1 · abrir el artefacto</tspan>
 </text>
-<text x="720" y="535" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
-<tspan x="720" dy="0">Clone using the web URL</tspan>
+<text x="720" y="570" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="650" text-anchor="start" style="">
+<tspan x="720" dy="0">2 · pulsar Edit this file</tspan>
 </text>
-<rect x="720" y="552" width="300" height="44" rx="7" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
-<text x="734" y="580" fill="#17324D" font-family="Consolas, monospace" font-size="12" font-weight="500" text-anchor="start" style="">
-<tspan x="734" dy="0">https://github.com/.../pareja-XX.git</tspan>
+<text x="720" y="605" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="650" text-anchor="start" style="">
+<tspan x="720" dy="0">3 · proponer una rama</tspan>
 </text>
-<rect x="720" y="622" width="300" height="36" rx="18" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
-<text x="870.0" y="645" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
-<tspan x="870.0" dy="0">Open with GitHub Desktop</tspan>
+<rect x="720" y="642" width="300" height="36" rx="18" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
+<text x="870.0" y="665" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
+<tspan x="870.0" dy="0">hito/s02-negocio</tspan>
 </text>
-<text x="720" y="694" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
-<tspan x="720" dy="0">Tip: pulsa . para abrir github.dev</tspan>
+<text x="720" y="704" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="start" style="">
+<tspan x="720" dy="0">Python usa el perfil precomputado</tspan>
 </text>
 <rect x="1100" y="142" width="458" height="650" rx="18" fill="#FFFFFF" stroke="#12395B" stroke-width="1.5" opacity="1"/>
 <text x="1130" y="186" fill="#12395B" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
-<tspan x="1130" dy="0">ÁRBOL DE DECISIÓN</tspan>
+<tspan x="1130" dy="0">TRES COMPROBACIONES</tspan>
 </text>
 <rect x="1128" y="218" width="402" height="128" rx="14" fill="#E7F5ED" stroke="#24855A" stroke-width="1.5" opacity="1"/>
 <circle cx="1162" cy="254" r="20" fill="#24855A" stroke="#24855A" stroke-width="1"/>
@@ -173,14 +171,14 @@
 <tspan x="1162" dy="0">1</tspan>
 </text>
 <text x="1196" y="256" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" text-anchor="start" style="">
-<tspan x="1196" dy="0">Git local</tspan>
+<tspan x="1196" dy="0">Acceso correcto</tspan>
 </text>
 <text x="1196" y="287" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start" style="">
-<tspan x="1196" dy="0">Terminal + Python</tspan>
+<tspan x="1196" dy="0">cuenta + repositorio</tspan>
 </text>
 <rect x="1196" y="300" width="230" height="36" rx="18" fill="#FFFFFF" stroke="#24855A" stroke-width="1.5" opacity="1"/>
 <text x="1311.0" y="323" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
-<tspan x="1311.0" dy="0">siempre gratuito</tspan>
+<tspan x="1311.0" dy="0">no estás en la plantilla</tspan>
 </text>
 <rect x="1128" y="372" width="402" height="128" rx="14" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
 <circle cx="1162" cy="408" r="20" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
@@ -188,14 +186,14 @@
 <tspan x="1162" dy="0">2</tspan>
 </text>
 <text x="1196" y="410" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" text-anchor="start" style="">
-<tspan x="1196" dy="0">Codespaces</tspan>
+<tspan x="1196" dy="0">Artefactos S02</tspan>
 </text>
 <text x="1196" y="441" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start" style="">
-<tspan x="1196" dy="0">Entorno completo</tspan>
+<tspan x="1196" dy="0">decisión + arquitectura</tspan>
 </text>
 <rect x="1196" y="454" width="230" height="36" rx="18" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
 <text x="1311.0" y="477" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
-<tspan x="1311.0" dy="0">solo cuota personal</tspan>
+<tspan x="1311.0" dy="0">mismo argumento</tspan>
 </text>
 <rect x="1128" y="526" width="402" height="128" rx="14" fill="#FFF3D2" stroke="#C98500" stroke-width="1.5" opacity="1"/>
 <circle cx="1162" cy="562" r="20" fill="#C98500" stroke="#C98500" stroke-width="1"/>
@@ -203,14 +201,14 @@
 <tspan x="1162" dy="0">3</tspan>
 </text>
 <text x="1196" y="564" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" text-anchor="start" style="">
-<tspan x="1196" dy="0">github.dev</tspan>
+<tspan x="1196" dy="0">Rama propuesta</tspan>
 </text>
 <text x="1196" y="595" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start" style="">
-<tspan x="1196" dy="0">Editor + Source Control</tspan>
+<tspan x="1196" dy="0">cambio separado de main</tspan>
 </text>
 <rect x="1196" y="608" width="230" height="36" rx="18" fill="#FFFFFF" stroke="#C98500" stroke-width="1.5" opacity="1"/>
 <text x="1311.0" y="631" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
-<tspan x="1311.0" dy="0">sin terminal</tspan>
+<tspan x="1311.0" dy="0">abre conversación</tspan>
 </text>
 <rect x="1128" y="690" width="402" height="70" rx="12" fill="#FCE8E6" stroke="#C93F34" stroke-width="1.5" opacity="1"/>
 <text x="1329" y="718" fill="#C93F34" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="middle" style="">
@@ -225,6 +223,6 @@
 <tspan x="166.0" dy="0">RESULTADO ESPERADO</tspan>
 </text>
 <text x="295" y="863" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
-<tspan x="295" dy="0">La URL termina en tu pareja y puedes crear una rama; no estás en la plantilla ni en el demo.</tspan>
+<tspan x="295" dy="0">Reconoces propietario, dos artefactos y rama; todavía no necesitas terminal ni instalar Git.</tspan>
 </text>
 </svg>
