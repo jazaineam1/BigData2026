@@ -105,8 +105,9 @@ def main() -> None:
         "Motivaciones y planificación de la adopción de Big Data",
         "BI tradicional y BI apoyada por capacidades Big Data",
         "Reserva curricular",
-        "Matriz RACI compacta de Compras Claras",
-        "Responsabilidades profesionales",
+        "Siete responsabilidades que sostienen un proyecto analítico",
+        "Ejemplo continuo — ¿qué ocurre si cambia `fecha_de_inicio`?",
+        "Git conserva el relevo, no reemplaza las responsabilidades",
         "Git como relevo entre roles",
         "hitos/s02/01_decision_proceso.md",
         "hitos/s02/02_caso_arquitectura_accion.md",
@@ -126,9 +127,19 @@ def main() -> None:
         "hito/s02-03-negocio",
         "Presentación relámpago",
         "| flujo Git, commits, PR y revisión |",
+        "Matriz RACI",
+        "Product Owner",
+        "patrocinador",
+        "data owner",
+        "arquitecto de solución",
+        "analytics engineer",
+        "ML engineer",
+        "MLOps",
+        "DevOps",
+        "SRE",
     ]:
         if forbidden in source:
-            errors.append(f"el cuaderno adelanta contenido formal de la sesión 4: {forbidden}")
+            errors.append(f"el cuaderno contiene texto fuera del alcance estudiantil acordado: {forbidden}")
 
     for base in VISUAL_BASES:
         svg_path = base.with_suffix(".svg")

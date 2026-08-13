@@ -513,7 +513,7 @@ def make_adoption() -> Canvas:
 
     # Seis puertas de preparación.
     gates = [
-        (350, 158, "1 · VALOR", ["brecha + decisión", "KPI + patrocinador"], ORANGE, ORANGE_L),
+        (350, 158, "1 · VALOR", ["brecha + decisión", "dueño + KPI"], ORANGE, ORANGE_L),
         (620, 158, "2 · DATOS", ["fuente + significado", "calidad + permiso"], AMBER, AMBER_L),
         (890, 158, "3 · PROCESO", ["acción posterior", "SLA + retroalimentación"], BLUE, BLUE_L),
         (350, 362, "4 · PERSONAS", ["dueño + usuario", "habilidad + operación"], PURPLE, PURPLE_L),
@@ -672,7 +672,7 @@ def make_architecture() -> Canvas:
         ],
         [
             ("Fuentes", "SECOP + internos"), ("Entidades", "contrato · entidad"),
-            ("Reglas", "data steward"), ("Diseño de datos", "arquitecto + linaje"),
+            ("Reglas", "data steward"), ("Diseño de datos", "arquitecto de datos + linaje"),
         ],
         [
             ("Integración", "ingeniería de datos"), ("Calidad", "steward + pruebas"),
@@ -680,7 +680,7 @@ def make_architecture() -> Canvas:
         ],
         [
             ("Conectividad", "API · archivos"), ("Almacenamiento", "Parquet · objetos"),
-            ("Procesamiento", "Pandas · Spark"), ("Operación", "plataforma · SRE"),
+            ("Procesamiento", "Pandas · Spark"), ("Operación", "recuperación · métricas"),
         ],
     ]
 
@@ -730,7 +730,7 @@ def make_nist() -> Canvas:
     c.text(800, 155, "GOBIERNO · SEGURIDAD · PRIVACIDAD · CALIDAD · TRAZABILIDAD", size=14.5, fill=NAVY, weight=900, anchor="middle")
 
     cards = [
-        (650, 182, "1", "CAPTURA", BLUE, BLUE_L, ["Entrada: API o muestra local", "Artefacto: snapshot + metadatos", "Rol: ingeniero de datos + data owner"]),
+        (650, 182, "1", "CAPTURA", BLUE, BLUE_L, ["Entrada: API o muestra local", "Artefacto: snapshot + metadatos", "Rol: ingeniero de datos · control de acceso"]),
         (1120, 288, "2", "PREPARACIÓN", AMBER, AMBER_L, ["Tipar fechas y duraciones", "Artefacto: tabla curada + excepciones", "Roles: ingeniería + data steward"]),
         (1010, 600, "3", "ANÁLISIS", PURPLE, PURPLE_L, ["Perfil descriptivo + reglas", "Artefacto: cola priorizada con motivos", "Roles: BI/datos + experto de dominio"]),
         (290, 600, "4", "VISUALIZACIÓN", TEAL, TEAL_L, ["Contexto de prioridad y filtros", "Artefacto: reporte / tablero analítico", "Roles: analista BI + usuario"]),
@@ -784,7 +784,7 @@ def make_git_states() -> Canvas:
     reviews = [
         (398, "Dueño del proceso", ["¿de dónde sale el SLA?", "¿qué acción mejora?"], ORANGE, ORANGE_L),
         (768, "Steward + dominio", ["¿qué significa fecha?", "¿cómo tratamos faltantes?"], AMBER, AMBER_L),
-        (1138, "Seguridad y privacidad", ["¿qué dato sobra?", "¿quién puede verlo?"], RED, RED_L),
+        (1138, "Control de privacidad", ["¿qué dato sobra?", "¿quién puede verlo?"], RED, RED_L),
     ]
     for x, title, body, color, fill in reviews:
         c.rect(x, 166, 322, 150, fill=WHITE, stroke=color, sw=2, rx=16, shadow=True)
@@ -809,7 +809,7 @@ def make_git_states() -> Canvas:
     c.card(928, 660, 298, 116, "CI · asistente", ["estructura · marcadores · secretos"], PURPLE, number=4, shadow=False, title_size=16, body_size=13.5)
     c.line(1077, 592, 1077, 660, stroke=PURPLE, marker="purple")
 
-    c.card(1280, 402, 278, 190, "Juicio humano", ["Proceso: ¿sirve?", "Dominio: ¿es válido?", "Seguridad: ¿es aceptable?"], ORANGE, number=5, tag="NO LO HACE CI", title_size=17)
+    c.card(1280, 402, 278, 190, "Juicio humano", ["Proceso: ¿sirve?", "Dominio: ¿es válido?", "Controles: ¿se cumplen?"], ORANGE, number=5, tag="NO LO HACE CI", title_size=17)
     c.line(1226, 500, 1280, 500, stroke=ORANGE, marker="orange")
     c.path("M1226 718 C1290 718 1300 594 1350 570", stroke=PURPLE, sw=2.5, marker="purple")
 

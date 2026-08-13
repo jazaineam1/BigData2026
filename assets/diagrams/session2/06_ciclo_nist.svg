@@ -73,7 +73,7 @@
 <text x="670" y="268" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13.5" font-weight="550" text-anchor="start" style="">
 <tspan x="670" dy="0">Entrada: API o muestra local</tspan>
 <tspan x="670" dy="18.225">Artefacto: snapshot + metadatos</tspan>
-<tspan x="670" dy="18.225">Rol: ingeniero de datos + data owner</tspan>
+<tspan x="670" dy="18.225">Rol: ingeniero de datos · control de acceso</tspan>
 </text>
 <rect x="1120" y="288" width="310" height="168" rx="18" fill="#FFFFFF" stroke="#C98500" stroke-width="2" opacity="1" filter="url(#shadow)"/>
 <circle cx="1156" cy="330" r="20" fill="#C98500" stroke="#C98500" stroke-width="1"/>

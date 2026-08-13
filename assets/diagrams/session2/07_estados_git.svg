@@ -115,7 +115,7 @@
 <rect x="1138" y="166" width="322" height="150" rx="16" fill="#FFFFFF" stroke="#C93F34" stroke-width="2" opacity="1" filter="url(#shadow)"/>
 <rect x="1138" y="166" width="322" height="44" rx="16" fill="#FCE8E6" stroke="#C93F34" stroke-width="1" opacity="1"/>
 <text x="1158" y="195" fill="#C93F34" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="900" text-anchor="start" style="">
-<tspan x="1158" dy="0">Seguridad y privacidad</tspan>
+<tspan x="1158" dy="0">Control de privacidad</tspan>
 </text>
 <text x="1158" y="238" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="start" style="">
 <tspan x="1158" dy="0">¿qué dato sobra?</tspan>
@@ -187,7 +187,7 @@
 <text x="1304" y="526" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
 <tspan x="1304" dy="0">Proceso: ¿sirve?</tspan>
 <tspan x="1304" dy="20.25">Dominio: ¿es válido?</tspan>
-<tspan x="1304" dy="20.25">Seguridad: ¿es aceptable?</tspan>
+<tspan x="1304" dy="20.25">Controles: ¿se cumplen?</tspan>
 </text>
 <line x1="1226" y1="500" x2="1280" y2="500" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-orange)"/>
 <path d="M1226 718 C1290 718 1300 594 1350 570" stroke="#6C5AA7" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>

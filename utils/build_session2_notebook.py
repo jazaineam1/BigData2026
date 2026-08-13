@@ -770,85 +770,62 @@ def build_cells():
         ),
         md(
             """
-            ## Los roles aparecen porque el proceso cruza varias responsabilidades
+            ## Siete responsabilidades que sostienen un proyecto analítico
 
             Hasta aquí hablamos de “la organización” como si fuera una sola persona. El AS-IS demuestra lo
-            contrario: quien define valor, quien produce el dato, quien gobierna su significado, quien construye el
-            flujo y quien usa la evidencia no necesariamente son la misma persona.
+            contrario: definir valor, preservar el significado, construir el flujo e interpretar la evidencia son
+            decisiones diferentes. Un **rol** representa una responsabilidad; no equivale necesariamente a un cargo.
+            En un equipo pequeño una persona puede asumir varios roles, pero debe saber desde cuál responsabilidad
+            está decidiendo.
 
-            Un **rol** es un conjunto de responsabilidades y decisiones; no siempre coincide con un cargo. En una
-            organización pequeña, una persona puede asumir varios roles. Lo importante es que ninguna responsabilidad
-            crítica quede implícita.
+            Para esta sesión estudiaremos únicamente siete roles que permiten seguir el recorrido completo de
+            Compras Claras:
 
-            ### Roles de negocio: definen valor y acción
+            | Rol esencial | Decisión principal | Artefacto y relevo | Error que evita |
+            |---|---|---|---|
+            | **dueño del proceso** | qué resultado debe mejorar, con qué KPI y qué acción ocurre después | entrega objetivo, AS-IS, SLA y criterio de aceptación a arquitectura; recibe evidencia para decidir | optimizar una métrica sin mejorar el proceso |
+            | **arquitecto empresarial** | cómo se alinean proceso, información, aplicaciones y tecnología con la decisión | convierte la necesidad en un blueprint trazable y entrega restricciones a arquitectura de datos | comenzar por una herramienta sin justificar su capacidad |
+            | **arquitecto de datos** | cómo se organizan, relacionan, integran y evolucionan las fuentes y entidades | define modelos, contratos y linaje que puede implementar ingeniería | diseñar datos correctos para una sola versión, pero imposibles de evolucionar |
+            | **data steward** | qué significa cada dato y qué regla conserva su calidad | mantiene definiciones, reglas y excepciones; consulta al experto contractual y entrega reglas verificables | limpiar un campo sin saber qué representa |
+            | **ingeniero de datos** | cómo capturar, preparar, probar y observar el recorrido del dato | implementa flujos reproducibles y devuelve excepciones al steward | inventar significado dentro del código o perder trazabilidad |
+            | **analista BI/datos** | qué ocurrió, cómo se mide y qué puede interpretarse responsablemente | produce métricas, comparaciones y visualizaciones; entrega evidencia contextualizada al usuario | presentar una cifra correcta con una definición equivocada |
+            | **científico de datos** | si una hipótesis, experimento o modelo mejora una línea base ya definida | compara modelos o experimentos y comunica desempeño, incertidumbre y límites | usar predicción cuando reglas descriptivas suficientes todavía no se han probado |
 
-            | Rol | Pregunta que responde | Artefacto o decisión en Compras Claras |
-            |---|---|---|
-            | patrocinador | ¿por qué invertir y qué bloqueo debe removerse? | valor esperado y continuidad del caso |
-            | dueño del proceso | ¿qué resultado, KPI y SLA deben mejorar? | prioridad, criterio de aceptación y acción posterior |
-            | Product Owner analítico | ¿qué necesidad se atiende primero? | orden de evolución del producto analítico |
-            | analista de negocio | ¿cómo se traduce el problema en proceso y reglas? | AS-IS, requerimientos y criterios verificables |
-            | experto de dominio | ¿qué excepciones cambian la interpretación? | validación contractual de reglas y límites |
-            | usuario de la evidencia | ¿la salida permite decidir y actuar? | revisión de la cola y registro de respuesta |
-
-            ### Arquitectura y gobierno: organizan y protegen el significado
-
-            | Rol | Pregunta que responde | Distinción clave |
-            |---|---|---|
-            | arquitecto empresarial | ¿cómo se alinean estrategia, proceso, información, aplicaciones y tecnología? | no diseña solo infraestructura |
-            | arquitecto de solución | ¿qué componentes integrables materializan el TO-BE? | traduce el blueprint a una solución coherente |
-            | arquitecto de datos | ¿cómo se organizan, integran y evolucionan fuentes, modelos y linaje? | diseña; no opera por sí solo todos los flujos |
-            | data owner | ¿quién autoriza usos y responde institucionalmente por el dato? | propiedad y riesgo institucional |
-            | data steward | ¿qué significa el dato y qué regla mantiene su calidad? | definiciones, metadatos y excepciones |
-            | seguridad y privacidad | ¿quién puede acceder y qué debe minimizarse? | controles, separación de funciones y exposición |
-            | cumplimiento o auditoría | ¿puede reconstruirse la decisión y su evidencia? | trazabilidad y conformidad |
-
-            ### Construcción y análisis: producen capacidades y evidencia
-
-            | Rol | Responsabilidad principal | No debe confundirse con... |
-            |---|---|---|
-            | ingeniero de datos | implementar captura, preparación, pruebas y observabilidad | arquitecto de datos, que define organización y evolución |
-            | analytics engineer | producir modelos analíticos documentados y reutilizables | analista BI, que interpreta y comunica métricas |
-            | analista de datos o BI | explicar qué ocurrió con métricas gobernadas | científico de datos, que diseña experimentos o modelos |
-            | científico de datos | formular hipótesis, experimentos o modelos cuando el caso lo justifica | requisito automático de todo proyecto de datos |
-            | ingeniero de software | integrar capacidades analíticas con aplicaciones y procesos | responsable del significado del dato |
-            | ML engineer/MLOps | operacionalizar y monitorear modelos | necesario para este primer hito descriptivo |
-            | plataforma, DevOps o SRE | automatizar operación, recuperación, monitoreo y costos | dueño de la decisión empresarial |
-            | responsable de calidad | comprobar datos, código, artefactos y criterios | sustituto del experto de dominio |
-
-            **Relevo clave.** El arquitecto de datos define qué debe significar y cómo debe evolucionar una entidad;
-            el ingeniero de datos implementa y opera su recorrido; el data steward verifica que significado y reglas
-            sigan vigentes; el analista BI usa el resultado para explicar el proceso. Si hace falta un modelo, el
-            científico de datos entra después de demostrar que una regla o análisis descriptivo no basta.
-
-            **Error frecuente:** contratar una herramienta o un científico de datos antes de asignar dueño del
-            proceso, experto de dominio y responsable de la acción. Un modelo no repara responsabilidades ausentes.
+            El **experto de dominio** y el **usuario de la evidencia** continúan siendo actores indispensables del
+            proceso: uno valida excepciones contractuales y el otro ejecuta la revisión. No los convertimos en nuevos
+            cargos para memorizar. Seguridad, privacidad, calidad, observabilidad y costos se tratarán como
+            **controles transversales** que todos deben respetar.
             """
         ),
         md(
             """
-            ## Matriz RACI compacta de Compras Claras
+            ## Ejemplo continuo — ¿qué ocurre si cambia `fecha_de_inicio`?
 
-            RACI hace explícito quién **R**ealiza el trabajo, quién **A**prueba o responde finalmente, a quién se
-            **C**onsulta y a quién se **I**nforma. No describe jerarquía completa; aclara un relevo concreto.
+            Supongamos que el diccionario de SECOP cambia: `fecha_de_inicio` ya no significa la fecha planeada, sino
+            la fecha efectiva registrada después de una validación. La columna conserva el mismo nombre, pero una
+            comparación histórica puede cambiar de sentido.
 
-            | Decisión o artefacto | A | R | C | I |
-            |---|---|---|---|---|
-            | problema, KPI y SLA | dueño del proceso | analista de negocio | patrocinador, usuario | equipo técnico |
-            | proceso AS-IS y excepciones | dueño del proceso | analista de negocio | experto de dominio, usuario | arquitectos |
-            | definiciones y reglas de calidad | data owner | data steward | arquitecto e ingeniero de datos | analista BI |
-            | arquitectura TO-BE | patrocinador / dueño del proceso | arquitecto empresarial | solución, datos, seguridad, plataforma | equipo analítico |
-            | captura y preparación | arquitecto de solución | ingeniero de datos | steward, seguridad, calidad | dueño del proceso |
-            | métricas e interpretación | dueño del proceso | analista BI | experto de dominio, steward | patrocinador |
-            | revisión y acción contractual | dueño del proceso | usuario de la evidencia | experto de dominio, cumplimiento | equipo de datos |
+            1. El **dueño del proceso** confirma qué decisión usa la fecha y si el KPI “tiempo hasta primera revisión”
+               debe calcularse desde la fecha planeada o desde la efectiva.
+            2. El **arquitecto empresarial** identifica qué proceso, reporte, aplicación y capacidad tecnológica
+               resultan afectados; evita tratar el cambio como un asunto aislado de una columna.
+            3. El **arquitecto de datos** actualiza definición, tipo, procedencia, versión y relaciones del campo, y
+               determina si se necesita conservar ambos conceptos.
+            4. El **data steward** valida la definición con el experto contractual, documenta nulos y excepciones y
+               formula una regla que otra persona pueda comprobar.
+            5. El **ingeniero de datos** implementa tipado, pruebas y registro de excepciones sin sobrescribir la
+               evidencia original; si la regla es ambigua, devuelve la pregunta al steward.
+            6. El **analista BI/datos** recalcula el KPI, compara la versión anterior con la nueva y explica qué parte
+               de la tendencia corresponde al cambio semántico.
+            7. El **científico de datos** solo entra si existe después una pregunta predictiva bien delimitada y una
+               línea base demuestra que reglas y BI no son suficientes. Un campo renombrado no justifica por sí solo
+               entrenar un modelo.
 
-            **Cómo leer una fila.** En “definiciones y reglas de calidad”, el data steward realiza el trabajo
-            semántico; el data owner responde por la decisión institucional; arquitectura e ingeniería son
-            consultadas para asegurar que la regla sea implementable; BI necesita conocer el resultado.
+            **Qué enseña el relevo.** Ningún rol puede corregir solo el problema completo. El valor se conserva cuando
+            la decisión, el significado, el diseño, el código y la interpretación cambian de forma coordinada.
 
-            **Limitación.** Esta matriz es una hipótesis docente. En una entidad real debe validarse con estructura,
-            competencias y segregación de funciones. El siguiente bloque convierte estas responsabilidades en un
-            caso de uso que pueda evaluarse.
+            **Error frecuente:** pedir al ingeniero que “arregle la fecha” sin confirmar su significado. El código
+            puede ejecutarse correctamente y aun así producir una métrica conceptualmente falsa.
             """
         ),
         md(
@@ -1190,7 +1167,7 @@ def build_cells():
 
             | Etapa | Entrada | Actividad Compras Claras | Responsable | Artefacto | Control | Métrica de éxito |
             |---|---|---|---|---|---|---|
-            | Captura | API o muestra SECOP | registrar fuente, fecha, campos y límite | ingeniero de datos; data owner autoriza | snapshot reproducible | acceso y procedencia | extracción completa según contrato |
+            | Captura | API o muestra SECOP | registrar fuente, fecha, campos y límite | ingeniero de datos | snapshot reproducible | autorización, acceso y procedencia | extracción completa según contrato |
             | Preparación | snapshot crudo | tipar, revisar nulos, fechas, duplicados y unidades | ingeniero de datos + data steward | tabla preparada + excepciones | regla y linaje | % filas válidas y excepciones contadas |
             | Análisis | datos preparados | perfilar duraciones y reglas de prioridad | analista BI/datos + experto de dominio | métricas y cola candidata | sesgo y reproducibilidad | cobertura de reglas explicables |
             | Visualización | resultados | presentar razón de prioridad, filtros y calidad | analista BI + usuario | tablero o reporte | accesibilidad y contexto | tiempo para comprender un caso |
@@ -1302,14 +1279,14 @@ def build_cells():
             [
                 "El científico de datos decide solo el significado, modifica producción y aprueba el KPI.",
                 "El data steward aclara la definición; el arquitecto de datos evalúa impacto; el ingeniero de datos corrige el flujo; BI reinterpreta la métrica.",
-                "El patrocinador cambia el script directamente y omite a los responsables de datos.",
+                "El dueño del proceso cambia el script directamente sin aclarar la definición ni revisar su impacto.",
                 "El analista BI conserva la métrica anterior para evitar revisar el resultado.",
             ],
             1,
             [
                 "Concentrar significado, implementación y aprobación elimina controles y no aprovecha al experto de dominio ni al dueño del proceso.",
                 "Correcto: cada rol aporta una responsabilidad distinta y el relevo conserva definición, impacto técnico, operación e interpretación.",
-                "El patrocinador justifica valor y remueve bloqueos, pero no sustituye gobierno semántico ni construcción técnica.",
+                "El dueño del proceso define la decisión y el KPI, pero no debe cambiar por sí solo una regla semántica ni su implementación.",
                 "Una métrica basada en una definición obsoleta puede ser consistente en código y aun así inducir una decisión equivocada.",
             ],
         ),
@@ -1320,8 +1297,8 @@ def build_cells():
 
             ## ¿Por qué aparecen después de los roles y del blueprint?
 
-            Negocio definió valor; el dueño del proceso explicó el trabajo; el data steward protegió el significado;
-            arquitectura organizó las capacidades; ingeniería preparó la evidencia; BI la convirtió en una salida
+            El dueño del proceso definió valor; el data steward protegió el significado; arquitectura organizó las
+            capacidades; ingeniería preparó la evidencia; BI la convirtió en una salida
             comprensible. El problema siguiente no es comprar otra tecnología:
 
             > ¿Cómo pueden estos roles construir el mismo proyecto, revisar sus decisiones y conservar por qué cambió
@@ -1345,20 +1322,21 @@ def build_cells():
         ),
         md(
             """
-            ## ¿Qué necesita conservar cada rol?
+            ## Git conserva el relevo, no reemplaza las responsabilidades
 
-            | Rol | Evidencia que necesita | Uso posible de GitHub |
+            No necesitamos memorizar otro catálogo de cargos. Basta con observar qué pregunta aporta cada
+            responsabilidad al mismo cambio:
+
+            | Momento del cambio | Pregunta profesional | Evidencia que puede quedar en GitHub |
             |---|---|---|
-            | dueño del proceso | motivo y criterio de aceptación | comentar y aprobar la propuesta |
-            | experto de dominio | reglas y excepciones | cuestionar una definición en el PR |
-            | arquitecto empresarial | decisiones entre dominios | comparar versiones del blueprint |
-            | arquitecto de datos | fuentes, modelos, contratos y linaje | revisar impactos de un cambio |
-            | data steward | definiciones y reglas de calidad | pedir correcciones antes de aceptar |
-            | ingeniero de datos | scripts, pruebas y configuración | conservar código reproducible y ejecutar CI |
-            | analista BI | métricas e interpretación | vincular el resultado con su versión |
-            | seguridad y privacidad | controles y exclusiones | detectar exposición o datos innecesarios |
-            | plataforma / DevOps | automatización y operación | mostrar fallos tempranos y repetibles |
-            | usuario de negocio | comprensión del cambio | confirmar si la salida permite decidir |
+            | dueño del proceso | ¿el cambio mejora la decisión y conserva el KPI correcto? | criterio de aceptación y comentario de negocio |
+            | arquitectura empresarial | ¿sigue existiendo trazabilidad entre proceso, información, aplicación y tecnología? | versión comparable del blueprint |
+            | data steward | ¿la definición y sus excepciones son explícitas? | regla documentada y objeción semántica |
+            | arquitectura e ingeniería de datos | ¿qué componentes se afectan y cómo se implementa sin perder historia? | cambio del diseño, prueba y corrección del flujo |
+            | análisis BI/datos | ¿la métrica debe recalcularse y cómo cambia su interpretación? | resultado actualizado y explicación de límites |
+
+            El experto de dominio y el usuario pueden comentar porque conocen el proceso y la acción. Los controles
+            de privacidad y calidad se comprueban sobre el cambio, sin convertirlos en nuevos roles para esta sesión.
             """
         ),
         md(
@@ -1368,11 +1346,11 @@ def build_cells():
             1. El arquitecto propone una actualización diaria.
             2. El dueño del proceso pregunta de dónde sale el SLA de 24 horas.
             3. El data steward cuestiona el tratamiento de fechas faltantes.
-            4. Seguridad solicita retirar identificadores innecesarios.
-            5. El ingeniero y el arquitecto corrigen el blueprint.
-            6. Un nuevo commit registra la modificación y responde a cada objeción.
-            7. El usuario contractual confirma que la salida sigue siendo comprensible.
-            8. CI verifica estructura; una persona valida el razonamiento.
+            4. El control de privacidad exige retirar identificadores innecesarios.
+            5. El arquitecto de datos y el ingeniero corrigen diseño y flujo.
+            6. BI recalcula la métrica y explica el efecto del cambio.
+            7. Un nuevo commit registra la modificación y responde a cada objeción.
+            8. CI verifica estructura; el usuario contractual valida si la salida sigue siendo comprensible.
 
             Un comentario útil no dice solamente “está mal”: explica qué decisión, riesgo o criterio resulta afectado.
             """
@@ -1391,12 +1369,12 @@ def build_cells():
             | 2. Propuesta | arquitectura | modifica el blueprint en una rama sin cambiar todavía `main` | versión diferenciable y archivos propuestos |
             | 3. Corrección | arquitectura e ingeniería | responden objeciones y cambian la misma rama | nuevo commit relacionado con la conversación |
             | 4. CI asistente | automatización | comprueba estructura, marcadores y secretos evidentes | check reproducible, verde o rojo |
-            | 5. Juicio humano | proceso, dominio y seguridad | evalúan si el proceso sirve, el significado es válido y el riesgo es aceptable | aprobación, solicitud de cambios o preguntas abiertas |
+            | 5. Juicio humano | proceso y dominio | evalúan si el proceso sirve, el significado es válido y se respetan los controles | aprobación, solicitud de cambios o preguntas abiertas |
             | 6. Acción del usuario | analista de seguimiento | usa la salida, registra resultado y genera nueva evidencia | decisión y retroalimentación para otra versión |
 
             **Lee después las tres cajas superiores.** No son pasos adicionales: representan preguntas simultáneas
             dentro del Pull Request. El dueño del proceso cuestiona valor y SLA; el data steward y el experto de
-            dominio cuestionan significado y faltantes; seguridad cuestiona necesidad y acceso a cada dato.
+            dominio cuestionan significado y faltantes; el control de privacidad cuestiona necesidad y acceso a cada dato.
 
             **Diferencia entre las herramientas.** Git conserva versiones y diferencias. GitHub aloja esas versiones
             y añade el espacio de conversación. El Pull Request relaciona propuesta, comentarios y correcciones. CI
@@ -1420,7 +1398,7 @@ def build_cells():
         question_cell(
             14,
             "Git como relevo entre roles",
-            "El data steward cuestiona fechas faltantes y seguridad pide retirar identificadores; el arquitecto debe corregir la propuesta.",
+            "El data steward cuestiona fechas faltantes y el control de privacidad exige retirar identificadores; arquitectura e ingeniería deben corregir la propuesta.",
             "¿Qué práctica aprovecha mejor Git y GitHub en este relevo?",
             [
                 "Crear varias copias del archivo y escoger la última por su nombre.",
@@ -1441,18 +1419,19 @@ def build_cells():
             ---
             # Bloque 9 — Laboratorio guiado de 90 minutos
 
-            ## Producto y roles temporales
+            ## Producto y perspectivas temporales
 
             La pareja construirá dos piezas del mismo argumento:
 
-            - `hitos/s02/01_decision_proceso.md`: motivación, patrocinador, dueño del proceso, decisión, KPI,
+            - `hitos/s02/01_decision_proceso.md`: motivación, dueño del proceso, decisión, KPI,
               evidencia SECOP, AS-IS, cuello de botella y límites.
             - `hitos/s02/02_caso_arquitectura_accion.md`: caso laboral anonimizado, veredicto BI/Big Data,
-              arquitectura TO-BE, ciclo NIST, responsabilidades, RACI, controles y siguiente evidencia necesaria.
+              arquitectura TO-BE, ciclo NIST, relevos esenciales, controles y siguiente evidencia necesaria.
 
-            **Estudiante A** asumirá temporalmente analista de negocio y data steward. **Estudiante B** asumirá
-            arquitecto de datos y responsable analítico. Durante la revisión intercambiarán perspectivas. Son roles
-            pedagógicos, no cargos asignados ni responsabilidades permanentes.
+            **Estudiante A** trabajará desde la perspectiva de **negocio y dominio**: decisión, KPI, proceso y
+            excepciones. **Estudiante B** trabajará desde la perspectiva de **datos y analítica**: arquitectura,
+            ciclo, evidencia e interpretación. Durante la revisión intercambiarán perspectivas. No están simulando
+            cargos; están comprobando que el relevo entre responsabilidades sea comprensible.
 
             ### Control de tiempo y criterio de terminación
 
@@ -1462,7 +1441,7 @@ def build_cells():
             | 98–118 | analizar decisión, evidencia, proceso y KPI | el primer artefacto conecta dato, cuello y decisión |
             | 118–138 | formular caso y veredicto BI/Big Data | suficiencia justificada con requisitos |
             | 138–153 | completar arquitectura, NIST y responsabilidades | segundo artefacto coherente |
-            | 153–165 | revisar desde el rol contrario | objeción específica y corrección argumentada |
+            | 153–165 | revisar desde la perspectiva contraria | objeción específica y corrección argumentada |
             | 165–175 | observar versión, comentario y CI | conversación reconstruible en GitHub |
             | 175–180 | ticket de salida | decisión, rol crítico y límite |
 
@@ -1534,7 +1513,9 @@ def build_cells():
 
             Estudiante B cambia a `hito/s02-negocio` y edita
             `hitos/s02/02_caso_arquitectura_accion.md`. Debe comprobar caso, veredicto BI/Big Data, cuatro dominios,
-            cinco etapas NIST, RACI, controles y la siguiente evidencia necesaria.
+            cinco etapas NIST, cuatro relevos esenciales, controles y la siguiente evidencia necesaria. Para cada
+            relevo indicará decisión, artefacto, destinatario y riesgo evitado, y justificará si hace falta o no un
+            científico de datos en este primer hito.
 
             **Resultado esperado.** La arquitectura puede leerse desde el objetivo hacia la tecnología y desde una
             restricción técnica hacia el proceso. La acción humana produce un registro que retroalimenta el ciclo.
@@ -1558,10 +1539,10 @@ def build_cells():
         ),
         md(
             """
-            ## Paso 4 — Revisar desde el rol contrario
+            ## Paso 4 — Revisar desde la perspectiva contraria
 
-            En **Files changed**, cada estudiante revisa el archivo que no lideró. Negocio/steward pregunta por
-            significado, evidencia, KPI, excepciones y controles; arquitectura/analítica pregunta por trazabilidad,
+            En **Files changed**, cada estudiante revisa el archivo que no lideró. La perspectiva de negocio/dominio
+            pregunta por significado, evidencia, KPI, excepciones y controles; la perspectiva de datos/analítica pregunta por trazabilidad,
             suficiencia, capacidad, etapa y responsable.
 
             La persona autora corrige en la misma rama y responde: “Se cambió X porque Y; ahora podemos verificar Z”.
@@ -1782,7 +1763,7 @@ def build_cells():
             | proceso AS-IS, datos, cuello de botella y límites | 20 |
             | caso de uso y veredicto BI / Big Data basado en evidencia | 20 |
             | arquitectura objetivo y trazabilidad entre dominios | 20 |
-            | ciclo NIST, responsabilidades, RACI y controles | 15 |
+            | ciclo NIST, relevos esenciales, controles y acción | 15 |
             | interpretación, revisión argumentada y límites éticos | 10 |
 
             **Criterios mínimos de contenido:** los dos artefactos están completos; la evidencia SECOP se interpreta
@@ -1844,10 +1825,8 @@ def build_cells():
             | KPI | *Key Performance Indicator* — indicador clave de desempeño | medida que muestra cómo se está comportando realmente un proceso | tiempo hasta primera revisión, porcentaje dentro del SLA y completitud de datos |
             | NIST | *National Institute of Standards and Technology* | organismo que publica marcos y estándares técnicos; aquí aporta el ciclo analítico usado en clase | organiza captura, preparación, análisis, visualización y acción |
             | PR | *Pull Request* — solicitud de integración de cambios | espacio de GitHub para comparar una propuesta, conversar, corregir y decidir si se integra | relaciona cambios del blueprint con objeciones de negocio, gobierno, seguridad y revisión humana |
-            | RACI | *Responsible, Accountable, Consulted, Informed* | matriz que aclara quién ejecuta, quién responde por el resultado, quién es consultado y quién debe ser informado | distribuye responsabilidades sobre problema, datos, arquitectura, validación y acción |
             | SECOP | Sistema Electrónico para la Contratación Pública | plataforma colombiana donde se publica y gestiona información de contratación estatal | fuente del caso Compras Claras y de la muestra reproducible |
             | SLA | *Service Level Agreement* — acuerdo de nivel de servicio | objetivo o compromiso sobre el nivel esperado del servicio; no es una medición del resultado | “priorizar un registro completo en máximo 24 horas” es un SLA |
-            | SRE | *Site Reliability Engineering* — ingeniería de confiabilidad de sitios | prácticas para operar servicios con disponibilidad, recuperación y observabilidad | sería relevante cuando Compras Claras pase de ejercicio reproducible a servicio operativo |
 
             ### Términos que no son siglas
 
@@ -1857,7 +1836,6 @@ def build_cells():
             | Artefacto | producto verificable creado durante el trabajo | mapa AS-IS, tabla preparada, perfil, decisión registrada o blueprint |
             | Carril | zona de un diagrama que asigna actividades a un participante o responsabilidad | entidad contratante, plataforma SECOP y oficina de seguimiento |
             | Commit | instantánea identificable de cambios guardada en el historial local de Git | versión que corrige el tratamiento de fechas faltantes |
-            | Data owner | responsable institucional que autoriza usos y responde por un conjunto de datos | determina si la información contractual puede utilizarse para el caso |
             | Data steward | responsable de definiciones, metadatos, reglas de calidad y uso coherente | aclara qué significa una fecha y cómo se tratan valores faltantes |
             | Gateway o compuerta | rombo de BPMN que divide o reúne rutas según una regla; no ejecuta la validación | “¿fechas y campos completos?” dirige a priorizar o a solicitar corrección |
             | Linaje | registro del origen del dato y de las transformaciones que recibió | conecta el campo publicado por SECOP con la regla y la prioridad resultante |

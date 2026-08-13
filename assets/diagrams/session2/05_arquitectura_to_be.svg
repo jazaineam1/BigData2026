@@ -166,7 +166,7 @@
 <tspan x="1246" dy="0">Diseño de datos</tspan>
 </text>
 <text x="1246" y="430" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
-<tspan x="1246" dy="0">arquitecto + linaje</tspan>
+<tspan x="1246" dy="0">arquitecto de datos + linaje</tspan>
 </text>
 <rect x="36" y="492" width="1528" height="140" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
 <rect x="36" y="492" width="230" height="140" rx="16" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
@@ -246,7 +246,7 @@
 <tspan x="1246" dy="0">Operación</tspan>
 </text>
 <text x="1246" y="738" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
-<tspan x="1246" dy="0">plataforma · SRE</tspan>
+<tspan x="1246" dy="0">recuperación · métricas</tspan>
 </text>
 <line x1="433" y1="324" x2="433" y2="362" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-orange)"/>
 <line x1="433" y1="478" x2="433" y2="516" stroke="#C98500" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-amber)"/>
