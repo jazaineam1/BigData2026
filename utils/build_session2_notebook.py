@@ -109,6 +109,9 @@ def build_cells():
             """
             # Sesión 2 — De la necesidad empresarial al caso de uso de Big Data
 
+            > **Ubicación en el curso:** este cuaderno corresponde **únicamente a la Sesión 2**. Los números que
+            > aparecen en los títulos siguientes identifican bloques de esta misma clase; no son sesiones nuevas.
+
             ## Universidad Central
             <div align="center">
               <img src="https://universidad.ucentral.edu.co/tulengua/wp-content/themes/tulengua/images/logo-ucentral.png"
@@ -122,7 +125,7 @@ def build_cells():
             **Caso:** Compras Claras — seguimiento de contratación pública con SECOP<br>
             **Duración:** 180 minutos — 90 de explicación y 90 de práctica<br>
             **Modalidad:** aprender haciendo, en parejas y con GitHub desde el navegador<br>
-            **Última actualización:** 12 de agosto de 2026
+            **Última actualización:** 13 de agosto de 2026
 
             ## Ficha de la sesión
 
@@ -335,7 +338,7 @@ def build_cells():
         md(
             """
             ---
-            # 1. La historia comienza con una decisión, no con una herramienta
+            # Bloque 1 — La historia comienza con una decisión, no con una herramienta
 
             Son las 8:00 a. m. La analista de seguimiento recibe cientos de registros contractuales. El director no
             le pide “usar Big Data”; le hace una pregunta operativa: **¿qué procesos debemos revisar primero hoy?**
@@ -401,18 +404,43 @@ def build_cells():
             f"""
             ## El hilo que seguiremos durante toda la sesión
 
-            {diagram('01_hilo_decision', 'Hilo decisión, proceso, datos, herramientas, KPI y acción humana')}
+            {diagram('01_hilo_decision', 'Secuencia de la Sesión 2: decisión, proceso actual, datos, ciclo NIST, acción humana y mejora; roles y Git aparecen como soportes transversales')}
 
-            **Cómo leerlo.** Laura formula la decisión en la columna izquierda. Sigue las tarjetas numeradas:
-            proceso, datos, capacidades, KPI y acción humana. El recuadro rojo muestra el atajo que rompe la
-            trazabilidad; la flecha punteada devuelve el resultado al proceso como un nuevo dato.
+            ### Antes de seguir las flechas
 
-            **Conclusión.** Una herramienta sin decisión, proceso y KPI es un componente aislado, no una solución.
+            La imagen contiene **tres tipos de información diferentes**. No deben leerse como una sola lista:
 
-            **Limitación.** El diagrama explica trazabilidad, no asigna todavía responsables a cada actividad.
+            - las **seis tarjetas numeradas** forman la secuencia principal del caso;
+            - la **banda superior** indica que los roles participan durante todo el recorrido, no en un paso aislado;
+            - la **banda inferior** indica que Git y GitHub pueden conservar versiones y conversaciones durante los
+              seis pasos; no son una etapa del proceso contractual ni deciden si una propuesta es correcta.
 
-            **Conexión.** Antes de rediseñar el trabajo debemos comprobar por qué cambiar y qué condiciones necesita
-            la adopción. Una arquitectura comienza con motivación y preparación, no con productos.
+            ### Qué significa cada paso y por qué conduce al siguiente
+
+            | Paso | Pregunta que responde | Qué ocurre en Compras Claras | Producto que permite avanzar |
+            |---:|---|---|---|
+            | 1. Decisión + KPI | ¿qué debemos mejorar y cómo sabremos si funcionó? | Laura necesita priorizar revisiones y se mide el tiempo hasta la primera revisión | propósito, responsable y KPI verificable |
+            | 2. Proceso AS-IS | ¿dónde nace la demora? | se reconstruyen actividades, actores, decisiones y consolidación manual | mapa del trabajo actual y cuello de botella |
+            | 3. Datos necesarios | ¿qué debemos saber para intervenir ese punto? | se definen estados, fechas, duraciones, significado, calidad y responsables | datos autorizados con reglas de interpretación |
+            | 4. Ciclo NIST | ¿cómo convertimos esos datos en evidencia? | se captura, prepara, analiza y visualiza una prioridad explicable | cola candidata con motivos y límites visibles |
+            | 5. Acción humana | ¿quién decide y qué hace con la evidencia? | la analista revisa contexto, corrige, escala o descarta y registra el motivo | decisión humana trazable, no acusación automática |
+            | 6. Medir y mejorar | ¿la intervención redujo la demora sin crear un riesgo mayor? | se compara el KPI con la línea base y se ajustan proceso y controles TO-BE | aprendizaje, proceso mejorado y una nueva pregunta |
+
+            **Ejemplo completo.** Si la línea base muestra tres días entre actualización y revisión, el proceso AS-IS
+            ayuda a localizar la consolidación manual. Los campos de SECOP permiten construir una cola diaria con
+            motivos visibles. Laura revisa cada caso y registra el resultado. Solo entonces se compara el nuevo tiempo
+            con la línea base para decidir si la solución se mantiene, se corrige o se detiene.
+
+            **Qué no significa la imagen.** Los roles no trabajan uno después de otro; acompañan los pasos donde su
+            responsabilidad es necesaria. Git tampoco produce la prioridad: conserva qué se propuso, quién objetó,
+            qué cambió y qué versión fue revisada. El ciclo NIST apoya una acción humana, no una decisión automática.
+
+            **Conclusión.** La arquitectura es defendible cuando cada componente puede señalar la decisión, el proceso,
+            el dato, el responsable y el KPI que justifican su existencia.
+
+            **Limitación y conexión.** Este primer mapa muestra la lógica general, pero todavía no detalla cada tarea
+            contractual. Primero comprobaremos si existe una motivación y preparación reales; después abriremos el
+            proceso AS-IS actividad por actividad.
             """
         ),
         question_cell(
@@ -437,14 +465,19 @@ def build_cells():
         md(
             """
             ---
-            # 2. Motivaciones y planificación de la adopción de Big Data
+            # Bloque 2 — Motivaciones y planificación de la adopción de Big Data
 
             ## ¿Por qué una organización decide adoptar nuevas capacidades analíticas?
 
-            Los capítulos 2 y 3 de la lectura del programa separan dos decisiones que suelen confundirse: **tener una
-            motivación empresarial** y **estar preparado para adoptar**. Un problema importante no garantiza que la
-            organización disponga de datos, responsables, gobierno, habilidades, presupuesto o un proceso capaz de
-            usar el resultado.
+            Este sigue siendo un bloque de la **Sesión 2**. El programa asigna dos lecturas del libro para prepararlo:
+            *Business Motivations and Drivers for Big Data Adoption* explica la motivación empresarial y *Big Data
+            Adoption and Planning Considerations* explica la preparación para adoptar. En la bibliografía se conserva
+            la numeración editorial del libro, pero **este cuaderno y todas sus actividades pertenecen solamente a la
+            Sesión 2 del curso**.
+
+            Ambas lecturas separan dos decisiones que suelen confundirse: **tener una motivación empresarial** y
+            **estar preparado para adoptar**. Un problema importante no garantiza que la organización disponga de
+            datos, responsables, gobierno, habilidades, presupuesto o un proceso capaz de usar el resultado.
 
             **Definición formal — motivación empresarial.** Presión, oportunidad u objetivo verificable que justifica
             cambiar la manera en que una organización decide o ejecuta un proceso.
@@ -476,23 +509,24 @@ def build_cells():
             """
         ),
         md(
-            f"""
-            ## Del problema a una decisión de adopción
+            """
+            ## Del problema a una decisión de adopción, sin añadir otra lámina
 
-            {diagram('03_adopcion_valor', 'Mapa de motivación, preparación, experimento y decisión de adopción de Big Data')}
+            Usa la tabla anterior como una lista de comprobación en este orden:
 
-            **Cómo leerlo.** La brecha empresarial aparece a la izquierda. En el centro, seis puertas comprueban
-            valor, datos, proceso, personas, gobierno y viabilidad. La salida no siempre es “adoptar Big Data”:
-            también puede ser mejorar la BI existente, ejecutar un experimento o detener el caso.
+            1. **Demostrar la brecha:** línea base, decisión afectada, responsable y KPI.
+            2. **Comprobar preparación:** datos, proceso, personas, gobierno y viabilidad.
+            3. **Elegir una intervención proporcional:** mejorar la capacidad actual, experimentar de forma acotada
+               o detener el caso si el riesgo supera el valor esperado.
+            4. **Registrar la evidencia faltante:** no convertir una promesa comercial en una decisión de adopción.
 
-            **Conclusión.** Adoptar es una decisión de portafolio basada en evidencia. La arquitectura debe permitir
-            aprender con una inversión proporcional antes de comprometer una plataforma completa.
+            **Aplicación.** Compras Claras no necesita comenzar comprando una plataforma. Puede probar con una muestra
+            local, una regla explicable y el KPI de tiempo hasta primera revisión. Si la evidencia demuestra que esa
+            alternativa incumple el SLA, entonces se justifica estudiar una capacidad mayor.
 
-            **Limitación.** El mapa no calcula retorno financiero ni reemplaza validación jurídica, de seguridad o
-            contratación. Indica qué evidencia falta para tomar esas decisiones.
-
-            **Conexión.** Si la motivación es válida, BPM permite localizar en qué trabajo real nace la demora y dónde
-            debe incorporarse la respuesta analítica.
+            **Conclusión y conexión.** Adoptar es una decisión de portafolio basada en evidencia. Si la motivación es
+            válida, BPM permite localizar en qué trabajo real nace la demora y dónde debe incorporarse la respuesta
+            analítica.
             """
         ),
         question_cell(
@@ -536,7 +570,7 @@ def build_cells():
         md(
             """
             ---
-            # 3. BPM: comprender el trabajo antes de automatizarlo
+            # Bloque 3 — BPM: comprender el trabajo antes de automatizarlo
 
             ## ¿Por qué aparece BPM ahora?
 
@@ -561,12 +595,50 @@ def build_cells():
             **Ciclo BPM.** Descubrir → modelar → analizar → rediseñar → implementar → monitorear. Después de medir,
             el ciclo vuelve a comenzar. Automatizar corresponde a una parte; mejorar exige comprobar el resultado.
 
-            **Ejemplo pequeño.** En un reembolso, recibir solicitud, validar soportes, decidir y pagar forman el
-            proceso. “Revisar la factura” es una tarea. Un gateway decide si hay soporte; un SLA fija el tiempo
-            máximo y el KPI revela cuánto tarda realmente.
+            ### Elementos mínimos para leer el proceso
+
+            | Elemento | Símbolo habitual | Qué representa | Qué no representa |
+            |---|---|---|---|
+            | Evento | círculo | algo que inicia, termina o afecta el flujo, como “se recibió un reporte” | una actividad ejecutada por una persona |
+            | Tarea | rectángulo con bordes redondeados | trabajo concreto con entrada y salida, como validar una fecha | todo el proceso de extremo a extremo |
+            | Gateway o compuerta | rombo | punto de control que divide o reúne rutas según una regla | una persona, una base de datos o el trabajo de validar |
+            | Flujo de secuencia | flecha continua | orden permitido entre eventos, tareas y gateways | transferencia automática de datos entre sistemas |
+            | Carril | banda horizontal o vertical | participante o responsabilidad que ejecuta tareas | una etapa cronológica obligatoria |
+
+            ### ¿Qué es exactamente un gateway?
+
+            **Definición formal.** En BPMN, un gateway —o compuerta— controla cómo el flujo se divide o se reúne. En
+            este cuaderno usamos un **gateway exclusivo**: evalúa condiciones y permite continuar por una sola ruta.
+
+            **Intuición.** Es un cruce con una regla explícita. El rombo no “hace” la validación y tampoco toma una
+            decisión por sí mismo. Una tarea o un responsable produce la información; el gateway representa qué ruta
+            sigue el caso de acuerdo con el resultado.
+
+            **Ejemplo pequeño.** En un reembolso, la tarea “validar soportes” produce `completos` o `incompletos`.
+            Después aparece el gateway “¿soportes completos?”:
+
+            - **Sí:** el caso continúa hacia aprobar y pagar.
+            - **No:** se solicita corrección y el caso espera nuevos soportes.
+
+            **Aplicación a Compras Claras.** La oficina consolida el registro y después evalúa “¿fechas y campos
+            completos?”. La ruta **Sí** conduce a priorizar. La ruta **No** solicita corrección y regresa a reportar
+            ejecución. Para que la decisión sea reproducible, “completo” debe convertirse en reglas observables, por
+            ejemplo: campos obligatorios presentes, fechas interpretables y unidad de duración reconocida.
+
+            **Regla de diseño.** Las condiciones de salida deben ser claras, mutuamente excluyentes y cubrir todos los
+            resultados esperados. Si se cumplen simultáneamente o no existe ruta para un caso, el flujo es ambiguo.
+
+            ### SLA y KPI no son lo mismo
+
+            - **SLA:** objetivo o compromiso de servicio. Ejemplo: priorizar cada registro completo en máximo 24 horas.
+            - **KPI:** medición del desempeño real. Ejemplo: porcentaje priorizado antes de 24 horas y tiempo mediano
+              hasta primera revisión.
+
+            El SLA fija el límite esperado; el KPI permite comprobar si el proceso realmente lo cumple.
 
             **Error frecuente:** dibujar únicamente el camino feliz y ocultar rechazos, correcciones y esperas. Esos
-            desvíos suelen explicar el cuello de botella.
+            desvíos suelen explicar el cuello de botella. Otro error es escribir una pregunta dentro de un rombo sin
+            definir las condiciones de sus flechas de salida.
             """
         ),
         question_cell(
@@ -594,19 +666,38 @@ def build_cells():
 
             {diagram('02_proceso_as_is', 'Proceso AS-IS de contratación con carriles, gateway, retrabajo y cuello de botella')}
 
-            **Cómo leerlo.** Los tres carriles asignan responsabilidad. En la parte superior, cada actividad muestra
-            también el dato que produce. SECOP recibe, guarda y expone registros; la oficina descarga y consolida.
-            El rombo pregunta por completitud, la ruta roja devuelve el caso a “Reportar ejecución” y el contorno
-            discontinuo identifica el cuello de botella. Los tres KPI inferiores indican cómo comprobar la mejora.
+            ### Cómo leer esta imagen sin perderse
 
-            **Conclusión.** El retraso no nace en un algoritmo: aparece cuando la oficina descarga, une y verifica
-            archivos después de que el proceso operacional ya ocurrió.
+            1. **Empieza por los carriles horizontales.** Cada carril representa quién responde por una parte del
+               trabajo: la entidad contratante origina y actualiza; SECOP registra y publica; la oficina de seguimiento
+               consolida, prioriza y revisa. Un carril no es una tecnología: es una frontera de responsabilidad.
+            2. **Sigue los números 1 a 13.** Los pasos 1–5 describen el proceso contractual resumido; 6–8 muestran lo
+               que hace la plataforma con el registro; 9–13 muestran el trabajo posterior de seguimiento.
+            3. **Lee las cápsulas dentro o junto a las tareas.** Nombran el dato que deja cada actividad. Por ejemplo,
+               “Reportar ejecución” produce estado y fechas; SECOP conserva ese evento y luego lo expone.
+            4. **Observa el rombo del paso 11.** Es una decisión: “¿fechas y campos completos?”. La ruta verde permite
+               priorizar; la ruta roja solicita corrección y obliga a esperar un nuevo reporte. Ese regreso es retrabajo.
+            5. **Ubica el contorno rojo discontinuo.** No acusa a una persona: señala una hipótesis de cuello de
+               botella en “Consolidar”, donde se unen y limpian descargas desarticuladas.
+            6. **Termina en los KPI inferiores.** Tiempo de consolidación mide la demora; porcentaje de datos completos
+               mide calidad; casos priorizados mide cobertura. Ninguno, por sí solo, demuestra que la revisión sea correcta.
 
-            **Limitación.** Es una representación simplificada, no el modelo normativo completo de contratación ni
-            un diagrama BPMN ejecutable. Debe validarse con responsables reales.
+            ### Ejemplo de un registro que recorre el proceso
 
-            **Conexión.** Cada actividad deja una huella. En el siguiente paso convertiremos el flujo en una tabla de
-            datos, controles, herramientas y KPI.
+            Un supervisor informa que un contrato continúa “en ejecución” y registra una fecha. SECOP guarda y publica
+            el registro. La oficina lo descarga junto con otros cortes. Si la fecha está vacía o la unidad de duración
+            es ambigua, la consolidación no puede compararlo de forma confiable: el caso vuelve para corrección. Si los
+            campos son suficientes, entra en una lista preliminar; aun así, una persona revisa el contexto antes de actuar.
+
+            **Qué demuestra.** El retraso aparece después de la operación, cuando la oficina descarga, une, valida y
+            vuelve a solicitar datos. Por eso no conviene empezar seleccionando un algoritmo.
+
+            **Qué no demuestra.** Es una representación pedagógica simplificada, no el procedimiento normativo completo,
+            no asigna culpa y no es un modelo BPMN ejecutable. El dueño del proceso y el experto de dominio deben validar
+            que los pasos, excepciones y SLA correspondan a la realidad.
+
+            **Conexión.** Cada actividad deja una huella. Ahora convertiremos el flujo en una tabla que conecte actor,
+            entrada, dato, validación, salida, herramienta posible y KPI.
             """
         ),
         md(
@@ -644,7 +735,7 @@ def build_cells():
             ],
             2,
             [
-                "Una tarea ejecuta trabajo; la bifurcación necesita expresar rutas mutuamente comprensibles.",
+                "Una tarea ejecuta trabajo; la bifurcación necesita condiciones explícitas y rutas mutuamente excluyentes.",
                 "El evento de inicio indica cuándo comienza el flujo, no cómo cambia de ruta.",
                 "El gateway hace visible la regla: completo continúa; incompleto genera retrabajo y vuelve al reporte.",
                 "Un repositorio conserva datos, pero no representa una decisión ni las rutas del proceso BPM.",
@@ -755,7 +846,7 @@ def build_cells():
         md(
             """
             ---
-            # 4. Casos de uso de Big Data en las organizaciones
+            # Bloque 4 — Casos de uso de Big Data en las organizaciones
 
             El AS-IS ya mostró una demora concreta. Ahora debemos convertirla en un caso de uso que otra persona
             pueda evaluar sin depender de una lista de productos.
@@ -892,20 +983,24 @@ def build_cells():
             """
         ),
         md(
-            f"""
+            """
             ## De la pregunta al veredicto de suficiencia
 
-            {diagram('04_casos_bi', 'Comparación profesional entre BI tradicional y capacidades Big Data a partir de requisitos del caso de uso')}
+            No necesitamos otra imagen para tomar esta decisión. Usa la matriz anterior y redacta el veredicto con
+            cuatro afirmaciones comprobables:
 
-            **Cómo leerlo.** El caso de uso ocupa el centro. La ruta izquierda muestra cuándo una solución de BI
-            gobernada es suficiente; la derecha representa condiciones que justifican capacidades Big Data. Las
-            puertas inferiores exigen evidencia sobre latencia, escala, variedad, operación y riesgo antes de escalar.
+            1. **Situación actual:** qué datos llegan, con qué frecuencia y cuánto tarda la respuesta.
+            2. **Capacidad suficiente hoy:** qué solución cumple el SLA con un costo y una operación razonables.
+            3. **Umbral de cambio:** qué medición demostraría que esa solución dejó de ser suficiente.
+            4. **Evidencia pendiente:** volumen, latencia, variedad, tasa de fallos, riesgo o costo que todavía debe medirse.
 
-            **Conclusión.** La etiqueta no decide. Compras Claras comienza con una alternativa simple y conserva
-            umbrales explícitos para evolucionar cuando el proceso lo demuestre.
+            **Veredicto para Compras Claras.** Un lote diario, Python y una salida de BI gobernada son suficientes para
+            el primer hito porque la fuente es estructurada y la decisión tolera 24 horas. Se estudiarían capacidades
+            Big Data si una medición muestra que el volumen, la latencia, la variedad o la confiabilidad incumplen el SLA.
 
-            **Limitación.** El diagrama orienta una decisión de capacidad, pero no selecciona proveedor, contrato,
-            arquitectura física ni presupuesto.
+            **Qué no podemos concluir todavía.** Este veredicto no selecciona proveedor, presupuesto o arquitectura
+            física. Tampoco afirma que BI sea inferior: el diseño responsable comienza por la alternativa suficiente y
+            conserva umbrales para evolucionar.
 
             **Conexión.** Con el caso y el nivel de capacidad definidos, la arquitectura empresarial puede alinear
             negocio, información, aplicaciones y tecnología sin adelantar los sistemas de la sesión 4.
@@ -952,7 +1047,7 @@ def build_cells():
         md(
             """
             ---
-            # 5. Arquitectura empresarial: alinear lo que ya comprendimos
+            # Bloque 5 — Arquitectura empresarial: alinear lo que ya comprendimos
 
             ## ¿Por qué definirla en este punto?
 
@@ -980,11 +1075,6 @@ def build_cells():
             """
             ## Cuatro dominios que responden preguntas distintas
 
-            <div align="center">
-              <img src="../Images/2.1.png" width="780"
-                   alt="Dominios de negocio, información, aplicaciones y tecnología">
-            </div>
-
             | Dominio | Pregunta de diseño | Evidencia en Compras Claras |
             |---|---|---|
             | Negocio | ¿qué objetivo, decisión, proceso y responsable mejoran? | priorización y revisión humana |
@@ -992,14 +1082,16 @@ def build_cells():
             | Aplicaciones | ¿qué capacidades manipulan y entregan información? | fuente, ingesta, perfilador, reglas, tablero y alertas |
             | Tecnología | ¿dónde se almacena, procesa, conecta y observa? | API, objetos/Parquet, motor analítico, CI y monitoreo |
 
-            **Cómo leer la imagen.** Cada dominio responde una clase de preguntas y se traduce en requisitos para el
-            siguiente. Gobierno, seguridad, privacidad, observabilidad y costos atraviesan a todos.
+            **Cómo se relacionan.** Negocio define para qué y para quién; información define qué debe significar el
+            dato; aplicaciones definen qué capacidades lo capturan, transforman y entregan; tecnología define dónde y
+            bajo qué condiciones operan esas capacidades. Una decisión en una fila impone requisitos a las demás.
 
-            **Conclusión.** Arquitectura empresarial es más amplia que arquitectura de datos; la segunda profundiza
-            fuentes, modelos, flujos y calidad. La arquitectura técnica profundiza cómputo, red, almacenamiento,
-            despliegue y operación.
+            **Distinción importante.** Arquitectura empresarial contiene los cuatro dominios. Arquitectura de datos
+            profundiza fuentes, modelos, contratos, flujos, calidad y linaje dentro de ese conjunto. Arquitectura
+            técnica profundiza cómputo, red, almacenamiento, despliegue y operación. No son nombres intercambiables.
 
-            **Limitación.** La figura clasifica dominios, pero no muestra todavía el diseño específico del caso.
+            **Apoyo de lectura.** Esta tabla permite comparar los dominios antes de ver el diseño aplicado. Primero
+            domina las cuatro preguntas; después usa la arquitectura TO-BE para comprobar cómo se conectan en el caso.
             """
         ),
         md(
@@ -1008,19 +1100,36 @@ def build_cells():
 
             {diagram('05_arquitectura_to_be', 'Arquitectura TO-BE con cuatro dominios y controles transversales')}
 
-            **Cómo leerlo.** Recorre las cuatro capas de arriba hacia abajo. La primera tarjeta numerada forma una
-            traza completa: decisión → fuente → integración → conectividad. Las demás columnas amplían proceso,
-            entidades, reglas, responsables, KPI, aplicaciones y componentes técnicos. La banda superior recuerda
-            que gobierno, seguridad, privacidad, observabilidad, costos, calidad y linaje condicionan cada capa.
+            ### Cómo leerla de arriba hacia abajo
 
-            **Conclusión.** La cola priorizada solo tiene valor si existe responsable, dato con significado,
-            aplicación explicable, tecnología sostenible y controles transversales.
+            | Zona de la imagen | Qué significa | Ejemplo aplicado | Pregunta de control |
+            |---|---|---|---|
+            | Banda superior | controles que atraviesan todos los dominios | acceso mínimo, linaje del snapshot, monitoreo del perfil y costo operativo | ¿quién controla y qué evidencia deja? |
+            | 1. Negocio | propósito, proceso, responsable y KPI | priorizar revisión; dueño del proceso; tiempo y cobertura | ¿la salida cambia una acción real? |
+            | 2. Información | fuentes, entidades, significado y reglas | SECOP, contrato, entidad, fecha, duración y definición mantenida por el steward | ¿dos roles interpretan igual el campo? |
+            | 3. Aplicaciones | capacidades que integran, validan, analizan y entregan | perfilador, reglas explicables, reporte y registro de respuesta | ¿qué capacidad transforma la información? |
+            | 4. Tecnología | mecanismos donde esas capacidades se ejecutan | API/archivos, almacenamiento, Pandas o Spark según medición y operación observable | ¿cumple SLA, seguridad, recuperación y costo? |
+
+            ### La columna numerada muestra una traza completa
+
+            1. La **decisión** de priorizar define qué información hace falta.
+            2. Las **fuentes** entregan los campos con los que puede construirse la evidencia.
+            3. La **integración** captura y prepara esos campos de forma reproducible.
+            4. La **conectividad** permite leerlos sin convertir un producto comercial en el propósito del diseño.
+
+            Las demás tarjetas no son pasos posteriores: amplían cada dominio. Por ejemplo, “Calidad” y “Analítica”
+            son capacidades de aplicación que dependen de reglas semánticas y deben entregar una salida comprensible
+            al usuario. La franja roja inferior recuerda que TO-BE no significa automatizar la decisión humana.
+
+            **Conclusión.** La cola priorizada solo tiene valor si existe responsable, dato con significado, aplicación
+            explicable, tecnología sostenible y controles transversales. Si una tarjeta técnica no puede señalar la
+            decisión o el KPI que la justifica, probablemente sobra o está ubicada demasiado pronto.
 
             **Limitación.** Es arquitectura lógica: todavía no fija volúmenes, latencia, proveedor, presupuesto ni
             acuerdos institucionales. Esas restricciones se documentan antes de implementar.
 
-            **Conexión.** Falta describir cómo un dato atraviesa la solución y regresa al proceso como acción; para
-            eso usamos el ciclo analítico de NIST.
+            **Conexión.** La arquitectura muestra qué debe existir; el ciclo NIST mostrará cómo un dato recorre esas
+            capacidades, se convierte en evidencia y regresa al proceso como una acción.
             """
         ),
         question_cell(
@@ -1045,7 +1154,7 @@ def build_cells():
         md(
             """
             ---
-            # 6. Ciclo analítico de Big Data: del dato a una acción responsable
+            # Bloque 6 — Ciclo analítico de Big Data: del dato a una acción responsable
 
             ## ¿Por qué no terminamos en una arquitectura o un tablero?
 
@@ -1079,10 +1188,29 @@ def build_cells():
             | Visualización | resultados | presentar razón de prioridad, filtros y calidad | analista BI + usuario | tablero o reporte | accesibilidad y contexto | tiempo para comprender un caso |
             | Acción | cola explicable | revisar, corregir, escalar o descartar alerta | usuario; dueño del proceso responde | decisión registrada | separación de funciones | % casos atendidos en SLA |
 
-            **Cómo leer el diagrama.** Sigue el ciclo en sentido horario. Cada tarjeta declara entrada o actividad,
-            artefacto y responsable; los rótulos sobre las flechas muestran qué cambia entre etapas. La decisión
-            humana permanece en el centro porque todas las fases deben poder justificarla. Los controles
-            transversales no son una sexta fase: condicionan las cinco.
+            ### Cómo leer el ciclo paso a paso
+
+            1. **Captura:** copia una evidencia identificable. “Snapshot + metadatos” significa conservar registros,
+               fecha de corte, fuente, campos y límites para poder repetir el análisis.
+            2. **Preparación:** convierte datos crudos en datos interpretables. Tipar una fecha, unificar unidades y
+               separar excepciones no crea un hallazgo; evita comparar valores incompatibles.
+            3. **Análisis:** aplica perfiles o reglas descriptivas. La salida es una cola candidata con motivos, no una
+               sentencia sobre el contrato ni una prueba de irregularidad.
+            4. **Visualización:** entrega contexto al usuario: razón de prioridad, filtros, calidad y límites. Su salida
+               debe permitir comprender por qué un caso aparece antes que otro.
+            5. **Acción:** una persona autorizada revisa contexto, corrige, escala o descarta y registra el resultado.
+               La flecha de regreso indica que esa decisión genera un nuevo dato y una nueva pregunta para el proceso.
+
+            **Elementos que no son etapas.** La pregunta central —“¿qué contrato revisar primero y por qué?”— mantiene
+            el propósito visible. La banda superior —gobierno, seguridad, privacidad, calidad y trazabilidad— impone
+            condiciones a las cinco etapas; no se ejecuta una sola vez al final. Las cápsulas sobre las flechas nombran
+            el artefacto que una etapa entrega a la siguiente: datos crudos, preparados, alertas con motivos, evidencia
+            priorizada y decisión registrada.
+
+            **Ejemplo de lectura.** Un registro con duración `12` no debe llegar directamente al tablero. Captura
+            conserva el valor y su fuente; preparación comprueba si la unidad es días o meses; análisis aplica la regla
+            acordada; visualización muestra valor, unidad y motivo; acción permite que Laura revise el contexto. Sin esa
+            cadena, “12” puede parecer preciso y aun así inducir una comparación equivocada.
 
             **Conclusión.** Visualizar no es actuar. Una gráfica se vuelve útil cuando alguien tiene autoridad,
             criterio y canal para registrar la respuesta.
@@ -1134,7 +1262,7 @@ def build_cells():
         md(
             """
             ---
-            # 7. Capacidades y herramientas reales en un flujo empresarial
+            # Bloque 7 — Capacidades y herramientas reales en un flujo empresarial
 
             Una arquitectura no debe casarse prematuramente con un proveedor. Primero nombra la capacidad; luego
             compara opciones por volumen, velocidad, costo, conocimiento del equipo, seguridad y operación.
@@ -1179,35 +1307,8 @@ def build_cells():
         ),
         md(
             """
-            ## Lectura crítica de arquitecturas de nube
-
-            Las siguientes imágenes históricas se conservan porque ayudan a practicar una habilidad durable:
-            **traducir productos en capacidades**. No vamos a crear recursos, cuentas, claves ni facturación.
-
-            <div align="center">
-              <img src="../Images/GCP/5.png" width="900" alt="Arquitectura histórica de datos en Google Cloud"><br><br>
-              <img src="../Images/GCP/6.png" width="900" alt="Arquitectura histórica de procesamiento en Google Cloud">
-            </div>
-
-            ### Método de lectura en cuatro preguntas
-
-            1. ¿Qué fuente produce datos y con qué frecuencia?
-            2. ¿Qué capacidad cumple cada bloque: ingesta, almacenamiento, procesamiento, consumo u orquestación?
-            3. ¿Dónde aparecen calidad, seguridad, observabilidad, recuperación y costo?
-            4. ¿Qué productos o nombres deben verificarse hoy antes de reutilizar la arquitectura?
-
-            **Interpretación.** Aunque un nombre comercial o una interfaz cambie, las necesidades de capturar,
-            almacenar, transformar, consultar, servir y gobernar permanecen. Diseñar por capacidad permite comparar
-            GCP con AWS, Azure o una alternativa local.
-
-            **Error frecuente:** copiar una arquitectura de referencia completa cuando el caso solo necesita una
-            fracción de sus capacidades.
-            """
-        ),
-        md(
-            """
             ---
-            # 8. Git y GitHub: una conversación que no se pierde
+            # Bloque 8 — Git y GitHub: una conversación que no se pierde
 
             ## ¿Por qué aparecen después de los roles y del blueprint?
 
@@ -1274,9 +1375,29 @@ def build_cells():
 
             {diagram('07_estados_git', 'Git y GitHub como conversación entre roles: propuesta, objeciones, corrección, CI y decisión humana')}
 
-            **Cómo leerlo.** El flujo comienza con una necesidad del dueño del proceso. Arquitectura formula una
-            propuesta en una rama; dominio, gobierno y seguridad revisan aspectos distintos; ingeniería corrige y
-            publica una nueva versión; CI comprueba la estructura; el usuario confirma si la salida sirve para actuar.
+            ### Qué significa cada número
+
+            | Paso | Participante principal | Qué sucede | Evidencia que queda |
+            |---:|---|---|---|
+            | 1. Necesidad | dueño del proceso | propone priorizar cada 24 horas y debe justificar el SLA | criterio de valor y pregunta pendiente |
+            | 2. Propuesta | arquitectura | modifica el blueprint en una rama sin cambiar todavía `main` | versión diferenciable y archivos propuestos |
+            | 3. Corrección | arquitectura e ingeniería | responden objeciones y cambian la misma rama | nuevo commit relacionado con la conversación |
+            | 4. CI asistente | automatización | comprueba estructura, marcadores y secretos evidentes | check reproducible, verde o rojo |
+            | 5. Juicio humano | proceso, dominio y seguridad | evalúan si el proceso sirve, el significado es válido y el riesgo es aceptable | aprobación, solicitud de cambios o preguntas abiertas |
+            | 6. Acción del usuario | analista de seguimiento | usa la salida, registra resultado y genera nueva evidencia | decisión y retroalimentación para otra versión |
+
+            **Lee después las tres cajas superiores.** No son pasos adicionales: representan preguntas simultáneas
+            dentro del Pull Request. El dueño del proceso cuestiona valor y SLA; el data steward y el experto de
+            dominio cuestionan significado y faltantes; seguridad cuestiona necesidad y acceso a cada dato.
+
+            **Diferencia entre las herramientas.** Git conserva versiones y diferencias. GitHub aloja esas versiones
+            y añade el espacio de conversación. El Pull Request relaciona propuesta, comentarios y correcciones. CI
+            ejecuta reglas observables. Ninguno de ellos determina por sí solo si el proceso es realista o la decisión
+            es responsable.
+
+            **Sentido de las flechas.** El recorrido sólido va de necesidad a propuesta, conversación, corrección,
+            verificación y acción. La flecha de regreso muestra que una acción registrada produce nueva evidencia y
+            puede abrir otra conversación; no obliga a crear cambios sin una razón profesional.
 
             **Conclusión.** El valor no está en mover un archivo por estados técnicos, sino en relacionar una objeción
             profesional con la versión que la resolvió.
@@ -1310,7 +1431,7 @@ def build_cells():
         md(
             """
             ---
-            # 9. Laboratorio guiado de 90 minutos
+            # Bloque 9 — Laboratorio guiado de 90 minutos
 
             ## Producto y roles temporales
 
@@ -1464,13 +1585,12 @@ def build_cells():
             """
             ## Paso 5 — Leer el Pull Request como conversación
 
-            {git_diagram('03_pull_request', 'Esquema conceptual de un Pull Request con propósito, evidencia, límites, cambios y revisión')}
-
             La descripción responde qué se propuso, por qué, con qué evidencia, qué objeción se atendió y qué límite
             permanece. **Conversation** conserva preguntas y respuestas; **Files changed** muestra la propuesta;
             **Checks** comunica validaciones automáticas.
 
-            **Nota visual.** La lámina es un esquema conceptual, no una captura de un repositorio estudiantil.
+            Antes de abrir el PR, prepara esas cinco respuestas en texto. En el paso 7 encontrarás una sola lámina de
+            referencia con las zonas que deberás comprobar; no necesitas memorizar la interfaz.
             """
         ),
         bash_commands(
@@ -1571,7 +1691,7 @@ def build_cells():
             """
         ),
         md(
-            """
+            f"""
             ## Paso 7 — Abrir el Pull Request y revisar los artefactos
 
             En GitHub selecciona **Compare & pull request**. Base: `main`; compare: `hito/s02-negocio`. Completa qué
@@ -1580,9 +1700,24 @@ def build_cells():
 
             {git_diagram('03_pull_request', 'Esquema conceptual de Pull Request con descripción y archivos revisables')}
 
-            **Cómo leer la vista.** Comprueba ramas, propósito, verificación, límites, archivos cambiados y revisores
-            en ese orden. Un check verde prueba reglas observables; la pestaña **Files changed** permite evaluar el
-            contenido y la conversación explica las decisiones.
+            ### Cómo leer la lámina
+
+            1. **Encabezado:** confirma que la base sea `main` y que la propuesta venga de `hito/s02-negocio`. Esta
+               relación significa “quiero revisar estos cambios antes de integrarlos”; no significa que ya estén aprobados.
+            2. **Descripción:** reconstruye qué se hizo, por qué, cómo se verificó y qué límite permanece. En el ejemplo,
+               la prioridad ayuda a revisar, pero no demuestra fraude.
+            3. **Pestañas:** `Conversation` contiene preguntas y respuestas; `Commits` identifica versiones; `Checks`
+               muestra automatización; `Files changed` permite leer exactamente qué se agregó o retiró.
+            4. **Columna derecha:** `Reviewers` indica quién debe emitir juicio; el check comunica el resultado del
+               validador; “Files changed: 2” delimita el alcance que debe revisarse.
+            5. **Cuatro lecturas laterales:** ramas correctas, propósito reconstruible, diferencia revisable y revisión
+               atribuible son condiciones distintas. Un check verde solo cubre una parte de ellas.
+
+            **Nota visual.** Es un esquema conceptual y no una captura de un repositorio estudiantil. La interfaz de
+            GitHub puede cambiar de posición, pero las preguntas de revisión permanecen.
+
+            **Resultado esperado.** La pareja puede explicar la propuesta sin depender del nombre del commit, abrir
+            `Files changed`, relacionar un comentario con una línea y reconocer qué limitación sigue abierta.
 
             **Error probable.** Si un diagrama no renderiza, revisa la sintaxis en la vista previa. No lo reemplaces
             por una captura: el artefacto debe continuar editable y revisable.
@@ -1595,10 +1730,17 @@ def build_cells():
             El compañero deja al menos un comentario sustantivo: pregunta por una decisión, señala una ambigüedad o
             propone una mejora verificable. Después abre **Checks** y confirma el validador.
 
-            {git_diagram('04_actions', 'Esquema conceptual de CI y revisión humana como controles complementarios')}
+            | CI puede comprobar de forma repetible | Una persona debe juzgar con contexto |
+            |---|---|
+            | existen los archivos y secciones esperados | el proceso AS-IS refleja el trabajo real |
+            | no quedan marcadores como `COMPLETAR` | el cuello de botella está bien sustentado |
+            | el perfilador termina y produce estructura válida | el KPI representa valor y no una métrica decorativa |
+            | no aparecen secretos evidentes | los datos incluidos son necesarios y su uso es aceptable |
+            | el Mermaid cumple sintaxis básica | la arquitectura responde a la decisión y conserva límites |
 
-            **Cómo leer la vista.** La columna verde enumera lo que puede comprobar CI; la naranja enumera lo que
-            requiere juicio humano. El check no aprueba por sí solo el proceso, el KPI ni la interpretación.
+            **Cómo interpretar el check.** Verde significa que las reglas programadas pasaron en esa versión. No
+            significa que el proceso, el KPI o la interpretación sean correctos. Rojo significa que al menos una regla
+            observable falló; abre el detalle para identificar archivo, prueba y mensaje antes de corregir.
 
             **Resultado esperado.** La pareja puede nombrar qué detectó la automatización y qué decisión aún necesita
             al experto de dominio, al dueño del proceso o al docente.
@@ -1674,11 +1816,60 @@ def build_cells():
             """
         ),
         md(
+            """
+            ## Diccionario de siglas y términos de la Sesión 2
+
+            > **Aclaración rápida:** la sigla correcta es **SLA**, no “SAL”. *Gateway* tampoco es una sigla: es el
+            > término inglés para **compuerta**, el rombo que dirige el flujo según condiciones explícitas.
+
+            ### Siglas
+
+            | Sigla | Nombre completo | Significado en palabras sencillas | Uso en Compras Claras |
+            |---|---|---|---|
+            | API | *Application Programming Interface* — interfaz de programación de aplicaciones | mecanismo para que dos sistemas soliciten o intercambien información mediante reglas definidas | permite consultar registros publicados por SECOP sin descargar manualmente cada archivo |
+            | BI | *Business Intelligence* — inteligencia de negocios | prácticas para organizar métricas, consultas y visualizaciones que apoyan decisiones | presenta tiempo de revisión, completitud y cola priorizada con contexto |
+            | BPM | *Business Process Management* — gestión de procesos de negocio | disciplina para descubrir, modelar, analizar, mejorar y monitorear procesos | ayuda a localizar la consolidación manual y diseñar el proceso TO-BE |
+            | BPMN | *Business Process Model and Notation* | lenguaje visual estandarizado para representar eventos, tareas, compuertas, flujos y responsables | sirve como referencia para leer el AS-IS; la lámina del cuaderno es pedagógica, no un modelo ejecutable completo |
+            | CI | *Continuous Integration* — integración continua | ejecución automática de validaciones cada vez que se publica una versión | comprueba estructura, marcadores incompletos y secretos evidentes en el repositorio |
+            | CRISP-DM | *Cross-Industry Standard Process for Data Mining* | ciclo para organizar proyectos de minería de datos desde comprensión del negocio hasta despliegue | se menciona como referencia para trabajos de modelado posteriores; no reemplaza el ciclo NIST de esta sesión |
+            | CSV | *Comma-Separated Values* — valores separados por comas | archivo de texto tabular donde cada fila es un registro y cada columna una variable | formato de la muestra local y de algunas descargas utilizadas por el perfilador |
+            | KPI | *Key Performance Indicator* — indicador clave de desempeño | medida que muestra cómo se está comportando realmente un proceso | tiempo hasta primera revisión, porcentaje dentro del SLA y completitud de datos |
+            | NIST | *National Institute of Standards and Technology* | organismo que publica marcos y estándares técnicos; aquí aporta el ciclo analítico usado en clase | organiza captura, preparación, análisis, visualización y acción |
+            | PR | *Pull Request* — solicitud de integración de cambios | espacio de GitHub para comparar una propuesta, conversar, corregir y decidir si se integra | relaciona cambios del blueprint con objeciones de negocio, gobierno, seguridad y revisión humana |
+            | RACI | *Responsible, Accountable, Consulted, Informed* | matriz que aclara quién ejecuta, quién responde por el resultado, quién es consultado y quién debe ser informado | distribuye responsabilidades sobre problema, datos, arquitectura, validación y acción |
+            | SECOP | Sistema Electrónico para la Contratación Pública | plataforma colombiana donde se publica y gestiona información de contratación estatal | fuente del caso Compras Claras y de la muestra reproducible |
+            | SLA | *Service Level Agreement* — acuerdo de nivel de servicio | objetivo o compromiso sobre el nivel esperado del servicio; no es una medición del resultado | “priorizar un registro completo en máximo 24 horas” es un SLA |
+            | SRE | *Site Reliability Engineering* — ingeniería de confiabilidad de sitios | prácticas para operar servicios con disponibilidad, recuperación y observabilidad | sería relevante cuando Compras Claras pase de ejercicio reproducible a servicio operativo |
+
+            ### Términos que no son siglas
+
+            | Término | Significado | Ejemplo del caso |
+            |---|---|---|
+            | AS-IS | representación de cómo funciona actualmente el proceso | descarga, unión manual, validación, priorización y retrabajo actuales |
+            | Artefacto | producto verificable creado durante el trabajo | mapa AS-IS, tabla preparada, perfil, decisión registrada o blueprint |
+            | Carril | zona de un diagrama que asigna actividades a un participante o responsabilidad | entidad contratante, plataforma SECOP y oficina de seguimiento |
+            | Commit | instantánea identificable de cambios guardada en el historial local de Git | versión que corrige el tratamiento de fechas faltantes |
+            | Data owner | responsable institucional que autoriza usos y responde por un conjunto de datos | determina si la información contractual puede utilizarse para el caso |
+            | Data steward | responsable de definiciones, metadatos, reglas de calidad y uso coherente | aclara qué significa una fecha y cómo se tratan valores faltantes |
+            | Gateway o compuerta | rombo de BPMN que divide o reúne rutas según una regla; no ejecuta la validación | “¿fechas y campos completos?” dirige a priorizar o a solicitar corrección |
+            | Linaje | registro del origen del dato y de las transformaciones que recibió | conecta el campo publicado por SECOP con la regla y la prioridad resultante |
+            | Push | publicación de commits locales en la rama remota | actualiza en GitHub la propuesta que está siendo revisada en el PR |
+            | Rama o *branch* | línea de trabajo separada que permite proponer cambios sin modificar inmediatamente `main` | `hito/s02-negocio` contiene el incremento de la sesión |
+            | Snapshot | copia de datos asociada a fuente, fecha de corte, campos y límites | muestra SECOP que permite repetir el perfil aunque la API cambie |
+            | TO-BE | representación del proceso o arquitectura objetivo después de una mejora propuesta | integración reproducible, reglas explicables y revisión humana con respuesta registrada |
+            | Workflow | secuencia automatizada de tareas o validaciones | GitHub Actions ejecuta el validador cuando se publica un cambio |
+
+            **Diferencia para recordar.** El **SLA** establece “máximo 24 horas”; el **KPI** mide cuánto tardamos de
+            verdad. La tarea valida los campos; el **gateway** usa ese resultado para elegir la ruta del proceso.
+            """
+        ),
+        md(
             f"""
             ## Referencias y recursos
 
-            - **Lectura del programa:** Chapter 2 — *Business Motivations and Drivers for Big Data Adoption*.
-            - **Lectura del programa:** Chapter 3 — *Big Data Adoption and Planning Considerations*.
+            - **Lecturas asignadas a la Sesión 2:** *Chapter 2 — Business Motivations and Drivers for Big Data Adoption*
+              y *Chapter 3 — Big Data Adoption and Planning Considerations*. “Chapter” identifica la numeración del
+              libro; ambos textos apoyan esta única sesión del curso.
             - [NIST Big Data Interoperability Framework — Definitions](https://doi.org/10.6028/NIST.SP.1500-1r2)
             - [NIST Big Data Reference Architecture](https://doi.org/10.6028/NIST.SP.1500-6r2)
             - [TOGAF Standard — The Open Group](https://publications.opengroup.org/standards/togaf)

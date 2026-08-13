@@ -228,48 +228,51 @@ class Canvas:
 def make_hilo() -> Canvas:
     c = Canvas(
         "Hilo conductor de Compras Claras",
-        "Trazabilidad desde una decisión empresarial hasta la acción humana y la mejora del proceso.",
+        "Secuencia de la Sesión 2 desde una decisión empresarial hasta la mejora verificable del proceso.",
     )
-    c.header("Mapa 1 de 7", "La historia completa: de la decisión a la mejora", "Cada componente existe porque responde una pregunta anterior del negocio")
+    c.header(
+        "SESIÓN 2 · MAPA DE LA CLASE",
+        "De una decisión empresarial a una mejora verificable",
+        "Los números muestran la secuencia; las bandas muestran responsabilidades que acompañan todo el recorrido.",
+    )
 
-    # Columna izquierda: Punto de partida (Laura)
-    c.rect(42, 140, 324, 664, fill="url(#navy-card-grad)", stroke="#2A5878", sw=1.5, rx=22, shadow=True)
-    c.pill(70, 168, 165, "PUNTO DE PARTIDA", fill="#214E6D", color="#D9EFFB", stroke="#4E7B99", size=13)
-    c.text(70, 236, ["Laura", "Analista de", "seguimiento"], size=25, fill=WHITE, weight=800, line_height=1.18)
-    c.text(70, 322, ["Necesita decidir:", "¿qué contratos", "revisar primero?"], size=23, fill="#FFFFFF", weight=700, line_height=1.2)
+    # Los roles son una dimensión transversal, no un paso aislado.
+    c.rect(48, 132, 1504, 68, fill=BLUE_L, stroke=BLUE, sw=1.2, rx=15)
+    c.pill(66, 147, 225, "ROLES EN TODOS LOS PASOS", fill=BLUE, color=WHITE, stroke=BLUE, size=12.5)
+    c.text(
+        320,
+        173,
+        "Negocio define valor · Gobierno cuida significado · Arquitectura alinea · Ingeniería y BI construyen · El usuario decide",
+        size=15.5,
+        fill=INK,
+        weight=700,
+    )
 
-    c.rect(66, 452, 276, 150, fill="#153650", stroke="#3F6B8A", sw=1, rx=14)
-    c.text(86, 484, "Criterio de éxito", size=16, fill="#BFE4F6", weight=800)
-    c.text(86, 520, ["menos tiempo para priorizar", "sin acusar ni automatizar", "la decisión humana"], size=15, fill=WHITE, weight=500, line_height=1.35)
+    # Secuencia principal: tres pasos arriba y tres abajo. El recorrido continúa en forma de U.
+    c.card(50, 226, 440, 192, "Decisión + KPI", ["Laura pregunta qué revisar primero", "KPI: tiempo hasta primera revisión", "Produce: propósito y criterio de éxito"], ORANGE, number=1, tag="¿QUÉ DEBEMOS MEJORAR?", title_size=18)
+    c.card(580, 226, 440, 192, "Proceso AS-IS", ["Actividades + actores + decisiones", "Cuello: consolidación manual", "Produce: mapa del trabajo actual"], BLUE, number=2, tag="¿DÓNDE NACE LA DEMORA?", title_size=18)
+    c.card(1110, 226, 440, 192, "Datos necesarios", ["Origen + significado + calidad", "SECOP + reglas + responsables", "Produce: evidencia confiable"], PURPLE, number=3, tag="¿QUÉ NECESITAMOS SABER?", title_size=18)
 
-    c.rect(66, 626, 276, 126, fill="#10263A", stroke="#3F6B8A", sw=1, rx=14)
-    c.text(86, 658, "Regla de diseño", size=16, fill="#F7CCBE", weight=800)
-    c.text(86, 694, ["primero propósito;", "después herramienta"], size=17, fill=WHITE, weight=700, line_height=1.3)
+    c.card(1110, 492, 440, 192, "Ciclo analítico NIST", ["Capturar · preparar · analizar", "Visualizar con contexto", "Produce: prioridad con motivos"], GREEN, number=4, tag="¿CÓMO CREAMOS EVIDENCIA?", title_size=18)
+    c.card(580, 492, 440, 192, "Acción humana", ["Revisar contexto contractual", "Corregir · escalar · descartar", "Produce: decisión y motivo registrados"], ORANGE, number=5, tag="¿QUIÉN DECIDE Y QUÉ HACE?", title_size=18)
+    c.card(50, 492, 440, 192, "Medir y mejorar", ["Comparar el KPI con la línea base", "Ajustar proceso y controles TO-BE", "Produce: aprendizaje + nueva pregunta"], TEAL, number=6, tag="¿FUNCIONÓ Y QUÉ CAMBIA?", title_size=18)
 
-    # Fila superior de tarjetas 1, 2, 3
-    c.card(406, 150, 334, 232, "Proceso AS-IS", ["Seguimiento contractual", "Actores + tareas + decisiones", "Cuello: consolidación manual"], BLUE, number=1, tag="¿DÓNDE SE DEMORA?")
-    c.card(784, 150, 334, 232, "Roles y relevos", ["Negocio define valor", "Gobierno protege significado", "Datos y BI construyen evidencia"], AMBER, number=2, tag="¿QUIÉN RESPONDE?")
-    c.card(1162, 150, 392, 232, "Datos y evidencia", ["Origen + significado + calidad", "SECOP + perfil reproducible", "Cada campo tiene responsable"], PURPLE, number=3, tag="¿QUÉ NECESITAMOS SABER?", title_size=18)
+    # Flechas de la secuencia. Git no aparece aquí porque no es una etapa del negocio.
+    c.line(490, 322, 580, 322, stroke=BLUE, marker="blue")
+    c.line(1020, 322, 1110, 322, stroke=BLUE, marker="blue")
+    c.line(1330, 418, 1330, 492, stroke=PURPLE, marker="purple")
+    c.line(1110, 588, 1020, 588, stroke=GREEN, marker="green")
+    c.line(580, 588, 490, 588, stroke=ORANGE, marker="orange")
+    c.path("M170 492 C170 458 170 452 170 418", stroke=TEAL, sw=3, arrow=True, dash="7 5", marker="teal")
+    c.pill(198, 434, 244, "RESULTADO → NUEVO CICLO", fill=TEAL_L, color=TEAL, stroke=TEAL, size=11.5)
 
-    # Fila inferior de tarjetas 4, 5 y Atajo
-    c.card(1162, 498, 392, 232, "Ciclo de evidencia", ["Capturar · preparar · analizar", "Visualizar · actuar · registrar", "KPI y controles en cada etapa"], GREEN, number=4, tag="¿CÓMO LLEGA A LA ACCIÓN?")
-    c.card(784, 498, 334, 232, "Acción humana", ["Revisar contexto contractual", "Corregir · escalar · descartar", "Registrar motivo y resultado"], ORANGE, number=5, tag="¿QUIÉN DECIDE?")
+    # Git y GitHub acompañan el trabajo; no sustituyen el juicio profesional.
+    c.rect(48, 720, 1504, 92, fill="url(#navy-card-grad)", stroke="#2A5878", sw=1.4, rx=17, shadow=True)
+    c.pill(70, 742, 330, "GIT Y GITHUB ACOMPAÑAN 1–6", fill="#214E6D", color="#D9EFFB", stroke="#4E7B99", size=12.5)
+    c.text(430, 761, "Conservan versión + comentario + corrección + verificación", size=16, fill=WHITE, weight=800)
+    c.text(430, 790, "Ayudan a reconstruir por qué cambió el blueprint; no deciden si el contenido es correcto.", size=14.5, fill="#D9EFFB", weight=500)
 
-    c.card(406, 498, 334, 232, "Conversación versionada", ["Propuesta + objeción + corrección", "PR conserva el porqué", "CI ayuda; personas validan"], RED, number=6, tag="¿CÓMO APRENDE EL EQUIPO?", title_size=18)
-
-    # Conectores y flechas
-    c.line(366, 274, 406, 274, stroke=BLUE, marker="blue")
-    c.line(740, 266, 784, 266, stroke=BLUE, marker="blue")
-    c.line(1118, 266, 1162, 266, stroke=AMBER, marker="amber")
-    c.line(1358, 382, 1358, 498, stroke=PURPLE, marker="purple")
-    c.line(1162, 614, 1118, 614, stroke=GREEN, marker="green")
-    c.line(784, 614, 740, 614, stroke=ORANGE, marker="orange")
-
-    # Bucle de retroalimentación
-    c.path("M406 614 C370 614 390 780 573 780 C748 780 748 430 508 382", stroke=ORANGE, sw=3, arrow=True, dash="8 6", marker="orange")
-    c.pill(450, 762, 330, "CONVERSACIÓN → PROCESO MEJORADO", fill=ORANGE_L, color=ORANGE, stroke=ORANGE, size=12.5)
-
-    c.footer("Lectura clave", "La arquitectura es una cadena de justificaciones, no una colección de productos.")
+    c.footer("LECTURA CLAVE", "La secuencia crea evidencia; los roles responden por ella; Git conserva la conversación.")
     return c
 
 
@@ -278,7 +281,7 @@ def make_as_is() -> Canvas:
         "Proceso AS-IS de seguimiento contractual",
         "Proceso con tres carriles, datos producidos, validación, cuello de botella y bucle de retrabajo.",
     )
-    c.header("Mapa 2 de 7", "Proceso AS-IS: dónde nace el retraso", "Carriles por responsable · artefactos de datos · decisión de completitud · retrabajo explícito")
+    c.header("SESIÓN 2 · PROCESO AS-IS", "Proceso AS-IS: dónde nace el retraso", "Carriles por responsable · artefactos de datos · decisión de completitud · retrabajo explícito")
 
     # Carriles con títulos divididos en dos líneas para evitar desborde
     lanes = [
@@ -641,7 +644,7 @@ def make_architecture() -> Canvas:
         "Arquitectura empresarial objetivo de Compras Claras",
         "Blueprint por capas con trazabilidad vertical, capacidades, herramientas y controles transversales.",
     )
-    c.header("Mapa 5 de 7", "Arquitectura TO-BE: cuatro dominios, una misma decisión", "La trazabilidad baja desde negocio hasta tecnología y vuelve con restricciones verificables")
+    c.header("SESIÓN 2 · ARQUITECTURA", "Arquitectura TO-BE: cuatro dominios, una misma decisión", "La trazabilidad baja desde negocio hasta tecnología y vuelve con restricciones verificables")
 
     # Controles transversales superiores
     c.text(48, 144, "CONTROLES TRANSVERSALES", size=15, fill=NAVY, weight=900)
@@ -721,7 +724,7 @@ def make_nist() -> Canvas:
         "Ciclo analítico NIST aplicado a SECOP",
         "Cinco etapas conectadas alrededor de una decisión humana con artefactos, responsables y controles.",
     )
-    c.header("Mapa 6 de 7", "Ciclo analítico: la evidencia debe volver al proceso", "Captura → preparación → análisis → visualización → acción; después aparecen nuevas preguntas")
+    c.header("SESIÓN 2 · CICLO NIST", "Ciclo analítico: la evidencia debe volver al proceso", "Captura → preparación → análisis → visualización → acción; después aparecen nuevas preguntas")
 
     c.rect(450, 126, 700, 46, fill=WHITE, stroke=LINE, sw=1.5, rx=16)
     c.text(800, 155, "GOBIERNO · SEGURIDAD · PRIVACIDAD · CALIDAD · TRAZABILIDAD", size=14.5, fill=NAVY, weight=900, anchor="middle")
@@ -769,7 +772,7 @@ def make_git_states() -> Canvas:
         "Propuesta, objeciones profesionales, corrección, CI y decisión humana conservadas en un Pull Request.",
     )
     c.header(
-        "Mapa 7 de 7",
+        "SESIÓN 2 · COLABORACIÓN",
         "Git como puente: conservar la conversación profesional",
         "La rama contiene una propuesta; el Pull Request relaciona objeciones, correcciones y validaciones",
     )
@@ -934,7 +937,7 @@ def make_pull_request() -> Canvas:
         "Pull Request revisable de Compras Claras",
         "Vista de ramas, descripción, archivos, reviewers y check con guía de lectura crítica.",
     )
-    c.header("Guía Git 3 de 4", "Pull Request: transformar commits en una explicación", "Un PR de calidad permite reconstruir propósito, evidencia, límites y forma de verificación")
+    c.header("SESIÓN 2 · PULL REQUEST", "Pull Request: transformar commits en una explicación", "Un PR de calidad permite reconstruir propósito, evidencia, límites y forma de verificación")
 
     browser_shell(c, 34, 140, 1130, 660, "github.com · Pull Request #1")
     c.text(64, 214, "Pull requests / #1", size=16, fill=BLUE, weight=700)
