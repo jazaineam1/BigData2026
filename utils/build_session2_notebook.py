@@ -155,6 +155,9 @@ def build_cells():
             8. explicar cómo rama, commit, Pull Request, revisión y CI pueden conservar la conversación entre roles;
             9. comunicar límites: una alerta descriptiva prioriza revisión, pero no prueba causalidad ni irregularidad.
 
+            > **No necesitas conocer todavía todas estas expresiones.** Los objetivos nombran el destino de la clase;
+            > cada concepto se definirá, ejemplificará y aplicará antes de pedirte que lo uses.
+
             **Producto de la sesión:** el primer hito del proyecto semestral: blueprint de Compras Claras y ficha de
             transferencia a un caso laboral. Cada decisión queda explicada, revisada y reproducible; no se elegirá
             una plataforma Big Data sin demostrar primero por qué la organización la necesita.
@@ -171,14 +174,16 @@ def build_cells():
 
             El orden de la clase sigue el viaje real de esa evidencia:
 
-            1. **La decisión** define para qué necesitamos información y qué KPI permitirá evaluar la mejora.
+            1. **La decisión** define para qué necesitamos información y qué medida permitirá evaluar la mejora.
             2. **La motivación y la preparación** comprueban si Big Data responde a una necesidad o solo a una moda.
-            3. **El proceso BPM** muestra quién trabaja, dónde se decide y en qué actividad nace cada dato.
+            3. **El trabajo actual** muestra quién participa, dónde se decide y en qué actividad nace cada dato.
             4. **El caso de uso** conecta usuario, decisión, evidencia, acción y valor verificable.
-            5. **BI tradicional frente a Big Data** se decide por requisitos, no por prestigio de la herramienta.
-            6. **La arquitectura y el ciclo NIST** asignan capacidades, controles y responsables de extremo a extremo.
-            7. **Los roles conversan** sobre el blueprint; Git y GitHub permiten conservar propuesta, objeción,
-               corrección y validación sin convertir los comandos en el objetivo de aprendizaje.
+            5. **La capacidad suficiente** se elige por requisitos, no por prestigio de la herramienta.
+            6. **La organización de la solución** conecta negocio, datos, herramientas, infraestructura y el recorrido
+               de la evidencia hasta una acción.
+            7. **Las personas conversan** sobre la propuesta y necesitan conservar preguntas, correcciones y acuerdos.
+
+            Los nombres formales de estas ideas aparecerán en su bloque, después de comprender el problema que resuelven.
 
             **Punto de partida.** No se presupone experiencia previa en Bash, Git, nube o contenedores. El flujo
             principal se realiza en GitHub.com. Los estados internos de Git y la terminal aparecen solo como
@@ -194,14 +199,14 @@ def build_cells():
 
             | Minutos | Pregunta que conduce el bloque | Resultado |
             |---:|---|---|
-            | 0–8 | ¿Qué debe decidir la analista y cómo sabrá si mejora? | responsable, alcance y KPI |
+            | 0–8 | ¿Qué debe decidir la analista y cómo sabrá si mejora? | responsable, alcance y medida de éxito |
             | 8–20 | ¿Por qué adoptar Big Data y qué debe estar preparado? | motivación, valor, viabilidad y riesgos |
-            | 20–37 | ¿Qué ocurre hoy y quién responde por cada parte? | proceso AS-IS, roles, datos y cuello de botella |
-            | 37–50 | ¿Qué caso de uso existe y basta la BI actual? | ficha del caso y decisión de suficiencia |
-            | 50–65 | ¿Cómo se alinean todas las piezas? | arquitectura empresarial TO-BE |
-            | 65–77 | ¿Cómo recorre la evidencia el ciclo analítico? | cinco etapas de NIST |
+            | 20–37 | ¿Qué ocurre hoy y quién responde por cada parte? | trabajo actual, personas, datos y cuello de botella |
+            | 37–50 | ¿Qué caso de uso existe y basta la capacidad actual? | ficha del caso y decisión de suficiencia |
+            | 50–65 | ¿Cómo se relacionan todas las piezas? | organización objetivo de la solución |
+            | 65–77 | ¿Cómo pasan los datos a convertirse en una acción? | cinco etapas conectadas y sus responsables |
             | 77–84 | ¿Qué capacidades y herramientas son proporcionales? | alternativas justificadas |
-            | 84–90 | ¿Cómo conversan los roles sin perder lo acordado? | Git/GitHub como puente de colaboración |
+            | 84–90 | ¿Cómo conversa el equipo sin perder lo acordado? | propuesta, comentario, corrección y versión |
 
             ### Últimos 90 minutos — construir evidencia
 
@@ -210,9 +215,9 @@ def build_cells():
             | 90–98 | Abrir el repositorio y reconocer artefactos | archivos y roles temporales identificados |
             | 98–118 | Analizar decisión, evidencia, proceso y KPI | primer artefacto argumentado |
             | 118–138 | Formular caso y veredicto BI/Big Data | suficiencia sustentada con requisitos |
-            | 138–153 | Completar arquitectura, NIST y responsabilidades | segundo artefacto coherente |
+            | 138–153 | Organizar la solución, el recorrido de la evidencia y las responsabilidades | segundo artefacto coherente |
             | 153–165 | Revisar desde el rol contrario | objeción y corrección justificadas |
-            | 165–175 | Observar comentario, cambio y versión en GitHub | conversación conservada en un PR |
+            | 165–175 | Observar comentario, cambio y versión compartida | conversación conservada para revisión |
             | 175–180 | Ticket de salida | decisión, rol crítico y límite |
             """
         ),
@@ -404,43 +409,46 @@ def build_cells():
             f"""
             ## El hilo que seguiremos durante toda la sesión
 
-            {diagram('01_hilo_decision', 'Secuencia de la Sesión 2: decisión, proceso actual, datos, ciclo NIST, acción humana y mejora; roles y Git aparecen como soportes transversales')}
+            {diagram('01_hilo_decision', 'Historia de la Sesión 2 en lenguaje cotidiano: definir la decisión, comprender el trabajo, identificar datos, crear evidencia, usarla y comprobar la mejora')}
 
             ### Antes de seguir las flechas
 
             La imagen contiene **tres tipos de información diferentes**. No deben leerse como una sola lista:
 
             - las **seis tarjetas numeradas** forman la secuencia principal del caso;
-            - la **banda superior** indica que los roles participan durante todo el recorrido, no en un paso aislado;
-            - la **banda inferior** indica que Git y GitHub pueden conservar versiones y conversaciones durante los
-              seis pasos; no son una etapa del proceso contractual ni deciden si una propuesta es correcta.
+            - la **banda superior** recuerda que distintas personas aportan durante todo el recorrido;
+            - la **banda inferior** muestra la necesidad de conservar versiones, preguntas y correcciones. La
+              herramienta concreta para hacerlo se presentará solamente cuando lleguemos a ese problema.
+
+            En este mapa se usa deliberadamente lenguaje cotidiano. No necesitas conocer todavía nombres de
+            metodologías, disciplinas, diagramas o herramientas.
 
             ### Qué significa cada paso y por qué conduce al siguiente
 
             | Paso | Pregunta que responde | Qué ocurre en Compras Claras | Producto que permite avanzar |
             |---:|---|---|---|
-            | 1. Decisión + KPI | ¿qué debemos mejorar y cómo sabremos si funcionó? | Laura necesita priorizar revisiones y se mide el tiempo hasta la primera revisión | propósito, responsable y KPI verificable |
-            | 2. Proceso AS-IS | ¿dónde nace la demora? | se reconstruyen actividades, actores, decisiones y consolidación manual | mapa del trabajo actual y cuello de botella |
-            | 3. Datos necesarios | ¿qué debemos saber para intervenir ese punto? | se definen estados, fechas, duraciones, significado, calidad y responsables | datos autorizados con reglas de interpretación |
-            | 4. Ciclo NIST | ¿cómo convertimos esos datos en evidencia? | se captura, prepara, analiza y visualiza una prioridad explicable | cola candidata con motivos y límites visibles |
-            | 5. Acción humana | ¿quién decide y qué hace con la evidencia? | la analista revisa contexto, corrige, escala o descarta y registra el motivo | decisión humana trazable, no acusación automática |
-            | 6. Medir y mejorar | ¿la intervención redujo la demora sin crear un riesgo mayor? | se compara el KPI con la línea base y se ajustan proceso y controles TO-BE | aprendizaje, proceso mejorado y una nueva pregunta |
+            | 1. Definir la decisión | ¿qué debemos mejorar y cómo sabremos si funcionó? | Laura necesita priorizar revisiones y se mide el tiempo hasta la primera revisión | propósito, responsable y medida de éxito |
+            | 2. Comprender el trabajo actual | ¿dónde nace la demora? | se reconstruyen actividades, personas, decisiones y consolidación manual | mapa del trabajo actual y cuello de botella |
+            | 3. Identificar los datos | ¿qué debemos saber para intervenir ese punto? | se definen estados, fechas, duraciones, significado, calidad y responsables | datos autorizados con reglas de interpretación |
+            | 4. Crear evidencia | ¿cómo usamos los datos para responder la pregunta? | se obtienen, ordenan y examinan los registros; después se presentan resultados con contexto | prioridad candidata con motivos y límites visibles |
+            | 5. Usar la evidencia | ¿quién decide y qué hace con ella? | la analista revisa contexto, corrige, escala o descarta y registra el motivo | decisión humana trazable, no acusación automática |
+            | 6. Comprobar y mejorar | ¿la intervención redujo la demora sin crear un riesgo mayor? | se compara el resultado con el punto de partida y se ajustan trabajo y controles | aprendizaje, trabajo mejorado y una nueva pregunta |
 
-            **Ejemplo completo.** Si la línea base muestra tres días entre actualización y revisión, el proceso AS-IS
-            ayuda a localizar la consolidación manual. Los campos de SECOP permiten construir una cola diaria con
+            **Ejemplo completo.** Si el punto de partida muestra tres días entre actualización y revisión, observar
+            el trabajo actual ayuda a localizar la consolidación manual. Los campos de SECOP permiten construir una cola diaria con
             motivos visibles. Laura revisa cada caso y registra el resultado. Solo entonces se compara el nuevo tiempo
             con la línea base para decidir si la solución se mantiene, se corrige o se detiene.
 
-            **Qué no significa la imagen.** Los roles no trabajan uno después de otro; acompañan los pasos donde su
-            responsabilidad es necesaria. Git tampoco produce la prioridad: conserva qué se propuso, quién objetó,
-            qué cambió y qué versión fue revisada. El ciclo NIST apoya una acción humana, no una decisión automática.
+            **Qué no significa la imagen.** Las personas no trabajan necesariamente una después de otra; aportan donde
+            su responsabilidad es necesaria. Conservar una versión tampoco produce la prioridad: solo permite reconstruir
+            qué se propuso, qué se preguntó y qué se corrigió. Crear evidencia no equivale a decidir automáticamente.
 
-            **Conclusión.** La arquitectura es defendible cuando cada componente puede señalar la decisión, el proceso,
-            el dato, el responsable y el KPI que justifican su existencia.
+            **Conclusión.** Una solución es defendible cuando cada componente puede señalar la decisión, el trabajo,
+            el dato, la persona responsable y la medida que justifican su existencia.
 
             **Limitación y conexión.** Este primer mapa muestra la lógica general, pero todavía no detalla cada tarea
             contractual. Primero comprobaremos si existe una motivación y preparación reales; después abriremos el
-            proceso AS-IS actividad por actividad.
+            trabajo actual actividad por actividad y aprenderemos el nombre formal de esa representación.
             """
         ),
         question_cell(

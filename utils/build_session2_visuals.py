@@ -233,29 +233,29 @@ def make_hilo() -> Canvas:
     c.header(
         "SESIÓN 2 · MAPA DE LA CLASE",
         "De una decisión empresarial a una mejora verificable",
-        "Los números muestran la secuencia; las bandas muestran responsabilidades que acompañan todo el recorrido.",
+        "Primero entendemos las preguntas; los nombres formales y las herramientas aparecerán cuando corresponda.",
     )
 
-    # Los roles son una dimensión transversal, no un paso aislado.
+    # La primera lectura usa lenguaje cotidiano. Los nombres formales se enseñan en los bloques posteriores.
     c.rect(48, 132, 1504, 68, fill=BLUE_L, stroke=BLUE, sw=1.2, rx=15)
-    c.pill(66, 147, 225, "ROLES EN TODOS LOS PASOS", fill=BLUE, color=WHITE, stroke=BLUE, size=12.5)
+    c.pill(66, 147, 300, "PERSONAS EN TODO EL RECORRIDO", fill=BLUE, color=WHITE, stroke=BLUE, size=12.5)
     c.text(
-        320,
+        395,
         173,
-        "Negocio define valor · Gobierno cuida significado · Arquitectura alinea · Ingeniería y BI construyen · El usuario decide",
-        size=15.5,
+        "quien define el problema · quien conoce el trabajo · quien cuida los datos · quien construye la evidencia · quien decide",
+        size=15,
         fill=INK,
         weight=700,
     )
 
     # Secuencia principal: tres pasos arriba y tres abajo. El recorrido continúa en forma de U.
-    c.card(50, 226, 440, 192, "Decisión + KPI", ["Laura pregunta qué revisar primero", "KPI: tiempo hasta primera revisión", "Produce: propósito y criterio de éxito"], ORANGE, number=1, tag="¿QUÉ DEBEMOS MEJORAR?", title_size=18)
-    c.card(580, 226, 440, 192, "Proceso AS-IS", ["Actividades + actores + decisiones", "Cuello: consolidación manual", "Produce: mapa del trabajo actual"], BLUE, number=2, tag="¿DÓNDE NACE LA DEMORA?", title_size=18)
-    c.card(1110, 226, 440, 192, "Datos necesarios", ["Origen + significado + calidad", "SECOP + reglas + responsables", "Produce: evidencia confiable"], PURPLE, number=3, tag="¿QUÉ NECESITAMOS SABER?", title_size=18)
+    c.card(50, 226, 440, 192, "Definir la decisión", ["Laura pregunta qué revisar primero", "Medida: tiempo hasta primera revisión", "Produce: propósito y criterio de éxito"], ORANGE, number=1, tag="¿QUÉ DEBEMOS MEJORAR?", title_size=18)
+    c.card(580, 226, 440, 192, "Comprender el trabajo actual", ["Actividades + personas + decisiones", "Demora: consolidación manual", "Produce: mapa del trabajo actual"], BLUE, number=2, tag="¿DÓNDE NACE LA DEMORA?", title_size=17)
+    c.card(1110, 226, 440, 192, "Identificar los datos", ["Origen + significado + calidad", "SECOP + reglas + responsables", "Produce: datos interpretables"], PURPLE, number=3, tag="¿QUÉ NECESITAMOS SABER?", title_size=18)
 
-    c.card(1110, 492, 440, 192, "Ciclo analítico NIST", ["Capturar · preparar · analizar", "Visualizar con contexto", "Produce: prioridad con motivos"], GREEN, number=4, tag="¿CÓMO CREAMOS EVIDENCIA?", title_size=18)
-    c.card(580, 492, 440, 192, "Acción humana", ["Revisar contexto contractual", "Corregir · escalar · descartar", "Produce: decisión y motivo registrados"], ORANGE, number=5, tag="¿QUIÉN DECIDE Y QUÉ HACE?", title_size=18)
-    c.card(50, 492, 440, 192, "Medir y mejorar", ["Comparar el KPI con la línea base", "Ajustar proceso y controles TO-BE", "Produce: aprendizaje + nueva pregunta"], TEAL, number=6, tag="¿FUNCIONÓ Y QUÉ CAMBIA?", title_size=18)
+    c.card(1110, 492, 440, 192, "Crear evidencia", ["Obtener · ordenar · examinar", "Presentar resultados con contexto", "Produce: prioridad con motivos"], GREEN, number=4, tag="¿CÓMO RESPONDEMOS LA PREGUNTA?", title_size=18)
+    c.card(580, 492, 440, 192, "Usar la evidencia", ["Revisar el contexto contractual", "Corregir · escalar · descartar", "Produce: decisión y motivo registrados"], ORANGE, number=5, tag="¿QUIÉN DECIDE Y QUÉ HACE?", title_size=18)
+    c.card(50, 492, 440, 192, "Comprobar y mejorar", ["Comparar el resultado con el inicio", "Ajustar trabajo y controles", "Produce: aprendizaje + nueva pregunta"], TEAL, number=6, tag="¿FUNCIONÓ Y QUÉ CAMBIA?", title_size=18)
 
     # Flechas de la secuencia. Git no aparece aquí porque no es una etapa del negocio.
     c.line(490, 322, 580, 322, stroke=BLUE, marker="blue")
@@ -266,13 +266,13 @@ def make_hilo() -> Canvas:
     c.path("M170 492 C170 458 170 452 170 418", stroke=TEAL, sw=3, arrow=True, dash="7 5", marker="teal")
     c.pill(198, 434, 244, "RESULTADO → NUEVO CICLO", fill=TEAL_L, color=TEAL, stroke=TEAL, size=11.5)
 
-    # Git y GitHub acompañan el trabajo; no sustituyen el juicio profesional.
+    # La necesidad de conservar la conversación aparece antes de presentar una herramienta concreta.
     c.rect(48, 720, 1504, 92, fill="url(#navy-card-grad)", stroke="#2A5878", sw=1.4, rx=17, shadow=True)
-    c.pill(70, 742, 330, "GIT Y GITHUB ACOMPAÑAN 1–6", fill="#214E6D", color="#D9EFFB", stroke="#4E7B99", size=12.5)
-    c.text(430, 761, "Conservan versión + comentario + corrección + verificación", size=16, fill=WHITE, weight=800)
-    c.text(430, 790, "Ayudan a reconstruir por qué cambió el blueprint; no deciden si el contenido es correcto.", size=14.5, fill="#D9EFFB", weight=500)
+    c.pill(70, 742, 390, "CONSERVAR LA CONVERSACIÓN EN 1–6", fill="#214E6D", color="#D9EFFB", stroke="#4E7B99", size=12.5)
+    c.text(490, 761, "Guardar versión + pregunta + corrección + comprobación", size=16, fill=WHITE, weight=800)
+    c.text(490, 790, "Más adelante conoceremos una herramienta que ayuda a reconstruir por qué cambió una propuesta.", size=14.5, fill="#D9EFFB", weight=500)
 
-    c.footer("LECTURA CLAVE", "La secuencia crea evidencia; los roles responden por ella; Git conserva la conversación.")
+    c.footer("LECTURA CLAVE", "Primero comprendemos la historia; después aprendemos el nombre formal de cada método y herramienta.")
     return c
 
 

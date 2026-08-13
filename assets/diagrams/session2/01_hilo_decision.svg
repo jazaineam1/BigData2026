@@ -56,15 +56,15 @@
 <tspan x="48" dy="0">De una decisión empresarial a una mejora verificable</tspan>
 </text>
 <text x="48" y="80" fill="#D1E6F5" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" text-anchor="start" style="">
-<tspan x="48" dy="0">Los números muestran la secuencia; las bandas muestran responsabilidades que acompañan todo el recorrido.</tspan>
+<tspan x="48" dy="0">Primero entendemos las preguntas; los nombres formales y las herramientas aparecerán cuando corresponda.</tspan>
 </text>
 <rect x="48" y="132" width="1504" height="68" rx="15" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.2" opacity="1"/>
-<rect x="66" y="147" width="225" height="36" rx="18" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
-<text x="178.5" y="170" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
-<tspan x="178.5" dy="0">ROLES EN TODOS LOS PASOS</tspan>
+<rect x="66" y="147" width="300" height="36" rx="18" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<text x="216.0" y="170" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="216.0" dy="0">PERSONAS EN TODO EL RECORRIDO</tspan>
 </text>
-<text x="320" y="173" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15.5" font-weight="700" text-anchor="start" style="">
-<tspan x="320" dy="0">Negocio define valor · Gobierno cuida significado · Arquitectura alinea · Ingeniería y BI construyen · El usuario decide</tspan>
+<text x="395" y="173" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" text-anchor="start" style="">
+<tspan x="395" dy="0">quien define el problema · quien conoce el trabajo · quien cuida los datos · quien construye la evidencia · quien decide</tspan>
 </text>
 <rect x="50" y="226" width="440" height="192" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
 <rect x="50" y="226" width="8" height="192" rx="4" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
@@ -73,7 +73,7 @@
 <tspan x="80" dy="0">1</tspan>
 </text>
 <text x="108" y="268" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="108" dy="0">Decisión + KPI</tspan>
+<tspan x="108" dy="0">Definir la decisión</tspan>
 </text>
 <rect x="72" y="288" width="192" height="36" rx="18" fill="#FFFFFF" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
 <text x="168.0" y="311" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
@@ -81,7 +81,7 @@
 </text>
 <text x="74" y="350" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
 <tspan x="74" dy="0">Laura pregunta qué revisar primero</tspan>
-<tspan x="74" dy="20.25">KPI: tiempo hasta primera revisión</tspan>
+<tspan x="74" dy="20.25">Medida: tiempo hasta primera revisión</tspan>
 <tspan x="74" dy="20.25">Produce: propósito y criterio de éxito</tspan>
 </text>
 <rect x="580" y="226" width="440" height="192" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
@@ -90,16 +90,16 @@
 <text x="610" y="268" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle" style="">
 <tspan x="610" dy="0">2</tspan>
 </text>
-<text x="638" y="268" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="638" dy="0">Proceso AS-IS</tspan>
+<text x="638" y="268" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="638" dy="0">Comprender el trabajo actual</tspan>
 </text>
 <rect x="602" y="288" width="200" height="36" rx="18" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
 <text x="702.0" y="311" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="702.0" dy="0">¿DÓNDE NACE LA DEMORA?</tspan>
 </text>
 <text x="604" y="350" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="604" dy="0">Actividades + actores + decisiones</tspan>
-<tspan x="604" dy="20.25">Cuello: consolidación manual</tspan>
+<tspan x="604" dy="0">Actividades + personas + decisiones</tspan>
+<tspan x="604" dy="20.25">Demora: consolidación manual</tspan>
 <tspan x="604" dy="20.25">Produce: mapa del trabajo actual</tspan>
 </text>
 <rect x="1110" y="226" width="440" height="192" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
@@ -109,7 +109,7 @@
 <tspan x="1140" dy="0">3</tspan>
 </text>
 <text x="1168" y="268" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="1168" dy="0">Datos necesarios</tspan>
+<tspan x="1168" dy="0">Identificar los datos</tspan>
 </text>
 <rect x="1132" y="288" width="208" height="36" rx="18" fill="#FFFFFF" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
 <text x="1236.0" y="311" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
@@ -118,7 +118,7 @@
 <text x="1134" y="350" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
 <tspan x="1134" dy="0">Origen + significado + calidad</tspan>
 <tspan x="1134" dy="20.25">SECOP + reglas + responsables</tspan>
-<tspan x="1134" dy="20.25">Produce: evidencia confiable</tspan>
+<tspan x="1134" dy="20.25">Produce: datos interpretables</tspan>
 </text>
 <rect x="1110" y="492" width="440" height="192" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
 <rect x="1110" y="492" width="8" height="192" rx="4" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
@@ -127,15 +127,15 @@
 <tspan x="1140" dy="0">4</tspan>
 </text>
 <text x="1168" y="534" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="1168" dy="0">Ciclo analítico NIST</tspan>
+<tspan x="1168" dy="0">Crear evidencia</tspan>
 </text>
-<rect x="1132" y="554" width="216" height="36" rx="18" fill="#FFFFFF" stroke="#24855A" stroke-width="1.5" opacity="1"/>
-<text x="1240.0" y="577" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
-<tspan x="1240.0" dy="0">¿CÓMO CREAMOS EVIDENCIA?</tspan>
+<rect x="1132" y="554" width="264" height="36" rx="18" fill="#FFFFFF" stroke="#24855A" stroke-width="1.5" opacity="1"/>
+<text x="1264.0" y="577" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="1264.0" dy="0">¿CÓMO RESPONDEMOS LA PREGUNTA?</tspan>
 </text>
 <text x="1134" y="616" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="1134" dy="0">Capturar · preparar · analizar</tspan>
-<tspan x="1134" dy="20.25">Visualizar con contexto</tspan>
+<tspan x="1134" dy="0">Obtener · ordenar · examinar</tspan>
+<tspan x="1134" dy="20.25">Presentar resultados con contexto</tspan>
 <tspan x="1134" dy="20.25">Produce: prioridad con motivos</tspan>
 </text>
 <rect x="580" y="492" width="440" height="192" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
@@ -145,14 +145,14 @@
 <tspan x="610" dy="0">5</tspan>
 </text>
 <text x="638" y="534" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="638" dy="0">Acción humana</tspan>
+<tspan x="638" dy="0">Usar la evidencia</tspan>
 </text>
 <rect x="602" y="554" width="224" height="36" rx="18" fill="#FFFFFF" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
 <text x="714.0" y="577" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="714.0" dy="0">¿QUIÉN DECIDE Y QUÉ HACE?</tspan>
 </text>
 <text x="604" y="616" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="604" dy="0">Revisar contexto contractual</tspan>
+<tspan x="604" dy="0">Revisar el contexto contractual</tspan>
 <tspan x="604" dy="20.25">Corregir · escalar · descartar</tspan>
 <tspan x="604" dy="20.25">Produce: decisión y motivo registrados</tspan>
 </text>
@@ -163,15 +163,15 @@
 <tspan x="80" dy="0">6</tspan>
 </text>
 <text x="108" y="534" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" text-anchor="start" style="">
-<tspan x="108" dy="0">Medir y mejorar</tspan>
+<tspan x="108" dy="0">Comprobar y mejorar</tspan>
 </text>
 <rect x="72" y="554" width="208" height="36" rx="18" fill="#FFFFFF" stroke="#167C80" stroke-width="1.5" opacity="1"/>
 <text x="176.0" y="577" fill="#167C80" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11.5" font-weight="800" text-anchor="middle" style="">
 <tspan x="176.0" dy="0">¿FUNCIONÓ Y QUÉ CAMBIA?</tspan>
 </text>
 <text x="74" y="616" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="74" dy="0">Comparar el KPI con la línea base</tspan>
-<tspan x="74" dy="20.25">Ajustar proceso y controles TO-BE</tspan>
+<tspan x="74" dy="0">Comparar el resultado con el inicio</tspan>
+<tspan x="74" dy="20.25">Ajustar trabajo y controles</tspan>
 <tspan x="74" dy="20.25">Produce: aprendizaje + nueva pregunta</tspan>
 </text>
 <line x1="490" y1="322" x2="580" y2="322" stroke="#2F6FB0" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
@@ -185,15 +185,15 @@
 <tspan x="320.0" dy="0">RESULTADO → NUEVO CICLO</tspan>
 </text>
 <rect x="48" y="720" width="1504" height="92" rx="17" fill="url(#navy-card-grad)" stroke="#2A5878" stroke-width="1.4" opacity="1" filter="url(#shadow)"/>
-<rect x="70" y="742" width="330" height="36" rx="18" fill="#214E6D" stroke="#4E7B99" stroke-width="1.5" opacity="1"/>
-<text x="235.0" y="765" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
-<tspan x="235.0" dy="0">GIT Y GITHUB ACOMPAÑAN 1–6</tspan>
+<rect x="70" y="742" width="390" height="36" rx="18" fill="#214E6D" stroke="#4E7B99" stroke-width="1.5" opacity="1"/>
+<text x="265.0" y="765" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="265.0" dy="0">CONSERVAR LA CONVERSACIÓN EN 1–6</tspan>
 </text>
-<text x="430" y="761" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
-<tspan x="430" dy="0">Conservan versión + comentario + corrección + verificación</tspan>
+<text x="490" y="761" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="490" dy="0">Guardar versión + pregunta + corrección + comprobación</tspan>
 </text>
-<text x="430" y="790" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
-<tspan x="430" dy="0">Ayudan a reconstruir por qué cambió el blueprint; no deciden si el contenido es correcto.</tspan>
+<text x="490" y="790" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
+<tspan x="490" dy="0">Más adelante conoceremos una herramienta que ayuda a reconstruir por qué cambió una propuesta.</tspan>
 </text>
 <rect x="48" y="836" width="1504" height="44" rx="14" fill="#E7EFF5" stroke="#D0DFEA" stroke-width="1.5" opacity="1"/>
 <rect x="52" y="840" width="173" height="36" rx="11" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
@@ -201,6 +201,6 @@
 <tspan x="138.5" dy="0">LECTURA CLAVE</tspan>
 </text>
 <text x="240" y="863" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
-<tspan x="240" dy="0">La secuencia crea evidencia; los roles responden por ella; Git conserva la conversación.</tspan>
+<tspan x="240" dy="0">Primero comprendemos la historia; después aprendemos el nombre formal de cada método y herramienta.</tspan>
 </text>
 </svg>
