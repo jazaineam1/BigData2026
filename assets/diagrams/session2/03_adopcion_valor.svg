@@ -1,0 +1,246 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">Motivación y preparación para adoptar Big Data</title>
+<desc id="desc">Mapa desde una brecha empresarial medible hasta una decisión incremental de adopción.</desc>
+<defs>
+              <linearGradient id="header-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#0D273E"/>
+                <stop offset="100%" stop-color="#1D4F73"/>
+              </linearGradient>
+              <linearGradient id="navy-card-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#184368"/>
+                <stop offset="100%" stop-color="#0F2B48"/>
+              </linearGradient>
+              <linearGradient id="hub-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1C4B72"/>
+                <stop offset="100%" stop-color="#0A2238"/>
+              </linearGradient>
+              <filter id="shadow" x="-10%" y="-10%" width="125%" height="130%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F2B48" flood-opacity="0.09"/>
+              </filter>
+              <filter id="shadow-lg" x="-15%" y="-15%" width="135%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F2B48" flood-opacity="0.14"/>
+              </filter>
+              <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#2F6FB0"/>
+              </marker>
+              <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#C93F34"/>
+              </marker>
+              <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#24855A"/>
+              </marker>
+              <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#6C5AA7"/>
+              </marker>
+              <marker id="arrow-orange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#E95C3A"/>
+              </marker>
+              <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#C98500"/>
+              </marker>
+              <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#167C80"/>
+              </marker>
+              <marker id="arrow-ink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#17324D"/>
+              </marker>
+            </defs>
+<rect width="1600" height="900" fill="#F3F7FA"/>
+<rect x="0" y="0" width="1600" height="114" rx="0" fill="url(#header-grad)" stroke="#0D273E" stroke-width="0" opacity="1"/>
+<line x1="0" y1="114" x2="1600" y2="114" stroke="#2F6FB0" stroke-width="2" fill="none" stroke-linecap="round"/>
+<rect x="1376" y="24" width="176" height="36" rx="18" fill="#214E6D" stroke="#3F769C" stroke-width="1.5" opacity="1"/>
+<text x="1464.0" y="47" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="middle" style="">
+<tspan x="1464.0" dy="0">MAPA 3 DE 7</tspan>
+</text>
+<text x="48" y="48" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="31" font-weight="800" text-anchor="start" style="">
+<tspan x="48" dy="0">Adopción: primero demostrar valor y preparación</tspan>
+</text>
+<text x="48" y="80" fill="#D1E6F5" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" text-anchor="start" style="">
+<tspan x="48" dy="0">Una necesidad importante no basta: datos, proceso, personas, gobierno y viabilidad deben sostenerla</tspan>
+</text>
+<line x1="318" y1="332" x2="350" y2="332" stroke="#2F6FB0" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
+<line x1="1140" y1="332" x2="1180" y2="332" stroke="#6C5AA7" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-purple)"/>
+<rect x="38" y="146" width="280" height="640" rx="22" fill="url(#navy-card-grad)" stroke="#2A5878" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
+<rect x="64" y="170" width="208" height="36" rx="18" fill="#214E6D" stroke="#4E7B99" stroke-width="1.5" opacity="1"/>
+<text x="168.0" y="193" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
+<tspan x="168.0" dy="0">MOTIVACIÓN</tspan>
+</text>
+<text x="64" y="236" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="25" font-weight="850" text-anchor="start" style="">
+<tspan x="64" dy="0">La revisión llega</tspan>
+<tspan x="64" dy="30.0">tres días tarde</tspan>
+</text>
+<text x="64" y="316" fill="#D7EBF7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" text-anchor="start" style="">
+<tspan x="64" dy="0">Decisión:</tspan>
+<tspan x="64" dy="25.0">¿qué caso revisar</tspan>
+<tspan x="64" dy="25.0">primero?</tspan>
+</text>
+<rect x="60" y="430" width="236" height="126" rx="14" fill="#153650" stroke="#3F6B8A" stroke-width="1" opacity="1"/>
+<text x="80" y="462" fill="#BFE4F6" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="start" style="">
+<tspan x="80" dy="0">KPI de valor</tspan>
+</text>
+<text x="80" y="500" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="650" text-anchor="start" style="">
+<tspan x="80" dy="0">tiempo actualización</tspan>
+<tspan x="80" dy="20.0">→ primera revisión</tspan>
+</text>
+<rect x="60" y="586" width="236" height="148" rx="14" fill="#10263A" stroke="#3F6B8A" stroke-width="1" opacity="1"/>
+<text x="80" y="618" fill="#F7CCBE" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="900" text-anchor="start" style="">
+<tspan x="80" dy="0">NO ES MOTIVACIÓN</tspan>
+</text>
+<text x="80" y="658" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start" style="">
+<tspan x="80" dy="0">“usar Big Data”</tspan>
+<tspan x="80" dy="19.5">“comprar una nube”</tspan>
+<tspan x="80" dy="19.5">“copiar a otra entidad”</tspan>
+</text>
+<rect x="350" y="158" width="250" height="164" rx="16" fill="#FFFFFF" stroke="#E95C3A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="350" y="158" width="250" height="45" rx="16" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
+<rect x="350" y="190" width="250" height="13" rx="0" fill="#E95C3A" stroke="#E95C3A" stroke-width="0" opacity="1"/>
+<text x="368" y="187" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15.5" font-weight="900" text-anchor="start" style="">
+<tspan x="368" dy="0">1 · VALOR</tspan>
+</text>
+<text x="370" y="246" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="650" text-anchor="start" style="">
+<tspan x="370" dy="0">brecha + decisión</tspan>
+<tspan x="370" dy="19.575000000000003">KPI + patrocinador</tspan>
+</text>
+<rect x="370" y="284" width="210" height="36" rx="18" fill="#FDE9E3" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
+<text x="475.0" y="307" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="475.0" dy="0">EVIDENCIA, NO PROMESA</tspan>
+</text>
+<rect x="620" y="158" width="250" height="164" rx="16" fill="#FFFFFF" stroke="#C98500" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="620" y="158" width="250" height="45" rx="16" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
+<rect x="620" y="190" width="250" height="13" rx="0" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
+<text x="638" y="187" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15.5" font-weight="900" text-anchor="start" style="">
+<tspan x="638" dy="0">2 · DATOS</tspan>
+</text>
+<text x="640" y="246" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="650" text-anchor="start" style="">
+<tspan x="640" dy="0">fuente + significado</tspan>
+<tspan x="640" dy="19.575000000000003">calidad + permiso</tspan>
+</text>
+<rect x="640" y="284" width="210" height="36" rx="18" fill="#FFF3D2" stroke="#C98500" stroke-width="1.5" opacity="1"/>
+<text x="745.0" y="307" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="745.0" dy="0">EVIDENCIA, NO PROMESA</tspan>
+</text>
+<rect x="890" y="158" width="250" height="164" rx="16" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="890" y="158" width="250" height="45" rx="16" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="0" opacity="1"/>
+<rect x="890" y="190" width="250" height="13" rx="0" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="0" opacity="1"/>
+<text x="908" y="187" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15.5" font-weight="900" text-anchor="start" style="">
+<tspan x="908" dy="0">3 · PROCESO</tspan>
+</text>
+<text x="910" y="246" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="650" text-anchor="start" style="">
+<tspan x="910" dy="0">acción posterior</tspan>
+<tspan x="910" dy="19.575000000000003">SLA + retroalimentación</tspan>
+</text>
+<rect x="910" y="284" width="210" height="36" rx="18" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<text x="1015.0" y="307" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="1015.0" dy="0">EVIDENCIA, NO PROMESA</tspan>
+</text>
+<rect x="350" y="362" width="250" height="164" rx="16" fill="#FFFFFF" stroke="#6C5AA7" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="350" y="362" width="250" height="45" rx="16" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
+<rect x="350" y="394" width="250" height="13" rx="0" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
+<text x="368" y="391" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15.5" font-weight="900" text-anchor="start" style="">
+<tspan x="368" dy="0">4 · PERSONAS</tspan>
+</text>
+<text x="370" y="450" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="650" text-anchor="start" style="">
+<tspan x="370" dy="0">dueño + usuario</tspan>
+<tspan x="370" dy="19.575000000000003">habilidad + operación</tspan>
+</text>
+<rect x="370" y="488" width="210" height="36" rx="18" fill="#EEEAF8" stroke="#6C5AA7" stroke-width="1.5" opacity="1"/>
+<text x="475.0" y="511" fill="#6C5AA7" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="475.0" dy="0">EVIDENCIA, NO PROMESA</tspan>
+</text>
+<rect x="620" y="362" width="250" height="164" rx="16" fill="#FFFFFF" stroke="#C93F34" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="620" y="362" width="250" height="45" rx="16" fill="#C93F34" stroke="#C93F34" stroke-width="0" opacity="1"/>
+<rect x="620" y="394" width="250" height="13" rx="0" fill="#C93F34" stroke="#C93F34" stroke-width="0" opacity="1"/>
+<text x="638" y="391" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15.5" font-weight="900" text-anchor="start" style="">
+<tspan x="638" dy="0">5 · GOBIERNO</tspan>
+</text>
+<text x="640" y="450" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="650" text-anchor="start" style="">
+<tspan x="640" dy="0">riesgo + privacidad</tspan>
+<tspan x="640" dy="19.575000000000003">linaje + control</tspan>
+</text>
+<rect x="640" y="488" width="210" height="36" rx="18" fill="#FCE8E6" stroke="#C93F34" stroke-width="1.5" opacity="1"/>
+<text x="745.0" y="511" fill="#C93F34" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="745.0" dy="0">EVIDENCIA, NO PROMESA</tspan>
+</text>
+<rect x="890" y="362" width="250" height="164" rx="16" fill="#FFFFFF" stroke="#24855A" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="890" y="362" width="250" height="45" rx="16" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
+<rect x="890" y="394" width="250" height="13" rx="0" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
+<text x="908" y="391" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15.5" font-weight="900" text-anchor="start" style="">
+<tspan x="908" dy="0">6 · VIABILIDAD</tspan>
+</text>
+<text x="910" y="450" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="650" text-anchor="start" style="">
+<tspan x="910" dy="0">capacidad + plazo</tspan>
+<tspan x="910" dy="19.575000000000003">costo + alternativa</tspan>
+</text>
+<rect x="910" y="488" width="210" height="36" rx="18" fill="#E7F5ED" stroke="#24855A" stroke-width="1.5" opacity="1"/>
+<text x="1015.0" y="511" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="10.5" font-weight="800" text-anchor="middle" style="">
+<tspan x="1015.0" dy="0">EVIDENCIA, NO PROMESA</tspan>
+</text>
+<rect x="1180" y="158" width="380" height="368" rx="20" fill="#FFFFFF" stroke="#6C5AA7" stroke-width="2" opacity="1" filter="url(#shadow)"/>
+<rect x="1180" y="158" width="380" height="66" rx="20" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
+<rect x="1180" y="210" width="380" height="14" rx="0" fill="#6C5AA7" stroke="#6C5AA7" stroke-width="0" opacity="1"/>
+<text x="1370" y="198" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" text-anchor="middle" style="">
+<tspan x="1370" dy="0">DECISIÓN DE PORTAFOLIO</tspan>
+</text>
+<rect x="1206" y="246" width="328" height="68" rx="13" fill="#E7F5ED" stroke="#24855A" stroke-width="1.5" opacity="1"/>
+<text x="1226" y="274" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="900" text-anchor="start" style="">
+<tspan x="1226" dy="0">MEJORAR BI ACTUAL</tspan>
+</text>
+<text x="1226" y="296" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="600" text-anchor="start" style="">
+<tspan x="1226" dy="0">si satisface el caso</tspan>
+</text>
+<rect x="1206" y="334" width="328" height="68" rx="13" fill="#FFF3D2" stroke="#C98500" stroke-width="1.5" opacity="1"/>
+<text x="1226" y="362" fill="#C98500" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="900" text-anchor="start" style="">
+<tspan x="1226" dy="0">EXPERIMENTAR</tspan>
+</text>
+<text x="1226" y="384" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="600" text-anchor="start" style="">
+<tspan x="1226" dy="0">si falta evidencia</tspan>
+</text>
+<rect x="1206" y="422" width="328" height="68" rx="13" fill="#FDE9E3" stroke="#E95C3A" stroke-width="1.5" opacity="1"/>
+<text x="1226" y="450" fill="#E95C3A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="900" text-anchor="start" style="">
+<tspan x="1226" dy="0">ESCALAR O DETENER</tspan>
+</text>
+<text x="1226" y="472" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="600" text-anchor="start" style="">
+<tspan x="1226" dy="0">según resultado y riesgo</tspan>
+</text>
+<text x="350" y="580" fill="#12395B" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="start" style="">
+<tspan x="350" dy="0">RUTA INCREMENTAL</tspan>
+</text>
+<rect x="350" y="606" width="250" height="170" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="350" y="606" width="8" height="170" rx="4" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="0" opacity="1"/>
+<text x="374" y="648" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="374" dy="0">A · HIPÓTESIS</tspan>
+</text>
+<text x="374" y="684" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
+<tspan x="374" dy="0">línea base</tspan>
+<tspan x="374" dy="19.575000000000003">criterio de éxito</tspan>
+</text>
+<rect x="620" y="606" width="250" height="170" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="620" y="606" width="8" height="170" rx="4" fill="#C98500" stroke="#C98500" stroke-width="0" opacity="1"/>
+<text x="644" y="648" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="644" dy="0">B · EXPERIMENTO</tspan>
+</text>
+<text x="644" y="684" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
+<tspan x="644" dy="0">muestra segura</tspan>
+<tspan x="644" dy="19.575000000000003">costo acotado</tspan>
+</text>
+<rect x="890" y="606" width="250" height="170" rx="16" fill="#FFFFFF" stroke="#D4E1EB" stroke-width="1.5" opacity="1"/>
+<rect x="890" y="606" width="8" height="170" rx="4" fill="#24855A" stroke="#24855A" stroke-width="0" opacity="1"/>
+<text x="914" y="648" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" style="">
+<tspan x="914" dy="0">C · DECISIÓN</tspan>
+</text>
+<text x="914" y="684" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
+<tspan x="914" dy="0">continuar · ajustar</tspan>
+<tspan x="914" dy="19.575000000000003">o detener</tspan>
+</text>
+<line x1="600" y1="690" x2="620" y2="690" stroke="#C98500" stroke-width="2.5" fill="none" stroke-linecap="round" marker-end="url(#arrow-amber)"/>
+<line x1="870" y1="690" x2="890" y2="690" stroke="#24855A" stroke-width="2.5" fill="none" stroke-linecap="round" marker-end="url(#arrow-green)"/>
+<path d="M1180 498 C1140 566 1125 646 1140 690" stroke="#6C5AA7" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-purple)" stroke-dasharray="7 5"/>
+<rect x="48" y="836" width="1504" height="44" rx="14" fill="#E7EFF5" stroke="#D0DFEA" stroke-width="1.5" opacity="1"/>
+<rect x="52" y="840" width="250" height="36" rx="11" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
+<text x="177.0" y="863" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="900" text-anchor="middle" style="">
+<tspan x="177.0" dy="0">CRITERIO DE ADOPCIÓN</tspan>
+</text>
+<text x="317" y="863" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
+<tspan x="317" dy="0">Big Data se justifica cuando una evidencia muestra que la capacidad actual no cumple la decisión, el SLA o el riesgo aceptable.</tspan>
+</text>
+</svg>

@@ -123,7 +123,7 @@
 <tspan x="118" dy="0">Estructura requerida</tspan>
 </text>
 <text x="118" y="389" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="118" dy="0">README + 3 documentos + perfil</tspan>
+<tspan x="118" dy="0">2 artefactos + perfil + fuente</tspan>
 </text>
 <circle cx="84" cy="438" r="18" fill="#24855A" stroke="#24855A" stroke-width="0"/>
 <text x="84" y="445" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" text-anchor="middle" style="">
@@ -140,10 +140,10 @@
 <tspan x="84" dy="0">✓</tspan>
 </text>
 <text x="118" y="520" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="118" dy="0">Historia mínima</tspan>
+<tspan x="118" dy="0">Estructura observable</tspan>
 </text>
 <text x="118" y="549" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" style="">
-<tspan x="118" dy="0">rama + dos autores + dos commits</tspan>
+<tspan x="118" dy="0">rama + archivos requeridos + mensajes</tspan>
 </text>
 <circle cx="84" cy="598" r="18" fill="#24855A" stroke="#24855A" stroke-width="0"/>
 <text x="84" y="605" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" text-anchor="middle" style="">
@@ -220,6 +220,6 @@
 <tspan x="160.5" dy="0">PUERTA DE CALIDAD</tspan>
 </text>
 <text x="284" y="863" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
-<tspan x="284" dy="0">Validador local + CI verde + comentario sustantivo; ninguno sustituye a los otros.</tspan>
+<tspan x="284" dy="0">CI ayuda a detectar reglas observables; el contenido y el razonamiento requieren revisión humana.</tspan>
 </text>
 </svg>

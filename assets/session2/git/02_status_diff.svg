@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
-<title id="title">Lectura de git status y git diff</title>
-<desc id="desc">Terminal con archivos modificados y panel explicativo de estados antes de staging.</desc>
+<title id="title">Lectura de cambios desde GitHub</title>
+<desc id="desc">Comparación conceptual de dos artefactos con preguntas de revisión profesional.</desc>
 <defs>
               <linearGradient id="header-grad" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stop-color="#0D273E"/>
@@ -53,10 +53,10 @@
 <tspan x="1464.0" dy="0">GUÍA GIT 2 DE 4</tspan>
 </text>
 <text x="48" y="48" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="31" font-weight="800" text-anchor="start" style="">
-<tspan x="48" dy="0">Observar antes de seleccionar: status y diff</tspan>
+<tspan x="48" dy="0">Leer Files changed antes de aceptar</tspan>
 </text>
-<text x="48" y="80" fill="#D1E6F5" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" text-anchor="start" style="">
-<tspan x="48" dy="0">El objetivo no es memorizar colores: es comprobar qué archivo cambió y qué evidencia contiene</tspan>
+<text x="48" y="80" fill="#D1E6F5" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="400" text-anchor="start" style="">
+<tspan x="48" dy="0">El objetivo es relacionar cada diferencia con una decisión, un rol y un límite</tspan>
 </text>
 <rect x="42" y="142" width="980" height="650" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1" filter="url(#shadow)"/>
 <rect x="42" y="142" width="980" height="46" rx="16" fill="#EFF3F6" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
@@ -65,52 +65,48 @@
 <circle cx="90" cy="165" r="6" fill="#FFC04A" stroke="#FFC04A" stroke-width="0"/>
 <circle cx="114" cy="165" r="6" fill="#2BCB4B" stroke="#2BCB4B" stroke-width="0"/>
 <text x="532.0" y="171" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle" style="">
-<tspan x="532.0" dy="0">VS Code · terminal · hito/s02-blueprint</tspan>
+<tspan x="532.0" dy="0">github.com · Pull Request · Files changed</tspan>
 </text>
-<rect x="60" y="198" width="944" height="568" rx="10" fill="#101A22" stroke="#101A22" stroke-width="0" opacity="1"/>
-<text x="88" y="238" fill="#75C7FF" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0">$ git branch --show-current</tspan>
+<text x="72" y="222" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="72" dy="0">hito/s02/01_decision_proceso.md</tspan>
 </text>
-<text x="88" y="270" fill="#EAF1F6" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0">hito/s02-blueprint</tspan>
+<rect x="752" y="202" width="110" height="36" rx="18" fill="#E7F5ED" stroke="#24855A" stroke-width="1.5" opacity="1"/>
+<text x="807.0" y="225" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" text-anchor="middle" style="">
+<tspan x="807.0" dy="0">Viewed</tspan>
 </text>
-<text x="88" y="318" fill="#75C7FF" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0">$ git status --short</tspan>
+<rect x="62" y="246" width="940" height="190" rx="10" fill="#F8FAFC" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
+<rect x="62" y="246" width="58" height="190" rx="10" fill="#F1F5F9" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
+<text x="136" y="282" fill="#C93F34" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
+<tspan x="136" dy="0">− Cuello: consolidación tardía.</tspan>
 </text>
-<text x="88" y="350" fill="#FFD166" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0"> M docs/01_proceso_as_is.md</tspan>
+<rect x="120" y="300" width="880" height="64" rx="0" fill="#E9F7EF" stroke="#C8E9D8" stroke-width="0" opacity="1"/>
+<text x="136" y="329" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="650" text-anchor="start" style="">
+<tspan x="136" dy="0">+ Hipótesis: descargar, unir y validar después de la operación.</tspan>
 </text>
-<text x="88" y="380" fill="#FFD166" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0"> M resultados/perfil_secop.md</tspan>
+<text x="136" y="357" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="650" text-anchor="start" style="">
+<tspan x="136" dy="0">+ Evidencia pendiente: marcas de tiempo de cuatro semanas.</tspan>
 </text>
-<text x="88" y="428" fill="#75C7FF" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0">$ git diff -- docs/01_proceso_as_is.md</tspan>
+<text x="72" y="478" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
+<tspan x="72" dy="0">hitos/s02/02_caso_arquitectura_accion.md</tspan>
 </text>
-<text x="88" y="460" fill="#B7C6D2" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0">@@ Proceso AS-IS @@</tspan>
+<rect x="62" y="502" width="940" height="214" rx="10" fill="#F8FAFC" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
+<rect x="62" y="502" width="58" height="214" rx="10" fill="#F1F5F9" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
+<text x="136" y="540" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="650" text-anchor="start" style="">
+<tspan x="136" dy="0">+ Veredicto: BI gobernada por lotes es suficiente.</tspan>
 </text>
-<text x="88" y="492" fill="#FF8178" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0">- COMPLETAR: cuello de botella</tspan>
+<text x="136" y="578" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="650" text-anchor="start" style="">
+<tspan x="136" dy="0">+ Umbral: reevaluar si el lote incumple SLA o costo medido.</tspan>
 </text>
-<text x="88" y="524" fill="#63E6A0" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0">+ Consolidación manual: 3 días promedio</tspan>
+<text x="136" y="626" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="650" text-anchor="start" style="">
+<tspan x="136" dy="0">+ Límite: una alerta prioriza; no demuestra irregularidad.</tspan>
 </text>
-<text x="88" y="554" fill="#63E6A0" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0">+ y 18 % de registros incompletos.</tspan>
-</text>
-<text x="88" y="602" fill="#75C7FF" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0">$ git diff --check</tspan>
-</text>
-<text x="88" y="634" fill="#B7C6D2" font-family="Consolas, Cascadia Mono, monospace" font-size="17" font-weight="500" text-anchor="start" style="">
-<tspan x="88" dy="0"># Sin salida: no hay errores de espacios</tspan>
-</text>
-<rect x="82" y="690" width="220" height="36" rx="18" fill="#213746" stroke="#2A5878" stroke-width="1.5" opacity="1"/>
-<text x="192.0" y="713" fill="#9EDAFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
-<tspan x="192.0" dy="0">working tree · MODIFICADO</tspan>
+<rect x="136" y="662" width="300" height="36" rx="18" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
+<text x="286.0" y="685" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" text-anchor="middle" style="">
+<tspan x="286.0" dy="0">2 artefactos · una decisión</tspan>
 </text>
 <rect x="1050" y="142" width="508" height="650" rx="18" fill="#FFFFFF" stroke="#12395B" stroke-width="1.5" opacity="1"/>
 <text x="1080" y="186" fill="#12395B" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="start" style="">
-<tspan x="1080" dy="0">¿QUÉ SABE GIT AHORA?</tspan>
+<tspan x="1080" dy="0">CUATRO PREGUNTAS DE ROL</tspan>
 </text>
 <rect x="1080" y="222" width="448" height="84" rx="13" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="2" opacity="1"/>
 <circle cx="1112" cy="254" r="18" fill="#2F6FB0" stroke="#2F6FB0" stroke-width="1"/>
@@ -118,14 +114,14 @@
 <tspan x="1112" dy="0">1</tspan>
 </text>
 <text x="1142" y="253" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="1142" dy="0">Working tree</tspan>
+<tspan x="1142" dy="0">Dueño del proceso</tspan>
 </text>
 <text x="1142" y="282" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
-<tspan x="1142" dy="0">2 archivos cambiaron</tspan>
+<tspan x="1142" dy="0">¿el KPI refleja valor?</tspan>
 </text>
 <rect x="1375" y="245" width="125" height="36" rx="18" fill="#FFFFFF" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
 <text x="1437.5" y="268" fill="#2F6FB0" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="11" font-weight="800" text-anchor="middle" style="">
-<tspan x="1437.5" dy="0">ESTADO ACTUAL</tspan>
+<tspan x="1437.5" dy="0">VALOR PRIMERO</tspan>
 </text>
 <rect x="1080" y="332" width="448" height="84" rx="13" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
 <circle cx="1112" cy="364" r="18" fill="#52697C" stroke="#52697C" stroke-width="1"/>
@@ -133,10 +129,10 @@
 <tspan x="1112" dy="0">2</tspan>
 </text>
 <text x="1142" y="363" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="1142" dy="0">Staging</tspan>
+<tspan x="1142" dy="0">Data steward</tspan>
 </text>
 <text x="1142" y="392" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
-<tspan x="1142" dy="0">todavía vacío</tspan>
+<tspan x="1142" dy="0">¿la regla conserva significado?</tspan>
 </text>
 <rect x="1080" y="442" width="448" height="84" rx="13" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
 <circle cx="1112" cy="474" r="18" fill="#52697C" stroke="#52697C" stroke-width="1"/>
@@ -144,10 +140,10 @@
 <tspan x="1112" dy="0">3</tspan>
 </text>
 <text x="1142" y="473" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="1142" dy="0">Commit</tspan>
+<tspan x="1142" dy="0">Arquitecto de datos</tspan>
 </text>
 <text x="1142" y="502" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
-<tspan x="1142" dy="0">todavía no existe</tspan>
+<tspan x="1142" dy="0">¿qué impacto tiene el cambio?</tspan>
 </text>
 <rect x="1080" y="552" width="448" height="84" rx="13" fill="#F6F8FA" stroke="#B8C8D6" stroke-width="1" opacity="1"/>
 <circle cx="1112" cy="584" r="18" fill="#52697C" stroke="#52697C" stroke-width="1"/>
@@ -155,25 +151,25 @@
 <tspan x="1112" dy="0">4</tspan>
 </text>
 <text x="1142" y="583" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" text-anchor="start" style="">
-<tspan x="1142" dy="0">Remoto</tspan>
+<tspan x="1142" dy="0">Usuario de evidencia</tspan>
 </text>
 <text x="1142" y="612" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="550" text-anchor="start" style="">
-<tspan x="1142" dy="0">todavía no cambió</tspan>
+<tspan x="1142" dy="0">¿la salida permite actuar?</tspan>
 </text>
 <rect x="1080" y="666" width="448" height="96" rx="13" fill="#E7F5ED" stroke="#24855A" stroke-width="1.5" opacity="1"/>
 <text x="1104" y="697" fill="#24855A" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="900" text-anchor="start" style="">
-<tspan x="1104" dy="0">DECISIÓN ANTES DE git add</tspan>
+<tspan x="1104" dy="0">CRITERIO ANTES DE APROBAR</tspan>
 </text>
 <text x="1104" y="728" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start" style="">
-<tspan x="1104" dy="0">¿Los dos archivos pertenecen al mismo propósito?</tspan>
-<tspan x="1104" dy="18.75">¿La cifra está explicada y limitada?</tspan>
+<tspan x="1104" dy="0">¿La corrección responde la objeción?</tspan>
+<tspan x="1104" dy="18.75">¿La evidencia y el límite son verificables?</tspan>
 </text>
 <rect x="48" y="836" width="1504" height="44" rx="14" fill="#E7EFF5" stroke="#D0DFEA" stroke-width="1.5" opacity="1"/>
-<rect x="52" y="840" width="206" height="36" rx="11" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
-<text x="155.0" y="863" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="900" text-anchor="middle" style="">
-<tspan x="155.0" dy="0">LECTURA DEL DIFF</tspan>
+<rect x="52" y="840" width="228" height="36" rx="11" fill="#12395B" stroke="#12395B" stroke-width="0" opacity="1"/>
+<text x="166.0" y="863" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="900" text-anchor="middle" style="">
+<tspan x="166.0" dy="0">LECTURA DEL CAMBIO</tspan>
 </text>
-<text x="273" y="863" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
-<tspan x="273" dy="0">Rojo retira una plantilla; verde propone evidencia. Todavía no hay commit, push ni PR.</tspan>
+<text x="295" y="863" fill="#17324D" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start" style="">
+<tspan x="295" dy="0">El color muestra una diferencia; el rol explica si esa diferencia mejora la decisión.</tspan>
 </text>
 </svg>
