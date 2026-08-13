@@ -187,8 +187,9 @@ Para sesiones mas teoricas, deja el laboratorio grande al final. Durante la clas
 
 Las preguntas deben distribuirse a lo largo del cuaderno, no solo al final.
 
-- Sesion corta: minimo 8 preguntas.
-- Sesion robusta: 10 a 16 preguntas.
+- Sesion corta: minimo 8 preguntas, salvo que el usuario fije otra cantidad.
+- Sesion robusta: 10 a 16 preguntas, salvo una decision explicita del usuario.
+- Para la sesion 2 vigente, usa exactamente siete preguntas distribuidas; no aumentes la cantidad para satisfacer una metrica heuristica.
 
 El formato esperado, inspirado en la sesion 7, es:
 
@@ -269,15 +270,18 @@ Si hay recursos externos importantes, incluyelos en el cuerpo de la clase y tamb
 ### Sesion 2 ampliada: historia y alcance confirmado
 
 - La historia conductora es Compras Claras: una analista necesita priorizar revision humana de procesos contractuales usando evidencia de SECOP.
-- El orden conceptual confirmado es: decision y KPI; motivaciones y preparacion para adoptar; proceso AS-IS y BPM; roles y relevos; caso de uso; BI tradicional frente a capacidades Big Data; arquitectura empresarial; ciclo analitico NIST; capacidades y herramientas; Git/GitHub como puente para conversar sobre los artefactos.
-- En la sesion 2, limita el contenido estudiantil a siete responsabilidades esenciales: dueno del proceso, arquitecto empresarial, arquitecto de datos, data steward, ingeniero de datos, analista BI/datos y cientifico de datos. El experto de dominio y el usuario de la evidencia son actores del proceso; seguridad, privacidad, calidad, observabilidad y costos son controles transversales. No uses RACI ni catalogos extensos de cargos en el cuaderno, laboratorio, rubrica o glosario.
-- Explica estos siete roles mediante decisiones, artefactos y relevos concretos. Usa un cambio semantico de datos, como `fecha_de_inicio`, para mostrar la cadena definicion, diseno, implementacion, validacion e interpretacion. El cientifico de datos aparece solo cuando una pregunta predictiva o experimental y una linea base justifican su participacion.
-- Explica en cada actividad contractual actor, entrada, tarea, dato, validacion, salida, problema, herramienta y KPI.
+- El orden conceptual confirmado es: decision e indicador; proceso AS-IS y BPM; caso de uso; BI tradicional frente a una necesidad Big Data demostrable; arquitectura empresarial; ciclo analitico NIST; GitHub como puente para revisar los artefactos.
+- Limita el contenido estudiantil a cinco nucleos: arquitectura empresarial, administracion de procesos, ciclo analitico, casos de uso y BI tradicional frente a Big Data. Motivaciones, herramientas, roles y controles solo aparecen cuando ayudan a entender uno de esos nucleos; no son bloques independientes.
+- En el cuaderno presenta primero cuatro perspectivas comprensibles: negocio, significado del dato, preparacion de evidencia y analisis. Los nombres profesionales pueden introducirse entre parentesis. Explica que el cientifico de datos solo aparece ante un problema predictivo o experimental justificado. No uses RACI ni catalogos de cargos.
+- Mantén profundidad en la relacion entre actividad, dato, validacion, salida, problema, indicador y decision, pero no conviertas el laboratorio en una matriz exhaustiva de todas las actividades.
 - Conserva `Images/2.1.png`, `Images/GCP/5.png`, `Images/GCP/6.png` y las imagenes originales. No modifiques `Cuadernos/2_BigData.ipynb` cuando se use solo como fuente historica.
 - El caso permite priorizar revision y describir patrones; no permite por si solo demostrar causalidad, fraude o irregularidad.
 - Integra casos de uso y BI tradicional frente a Big Data dentro de la historia, sin explicar al estudiante la reorganizacion curricular. No incluye presentaciones relampago de estudiantes; el cierre usa un ticket individual o de pareja.
 - OLTP, OLAP, Data Marts, Data Warehouses, Data Lakes y ETL pertenecen a la sesion 4. En la sesion 2 solo pueden nombrarse como adelanto curricular, sin definicion formal, comparacion, pregunta evaluable ni implementacion.
 - La proxima sesion anunciada es la sesion 4. Conserva los cuadernos historicos de la sesion 3, pero no los publiques como una tarjeta separada.
+- El laboratorio de la sesion 2 es no tecnico: usa el perfil SECOP precomputado y solo dos artefactos breves. No exige Python, terminal, API viva, instalacion de Git ni rediseñar diagramas.
+- La ruta GitHub debe detallar accion, resultado esperado, significado y error probable para crear rama, editar, previsualizar, guardar commit, abrir PR, comentar una linea, corregir la misma rama y leer Checks. La pareja se detiene antes del merge.
+- Antes de entregar cambios, prueba la plantilla incompleta, la solucion resuelta y un PR docente con comentario, correccion posterior y CI verde. Mantén una prueba privada separada para no consumir la oportunidad de validacion con otra cuenta.
 
 ### Git como puente de colaboracion del proyecto semestral
 

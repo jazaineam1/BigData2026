@@ -16,19 +16,9 @@ VISUAL_BASES = [
     for name in [
         "01_hilo_decision",
         "02_proceso_as_is",
-        "03_adopcion_valor",
-        "04_casos_bi",
         "05_arquitectura_to_be",
         "06_ciclo_nist",
         "07_estados_git",
-    ]
-] + [
-    ROOT / "assets" / "session2" / "git" / name
-    for name in [
-        "01_entorno_gratuito",
-        "02_status_diff",
-        "03_pull_request",
-        "04_actions",
     ]
 ]
 
@@ -66,7 +56,7 @@ def main() -> None:
     question_numbers = sorted(
         int(match)
         for cell in questions
-        for match in re.findall(r"# Pregunta (\d+) de 14", "".join(cell.get("source", [])))
+        for match in re.findall(r"# Pregunta (\d+) de 7", "".join(cell.get("source", [])))
     )
     references = re.findall(r'(?:src|href)="(\.\./(?:assets|Images)/[^"]+)', source)
     missing = [
@@ -76,11 +66,11 @@ def main() -> None:
     ]
 
     errors = []
-    if len(cells) < 55:
+    if len(cells) < 35:
         errors.append(f"se esperaba una clase robusta y solo se encontraron {len(cells)} celdas")
-    if len(questions) != 14:
-        errors.append(f"se esperaban 14 preguntas y se encontraron {len(questions)}")
-    if question_numbers != list(range(1, 15)):
+    if len(questions) != 7:
+        errors.append(f"se esperaban 7 preguntas y se encontraron {len(questions)}")
+    if question_numbers != list(range(1, 8)):
         errors.append(f"numeración de preguntas inesperada: {question_numbers}")
     if len(hidden) != len(code_cells):
         errors.append(
@@ -101,18 +91,20 @@ def main() -> None:
     if "flowchart " in source or "```mermaid" in source:
         errors.append("el cuaderno todavía contiene Mermaid visible")
     required_snippets = [
-        "Sesión 2 — De la necesidad empresarial al caso de uso de Big Data",
-        "Motivaciones y planificación de la adopción de Big Data",
-        "BI tradicional y BI apoyada por capacidades Big Data",
-        "Reserva curricular",
-        "Siete responsabilidades que sostienen un proyecto analítico",
-        "Ejemplo continuo — ¿qué ocurre si cambia `fecha_de_inicio`?",
-        "Git conserva el relevo, no reemplaza las responsabilidades",
-        "Git como relevo entre roles",
+        "Sesión 2 — De una necesidad empresarial a una decisión apoyada por datos",
+        "Administración de procesos de negocio: comprender antes de cambiar",
+        "Casos de uso de Big Data en las organizaciones",
+        "Inteligencia de negocios tradicional y con Big Data",
+        "Arquitectura empresarial: conectar el propósito con la solución",
+        "Ciclo de vida de la analítica de Big Data",
+        "GitHub como puente para construir el mismo proyecto",
+        "base: main",
+        "compare: hito/s02-negocio",
+        "No pulses **Merge pull request**",
         "hitos/s02/01_decision_proceso.md",
         "hitos/s02/02_caso_arquitectura_accion.md",
-        "Git no decide si la arquitectura es correcta",
-        "TOTAL_QUESTIONS = 14",
+        "No debes programar",
+        "TOTAL_QUESTIONS = 7",
     ]
     for snippet in required_snippets:
         if snippet not in source:
@@ -137,6 +129,16 @@ def main() -> None:
         "MLOps",
         "DevOps",
         "SRE",
+        "Kafka",
+        "Spark",
+        "DuckDB",
+        "Airflow",
+        "git status",
+        "git add",
+        "git push",
+        "working tree",
+        "staging",
+        "Profundización opcional",
     ]:
         if forbidden in source:
             errors.append(f"el cuaderno contiene texto fuera del alcance estudiantil acordado: {forbidden}")
