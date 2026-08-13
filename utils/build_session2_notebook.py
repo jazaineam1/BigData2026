@@ -518,7 +518,7 @@ def build_cells():
         ),
         md(
             """
-            ## Del problema a una decisión de adopción, sin añadir otra lámina
+            ## Del problema a una decisión de adopción
 
             Usa la tabla anterior como una lista de comprobación en este orden:
 
