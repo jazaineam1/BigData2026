@@ -92,6 +92,7 @@ def main() -> None:
         errors.append("el cuaderno todavía contiene Mermaid visible")
     required_snippets = [
         "Sesión 2 — De una necesidad empresarial a una decisión apoyada por datos",
+        "VERSIÓN VIGENTE EN COLAB — 14 de agosto de 2026",
         "Administración de procesos de negocio: comprender antes de cambiar",
         "Casos de uso de Big Data en las organizaciones",
         "Inteligencia de negocios tradicional y con Big Data",
@@ -105,6 +106,7 @@ def main() -> None:
         "hitos/s02/02_caso_arquitectura_accion.md",
         "No debes programar",
         "TOTAL_QUESTIONS = 7",
+        "https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session2/01_hilo_decision.png",
     ]
     for snippet in required_snippets:
         if snippet not in source:

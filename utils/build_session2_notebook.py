@@ -19,7 +19,8 @@ COLAB = (
     "blob/main/Cuadernos/2_Definiciones_gcp.ipynb"
 )
 WEB_CURSO = "https://jazaineam1.github.io/BigData2026/"
-DIAGRAMS = "../assets/diagrams/session2"
+DIAGRAMS_RAW = "https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session2"
+DIAGRAMS_GITHUB = "https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session2"
 TOTAL_QUESTIONS = 7
 
 
@@ -61,8 +62,8 @@ def question_cell(numero, tema, contexto, pregunta, opciones, correcta, retro_op
 def diagram(name, alt, width=980):
     """Inserta PNG visible y mantiene el SVG como versión ampliable."""
     return (
-        f'<div align="center"><a href="{DIAGRAMS}/{name}.svg" target="_blank">'
-        f'<img src="{DIAGRAMS}/{name}.png" width="{width}" alt="{alt}"></a></div>'
+        f'<div align="center"><a href="{DIAGRAMS_GITHUB}/{name}.svg" target="_blank">'
+        f'<img src="{DIAGRAMS_RAW}/{name}.png" width="{width}" alt="{alt}"></a></div>'
     )
 
 
@@ -87,6 +88,11 @@ def build_cells():
             """
             # Sesión 2 — De una necesidad empresarial a una decisión apoyada por datos
 
+            > **VERSIÓN VIGENTE EN COLAB — 14 de agosto de 2026 · 7 preguntas · laboratorio desde GitHub.com**
+
+            Si no ves esta franja, la pestaña conserva una copia anterior. Cierra el cuaderno y vuelve a abrirlo
+            desde el enlace de GitHub; no uses **Copiar en Drive** para consultar la versión oficial.
+
             ## Universidad Central
             <div align="center">
               <img src="https://universidad.ucentral.edu.co/tulengua/wp-content/themes/tulengua/images/logo-ucentral.png"
@@ -101,7 +107,7 @@ def build_cells():
             **Caso conductor:** Compras Claras — seguimiento de contratación pública con SECOP<br>
             **Duración:** 180 minutos — 90 de explicación y 90 de práctica<br>
             **Modalidad:** aprender haciendo, en parejas y desde el navegador<br>
-            **Última actualización:** 13 de agosto de 2026
+            **Última actualización:** 14 de agosto de 2026
 
             ## Ficha de la sesión
 
