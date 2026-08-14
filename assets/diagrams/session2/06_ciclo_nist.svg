@@ -50,7 +50,7 @@
 <line x1="0" y1="114" x2="1600" y2="114" stroke="#2F6FB0" stroke-width="2" fill="none" stroke-linecap="round"/>
 <rect x="1376" y="24" width="176" height="36" rx="18" fill="#214E6D" stroke="#3F769C" stroke-width="1.5" opacity="1"/>
 <text x="1464.0" y="47" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="middle" style="">
-<tspan x="1464.0" dy="0">MAPA 6 DE 7</tspan>
+<tspan x="1464.0" dy="0">SESIÓN 2 · CICLO NIST</tspan>
 </text>
 <text x="48" y="48" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" text-anchor="start" style="">
 <tspan x="48" dy="0">Ciclo analítico: la evidencia debe volver al proceso</tspan>
@@ -73,7 +73,7 @@
 <text x="670" y="268" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="13.5" font-weight="550" text-anchor="start" style="">
 <tspan x="670" dy="0">Entrada: API o muestra local</tspan>
 <tspan x="670" dy="18.225">Artefacto: snapshot + metadatos</tspan>
-<tspan x="670" dy="18.225">Rol: ingeniero de datos + data owner</tspan>
+<tspan x="670" dy="18.225">Rol: ingeniero de datos · control de acceso</tspan>
 </text>
 <rect x="1120" y="288" width="310" height="168" rx="18" fill="#FFFFFF" stroke="#C98500" stroke-width="2" opacity="1" filter="url(#shadow)"/>
 <circle cx="1156" cy="330" r="20" fill="#C98500" stroke="#C98500" stroke-width="1"/>

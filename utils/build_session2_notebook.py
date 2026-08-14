@@ -1,32 +1,32 @@
 # -*- coding: utf-8 -*-
-"""Genera la sesión 2 sobre negocio, roles, arquitectura y ciclo analítico."""
+"""Genera la Sesión 2 como clase guiada para estudiantes no técnicos."""
 
-from pathlib import Path
+from __future__ import annotations
+
 import sys
+from pathlib import Path
 
-if __package__ in (None, ""):
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from utils.make_notebook import code, md, save, validate
 
 
 OUTPUT = "Cuadernos/2_Definiciones_gcp.ipynb"
-WEB_CURSO = "https://jazaineam1.github.io/BigData2026/"
 COLAB = (
     "https://colab.research.google.com/github/jazaineam1/BigData2026/"
     "blob/main/Cuadernos/2_Definiciones_gcp.ipynb"
 )
+WEB_CURSO = "https://jazaineam1.github.io/BigData2026/"
 DIAGRAMS = "../assets/diagrams/session2"
-GIT_CAPTURES = "../assets/session2/git"
-TOTAL_QUESTIONS = 14
+TOTAL_QUESTIONS = 7
 
 
 def hidden(cell, title, *tags):
-    """Pliega código de soporte en Colab, manteniendo visible su resultado."""
-    source = "".join(cell["source"])
-    if not source.startswith("#@title"):
-        source = f'#@title {title} {{ display-mode: "form" }}\n' + source
-        cell["source"] = [line + "\n" for line in source.split("\n")[:-1]] + [source.split("\n")[-1]]
+    """Configura una celda para que el estudiante vea el formulario, no su código."""
+    first_line = f'#@title {title} {{ display-mode: "form" }}'
+    cell["source"] = [first_line + "\n"] + cell["source"]
     cell["metadata"]["tags"] = list(tags or ("hide-input",))
     cell["metadata"]["jupyter"] = {"source_hidden": True}
     cell["metadata"]["cellView"] = "form"
@@ -35,9 +35,8 @@ def hidden(cell, title, *tags):
 
 
 def question_cell(numero, tema, contexto, pregunta, opciones, correcta, retro_opciones):
-    """Crea una pregunta visual con retroalimentación específica por distractor."""
-    if len(opciones) != 4 or len(retro_opciones) != 4:
-        raise ValueError("Cada pregunta debe tener cuatro opciones y cuatro retroalimentaciones.")
+    options_repr = repr(opciones)
+    feedback_repr = repr(retro_opciones)
     return hidden(
         code(
             f"""
@@ -47,9 +46,9 @@ def question_cell(numero, tema, contexto, pregunta, opciones, correcta, retro_op
                 tema={tema!r},
                 contexto={contexto!r},
                 pregunta={pregunta!r},
-                opciones={opciones!r},
+                opciones={options_repr},
                 correcta={correcta},
-                retro_opciones={retro_opciones!r},
+                retro_opciones={feedback_repr},
             )
             """
         ),
@@ -60,29 +59,10 @@ def question_cell(numero, tema, contexto, pregunta, opciones, correcta, retro_op
 
 
 def diagram(name, alt, width=980):
-    """Inserta PNG compatible con Colab y enlaza el SVG para ampliación."""
+    """Inserta PNG visible y mantiene el SVG como versión ampliable."""
     return (
         f'<div align="center"><a href="{DIAGRAMS}/{name}.svg" target="_blank">'
         f'<img src="{DIAGRAMS}/{name}.png" width="{width}" alt="{alt}"></a></div>'
-    )
-
-
-def git_diagram(name, alt, width=920):
-    """Inserta PNG compatible con Colab y enlaza el SVG para ampliación."""
-    return (
-        f'<div align="center"><a href="{GIT_CAPTURES}/{name}.svg" target="_blank">'
-        f'<img src="{GIT_CAPTURES}/{name}.png" width="{width}" alt="{alt}"></a></div>'
-    )
-
-
-def bash_commands(text):
-    """Presenta comandos opcionales de profundización sin ejecutarlos en Colab."""
-    return md(
-        "<details>\n"
-        "<summary><strong>Profundización opcional: ver equivalencia en terminal</strong></summary>\n\n"
-        "Estos comandos no son requisito de la sesión ni se evalúan de memoria.\n\n"
-        "```bash\n" + text.strip() + "\n```\n"
-        "</details>"
     )
 
 
@@ -96,18 +76,16 @@ def build_cells():
 
             **Acceso público:** [página del curso]({WEB_CURSO})
 
-            > **Antes de comenzar en Colab:** selecciona **Entorno de ejecución → Ejecutar todas**. Verás las
-            > preguntas, sus opciones y la retroalimentación; el código técnico queda plegado porque no es parte
-            > del aprendizaje de esta sesión. Los comandos de Git y del perfilador sí permanecerán visibles.
+            > **En Colab:** selecciona **Entorno de ejecución → Ejecutar todas**. Las siete preguntas aparecerán
+            > con sus opciones y retroalimentación; su código permanecerá plegado.
 
-            > El docente compartirá únicamente el enlace del repositorio privado asignado a cada pareja. Esta
-            > actividad usa GitHub Free y no requiere servicios pagos. No necesitas crear cuentas de
-            > nube, tarjetas, claves, tokens ni cuentas de servicio.
+            > **En el laboratorio:** trabajarás desde GitHub.com. No necesitas instalar Git, usar terminal, crear
+            > cuentas de nube ni compartir claves. El docente entregará el enlace del repositorio de práctica.
             """
         ),
         md(
             """
-            # Sesión 2 — De la necesidad empresarial al caso de uso de Big Data
+            # Sesión 2 — De una necesidad empresarial a una decisión apoyada por datos
 
             ## Universidad Central
             <div align="center">
@@ -118,149 +96,90 @@ def build_cells():
             > ### Facultad de Ingeniería y Ciencias Básicas
             > ### Maestría en Analítica de Datos — BIG DATA (64491093), Grupo 2
 
-            **Temas:** motivaciones de adopción · arquitectura empresarial · BPM · ciclo analítico · casos de uso · BI tradicional y Big Data<br>
-            **Caso:** Compras Claras — seguimiento de contratación pública con SECOP<br>
+            **Temas de esta sesión:** arquitectura empresarial · administración de procesos de negocio · ciclo de
+            vida de la analítica de Big Data · casos de uso organizacionales · BI tradicional y con Big Data<br>
+            **Caso conductor:** Compras Claras — seguimiento de contratación pública con SECOP<br>
             **Duración:** 180 minutos — 90 de explicación y 90 de práctica<br>
-            **Modalidad:** aprender haciendo, en parejas y con GitHub desde el navegador<br>
-            **Última actualización:** 12 de agosto de 2026
+            **Modalidad:** aprender haciendo, en parejas y desde el navegador<br>
+            **Última actualización:** 13 de agosto de 2026
 
             ## Ficha de la sesión
 
-            | Campo | Definición |
+            | Campo | Descripción |
             |---|---|
-            | Pregunta profesional | ¿Qué procesos contractuales deberían revisarse primero? |
-            | Responsable | analista de seguimiento con validación del director |
-            | Fuente | SECOP Integrado; muestra local reproducible y API opcional |
-            | Entorno | Colab para la clase; GitHub.com para colaborar sin depender de Git instalado |
-            | Producto | dos artefactos enlazados: decisión/proceso y caso/arquitectura/acción |
+            | pregunta profesional | ¿qué procesos contractuales deberían revisarse primero? |
+            | fuente | muestra local de SECOP con perfil descriptivo precomputado |
+            | entorno | Colab para la clase y GitHub.com para el laboratorio |
+            | producto | dos documentos conectados del proyecto semestral |
             """
         ),
         md(
             """
-            ## Objetivos de aprendizaje y alcance
+            ## Objetivos de aprendizaje y producto
 
             Al finalizar podrás:
 
-            1. formular una motivación empresarial, una decisión, un responsable y un KPI antes de proponer tecnología;
-            2. evaluar preparación para adoptar Big Data mediante valor, datos, proceso, personas, riesgo y viabilidad;
-            3. distinguir proceso, tarea, procedimiento y proyecto, y representar un AS-IS con elementos BPMN;
-            4. diferenciar arquitectura empresarial, arquitectura de datos y arquitectura técnica;
-            5. aplicar captura, preparación, análisis, visualización y acción al caso SECOP;
-            6. formular un caso de uso de su entorno laboral y distinguir cuándo basta BI tradicional y cuándo se
-               justifican capacidades Big Data;
-            7. elegir capacidades tecnológicas según el problema y no por popularidad del producto;
-            8. explicar cómo rama, commit, Pull Request, revisión y CI pueden conservar la conversación entre roles;
-            9. comunicar límites: una alerta descriptiva prioriza revisión, pero no prueba causalidad ni irregularidad.
+            1. describir un proceso actual e identificar una demora, una decisión y un indicador;
+            2. formular un caso de uso sin comenzar por una herramienta;
+            3. explicar cuándo BI tradicional es suficiente y cuándo una necesidad puede justificar Big Data;
+            4. leer una arquitectura empresarial desde negocio, información, aplicaciones y tecnología;
+            5. seguir el recorrido captura → preparación → análisis → visualización → acción;
+            6. reconocer quién debe definir, construir, interpretar y usar la evidencia;
+            7. conservar una propuesta, una objeción y una corrección mediante GitHub.
 
-            **Producto de la sesión:** el primer hito del proyecto semestral: blueprint de Compras Claras y ficha de
-            transferencia a un caso laboral. Cada decisión queda explicada, revisada y reproducible; no se elegirá
-            una plataforma Big Data sin demostrar primero por qué la organización la necesita.
+            **Producto de la sesión.** Cada pareja completará dos documentos breves del mismo proyecto:
+
+            - `01_decision_proceso.md`: qué debe decidir la organización y qué ocurre hoy;
+            - `02_caso_arquitectura_accion.md`: qué solución se propone y cómo la evidencia vuelve al proceso.
+
+            No evaluaremos memoria de comandos ni cantidad de cambios. Evaluaremos si la historia tiene sentido.
             """
         ),
         md(
             """
-            ## Propósito del hilo: convertir una operación en una decisión confiable
+            ## La historia completa en una frase
 
-            Esta sesión no busca memorizar una lista de siglas. Busca responder una pregunta más útil:
+            > Laura recibe información contractual tarde. Necesita saber qué revisar primero, comprender dónde se
+            > produce la demora y proponer una forma responsable de convertir datos en una acción humana.
 
-            > ¿Cómo pasa un hecho registrado durante la contratación a convertirse en evidencia que una analista
-            > puede usar, explicar y devolver al proceso como una acción?
+            La clase seguirá exactamente ese problema:
 
-            El orden de la clase sigue el viaje real de esa evidencia:
+            1. **Decisión:** qué necesita resolver Laura.
+            2. **Proceso:** cómo se trabaja actualmente y dónde se pierde tiempo.
+            3. **Caso de uso y BI:** qué evidencia necesita y qué capacidad es suficiente.
+            4. **Arquitectura empresarial:** cómo se organizan las partes de la solución.
+            5. **Ciclo analítico:** cómo los datos terminan en una acción y producen nueva evidencia.
+            6. **GitHub:** cómo una pareja construye y revisa esos acuerdos sin sobrescribirlos.
 
-            1. **La decisión** define para qué necesitamos información y qué KPI permitirá evaluar la mejora.
-            2. **La motivación y la preparación** comprueban si Big Data responde a una necesidad o solo a una moda.
-            3. **El proceso BPM** muestra quién trabaja, dónde se decide y en qué actividad nace cada dato.
-            4. **El caso de uso** conecta usuario, decisión, evidencia, acción y valor verificable.
-            5. **BI tradicional frente a Big Data** se decide por requisitos, no por prestigio de la herramienta.
-            6. **La arquitectura y el ciclo NIST** asignan capacidades, controles y responsables de extremo a extremo.
-            7. **Los roles conversan** sobre el blueprint; Git y GitHub permiten conservar propuesta, objeción,
-               corrección y validación sin convertir los comandos en el objetivo de aprendizaje.
-
-            **Punto de partida.** No se presupone experiencia previa en Bash, Git, nube o contenedores. El flujo
-            principal se realiza en GitHub.com. Los estados internos de Git y la terminal aparecen solo como
-            profundización opcional. El razonamiento estadístico se aprovecha para interpretar evidencia, no para
-            saltar pasos de arquitectura.
+            Cada bloque responde una pregunta del anterior. No aparecerá una herramienta antes de explicar qué
+            problema resuelve.
             """
         ),
         md(
             """
-            ## Agenda: una historia empresarial integrada
+            ## Agenda de 180 minutos
 
-            ### Primeros 90 minutos — comprender el sistema
+            ### 90 minutos de explicación y conversación
 
-            | Minutos | Pregunta que conduce el bloque | Resultado |
+            | Tiempo | Pregunta de la clase | Resultado |
             |---:|---|---|
-            | 0–8 | ¿Qué debe decidir la analista y cómo sabrá si mejora? | responsable, alcance y KPI |
-            | 8–20 | ¿Por qué adoptar Big Data y qué debe estar preparado? | motivación, valor, viabilidad y riesgos |
-            | 20–37 | ¿Qué ocurre hoy y quién responde por cada parte? | proceso AS-IS, roles, datos y cuello de botella |
-            | 37–50 | ¿Qué caso de uso existe y basta la BI actual? | ficha del caso y decisión de suficiencia |
-            | 50–65 | ¿Cómo se alinean todas las piezas? | arquitectura empresarial TO-BE |
-            | 65–77 | ¿Cómo recorre la evidencia el ciclo analítico? | cinco etapas de NIST |
-            | 77–84 | ¿Qué capacidades y herramientas son proporcionales? | alternativas justificadas |
-            | 84–90 | ¿Cómo conversan los roles sin perder lo acordado? | Git/GitHub como puente de colaboración |
+            | 0–10 | ¿Qué debe decidir Laura? | decisión, responsable e indicador |
+            | 10–30 | ¿Qué ocurre hoy? | proceso AS-IS y cuello de botella |
+            | 30–48 | ¿Cuál es el caso de uso? | usuario, evidencia, acción y límite |
+            | 48–62 | ¿Basta la BI actual? | veredicto BI / Big Data |
+            | 62–77 | ¿Cómo se conectan las partes? | arquitectura empresarial |
+            | 77–90 | ¿Cómo vuelve la evidencia al proceso? | ciclo analítico y responsabilidades |
 
-            ### Últimos 90 minutos — construir evidencia
+            ### 90 minutos de laboratorio
 
-            | Minutos | Actividad | Evidencia observable |
+            | Tiempo | Actividad | Evidencia para avanzar |
             |---:|---|---|
-            | 90–98 | Abrir el repositorio y reconocer artefactos | archivos y roles temporales identificados |
-            | 98–118 | Analizar decisión, evidencia, proceso y KPI | primer artefacto argumentado |
-            | 118–138 | Formular caso y veredicto BI/Big Data | suficiencia sustentada con requisitos |
-            | 138–153 | Completar arquitectura, NIST y responsabilidades | segundo artefacto coherente |
-            | 153–165 | Revisar desde el rol contrario | objeción y corrección justificadas |
-            | 165–175 | Observar comentario, cambio y versión en GitHub | conversación conservada en un PR |
-            | 175–180 | Ticket de salida | decisión, rol crítico y límite |
-            """
-        ),
-        md(
-            """
-            ## ¿Por qué importa esta sesión?
-
-            En la sesión anterior reconocimos que Big Data no significa solamente “un archivo grande”. Ahora unimos
-            la lógica empresarial con los casos de uso organizacionales: conectar una pregunta con el trabajo que
-            produce los datos, comprobar si la organización está preparada y decidir si la BI existente es suficiente.
-
-            Si comenzamos por una herramienta, podemos automatizar un proceso defectuoso o construir un tablero que
-            nadie usa. Si comenzamos por decisión, proceso y KPI, cada dato y cada componente puede justificarse.
-            Por eso la secuencia de esta clase es deliberada y no una lista intercambiable de definiciones.
-            """
-        ),
-        md(
-            """
-            ## Un repositorio puede conservar el proyecto y su conversación
-
-            Cuando se definan los equipos, cada grupo tendrá **un repositorio propio** que podrá crecer durante el
-            semestre. No es necesario crear una copia nueva por cada actividad: los hitos pueden ampliar la misma
-            historia con datos, decisiones, análisis, documentación e implementación.
-
-            Esto no convierte Git en una obligación aislada ni en una prueba de memoria. Aparece porque los roles
-            necesitan resolver problemas cotidianos: documentos sobrescritos, versiones enviadas por correo,
-            decisiones sin autor, reglas de calidad cambiadas sin revisión y desacuerdos que desaparecen.
-
-            | Elemento | Qué permite conservar | Pregunta profesional que ayuda a responder |
-            |---|---|---|
-            | `main` | versión integrada que el equipo reconoce como base | ¿sobre qué acuerdo seguimos trabajando? |
-            | rama `hito/s02-negocio` | propuesta separada mientras se conversa | ¿qué cambio estamos evaluando sin alterar la base? |
-            | commit | una versión identificable con autor y explicación | ¿qué cambió y con qué intención? |
-            | Pull Request | propuesta, diferencias, preguntas y correcciones | ¿qué objeciones recibió y cómo se atendieron? |
-            | revisión humana | criterio de negocio, dominio, datos, seguridad y arquitectura | ¿la propuesta tiene sentido en el proceso real? |
-            | CI | comprobaciones automáticas repetibles | ¿faltan secciones, hay secretos evidentes o falló una regla observable? |
-
-            **Git no decide si la arquitectura es correcta.** Ayuda a reconstruir quién propuso una decisión, qué
-            evidencia usó, qué objeción recibió y cómo fue corregida. La cantidad de commits, líneas o publicaciones
-            no determina la calidad ni la nota.
-
-            ### ¿Cómo se relaciona con el proyecto del semestre?
-
-            Un hito puede convertirse en la base del siguiente cuando el equipo entiende y acepta sus decisiones.
-            La retroalimentación deja de ser un comentario que se pierde: puede provocar una corrección trazable. El
-            repositorio es, por tanto, una buena herramienta para conservar el aprendizaje acumulado, no el fin del
-            curso.
-
-            > **Situación actual.** Los grupos todavía no están definidos. En esta sesión usaremos roles temporales y
-            > un repositorio de práctica. Cuando existan equipos estables, cada grupo decidirá con el docente cómo
-            > aplicar este flujo a su proyecto.
+            | 90–100 | reconocer repositorio y evidencia | ambos ubican los tres archivos de trabajo |
+            | 100–120 | completar decisión y proceso | cuello, KPI y límite coherentes |
+            | 120–140 | completar caso y veredicto BI / Big Data | decisión sustentada sin marcas |
+            | 140–158 | completar arquitectura y ciclo | cuatro dominios y cinco etapas conectados |
+            | 158–172 | abrir y revisar Pull Request | una objeción específica y una corrección |
+            | 172–180 | interpretar CI y cerrar | diferencia entre comprobación automática y juicio humano |
             """
         ),
         hidden(
@@ -272,7 +191,6 @@ def build_cells():
                 from IPython.display import HTML, display
 
                 TOTAL_QUESTIONS = {TOTAL_QUESTIONS}
-                print("Python:", sys.version.split()[0])
                 print("Interactividad preparada. Continúa con la historia de Compras Claras.")
                 """
             ),
@@ -333,1279 +251,655 @@ def build_cells():
             "soporte-interactividad",
         ),
         md(
-            """
+            f"""
             ---
-            # 1. La historia comienza con una decisión, no con una herramienta
+            # 1. Comenzar por la decisión
 
-            Son las 8:00 a. m. La analista de seguimiento recibe cientos de registros contractuales. El director no
-            le pide “usar Big Data”; le hace una pregunta operativa: **¿qué procesos debemos revisar primero hoy?**
+            Son las 8:00 a. m. Laura, analista de seguimiento, recibe registros contractuales y debe organizar su
+            jornada. El director no le pide “usar Big Data”; le pregunta: **¿qué procesos deberíamos revisar primero?**
 
-            La oficina consolida información tarde, encuentra estados incompletos y compara duraciones expresadas
-            en unidades distintas. La analista necesita una cola explicable para orientar una revisión humana.
+            Antes de hablar de arquitectura necesitamos cuatro acuerdos:
 
-            ### Contrato de decisión
-
-            | Elemento | Definición en Compras Claras | Por qué se define primero |
+            | Acuerdo | Compras Claras | Por qué importa |
             |---|---|---|
-            | Problema | la revisión comienza tarde y sin criterio reproducible | evita diseñar una solución para un síntoma ambiguo |
-            | Responsable | analista de seguimiento; el director aprueba el criterio | aclara quién interpreta y quién decide |
-            | Decisión | ordenar casos para revisar, corregir o escalar | delimita qué salida debe producir la analítica |
-            | Entradas | fechas, estado, duración, unidad, valor y completitud | determina qué evidencia mínima hace falta |
-            | KPI de proceso | tiempo desde actualización hasta priorización | mide si el proceso mejora, no solo si el modelo corre |
-            | Salvaguarda | toda alerta requiere revisión humana | evita convertir una señal descriptiva en acusación |
+            | usuario | Laura, analista de seguimiento | alguien debe interpretar la evidencia |
+            | decisión | ordenar los casos que serán revisados | delimita la salida esperada |
+            | indicador | tiempo desde actualización hasta primera revisión | permite comparar antes y después |
+            | límite | la prioridad orienta una revisión humana | evita presentar una señal como acusación |
 
-            **Definición formal — decisión soportada por datos.** Elección entre cursos de acción cuyo criterio usa
-            evidencia trazable, reglas explícitas y responsabilidad humana.
+            {diagram('01_hilo_decision', 'Historia de Compras Claras: decisión, proceso, datos, evidencia, acción y mejora')}
 
-            **Intuición.** Los datos no “toman” la decisión: reducen el espacio de búsqueda. Es como ordenar una
-            bandeja de entrada por urgencia; la clasificación ayuda, pero una persona todavía lee y actúa.
+            **Cómo leer la imagen.** Empieza en la decisión y avanza de izquierda a derecha. Los datos nacen en el
+            proceso; la evidencia ayuda a Laura, pero Laura conserva la responsabilidad de actuar. La flecha de
+            regreso significa que cada revisión genera nueva información para mejorar el proceso.
 
-            **Ejemplo manual.** Si hay diez expedientes y solo dos horas, revisar primero los que no tienen fecha de
-            actualización o cuya duración no puede compararse es un criterio explicable. No afirma que estén mal.
+            **Conclusión.** Si no podemos nombrar usuario, decisión, indicador y límite, todavía no existe un caso
+            analítico bien formulado.
 
-            **Error frecuente:** comenzar con “hagamos un tablero” sin acordar quién actuará, con qué regla y cómo se
-            medirá el efecto.
-            """
-        ),
-        md(
-            """
-            ## Datos y fuentes del caso
-
-            Trabajaremos con una muestra local de **SECOP Integrado**, derivada del portal Datos Abiertos Colombia.
-            La API viva sirve como actualización opcional; la clase no depende de su disponibilidad.
-
-            **Unidad de observación:** un proceso contractual publicado en la fuente consultada. Una fila representa
-            un registro disponible, no toda la realidad jurídica u operacional del contrato.
-
-            ### Diccionario de variables
-
-            | Variable | Significado | Papel en Compras Claras | Control necesario |
-            |---|---|---|---|
-            | `id_del_proceso` | identificador del proceso | trazabilidad y detección de duplicados | no nulo y único según el corte |
-            | `entidad` | entidad contratante | responsable y dimensión de análisis | catálogo y texto normalizado |
-            | `departamento_entidad` | territorio de la entidad | segmentación descriptiva | valores geográficos consistentes |
-            | `modalidad_de_contratacion` | mecanismo contractual | comparación entre grupos | categoría documentada |
-            | `estado_del_procedimiento` | estado publicado | seguimiento y reglas de completitud | catálogo y fecha de actualización |
-            | `tipo_de_contrato` | naturaleza contractual | contexto de comparaciones | categoría documentada |
-            | `fecha_de_publicacion_del` | fecha de publicación | antigüedad y oportunidad | tipo fecha y rango plausible |
-            | `duracion` | cantidad declarada | señal descriptiva de tiempo | valor numérico no negativo |
-            | `unidad_de_duracion` | días, meses u otra unidad | permite comparar duraciones | conversión con regla trazable |
-            | `precio_base` | valor de referencia | contexto económico | moneda, escala y valores faltantes |
-
-            **Interpretación.** Las variables no son “columnas sueltas”: cada una nace en una actividad, tiene un
-            responsable y necesita una regla antes de alimentar una prioridad. Precio o duración altos no prueban
-            riesgo por sí mismos; requieren contexto, calidad y revisión humana.
-            """
-        ),
-        md(
-            f"""
-            ## El hilo que seguiremos durante toda la sesión
-
-            {diagram('01_hilo_decision', 'Hilo decisión, proceso, datos, herramientas, KPI y acción humana')}
-
-            **Cómo leerlo.** Laura formula la decisión en la columna izquierda. Sigue las tarjetas numeradas:
-            proceso, datos, capacidades, KPI y acción humana. El recuadro rojo muestra el atajo que rompe la
-            trazabilidad; la flecha punteada devuelve el resultado al proceso como un nuevo dato.
-
-            **Conclusión.** Una herramienta sin decisión, proceso y KPI es un componente aislado, no una solución.
-
-            **Limitación.** El diagrama explica trazabilidad, no asigna todavía responsables a cada actividad.
-
-            **Conexión.** Antes de rediseñar el trabajo debemos comprobar por qué cambiar y qué condiciones necesita
-            la adopción. Una arquitectura comienza con motivación y preparación, no con productos.
+            **Error frecuente:** medir cantidad de gráficos, archivos o herramientas. Esas cifras describen trabajo
+            técnico, no demuestran que la revisión sea más oportuna.
             """
         ),
         question_cell(
             1,
-            "Decisión y KPI",
-            "La directora propone medir el éxito por la cantidad de tecnologías instaladas.",
-            "¿Qué medida responde mejor al problema empresarial?",
+            "Decisión e indicador",
+            "El director propone medir el éxito por la cantidad de tecnologías instaladas.",
+            "¿Qué indicador responde mejor al problema de Laura?",
             [
-                "Número de servicios de nube activados.",
-                "Cantidad total de columnas descargadas.",
-                "Tiempo entre la actualización del registro y su priorización para revisión.",
-                "Número de gráficos creados por la analista.",
+                "Número de servicios tecnológicos activados.",
+                "Cantidad de columnas descargadas.",
+                "Tiempo entre la actualización del registro y su primera revisión.",
+                "Número de gráficos producidos.",
             ],
             2,
             [
-                "Cuenta infraestructura, pero no demuestra que Compras Claras acelere la revisión.",
-                "Más columnas pueden aumentar ruido y riesgo; no miden una mejora del proceso.",
-                "Este KPI enlaza el problema —consolidación tardía— con la decisión y permite comparar antes y después.",
-                "Un gráfico es un artefacto intermedio. El valor aparece cuando la evidencia llega a tiempo a la decisión.",
+                "Cuenta infraestructura, pero no demuestra que Laura reciba evidencia a tiempo.",
+                "Más columnas pueden aumentar trabajo y confusión; no miden la mejora del proceso.",
+                "Este indicador corresponde a la demora observada y permite comparar la situación actual con la propuesta.",
+                "Un gráfico es un medio de comunicación; el valor aparece cuando apoya una revisión oportuna.",
             ],
         ),
         md(
             """
             ---
-            # 2. Motivaciones y planificación de la adopción de Big Data
+            # 2. Administración de procesos de negocio: comprender antes de cambiar
 
-            ## ¿Por qué una organización decide adoptar nuevas capacidades analíticas?
+            Ya sabemos qué decisión apoyar. Ahora debemos localizar **dónde nace la demora**. La administración de
+            procesos de negocio —BPM— ayuda a observar el trabajo de principio a fin, no solo una tarea aislada.
 
-            Los capítulos 2 y 3 de la lectura del programa separan dos decisiones que suelen confundirse: **tener una
-            motivación empresarial** y **estar preparado para adoptar**. Un problema importante no garantiza que la
-            organización disponga de datos, responsables, gobierno, habilidades, presupuesto o un proceso capaz de
-            usar el resultado.
+            **Definición formal.** BPM es la disciplina que permite descubrir, representar, analizar, mejorar y
+            observar procesos para alcanzar un resultado medible.
 
-            **Definición formal — motivación empresarial.** Presión, oportunidad u objetivo verificable que justifica
-            cambiar la manera en que una organización decide o ejecuta un proceso.
+            **En palabras sencillas.** Un proceso es la historia completa del trabajo: quién recibe algo, qué hace,
+            qué decisión cambia la ruta y qué resultado entrega.
 
-            **Intuición.** “Queremos usar Big Data” describe una tecnología deseada. “Necesitamos priorizar revisiones
-            antes de 24 horas y hoy tardamos tres días” describe una brecha que puede medirse.
+            | Concepto | Significado sencillo | Ejemplo |
+            |---|---|---|
+            | tarea | trabajo concreto | validar que una fecha sea coherente |
+            | proceso | conjunto de tareas con un resultado | desde reportar ejecución hasta registrar la revisión |
+            | compuerta o *gateway* | pregunta que dirige el flujo | ¿la información está completa? |
+            | retrabajo | regreso a un paso anterior | solicitar corrección y esperar otra actualización |
+            | SLA | tiempo esperado del servicio | priorizar en máximo 24 horas |
+            | KPI | medición de lo que ocurrió realmente | horas transcurridas hasta la revisión |
 
-            **Ejemplo manual.** Una clínica que recibe un informe mensual puede operar con BI convencional. Si debe
-            detectar deterioro en minutos a partir de señales continuas y texto clínico, aparecen requisitos de
-            velocidad, variedad, confiabilidad y operación que deben evaluarse antes de escalar.
+            **Ejemplo pequeño.** En un reembolso, revisar la factura es una tarea. Recibir la solicitud, validar,
+            decidir y pagar forman el proceso. Si falta un soporte, una compuerta devuelve el caso y produce retrabajo.
 
-            ### Seis preguntas de preparación
-
-            | Dimensión | Pregunta de adopción | Evidencia mínima en Compras Claras | Riesgo si se omite |
-            |---|---|---|---|
-            | valor | ¿qué decisión o resultado mejora? | reducir tiempo de priorización | proyecto sin usuario ni beneficio |
-            | datos | ¿existen, significan lo mismo y pueden usarse? | SECOP, diccionario, fecha de corte y calidad | conclusiones sobre datos ambiguos |
-            | proceso | ¿dónde vuelve el resultado como acción? | revisión, corrección o escalamiento | tablero sin respuesta operacional |
-            | personas | ¿quién patrocina, interpreta, opera y responde? | director, analista y responsables de captura | solución sin propiedad |
-            | riesgo y gobierno | ¿qué límites, acceso y trazabilidad se exigen? | revisión humana, minimización y linaje | daño, exposición o acusaciones indebidas |
-            | viabilidad | ¿qué capacidad, costo y plazo son proporcionales? | lote diario y muestra reproducible | sobrediseño y costo sin valor |
-
-            **Aplicación SECOP.** La disponibilidad de una API es una condición técnica, no la motivación. La
-            motivación es priorizar mejor; el plan debe validar datos, proceso, responsables, controles y una ruta
-            incremental que pueda detenerse si la evidencia no demuestra valor.
-
-            **Error frecuente:** convertir la adopción en una compra irreversible. Una prueba acotada debe producir
-            aprendizaje y criterios de continuar, ajustar o detener.
+            **Error frecuente:** dibujar solo el camino en el que todo sale bien. Las esperas y devoluciones suelen
+            explicar el verdadero cuello de botella.
             """
         ),
         md(
             f"""
-            ## Del problema a una decisión de adopción
+            ## El proceso actual — AS-IS
 
-            {diagram('03_adopcion_valor', 'Mapa de motivación, preparación, experimento y decisión de adopción de Big Data')}
+            {diagram('02_proceso_as_is', 'Proceso actual de Compras Claras con actores, datos, decisión, retrabajo y cuello de botella')}
 
-            **Cómo leerlo.** La brecha empresarial aparece a la izquierda. En el centro, seis puertas comprueban
-            valor, datos, proceso, personas, gobierno y viabilidad. La salida no siempre es “adoptar Big Data”:
-            también puede ser mejorar la BI existente, ejecutar un experimento o detener el caso.
+            **Cómo leerlo paso a paso.**
 
-            **Conclusión.** Adoptar es una decisión de portafolio basada en evidencia. La arquitectura debe permitir
-            aprender con una inversión proporcional antes de comprometer una plataforma completa.
+            1. Los carriles muestran quién participa: entidad contratante, SECOP y oficina de seguimiento.
+            2. La entidad reporta hechos de la contratación; SECOP los publica; la oficina los descarga y une.
+            3. La compuerta pregunta si fechas y estados son suficientes.
+            4. Cuando faltan datos, el caso regresa al supervisor: aparece retrabajo y espera.
+            5. El bloque rojo señala la consolidación manual, nuestra hipótesis de cuello de botella.
 
-            **Limitación.** El mapa no calcula retorno financiero ni reemplaza validación jurídica, de seguridad o
-            contratación. Indica qué evidencia falta para tomar esas decisiones.
+            **Qué dato nace dónde.** El supervisor produce estado y fechas; SECOP conserva el registro; la oficina
+            produce una lista de casos; Laura produce la decisión final y su motivo.
 
-            **Conexión.** Si la motivación es válida, BPM permite localizar en qué trabajo real nace la demora y dónde
-            debe incorporarse la respuesta analítica.
+            **Qué todavía no sabemos.** El diagrama es una hipótesis razonable, no una prueba de cómo funciona cada
+            entidad. Antes de implementar habría que entrevistar a quienes ejecutan el proceso y medir los tiempos.
+
+            **Conexión.** Al comprender el trabajo actual podemos formular un caso de uso que responda al cuello, no
+            a una moda tecnológica.
             """
         ),
         question_cell(
             2,
-            "Motivación empresarial",
-            "La organización propone comprar una plataforma porque otras entidades ya la usan.",
-            "¿Qué evidencia convertiría esa idea en una motivación empresarial defendible?",
+            "Proceso, compuerta y retrabajo",
+            "La tarea valida fechas y produce dos resultados: información suficiente o información incompleta.",
+            "¿Cómo debe representarse la decisión posterior?",
             [
-                "Una lista más larga de productos populares.",
-                "Una brecha medible entre el desempeño actual y una decisión prioritaria, con responsable y KPI.",
-                "El número de publicaciones que mencionan Big Data.",
-                "La promesa de que cualquier dato producirá valor automáticamente.",
+                "La tarea almacena los archivos y termina el proceso.",
+                "Una compuerta dirige: suficiente continúa; incompleta regresa para corrección.",
+                "Un gráfico reemplaza la decisión y elimina la revisión.",
+                "El SLA decide automáticamente si existe irregularidad.",
             ],
             1,
             [
-                "Popularidad no demuestra que el producto resuelva una brecha propia ni que el proceso pueda usarlo.",
-                "La brecha, el responsable y el KPI permiten verificar valor antes y después de una intervención.",
-                "Las publicaciones pueden orientar una exploración, pero no definen el resultado de negocio esperado.",
-                "El valor depende de significado, proceso, acción y control; acumular datos no lo produce por sí solo.",
+                "La tarea realiza la validación, pero no muestra las dos rutas ni el retrabajo.",
+                "La compuerta hace explícita la regla y permite ver que la ruta incompleta produce espera y corrección.",
+                "Una visualización comunica resultados; no representa ni ejecuta el flujo del proceso.",
+                "El SLA fija un tiempo esperado y no permite concluir irregularidad ni reemplazar el juicio humano.",
             ],
+        ),
+        md(
+            """
+            ---
+            # 3. Casos de uso de Big Data en las organizaciones
+
+            Un caso de uso no es el nombre de una herramienta. Es una descripción clara de **quién usa qué evidencia
+            para decidir o actuar dentro de un proceso**.
+
+            | Pregunta | Compras Claras |
+            |---|---|
+            | ¿quién? | Laura, analista de seguimiento |
+            | ¿qué decide? | qué registros revisar primero |
+            | ¿con qué evidencia? | fechas, estado, duración y completitud |
+            | ¿qué recibe? | lista priorizada con el motivo visible |
+            | ¿qué hace? | revisa, solicita corrección, escala o descarta |
+            | ¿cómo se mide? | tiempo hasta primera revisión |
+            | ¿qué no afirma? | fraude, causalidad o irregularidad |
+
+            **Ejemplo no técnico.** “Analizar clientes” no es un caso de uso. “Cada lunes, la coordinadora identifica
+            clientes sin respuesta durante siete días para asignar seguimiento” sí lo es: tiene persona, momento,
+            evidencia, acción e indicador.
+
+            **Casos comunes en las organizaciones:** describir desempeño, detectar eventos que requieren atención,
+            recomendar un orden de trabajo, predecir una demanda u optimizar recursos. El verbo ayuda a reconocer la
+            decisión; el sector por sí solo no la define.
+
+            **Compras Claras describe, detecta y recomienda.** Describe calidad y duración, detecta registros que
+            merecen atención y recomienda un orden de revisión. No predice culpabilidad.
+            """
         ),
         question_cell(
             3,
-            "Preparación para adoptar",
-            "Compras Claras tiene datos y presupuesto, pero nadie está autorizado para revisar o atender las alertas.",
-            "¿Cuál es la principal brecha de preparación?",
-            [
-                "Falta aumentar el volumen de datos.",
-                "Falta definir proceso, responsable y acción para usar el resultado.",
-                "Falta cambiar inmediatamente a streaming.",
-                "Falta ocultar la limitación en la presentación.",
-            ],
-            1,
-            [
-                "Más volumen no crea autoridad ni un mecanismo de atención; puede agravar el problema.",
-                "Sin propietario y acción, la analítica termina en una visualización sin efecto operacional.",
-                "La latencia solo se justifica desde el tiempo disponible para decidir; no resuelve la falta de responsable.",
-                "Una adopción responsable hace visibles sus límites y usa esa evidencia para ajustar el plan.",
-            ],
-        ),
-        md(
-            """
-            ---
-            # 3. BPM: comprender el trabajo antes de automatizarlo
-
-            ## ¿Por qué aparece BPM ahora?
-
-            Ya sabemos qué decisión mejorar. Aún no sabemos **qué trabajo produce la información**, dónde se valida
-            ni por qué llega tarde. La administración de procesos de negocio —BPM— aporta ese mapa.
-
-            **Definición formal.** BPM es una disciplina de gestión que identifica, modela, analiza, mejora, ejecuta
-            y monitorea procesos de extremo a extremo para alcanzar resultados organizacionales medibles.
-
-            **Intuición.** Si la arquitectura es el plano de la organización, el proceso es la película: muestra
-            quién hace qué, en qué orden, con qué entrada, qué decisión cambia la ruta y qué resultado entrega.
-
-            ### Conceptos que no son equivalentes
-
-            | Concepto | Qué representa | Ejemplo del caso |
-            |---|---|---|
-            | Tarea | unidad de trabajo concreta | validar que una fecha tenga formato correcto |
-            | Procedimiento | instrucciones para ejecutar una tarea | pasos y regla usados para validar la fecha |
-            | Proceso | conjunto de actividades de extremo a extremo | desde reportar ejecución hasta priorizar revisión |
-            | Proyecto | esfuerzo temporal para cambiar algo | implementar la primera versión de Compras Claras |
-
-            **Ciclo BPM.** Descubrir → modelar → analizar → rediseñar → implementar → monitorear. Después de medir,
-            el ciclo vuelve a comenzar. Automatizar corresponde a una parte; mejorar exige comprobar el resultado.
-
-            **Ejemplo pequeño.** En un reembolso, recibir solicitud, validar soportes, decidir y pagar forman el
-            proceso. “Revisar la factura” es una tarea. Un gateway decide si hay soporte; un SLA fija el tiempo
-            máximo y el KPI revela cuánto tarda realmente.
-
-            **Error frecuente:** dibujar únicamente el camino feliz y ocultar rechazos, correcciones y esperas. Esos
-            desvíos suelen explicar el cuello de botella.
-            """
-        ),
-        question_cell(
-            4,
-            "Proceso frente a tarea",
-            "Una persona comprueba que la fecha final sea posterior a la inicial.",
-            "¿Cómo se clasifica esa acción?",
-            [
-                "Como todo el proceso contractual.",
-                "Como una tarea de validación dentro del proceso.",
-                "Como un proyecto de transformación empresarial.",
-                "Como una arquitectura técnica.",
-            ],
-            1,
-            [
-                "El proceso incluye varias actividades, actores, decisiones y un resultado de extremo a extremo.",
-                "La comprobación tiene una entrada, una regla y una salida concreta; por eso es una tarea.",
-                "Un proyecto es temporal y busca producir un cambio; esta validación ocurre en la operación cotidiana.",
-                "La arquitectura técnica describe infraestructura y ejecución, no una acción puntual del negocio.",
-            ],
-        ),
-        md(
-            f"""
-            ## Proceso AS-IS: lo que ocurre hoy
-
-            {diagram('02_proceso_as_is', 'Proceso AS-IS de contratación con carriles, gateway, retrabajo y cuello de botella')}
-
-            **Cómo leerlo.** Los tres carriles asignan responsabilidad. En la parte superior, cada actividad muestra
-            también el dato que produce. SECOP recibe, guarda y expone registros; la oficina descarga y consolida.
-            El rombo pregunta por completitud, la ruta roja devuelve el caso a “Reportar ejecución” y el contorno
-            discontinuo identifica el cuello de botella. Los tres KPI inferiores indican cómo comprobar la mejora.
-
-            **Conclusión.** El retraso no nace en un algoritmo: aparece cuando la oficina descarga, une y verifica
-            archivos después de que el proceso operacional ya ocurrió.
-
-            **Limitación.** Es una representación simplificada, no el modelo normativo completo de contratación ni
-            un diagrama BPMN ejecutable. Debe validarse con responsables reales.
-
-            **Conexión.** Cada actividad deja una huella. En el siguiente paso convertiremos el flujo en una tabla de
-            datos, controles, herramientas y KPI.
-            """
-        ),
-        md(
-            """
-            ## Trazabilidad actividad por actividad
-
-            | Paso | Actor | Entrada | Actividad | Dato producido | Validación | Salida | Problema AS-IS | Herramienta posible | KPI |
-            |---:|---|---|---|---|---|---|---|---|---|
-            | 1 | área solicitante | necesidad y presupuesto | definir necesidad | objeto, monto, responsable | aprobación y disponibilidad | solicitud aprobada | texto ambiguo | gestor documental / ERP | tiempo de aprobación |
-            | 2 | equipo contractual | solicitud aprobada | preparar y publicar | modalidad, cronograma, requisitos | campos obligatorios | proceso publicado | campos incompletos | SECOP / Socrata | % publicaciones completas |
-            | 3 | comité evaluador | ofertas | evaluar | puntajes, observaciones, decisión | regla de evaluación | proveedor recomendado | criterios dispersos | SECOP + expediente | tiempo de evaluación |
-            | 4 | ordenador y jurídico | recomendación | formalizar | contrato, fechas, valor, proveedor | firmas y coherencia | contrato vigente | fechas inconsistentes | SECOP / sistema contractual | % contratos validados |
-            | 5 | supervisor | contrato y evidencias | reportar ejecución | avance, estado, novedades | unidad, periodo y soporte | registro actualizado | reporte tardío | formulario / SECOP | oportunidad del reporte |
-            | 6 | plataforma | actualización | persistir y publicar | versión del registro | esquema y reglas básicas | dato consultable | calidad heterogénea | API Socrata / sistema fuente | disponibilidad y completitud |
-            | 7 | analista | archivos o API | consolidar y priorizar | perfil, reglas y cola | calidad y reproducibilidad | casos ordenados | unión manual y tardía | Python / análisis descriptivo | tiempo hasta priorización |
-            | 8 | director y analista | cola explicable | revisar y actuar | comentario, corrección o escalamiento | evidencia humana | decisión registrada | retroalimentación no trazada | gestor de casos | % casos revisados a tiempo |
-
-            **Cómo se interpreta.** Una fila conecta negocio y dato. Por ejemplo, `estado` no es una columna que
-            “aparece” en el CSV: nace cuando el supervisor reporta, se valida con una regla y se consume después.
-
-            **Qué no podemos concluir todavía.** La tabla propone herramientas posibles; no confirma que SECOP use
-            internamente una base específica ni reemplaza el levantamiento con la entidad.
-            """
-        ),
-        question_cell(
-            5,
-            "Gateway y retrabajo",
-            "El registro puede estar completo o debe regresar al supervisor para corrección.",
-            "¿Qué elemento representa mejor esa bifurcación?",
-            [
-                "Una tarea adicional llamada decidir.",
-                "Un evento de inicio.",
-                "Un gateway con condiciones explícitas de salida.",
-                "Un repositorio de datos.",
-            ],
-            2,
-            [
-                "Una tarea ejecuta trabajo; la bifurcación necesita expresar rutas mutuamente comprensibles.",
-                "El evento de inicio indica cuándo comienza el flujo, no cómo cambia de ruta.",
-                "El gateway hace visible la regla: completo continúa; incompleto genera retrabajo y vuelve al reporte.",
-                "Un repositorio conserva datos, pero no representa una decisión ni las rutas del proceso BPM.",
-            ],
-        ),
-        question_cell(
-            6,
-            "KPI de proceso",
-            "El cuello de botella es descargar y unir archivos manualmente antes de priorizar.",
-            "¿Qué KPI ayuda a verificar una mejora TO-BE?",
-            [
-                "Cantidad de logos en el diagrama.",
-                "Tiempo desde el último reporte hasta la cola priorizada.",
-                "Número de filas sin considerar la fecha de actualización.",
-                "Precisión de una acusación automática de fraude.",
-            ],
-            1,
-            [
-                "La apariencia no mide desempeño operacional ni valor para la analista.",
-                "Compara directamente la demora AS-IS con el flujo mejorado y puede medirse antes y después.",
-                "El volumen aporta contexto, pero no demuestra que la priorización llegue más rápido.",
-                "Compras Claras no acusa ni demuestra fraude; prioriza revisión humana con señales descriptivas.",
-            ],
-        ),
-        md(
-            """
-            ## Los roles aparecen porque el proceso cruza varias responsabilidades
-
-            Hasta aquí hablamos de “la organización” como si fuera una sola persona. El AS-IS demuestra lo
-            contrario: quien define valor, quien produce el dato, quien gobierna su significado, quien construye el
-            flujo y quien usa la evidencia no necesariamente son la misma persona.
-
-            Un **rol** es un conjunto de responsabilidades y decisiones; no siempre coincide con un cargo. En una
-            organización pequeña, una persona puede asumir varios roles. Lo importante es que ninguna responsabilidad
-            crítica quede implícita.
-
-            ### Roles de negocio: definen valor y acción
-
-            | Rol | Pregunta que responde | Artefacto o decisión en Compras Claras |
-            |---|---|---|
-            | patrocinador | ¿por qué invertir y qué bloqueo debe removerse? | valor esperado y continuidad del caso |
-            | dueño del proceso | ¿qué resultado, KPI y SLA deben mejorar? | prioridad, criterio de aceptación y acción posterior |
-            | Product Owner analítico | ¿qué necesidad se atiende primero? | orden de evolución del producto analítico |
-            | analista de negocio | ¿cómo se traduce el problema en proceso y reglas? | AS-IS, requerimientos y criterios verificables |
-            | experto de dominio | ¿qué excepciones cambian la interpretación? | validación contractual de reglas y límites |
-            | usuario de la evidencia | ¿la salida permite decidir y actuar? | revisión de la cola y registro de respuesta |
-
-            ### Arquitectura y gobierno: organizan y protegen el significado
-
-            | Rol | Pregunta que responde | Distinción clave |
-            |---|---|---|
-            | arquitecto empresarial | ¿cómo se alinean estrategia, proceso, información, aplicaciones y tecnología? | no diseña solo infraestructura |
-            | arquitecto de solución | ¿qué componentes integrables materializan el TO-BE? | traduce el blueprint a una solución coherente |
-            | arquitecto de datos | ¿cómo se organizan, integran y evolucionan fuentes, modelos y linaje? | diseña; no opera por sí solo todos los flujos |
-            | data owner | ¿quién autoriza usos y responde institucionalmente por el dato? | propiedad y riesgo institucional |
-            | data steward | ¿qué significa el dato y qué regla mantiene su calidad? | definiciones, metadatos y excepciones |
-            | seguridad y privacidad | ¿quién puede acceder y qué debe minimizarse? | controles, separación de funciones y exposición |
-            | cumplimiento o auditoría | ¿puede reconstruirse la decisión y su evidencia? | trazabilidad y conformidad |
-
-            ### Construcción y análisis: producen capacidades y evidencia
-
-            | Rol | Responsabilidad principal | No debe confundirse con... |
-            |---|---|---|
-            | ingeniero de datos | implementar captura, preparación, pruebas y observabilidad | arquitecto de datos, que define organización y evolución |
-            | analytics engineer | producir modelos analíticos documentados y reutilizables | analista BI, que interpreta y comunica métricas |
-            | analista de datos o BI | explicar qué ocurrió con métricas gobernadas | científico de datos, que diseña experimentos o modelos |
-            | científico de datos | formular hipótesis, experimentos o modelos cuando el caso lo justifica | requisito automático de todo proyecto de datos |
-            | ingeniero de software | integrar capacidades analíticas con aplicaciones y procesos | responsable del significado del dato |
-            | ML engineer/MLOps | operacionalizar y monitorear modelos | necesario para este primer hito descriptivo |
-            | plataforma, DevOps o SRE | automatizar operación, recuperación, monitoreo y costos | dueño de la decisión empresarial |
-            | responsable de calidad | comprobar datos, código, artefactos y criterios | sustituto del experto de dominio |
-
-            **Relevo clave.** El arquitecto de datos define qué debe significar y cómo debe evolucionar una entidad;
-            el ingeniero de datos implementa y opera su recorrido; el data steward verifica que significado y reglas
-            sigan vigentes; el analista BI usa el resultado para explicar el proceso. Si hace falta un modelo, el
-            científico de datos entra después de demostrar que una regla o análisis descriptivo no basta.
-
-            **Error frecuente:** contratar una herramienta o un científico de datos antes de asignar dueño del
-            proceso, experto de dominio y responsable de la acción. Un modelo no repara responsabilidades ausentes.
-            """
-        ),
-        md(
-            """
-            ## Matriz RACI compacta de Compras Claras
-
-            RACI hace explícito quién **R**ealiza el trabajo, quién **A**prueba o responde finalmente, a quién se
-            **C**onsulta y a quién se **I**nforma. No describe jerarquía completa; aclara un relevo concreto.
-
-            | Decisión o artefacto | A | R | C | I |
-            |---|---|---|---|---|
-            | problema, KPI y SLA | dueño del proceso | analista de negocio | patrocinador, usuario | equipo técnico |
-            | proceso AS-IS y excepciones | dueño del proceso | analista de negocio | experto de dominio, usuario | arquitectos |
-            | definiciones y reglas de calidad | data owner | data steward | arquitecto e ingeniero de datos | analista BI |
-            | arquitectura TO-BE | patrocinador / dueño del proceso | arquitecto empresarial | solución, datos, seguridad, plataforma | equipo analítico |
-            | captura y preparación | arquitecto de solución | ingeniero de datos | steward, seguridad, calidad | dueño del proceso |
-            | métricas e interpretación | dueño del proceso | analista BI | experto de dominio, steward | patrocinador |
-            | revisión y acción contractual | dueño del proceso | usuario de la evidencia | experto de dominio, cumplimiento | equipo de datos |
-
-            **Cómo leer una fila.** En “definiciones y reglas de calidad”, el data steward realiza el trabajo
-            semántico; el data owner responde por la decisión institucional; arquitectura e ingeniería son
-            consultadas para asegurar que la regla sea implementable; BI necesita conocer el resultado.
-
-            **Limitación.** Esta matriz es una hipótesis docente. En una entidad real debe validarse con estructura,
-            competencias y segregación de funciones. El siguiente bloque convierte estas responsabilidades en un
-            caso de uso que pueda evaluarse.
-            """
-        ),
-        md(
-            """
-            ---
-            # 4. Casos de uso de Big Data en las organizaciones
-
-            El AS-IS ya mostró una demora concreta. Ahora debemos convertirla en un caso de uso que otra persona
-            pueda evaluar sin depender de una lista de productos.
-
-            **Definición formal — caso de uso analítico.** Descripción verificable de un usuario que emplea evidencia
-            para tomar una decisión o ejecutar una acción dentro de un proceso, bajo restricciones y métricas claras.
-
-            **Intuición.** “Analizar contratos” es demasiado amplio. “Cada mañana, la analista ordena registros para
-            revisar primero los que tienen problemas de calidad explicables” permite identificar usuario, momento,
-            entrada, salida, acción y valor.
-
-            ### Anatomía mínima del caso
-
-            | Elemento | Pregunta | Compras Claras |
-            |---|---|---|
-            | usuario | ¿quién consume la evidencia? | analista de seguimiento |
-            | decisión | ¿qué elige o prioriza? | qué procesos revisar primero |
-            | frecuencia | ¿cada cuánto debe decidir? | cada mañana o después del corte diario |
-            | evidencia | ¿qué datos y calidad necesita? | estados, fechas, duración, unidad y completitud |
-            | salida | ¿qué recibe y con qué explicación? | lista priorizada con motivo trazable |
-            | acción | ¿qué hace después? | revisar, corregir, escalar o descartar la alerta |
-            | KPI | ¿cómo sabremos que aporta valor? | tiempo hasta revisión y cobertura dentro del SLA |
-            | límite | ¿qué no puede afirmar? | causalidad, fraude o irregularidad |
-
-            **Ejemplo pequeño.** Un restaurante que revisa ventas mensuales por sede tiene un caso de reporte. Si debe
-            ajustar abastecimiento durante el día con pedidos, clima y entregas, el caso agrega nuevas restricciones;
-            todavía debe demostrar que esa latencia cambia una decisión antes de llamarlo Big Data.
-
-            **Error frecuente:** formular el caso como “implementar Spark” o “crear un dashboard”. Esos son candidatos
-            técnicos; el caso debe existir aunque la herramienta cambie.
-            """
-        ),
-        md(
-            """
-            ## Familias organizacionales: el verbo importa más que el sector
-
-            | Familia | Pregunta típica | Salida | Ejemplo organizacional | Riesgo frecuente |
-            |---|---|---|---|---|
-            | describir | ¿qué ocurrió y dónde? | KPI, tendencia o segmentación | contratación por modalidad y periodo | confundir asociación con causa |
-            | diagnosticar | ¿qué patrón merece investigación? | hipótesis y evidencia relacionada | demoras concentradas en una etapa | acusar sin contexto |
-            | predecir | ¿qué podría ocurrir? | probabilidad o pronóstico | demanda, abandono o mantenimiento | usar datos históricos sin vigilar cambio |
-            | recomendar | ¿qué alternativa conviene primero? | ranking o siguiente acción | cola de revisión explicable | automatizar una decisión sensible |
-            | detectar | ¿qué evento requiere atención? | alerta con motivo y severidad | anomalía de calidad o seguridad | saturar al usuario con falsos positivos |
-            | optimizar | ¿cómo asignar recursos bajo restricciones? | plan o combinación factible | turnos, rutas o capacidad | ocultar restricciones humanas |
-
-            **Aplicación.** Compras Claras combina describir, detectar y recomendar: perfila calidad, identifica señales
-            y propone un orden de revisión. No predice culpabilidad ni optimiza automáticamente una sanción.
-
-            **Interpretación.** La familia ayuda a elegir evidencia, método y métrica. Un mismo sector puede contener
-            varios casos; decir “Big Data en salud” o “Big Data en gobierno” todavía no define ninguno.
-            """
-        ),
-        question_cell(
-            7,
             "Formulación del caso de uso",
-            "Un equipo escribe como caso de uso: implementar una plataforma de streaming para contratación.",
-            "¿Qué reformulación permite evaluar valor antes de elegir tecnología?",
+            "Un equipo escribe: «implementar una plataforma tecnológica de tiempo real para contratación».",
+            "¿Qué reformulación permite evaluar primero el valor?",
             [
-                "Instalar más productos para descubrir después quién los usará.",
-                "Definir usuario, decisión, frecuencia, evidencia, acción, KPI y límite del caso.",
-                "Cambiar streaming por inteligencia artificial sin modificar el problema.",
+                "Instalar la plataforma y decidir después quién la usará.",
+                "Definir usuario, decisión, evidencia, acción, indicador y límite antes de elegir tecnología.",
+                "Cambiar una tecnología por inteligencia artificial sin modificar la necesidad.",
                 "Llamar estratégico al proyecto y omitir el proceso actual.",
             ],
             1,
             [
-                "La plataforma seguiría sin decisión, usuario ni resultado verificable y aumentaría el riesgo de sobrediseño.",
-                "Estos elementos convierten la idea en un caso evaluable y permiten comparar alternativas técnicas.",
-                "Cambiar la etiqueta tecnológica no corrige la falta de propósito ni de criterio de éxito.",
-                "La importancia declarada no sustituye evidencia sobre el trabajo, el responsable y el valor esperado.",
+                "La plataforma seguiría sin usuario ni resultado verificable y podría aumentar el trabajo sin aportar valor.",
+                "Estos elementos convierten la idea en un caso evaluable y permiten comparar soluciones distintas.",
+                "Cambiar la etiqueta tecnológica no corrige la ausencia de una decisión y una acción definidas.",
+                "La importancia declarada no sustituye evidencia sobre el proceso, el responsable y la mejora esperada.",
             ],
         ),
         md(
             """
-            ---
-            ## BI tradicional y BI apoyada por capacidades Big Data
+            ## Inteligencia de negocios tradicional y con Big Data
 
-            La inteligencia de negocios —BI— organiza datos, métricas y visualizaciones para comprender el desempeño
-            y apoyar decisiones. “Tradicional” no significa inútil: un reporte periódico con datos estructurados,
-            definiciones gobernadas y una decisión clara puede ser la solución correcta.
+            **BI tradicional** organiza datos conocidos, indicadores y reportes para comprender qué ocurrió y apoyar
+            decisiones periódicas. Es una solución válida cuando los datos, el tiempo de respuesta y el número de
+            usuarios pueden manejarse de forma confiable.
 
-            **Definición formal — BI tradicional.** Capacidades de integración, modelado, consulta y visualización
-            orientadas principalmente a datos estructurados, métricas acordadas y análisis descriptivo o diagnóstico
-            con latencias compatibles con reportes periódicos.
+            **BI con capacidades Big Data** amplía esa solución cuando una necesidad demostrable exige trabajar con
+            mucha más escala, rapidez, variedad o complejidad. Big Data no reemplaza automáticamente a la BI.
 
-            **Definición formal — BI con capacidades Big Data.** Extensión del ecosistema analítico cuando variedad,
-            velocidad, escala, complejidad o tipos de análisis exceden de forma demostrable la solución actual y
-            requieren nuevas capacidades de cómputo, almacenamiento, procesamiento u operación.
-
-            **Intuición.** Big Data no reemplaza automáticamente la BI. Amplía el conjunto de fuentes, tiempos y
-            métodos posibles. La pregunta correcta es: ¿qué requisito no puede cumplir de manera confiable y
-            sostenible la solución actual?
-
-            | Criterio | BI tradicional puede ser suficiente | Se justifican capacidades Big Data cuando... |
+            | Pregunta | BI puede ser suficiente | Conviene estudiar Big Data cuando... |
             |---|---|---|
-            | decisión | KPI, seguimiento y exploración periódica | la decisión necesita señales más diversas, frecuentes o complejas |
-            | datos | fuentes estructuradas y definiciones estables | texto, eventos, sensores, imágenes o múltiples fuentes cambian el análisis |
-            | latencia | horas, días o cierre mensual | segundos o minutos modifican una acción real y medible |
-            | escala | el volumen cumple SLA y costo en la plataforma actual | una sola máquina o arquitectura no cumple tiempo, concurrencia o retención |
-            | método | agregación, segmentación y diagnóstico | se necesitan procesamiento distribuido, búsqueda, grafos o modelos a escala |
-            | operación | actualización controlada y equipo existente | fallos, particiones, reintentos y observabilidad exigen operación adicional |
-            | gobierno | métricas y acceso gobernados | aumenta la superficie de riesgo, linaje, privacidad y costo |
+            | tiempo | un informe diario llega antes de decidir | minutos o segundos cambian una acción real |
+            | datos | tablas conocidas y manejables | texto, imágenes, eventos y muchas fuentes son indispensables |
+            | escala | el proceso cumple tiempo y costo actuales | deja de cumplirlos de forma medida y repetida |
+            | análisis | indicadores y reglas explicables responden | la decisión exige métodos o procesamiento que la solución actual no soporta |
 
-            ### Veredicto inicial para Compras Claras
+            **Veredicto para el primer hito.** Con una muestra pequeña, una actualización diaria y reglas
+            descriptivas, BI gobernada y procesamiento sencillo son suficientes. Se reconsiderará la arquitectura si
+            mediciones reales muestran que volumen, tiempo, variedad o confiabilidad impiden cumplir el objetivo.
 
-            Con una muestra pequeña, actualización diaria y reglas descriptivas, **BI tradicional más Python es
-            suficiente para el primer hito**. No necesitamos streaming ni procesamiento distribuido para demostrar
-            la trazabilidad decisión–dato–acción.
-
-            Reabriríamos la decisión si aparecen, por ejemplo, millones de eventos, documentos y texto que deban
-            analizarse juntos; una latencia de minutos que cambie el proceso; muchos usuarios concurrentes; o una
-            medición que demuestre que la solución actual incumple capacidad, tiempo o costo.
-
-            **Error frecuente:** considerar “BI tradicional” como fracaso y “Big Data” como madurez. La madurez está
-            en elegir la alternativa suficiente, gobernarla y definir cuándo debe escalar.
-
-            ### Matriz de suficiencia para argumentar, no adivinar
-
-            Cada equipo registrará el estado actual, el requisito futuro y una evidencia observable:
-
-            | Restricción | Estado actual | Umbral que obligaría a cambiar | Evidencia por recolectar |
-            |---|---|---|---|
-            | tiempo para decidir | lote diario | una demora superior al SLA afecta la acción | marcas de tiempo y casos no atendidos |
-            | volumen y concurrencia | una máquina cumple el ejercicio | tiempo o memoria incumplen el objetivo | filas, bytes, duración y usuarios simultáneos |
-            | variedad | campos estructurados de SECOP | texto o documentos aportan una señal necesaria | inventario, formato, calidad y permiso |
-            | confiabilidad | muestra local y ejecución manual guiada | operación repetida exige recuperación automática | tasa de fallos, reintentos y pérdida tolerable |
-            | riesgo y costo | datos minimizados y entorno gratuito | nuevas fuentes amplían acceso, retención o gasto | clasificación, controles y estimación |
-
-            **Comentario docente.** La columna “umbral” evita frases vagas como “cuando haya muchos datos”. Una
-            arquitectura evoluciona cuando una medición demuestra que la capacidad actual dejó de ser suficiente.
-
-            **Reserva curricular.** En la sesión 4 estudiaremos formalmente OLTP, OLAP, Data Marts, Data Warehouses,
-            Data Lakes y ETL. Aquí solo nombramos capacidades genéricas para no adelantar sus definiciones ni su
-            implementación.
-            """
-        ),
-        md(
-            f"""
-            ## De la pregunta al veredicto de suficiencia
-
-            {diagram('04_casos_bi', 'Comparación profesional entre BI tradicional y capacidades Big Data a partir de requisitos del caso de uso')}
-
-            **Cómo leerlo.** El caso de uso ocupa el centro. La ruta izquierda muestra cuándo una solución de BI
-            gobernada es suficiente; la derecha representa condiciones que justifican capacidades Big Data. Las
-            puertas inferiores exigen evidencia sobre latencia, escala, variedad, operación y riesgo antes de escalar.
-
-            **Conclusión.** La etiqueta no decide. Compras Claras comienza con una alternativa simple y conserva
-            umbrales explícitos para evolucionar cuando el proceso lo demuestre.
-
-            **Limitación.** El diagrama orienta una decisión de capacidad, pero no selecciona proveedor, contrato,
-            arquitectura física ni presupuesto.
-
-            **Conexión.** Con el caso y el nivel de capacidad definidos, la arquitectura empresarial puede alinear
-            negocio, información, aplicaciones y tecnología sin adelantar los sistemas de la sesión 4.
+            **Error frecuente:** pensar que “tradicional” significa atrasado y que “Big Data” siempre significa mejor.
+            La solución madura es la que resuelve el problema con una complejidad proporcional.
             """
         ),
         question_cell(
-            8,
+            4,
             "BI tradicional frente a Big Data",
-            "La oficina recibe un archivo estructurado al día, una máquina lo procesa en minutos y la decisión tolera 24 horas.",
+            "La oficina recibe un archivo estructurado al día, lo procesa en minutos y decide dentro de 24 horas.",
             "¿Cuál es el veredicto más responsable para el primer hito?",
             [
-                "Streaming distribuido obligatorio porque el curso se llama Big Data.",
-                "BI gobernada y procesamiento simple son suficientes; se documentan umbrales para escalar.",
-                "No medir nada hasta comprar una plataforma empresarial.",
-                "Declarar que cualquier archivo diario ya es Big Data.",
+                "Usar procesamiento distribuido porque el curso se llama Big Data.",
+                "Usar BI gobernada y procesamiento sencillo; definir mediciones que indiquen cuándo reevaluar.",
+                "Comprar una plataforma antes de medir el proceso actual.",
+                "Declarar que cualquier archivo diario ya necesita Big Data.",
             ],
             1,
             [
-                "La solución agregaría costo y operación sin un requisito de latencia, volumen o variedad que la justifique.",
-                "El diseño satisface la decisión actual y convierte una futura evolución en una respuesta a evidencia medible.",
-                "La compra no sustituye una línea base; sin medición no puede demostrarse insuficiencia ni valor.",
-                "La frecuencia del archivo por sí sola no define una necesidad Big Data ni la capacidad requerida.",
-            ],
-        ),
-        question_cell(
-            9,
-            "Umbral para escalar",
-            "El equipo afirma que en el futuro habrá muchos datos, pero no registra volumen, tiempo de proceso ni usuarios.",
-            "¿Qué debe agregar a su blueprint?",
-            [
-                "Una promesa general de escalabilidad ilimitada.",
-                "Umbrales medibles de latencia, capacidad, variedad, concurrencia, riesgo y costo.",
-                "Más logotipos de proveedores.",
-                "Una conclusión causal a partir del perfil descriptivo.",
-            ],
-            1,
-            [
-                "Sin umbral no existe una condición comprobable para cambiar de arquitectura ni estimar inversión.",
-                "Los umbrales convierten la evolución en una decisión verificable y enlazada con el SLA del proceso.",
-                "Los productos solo pueden compararse después de conocer el requisito que deben cumplir.",
-                "El perfil describe la muestra; no demuestra causas y tampoco define requisitos de infraestructura.",
+                "Añadiría costo y operación sin un requisito de escala, variedad o tiempo que lo justifique.",
+                "La solución satisface la decisión actual y deja una condición medible para evolucionar más adelante.",
+                "Sin línea base no puede demostrarse que la solución actual sea insuficiente ni que la compra aporte valor.",
+                "La frecuencia por sí sola no define Big Data; importa si la capacidad actual incumple una necesidad real.",
             ],
         ),
         md(
             """
             ---
-            # 5. Arquitectura empresarial: alinear lo que ya comprendimos
+            # 4. Arquitectura empresarial: conectar el propósito con la solución
 
-            ## ¿Por qué definirla en este punto?
+            Ya conocemos la decisión, el proceso y el caso de uso. Ahora necesitamos comprobar que todas las partes
+            de la solución apunten al mismo resultado.
 
-            Ahora conocemos la motivación, la decisión, el proceso, los datos, el caso de uso y el nivel de capacidad
-            requerido. La arquitectura empresarial organiza esas piezas y comprueba que ninguna tecnología quede
-            huérfana de propósito.
+            **Definición formal.** La arquitectura empresarial describe cómo negocio, información, aplicaciones y
+            tecnología se relacionan para alcanzar objetivos y evolucionar de una situación actual —AS-IS— a una
+            situación deseada —TO-BE—.
 
-            **Definición formal.** Conjunto coherente de principios, modelos y decisiones que describe cómo negocio,
-            información, aplicaciones y tecnología se relacionan para lograr objetivos y evolucionar de un estado
-            AS-IS a uno TO-BE.
+            **En palabras sencillas.** Es un plano compartido. No comienza con marcas ni productos; comienza con el
+            resultado que la organización quiere mejorar.
 
-            **Intuición.** Es el plano de una ciudad, no una lista de edificios. Muestra rutas, responsabilidades,
-            restricciones y cómo un cambio en una zona afecta a las demás.
-
-            **Ejemplo manual.** Una tienda quiere responder reclamos en 12 horas. Negocio define el SLA; información
-            define cliente, caso y estado; aplicaciones reciben, enrutan y notifican; tecnología ejecuta y monitorea.
-
-            **Aplicación SECOP.** El objetivo es priorizar; el proceso produce estados y fechas; las aplicaciones
-            capturan, perfilan y presentan; la tecnología conecta, ejecuta y observa; gobierno controla acceso y linaje.
-
-            **Error frecuente:** dibujar logos primero y añadir el objetivo al final.
-            """
-        ),
-        md(
-            """
-            ## Cuatro dominios que responden preguntas distintas
-
-            <div align="center">
-              <img src="../Images/2.1.png" width="780"
-                   alt="Dominios de negocio, información, aplicaciones y tecnología">
-            </div>
-
-            | Dominio | Pregunta de diseño | Evidencia en Compras Claras |
+            | Dominio | Pregunta sencilla | Compras Claras |
             |---|---|---|
-            | Negocio | ¿qué objetivo, decisión, proceso y responsable mejoran? | priorización y revisión humana |
-            | Información | ¿qué entidades, significados, reglas y calidad se requieren? | contrato, entidad, estado, fecha, duración y linaje |
-            | Aplicaciones | ¿qué capacidades manipulan y entregan información? | fuente, ingesta, perfilador, reglas, tablero y alertas |
-            | Tecnología | ¿dónde se almacena, procesa, conecta y observa? | API, objetos/Parquet, motor analítico, CI y monitoreo |
+            | negocio | ¿para qué, quién y qué proceso? | priorizar y revisar con responsabilidad humana |
+            | información | ¿qué datos deben significar lo mismo? | contrato, estado, fechas, duración y calidad |
+            | aplicaciones | ¿qué funciones necesita el usuario? | obtener, revisar calidad, priorizar y mostrar |
+            | tecnología | ¿dónde y bajo qué condiciones funciona? | conexión, almacenamiento y ejecución confiable |
 
-            **Cómo leer la imagen.** Cada dominio responde una clase de preguntas y se traduce en requisitos para el
-            siguiente. Gobierno, seguridad, privacidad, observabilidad y costos atraviesan a todos.
+            **Ejemplo pequeño.** Una clínica quiere reducir el tiempo de asignación de citas. Negocio define la meta;
+            información define paciente, agenda y estado; aplicaciones reciben y asignan; tecnología permite operar
+            con seguridad. Comprar un servidor no sustituye esos acuerdos.
 
-            **Conclusión.** Arquitectura empresarial es más amplia que arquitectura de datos; la segunda profundiza
-            fuentes, modelos, flujos y calidad. La arquitectura técnica profundiza cómputo, red, almacenamiento,
-            despliegue y operación.
-
-            **Limitación.** La figura clasifica dominios, pero no muestra todavía el diseño específico del caso.
+            **Controles transversales.** Seguridad, privacidad, calidad y costo se revisan en todos los dominios. Son
+            condiciones de la solución, no capas adicionales para memorizar.
             """
         ),
         md(
             f"""
-            ## Arquitectura objetivo TO-BE de Compras Claras
+            ## Arquitectura objetivo — TO-BE
 
-            {diagram('05_arquitectura_to_be', 'Arquitectura TO-BE con cuatro dominios y controles transversales')}
+            {diagram('05_arquitectura_to_be', 'Arquitectura objetivo de Compras Claras con negocio, información, aplicaciones, tecnología y controles')}
 
-            **Cómo leerlo.** Recorre las cuatro capas de arriba hacia abajo. La primera tarjeta numerada forma una
-            traza completa: decisión → fuente → integración → conectividad. Las demás columnas amplían proceso,
-            entidades, reglas, responsables, KPI, aplicaciones y componentes técnicos. La banda superior recuerda
-            que gobierno, seguridad, privacidad, observabilidad, costos, calidad y linaje condicionan cada capa.
+            **Cómo leerla.** Empieza arriba, en el objetivo y la acción humana. Luego baja hacia los datos, las
+            funciones necesarias y el soporte tecnológico. La columna numerada muestra una sola cadena completa:
+            objetivo → proceso → dato → función → soporte → indicador.
 
-            **Conclusión.** La cola priorizada solo tiene valor si existe responsable, dato con significado,
-            aplicación explicable, tecnología sostenible y controles transversales.
+            **Cómo comprobar si algo sobra.** Pregunta “¿qué decisión o necesidad justifica este elemento?”. Si una
+            herramienta no puede responder, todavía no debería aparecer en el diseño.
 
-            **Limitación.** Es arquitectura lógica: todavía no fija volúmenes, latencia, proveedor, presupuesto ni
-            acuerdos institucionales. Esas restricciones se documentan antes de implementar.
+            **Limitación.** Esta arquitectura es lógica: explica qué debe existir, pero todavía no selecciona un
+            proveedor ni fija un presupuesto. Eso requiere mediciones que aún no tenemos.
 
-            **Conexión.** Falta describir cómo un dato atraviesa la solución y regresa al proceso como acción; para
-            eso usamos el ciclo analítico de NIST.
+            ### Las responsabilidades que necesitamos en esta historia
+
+            No se trata de memorizar cargos. Para este primer hito basta reconocer cuatro preguntas:
+
+            | Perspectiva | Pregunta que debe quedar respondida |
+            |---|---|
+            | negocio | ¿qué decisión y qué resultado deben mejorar? |
+            | significado del dato | ¿qué quiere decir cada fecha, estado y excepción? |
+            | preparación de la evidencia | ¿cómo obtenemos datos comparables y sabemos si fallaron? |
+            | análisis | ¿qué ocurrió, cómo se prioriza y qué no podemos concluir? |
+
+            En organizaciones grandes estas responsabilidades pueden corresponder al dueño del proceso, *data
+            steward*, ingeniero de datos y analista BI. En un equipo pequeño una persona puede asumir varias. El
+            científico de datos solo sería necesario si aparece un problema predictivo que las reglas descriptivas y
+            la BI no resuelven suficientemente; no es el punto de partida de Compras Claras.
             """
         ),
         question_cell(
-            10,
+            5,
             "Trazabilidad arquitectónica",
-            "El equipo propone Kafka porque es popular, pero no ha definido latencia ni eventos.",
-            "¿Qué debe hacer antes de seleccionarlo?",
+            "El equipo propone una herramienta popular, pero no puede relacionarla con una decisión del proceso.",
+            "¿Qué debe hacer antes de incluirla en la arquitectura?",
             [
-                "Instalarlo y buscar un problema después.",
-                "Definir decisión, proceso, volumen, velocidad, confiabilidad y capacidad requerida.",
-                "Reemplazar BPM por una lista de productos.",
+                "Instalarla y buscar después un problema.",
+                "Explicar qué necesidad, dato, función e indicador justifican su existencia.",
+                "Reemplazar el proceso por una lista de productos.",
                 "Ocultar el costo para no limitar el diseño.",
             ],
             1,
             [
-                "La tecnología quedaría sin requisito verificable y aumentaría complejidad operacional.",
-                "Esas restricciones permiten decidir si hacen falta eventos o si una actualización programada es suficiente.",
-                "BPM explica el trabajo; una lista de productos no representa actores, reglas ni retrabajo.",
-                "Costo es una preocupación transversal y puede cambiar una alternativa técnicamente válida.",
+                "La tecnología quedaría sin un resultado verificable y añadiría complejidad innecesaria.",
+                "La cadena de trazabilidad permite comprobar que cada componente responde al objetivo empresarial.",
+                "Los productos no muestran quién trabaja, qué decide ni qué datos necesita.",
+                "El costo es una condición real de la arquitectura y puede cambiar una alternativa técnicamente posible.",
             ],
         ),
         md(
             """
             ---
-            # 6. Ciclo analítico de Big Data: del dato a una acción responsable
+            # 5. Ciclo de vida de la analítica de Big Data
 
-            ## ¿Por qué no terminamos en una arquitectura o un tablero?
+            La arquitectura muestra las partes. El ciclo analítico muestra **cómo viaja la evidencia** hasta una
+            acción. En esta sesión usamos cinco etapas del marco NIST:
 
-            Diseñar componentes o mostrar datos no mejora por sí solo una decisión. El ciclo analítico describe el
-            movimiento de la evidencia hasta una acción y su retroalimentación. Usaremos el modelo NIST: **captura, preparación, análisis,
-            visualización y acción**.
-
-            ### Tres ciclos que conviene diferenciar
-
-            | Ciclo | Pregunta central | Alcance |
+            | Etapa | Pregunta sencilla | Compras Claras |
             |---|---|---|
-            | ciclo de vida del dato | ¿cómo se crea, conserva, usa y retira el dato? | gobierno y permanencia |
-            | ciclo analítico NIST | ¿cómo se transforma evidencia en acción? | flujo analítico de extremo a extremo |
-            | CRISP-DM | ¿cómo se organiza un proyecto de minería de datos? | negocio, datos, modelado, evaluación y despliegue |
+            | captura | ¿de dónde obtenemos los hechos? | muestra de SECOP con fecha y origen |
+            | preparación | ¿qué debemos ordenar o validar? | tipos, fechas, faltantes y unidades |
+            | análisis | ¿qué patrón ayuda a decidir? | reglas descriptivas y lista candidata |
+            | visualización | ¿cómo entiende Laura el resultado? | prioridad, motivo y límite visibles |
+            | acción | ¿qué hace la persona y qué registra? | revisar, corregir, escalar o descartar |
 
-            No compiten: se superponen desde perspectivas distintas. En esta sesión NIST es la columna vertebral;
-            CRISP-DM sirve como referencia para proyectos de modelado posteriores.
+            **Ejemplo pequeño.** En una biblioteca: se capturan préstamos, se corrigen fechas, se analiza demanda, se
+            muestra una lista de libros y la responsable decide cuáles adquirir. La compra registrada genera nuevos
+            datos y el ciclo vuelve a comenzar.
+
+            **Tres ideas importantes.**
+
+            - Preparar no significa “maquillar” datos: significa documentar reglas y excepciones.
+            - Visualizar no es actuar: un tablero sin responsable no mejora el proceso.
+            - La acción produce nueva evidencia: resultado, fecha, motivo y aprendizaje.
+
+            **Error frecuente:** comenzar por el tablero y descubrir después que las fechas no significan lo mismo.
             """
         ),
         md(
             f"""
-            ## Las cinco etapas aplicadas
+            ## El ciclo aplicado a SECOP
 
-            {diagram('06_ciclo_nist', 'Ciclo NIST aplicado a captura, preparación, análisis, visualización y acción')}
+            {diagram('06_ciclo_nist', 'Ciclo analítico aplicado a SECOP: captura, preparación, análisis, visualización, acción y retroalimentación')}
 
-            | Etapa | Entrada | Actividad Compras Claras | Responsable | Artefacto | Control | Métrica de éxito |
-            |---|---|---|---|---|---|---|
-            | Captura | API o muestra SECOP | registrar fuente, fecha, campos y límite | ingeniero de datos; data owner autoriza | snapshot reproducible | acceso y procedencia | extracción completa según contrato |
-            | Preparación | snapshot crudo | tipar, revisar nulos, fechas, duplicados y unidades | ingeniero de datos + data steward | tabla preparada + excepciones | regla y linaje | % filas válidas y excepciones contadas |
-            | Análisis | datos preparados | perfilar duraciones y reglas de prioridad | analista BI/datos + experto de dominio | métricas y cola candidata | sesgo y reproducibilidad | cobertura de reglas explicables |
-            | Visualización | resultados | presentar razón de prioridad, filtros y calidad | analista BI + usuario | tablero o reporte | accesibilidad y contexto | tiempo para comprender un caso |
-            | Acción | cola explicable | revisar, corregir, escalar o descartar alerta | usuario; dueño del proceso responde | decisión registrada | separación de funciones | % casos atendidos en SLA |
+            **Cómo leerlo.** Sigue las cinco etapas en sentido horario. La banda central recuerda que calidad,
+            seguridad y trazabilidad acompañan todo el recorrido. La flecha de regreso muestra que Laura registra el
+            resultado de la revisión y ese dato permite ajustar reglas o incluso replantear el proceso.
 
-            **Cómo leer el diagrama.** Sigue el ciclo en sentido horario. Cada tarjeta declara entrada o actividad,
-            artefacto y responsable; los rótulos sobre las flechas muestran qué cambia entre etapas. La decisión
-            humana permanece en el centro porque todas las fases deben poder justificarla. Los controles
-            transversales no son una sexta fase: condicionan las cinco.
+            **Conclusión.** El valor no termina en una lista priorizada. Termina cuando una persona usa la evidencia,
+            registra qué hizo y permite evaluar si el indicador mejoró.
 
-            **Conclusión.** Visualizar no es actuar. Una gráfica se vuelve útil cuando alguien tiene autoridad,
-            criterio y canal para registrar la respuesta.
-
-            **Limitación.** El ciclo no prescribe un algoritmo ni un proveedor y no elimina la necesidad de validar
-            el proceso, los datos y el impacto.
-
-            **Conexión.** Con las responsabilidades claras, podemos comparar herramientas reales por capacidad.
+            **Límite.** El ciclo no prescribe una herramienta ni demuestra causalidad; organiza responsabilidades y
+            evidencia.
             """
         ),
         question_cell(
-            11,
-            "Orden del ciclo NIST",
-            "La oficina quiere mostrar un tablero antes de verificar fechas, unidades y nulos.",
-            "¿Cuál secuencia conserva mejor la lógica del ciclo?",
-            [
-                "Visualizar → actuar → capturar → preparar → analizar.",
-                "Capturar → preparar → analizar → visualizar → actuar.",
-                "Analizar → comprar tecnología → capturar → actuar → preparar.",
-                "Capturar → visualizar → acusar → cerrar.",
-            ],
-            1,
-            [
-                "Comienza por una representación sin evidencia preparada y puede hacer visible un error como si fuera hallazgo.",
-                "La secuencia preserva procedencia, calidad, interpretación y una acción humana trazable.",
-                "Comprar tecnología no es una etapa analítica y analizar antes de capturar/preparar rompe trazabilidad.",
-                "El ciclo no incluye acusación automática; una señal descriptiva requiere revisión humana.",
-            ],
-        ),
-        question_cell(
-            12,
-            "Visualización y acción",
+            6,
+            "Ciclo analítico: visualización y acción",
             "El tablero muestra cinco registros incompletos, pero nadie tiene asignada la revisión.",
             "¿Qué falta para cerrar el ciclo analítico?",
             [
                 "Cambiar los colores del tablero.",
                 "Agregar más gráficos sin responsable.",
-                "Asignar responsable, regla de atención, SLA y registro de la decisión.",
+                "Asignar responsable, regla de atención y registro de la decisión.",
                 "Declarar que los cinco casos son irregulares.",
             ],
             2,
             [
-                "El diseño visual puede ayudar a leer, pero no crea capacidad de respuesta.",
-                "Más visualización no sustituye gobernanza ni una acción definida.",
-                "Estos elementos convierten la señal en trabajo trazable y permiten medir si el proceso mejora.",
-                "La incompletitud es una señal de calidad, no prueba de irregularidad o causalidad.",
+                "El diseño visual puede ayudar a leer, pero no crea una acción dentro del proceso.",
+                "Más visualización no sustituye a la persona que revisa ni al registro del resultado.",
+                "Estos elementos convierten la señal en trabajo trazable y producen evidencia para mejorar el ciclo.",
+                "La incompletitud es una señal de calidad y no prueba irregularidad ni causalidad.",
             ],
-        ),
-        md(
-            """
-            ---
-            # 7. Capacidades y herramientas reales en un flujo empresarial
-
-            Una arquitectura no debe casarse prematuramente con un proveedor. Primero nombra la capacidad; luego
-            compara opciones por volumen, velocidad, costo, conocimiento del equipo, seguridad y operación.
-
-            | Capacidad | Pregunta que debe responder | Herramientas reales como ejemplo | Evidencia antes de escalar |
-            |---|---|---|---|
-            | acceder a evidencia | ¿podemos obtener datos autorizados y reproducibles? | SECOP/Socrata, API, archivos, formularios | fuente, permiso, frecuencia y contrato de campos |
-            | perfilar calidad | ¿qué tan completos y consistentes son? | Python, Pandas, DuckDB | nulos, tipos, duplicados, unidades y excepciones |
-            | analizar | ¿qué patrón o regla apoya la decisión? | SQL, Python; Spark cuando la medición lo exige | tiempo, memoria, volumen y reproducibilidad |
-            | consumir BI | ¿cómo comprende el usuario KPI, tendencia y contexto? | Power BI, Looker, Tableau | usuario, métrica, frecuencia y acción posterior |
-            | construir una aplicación | ¿la decisión necesita interacción o flujo propio? | Streamlit, aplicaciones web | tarea, permisos, registro de respuesta y SLA |
-            | colaborar y revisar | ¿cómo se explican y aprueban los cambios? | Git, GitHub, Pull Requests | autor, diff, comentario, validación y versión |
-            | automatizar | ¿la repetición y recuperación justifican orquestación? | GitHub Actions; Airflow más adelante | dependencia, tasa de fallo, reintento y responsable |
-
-            **Ejemplo de decisión tecnológica.** Para una muestra estable y una clase de tres horas, Python,
-            Pandas/DuckDB, Markdown y Git son suficientes. Si una medición demuestra que una máquina no cumple el SLA
-            o que nuevas fuentes cambian el caso, se reevalúan capacidades distribuidas. “Big Data” no obliga a usar
-            todas las herramientas.
-
-            **Límite de esta sesión.** Nombramos herramientas para reconocer capacidades. La organización técnica de
-            OLTP, OLAP, Data Marts, Data Warehouses, Data Lakes y ETL pertenece a la sesión 4.
-            """
-        ),
-        question_cell(
-            13,
-            "Responsabilidades profesionales",
-            "La regla de prioridad usa una fecha cuya definición cambió. El flujo debe corregirse y la métrica debe reinterpretarse.",
-            "¿Cuál reparto de responsabilidades conserva mejor el significado y la implementación?",
-            [
-                "El científico de datos decide solo el significado, modifica producción y aprueba el KPI.",
-                "El data steward aclara la definición; el arquitecto de datos evalúa impacto; el ingeniero de datos corrige el flujo; BI reinterpreta la métrica.",
-                "El patrocinador cambia el script directamente y omite a los responsables de datos.",
-                "El analista BI conserva la métrica anterior para evitar revisar el resultado.",
-            ],
-            1,
-            [
-                "Concentrar significado, implementación y aprobación elimina controles y no aprovecha al experto de dominio ni al dueño del proceso.",
-                "Correcto: cada rol aporta una responsabilidad distinta y el relevo conserva definición, impacto técnico, operación e interpretación.",
-                "El patrocinador justifica valor y remueve bloqueos, pero no sustituye gobierno semántico ni construcción técnica.",
-                "Una métrica basada en una definición obsoleta puede ser consistente en código y aun así inducir una decisión equivocada.",
-            ],
-        ),
-        md(
-            """
-            ## Lectura crítica de arquitecturas de nube
-
-            Las siguientes imágenes históricas se conservan porque ayudan a practicar una habilidad durable:
-            **traducir productos en capacidades**. No vamos a crear recursos, cuentas, claves ni facturación.
-
-            <div align="center">
-              <img src="../Images/GCP/5.png" width="900" alt="Arquitectura histórica de datos en Google Cloud"><br><br>
-              <img src="../Images/GCP/6.png" width="900" alt="Arquitectura histórica de procesamiento en Google Cloud">
-            </div>
-
-            ### Método de lectura en cuatro preguntas
-
-            1. ¿Qué fuente produce datos y con qué frecuencia?
-            2. ¿Qué capacidad cumple cada bloque: ingesta, almacenamiento, procesamiento, consumo u orquestación?
-            3. ¿Dónde aparecen calidad, seguridad, observabilidad, recuperación y costo?
-            4. ¿Qué productos o nombres deben verificarse hoy antes de reutilizar la arquitectura?
-
-            **Interpretación.** Aunque un nombre comercial o una interfaz cambie, las necesidades de capturar,
-            almacenar, transformar, consultar, servir y gobernar permanecen. Diseñar por capacidad permite comparar
-            GCP con AWS, Azure o una alternativa local.
-
-            **Error frecuente:** copiar una arquitectura de referencia completa cuando el caso solo necesita una
-            fracción de sus capacidades.
-            """
-        ),
-        md(
-            """
-            ---
-            # 8. Git y GitHub: una conversación que no se pierde
-
-            ## ¿Por qué aparecen después de los roles y del blueprint?
-
-            Negocio definió valor; el dueño del proceso explicó el trabajo; el data steward protegió el significado;
-            arquitectura organizó las capacidades; ingeniería preparó la evidencia; BI la convirtió en una salida
-            comprensible. El problema siguiente no es comprar otra tecnología:
-
-            > ¿Cómo pueden estos roles construir el mismo proyecto, revisar sus decisiones y conservar por qué cambió
-            > la arquitectura?
-
-            Sin un mecanismo compartido aparecen copias como `arquitectura_final_ahora_si_v3`, reglas sobrescritas,
-            decisiones sin autor y correcciones que no explican qué objeción resolvieron. Git y GitHub son una buena
-            respuesta, no la única, porque combinan versiones identificables con un espacio de revisión.
-
-            **Definición formal.** Git es un sistema distribuido de control de versiones. GitHub aloja repositorios y
-            añade colaboración mediante ramas, Pull Requests, revisiones y automatización.
-
-            **Intuición.** Una rama es una propuesta separada; un commit identifica una versión y su intención; un
-            Pull Request pone la propuesta sobre la mesa; un comentario formula una objeción; un nuevo commit muestra
-            cómo se atendió; CI comprueba reglas observables.
-
-            **Límite esencial.** Git no decide si la arquitectura es correcta. Ayuda a explicar, cuestionar, corregir
-            y conservar cómo los roles llegaron a una decisión. La cantidad de commits, líneas o publicaciones no
-            mide el valor, la comprensión ni la responsabilidad de una contribución.
-            """
-        ),
-        md(
-            """
-            ## ¿Qué necesita conservar cada rol?
-
-            | Rol | Evidencia que necesita | Uso posible de GitHub |
-            |---|---|---|
-            | dueño del proceso | motivo y criterio de aceptación | comentar y aprobar la propuesta |
-            | experto de dominio | reglas y excepciones | cuestionar una definición en el PR |
-            | arquitecto empresarial | decisiones entre dominios | comparar versiones del blueprint |
-            | arquitecto de datos | fuentes, modelos, contratos y linaje | revisar impactos de un cambio |
-            | data steward | definiciones y reglas de calidad | pedir correcciones antes de aceptar |
-            | ingeniero de datos | scripts, pruebas y configuración | conservar código reproducible y ejecutar CI |
-            | analista BI | métricas e interpretación | vincular el resultado con su versión |
-            | seguridad y privacidad | controles y exclusiones | detectar exposición o datos innecesarios |
-            | plataforma / DevOps | automatización y operación | mostrar fallos tempranos y repetibles |
-            | usuario de negocio | comprensión del cambio | confirmar si la salida permite decidir |
-            """
-        ),
-        md(
-            """
-            ## Ejemplo de Pull Request conceptual
-
-            1. El arquitecto propone una actualización diaria.
-            2. El dueño del proceso pregunta de dónde sale el SLA de 24 horas.
-            3. El data steward cuestiona el tratamiento de fechas faltantes.
-            4. Seguridad solicita retirar identificadores innecesarios.
-            5. El ingeniero y el arquitecto corrigen el blueprint.
-            6. Un nuevo commit registra la modificación y responde a cada objeción.
-            7. El usuario contractual confirma que la salida sigue siendo comprensible.
-            8. CI verifica estructura; una persona valida el razonamiento.
-
-            Un comentario útil no dice solamente “está mal”: explica qué decisión, riesgo o criterio resulta afectado.
-            """
         ),
         md(
             f"""
-            ## Del artefacto a la conversación entre roles
+            ---
+            # GitHub como puente para construir el mismo proyecto
 
-            {diagram('07_estados_git', 'Git y GitHub como conversación entre roles: propuesta, objeciones, corrección, CI y decisión humana')}
+            Hasta aquí cada responsabilidad aportó una parte. El problema siguiente es cotidiano: ¿cómo evitar
+            archivos como `final_v2_ahora_si.md`, saber qué cambió y conservar una pregunta del compañero?
 
-            **Cómo leerlo.** El flujo comienza con una necesidad del dueño del proceso. Arquitectura formula una
-            propuesta en una rama; dominio, gobierno y seguridad revisan aspectos distintos; ingeniería corrige y
-            publica una nueva versión; CI comprueba la estructura; el usuario confirma si la salida sirve para actuar.
+            GitHub ofrece una forma práctica:
 
-            **Conclusión.** El valor no está en mover un archivo por estados técnicos, sino en relacionar una objeción
-            profesional con la versión que la resolvió.
+            | Elemento | Explicación no técnica |
+            |---|---|
+            | `main` | versión acordada del proyecto |
+            | rama | copia de trabajo donde se prepara una propuesta sin alterar `main` |
+            | commit | punto guardado con una explicación breve del cambio |
+            | Pull Request o PR | espacio para comparar, preguntar y corregir antes de integrar |
+            | CI o *Checks* | comprobaciones automáticas sobre aspectos observables |
 
-            **Limitación.** Un Pull Request conserva conversación, pero no garantiza que las personas correctas hayan
-            participado ni que la evidencia sea suficiente.
+            {diagram('07_estados_git', 'GitHub como conversación: propuesta, revisión, corrección, comprobación y decisión humana')}
 
-            **Conexión.** En el laboratorio asumiremos roles temporales y construiremos esa conversación sobre dos
-            artefactos conectados.
+            **Cómo leer la imagen.** Una necesidad produce una propuesta. El compañero formula una objeción; la misma
+            rama recibe una corrección; CI comprueba estructura y una persona juzga el sentido. GitHub conserva la
+            conversación, pero no decide si la arquitectura es correcta.
+
+            **Por qué aparece aquí y no antes.** Ahora sí tenemos algo valioso que conservar: decisión, proceso,
+            arquitectura, ciclo y límites. GitHub es el medio de colaboración, no otro tema para memorizar.
             """
         ),
         question_cell(
-            14,
-            "Git como relevo entre roles",
-            "El data steward cuestiona fechas faltantes y seguridad pide retirar identificadores; el arquitecto debe corregir la propuesta.",
-            "¿Qué práctica aprovecha mejor Git y GitHub en este relevo?",
+            7,
+            "Roles y GitHub como relevo",
+            "Cambió el significado de una fecha: debe aclararse la definición, corregirse el flujo y reinterpretarse el indicador.",
+            "¿Qué práctica conserva mejor ese relevo?",
             [
-                "Crear varias copias del archivo y escoger la última por su nombre.",
-                "Cerrar los comentarios sin modificar la propuesta para obtener un check verde.",
-                "Responder las objeciones, modificar la misma rama y relacionar el nuevo commit con la decisión corregida.",
-                "Medir la calidad por cantidad de commits y líneas cambiadas.",
+                "Una sola persona cambia todo directamente en main sin explicar el motivo.",
+                "Cada persona envía un archivo final por correo y se usa el más reciente.",
+                "El equipo documenta la objeción en un PR, corrige la misma rama y explica el efecto del cambio.",
+                "La calidad se decide contando commits y líneas modificadas.",
             ],
             2,
             [
-                "Las copias separan conversación e historia; no permiten reconstruir qué objeción originó cada cambio.",
-                "CI puede estar verde y el razonamiento seguir incompleto; cerrar sin responder elimina la función de la revisión.",
-                "Correcto: el PR conserva pregunta, respuesta, diferencia y versión; la aprobación humana evalúa el sentido.",
-                "El volumen de actividad es una métrica mecánica y puede premiar cambios innecesarios o fragmentados.",
+                "El cambio puede funcionar técnicamente y aun perder el significado o la revisión necesaria.",
+                "La fecha del archivo no permite reconstruir qué se preguntó, qué se corrigió ni qué se aprobó.",
+                "El PR relaciona propuesta, pregunta y corrección; la revisión humana valida el significado y el impacto.",
+                "La cantidad de actividad puede premiar fragmentación y no demuestra comprensión ni calidad.",
             ],
         ),
         md(
             """
             ---
-            # 9. Laboratorio guiado de 90 minutos
+            # Laboratorio guiado — 90 minutos desde GitHub.com
 
-            ## Producto y roles temporales
+            ## Qué debes producir
 
-            La pareja construirá dos piezas del mismo argumento:
+            La pareja completará únicamente:
 
-            - `hitos/s02/01_decision_proceso.md`: motivación, patrocinador, dueño del proceso, decisión, KPI,
-              evidencia SECOP, AS-IS, cuello de botella y límites.
-            - `hitos/s02/02_caso_arquitectura_accion.md`: caso laboral anonimizado, veredicto BI/Big Data,
-              arquitectura TO-BE, ciclo NIST, responsabilidades, RACI, controles y siguiente evidencia necesaria.
+            1. `hitos/s02/01_decision_proceso.md`;
+            2. `hitos/s02/02_caso_arquitectura_accion.md`.
 
-            **Estudiante A** asumirá temporalmente analista de negocio y data steward. **Estudiante B** asumirá
-            arquitecto de datos y responsable analítico. Durante la revisión intercambiarán perspectivas. Son roles
-            pedagógicos, no cargos asignados ni responsabilidades permanentes.
+            El archivo `resultados/perfil_secop.md` ya contiene evidencia descriptiva. **No debes programar ni
+            modificarlo.** Úsalo para sustentar tus respuestas.
 
-            ### Control de tiempo y criterio de terminación
+            - Perspectiva **negocio/dominio:** decisión, proceso, indicador y límites.
+            - Perspectiva **datos/analítica:** caso de uso, arquitectura, ciclo e interpretación.
 
-            | Minutos | Actividad | Evidencia para avanzar |
-            |---:|---|---|
-            | 90–98 | abrir el repositorio y reconocer artefactos | ambos explican la relación entre los dos archivos |
-            | 98–118 | analizar decisión, evidencia, proceso y KPI | el primer artefacto conecta dato, cuello y decisión |
-            | 118–138 | formular caso y veredicto BI/Big Data | suficiencia justificada con requisitos |
-            | 138–153 | completar arquitectura, NIST y responsabilidades | segundo artefacto coherente |
-            | 153–165 | revisar desde el rol contrario | objeción específica y corrección argumentada |
-            | 165–175 | observar versión, comentario y CI | conversación reconstruible en GitHub |
-            | 175–180 | ticket de salida | decisión, rol crítico y límite |
-
-            **Este laboratorio produce una base reutilizable, no una práctica desechable.** El repositorio es una
-            herramienta posible para conservarla y ampliarla durante el semestre. El objetivo conceptual no depende
-            de memorizar Git ni de producir una cantidad determinada de commits.
-
-            Si GitHub Actions se demora, la pareja conserva el contenido y revisa el check después. Si no puede
-            ejecutar Python, usa el perfil SECOP precomputado: la clase evalúa el razonamiento del diseño, no una
-            instalación local.
+            Luego intercambiarán perspectivas. La meta no es llenar tablas: es que ambos puedan contar la misma
+            historia de principio a fin.
             """
         ),
         md(
             """
-            ## Paso 1 — Abrir el repositorio y reconocer la historia
+            ## Paso 0 — Antes de editar
 
-            **Acción.** Inicia sesión en GitHub.com, abre el repositorio indicado por el docente y verifica el
-            propietario antes de editar. En la raíz localiza `hitos/s02/`, `data/`, `resultados/` y `scripts/`.
+            **Acción**
 
-            **Resultado esperado.** Puedes abrir los dos artefactos y el perfil SECOP; no estás en la plantilla ni
-            en el repositorio de otro equipo.
+            1. Inicia sesión en la cuenta de GitHub que usarás en el curso.
+            2. Abre el enlace privado entregado por el docente.
+            3. Comprueba que en la parte superior aparezca el repositorio de tu pareja.
 
-            **Error probable.** Un 404 suele indicar cuenta incorrecta o falta de acceso. No crees un fork público:
-            confirma con el docente el nombre de usuario y la URL.
-            """
-        ),
-        bash_commands(
-            """
-            pwd
-            ls
+            **Resultado esperado:** ves `README.md`, `hitos/`, `resultados/` y la rama `main`.
+
+            **Si aparece 404:** probablemente abriste otra cuenta o aún no tienes acceso. No crees un *fork* público;
+            informa al docente tu nombre de usuario de GitHub.
             """
         ),
         md(
             """
-            ## Paso 2 — Construir decisión y proceso desde dos responsabilidades
+            ## Paso 1 — Crear la rama de trabajo
 
-            Estudiante A abre `hitos/s02/01_decision_proceso.md`, pulsa el lápiz de edición y completa los marcadores.
-            Estudiante B pregunta si el KPI mide el cuello, si cada dato tiene actividad de origen y si los límites
-            impiden acusar fraude o causalidad.
+            **Acción**
 
-            **Cómo conservar la propuesta.** Al pulsar **Commit changes**, escribe un mensaje que explique la intención
-            y selecciona **Create a new branch for this commit and start a pull request**. Usa `hito/s02-negocio`.
-            GitHub conserva esa versión sin modificar directamente `main`.
+            1. En la página principal del repositorio, localiza el selector que dice **main**.
+            2. Ábrelo y escribe `hito/s02-negocio`.
+            3. Selecciona **Create branch: hito/s02-negocio from main**.
+            4. Comprueba que el selector ahora muestre `hito/s02-negocio`.
 
-            **Resultado esperado.** El archivo conecta motivación → proceso → dato → evidencia → decisión.
+            **Qué significa:** creaste una propuesta separada. `main` continúa siendo la versión acordada.
 
-            **Error probable.** Si la rama ya existe, selecciónala antes de confirmar; no crees nombres alternativos
-            sin coordinar con la pareja.
-            """
-        ),
-        bash_commands(
-            """
-            python --version
-            git --version
-            git status
-            git remote -v
+            **Si la rama ya existe:** selecciónala; no crees `hito/s02-negocio-2`. Es posible que tu compañero haya
+            comenzado primero.
             """
         ),
         md(
             """
-            **Profundización opcional.** Los comandos plegados comprueban versión, rama y remoto cuando existe Git
-            local. El laboratorio principal no depende de esa instalación: en GitHub.com la cuenta autenticada firma
-            la versión y el selector de ramas muestra dónde se está trabajando.
+            ## Paso 2 — Leer la evidencia antes de responder
+
+            **Acción**
+
+            1. Verifica que sigues en `hito/s02-negocio`.
+            2. Abre `resultados/perfil_secop.md`.
+            3. Identifica tres hechos: registros analizados, fechas con problemas y duración máxima.
+            4. Lee también la columna de límites.
+
+            **Resultado esperado:** puedes explicar una observación sin afirmar fraude, incumplimiento o causalidad.
+
+            **Error frecuente:** copiar una cifra sin explicar qué permite observar y qué no permite concluir.
             """
         ),
         md(
             """
-            ## Paso 3 — Formular el caso, la arquitectura y el regreso a la acción
+            ## Paso 3 — Completar decisión y proceso
 
-            Estudiante B cambia a `hito/s02-negocio` y edita
-            `hitos/s02/02_caso_arquitectura_accion.md`. Debe comprobar caso, veredicto BI/Big Data, cuatro dominios,
-            cinco etapas NIST, RACI, controles y la siguiente evidencia necesaria.
+            **Acción**
 
-            **Resultado esperado.** La arquitectura puede leerse desde el objetivo hacia la tecnología y desde una
-            restricción técnica hacia el proceso. La acción humana produce un registro que retroalimenta el ciclo.
-            """
-        ),
-        bash_commands(
-            """
-            git config --local user.name "Tu Nombre Completo"
-            git config --local user.email "tu-correo-asociado-a-github"
-            git config --local --get user.name
-            git config --local --get user.email
-            git switch -c hito/s02-negocio
-            git branch --show-current
+            1. Regresa a la raíz del repositorio.
+            2. Abre `hitos/s02/01_decision_proceso.md`.
+            3. Pulsa el ícono de lápiz **Edit this file**.
+            4. Reemplaza cada marcador `<!-- COMPLETAR -->` con respuestas breves.
+            5. Usa la pestaña **Preview** para comprobar la tabla y el diagrama.
+
+            **Criterio para avanzar:** el documento dice quién decide, qué decide, dónde está el cuello, qué indicador
+            observará y cuál es el límite de la evidencia.
+
+            **Si el diagrama no aparece:** revisa que no hayas borrado las líneas con tres acentos graves. No es
+            necesario rediseñarlo; basta con comprenderlo y completar el análisis.
             """
         ),
         md(
             """
-            **Profundización opcional.** La última línea muestra `hito/s02-negocio`. Si Git responde que la rama ya
-            existe, usa `git switch hito/s02-negocio`; no crees nombres alternativos sin avisar a tu pareja.
+            ## Paso 4 — Guardar la primera versión
+
+            **Acción**
+
+            1. Pulsa **Commit changes...**.
+            2. En el mensaje escribe: `Explica decisión y proceso actual`.
+            3. Confirma que aparezca **Commit directly to the hito/s02-negocio branch**.
+            4. Pulsa **Commit changes**.
+
+            **Resultado esperado:** GitHub vuelve al archivo y muestra tu mensaje en el historial. La rama sigue siendo
+            `hito/s02-negocio`; `main` no cambió.
+
+            **Si solo ofrece guardar en main:** cancela y verifica el selector de rama antes de continuar.
             """
         ),
         md(
             """
-            ## Paso 4 — Revisar desde el rol contrario
+            ## Paso 5 — Completar caso, arquitectura y ciclo
 
-            En **Files changed**, cada estudiante revisa el archivo que no lideró. Negocio/steward pregunta por
-            significado, evidencia, KPI, excepciones y controles; arquitectura/analítica pregunta por trazabilidad,
-            suficiencia, capacidad, etapa y responsable.
+            **Acción**
 
-            La persona autora corrige en la misma rama y responde: “Se cambió X porque Y; ahora podemos verificar Z”.
+            1. En la misma rama abre `hitos/s02/02_caso_arquitectura_accion.md`.
+            2. Pulsa **Edit this file**.
+            3. Completa el caso de uso, el veredicto BI / Big Data, los cuatro dominios y las cinco etapas.
+            4. En **Preview**, comprueba que cada tabla pueda leerse sin desplazamientos confusos.
+            5. Guarda con el mensaje: `Conecta caso, arquitectura y acción`.
 
-            **Comentario insuficiente:** “todo bien”, “me gusta” o “corrige esto” sin explicar el impacto.
-            """
-        ),
-        bash_commands(
-            """
-            python scripts/perfilar_secop.py
-            git status --short
-            git diff -- resultados/perfil_secop.md
+            **Criterio para avanzar:** una persona ajena al equipo puede seguir la cadena decisión → proceso → dato →
+            evidencia → acción.
+
+            **Error frecuente:** escribir nombres de herramientas sin explicar qué necesidad resuelven.
             """
         ),
         md(
             """
-            **Función usada: `git diff`.**
+            ## Paso 6 — Abrir el Pull Request
 
-            - Para qué sirve: compara el working tree con la última instantánea.
-            - Parámetro usado: ruta del archivo que queremos inspeccionar.
-            - Qué devuelve: líneas agregadas y retiradas; todavía no crea historial.
-            - Cómo interpretar: verde es contenido propuesto; rojo es contenido removido.
+            **Acción**
 
-            **Error probable.** Si `perfil_secop.md` sigue con `COMPLETAR`, confirma que ejecutaste el script desde la
-            raíz del repositorio y lee el mensaje de error, sin borrar la plantilla manualmente.
+            1. Abre la pestaña **Pull requests**.
+            2. Pulsa **New pull request**.
+            3. Confirma **base: main** y **compare: hito/s02-negocio**.
+            4. Pulsa **Create pull request**.
+            5. Usa como título: `Hito S02 — decisión, arquitectura y acción`.
+            6. Completa las secciones de la plantilla: qué hicimos, por qué, cómo verificamos, interpretación y límites,
+               y objeción/corrección entre perspectivas.
+            7. Pulsa nuevamente **Create pull request**.
+
+            **Resultado esperado:** el PR muestra las pestañas **Conversation**, **Commits**, **Checks** y
+            **Files changed**.
+
+            **Si GitHub dice que no hay cambios:** comprueba que `compare` sea tu rama y que los commits no se hayan
+            creado en `main`.
             """
         ),
         md(
             """
-            ## Paso 5 — Leer el Pull Request como conversación
+            ## Paso 7 — Revisar como compañero
 
-            {git_diagram('03_pull_request', 'Esquema conceptual de un Pull Request con propósito, evidencia, límites, cambios y revisión')}
+            **Acción**
 
-            La descripción responde qué se propuso, por qué, con qué evidencia, qué objeción se atendió y qué límite
-            permanece. **Conversation** conserva preguntas y respuestas; **Files changed** muestra la propuesta;
-            **Checks** comunica validaciones automáticas.
+            1. El segundo integrante abre el mismo PR con su propia cuenta.
+            2. Entra en **Files changed**.
+            3. Busca una afirmación que necesite evidencia o una definición que pueda ser ambigua.
+            4. Pulsa el signo **+** junto a la línea y escribe una pregunta concreta.
 
-            **Nota visual.** La lámina es un esquema conceptual, no una captura de un repositorio estudiantil.
-            """
-        ),
-        bash_commands(
-            """
-            git status
-            git diff --check
-            git diff -- hitos/s02/01_decision_proceso.md hitos/s02/02_caso_arquitectura_accion.md
-            """
-        ),
-        md(
-            """
-            **Resultado esperado.** Solo aparecen los cuatro archivos deliberadamente editados. `git diff --check` no
-            imprime nada cuando no encuentra espacios problemáticos. Si ves otro archivo, investiga su origen antes
-            de agregarlo.
+            **Modelo de comentario:** “La fecha usada para medir la demora no está definida. ¿Es fecha de publicación,
+            inicio o actualización? Esta elección puede cambiar el KPI”.
+
+            **Comentario insuficiente:** “todo bien”, “me gusta” o “corrige esto”.
+
+            **Resultado esperado:** la conversación señala qué decisión se afecta y qué debe poder verificarse.
             """
         ),
         md(
             """
-            ## Paso 6 — Distinguir CI de revisión humana
+            ## Paso 8 — Corregir sin abrir otra propuesta
 
-            GitHub Actions puede detectar marcadores sin completar, estructura ausente, errores del perfilador o
-            secretos evidentes. No puede decidir si el AS-IS es realista, si el KPI representa valor o si una
-            interpretación contractual es válida.
+            **Acción**
 
-            **Resultado esperado.** La pareja nombra una comprobación automática y un juicio humano indispensable.
-            """
-        ),
-        bash_commands(
-            """
-            git add hitos/s02/01_decision_proceso.md hitos/s02/02_caso_arquitectura_accion.md
-            git status
-            git diff --staged
-            git commit -m "Formula decisión, proceso y caso de uso"
-            git status
-            git log --oneline --decorate -3
+            1. Vuelve a la pestaña **Code** del repositorio.
+            2. Selecciona `hito/s02-negocio`.
+            3. Edita el archivo señalado y atiende la objeción.
+            4. Guarda con el mensaje: `Aclara definición y efecto en el indicador`.
+            5. Regresa al PR y responde: “Se cambió X porque Y; ahora puede verificarse Z”.
+
+            **Resultado esperado:** el PR se actualiza automáticamente. No debes abrir otro PR ni crear otra rama.
+
+            **Error frecuente:** responder el comentario sin modificar el artefacto. La conversación debe quedar unida
+            a una corrección visible.
             """
         ),
         md(
             """
-            **Profundización opcional.** En terminal, `git diff --staged` permite leer la instantánea propuesta antes
-            de crearla. Un commit equivocado no se usa para castigar: una corrección explicada puede añadir una nueva
-            versión y conservar el razonamiento.
+            ## Paso 9 — Interpretar Checks sin confundirlos con evaluación humana
+
+            **Acción**
+
+            1. Abre **Checks** o pulsa **Details** junto a la validación.
+            2. Si está verde, confirma qué reglas ejecutó.
+            3. Si está roja, abre el paso fallido, identifica el archivo y corrige en la misma rama.
+
+            | La automatización puede comprobar | Una persona debe juzgar |
+            |---|---|
+            | existen los dos archivos | el proceso se parece al trabajo real |
+            | no quedan marcadores `COMPLETAR` | el indicador representa una mejora valiosa |
+            | las tablas y diagramas conservan estructura | la arquitectura responde al problema |
+            | no aparecen secretos evidentes | los límites y la interpretación son responsables |
+
+            **Importante:** verde significa “pasaron estas reglas”, no “la respuesta es correcta”.
             """
         ),
         md(
             """
-            ## Profundización opcional — qué ocurre detrás del navegador
+            ## Paso 10 — Detenerse antes de integrar
 
-            Abre los bloques plegados solo si quieres relacionar la interfaz con Git local. Working tree es el
-            contenido editado; staging selecciona la próxima instantánea; commit registra una versión local; push la
-            publica. Estos estados no son el criterio conceptual ni un examen de comandos.
-            """
-        ),
-        bash_commands(
-            """
-            git push -u origin hito/s02-negocio
-            """
-        ),
-        md(
-            """
-            **Profundización opcional.** Git confirma que la rama local rastrea `origin/hito/s02-negocio`. Un 403
-            indica un problema de cuenta o acceso; nunca pegues tokens en archivos, comentarios ni chats.
-            """
-        ),
-        bash_commands(
-            """
-            git fetch origin
-            git switch --track origin/hito/s02-negocio
-            git pull --ff-only
-            git log --oneline --decorate -3
+            No pulses **Merge pull request** hasta recibir la indicación docente. El PR abierto ya es una entrega
+            revisable. El docente puede comentar y la pareja puede responder con una nueva corrección en la misma rama.
+
+            **Resultado final esperado**
+
+            - dos documentos completos y coherentes;
+            - una rama distinta de `main`;
+            - un PR con explicación y límites;
+            - una pregunta sustantiva del compañero;
+            - una corrección relacionada con esa pregunta;
+            - CI verde o un error comprendido y documentado.
+
+            La cantidad de commits, líneas o publicaciones no determina la nota.
             """
         ),
         md(
             """
-            ### Equivalencia opcional para revisar y publicar los dos artefactos
+            ## Criterios de calidad del ejercicio
 
-            Los comandos siguientes muestran cómo una persona con Git instalado observaría diferencias, seleccionaría
-            los dos archivos, ejecutaría el validador y publicaría una nueva versión. No se exige reproducirlos.
-            """
-        ),
-        bash_commands(
-            """
-            git status
-            git diff -- hitos/s02/01_decision_proceso.md hitos/s02/02_caso_arquitectura_accion.md
-            git add hitos/s02/01_decision_proceso.md hitos/s02/02_caso_arquitectura_accion.md
-            git diff --staged
-            python scripts/validar_entrega.py
-            git commit -m "Relaciona decisión, arquitectura y acción"
-            git push
-            git log --oneline --decorate -5
-            """
-        ),
-        md(
-            """
-            **Cómo leerlo.** El validador comprueba estructura observable; el log muestra versiones, pero no demuestra
-            por sí solo comprensión ni calidad. Si falla una regla, se corrige el contenido o el validador mediante
-            una decisión explicada.
-            """
-        ),
-        md(
-            """
-            ## Paso 7 — Abrir el Pull Request y revisar los artefactos
+            | Pregunta de revisión | Evidencia mínima |
+            |---|---|
+            | ¿la decisión está clara? | usuario, acción e indicador |
+            | ¿el proceso explica la demora? | cuello, retrabajo y dato producido |
+            | ¿el caso de uso evita comenzar por tecnología? | evidencia, salida, acción y límite |
+            | ¿el veredicto BI / Big Data está sustentado? | necesidad actual y condición para reevaluar |
+            | ¿la arquitectura conecta las partes? | cuatro dominios relacionados con el objetivo |
+            | ¿el ciclo termina en acción? | responsable y nuevo dato registrado |
+            | ¿la revisión produjo aprendizaje? | objeción, corrección y explicación |
 
-            En GitHub selecciona **Compare & pull request**. Base: `main`; compare: `hito/s02-negocio`. Completa qué
-            se hizo, por qué, cómo se verificó y qué limitaciones conserva. Abre la pestaña **Files changed** y
-            confirma que los diagramas editables renderizan y que no quedan marcadores.
-
-            {git_diagram('03_pull_request', 'Esquema conceptual de Pull Request con descripción y archivos revisables')}
-
-            **Cómo leer la vista.** Comprueba ramas, propósito, verificación, límites, archivos cambiados y revisores
-            en ese orden. Un check verde prueba reglas observables; la pestaña **Files changed** permite evaluar el
-            contenido y la conversación explica las decisiones.
-
-            **Error probable.** Si un diagrama no renderiza, revisa la sintaxis en la vista previa. No lo reemplaces
-            por una captura: el artefacto debe continuar editable y revisable.
-            """
-        ),
-        md(
-            """
-            ## Paso 8 — Revisión argumentada y CI como asistente
-
-            El compañero deja al menos un comentario sustantivo: pregunta por una decisión, señala una ambigüedad o
-            propone una mejora verificable. Después abre **Checks** y confirma el validador.
-
-            {git_diagram('04_actions', 'Esquema conceptual de CI y revisión humana como controles complementarios')}
-
-            **Cómo leer la vista.** La columna verde enumera lo que puede comprobar CI; la naranja enumera lo que
-            requiere juicio humano. El check no aprueba por sí solo el proceso, el KPI ni la interpretación.
-
-            **Resultado esperado.** La pareja puede nombrar qué detectó la automatización y qué decisión aún necesita
-            al experto de dominio, al dueño del proceso o al docente.
-
-            **Error probable.** Si CI está rojo, abre el detalle, identifica el archivo y corrige en la misma rama.
-            Un nuevo push actualiza el PR automáticamente. Si Actions está demorado, conserva la salida verde del
-            validador local y revisa CI después.
+            **Tiempo de contingencia.** Si GitHub Actions se demora, conserva el PR y explica qué comprobarías. Si
+            una cuenta no puede acceder, la pareja puede trabajar en una sola cuenta durante la clase y registrar la
+            revisión oral; después se repetirá el flujo con acceso individual.
             """
         ),
         md(
@@ -1614,33 +908,9 @@ def build_cells():
 
             Responde en tres frases:
 
-            1. ¿Qué decisión soporta Compras Claras y qué evidencia la limita?
-            2. ¿Qué rol resulta crítico en el siguiente relevo y por qué?
-            3. ¿Qué parte puede comprobar CI y qué parte requiere juicio humano?
-            """
-        ),
-        md(
-            """
-            ## Criterios de calidad del hito
-
-            La evaluación se concentra en el argumento profesional. El historial y la conversación pueden aportar
-            evidencia, pero Git no constituye un criterio separado.
-
-            | Criterio | Peso |
-            |---|---:|
-            | problema, decisión, responsable, KPI y alcance | 15 |
-            | proceso AS-IS, datos, cuello de botella y límites | 20 |
-            | caso de uso y veredicto BI / Big Data basado en evidencia | 20 |
-            | arquitectura objetivo y trazabilidad entre dominios | 20 |
-            | ciclo NIST, responsabilidades, RACI y controles | 15 |
-            | interpretación, revisión argumentada y límites éticos | 10 |
-
-            **Criterios mínimos de contenido:** los dos artefactos están completos; la evidencia SECOP se interpreta
-            sin acusaciones; los roles no se usan como sinónimos; toda capacidad responde a un requisito;
-            visualización y acción permanecen diferenciadas; la revisión explica su corrección.
-
-            No se exige una cantidad de commits, pushes o líneas. El docente puede usar la conversación para comprender
-            el proceso de trabajo, nunca como contador automático de participación.
+            1. ¿Qué decisión apoya Compras Claras?
+            2. ¿Por qué BI tradicional es suficiente para el primer hito?
+            3. ¿Qué parte puede comprobar CI y qué parte exige juicio humano?
             """
         ),
         md(
@@ -1650,49 +920,59 @@ def build_cells():
 
             ## Recapitulación
 
-            1. Definimos una motivación, decisión, responsable y KPI antes de elegir tecnología.
-            2. Evaluamos valor, datos, proceso, personas, riesgo y viabilidad antes de adoptar.
-            3. BPM reveló actividades, datos, gateway, retrabajo y cuello de botella.
-            4. El caso de uso conectó usuario, evidencia, acción, KPI y límite.
-            5. Comparamos BI tradicional y Big Data mediante requisitos y umbrales medibles.
-            6. La arquitectura alineó negocio, información, aplicaciones, tecnología y controles.
-            7. NIST llevó la evidencia de captura a acción y retroalimentación.
-            8. Git y GitHub mostraron una forma útil de conservar propuestas, objeciones y correcciones entre roles.
+            1. **BPM** permitió localizar el trabajo, la espera y el retrabajo.
+            2. El **caso de uso** conectó persona, evidencia, decisión, acción e indicador.
+            3. La comparación **BI / Big Data** evitó añadir complejidad sin una necesidad medida.
+            4. La **arquitectura empresarial** alineó negocio, información, aplicaciones y tecnología.
+            5. El **ciclo analítico** llevó los datos hasta una acción que produce nueva evidencia.
+            6. **GitHub** conservó propuesta, pregunta y corrección sin convertirse en el objetivo de la clase.
 
-            **Idea más importante.** Big Data crea valor cuando una evidencia trazable regresa al proceso como una
-            acción responsable. La colección de herramientas es secundaria a esa cadena.
+            **Idea principal.** Una iniciativa de Big Data tiene sentido cuando mejora una decisión dentro de un
+            proceso y puede explicar cómo la evidencia llega a una persona responsable.
 
-            **Errores que evitaremos:** empezar por productos, llamar Big Data a cualquier reporte, automatizar un
-            AS-IS defectuoso, confundir visualización con acción, atribuir causalidad y creer que CI reemplaza la
-            revisión profesional.
+            **Próxima sesión.** En la sesión 4 estudiaremos formalmente OLTP, OLAP, Data Marts, Data Warehouses, Data
+            Lakes y ETL. Esos sistemas se conectarán con el blueprint construido hoy.
+            """
+        ),
+        md(
+            """
+            ## Diccionario de variables y términos clave
 
-            ## Próximas sesiones
+            | Término | Significado en esta sesión |
+            |---|---|
+            | AS-IS | forma actual de trabajar |
+            | TO-BE | forma propuesta de trabajar |
+            | BI | prácticas para organizar indicadores, análisis y reportes que apoyan decisiones |
+            | BPM | disciplina para comprender y mejorar procesos de principio a fin |
+            | compuerta o *gateway* | punto que dirige el proceso según una condición |
+            | SLA | tiempo o nivel esperado del servicio |
+            | KPI | indicador que mide lo que realmente ocurrió |
+            | NIST | organismo cuyo marco usamos para organizar las cinco etapas analíticas |
+            | rama | espacio separado para preparar una propuesta |
+            | commit | versión guardada con una explicación breve |
+            | Pull Request o PR | conversación para comparar, revisar y corregir una propuesta |
+            | CI o *Checks* | comprobaciones automáticas sobre reglas observables |
+            | data steward | responsabilidad de aclarar el significado y las reglas de calidad de los datos |
 
-            > En la sesión 4 estudiaremos formalmente sistemas OLTP y OLAP, Data Marts, Data Warehouses, Data Lakes y
-            > ETL. Usaremos el blueprint para explicar cómo se organizan los datos necesarios, sin perder la decisión,
-            > el proceso ni los controles definidos hoy.
+            **Ejemplo:** si el equipo acuerda un SLA de “revisar en máximo 24 horas”, el KPI mide cuánto tardó
+            realmente cada caso. La tarea valida las fechas; la compuerta usa ese resultado para decidir si el caso
+            continúa o vuelve a corrección.
             """
         ),
         md(
             f"""
-            ## Referencias y recursos
+            ## Referencias
 
-            - **Lectura del programa:** Chapter 2 — *Business Motivations and Drivers for Big Data Adoption*.
-            - **Lectura del programa:** Chapter 3 — *Big Data Adoption and Planning Considerations*.
-            - [NIST Big Data Interoperability Framework — Definitions](https://doi.org/10.6028/NIST.SP.1500-1r2)
             - [NIST Big Data Reference Architecture](https://doi.org/10.6028/NIST.SP.1500-6r2)
-            - [TOGAF Standard — The Open Group](https://publications.opengroup.org/standards/togaf)
             - [BPMN 2.0.2 — Object Management Group](https://www.omg.org/spec/BPMN/)
-            - [CRISP-DM — IBM](https://www.ibm.com/docs/en/spss-modeler/saas?topic=dm-crisp-help-overview)
+            - [TOGAF Standard — The Open Group](https://publications.opengroup.org/standards/togaf)
             - [SECOP Integrado — Datos Abiertos Colombia](https://www.datos.gov.co/Gastos-Gubernamentales/SECOP-Integrado/rpmr-utcd)
-            - [API Socrata de SECOP Integrado](https://dev.socrata.com/foundry/www.datos.gov.co/rpmr-utcd)
-            - [Diagramas Mermaid en GitHub](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams)
             - [Editar archivos en GitHub](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files)
             - [Crear un Pull Request](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request)
             - [Página web del curso]({WEB_CURSO})
 
-            **Nota de reproducibilidad.** Al actualizar SECOP registra fecha, fuente, campos, filtros, límite y regla
-            de transformación. Una API viva puede cambiar; la muestra local permite repetir la práctica.
+            La muestra local permite repetir el ejercicio aunque la fuente externa cambie. Una actualización futura
+            debe registrar fuente, fecha de corte, campos y límites.
             """
         ),
     ]

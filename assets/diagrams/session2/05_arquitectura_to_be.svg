@@ -50,7 +50,7 @@
 <line x1="0" y1="114" x2="1600" y2="114" stroke="#2F6FB0" stroke-width="2" fill="none" stroke-linecap="round"/>
 <rect x="1376" y="24" width="176" height="36" rx="18" fill="#214E6D" stroke="#3F769C" stroke-width="1.5" opacity="1"/>
 <text x="1464.0" y="47" fill="#D9EFFB" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800" text-anchor="middle" style="">
-<tspan x="1464.0" dy="0">MAPA 5 DE 7</tspan>
+<tspan x="1464.0" dy="0">SESIÓN 2 · ARQUITECTURA</tspan>
 </text>
 <text x="48" y="48" fill="#FFFFFF" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" text-anchor="start" style="">
 <tspan x="48" dy="0">Arquitectura TO-BE: cuatro dominios, una misma decisión</tspan>
@@ -166,7 +166,7 @@
 <tspan x="1246" dy="0">Diseño de datos</tspan>
 </text>
 <text x="1246" y="430" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
-<tspan x="1246" dy="0">arquitecto + linaje</tspan>
+<tspan x="1246" dy="0">arquitecto de datos + linaje</tspan>
 </text>
 <rect x="36" y="492" width="1528" height="140" rx="16" fill="#FFFFFF" stroke="#B8C8D6" stroke-width="1.5" opacity="1"/>
 <rect x="36" y="492" width="230" height="140" rx="16" fill="#E8F2FB" stroke="#2F6FB0" stroke-width="1.5" opacity="1"/>
@@ -246,7 +246,7 @@
 <tspan x="1246" dy="0">Operación</tspan>
 </text>
 <text x="1246" y="738" fill="#52697C" font-family="Inter, -apple-system, Segoe UI, Arial, sans-serif" font-size="14.5" font-weight="500" text-anchor="start" style="">
-<tspan x="1246" dy="0">plataforma · SRE</tspan>
+<tspan x="1246" dy="0">recuperación · métricas</tspan>
 </text>
 <line x1="433" y1="324" x2="433" y2="362" stroke="#E95C3A" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-orange)"/>
 <line x1="433" y1="478" x2="433" y2="516" stroke="#C98500" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-amber)"/>
