@@ -1,0 +1,1771 @@
+# -*- coding: utf-8 -*-
+"""
+Genera la Sesión 3 — Bases de datos documentales con MongoDB.
+
+Decisiones de diseño (ver .local-docente/Plan_Sesiones_3_y_4_2026-2.md):
+
+- Motor: MongoDB Community por tarball oficial dentro del runtime de Colab.
+  No se usa apt ni systemctl: Colab no arranca con systemd y toda receta copiada
+  de internet se rompe en esa línea. Respaldo probado: mongomock, que sí
+  implementa las etapas de agregación que usa el laboratorio (montydb no).
+- Datos: noticias de El Tiempo (sitemap XML + feed JSON por artículo). El CSV de
+  SECOP es rectangular y no permite demostrar por qué existe un modelo
+  documental; las noticias sí traen arreglos, anidamiento y campos ausentes.
+- Caso conductor: Compras Claras. Las noticias son la señal externa que Laura
+  cruza con los contratos para decidir qué revisar primero.
+- Git sin instalar nada: todo el flujo ocurre en GitHub.com, porque el curso se
+  dicta en computadores de la universidad donde Git puede no estar disponible.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from utils.make_notebook import code, md, save, validate
+
+OUTPUT = "Cuadernos/3_MongoDB_Documental.ipynb"
+COLAB = (
+    "https://colab.research.google.com/github/jazaineam1/BigData2026/"
+    "blob/main/Cuadernos/3_MongoDB_Documental.ipynb"
+)
+WEB_CURSO = "https://jazaineam1.github.io/BigData2026/"
+RAW = "https://raw.githubusercontent.com/jazaineam1/BigData2026/main"
+DATOS_NOTICIAS = f"{RAW}/Datos/noticias_contratacion_2026.json"
+DATOS_SECOP = f"{RAW}/Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv"
+DATOS_CRUCE = f"{RAW}/Datos/entidades_en_noticias_2026.json"
+TOTAL_QUESTIONS = 8
+
+
+def hidden(cell, title, *tags):
+    """Configura una celda para que el estudiante vea el formulario, no su código."""
+    first_line = f'#@title {title} {{ display-mode: "form" }}'
+    cell["source"] = [first_line + "\n"] + cell["source"]
+    cell["metadata"]["tags"] = list(tags or ("hide-input",))
+    cell["metadata"]["jupyter"] = {"source_hidden": True}
+    cell["metadata"]["cellView"] = "form"
+    cell["metadata"]["colab"] = {"formView": "both"}
+    return cell
+
+
+def question_cell(numero, tema, contexto, pregunta, opciones, correcta, retro_opciones):
+    return hidden(
+        code(
+            f"""
+            # Pregunta {numero} de {TOTAL_QUESTIONS} — {tema}
+            pregunta_interactiva(
+                numero={numero},
+                tema={tema!r},
+                contexto={contexto!r},
+                pregunta={pregunta!r},
+                opciones={opciones!r},
+                correcta={correcta},
+                retro_opciones={retro_opciones!r},
+            )
+            """
+        ),
+        f"Activar pregunta {numero} — {tema}",
+        "hide-input",
+        "pregunta-interactiva",
+    )
+
+
+def soporte_cells():
+    """Celdas de infraestructura del cuaderno: se ven plegadas en Colab."""
+    return [
+        hidden(
+            code(
+                """
+                import json
+                import html as html_lib
+                from IPython.display import display, HTML
+
+                TOTAL_QUESTIONS = 8
+                print("Entorno listo. Ejecuta las celdas en orden.")
+                """
+            ),
+            "Preparar entorno e interactividad",
+            "hide-input",
+            "soporte-entorno",
+        ),
+        hidden(
+            code(
+                """
+                def pregunta_interactiva(numero, tema, contexto, pregunta, opciones, correcta, retro_opciones):
+                    '''Muestra una pregunta autocorregible con explicación específica por opción.'''
+                    uid = f"pregunta-{numero}"
+                    opciones_html = "".join(
+                        f'''<label style="display:block;margin:9px 0;cursor:pointer;">
+                        <input type="radio" name="{uid}" value="{i}"> {html_lib.escape(opcion)}
+                        </label>'''
+                        for i, opcion in enumerate(opciones)
+                    )
+                    retro_json = json.dumps(retro_opciones, ensure_ascii=False)
+                    bloque = f'''
+                    <div style="border:2px solid #1565c0;border-radius:12px;padding:16px;margin:16px 0;background:#e3f2fd;">
+                      <h3 style="color:#0d47a1;margin-top:0;">Pregunta {numero} de {TOTAL_QUESTIONS} — {html_lib.escape(tema)}</h3>
+                      <div style="background:#fff8d6;border-left:5px solid #f9a825;padding:12px;margin:10px 0;">
+                        <strong>Contexto.</strong> {html_lib.escape(contexto)}
+                      </div>
+                      <p><strong>Pregunta.</strong> {html_lib.escape(pregunta)}</p>
+                      {opciones_html}
+                      <button onclick="verificar_{numero}()" style="background:#1565c0;color:white;border:0;border-radius:6px;padding:9px 15px;cursor:pointer;">
+                        Verificar respuesta
+                      </button>
+                      <div id="retro-{numero}" style="margin-top:12px;"></div>
+                    </div>
+                    <script>
+                    function verificar_{numero}() {{
+                      const elegida = document.querySelector('input[name="{uid}"]:checked');
+                      const salida = document.getElementById('retro-{numero}');
+                      if (!elegida) {{
+                        salida.innerHTML = '<div style="background:#fff3cd;color:#664d03;padding:10px;border-radius:6px;">Selecciona una opción antes de verificar.</div>';
+                        return;
+                      }}
+                      const indice = Number(elegida.value);
+                      const mensajes = {retro_json};
+                      const esCorrecta = indice === {correcta};
+                      const estilo = esCorrecta
+                        ? 'background:#d1e7dd;color:#0f5132;border:1px solid #badbcc;'
+                        : 'background:#f8d7da;color:#842029;border:1px solid #f5c2c7;';
+                      salida.innerHTML = '<div style="' + estilo + 'padding:10px;border-radius:6px;"><strong>'
+                        + (esCorrecta ? 'Correcto. ' : 'Revisa. ') + '</strong>' + mensajes[indice] + '</div>';
+                    }}
+                    </script>
+                    '''
+                    display(HTML(bloque))
+                """
+            ),
+            "Preparar componente de preguntas",
+            "hide-input",
+            "soporte-interactividad",
+        ),
+    ]
+
+
+def build_cells():
+    cells = [
+        md(
+            f"""
+            <a href="{COLAB}" target="_parent">
+              <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Abrir el cuaderno en Google Colab">
+            </a>
+
+            **Acceso público:** [página del curso]({WEB_CURSO})
+
+            > **En Colab:** ejecuta las celdas en orden. Las ocho preguntas aparecen con sus opciones y su
+            > retroalimentación; el código que las dibuja permanece plegado.
+
+            > **No necesitas instalar nada en tu computador.** Ni MongoDB, ni Git, ni una cuenta de nube. Todo
+            > ocurre dentro de esta pestaña y dentro de GitHub.com. Esto importa porque la clase se dicta en
+            > computadores de la universidad donde no siempre hay permisos de instalación.
+            """
+        ),
+        md(
+            """
+            # Sesión 3 — Cuando la tabla ya no cabe: bases de datos documentales con MongoDB
+
+            ## Universidad Central
+            <div align="center">
+              <img src="https://universidad.ucentral.edu.co/tulengua/wp-content/themes/tulengua/images/logo-ucentral.png"
+                   width="340" alt="Logo de la Universidad Central">
+            </div>
+
+            > ### Facultad de Ingeniería y Ciencias Básicas
+            > ### Maestría en Analítica de Datos — BIG DATA (64491093), Grupo 1
+
+            **Tema del PDA:** introducción a bases de datos documentales con MongoDB<br>
+            **Finalidad formativa:** comprender el uso e implementación de bases de datos documentales<br>
+            **Producción evaluable de hoy:** quiz de conceptos básicos de Big Data<br>
+            **Caso conductor:** Compras Claras — priorizar la revisión de contratación pública<br>
+            **Duración:** 180 minutos — 85 de explicación, 10 de receso y 85 donde trabajas tú<br>
+            **Fecha:** 20 de agosto de 2026
+
+            ## Ficha de la sesión
+
+            | Campo | Descripción |
+            |---|---|
+            | pregunta profesional | ¿qué evidencia externa ayuda a Laura a decidir qué contrato revisar primero? |
+            | fuentes | noticias de El Tiempo (sitemap XML + feed JSON) y muestra de contratación SECOP |
+            | entorno | Colab, con MongoDB corriendo dentro de esta misma pestaña |
+            | producto | una colección de documentos, tres consultas propias y una interpretación con límites |
+            """
+        ),
+        md(
+            """
+            ## Objetivos de aprendizaje y producto
+
+            Al terminar podrás:
+
+            1. explicar con un caso propio por qué un modelo tabular se queda corto ante datos irregulares;
+            2. nombrar las cuatro familias NoSQL y decir qué problema resuelve cada una;
+            3. leer un documento JSON/BSON: campos, anidamiento, arreglos y `_id`;
+            4. traducir una consulta entre SQL y MongoDB en los dos sentidos;
+            5. explicar qué es una réplica, qué es un fragmento y qué garantía se cede al replicar;
+            6. escribir consultas `find()` con filtro y proyección, y una agregación de cuatro etapas;
+            7. interpretar un resultado diciendo también **qué no permite concluir**;
+            8. cerrar en GitHub una propuesta abierta la semana pasada, sin usar la terminal.
+
+            **Producto de la sesión.** Una colección `noticias` cargada en tu propia base, tres consultas escritas
+            por ti con su interpretación, y el Pull Request de la sesión 2 integrado.
+
+            No evaluamos memoria de sintaxis. Evaluamos si puedes decidir cómo guardar algo y defender la lectura
+            de un resultado.
+            """
+        ),
+        md(
+            """
+            ## Agenda de 180 minutos
+
+            ### 85 minutos de explicación y conversación
+
+            | Tiempo | Pregunta de la clase | Resultado |
+            |---:|---|---|
+            | 0–10 | ¿en qué quedamos la semana pasada? | ticket de salida respondido y PR listo para cerrar |
+            | 10–22 | ¿por qué esta evidencia no cabe en una tabla? | el problema nombrado: variedad, no volumen |
+            | 22–30 | ¿y qué existe en lugar de la tabla? | las cuatro familias NoSQL |
+            | 30–46 | ¿cómo se ve un documento por dentro? | anidamiento, arreglos y equivalencia con SQL |
+            | 46–54 | ¿y cuando no cabe en un servidor? | fragmentar y replicar |
+            | 54–62 | ¿qué se cede al tener copias? | ACID, BASE y consistencia eventual |
+            | 62–80 | ¿cómo le pregunto algo a la base? | MQL, siempre junto a su SQL equivalente |
+            | 80–83 | ¿qué vamos a construir? | puente al laboratorio |
+
+            ### 10 minutos de receso
+
+            Antes de salir, ejecuta la celda de arranque del laboratorio. Va a seguir trabajando sola.
+
+            ### 85 minutos donde trabajas tú
+
+            | Tiempo | Actividad |
+            |---:|---|
+            | 0–10 | quiz de conceptos básicos de Big Data (evaluable) |
+            | 10–15 | confirmar que el motor quedó listo |
+            | 15–30 | cargar las noticias y leer un documento |
+            | 30–48 | tres consultas `find()` escritas por ti |
+            | 48–56 | marcar una noticia como revisada (`update_one`) |
+            | 56–74 | primera agregación y su interpretación |
+            | 74–80 | cruzar noticias con entidades de SECOP, y descubrir por qué el cruce fácil miente |
+            | 80–85 | cerrar el Pull Request de la sesión 2 y ticket de salida |
+            """
+        ),
+        *soporte_cells(),
+        md(
+            """
+            ---
+            # 0. En qué quedamos la semana pasada
+
+            Abre el archivo `hitos/s02/01_decision_proceso.md` que tu pareja y tú escribieron hace ocho días. Ahí
+            quedó un indicador, con el nombre de ustedes al lado.
+
+            **Hoy vamos a calcular ese indicador por primera vez sobre datos reales.** Y en el camino nos vamos a
+            topar con el problema que hace ocho días no vimos.
+
+            ## El ticket de salida de la sesión 2, respondido
+
+            Quedaron tres preguntas sin cerrar. Estas son las respuestas que sirven de punto de partida.
+
+            **1. ¿Qué decisión apoya Compras Claras?**
+
+            > Laura debe decidir **cuáles procesos contractuales revisa primero** con un equipo humano que no
+            > alcanza a revisarlos todos. No decide si hay una irregularidad: decide dónde mirar. El indicador
+            > ordena una fila de espera, no emite un veredicto.
+
+            **2. ¿Por qué BI tradicional es suficiente para el primer hito?**
+
+            > Porque en el primer hito la evidencia cabe en una máquina, llega por lotes y las preguntas son
+            > descriptivas: cuántos, cuánto, de quién, en qué periodo. Nada de eso exige procesamiento
+            > distribuido. La condición para reevaluar es concreta: si hay que **incorporar fuentes externas de
+            > forma continua y con estructuras distintas**, BI tradicional deja de alcanzar. Hoy vamos a cruzar
+            > justamente esa frontera.
+
+            **3. ¿Qué parte puede comprobar CI y qué parte exige juicio humano?**
+
+            > CI comprueba lo mecánico: que el archivo exista, que tenga las secciones pedidas, que no queden
+            > campos `COMPLETAR`, que el enlace no esté roto. **CI no puede decir si la decisión está bien
+            > planteada, si el indicador mide lo que dice medir o si la conclusión se estiró más de lo que el dato
+            > aguanta.** Un check verde no es una aprobación conceptual.
+
+            > **Conexión con hoy.** La respuesta 2 dejó una condición: *incorporar fuentes externas con estructuras
+            > distintas*. Eso es exactamente lo que vamos a hacer ahora, y es lo que va a romper la tabla.
+            """
+        ),
+        md(
+            """
+            ---
+            # 1. Por qué esta evidencia no cabe en una tabla
+
+            ## La necesidad, primero
+
+            Laura tiene los contratos. Le faltan **señales externas**: qué entidades están apareciendo en la
+            prensa, por qué y con qué frecuencia. Una entidad que aparece en varias noticias sobre un mismo asunto
+            no es culpable de nada, pero **merece que alguien mire antes** que una entidad de la que nadie habla.
+
+            Así que necesitamos dos fuentes, y son de naturalezas distintas:
+
+            | Fuente | Qué es | Forma |
+            |---|---|---|
+            | SECOP II | procesos de contratación pública | **tabla**: 59 columnas fijas, una fila por proceso |
+            | El Tiempo | noticias sobre contratación de enero a agosto de 2026 | **documentos**: cada noticia trae listas y partes de tipos distintos |
+
+            ## Cómo se armó la colección de noticias
+
+            El Tiempo publica dos cosas que se pueden enlazar entre sí, y el enlace es **el número que aparece al
+            final de cada dirección**:
+
+            | Fuente | Qué entrega | Formato |
+            |---|---|---|
+            | `sitemap-articles-2026-MM.xml` | el índice de todo lo publicado ese mes | XML |
+            | `servicios/feeds/articulo/<ID>` | el artículo completo | JSON |
+
+            El índice del año trae **57 844 artículos**. Descargarlos todos habría sido absurdo, así que primero
+            filtramos por la dirección: el texto de la URL ya dice de qué trata el artículo. Los que contienen
+            palabras como `contrato`, `licitacion`, `secop`, `sobrecosto`, `contraloria` o `corrupcion` son
+            **995**. De esos, 991 respondieron, y al quitar repetidos quedaron **987 noticias**.
+
+            > **Fíjate en el orden, porque es una decisión de ingeniería y no un detalle:** revisamos 57 844
+            > artículos con **8 peticiones** (una por mes) y solo descargamos 995. Filtrar donde la información ya
+            > está, antes de traer los datos, es la misma idea que vas a ver toda la noche con `$match` y todo el
+            > semestre con los índices.
+
+            Empecemos mirando la tabla, que es lo que ya conocemos.
+            """
+        ),
+        code(
+            f"""
+            # Miramos la muestra de contratación pública tal como viene: una tabla.
+            import pandas as pd
+
+            contratos = pd.read_csv("{DATOS_SECOP}", low_memory=False)
+
+            print("Filas:", len(contratos))
+            print("Columnas:", len(contratos.columns))
+
+            # ¿Qué tan llena está esta tabla realmente?
+            vacias = contratos.isna().mean().mul(100).round(1).sort_values(ascending=False)
+            print()
+            print("Columnas 100% vacías:", int((vacias == 100).sum()))
+            print("Columnas con más del 80% vacío:", int((vacias > 80).sum()))
+            print("Columnas sin ningún vacío:", int((vacias == 0).sum()))
+            print()
+            print("Las 8 columnas más vacías (porcentaje de celdas sin dato):")
+            print(vacias.head(8).to_string())
+            """
+        ),
+        md(
+            """
+            ### Interpretación docente — la tabla ya nos está avisando
+
+            **Cómo se lee.** De 59 columnas, 2 están completamente vacías y otras 6 están vacías en más del 80 % de
+            las filas. Al mismo tiempo, 48 columnas no tienen un solo hueco.
+
+            **Qué nos dice.** La tabla está pagando el precio de un esquema rígido: para que quepan los procesos que
+            *sí* tienen fecha de adjudicación, **todos** los procesos tienen que cargar con esa columna, aunque el
+            90 % la deje vacía. Cada campo opcional que aparezca en el futuro será una columna nueva y casi vacía.
+
+            **Qué todavía no podemos concluir.** Que la tabla sea el modelo equivocado. Para 48 columnas es perfecta.
+            El problema aparece cuando lo irregular deja de ser la excepción.
+
+            **El error común.** Creer que esto se arregla "limpiando los datos". No hay nada sucio: esos procesos
+            realmente no tienen fecha de adjudicación porque todavía no se adjudicaron. El dato ausente es
+            información, no basura.
+
+            ## Ahora la otra fuente
+
+            Vamos a traer las noticias. Y aquí es donde la tabla se rompe de verdad.
+            """
+        ),
+        code(
+            f"""
+            # Traemos las noticias ya recolectadas y las miramos SIN base de datos todavía.
+            import urllib.request, json
+            from collections import Counter
+
+            with urllib.request.urlopen("{DATOS_NOTICIAS}") as r:
+                noticias = json.loads(r.read().decode("utf-8"))
+
+            print("Noticias:", len(noticias))
+            fechas = sorted(n["publicado"][:10] for n in noticias)
+            print("Van desde", fechas[0], "hasta", fechas[-1])
+
+            # 1) ¿Todas las noticias tienen los mismos campos?
+            presencia = Counter(k for n in noticias for k in n)
+            print()
+            print("Presencia de cada campo (cuántas noticias lo traen):")
+            for campo, veces in presencia.most_common():
+                marca = "" if veces == len(noticias) else "   <-- NO está en todas"
+                print(f"  {{campo:14s}} {{veces:4d}}/{{len(noticias)}}{{marca}}")
+
+            # 2) ¿Cuántas etiquetas trae cada noticia?
+            n_etiquetas = [len(n["etiquetas"]) for n in noticias]
+            n_imagenes = [len(n["imagenes"]) for n in noticias]
+            print()
+            print(f"Etiquetas por noticia: mínimo {{min(n_etiquetas)}}, máximo {{max(n_etiquetas)}}")
+            print(f"Imágenes por noticia:  mínimo {{min(n_imagenes)}}, máximo {{max(n_imagenes)}}")
+
+            # 3) ¿De qué está hecho el cuerpo de una noticia?
+            tipos = Counter(b["tipo"] for n in noticias for b in n["cuerpo"])
+            print()
+            print(f"El cuerpo está hecho de bloques, y hay {{len(tipos)}} tipos distintos:")
+            for tipo, veces in tipos.most_common(8):
+                print(f"  {{str(tipo):18s}} {{veces}}")
+            print("  ... y otros menos frecuentes")
+            """
+        ),
+        md(
+            """
+            ### Interpretación docente — aquí sí se rompe la tabla
+
+            **Cómo se lee.** Tres hechos, y cada uno rompe la tabla de una manera distinta:
+
+            1. **Campos que faltan.** `subcategoria` no está en todas; `tiene_video`, en menos de veinte; y
+               `descripcion`, en un puñado. En una tabla, cada uno sería una columna casi vacía. Ya vimos ese costo
+               con SECOP.
+            2. **Listas dentro de un registro.** Una noticia tiene entre 1 y 24 etiquetas, y entre 0 y 25 imágenes.
+               En una tabla solo hay dos salidas, y las dos son malas: inventar `etiqueta_1` … `etiqueta_24`, o
+               partir la noticia en veinticuatro filas repitiendo el título en cada una.
+            3. **Partes de tipos distintos.** El cuerpo no es un texto: es una lista de bloques —entre 1 y 86 por
+               noticia— y hay **25 tipos diferentes**: párrafo, imagen, subtítulo, artículo relacionado, video,
+               cita de Instagram, documento de Scribd. Cada tipo guarda campos distintos. Una tabla necesitaría una
+               columna por cada campo de cada tipo.
+
+            **Qué nos dice.** El problema no es el tamaño. Son 987 noticias y 9 MB: caben en cualquier portátil. El
+            problema es la **variedad**. Esa es la V que está fallando hoy, y por eso la solución no va a ser una
+            máquina más grande.
+
+            **Qué no podemos concluir.** Que las tablas sean malas o estén superadas. Los contratos de SECOP siguen
+            estando bien en una tabla. Lo que aprendemos es a elegir según la forma del dato.
+
+            > **Pregunta que dejamos colgada.** Estas 987 noticias salieron de filtrar **57 844 artículos**, y eso
+            > es ocho meses de **un solo periódico**. Si Laura quiere vigilar diez medios durante cinco años,
+            > hablamos de millones de documentos. Aunque arreglemos la forma, ¿dónde guardamos eso? Volveremos a
+            > esta pregunta en el minuto 46.
+            """
+        ),
+        question_cell(
+            1,
+            "El límite del modelo tabular",
+            "Una noticia trae entre 1 y 24 etiquetas. El equipo quiere guardar las noticias en la misma base "
+            "relacional donde ya están los contratos, sin cambiar de tecnología.",
+            "¿Cuál de estas opciones describe mejor el costo real de forzar las etiquetas dentro de una tabla?",
+            [
+                "Ninguno: basta con guardar las etiquetas separadas por comas en una sola columna de texto.",
+                "Hay que crear 21 columnas casi siempre vacías, o repetir la noticia completa en 21 filas.",
+                "Hay que comprar más disco, porque el problema es el volumen de las noticias.",
+                "Hay que limpiar los datos, porque una noticia bien formada debería tener una sola etiqueta.",
+            ],
+            1,
+            [
+                "Es la salida más común y la que más duele después: una columna de texto con comas ya no permite "
+                "filtrar por una etiqueta sin buscar subcadenas, que es justo el error que veremos al final de la "
+                "clase. Guardar una lista como texto es renunciar a poder consultarla.",
+                "Correcto. Y las dos salidas son malas por razones distintas: las 24 columnas desperdician espacio y "
+                "se quedan cortas con la noticia número 25; repetir la noticia en 24 filas duplica el título, el "
+                "autor y el cuerpo, y obliga a recordar que 24 filas son en realidad una sola noticia.",
+                "El volumen no es el problema aquí: son 987 noticias y 9 MB. La V que está fallando es la variedad, "
+                "y esa no se resuelve con más disco.",
+                "No hay nada sucio. Que una noticia tenga varias etiquetas es su forma legítima; el dato está bien y "
+                "el modelo es el que no lo admite.",
+            ],
+        ),
+        md(
+            """
+            ---
+            # 2. Qué existe en lugar de la tabla
+
+            Ya sabemos qué le sobra a la tabla. La pregunta obvia es qué existe en su lugar. La respuesta incómoda
+            es que no existe *una* alternativa: existen cuatro, y **cada una renunció a algo distinto de la tabla**.
+
+            | Familia | Qué guarda | Renuncia a | Ejemplo real | Cuándo la vemos |
+            |---|---|---|---|---|
+            | **Documental** | documentos con estructura libre y anidada | el esquema fijo y los JOIN baratos | MongoDB | **hoy** |
+            | **Clave-valor** | un valor cualquiera bajo una llave | poder consultar por el contenido | Redis | mención |
+            | **Columnar / wide-column** | filas repartidas por una llave de partición | consultas que no anticipaste | Cassandra | sesiones 4 y 5 |
+            | **Grafos** | nodos y relaciones como ciudadanos de primera | el rendimiento en agregaciones masivas | Neo4j | sesión 6 |
+
+            **La idea que hay que llevarse.** Ninguna de las cuatro es "mejor". Cada una hizo un intercambio, y
+            elegir bien significa saber **qué consulta vas a hacer** antes de elegir dónde guardar. Esa frase va a
+            volver hoy, va a volver en la sesión 4 con los índices y va a volver en la sesión 5 con Cassandra.
+
+            **Error común que hay que desactivar de una vez.** "NoSQL significa sin estructura." No. Significa *sin
+            esquema fijo impuesto por el motor*. El diseño sigue existiendo; lo que cambia es quién lo sostiene y
+            cuándo se decide. Un documento mal diseñado es tan caro como una tabla mal normalizada.
+            """
+        ),
+        question_cell(
+            2,
+            "Las cuatro familias NoSQL",
+            "El equipo necesita responder rápido, en cualquier momento, una consulta que nadie anticipó: "
+            "«dame todas las noticias que mencionen esta entidad, sin importar la sección ni la fecha».",
+            "¿Qué familia se ajusta mejor a esa necesidad, según el intercambio que hizo cada una?",
+            [
+                "Clave-valor, porque es la más rápida de todas.",
+                "Columnar, porque reparte los datos entre varias máquinas.",
+                "Documental, porque permite consultar por el contenido de los documentos sin haber anticipado la consulta.",
+                "Grafos, porque una entidad y una noticia se pueden conectar.",
+            ],
+            2,
+            [
+                "Clave-valor es rapidísima, pero solo si ya sabes la llave. No puede responder «búscame las que "
+                "mencionen X» sin recorrerlo todo: renunció justamente a consultar por contenido.",
+                "Columnar reparte muy bien, pero su intercambio es el contrario del que necesitamos: rinde cuando la "
+                "consulta se anticipó al diseñar la llave de partición. Una consulta imprevista es su punto débil, y "
+                "lo vamos a comprobar en la sesión 4.",
+                "Correcto. La familia documental conserva la capacidad de filtrar por cualquier campo del documento, "
+                "incluso dentro de arreglos y estructuras anidadas, sin haber definido esa consulta de antemano.",
+                "Un grafo sería excelente si la pregunta fuera sobre *cadenas* de relaciones —qué proveedores comparten "
+                "dos entidades, por ejemplo—. Esa pregunta llega en la sesión 6. Para «filtrar por contenido», el grafo "
+                "no aporta su ventaja.",
+            ],
+        ),
+        md(
+            """
+            ---
+            # 3. Cómo se ve un documento por dentro
+
+            De las cuatro familias, la documental es la que más se parece a lo que ya tienes en la cabeza: un
+            documento es lo que llamarías **la ficha completa** de algo. Abramos una.
+
+            ## Primero, dos ejemplos pequeños de otros sectores
+
+            Antes del caso grande, mira la misma idea en dos terrenos que conoces.
+
+            **Un registro clínico.** Un paciente tiene *un* documento con sus datos y *una lista* de atenciones.
+            Cada atención tiene su propia forma: una consulta trae diagnóstico, un examen trae resultado y unidad,
+            una hospitalización trae fecha de egreso. En una tabla, cada tipo de atención sería una tabla aparte.
+
+            ```json
+            {
+              "_id": "PAC-1042",
+              "nombre": "María R.",
+              "atenciones": [
+                {"tipo": "consulta",  "fecha": "2026-03-02", "diagnostico": "J06.9"},
+                {"tipo": "examen",    "fecha": "2026-03-05", "prueba": "hemograma", "valor": 13.2, "unidad": "g/dL"},
+                {"tipo": "urgencias", "fecha": "2026-04-11", "triage": 2, "egreso": "2026-04-12"}
+              ]
+            }
+            ```
+
+            **Una transacción financiera.** El monto y la fecha están en todas; pero una transferencia trae cuenta
+            destino, una compra trae comercio y categoría, y un retiro trae cajero. Mismos hechos, formas distintas.
+
+            **Qué comparten los dos ejemplos.** Una entidad principal, y dentro de ella una **lista de cosas que no
+            tienen todas la misma forma**. Eso es exactamente una noticia. Y exactamente lo que no cabe en una fila.
+
+            ## Anatomía de un documento real
+
+            Vamos a mirar una noticia completa.
+            """
+        ),
+        code(
+            """
+            # Miramos UNA noticia completa, con su estructura a la vista.
+            from pprint import pprint
+
+            n = noticias[0]
+
+            print("CAMPOS DE PRIMER NIVEL")
+            for campo, valor in n.items():
+                if isinstance(valor, list):
+                    print(f"  {campo:12s} -> lista con {len(valor)} elementos")
+                elif isinstance(valor, dict):
+                    print(f"  {campo:12s} -> objeto anidado")
+                else:
+                    print(f"  {campo:12s} -> {str(valor)[:60]}")
+
+            print()
+            print("DENTRO DEL ARREGLO 'etiquetas' (primeras 2):")
+            pprint(n["etiquetas"][:2])
+
+            print()
+            print("DENTRO DEL ARREGLO 'cuerpo' (primeros 4 bloques):")
+            for b in n["cuerpo"][:4]:
+                print("  ", b.get("tipo"), "->", [k for k in b if k != "tipo"])
+            """
+        ),
+        md(
+            """
+            ### Interpretación docente — leer un documento
+
+            **Cómo se lee.** Hay tres niveles a la vista. Campos simples (`titulo`, `seccion`, `premium`). Arreglos
+            de objetos (`etiquetas`, donde cada etiqueta es a su vez un objeto con `id`, `nombre` y `slug`). Y un
+            arreglo heterogéneo (`cuerpo`), donde cada bloque tiene **claves distintas según su `tipo`**.
+
+            **Qué nos dice.** Un documento no es "una fila con más campos": es una estructura de árbol. Y guarda
+            junto lo que se consulta junto. Si siempre vas a leer la noticia con sus etiquetas, tenerlas adentro
+            evita un JOIN que en una base relacional pagarías cada vez.
+
+            **Qué no podemos concluir.** Que anidar sea siempre mejor. Un arreglo que crece sin límite se vuelve un
+            problema serio, y es la primera advertencia de diseño de la sesión 4.
+
+            ### Vocabulario mínimo (para los que nunca han usado una base de datos)
+
+            | Palabra | Qué es | Equivalente que ya conoces |
+            |---|---|---|
+            | base de datos | el contenedor mayor | el archivo de Excel |
+            | colección | un conjunto de documentos del mismo tipo | una hoja del archivo |
+            | documento | un registro completo | una fila, pero que puede tener árbol adentro |
+            | campo | un dato dentro del documento | una celda con su encabezado |
+            | `_id` | identificador único, obligatorio | la llave primaria |
+            | BSON | el formato binario en que MongoDB guarda el JSON | — |
+
+            ### Equivalencia entre SQL y MongoDB
+
+            | Concepto en SQL | En MongoDB |
+            |---|---|
+            | tabla | colección |
+            | fila | documento |
+            | columna | campo |
+            | llave primaria | `_id` |
+            | `SELECT ... WHERE` | `find(filtro, proyección)` |
+            | `GROUP BY` | etapa `$group` de una agregación |
+            | esquema declarado al crear la tabla | esquema decidido al diseñar el documento |
+
+            > La fila que falta en esta tabla es `JOIN`. La vemos en la sesión 4, cuando tengamos dos colecciones
+            > que de verdad haya que cruzar. Hoy no la necesitamos.
+
+            > **Esto entra en el quiz de hoy.**
+            """
+        ),
+        question_cell(
+            3,
+            "Anatomía de un documento",
+            "En el arreglo `cuerpo` de una noticia, un bloque de tipo `paragraph` tiene la clave `texto`, "
+            "mientras que un bloque de tipo `related_article` tiene un objeto anidado con otras claves.",
+            "¿Qué característica del modelo documental hace posible eso, y qué obligaría a hacer una tabla?",
+            [
+                "Que el motor no valida nada; una tabla obligaría a limpiar los bloques antes de guardarlos.",
+                "Que cada documento puede tener su propia estructura interna; una tabla obligaría a una columna por cada campo de cada tipo de bloque, casi todas vacías.",
+                "Que MongoDB convierte todo a texto; una tabla obligaría a usar el tipo VARCHAR.",
+                "Que los arreglos están prohibidos en SQL; una tabla obligaría a usar otro motor.",
+            ],
+            1,
+            [
+                "El motor sí puede validar si tú se lo pides (hay validación de esquema en MongoDB). Y el problema de "
+                "la tabla no se resuelve limpiando: los bloques son legítimamente distintos entre sí.",
+                "Correcto. La estructura la decide el documento, no el motor. Con 19 tipos de bloque, cada uno con sus "
+                "propias claves, la tabla necesitaría la unión de todas esas claves como columnas, y cada fila dejaría "
+                "vacías las que no le corresponden. Es el mismo costo que ya medimos en SECOP, multiplicado.",
+                "MongoDB conserva los tipos: números, booleanos, fechas y objetos siguen siendo lo que son. No convierte todo a texto.",
+                "Los arreglos no están prohibidos en SQL —varios motores tienen tipos de arreglo y JSON—. El punto no es "
+                "la prohibición sino el costo: el modelo relacional te empuja a normalizar en tablas separadas.",
+            ],
+        ),
+        md(
+            """
+            ---
+            # 4. Y cuando no cabe en un servidor
+
+            En el minuto 22 quedó una pregunta colgada: nuestras 987 noticias salieron de 57 844 artículos, de un solo
+            periódico y ocho meses. Aunque arreglemos la forma, ¿dónde guardamos eso?
+
+            Hay dos respuestas, y hacen cosas distintas.
+
+            ## Fragmentar (*sharding*): repartir
+
+            Los documentos se **reparten** entre varias máquinas según una llave. Las noticias de enero a una, las
+            de febrero a otra. Ninguna máquina tiene todo; entre todas tienen el total.
+
+            - **Resuelve:** que el volumen no cabe, y que las escrituras saturan un solo servidor.
+            - **Cuesta:** una consulta que no usa la llave de reparto tiene que preguntarle a todas las máquinas.
+
+            ## Replicar: copiar
+
+            El mismo dato se **copia** en varias máquinas. Las tres tienen lo mismo.
+
+            - **Resuelve:** que si una máquina se apaga, el servicio siga respondiendo; y que las lecturas se repartan.
+            - **Cuesta:** mantener las copias de acuerdo. Y ahí aparece el problema del bloque siguiente.
+
+            ```
+                 FRAGMENTAR (sharding)                    REPLICAR
+            ┌────────┐ ┌────────┐ ┌────────┐      ┌────────┐ ┌────────┐ ┌────────┐
+            │ ene-abr│ │ may-ago│ │ sep-dic│      │  TODO  │ │  TODO  │ │  TODO  │
+            └────────┘ └────────┘ └────────┘      └────────┘ └────────┘ └────────┘
+              cada una tiene UNA PARTE              cada una tiene EL TOTAL
+              → resuelve tamaño                     → resuelve caídas y lecturas
+            ```
+
+            **Cómo leer el dibujo.** Son ejes independientes: un sistema real fragmenta *y* replica cada fragmento.
+            Lo que hay que retener es que **fragmentar responde a "no cabe" y replicar responde a "no se puede caer"**.
+
+            **Error común.** Confundirlos. "Tengo tres servidores" no dice nada por sí solo: hay que preguntar si
+            cada uno tiene una parte o si cada uno tiene una copia.
+            """
+        ),
+        md(
+            """
+            ---
+            # 5. Qué se cede al tener copias
+
+            Tenemos el dato repartido y el dato copiado. **Las copias resuelven un problema y crean otro**, y el
+            otro es el que le importa a Laura.
+
+            ## La situación, con el caso de hoy
+
+            Mientras nosotros hablábamos, El Tiempo publicó una noticia nueva. Entró al servidor central a las
+            10:00. Hay tres copias: la central y dos réplicas.
+
+            ```
+            10:00:00,0   central     noticias = 987   (entra la noticia nueva)
+            10:00:00,0   réplica A   noticias = 986
+            10:00:00,0   réplica B   noticias = 986
+            10:00:00,4   réplica A   noticias = 987
+            10:00:02,0   réplica B   noticias = 987
+            ```
+
+            **Señala la fila donde el sistema está mal.**
+
+            No hay ninguna. En cada instante, cada copia dice algo que **fue verdad**. Si Laura consulta a las
+            10:00:01 y le toca la réplica lenta, ve 986. Consulta dos segundos después y ve 987. No hubo error,
+            no se perdió nada, nadie hizo nada mal.
+
+            Eso es **consistencia eventual**: si dejas de escribir, todas las copias van a terminar diciendo lo
+            mismo. No te dice cuándo.
+
+            > **La frase que hay que llevarse:** la consistencia eventual no te da un dato falso; **te da un dato que
+            > fue verdad hace un momento.**
+
+            ## ACID y BASE, en lenguaje de negocio
+
+            | | ACID | BASE |
+            |---|---|---|
+            | promete | cada lectura ve el último estado confirmado | todas las copias coincidirán, sin decir cuándo |
+            | prioriza | consistencia | disponibilidad |
+            | típico de | bancos, inventarios, nómina | catálogos, medios, telemetría, redes sociales |
+            | cuesta | disponibilidad bajo fallas y escala de escritura | tolerar respuestas desactualizadas |
+
+            ## La pregunta que hay que hacerle al negocio
+
+            No es *"¿quiero consistencia?"*, porque a eso todo el mundo dice que sí. Es:
+
+            > **¿Cuántos segundos de desactualización cambian la decisión?**
+
+            Para Laura, priorizando qué revisar la próxima semana, dos segundos no cambian absolutamente nada. Para
+            el saldo de una cuenta después de un retiro, dos segundos son un sobregiro. **Es la misma tecnología. Lo
+            que cambia es la decisión que está colgando de ella.**
+
+            Si trabajas en salud, ya viviste esto: el resultado de laboratorio está cargado, pero el médico de
+            urgencias todavía no lo ve.
+
+            ## Dos errores frecuentes
+
+            1. *"Consistencia eventual significa que el dato puede estar mal o perderse."* No. No se pierde ni se
+               inventa nada. Lo que varía es **qué tan viejo** es el dato.
+            2. *"Esto es un tema de NoSQL."* Tampoco. Aparece **en el momento en que hay más de una copia**, y hay
+               más de una copia porque no queremos que una máquina apagada apague el servicio. Un motor relacional
+               con réplica de lectura tiene exactamente el mismo fenómeno.
+
+            > Existe un resultado clásico llamado **CAP** que formaliza este intercambio bajo fallas de red. Lo
+            > nombramos aquí y lo trabajamos con un clúster real en la sesión 4. No entra en el quiz de hoy.
+            """
+        ),
+        question_cell(
+            4,
+            "Consistencia eventual",
+            "El tablero de Laura lee desde una réplica. Un contrato se modificó hace 1,5 segundos en la copia "
+            "principal y la réplica todavía no se enteró. Laura consulta justo ahora.",
+            "¿Qué está pasando y qué debería preocuparle al equipo?",
+            [
+                "Hay un error de integridad: el sistema perdió la modificación y hay que restaurar desde una copia de seguridad.",
+                "Laura ve un valor que fue verdad hace un momento; lo que hay que preguntarse es si 1,5 segundos de desfase cambian su decisión.",
+                "Es un problema exclusivo de MongoDB que se evita usando una base relacional.",
+                "El sistema está mal configurado: con consistencia eventual las copias nunca llegan a coincidir.",
+            ],
+            1,
+            [
+                "No se perdió nada. La modificación está confirmada y durable en la copia principal, y va en camino a "
+                "las réplicas. Restaurar una copia de seguridad aquí sería destruir información buena.",
+                "Correcto. Y la segunda mitad es la que convierte esto en una decisión profesional: para priorizar "
+                "revisiones de la próxima semana, 1,5 segundos son irrelevantes. Para un saldo bancario después de un "
+                "retiro, no lo son. La pregunta correcta no es «¿quiero consistencia?» sino «¿cuántos segundos cambian "
+                "la decisión?».",
+                "No es exclusivo de MongoDB. Cualquier sistema con más de una copia —incluido un motor relacional con "
+                "réplicas de lectura— tiene el mismo fenómeno. Aparece con las copias, no con la tecnología.",
+                "«Eventual» significa justamente que sí llegan a coincidir; lo que no se garantiza es en cuánto tiempo. "
+                "Que no haya un plazo prometido no es lo mismo que no haya convergencia.",
+            ],
+        ),
+        md(
+            """
+            ---
+            # 6. Cómo le pregunto algo a la base
+
+            Bajemos de la nube al teclado. Todo lo anterior no sirve de nada si no sabemos preguntarle algo a la
+            base. En SQL escribirías `SELECT` y `WHERE`. Aquí se escribe distinto y se lee igual. **Voy a poner las
+            dos, siempre, una al lado de la otra.**
+
+            ## Traer documentos con un filtro
+
+            ```sql
+            -- SQL
+            SELECT titulo, seccion
+            FROM noticias
+            WHERE seccion = 'salud';
+            ```
+
+            ```python
+            # MongoDB
+            db.noticias.find(
+                {"seccion": "salud"},          # filtro   -> el WHERE
+                {"titulo": 1, "seccion": 1}    # proyección -> el SELECT
+            )
+            ```
+
+            **Lo que cambia:** en SQL el `SELECT` va primero y el `WHERE` después. En MongoDB el **filtro va
+            primero** y la **proyección segunda**. Es el mismo par de ideas en orden inverso.
+
+            ## Comparar números
+
+            ```sql
+            SELECT titulo FROM noticias WHERE n_palabras > 800;
+            ```
+
+            ```python
+            db.noticias.find({"n_palabras": {"$gt": 800}}, {"titulo": 1})
+            ```
+
+            | Operador | Significa | En SQL |
+            |---|---|---|
+            | `$gt` / `$gte` | mayor / mayor o igual | `>` / `>=` |
+            | `$lt` / `$lte` | menor / menor o igual | `<` / `<=` |
+            | `$ne` | distinto de | `<>` |
+            | `$in` | está en la lista | `IN (...)` |
+            | `$exists` | el campo existe en el documento | *no tiene equivalente directo* |
+            | `$regex` | el texto contiene un patrón | `LIKE '%...%'` |
+
+            > `$exists` no tiene equivalente en SQL, y por una razón de fondo: **en una tabla la columna siempre
+            > existe**, aunque esté vacía. En un documento, el campo puede simplemente no estar. Es la diferencia
+            > entre "no tiene valor" y "no tiene el campo".
+
+            ## Varias condiciones a la vez
+
+            ```sql
+            SELECT titulo FROM noticias WHERE seccion = 'bogota' AND n_palabras > 500;
+            ```
+
+            ```python
+            db.noticias.find({"seccion": "bogota", "n_palabras": {"$gt": 500}})
+            ```
+
+            **Regla que evita el primer error de todos:** varias claves dentro del mismo diccionario significan
+            **AND** implícito. Para un **OR** hay que escribirlo: `{"$or": [ {...}, {...} ]}`.
+
+            ## Entrar en lo anidado: notación de punto
+
+            Aquí no hay SQL equivalente, porque no hay nada anidado en una tabla.
+
+            ```python
+            # noticias que tengan al menos una etiqueta cuyo slug sea exactamente "contraloria"
+            db.noticias.find({"etiquetas.slug": "contraloria"})
+            ```
+
+            **Lo importante:** `etiquetas` es una **lista** de objetos, y MongoDB busca *dentro de cada elemento*
+            de la lista sin que tengas que decirlo. Esa sola línea es lo que en una base relacional exigiría una
+            tabla `noticia_etiqueta` y un JOIN.
+
+            ### Mini ficha: `find(filtro, proyección)`
+
+            - **Para qué sirve:** traer los documentos de una colección que cumplen una condición.
+            - **Parámetros usados:** `filtro`, un diccionario con las condiciones; `proyección`, un diccionario que
+              indica con `1` los campos a mostrar y con `0` los que no.
+            - **Qué devuelve:** un cursor, no una lista. Se recorre con un `for` o se convierte con `list(...)`.
+            - **Cómo interpretar la salida:** cada elemento es un documento completo, salvo que hayas proyectado.
+            - **Error frecuente:** olvidar que `_id` se incluye siempre, aunque no lo pidas. Para quitarlo: `{"_id": 0}`.
+            """
+        ),
+        question_cell(
+            5,
+            "Traducir entre SQL y MongoDB",
+            "Necesitas las noticias de la sección 'bogota' que además tengan más de 500 palabras, y quieres ver "
+            "solamente el título.",
+            "¿Cuál de estas consultas de MongoDB corresponde a "
+            "`SELECT titulo FROM noticias WHERE seccion='bogota' AND n_palabras>500`?",
+            [
+                'find({"seccion": "bogota", "n_palabras": {"$gt": 500}}, {"titulo": 1, "_id": 0})',
+                'find({"titulo": 1}, {"seccion": "bogota", "n_palabras": {"$gt": 500}})',
+                'find({"$or": [{"seccion": "bogota"}, {"n_palabras": {"$gt": 500}}]})',
+                'find({"seccion": "bogota"}).find({"n_palabras": 500})',
+            ],
+            0,
+            [
+                "Correcto. El filtro va primero y la proyección segunda —al revés que en SQL—, las dos claves dentro "
+                "del mismo diccionario significan AND, y `_id: 0` es lo que evita que aparezca el identificador que no pediste.",
+                "Están invertidos: eso filtraría por «documentos cuyo campo titulo valga 1» y proyectaría con la "
+                "condición. Es el error más común al venir de SQL, donde el SELECT se escribe primero.",
+                "`$or` devolvería también las noticias largas de cualquier otra sección, y las de Bogotá de cualquier "
+                "longitud. El enunciado pide las dos condiciones a la vez, que es el AND implícito.",
+                "`find()` no se encadena así, y `n_palabras: 500` pediría exactamente 500 palabras, no más de 500. "
+                "Para «más de» se necesita `$gt`.",
+            ],
+        ),
+        md(
+            """
+            ---
+            # Puente al laboratorio
+
+            En los próximos 85 minutos vas a hacer esto, en este orden:
+
+            1. responder el quiz de conceptos básicos (evaluable) **mientras el motor se instala solo**;
+            2. cargar las 987 noticias de contratación en tu propia base de datos;
+            3. escribir tres consultas tuyas;
+            4. marcar una noticia como revisada;
+            5. contar, por sección, cuántas noticias hay — y decir qué **no** permite concluir ese conteo;
+            6. cruzar las noticias con las entidades de SECOP y descubrir por qué el cruce fácil miente;
+            7. cerrar en GitHub el Pull Request que dejamos abierto la semana pasada.
+
+            ## El método, antes de tocar el teclado
+
+            Cada vez que te sientes a consultar datos, responde estas seis preguntas en este orden. Sirve hoy con
+            MongoDB y va a seguir sirviendo con Spark y con Cassandra.
+
+            1. **¿Qué pregunta tengo?** En una frase, y en lenguaje de negocio.
+            2. **¿Qué documentos necesito?** Cuáles entran y cuáles sobran.
+            3. **¿Por qué campos filtro y con qué operadores?**
+            4. **¿Qué campos proyecto?** Traer todo es cómodo y caro.
+            5. **¿Qué resumen responde mejor?** Un conteo, una suma, un promedio.
+            6. **¿Qué interpretación es válida y qué NO puedo concluir todavía?**
+
+            > **Antes del receso:** ejecuta ya la celda de arranque que viene enseguida. Va a seguir trabajando sola
+            > mientras descansas. Deja la pestaña abierta y no cierres la tapa del portátil: si al volver dice
+            > *reconectando*, vuelve a ejecutarla, tienes margen.
+            """
+        ),
+        md(
+            """
+            ---
+            # LABORATORIO — 85 minutos
+
+            ## Paso 0 · Arrancar el motor (ejecuta y sigue al quiz)
+
+            Esta celda **no está oculta a propósito**: si algo falla, tienes que poder leer qué pasó.
+
+            Levanta MongoDB dentro de este mismo Colab. No usa `apt` ni `systemctl`, y aquí está la razón, que vale
+            la pena entender: **Colab no arranca con systemd**, así que `sudo systemctl start mongod` —que es lo
+            que dicen casi todos los tutoriales— falla siempre. Descargamos el paquete oficial y lo ejecutamos
+            directamente.
+
+            Si algo sale mal, la celda **no se rompe**: cambia sola a `mongomock`, un MongoDB de mentiras que corre
+            en memoria y que alcanza para todo lo de hoy. Te va a decir cuál de los dos quedó activo.
+            """
+        ),
+        code(
+            """
+            # Paso 0 — levantar el motor. Ejecuta y pasa al quiz mientras trabaja.
+            import os, subprocess, sys, time, urllib.request
+
+            TGZ = "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2204-8.0.14.tgz"
+            BASE, DBPATH, LOG = "/content/mongo", "/content/mongo-data", "/content/mongod.log"
+            motor, client = None, None
+
+            def paso(texto):
+                print(texto, flush=True)
+
+            try:
+                # MongoDB 5 y superiores exigen instrucciones AVX en el procesador.
+                with open("/proc/cpuinfo") as f:
+                    if "avx" not in f.read():
+                        raise RuntimeError("Este procesador no tiene AVX; MongoDB 8 no puede arrancar aqui.")
+
+                if not os.path.exists(f"{BASE}/bin/mongod"):
+                    paso("1/4 Descargando MongoDB (aprox. 100 MB, desde la red de Google)...")
+                    urllib.request.urlretrieve(TGZ, "/content/mongo.tgz")
+                    paso("2/4 Descomprimiendo...")
+                    os.makedirs(BASE, exist_ok=True)
+                    subprocess.run(
+                        ["tar", "-xzf", "/content/mongo.tgz", "-C", BASE, "--strip-components=1"],
+                        check=True,
+                    )
+                else:
+                    paso("1/4 y 2/4 ya estaban hechos; reutilizamos la instalacion.")
+
+                paso("3/4 Arrancando el servidor...")
+                os.makedirs(DBPATH, exist_ok=True)
+                subprocess.run(
+                    [f"{BASE}/bin/mongod", "--dbpath", DBPATH, "--logpath", LOG,
+                     "--bind_ip", "127.0.0.1", "--port", "27017", "--fork"],
+                    check=True, capture_output=True,
+                )
+
+                paso("4/4 Conectando desde Python...")
+                subprocess.run([sys.executable, "-m", "pip", "install", "-q", "pymongo"], check=False)
+                from pymongo import MongoClient
+                client = MongoClient("mongodb://127.0.0.1:27017", serverSelectionTimeoutMS=8000)
+                client.admin.command("ping")
+                motor = "MongoDB " + client.server_info()["version"] + " (real, dentro de este Colab)"
+
+            except Exception as error:
+                print()
+                print("No se pudo levantar MongoDB real. Motivo:")
+                print("   ", str(error)[:300])
+                print("Pasamos al respaldo. El laboratorio continua igual.")
+                subprocess.run([sys.executable, "-m", "pip", "install", "-q", "mongomock"], check=False)
+                import mongomock
+                client = mongomock.MongoClient()
+                motor = "mongomock (respaldo en memoria)"
+
+            db = client["compras_claras"]
+            print()
+            print("=" * 60)
+            print("MOTOR ACTIVO:", motor)
+            print("=" * 60)
+            """
+        ),
+        md(
+            """
+            ### Cómo leer lo que acaba de pasar
+
+            - Si dice **MongoDB 8.x (real...)**, estás hablando con un servidor de verdad, con su proceso, su
+              archivo de datos y su log. Es lo mismo que correría una empresa, en pequeño.
+            - Si dice **mongomock (respaldo...)**, el motor real no arrancó y estás usando una imitación en memoria.
+              **Todo el laboratorio funciona igual.** Anótalo, porque en la sesión 4 vas a conectarte a un servidor
+              que no vive en tu pestaña.
+            - En los dos casos, la variable se llama `client` y la base se llama `db`. El resto del cuaderno no
+              cambia ni una línea. **Que el código no dependa de dónde corre la base es una idea de ingeniería, no
+              un truco.**
+
+            **Advertencia sobre el reinicio.** Si el runtime de Colab se desconecta, el servidor muere y tus
+            documentos con él. Por eso todas las celdas de carga se pueden volver a ejecutar sin duplicar nada.
+
+            ## Paso 1 · Quiz de conceptos básicos de Big Data (evaluable)
+
+            Diez minutos, individual. Evalúa las **sesiones 1 y 2**: las V, tipos de dato, BI tradicional frente a
+            Big Data, ciclo analítico y SQL frente a NoSQL. **No pregunta nada de MongoDB ni de hoy.**
+
+            > **Enlace del formulario:** lo comparte el docente al inicio del bloque. Inicia sesión con tu correo
+            > institucional. Una sola respuesta por persona.
+
+            Cuando termines, el motor de arriba ya debería estar listo.
+            """
+        ),
+        md(
+            """
+            ## Paso 2 · Cargar las noticias en tu base
+
+            Ahora sí, las 987 noticias pasan de ser una lista de Python a ser **documentos dentro de una base de
+            datos**. La diferencia importa: en la lista solo puedes recorrer; en la base puedes consultar.
+            """
+        ),
+        code(
+            """
+            # Paso 2 — cargar. Se puede volver a ejecutar sin duplicar: primero borra, luego inserta.
+            coleccion = db["noticias"]
+
+            coleccion.delete_many({})          # idempotencia: dejamos la coleccion vacia
+            resultado = coleccion.insert_many(noticias)
+
+            print("Documentos insertados:", len(resultado.inserted_ids))
+            print("Documentos en la coleccion:", coleccion.count_documents({}))
+
+            # Leemos UNO para confirmar que llego completo.
+            uno = coleccion.find_one({}, {"titulo": 1, "seccion": 1, "n_palabras": 1})
+            print()
+            print("Un documento cualquiera:")
+            print("  ", uno)
+            """
+        ),
+        md(
+            """
+            ### Interpretación docente — el `_id` y la idempotencia
+
+            **Cómo se lee.** El conteo insertado y el conteo de la colección coinciden: nada se perdió ni se duplicó.
+
+            **Qué observar en la salida.** Aparece un campo `_id` que tú no escribiste... salvo que sí lo escribiste:
+            nuestras noticias ya traían `_id` con el número que El Tiempo usa para identificar el artículo. Cuando el
+            documento no trae `_id`, MongoDB genera uno. **Ese campo es obligatorio y único: es la llave primaria.**
+
+            **Por qué el `delete_many({})` antes.** Porque el runtime se puede reiniciar y vas a volver a ejecutar
+            esta celda. Sin él, la segunda ejecución fallaría con error de `_id` duplicado o te dejaría 1 974
+            documentos. Una carga que se puede repetir sin cambiar el resultado se llama **idempotente**, y es una
+            propiedad que vas a agradecer todo el semestre.
+
+            > **Esto no es un ejemplo inventado.** Al construir esta colección, la primera versión traía 991
+            > documentos y la inserción **falló** con `E11000 Duplicate Key Error`. La causa: un artículo que se
+            > actualiza aparece listado en el sitemap de varios meses, así que se descargó cuatro veces. La regla
+            > del `_id` único **encontró un error de recolección que nadie había notado**. Por eso el archivo que
+            > acabas de cargar tiene 987 y no 991. Una restricción de la base no es un estorbo: es un control de
+            > calidad que trabaja gratis.
+
+            ### Mini ficha: `insert_many(lista)`
+
+            - **Para qué sirve:** insertar muchos documentos en una sola operación.
+            - **Parámetro usado:** una lista de diccionarios.
+            - **Qué devuelve:** un resultado con `inserted_ids`, la lista de identificadores creados.
+            - **Cómo interpretar la salida:** si la longitud coincide con lo que enviaste, entró todo.
+            - **Error frecuente:** insertar en un bucle con `insert_one`. Son N viajes al servidor en vez de uno. En
+              la sesión 4, con un servidor en la nube, esa diferencia deja de ser estética: el plan gratuito
+              **estrangula a las 100 operaciones por segundo**.
+            """
+        ),
+        md(
+            """
+            ## Paso 3 · Tres consultas tuyas
+
+            Las dos primeras las escribes tú desde cero. La tercera viene con el patrón ya escrito para que solo
+            cambies la palabra buscada.
+
+            **Recuerda el método:** ¿qué pregunta tengo? ¿por qué campo filtro? ¿qué proyecto? ¿qué concluyo?
+            """
+        ),
+        code(
+            """
+            # 3.1 — ESCRÍBELA TÚ.
+            # Pregunta: ¿que noticias hay de una seccion que te interese?
+            # Pista: primero mira que secciones existen.
+            print("Secciones disponibles:", sorted(coleccion.distinct("seccion"))[:15], "...")
+
+            # Completa el filtro y la proyeccion:
+            # for n in coleccion.find({"seccion": "____"}, {"titulo": 1, "_id": 0}):
+            #     print(n["titulo"][:80])
+            """
+        ),
+        code(
+            """
+            # 3.2 — ESCRÍBELA TÚ.
+            # Pregunta: ¿cuales son las noticias mas largas? (mas de 800 palabras)
+            # Recuerda: para "mayor que" se usa {"$gt": valor}
+
+            # for n in coleccion.find({"n_palabras": {"____": 800}}, {"titulo": 1, "n_palabras": 1, "_id": 0}):
+            #     print(n["n_palabras"], "|", n["titulo"][:70])
+            """
+        ),
+        code(
+            """
+            # 3.3 — Esta viene escrita. Cambia SOLO la palabra que buscas.
+            # Pregunta: ¿que noticias mencionan un tema en el titulo?
+            PALABRA = "salud"        # <--- cambia esto
+
+            # $regex busca un patron dentro del texto; $options "i" ignora mayusculas.
+            encontradas = list(coleccion.find(
+                {"titulo": {"$regex": PALABRA, "$options": "i"}},
+                {"titulo": 1, "seccion": 1, "_id": 0},
+            ))
+
+            print(f"Noticias con '{PALABRA}' en el titulo: {len(encontradas)}")
+            for n in encontradas[:5]:
+                print("  -", n["seccion"], "|", n["titulo"][:70])
+            """
+        ),
+        md(
+            """
+            ### Mini ficha: `$regex`
+
+            - **Para qué sirve:** buscar un patrón de texto dentro de un campo. Es el pariente de `LIKE '%...%'`.
+            - **Parámetros usados:** el patrón, y `$options: "i"` para ignorar mayúsculas y minúsculas.
+            - **Qué devuelve:** los documentos cuyo campo contiene ese patrón **en cualquier posición**.
+            - **Advertencia que vas a necesitar en el paso 5:** busca **subcadenas**, no palabras completas. Buscar
+              `"sena"` encuentra también `señaló`, `senador` y `enseñanza`. Guarda esta frase; en veinte minutos va
+              a explicar un resultado que parecerá bueno y no lo es.
+            """
+        ),
+        question_cell(
+            6,
+            "Consultar dentro de un arreglo",
+            "Cada noticia tiene un arreglo `etiquetas`, y cada etiqueta es un objeto con `nombre` y `slug`. "
+            "Quieres las noticias que tengan al menos una etiqueta cuyo slug sea exactamente 'contraloria'.",
+            "¿Qué consulta lo resuelve, y por qué funciona?",
+            [
+                'find({"etiquetas": "contraloria"}) — porque MongoDB busca en todo el documento.',
+                'find({"etiquetas.slug": "contraloria"}) — porque la notación de punto entra en cada elemento del arreglo automáticamente.',
+                'Hay que traer todas las noticias y filtrarlas después con un for en Python.',
+                'Hay que crear una colección aparte de etiquetas y hacer un JOIN.',
+            ],
+            1,
+            [
+                "Eso buscaría una etiqueta que fuera exactamente el texto «contraloria», pero las etiquetas son objetos, "
+                "no textos. No encontraría nada.",
+                "Correcto. `etiquetas.slug` recorre cada objeto dentro del arreglo y compara su campo `slug`. Es la "
+                "diferencia central con una tabla: sin JOIN, sin tabla intermedia y sin recorrer nada a mano.",
+                "Funcionaría, pero traería los 126 documentos completos a Python para descartar la mayoría. Con 126 no "
+                "se nota; con 4 millones sí. La regla es filtrar donde están los datos, no donde está tu código.",
+                "Esa es exactamente la solución relacional, y es la que el modelo documental te permite evitar cuando "
+                "las etiquetas solo se consultan junto con su noticia.",
+            ],
+        ),
+        md(
+            """
+            ## Paso 4 · Marcar una noticia como revisada
+
+            En la sesión 2 dijimos que el ciclo analítico **termina en una acción humana que produce nueva
+            evidencia**. Esto es eso: cuando alguien del equipo revisa una noticia, ese hecho tiene que quedar
+            registrado en el dato.
+            """
+        ),
+        code(
+            """
+            # Paso 4 — la accion humana vuelve al dato.
+            from datetime import datetime, timezone
+
+            objetivo = coleccion.find_one({}, {"_id": 1, "titulo": 1})
+            print("Antes :", coleccion.find_one({"_id": objetivo["_id"]}, {"revision": 1, "_id": 0}))
+
+            cambio = coleccion.update_one(
+                {"_id": objetivo["_id"]},
+                {"$set": {"revision": {
+                    "estado": "revisada",
+                    "por": "equipo_compras_claras",
+                    "fecha": datetime.now(timezone.utc).isoformat(),
+                }}},
+            )
+
+            print("Coincidieron:", cambio.matched_count, "| Modificados:", cambio.modified_count)
+            print("Despues:", coleccion.find_one({"_id": objetivo["_id"]}, {"revision": 1, "_id": 0}))
+            """
+        ),
+        md(
+            """
+            ### Interpretación docente — `$set` y el campo que no existía
+
+            **Cómo se lee.** `matched_count` dice cuántos documentos cumplían el filtro; `modified_count`, cuántos
+            cambiaron de verdad. Si vuelves a ejecutar la celda con los mismos valores, `matched` sigue en 1 y
+            `modified` puede bajar a 0: coincidió, pero no había nada nuevo que escribir.
+
+            **Lo importante, y es el punto de toda la sesión:** el campo `revision` **no existía en ningún
+            documento** y ahora existe en uno solo. No hubo que alterar la colección, ni avisarle al motor, ni
+            migrar los otros 125 documentos. En una tabla esto habría sido un `ALTER TABLE` que afecta a todas las
+            filas y que en producción exige una ventana de mantenimiento.
+
+            **Qué no podemos concluir.** Que esto sea gratis. Ahora tienes documentos con `revision` y documentos
+            sin él, y **cualquier consulta futura tiene que decidir qué hacer con los que no lo tienen**. La
+            flexibilidad no elimina el trabajo de diseño: lo mueve de la base a tu cabeza.
+
+            ### Mini ficha: `update_one(filtro, cambio)`
+
+            - **Para qué sirve:** modificar el primer documento que cumple el filtro.
+            - **Parámetros usados:** el filtro, y un diccionario de operadores como `{"$set": {...}}`.
+            - **Qué devuelve:** un resultado con `matched_count` y `modified_count`.
+            - **Error frecuente y grave:** olvidar el `$set` y escribir `update_one(filtro, {"campo": valor})`.
+              Las versiones modernas lanzan error; en las antiguas **reemplazaba el documento entero** y se perdía
+              todo lo demás.
+            """
+        ),
+        md(
+            """
+            ## Paso 5 · La primera agregación
+
+            `find()` trae documentos. Pero Laura no necesita documentos: necesita **un resumen**. ¿En qué secciones
+            se concentra la cobertura de este mes?
+
+            Para eso existe el *aggregation pipeline*: una tubería de etapas donde la salida de una entra a la
+            siguiente. Es la misma idea de un `GROUP BY`, escrita por pasos.
+
+            ```sql
+            -- SQL
+            SELECT seccion, COUNT(*) AS n, AVG(n_palabras) AS promedio
+            FROM noticias
+            WHERE n_palabras > 0
+            GROUP BY seccion
+            ORDER BY n DESC
+            LIMIT 10;
+            ```
+            """
+        ),
+        code(
+            """
+            # Paso 5 — la misma consulta del SQL de arriba, etapa por etapa.
+            pipeline = [
+                {"$match": {"n_palabras": {"$gt": 0}}},                 # el WHERE
+                {"$group": {                                            # el GROUP BY
+                    "_id": "$seccion",
+                    "n": {"$sum": 1},
+                    "promedio_palabras": {"$avg": "$n_palabras"},
+                }},
+                {"$sort": {"n": -1}},                                   # el ORDER BY
+                {"$limit": 10},                                         # el LIMIT
+            ]
+
+            print(f"{'SECCION':32s} {'NOTICIAS':>9s} {'PALABRAS (prom.)':>17s}")
+            print("-" * 60)
+            for fila in coleccion.aggregate(pipeline):
+                print(f"{str(fila['_id'])[:32]:32s} {fila['n']:9d} {fila['promedio_palabras']:17.0f}")
+            """
+        ),
+        md(
+            """
+            ### Interpretación docente — leer la tabla, y sobre todo sus límites
+
+            **Cómo se lee.** Cada fila es una sección; `n` es cuántas noticias tiene y `promedio_palabras` qué tan
+            extensas son. `_id` en la salida no es un identificador: en `$group` es **el criterio de agrupación**,
+            y por eso vale el nombre de la sección.
+
+            **Qué nos dice.** La cobertura de contratación se concentra abrumadoramente en secciones judiciales y
+            de investigación, y esas noticias son notoriamente **más largas** que el promedio. Tiene sentido: un
+            reportaje de investigación sobre un contrato necesita más espacio que una nota breve.
+
+            **Qué NO permite concluir, y esto es lo importante de hoy.** Que la contratación "sea sobre todo un
+            asunto judicial". Nuestro filtro incluyó palabras como `corrupcion`, `contraloria`, `procuraduria` y
+            `peculado`, **así que el resultado estaba parcialmente decidido desde que elegimos las palabras**. Si
+            hubiéramos filtrado solo por `licitacion` y `adjudicacion`, la sección económica pesaría mucho más.
+
+            Y falta el denominador: no sabemos cuántos artículos publicó en total cada sección, así que no podemos
+            distinguir *una sección donde la contratación es tema frecuente* de *una sección que simplemente
+            publica mucho de todo*.
+
+            > **Lo que sí podemos afirmar:** "entre los artículos que nuestro filtro seleccionó, estas secciones
+            > aparecen más". **Lo que no:** "El Tiempo cubre la contratación principalmente desde lo judicial". La
+            > distancia entre esas dos frases es el trabajo profesional.
+
+            ## La historia del año
+
+            Como tenemos ocho meses, podemos hacer algo que con un solo mes no se podía: mirar la evolución.
+
+            ### Mini ficha auxiliar: `$substr`
+
+            - **Para qué sirve:** cortar un pedazo de un texto dentro de una etapa de agregación.
+            - **Parámetros usados:** el campo, la posición inicial (desde 0) y cuántos caracteres tomar.
+            - **Por qué aquí:** `publicado` es un texto como `2026-03-15T09:41:00-05:00`. Los primeros 7 caracteres
+              son `2026-03`, es decir el mes. Agrupamos por ese pedazo.
+            - **Advertencia honesta:** esto funciona porque la fecha viene como texto **en formato ISO**, donde el
+              orden alfabético coincide con el orden cronológico. Si las fechas estuvieran guardadas como
+              `15/03/2026`, este truco daría un resultado sin sentido. Guardar fechas como texto es cómodo y
+              frágil; en la sesión 4 las guardaremos como fechas de verdad.
+
+            ### Mini ficha: `aggregate(pipeline)`
+
+            - **Para qué sirve:** calcular resúmenes encadenando etapas.
+            - **Parámetro usado:** una lista de etapas, **y el orden importa**.
+            - **Qué devuelve:** un cursor con un documento por grupo.
+            - **Cómo interpretar la salida:** `_id` es el criterio de agrupación, no una llave.
+            - **Error frecuente:** poner `$match` después de `$group`. Funciona, pero agrupa todo primero y filtra
+              después: haces trabajo de más. **Filtra temprano, agrupa después.**
+            """
+        ),
+        code(
+            """
+            # ¿Como se distribuye la cobertura de contratacion a lo largo del ano?
+            # 'publicado' es un texto ISO: los primeros 7 caracteres son el mes.
+            por_mes = [
+                {"$group": {"_id": {"$substr": ["$publicado", 0, 7]}, "n": {"$sum": 1}}},
+                {"$sort": {"_id": 1}},
+            ]
+
+            print("MES      NOTICIAS")
+            print("-" * 34)
+            for fila in coleccion.aggregate(por_mes):
+                print(f"{fila['_id']}  {fila['n']:4d}  {'#' * (fila['n'] // 5)}")
+            """
+        ),
+        md(
+            """
+            ### Interpretación docente — el mes que se sale de la serie
+
+            **Cómo se lee.** Cada fila es un mes y las almohadillas son el conteo a escala.
+
+            **Qué nos dice.** La serie es bastante estable salvo dos cosas: **julio se dispara** y **agosto cae**.
+
+            **Qué NO permite concluir.** Que en julio hubiera más irregularidades. Hay al menos dos explicaciones
+            competidoras y con estos datos **no podemos separarlas**:
+
+            - puede que efectivamente hubiera más hechos noticiosos sobre contratación en julio;
+            - o puede que el periódico haya publicado más de todo ese mes, y contratación subiera con la marea.
+
+            Distinguirlas exige el denominador: cuántos artículos publicó el periódico cada mes. Ese dato **sí lo
+            tenemos** —está en el sitemap, son los 57 844— y aun así este análisis no lo usa. Anótalo: es la
+            primera cosa que arreglarías si esto fuera tu trabajo.
+
+            Y agosto tiene una explicación que no es un hallazgo: **el mes estaba a mitad de camino cuando
+            descargamos**, el 19 de agosto. Comparar un periodo incompleto con periodos completos es el error de
+            conteo más común que vas a encontrar en tu vida profesional, y aquí lo tienes servido en la última fila
+            de tu propia tabla.
+            """
+        ),
+        question_cell(
+            7,
+            "Interpretar una agregación",
+            "El conteo por sección muestra que las secciones judiciales encabezan la lista, en una selección de "
+            "987 artículos que se obtuvo filtrando 57 844 por palabras como 'contrato', 'corrupcion', "
+            "'contraloria' y 'peculado'.",
+            "¿Cuál es la afirmación defendible ante un jefe que va a tomar una decisión con esto?",
+            [
+                "El periódico cubre la contratación pública principalmente como un asunto judicial.",
+                "Entre los artículos que nuestro filtro seleccionó predominan los judiciales; como el filtro incluía palabras como 'corrupcion' y 'peculado', el resultado está parcialmente decidido por el filtro.",
+                "Hay más corrupción en contratación de la que se creía, por eso hay tantas noticias judiciales.",
+                "El resultado no sirve para nada porque la selección no es aleatoria.",
+            ],
+            1,
+            [
+                "Es el salto que hay que evitar. Nosotros elegimos las palabras del filtro, y varias de ellas son "
+                "judiciales. El resultado refleja esa elección tanto como refleja al periódico.",
+                "Correcto. Se afirma exactamente lo que el dato sostiene y se nombra la causa concreta del sesgo: el "
+                "filtro. Eso además indica el arreglo —repetir el ejercicio con un filtro solo de 'licitacion' y "
+                "'adjudicacion' y comparar—, que es lo que distingue un análisis de una opinión con tabla.",
+                "Este es el salto más peligroso de todos: pasa de «hay noticias» a «hay más corrupción». Una noticia "
+                "mide cobertura periodística, no cantidad de hechos. Puede haber más cobertura porque hay más "
+                "investigación, más interés o más acceso a fuentes.",
+                "Demasiado severo, y también es un error. El resultado sí sirve: describe con precisión lo que el "
+                "filtro seleccionó y señala qué habría que cambiar. Descartar evidencia parcial es tan poco riguroso "
+                "como sobreinterpretarla.",
+            ],
+        ),
+        md(
+            """
+            ## Paso 6 · Cruzar las dos fuentes, y descubrir por qué el cruce fácil miente
+
+            Volvamos a la necesidad de Laura: **¿qué entidades de contratación están apareciendo en la prensa?**
+
+            Tenemos las noticias en MongoDB y los contratos en una tabla. Vamos a cruzarlas por el nombre de la
+            entidad. Primero de la manera obvia.
+            """
+        ),
+        code(
+            """
+            # 6.1 — El cruce OBVIO: buscar el nombre corto de la entidad dentro del texto.
+            import unicodedata, re
+            from collections import Counter
+
+            def normalizar(texto):
+                '''Pasa a minusculas y quita tildes, para comparar sin sorpresas.'''
+                texto = unicodedata.normalize("NFKD", str(texto).lower())
+                return texto.encode("ascii", "ignore").decode()
+
+            # Armamos el texto completo de cada noticia (titulo + parrafos + etiquetas).
+            textos = {}
+            for n in coleccion.find({}, {"titulo": 1, "cuerpo": 1, "etiquetas": 1}):
+                partes = [n["titulo"]]
+                partes += [b.get("texto", "") for b in n["cuerpo"] if b.get("texto")]
+                partes += [t.get("nombre", "") for t in n.get("etiquetas", [])]
+                textos[n["_id"]] = normalizar(" ".join(partes))
+
+            claves = ["alcaldia", "gobernacion", "ministerio", "universidad", "hospital",
+                      "fiscalia", "contraloria", "icbf", "sena", "dian", "policia"]
+
+            print("CRUCE 1 — buscando la palabra como SUBCADENA (lo obvio):")
+            con_alguna = sum(1 for t in textos.values() if any(k in t for k in claves))
+            for k in claves:
+                hits = sum(1 for t in textos.values() if k in t)
+                print(f"  {k:14s} {hits:4d} noticias")
+            print(f"  {'AL MENOS UNA':14s} {con_alguna:4d} de {len(textos)} noticias")
+            """
+        ),
+        code(
+            """
+            # 6.2 — El MISMO cruce, exigiendo que sea una palabra completa.
+            print("CRUCE 2 — exigiendo PALABRA COMPLETA:")
+            con_alguna_ok = sum(
+                1 for t in textos.values()
+                if any(re.search(r"\\b" + k + r"\\b", t) for k in claves)
+            )
+            for k in claves:
+                hits = sum(1 for t in textos.values() if re.search(r"\\b" + k + r"\\b", t))
+                print(f"  {k:14s} {hits:4d} noticias")
+            print(f"  {'AL MENOS UNA':14s} {con_alguna_ok:4d} de {len(textos)} noticias")
+
+            print()
+            print(f"Cruce obvio    : {con_alguna} noticias")
+            print(f"Cruce correcto : {con_alguna_ok} noticias")
+            print(f"Diferencia     : {con_alguna - con_alguna_ok} noticias que NO decian lo que creiamos")
+            print()
+            print("¿De donde salio el exceso? Miremos que estaba contando de mas:")
+            for k in ["sena", "dian"]:
+                falsos = [m for t in textos.values() for m in re.findall(r"\\w*" + k + r"\\w*", t) if m != k]
+                print(f"  '{k}' aparecia dentro de:", Counter(falsos).most_common(5))
+            """
+        ),
+        md(
+            """
+            ### Interpretación docente — el resultado que parecía bueno
+
+            **Qué acaba de pasar.** El primer cruce encontró muchas más menciones que el segundo. Y si lo hubiéramos
+            entregado así, con una tabla bonita, nadie habría dudado.
+
+            **De dónde salía el exceso.** `"sena"` estaba contando `señaló`, `señala`, `senador`, `señales`.
+            `"dian"` estaba contando `mediante`, `estudiantes`, `diana`, `podían`. El buscador funcionaba
+            perfectamente: **buscaba subcadenas, que es lo que le pedimos.** El error no fue del código; fue nuestro,
+            al no preguntarnos qué significaba "mencionar una entidad".
+
+            **Por qué esto es lo más importante de la noche.** Recuerda la advertencia de la mini ficha de `$regex`
+            en el paso 3. Ahí te dijimos que buscaba subcadenas y no palabras. Veinte minutos después, esa línea
+            explica una tabla entera de resultados falsos. **La documentación te avisó y el resultado igual te
+            convenció.** Así se producen los informes equivocados: no por ignorancia, sino por no verificar lo que ya
+            sabíamos.
+
+            **Qué se lleva Laura de aquí.** Que una mención en prensa **no es evidencia de irregularidad**, y ni
+            siquiera es evidencia de mención hasta que definamos qué cuenta como mención. Sirve para ordenar una fila
+            de revisión, no para acusar a nadie.
+
+            **Qué no podemos concluir todavía.** Ni siquiera con el cruce correcto podemos decir que una entidad
+            "está en las noticias por sus contratos": la noticia puede hablar de otra cosa completamente. Cruzar por
+            nombre de entidad y cruzar por *tema contractual* son dos problemas distintos, y el segundo necesita
+            herramientas que veremos en la sesión 7 con búsqueda textual.
+            """
+        ),
+        code(
+            """
+            # 6.3 — Cruce por NOMBRE COMPLETO de entidad, contra las 9.111 entidades de SECOP.
+            # Este cruce ya esta calculado y versionado: hacerlo aqui tomaria varios minutos.
+            with urllib.request.urlopen("{cruce}") as r:
+                cruce = json.loads(r.read().decode("utf-8"))
+
+            print(f"Entidades de SECOP nombradas en alguna noticia: {len(cruce)}")
+            print()
+            print(f"{'ENTIDAD':46s} {'NOTICIAS':>8s} {'PROCESOS':>9s}")
+            print("-" * 66)
+            for fila in cruce[:12]:
+                print(f"{fila['entidad'][:46]:46s} {fila['noticias']:8d} {fila['procesos_en_secop']:9d}")
+            """.replace("{cruce}", DATOS_CRUCE)
+        ),
+        md(
+            """
+            ### Interpretación docente — y la trampa que casi nadie ve
+
+            **Cómo se lee.** De las 9 111 entidades que contratan en nuestra base de SECOP, **142** aparecen
+            nombradas completas en las noticias del año. La columna `NOTICIAS` dice en cuántas apareció; la columna
+            `PROCESOS` dice cuántos procesos de contratación tiene esa entidad en SECOP.
+
+            **Ahora mira la primera fila.** La **Procuraduría General de la Nación** encabeza con muchísima
+            diferencia: cerca de 195 noticias. Y tiene apenas 74 procesos en SECOP.
+
+            Si Laura ordenara su fila de revisión por esta tabla, **empezaría investigando a la Procuraduría**. Y
+            sería exactamente al revés: la Procuraduría aparece tanto en la prensa porque **es la entidad que
+            investiga a las demás**. Lo mismo pasa con la Contraloría de Bogotá y con Colombia Compra Eficiente,
+            que es la entidad que *administra el SECOP*.
+
+            **Esto es lo más importante que te llevas hoy.** El indicador no está mal calculado: está midiendo
+            *aparición en prensa*, y aparición en prensa mezcla al menos tres cosas distintas:
+
+            | Por qué una entidad sale en las noticias | Ejemplo en esta tabla |
+            |---|---|
+            | porque **investiga** a otros | Procuraduría, Contraloría |
+            | porque **regula o administra** el sistema | Colombia Compra Eficiente |
+            | porque **está siendo cuestionada** | Área Metropolitana del Valle de Aburrá |
+
+            Solo la tercera fila le sirve a Laura. Y **el dato, por sí solo, no distingue cuál es cuál.**
+
+            **Qué haría falta para arreglarlo.** Alguna señal del *papel* que juega la entidad en la noticia: si es
+            sujeto o si es autoridad. Eso ya no es contar palabras, es entender el texto — y aparece en la sesión 7
+            con búsqueda textual, y más adelante con análisis semántico.
+
+            **Qué tampoco podemos concluir.** Que las otras 8 969 entidades no salgan en prensa: pueden estar
+            nombradas con siglas, con nombre parcial o con su nombre popular. Nuestro cruce exacto es
+            **conservador**: prefiere perder menciones reales antes que inventar falsas. Esa preferencia es una
+            decisión de diseño y hay que declararla al entregar el resultado, no esconderla.
+
+            > **Esta sí es una necesidad de Big Data demostrable, no una excusa para usar una herramienta.** Hoy
+            > fueron 8 meses, un periódico y 987 noticias, y ya necesitamos cruzar dos fuentes de formas distintas.
+            > Con doce medios, cinco años, sinónimos y siglas, deja de caber en una máquina y en un solo formato.
+            > Ahí es donde el curso continúa.
+            """
+        ),
+        question_cell(
+            8,
+            "El cruce entre dos fuentes",
+            "Un compañero entrega la tabla del cruce por nombre completo y dice: «la Procuraduría es la entidad "
+            "que más aparece en noticias de contratación, hay que revisar sus contratos primero».",
+            "¿Cuál es la objeción más importante que hay que hacerle?",
+            [
+                "Que el cruce por nombre completo es demasiado conservador y pierde menciones con siglas.",
+                "Que aparecer en noticias de contratación mezcla al menos tres papeles distintos —investigar, regular y ser cuestionado—, y la Procuraduría encabeza por el primero, no por el tercero.",
+                "Que 987 noticias son muy pocas para ordenar una fila de revisión.",
+                "Que debió usar palabra completa en vez de nombre completo de entidad.",
+            ],
+            1,
+            [
+                "Es una limitación real y hay que declararla, pero afecta a las entidades que faltan, no a las que "
+                "aparecen. No explica por qué la primera fila de la tabla es engañosa.",
+                "Correcto, y es el hallazgo central de la sesión. El indicador no está mal calculado: está midiendo "
+                "«aparición en prensa», y eso no es lo mismo que «estar cuestionado». La Procuraduría aparece porque "
+                "investiga; Colombia Compra Eficiente porque administra el SECOP. Ordenar la revisión por esta tabla "
+                "pondría de primeras justo a las entidades equivocadas.",
+                "Al contrario: 987 noticias de ocho meses son bastantes para describir un patrón. El problema no es "
+                "cuántas son, sino qué significa el número que sacamos de ellas.",
+                "El nombre completo es más exigente que la palabra completa, no menos: es justamente el cruce más "
+                "conservador de los tres. El problema no está en cómo se buscó, sino en qué se concluyó.",
+            ],
+        ),
+        md(
+            """
+            ---
+            ## Paso 7 · Cerrar en GitHub lo que dejamos abierto
+
+            La semana pasada tu pareja y tú abrieron un Pull Request y **se detuvieron antes de integrarlo**. Hoy
+            lo cerramos. Y de paso aprendemos qué significa realmente ese último paso.
+
+            > **Nada de esto necesita Git instalado.** Todo ocurre en `github.com` dentro del navegador. Esto no es
+            > una simplificación para la clase: es la ruta que funciona en los computadores de la universidad, donde
+            > puede que no tengas permisos para instalar nada.
+
+            ### 7.1 — Revisar antes de integrar (3 minutos)
+
+            1. Entra al repositorio de tu pareja y abre la pestaña **Pull requests**.
+            2. Abre el PR de la sesión 2 y ve a **Files changed**.
+            3. Lee la última versión de los dos archivos. **Comprueba una cosa concreta:** que no quede ningún
+               `COMPLETAR` y que el indicador tenga responsable y límite.
+            4. Si algo falta, escríbelo como comentario en la línea exacta. Si está bien, sigue.
+
+            ### 7.2 — Integrar (2 minutos)
+
+            1. En la pestaña **Conversation**, revisa los **Checks**.
+            2. Pulsa **Merge pull request** y confirma.
+            3. Después del merge, GitHub ofrece **Delete branch**. Acéptalo.
+
+            ### Qué acaba de pasar, en palabras
+
+            | Acción | Qué significa de verdad |
+            |---|---|
+            | **rama** `hito/s02-negocio` | una propuesta separada, que no toca el trabajo integrado |
+            | **commit** | una versión guardada, con autor y fecha, que se puede recuperar |
+            | **Pull Request** | la conversación: *propongo esto, ¿qué opinan?* |
+            | **comentario en una línea** | una objeción localizada, no un juicio general |
+            | **Checks** | comprobaciones mecánicas: que el archivo exista y esté completo |
+            | **Merge** | la propuesta pasa a ser **la versión oficial** del equipo |
+            | **Delete branch** | la propuesta ya se integró; la rama cumplió su función |
+
+            > **Lo que hay que entender, y es la respuesta 3 del ticket de la sesión 2:** un check verde **no
+            > significa que la decisión esté bien planteada**. La máquina comprueba que el archivo esté completo. Si
+            > tu indicador mide lo que no dice medir, el check sigue verde. Eso solo lo ve una persona.
+
+            ### 7.3 — Abrir el hito de hoy (5 minutos, en casa si falta tiempo)
+
+            En el mismo repositorio, con el botón **Add file → Create new file**:
+
+            1. Nombre del archivo: `hitos/s03/03_evidencia_documental.md`
+            2. Pega la plantilla de aquí abajo y complétala con lo que hiciste hoy.
+            3. **Commit** eligiendo *Create a new branch*, con el nombre `hito/s03-documental`, y abre el Pull Request.
+
+            ```markdown
+            # Hito 3 — Evidencia documental
+
+            **Pareja:**
+            **Motor usado:** (MongoDB real en Colab / mongomock)
+
+            ## 1. Por qué esta evidencia no cabía en una tabla
+            (dos frases, con un ejemplo concreto de la colección)
+
+            ## 2. Mis tres consultas
+            | # | Pregunta en lenguaje de negocio | Consulta | Qué encontré |
+            |---|---|---|---|
+            | 1 | | | |
+            | 2 | | | |
+            | 3 | | | |
+
+            ## 3. El resumen por sección
+            (pega la tabla y escribe UNA frase con lo que sí se puede afirmar)
+
+            ## 4. Qué NO permite concluir
+            (nombra el dato que falta, no digas solo "faltan datos")
+
+            ## 5. El cruce con SECOP
+            (cuántas menciones dio el cruce obvio, cuántas el correcto, y por qué cambia)
+            ```
+
+            **Fecha de entrega:** domingo. Se evalúa el contenido y la honestidad de los límites, no la cantidad de
+            commits.
+            """
+        ),
+        md(
+            """
+            ---
+            ## Ticket de salida
+
+            Responde en tres frases, antes de irte:
+
+            1. ¿Qué característica concreta de las noticias hace que una tabla no sirva? Da un ejemplo real de la
+               colección.
+            2. ¿Qué diferencia hay entre fragmentar y replicar, y qué problema resuelve cada uno?
+            3. El cruce obvio con SECOP dio más menciones que el correcto. ¿Por qué, y qué aprendiste de eso?
+
+            ---
+            # Cierre de la sesión
+
+            ## Recapitulación
+
+            1. Una tabla se rompe ante la **variedad**, no ante el volumen: campos que faltan, listas dentro de un
+               registro y partes de tipos distintos.
+            2. Hay **cuatro familias NoSQL** y cada una renunció a algo diferente. La documental conserva la
+               capacidad de consultar por contenido sin haber anticipado la consulta.
+            3. Un **documento** es un árbol con `_id` obligatorio; la notación de punto entra en los arreglos sin
+               JOIN.
+            4. **Fragmentar** responde a "no cabe"; **replicar** responde a "no se puede caer", y su precio es la
+               consistencia eventual.
+            5. `find()` trae documentos y `aggregate()` trae resúmenes; el orden de las etapas importa y conviene
+               filtrar temprano.
+            6. Un resultado sin **denominador** describe la muestra, no la realidad.
+            7. Un **merge** convierte una propuesta en la versión oficial; un **check verde** no valida el
+               razonamiento.
+
+            ## La idea más importante
+
+            > **El modelo de datos se elige desde la consulta que se quiere responder.** Hoy fue el documento. En la
+            > sesión 4 será el índice. En la sesión 5 será la llave de partición de Cassandra. Es la misma idea tres
+            > veces.
+
+            ## Errores comunes de hoy
+
+            - Creer que NoSQL significa "sin estructura". Significa sin esquema fijo **impuesto por el motor**.
+            - Confundir fragmentar con replicar.
+            - Olvidar `$set` en un `update_one`.
+            - Poner `$match` después de `$group` y hacer trabajo de más.
+            - Aceptar un conteo sin preguntar cuál es el denominador.
+            - Buscar subcadenas creyendo que se buscan palabras.
+
+            ## Lo que NO te llevas hoy, y por qué existe la próxima clase
+
+            Cuando cierres esta pestaña, **el servidor que levantamos se muere y tus documentos con él.** Eso no es
+            un defecto del ejercicio: es la razón de ser de la sesión 4.
+
+            El jueves cada pareja va a tener su propia base corriendo en un servidor que no se apaga, va a subir
+            estas mismas noticias ahí, y va a calcular el indicador de su archivo `01_decision_proceso.md`. También
+            vamos a medir por primera vez **cuánto cuesta leer** un dato, y ahí aparecerá el almacenamiento
+            columnar.
+
+            **Tarea de la semana, y es la que habilita la clase:** crear tu cuenta gratuita en MongoDB Atlas.
+
+            > La colección de noticias que construiste hoy vive dentro de tu Colab y se muere cuando cierres la
+            > pestaña. El equipo de Laura no puede trabajar así. Esta semana la vas a poner donde el equipo entero
+            > pueda alcanzarla.
+
+            El docente entrega la guía paso a paso. **El pantallazo del clúster creado se entrega el miércoles**, no
+            el jueves a las seis y cinco.
+            """
+        ),
+        md(
+            f"""
+            ---
+            # Referencias
+
+            ## Datos usados en esta sesión
+
+            - **Noticias de El Tiempo sobre contratación pública**, enero a agosto de 2026. Dos fuentes públicas enlazadas por el identificador
+              numérico que aparece al final de cada URL:
+              - índice mensual de artículos: `https://www.eltiempo.com/sitemap-articles-2026-MM.xml`
+                (**57 844 artículos** entre enero y agosto)
+              - contenido de cada artículo: `https://www.eltiempo.com/servicios/feeds/articulo/<ID>`
+              - selección por tema, ya recolectada: [`Datos/noticias_contratacion_2026.json`]({DATOS_NOTICIAS})
+                — **987 noticias** de las 995 que el filtro identificó
+              - cruce con entidades contratantes: [`Datos/entidades_en_noticias_2026.json`]({DATOS_CRUCE})
+            - **SECOP II**, muestra de procesos de contratación: [`prueba_chunk_0000000.csv`]({DATOS_SECOP})
+
+            > **Nota sobre la recolección.** Las noticias se descargaron **una sola vez**, del lado del docente, con
+            > pausa entre peticiones y un identificador de agente visible. En clase leemos el archivo ya versionado
+            > en el repositorio: diez runtimes pidiendo artículos al mismo tiempo sería descortés con la fuente y
+            > frágil para nosotros. Los scripts son `utils/build_eltiempo_dataset.py` (recolección) y
+            > `utils/cruzar_noticias_secop.py` (cruce), y puedes leerlos: forman parte del material de la sesión.
+
+            ## Documentación oficial
+
+            - [Mapa de equivalencias SQL ↔ MongoDB](https://www.mongodb.com/docs/manual/reference/sql-comparison/)
+            - [Mapa de equivalencias SQL ↔ agregación](https://www.mongodb.com/docs/manual/reference/sql-aggregation-comparison/)
+            - [Operadores de consulta](https://www.mongodb.com/docs/manual/reference/operator/query/)
+            - [Preferencia de lectura y réplicas](https://www.mongodb.com/docs/manual/core/read-preference/)
+
+            ## Texto guía
+
+            - Khattak, W., Buhler, P. y Erl, T. (2016). *Big Data Fundamentals: Concepts, Drivers & Techniques*.
+              Pearson. **Capítulo 5**, "Big Data Storage Concepts" (clústeres, fragmentación, replicación, ACID y
+              BASE) y **capítulo 7**, "Big Data Storage Technology" (las cuatro familias NoSQL).
+            """
+        ),
+    ]
+    return cells
+
+
+def main():
+    cells = build_cells()
+    validate(cells)
+    save(cells, OUTPUT)
+
+
+if __name__ == "__main__":
+    main()

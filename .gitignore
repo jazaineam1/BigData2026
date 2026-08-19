@@ -1,0 +1,23 @@
+# Material docente privado (libretos, planes, soluciones, respaldos)
+.local-docente/
+
+# Datos personales de estudiantes: encuestas con nombres y correos, entregas,
+# notas y reclamos. Nada de esto debe salir del computador del docente.
+otros/
+Talleres/
+Encuesta*.xlsx
+*respuestas*.xlsx
+
+# Artefactos de Python
+__pycache__/
+*.py[cod]
+
+# Entornos y credenciales
+.env
+databricks.env
+*.secret
+secure-connect-*.zip
+
+# Ruido de ejecucion
+Cuadernos/dask-worker-space/
+.ipynb_checkpoints/

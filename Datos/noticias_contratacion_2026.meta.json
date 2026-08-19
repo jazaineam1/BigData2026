@@ -1,0 +1,84 @@
+{
+ "generado": "2026-08-19T19:45:54.795807+00:00",
+ "fuente_sitemap": "https://www.eltiempo.com/sitemap-articles-{mes}.xml",
+ "fuente_feed": "https://www.eltiempo.com/servicios/feeds/articulo/{id}",
+ "meses": [
+  "2026-01",
+  "2026-02",
+  "2026-03",
+  "2026-04",
+  "2026-05",
+  "2026-06",
+  "2026-07",
+  "2026-08"
+ ],
+ "tema": "contratacion",
+ "claves_filtro": [
+  "contrato",
+  "contratos",
+  "contratacion",
+  "secop",
+  "licitacion",
+  "licitaciones",
+  "adjudicacion",
+  "adjudico",
+  "corrupcion",
+  "sobrecosto",
+  "sobrecostos",
+  "peculado",
+  "detrimento",
+  "contraloria",
+  "procuraduria",
+  "interventoria",
+  "obra-inconclusa",
+  "elefante-blanco",
+  "carrusel",
+  "coima",
+  "soborno"
+ ],
+ "n_listados_por_eltiempo": 57848,
+ "n_candidatos_tras_filtro": 995,
+ "n_documentos": 987,
+ "n_fallos": 4,
+ "fallos": [
+  {
+   "id": 3525523,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 3537534,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 3549529,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 3558902,
+   "error": "HTTP Error 404: Not Found"
+  }
+ ],
+ "presencia_de_campos": {
+  "_id": 991,
+  "titulo": 991,
+  "seccion": 991,
+  "url": 991,
+  "publicado": 991,
+  "premium": 991,
+  "etiquetas": 991,
+  "autores": 991,
+  "imagenes": 991,
+  "cuerpo": 991,
+  "n_palabras": 991,
+  "subtitulo": 986,
+  "editor": 991,
+  "categoria": 991,
+  "subcategoria": 811,
+  "firma": 991,
+  "tiene_audio": 991,
+  "tiene_video": 18,
+  "descripcion": 6
+ },
+ "nota": "Datos publicos de El Tiempo descargados una sola vez para uso docente. El enlace entre las dos fuentes es el ID numerico final de la URL del sitemap.",
+ "nota_duplicados": "Un articulo actualizado aparece en varios sitemaps mensuales; se deduplico por _id."
+}

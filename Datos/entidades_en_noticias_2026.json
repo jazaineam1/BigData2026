@@ -1,0 +1,2716 @@
+[
+ {
+  "entidad": "PROCURADURIA GENERAL DE LA NACION",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 74,
+  "noticias": 195,
+  "ejemplos": [
+   {
+    "id": 3527169,
+    "titulo": "Procuraduría abre un nuevo frente disciplinario contra directivos de la Universidad del Atlántico: estos son los implicados en la investigación",
+    "url": "https://www.eltiempo.com/colombia/barranquilla/procuraduria-abre-un-nuevo-frente-disciplinario-contra-directivos-de-la-universidad-del-atlantico-estos-son-los-implicados-en-la-investigacion-3527169",
+    "publicado": "2026-01-26T09:33:02-05:00"
+   },
+   {
+    "id": 3527142,
+    "titulo": "Nuevos problemas disciplinarios para el exrector de la Universidad del Atlántico: la Procuraduría le abrió investigación",
+    "url": "https://www.eltiempo.com/justicia/investigacion/nuevos-problemas-disciplinarios-para-el-exrector-de-la-universidad-del-atlantico-la-procuraduria-le-abrio-investigacion-3527142",
+    "publicado": "2026-01-26T07:55:18-05:00"
+   },
+   {
+    "id": 3526713,
+    "titulo": "La Procuraduría ratificó la suspensión provisional del gerente general de Emcali y del director de la Uaesp: así van ambos casos",
+    "url": "https://www.eltiempo.com/colombia/cali/la-procuraduria-confirmo-la-suspension-provisional-en-contra-del-gerente-general-de-emcali-y-del-director-de-la-uaesp-asi-van-ambos-casos-3526713",
+    "publicado": "2026-01-24T20:18:59-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DEL INTERIOR",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 746,
+  "noticias": 31,
+  "ejemplos": [
+   {
+    "id": 3527465,
+    "titulo": "La feria de contratación estatal: en tres semanas, el Gobierno Petro ha firmado contratos por 609 mil millones, en vísperas de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/la-feria-de-contratacion-estatal-en-tres-semanas-se-han-firmado-contratos-por-609-mil-millones-de-pesos-en-visperas-de-la-ley-de-garantias-3527465",
+    "publicado": "2026-01-27T18:15:17-05:00"
+   },
+   {
+    "id": 3526825,
+    "titulo": "Registraduría, Procuraduría y Contraloría pidieron al CNE definir si Iván Cepeda está habilitado para participar en la consulta del Pacto Amplio",
+    "url": "https://www.eltiempo.com/politica/elecciones-colombia-2026/registraduria-procuraduria-y-contraloria-pidieron-al-cne-definir-si-ivan-cepeda-esta-habilitado-para-participar-en-las-consultas-interpartidistas-3526825",
+    "publicado": "2026-01-24T10:03:09-05:00"
+   },
+   {
+    "id": 3521346,
+    "titulo": "Procuraduría pide nombrar alcalde ad hoc en Pereira tras impedimento de Mauricio Salazar por campaña de su esposa",
+    "url": "https://www.eltiempo.com/justicia/investigacion/procuraduria-pide-nombrar-alcalde-ad-hoc-en-pereira-tras-impedimento-de-mauricio-salazar-por-campana-de-su-esposa-3521346",
+    "publicado": "2026-01-02T12:46:17-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CAMARA DE REPRESENTANTES",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 715,
+  "noticias": 29,
+  "ejemplos": [
+   {
+    "id": 3528476,
+    "titulo": "Jennifer Pedraza: 'Nuestra labor en la Cámara ha sido, y ahora lo será en el Senado, la lucha incansable contra la corrupción'",
+    "url": "https://www.eltiempo.com/politica/elecciones-colombia-2026/jennifer-pedraza-nuestra-labor-en-la-camara-ha-sido-y-ahora-lo-sera-en-el-senado-la-lucha-incansable-contra-la-corrupcion-3528476",
+    "publicado": "2026-01-30T11:15:16-05:00"
+   },
+   {
+    "id": 3527688,
+    "titulo": "Sobrecostos y fines electorales: los graves señalamientos de la Fiscalía por 6 contratos del AMVA en la era de Daniel Quintero",
+    "url": "https://www.eltiempo.com/justicia/delitos/sobrecostos-y-fines-electorales-los-graves-senalamientos-de-la-fiscalia-por-6-contratos-del-amva-en-la-era-de-daniel-quintero-3527688",
+    "publicado": "2026-01-27T21:28:00-05:00"
+   },
+   {
+    "id": 3527470,
+    "titulo": "Fiscalía pidió catalogar a imputados por corrupción de la administración de Daniel Quintero en Medellín como 'Grupo Delincuencial Organizado'",
+    "url": "https://www.eltiempo.com/colombia/medellin/fiscalia-pidio-catalogar-a-imputados-por-corrupcion-de-la-administracion-de-daniel-quintero-en-medellin-como-grupo-delincuencial-organizado-3527470",
+    "publicado": "2026-01-27T09:39:54-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DEFENSORÍA DEL PUEBLO",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 455,
+  "noticias": 23,
+  "ejemplos": [
+   {
+    "id": 3527428,
+    "titulo": "Defensoría del Pueblo pide al Gobierno Petro 'respuestas claras' por presuntos hechos de corrupción en la Unidad para las Víctimas",
+    "url": "https://www.eltiempo.com/justicia/delitos/defensoria-del-pueblo-pide-al-gobierno-petro-respuestas-claras-por-presuntos-hechos-de-corrupcion-en-la-unidad-para-las-victimas-3527428",
+    "publicado": "2026-01-27T07:30:09-05:00"
+   },
+   {
+    "id": 3525540,
+    "titulo": "Fin de las carretas con caballos en el Centro Histórico de Cartagena: juez tumba tutela de los cocheros y respalda carros eléctricos de la Alcaldía",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/cartagena-juzgado-procuraduria-general-y-defensoria-niegan-tutela-contra-los-coches-electricos-que-ya-ruedan-por-el-centro-historico-3525540",
+    "publicado": "2026-01-20T10:50:53-05:00"
+   },
+   {
+    "id": 3524350,
+    "titulo": "Procuraduría descartó investigación disciplinaria contra la defensora Iris Marín por supuesta calumnia contra ministro Benedetti",
+    "url": "https://www.eltiempo.com/justicia/investigacion/procuraduria-no-abrio-investigacion-disciplinaria-contra-la-defensora-iris-marin-por-supuesta-calumnia-contra-ministro-benedetti-3524350",
+    "publicado": "2026-01-15T08:22:37-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DE RELACIONES EXTERIORES",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 2,
+  "noticias": 23,
+  "ejemplos": [
+   {
+    "id": 3524837,
+    "titulo": "Presidente Gustavo Petro reacciona a las alertas de la Contraloría sobre el nuevo modelo de pasaportes: 'El cuarto mejor del mundo'",
+    "url": "https://www.eltiempo.com/politica/gobierno/presidente-gustavo-petro-reacciona-a-las-alertas-de-la-contraloria-sobre-el-nuevo-modelo-de-pasaportes-el-cuarto-mejor-del-mundo-3524837",
+    "publicado": "2026-01-17T09:17:35-05:00"
+   },
+   {
+    "id": 3524732,
+    "titulo": "Nuevo contratista de pasaportes no hará documentos por demanda, sino producirá un número máximo anual: Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/nuevo-contratista-de-pasaportes-no-hara-documentos-por-demanda-sino-producira-un-numero-maximo-anual-contraloria-3524732",
+    "publicado": "2026-01-16T12:00:27-05:00"
+   },
+   {
+    "id": 3524690,
+    "titulo": "Alerta en nuevo modelo de producción de pasaportes: Contraloría identificó 'riesgos, retrasos e incumplimientos de plazos'",
+    "url": "https://www.eltiempo.com/justicia/servicios/alerta-en-nuevo-modelo-de-produccion-de-pasaportes-contraloria-identifico-riesgos-retrasos-e-incumplimientos-de-plazos-3524690",
+    "publicado": "2026-01-16T11:25:35-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "Consejo Nacional Electoral",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 13,
+  "noticias": 21,
+  "ejemplos": [
+   {
+    "id": 3526825,
+    "titulo": "Registraduría, Procuraduría y Contraloría pidieron al CNE definir si Iván Cepeda está habilitado para participar en la consulta del Pacto Amplio",
+    "url": "https://www.eltiempo.com/politica/elecciones-colombia-2026/registraduria-procuraduria-y-contraloria-pidieron-al-cne-definir-si-ivan-cepeda-esta-habilitado-para-participar-en-las-consultas-interpartidistas-3526825",
+    "publicado": "2026-01-24T10:03:09-05:00"
+   },
+   {
+    "id": 3525308,
+    "titulo": "El patrimonio declarado de Carolina Corcho, cabeza de lista al Senado por el Pacto Histórico, y los contratos que ha tenido con el Estado",
+    "url": "https://www.eltiempo.com/datos/el-patrimonio-declarado-de-carolina-corcho-cabeza-de-lista-al-senado-por-el-pacto-historico-y-los-contratos-que-ha-tenido-con-el-estado-3525308",
+    "publicado": "2026-01-21T12:29:38-05:00"
+   },
+   {
+    "id": 3525590,
+    "titulo": "Procuraduría pide a la Corte Constitucional salvar la Ley de Encuestas: 'no tiene impacto fiscal ni viola la libertad de expresión'",
+    "url": "https://www.eltiempo.com/justicia/cortes/procuraduria-pide-a-la-corte-constitucional-salvar-la-ley-de-encuestas-no-tiene-impacto-fiscal-ni-viola-la-libertad-de-expresion-3525590",
+    "publicado": "2026-01-20T15:46:49-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CONTRALORIA DE BOGOTA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 245,
+  "noticias": 19,
+  "ejemplos": [
+   {
+    "id": 3534793,
+    "titulo": "Contraloría de Bogotá alerta que el Hospital de Usme duplicó los tiempos de su entrega y tiene millonarios sobrecostos",
+    "url": "https://www.eltiempo.com/bogota/contraloria-de-bogota-alerta-que-el-hospital-de-usme-duplico-los-tiempos-de-su-entrega-y-tiene-millonarios-sobrecostos-3534793",
+    "publicado": "2026-02-23T16:59:56-05:00"
+   },
+   {
+    "id": 3528990,
+    "titulo": "Contraloría de Bogotá advierte riesgos fiscales en el esquema de aseo y exige medidas para garantizar su continuidad: alerta a la Uaesp",
+    "url": "https://www.eltiempo.com/bogota/contraloria-de-bogota-advierte-riesgos-fiscales-en-el-esquema-de-aseo-y-exige-medidas-para-garantizar-su-continuidad-alerta-a-la-uaesp-3528990",
+    "publicado": "2026-02-02T08:11:49-05:00"
+   },
+   {
+    "id": 3543100,
+    "titulo": "Contraloría abre procesos fiscales por $1.439 millones relacionados con contratos de malla vial en Puente Aranda",
+    "url": "https://www.eltiempo.com/bogota/contraloria-abre-procesos-fiscales-por-1-439-millones-relacionados-con-contratos-de-malla-vial-en-puente-aranda-3543100",
+    "publicado": "2026-03-26T07:23:54-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "AREA METROPOLITANA DEL VALLE DE ABURRA",
+  "departamento": "Antioquia",
+  "procesos_en_secop": 95,
+  "noticias": 19,
+  "ejemplos": [
+   {
+    "id": 3527806,
+    "titulo": "Chats, contratos a dedo y una exfuncionaria: los señalamientos de la Fiscalía contra el hermano de Daniel Quintero en caso de corrupción",
+    "url": "https://www.eltiempo.com/justicia/delitos/chats-contratos-a-dedo-y-una-exfuncionaria-los-senalamientos-de-la-fiscalia-contra-el-hermano-de-daniel-quintero-en-caso-de-corrupcion-3527806",
+    "publicado": "2026-01-30T14:59:24-05:00"
+   },
+   {
+    "id": 3527688,
+    "titulo": "Sobrecostos y fines electorales: los graves señalamientos de la Fiscalía por 6 contratos del AMVA en la era de Daniel Quintero",
+    "url": "https://www.eltiempo.com/justicia/delitos/sobrecostos-y-fines-electorales-los-graves-senalamientos-de-la-fiscalia-por-6-contratos-del-amva-en-la-era-de-daniel-quintero-3527688",
+    "publicado": "2026-01-27T21:28:00-05:00"
+   },
+   {
+    "id": 3527604,
+    "titulo": "La red de contratos por más de $18.000 millones y los nombres que cercan a Quintero en caso por presunta corrupción en Área Metropolitana de Medellín",
+    "url": "https://www.eltiempo.com/colombia/medellin/el-abece-del-entramado-de-presunta-corrupcion-en-el-area-metropolitana-que-sacude-a-medellin-y-salpica-al-circulo-de-daniel-quintero-3527604",
+    "publicado": "2026-01-27T18:08:31-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "COLOMBIA COMPRA EFICIENTE",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 452,
+  "noticias": 17,
+  "ejemplos": [
+   {
+    "id": 3523828,
+    "titulo": "La puja por la nube pública del Estado: adjudicaron el contrato que define quién manejará los datos oficiales",
+    "url": "https://www.eltiempo.com/politica/gobierno/la-puja-por-la-nube-publica-del-estado-adjudicaron-el-contrato-que-define-quien-manejara-los-datos-oficiales-3523828",
+    "publicado": "2026-01-13T11:43:03-05:00"
+   },
+   {
+    "id": 3531254,
+    "titulo": "Entidades públicas celebraron contratos por $ 37 billones previo a la Ley de Garantías",
+    "url": "https://www.eltiempo.com/economia/sectores/entidades-publicas-celebraron-contratos-por-37-billones-previo-a-la-ley-de-garantias-3531254",
+    "publicado": "2026-02-10T14:06:35-05:00"
+   },
+   {
+    "id": 3543582,
+    "titulo": "La nueva versión de Colombia Compra Eficiente tras respuesta oficial sobre contratos con asociaciones público-populares",
+    "url": "https://www.eltiempo.com/justicia/investigacion/la-nueva-version-de-colombia-compra-eficiente-tras-respuesta-oficial-sobre-contratos-con-asociaciones-publico-populares-3543582",
+    "publicado": "2026-03-27T16:42:06-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "SUPERINTENDENCIA DE SERVICIOS PÚBLICOS DOMICILIARIOS",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 230,
+  "noticias": 17,
+  "ejemplos": [
+   {
+    "id": 3535361,
+    "titulo": "RTVC recibió 18.800 millones de pesos en contratos con el Estado a pocos días de la entrada en vigor de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/rtvc-recibio-18-800-millones-de-pesos-en-contratos-con-el-estado-a-pocos-dias-de-la-entrada-en-vigor-de-la-ley-de-garantias-3535361",
+    "publicado": "2026-02-25T17:24:52-05:00"
+   },
+   {
+    "id": 3533153,
+    "titulo": "¿Por qué hubo doble cobro en la factura de aseo en Cali? Alcaldía atiende denuncia y aclara caso: 'Vincularon a usuarios a estos contratos'",
+    "url": "https://www.eltiempo.com/colombia/cali/por-que-hubo-doble-cobro-en-la-factura-de-aseo-en-cali-alcaldia-atiende-denuncia-y-aclara-caso-vincularon-a-usuarios-a-estos-contratos-3533153",
+    "publicado": "2026-02-17T13:58:05-05:00"
+   },
+   {
+    "id": 3543367,
+    "titulo": "Los detalles que destapó la Procuraduría en la apertura de investigación contra la ministra Irene Vélez",
+    "url": "https://www.eltiempo.com/justicia/investigacion/los-detalles-que-destapo-la-procuraduria-en-la-apertura-de-investigacion-contra-la-ministra-irene-velez-3543367",
+    "publicado": "2026-03-26T23:40:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "SUPERINTENDENCIA NACIONAL DE SALUD",
+  "departamento": "No Definido",
+  "procesos_en_secop": 112,
+  "noticias": 17,
+  "ejemplos": [
+   {
+    "id": 3523356,
+    "titulo": "Deudas, quejas y contratos terminados: la debacle de Nueva EPS, en manos del Gobierno",
+    "url": "https://www.eltiempo.com/salud/deudas-quejas-y-contratos-terminados-la-debacle-de-nueva-eps-en-manos-del-gobierno-3523356",
+    "publicado": "2026-01-11T08:26:37-05:00"
+   },
+   {
+    "id": 3523278,
+    "titulo": "Congresista denunció presuntas irregularidades en contratos de EPS Famisanar: bachilleres estarían ganando hasta 28 millones de pesos",
+    "url": "https://www.eltiempo.com/salud/congresista-denuncio-presuntas-irregularidades-en-contratos-de-eps-famisanar-bachilleres-estarian-ganando-hasta-28-millones-de-pesos-3523278",
+    "publicado": "2026-01-10T14:20:56-05:00"
+   },
+   {
+    "id": 3522785,
+    "titulo": "Luego de las largas filas y malestar de los usuarios, Nueva EPS activa plan para entrega de medicamentos tras fin de contrato con Colsubsidio",
+    "url": "https://www.eltiempo.com/salud/luego-de-las-largas-filas-y-malestar-de-los-usuarios-nueva-eps-activa-plan-para-entrega-de-medicamentos-tras-fin-de-contrato-con-colsubsidio-3522785",
+    "publicado": "2026-01-09T07:41:37-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DEPARTAMENTO ADMINISTRATIVO DE LA PRESIDENCIA DE LA REPÚBLICA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 606,
+  "noticias": 15,
+  "ejemplos": [
+   {
+    "id": 3523608,
+    "titulo": "Siguen las críticas por contrato de 10.000 millones para la defensa internacional del Gobierno: Álvaro Uribe y Katherine Miranda piden investigarlo",
+    "url": "https://www.eltiempo.com/politica/partidos-politicos/siguen-las-criticas-por-contrato-de-10-000-millones-para-la-defensa-internacional-del-gobierno-alvaro-uribe-y-katherine-miranda-piden-investigarlo-3523608",
+    "publicado": "2026-01-12T11:05:34-05:00"
+   },
+   {
+    "id": 3523476,
+    "titulo": "María Fernanda Cabal cuestiona contrato del Gobierno para asesoría especializada en defensa jurídica internacional",
+    "url": "https://www.eltiempo.com/politica/partidos-politicos/maria-fernanda-cabal-cuestiona-contrato-de-asesoria-especializada-en-defensa-juridica-internacional-firmado-por-el-gobierno-de-gustavo-petro-3523476",
+    "publicado": "2026-01-11T13:13:50-05:00"
+   },
+   {
+    "id": 3535361,
+    "titulo": "RTVC recibió 18.800 millones de pesos en contratos con el Estado a pocos días de la entrada en vigor de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/rtvc-recibio-18-800-millones-de-pesos-en-contratos-con-el-estado-a-pocos-dias-de-la-entrada-en-vigor-de-la-ley-de-garantias-3535361",
+    "publicado": "2026-02-25T17:24:52-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DIRECCION NACIONAL DE INTELIGENCIA",
+  "departamento": "No Definido",
+  "procesos_en_secop": 33,
+  "noticias": 11,
+  "ejemplos": [
+   {
+    "id": 3532363,
+    "titulo": "La acumulación de procesos judiciales contra alfiles del gobierno del presidente Gustavo Petro por presunta corrupción",
+    "url": "https://www.eltiempo.com/unidad-investigativa/la-acumulacion-de-procesos-judiciales-contra-alfiles-del-gobierno-del-presidente-gustavo-petro-por-presunta-corrupcion-3532363",
+    "publicado": "2026-02-14T21:23:27-05:00"
+   },
+   {
+    "id": 3531209,
+    "titulo": "Ricardo Roa, Juliana Guerrero, UNGRD y los escándalos de corrupción que acorralan al gobierno del presidente Gustavo Petro",
+    "url": "https://www.eltiempo.com/justicia/investigacion/ricardo-roa-juliana-guerrero-ungrd-y-los-escandalos-de-corrupcion-que-acorralan-al-gobierno-del-presidente-gustavo-petro-3531209",
+    "publicado": "2026-02-10T15:41:40-05:00"
+   },
+   {
+    "id": 3536614,
+    "titulo": "Procuraduría no renovó la suspensión del general Huertas y Wilmar Mejía tras menciones en correos de alias Calarcá",
+    "url": "https://www.eltiempo.com/justicia/investigacion/procuraduria-no-renovo-la-suspension-del-general-huertas-y-wilmar-mejia-tras-menciones-en-correso-de-alias-calarca-3536614",
+    "publicado": "2026-03-02T11:56:34-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DE MINAS Y ENERGIA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 375,
+  "noticias": 10,
+  "ejemplos": [
+   {
+    "id": 3527465,
+    "titulo": "La feria de contratación estatal: en tres semanas, el Gobierno Petro ha firmado contratos por 609 mil millones, en vísperas de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/la-feria-de-contratacion-estatal-en-tres-semanas-se-han-firmado-contratos-por-609-mil-millones-de-pesos-en-visperas-de-la-ley-de-garantias-3527465",
+    "publicado": "2026-01-27T18:15:17-05:00"
+   },
+   {
+    "id": 3525341,
+    "titulo": "¿Por qué la granja solar de Providencia pasó de promesa energética a estar inoperante y con posibles sobrecostos? Así lo determinó la Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/por-que-la-granja-solar-de-providencia-paso-de-promesa-energetica-a-estar-inoperante-y-con-posibles-sobrecostos-asi-lo-determino-la-contraloria-3525341",
+    "publicado": "2026-01-19T13:15:34-05:00"
+   },
+   {
+    "id": 3554132,
+    "titulo": "Superservicios activa vigilancia sobre Canacol ante riesgo de suspensión de contratos de gas en Colombia",
+    "url": "https://www.eltiempo.com/economia/sectores/superservicios-activa-vigilancia-sobre-canacol-ante-riesgo-de-suspension-de-contratos-de-gas-en-colombia-3554132",
+    "publicado": "2026-05-08T09:59:37-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "FONDO ADAPTACIÓN",
+  "departamento": "No Definido",
+  "procesos_en_secop": 112,
+  "noticias": 10,
+  "ejemplos": [
+   {
+    "id": 3533601,
+    "titulo": "Habla hijo de la senadora Berenice Bedoya, señalado de obtener contrato en Mininterior por gestión de la congresista en reforma a la Salud",
+    "url": "https://www.eltiempo.com/unidad-investigativa/habla-hijo-de-la-senadora-berenice-bedoya-senalado-de-obtener-contrato-en-mininterior-por-gestion-de-la-congresista-en-reforma-a-la-salud-3533601",
+    "publicado": "2026-02-18T18:48:31-05:00"
+   },
+   {
+    "id": 3551189,
+    "titulo": "Gustavo Petro cuestiona a funcionarios que salen a hablar de líos en su administración: 'Aquí se va el que tenga hechos sospechosos de corrupción'",
+    "url": "https://www.eltiempo.com/politica/gobierno/gustavo-petro-cuestiona-a-funcionarios-que-salen-a-hablar-de-lios-en-su-administracion-aqui-se-va-el-que-tenga-hechos-sospechosos-de-corrupcion-3551189",
+    "publicado": "2026-04-27T10:46:58-05:00"
+   },
+   {
+    "id": 3550973,
+    "titulo": "Caso Angie Rodríguez: piden recusar al presidente Gustavo Petro tras denuncias de presunta corrupción",
+    "url": "https://www.eltiempo.com/politica/gobierno/caso-angie-rodriguez-piden-recusar-al-presidente-gustavo-petro-tras-denuncias-de-presunta-corrupcion-3550973",
+    "publicado": "2026-04-26T10:54:27-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DEPARTAMENTO NACIONAL DE PLANEACIÓN",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 503,
+  "noticias": 9,
+  "ejemplos": [
+   {
+    "id": 3527465,
+    "titulo": "La feria de contratación estatal: en tres semanas, el Gobierno Petro ha firmado contratos por 609 mil millones, en vísperas de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/la-feria-de-contratacion-estatal-en-tres-semanas-se-han-firmado-contratos-por-609-mil-millones-de-pesos-en-visperas-de-la-ley-de-garantias-3527465",
+    "publicado": "2026-01-27T18:15:17-05:00"
+   },
+   {
+    "id": 3526585,
+    "titulo": "La feria de contratos para instalar gas natural en Chocó que llevó a juicio al exgobernador Johany Palacios",
+    "url": "https://www.eltiempo.com/justicia/cortes/la-fiesta-de-contratos-para-instalar-gas-natural-en-choco-que-llevo-a-juicio-al-exgobernador-johany-palacios-3526585",
+    "publicado": "2026-01-23T11:09:15-05:00"
+   },
+   {
+    "id": 3526094,
+    "titulo": "Contraloría advierte riesgos fiscales por recorte a vigencias futuras para el proyecto de restauración del Canal del Dique",
+    "url": "https://www.eltiempo.com/justicia/investigacion/contraloria-advierte-riesgos-fiscales-por-recorte-a-vigencias-futuras-para-el-proyecto-de-restauracion-del-canal-del-dique-3526094",
+    "publicado": "2026-01-21T18:38:18-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "SUPERINTENDENCIA DE NOTARIADO Y REGISTRO",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 444,
+  "noticias": 9,
+  "ejemplos": [
+   {
+    "id": 3525308,
+    "titulo": "El patrimonio declarado de Carolina Corcho, cabeza de lista al Senado por el Pacto Histórico, y los contratos que ha tenido con el Estado",
+    "url": "https://www.eltiempo.com/datos/el-patrimonio-declarado-de-carolina-corcho-cabeza-de-lista-al-senado-por-el-pacto-historico-y-los-contratos-que-ha-tenido-con-el-estado-3525308",
+    "publicado": "2026-01-21T12:29:38-05:00"
+   },
+   {
+    "id": 3534196,
+    "titulo": "El nuevo contrato de Nerú Martínez, bailarín de Casa de Nariño cercano a Verónica Alcocer que ha facturado más de 270 millones de pesos con el Dapre",
+    "url": "https://www.eltiempo.com/datos/el-nuevo-contrato-de-neru-martinez-bailarin-de-casa-de-narino-cercano-a-veronica-alcocer-que-ha-facturado-mas-de-270-millones-de-pesos-con-el-dapre-3534196",
+    "publicado": "2026-02-21T18:35:56-05:00"
+   },
+   {
+    "id": 3530866,
+    "titulo": "Salim Kadamani, hermano de la ministra de Cultura, ha firmado contratos por 383’695.900 pesos con el Estado",
+    "url": "https://www.eltiempo.com/datos/salim-kadamani-hermano-de-la-ministra-de-cultura-ha-firmado-contratos-por-383-695-900-pesos-con-el-estado-3530866",
+    "publicado": "2026-02-14T19:05:21-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "INSTITUTO DE DESARROLLO URBANO",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 621,
+  "noticias": 8,
+  "ejemplos": [
+   {
+    "id": 3526113,
+    "titulo": "El detrás de cámara de la fallida licitación de la línea 2 del metro de Bogotá: inhabilidades, conflictos de interés, adendas y prórrogas",
+    "url": "https://www.eltiempo.com/bogota/el-detras-de-camara-de-la-fallida-licitacion-de-la-linea-2-del-metro-de-bogota-inhabilidades-conflictos-de-interes-adendas-y-prorrogas-3526113",
+    "publicado": "2026-01-22T05:01:00-05:00"
+   },
+   {
+    "id": 3523210,
+    "titulo": "Así van las obras en Bogotá: Grupo 2 de la av. Ciudad de Cali está paralizado tras contrato caducado, retrasos y multas; hay fecha para su continuidad",
+    "url": "https://www.eltiempo.com/bogota/asi-van-las-obras-en-bogota-grupo-2-de-la-av-ciudad-de-cali-esta-paralizado-tras-contrato-caducado-retrasos-y-multas-hay-fecha-para-su-continuidad-3523210",
+    "publicado": "2026-01-09T19:02:32-05:00"
+   },
+   {
+    "id": 3532690,
+    "titulo": "Arranca la construcción del puente peatonal de la calle 112 con Novena tras años de retrasos y contratos fallidos",
+    "url": "https://www.eltiempo.com/bogota/arranca-la-construccion-del-puente-peatonal-de-la-calle-112-con-novena-tras-anos-de-retrasos-y-contratos-fallidos-3532690",
+    "publicado": "2026-02-16T08:14:38-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "AGENCIA DE DESARROLLO RURAL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 450,
+  "noticias": 8,
+  "ejemplos": [
+   {
+    "id": 3522825,
+    "titulo": "Las demoras en proyecto de represa del río Ranchería, por las que la Procuraduría investiga a César Pachón, director de la Agencia de Desarrollo Rural",
+    "url": "https://www.eltiempo.com/justicia/investigacion/las-demoras-en-proyecto-de-represa-del-rio-rancheria-por-las-que-la-procuraduria-investiga-a-cesar-pachon-director-de-la-agencia-de-desarrollo-rural-3522825",
+    "publicado": "2026-01-08T12:18:39-05:00"
+   },
+   {
+    "id": 3533789,
+    "titulo": "Los contratos que suman más de 1.000 millones de pesos de la familia del ministro Antonio Sanguino con el Estado desde el inicio del gobierno Petro",
+    "url": "https://www.eltiempo.com/datos/los-contratos-que-suman-mas-de-1-000-millones-de-pesos-de-la-familia-del-ministro-antonio-sanguino-con-el-estado-desde-el-inicio-del-gobierno-petro-3533789",
+    "publicado": "2026-02-19T18:35:03-05:00"
+   },
+   {
+    "id": 3571398,
+    "titulo": "Primicia: esta es la firma que, según denuncias, Aerocivil buscaría favorecer con contrato por $ 78 mil millones para vigilancia de aeropuertos",
+    "url": "https://www.eltiempo.com/unidad-investigativa/primicia-esta-es-la-firma-que-segun-denuncias-aerocivil-buscaria-favorecer-con-contrato-por-78-mil-millones-para-vigilancia-de-aeropuertos-3571398",
+    "publicado": "2026-07-15T12:39:33-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "PROSPERIDAD SOCIAL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 312,
+  "noticias": 8,
+  "ejemplos": [
+   {
+    "id": 3527465,
+    "titulo": "La feria de contratación estatal: en tres semanas, el Gobierno Petro ha firmado contratos por 609 mil millones, en vísperas de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/la-feria-de-contratacion-estatal-en-tres-semanas-se-han-firmado-contratos-por-609-mil-millones-de-pesos-en-visperas-de-la-ley-de-garantias-3527465",
+    "publicado": "2026-01-27T18:15:17-05:00"
+   },
+   {
+    "id": 3535665,
+    "titulo": "Habla Natalí, la supuesta testigo de fraude electoral que el presidente Petro presentó y que ha tenido contratos con el Gobierno por $ 308 millones",
+    "url": "https://www.eltiempo.com/unidad-investigativa/habla-natali-la-supuesta-testigo-de-fraude-electoral-que-el-presidente-petro-presento-y-que-ha-tenido-contratos-con-el-gobierno-por-308-millones-3535665",
+    "publicado": "2026-02-26T21:25:37-05:00"
+   },
+   {
+    "id": 3542995,
+    "titulo": "Atención: Estos son los graves vacíos que halló la Contraloría en los 18 decretos de emergencia económica del gobierno Petro",
+    "url": "https://www.eltiempo.com/justicia/investigacion/atencion-estos-son-los-graves-vacios-que-hallo-la-contraloria-en-los-18-decretos-de-emergencia-economica-del-gobierno-petro-3542995",
+    "publicado": "2026-03-26T15:21:56-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DE TRABAJO",
+  "departamento": "No Definido",
+  "procesos_en_secop": 1,
+  "noticias": 8,
+  "ejemplos": [
+   {
+    "id": 3527449,
+    "titulo": "¿Operación Ley de Garantías? Los despidos y vinculaciones del gobierno de Gustavo Petro en la previa a la restricción en contratación por elecciones",
+    "url": "https://www.eltiempo.com/politica/gobierno/operacion-ley-de-garantias-las-movidas-en-contratacion-del-gobierno-de-gustavo-petro-en-la-previa-a-la-restriccion-en-la-contratacion-por-elecciones-3527449",
+    "publicado": "2026-01-27T07:57:17-05:00"
+   },
+   {
+    "id": 3536081,
+    "titulo": "'Contratos en HUV no son ilegales': le respondió la gobernadora del Valle al presidente Petro, tras afirmar que el hospital era centro de esclavitud",
+    "url": "https://www.eltiempo.com/colombia/cali/contratos-en-huv-no-son-ilegales-le-respondio-la-gobernadora-del-valle-al-presidente-petro-tras-afirmar-que-el-hospital-era-centro-de-esclavitud-3536081",
+    "publicado": "2026-02-27T20:37:52-05:00"
+   },
+   {
+    "id": 3537744,
+    "titulo": "El candidato a la Cámara Hugo Ruano, acusó de 'doble moral' a políticos que criticaron la contratación en salud: así respondió exalcalde de Jamundí",
+    "url": "https://www.eltiempo.com/politica/elecciones-colombia-2026/el-candidato-a-la-camara-hugo-ruano-acuso-de-doble-moral-a-politicos-que-criticaron-la-contratacion-en-salud-asi-respondio-exalcalde-de-jamundi-3537744",
+    "publicado": "2026-03-06T09:03:21-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD DE ANTIOQUIA",
+  "departamento": "Antioquia",
+  "procesos_en_secop": 1461,
+  "noticias": 7,
+  "ejemplos": [
+   {
+    "id": 3527278,
+    "titulo": "'Las universidades públicas tienen un déficit estructural por su alta dependencia a los recursos del gobierno’: Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/las-universidades-publicas-tienen-un-deficit-estructural-por-su-alta-dependencia-a-los-recursos-del-gobierno-contraloria-3527278",
+    "publicado": "2026-01-26T18:29:16-05:00"
+   },
+   {
+    "id": 3527225,
+    "titulo": "Esta es la única universidad pública, de las 34 que hay en Colombia, que puede mantenerse con recursos propios, según la Contraloría",
+    "url": "https://www.eltiempo.com/vida/educacion/esta-es-la-unica-universidad-publica-de-las-34-que-hay-en-colombia-que-puede-mantenerse-con-recursos-propios-segun-la-contraloria-3527225",
+    "publicado": "2026-01-26T14:34:06-05:00"
+   },
+   {
+    "id": 3526838,
+    "titulo": "Solo una de 34 universidades públicas es autosostenible: el duro informe de la Contraloría sobre la educación superior",
+    "url": "https://www.eltiempo.com/justicia/investigacion/solo-una-de-34-universidades-publicas-es-autosostenible-el-duro-informe-de-la-contraloria-sobre-la-educacion-superior-3526838",
+    "publicado": "2026-01-25T08:55:10-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "BANCO DE LA REPUBLICA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 1093,
+  "noticias": 6,
+  "ejemplos": [
+   {
+    "id": 3535853,
+    "titulo": "Polémica por ‘mico’ que da vía libre a la contratación directa en la Ley de Garantías, en decreto de emergencia económica",
+    "url": "https://www.eltiempo.com/justicia/investigacion/polemica-por-mico-de-contratacion-directa-en-plena-ley-de-garantias-en-decreto-expedido-bajo-emergencia-economica-3535853",
+    "publicado": "2026-02-27T12:11:58-05:00"
+   },
+   {
+    "id": 3542453,
+    "titulo": "Las razones de la Contraloría para rechazar el proyecto de Petro de repatriación de $25 billones ahorrados en fondos privados de pensión",
+    "url": "https://www.eltiempo.com/justicia/investigacion/las-razones-de-la-contraloria-para-rechazar-el-proyecto-de-petro-de-repatriacion-de-25-billones-ahorrados-en-fondos-privados-de-pension-3542453",
+    "publicado": "2026-03-24T08:20:57-05:00"
+   },
+   {
+    "id": 3542122,
+    "titulo": "Exclusivo: la alerta de la Contraloría sobre el riesgo y la inviabilidad jurídica del traslado del ahorro pensional",
+    "url": "https://www.eltiempo.com/justicia/investigacion/exclusivo-la-alerta-de-la-contraloria-sobre-el-riesgo-y-la-inviabilidad-juridica-del-traslado-del-ahorro-pensional-3542122",
+    "publicado": "2026-03-24T08:03:50-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DE HACIENDA Y CREDITO PUBLICO",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 195,
+  "noticias": 6,
+  "ejemplos": [
+   {
+    "id": 3529200,
+    "titulo": "La feria de contratos en el Ministerio de Salud a horas del inicio de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/la-feria-de-contratos-en-el-ministerio-de-salud-a-horas-del-inicio-de-la-ley-de-garantias-3529200",
+    "publicado": "2026-02-04T06:40:34-05:00"
+   },
+   {
+    "id": 3547818,
+    "titulo": "Las alertas de la Contraloría sobre el estado de la economía colombiana: 'Se requiere plan de recuperación para evitar crisis fiscal'",
+    "url": "https://www.eltiempo.com/justicia/investigacion/las-alertas-de-la-contraloria-sobre-el-estado-de-la-economia-colombiana-se-requiere-plan-de-recuperacion-para-evitar-crisis-fiscal-3547818",
+    "publicado": "2026-04-15T06:24:50-05:00"
+   },
+   {
+    "id": 3547705,
+    "titulo": "Contraloría emite advertencia por graves riesgos fiscales en manejo de deuda pública: el servicio de deuda alcanzó los 105 billones",
+    "url": "https://www.eltiempo.com/justicia/investigacion/contraloria-emite-advertencia-por-graves-riesgos-fiscales-en-manejo-de-deuda-publica-el-servicio-de-deuda-alcanzo-los-105-billones-3547705",
+    "publicado": "2026-04-14T10:28:59-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "EMPRESAS MUNICIPALES DE CALI",
+  "departamento": "Valle del Cauca",
+  "procesos_en_secop": 404,
+  "noticias": 5,
+  "ejemplos": [
+   {
+    "id": 3526713,
+    "titulo": "La Procuraduría ratificó la suspensión provisional del gerente general de Emcali y del director de la Uaesp: así van ambos casos",
+    "url": "https://www.eltiempo.com/colombia/cali/la-procuraduria-confirmo-la-suspension-provisional-en-contra-del-gerente-general-de-emcali-y-del-director-de-la-uaesp-asi-van-ambos-casos-3526713",
+    "publicado": "2026-01-24T20:18:59-05:00"
+   },
+   {
+    "id": 3526789,
+    "titulo": "¿Por qué la Procuraduría General de la Nación abrió una investigación disciplinaria al alcalde de Tuluá, Gustavo Vélez? Esto dijo el mandatario",
+    "url": "https://www.eltiempo.com/colombia/cali/por-que-la-procuraduria-general-de-la-nacion-abrio-una-investigacion-disciplinaria-al-alcalde-de-tulua-gustavo-velez-esto-dijo-el-mandatario-3526789",
+    "publicado": "2026-01-23T23:24:27-05:00"
+   },
+   {
+    "id": 3533804,
+    "titulo": "Procuraduría levanta suspensión provisional contra gerente de Emcali, Roger Mina, quien retomará sus funciones al frente de la entidad",
+    "url": "https://www.eltiempo.com/colombia/cali/procuraduria-levanta-suspension-provisional-contra-gerente-de-emcali-roger-mina-quien-retomara-sus-funciones-al-frente-de-la-entidad-3533804",
+    "publicado": "2026-02-19T12:32:37-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "GOBERNACION DEL MAGDALENA",
+  "departamento": "Magdalena",
+  "procesos_en_secop": 403,
+  "noticias": 5,
+  "ejemplos": [
+   {
+    "id": 3526657,
+    "titulo": "Procuraduría indaga presuntos casos de acoso sexual en la Gobernación del Magdalena entre 2020 y 2023",
+    "url": "https://www.eltiempo.com/justicia/investigacion/procuraduria-indaga-presuntos-casos-de-acoso-sexual-en-la-gobernacion-del-magdalena-entre-2020-y-3526657",
+    "publicado": "2026-01-23T13:49:15-05:00"
+   },
+   {
+    "id": 3533226,
+    "titulo": "Un colegio a medio hacer, contratos sin cumplir y pagos injustificados a profesores: las conclusiones de la Contraloría tras auditoría al Magdalena",
+    "url": "https://www.eltiempo.com/justicia/investigacion/un-colegio-a-medio-hacer-contratos-sin-cumplir-y-pagos-injustificados-a-profesores-las-conclusiones-de-la-auditoria-al-magdalena-de-la-contraloria-3533226",
+    "publicado": "2026-02-17T17:18:06-05:00"
+   },
+   {
+    "id": 3529733,
+    "titulo": "Fundación San José responde a denuncias por contrato de alfabetización en Magdalena",
+    "url": "https://www.eltiempo.com/vida/educacion/fundacion-san-jose-responde-a-denuncias-por-contrato-de-alfabetizacion-en-magdalena-3529733",
+    "publicado": "2026-02-04T14:54:09-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DEPARTAMENTO DE CORDOBA",
+  "departamento": "Córdoba",
+  "procesos_en_secop": 378,
+  "noticias": 5,
+  "ejemplos": [
+   {
+    "id": 3527208,
+    "titulo": "Atención: luego de la turbulencia por cesión de contrato en bloque gasífero Sinú-9 renunció Orlando Velandia, presidente de la ANH",
+    "url": "https://www.eltiempo.com/unidad-investigativa/atencion-luego-de-la-turbulencia-por-cesion-de-contrato-en-bloque-gasifero-sinu-9-renuncia-orlando-velandia-presidente-de-la-anh-3527208",
+    "publicado": "2026-01-26T11:17:00-05:00"
+   },
+   {
+    "id": 3520414,
+    "titulo": "Atención: aprueban cesión del polémico Bloque Sinú-9 a pesar de alertas de la Procuraduría",
+    "url": "https://www.eltiempo.com/unidad-investigativa/atencion-aprueban-cesion-del-polemico-bloque-sinu-9-a-pesar-de-alertas-de-la-procuraduria-3520414",
+    "publicado": "2026-01-02T17:34:31-05:00"
+   },
+   {
+    "id": 3554499,
+    "titulo": "Presidente de Cerro Matoso advierte: ‘Suspender contrato de gas con Canacol pone en riesgo la viabilidad del negocio’",
+    "url": "https://www.eltiempo.com/economia/sectores/presidente-de-cerro-matoso-advierte-suspender-contrato-de-gas-con-canacol-pone-en-riesgo-la-viabilidad-del-negocio-3554499",
+    "publicado": "2026-05-11T10:42:57-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "FUERZA AEROESPACIAL COLOMBIANA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 307,
+  "noticias": 5,
+  "ejemplos": [
+   {
+    "id": 3547321,
+    "titulo": "Atención: Solo el 19% de las aeronaves de la Fuerza Aeroespacial cuenta con seguro, alerta la Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/atencion-solo-el-19-de-las-aeronaves-de-la-fuerza-aeroespacial-cuenta-con-seguro-alerta-la-contraloria-3547321",
+    "publicado": "2026-04-13T06:01:00-05:00"
+   },
+   {
+    "id": 3562373,
+    "titulo": "Saab descarta riesgo en contrato de los Gripen por relevo de gobierno: ¿cómo va el cronograma para la entrega de los cazas?",
+    "url": "https://www.eltiempo.com/justicia/conflicto-y-narcotrafico/saab-descarta-riesgo-en-contrato-de-los-gripen-por-relevo-de-gobierno-como-va-el-cronograma-para-la-entrega-de-los-cazas-3562373",
+    "publicado": "2026-06-05T22:05:00-05:00"
+   },
+   {
+    "id": 3573214,
+    "titulo": "Procuraduría vigilará la contratación de $13 billones de MinDefensa para fortalecer las Fuerzas Militares y la Policía",
+    "url": "https://www.eltiempo.com/justicia/investigacion/procuraduria-le-pone-la-lupa-a-la-contratacion-de-13-billones-para-fortalecer-las-fuerzas-militares-y-la-policia-3573214",
+    "publicado": "2026-07-23T07:38:53-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "SUPERSOCIEDADES",
+  "departamento": "No Definido",
+  "procesos_en_secop": 108,
+  "noticias": 5,
+  "ejemplos": [
+   {
+    "id": 3554132,
+    "titulo": "Superservicios activa vigilancia sobre Canacol ante riesgo de suspensión de contratos de gas en Colombia",
+    "url": "https://www.eltiempo.com/economia/sectores/superservicios-activa-vigilancia-sobre-canacol-ante-riesgo-de-suspension-de-contratos-de-gas-en-colombia-3554132",
+    "publicado": "2026-05-08T09:59:37-05:00"
+   },
+   {
+    "id": 3569567,
+    "titulo": "Ecopetrol y Aerocivil: la evidencia de turbios contratos de última hora del gobierno Petro que han salido a relucir en pleno empalme",
+    "url": "https://www.eltiempo.com/unidad-investigativa/ecopetrol-y-aerocivil-la-evidencia-de-turbios-contratos-de-ultima-hora-del-gobierno-petro-que-han-salido-a-relucir-en-pleno-empalme-3569567",
+    "publicado": "2026-07-07T08:16:02-05:00"
+   },
+   {
+    "id": 3568888,
+    "titulo": "¿Qué sigue tras fallo canadiense sobre contratos de Canacol?; nuevo capítulo se jugará en la Supersociedades",
+    "url": "https://www.eltiempo.com/economia/empresas/que-sigue-tras-fallo-canadiense-sobre-contratos-de-canacol-nuevo-capitulo-se-jugara-en-la-supersociedades-3568888",
+    "publicado": "2026-07-06T18:14:27-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "IMPRENTA NACIONAL DE COLOMBIA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 69,
+  "noticias": 5,
+  "ejemplos": [
+   {
+    "id": 3524752,
+    "titulo": "‘El nuevo esquema de pasaportes no está plenamente estructurado’: contralor delegado advierte riesgos en contrato con Portugal",
+    "url": "https://www.eltiempo.com/justicia/investigacion/el-nuevo-esquema-de-pasaportes-no-esta-plenamente-estructurado-contralor-delegado-advierte-riesgos-en-contrato-con-portugal-3524752",
+    "publicado": "2026-01-16T13:11:43-05:00"
+   },
+   {
+    "id": 3524690,
+    "titulo": "Alerta en nuevo modelo de producción de pasaportes: Contraloría identificó 'riesgos, retrasos e incumplimientos de plazos'",
+    "url": "https://www.eltiempo.com/justicia/servicios/alerta-en-nuevo-modelo-de-produccion-de-pasaportes-contraloria-identifico-riesgos-retrasos-e-incumplimientos-de-plazos-3524690",
+    "publicado": "2026-01-16T11:25:35-05:00"
+   },
+   {
+    "id": 3534584,
+    "titulo": "Pasaportes: en medio de polémica y proceso judicial, la Imprenta Nacional adjudica nuevo contrato por $ 13 mil millones",
+    "url": "https://www.eltiempo.com/unidad-investigativa/pasaportes-en-medio-de-polemica-y-proceso-judicial-la-imprenta-nacional-adjudica-nuevo-contrato-por-13-mil-millones-3534584",
+    "publicado": "2026-02-23T07:03:55-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "POLICIA METROPOLITANA DE BOGOTA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 28,
+  "noticias": 5,
+  "ejemplos": [
+   {
+    "id": 3525697,
+    "titulo": "Claves de la muerte del profesor del Externado Neill Cubides tras desaparecer en Bogotá: su otro trabajo en la Procuraduría y los millonarios retiros",
+    "url": "https://www.eltiempo.com/bogota/claves-de-la-muerte-del-profesor-del-externado-neill-cubides-tras-desaparecer-en-bogota-su-otro-trabajo-en-la-procuraduria-y-los-millonarios-retiros-3525697",
+    "publicado": "2026-01-20T15:18:22-05:00"
+   },
+   {
+    "id": 3550313,
+    "titulo": "Elvia Otero, aspirante a la Contraloría, narró cómo fue violento atentado en su contra en Ciudad Salitre, en Bogotá: 'Desconcertada'",
+    "url": "https://www.eltiempo.com/bogota/aspirante-a-la-contraloria-elvia-otero-narro-como-fueron-los-minutos-de-panico-cuando-sufrio-atentado-en-ciudad-salitre-en-bogota-desconcertada-3550313",
+    "publicado": "2026-04-23T15:54:57-05:00"
+   },
+   {
+    "id": 3550171,
+    "titulo": "Así quedó la camioneta en la que se movilizaba aspirante a la Contraloría tras atentado en Ciudad Salitre, en Bogotá: detalles del ataque",
+    "url": "https://www.eltiempo.com/bogota/asi-quedo-la-camioneta-en-la-que-se-movilizaba-aspirante-a-la-contraloria-tras-atentado-en-ciudad-salitre-en-bogota-detalles-del-ataque-3550171",
+    "publicado": "2026-04-22T23:16:01-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "GOBIERNO DEPARTAMENTAL",
+  "departamento": "Tolima",
+  "procesos_en_secop": 1008,
+  "noticias": 4,
+  "ejemplos": [
+   {
+    "id": 3536081,
+    "titulo": "'Contratos en HUV no son ilegales': le respondió la gobernadora del Valle al presidente Petro, tras afirmar que el hospital era centro de esclavitud",
+    "url": "https://www.eltiempo.com/colombia/cali/contratos-en-huv-no-son-ilegales-le-respondio-la-gobernadora-del-valle-al-presidente-petro-tras-afirmar-que-el-hospital-era-centro-de-esclavitud-3536081",
+    "publicado": "2026-02-27T20:37:52-05:00"
+   },
+   {
+    "id": 3535096,
+    "titulo": "¿Quiere verificar la transparencia de las obras en el Valle? En esta plataforma podrá consultar contratos, presupuestos y responsables en tiempo real",
+    "url": "https://www.eltiempo.com/colombia/cali/quiere-verificar-la-transparencia-de-las-obras-en-el-valle-en-esta-plataforma-podra-consultar-contratos-presupuestos-y-responsables-en-tiempo-real-3535096",
+    "publicado": "2026-02-24T14:11:00-05:00"
+   },
+   {
+    "id": 3545979,
+    "titulo": "El Instituto departamental Inciva activa la ruta de protección tras presuntos casos de acoso sexual: Fiscalía y Procuraduría acompañan investigaciones",
+    "url": "https://www.eltiempo.com/colombia/cali/el-instituto-departamental-inciva-activa-la-ruta-de-proteccion-tras-presuntos-casos-de-acoso-sexual-fiscalia-y-procuraduria-acompanan-investigaciones-3545979",
+    "publicado": "2026-04-07T15:12:30-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DE AMBIENTE Y DESARROLLO SOSTENIBLE",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 363,
+  "noticias": 4,
+  "ejemplos": [
+   {
+    "id": 3527465,
+    "titulo": "La feria de contratación estatal: en tres semanas, el Gobierno Petro ha firmado contratos por 609 mil millones, en vísperas de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/la-feria-de-contratacion-estatal-en-tres-semanas-se-han-firmado-contratos-por-609-mil-millones-de-pesos-en-visperas-de-la-ley-de-garantias-3527465",
+    "publicado": "2026-01-27T18:15:17-05:00"
+   },
+   {
+    "id": 3535361,
+    "titulo": "RTVC recibió 18.800 millones de pesos en contratos con el Estado a pocos días de la entrada en vigor de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/rtvc-recibio-18-800-millones-de-pesos-en-contratos-con-el-estado-a-pocos-dias-de-la-entrada-en-vigor-de-la-ley-de-garantias-3535361",
+    "publicado": "2026-02-25T17:24:52-05:00"
+   },
+   {
+    "id": 3567414,
+    "titulo": "Los nueve contratos que firmó el Gobierno Nacional por más de 200 millones de pesos después de la segunda vuelta presidencial",
+    "url": "https://www.eltiempo.com/datos/los-nueve-contratos-que-firmo-el-gobierno-nacional-por-mas-de-200-millones-de-pesos-despues-de-la-segunda-vuelta-presidencial-3567414",
+    "publicado": "2026-06-28T13:50:07-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DE AGRICULTURA Y DESARROLLO RURAL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 333,
+  "noticias": 4,
+  "ejemplos": [
+   {
+    "id": 3527465,
+    "titulo": "La feria de contratación estatal: en tres semanas, el Gobierno Petro ha firmado contratos por 609 mil millones, en vísperas de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/la-feria-de-contratacion-estatal-en-tres-semanas-se-han-firmado-contratos-por-609-mil-millones-de-pesos-en-visperas-de-la-ley-de-garantias-3527465",
+    "publicado": "2026-01-27T18:15:17-05:00"
+   },
+   {
+    "id": 3535257,
+    "titulo": "Estas son las irregularidades halladas por la Contraloría en la entrega de subsidios de vivienda rural: los hallazgos superan los $9 mil millones",
+    "url": "https://www.eltiempo.com/justicia/investigacion/estas-son-las-irregularidades-halladas-por-la-contraloria-en-la-entrega-de-subsidios-de-vivienda-rural-los-hallazgos-superan-los-9-mil-millones-3535257",
+    "publicado": "2026-02-25T11:53:43-05:00"
+   },
+   {
+    "id": 3530081,
+    "titulo": "Estos son los hallazgos de la Contraloría sobre los recursos del Fondo Nacional del Arroz: miles de millones de pesos se están quedando en privados",
+    "url": "https://www.eltiempo.com/justicia/investigacion/estos-son-los-hallazgos-de-la-contraloria-sobre-los-recursos-del-fondo-nacional-del-arroz-miles-de-millones-de-pesos-se-estan-quedando-en-privados-3530081",
+    "publicado": "2026-02-06T08:51:32-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "PERSONERÍA DE BOGOTA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 213,
+  "noticias": 4,
+  "ejemplos": [
+   {
+    "id": 3533789,
+    "titulo": "Los contratos que suman más de 1.000 millones de pesos de la familia del ministro Antonio Sanguino con el Estado desde el inicio del gobierno Petro",
+    "url": "https://www.eltiempo.com/datos/los-contratos-que-suman-mas-de-1-000-millones-de-pesos-de-la-familia-del-ministro-antonio-sanguino-con-el-estado-desde-el-inicio-del-gobierno-petro-3533789",
+    "publicado": "2026-02-19T18:35:03-05:00"
+   },
+   {
+    "id": 3551442,
+    "titulo": "Séptima prórroga al contrato de cámaras LPR en Bogotá aumenta cuestionamientos por retrasos",
+    "url": "https://www.eltiempo.com/bogota/septima-prorroga-al-contrato-de-camaras-lpr-en-bogota-aumenta-cuestionamientos-por-retrasos-3551442",
+    "publicado": "2026-04-29T13:10:36-05:00"
+   },
+   {
+    "id": 3545728,
+    "titulo": "Tras salida de Carlos Mario Zuluaga, Contraloría nombra a Carlos Silgado como nuevo vicecontralor",
+    "url": "https://www.eltiempo.com/justicia/investigacion/tras-salida-de-carlos-mario-zuluaga-contraloria-nombra-a-carlos-silgado-como-nuevo-vicecontralor-3545728",
+    "publicado": "2026-04-06T18:05:59-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "FONDO COLOMBIA EN PAZ",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 79,
+  "noticias": 4,
+  "ejemplos": [
+   {
+    "id": 3550345,
+    "titulo": "'Parece que entre más denuncias por corrupción, más los atornillan en sus cargos': Jennifer Pedraza critica al Gobierno por rol de Juliana Guerrero",
+    "url": "https://www.eltiempo.com/politica/partidos-politicos/entre-mas-denuncias-por-corrupcion-mas-los-atornillan-en-sus-cargos-jennifer-pedraza-critica-al-gobierno-petro-por-rol-de-juliana-guerrero-3550345",
+    "publicado": "2026-04-23T18:38:22-05:00"
+   },
+   {
+    "id": 3573842,
+    "titulo": "Circulan videos de Juliana Guerrero en las Fiestas del Mar en Santa Marta, en medio de revelaciones por corrupción",
+    "url": "https://www.eltiempo.com/politica/gobierno/circulan-videos-de-juliana-guerrero-en-las-fiestas-del-mar-en-santa-marta-en-medio-de-revelaciones-por-corrupcion-3573842",
+    "publicado": "2026-07-25T14:36:13-05:00"
+   },
+   {
+    "id": 3573810,
+    "titulo": "Gustavo Petro se refiere a denuncias contra Juliana Guerrero por supuesta red de coimas por contratos con su Gobierno: 'Dieron plata como pendejos'",
+    "url": "https://www.eltiempo.com/politica/gobierno/gustavo-petro-se-refiere-a-denuncias-contra-juliana-guerrero-por-supuesta-red-de-coimas-por-contratos-con-su-gobierno-dieron-plata-como-pendejos-3573810",
+    "publicado": "2026-07-25T10:46:56-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "AUDITORIA GENERAL DE LA REPUBLICA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 43,
+  "noticias": 4,
+  "ejemplos": [
+   {
+    "id": 3550543,
+    "titulo": "Estos son los puntajes más altos de la prueba de conocimiento en la puja por la Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/el-vice-carlos-mario-zuluaga-y-los-puntajes-mas-altos-de-la-prueba-de-conocimiento-en-la-puja-por-la-contraloria-3550543",
+    "publicado": "2026-04-24T08:25:14-05:00"
+   },
+   {
+    "id": 3550255,
+    "titulo": "¿Quién es Elvia Isabel Otero, la aspirante a la Contraloría General, víctima de crudo atentado sicarial en Bogotá?",
+    "url": "https://www.eltiempo.com/justicia/delitos/quien-es-elvia-isabel-otero-la-aspirante-a-la-contraloria-general-victima-de-crudo-atentado-sicarial-en-bogota-3550255",
+    "publicado": "2026-04-23T11:27:33-05:00"
+   },
+   {
+    "id": 3545587,
+    "titulo": "Auditoría General advirtió que hubo más de 262.000 contratos directos antes de la Ley de Garantías en 2026",
+    "url": "https://www.eltiempo.com/justicia/investigacion/auditoria-general-advirtio-que-hubo-mas-de-262-000-contratos-directos-antes-de-la-ley-de-garantias-en-3545587",
+    "publicado": "2026-04-06T11:23:38-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "PERSONERIA MUNICIPAL",
+  "departamento": "Boyacá",
+  "procesos_en_secop": 2,
+  "noticias": 4,
+  "ejemplos": [
+   {
+    "id": 3526789,
+    "titulo": "¿Por qué la Procuraduría General de la Nación abrió una investigación disciplinaria al alcalde de Tuluá, Gustavo Vélez? Esto dijo el mandatario",
+    "url": "https://www.eltiempo.com/colombia/cali/por-que-la-procuraduria-general-de-la-nacion-abrio-una-investigacion-disciplinaria-al-alcalde-de-tulua-gustavo-velez-esto-dijo-el-mandatario-3526789",
+    "publicado": "2026-01-23T23:24:27-05:00"
+   },
+   {
+    "id": 3522847,
+    "titulo": "Atlántico | Gerente del hospital de Manatí es apartada del cargo por investigación disciplinaria sobre contratos; designan reemplazo temporal",
+    "url": "https://www.eltiempo.com/colombia/barranquilla/atlantico-gerente-del-hospital-de-manati-es-apartada-del-cargo-por-investigacion-disciplinaria-sobre-contratos-designan-reemplazo-temporal-3522847",
+    "publicado": "2026-01-08T13:33:35-05:00"
+   },
+   {
+    "id": 3549246,
+    "titulo": "Firmar contratos de arriendo en Colombia: los cinco filtros de confianza para protegerse antes de cerrar un acuerdo",
+    "url": "https://www.eltiempo.com/economia/finanzas-personales/firmar-contratos-de-arriendo-en-colombia-los-cinco-filtros-de-confianza-para-protegerse-antes-de-cerrar-un-acuerdo-3549246",
+    "publicado": "2026-04-20T08:51:15-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD NACIONAL DE COLOMBIA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 3644,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3527225,
+    "titulo": "Esta es la única universidad pública, de las 34 que hay en Colombia, que puede mantenerse con recursos propios, según la Contraloría",
+    "url": "https://www.eltiempo.com/vida/educacion/esta-es-la-unica-universidad-publica-de-las-34-que-hay-en-colombia-que-puede-mantenerse-con-recursos-propios-segun-la-contraloria-3527225",
+    "publicado": "2026-01-26T14:34:06-05:00"
+   },
+   {
+    "id": 3525308,
+    "titulo": "El patrimonio declarado de Carolina Corcho, cabeza de lista al Senado por el Pacto Histórico, y los contratos que ha tenido con el Estado",
+    "url": "https://www.eltiempo.com/datos/el-patrimonio-declarado-de-carolina-corcho-cabeza-de-lista-al-senado-por-el-pacto-historico-y-los-contratos-que-ha-tenido-con-el-estado-3525308",
+    "publicado": "2026-01-21T12:29:38-05:00"
+   },
+   {
+    "id": 3551442,
+    "titulo": "Séptima prórroga al contrato de cámaras LPR en Bogotá aumenta cuestionamientos por retrasos",
+    "url": "https://www.eltiempo.com/bogota/septima-prorroga-al-contrato-de-camaras-lpr-en-bogota-aumenta-cuestionamientos-por-retrasos-3551442",
+    "publicado": "2026-04-29T13:10:36-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD DISTRITAL FRANCISCO JOSE DE CALDAS",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 943,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3533226,
+    "titulo": "Un colegio a medio hacer, contratos sin cumplir y pagos injustificados a profesores: las conclusiones de la Contraloría tras auditoría al Magdalena",
+    "url": "https://www.eltiempo.com/justicia/investigacion/un-colegio-a-medio-hacer-contratos-sin-cumplir-y-pagos-injustificados-a-profesores-las-conclusiones-de-la-auditoria-al-magdalena-de-la-contraloria-3533226",
+    "publicado": "2026-02-17T17:18:06-05:00"
+   },
+   {
+    "id": 3550018,
+    "titulo": "Contraloría de Bogotá determina fallo por más de $ 30.000 millones en la Universidad Distrital por irregularidades: 'Hay responsables identificados'",
+    "url": "https://www.eltiempo.com/bogota/contraloria-de-bogota-determina-fallo-por-mas-de-30-000-millones-en-la-universidad-distrital-por-irregularidades-hay-responsables-identificados-3550018",
+    "publicado": "2026-04-22T14:20:59-05:00"
+   },
+   {
+    "id": 3548202,
+    "titulo": "Los funcionarios y exdirectivos que deberán responder por millonario detrimento en la U. Distrital tras reciente fallo de la Contraloría de Bogotá",
+    "url": "https://www.eltiempo.com/bogota/los-funcionarios-y-exdirectivos-que-deberan-responder-por-millonario-detrimento-en-la-u-distrital-con-reciente-fallo-de-la-contraloria-de-bogota-3548202",
+    "publicado": "2026-04-15T18:37:44-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DISTRITO ESPECIAL INDUSTRIAL Y PORTUARIO DE BARRANQUILLA",
+  "departamento": "Atlántico",
+  "procesos_en_secop": 631,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3532471,
+    "titulo": "Informe | En previa a la Ley de Garantías hubo una cascada de contratos públicos",
+    "url": "https://www.eltiempo.com/justicia/investigacion/informe-en-previa-a-la-ley-de-garantias-hubo-una-cascada-de-contratos-publicos-3532471",
+    "publicado": "2026-02-14T22:15:00-05:00"
+   },
+   {
+    "id": 3531737,
+    "titulo": "Contraloría confirma que gobierno Petro hizo contratos por $14 billones antes de Ley de Garantías: la misma cifra de la emergencia económica",
+    "url": "https://www.eltiempo.com/justicia/investigacion/atencion-contraloria-confirma-que-gobierno-petro-hizo-contratos-por-14-billones-antes-de-ley-de-garantias-y-supero-por-mucho-la-era-duque-3531737",
+    "publicado": "2026-02-12T21:04:28-05:00"
+   },
+   {
+    "id": 3531874,
+    "titulo": "‘Puede representar un riesgo’: delegado de la Contraloría que reveló cascada de contratos del gobierno Petro previo a la Ley de Garantías",
+    "url": "https://www.eltiempo.com/justicia/investigacion/puede-representar-un-riesgo-delegado-de-la-contraloria-que-revelo-cascada-de-contratos-del-gobierno-petro-previo-a-la-ley-de-garantias-3531874",
+    "publicado": "2026-02-12T16:43:30-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "FONDO UNICO DE TECNOLOGÍAS DE LA INFORMACIÓN Y LAS COMUNICACIONES",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 515,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3535361,
+    "titulo": "RTVC recibió 18.800 millones de pesos en contratos con el Estado a pocos días de la entrada en vigor de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/rtvc-recibio-18-800-millones-de-pesos-en-contratos-con-el-estado-a-pocos-dias-de-la-entrada-en-vigor-de-la-ley-de-garantias-3535361",
+    "publicado": "2026-02-25T17:24:52-05:00"
+   },
+   {
+    "id": 3530866,
+    "titulo": "Salim Kadamani, hermano de la ministra de Cultura, ha firmado contratos por 383’695.900 pesos con el Estado",
+    "url": "https://www.eltiempo.com/datos/salim-kadamani-hermano-de-la-ministra-de-cultura-ha-firmado-contratos-por-383-695-900-pesos-con-el-estado-3530866",
+    "publicado": "2026-02-14T19:05:21-05:00"
+   },
+   {
+    "id": 3537686,
+    "titulo": "¿Cuál es la empresa detrás del millonario contrato de la polémica película en la que el presidente Gustavo Petro hará cameo?",
+    "url": "https://www.eltiempo.com/datos/cual-es-la-empresa-detras-del-millonario-contrato-de-la-polemica-pelicula-en-la-que-el-presidente-gustavo-petro-hara-cameo-3537686",
+    "publicado": "2026-03-06T11:47:32-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DEPARTAMENTO ADMINISTRATIVO NACIONAL DE ESTADISTICA (DANE)",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 463,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3527465,
+    "titulo": "La feria de contratación estatal: en tres semanas, el Gobierno Petro ha firmado contratos por 609 mil millones, en vísperas de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/la-feria-de-contratacion-estatal-en-tres-semanas-se-han-firmado-contratos-por-609-mil-millones-de-pesos-en-visperas-de-la-ley-de-garantias-3527465",
+    "publicado": "2026-01-27T18:15:17-05:00"
+   },
+   {
+    "id": 3528688,
+    "titulo": "En 30 días y en plena época electoral, el gobierno de Gustavo Petro contrató más de $ 1,3 billones en 10 entidades: este es el top",
+    "url": "https://www.eltiempo.com/unidad-investigativa/en-30-dias-y-en-plena-epoca-electoral-el-gobierno-de-gustavo-petro-contrato-mas-de-1-3-billones-en-10-entidades-este-es-el-top-3528688",
+    "publicado": "2026-02-01T12:51:16-05:00"
+   },
+   {
+    "id": 3563832,
+    "titulo": "Procuraduría alerta que el 71 % de municipios y departamentos carece de diagnósticos actualizados sobre trabajo infantil",
+    "url": "https://www.eltiempo.com/justicia/investigacion/procuraduria-alerta-que-el-71-de-municipios-y-departamentos-carece-de-diagnosticos-actualizados-sobre-trabajo-infantil-3563832",
+    "publicado": "2026-06-12T06:40:39-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DEL DEPORTE",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 346,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3527465,
+    "titulo": "La feria de contratación estatal: en tres semanas, el Gobierno Petro ha firmado contratos por 609 mil millones, en vísperas de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/la-feria-de-contratacion-estatal-en-tres-semanas-se-han-firmado-contratos-por-609-mil-millones-de-pesos-en-visperas-de-la-ley-de-garantias-3527465",
+    "publicado": "2026-01-27T18:15:17-05:00"
+   },
+   {
+    "id": 3535361,
+    "titulo": "RTVC recibió 18.800 millones de pesos en contratos con el Estado a pocos días de la entrada en vigor de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/rtvc-recibio-18-800-millones-de-pesos-en-contratos-con-el-estado-a-pocos-dias-de-la-entrada-en-vigor-de-la-ley-de-garantias-3535361",
+    "publicado": "2026-02-25T17:24:52-05:00"
+   },
+   {
+    "id": 3567414,
+    "titulo": "Los nueve contratos que firmó el Gobierno Nacional por más de 200 millones de pesos después de la segunda vuelta presidencial",
+    "url": "https://www.eltiempo.com/datos/los-nueve-contratos-que-firmo-el-gobierno-nacional-por-mas-de-200-millones-de-pesos-despues-de-la-segunda-vuelta-presidencial-3567414",
+    "publicado": "2026-06-28T13:50:07-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CAJA DE RETIRO DE LAS FUERZAS MILITARES",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 157,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3573865,
+    "titulo": "En solo 15 días, el gobierno de Gustavo Petro busca adjudicar contratos por cerca de $ 3 billones de pesos",
+    "url": "https://www.eltiempo.com/justicia/investigacion/en-solo-15-dias-el-gobierno-de-gustavo-petro-busca-adjudicar-contratos-por-cerca-de-3-billones-3573865",
+    "publicado": "2026-07-27T11:57:47-05:00"
+   },
+   {
+    "id": 3573596,
+    "titulo": "Veinticuatro horas antes de posesión de De La Espriella, se firmará en Colpensiones jugoso contrato de interventoría en manejo de datos de afiliados",
+    "url": "https://www.eltiempo.com/unidad-investigativa/veinticuatro-horas-antes-de-posesion-de-de-la-espriella-se-firma-en-colpensiones-millonario-contrato-de-interventoria-en-manejo-de-datos-de-afiliados-3573596",
+    "publicado": "2026-07-24T18:35:18-05:00"
+   },
+   {
+    "id": 3568637,
+    "titulo": "Las empresas detrás de pelea entre cabeza de Colpensiones y senador Enrique Gómez por contrato de $223 mil millones para manejo de datos de afiliados",
+    "url": "https://www.eltiempo.com/unidad-investigativa/las-empresas-detras-de-pelea-entre-cabeza-de-colpensiones-y-senador-enrique-gomez-por-contrato-de-223-mil-millones-para-manejo-de-datos-de-afiliados-3568637",
+    "publicado": "2026-07-08T19:06:42-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DE DEFENSA NACIONAL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 134,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3524147,
+    "titulo": "Procuraduría rechaza asesinato de menor de 11 años en medio de atentado a directivos de la cárcel de Neiva",
+    "url": "https://www.eltiempo.com/justicia/investigacion/procuraduria-rechaza-asesinato-de-menor-de-11-anos-en-medio-de-atentado-a-directivos-de-la-carcel-de-neiva-3524147",
+    "publicado": "2026-01-14T13:13:50-05:00"
+   },
+   {
+    "id": 3567414,
+    "titulo": "Los nueve contratos que firmó el Gobierno Nacional por más de 200 millones de pesos después de la segunda vuelta presidencial",
+    "url": "https://www.eltiempo.com/datos/los-nueve-contratos-que-firmo-el-gobierno-nacional-por-mas-de-200-millones-de-pesos-despues-de-la-segunda-vuelta-presidencial-3567414",
+    "publicado": "2026-06-28T13:50:07-05:00"
+   },
+   {
+    "id": 3575673,
+    "titulo": "Petro termina su presidencia dejando un proyecto de hueco fiscal de $30 billones en el presupuesto para 2027: grave alerta de la Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/petro-termina-su-presidencia-dejando-un-hueco-fiscal-de-30-billones-en-el-presupuesto-para-2027-grave-alerta-de-la-contraloria-3575673",
+    "publicado": "2026-08-03T06:17:47-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "SUPERINTENDENCIA DEL SUBSIDIO FAMILIAR",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 117,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3543464,
+    "titulo": "Estas son las fallas del gobierno en la sostenida intervención a las Cajas de Compensación Familiar: alerta de la Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/estas-son-las-fallas-del-gobierno-en-la-sostenida-intervencion-a-las-cajas-de-compensacion-familiar-alerta-de-la-contraloria-3543464",
+    "publicado": "2026-03-27T09:52:14-05:00"
+   },
+   {
+    "id": 3578122,
+    "titulo": "¿En cuáles entidades ha tenido contratos Elizabeth Ortiz, la 'influencer' del gobierno Petro? Suman $795 millones",
+    "url": "https://www.eltiempo.com/datos/en-cuales-entidades-ha-tenido-contratos-elizabeth-ortiz-la-influencer-del-gobierno-petro-suman-795-millones-3578122",
+    "publicado": "2026-08-14T10:05:33-05:00"
+   },
+   {
+    "id": 3577987,
+    "titulo": "'Influencer' Elizabeth Ortiz firmó 13 contratos por $ 795 millones con el Estado durante todo el gobierno de Gustavo Petro; aún hay dos vigentes",
+    "url": "https://www.eltiempo.com/datos/influencer-elizabeth-ortiz-firmo-13-contratos-por-795-millones-con-el-estado-durante-todo-el-gobierno-de-gustavo-petro-aun-hay-dos-vigentes-3577987",
+    "publicado": "2026-08-13T07:35:19-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "INDUSTRIA MILITAR",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 111,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3562373,
+    "titulo": "Saab descarta riesgo en contrato de los Gripen por relevo de gobierno: ¿cómo va el cronograma para la entrega de los cazas?",
+    "url": "https://www.eltiempo.com/justicia/conflicto-y-narcotrafico/saab-descarta-riesgo-en-contrato-de-los-gripen-por-relevo-de-gobierno-como-va-el-cronograma-para-la-entrega-de-los-cazas-3562373",
+    "publicado": "2026-06-05T22:05:00-05:00"
+   },
+   {
+    "id": 3568913,
+    "titulo": "Contratos amarrados y nombramiento de petristas: los hallazgos del empalme con el gobierno saliente",
+    "url": "https://www.eltiempo.com/unidad-investigativa/contratos-amarrados-y-nombramiento-de-petristas-los-hallazgos-del-empalme-con-el-gobierno-saliente-3568913",
+    "publicado": "2026-07-06T14:13:24-05:00"
+   },
+   {
+    "id": 3569359,
+    "titulo": "Mark Rutte, secretario general de la Otán, anuncia contratos millonarios para rearme de la alianza y pide a Europa asumir un mayor papel en su defensa",
+    "url": "https://www.eltiempo.com/mundo/europa/mark-rutte-secretario-general-de-la-otan-anuncia-contratos-millonarios-para-rearme-de-la-alianza-y-pide-a-europa-asumir-un-mayor-papel-en-su-defensa-3569359",
+    "publicado": "2026-07-06T11:36:29-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "COMISION DE REGULACION DE ENERGIA Y GAS",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 30,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3539393,
+    "titulo": "Bolsa Mercantil de Colombia recibe aval de la Creg para operar nuevo mecanismo de contratación de energía eléctrica",
+    "url": "https://www.eltiempo.com/economia/sectores/bolsa-mercantil-de-colombia-recibe-aval-de-la-creg-para-operar-nuevo-mecanismo-de-contratacion-de-energia-electrica-3539393",
+    "publicado": "2026-03-11T14:24:15-05:00"
+   },
+   {
+    "id": 3550383,
+    "titulo": "Gobierno propone ajustar regulación para que Air-e contrate más energía ante riesgo de fenómeno de El Niño: piden revisar reglas de contratación",
+    "url": "https://www.eltiempo.com/colombia/barranquilla/gobierno-propone-ajustar-regulacion-para-que-air-e-contrate-mas-energia-ante-riesgo-de-fenomeno-de-el-nino-piden-revisar-reglas-de-contratacion-3550383",
+    "publicado": "2026-04-23T15:40:10-05:00"
+   },
+   {
+    "id": 3554132,
+    "titulo": "Superservicios activa vigilancia sobre Canacol ante riesgo de suspensión de contratos de gas en Colombia",
+    "url": "https://www.eltiempo.com/economia/sectores/superservicios-activa-vigilancia-sobre-canacol-ante-riesgo-de-suspension-de-contratos-de-gas-en-colombia-3554132",
+    "publicado": "2026-05-08T09:59:37-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "FONDO MIXTO SIERRA NEVADA",
+  "departamento": "Cesar",
+  "procesos_en_secop": 30,
+  "noticias": 3,
+  "ejemplos": [
+   {
+    "id": 3576240,
+    "titulo": "Los detalles inéditos de la supuesta red de corrupción que movió $ 3,1 billones de regalías y salpica a cinco gobernadores",
+    "url": "https://www.eltiempo.com/justicia/delitos/los-detalles-ineditos-de-la-supuesta-red-de-corrupcion-que-movio-3-1-billones-de-regalias-y-salpica-a-cinco-gobernadores-3576240",
+    "publicado": "2026-08-05T06:05:54-05:00"
+   },
+   {
+    "id": 3576158,
+    "titulo": "Con 13 capturas, la Fiscalía destapó presunta red de corrupción que habría movido $3,1 billones de regalías",
+    "url": "https://www.eltiempo.com/justicia/delitos/con-13-capturas-la-fiscalia-destapo-presunta-red-de-corrupcion-que-habria-movido-3-1-billones-de-regalias-3576158",
+    "publicado": "2026-08-04T16:36:09-05:00"
+   },
+   {
+    "id": 3575835,
+    "titulo": "Fiscalía captura a un alcalde y otras 12 personas por presunta 'megared' de corrupción con dineros de regalías",
+    "url": "https://www.eltiempo.com/justicia/delitos/fiscalia-captura-a-un-alcalde-y-otras-12-personas-por-pregunta-megared-de-corrupcion-con-dineros-de-regalias-3575835",
+    "publicado": "2026-08-03T12:44:10-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "(Secretaría Distrital de Integración Social)",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 3527,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3540125,
+    "titulo": "Corte Suprema condena a más de cuatro años de prisión al exsenador Iván Moreno por el carrusel de la contratación en Bogotá",
+    "url": "https://www.eltiempo.com/justicia/cortes/corte-suprema-condena-a-mas-de-cuatro-anos-de-prision-al-exsenador-ivan-moreno-por-el-carrusel-de-la-contratacion-en-bogota-3540125",
+    "publicado": "2026-03-13T22:56:12-05:00"
+   },
+   {
+    "id": 3566046,
+    "titulo": "Contraloría abre proceso fiscal por presunta doble atención a 1.315 niños en Bogotá",
+    "url": "https://www.eltiempo.com/bogota/contraloria-abre-proceso-fiscal-por-presunta-doble-atencion-a-1-315-ninos-en-bogota-3566046",
+    "publicado": "2026-06-23T06:16:38-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "GOBERNACIÓN DE BOYACÁ",
+  "departamento": "Boyacá",
+  "procesos_en_secop": 948,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3553818,
+    "titulo": "Atención: el alcalde de Villa de Leyva, Víctor Gamboa, fue capturado por agentes del CTI cuando ingresaba al edificio de la Alcaldía; lo que se sabe",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/atencion-el-alcalde-de-villa-de-leyva-fue-capturado-esta-manana-por-agentes-del-cti-en-un-caso-de-corrupcion-3553818",
+    "publicado": "2026-05-07T11:45:00-05:00"
+   },
+   {
+    "id": 3565541,
+    "titulo": "Procuraduría abre investigación contra el gobernador Carlos Amaya por supuesta participación indebida en política",
+    "url": "https://www.eltiempo.com/politica/elecciones-colombia-2026/procuraduria-abre-investigacion-contra-el-gobernador-carlos-amaya-por-supuesta-participacion-indebida-en-politica-3565541",
+    "publicado": "2026-06-19T12:44:56-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "SECRETARÍA DISTRITAL DE MOVILIDAD",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 793,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3535698,
+    "titulo": "Inicia el proceso de licitación para el nuevo sistema de recaudo del transporte público en Bogotá",
+    "url": "https://www.eltiempo.com/bogota/inicia-el-proceso-de-licitacion-para-el-nuevo-sistema-de-recaudo-del-transporte-publico-en-bogota-3535698",
+    "publicado": "2026-02-26T11:07:20-05:00"
+   },
+   {
+    "id": 3550836,
+    "titulo": "Empresa suspendida por presuntos vínculos criminales tiene contrato con Movilidad: alerta Diana Diago, concejal de Bogotá",
+    "url": "https://www.eltiempo.com/bogota/empresa-suspendida-por-presuntos-vinculos-criminales-tiene-contrato-con-movilidad-alerta-diana-diago-concejal-de-bogota-3550836",
+    "publicado": "2026-04-25T11:35:01-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "GOBERNACION DE NARIÑO",
+  "departamento": "Nariño",
+  "procesos_en_secop": 767,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3535356,
+    "titulo": "¿Por qué Procuraduría suspendió al alcalde de Ipiales, Nariño, durante tres meses?: 'Esto es infame, no he robado ni un peso', dijo el mandatario",
+    "url": "https://www.eltiempo.com/colombia/cali/por-que-procuraduria-suspendio-al-alcalde-de-ipiales-narino-durante-tres-meses-esto-es-infame-no-me-he-robado-ni-un-peso-dijo-el-mandatario-3535356",
+    "publicado": "2026-02-25T13:15:30-05:00"
+   },
+   {
+    "id": 3537133,
+    "titulo": "SIC abre dos investigaciones por presunta colusión en contratación pública en el Icbf y en licitación de infraestructura en La Mesa, Cundinamarca",
+    "url": "https://www.eltiempo.com/justicia/investigacion/sic-abre-dos-investigaciones-por-presunta-colusion-en-contratacion-publica-en-el-icbf-y-en-licitacion-de-infraestructura-en-la-mesa-cundinamarca-3537133",
+    "publicado": "2026-03-04T07:19:57-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "TRANSMILENIO S.A.",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 484,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3550545,
+    "titulo": "Video| Sancionan a dos funcionarias vinculadas a la Secretaría de Educación tras colarse en TransMilenio: operador suspendió sus contratos",
+    "url": "https://www.eltiempo.com/bogota/video-sancionan-a-dos-funcionarias-vinculadas-a-la-secretaria-de-educacion-tras-colarse-en-transmilenio-operador-suspendio-sus-contratos-3550545",
+    "publicado": "2026-04-24T08:20:28-05:00"
+   },
+   {
+    "id": 3546796,
+    "titulo": "TransMilenio abre licitación para escoger al operador del TransMiCable de San Cristóbal",
+    "url": "https://www.eltiempo.com/bogota/transmilenio-abre-licitacion-para-escoger-al-operador-del-transmicable-de-san-cristobal-3546796",
+    "publicado": "2026-04-10T07:44:08-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD DEL VALLE",
+  "departamento": "Valle del Cauca",
+  "procesos_en_secop": 451,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3527225,
+    "titulo": "Esta es la única universidad pública, de las 34 que hay en Colombia, que puede mantenerse con recursos propios, según la Contraloría",
+    "url": "https://www.eltiempo.com/vida/educacion/esta-es-la-unica-universidad-publica-de-las-34-que-hay-en-colombia-que-puede-mantenerse-con-recursos-propios-segun-la-contraloria-3527225",
+    "publicado": "2026-01-26T14:34:06-05:00"
+   },
+   {
+    "id": 3526838,
+    "titulo": "Solo una de 34 universidades públicas es autosostenible: el duro informe de la Contraloría sobre la educación superior",
+    "url": "https://www.eltiempo.com/justicia/investigacion/solo-una-de-34-universidades-publicas-es-autosostenible-el-duro-informe-de-la-contraloria-sobre-la-educacion-superior-3526838",
+    "publicado": "2026-01-25T08:55:10-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "GOBERNACION DEL CHOCÓ.",
+  "departamento": "No Definido",
+  "procesos_en_secop": 431,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3549450,
+    "titulo": "Primicia: Contraloría descubre multimillonario desfalco por 'becas fantasma' en Chocó y Magdalena",
+    "url": "https://www.eltiempo.com/justicia/investigacion/primicia-contraloria-descubre-multimillonario-desfalco-por-becas-fantasma-en-choco-y-magdalena-3549450",
+    "publicado": "2026-04-21T06:01:00-05:00"
+   },
+   {
+    "id": 3576038,
+    "titulo": "Corte Suprema llama a juicio al exgobernador del Chocó Jhoany Palacios por presuntas irregularidades en contrato de hospital de Acandí",
+    "url": "https://www.eltiempo.com/justicia/cortes/corte-suprema-llama-a-juicio-al-exgobernador-del-choco-jhoany-palacios-por-presuntas-irregularidades-en-contrato-de-hospital-de-acandi-3576038",
+    "publicado": "2026-08-04T09:45:37-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "Universidad de Cartagena",
+  "departamento": "Bolívar",
+  "procesos_en_secop": 232,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3527461,
+    "titulo": "Distrito de Cartagena entregó El Hospital de Nelson Mandela, un 'elefante blanco' que tardó 14 años en obra negra",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/distrito-de-cartagena-entrego-el-hospital-de-nelson-mandela-una-elefante-blanco-que-tardo-14-anos-en-obra-negra-3527461",
+    "publicado": "2026-01-27T08:33:57-05:00"
+   },
+   {
+    "id": 3564744,
+    "titulo": "Procuraduría abre proceso disciplinario contra docente de Universidad de Cartagena por presuntos mensajes inapropiados a estudiante",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/procuraduria-abre-proceso-disciplinario-contra-docente-de-universidad-de-cartagena-por-presuntos-mensajes-inapropiados-a-estudiante-3564744",
+    "publicado": "2026-06-16T20:21:50-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "AREA METROPOLITANA DE BUCARAMANGA",
+  "departamento": "Santander",
+  "procesos_en_secop": 131,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3540027,
+    "titulo": "Así fue el operativo en el que el CTI capturó a exfuncionaria condenada por corrupción en Bucaramanga",
+    "url": "https://www.eltiempo.com/justicia/delitos/asi-fue-el-operativo-en-el-que-el-cti-capturo-a-exfuncionaria-condenada-por-corrupcion-en-bucaramanga-3540027",
+    "publicado": "2026-03-16T01:19:27-05:00"
+   },
+   {
+    "id": 3576373,
+    "titulo": "Las razones de la Procuraduría para indagar a Susana Muhamad e Irene Vélez por presuntas omisiones en la protección del páramo de Santurbán",
+    "url": "https://www.eltiempo.com/justicia/investigacion/las-razones-de-la-procuraduria-para-indagar-a-susana-muhamad-e-irene-velez-por-presuntas-omisiones-en-la-proteccion-del-paramo-de-santurban-3576373",
+    "publicado": "2026-08-05T11:16:02-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DIRECCIÓN DE INVESTIGACIÓN CRIMINAL E INTERPOL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 118,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3546630,
+    "titulo": "Coronel que investigó casos de corrupción pierde cupo en estudios en Washington, tras retiro de respaldo oficial: ¿qué hay detrás?",
+    "url": "https://www.eltiempo.com/justicia/conflicto-y-narcotrafico/coronel-que-investigo-casos-de-corrupcion-pierde-cupo-en-estudios-en-washington-tras-retiro-de-respaldo-oficial-que-hay-detras-3546630",
+    "publicado": "2026-04-09T16:12:58-05:00"
+   },
+   {
+    "id": 3553476,
+    "titulo": "Fiscalía, Procuraduría y Corte Suprema rechazan ‘juicios revolucionarios’ del Eln contra policías y funcionarios del CTI secuestrados: esto dijeron",
+    "url": "https://www.eltiempo.com/justicia/paz-y-derechos-humanos/fiscalia-procuraduria-y-corte-suprema-rechazan-juicios-revolucionarios-del-eln-contra-policias-y-funcionarios-del-cti-secuestrados-esto-dijeron-3553476",
+    "publicado": "2026-05-06T08:08:07-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD DE CUNDINAMARCA",
+  "departamento": "Cundinamarca",
+  "procesos_en_secop": 116,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3527278,
+    "titulo": "'Las universidades públicas tienen un déficit estructural por su alta dependencia a los recursos del gobierno’: Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/las-universidades-publicas-tienen-un-deficit-estructural-por-su-alta-dependencia-a-los-recursos-del-gobierno-contraloria-3527278",
+    "publicado": "2026-01-26T18:29:16-05:00"
+   },
+   {
+    "id": 3549450,
+    "titulo": "Primicia: Contraloría descubre multimillonario desfalco por 'becas fantasma' en Chocó y Magdalena",
+    "url": "https://www.eltiempo.com/justicia/investigacion/primicia-contraloria-descubre-multimillonario-desfalco-por-becas-fantasma-en-choco-y-magdalena-3549450",
+    "publicado": "2026-04-21T06:01:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "Instituto Municipal de Cultura y Turismo de Bucaramanga",
+  "departamento": "Santander",
+  "procesos_en_secop": 91,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3551357,
+    "titulo": "Cartagena | Caso Yeimy Paola Vargas: las claves del expediente de la actriz y exreina por presunta falsedad y lo que está en juego en la imputación",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/fiscalia-imputara-cargos-a-actriz-y-exreina-yeimy-vargas-por-presunta-falsedad-en-contrato-con-instituto-de-patrimonio-y-cultura-de-cartagena-en-3551357",
+    "publicado": "2026-04-27T18:20:22-05:00"
+   },
+   {
+    "id": 3550953,
+    "titulo": "Fiscalía imputará cargos a exreina Yeimy Paola Vargas por presunto diploma falso: IPCC, en la mira de autoridades por aparente contratación irregular",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/fiscalia-imputara-cargos-a-exreina-yeimy-paola-vargas-por-presunto-diploma-falso-ipcc-en-la-mira-de-autoridades-por-aparente-contratacion-irregular-3550953",
+    "publicado": "2026-04-26T08:53:19-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "PERSONERIA DISTRITAL DE SANTIAGO DE CALI",
+  "departamento": "Valle del Cauca",
+  "procesos_en_secop": 90,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3526713,
+    "titulo": "La Procuraduría ratificó la suspensión provisional del gerente general de Emcali y del director de la Uaesp: así van ambos casos",
+    "url": "https://www.eltiempo.com/colombia/cali/la-procuraduria-confirmo-la-suspension-provisional-en-contra-del-gerente-general-de-emcali-y-del-director-de-la-uaesp-asi-van-ambos-casos-3526713",
+    "publicado": "2026-01-24T20:18:59-05:00"
+   },
+   {
+    "id": 3526789,
+    "titulo": "¿Por qué la Procuraduría General de la Nación abrió una investigación disciplinaria al alcalde de Tuluá, Gustavo Vélez? Esto dijo el mandatario",
+    "url": "https://www.eltiempo.com/colombia/cali/por-que-la-procuraduria-general-de-la-nacion-abrio-una-investigacion-disciplinaria-al-alcalde-de-tulua-gustavo-velez-esto-dijo-el-mandatario-3526789",
+    "publicado": "2026-01-23T23:24:27-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD TECNOLOGICA DEL CHOCO",
+  "departamento": "Chocó",
+  "procesos_en_secop": 88,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3549450,
+    "titulo": "Primicia: Contraloría descubre multimillonario desfalco por 'becas fantasma' en Chocó y Magdalena",
+    "url": "https://www.eltiempo.com/justicia/investigacion/primicia-contraloria-descubre-multimillonario-desfalco-por-becas-fantasma-en-choco-y-magdalena-3549450",
+    "publicado": "2026-04-21T06:01:00-05:00"
+   },
+   {
+    "id": 3571778,
+    "titulo": "Corte Suprema condenó y ordenó la captura de Abraham Palacios, exgobernador del Chocó, por contratación ilegal",
+    "url": "https://www.eltiempo.com/justicia/cortes/corte-suprema-condeno-y-ordeno-la-captura-de-abraham-palacios-exgobernador-del-choco-por-contratacion-ilegal-3571778",
+    "publicado": "2026-07-16T16:03:43-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MUNICIPIO DE ITAGUI",
+  "departamento": "Antioquia",
+  "procesos_en_secop": 56,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3532422,
+    "titulo": "Medellín | Así van procesos por los polémicos contratos del Área Metropolitana contra tres exfuncionarios de la entonces alcaldía de Daniel Quintero",
+    "url": "https://www.eltiempo.com/colombia/medellin/medellin-asi-van-procesos-por-los-polemicos-contratos-del-area-metropolitana-contra-tres-exfuncionarios-de-la-entonces-alcaldia-de-daniel-quintero-3532422",
+    "publicado": "2026-02-14T13:11:48-05:00"
+   },
+   {
+    "id": 3571530,
+    "titulo": "Primicia: Procuraduría de Antioquia convocó a autoridades para revisar planes de contingencia tras denuncia por posible fuga de la cárcel de Itagüí",
+    "url": "https://www.eltiempo.com/colombia/medellin/primicia-procuraduria-de-antioquia-convoco-a-autoridades-para-revisar-planes-de-contingencia-tras-denuncia-por-posible-fuga-de-la-carcel-de-itaguei-3571530",
+    "publicado": "2026-07-15T20:04:56-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MUNICIPIO DE RIONEGRO",
+  "departamento": "Antioquia",
+  "procesos_en_secop": 43,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3525098,
+    "titulo": "Contraloría archivó caso contra el gobernador de Antioquia, Andrés Julián Rendón, por supuesto daño patrimonial en Rionegro",
+    "url": "https://www.eltiempo.com/colombia/medellin/contraloria-archivo-caso-contra-el-gobernador-de-antioquia-andres-julian-rendon-por-supuesto-dano-patrimonial-en-rionegro-3525098",
+    "publicado": "2026-01-18T11:26:27-05:00"
+   },
+   {
+    "id": 3571400,
+    "titulo": "¿Se salvó Daniel Quintero de los señalamientos de corrupción en su contra tras el giro en el polémico caso del lote ‘Aguas Vivas'?",
+    "url": "https://www.eltiempo.com/justicia/investigacion/se-salvo-daniel-quintero-de-los-senalamientos-de-corrupcion-en-su-contra-tras-el-giro-en-el-polemico-caso-del-lote-aguas-vivas-3571400",
+    "publicado": "2026-07-15T19:31:08-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MUNICIPIO DE LA MESA",
+  "departamento": "Cundinamarca",
+  "procesos_en_secop": 27,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3537144,
+    "titulo": "La SIC inició dos investigaciones para determinar prácticas de colusión en procesos de contratación pública",
+    "url": "https://www.eltiempo.com/economia/sectores/la-sic-inicio-dos-investigaciones-para-determinar-practicas-de-colusion-en-procesos-de-contratacion-publica-3537144",
+    "publicado": "2026-03-04T07:37:31-05:00"
+   },
+   {
+    "id": 3537133,
+    "titulo": "SIC abre dos investigaciones por presunta colusión en contratación pública en el Icbf y en licitación de infraestructura en La Mesa, Cundinamarca",
+    "url": "https://www.eltiempo.com/justicia/investigacion/sic-abre-dos-investigaciones-por-presunta-colusion-en-contratacion-publica-en-el-icbf-y-en-licitacion-de-infraestructura-en-la-mesa-cundinamarca-3537133",
+    "publicado": "2026-03-04T07:19:57-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "SECRETARIA DE PLANEACION",
+  "departamento": "No Definido",
+  "procesos_en_secop": 8,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3557009,
+    "titulo": "Víctor Gamboa, alcalde de Villa de Leyva, a defenderse desde la cárcel: es acusado de pedir millonaria coima para autorizar licencia",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/victor-gamboa-el-alcalde-de-villa-de-leyva-a-defenderse-desde-la-carcel-es-acusado-de-pedir-millonaria-coima-para-autorizar-licencia-3557009",
+    "publicado": "2026-05-20T20:08:49-05:00"
+   },
+   {
+    "id": 3553993,
+    "titulo": "Corte Suprema condenó y ordenó la captura del exgobernador de Putumayo Felipe Alfonso Guzmán por corrupción",
+    "url": "https://www.eltiempo.com/justicia/cortes/corte-suprema-condeno-y-ordeno-la-captura-del-exgobernador-de-putumayo-felipe-alfonso-guzman-por-corrupcion-3553993",
+    "publicado": "2026-05-12T12:53:45-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD LIBRE",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 5,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3558145,
+    "titulo": "Universidad Libre solicitó al Gobierno Petro terminar el contrato del concurso de notarios en medio de retrasos, cambios y alertas de Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/universidad-libre-solicito-al-gobierno-petro-terminar-el-contrato-del-concurso-de-notarios-en-medio-de-retrasos-cambios-y-alertas-de-contraloria-3558145",
+    "publicado": "2026-05-25T21:17:33-05:00"
+   },
+   {
+    "id": 3558122,
+    "titulo": "Contraloría alerta por fallas, vacíos documentales y retrasos en el concurso nacional de notarías",
+    "url": "https://www.eltiempo.com/justicia/investigacion/contraloria-alerta-por-fallas-vacios-documentales-y-retrasos-en-el-concurso-nacional-de-notarias-3558122",
+    "publicado": "2026-05-25T06:38:49-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD AUTONOMA DEL CARIBE",
+  "departamento": "Atlántico",
+  "procesos_en_secop": 4,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3552312,
+    "titulo": "Barranquilla: Jorge Senior defenderá ante la justicia laboral su contrato como rector en propiedad de la Universidad Autónoma del Caribe",
+    "url": "https://www.eltiempo.com/colombia/barranquilla/barranquilla-jorge-senior-defendera-ante-la-justicia-laboral-su-contrato-como-rector-en-propiedad-de-la-universidad-autonoma-del-caribe-3552312",
+    "publicado": "2026-04-30T17:27:17-05:00"
+   },
+   {
+    "id": 3549450,
+    "titulo": "Primicia: Contraloría descubre multimillonario desfalco por 'becas fantasma' en Chocó y Magdalena",
+    "url": "https://www.eltiempo.com/justicia/investigacion/primicia-contraloria-descubre-multimillonario-desfalco-por-becas-fantasma-en-choco-y-magdalena-3549450",
+    "publicado": "2026-04-21T06:01:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD POPULAR DEL CESAR.",
+  "departamento": "Cesar",
+  "procesos_en_secop": 1,
+  "noticias": 2,
+  "ejemplos": [
+   {
+    "id": 3574121,
+    "titulo": "Hermana de Juliana Guerrero también tuvo contratos con gobierno Petro; y ella llegó primero a oficina de Transparencia que maneja temas anticorrupción",
+    "url": "https://www.eltiempo.com/unidad-investigativa/hermana-de-juliana-guerrero-tambien-tuvo-contratos-con-gobierno-petro-y-ella-llego-primero-a-oficina-de-transparencia-que-maneja-temas-anticorrupcion-3574121",
+    "publicado": "2026-07-27T18:07:11-05:00"
+   },
+   {
+    "id": 3574177,
+    "titulo": "Escándalo por denuncias de corrupción tumba a Juliana Guerrero de silla como representante de Petro en la Universidad del Cesar",
+    "url": "https://www.eltiempo.com/justicia/investigacion/escandalo-por-denuncias-de-corrupcion-tumba-a-juliana-guerrero-de-silla-como-representante-de-petro-en-la-universidad-del-cesar-3574177",
+    "publicado": "2026-07-27T18:00:16-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "SECRETARIA DE EDUCACION DEL DISTRITO",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 1181,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3550545,
+    "titulo": "Video| Sancionan a dos funcionarias vinculadas a la Secretaría de Educación tras colarse en TransMilenio: operador suspendió sus contratos",
+    "url": "https://www.eltiempo.com/bogota/video-sancionan-a-dos-funcionarias-vinculadas-a-la-secretaria-de-educacion-tras-colarse-en-transmilenio-operador-suspendio-sus-contratos-3550545",
+    "publicado": "2026-04-24T08:20:28-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "Ministerio de las Culturas, las Artes y los Saberes",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 999,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3567414,
+    "titulo": "Los nueve contratos que firmó el Gobierno Nacional por más de 200 millones de pesos después de la segunda vuelta presidencial",
+    "url": "https://www.eltiempo.com/datos/los-nueve-contratos-que-firmo-el-gobierno-nacional-por-mas-de-200-millones-de-pesos-despues-de-la-segunda-vuelta-presidencial-3567414",
+    "publicado": "2026-06-28T13:50:07-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD INDUSTRIAL DE SANTANDER",
+  "departamento": "Santander",
+  "procesos_en_secop": 929,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3574121,
+    "titulo": "Hermana de Juliana Guerrero también tuvo contratos con gobierno Petro; y ella llegó primero a oficina de Transparencia que maneja temas anticorrupción",
+    "url": "https://www.eltiempo.com/unidad-investigativa/hermana-de-juliana-guerrero-tambien-tuvo-contratos-con-gobierno-petro-y-ella-llego-primero-a-oficina-de-transparencia-que-maneja-temas-anticorrupcion-3574121",
+    "publicado": "2026-07-27T18:07:11-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "HOSPITAL MILITAR CENTRAL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 879,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3570151,
+    "titulo": "Gobierno y entidades adscritas firmaron contratos por 2,3 billones de pesos después de la segunda vuelta presidencial",
+    "url": "https://www.eltiempo.com/datos/en-las-dos-semanas-siguientes-a-la-segunda-vuelta-presidencial-entidades-firmaron-contratos-por-2-42-billones-invias-adjudico-el-mayor-monto-3570151",
+    "publicado": "2026-07-15T18:48:55-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "ALCALDIA DE PASTO",
+  "departamento": "Nariño",
+  "procesos_en_secop": 841,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3537133,
+    "titulo": "SIC abre dos investigaciones por presunta colusión en contratación pública en el Icbf y en licitación de infraestructura en La Mesa, Cundinamarca",
+    "url": "https://www.eltiempo.com/justicia/investigacion/sic-abre-dos-investigaciones-por-presunta-colusion-en-contratacion-publica-en-el-icbf-y-en-licitacion-de-infraestructura-en-la-mesa-cundinamarca-3537133",
+    "publicado": "2026-03-04T07:19:57-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "HOSPITAL CENTRAL DE LA POLICIA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 785,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3570151,
+    "titulo": "Gobierno y entidades adscritas firmaron contratos por 2,3 billones de pesos después de la segunda vuelta presidencial",
+    "url": "https://www.eltiempo.com/datos/en-las-dos-semanas-siguientes-a-la-segunda-vuelta-presidencial-entidades-firmaron-contratos-por-2-42-billones-invias-adjudico-el-mayor-monto-3570151",
+    "publicado": "2026-07-15T18:48:55-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD TECNOLÓGICA DE PEREIRA",
+  "departamento": "Risaralda",
+  "procesos_en_secop": 780,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3527225,
+    "titulo": "Esta es la única universidad pública, de las 34 que hay en Colombia, que puede mantenerse con recursos propios, según la Contraloría",
+    "url": "https://www.eltiempo.com/vida/educacion/esta-es-la-unica-universidad-publica-de-las-34-que-hay-en-colombia-que-puede-mantenerse-con-recursos-propios-segun-la-contraloria-3527225",
+    "publicado": "2026-01-26T14:34:06-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "ALCALDÍA DE POPAYÁN",
+  "departamento": "Cauca",
+  "procesos_en_secop": 774,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3561430,
+    "titulo": "Corte Suprema absolvió al representante César Cristian Gómez por proceso relacionado con contratación en Popayán",
+    "url": "https://www.eltiempo.com/justicia/cortes/corte-suprema-absolvio-al-representante-cesar-cristian-gomez-por-proceso-relacionado-con-contratacion-en-popayan-3561430",
+    "publicado": "2026-06-02T09:55:15-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DEPARTAMENTO DEL META",
+  "departamento": "Meta",
+  "procesos_en_secop": 660,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3573487,
+    "titulo": "Contraloría evidenció hallazgos fiscales por la mala prestación del servicio de energía en tres departamentos",
+    "url": "https://www.eltiempo.com/justicia/investigacion/contraloria-evidencio-hallazgos-fiscales-por-la-mala-prestacion-del-servicio-de-energia-en-tres-departamentos-3573487",
+    "publicado": "2026-07-24T06:58:41-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "SECRETARIA DISTRITAL DE SEGURIDAD, CONVIVENCIA Y JUSTICIA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 592,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3540700,
+    "titulo": "Exgeneral de la Policía y el secretario de Seguridad de Bogotá entre los 8 investigados por presuntas irregularidades en contrato de $14.000 millones",
+    "url": "https://www.eltiempo.com/bogota/exgeneral-de-la-policia-y-el-secretario-de-seguridad-de-bogota-entre-los-8-investigados-por-presuntas-irregularidades-en-contrato-de-14-000-millones-3540700",
+    "publicado": "2026-03-16T21:42:05-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CENAC AVIACION",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 506,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3523304,
+    "titulo": "Colombia recibe más de 7 mil millones de pesos por incumplimiento de un contrato para la entrega de un dron estratégico",
+    "url": "https://www.eltiempo.com/justicia/conflicto-y-narcotrafico/colombia-recibe-mas-de-us-7-millones-por-incumplimiento-de-un-contrato-para-la-entrega-de-un-dron-estrategico-3523304",
+    "publicado": "2026-01-10T11:06:36-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "GOBERNACION DE SUCRE",
+  "departamento": "Sucre",
+  "procesos_en_secop": 466,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3559337,
+    "titulo": "Procuraduría suspende a alcaldesa de San Onofre (Sucre) por presunta participación indebida en política durante plena campaña presidencial",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/procuraduria-suspende-a-alcaldesa-de-san-onofre-sucre-por-presunta-participacion-indebida-en-politica-durante-plena-campana-presidencial-3559337",
+    "publicado": "2026-05-29T09:20:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "INSTITUTO NACIONAL DE SALUD",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 444,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3558821,
+    "titulo": "Procuraduría exige garantizar derechos a salud por brote de tuberculosis en cárcel de Ternera en Cartagena: contagio abraza a una veintena de reclusos",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/procuraduria-exige-garantizar-derechos-a-salud-por-brote-de-tuberculosis-en-carcel-de-ternera-de-cartagena-contagio-abraza-a-una-veintena-de-reclusos-3558821",
+    "publicado": "2026-05-27T13:44:07-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "GOBERNACION DE CALDAS",
+  "departamento": "Caldas",
+  "procesos_en_secop": 436,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3523061,
+    "titulo": "Dos exsecretarios de la Gobernación de Caldas van a juicio disciplinario en la Procuraduría: ¿quiénes son?",
+    "url": "https://www.eltiempo.com/justicia/investigacion/dos-exsecretarios-de-la-gobernacion-de-caldas-van-a-juicio-disciplinario-en-la-procuraduria-quienes-son-3523061",
+    "publicado": "2026-01-09T10:45:28-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "Universidad Surcolombiana",
+  "departamento": "Huila",
+  "procesos_en_secop": 435,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3526838,
+    "titulo": "Solo una de 34 universidades públicas es autosostenible: el duro informe de la Contraloría sobre la educación superior",
+    "url": "https://www.eltiempo.com/justicia/investigacion/solo-una-de-34-universidades-publicas-es-autosostenible-el-duro-informe-de-la-contraloria-sobre-la-educacion-superior-3526838",
+    "publicado": "2026-01-25T08:55:10-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DE EDUCACION NACIONAL (MEN)",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 354,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3527169,
+    "titulo": "Procuraduría abre un nuevo frente disciplinario contra directivos de la Universidad del Atlántico: estos son los implicados en la investigación",
+    "url": "https://www.eltiempo.com/colombia/barranquilla/procuraduria-abre-un-nuevo-frente-disciplinario-contra-directivos-de-la-universidad-del-atlantico-estos-son-los-implicados-en-la-investigacion-3527169",
+    "publicado": "2026-01-26T09:33:02-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "SECRETARIA DISTRITAL DE LA MUJER",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 328,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3578137,
+    "titulo": "Contraloría confirma detrimento por $856 millones en contrato para integrar la Línea Púrpura con el 123",
+    "url": "https://www.eltiempo.com/bogota/contraloria-confirma-detrimento-por-856-millones-en-contrato-para-integrar-la-linea-purpura-con-el-3578137",
+    "publicado": "2026-08-13T10:16:55-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "GOBERNACIÓN DE LA GUAJIRA",
+  "departamento": "La Guajira",
+  "procesos_en_secop": 279,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3570473,
+    "titulo": "Las interceptaciones que llevaron a la Corte a investigar a Jorge Cerchiaro por presunta corrupción en La Guajira",
+    "url": "https://www.eltiempo.com/justicia/cortes/las-interceptaciones-que-llevaron-a-la-corte-a-investigar-a-jorge-cerchiaro-por-presunta-corrupcion-en-la-guajira-3570473",
+    "publicado": "2026-07-10T12:22:05-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DIRECCION DE ANTINARCOTICOS",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 211,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3566520,
+    "titulo": "Policía declara desierto por segunda vez millonario contrato de erradicación manual de narcocultivos: hay denuncias de maniobras dilatorias",
+    "url": "https://www.eltiempo.com/unidad-investigativa/policia-declara-desierto-por-segunda-vez-millonario-contrato-de-erradicacion-manual-de-narcocultivos-hay-denuncias-de-maniobras-dilatorias-3566520",
+    "publicado": "2026-06-23T16:21:35-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD DE LOS LLANOS",
+  "departamento": "Meta",
+  "procesos_en_secop": 203,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3561989,
+    "titulo": "Senadora Andrea Padilla anunció que la Fiscalía y Procuraduría abrieron investigación por crisis de 317 caimanes sin comida: 'Ya fueron alimentados'",
+    "url": "https://www.eltiempo.com/vida/medio-ambiente/senadora-andrea-padilla-anuncio-que-fiscalia-y-procuraduria-abrieron-investigacion-por-crisis-de-317-caimanes-sin-comida-ya-fueron-alimentados-3561989",
+    "publicado": "2026-06-04T05:36:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "POLITECNICO COLOMBIANO JAIME ISAZA CADAVID",
+  "departamento": "Antioquia",
+  "procesos_en_secop": 200,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3529351,
+    "titulo": "Relatos de estudiantes y denuncias de abuso sexual sacuden la U. de Antioquia: Procuraduría formula pliego de cargos contra profesor de Derecho",
+    "url": "https://www.eltiempo.com/colombia/medellin/procuraduria-formulo-pliego-de-cargos-contra-un-profesor-de-la-facultad-de-derecho-de-la-universidad-de-antioquia-por-denuncias-de-abuso-sexual-3529351",
+    "publicado": "2026-02-03T12:02:24-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "ARCHIVO GENERAL DE LA NACION",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 191,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3576200,
+    "titulo": "Supersalud: Se indaga millonario detrimento por compra de software que no sirvió; empresa mencionada es la misma de la Aerocivil",
+    "url": "https://www.eltiempo.com/unidad-investigativa/supersalud-se-indaga-millonario-detrimento-por-compra-de-software-que-no-sirvio-empresa-mencionada-es-la-misma-de-la-aerocivil-3576200",
+    "publicado": "2026-08-05T11:07:04-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CONCEJO DISTRITAL DE SANTIAGO DE CALI",
+  "departamento": "Valle del Cauca",
+  "procesos_en_secop": 178,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3539241,
+    "titulo": "Las explicaciones del Concejo de Cali para tumbar la elección del nuevo contralor de la ciudad: ¿qué vicios de legalidad advirtió la Procuraduría?",
+    "url": "https://www.eltiempo.com/colombia/cali/las-explicaciones-del-concejo-de-cali-para-tumbar-la-eleccion-del-nuevo-contralor-de-la-ciudad-que-vicios-de-legalidad-advirtio-la-procuraduria-3539241",
+    "publicado": "2026-03-11T07:58:42-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CENTRO NACIONAL DE MEMORIA  HISTORICA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 172,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3537521,
+    "titulo": "Primicia: Contraloría encuentra millonario detrimento patrimonial por abandono del proyecto de Museo de la Memoria | el 'elefante blanco' en Bogotá",
+    "url": "https://www.eltiempo.com/justicia/investigacion/primicia-contraloria-encuentra-graves-hallazgos-fiscales-por-abandono-del-proyecto-de-museo-de-la-memoria-en-bogota-3537521",
+    "publicado": "2026-03-05T09:29:24-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "FONDO DE DESARROLLO DE PROYECTOS DE CUNDINAMARCA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 170,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3535005,
+    "titulo": "Los 22 contratos de familiares de ministro Guillermo Jaramillo que fueron adjudicados desde posesión del presidente Petro: suman más de 2.000 millones",
+    "url": "https://www.eltiempo.com/datos/los-22-contratos-de-familiares-de-ministro-guillermo-jaramillo-que-fueron-adjudicados-desde-posesion-del-presidente-petro-suman-mas-de-2-000-millones-3535005",
+    "publicado": "2026-02-26T18:01:30-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "FINANCIERA DE DESARROLLO TERRITORIAL S.A.",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 169,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3553482,
+    "titulo": "Centros PotencIA, en vilo: obras con avance de apenas 2,09% bajo la lupa de la Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/centros-potencia-en-vilo-obras-con-avance-de-apenas-2-09-bajo-la-lupa-de-la-contraloria-3553482",
+    "publicado": "2026-05-06T08:30:41-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DEPARTAMENTO ADMINISTRATIVO DE LA DEFENSORIA DEL ESPACIO PUBLICO",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 167,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3557252,
+    "titulo": "Bogotá incorporó 809 predios públicos a sus cuentas tras hallazgo de la Contraloría",
+    "url": "https://www.eltiempo.com/bogota/bogota-incorporo-809-predios-publicos-a-sus-cuentas-tras-hallazgo-de-la-contraloria-3557252",
+    "publicado": "2026-05-21T08:07:52-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "INSTITUTO DISTRITAL DE PATRIMONIO CULTURAL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 159,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3527450,
+    "titulo": "El Distrito, a través del IDPC, abre la licitación para restaurar y reforzar los columbarios del Cementerio Central: así se revivirá este espacio",
+    "url": "https://www.eltiempo.com/bogota/el-distrito-a-traves-del-idpc-abre-la-licitacion-para-restaurar-y-reforzar-los-columbarios-del-cementerio-central-asi-se-revivira-este-espacio-3527450",
+    "publicado": "2026-01-27T09:33:25-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "FONDO ROTATORIO DE LA POLICIA NACIONAL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 148,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3569825,
+    "titulo": "Contrato de compra de drones en la Policía terminó en expediente de corrupción, alerta la Procuraduría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/contrato-de-compra-de-drones-en-la-policia-termino-en-expediente-de-corrupcion-alerta-la-procuraduria-3569825",
+    "publicado": "2026-07-08T10:55:58-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "COMISIÓN NACIONAL DEL SERVICIO CIVIL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 130,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3574819,
+    "titulo": "El rastro de la DNI en escándalo de la Aerocivil por contratos de Gabriela Muñoz y de 5 parientes: ¿Qué datos se le están ocultando a Mintransporte?",
+    "url": "https://www.eltiempo.com/unidad-investigativa/el-rastro-de-la-dni-en-escandalo-de-la-aerocivil-por-contratos-de-gabriela-munoz-y-de-5-parientes-que-datos-se-le-estan-ocultando-a-mintransporte-3574819",
+    "publicado": "2026-07-30T06:29:04-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CANAL REGIONAL DE TELEVISION S.A.S",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 116,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3535361,
+    "titulo": "RTVC recibió 18.800 millones de pesos en contratos con el Estado a pocos días de la entrada en vigor de la Ley de Garantías",
+    "url": "https://www.eltiempo.com/datos/rtvc-recibio-18-800-millones-de-pesos-en-contratos-con-el-estado-a-pocos-dias-de-la-entrada-en-vigor-de-la-ley-de-garantias-3535361",
+    "publicado": "2026-02-25T17:24:52-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CORPORACION AUTONOMA REGIONAL DEL MAGDALENA",
+  "departamento": "Magdalena",
+  "procesos_en_secop": 111,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3546147,
+    "titulo": "Procuraduría advierte posibles faltas disciplinarias por crisis del ferry en Salamina (Magdalena): más de 60.000 personas las afectadas",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/procuraduria-advierte-posibles-faltas-disciplinarias-por-crisis-del-ferry-en-salamina-magdalena-mas-de-60-000-personas-las-afectadas-3546147",
+    "publicado": "2026-04-08T08:06:15-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "METRO DE BOGOTA SA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 88,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3535005,
+    "titulo": "Los 22 contratos de familiares de ministro Guillermo Jaramillo que fueron adjudicados desde posesión del presidente Petro: suman más de 2.000 millones",
+    "url": "https://www.eltiempo.com/datos/los-22-contratos-de-familiares-de-ministro-guillermo-jaramillo-que-fueron-adjudicados-desde-posesion-del-presidente-petro-suman-mas-de-2-000-millones-3535005",
+    "publicado": "2026-02-26T18:01:30-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIDAD PARA LAS VÍCTIMAS - FONDO PARA LA REPARACIÓN DE LAS VÍCTIMAS",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 76,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3570151,
+    "titulo": "Gobierno y entidades adscritas firmaron contratos por 2,3 billones de pesos después de la segunda vuelta presidencial",
+    "url": "https://www.eltiempo.com/datos/en-las-dos-semanas-siguientes-a-la-segunda-vuelta-presidencial-entidades-firmaron-contratos-por-2-42-billones-invias-adjudico-el-mayor-monto-3570151",
+    "publicado": "2026-07-15T18:48:55-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "EMPRESA DE DESARROLLO SOSTENIBLE",
+  "departamento": "No Definido",
+  "procesos_en_secop": 70,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3522309,
+    "titulo": "Contraloría General asume, por conflicto de intereses, proceso fiscal contra el gobernador Andrés J. Rendón",
+    "url": "https://www.eltiempo.com/justicia/investigacion/contraloria-general-asume-proceso-fiscal-contra-el-gobernador-andres-j-rendon-por-presunto-conflicto-de-interes-3522309",
+    "publicado": "2026-01-06T22:49:03-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "POLICIA METROPOLITANA DEL VALLE DE ABURRA",
+  "departamento": "Antioquia",
+  "procesos_en_secop": 70,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3571530,
+    "titulo": "Primicia: Procuraduría de Antioquia convocó a autoridades para revisar planes de contingencia tras denuncia por posible fuga de la cárcel de Itagüí",
+    "url": "https://www.eltiempo.com/colombia/medellin/primicia-procuraduria-de-antioquia-convoco-a-autoridades-para-revisar-planes-de-contingencia-tras-denuncia-por-posible-fuga-de-la-carcel-de-itaguei-3571530",
+    "publicado": "2026-07-15T20:04:56-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "UNIVERSIDAD DE SUCRE",
+  "departamento": "Sucre",
+  "procesos_en_secop": 69,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3551298,
+    "titulo": "Escándalo en Universidad de Sucre lleva a que cancelen contratos a 430 docentes de cátedra frente a sueldos millonarios de profesores de planta",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/unisucre-cancelo-contratos-a-430-docentes-de-hora-catedra-frente-a-situacion-de-sueldos-millonarios-de-profesores-de-planta-hay-cese-de-clases-3551298",
+    "publicado": "2026-04-27T16:44:11-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CORPORACIÓN AUTÓNOMA REGIONAL DEL CANAL DEL DIQUE",
+  "departamento": "Bolívar",
+  "procesos_en_secop": 64,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3571221,
+    "titulo": "Contraloría revela nueve hallazgos durante auditoría a Cardique: cuestiona manejo contable de contrato de lanchas por $706 millones",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/contraloria-revela-nueve-hallazgos-en-cardique-durante-auditoria-a-canal-del-dique-cuestiona-manejo-contable-de-contrato-de-lanchas-por-706-millones-3571221",
+    "publicado": "2026-07-15T07:25:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "COMPUTADORES PARA EDUCAR",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 56,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3533789,
+    "titulo": "Los contratos que suman más de 1.000 millones de pesos de la familia del ministro Antonio Sanguino con el Estado desde el inicio del gobierno Petro",
+    "url": "https://www.eltiempo.com/datos/los-contratos-que-suman-mas-de-1-000-millones-de-pesos-de-la-familia-del-ministro-antonio-sanguino-con-el-estado-desde-el-inicio-del-gobierno-petro-3533789",
+    "publicado": "2026-02-19T18:35:03-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CORPORACIÓN AUTÓNOMA REGIONAL DEL ATLÁNTICO",
+  "departamento": "Atlántico",
+  "procesos_en_secop": 52,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3544529,
+    "titulo": "Choque institucional en el Atlántico: licitación de $2.000 millones enfrenta a Secretaría de Transparencia y CRA tras requerimientos de contratación",
+    "url": "https://www.eltiempo.com/colombia/barranquilla/choque-institucional-en-el-atlantico-licitacion-de-2-000-millones-enfrenta-a-secretaria-de-transparencia-y-cra-tras-requerimientos-de-contratacion-3544529",
+    "publicado": "2026-03-31T19:30:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MUNICIPIO DE URIBIA",
+  "departamento": "La Guajira",
+  "procesos_en_secop": 48,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3575906,
+    "titulo": "En julio, Invías adjudicó en un mismo día $ 2,07 billones para vías en La Guajira: los contratos de la entidad en la recta final del gobierno Petro",
+    "url": "https://www.eltiempo.com/datos/en-julio-invias-adjudico-en-un-mismo-dia-2-07-billones-para-vias-en-la-guajira-los-contratos-de-la-entidad-en-la-recta-final-del-gobierno-petro-3575906",
+    "publicado": "2026-08-03T19:24:27-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DEPARTAMENTO ADMINISTRATIVO DEL SERVICIO CIVIL DISTRITAL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 47,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3533789,
+    "titulo": "Los contratos que suman más de 1.000 millones de pesos de la familia del ministro Antonio Sanguino con el Estado desde el inicio del gobierno Petro",
+    "url": "https://www.eltiempo.com/datos/los-contratos-que-suman-mas-de-1-000-millones-de-pesos-de-la-familia-del-ministro-antonio-sanguino-con-el-estado-desde-el-inicio-del-gobierno-petro-3533789",
+    "publicado": "2026-02-19T18:35:03-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "INSTITUTO MUNICIPAL DE EMPLEO Y FOMENTO EMPRESARIAL DE BUCARAMANGA",
+  "departamento": "Santander",
+  "procesos_en_secop": 46,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3540027,
+    "titulo": "Así fue el operativo en el que el CTI capturó a exfuncionaria condenada por corrupción en Bucaramanga",
+    "url": "https://www.eltiempo.com/justicia/delitos/asi-fue-el-operativo-en-el-que-el-cti-capturo-a-exfuncionaria-condenada-por-corrupcion-en-bucaramanga-3540027",
+    "publicado": "2026-03-16T01:19:27-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "AREA METROPOLITANA DE CUCUTA",
+  "departamento": "Norte de Santander",
+  "procesos_en_secop": 46,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3574884,
+    "titulo": "Contraloría detecta detrimento por más de $121 mil millones en el Acueducto Metropolitano de Cúcuta: estas son las razones",
+    "url": "https://www.eltiempo.com/justicia/investigacion/contraloria-detecta-detrimento-por-mas-de-121-mil-millones-en-el-acueducto-metropolitano-de-cucuta-estas-son-las-razones-3574884",
+    "publicado": "2026-07-30T07:20:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "EMPRESA URRA S.A. E.S.P.",
+  "departamento": "No Definido",
+  "procesos_en_secop": 36,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3543310,
+    "titulo": "Procuraduría investiga a la ministra de Ambiente Irene Vélez por emergencia de Urrá que dejó más de 200 mil damnificados",
+    "url": "https://www.eltiempo.com/justicia/investigacion/procuraduria-investiga-a-la-ministra-de-ambiente-irene-velez-por-emergencia-de-urra-que-dejo-mas-de-200-mil-damnificados-3543310",
+    "publicado": "2026-03-27T06:29:57-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MUNICIPIO DE DABEIBA",
+  "departamento": "Antioquia",
+  "procesos_en_secop": 31,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3575775,
+    "titulo": "Periodismo en riesgo en Antioquia: cuatro comunicadores fueron amenazados en menos de seis horas por investigar la corrupción",
+    "url": "https://www.eltiempo.com/colombia/medellin/periodismo-en-riesgo-en-antioquia-cuatro-comunicadores-fueron-amenazados-en-menos-de-seis-horas-por-investigar-la-corrupcion-3575775",
+    "publicado": "2026-08-03T09:50:43-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "POLICIA METROPOLITANA DE BARRANQUILLA",
+  "departamento": "Atlántico",
+  "procesos_en_secop": 28,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3549228,
+    "titulo": "Procuraduría pidió protección para Alejandro Char, alcalde de Barranquilla, por presunto plan de atentado contra su vida: Gobierno activó inteligencia",
+    "url": "https://www.eltiempo.com/colombia/barranquilla/procuraduria-pidio-proteccion-para-alejandro-char-alcalde-de-barranquilla-por-presunto-plan-de-atentado-contra-su-vida-gobierno-activo-inteligencia-3549228",
+    "publicado": "2026-04-20T08:48:18-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MUNICIPIO DE PUERTO COLOMBIA",
+  "departamento": "Atlántico",
+  "procesos_en_secop": 26,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3550330,
+    "titulo": "Procuraduría pide explicaciones a la Universidad del Atlántico por el estado de piscinas clausuradas desde marzo: estos son todos los detalles",
+    "url": "https://www.eltiempo.com/colombia/barranquilla/procuraduria-pide-explicaciones-a-la-universidad-del-atlantico-por-el-estado-de-piscinas-clausuradas-desde-marzo-estos-son-todos-los-detalles-3550330",
+    "publicado": "2026-04-23T14:30:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "LOTERIA DE CUNDINAMARCA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 25,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3550503,
+    "titulo": "Los millonarios contratos de la empresa de vigilancia indagada tras la pérdida de armas en Bogotá",
+    "url": "https://www.eltiempo.com/justicia/delitos/los-millonarios-contratos-de-la-empresa-de-vigilancia-indagada-tras-la-perdida-de-armas-en-bogota-3550503",
+    "publicado": "2026-04-24T05:32:03-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MINISTERIO DE IGUALDAD Y EQUIDAD",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 24,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3575673,
+    "titulo": "Petro termina su presidencia dejando un proyecto de hueco fiscal de $30 billones en el presupuesto para 2027: grave alerta de la Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/petro-termina-su-presidencia-dejando-un-hueco-fiscal-de-30-billones-en-el-presupuesto-para-2027-grave-alerta-de-la-contraloria-3575673",
+    "publicado": "2026-08-03T06:17:47-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "FEDERACION COLOMBIANA DE MUNICIPIOS",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 23,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3533936,
+    "titulo": "Procuraduría advierte a jurados de votación: quienes no acaten directrices de la Registraduría frente a formularios E-14 se exponen a sanciones",
+    "url": "https://www.eltiempo.com/politica/elecciones-colombia-2026/procuraduria-advierte-a-jurados-de-votacion-quienes-no-acaten-directrices-de-la-registraduria-frentre-a-formularios-e-14-se-exponen-a-sanciones-3533936",
+    "publicado": "2026-02-20T18:36:28-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "DIRECCION DE PROTECCION Y SERVICIOS ESPECIALES",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 20,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3549228,
+    "titulo": "Procuraduría pidió protección para Alejandro Char, alcalde de Barranquilla, por presunto plan de atentado contra su vida: Gobierno activó inteligencia",
+    "url": "https://www.eltiempo.com/colombia/barranquilla/procuraduria-pidio-proteccion-para-alejandro-char-alcalde-de-barranquilla-por-presunto-plan-de-atentado-contra-su-vida-gobierno-activo-inteligencia-3549228",
+    "publicado": "2026-04-20T08:48:18-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "HOSPITAL SAN JOSE",
+  "departamento": "No Definido",
+  "procesos_en_secop": 20,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3523356,
+    "titulo": "Deudas, quejas y contratos terminados: la debacle de Nueva EPS, en manos del Gobierno",
+    "url": "https://www.eltiempo.com/salud/deudas-quejas-y-contratos-terminados-la-debacle-de-nueva-eps-en-manos-del-gobierno-3523356",
+    "publicado": "2026-01-11T08:26:37-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "RESGUARDO INDIGENA KANKUAMO",
+  "departamento": "No Definido",
+  "procesos_en_secop": 19,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3570587,
+    "titulo": "Los contratos por más de 68 mil millones de pesos que se cocinan a última hora en el agonizante Ministerio de la Igualdad",
+    "url": "https://www.eltiempo.com/unidad-investigativa/los-contratos-por-mas-de-68-mil-millones-de-pesos-que-se-cocinan-a-ultima-hora-en-el-agonizante-ministerio-de-la-igualdad-3570587",
+    "publicado": "2026-07-10T22:01:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "AGENCIA NACIONAL INMOBILIARIA VIRGILIO BARCO VARGAS",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 17,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3537521,
+    "titulo": "Primicia: Contraloría encuentra millonario detrimento patrimonial por abandono del proyecto de Museo de la Memoria | el 'elefante blanco' en Bogotá",
+    "url": "https://www.eltiempo.com/justicia/investigacion/primicia-contraloria-encuentra-graves-hallazgos-fiscales-por-abandono-del-proyecto-de-museo-de-la-memoria-en-bogota-3537521",
+    "publicado": "2026-03-05T09:29:24-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CONTRALORÍA DISTRITAL DE MEDELLÍN",
+  "departamento": "Antioquia",
+  "procesos_en_secop": 12,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3566225,
+    "titulo": "Contraloría de Antioquia destapa presunto detrimento de $108 mil millones en EPM por cambio de contratistas en Hidroituango en la alcaldía Quintero",
+    "url": "https://www.eltiempo.com/colombia/medellin/contraloria-de-antioquia-destapa-presunto-detrimento-de-108-mil-millones-en-epm-por-cambio-de-contratistas-en-hidroituango-3566225",
+    "publicado": "2026-06-23T08:43:51-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CORPORACION UNIVERSIDAD DE LA COSTA",
+  "departamento": "Atlántico",
+  "procesos_en_secop": 10,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3549450,
+    "titulo": "Primicia: Contraloría descubre multimillonario desfalco por 'becas fantasma' en Chocó y Magdalena",
+    "url": "https://www.eltiempo.com/justicia/investigacion/primicia-contraloria-descubre-multimillonario-desfalco-por-becas-fantasma-en-choco-y-magdalena-3549450",
+    "publicado": "2026-04-21T06:01:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "INSTITUCION EDUCATIVA DISTRITAL LAURA VICUÑA",
+  "departamento": "Magdalena",
+  "procesos_en_secop": 10,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3556037,
+    "titulo": "Procuraduría formuló cargos contra docente en Santa Marta por presunta falsificación de título universitario",
+    "url": "https://www.eltiempo.com/justicia/delitos/procuraduria-formulo-cargos-contra-docente-en-santa-marta-por-presunta-falsificacion-de-titulo-universitario-3556037",
+    "publicado": "2026-05-15T12:05:23-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MUNICIPIO DE FORTUL",
+  "departamento": "Arauca",
+  "procesos_en_secop": 7,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3553476,
+    "titulo": "Fiscalía, Procuraduría y Corte Suprema rechazan ‘juicios revolucionarios’ del Eln contra policías y funcionarios del CTI secuestrados: esto dijeron",
+    "url": "https://www.eltiempo.com/justicia/paz-y-derechos-humanos/fiscalia-procuraduria-y-corte-suprema-rechazan-juicios-revolucionarios-del-eln-contra-policias-y-funcionarios-del-cti-secuestrados-esto-dijeron-3553476",
+    "publicado": "2026-05-06T08:08:07-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MUNICIPIO DE SALAMINA",
+  "departamento": "Caldas",
+  "procesos_en_secop": 7,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3546147,
+    "titulo": "Procuraduría advierte posibles faltas disciplinarias por crisis del ferry en Salamina (Magdalena): más de 60.000 personas las afectadas",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/procuraduria-advierte-posibles-faltas-disciplinarias-por-crisis-del-ferry-en-salamina-magdalena-mas-de-60-000-personas-las-afectadas-3546147",
+    "publicado": "2026-04-08T08:06:15-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CAMARA DE COMERCIO DE BUCARAMANGA",
+  "departamento": "No Definido",
+  "procesos_en_secop": 7,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3546348,
+    "titulo": "Otro golpe para la inversión de vías en Santander: cancelaron la licitación pública de la Variante San Gil, obra que debió terminarse en el 2023",
+    "url": "https://www.eltiempo.com/colombia/santander/otro-golpe-para-la-inversion-de-vias-en-santander-cancelaron-la-licitacion-publica-de-la-variante-san-gil-obra-que-debio-terminarse-en-el-3546348",
+    "publicado": "2026-04-08T19:52:55-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CORPORACION PARA EL DESARROLLO ECONOMICO REGIONAL",
+  "departamento": "Valle del Cauca",
+  "procesos_en_secop": 7,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3573870,
+    "titulo": "Logística para la transmisión de mando presidencial costará 5.950 millones de pesos: Dapre dejó listos los contratos",
+    "url": "https://www.eltiempo.com/politica/gobierno/logistica-para-la-transmision-de-mando-presidencial-costara-5-950-millones-de-pesos-dapre-dejo-listos-los-contratos-3573870",
+    "publicado": "2026-07-26T09:36:04-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "ASAMBLEA DEPARTAMENTAL DEL VALLE DEL CAUCA",
+  "departamento": "Valle del Cauca",
+  "procesos_en_secop": 7,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3539743,
+    "titulo": "Guerra en Medio Oriente amenaza abastecimiento de insumos médicos en el Valle del Cauca: están cancelando los contratos por crisis de rutas marítimas",
+    "url": "https://www.eltiempo.com/colombia/cali/guerra-en-medio-oriente-amenaza-abastecimiento-de-insumos-medicos-en-el-valle-del-cauca-estan-cancelando-los-contratos-por-crisis-de-rutas-maritimas-3539743",
+    "publicado": "2026-03-12T16:19:51-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "FONDO NACIONAL DE VIVIENDA",
+  "departamento": "No Definido",
+  "procesos_en_secop": 6,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3575673,
+    "titulo": "Petro termina su presidencia dejando un proyecto de hueco fiscal de $30 billones en el presupuesto para 2027: grave alerta de la Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/petro-termina-su-presidencia-dejando-un-hueco-fiscal-de-30-billones-en-el-presupuesto-para-2027-grave-alerta-de-la-contraloria-3575673",
+    "publicado": "2026-08-03T06:17:47-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "ASOCIACION COLOMBIANA PARA EL AVANCE DE LA CIENCIA",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 6,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3545735,
+    "titulo": "Academia Colombiana de Ciencias le pide a Minciencias 'prudencia en el lenguaje público' por controversia en multimillonario contrato con Avanciencia",
+    "url": "https://www.eltiempo.com/vida/ciencia/academia-colombiana-de-ciencias-le-pide-a-minciencias-prudencia-en-el-lenguaje-publico-por-controversia-en-multimillonario-contrato-con-avanciencia-3545735",
+    "publicado": "2026-04-06T18:27:16-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "MUNICIPIO DE GUACA",
+  "departamento": "Santander",
+  "procesos_en_secop": 5,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3574439,
+    "titulo": "El primer golpe del nuevo alcalde de Tunja: anuncia auditoría a contrato por $15.000 millones y pone en duda otra contratación del ruso Krasnov",
+    "url": "https://www.eltiempo.com/colombia/otras-ciudades/el-primer-golpe-del-nuevo-alcalde-de-tunja-anuncia-auditoria-a-contrato-por-15-000-millones-y-pone-en-duda-otra-contratacion-del-ruso-krasnov-3574439",
+    "publicado": "2026-07-28T13:45:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "Universidad de Medellín",
+  "departamento": "Antioquia",
+  "procesos_en_secop": 3,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3557311,
+    "titulo": "Fiscalía y Procuraduría pidieron mantener la condena a los funcionarios vinculados al caso del presunto título falso del excongresista Julián Bedoya",
+    "url": "https://www.eltiempo.com/justicia/cortes/fiscalia-y-procuraduria-pidieron-mantener-la-condena-a-los-funcionarios-vinculados-al-caso-del-presunto-titulo-falso-del-excongresista-julian-bedoya-3557311",
+    "publicado": "2026-05-21T11:23:12-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "CONTRALORIA MUNICIPAL DE VILLAVICENCIO",
+  "departamento": "Meta",
+  "procesos_en_secop": 3,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3551079,
+    "titulo": "Abogado del alcalde de Villavicencio habría cobrado más de $70 millones sin trabajar: inédito expediente en la Contraloría",
+    "url": "https://www.eltiempo.com/justicia/investigacion/abogado-del-alcalde-de-villavicencio-habria-cobrado-mas-de-70-millones-sin-trabajar-inedito-expediente-en-la-contraloria-3551079",
+    "publicado": "2026-04-27T07:01:00-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "INSTITUTO GEOGRÁFICO AGUSTÍN CODAZZI",
+  "departamento": "No Definido",
+  "procesos_en_secop": 3,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3571951,
+    "titulo": "Entidades del Estado firmaron 43.092 contratos por cerca de 7 billones tras la segunda vuelta presidencial, según Transparencia por Colombia",
+    "url": "https://www.eltiempo.com/datos/entidades-del-estado-firmaron-43-092-contratos-por-cerca-de-7-billones-tras-la-segunda-vuelta-presidencial-segun-transparencia-por-colombia-3571951",
+    "publicado": "2026-07-18T09:08:58-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "HOSPITAL UNIVERSITARIO SAN JUAN DE DIOS Y MATERNO INFANTIL",
+  "departamento": "Distrito Capital de Bogotá",
+  "procesos_en_secop": 3,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3568650,
+    "titulo": "Millonarios contratos, nómina y pagos: lo que se mueve en el Hospital San Juan de Dios de Bogotá antes de operar",
+    "url": "https://www.eltiempo.com/bogota/millonarios-contratos-nomina-y-pagos-lo-que-se-mueve-en-el-hospital-san-juan-de-dios-de-bogota-antes-de-operar-3568650",
+    "publicado": "2026-07-03T09:54:20-05:00"
+   }
+  ]
+ },
+ {
+  "entidad": "PERSONERIA MUNICIPAL DE EL PAUJIL",
+  "departamento": "Caquetá",
+  "procesos_en_secop": 1,
+  "noticias": 1,
+  "ejemplos": [
+   {
+    "id": 3561000,
+    "titulo": "¿Quién es la alcaldesa a la que la Fiscalía y Procuraduría investiga por supuesto constreñimiento en favor de Iván Cepeda?",
+    "url": "https://www.eltiempo.com/justicia/investigacion/quien-es-la-alcaldesa-a-la-que-la-fiscalia-y-procuraduria-investiga-por-supuesto-constrenimiento-en-favor-de-ivan-cepeda-3561000",
+    "publicado": "2026-06-01T23:11:52-05:00"
+   }
+  ]
+ }
+]

@@ -10,7 +10,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-NOTEBOOK = ROOT / "Cuadernos" / "2_Definiciones_gcp.ipynb"
+NOTEBOOK = ROOT / "Cuadernos" / "2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb"
+LEGACY_NOTEBOOK = ROOT / "Cuadernos" / "2_Definiciones_gcp.ipynb"
 VISUAL_BASES = [
     ROOT / "assets" / "diagrams" / "session2" / name
     for name in [
@@ -66,6 +67,10 @@ def main() -> None:
     ]
 
     errors = []
+    if not LEGACY_NOTEBOOK.is_file():
+        errors.append("falta la copia de compatibilidad Cuadernos/2_Definiciones_gcp.ipynb")
+    elif NOTEBOOK.read_bytes() != LEGACY_NOTEBOOK.read_bytes():
+        errors.append("la ruta canónica y la copia histórica del cuaderno no están sincronizadas")
     if len(cells) < 35:
         errors.append(f"se esperaba una clase robusta y solo se encontraron {len(cells)} celdas")
     if len(questions) != 7:
