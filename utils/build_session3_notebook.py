@@ -289,7 +289,7 @@ def build_cells():
             | 3 | cómo se ve un documento por dentro | anidamiento, arreglos, equivalencia con SQL |
             | 4 | cuando el dato vive en más de una máquina | qué es una réplica |
             | 5 | qué se cede al tener copias | ACID, BASE y consistencia eventual |
-            | 6 | cómo le pregunto algo a la base | MQL, siempre junto a su SQL |
+            | 6 | **el taller: aquí ejecutas tú** | MQL paso a paso, junto a su SQL |
             | — | **receso** | el motor se instala mientras descansas |
             | 7 | **el laboratorio: aquí trabajas tú** | tu colección, tus consultas, tu interpretación |
             | 8 | cerramos en GitHub lo que quedó abierto | el Pull Request de la sesión 2, integrado |
@@ -992,150 +992,6 @@ def build_cells():
         md(
             """
             ---
-            # Bloque 6 · Cómo le pregunto algo a la base
-
-            **NÚCLEO** · lo necesitas para el laboratorio de hoy.
-
-            *MQL, siempre junto a su SQL equivalente*
-
-            Bajemos de la nube al teclado. Todo lo anterior no sirve de nada si no sabemos preguntarle algo a la
-            base. En SQL escribirías `SELECT` y `WHERE`. Aquí se escribe distinto y se lee igual. **Voy a poner las
-            dos, siempre, una al lado de la otra.**
-
-            ## Traer documentos con un filtro
-
-            ```sql
-            -- SQL
-            SELECT titulo, seccion
-            FROM noticias
-            WHERE seccion = 'salud';
-            ```
-
-            ```python
-            # MongoDB
-            db.noticias.find(
-                {"seccion": "salud"},          # filtro   -> el WHERE
-                {"titulo": 1, "seccion": 1}    # proyección -> el SELECT
-            )
-            ```
-
-            **Lo que cambia:** en SQL el `SELECT` va primero y el `WHERE` después. En MongoDB el **filtro va
-            primero** y la **proyección segunda**. Es el mismo par de ideas en orden inverso.
-
-            ## Comparar números
-
-            ```sql
-            SELECT titulo FROM noticias WHERE n_palabras > 800;
-            ```
-
-            ```python
-            db.noticias.find({"n_palabras": {"$gt": 800}}, {"titulo": 1})
-            ```
-
-            | Operador | Significa | En SQL |
-            |---|---|---|
-            | `$gt` / `$gte` | mayor / mayor o igual | `>` / `>=` |
-            | `$lt` / `$lte` | menor / menor o igual | `<` / `<=` |
-            | `$ne` | distinto de | `<>` |
-            | `$in` | está en la lista | `IN (...)` |
-            | `$exists` | el campo existe en el documento | *no tiene equivalente directo* |
-            | `$regex` | el texto contiene un patrón | `LIKE '%...%'` |
-
-            > `$exists` no tiene equivalente en SQL, y por una razón de fondo: **en una tabla la columna siempre
-            > existe**, aunque esté vacía. En un documento, el campo puede simplemente no estar. Es la diferencia
-            > entre "no tiene valor" y "no tiene el campo".
-
-            **El error que vas a cometer si vienes de SQL.** `{"subcategoria": None}` **no** significa "no tiene el
-            campo": empata tanto los documentos que lo tienen en nulo como los que no lo traen. Para distinguirlos
-            de verdad: `{"subcategoria": {"$exists": False}}`. Y en esta colección importa, porque 180 noticias no
-            traen `subcategoria`.
-
-            ## Varias condiciones a la vez
-
-            ```sql
-            SELECT titulo FROM noticias WHERE seccion = 'bogota' AND n_palabras > 500;
-            ```
-
-            ```python
-            db.noticias.find({"seccion": "bogota", "n_palabras": {"$gt": 500}})
-            ```
-
-            **Regla que evita el primer error de todos:** varias claves dentro del mismo diccionario significan
-            **AND** implícito. Para un **OR** hay que escribirlo: `{"$or": [ {...}, {...} ]}`.
-
-            **Cuidado cuando las dos condiciones entran en el mismo arreglo.** Si escribes
-            `{"etiquetas.slug": "salud", "etiquetas.nombre": "Contraloría"}`, eso se cumple aunque sean **dos
-            etiquetas diferentes** de la misma noticia. Para exigir que sea la misma:
-            `{"etiquetas": {"$elemMatch": {"slug": "salud", "nombre": "Contraloría"}}}`.
-
-            ## Entrar en lo anidado: notación de punto
-
-            Aquí no hay SQL equivalente, porque no hay nada anidado en una tabla.
-
-            ```python
-            # noticias que tengan al menos una etiqueta cuyo slug sea exactamente "contraloria"
-            db.noticias.find({"etiquetas.slug": "contraloria"})
-            ```
-
-            **Lo importante:** `etiquetas` es una **lista** de objetos, y MongoDB busca *dentro de cada elemento*
-            de la lista sin que tengas que decirlo. Esa sola línea es lo que en una base relacional exigiría una
-            tabla `noticia_etiqueta` y un JOIN.
-
-            ### Mini ficha: `find` — traer documentos
-
-            **La forma. Siempre son estos dos huecos:**
-
-            ```python
-            coleccion.find(FILTRO, PROYECCION)
-            ```
-
-            | El hueco | Qué escribes ahí | Si lo dejas vacío |
-            |---|---|---|
-            | `FILTRO` | un diccionario con las condiciones que hay que cumplir | `find({})` trae **todos** los documentos |
-            | `PROYECCION` | un diccionario: `1` en los campos que quieres, `0` en los que no | te devuelve el documento **completo**, con todos sus campos |
-
-            **Un ejemplo con los datos de esta noche:**
-
-            ```python
-            coleccion.find(
-                {"n_palabras": {"$gt": 800}},    # FILTRO:     las de mas de 800 palabras
-                {"titulo": 1, "_id": 0},         # PROYECCION: solo quiero el titulo
-            )
-            ```
-
-            - **Qué devuelve:** un **cursor**, no una lista. Se recorre con un `for` o se convierte con `list(...)`.
-            - **Error frecuente:** `_id` viene **siempre**, aunque no lo pidas. Para quitarlo hay que decirlo
-              explícitamente con `{"_id": 0}`, como en el ejemplo.
-            """
-        ),
-        *question_cell(
-            5,
-            "Traducir entre SQL y MongoDB",
-            "Necesitas las noticias de la sección 'bogota' que además tengan más de 500 palabras, y quieres ver "
-            "solamente el título.",
-            "¿Cuál de estas consultas de MongoDB corresponde a "
-            "`SELECT titulo FROM noticias WHERE seccion='bogota' AND n_palabras>500`?",
-            [
-                'find({"seccion": "bogota", "n_palabras": {"$gt": 500}}, {"titulo": 1, "_id": 0})',
-                'find({"titulo": 1}, {"seccion": "bogota", "n_palabras": {"$gt": 500}})',
-                'find({"$or": [{"seccion": "bogota"}, {"n_palabras": {"$gt": 500}}]})',
-                'find({"seccion": "bogota"}).find({"n_palabras": 500})',
-            ],
-            0,
-            [
-                "Correcto. El filtro va primero y la proyección segunda —al revés que en SQL—, las dos claves dentro "
-                "del mismo diccionario significan AND, y `_id: 0` es lo que evita que aparezca el identificador que no pediste.",
-                "Están invertidos: eso filtraría por «documentos cuyo campo titulo valga 1» y proyectaría con la "
-                "condición. Es el error más común al venir de SQL, donde el SELECT se escribe primero.",
-                "`$or` devolvería también las noticias largas de cualquier otra sección, y las de Bogotá de cualquier "
-                "longitud. El enunciado pide las dos condiciones a la vez, que es el AND implícito.",
-                "`find()` no se encadena así, y `n_palabras: 500` pediría exactamente 500 palabras, no más de 500. "
-                "Para «más de» se necesita `$gt`.",
-            ],
-        ),
-        md(
-            """
-            ---
             # Puente al laboratorio
 
             > **PARA LLEVAR.** Las ocho preguntas azules **no se califican**: son el ensayo de la única entrega
@@ -1524,6 +1380,8 @@ def build_cells():
             | `practica.delete_many({})` | la vacía. El `{}` es «todos». Está aquí para que puedas ejecutar la celda diez veces sin que se acumulen copias |
             | `practica.insert_many([...])` | guarda la lista. Cada `{...}` de dentro será **un documento** |
             | `{"_id": 1, "nombre": "Ana", ...}` | un documento. El `_id` se lo ponemos nosotros; si no lo pusiéramos, MongoDB inventaría uno |
+            | `"idiomas": [ {...}, {...} ]` | una **lista de objetos** dentro del documento. Ana tiene dos, Luis uno |
+            | `"correo"` en Sara | un campo que **solo existe en un documento**. Los otros dos no lo tienen —no está vacío: no está |
             | `practica.count_documents({})` | cuenta los que hay. Otra vez `{}` = todos |
             """
         ),
@@ -1535,9 +1393,17 @@ def build_cells():
             practica.delete_many({})        # la vaciamos, para poder repetir esta celda
 
             practica.insert_many([
-                {"_id": 1, "nombre": "Ana",  "edad": 30, "ciudad": "Bogota"},
-                {"_id": 2, "nombre": "Luis", "edad": 45, "ciudad": "Cali"},
-                {"_id": 3, "nombre": "Sara", "edad": 28, "ciudad": "Bogota"},
+                {"_id": 1, "nombre": "Ana",  "edad": 30, "ciudad": "Bogota",
+                 "idiomas": [{"nombre": "espanol", "nivel": "nativo"},
+                             {"nombre": "ingles",  "nivel": "medio"}]},
+
+                {"_id": 2, "nombre": "Luis", "edad": 45, "ciudad": "Cali",
+                 "idiomas": [{"nombre": "espanol", "nivel": "nativo"}]},
+
+                {"_id": 3, "nombre": "Sara", "edad": 28, "ciudad": "Bogota",
+                 "idiomas": [{"nombre": "espanol", "nivel": "nativo"},
+                             {"nombre": "frances", "nivel": "basico"}],
+                 "correo": "sara@ejemplo.com"},        # solo Sara tiene correo
             ])
 
             print("Documentos guardados:", practica.count_documents({}))
@@ -1647,49 +1513,411 @@ def build_cells():
         ),
         md(
             """
-            ### ✏️ Ejercicio 1 — modifica la consulta
+            ---
+            ## Si vienes de SQL: es lo mismo, en otro orden
 
-            La celda de abajo funciona tal como está. **Tu trabajo es cambiarla** para que traiga:
+            Antes de seguir, el puente. Esta es exactamente la misma consulta escrita en los dos idiomas:
 
-            > las noticias de la sección `bogota` **que además tengan más de 800 palabras**,
-            > mostrando el título y el número de palabras.
+            ```sql
+            -- SQL
+            SELECT titulo, seccion
+            FROM noticias
+            WHERE seccion = 'salud';
+            ```
 
-            Dos pistas, y no necesitas nada más:
+            ```python
+            # MongoDB
+            coleccion.find(
+                {"seccion": "salud"},          # el FILTRO     -> es el WHERE
+                {"titulo": 1, "seccion": 1},   # la PROYECCION -> es el SELECT
+            )
+            ```
 
-            - dentro del filtro puedes poner **varias condiciones separadas por coma**, y se cumplen todas
-              a la vez: `{"campo_a": valor, "campo_b": valor}`;
-            - «más de 800» se escribe `{"$gt": 800}`.
+            **Lo único que cambia es el orden.** En SQL el `SELECT` va primero y el `WHERE` después. En
+            MongoDB el **filtro va primero** y la **proyección segunda**. Las mismas dos ideas, al revés.
+
+            Lo que sigue son cuatro cosas que necesitas para escribir consultas de verdad. Cada una va
+            igual: **se explica, se prueba en pequeño, se aplica a las noticias, la practicas tú, y la
+            solución está plegada.**
+            """
+        ),
+        md(
+            """
+            ## Tema 1 · Comparar números
+
+            Hasta ahora el filtro pedía **igualdad**: `{"ciudad": "Bogota"}`. Para «mayor que» o «menor
+            que» hay que escribir un diccionario dentro del diccionario.
+
+            **La forma:**
+
+            ```python
+            {CAMPO: {OPERADOR: VALOR}}
+            ```
+
+            | El hueco | Qué escribes ahí |
+            |---|---|
+            | `CAMPO` | el campo que comparas: `"edad"`, `"n_palabras"` |
+            | `OPERADOR` | uno de los de la tabla de abajo, entre comillas y con signo pesos |
+            | `VALOR` | el número contra el que comparas |
+
+            | Operador | Significa | En SQL |
+            |---|---|---|
+            | `$gt` / `$gte` | mayor / mayor o igual | `>` / `>=` |
+            | `$lt` / `$lte` | menor / menor o igual | `<` / `<=` |
+            | `$ne` | distinto de | `<>` |
+            | `$in` | está en la lista | `IN (...)` |
+
+            **En pequeño:** de Ana (30), Luis (45) y Sara (28), ¿quiénes pasan de 29 años?
             """
         ),
         code(
             """
-            # ── EJERCICIO 1 — cambia esta celda y vuelve a ejecutarla ──────────────
-            resultado = coleccion.find(
-                {"seccion": "bogota"},       # FILTRO      <-- anade aqui la segunda condicion
-                {"titulo": 1, "_id": 0},     # PROYECCION  <-- anade aqui n_palabras
-            )
+            # ── TEMA 1, en pequeno ─────────────────────────────────────────────────
+            for p in practica.find({"edad": {"$gt": 29}}):
+                print(p["nombre"], p["edad"])
+            """
+        ),
+        code(
+            """
+            # ── TEMA 1, sobre las noticias ─────────────────────────────────────────
+            # count_documents cuenta sin traer nada: util cuando solo quieres el numero.
+            print("Noticias de mas de 800 palabras:", coleccion.count_documents({"n_palabras": {"$gt": 800}}))
 
-            for n in resultado:
-                print(n)
+            for n in coleccion.find({"n_palabras": {"$gt": 800}}, {"titulo": 1, "n_palabras": 1, "_id": 0}).limit(5):
+                print(n["n_palabras"], "|", n["titulo"][:64])
+            """
+        ),
+        md(
+            """
+            ### ✏️ Ejercicio · Tema 1
+
+            La celda de abajo funciona. Cámbiala para que cuente **las noticias de menos de 300 palabras**
+            y muestre cinco de ellas.
+            """
+        ),
+        code(
+            """
+            # ── EJERCICIO 1 — cambia el operador y el numero ───────────────────────
+            print("Cuantas:", coleccion.count_documents({"n_palabras": {"$gt": 800}}))
+
+            for n in coleccion.find({"n_palabras": {"$gt": 800}}, {"titulo": 1, "n_palabras": 1, "_id": 0}).limit(5):
+                print(n["n_palabras"], "|", n["titulo"][:64])
             """
         ),
         md(
             """
             <details>
-            <summary><b>Solución del ejercicio 1</b> — ábrela solo si te atascaste</summary>
+            <summary><b>Solución · Tema 1</b></summary>
 
             ```python
-            resultado = coleccion.find(
-                {"seccion": "bogota", "n_palabras": {"$gt": 800}},   # FILTRO: las dos condiciones
-                {"titulo": 1, "n_palabras": 1, "_id": 0},            # PROYECCION: dos campos
-            )
+            print("Cuantas:", coleccion.count_documents({"n_palabras": {"$lt": 300}}))
 
-            for n in resultado:
-                print(n["n_palabras"], "|", n["titulo"][:65])
+            for n in coleccion.find({"n_palabras": {"$lt": 300}}, {"titulo": 1, "n_palabras": 1, "_id": 0}).limit(5):
+                print(n["n_palabras"], "|", n["titulo"][:64])
             ```
 
-            **Deberías ver 15 noticias.** Si ves 53, te faltó la condición de las palabras; si ves 0,
-            revisa que `bogota` esté sin tilde y en minúscula — así está guardado.
+            **Son 99 noticias.** Si te salieron 189, cambiaste el número pero no el operador.
+
+            </details>
+            """
+        ),
+        md(
+            """
+            ## Tema 2 · Varias condiciones a la vez
+
+            **La forma. Dos claves en el mismo diccionario significan Y:**
+
+            ```python
+            {CAMPO_A: VALOR_A, CAMPO_B: VALOR_B}      # se cumplen las dos
+            ```
+
+            **Y para O hay que escribirlo, porque no es el comportamiento por defecto:**
+
+            ```python
+            {"$or": [ {CONDICION_1}, {CONDICION_2} ]}   # basta con una
+            ```
+
+            | La forma | Qué significa | En SQL |
+            |---|---|---|
+            | varias claves juntas | **Y** — todas se cumplen | `AND` |
+            | `$or` con una lista | **O** — basta una | `OR` |
+
+            > **El primer error de todos los que vienen de SQL** es esperar que la coma sea un `OR`. No lo
+            > es: la coma es `AND`.
+
+            **En pequeño:** ¿quién vive en Bogotá **y** tiene menos de 29? Y luego: ¿quién vive en Cali
+            **o** pasa de 29?
+            """
+        ),
+        code(
+            """
+            # ── TEMA 2, en pequeno ─────────────────────────────────────────────────
+            print("Y  (Bogota Y menor de 29):")
+            for p in practica.find({"ciudad": "Bogota", "edad": {"$lt": 29}}):
+                print("   ", p["nombre"], p["ciudad"], p["edad"])
+
+            print()
+            print("O  (Cali O mayor de 29):")
+            for p in practica.find({"$or": [{"ciudad": "Cali"}, {"edad": {"$gt": 29}}]}):
+                print("   ", p["nombre"], p["ciudad"], p["edad"])
+            """
+        ),
+        code(
+            """
+            # ── TEMA 2, sobre las noticias ─────────────────────────────────────────
+            print("Solo bogota            :", coleccion.count_documents({"seccion": "bogota"}))
+            print("bogota Y mas de 500 pal:", coleccion.count_documents(
+                {"seccion": "bogota", "n_palabras": {"$gt": 500}}))
+            """
+        ),
+        md(
+            """
+            ### ✏️ Ejercicio · Tema 2
+
+            Cuenta **las noticias que están detrás del muro de pago y además pasan de 1 500 palabras**.
+
+            El campo se llama `premium` y vale `True` o `False`.
+            """
+        ),
+        code(
+            """
+            # ── EJERCICIO 2 — anade la segunda condicion ───────────────────────────
+            print(coleccion.count_documents({"premium": True}))
+            """
+        ),
+        md(
+            """
+            <details>
+            <summary><b>Solución · Tema 2</b></summary>
+
+            ```python
+            print(coleccion.count_documents({"premium": True, "n_palabras": {"$gt": 1500}}))
+            ```
+
+            **Son 25.** Sin la segunda condición son 256, así que si te salió ese número te faltó la coma.
+
+            </details>
+            """
+        ),
+        *question_cell(
+            5,
+            "Traducir entre SQL y MongoDB",
+            "Necesitas las noticias de la sección 'bogota' que además tengan más de 500 palabras, y quieres ver "
+            "solamente el título.",
+            "¿Cuál de estas consultas de MongoDB corresponde a "
+            "`SELECT titulo FROM noticias WHERE seccion='bogota' AND n_palabras>500`?",
+            [
+                'find({"seccion": "bogota", "n_palabras": {"$gt": 500}}, {"titulo": 1, "_id": 0})',
+                'find({"titulo": 1}, {"seccion": "bogota", "n_palabras": {"$gt": 500}})',
+                'find({"$or": [{"seccion": "bogota"}, {"n_palabras": {"$gt": 500}}]})',
+                'find({"seccion": "bogota"}).find({"n_palabras": 500})',
+            ],
+            0,
+            [
+                "Correcto. El filtro va primero y la proyección segunda —al revés que en SQL—, las dos claves dentro "
+                "del mismo diccionario significan AND, y `_id: 0` es lo que evita que aparezca el identificador que no pediste.",
+                "Están invertidos: eso filtraría por «documentos cuyo campo titulo valga 1» y proyectaría con la "
+                "condición. Es el error más común al venir de SQL, donde el SELECT se escribe primero.",
+                "`$or` devolvería también las noticias largas de cualquier otra sección, y las de Bogotá de cualquier "
+                "longitud. El enunciado pide las dos condiciones a la vez, que es el AND implícito.",
+                "`find()` no se encadena así, y `n_palabras: 500` pediría exactamente 500 palabras, no más de 500. "
+                "Para «más de» se necesita `$gt`.",
+            ],
+        ),
+        md(
+            """
+            ## Tema 3 · Entrar en lo anidado: la notación de punto
+
+            Aquí **no hay SQL equivalente**, porque en una tabla no hay nada anidado. Es lo que de verdad
+            distingue a una base documental.
+
+            **La forma:**
+
+            ```python
+            {"CAMPO.SUBCAMPO": VALOR}
+            ```
+
+            | El hueco | Qué escribes ahí |
+            |---|---|
+            | `CAMPO` | el campo que contiene la lista o el objeto: `"idiomas"`, `"etiquetas"` |
+            | `.SUBCAMPO` | el campo de adentro: `.nombre`, `.slug` |
+            | todo junto y entre comillas | `"etiquetas.slug"` — el punto va **dentro** de las comillas |
+
+            **Y esto es lo que hace que valga la pena:** si el campo es una **lista**, MongoDB busca dentro
+            de **cada elemento** sin que se lo pidas. Esa sola línea es lo que en una base relacional
+            exigiría una tabla aparte y un JOIN.
+
+            **En pequeño:** ¿quién habla inglés? Ana lo tiene en su lista; Luis y Sara no.
+            """
+        ),
+        code(
+            """
+            # ── TEMA 3, en pequeno ─────────────────────────────────────────────────
+            for p in practica.find({"idiomas.nombre": "ingles"}):
+                print(p["nombre"], "->", p["idiomas"])
+            """
+        ),
+        md(
+            """
+            ### 🔎 Y ahora la trampa, que se ve mejor en pequeño que en grande
+
+            Pregunta: **¿quién habla español a nivel medio?** Nadie: Ana, Luis y Sara lo tienen como
+            nativo. Ana tiene *medio*, pero de **inglés**.
+
+            Ejecuta la celda de abajo y mira las dos respuestas.
+            """
+        ),
+        code(
+            """
+            # ── TEMA 3, la trampa ──────────────────────────────────────────────────
+            print("Con notacion de punto:")
+            for p in practica.find({"idiomas.nombre": "espanol", "idiomas.nivel": "medio"}):
+                print("   ", p["nombre"])          # <-- sale Ana, y NO deberia
+
+            print()
+            print("Con $elemMatch:")
+            for p in practica.find({"idiomas": {"$elemMatch": {"nombre": "espanol", "nivel": "medio"}}}):
+                print("   ", p["nombre"])
+            print("   (no salio nadie, que es la respuesta correcta)")
+            """
+        ),
+        md(
+            """
+            ### 🔎 Por qué pasa eso
+
+            Con notación de punto, las dos condiciones se buscan **en la lista entera**, no en el mismo
+            elemento. Ana tiene *un* idioma llamado `espanol` y *otro* con nivel `medio` — condiciones
+            cumplidas, aunque en objetos distintos.
+
+            `$elemMatch` exige que **un solo elemento** cumpla las dos a la vez.
+
+            > **PARA LLEVAR.** Cuando pongas **dos condiciones sobre la misma lista**, usa `$elemMatch`.
+            > Con una sola condición, la notación de punto basta y es más corta.
+
+            Con las noticias pasa igual: `{"etiquetas.slug": "salud", "etiquetas.nombre": "Contraloría"}`
+            se cumple aunque sean **dos etiquetas distintas** de la misma noticia.
+            """
+        ),
+        code(
+            """
+            # ── TEMA 3, sobre las noticias ─────────────────────────────────────────
+            print("Noticias con la etiqueta 'contraloria':",
+                  coleccion.count_documents({"etiquetas.slug": "contraloria"}))
+
+            for n in coleccion.find({"etiquetas.slug": "contraloria"}, {"titulo": 1, "_id": 0}).limit(5):
+                print("  -", n["titulo"][:70])
+            """
+        ),
+        md(
+            """
+            ### ✏️ Ejercicio · Tema 3
+
+            Cuenta las noticias etiquetadas con el **nombre** exacto `Contraloría General de la Nación`.
+
+            Ojo: el campo de adentro ya no es `slug`, es `nombre`, y **lleva tildes**.
+            """
+        ),
+        code(
+            """
+            # ── EJERCICIO 3 — cambia el subcampo y el valor ────────────────────────
+            print(coleccion.count_documents({"etiquetas.slug": "contraloria"}))
+            """
+        ),
+        md(
+            """
+            <details>
+            <summary><b>Solución · Tema 3</b></summary>
+
+            ```python
+            print(coleccion.count_documents({"etiquetas.nombre": "Contraloría General de la Nación"}))
+            ```
+
+            **Son 10**, frente a 144 por `slug`. La diferencia no es un error: `slug` agrupa muchas
+            variantes que la redacción escribió distinto, y el `nombre` exacto solo empata con una.
+            **Buscar por el campo equivocado te cambia el resultado en un factor de catorce.**
+
+            </details>
+            """
+        ),
+        md(
+            """
+            ## Tema 4 · Campos que no existen
+
+            En una tabla la columna **siempre existe**, aunque esté vacía. En un documento el campo puede
+            simplemente **no estar**. Son cosas distintas y hay un operador para preguntarlo.
+
+            **La forma:**
+
+            ```python
+            {CAMPO: {"$exists": True}}     # los que SI tienen el campo
+            {CAMPO: {"$exists": False}}    # los que NO lo tienen
+            ```
+
+            **En pequeño:** solo Sara tiene `correo`.
+            """
+        ),
+        code(
+            """
+            # ── TEMA 4, en pequeno ─────────────────────────────────────────────────
+            print("Tienen correo:")
+            for p in practica.find({"correo": {"$exists": True}}):
+                print("   ", p["nombre"], p["correo"])
+
+            print("No tienen correo:")
+            for p in practica.find({"correo": {"$exists": False}}):
+                print("   ", p["nombre"])
+            """
+        ),
+        code(
+            """
+            # ── TEMA 4, sobre las noticias ─────────────────────────────────────────
+            print("Total de noticias        :", coleccion.count_documents({}))
+            print("SIN el campo subcategoria:", coleccion.count_documents({"subcategoria": {"$exists": False}}))
+            print("Con subcategoria en nulo :", coleccion.count_documents({"subcategoria": None}))
+            """
+        ),
+        md(
+            """
+            ### 🔎 Las dos últimas líneas dan el mismo número, y hay que entender por qué
+
+            `{"subcategoria": None}` da 180 igual que `$exists: False`. **No significa que sean lo mismo.**
+
+            `{"campo": None}` empata **dos cosas a la vez**: los documentos que tienen el campo con valor
+            nulo, y los que no lo traen. En esta colección **ninguna noticia lo tiene en nulo** —las 180
+            simplemente no lo traen—, así que los dos números coinciden por casualidad del dato.
+
+            El día que trabajes con una colección donde sí haya nulos, esos dos números se van a separar,
+            y solo `$exists` te dirá la verdad.
+            """
+        ),
+        md(
+            """
+            ### ✏️ Ejercicio · Tema 4
+
+            El campo `tiene_video` solo aparece en algunas noticias. **Cuenta en cuántas existe** y muestra
+            tres títulos.
+            """
+        ),
+        code(
+            """
+            # ── EJERCICIO 4 — cambia el campo y el valor de $exists ────────────────
+            print(coleccion.count_documents({"subcategoria": {"$exists": False}}))
+            """
+        ),
+        md(
+            """
+            <details>
+            <summary><b>Solución · Tema 4</b></summary>
+
+            ```python
+            print(coleccion.count_documents({"tiene_video": {"$exists": True}}))
+
+            for n in coleccion.find({"tiene_video": {"$exists": True}}, {"titulo": 1, "_id": 0}).limit(3):
+                print("  -", n["titulo"][:70])
+            ```
+
+            **Son 17 noticias de 987.** Diecisiete documentos traen un campo que los otros 970 no tienen,
+            y a MongoDB le da igual. Eso en una tabla sería una columna con 970 celdas vacías.
 
             </details>
             """
@@ -1741,7 +1969,7 @@ def build_cells():
         ),
         md(
             """
-            ### ✏️ Ejercicio 2 — marca una noticia
+            ### ✏️ Ejercicio · `update_one` — marca una noticia
 
             En la colección de noticias, la del contrato de basuras de Cali tiene el `_id` **3528032**.
 
@@ -1754,7 +1982,7 @@ def build_cells():
         ),
         code(
             """
-            # ── EJERCICIO 2 — completa la orden del medio ──────────────────────────
+            # ── EJERCICIO 5 — completa la orden del medio ──────────────────────────
             print("Antes  :", coleccion.find_one({"_id": 3528032}, {"revisada": 1, "revisor": 1, "_id": 0}))
 
             coleccion.update_one(
@@ -1768,7 +1996,7 @@ def build_cells():
         md(
             """
             <details>
-            <summary><b>Solución del ejercicio 2</b></summary>
+            <summary><b>Solución · update_one</b></summary>
 
             ```python
             coleccion.update_one(
@@ -1864,7 +2092,7 @@ def build_cells():
         ),
         md(
             """
-            ### ✏️ Ejercicio 3 — cambia por qué se ordena
+            ### ✏️ Ejercicio · `aggregate` — cambia por qué se ordena
 
             La celda de arriba da **las 5 secciones con más noticias**. Cámbiala para que dé otra cosa:
 
@@ -1880,7 +2108,7 @@ def build_cells():
         ),
         code(
             """
-            # ── EJERCICIO 3 — cambia esta celda y vuelve a ejecutarla ──────────────
+            # ── EJERCICIO 6 — cambia esta celda y vuelve a ejecutarla ──────────────
             resultado = coleccion.aggregate([
                 {"$group": {"_id": "$seccion", "cuantas": {"$sum": 1}}},   # <-- anade el promedio
                 {"$sort": {"cuantas": -1}},                                # <-- ordena por el promedio
@@ -1894,7 +2122,7 @@ def build_cells():
         md(
             """
             <details>
-            <summary><b>Solución del ejercicio 3</b></summary>
+            <summary><b>Solución · aggregate</b></summary>
 
             ```python
             resultado = coleccion.aggregate([
@@ -1933,9 +2161,9 @@ def build_cells():
         ),
         md(
             """
-            ### Ya sabes las cuatro órdenes
+            ### Hasta aquí el taller
 
-            Eso es todo el vocabulario que necesitas esta noche:
+            Eso es todo el vocabulario que necesitas esta noche. **Cuatro órdenes:**
 
             | Orden | Para qué |
             |---|---|
@@ -1943,6 +2171,15 @@ def build_cells():
             | `find` | buscar |
             | `update_one` | modificar |
             | `aggregate` | resumir |
+
+            **Y cuatro formas de escribir un filtro:**
+
+            | Lo que quieres | Cómo se escribe |
+            |---|---|
+            | comparar números | `{"n_palabras": {"$gt": 800}}` |
+            | dos condiciones a la vez | `{"seccion": "bogota", "n_palabras": {"$gt": 500}}` |
+            | entrar en algo anidado | `{"etiquetas.slug": "contraloria"}` |
+            | preguntar si el campo existe | `{"tiene_video": {"$exists": True}}` |
 
             Lo que sigue es lo mismo, con preguntas más interesantes.
             """
