@@ -244,12 +244,16 @@ def build_cells():
             |---:|---|
             | 0–10 | quiz de conceptos básicos de Big Data (evaluable) |
             | 10–15 | confirmar que el motor quedó listo |
-            | 15–30 | cargar las noticias y leer un documento |
-            | 30–48 | tres consultas `find()` escritas por ti |
-            | 48–56 | marcar una noticia como revisada (`update_one`) |
-            | 56–74 | primera agregación y su interpretación |
-            | 74–80 | cruzar noticias con entidades de SECOP, y descubrir por qué el cruce fácil miente |
-            | 80–85 | cerrar el Pull Request de la sesión 2 y ticket de salida |
+            | 15–23 | cargar las noticias y leer un documento |
+            | 23–35 | tres consultas `find()` completadas por ti |
+            | 35–41 | marcar una noticia como revisada (`update_one`) |
+            | 41–58 | dos agregaciones y su interpretación |
+            | 58–73 | cruzar noticias con entidades de SECOP, y descubrir por qué el cruce fácil miente |
+            | 73–83 | cerrar el Pull Request de la sesión 2 y abrir el hito de hoy |
+            | 83–85 | ticket de salida |
+
+            > Las preguntas azules del cuaderno son de **autoevaluación y no se califican**. La única producción
+            > evaluable de hoy es el formulario del quiz.
             """
         ),
         *soporte_cells(),
@@ -321,12 +325,12 @@ def build_cells():
             | `sitemap-articles-2026-MM.xml` | el índice de todo lo publicado ese mes | XML |
             | `servicios/feeds/articulo/<ID>` | el artículo completo | JSON |
 
-            El índice del año trae **57 844 artículos**. Descargarlos todos habría sido absurdo, así que primero
+            El índice del año trae **57 848 artículos**. Descargarlos todos habría sido absurdo, así que primero
             filtramos por la dirección: el texto de la URL ya dice de qué trata el artículo. Los que contienen
             palabras como `contrato`, `licitacion`, `secop`, `sobrecosto`, `contraloria` o `corrupcion` son
             **995**. De esos, 991 respondieron, y al quitar repetidos quedaron **987 noticias**.
 
-            > **Fíjate en el orden, porque es una decisión de ingeniería y no un detalle:** revisamos 57 844
+            > **Fíjate en el orden, porque es una decisión de ingeniería y no un detalle:** revisamos 57 848
             > artículos con **8 peticiones** (una por mes) y solo descargamos 995. Filtrar donde la información ya
             > está, antes de traer los datos, es la misma idea que vas a ver toda la noche con `$match` y todo el
             > semestre con los índices.
@@ -360,7 +364,7 @@ def build_cells():
             ### Interpretación docente — la tabla ya nos está avisando
 
             **Cómo se lee.** De 59 columnas, 2 están completamente vacías y otras 6 están vacías en más del 80 % de
-            las filas. Al mismo tiempo, 48 columnas no tienen un solo hueco.
+            las filas — el 8 que imprime la celda incluye esas 2 totalmente vacías. Al mismo tiempo, 48 columnas no tienen un solo hueco.
 
             **Qué nos dice.** La tabla está pagando el precio de un esquema rígido: para que quepan los procesos que
             *sí* tienen fecha de adjudicación, **todos** los procesos tienen que cargar con esa columna, aunque el
@@ -384,7 +388,9 @@ def build_cells():
             import urllib.request, json
             from collections import Counter
 
-            with urllib.request.urlopen("{DATOS_NOTICIAS}") as r:
+            URL_NOTICIAS = "{DATOS_NOTICIAS}"
+
+            with urllib.request.urlopen(URL_NOTICIAS) as r:
                 noticias = json.loads(r.read().decode("utf-8"))
 
             print("Noticias:", len(noticias))
@@ -429,7 +435,7 @@ def build_cells():
                partir la noticia en veinticuatro filas repitiendo el título en cada una.
             3. **Partes de tipos distintos.** El cuerpo no es un texto: es una lista de bloques —entre 1 y 86 por
                noticia— y hay **25 tipos diferentes**: párrafo, imagen, subtítulo, artículo relacionado, video,
-               cita de Instagram, documento de Scribd. Cada tipo guarda campos distintos. Una tabla necesitaría una
+               cita de Instagram, PDF adjunto. Cada tipo guarda campos distintos. Una tabla necesitaría una
                columna por cada campo de cada tipo.
 
             **Qué nos dice.** El problema no es el tamaño. Son 987 noticias y 9 MB: caben en cualquier portátil. El
@@ -439,7 +445,7 @@ def build_cells():
             **Qué no podemos concluir.** Que las tablas sean malas o estén superadas. Los contratos de SECOP siguen
             estando bien en una tabla. Lo que aprendemos es a elegir según la forma del dato.
 
-            > **Pregunta que dejamos colgada.** Estas 987 noticias salieron de filtrar **57 844 artículos**, y eso
+            > **Pregunta que dejamos colgada.** Estas 987 noticias salieron de filtrar **57 848 artículos**, y eso
             > es ocho meses de **un solo periódico**. Si Laura quiere vigilar diez medios durante cinco años,
             > hablamos de millones de documentos. Aunque arreglemos la forma, ¿dónde guardamos eso? Volveremos a
             > esta pregunta en el minuto 46.
@@ -453,7 +459,7 @@ def build_cells():
             "¿Cuál de estas opciones describe mejor el costo real de forzar las etiquetas dentro de una tabla?",
             [
                 "Ninguno: basta con guardar las etiquetas separadas por comas en una sola columna de texto.",
-                "Hay que crear 21 columnas casi siempre vacías, o repetir la noticia completa en 21 filas.",
+                "Hay que crear 24 columnas casi siempre vacías, o repetir la noticia completa en 24 filas.",
                 "Hay que comprar más disco, porque el problema es el volumen de las noticias.",
                 "Hay que limpiar los datos, porque una noticia bien formada debería tener una sola etiqueta.",
             ],
@@ -581,9 +587,12 @@ def build_cells():
             pprint(n["etiquetas"][:2])
 
             print()
-            print("DENTRO DEL ARREGLO 'cuerpo' (primeros 4 bloques):")
-            for b in n["cuerpo"][:4]:
-                print("  ", b.get("tipo"), "->", [k for k in b if k != "tipo"])
+            print("DENTRO DEL ARREGLO 'cuerpo' (un bloque de cada tipo que trae esta noticia):")
+            vistos = set()
+            for b in n["cuerpo"]:
+                if b.get("tipo") not in vistos:
+                    vistos.add(b.get("tipo"))
+                    print("  ", str(b.get("tipo")), "-> claves:", [k for k in b if k != "tipo"])
             """
         ),
         md(
@@ -646,7 +655,7 @@ def build_cells():
             [
                 "El motor sí puede validar si tú se lo pides (hay validación de esquema en MongoDB). Y el problema de "
                 "la tabla no se resuelve limpiando: los bloques son legítimamente distintos entre sí.",
-                "Correcto. La estructura la decide el documento, no el motor. Con 19 tipos de bloque, cada uno con sus "
+                "Correcto. La estructura la decide el documento, no el motor. Con 25 tipos de bloque, cada uno con sus "
                 "propias claves, la tabla necesitaría la unión de todas esas claves como columnas, y cada fila dejaría "
                 "vacías las que no le corresponden. Es el mismo costo que ya medimos en SECOP, multiplicado.",
                 "MongoDB conserva los tipos: números, booleanos, fechas y objetos siguen siendo lo que son. No convierte todo a texto.",
@@ -659,7 +668,7 @@ def build_cells():
             ---
             # 4. Y cuando no cabe en un servidor
 
-            En el minuto 22 quedó una pregunta colgada: nuestras 987 noticias salieron de 57 844 artículos, de un solo
+            En el minuto 22 quedó una pregunta colgada: nuestras 987 noticias salieron de 57 848 artículos, de un solo
             periódico y ocho meses. Aunque arreglemos la forma, ¿dónde guardamos eso?
 
             Hay dos respuestas, y hacen cosas distintas.
@@ -668,6 +677,12 @@ def build_cells():
 
             Los documentos se **reparten** entre varias máquinas según una llave. Las noticias de enero a una, las
             de febrero a otra. Ninguna máquina tiene todo; entre todas tienen el total.
+
+            **Y aquí ya hay una trampa de diseño, aprovéchala.** Repartir por mes es fácil de dibujar y malo en la
+            práctica: como las noticias nuevas siempre son del mes actual, **todas las escrituras caen en la misma
+            máquina** y no resolvimos nada. Una llave de reparto tiene que repartir también el futuro, no solo el
+            pasado. Guarda esta idea: en la sesión 5, con Cassandra, elegir la llave de partición **es** el
+            ejercicio.
 
             - **Resuelve:** que el volumen no cabe, y que las escrituras saturan un solo servidor.
             - **Cuesta:** una consulta que no usa la llave de reparto tiene que preguntarle a todas las máquinas.
@@ -732,10 +747,19 @@ def build_cells():
 
             | | ACID | BASE |
             |---|---|---|
-            | promete | cada lectura ve el último estado confirmado | todas las copias coincidirán, sin decir cuándo |
+            | promete | que la transacción respeta las reglas: o pasa entera o no pasa | todas las copias coincidirán, sin decir cuándo |
             | prioriza | consistencia | disponibilidad |
             | típico de | bancos, inventarios, nómina | catálogos, medios, telemetría, redes sociales |
-            | cuesta | disponibilidad bajo fallas y escala de escritura | tolerar respuestas desactualizadas |
+            | cuesta | coordinación, y por lo tanto latencia y escala de escritura | tolerar respuestas desactualizadas |
+
+            **Dos precisiones, antes de que se vuelvan un mito.**
+
+            1. La **C de ACID** es *integridad de las reglas* —que un saldo no quede negativo—, no *ver siempre el
+               último valor*. Eso último tiene otro nombre y llega en la sesión 4.
+            2. Y la más importante: **ACID no es «lo relacional» y BASE no es «lo NoSQL»**. El MongoDB que vas a
+               levantar en un rato tiene transacciones ACID sobre varios documentos desde la versión 4.0, y una
+               operación sobre un solo documento siempre fue atómica. No son tecnologías: son **configuraciones
+               que se eligen**, y se eligen por la decisión que cuelga de ellas.
 
             ## La pregunta que hay que hacerle al negocio
 
@@ -754,9 +778,10 @@ def build_cells():
 
             1. *"Consistencia eventual significa que el dato puede estar mal o perderse."* No. No se pierde ni se
                inventa nada. Lo que varía es **qué tan viejo** es el dato.
-            2. *"Esto es un tema de NoSQL."* Tampoco. Aparece **en el momento en que hay más de una copia**, y hay
-               más de una copia porque no queremos que una máquina apagada apague el servicio. Un motor relacional
-               con réplica de lectura tiene exactamente el mismo fenómeno.
+            2. *"Esto es un tema de NoSQL."* Tampoco. Aparece cuando hay más de una copia **y alguien decide leer de
+               una copia que no es la principal**. Ese «alguien decide» es una línea de configuración, y es tuya:
+               si lees siempre de la principal, no ves consistencia eventual aunque tengas cinco réplicas. Un
+               motor relacional con réplica de lectura tiene exactamente el mismo fenómeno.
 
             > Existe un resultado clásico llamado **CAP** que formaliza este intercambio bajo fallas de red. Lo
             > nombramos aquí y lo trabajamos con un clúster real en la sesión 4. No entra en el quiz de hoy.
@@ -840,6 +865,11 @@ def build_cells():
             > existe**, aunque esté vacía. En un documento, el campo puede simplemente no estar. Es la diferencia
             > entre "no tiene valor" y "no tiene el campo".
 
+            **El error que vas a cometer si vienes de SQL.** `{"subcategoria": None}` **no** significa "no tiene el
+            campo": empata tanto los documentos que lo tienen en nulo como los que no lo traen. Para distinguirlos
+            de verdad: `{"subcategoria": {"$exists": False}}`. Y en esta colección importa, porque 180 noticias no
+            traen `subcategoria`.
+
             ## Varias condiciones a la vez
 
             ```sql
@@ -852,6 +882,11 @@ def build_cells():
 
             **Regla que evita el primer error de todos:** varias claves dentro del mismo diccionario significan
             **AND** implícito. Para un **OR** hay que escribirlo: `{"$or": [ {...}, {...} ]}`.
+
+            **Cuidado cuando las dos condiciones entran en el mismo arreglo.** Si escribes
+            `{"etiquetas.slug": "salud", "etiquetas.nombre": "Contraloría"}`, eso se cumple aunque sean **dos
+            etiquetas diferentes** de la misma noticia. Para exigir que sea la misma:
+            `{"etiquetas": {"$elemMatch": {"slug": "salud", "nombre": "Contraloría"}}}`.
 
             ## Entrar en lo anidado: notación de punto
 
@@ -969,7 +1004,20 @@ def build_cells():
                     if "avx" not in f.read():
                         raise RuntimeError("Este procesador no tiene AVX; MongoDB 8 no puede arrancar aqui.")
 
-                if not os.path.exists(f"{BASE}/bin/mongod"):
+                # Si ya hay un mongod vivo de una ejecucion anterior, se reutiliza.
+                # Sin esto, volver a ejecutar la celda intenta lanzar un segundo servidor
+                # sobre el mismo puerto, falla, y caeriamos al respaldo perdiendo los datos.
+                try:
+                    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "pymongo"], check=False)
+                    from pymongo import MongoClient
+                    ya = MongoClient("mongodb://127.0.0.1:27017", serverSelectionTimeoutMS=1500)
+                    ya.admin.command("ping")
+                    client = ya
+                    motor = "MongoDB " + client.server_info()["version"] + " (ya estaba corriendo)"
+                except Exception:
+                    client = None
+
+                if client is None and not os.path.exists(f"{BASE}/bin/mongod"):
                     paso("1/4 Descargando MongoDB (aprox. 100 MB, desde la red de Google)...")
                     urllib.request.urlretrieve(TGZ, "/content/mongo.tgz")
                     paso("2/4 Descomprimiendo...")
@@ -980,6 +1028,9 @@ def build_cells():
                     )
                 else:
                     paso("1/4 y 2/4 ya estaban hechos; reutilizamos la instalacion.")
+
+                if client is not None:
+                    raise StopIteration  # ya conectado arriba; no relanzamos nada
 
                 paso("3/4 Arrancando el servidor...")
                 os.makedirs(DBPATH, exist_ok=True)
@@ -996,11 +1047,14 @@ def build_cells():
                 client.admin.command("ping")
                 motor = "MongoDB " + client.server_info()["version"] + " (real, dentro de este Colab)"
 
+            except StopIteration:
+                pass
+
             except Exception as error:
                 print()
-                print("No se pudo levantar MongoDB real. Motivo:")
-                print("   ", str(error)[:300])
-                print("Pasamos al respaldo. El laboratorio continua igual.")
+                print("AVISO, no es un error: en esta maquina no arranco MongoDB real.")
+                print("Seguimos con mongomock. El laboratorio es identico y no tienes que hacer nada.")
+                print("Detalle tecnico (no necesitas entenderlo):", str(error)[:200])
                 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "mongomock"], check=False)
                 import mongomock
                 client = mongomock.MongoClient()
@@ -1051,6 +1105,17 @@ def build_cells():
         code(
             """
             # Paso 2 — cargar. Se puede volver a ejecutar sin duplicar: primero borra, luego inserta.
+
+            # Si vuelves del receso y ves un NameError, no busques nada: esta celda
+            # recupera sola las noticias que cargamos durante la explicacion.
+            if "noticias" not in dir():
+                import urllib.request, json
+                print("Recuperando las noticias (el entorno se reinicio)...")
+                with urllib.request.urlopen("{DATOS_NOTICIAS}") as r:
+                    noticias = json.loads(r.read().decode("utf-8"))
+                print("Recuperadas:", len(noticias))
+
+            # 'coleccion' es lo mismo que el 'db.noticias' que vimos en la explicacion.
             coleccion = db["noticias"]
 
             coleccion.delete_many({})          # idempotencia: dejamos la coleccion vacia
@@ -1064,7 +1129,7 @@ def build_cells():
             print()
             print("Un documento cualquiera:")
             print("  ", uno)
-            """
+            """.replace("{DATOS_NOTICIAS}", DATOS_NOTICIAS)
         ),
         md(
             """
@@ -1111,24 +1176,41 @@ def build_cells():
         ),
         code(
             """
-            # 3.1 — ESCRÍBELA TÚ.
+            # 3.1 — COMPLÉTALA TÚ. Solo cambia el valor de SECCION.
             # Pregunta: ¿que noticias hay de una seccion que te interese?
-            # Pista: primero mira que secciones existen.
-            print("Secciones disponibles:", sorted(coleccion.distinct("seccion"))[:15], "...")
 
-            # Completa el filtro y la proyeccion:
-            # for n in coleccion.find({"seccion": "____"}, {"titulo": 1, "_id": 0}):
-            #     print(n["titulo"][:80])
+            # Pista: estas son las 10 secciones con mas noticias, con su conteo.
+            # Hay 57 secciones en total y muchas tienen una sola noticia: si eliges
+            # una de esas y ves un solo resultado, tu consulta esta bien.
+            conteo = [
+                {"$group": {"_id": "$seccion", "n": {"$sum": 1}}},
+                {"$sort": {"n": -1}},
+                {"$limit": 10},
+            ]
+            for fila in coleccion.aggregate(conteo):
+                print(f"  {fila['_id']:38s} {fila['n']:4d}")
+
+            SECCION = "salud"      # <--- cambia esto
+
+            print()
+            for n in coleccion.find({"seccion": SECCION}, {"titulo": 1, "_id": 0}).limit(10):
+                print("-", n["titulo"][:80])
             """
         ),
         code(
             """
-            # 3.2 — ESCRÍBELA TÚ.
-            # Pregunta: ¿cuales son las noticias mas largas? (mas de 800 palabras)
-            # Recuerda: para "mayor que" se usa {"$gt": valor}
+            # 3.2 — COMPLÉTALA TÚ. Falta el operador: escribe "$gt" donde dice ____
+            # Pregunta: ¿cuales son las noticias mas largas?
 
-            # for n in coleccion.find({"n_palabras": {"____": 800}}, {"titulo": 1, "n_palabras": 1, "_id": 0}):
-            #     print(n["n_palabras"], "|", n["titulo"][:70])
+            OPERADOR = "____"      # <--- reemplaza por el operador de "mayor que"
+
+            largas = coleccion.find(
+                {"n_palabras": {OPERADOR: 800}},
+                {"titulo": 1, "n_palabras": 1, "_id": 0},
+            )
+            # .limit(10) evita llenar la pantalla: hay 189 noticias de mas de 800 palabras.
+            for n in largas.limit(10):
+                print(n["n_palabras"], "|", n["titulo"][:70])
             """
         ),
         code(
@@ -1178,7 +1260,7 @@ def build_cells():
                 "no textos. No encontraría nada.",
                 "Correcto. `etiquetas.slug` recorre cada objeto dentro del arreglo y compara su campo `slug`. Es la "
                 "diferencia central con una tabla: sin JOIN, sin tabla intermedia y sin recorrer nada a mano.",
-                "Funcionaría, pero traería los 126 documentos completos a Python para descartar la mayoría. Con 126 no "
+                "Funcionaría, pero traería las 987 noticias completas a Python para descartar la mayoría. Con 987 no "
                 "se nota; con 4 millones sí. La regla es filtrar donde están los datos, no donde está tu código.",
                 "Esa es exactamente la solución relacional, y es la que el modelo documental te permite evitar cuando "
                 "las etiquetas solo se consultan junto con su noticia.",
@@ -1219,12 +1301,13 @@ def build_cells():
             ### Interpretación docente — `$set` y el campo que no existía
 
             **Cómo se lee.** `matched_count` dice cuántos documentos cumplían el filtro; `modified_count`, cuántos
-            cambiaron de verdad. Si vuelves a ejecutar la celda con los mismos valores, `matched` sigue en 1 y
-            `modified` puede bajar a 0: coincidió, pero no había nada nuevo que escribir.
+            cambiaron de verdad. Si vuelves a ejecutar esta celda **seguirá diciendo 1 y 1**, porque el `$set`
+            incluye la hora actual y la hora cambia cada vez. Si el valor fuera fijo, `modified` bajaría a 0:
+            coincidió, pero no había nada nuevo que escribir. Pruébalo mentalmente antes de creerlo.
 
             **Lo importante, y es el punto de toda la sesión:** el campo `revision` **no existía en ningún
             documento** y ahora existe en uno solo. No hubo que alterar la colección, ni avisarle al motor, ni
-            migrar los otros 125 documentos. En una tabla esto habría sido un `ALTER TABLE` que afecta a todas las
+            migrar los otros 986 documentos. En una tabla esto habría sido un `ALTER TABLE` que afecta a todas las
             filas y que en producción exige una ventana de mantenimiento.
 
             **Qué no podemos concluir.** Que esto sea gratis. Ahora tienes documentos con `revision` y documentos
@@ -1276,6 +1359,9 @@ def build_cells():
                 {"$limit": 10},                                         # el LIMIT
             ]
 
+            media_global = sum(n["n_palabras"] for n in noticias) / len(noticias)
+            print(f"Media global de palabras: {media_global:.0f}")
+            print()
             print(f"{'SECCION':32s} {'NOTICIAS':>9s} {'PALABRAS (prom.)':>17s}")
             print("-" * 60)
             for fila in coleccion.aggregate(pipeline):
@@ -1290,9 +1376,16 @@ def build_cells():
             extensas son. `_id` en la salida no es un identificador: en `$group` es **el criterio de agrupación**,
             y por eso vale el nombre de la sección.
 
-            **Qué nos dice.** La cobertura de contratación se concentra abrumadoramente en secciones judiciales y
-            de investigación, y esas noticias son notoriamente **más largas** que el promedio. Tiene sentido: un
-            reportaje de investigación sobre un contrato necesita más espacio que una nota breve.
+            **Qué nos dice, y ojo con lo que parece decir.** La cobertura se concentra en secciones judiciales y de
+            investigación: eso sí es claro. Pero mira la columna de palabras **antes** de sacar la conclusión
+            intuitiva. La sección que encabeza, `justicia/investigacion`, aporta 238 de las 987 noticias y
+            promedia 561 palabras: está **por debajo** de la media global de 622. `justicia/delitos` promedia
+            491, todavía más abajo. La única sección notoriamente larga es `unidad-investigativa`, con 822
+            palabras… y 77 noticias.
+
+            Es decir: la lectura cómoda —«los reportajes judiciales son más largos»— **es falsa en esta tabla**.
+            Un promedio sin su `n` al lado y sin una media de referencia no dice nada, y aquí lo acabas de
+            comprobar tú mismo.
 
             **Qué NO permite concluir, y esto es lo importante de hoy.** Que la contratación "sea sobre todo un
             asunto judicial". Nuestro filtro incluyó palabras como `corrupcion`, `contraloria`, `procuraduria` y
@@ -1353,7 +1446,9 @@ def build_cells():
 
             **Cómo se lee.** Cada fila es un mes y las almohadillas son el conteo a escala.
 
-            **Qué nos dice.** La serie es bastante estable salvo dos cosas: **julio se dispara** y **agosto cae**.
+            **Qué nos dice.** La serie oscila bastante más de lo que parece a simple vista: entre junio (92) y enero
+            (141) hay un 53 % de diferencia, **y eso sin contar julio**. Julio, con 175, se sale claramente de
+            esa oscilación: ese sí parece un pico real. Agosto, con 80, parece un desplome.
 
             **Qué NO permite concluir.** Que en julio hubiera más irregularidades. Hay al menos dos explicaciones
             competidoras y con estos datos **no podemos separarlas**:
@@ -1362,20 +1457,23 @@ def build_cells():
             - o puede que el periódico haya publicado más de todo ese mes, y contratación subiera con la marea.
 
             Distinguirlas exige el denominador: cuántos artículos publicó el periódico cada mes. Ese dato **sí lo
-            tenemos** —está en el sitemap, son los 57 844— y aun así este análisis no lo usa. Anótalo: es la
+            tenemos** —está en el sitemap, son los 57 848— y aun así este análisis no lo usa. Anótalo: es la
             primera cosa que arreglarías si esto fuera tu trabajo.
 
-            Y agosto tiene una explicación que no es un hallazgo: **el mes estaba a mitad de camino cuando
-            descargamos**, el 19 de agosto. Comparar un periodo incompleto con periodos completos es el error de
-            conteo más común que vas a encontrar en tu vida profesional, y aquí lo tienes servido en la última fila
-            de tu propia tabla.
+            Y el desplome de agosto no es un hallazgo: **el mes estaba a mitad de camino cuando descargamos**, el 19
+            de agosto. Haz la cuenta tú mismo: 19 de 31 días, así que 80 × 31 / 19 ≈ **131**. En pleno rango
+            normal. La caída no existe: la fabricó el corte.
+
+            Comparar un periodo incompleto con periodos completos es el error de conteo más común que vas a
+            encontrar en tu vida profesional. Haz esa división antes de creerle a la última barra de cualquier
+            serie que te muestren en tu trabajo.
             """
         ),
         question_cell(
             7,
             "Interpretar una agregación",
             "El conteo por sección muestra que las secciones judiciales encabezan la lista, en una selección de "
-            "987 artículos que se obtuvo filtrando 57 844 por palabras como 'contrato', 'corrupcion', "
+            "987 artículos que se obtuvo filtrando 57 848 por palabras como 'contrato', 'corrupcion', "
             "'contraloria' y 'peculado'.",
             "¿Cuál es la afirmación defendible ante un jefe que va a tomar una decisión con esto?",
             [
@@ -1504,18 +1602,56 @@ def build_cells():
             print("-" * 66)
             for fila in cruce[:12]:
                 print(f"{fila['entidad'][:46]:46s} {fila['noticias']:8d} {fila['procesos_en_secop']:9d}")
+
+            # El archivo trae hasta 3 titulares por entidad. Miremos los de la primera fila:
+            print()
+            print("Titulares de la entidad que encabeza:", cruce[0]["entidad"])
+            for ej in cruce[0]["ejemplos"]:
+                print("  -", ej["titulo"][:95])
             """.replace("{cruce}", DATOS_CRUCE)
         ),
         md(
             """
             ### Interpretación docente — y la trampa que casi nadie ve
 
-            **Cómo se lee.** De las 9 111 entidades que contratan en nuestra base de SECOP, **142** aparecen
-            nombradas completas en las noticias del año. La columna `NOTICIAS` dice en cuántas apareció; la columna
-            `PROCESOS` dice cuántos procesos de contratación tiene esa entidad en SECOP.
+            **Cómo se lee, y de dónde salen estos números.** Este cruce **no** se hizo contra la muestra de 1 000
+            procesos que cargaste al principio de la clase: con sus 647 entidades no habría casi coincidencias. Se
+            hizo aparte, contra el volcado completo de SECOP II —**300 000 procesos y 9 111 entidades**— y aquí
+            solo leemos el resultado ya calculado. El script es `utils/cruzar_noticias_secop.py` y puedes abrirlo.
+
+            > Que un cálculo no quepa dentro de la clase también es un dato sobre el problema.
+
+            De esas 9 111 entidades, **142** aparecen nombradas completas en las noticias del año. La columna
+            `NOTICIAS` dice en cuántas apareció; `PROCESOS`, cuántos procesos de contratación tiene en SECOP —de
+            los 300 000, no de los 1 000 que viste—.
+
+            **Una advertencia sobre esa columna:** las 142 entidades suman más menciones que noticias hay, porque
+            una noticia que nombra cinco entidades cuenta cinco veces. La columna `NOTICIAS` **no se puede sumar**.
 
             **Ahora mira la primera fila.** La **Procuraduría General de la Nación** encabeza con muchísima
-            diferencia: cerca de 195 noticias. Y tiene apenas 74 procesos en SECOP.
+            diferencia: 195 noticias, contra 31 de la segunda. Y tiene 74 procesos en SECOP.
+
+            ## Antes de la explicación elegante, la explicación incómoda
+
+            Nosotros construimos este conjunto de noticias filtrando direcciones por una lista de 21 palabras. Y
+            en esa lista estaba `procuraduria`.
+
+            **265 de las 987 noticias entraron al conjunto precisamente porque llevaban esa palabra en la
+            dirección.** También estaba `contraloria`, que metió otras 168.
+
+            Es decir: la Procuraduría encabeza el conteo de menciones **en un conjunto que se seleccionó buscando
+            su nombre**. Contar un término dentro de un corpus que se construyó con ese término no es un hallazgo:
+            es medir tu propio filtro y ponerle nombre de entidad.
+
+            > **Esto es la lección del paso 5 cobrándote otra vez, media hora después.** Allá dijimos que "el
+            > resultado estaba parcialmente decidido desde que elegimos las palabras". Aquí esa misma decisión
+            > fabricó al ganador de la tabla final. La primera vez fue una advertencia; esta es la factura.
+
+            Compruébalo tú: el archivo `noticias_contratacion_2026.meta.json` guarda la lista exacta de palabras
+            con las que se filtró. Está publicada a propósito, para que puedas auditar el criterio en vez de
+            confiar en él.
+
+            ## Y ahora sí, la segunda razón
 
             Si Laura ordenara su fila de revisión por esta tabla, **empezaría investigando a la Procuraduría**. Y
             sería exactamente al revés: la Procuraduría aparece tanto en la prensa porque **es la entidad que
@@ -1530,17 +1666,45 @@ def build_cells():
             | porque **investiga** a otros | Procuraduría, Contraloría |
             | porque **regula o administra** el sistema | Colombia Compra Eficiente |
             | porque **está siendo cuestionada** | Área Metropolitana del Valle de Aburrá |
+            | porque **es un escenario político** y ahí pasan cosas todos los días | Cámara de Representantes |
 
             Solo la tercera fila le sirve a Laura. Y **el dato, por sí solo, no distingue cuál es cuál.**
+
+            Fíjate en la cuarta: la Cámara de Representantes tiene 29 noticias y 715 procesos. No investiga, no
+            administra el SECOP y no está cuestionada por contratación. Sale en la prensa porque es la Cámara.
+
+            ## Y la tentación que viene después
+
+            Tienes dos columnas y vas a querer dividirlas: menciones por proceso. Hazlo mentalmente y mira quién
+            queda de primero: el **Ministerio de Relaciones Exteriores**, con 23 noticias y **2 procesos**. Un
+            cociente de 11,5.
+
+            Un cociente con denominador 2 no es un indicador: es ruido con decimales. Y la regla vale para todo el
+            semestre:
+
+            > **Una tasa sin un mínimo de exposición en el denominador miente más que el conteo crudo que querías
+            > arreglar.** Antes de dividir, fija ese mínimo y decláralo.
+
+            Es el mismo problema del denominador del paso 5, pero al revés: allá **no teníamos** el denominador;
+            aquí lo tenemos impreso en pantalla y es tan pequeño que usarlo hace más daño que ignorarlo.
 
             **Qué haría falta para arreglarlo.** Alguna señal del *papel* que juega la entidad en la noticia: si es
             sujeto o si es autoridad. Eso ya no es contar palabras, es entender el texto — y aparece en la sesión 7
             con búsqueda textual, y más adelante con análisis semántico.
 
+            **Y sobre los 74 procesos, que es donde casi todo el mundo se equivoca.** Alguien puede leer "muchas
+            noticias y poquísimos contratos" y concluir *"qué sospechoso"*. Es justo al revés: 74 procesos sobre
+            300 000 significa que **la Procuraduría casi no contrata**. Y si casi no contrata, es imposible que
+            aparezca en la prensa por sus contratos. El número pequeño no es una alarma: es la prueba de que la
+            explicación tiene que ser otra.
+
             **Qué tampoco podemos concluir.** Que las otras 8 969 entidades no salgan en prensa: pueden estar
-            nombradas con siglas, con nombre parcial o con su nombre popular. Nuestro cruce exacto es
-            **conservador**: prefiere perder menciones reales antes que inventar falsas. Esa preferencia es una
-            decisión de diseño y hay que declararla al entregar el resultado, no esconderla.
+            nombradas con siglas, con nombre parcial o con su nombre popular. Y hay un motivo adicional que hay
+            que declarar: el script **descarta por diseño los nombres de menos de 14 caracteres**, porque generan
+            falsos positivos. Eso significa que a algunas entidades **ni siquiera las buscamos**.
+
+            Nuestro cruce exacto es **conservador**: prefiere perder menciones reales antes que inventar falsas.
+            Esa preferencia es una decisión de diseño y hay que declararla al entregar el resultado, no esconderla.
 
             > **Esta sí es una necesidad de Big Data demostrable, no una excusa para usar una herramienta.** Hoy
             > fueron 8 meses, un periódico y 987 noticias, y ya necesitamos cruzar dos fuentes de formas distintas.
@@ -1551,27 +1715,30 @@ def build_cells():
         question_cell(
             8,
             "El cruce entre dos fuentes",
-            "Un compañero entrega la tabla del cruce por nombre completo y dice: «la Procuraduría es la entidad "
-            "que más aparece en noticias de contratación, hay que revisar sus contratos primero».",
-            "¿Cuál es la objeción más importante que hay que hacerle?",
+            "Un compañero entrega la tabla del cruce y dice: «la Procuraduría es la entidad que más aparece en "
+            "noticias de contratación, hay que revisar sus contratos primero». Recuerda que el conjunto de "
+            "noticias se armó filtrando direcciones por 21 palabras, y que 'procuraduria' era una de ellas.",
+            "¿Cuál es la objeción más fuerte que hay que hacerle?",
             [
                 "Que el cruce por nombre completo es demasiado conservador y pierde menciones con siglas.",
-                "Que aparecer en noticias de contratación mezcla al menos tres papeles distintos —investigar, regular y ser cuestionado—, y la Procuraduría encabeza por el primero, no por el tercero.",
+                "Que el conteo mide en buena parte nuestro propio filtro: 265 de las 987 noticias entraron al conjunto porque llevaban la palabra 'procuraduria' en la dirección.",
                 "Que 987 noticias son muy pocas para ordenar una fila de revisión.",
-                "Que debió usar palabra completa en vez de nombre completo de entidad.",
+                "Que la Procuraduría tiene solo 74 procesos, y tan pocos contratos con tantas noticias es sospechoso.",
             ],
             1,
             [
-                "Es una limitación real y hay que declararla, pero afecta a las entidades que faltan, no a las que "
-                "aparecen. No explica por qué la primera fila de la tabla es engañosa.",
-                "Correcto, y es el hallazgo central de la sesión. El indicador no está mal calculado: está midiendo "
-                "«aparición en prensa», y eso no es lo mismo que «estar cuestionado». La Procuraduría aparece porque "
-                "investiga; Colombia Compra Eficiente porque administra el SECOP. Ordenar la revisión por esta tabla "
-                "pondría de primeras justo a las entidades equivocadas.",
-                "Al contrario: 987 noticias de ocho meses son bastantes para describir un patrón. El problema no es "
-                "cuántas son, sino qué significa el número que sacamos de ellas.",
-                "El nombre completo es más exigente que la palabra completa, no menos: es justamente el cruce más "
-                "conservador de los tres. El problema no está en cómo se buscó, sino en qué se concluyó.",
+                "Es una limitación real y hay que declararla, pero afecta a las entidades que faltan, no a la que "
+                "encabeza. No explica por qué la primera fila es engañosa.",
+                "Correcto, y es lo más importante de la noche. Antes de discutir si la Procuraduría sale porque "
+                "investiga —que también es cierto—, hay algo más básico: **construimos el corpus buscando su nombre y "
+                "después contamos su nombre**. Es la misma lección del conteo por sección, media hora después y con "
+                "consecuencias mayores. Un indicador puede estar bien calculado y aun así estar midiendo tu método en "
+                "vez de la realidad.",
+                "Al contrario: 987 noticias de ocho meses bastan para describir un patrón. El problema no es cuántas "
+                "son, sino cómo las elegimos.",
+                "Esta es la inferencia invertida, y es peligrosa. 74 procesos sobre 300 000 significa que la "
+                "Procuraduría **casi no contrata**; y si casi no contrata, es imposible que salga en prensa por sus "
+                "contratos. El número pequeño descarta la sospecha, no la sostiene.",
             ],
         ),
         md(
@@ -1730,7 +1897,7 @@ def build_cells():
             - **Noticias de El Tiempo sobre contratación pública**, enero a agosto de 2026. Dos fuentes públicas enlazadas por el identificador
               numérico que aparece al final de cada URL:
               - índice mensual de artículos: `https://www.eltiempo.com/sitemap-articles-2026-MM.xml`
-                (**57 844 artículos** entre enero y agosto)
+                (**57 848 artículos** entre enero y agosto)
               - contenido de cada artículo: `https://www.eltiempo.com/servicios/feeds/articulo/<ID>`
               - selección por tema, ya recolectada: [`Datos/noticias_contratacion_2026.json`]({DATOS_NOTICIAS})
                 — **987 noticias** de las 995 que el filtro identificó
