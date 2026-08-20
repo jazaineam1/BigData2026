@@ -1513,6 +1513,18 @@ def build_cells():
             Todas las celdas son editables: cambia lo que quieras y vuelve a ejecutar. **Nada de lo que
             hagas aquí daña la colección de noticias** — trabajamos en una colección aparte llamada
             `practica`.
+
+            ### `insert_many` — guardar
+
+            **Léelo antes de ejecutarlo. Línea por línea:**
+
+            | La línea | Qué hace |
+            |---|---|
+            | `practica = db["practica"]` | elige una colección llamada `practica`. **No hace falta crearla**: nace sola cuando escribas el primer documento |
+            | `practica.delete_many({})` | la vacía. El `{}` es «todos». Está aquí para que puedas ejecutar la celda diez veces sin que se acumulen copias |
+            | `practica.insert_many([...])` | guarda la lista. Cada `{...}` de dentro será **un documento** |
+            | `{"_id": 1, "nombre": "Ana", ...}` | un documento. El `_id` se lo ponemos nosotros; si no lo pusiéramos, MongoDB inventaría uno |
+            | `practica.count_documents({})` | cuenta los que hay. Otra vez `{}` = todos |
             """
         ),
         code(
@@ -1533,9 +1545,22 @@ def build_cells():
         ),
         md(
             """
-            ### `find` — en pequeño
+            ### `find` — buscar
 
-            Ahora la primera consulta. **Fíjate en que la consulta es una sola línea.**
+            **Léelo antes de ejecutarlo. Es una sola línea, y tiene tres partes:**
+
+            ```python
+            practica.find({"ciudad": "Bogota"})
+            ```
+
+            | La parte | Qué hace |
+            |---|---|
+            | `practica` | **dónde** buscas: la colección |
+            | `.find(` | **qué** haces: buscar |
+            | `{"ciudad": "Bogota"}` | **el filtro**: solo los documentos cuyo campo `ciudad` valga exactamente `Bogota` |
+
+            Con nuestros tres documentos debería encontrar a **Ana y a Sara**, que son las de Bogotá.
+            Ejecútala y mira lo que sale — no va a ser lo que esperas.
             """
         ),
         code(
@@ -1671,9 +1696,22 @@ def build_cells():
         ),
         md(
             """
-            ### `update_one` — en pequeño
+            ### `update_one` — modificar
 
             Volvemos a los tres documentos de juguete. Vamos a cambiarle la edad a Ana.
+
+            **Léelo antes de ejecutarlo. Línea por línea:**
+
+            | La línea | Qué hace |
+            |---|---|
+            | `practica.find_one({"nombre": "Ana"})` | trae **un solo** documento, el primero que cumpla. Lo usamos para ver cómo está antes |
+            | `practica.update_one(` | modifica **un solo** documento, el primero que cumpla |
+            | `{"nombre": "Ana"}` | **el filtro**: a quién le vas a pegar. Es el mismo tipo de diccionario que en `find` |
+            | `{"$set": {"edad": 31}}` | **la orden**: pon `edad` en 31 y **deja el resto igual** |
+
+            **El `$set` no es decoración.** Sin él, MongoDB entiende que quieres reemplazar el documento
+            entero por `{"edad": 31}` — y Ana se queda sin nombre y sin ciudad. Es el error más caro de
+            esta orden.
             """
         ),
         code(
@@ -1750,10 +1788,27 @@ def build_cells():
         ),
         md(
             """
-            ### `aggregate` — en pequeño
+            ### `aggregate` — resumir
 
-            La última orden, y la única que no se parece a nada de SQL a primera vista. Sobre los tres
-            documentos de juguete: **¿cuántas personas hay por ciudad?**
+            La última orden. Sobre los tres documentos de juguete: **¿cuántas personas hay por ciudad?**
+
+            **Léelo antes de ejecutarlo. Línea por línea:**
+
+            ```python
+            practica.aggregate([
+                {"$group": {"_id": "$ciudad", "cuantas": {"$sum": 1}}},
+            ])
+            ```
+
+            | La parte | Qué hace |
+            |---|---|
+            | `.aggregate([` | resumir. El corchete abre una **lista de etapas**; aquí solo hay una |
+            | `{"$group":` | la etapa: **juntar** documentos que comparten algo |
+            | `"_id": "$ciudad"` | **por qué agrupas**. El signo pesos significa «el **valor** de ese campo». Sin el pesos sería el texto `ciudad`, que es igual para todos |
+            | `"cuantas": {"$sum": 1}` | **suma 1 por cada documento** del grupo. Eso es contar. El nombre `cuantas` lo eliges tú |
+
+            Con Ana y Sara en Bogotá y Luis en Cali, deberían salir **dos filas**, no tres. Y ahí está la
+            idea entera de la agregación: **una fila por grupo, no por documento**.
             """
         ),
         code(
