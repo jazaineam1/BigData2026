@@ -1952,8 +1952,10 @@ def build_cells():
             print("MODALIDAD :", caso["modalidad"], "| respuestas:", caso["respuestas"])
             print("ESTADO    :", caso["estado"], "| publicado:", caso["publicado"])
             print()
+            # .get() y no [ ]: si el campo no viniera, la celda avisa en vez de romperse.
+            enlace = caso.get("url_secop", "")
             print("VELO TU MISMO EN SECOP:")
-            print("  ", caso["url_secop"])
+            print("  ", enlace or "(este proceso no trae enlace publico)")
             print()
             print("LO QUE DIJO LA PRENSA SOBRE ESTA ENTIDAD:")
             for t in caso["titulares"]:
