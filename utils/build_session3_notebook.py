@@ -265,7 +265,7 @@ def build_cells():
             2. nombrar las cuatro familias NoSQL y decir qué problema resuelve cada una;
             3. leer un documento JSON/BSON: campos, anidamiento, arreglos y `_id`;
             4. traducir una consulta entre SQL y MongoDB en los dos sentidos;
-            5. explicar qué es una réplica, qué es un fragmento y qué garantía se cede al replicar;
+            5. explicar qué es una réplica y qué garantía se cede al tener copias;
             6. escribir consultas `find()` con filtro y proyección, y una agregación de cuatro etapas;
             7. interpretar un resultado diciendo también **qué no permite concluir**;
             8. cerrar en GitHub una propuesta abierta la semana pasada, sin usar la terminal.
@@ -287,7 +287,7 @@ def build_cells():
             | 1 | por qué esta evidencia no cabe en una tabla | el problema nombrado: variedad |
             | 2 | qué existe en lugar de la tabla | las cuatro familias NoSQL |
             | 3 | cómo se ve un documento por dentro | anidamiento, arreglos, equivalencia con SQL |
-            | 4 | y cuando no cabe en un servidor | fragmentar y replicar |
+            | 4 | cuando el dato vive en más de una máquina | qué es una réplica |
             | 5 | qué se cede al tener copias | ACID, BASE y consistencia eventual |
             | 6 | cómo le pregunto algo a la base | MQL, siempre junto a su SQL |
             | — | **receso** | el motor se instala mientras descansas |
@@ -802,129 +802,44 @@ def build_cells():
         md(
             """
             ---
-            # Bloque 4 · Y cuando no cabe en un servidor
+            # Bloque 4 · Cuando el dato vive en más de una máquina
 
             **MAPA** · hoy lo recorremos hablando. No lo necesitas para ejecutar nada, pero sí para entender por qué el motor se comporta como se comporta.
 
-            *Repartir y copiar no son lo mismo*
+            *Por qué existen las copias, y qué traen de regalo*
 
-            Al principio de la sesión quedó una pregunta colgada: nuestras 987 noticias salieron de 57 848 artículos,
-            de un solo periódico y ocho meses. Aunque arreglemos la forma, ¿dónde guardamos eso?
+            Laura no puede depender de que un servidor no se caiga: si el lunes por la mañana la base no
+            responde, esa semana no se revisa nada. La solución es vieja y simple: **tener el dato más de
+            una vez**.
 
-            Hay dos respuestas, y hacen cosas distintas.
+            ## Replicar: copiar el mismo dato en varias máquinas
 
-            ## Fragmentar (*sharding*): repartir
+            Tres máquinas, el mismo contenido en las tres. Una recibe las escrituras y las otras la copian.
 
-            Los documentos se **reparten** entre varias máquinas según una llave. Las noticias de enero a una, las
-            de febrero a otra. Ninguna máquina tiene todo; entre todas tienen el total.
+            - **Resuelve:** que si una máquina se apaga, el servicio siga respondiendo. Y de paso, que las
+              lecturas se repartan entre varias.
+            - **Cuesta:** mantener las copias de acuerdo. Y ahí aparece el problema del bloque siguiente,
+              que es de lo que trata el resto de la conversación.
 
-            **Y aquí ya hay una trampa de diseño, aprovéchala.** Repartir por mes es fácil de dibujar y malo en la
-            práctica: como las noticias nuevas siempre son del mes actual, **todas las escrituras caen en la misma
-            máquina** y no resolvimos nada. Una llave de reparto tiene que repartir también el futuro, no solo el
-            pasado. Guarda esta idea: en la sesión 5, con Cassandra, elegir la llave de partición **es** el
-            ejercicio.
-
-            - **Resuelve:** que el volumen no cabe, y que las escrituras saturan un solo servidor.
-            - **Cuesta:** una consulta que no usa la llave de reparto tiene que preguntarle a todas las máquinas.
-
-            ## Replicar: copiar
-
-            El mismo dato se **copia** en varias máquinas. Las tres tienen lo mismo.
-
-            - **Resuelve:** que si una máquina se apaga, el servicio siga respondiendo; y que las lecturas se repartan.
-            - **Cuesta:** mantener las copias de acuerdo. Y ahí aparece el problema del bloque siguiente.
-
-            {svg("fragmentar_vs_replicar", "Fragmentar reparte una parte a cada maquina; replicar da el total a todas")}
-
-            **Cómo leer el dibujo.** Son ejes independientes: un sistema real fragmenta *y* replica cada fragmento.
-            Lo que hay que retener es que **fragmentar responde a "no cabe" y replicar responde a "no se puede caer"**.
-
-            ## Antes de seguir: ¿qué es un clúster?
-
-            Esto también es de Laura, aunque no lo parezca: su equipo no puede depender de que un servidor
-            no se caiga. Si el lunes por la mañana la base no responde, esa semana no se revisa nada.
-
-            La palabra va a aparecer todo el semestre y conviene fijarla ahora, porque es más simple de
-            lo que suena.
-
-            > **Un clúster son varias máquinas que se coordinan entre ellas y que tú usas como si fueran
-            > una sola.**
-
-            Eso es todo. La parte importante es la segunda mitad: **como si fueran una sola**. Tu código
-            no cambia. Le sigues hablando a una dirección, con la misma línea `MongoClient(...)`, y por
-            dentro esa dirección esconde tres máquinas que se reparten el trabajo y se vigilan.
-
-            {svg("que_es_un_cluster", "A la izquierda un servidor solo: si se apaga no hay servicio. A la derecha un cluster de tres nodos coordinados que la aplicacion usa como si fuera uno")}
-
-            **Cómo leerlo.** A la izquierda está lo que tienes hoy: **una** máquina, dentro de esta
-            pestaña. Si se apaga, se acabó. A la derecha, tres máquinas —llamadas **nodos**— que se hablan
-            entre ellas: si el principal cae, los otros dos lo notan, **votan** cuál toma el relevo, y tu
-            aplicación ni se entera.
-
-            **Tres palabras que ya puedes usar sin miedo:**
+            **Tres palabras que vas a necesitar en dos minutos:**
 
             | Palabra | Qué es |
             |---|---|
-            | **nodo** | un `mongod` corriendo. En producción, cada uno en su propia máquina; en tu portátil, los tres en la misma |
-            | **principal** *(primary)* | el nodo que recibe las escrituras en ese momento |
+            | **nodo** | un `mongod` corriendo. Hoy tú tienes uno |
+            | **principal** *(primary)* | el nodo que recibe las escrituras |
             | **réplica** *(secondary)* | un nodo que mantiene una copia del principal |
 
-            **Y por qué votan.** Porque nadie puede decidir solo que el principal murió: podría ser que
-            *él* esté bien y sea *quien mira* el que perdió la red. Por eso hace falta **mayoría**, y por
-            eso el número mínimo es tres. Con dos nodos no hay mayoría posible y el clúster se queda
-            paralizado justo cuando más lo necesitas.
+            > **PARA LLEVAR.** Copiar el dato compra disponibilidad. No es gratis: lo que se paga está en
+            > el bloque 5, y es lo único de esta parte que de verdad hay que entender esta noche.
 
-            > **MÁS ADELANTE.** El clúster que vas a usar el jueves entrante, en Atlas, es exactamente
-            > esto: tres nodos administrados por otros. Tú solo verás una dirección.
+            **Y hay otra estrategia, que no es esta.** Se llama **fragmentar** (*sharding*) y consiste en
+            **repartir** los documentos entre varias máquinas en vez de copiarlos: cada una tiene una parte,
+            ninguna tiene el total. Resuelve un problema distinto —que el volumen no cabe— y **hoy no la
+            necesitamos**: nuestras 987 noticias caben de sobra. La tienes explicada, con lo que cuesta
+            montarla de verdad, en el **apéndice** al final del cuaderno.
 
-            ## ¿Y qué máquinas hacen falta para esto?
-
-            Es la pregunta correcta, y la respuesta honesta tiene dos partes.
-
-            ### Lo mínimo real, en producción
-
-            | Estrategia | Qué se necesita de verdad | Por qué ese número |
-            |---|---|---|
-            | **Replicar** | **3 servidores** para un conjunto de réplicas | con 3, si uno cae los otros dos son mayoría y pueden elegir un nuevo principal. Con 2 no hay mayoría posible y el sistema se bloquea |
-            | **Fragmentar** | **3 servidores por cada fragmento**, más 3 de configuración, más 1 o más enrutadores | cada fragmento es a su vez un conjunto de réplicas: fragmentar sin replicar significa que si cae una máquina, pierdes esa parte de los datos |
-
-            Los dos nombres que faltan de esa tabla, para que no queden sueltos: los **servidores de
-            configuración** son los que saben qué fragmento tiene qué datos —el índice del clúster—, y el
-            **enrutador** es el que recibe tu consulta y decide a qué fragmento preguntarle. Tú siempre le
-            hablas al enrutador.
-
-            Es decir: un clúster fragmentado de verdad, con tres fragmentos, arranca en **unas 13
-            máquinas**.
-
-            **¿Y eso cuánto cuesta?** Para que tengas un ancla y no una sensación: un clúster
-            administrado de tres nodos, del tamaño más pequeño que sirve para trabajar en serio, ronda los
-            **200 a 500 dólares al mes**. Fragmentado en tres, con sus servidores de configuración,
-            fácilmente **pasa de los 2 000**. Súmale a alguien que lo vigile.
-
-            Por eso esto no se monta "por si acaso": se monta cuando el volumen o la disponibilidad lo
-            exigen. Y por eso el plan gratuito que vas a usar el jueves entrante es un solo conjunto de
-            réplicas de 512 MB, no un clúster fragmentado.
-
-            ### ¿Puedo hacerlo en mi computador?
-
-            **Sí, y es más fácil de lo que parece — pero simulado.** Un conjunto de réplicas de tres nodos
-            en un portátil son tres procesos `mongod` en tres puertos distintos, cada uno con su carpeta de
-            datos. Funciona, se comporta igual y sirve para aprender.
-
-            Lo que **no** obtienes en tu máquina es lo único que justifica todo esto: **tolerancia a
-            fallos reales**. Si se apaga tu portátil, se apagan las tres réplicas a la vez. La copia
-            protege contra la caída de *una* máquina, no contra la caída de la máquina que las contiene a
-            todas.
-
-            > **PARA LLEVAR.** Replicar en un solo computador enseña el mecanismo y no da la garantía.
-            > Es exactamente igual que guardar el respaldo de tu disco duro en el mismo disco duro.
-
-            En la práctica, casi nadie monta esto a mano: se contrata. Eso es lo que hace Atlas, y es lo
-            que vas a usar el jueves entrante — un conjunto de réplicas de tres nodos, administrado, en el
-            plan gratuito.
-
-            **Error común.** Confundirlos. "Tengo tres servidores" no dice nada por sí solo: hay que preguntar si
-            cada uno tiene una parte o si cada uno tiene una copia.
+            **Error común.** Confundir las dos. «Tengo tres servidores» no dice nada por sí solo: hay que
+            preguntar si cada uno tiene **una parte** o si cada uno tiene **una copia**.
             """
         ),
         md(
@@ -1031,31 +946,21 @@ def build_cells():
                si lees siempre de la principal, no ves consistencia eventual aunque tengas cinco réplicas. Un
                motor relacional con réplica de lectura tiene exactamente el mismo fenómeno.
 
-            ## CAP: las tres letras y la que no se puede elegir
+            ## CAP, en tres líneas
 
-            CAP es el nombre formal de lo que acabas de leer. Son tres promesas:
+            Este intercambio tiene nombre formal: **CAP**. Dice que cuando **se corta la red** entre dos
+            copias —y alguna vez se corta—, la copia que quedó aislada solo puede hacer dos cosas:
+            **negarse a responder** para no darte un dato viejo, o **responderte con lo último que sabe**.
+            No hay una tercera.
 
-            | Letra | Qué significa |
-            |---|---|
-            | **C** · Consistencia | todas las copias te dan **el mismo valor**, el más reciente |
-            | **A** · Disponibilidad | el sistema **siempre responde algo**, nunca se queda mudo |
-            | **P** · Tolerancia a particiones | el sistema **sigue funcionando aunque se corte la red** entre las copias |
-
-            La forma en que casi siempre se enuncia —«de las tres, escoge dos»— es la que más confunde,
-            porque **la P no es una opción**. Si tienes varias máquinas, la red entre ellas se va a caer
-            alguna vez: eso no lo decides tú, lo decide el mundo. Y cuando se cae, la copia que quedó
-            aislada tiene exactamente **dos** salidas.
-
-            {svg("cap_particion", "Con la red sana las dos copias coinciden y no hay que elegir; cuando el cable se corta la copia aislada solo puede negarse a responder, que es elegir consistencia, o responder con un dato viejo, que es elegir disponibilidad")}
-
-            **Lo único que hay que llevarse de CAP:** la decisión no aparece todos los días. Aparece
-            **el día que se cae la red**, y ese día el sistema hace lo que alguien configuró meses antes.
-            CAP no te dice qué elegir: te dice que **no puedes no elegir**.
+            CAP no te dice cuál elegir. Te dice que **no puedes no elegir**, y que la decisión la toma
+            quien configura el sistema meses antes del día que se cae la red. Está desarrollado, con su
+            diagrama, en el **apéndice** al final del cuaderno.
 
             > **Y con esto se cierra el hilo del bloque.** Copiar el dato da tolerancia a fallas; tolerar
             > fallas obliga a elegir entre esperar y responder viejo; esa elección tiene nombres —ACID y
-            > BASE, C y A— y no la toma la tecnología, la toma **quien conoce la decisión de negocio que
-            > cuelga del dato**. En la sesión 4 lo verás sobre un clúster real de tres nodos en Atlas.
+            > BASE— y no la toma la tecnología, la toma **quien conoce la decisión de negocio que cuelga
+            > del dato**.
             """
         ),
         *question_cell(
@@ -1176,14 +1081,31 @@ def build_cells():
             de la lista sin que tengas que decirlo. Esa sola línea es lo que en una base relacional exigiría una
             tabla `noticia_etiqueta` y un JOIN.
 
-            ### Mini ficha: `find(filtro, proyección)`
+            ### Mini ficha: `find` — traer documentos
 
-            - **Para qué sirve:** traer los documentos de una colección que cumplen una condición.
-            - **Parámetros usados:** `filtro`, un diccionario con las condiciones; `proyección`, un diccionario que
-              indica con `1` los campos a mostrar y con `0` los que no.
-            - **Qué devuelve:** un cursor, no una lista. Se recorre con un `for` o se convierte con `list(...)`.
-            - **Cómo interpretar la salida:** cada elemento es un documento completo, salvo que hayas proyectado.
-            - **Error frecuente:** olvidar que `_id` se incluye siempre, aunque no lo pidas. Para quitarlo: `{"_id": 0}`.
+            **La forma. Siempre son estos dos huecos:**
+
+            ```python
+            coleccion.find(FILTRO, PROYECCION)
+            ```
+
+            | El hueco | Qué escribes ahí | Si lo dejas vacío |
+            |---|---|---|
+            | `FILTRO` | un diccionario con las condiciones que hay que cumplir | `find({})` trae **todos** los documentos |
+            | `PROYECCION` | un diccionario: `1` en los campos que quieres, `0` en los que no | te devuelve el documento **completo**, con todos sus campos |
+
+            **Un ejemplo con los datos de esta noche:**
+
+            ```python
+            coleccion.find(
+                {"n_palabras": {"$gt": 800}},    # FILTRO:     las de mas de 800 palabras
+                {"titulo": 1, "_id": 0},         # PROYECCION: solo quiero el titulo
+            )
+            ```
+
+            - **Qué devuelve:** un **cursor**, no una lista. Se recorre con un `for` o se convierte con `list(...)`.
+            - **Error frecuente:** `_id` viene **siempre**, aunque no lo pidas. Para quitarlo hay que decirlo
+              explícitamente con `{"_id": 0}`, como en el ejemplo.
             """
         ),
         *question_cell(
@@ -1533,9 +1455,19 @@ def build_cells():
             > acabas de cargar tiene 987 y no 991. Una restricción de la base no es un estorbo: es un control de
             > calidad que trabaja gratis.
 
-            ### Mini ficha: `insert_many(lista)` — guardar muchos de una vez
+            ### Mini ficha: `insert_many` — guardar muchos de una vez
 
-            **Cómo se escribe, en pequeño:**
+            **La forma. Un solo hueco:**
+
+            ```python
+            coleccion.insert_many(LISTA_DE_DOCUMENTOS)
+            ```
+
+            | El hueco | Qué escribes ahí |
+            |---|---|
+            | `LISTA_DE_DOCUMENTOS` | una **lista de diccionarios**. Cada diccionario será un documento |
+
+            **Un ejemplo en pequeño, para verlo entero:**
 
             ```python
             db["prueba"].insert_many([
@@ -1600,9 +1532,9 @@ def build_cells():
             print(f"Noticias de la seccion '{SECCION}':")
 
             resultado = coleccion.find(
-                {"seccion": SECCION},        # el filtro: solo las de esa seccion
-                {"titulo": 1, "_id": 0},     # la proyeccion: solo quiero el titulo
-            ).limit(10)                      # y como mucho 10
+                {"seccion": SECCION},        # FILTRO:     solo las de esa seccion
+                {"titulo": 1, "_id": 0},     # PROYECCION: solo el titulo, sin el _id
+            ).limit(10)                      # y como mucho 10 resultados
 
             for n in resultado:
                 print("  -", n["titulo"][:78])
@@ -1618,8 +1550,8 @@ def build_cells():
             OPERADOR = "____"      # <--- reemplaza por el operador de "mayor que"
 
             largas = coleccion.find(
-                {"n_palabras": {OPERADOR: 800}},
-                {"titulo": 1, "n_palabras": 1, "_id": 0},
+                {"n_palabras": {OPERADOR: 800}},             # FILTRO:     n_palabras > 800
+                {"titulo": 1, "n_palabras": 1, "_id": 0},    # PROYECCION: titulo y n_palabras
             )
             # .limit(10) evita llenar la pantalla: hay 189 noticias de mas de 800 palabras.
             for n in largas.limit(10):
@@ -1634,8 +1566,8 @@ def build_cells():
 
             # $regex busca un patron dentro del texto; $options "i" ignora mayusculas.
             encontradas = list(coleccion.find(
-                {"titulo": {"$regex": PALABRA, "$options": "i"}},
-                {"titulo": 1, "seccion": 1, "_id": 0},
+                {"titulo": {"$regex": PALABRA, "$options": "i"}},   # FILTRO:     PALABRA dentro del titulo
+                {"titulo": 1, "seccion": 1, "_id": 0},              # PROYECCION: titulo y seccion
             ))
 
             print(f"Noticias con '{PALABRA}' en el titulo: {len(encontradas)}")
@@ -1675,11 +1607,22 @@ def build_cells():
             """
             ### Mini ficha: `$regex` — buscar texto dentro de un campo
 
-            **Cómo se escribe:**
+            **La forma. Va dentro del FILTRO de un `find`:**
+
+            ```python
+            coleccion.find({CAMPO: {"$regex": TEXTO, "$options": "i"}})
+            ```
+
+            | El hueco | Qué escribes ahí |
+            |---|---|
+            | `CAMPO` | el nombre del campo donde buscar, entre comillas: `"titulo"` |
+            | `TEXTO` | el pedazo de texto que buscas, entre comillas: `"salud"` |
+            | `"$options": "i"` | opcional. La `i` hace que no distinga mayúsculas de minúsculas |
+
+            **Ya con los huecos llenos:**
 
             ```python
             coleccion.find({"titulo": {"$regex": "salud", "$options": "i"}})
-            #                 ↑ campo    ↑ lo que busco   ↑ ignora mayúsculas
             ```
 
             **Qué devuelve con nuestros datos:** 34 noticias. Y devuelve estas, entre otras:
@@ -1738,16 +1681,19 @@ def build_cells():
             # Paso 4 — la accion humana vuelve al dato.
             from datetime import datetime, timezone
 
+            # find_one trae UN documento. Con el filtro {} vale cualquiera.
             objetivo = coleccion.find_one({}, {"_id": 1, "titulo": 1})
             print("Antes :", coleccion.find_one({"_id": objetivo["_id"]}, {"revision": 1, "_id": 0}))
 
             cambio = coleccion.update_one(
-                {"_id": objetivo["_id"]},
-                {"$set": {"revision": {
-                    "estado": "revisada",
-                    "por": "equipo_auditoria_laura",
-                    "fecha": datetime.now(timezone.utc).isoformat(),
-                }}},
+                {"_id": objetivo["_id"]},        # FILTRO: exactamente ese documento
+                {"$set": {                       # ORDEN:  pon esto y deja el resto igual
+                    "revision": {                # CAMPO NUEVO: no existia en ningun documento
+                        "estado": "revisada",
+                        "por": "equipo_auditoria_laura",
+                        "fecha": datetime.now(timezone.utc).isoformat(),
+                    }
+                }},
             )
 
             print("Coincidieron:", cambio.matched_count, "| Modificados:", cambio.modified_count)
@@ -1805,11 +1751,31 @@ def build_cells():
             sin él, y **cualquier consulta futura tiene que decidir qué hacer con los que no lo tienen**. La
             flexibilidad no elimina el trabajo de diseño: lo mueve de la base a tu cabeza.
 
-            ### Mini ficha: `update_one(filtro, cambio)`
+            ### Mini ficha: `update_one` — modificar un documento
 
-            - **Para qué sirve:** modificar el primer documento que cumple el filtro.
-            - **Parámetros usados:** el filtro, y un diccionario de operadores como `{"$set": {...}}`.
-            - **Qué devuelve:** un resultado con `matched_count` y `modified_count`.
+            **La forma. Dos huecos, y en el segundo se equivoca todo el mundo:**
+
+            ```python
+            coleccion.update_one(FILTRO, {"$set": CAMPOS_NUEVOS})
+            ```
+
+            | El hueco | Qué escribes ahí |
+            |---|---|
+            | `FILTRO` | igual que en `find`: a qué documento le vas a pegar. Modifica **solo el primero** que cumpla |
+            | `"$set"` | la **orden**. Dice «pon estos campos y deja el resto como está» |
+            | `CAMPOS_NUEVOS` | un diccionario con lo que quieres poner. Si el campo no existía, lo crea |
+
+            **Un ejemplo con los datos de esta noche:**
+
+            ```python
+            coleccion.update_one(
+                {"_id": 3550171},                                 # FILTRO: esta noticia
+                {"$set": {"revisada": True, "quien": "Laura"}},   # dos campos que no existian
+            )
+            ```
+
+            - **Qué devuelve:** un resultado con `matched_count` (cuántos cumplían el filtro) y
+              `modified_count` (cuántos cambiaron de verdad).
             - **Error frecuente y grave:** olvidar el `$set` y escribir `update_one(filtro, {"campo": valor})`.
               Las versiones modernas lanzan error; en las antiguas **reemplazaba el documento entero** y se perdía
               todo lo demás.
@@ -1855,14 +1821,21 @@ def build_cells():
             """
             # Paso 5 — la misma consulta del SQL de arriba, etapa por etapa.
             pipeline = [
-                {"$match": {"n_palabras": {"$gt": 0}}},                 # el WHERE
-                {"$group": {                                            # el GROUP BY
-                    "_id": "$seccion",
-                    "n": {"$sum": 1},
-                    "promedio_palabras": {"$avg": "$n_palabras"},
+                # ETAPA 1 — el WHERE. Descarta las que no cumplen. Entran 987, salen 987.
+                {"$match": {"n_palabras": {"$gt": 0}}},
+
+                # ETAPA 2 — el GROUP BY. Junta las que comparten seccion. Entran 987, salen 57.
+                {"$group": {
+                    "_id": "$seccion",                        # POR QUE agrupas (ojo al signo pesos)
+                    "n": {"$sum": 1},                         # cuenta 1 por cada documento del grupo
+                    "promedio_palabras": {"$avg": "$n_palabras"},   # promedia ese campo en el grupo
                 }},
-                {"$sort": {"n": -1}},                                   # el ORDER BY
-                {"$limit": 10},                                         # el LIMIT
+
+                # ETAPA 3 — el ORDER BY. Ordena las 57 filas. -1 es de mayor a menor.
+                {"$sort": {"n": -1}},
+
+                # ETAPA 4 — el LIMIT. De las 57 se queda con 10.
+                {"$limit": 10},
             ]
 
             media_global = sum(n["n_palabras"] for n in noticias) / len(noticias)
@@ -1912,7 +1885,19 @@ def build_cells():
 
             ### Mini ficha: `$substr` — cortar un pedazo de un texto
 
-            **Cómo se escribe, y qué corta exactamente:**
+            **La forma. Los tres valores van en una lista, en este orden:**
+
+            ```python
+            {"$substr": [CAMPO, DESDE, CUANTOS]}
+            ```
+
+            | El hueco | Qué escribes ahí |
+            |---|---|
+            | `CAMPO` | el campo, **con el signo pesos delante**: `"$publicado"` |
+            | `DESDE` | desde qué posición empiezas a cortar. La primera letra es la `0` |
+            | `CUANTOS` | cuántos caracteres tomas |
+
+            **Y qué corta exactamente:**
 
             ```
             El campo publicado vale:   "2026-03-15T09:41:00-05:00"
@@ -1933,6 +1918,16 @@ def build_cells():
               frágil; en la sesión 4 las guardaremos como fechas de verdad.
 
             ### Mini ficha: `$unwind` — desenrollar una lista
+
+            **La forma. Un solo hueco, y es una etapa del pipeline:**
+
+            ```python
+            {"$unwind": CAMPO_QUE_ES_LISTA}
+            ```
+
+            | El hueco | Qué escribes ahí |
+            |---|---|
+            | `CAMPO_QUE_ES_LISTA` | el campo, **con el signo pesos delante**: `"$etiquetas"`. Tiene que ser una lista |
 
             - **Para qué sirve:** cuando un campo es una **lista**, `$unwind` convierte cada elemento en su
               propia fila. Una noticia con 4 etiquetas se vuelve 4 filas, iguales en todo menos en la etiqueta.
@@ -1975,17 +1970,54 @@ def build_cells():
               Si sumas las etiquetas te va a dar más que el número de noticias, porque cada noticia se contó
               tantas veces como etiquetas tenga. Es correcto, pero no es lo mismo que contar noticias.
 
-            ### Mini ficha: `sort()` y `limit()`
+            ### Mini ficha: `sort` y `limit` — ordenar y cortar
 
-            - **`sort("campo", -1)`** ordena de mayor a menor; con `1`, de menor a mayor.
-            - **`limit(n)`** se queda con los primeros n. Se encadenan después de `find()`:
-              `coleccion.find(filtro).sort("n_palabras", -1).limit(5)`.
-            - **Error frecuente:** ordenar en Python después de traerlo todo. Ordena en la base, que para eso está.
+            **La forma. Se enganchan detrás de un `find`, uno tras otro:**
 
-            ### Mini ficha: `aggregate(pipeline)`
+            ```python
+            coleccion.find(FILTRO).sort(CAMPO, ORDEN).limit(CUANTOS)
+            ```
+
+            | El hueco | Qué escribes ahí |
+            |---|---|
+            | `CAMPO` | por cuál campo ordenas, entre comillas y **sin** signo pesos: `"n_palabras"` |
+            | `ORDEN` | `-1` de mayor a menor, `1` de menor a mayor |
+            | `CUANTOS` | cuántos resultados quieres conservar |
+
+            **Un ejemplo con los datos de esta noche:**
+
+            ```python
+            coleccion.find({"seccion": "bogota"}).sort("n_palabras", -1).limit(5)
+            # las 5 noticias mas largas de la seccion bogota
+            ```
+
+            - **Error frecuente:** traerlo todo y ordenarlo en Python. Ordena en la base, que para eso está.
+
+            ### Mini ficha: `aggregate` — resumir
+
+            **La forma. Un solo hueco, pero es una lista:**
+
+            ```python
+            coleccion.aggregate([ETAPA_1, ETAPA_2, ETAPA_3])
+            ```
+
+            | El hueco | Qué escribes ahí |
+            |---|---|
+            | cada `ETAPA` | un diccionario con **un** operador: `{"$match": ...}`, `{"$group": ...}`, `{"$sort": ...}`, `{"$limit": ...}` |
+            | el orden | **importa**. Cada etapa solo ve lo que le entregó la anterior |
+
+            **Un ejemplo con los datos de esta noche:**
+
+            ```python
+            coleccion.aggregate([
+                {"$match": {"n_palabras": {"$gt": 0}}},                 # 1. filtra
+                {"$group": {"_id": "$seccion", "n": {"$sum": 1}}},      # 2. agrupa y cuenta
+                {"$sort":  {"n": -1}},                                  # 3. ordena
+                {"$limit": 10},                                         # 4. corta
+            ])
+            ```
 
             - **Para qué sirve:** calcular resúmenes encadenando etapas.
-            - **Parámetro usado:** una lista de etapas, **y el orden importa**.
             - **Qué devuelve:** un cursor con un documento por grupo.
             - **Cómo interpretar la salida:** `_id` es el criterio de agrupación, no una llave.
             - **Error frecuente:** poner `$match` después de `$group`. Funciona, pero agrupa todo primero y filtra
@@ -3554,6 +3586,105 @@ def build_cells():
             | 0 resultados y no entiendes por qué | revisa comillas, tildes y que el Paso 2 haya corrido |
             | `DtypeWarning` en rojo | es un **aviso**, no un error: la celda terminó bien |
             | el update no cambia nada | te faltó `$set` |
+            """
+        ),
+        md(
+            """
+            ---
+            # Apéndice · Cuando una máquina no alcanza
+
+            **AMPLIACIÓN** · nada de esto hace falta para la sesión de hoy. Está aquí porque son las
+            preguntas que aparecen apenas el proyecto crece, y porque cuando te las hagan en el trabajo
+            vas a querer tener la respuesta a mano.
+
+            Esto estuvo en la conversación de la sesión y lo movimos aquí por una razón honesta: **esta
+            noche tienes un solo servidor**, así que nada de esto se puede demostrar, solo prometer. Lo
+            vas a ver funcionando más adelante en el curso, cuando trabajemos sobre un clúster de verdad.
+
+            ## Fragmentar (*sharding*): repartir
+
+            Los documentos se **reparten** entre varias máquinas según una llave. Las noticias de enero a
+            una, las de febrero a otra. Ninguna máquina tiene todo; entre todas tienen el total.
+
+            **Y aquí ya hay una trampa de diseño.** Repartir por mes es fácil de dibujar y malo en la
+            práctica: como las noticias nuevas siempre son del mes actual, **todas las escrituras caen en
+            la misma máquina** y no resolvimos nada. Una llave de reparto tiene que repartir también el
+            futuro, no solo el pasado.
+
+            - **Resuelve:** que el volumen no cabe, y que las escrituras saturan un solo servidor.
+            - **Cuesta:** una consulta que no usa la llave de reparto tiene que preguntarle a todas las máquinas.
+
+            {svg("fragmentar_vs_replicar", "Fragmentar reparte una parte a cada maquina; replicar da el total a todas")}
+
+            **Cómo leer el dibujo.** Son ejes independientes: un sistema real fragmenta *y* replica cada
+            fragmento. Lo que hay que retener es que **fragmentar responde a «no cabe» y replicar responde
+            a «no se puede caer»**.
+
+            ## ¿Qué es un clúster?
+
+            > **Un clúster son varias máquinas que se coordinan entre ellas y que tú usas como si fueran
+            > una sola.**
+
+            La parte importante es la segunda mitad: **como si fueran una sola**. Tu código no cambia. Le
+            sigues hablando a una dirección, con la misma línea `MongoClient(...)`, y por dentro esa
+            dirección esconde varias máquinas que se reparten el trabajo y se vigilan.
+
+            {svg("que_es_un_cluster", "A la izquierda un servidor solo: si se apaga no hay servicio. A la derecha un cluster de tres nodos coordinados que la aplicacion usa como si fuera uno")}
+
+            **Y por qué votan.** Porque nadie puede decidir solo que el principal murió: podría ser que
+            *él* esté bien y sea *quien mira* el que perdió la red. Por eso hace falta **mayoría**, y por
+            eso el número mínimo es tres. Con dos nodos no hay mayoría posible y el clúster se queda
+            paralizado justo cuando más lo necesitas.
+
+            ## ¿Y qué máquinas hacen falta de verdad?
+
+            | Estrategia | Qué se necesita | Por qué ese número |
+            |---|---|---|
+            | **Replicar** | **3 servidores** para un conjunto de réplicas | con 3, si uno cae los otros dos son mayoría y pueden elegir un nuevo principal. Con 2 no hay mayoría posible y el sistema se bloquea |
+            | **Fragmentar** | **3 servidores por cada fragmento**, más 3 de configuración, más 1 o más enrutadores | cada fragmento es a su vez un conjunto de réplicas: fragmentar sin replicar significa que si cae una máquina, pierdes esa parte de los datos |
+
+            Los dos nombres que faltan de esa tabla: los **servidores de configuración** son los que saben
+            qué fragmento tiene qué datos —el índice del clúster—, y el **enrutador** es el que recibe tu
+            consulta y decide a qué fragmento preguntarle. Tú siempre le hablas al enrutador.
+
+            Es decir: un clúster fragmentado de verdad, con tres fragmentos, arranca en **unas 13 máquinas**.
+
+            **¿Y eso cuánto cuesta?** Para que tengas un ancla y no una sensación: un clúster administrado
+            de tres nodos, del tamaño más pequeño que sirve para trabajar en serio, ronda los **200 a 500
+            dólares al mes**. Fragmentado en tres, con sus servidores de configuración, fácilmente **pasa
+            de los 2 000**. Súmale a alguien que lo vigile. Por eso esto no se monta «por si acaso».
+
+            ## ¿Puedo montarlo en mi computador?
+
+            **Sí, y es más fácil de lo que parece — pero simulado.** Un conjunto de réplicas de tres nodos
+            en un portátil son tres procesos `mongod` en tres puertos distintos, cada uno con su carpeta
+            de datos. Funciona, se comporta igual y sirve para aprender.
+
+            Lo que **no** obtienes es lo único que justifica todo esto: **tolerancia a fallos reales**. Si
+            se apaga tu portátil, se apagan las tres réplicas a la vez.
+
+            > **PARA LLEVAR.** Replicar en un solo computador enseña el mecanismo y no da la garantía. Es
+            > exactamente igual que guardar el respaldo de tu disco duro en el mismo disco duro.
+
+            ## CAP, completo
+
+            CAP son tres promesas:
+
+            | Letra | Qué significa |
+            |---|---|
+            | **C** · Consistencia | todas las copias te dan **el mismo valor**, el más reciente |
+            | **A** · Disponibilidad | el sistema **siempre responde algo**, nunca se queda mudo |
+            | **P** · Tolerancia a particiones | el sistema **sigue funcionando aunque se corte la red** entre las copias |
+
+            La forma en que casi siempre se enuncia —«de las tres, escoge dos»— es la que más confunde,
+            porque **la P no es una opción**. Si tienes varias máquinas, la red entre ellas se va a caer
+            alguna vez: eso no lo decides tú, lo decide el mundo. Y cuando se cae, la copia que quedó
+            aislada tiene exactamente **dos** salidas.
+
+            {svg("cap_particion", "Con la red sana las dos copias coinciden y no hay que elegir; cuando el cable se corta la copia aislada solo puede negarse a responder, que es elegir consistencia, o responder con un dato viejo, que es elegir disponibilidad")}
+
+            **Lo único que hay que llevarse de CAP:** la decisión no aparece todos los días. Aparece **el
+            día que se cae la red**, y ese día el sistema hace lo que alguien configuró meses antes.
             """
         ),
         md(
