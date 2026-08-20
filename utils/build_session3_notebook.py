@@ -77,26 +77,30 @@ def question_cell(numero, tema, contexto, pregunta, opciones, correcta, retro_op
     ).decode("ascii")
 
     letras = "ABCD"
-    opciones_md = "\n".join(
+    opciones_md = "\n\n".join(
         f"{letras[i]}. {texto}" for i, texto in enumerate(opciones)
     )
 
+    # Se arma sin indentacion a proposito: cualquier linea con cuatro espacios
+    # al inicio convierte la celda entera en un bloque de codigo en Colab.
     enunciado = md(
-        f"""
-        <div style="border-left:5px solid #1565c0;background:#e3f2fd;color:#0d1b2a;padding:14px 18px;border-radius:8px;">
-
-        **Pregunta {numero} de {TOTAL_QUESTIONS} — {tema}**
-
-        *Contexto.* {contexto}
-
-        **{pregunta}**
-
-        {opciones_md}
-
-        </div>
-
-        *Ejecuta la celda de abajo para responder y ver por qué cada opción es correcta o incorrecta.*
-        """
+        "\n".join([
+            '<div style="border-left:5px solid #1565c0;background:#e3f2fd;color:#0d1b2a;'
+            'padding:14px 18px;border-radius:8px;">',
+            "",
+            f"**Pregunta {numero} de {TOTAL_QUESTIONS} — {tema}**",
+            "",
+            f"*Contexto.* {contexto}",
+            "",
+            f"**{pregunta}**",
+            "",
+            opciones_md,
+            "",
+            "</div>",
+            "",
+            "*Ejecuta la celda de abajo para responder y ver por qué cada opción es correcta "
+            "o incorrecta.*",
+        ])
     )
 
     verificador = hidden(
@@ -1047,14 +1051,15 @@ def build_cells():
 
             > **HAZ ESTO AHORA.** Ejecuta la celda de abajo antes de seguir leyendo, y déjala trabajando.
 
-> **OJO.** Si en cualquier momento del laboratorio ves un `NameError`, no busques la celda culpable:
-> vuelve al Paso 0 y ejecuta desde ahí hacia abajo. Todas las celdas de carga se pueden repetir.
+            > **OJO.** Si en cualquier momento del laboratorio ves un `NameError`, no busques la celda
+            > culpable: vuelve al Paso 0 y ejecuta desde ahí hacia abajo. Todas las celdas de carga se
+            > pueden repetir sin romper nada.
 
-> **MÁS ADELANTE.** Este arranque descarga MongoDB para Linux y por eso funciona en Colab y solo en
-> Colab. En tu computador con Windows no corre: no pierdas la noche intentándolo. La ruta para tu
-> máquina es Atlas, y llega el jueves entrante.
+            > **MÁS ADELANTE.** Este arranque descarga MongoDB para Linux y por eso funciona en Colab y
+            > solo en Colab. En tu computador con Windows no corre: no pierdas la noche intentándolo. La
+            > ruta para tu máquina es Atlas, y llega el jueves entrante.
 
-## Paso 0 · Arrancar el motor (ejecuta y sigue leyendo)
+            ## Paso 0 · Arrancar el motor (ejecuta y sigue leyendo)
 
             Esta celda **no está oculta a propósito**: si algo falla, tienes que poder leer qué pasó.
 
@@ -2036,7 +2041,7 @@ def build_cells():
             """
             ### 🔎 Leamos el resultado — el identificador que no identificaba
 
-**Primero, lo que ves en tu pantalla.** En tu muestra de 1 000 procesos no coincide **ninguna** de las 13
+            **Primero, lo que ves en tu pantalla.** En tu muestra de 1 000 procesos no coincide **ninguna** de las 13
             referencias. Con 1 000 procesos de los 300 000 que existen, la probabilidad de acertar es mínima: el
             tamaño de la muestra vuelve a decidir el resultado, igual que en el conteo por sección.
 
