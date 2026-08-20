@@ -1,0 +1,42 @@
+{
+ "referencias_en_noticias": 13,
+ "procesos_evaluados": 300000,
+ "referencias_distintas_en_secop": 268525,
+ "coincidencias": [
+  {
+   "referencia": "LP-001-2026",
+   "entidad": "ALCALDIA DE FLANDES",
+   "departamento": "Tolima",
+   "valor": 744680300.0,
+   "objeto": "CONTRATAR LA PRESTACION DE SERVICIOS PARA LA IMPLEMENTACION DEL PROGRAMA DE ALIMENTACION ESCOLAR (PAE) A TRAVES DE LA EN"
+  },
+  {
+   "referencia": "LP-001-2026",
+   "entidad": "MUNICIPIO DE VEGACHI",
+   "departamento": "Antioquia",
+   "valor": 1300000000.0,
+   "objeto": "ESTRUCTURACIÓN Y EJECUCIÓN DE LOS MEJORAMIENTOS CORRESPONDIENTES HASTA 100 BENEFICIARIOS POSTULADOS POR EL MUNICIPIO DE "
+  },
+  {
+   "referencia": "LP-001-2026",
+   "entidad": "MUNICIPIO DE LA MESA",
+   "departamento": "Cundinamarca",
+   "valor": 1272727272.0,
+   "objeto": "MEJORAMIENTO DEL ESPACIO PUBLICO Y EMBELLECIMIENTO DE FACHADAS DE LA INSPECCIÓN DE SAN JOAQUIN DEL MUNICIPIO DE LA MESA;"
+  },
+  {
+   "referencia": "LP-001-2026",
+   "entidad": "ALCALDIA DISTRITO DE RIOHACHA",
+   "departamento": "La Guajira",
+   "valor": 18561334126.0,
+   "objeto": "PRESTACIÓN DEL SERVICIO PARA LA IMPLEMENTACIÓN DEL PROGRAMA DE ALIMENTACIÓN ESCOLAR (PAE) A POBLACIÓN MAYORITARIA NO ETN"
+  }
+ ],
+ "referencias_compartidas_por_varias_entidades": 10004,
+ "porcentaje_compartidas": 3.7,
+ "peor_caso": {
+  "referencia": "002-2024",
+  "entidades_distintas": 52
+ },
+ "nota": "La referencia del proceso es unica dentro de una entidad, no en todo SECOP. Para enlazar hace falta entidad + referencia, o el id_del_proceso global."
+}

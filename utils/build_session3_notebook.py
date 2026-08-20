@@ -39,6 +39,7 @@ DATOS_NOTICIAS = f"{RAW}/Datos/noticias_contratacion_2026.json"
 DATOS_SECOP = f"{RAW}/Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv"
 DATOS_CRUCE = f"{RAW}/Datos/entidades_en_noticias_2026.json"
 DATOS_BANDEJA = f"{RAW}/Datos/bandeja_revision_2026.json"
+DATOS_REFERENCIA = f"{RAW}/Datos/cruce_por_referencia_2026.json"
 TOTAL_QUESTIONS = 8
 
 
@@ -292,7 +293,11 @@ def build_cells():
         md(
             """
             ---
-            # 0. En qué quedamos la semana pasada
+            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
+              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 0</div>
+              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">En qué quedamos la semana pasada</div>
+              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">Tu indicador, y la condición que hoy vamos a cruzar</div>
+            </div>
 
             Abre el archivo `hitos/s02/01_decision_proceso.md` que tu pareja y tú escribieron hace ocho días. Ahí
             quedó un indicador, con el nombre de ustedes al lado.
@@ -339,7 +344,11 @@ def build_cells():
         md(
             """
             ---
-            # 1. Por qué esta evidencia no cabe en una tabla
+            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
+              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 1</div>
+              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Por qué esta evidencia no cabe en una tabla</div>
+              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">El problema es la variedad, no el volumen</div>
+            </div>
 
             ## La necesidad, primero
 
@@ -400,7 +409,7 @@ def build_cells():
         ),
         md(
             """
-            ### Interpretación docente — la tabla ya nos está avisando
+            ### 🔎 Leamos el resultado — la tabla ya nos está avisando
 
             **Cómo se lee.** De 59 columnas, 2 están completamente vacías y otras 6 están vacías en más del 80 % de
             las filas — el 8 que imprime la celda incluye esas 2 totalmente vacías. Al mismo tiempo, 48 columnas no tienen un solo hueco.
@@ -462,7 +471,7 @@ def build_cells():
         ),
         md(
             """
-            ### Interpretación docente — aquí sí se rompe la tabla
+            ### 🔎 Leamos el resultado — aquí sí se rompe la tabla
 
             **Cómo se lee.** Tres hechos, y cada uno rompe la tabla de una manera distinta:
 
@@ -519,7 +528,11 @@ def build_cells():
         md(
             """
             ---
-            # 2. Qué existe en lugar de la tabla
+            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
+              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 2</div>
+              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Qué existe en lugar de la tabla</div>
+              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">Cuatro familias, y cada una renunció a algo distinto</div>
+            </div>
 
             Ya sabemos qué le sobra a la tabla. La pregunta obvia es qué existe en su lugar. La respuesta incómoda
             es que no existe *una* alternativa: existen cuatro, y **cada una renunció a algo distinto de la tabla**.
@@ -569,7 +582,11 @@ def build_cells():
         md(
             """
             ---
-            # 3. Cómo se ve un documento por dentro
+            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
+              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 3</div>
+              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Cómo se ve un documento por dentro</div>
+              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">Campos, anidamiento y arreglos</div>
+            </div>
 
             De las cuatro familias, la documental es la que más se parece a lo que ya tienes en la cabeza: un
             documento es lo que llamarías **la ficha completa** de algo. Abramos una.
@@ -636,7 +653,7 @@ def build_cells():
         ),
         md(
             """
-            ### Interpretación docente — leer un documento
+            ### 🔎 Leamos el resultado — leer un documento
 
             **Cómo se lee.** Hay tres niveles a la vista. Campos simples (`titulo`, `seccion`, `premium`). Arreglos
             de objetos (`etiquetas`, donde cada etiqueta es a su vez un objeto con `id`, `nombre` y `slug`). Y un
@@ -706,7 +723,11 @@ def build_cells():
         md(
             """
             ---
-            # 4. Y cuando no cabe en un servidor
+            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
+              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 4</div>
+              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Y cuando no cabe en un servidor</div>
+              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">Repartir y copiar no son lo mismo</div>
+            </div>
 
             Al principio de la sesión quedó una pregunta colgada: nuestras 987 noticias salieron de 57 848 artículos,
             de un solo periódico y ocho meses. Aunque arreglemos la forma, ¿dónde guardamos eso?
@@ -748,7 +769,11 @@ def build_cells():
         md(
             """
             ---
-            # 5. Qué se cede al tener copias
+            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
+              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 5</div>
+              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Qué se cede al tener copias</div>
+              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">ACID, BASE y el dato que fue verdad hace un momento</div>
+            </div>
 
             Tenemos el dato repartido y el dato copiado. **Las copias resuelven un problema y crean otro**, y el
             otro es el que le importa a Laura.
@@ -851,7 +876,11 @@ def build_cells():
         md(
             """
             ---
-            # 6. Cómo le pregunto algo a la base
+            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
+              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 6</div>
+              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Cómo le pregunto algo a la base</div>
+              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">MQL, siempre junto a su SQL equivalente</div>
+            </div>
 
             Bajemos de la nube al teclado. Todo lo anterior no sirve de nada si no sabemos preguntarle algo a la
             base. En SQL escribirías `SELECT` y `WHERE`. Aquí se escribe distinto y se lee igual. **Voy a poner las
@@ -1010,7 +1039,11 @@ def build_cells():
         md(
             """
             ---
-            # LABORATORIO — aquí trabajas tú
+            <div style="background:linear-gradient(90deg,#1b5e20,#2e7d32);color:#ffffff;border-radius:10px;padding:22px 24px;margin:24px 0 14px 0;">
+              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c8e6c9;">Segunda mitad</div>
+              <div style="font-size:1.7rem;font-weight:700;">Laboratorio — aquí trabajas tú</div>
+              <div style="color:#e8f5e9;font-size:0.97rem;margin-top:6px;">Tu colección, tus consultas, tu interpretación. Lo que produzcas hoy es el insumo de la próxima sesión.</div>
+            </div>
 
             > **HAZ ESTO AHORA.** Ejecuta la celda de abajo antes de seguir leyendo, y déjala trabajando.
 
@@ -1224,7 +1257,7 @@ def build_cells():
         ),
         md(
             """
-            ### Interpretación docente — el `_id` y la idempotencia
+            ### 🔎 Leamos el resultado — el `_id` y la idempotencia
 
             **Cómo se lee.** El conteo insertado y el conteo de la colección coinciden: nada se perdió ni se duplicó.
 
@@ -1417,7 +1450,7 @@ def build_cells():
         ),
         md(
             """
-            ### Interpretación docente — `$set` y el campo que no existía
+            ### 🔎 Leamos el resultado — `$set` y el campo que no existía
 
             **Cómo se lee.** `matched_count` dice cuántos documentos cumplían el filtro; `modified_count`, cuántos
             cambiaron de verdad. Si vuelves a ejecutar esta celda **seguirá diciendo 1 y 1**, porque el `$set`
@@ -1489,7 +1522,7 @@ def build_cells():
         ),
         md(
             """
-            ### Interpretación docente — leer la tabla, y sobre todo sus límites
+            ### 🔎 Leamos el resultado — leer la tabla, y sobre todo sus límites
 
             **Cómo se lee.** Cada fila es una sección; `n` es cuántas noticias tiene y `promedio_palabras` qué tan
             extensas son. `_id` en la salida no es un identificador: en `$group` es **el criterio de agrupación**,
@@ -1561,7 +1594,7 @@ def build_cells():
         ),
         md(
             """
-            ### Interpretación docente — el mes que se sale de la serie
+            ### 🔎 Leamos el resultado — el mes que se sale de la serie
 
             **Cómo se lee.** Cada fila es un mes y las almohadillas son el conteo a escala.
 
@@ -1639,11 +1672,15 @@ def build_cells():
 
             # Armamos el texto completo de cada noticia (titulo + parrafos + etiquetas).
             textos = {}
+            textos_originales = {}
             for n in coleccion.find({}, {"titulo": 1, "cuerpo": 1, "etiquetas": 1}):
                 partes = [n["titulo"]]
                 partes += [b.get("texto", "") for b in n["cuerpo"] if b.get("texto")]
                 partes += [t.get("nombre", "") for t in n.get("etiquetas", [])]
                 textos[n["_id"]] = normalizar(" ".join(partes))
+                # Guardamos tambien el texto SIN normalizar: las referencias de
+                # contrato van en mayusculas y el normalizador las destruiria.
+                textos_originales[n["_id"]] = " ".join(partes)
 
             claves = ["alcaldia", "gobernacion", "ministerio", "universidad", "hospital",
                       "fiscalia", "contraloria", "icbf", "sena", "dian", "policia"]
@@ -1682,7 +1719,7 @@ def build_cells():
         ),
         md(
             """
-            ### Interpretación docente — el resultado que parecía bueno
+            ### 🔎 Leamos el resultado — el resultado que parecía bueno
 
             **Qué acaba de pasar.** El primer cruce encontró muchas más menciones que el segundo. Y si lo hubiéramos
             entregado así, con una tabla bonita, nadie habría dudado.
@@ -1731,7 +1768,7 @@ def build_cells():
         ),
         md(
             """
-            ### Interpretación docente — y la trampa que casi nadie ve
+            ### 🔎 Leamos el resultado — y la trampa que casi nadie ve
 
             **Cómo se lee, y de dónde salen estos números.** Este cruce **no** se hizo contra la muestra de 1 000
             procesos que cargaste al principio de la clase: con sus 647 entidades no habría casi coincidencias. Se
@@ -1908,7 +1945,7 @@ def build_cells():
         ),
         md(
             """
-            ### Interpretación docente — lo que sí es y lo que no es esta bandeja
+            ### 🔎 Leamos el resultado — lo que sí es y lo que no es esta bandeja
 
             **Qué acabas de construir.** Una lista priorizada de procesos concretos, con su objeto, su valor, cómo
             se contrataron, cuántos proveedores respondieron y qué se dijo en prensa sobre la entidad. Eso es un
@@ -1939,6 +1976,120 @@ def build_cells():
             **PARA LLEVAR.** Ninguna de esas cuatro cosas es un capricho técnico: cada una es una pregunta que tu
             propio resultado dejó abierta hoy. Así se construye una capacidad de datos — no eligiendo herramientas,
             sino persiguiendo los límites de lo que ya tienes.
+            """
+        ),
+        md(
+            """
+            ## Paso 6.5 · Cuando la noticia nombra el contrato
+
+            Hasta aquí el enlace fue **entidad ↔ noticia**, y ya dijimos que es débil: la noticia habla del
+            Ministerio, no de *este* contrato.
+
+            Pero a veces el periodista **da el número**. Cuando eso pasa, la señal deja de ser un indicio y se
+            vuelve una identificación. Sería lo mejor que le puede pasar a Laura. Busquémoslos.
+            """
+        ),
+        code(
+            """
+            # 6.5.1 — ¿Alguna noticia menciona un contrato por su numero?
+            # Las referencias de SECOP se ven asi: EDP-545-2022, CD-436-2022, LP-001-2026.
+            patron = r"\\b[A-Z]{2,6}-\\d{1,5}-\\d{4}\\b"
+
+            referencias = {}
+            for _id, t in textos_originales.items():
+                for ref in re.findall(patron, t):
+                    referencias.setdefault(ref.upper(), []).append(_id)
+
+            print(f"Referencias de contrato encontradas en las noticias: {len(referencias)}")
+            for ref, ids in list(referencias.items())[:8]:
+                print(f"  {ref:18s} en {len(ids)} noticia(s)")
+            """
+        ),
+        code(
+            """
+            # 6.5.2 — Cruzamos esas referencias contra las 268.525 de SECOP.
+            import pandas as pd
+
+            secop = pd.read_csv(
+                "https://raw.githubusercontent.com/jazaineam1/BigData2026/main/"
+                "Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv",
+                usecols=["referencia_del_proceso", "entidad", "precio_base"],
+                low_memory=False,
+            )
+            secop["ref"] = secop["referencia_del_proceso"].astype(str).str.upper().str.strip()
+
+            coinciden = secop[secop["ref"].isin(referencias)]
+            print(f"En TU muestra de {len(secop)} procesos coinciden: {len(coinciden)}")
+            print()
+
+            # El mismo cruce, hecho aparte sobre los 300.000 procesos completos.
+            with urllib.request.urlopen("{referencia}") as r:
+                cruce_ref = json.loads(r.read().decode("utf-8"))
+
+            print(f"Sobre los {cruce_ref['procesos_evaluados']:,} procesos completos coinciden: "
+                  f"{len(cruce_ref['coincidencias'])}")
+            for c in cruce_ref["coincidencias"]:
+                print(f"  {c['referencia']:14s} | {c['entidad'][:42]:42s} | {c['valor']:>14,.0f}")
+            """.replace("{referencia}", DATOS_REFERENCIA)
+        ),
+        md(
+            """
+            ### 🔎 Leamos el resultado — el identificador que no identificaba
+
+**Primero, lo que ves en tu pantalla.** En tu muestra de 1 000 procesos no coincide **ninguna** de las 13
+            referencias. Con 1 000 procesos de los 300 000 que existen, la probabilidad de acertar es mínima: el
+            tamaño de la muestra vuelve a decidir el resultado, igual que en el conteo por sección.
+
+            **Y ahora sobre los 300 000 completos**, que es el segundo número que imprimió la celda: el cruce
+            devuelve **cuatro coincidencias**, y las cuatro son la misma referencia, `LP-001-2026`. Pertenecen a la
+            **Alcaldía de Flandes**, el **Municipio de Vegachí**, el **Municipio de La Mesa** y la **Alcaldía de
+            Riohacha**.
+
+            Cuatro municipios que no tienen nada que ver entre sí, ni con la noticia. ¿Qué pasó?
+
+            **Primero: la noticia sí nombraba un contrato, y uno importante.** Dice, textualmente:
+
+            > *"MinTIC confirmó este 18 de agosto de 2026 la cancelación definitiva de la licitación pública
+            > **FTIC-LP-001-2026**. El proceso buscaba adjudicar la construcción e interventoría del cable de
+            > fibra óptica Putumayo."* — cancelada por sobrecostos, **1,14 billones de pesos**.
+
+            Eso es exactamente lo que Laura quiere: un contrato concreto, nombrado, con un problema declarado.
+
+            **Segundo: nuestro patrón se comió el prefijo.** Fíjate:
+
+            | Referencia real | Lo que capturó el patrón |
+            |---|---|
+            | `FTIC-LP-001-2026` | `LP-001-2026` ← **perdió `FTIC-`** |
+            | `SCJ-1904-2023` | `SCJ-1904-2023` ✓ |
+
+            `\b` marca el borde de una palabra, y **un guion también es un borde**. Así que el patrón empezó a
+            contar desde el segundo tramo y descartó justo la parte que decía de qué entidad era.
+
+            **Tercero, y es lo más importante: aunque el patrón fuera perfecto, la referencia no basta.**
+
+            En SECOP hay 268 525 referencias distintas, y **10 004 de ellas —el 3,7 %— las usan dos o más
+            entidades diferentes**. `002-2024` la usan **52 entidades distintas**. Es lógico: cada alcaldía
+            numera sus licitaciones desde 001 cada año.
+
+            > **🚧 La regla que te llevas.** Un identificador que solo es único **dentro de** una organización no
+            > identifica nada fuera de ella. Para enlazar de verdad hace falta **entidad + referencia**, o el
+            > identificador global que SECOP sí tiene (`id_del_proceso`, del estilo `CO1.REQ.6477624`) — y que
+            > ningún periódico publica jamás.
+
+            **Y una limitación honesta de nuestro ejercicio:** `FTIC-LP-001-2026` no está en nuestra muestra,
+            porque nuestros datos de SECOP llegan hasta abril de 2026 y esa licitación se canceló en agosto. Sí
+            están, en cambio, **485 procesos con el prefijo `FTIC`**: la entidad está, el contrato todavía no.
+            Trabajar con una foto desactualizada es la condición normal del oficio, y hay que decirlo, no
+            esconderlo.
+
+            ### Qué significa esto para la bandeja de Laura
+
+            Si un contrato aparece nombrado **con su entidad** en una noticia, ese proceso **sube directo al tope
+            de la fila de revisión**: ya no es una entidad bajo atención pública, es un contrato señalado.
+
+            Eso justifica una columna nueva en la bandeja —*"¿lo nombra la prensa?"*— y explica por qué la
+            búsqueda textual sobre el objeto contractual es la sesión 7 y no un adorno: es lo que convierte una
+            señal difusa en una identificación.
             """
         ),
         *question_cell(
