@@ -1412,6 +1412,8 @@ def build_cells():
             """
             ## Paso 2 · Cargar las noticias en tu base
 
+            > **HAZ ESTO AHORA.** Ejecuta la celda de abajo. Es la que pone los datos en tu base.
+
             Ahora sí, las 987 noticias pasan de ser una lista de Python a ser **documentos dentro de una base de
             datos**. La diferencia importa: en la lista solo puedes recorrer; en la base puedes consultar.
             """
@@ -1481,6 +1483,9 @@ def build_cells():
         md(
             """
             ## Paso 3 · Tres consultas tuyas
+
+            > **HAZ ESTO AHORA.** Aquí escribes tú. Son las tres únicas celdas de la noche donde el
+            > cuaderno te deja el hueco: tómate el tiempo.
 
             Las dos primeras las escribes tú desde cero. La tercera viene con el patrón ya escrito para que solo
             cambies la palabra buscada.
@@ -2518,6 +2523,8 @@ def build_cells():
             ---
             ## Paso 7 · Cerrar en GitHub lo que dejamos abierto
 
+            > **HAZ ESTO AHORA.** Esto se hace en pareja y en el navegador. Nada de terminal.
+
             La semana pasada tu pareja y tú abrieron un Pull Request y **se detuvieron antes de integrarlo**. Hoy
             lo cerramos. Y de paso aprendemos qué significa realmente ese último paso.
 
@@ -2787,8 +2794,8 @@ def build_cells():
             # Reto 2 — cargar. COMPLETA las dos lineas marcadas.
             articulos_col = db["articulos"]
 
-            # a) que hay que hacer antes de insertar, para poder repetir la celda?
-            articulos_col.____({})
+            # Vaciar antes de insertar, para poder repetir la celda sin duplicar.
+            articulos_col.delete_many({})
 
             docs = []
             for a in articulos:
@@ -2829,7 +2836,7 @@ def build_cells():
             # Reto 3.1 — ¿Cuales son los 5 articulos mas citados?
             # Pista: find(), sort() y limit(). Para ordenar de mayor a menor: sort("campo", -1)
 
-            for a in articulos_col.find({}, {"titulo": 1, "citas": 1, "_id": 0}).____("citas", -1).____(5):
+            for a in articulos_col.find({}, {"titulo": 1, "citas": 1, "_id": 0}).____("citas", -1).limit(5):
                 print(a["citas"], "|", a["titulo"][:78])
             """
         ),
@@ -2887,8 +2894,54 @@ def build_cells():
 
             ## Reto, paso 4 · Llévalo a una tabla
 
-            Aplana tus artículos a un DataFrame y quédate con: título, revista, año, citas y número de
-            autores. **Y anota qué perdiste al aplanar** — ya sabes que siempre se pierde algo.
+            Aplana tus artículos a un DataFrame y quédate con lo que quepa en columnas. **Y anota qué
+            perdiste al aplanar** — ya sabes que siempre se pierde algo.
+            """
+        ),
+        code(
+            """
+            # Reto 4 — aplanar. Falta UNA cosa: como cuentas los autores de cada articulo?
+            import pandas as pd
+
+            tabla = pd.DataFrame([
+                {"titulo": a["titulo"][:70],
+                 "revista": a["revista"][:40],
+                 "anio": a["anio"],
+                 "citas": a["citas"],
+                 "n_autores": ____(a["autores"])}       # <--- completa
+                for a in articulos_col.find({})
+            ])
+
+            print("Tu tabla:", tabla.shape)
+            tabla.sort_values("citas", ascending=False).head(8)
+            """
+        ),
+        md(
+            """
+            ### Qué deberías estar viendo
+
+            Los resultados de una API viva **cambian**. Si haces esto el domingo, Crossref puede devolver
+            artículos distintos de los del jueves. No compares tus números con los de un compañero:
+            compara la **forma** de lo que sale.
+
+            <details>
+            <summary><b>Ver qué debería salir en cada paso</b></summary>
+
+            | Paso | Qué deberías ver |
+            |---|---|
+            | Reto 1 | 120 artículos traídos, y más de un millón disponibles |
+            | Reto 2 | 120 documentos cargados. Si salen menos, hubo DOI repetidos — y eso ya sabes leerlo |
+            | Reto 3.1 | 5 títulos, el más citado por encima de 20 citas |
+            | Reto 3.2 | 8 revistas; la primera con 15 a 30 artículos |
+            | Reto 3.3 | 10 autores; los primeros con 4 a 6 artículos cada uno |
+            | Reto 4 | una tabla de 120 filas y 5 columnas |
+
+            **Los huecos, si te atascas:** `insert_many` · `sort` · `revista` · `$unwind` · `len`.
+
+            **Si el Reto 1 falla con un error de red:** Crossref limita las peticiones muy seguidas. Espera
+            un minuto y vuelve a ejecutarlo. No cambies el código.
+
+            </details>
 
             ## Si quieres ir más lejos
 
