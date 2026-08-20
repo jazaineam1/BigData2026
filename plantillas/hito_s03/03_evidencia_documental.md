@@ -95,7 +95,13 @@ ____
 
 ---
 
-## 7. Observación propia *(opcional, hasta 0,5)*
+## 7. Extras *(opcional, hasta +0,5)*
+
+Marca lo que hayas hecho y escribe dos líneas de cada uno:
+
+- [ ] **El ejercicio de conflicto de Git.** Qué pasó y qué decidieron: ____
+- [ ] **El reto de Crossref.** Qué encontré y qué NO permite concluir: ____
+- [ ] **Una observación propia** que el cuaderno no hizo
 
 *Algo que notaste y el cuaderno no dijo: un patrón, una consulta que se te ocurrió, un error que encontraste en el material. Se premia porque es lo más difícil.*
 
@@ -112,7 +118,7 @@ ____
 | La entidad que elegiste (punto 3) | 1,0 |
 | Los dos números del cruce (punto 4) | 1,0 |
 | Qué NO permite concluir (punto 5) | 1,0 |
-| Observación propia (punto 7) | +0,5 · no sube de 5,0 |
+| Extras (punto 7) | +0,5 · no sube de 5,0 |
 
 Los niveles completos están en el cuaderno de la sesión 3, en «Cómo se evalúa esta sesión».
 

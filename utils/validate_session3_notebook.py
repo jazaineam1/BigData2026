@@ -110,6 +110,28 @@ def main():
                 )
                 break
 
+    # ── 4-bis. Caracteres de control que se comen el texto ────────────────────
+    # Un `\b` escrito sin escapar en el generador se guarda como retroceso real
+    # (\x08) y borra la palabra que explica. Paso desapercibido en la frase que
+    # explicaba por que el patron se comio el prefijo FTIC-.
+    for i, c in enumerate(celdas):
+        for ch in "".join(c["source"]):
+            if ord(ch) < 32 and ch not in "\n\t":
+                errores.append(
+                    f"celda {i}: contiene el caracter de control {ord(ch):#04x}; "
+                    f"seguramente es un escape sin escapar y se comio texto"
+                )
+                break
+
+    # ── 4-ter. <details> abierto en una celda y cerrado en otra ───────────────
+    for i, c in enumerate(celdas):
+        src = "".join(c["source"])
+        if src.count("<details>") != src.count("</details>"):
+            errores.append(
+                f"celda {i}: <details> descuadrado; en Colab cada celda se dibuja "
+                f"aparte, asi que no puede abrirse en una y cerrarse en otra"
+            )
+
     # ── 5. Sin celdas vacias y sin triple comilla doble en codigo ─────────────
     for i, c in enumerate(celdas):
         src = "".join(c["source"])

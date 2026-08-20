@@ -374,6 +374,11 @@ def build_cells():
 
             ## La necesidad, primero
 
+            **Quién es Laura.** Coordina un equipo de auditoría en una entidad de control. Son **cuatro
+            personas**, y cada semana les entran cerca de **1 200 procesos** nuevos de contratación. Alcanzan
+            a revisar a fondo unos **veinte**. No les falta criterio: les falta saber **por cuáles veinte
+            empezar**, y hoy esa decisión la toman por orden de llegada.
+
             Laura tiene los contratos. Le faltan **señales externas**: qué entidades están apareciendo en la
             prensa, por qué y con qué frecuencia. Una entidad que aparece en varias noticias sobre un mismo asunto
             no es culpable de nada, pero **merece que alguien mire antes** que una entidad de la que nadie habla.
@@ -629,11 +634,11 @@ def build_cells():
             }
             ```
 
-            **Una transacción financiera.** El monto y la fecha están en todas; pero una transferencia trae cuenta
-            destino, una compra trae comercio y categoría, y un retiro trae cajero. Mismos hechos, formas distintas.
+            **Qué muestra este ejemplo.** Una entidad principal —el paciente— y dentro de ella una **lista de
+            cosas que no tienen todas la misma forma**: la consulta trae diagnóstico, el examen trae valor y
+            unidad, la urgencia trae triage y egreso.
 
-            **Qué comparten los dos ejemplos.** Una entidad principal, y dentro de ella una **lista de cosas que no
-            tienen todas la misma forma**. Eso es exactamente una noticia. Y exactamente lo que no cabe en una fila.
+            Eso es exactamente una noticia. Y exactamente lo que no cabe en una fila.
 
             ## El mismo dato, de las dos formas
 
@@ -789,6 +794,9 @@ def build_cells():
 
             ## Antes de seguir: ¿qué es un clúster?
 
+            Esto también es de Laura, aunque no lo parezca: su equipo no puede depender de que un servidor
+            no se caiga. Si el lunes por la mañana la base no responde, esa semana no se revisa nada.
+
             La palabra va a aparecer todo el semestre y conviene fijarla ahora, porque es más simple de
             lo que suena.
 
@@ -810,7 +818,7 @@ def build_cells():
 
             | Palabra | Qué es |
             |---|---|
-            | **nodo** | cada máquina del clúster |
+            | **nodo** | un `mongod` corriendo. En producción, cada uno en su propia máquina; en tu portátil, los tres en la misma |
             | **principal** *(primary)* | el nodo que recibe las escrituras en ese momento |
             | **réplica** *(secondary)* | un nodo que mantiene una copia del principal |
 
@@ -833,9 +841,22 @@ def build_cells():
             | **Replicar** | **3 servidores** para un conjunto de réplicas | con 3, si uno cae los otros dos son mayoría y pueden elegir un nuevo principal. Con 2 no hay mayoría posible y el sistema se bloquea |
             | **Fragmentar** | **3 servidores por cada fragmento**, más 3 de configuración, más 1 o más enrutadores | cada fragmento es a su vez un conjunto de réplicas: fragmentar sin replicar significa que si cae una máquina, pierdes esa parte de los datos |
 
+            Los dos nombres que faltan de esa tabla, para que no queden sueltos: los **servidores de
+            configuración** son los que saben qué fragmento tiene qué datos —el índice del clúster—, y el
+            **enrutador** es el que recibe tu consulta y decide a qué fragmento preguntarle. Tú siempre le
+            hablas al enrutador.
+
             Es decir: un clúster fragmentado de verdad, con tres fragmentos, arranca en **unas 13
-            máquinas**. Por eso esto no se monta "por si acaso": se monta cuando el volumen o la
-            disponibilidad lo exigen, y cuesta dinero y personas.
+            máquinas**.
+
+            **¿Y eso cuánto cuesta?** Para que tengas un ancla y no una sensación: un clúster
+            administrado de tres nodos, del tamaño más pequeño que sirve para trabajar en serio, ronda los
+            **200 a 500 dólares al mes**. Fragmentado en tres, con sus servidores de configuración,
+            fácilmente **pasa de los 2 000**. Súmale a alguien que lo vigile.
+
+            Por eso esto no se monta "por si acaso": se monta cuando el volumen o la disponibilidad lo
+            exigen. Y por eso el plan gratuito que vas a usar el jueves entrante es un solo conjunto de
+            réplicas de 512 MB, no un clúster fragmentado.
 
             ### ¿Puedo hacerlo en mi computador?
 
@@ -938,15 +959,6 @@ def build_cells():
             | prioriza | consistencia | disponibilidad |
             | típico de | bancos, inventarios, nómina | catálogos, medios, telemetría, redes sociales |
             | cuesta | coordinación, y por lo tanto latencia y escala de escritura | tolerar respuestas desactualizadas |
-
-            **Dos precisiones, antes de que se vuelvan un mito.**
-
-            1. La **C de ACID** es *integridad de las reglas* —que un saldo no quede negativo—, no *ver siempre el
-               último valor*. Eso último tiene otro nombre y llega en la sesión 4.
-            2. Y la más importante: **ACID no es «lo relacional» y BASE no es «lo NoSQL»**. El MongoDB que vas a
-               levantar en un rato tiene transacciones ACID sobre varios documentos desde la versión 4.0, y una
-               operación sobre un solo documento siempre fue atómica. No son tecnologías: son **configuraciones
-               que se eligen**, y se eligen por la decisión que cuelga de ellas.
 
             ## La pregunta que hay que hacerle al negocio
 
@@ -1320,7 +1332,7 @@ def build_cells():
         ),
         md(
             """
-            ### Cómo leer lo que acaba de pasar
+            ## Paso 1 · Confirma qué motor te tocó
 
             - Si dice **MongoDB 8.x (real...)**, estás hablando con un servidor de verdad, con su proceso, su
               archivo de datos y su log. Es lo mismo que correría una empresa, en pequeño.
@@ -1379,6 +1391,7 @@ def build_cells():
             | **La entidad que elegiste**<br>(revisar o no, y por qué) | 1,0 | decide, nombra la alternativa que descartó y sostiene el criterio | decide y da una razón | menciona una entidad sin decidir | no hay |
             | **Los dos números del cruce**<br>(y por qué se diferencian) | 1,0 | explica el mecanismo —subcadena frente a palabra— con un ejemplo propio | reporta ambos y dice que la diferencia son falsos positivos | reporta un solo número | no hay |
             | **Qué NO permite concluir** | 1,0 | nombra el **dato que falta**, no solo la limitación | dice correctamente qué no se puede afirmar | escribe "faltan datos" | no hay |
+            | **Por qué no cabía en una tabla** y **tu sector**<br>(puntos 1 y 6) | se reparten dentro de los anteriores | usa un documento que **abrió** y un dato **real de su trabajo** | responde con un ejemplo del cuaderno | repite el enunciado | no hay |
 
             **Punto adicional de hasta 0,5**, que no sube de 5,0: una observación propia que el cuaderno no hizo.
             Un patrón que notaste, una consulta que se te ocurrió, un error que encontraste en el material. Se premia
@@ -1472,7 +1485,6 @@ def build_cells():
             Las dos primeras las escribes tú desde cero. La tercera viene con el patrón ya escrito para que solo
             cambies la palabra buscada.
 
-            **Recuerda el método:** ¿qué pregunta tengo? ¿por qué campo filtro? ¿qué proyecto? ¿qué concluyo?
             """
         ),
         code(
@@ -1616,7 +1628,7 @@ def build_cells():
                 {"_id": objetivo["_id"]},
                 {"$set": {"revision": {
                     "estado": "revisada",
-                    "por": "equipo_compras_claras",
+                    "por": "equipo_auditoria_laura",
                     "fecha": datetime.now(timezone.utc).isoformat(),
                 }}},
             )
@@ -1744,6 +1756,35 @@ def build_cells():
               `15/03/2026`, este truco daría un resultado sin sentido. Guardar fechas como texto es cómodo y
               frágil; en la sesión 4 las guardaremos como fechas de verdad.
 
+            ### Mini ficha: `$unwind` — desenrollar una lista
+
+            - **Para qué sirve:** cuando un campo es una **lista**, `$unwind` convierte cada elemento en su
+              propia fila. Una noticia con 4 etiquetas se vuelve 4 filas, iguales en todo menos en la etiqueta.
+            - **Para qué lo necesitas:** para poder agrupar **por** el contenido de una lista. Sin desenrollar,
+              `$group` vería la lista entera como un solo valor.
+            - **Ejemplo:** contar cuáles son las etiquetas más usadas en la colección.
+
+            ```python
+            coleccion.aggregate([
+                {"$unwind": "$etiquetas"},                                  # 1 fila por etiqueta
+                {"$group": {"_id": "$etiquetas.nombre", "n": {"$sum": 1}}},
+                {"$sort": {"n": -1}},
+                {"$limit": 5},
+            ])
+            ```
+
+            - **Cómo interpretar la salida:** cada fila es una etiqueta y su conteo.
+            - **Error frecuente, y es importante:** después de `$unwind` **los conteos ya no son aditivos**.
+              Si sumas las etiquetas te va a dar más que el número de noticias, porque cada noticia se contó
+              tantas veces como etiquetas tenga. Es correcto, pero no es lo mismo que contar noticias.
+
+            ### Mini ficha: `sort()` y `limit()`
+
+            - **`sort("campo", -1)`** ordena de mayor a menor; con `1`, de menor a mayor.
+            - **`limit(n)`** se queda con los primeros n. Se encadenan después de `find()`:
+              `coleccion.find(filtro).sort("n_palabras", -1).limit(5)`.
+            - **Error frecuente:** ordenar en Python después de traerlo todo. Ordena en la base, que para eso está.
+
             ### Mini ficha: `aggregate(pipeline)`
 
             - **Para qué sirve:** calcular resúmenes encadenando etapas.
@@ -1798,7 +1839,8 @@ def build_cells():
             """
             ### 🔎 Leamos el resultado — el mes que se sale de la serie
 
-            **Cómo se lee.** Cada fila es un mes y las almohadillas son el conteo a escala.
+            **Cómo se lee.** Cada barra es un mes y su altura es cuántas noticias trae. La última está en otro
+            color y rayada a propósito: agosto no está completo.
 
             **Qué nos dice.** La serie oscila bastante más de lo que parece a simple vista: entre junio (92) y enero
             (141) hay un 53 % de diferencia, **y eso sin contar julio**. Julio, con 175, se sale claramente de
@@ -2036,15 +2078,13 @@ def build_cells():
 
             Solo la tercera fila le sirve a Laura. Y **el dato, por sí solo, no distingue cuál es cuál.**
 
-            Fíjate en la cuarta: la Cámara de Representantes tiene 29 noticias y 715 procesos. No investiga, no
+            Fíjate en la tercera fila: la Cámara de Representantes tiene 29 noticias y 715 procesos. No investiga, no
             administra el SECOP y no está cuestionada por contratación. Sale en la prensa porque es la Cámara.
 
             """
         ),
         md(
             """
-            <details>
-            <summary><b>Si quieres ir más lejos: la tentación de dividir las dos columnas</b></summary>
 
             No es indispensable hoy. Ábrelo cuando tengas la cabeza fresca: es la misma lección del denominador, aplicada al revés.
             ## Y la tentación que viene después
@@ -2168,8 +2208,6 @@ def build_cells():
         ),
         md(
             """
-
-            </details>
 
             ### 🔎 Leamos el resultado — lo que sí es y lo que no es esta bandeja
 
@@ -2296,7 +2334,8 @@ def build_cells():
             | `FTIC-LP-001-2026` | `LP-001-2026` ← **perdió `FTIC-`** |
             | `SCJ-1904-2023` | `SCJ-1904-2023` ✓ |
 
-            `\b` marca el borde de una palabra, y **un guion también es un borde**. Así que el patrón empezó a
+            El símbolo `\\b` de la expresión regular marca **el borde de una palabra**, y para una expresión
+            regular **un guion también es un borde**. Así que el patrón empezó a
             contar desde el segundo tramo y descartó justo la parte que decía de qué entidad era.
 
             <details>
@@ -2546,13 +2585,19 @@ def build_cells():
             Diez minutos, en pareja, desde el navegador. Vale la pena verlo una vez en un archivo que no
             importa, para no verlo por primera vez en la entrega.
 
-            1. **Los dos a la vez** abren en GitHub el archivo `hitos/s03/03_evidencia_documental.md` y
-               pulsan el lápiz de editar. **Sin cerrar ninguna de las dos pestañas.**
-            2. En la línea de «La sección que elegí fue», **cada uno escribe una sección distinta**.
-            3. **La persona A** pulsa *Commit changes* y elige **Commit directly to the main branch**.
-               Funciona sin problema.
-            4. **La persona B** pulsa *Commit changes* en su pestaña. GitHub le responde algo como
-               *"this file has changed since you started editing"* y **no la deja guardar**.
+            Se hace sobre `practica/conflicto.md`, un archivo de juguete que el docente ya dejó creado en
+            su repositorio. **No lo hagan sobre el archivo del hito:** ese es el que les califican, y la
+            idea es equivocarse donde no cuesta nada.
+
+            1. **Los dos a la vez** abren `practica/conflicto.md` en GitHub y pulsan el lápiz de editar.
+               **Sin cerrar ninguna de las dos pestañas.**
+            2. En la línea que dice «Nuestro color favorito es ____», **cada uno escribe un color distinto**.
+            3. **La persona A** pulsa *Commit changes*. Funciona sin problema.
+            4. **La persona B** pulsa *Commit changes* en su pestaña. GitHub le responde con un aviso
+               parecido a *"this file has changed since you started editing"* y **no la deja guardar**.
+
+            > **OJO.** Ese aviso **no es un error tuyo y no rompiste nada.** Es GitHub haciendo su trabajo.
+               Si aparece, vas bien.
 
             **Qué acaba de pasar, y es lo importante:** GitHub **protegió** el trabajo de A. Si hubiera
             dejado guardar a B, el texto de A habría desaparecido sin que nadie se enterara. Eso es
@@ -2566,6 +2611,10 @@ def build_cells():
 
             **Escríbanlo en el hito, punto 7:** qué pasó, qué decidieron y por qué. Esa frase vale más que
             cualquier definición de conflicto que puedan copiar.
+
+            > **MÁS ADELANTE.** Aquí guardamos directo para que el choque se vea en dos minutos. En su
+            > entrega real siguen con el flujo de la sesión 2 —rama, Pull Request y revisión—, que es el
+            > que sirve cuando el trabajo importa. Lo de hoy es un simulacro, no un cambio de método.
 
             ### 7.2 — Integrar
 
@@ -2640,6 +2689,12 @@ def build_cells():
             ## 6. En mi sector
             Trabajo en ____. Un dato de mi trabajo que guardaría como documento y no como fila:
             Y uno que dejaría en una tabla, porque:
+
+            ## 7. Extras (opcional, hasta +0,5)
+            Marca lo que hayas hecho y escribe dos líneas de cada uno:
+            - [ ] El ejercicio de conflicto de Git: qué pasó y qué decidimos.
+            - [ ] El reto de Crossref: qué encontré y qué NO permite concluir.
+            - [ ] Una observación propia que el cuaderno no hizo.
             ```
 
             **Fecha de entrega:** domingo. Se corrige con la rúbrica que está más arriba, en «Cómo se evalúa esta
@@ -2650,6 +2705,10 @@ def build_cells():
             """
             ---
             # Reto final · Hazlo tú, con otros datos
+
+            > **MÁS ADELANTE.** Esto **no se hace en clase**: es para el fin de semana, y es opcional. Lo
+            > pongo aquí porque es lo único de la sesión donde te enfrentas solo a datos que nunca viste,
+            > que es exactamente lo que te va a pasar en tu trabajo.
 
             Todo lo de esta noche lo hiciste sobre un caso que yo te di preparado. **Este reto es
             distinto: son datos que nunca has visto, de otro dominio, y el camino lo eliges tú.**
@@ -2671,7 +2730,7 @@ def build_cells():
             > viene como `{"date-parts": [[2024, 3, 27]]}` — una lista dentro de otra lista. Y varios
             > campos **no siempre vienen**. Otra vez: no cabe en una tabla sin pelear.
 
-            ## Paso 1 · Trae los datos y míralos antes de tocarlos
+            ## Reto, paso 1 · Trae los datos y míralos antes de tocarlos
 
             La primera regla del oficio: **mira la forma antes de decidir nada**.
             """
@@ -2715,7 +2774,7 @@ def build_cells():
             2. ¿Cuál está **anidado dentro de otra lista**?
             3. ¿Qué campo tiene ese artículo que **quizá otro no tenga**?
 
-            ## Paso 2 · Cárgalos en tu base
+            ## Reto, paso 2 · Cárgalos en tu base
 
             Ya sabes hacer esto. Dos advertencias, y las dos las viste hoy:
 
@@ -2759,7 +2818,7 @@ def build_cells():
             > `a["title"]` es lo que evita que un artículo sin título rompa la carga entera. Cuando los
             > campos no siempre vienen, indexar directo es una bomba de tiempo.
 
-            ## Paso 3 · Tres preguntas, tres consultas
+            ## Reto, paso 3 · Tres preguntas, tres consultas
 
             Escríbelas tú. Están ordenadas de menor a mayor dificultad, y las tres se responden con lo
             que hiciste esta noche.
@@ -2826,7 +2885,7 @@ def build_cells():
 
             Si puedes escribir esa frase, entendiste la sesión. La sintaxis se busca en Google; **esto no**.
 
-            ## Paso 4 · Llévalo a una tabla
+            ## Reto, paso 4 · Llévalo a una tabla
 
             Aplana tus artículos a un DataFrame y quédate con: título, revista, año, citas y número de
             autores. **Y anota qué perdiste al aplanar** — ya sabes que siempre se pierde algo.
@@ -2841,9 +2900,13 @@ def build_cells():
 
             ## Entrega opcional
 
-            Si lo haces, pégalo en el punto 7 del hito. **No suma ni resta nota por estar bien o mal
-            resuelto**: suma por haberlo intentado y por lo que escribas sobre los límites de tu
-            resultado.
+            Si lo haces, pégalo en el **punto 7 del hito**. **No suma ni resta nota por estar bien o mal
+            resuelto**: suma por haberlo intentado y por lo que escribas sobre los límites de tu resultado.
+
+            > **PARA LLEVAR.** Fíjate en lo que acabas de hacer: cambiaste de fuente, de dominio y de
+            > vocabulario, y **el método no cambió**. Trae, mira la forma, carga, consulta, resume,
+            > interpreta y declara los límites. Eso es lo que Laura necesita de ti, y es lo que te llevas
+            > de esta noche: no MongoDB, sino saber qué hacer cuando llegan datos que nadie ha mirado.
 
             
             ---
@@ -2942,6 +3005,7 @@ def build_cells():
             coleccion.find(filtro).limit(10)             # los primeros 10
             coleccion.count_documents(filtro)            # cuántos hay
             coleccion.distinct("seccion")                # valores distintos
+            coleccion.find(filtro).sort("campo", -1)     # ordenar: -1 mayor a menor, 1 al reves
             ```
 
             | Operador | Significa | En SQL |
@@ -2971,6 +3035,9 @@ def build_cells():
             ```
 
             **Filtra temprano, agrupa después.** `$match` antes de `$group` hace menos trabajo.
+
+            Si el campo por el que quieres agrupar es una **lista**, desenróllala primero:
+            `{"$unwind": "$etiquetas"}`. Después de eso los conteos **dejan de ser aditivos**.
 
             ## Escribir
 
