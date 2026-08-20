@@ -65,7 +65,7 @@
   <text class="m" x="46" y="262">{ "titulo": "La Gran Vía…",   "seccion": "bogota",    "n_palabras": 557 }</text>
   <text class="m" x="46" y="282">{ "titulo": "Metro de Bogotá…", "seccion": "bogota",    "n_palabras": 431 }</text>
   <text class="m" x="46" y="302">{ "titulo": "Nueva EPS…",      "seccion": "salud",     "n_palabras": 688 }</text>
-  <text class="m" x="46" y="322">{ "titulo": "Contratos AMVA…", "seccion": "justicia",  "n_palabras": 947 }</text>
+  <text class="m" x="46" y="322">{ "titulo": "Contratos AMVA…", "seccion": "justicia/investigacion", "n_palabras": 947 }</text>
   <text class="s" x="46" y="344">…y otros 983 más</text>
 
   <path d="M566 275 l0 -8 l22 14 l-22 14 l0 -8 z" fill="#66bb6a"/>
@@ -75,7 +75,7 @@
   <text class="cap" x="628" y="238">DESPUÉS — 57 filas, una por sección</text>
   <text class="m" x="628" y="262">{ "_id": "bogota",   "n": 53,  "prom": 679 }</text>
   <text class="m" x="628" y="282">{ "_id": "salud",    "n": 11,  "prom": 586 }</text>
-  <text class="m" x="628" y="302">{ "_id": "justicia", "n": 238, "prom": 561 }</text>
+  <text class="m" x="628" y="302">{ "_id": "justicia/investigacion", "n": 238, "prom": 561 }</text>
   <text class="s" x="628" y="326">El campo _id ya no es la llave del documento:</text>
   <text class="s" x="628" y="344">en $group es <tspan class="m">por qué agrupaste</tspan>.</text>
 

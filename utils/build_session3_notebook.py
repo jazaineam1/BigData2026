@@ -1499,6 +1499,401 @@ def build_cells():
         ),
         md(
             """
+            ## Taller guiado · Cada orden, primero en pequeño
+
+            **NÚCLEO** · esto es lo que hay que salir sabiendo hacer.
+
+            Antes de tocar las 987 noticias vamos a practicar con **tres documentos de juguete**. La razón
+            es simple: con tres documentos puedes ver el resultado completo en pantalla y comprobar con los
+            ojos si la orden hizo lo que creías.
+
+            Cada orden va en cuatro pasos: **en pequeño**, **sobre las noticias**, **tu ejercicio** y
+            **la solución**, que está plegada para que la mires solo si la necesitas.
+
+            Todas las celdas son editables: cambia lo que quieras y vuelve a ejecutar. **Nada de lo que
+            hagas aquí daña la colección de noticias** — trabajamos en una colección aparte llamada
+            `practica`.
+            """
+        ),
+        code(
+            """
+            # ── 1. Creamos una coleccion de juguete con tres documentos ────────────
+            practica = db["practica"]
+
+            practica.delete_many({})        # la vaciamos, para poder repetir esta celda
+
+            practica.insert_many([
+                {"_id": 1, "nombre": "Ana",  "edad": 30, "ciudad": "Bogota"},
+                {"_id": 2, "nombre": "Luis", "edad": 45, "ciudad": "Cali"},
+                {"_id": 3, "nombre": "Sara", "edad": 28, "ciudad": "Bogota"},
+            ])
+
+            print("Documentos guardados:", practica.count_documents({}))
+            """
+        ),
+        md(
+            """
+            ### `find` — en pequeño
+
+            Ahora la primera consulta. **Fíjate en que la consulta es una sola línea.**
+            """
+        ),
+        code(
+            """
+            # ── 2. La consulta mas simple posible: traeme los de Bogota ────────────
+            practica.find({"ciudad": "Bogota"})
+            """
+        ),
+        md(
+            """
+            ### 🔎 ¿Y dónde están los datos?
+
+            La celda de arriba imprimió algo así:
+
+            ```
+            <pymongo.cursor.Cursor object at 0x7f3a2c1d5f10>
+            ```
+
+            **No es un error.** `find` no te devuelve los documentos: te devuelve un **cursor**, que es
+            una promesa de resultados. Los datos no viajan hasta que tú los pides.
+
+            Para verlos hay exactamente dos formas, y las dos hacen lo mismo:
+            """
+        ),
+        code(
+            """
+            # ── 3. Las dos formas de ver lo que trajo la consulta ──────────────────
+
+            # Forma A: convertirlo en lista
+            print(list(practica.find({"ciudad": "Bogota"})))
+
+            print()
+
+            # Forma B: recorrerlo con un for
+            for persona in practica.find({"ciudad": "Bogota"}):
+                print(persona)
+            """
+        ),
+        md(
+            """
+            ### 🔎 Y ahora la pregunta que importa: ¿por qué tanto código?
+
+            Es la duda correcta, y la respuesta te va a ordenar todo lo que sigue.
+
+            **La consulta es UNA línea. Todo lo demás es para verla.** Mira este bloque, que es el que vas
+            a escribir el resto de la noche, partido en sus dos mitades:
+
+            ```python
+            resultado = coleccion.find({"seccion": "salud"}, {"titulo": 1, "_id": 0})   # ← LA CONSULTA
+
+            for n in resultado:          # ← esto no consulta nada:
+                print(n["titulo"])       #    solo recorre e imprime
+            ```
+
+            La primera línea es MongoDB. Las dos últimas son Python puro, y son idénticas a las que
+            usarías para recorrer una lista cualquiera. **Si el bloque te parece largo, es porque estás
+            contando las líneas de imprimir**, no las de consultar.
+
+            **¿Y no se puede más corto?** Sí:
+
+            ```python
+            print(list(coleccion.find({"seccion": "salud"}, {"titulo": 1, "_id": 0})))
+            ```
+
+            Eso es una sola línea y funciona. Lo que pasa es que imprime los diccionarios crudos, todos
+            pegados, y a las cinco noticias ya no se lee nada. El `for` con `print` existe **para que tú
+            puedas leer el resultado**, no porque MongoDB lo exija.
+
+            > **PARA LLEVAR.** Cuando veas un bloque de consulta, busca primero la línea del `find` o del
+            > `aggregate`. Esa es la consulta. El resto es decoración para tus ojos.
+            """
+        ),
+        code(
+            """
+            # ── 4. La misma orden, ahora sobre las 987 noticias ────────────────────
+            resultado = coleccion.find(
+                {"seccion": "bogota"},       # FILTRO
+                {"titulo": 1, "_id": 0},     # PROYECCION
+            )
+
+            for n in resultado:
+                print("-", n["titulo"][:70])
+            """
+        ),
+        md(
+            """
+            ### ✏️ Ejercicio 1 — modifica la consulta
+
+            La celda de abajo funciona tal como está. **Tu trabajo es cambiarla** para que traiga:
+
+            > las noticias de la sección `bogota` **que además tengan más de 800 palabras**,
+            > mostrando el título y el número de palabras.
+
+            Dos pistas, y no necesitas nada más:
+
+            - dentro del filtro puedes poner **varias condiciones separadas por coma**, y se cumplen todas
+              a la vez: `{"campo_a": valor, "campo_b": valor}`;
+            - «más de 800» se escribe `{"$gt": 800}`.
+            """
+        ),
+        code(
+            """
+            # ── EJERCICIO 1 — cambia esta celda y vuelve a ejecutarla ──────────────
+            resultado = coleccion.find(
+                {"seccion": "bogota"},       # FILTRO      <-- anade aqui la segunda condicion
+                {"titulo": 1, "_id": 0},     # PROYECCION  <-- anade aqui n_palabras
+            )
+
+            for n in resultado:
+                print(n)
+            """
+        ),
+        md(
+            """
+            <details>
+            <summary><b>Solución del ejercicio 1</b> — ábrela solo si te atascaste</summary>
+
+            ```python
+            resultado = coleccion.find(
+                {"seccion": "bogota", "n_palabras": {"$gt": 800}},   # FILTRO: las dos condiciones
+                {"titulo": 1, "n_palabras": 1, "_id": 0},            # PROYECCION: dos campos
+            )
+
+            for n in resultado:
+                print(n["n_palabras"], "|", n["titulo"][:65])
+            ```
+
+            **Deberías ver 15 noticias.** Si ves 53, te faltó la condición de las palabras; si ves 0,
+            revisa que `bogota` esté sin tilde y en minúscula — así está guardado.
+
+            </details>
+            """
+        ),
+        md(
+            """
+            ### `update_one` — en pequeño
+
+            Volvemos a los tres documentos de juguete. Vamos a cambiarle la edad a Ana.
+            """
+        ),
+        code(
+            """
+            # ── 5. Modificar un documento ──────────────────────────────────────────
+            print("Antes :", practica.find_one({"nombre": "Ana"}))
+
+            practica.update_one(
+                {"nombre": "Ana"},        # FILTRO: a quien le pego
+                {"$set": {"edad": 31}},   # ORDEN:  pon edad en 31, deja lo demas igual
+            )
+
+            print("Despues:", practica.find_one({"nombre": "Ana"}))
+            """
+        ),
+        md(
+            """
+            ### 🔎 Dos cosas que ver en esa salida
+
+            **La edad cambió y lo demás no.** Eso lo hace el `$set`. Sin él, MongoDB entendería que quieres
+            **reemplazar el documento entero** por `{"edad": 31}`, y Ana perdería su nombre y su ciudad.
+
+            **Y puedes poner un campo que no existía.** Pruébalo cambiando la celda de arriba por
+            `{"$set": {"profesion": "auditora"}}` y vuelve a ejecutarla: aparecerá un campo nuevo en Ana y
+            solo en Ana. Luis y Sara siguen sin él. **Eso es lo que una tabla no hace.**
+            """
+        ),
+        md(
+            """
+            ### ✏️ Ejercicio 2 — marca una noticia
+
+            En la colección de noticias, la del contrato de basuras de Cali tiene el `_id` **3528032**.
+
+            > Márcala como revisada: ponle un campo `revisada` con el valor `True` y un campo `revisor`
+            > con tu nombre.
+
+            La celda de abajo **ya funciona** y pone el primer campo. Te falta añadir el segundo, dentro del
+            mismo `$set` y separado por una coma.
+            """
+        ),
+        code(
+            """
+            # ── EJERCICIO 2 — completa la orden del medio ──────────────────────────
+            print("Antes  :", coleccion.find_one({"_id": 3528032}, {"revisada": 1, "revisor": 1, "_id": 0}))
+
+            coleccion.update_one(
+                {"_id": 3528032},           # FILTRO: ya esta bien, no lo toques
+                {"$set": {"revisada": True}},   # ORDEN: anade aqui el campo revisor
+            )
+
+            print("Despues:", coleccion.find_one({"_id": 3528032}, {"revisada": 1, "revisor": 1, "_id": 0}))
+            """
+        ),
+        md(
+            """
+            <details>
+            <summary><b>Solución del ejercicio 2</b></summary>
+
+            ```python
+            coleccion.update_one(
+                {"_id": 3528032},
+                {"$set": {"revisada": True, "revisor": "Ana Gomez"}},
+            )
+            ```
+
+            **Antes** imprime `{}` — el documento no tenía ninguno de los dos campos. **Después** imprime
+            `{'revisada': True, 'revisor': 'Ana Gomez'}`.
+
+            Si el «antes» ya te salió con datos, es que ejecutaste la celda dos veces. No pasa nada: `$set`
+            vuelve a poner el mismo valor.
+
+            </details>
+            """
+        ),
+        md(
+            """
+            ### `aggregate` — en pequeño
+
+            La última orden, y la única que no se parece a nada de SQL a primera vista. Sobre los tres
+            documentos de juguete: **¿cuántas personas hay por ciudad?**
+            """
+        ),
+        code(
+            """
+            # ── 6. Agrupar y contar ────────────────────────────────────────────────
+            resultado = practica.aggregate([
+                {"$group": {"_id": "$ciudad", "cuantas": {"$sum": 1}}},
+            ])
+
+            for fila in resultado:
+                print(fila)
+            """
+        ),
+        md(
+            """
+            ### 🔎 Léelo despacio, porque aquí está todo
+
+            Con tres personas —Ana y Sara en Bogotá, Luis en Cali— la salida es:
+
+            ```
+            {'_id': 'Bogota', 'cuantas': 2}
+            {'_id': 'Cali',   'cuantas': 1}
+            ```
+
+            **Tres cosas, y con estas tres entiendes cualquier agregación:**
+
+            | Lo que escribiste | Qué significa |
+            |---|---|
+            | `"_id": "$ciudad"` | **por qué agrupas**. El signo pesos quiere decir «el valor de ese campo», no el texto `ciudad` |
+            | `"cuantas": {"$sum": 1}` | **suma 1 por cada documento** del grupo. Es contar |
+            | el resultado | **una fila por grupo**, no por documento. De 3 documentos salieron 2 filas |
+
+            **Y el `_id` de la salida ya no es la llave de nadie.** Vale `Bogota` y `Cali` porque es *por
+            qué agrupaste*. Ese cambio de significado es lo que más confunde la primera vez.
+
+            **Quita el signo pesos y ejecútala otra vez** —`"_id": "ciudad"`— para ver qué pasa: te dará
+            una sola fila con `_id: 'ciudad'` y `cuantas: 3`, porque agrupaste por un texto fijo que es
+            igual para todos. Vale la pena equivocarse a propósito una vez.
+            """
+        ),
+        code(
+            """
+            # ── 7. Lo mismo sobre las noticias: cuantas hay por seccion ────────────
+            resultado = coleccion.aggregate([
+                {"$group": {"_id": "$seccion", "cuantas": {"$sum": 1}}},
+                {"$sort": {"cuantas": -1}},
+                {"$limit": 5},
+            ])
+
+            for fila in resultado:
+                print(f"{fila['_id'][:34]:34s} {fila['cuantas']:4d}")
+            """
+        ),
+        md(
+            """
+            ### ✏️ Ejercicio 3 — cambia por qué se ordena
+
+            La celda de arriba da **las 5 secciones con más noticias**. Cámbiala para que dé otra cosa:
+
+            > las 5 secciones **cuyas noticias son más largas en promedio**, mostrando también cuántas
+            > noticias tiene cada una.
+
+            Tres pistas:
+
+            - el promedio de un campo se calcula con `{"$avg": "$n_palabras"}`;
+            - puedes pedir **varias cosas a la vez** dentro del mismo `$group`;
+            - `$sort` tiene que ordenar por el nombre que tú le pusiste al promedio.
+            """
+        ),
+        code(
+            """
+            # ── EJERCICIO 3 — cambia esta celda y vuelve a ejecutarla ──────────────
+            resultado = coleccion.aggregate([
+                {"$group": {"_id": "$seccion", "cuantas": {"$sum": 1}}},   # <-- anade el promedio
+                {"$sort": {"cuantas": -1}},                                # <-- ordena por el promedio
+                {"$limit": 5},
+            ])
+
+            for fila in resultado:
+                print(fila)
+            """
+        ),
+        md(
+            """
+            <details>
+            <summary><b>Solución del ejercicio 3</b></summary>
+
+            ```python
+            resultado = coleccion.aggregate([
+                {"$group": {
+                    "_id": "$seccion",
+                    "cuantas": {"$sum": 1},
+                    "promedio": {"$avg": "$n_palabras"},
+                }},
+                {"$sort": {"promedio": -1}},
+                {"$limit": 5},
+            ])
+
+            for fila in resultado:
+                print(f"{fila['_id'][:30]:30s} {fila['cuantas']:4d} noticias   {fila['promedio']:6.0f} palabras")
+            ```
+
+            **Y ahora mira bien el resultado, porque tiene una trampa.** Las primeras secciones de la
+            lista tienen **una o dos noticias**. Un promedio calculado sobre una sola noticia no es un
+            promedio: es esa noticia.
+
+            Para que la respuesta sirva hay que exigir un mínimo, y eso se hace con una etapa más:
+
+            ```python
+                {"$match": {"cuantas": {"$gte": 10}}},   # va DESPUES del $group
+            ```
+
+            Con ese filtro las cinco primeras son `datos` (22 noticias, 1 037 palabras),
+            `colombia/cali` (31, 988), `unidad-investigativa` (77, 822), `salud` (11, 793) y
+            `colombia/otras-ciudades` (39, 720).
+
+            **Fíjate en dónde va ese `$match`:** después del `$group`, porque filtra sobre `cuantas`, que
+            **no existía** antes de agrupar. Es la única vez en que filtrar tarde es lo correcto.
+
+            </details>
+            """
+        ),
+        md(
+            """
+            ### Ya sabes las cuatro órdenes
+
+            Eso es todo el vocabulario que necesitas esta noche:
+
+            | Orden | Para qué |
+            |---|---|
+            | `insert_many` | guardar |
+            | `find` | buscar |
+            | `update_one` | modificar |
+            | `aggregate` | resumir |
+
+            Lo que sigue es lo mismo, con preguntas más interesantes.
+            """
+        ),
+        md(
+            """
             ## Paso 3 · Tres consultas tuyas
 
             > **HAZ ESTO AHORA.** Aquí escribes tú. Son las tres únicas celdas de la noche donde el
