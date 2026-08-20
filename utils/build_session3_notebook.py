@@ -213,12 +213,31 @@ def build_cells():
 
             **Acceso público:** [página del curso]({WEB_CURSO})
 
-            > **En Colab:** ejecuta las celdas en orden. Las ocho preguntas aparecen con sus opciones y su
-            > retroalimentación; el código que las dibuja permanece plegado.
-
             > **No necesitas instalar nada en tu computador.** Ni MongoDB, ni Git, ni una cuenta de nube. Todo
             > ocurre dentro de esta pestaña y dentro de GitHub.com. Esto importa porque la clase se dicta en
             > computadores de la universidad donde no siempre hay permisos de instalación.
+
+            ## Cómo usar este cuaderno
+
+            **Este cuaderno es más largo de lo que se puede leer en una noche, y es a propósito.** No está
+            hecho para que lo leas de corrido hoy: está hecho para que lo sigas hoy y lo consultes después.
+
+            | | En clase | Después, en tu casa |
+            |---|---|---|
+            | **Sigues** | lo que dice el profesor y las celdas que ejecutas | — |
+            | **Lees completo** | los recuadros de color y las tablas | los bloques largos de «🔎 Leamos el resultado» |
+            | **Consultas** | la **hoja de trucos** del final, mientras escribes consultas | la rúbrica y los pasos de GitHub |
+            | **Abres solo si te interesa** | — | todo lo que esté plegado en **▸ Ver más** |
+
+            Las cuatro etiquetas que verás en los recuadros, y que significan siempre lo mismo:
+
+            - **HAZ ESTO AHORA** — lo único que exige que hagas algo en ese momento.
+            - **OJO** — un error frecuente o una advertencia.
+            - **PARA LLEVAR** — la idea que quiero que te quede.
+            - **MÁS ADELANTE** — se ve en otra sesión; hoy puedes ignorarlo sin costo.
+
+            > **PARA LLEVAR.** Si en algún momento sientes que vas atrasado leyendo: no lo estás. Lo que
+            > importa hoy es que **ejecutes, decidas e interpretes**. El texto queda aquí, y no se borra.
             """
         ),
         md(
@@ -1198,6 +1217,10 @@ def build_cells():
             > el 5, con tu pantalla a la vista. No es un examen: es la forma más rápida de saber si la explicación
             > que escribiste es tuya. Si algo no te salió, decirlo cuenta a favor, no en contra.
 
+            <details>
+            <summary><b>Cómo se califica — ábrelo antes de escribir el hito</b></summary>
+
+            Está aquí, antes de que lo escribas, para que sepas contra qué se mide.
             ### Cómo se califica
 
             El hito vale **sobre 5,0** y se corrige con esta tabla. Está aquí, antes de que lo escribas, para que
@@ -1214,6 +1237,9 @@ def build_cells():
             **Punto adicional de hasta 0,5**, que no sube de 5,0: una observación propia que el cuaderno no hizo.
             Un patrón que notaste, una consulta que se te ocurrió, un error que encontraste en el material. Se premia
             porque es lo más difícil de todo esto.
+
+
+            </details>
 
             **Lo que no se califica:** la cantidad de commits, las líneas escritas, la velocidad, ni si el motor
             real te arrancó o te tocó el respaldo. **Un laboratorio que falló y está bien explicado vale más que uno
@@ -1846,6 +1872,10 @@ def build_cells():
         ),
         md(
             """
+            <details>
+            <summary><b>Si quieres ir más lejos: la tentación de dividir las dos columnas</b></summary>
+
+            No es indispensable hoy. Ábrelo cuando tengas la cabeza fresca: es la misma lección del denominador, aplicada al revés.
             ## Y la tentación que viene después
 
             Tienes dos columnas y vas a querer dividirlas: menciones por proceso. Hazlo mentalmente y mira quién
@@ -1950,6 +1980,9 @@ def build_cells():
         ),
         md(
             """
+
+            </details>
+
             ### 🔎 Leamos el resultado — lo que sí es y lo que no es esta bandeja
 
             **Qué acabas de construir.** Una lista priorizada de procesos concretos, con su objeto, su valor, cómo
@@ -2070,6 +2103,9 @@ def build_cells():
             `\b` marca el borde de una palabra, y **un guion también es un borde**. Así que el patrón empezó a
             contar desde el segundo tramo y descartó justo la parte que decía de qué entidad era.
 
+            <details>
+            <summary><b>La tercera capa: por qué una referencia no identifica un contrato</b></summary>
+
             **Tercero, y es lo más importante: aunque el patrón fuera perfecto, la referencia no basta.**
 
             En SECOP hay 268 525 referencias distintas, y **10 004 de ellas —el 3,7 %— las usan dos o más
@@ -2086,6 +2122,9 @@ def build_cells():
             están, en cambio, **485 procesos con el prefijo `FTIC`**: la entidad está, el contrato todavía no.
             Trabajar con una foto desactualizada es la condición normal del oficio, y hay que decirlo, no
             esconderlo.
+
+
+            </details>
 
             ### Qué significa esto para la bandeja de Laura
 
@@ -2152,6 +2191,9 @@ def build_cells():
             2. Pulsa **Merge pull request** y confirma.
             3. Después del merge, GitHub ofrece **Delete branch**. Acéptalo.
 
+            <details>
+            <summary><b>Qué significa de verdad cada paso de GitHub</b></summary>
+
             ### Qué acaba de pasar, en palabras
 
             | Acción | Qué significa de verdad |
@@ -2163,6 +2205,9 @@ def build_cells():
             | **Checks** | comprobaciones mecánicas: que el archivo exista y esté completo |
             | **Merge** | la propuesta pasa a ser **la versión oficial** del equipo |
             | **Delete branch** | la propuesta ya se integró; la rama cumplió su función |
+
+
+            </details>
 
             > **Lo que hay que entender, y es la respuesta 3 del ticket de la sesión 2:** un check verde **no
             > significa que la decisión esté bien planteada**. La máquina comprueba que el archivo esté completo. Si
