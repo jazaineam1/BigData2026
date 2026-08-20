@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 460" width="980" height="460"
+     role="img" aria-labelledby="t d">
+  <title id="t">Una fila frente a un documento</title>
+  <desc id="d">A la izquierda, una tabla obligada a guardar una noticia con tres etiquetas:
+    aparecen columnas etiqueta_1, etiqueta_2 y etiqueta_3, y la mayoría quedan vacías porque otras
+    noticias tienen menos. A la derecha, el mismo dato como documento: un campo etiquetas que
+    contiene una lista, sin columnas vacías y sin límite de cuántas caben.</desc>
+  <style>
+    .bg   { fill:#ffffff; }
+    .h    { font:700 19px "Segoe UI","Helvetica Neue",Arial,sans-serif; }
+    .sub  { font:400 13px "Segoe UI",Arial,sans-serif; fill:#546e7a; }
+    .th   { font:600 12px "Segoe UI",Arial,sans-serif; fill:#37474f; }
+    .td   { font:400 12.5px "Segoe UI",Arial,sans-serif; fill:#1a2027; }
+    .mono { font:400 13px "Consolas","SF Mono",monospace; fill:#1a2027; }
+    .key  { font:600 13px "Consolas",monospace; fill:#0d47a1; }
+    .note { font:600 13px "Segoe UI",Arial,sans-serif; }
+    .cell { fill:#ffffff; stroke:#b0bec5; stroke-width:1; }
+    .empty{ fill:#fbe9e7; stroke:#ffab91; stroke-width:1; }
+  </style>
+
+  <rect class="bg" x="0" y="0" width="980" height="460"/>
+
+  <!-- ── TABLA ── -->
+  <text class="h"   x="34" y="36" fill="#b71c1c">En una tabla</text>
+  <text class="sub" x="34" y="58">Una columna por cada etiqueta posible. Y nunca sabes cuántas serán.</text>
+
+  <g>
+    <rect class="cell" x="34"  y="76" width="126" height="30"/>
+    <rect class="cell" x="160" y="76" width="94"  height="30"/>
+    <rect class="cell" x="254" y="76" width="94"  height="30"/>
+    <rect class="cell" x="348" y="76" width="94"  height="30"/>
+    <text class="th" x="44"  y="96">titulo</text>
+    <text class="th" x="170" y="96">etiqueta_1</text>
+    <text class="th" x="264" y="96">etiqueta_2</text>
+    <text class="th" x="358" y="96">etiqueta_3</text>
+
+    <rect class="cell"  x="34"  y="106" width="126" height="30"/>
+    <rect class="cell"  x="160" y="106" width="94"  height="30"/>
+    <rect class="cell"  x="254" y="106" width="94"  height="30"/>
+    <rect class="cell"  x="348" y="106" width="94"  height="30"/>
+    <text class="td" x="44"  y="126">La Gran Vía…</text>
+    <text class="td" x="170" y="126">contraloria</text>
+    <text class="td" x="264" y="126">retrasos</text>
+    <text class="td" x="358" y="126">obra vial</text>
+
+    <rect class="cell"  x="34"  y="136" width="126" height="30"/>
+    <rect class="cell"  x="160" y="136" width="94"  height="30"/>
+    <rect class="empty" x="254" y="136" width="94"  height="30"/>
+    <rect class="empty" x="348" y="136" width="94"  height="30"/>
+    <text class="td" x="44"  y="156">Sobrecostos…</text>
+    <text class="td" x="170" y="156">fiscalia</text>
+    <text class="td" x="286" y="156" fill="#c62828">vacío</text>
+    <text class="td" x="380" y="156" fill="#c62828">vacío</text>
+
+    <rect class="cell"  x="34"  y="166" width="126" height="30"/>
+    <rect class="cell"  x="160" y="166" width="94"  height="30"/>
+    <rect class="cell"  x="254" y="166" width="94"  height="30"/>
+    <rect class="empty" x="348" y="166" width="94"  height="30"/>
+    <text class="td" x="44"  y="186">Contratos a…</text>
+    <text class="td" x="170" y="186">corrupcion</text>
+    <text class="td" x="264" y="186">medellin</text>
+    <text class="td" x="380" y="186" fill="#c62828">vacío</text>
+  </g>
+
+  <text class="note" x="34" y="228" fill="#b71c1c">¿Y la noticia que trae 24 etiquetas?</text>
+  <text class="sub"  x="34" y="250">Toca añadir 21 columnas más. Y todas las demás filas las dejan vacías.</text>
+
+  <g>
+    <rect x="34" y="270" width="408" height="150" rx="8" fill="#fff5f5" stroke="#ffcdd2" stroke-width="1.5"/>
+    <text class="sub" x="52" y="296" fill="#37474f">Las dos únicas salidas, y las dos son malas:</text>
+    <text class="sub" x="52" y="322">· inventar <tspan class="mono" fill="#b71c1c">etiqueta_1 … etiqueta_24</tspan>, casi todas vacías;</text>
+    <text class="sub" x="52" y="348">· o repetir la noticia entera en 24 filas, duplicando</text>
+    <text class="sub" x="52" y="368">  título, autor y cuerpo en cada una.</text>
+    <text class="sub" x="52" y="400" fill="#b71c1c">En los datos reales: 2 columnas 100 % vacías, 6 más por encima del 80 %.</text>
+  </g>
+
+  <!-- ── separador ── -->
+  <line x1="490" y1="30" x2="490" y2="430" stroke="#cfd8dc" stroke-width="2" stroke-dasharray="7 6"/>
+
+  <!-- ── DOCUMENTO ── -->
+  <text class="h"   x="524" y="36" fill="#1b5e20">En un documento</text>
+  <text class="sub" x="524" y="58">Un campo que contiene una lista. Caben 1 o caben 24.</text>
+
+  <g>
+    <rect x="524" y="76" width="422" height="200" rx="8" fill="#f1f8f2" stroke="#81c784" stroke-width="1.5"/>
+    <text class="mono" x="544" y="102">{</text>
+    <text class="key"  x="562" y="126">"titulo"</text><text class="mono" x="628" y="126">: "La Gran Vía en alerta…",</text>
+    <text class="key"  x="562" y="150">"etiquetas"</text><text class="mono" x="648" y="150">: [</text>
+    <text class="mono" x="586" y="174">{ "nombre": "Contraloría" },</text>
+    <text class="mono" x="586" y="196">{ "nombre": "retrasos" },</text>
+    <text class="mono" x="586" y="218">{ "nombre": "obra vial" }</text>
+    <text class="mono" x="648" y="240">]</text>
+    <text class="mono" x="544" y="262">}</text>
+  </g>
+
+  <text class="note" x="524" y="306" fill="#1b5e20">La siguiente noticia trae una sola etiqueta.</text>
+  <text class="sub"  x="524" y="328">Su lista tiene un elemento. No hay columnas que dejar vacías.</text>
+
+  <g>
+    <rect x="524" y="348" width="422" height="72" rx="8" fill="#f4faf5" stroke="#c8e6c9" stroke-width="1.5"/>
+    <text class="sub" x="542" y="374" fill="#37474f">Y se consulta sin unir tablas:</text>
+    <text class="mono" x="542" y="400" fill="#1b5e20">find({"etiquetas.nombre": "Contraloría"})</text>
+  </g>
+</svg>

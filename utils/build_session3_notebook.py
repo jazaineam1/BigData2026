@@ -19,6 +19,8 @@ Decisiones de diseño (ver .local-docente/Plan_Sesiones_3_y_4_2026-2.md):
 
 from __future__ import annotations
 
+import os
+import re
 import sys
 from pathlib import Path
 
@@ -41,6 +43,20 @@ DATOS_CRUCE = f"{RAW}/Datos/entidades_en_noticias_2026.json"
 DATOS_BANDEJA = f"{RAW}/Datos/bandeja_revision_2026.json"
 DATOS_REFERENCIA = f"{RAW}/Datos/cruce_por_referencia_2026.json"
 TOTAL_QUESTIONS = 8
+
+
+import base64 as _b64
+
+
+def svg(nombre, alt, width=940):
+    """Incrusta un SVG de assets/ como imagen. El fuente queda editable en disco."""
+    ruta = os.path.join(ROOT, "assets", "diagrams", "session3", f"{nombre}.svg")
+    with open(ruta, encoding="utf-8") as f:
+        datos = _b64.b64encode(f.read().encode("utf-8")).decode("ascii")
+    return (
+        f'<img alt="{alt}" width="{width}" '
+        f'src="data:image/svg+xml;base64,{datos}">'
+    )
 
 
 def hidden(cell, title, *tags):
@@ -239,6 +255,13 @@ def build_cells():
 
             > ### Facultad de Ingeniería y Ciencias Básicas
             > ### Maestría en Analítica de Datos — BIG DATA (64491093), Grupo 1
+
+            <img alt="MongoDB" width="190" src="https://upload.wikimedia.org/wikipedia/commons/9/93/MongoDB_Logo.svg">
+
+            ![](https://img.shields.io/badge/motor-MongoDB%208.0-13AA52?style=flat-square)
+            ![](https://img.shields.io/badge/entorno-Google%20Colab-F9AB00?style=flat-square)
+            ![](https://img.shields.io/badge/datos-987%20noticias%20%C2%B7%20300.000%20procesos-1976D2?style=flat-square)
+            ![](https://img.shields.io/badge/caso-Compras%20Claras-8C1D2F?style=flat-square)
 
             **Tema del PDA:** introducción a bases de datos documentales con MongoDB<br>
             **Finalidad formativa:** comprender el uso e implementación de bases de datos documentales<br>
@@ -619,6 +642,17 @@ def build_cells():
             **Qué comparten los dos ejemplos.** Una entidad principal, y dentro de ella una **lista de cosas que no
             tienen todas la misma forma**. Eso es exactamente una noticia. Y exactamente lo que no cabe en una fila.
 
+            ## El mismo dato, de las dos formas
+
+            {svg("fila_vs_documento", "A la izquierda una tabla con columnas de etiqueta casi siempre vacias; a la derecha el mismo dato como documento con una lista")}
+
+            **Cómo leerlo.** A la izquierda, la tabla necesita una columna por cada etiqueta
+            posible y llena de vacíos las que sobran. A la derecha, el mismo dato tiene un campo
+            que contiene una lista: caben una o veinticuatro, y no hay nada que dejar vacío.
+
+            **La conclusión.** No es que la tabla esté mal hecha: es que el dato tiene una forma
+            que la tabla no puede representar sin inventar columnas.
+
             ## Anatomía de un documento real
 
             Vamos a mirar una noticia completa.
@@ -755,9 +789,7 @@ def build_cells():
             - **Resuelve:** que si una máquina se apaga, el servicio siga respondiendo; y que las lecturas se repartan.
             - **Cuesta:** mantener las copias de acuerdo. Y ahí aparece el problema del bloque siguiente.
 
-            <div align="center">
-              <img alt="Fragmentar reparte una parte a cada maquina; replicar da el total a todas" width="900" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5ODAgNDIwIiB3aWR0aD0iOTgwIiBoZWlnaHQ9IjQyMCIKICAgICByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0idGl0dWxvIGRlc2MiPgogIDx0aXRsZSBpZD0idGl0dWxvIj5GcmFnbWVudGFyIGZyZW50ZSBhIHJlcGxpY2FyPC90aXRsZT4KICA8ZGVzYyBpZD0iZGVzYyI+RG9zIGVzdHJhdGVnaWFzIGRpc3RpbnRhcyBwYXJhIHJlcGFydGlyIGRhdG9zIGVudHJlIHZhcmlhcyBtw6FxdWluYXMuCiAgICBBbCBmcmFnbWVudGFyLCBjYWRhIG3DoXF1aW5hIGd1YXJkYSB1bmEgcGFydGUgZGUgbG9zIGRhdG9zOiBlbmVybyBhIGFicmlsLCBtYXlvIGEgYWdvc3RvIHkKICAgIHNlcHRpZW1icmUgYSBkaWNpZW1icmU7IGVudHJlIGxhcyB0cmVzIHRpZW5lbiBlbCB0b3RhbCwgeSBlc28gcmVzdWVsdmUgZWwgcHJvYmxlbWEgZGUgcXVlIGxvcwogICAgZGF0b3Mgbm8gY2FiZW4uIEFsIHJlcGxpY2FyLCBjYWRhIG3DoXF1aW5hIGd1YXJkYSBlbCB0b3RhbCBjb21wbGV0bywgeSBlc28gcmVzdWVsdmUgbGFzIGNhw61kYXMKICAgIGRlbCBzZXJ2aWNpbyB5IHJlcGFydGUgbGFzIGxlY3R1cmFzLjwvZGVzYz4KCiAgPHN0eWxlPgogICAgLmZvbmRvICAgIHsgZmlsbDogI2ZmZmZmZjsgfQogICAgLnRpdHVsbyAgIHsgZm9udDogNzAwIDIxcHggIlNlZ29lIFVJIiwgIkhlbHZldGljYSBOZXVlIiwgQXJpYWwsIHNhbnMtc2VyaWY7IH0KICAgIC5jYWphICAgICB7IHN0cm9rZS13aWR0aDogMi41OyByeDogMTA7IH0KICAgIC5ldGlxdWV0YSB7IGZvbnQ6IDYwMCAxNXB4ICJTZWdvZSBVSSIsICJIZWx2ZXRpY2EgTmV1ZSIsIEFyaWFsLCBzYW5zLXNlcmlmOyBmaWxsOiAjMWEyMDI3OyB9CiAgICAucGllICAgICAgeyBmb250OiA0MDAgMTVweCAiU2Vnb2UgVUkiLCAiSGVsdmV0aWNhIE5ldWUiLCBBcmlhbCwgc2Fucy1zZXJpZjsgZmlsbDogIzM3NDc0ZjsgfQogICAgLmNsYXZlICAgIHsgZm9udDogNzAwIDE1cHggIlNlZ29lIFVJIiwgIkhlbHZldGljYSBOZXVlIiwgQXJpYWwsIHNhbnMtc2VyaWY7IH0KICAgIC5ub3RhICAgICB7IGZvbnQ6IDQwMCAxMy41cHggIlNlZ29lIFVJIiwgIkhlbHZldGljYSBOZXVlIiwgQXJpYWwsIHNhbnMtc2VyaWY7IGZpbGw6ICM1NDZlN2E7IH0KICAgIC5kaXZpc29yICB7IHN0cm9rZTogI2NmZDhkYzsgc3Ryb2tlLXdpZHRoOiAyOyBzdHJva2UtZGFzaGFycmF5OiA3IDY7IH0KICA8L3N0eWxlPgoKICA8cmVjdCBjbGFzcz0iZm9uZG8iIHg9IjAiIHk9IjAiIHdpZHRoPSI5ODAiIGhlaWdodD0iNDIwIi8+CgogIDwhLS0g4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIEZSQUdNRU5UQVIg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIC0tPgogIDx0ZXh0IGNsYXNzPSJ0aXR1bG8iIHg9IjYwIiB5PSI0NiIgZmlsbD0iIzBkNDdhMSI+RlJBR01FTlRBUiAoc2hhcmRpbmcpPC90ZXh0PgogIDx0ZXh0IGNsYXNzPSJub3RhIiAgIHg9IjYwIiB5PSI3MCI+Q2FkYSBtw6FxdWluYSBndWFyZGEgdW5hIHBhcnRlIGRpc3RpbnRhPC90ZXh0PgoKICA8Zz4KICAgIDxyZWN0IGNsYXNzPSJjYWphIiB4PSI2MCIgIHk9Ijk2IiB3aWR0aD0iMTIyIiBoZWlnaHQ9Ijg2IiBmaWxsPSIjZTNmMmZkIiBzdHJva2U9IiMxNTY1YzAiLz4KICAgIDxyZWN0IGNsYXNzPSJjYWphIiB4PSIyMDAiIHk9Ijk2IiB3aWR0aD0iMTIyIiBoZWlnaHQ9Ijg2IiBmaWxsPSIjZTNmMmZkIiBzdHJva2U9IiMxNTY1YzAiLz4KICAgIDxyZWN0IGNsYXNzPSJjYWphIiB4PSIzNDAiIHk9Ijk2IiB3aWR0aD0iMTIyIiBoZWlnaHQ9Ijg2IiBmaWxsPSIjZTNmMmZkIiBzdHJva2U9IiMxNTY1YzAiLz4KCiAgICA8dGV4dCBjbGFzcz0iZXRpcXVldGEiIHg9IjEyMSIgeT0iMTQ2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5lbmUg4oCTIGFicjwvdGV4dD4KICAgIDx0ZXh0IGNsYXNzPSJldGlxdWV0YSIgeD0iMjYxIiB5PSIxNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPm1heSDigJMgYWdvPC90ZXh0PgogICAgPHRleHQgY2xhc3M9ImV0aXF1ZXRhIiB4PSI0MDEiIHk9IjE0NiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+c2VwIOKAkyBkaWM8L3RleHQ+CiAgPC9nPgoKICA8dGV4dCBjbGFzcz0icGllIiAgIHg9IjYwIiB5PSIyMjIiPmNhZGEgdW5hIHRpZW5lIDx0c3BhbiBjbGFzcz0iY2xhdmUiIGZpbGw9IiMwZDQ3YTEiPlVOQSBQQVJURTwvdHNwYW4+PC90ZXh0PgogIDx0ZXh0IGNsYXNzPSJjbGF2ZSIgeD0iNjAiIHk9IjI1MiIgZmlsbD0iIzBkNDdhMSI+4oaSIHJlc3VlbHZlIHF1ZSBubyBxdWVwYTwvdGV4dD4KCiAgPGc+CiAgICA8cmVjdCB4PSI2MCIgeT0iMjc4IiB3aWR0aD0iNDAyIiBoZWlnaHQ9IjEwNiIgcng9IjkiIGZpbGw9IiNmNWY5ZmYiIHN0cm9rZT0iI2JiZGVmYiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI3OCIgeT0iMzA0Ij5TZSBwYWdhIGNvbiBlc3RvOjwvdGV4dD4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI3OCIgeT0iMzI2Ij7CtyB1bmEgY29uc3VsdGEgcXVlIG5vIHVzYSBsYSBsbGF2ZSBkZSByZXBhcnRvPC90ZXh0PgogICAgPHRleHQgY2xhc3M9Im5vdGEiIHg9Ijc4IiB5PSIzNDYiPiAgdGllbmUgcXVlIHByZWd1bnRhcmxlIGEgdG9kYXMgbGFzIG3DoXF1aW5hczs8L3RleHQ+CiAgICA8dGV4dCBjbGFzcz0ibm90YSIgeD0iNzgiIHk9IjM2OCI+wrcgc2kgbGEgbGxhdmUgY3JlY2Ugc2llbXByZSBoYWNpYSBhZGVsYW50ZSwgY29tbyBlbCBtZXMsPC90ZXh0PgogICAgPHRleHQgY2xhc3M9Im5vdGEiIHg9Ijc4IiB5PSIzODgiPiAgdG9kbyBsbyBudWV2byBjYWUgZW4gbGEgbWlzbWEgbcOhcXVpbmEuPC90ZXh0PgogIDwvZz4KCiAgPCEtLSDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgZGl2aXNvciDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgLS0+CiAgPGxpbmUgY2xhc3M9ImRpdmlzb3IiIHgxPSI1MDAiIHkxPSI0MCIgeDI9IjUwMCIgeTI9IjM5MCIvPgoKICA8IS0tIOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCBSRVBMSUNBUiDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgLS0+CiAgPHRleHQgY2xhc3M9InRpdHVsbyIgeD0iNTQwIiB5PSI0NiIgZmlsbD0iIzFiNWUyMCI+UkVQTElDQVI8L3RleHQ+CiAgPHRleHQgY2xhc3M9Im5vdGEiICAgeD0iNTQwIiB5PSI3MCI+Q2FkYSBtw6FxdWluYSBndWFyZGEgbG8gbWlzbW88L3RleHQ+CgogIDxnPgogICAgPHJlY3QgY2xhc3M9ImNhamEiIHg9IjU0MCIgeT0iOTYiIHdpZHRoPSIxMjIiIGhlaWdodD0iODYiIGZpbGw9IiNlOGY1ZTkiIHN0cm9rZT0iIzJlN2QzMiIvPgogICAgPHJlY3QgY2xhc3M9ImNhamEiIHg9IjY4MCIgeT0iOTYiIHdpZHRoPSIxMjIiIGhlaWdodD0iODYiIGZpbGw9IiNlOGY1ZTkiIHN0cm9rZT0iIzJlN2QzMiIvPgogICAgPHJlY3QgY2xhc3M9ImNhamEiIHg9IjgyMCIgeT0iOTYiIHdpZHRoPSIxMjIiIGhlaWdodD0iODYiIGZpbGw9IiNlOGY1ZTkiIHN0cm9rZT0iIzJlN2QzMiIvPgoKICAgIDx0ZXh0IGNsYXNzPSJldGlxdWV0YSIgeD0iNjAxIiB5PSIxNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlRPRE88L3RleHQ+CiAgICA8dGV4dCBjbGFzcz0iZXRpcXVldGEiIHg9Ijc0MSIgeT0iMTQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5UT0RPPC90ZXh0PgogICAgPHRleHQgY2xhc3M9ImV0aXF1ZXRhIiB4PSI4ODEiIHk9IjE0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VE9ETzwvdGV4dD4KCiAgICA8dGV4dCBjbGFzcz0ibm90YSIgeD0iNjAxIiB5PSIxNjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMyZTdkMzIiPnByaW5jaXBhbDwvdGV4dD4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI3NDEiIHk9IjE2NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+csOpcGxpY2E8L3RleHQ+CiAgICA8dGV4dCBjbGFzcz0ibm90YSIgeD0iODgxIiB5PSIxNjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnLDqXBsaWNhPC90ZXh0PgogIDwvZz4KCiAgPHRleHQgY2xhc3M9InBpZSIgICB4PSI1NDAiIHk9IjIyMiI+Y2FkYSB1bmEgdGllbmUgPHRzcGFuIGNsYXNzPSJjbGF2ZSIgZmlsbD0iIzFiNWUyMCI+RUwgVE9UQUw8L3RzcGFuPjwvdGV4dD4KICA8dGV4dCBjbGFzcz0iY2xhdmUiIHg9IjU0MCIgeT0iMjUyIiBmaWxsPSIjMWI1ZTIwIj7ihpIgcmVzdWVsdmUgY2HDrWRhcyB5IGxlY3R1cmFzPC90ZXh0PgoKICA8Zz4KICAgIDxyZWN0IHg9IjU0MCIgeT0iMjc4IiB3aWR0aD0iNDAyIiBoZWlnaHQ9IjEwNiIgcng9IjkiIGZpbGw9IiNmNGZhZjUiIHN0cm9rZT0iI2M4ZTZjOSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI1NTgiIHk9IjMwNCI+U2UgcGFnYSBjb24gZXN0bzo8L3RleHQ+CiAgICA8dGV4dCBjbGFzcz0ibm90YSIgeD0iNTU4IiB5PSIzMjYiPsK3IG1hbnRlbmVyIGxhcyBjb3BpYXMgZGUgYWN1ZXJkbyBjdWVzdGEgdGllbXBvOzwvdGV4dD4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI1NTgiIHk9IjM0NiI+wrcgc2kgbGVlcyBkZSB1bmEgcsOpcGxpY2EgcXVlIGHDum4gbm8gc2UgZW50ZXLDsyw8L3RleHQ+CiAgICA8dGV4dCBjbGFzcz0ibm90YSIgeD0iNTU4IiB5PSIzNjgiPiAgdmVzIHVuIGRhdG8gcXVlIGZ1ZSB2ZXJkYWQgaGFjZSB1biBtb21lbnRvLjwvdGV4dD4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI1NTgiIHk9IjM4OCI+ICBFc28gZXMgbGEgY29uc2lzdGVuY2lhIGV2ZW50dWFsLjwvdGV4dD4KICA8L2c+Cjwvc3ZnPgo=">
-            </div>
+            {svg("fragmentar_vs_replicar", "Fragmentar reparte una parte a cada maquina; replicar da el total a todas")}
 
             **Cómo leer el dibujo.** Son ejes independientes: un sistema real fragmenta *y* replica cada fragmento.
             Lo que hay que retener es que **fragmentar responde a "no cabe" y replicar responde a "no se puede caer"**.
@@ -2000,6 +2032,14 @@ def build_cells():
         ),
         md(
             """
+            ## Todo el recorrido, en una imagen
+
+            {svg("de_la_noticia_al_contrato", "Cinco etapas: 57.848 articulos, 995 candidatos, 987 noticias, 142 entidades y 200 procesos priorizados")}
+
+            **Cómo leerlo.** Cada caja conserva lo que la anterior seleccionó. Por eso la
+            advertencia de abajo importa tanto: **el filtro de la segunda caja decide el resultado
+            de la cuarta**, y esa decisión viaja hasta el final sin que nadie la vuelva a mirar.
+
             ## Paso 6.5 · Cuando la noticia nombra el contrato
 
             Hasta aquí el enlace fue **entidad ↔ noticia**, y ya dijimos que es débil: la noticia habla del
@@ -2434,8 +2474,46 @@ def build_cells():
     return cells
 
 
+def insertar_diagramas(cells):
+    """
+    Sustituye los marcadores {svg("nombre", "texto alternativo")} por la imagen.
+
+    Se hace despues de construir las celdas y no con f-strings porque casi
+    todas contienen llaves —JSON, filtros de MongoDB, f-strings de ejemplo— y
+    convertirlas en f-strings las romperia. El marcador es explicito y no
+    colisiona con nada del contenido.
+    """
+    patron = re.compile(r'\{svg\("([^"]+)",\s*"([^"]+)"\)\}')
+    faltantes = []
+    for celda in cells:
+        texto = "".join(celda["source"])
+        if "{svg(" not in texto:
+            continue
+
+        def reemplazo(m):
+            try:
+                return svg(m.group(1), m.group(2))
+            except FileNotFoundError:
+                faltantes.append(m.group(1))
+                return m.group(0)
+
+        celda["source"] = _lineas(patron.sub(reemplazo, texto))
+
+    if faltantes:
+        raise FileNotFoundError(
+            "Faltan diagramas en assets/diagrams/session3/: " + ", ".join(faltantes)
+        )
+    return cells
+
+
+def _lineas(texto):
+    """Vuelve a partir un texto en el formato source[] de nbformat."""
+    partes = texto.split("\n")
+    return [l + "\n" for l in partes[:-1]] + [partes[-1]]
+
+
 def main():
-    cells = build_cells()
+    cells = insertar_diagramas(build_cells())
     validate(cells)
     save(cells, OUTPUT)
 
