@@ -2885,6 +2885,8 @@ def build_cells():
 
             pipeline_autores = [
                 {"$____": "$autores"},                       # una fila por autor
+                # Algunos registros vienen sin nombre de autor: los sacamos antes de contar.
+                {"$match": {"autores.nombre": {"$ne": ""}}},
                 {"$group": {"_id": "$autores.nombre", "articulos": {"$sum": 1}}},
                 {"$sort": {"articulos": -1}},
                 {"$limit": 10},
