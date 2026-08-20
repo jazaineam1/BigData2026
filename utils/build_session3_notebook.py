@@ -1518,6 +1518,8 @@ def build_cells():
         code(
             """
             # 3.2 — COMPLÉTALA TÚ. Falta el operador: escribe "$gt" donde dice ____
+            # Si la ejecutas sin completar, MongoDB dira: unknown operator: ____
+            # Eso no es que rompiste algo: es que falta el hueco.
             # Pregunta: ¿cuales son las noticias mas largas?
 
             OPERADOR = "____"      # <--- reemplaza por el operador de "mayor que"
@@ -2736,6 +2738,25 @@ def build_cells():
             > **otra lista**, `title` es una **lista** aunque casi siempre tenga un elemento, y la fecha
             > viene como `{"date-parts": [[2024, 3, 27]]}` — una lista dentro de otra lista. Y varios
             > campos **no siempre vienen**. Otra vez: no cabe en una tabla sin pelear.
+
+            ## Cómo funcionan los huecos de este reto
+
+            De aquí en adelante hay celdas con `____`. Ese hueco lo llenas tú, y **hasta que lo llenes la
+            celda va a fallar a propósito**. Los errores que vas a ver son estos, y ninguno significa que
+            hayas roto algo:
+
+            | Lo que dice la pantalla | Qué significa |
+            |---|---|
+            | `AttributeError: Collection has no attribute '____'` | falta el nombre de un **método** |
+            | `NameError: name '____' is not defined` | falta el nombre de una **función** |
+            | El resultado sale vacío o raro | el hueco era el nombre de un **campo** y quedó mal |
+
+            > **OJO.** Si ves `____` en un mensaje de error, ya sabes qué pasó: busca `____` en la celda y
+            > complétalo. **Leer el error y saber qué te está diciendo es parte del ejercicio** — es lo que
+            > vas a hacer el resto de tu vida profesional.
+
+            Y si te atascas, los seis huecos están resueltos en la caja «Qué deberías estar viendo», al
+            final del reto. Mirarlos no es hacer trampa: es no perder la noche.
 
             ## Reto, paso 1 · Trae los datos y míralos antes de tocarlos
 
