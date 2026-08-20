@@ -180,7 +180,7 @@ def build_cells():
 
             **Tema del PDA:** introducción a bases de datos documentales con MongoDB<br>
             **Finalidad formativa:** comprender el uso e implementación de bases de datos documentales<br>
-            **Producción evaluable de hoy:** quiz de conceptos básicos de Big Data<br>
+            **Producción evaluable de hoy:** el hito de la sesión, construido con tu propia ejecución<br>
             **Caso conductor:** Compras Claras — priorizar la revisión de contratación pública<br>
             **Duración:** 180 minutos — 85 de explicación, 10 de receso y 85 donde trabajas tú<br>
             **Fecha:** 20 de agosto de 2026
@@ -219,41 +219,22 @@ def build_cells():
         ),
         md(
             """
-            ## Agenda de 180 minutos
+            ## Cómo está organizada la sesión
 
-            ### 85 minutos de explicación y conversación
+            | Bloque | Qué pasa | Qué queda |
+            |---|---|---|
+            | 0 | retomamos el ticket de salida de la sesión 2 | la condición que hoy vamos a cruzar |
+            | 1 | por qué esta evidencia no cabe en una tabla | el problema nombrado: variedad |
+            | 2 | qué existe en lugar de la tabla | las cuatro familias NoSQL |
+            | 3 | cómo se ve un documento por dentro | anidamiento, arreglos, equivalencia con SQL |
+            | 4 | y cuando no cabe en un servidor | fragmentar y replicar |
+            | 5 | qué se cede al tener copias | ACID, BASE y consistencia eventual |
+            | 6 | cómo le pregunto algo a la base | MQL, siempre junto a su SQL |
+            | — | **receso** | el motor se instala mientras descansas |
+            | 7 | **el laboratorio: aquí trabajas tú** | tu colección, tus consultas, tu interpretación |
+            | 8 | cerramos en GitHub lo que quedó abierto | el Pull Request de la sesión 2, integrado |
 
-            | Tiempo | Pregunta de la clase | Resultado |
-            |---:|---|---|
-            | 0–10 | ¿en qué quedamos la semana pasada? | ticket de salida respondido y PR listo para cerrar |
-            | 10–22 | ¿por qué esta evidencia no cabe en una tabla? | el problema nombrado: variedad, no volumen |
-            | 22–30 | ¿y qué existe en lugar de la tabla? | las cuatro familias NoSQL |
-            | 30–46 | ¿cómo se ve un documento por dentro? | anidamiento, arreglos y equivalencia con SQL |
-            | 46–54 | ¿y cuando no cabe en un servidor? | fragmentar y replicar |
-            | 54–62 | ¿qué se cede al tener copias? | ACID, BASE y consistencia eventual |
-            | 62–80 | ¿cómo le pregunto algo a la base? | MQL, siempre junto a su SQL equivalente |
-            | 80–83 | ¿qué vamos a construir? | puente al laboratorio |
-
-            ### 10 minutos de receso
-
-            Antes de salir, ejecuta la celda de arranque del laboratorio. Va a seguir trabajando sola.
-
-            ### 85 minutos donde trabajas tú
-
-            | Tiempo | Actividad |
-            |---:|---|
-            | 0–10 | quiz de conceptos básicos de Big Data (evaluable) |
-            | 10–15 | confirmar que el motor quedó listo |
-            | 15–23 | cargar las noticias y leer un documento |
-            | 23–35 | tres consultas `find()` completadas por ti |
-            | 35–41 | marcar una noticia como revisada (`update_one`) |
-            | 41–58 | dos agregaciones y su interpretación |
-            | 58–73 | cruzar noticias con entidades de SECOP, y descubrir por qué el cruce fácil miente |
-            | 73–83 | cerrar el Pull Request de la sesión 2 y abrir el hito de hoy |
-            | 83–85 | ticket de salida |
-
-            > Las preguntas azules del cuaderno son de **autoevaluación y no se califican**. La única producción
-            > evaluable de hoy es el formulario del quiz.
+            La segunda mitad de la sesión es tuya. Lo que produzcas hoy es el insumo de la sesión 4.
             """
         ),
         *soporte_cells(),
@@ -636,7 +617,8 @@ def build_cells():
             > La fila que falta en esta tabla es `JOIN`. La vemos en la sesión 4, cuando tengamos dos colecciones
             > que de verdad haya que cruzar. Hoy no la necesitamos.
 
-            > **Esto entra en el quiz de hoy.**
+            > **Esto lo vas a necesitar en el hito de hoy**, cuando expliques por qué esta evidencia no cabía en
+            > una tabla.
             """
         ),
         question_cell(
@@ -694,14 +676,9 @@ def build_cells():
             - **Resuelve:** que si una máquina se apaga, el servicio siga respondiendo; y que las lecturas se repartan.
             - **Cuesta:** mantener las copias de acuerdo. Y ahí aparece el problema del bloque siguiente.
 
-            ```
-                 FRAGMENTAR (sharding)                    REPLICAR
-            ┌────────┐ ┌────────┐ ┌────────┐      ┌────────┐ ┌────────┐ ┌────────┐
-            │ ene-abr│ │ may-ago│ │ sep-dic│      │  TODO  │ │  TODO  │ │  TODO  │
-            └────────┘ └────────┘ └────────┘      └────────┘ └────────┘ └────────┘
-              cada una tiene UNA PARTE              cada una tiene EL TOTAL
-              → resuelve tamaño                     → resuelve caídas y lecturas
-            ```
+            <div align="center">
+              <img alt="Fragmentar reparte una parte a cada maquina; replicar da el total a todas" width="900" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5ODAgNDIwIiB3aWR0aD0iOTgwIiBoZWlnaHQ9IjQyMCIKICAgICByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0idGl0dWxvIGRlc2MiPgogIDx0aXRsZSBpZD0idGl0dWxvIj5GcmFnbWVudGFyIGZyZW50ZSBhIHJlcGxpY2FyPC90aXRsZT4KICA8ZGVzYyBpZD0iZGVzYyI+RG9zIGVzdHJhdGVnaWFzIGRpc3RpbnRhcyBwYXJhIHJlcGFydGlyIGRhdG9zIGVudHJlIHZhcmlhcyBtw6FxdWluYXMuCiAgICBBbCBmcmFnbWVudGFyLCBjYWRhIG3DoXF1aW5hIGd1YXJkYSB1bmEgcGFydGUgZGUgbG9zIGRhdG9zOiBlbmVybyBhIGFicmlsLCBtYXlvIGEgYWdvc3RvIHkKICAgIHNlcHRpZW1icmUgYSBkaWNpZW1icmU7IGVudHJlIGxhcyB0cmVzIHRpZW5lbiBlbCB0b3RhbCwgeSBlc28gcmVzdWVsdmUgZWwgcHJvYmxlbWEgZGUgcXVlIGxvcwogICAgZGF0b3Mgbm8gY2FiZW4uIEFsIHJlcGxpY2FyLCBjYWRhIG3DoXF1aW5hIGd1YXJkYSBlbCB0b3RhbCBjb21wbGV0bywgeSBlc28gcmVzdWVsdmUgbGFzIGNhw61kYXMKICAgIGRlbCBzZXJ2aWNpbyB5IHJlcGFydGUgbGFzIGxlY3R1cmFzLjwvZGVzYz4KCiAgPHN0eWxlPgogICAgLmZvbmRvICAgIHsgZmlsbDogI2ZmZmZmZjsgfQogICAgLnRpdHVsbyAgIHsgZm9udDogNzAwIDIxcHggIlNlZ29lIFVJIiwgIkhlbHZldGljYSBOZXVlIiwgQXJpYWwsIHNhbnMtc2VyaWY7IH0KICAgIC5jYWphICAgICB7IHN0cm9rZS13aWR0aDogMi41OyByeDogMTA7IH0KICAgIC5ldGlxdWV0YSB7IGZvbnQ6IDYwMCAxNXB4ICJTZWdvZSBVSSIsICJIZWx2ZXRpY2EgTmV1ZSIsIEFyaWFsLCBzYW5zLXNlcmlmOyBmaWxsOiAjMWEyMDI3OyB9CiAgICAucGllICAgICAgeyBmb250OiA0MDAgMTVweCAiU2Vnb2UgVUkiLCAiSGVsdmV0aWNhIE5ldWUiLCBBcmlhbCwgc2Fucy1zZXJpZjsgZmlsbDogIzM3NDc0ZjsgfQogICAgLmNsYXZlICAgIHsgZm9udDogNzAwIDE1cHggIlNlZ29lIFVJIiwgIkhlbHZldGljYSBOZXVlIiwgQXJpYWwsIHNhbnMtc2VyaWY7IH0KICAgIC5ub3RhICAgICB7IGZvbnQ6IDQwMCAxMy41cHggIlNlZ29lIFVJIiwgIkhlbHZldGljYSBOZXVlIiwgQXJpYWwsIHNhbnMtc2VyaWY7IGZpbGw6ICM1NDZlN2E7IH0KICAgIC5kaXZpc29yICB7IHN0cm9rZTogI2NmZDhkYzsgc3Ryb2tlLXdpZHRoOiAyOyBzdHJva2UtZGFzaGFycmF5OiA3IDY7IH0KICA8L3N0eWxlPgoKICA8cmVjdCBjbGFzcz0iZm9uZG8iIHg9IjAiIHk9IjAiIHdpZHRoPSI5ODAiIGhlaWdodD0iNDIwIi8+CgogIDwhLS0g4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIEZSQUdNRU5UQVIg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIC0tPgogIDx0ZXh0IGNsYXNzPSJ0aXR1bG8iIHg9IjYwIiB5PSI0NiIgZmlsbD0iIzBkNDdhMSI+RlJBR01FTlRBUiAoc2hhcmRpbmcpPC90ZXh0PgogIDx0ZXh0IGNsYXNzPSJub3RhIiAgIHg9IjYwIiB5PSI3MCI+Q2FkYSBtw6FxdWluYSBndWFyZGEgdW5hIHBhcnRlIGRpc3RpbnRhPC90ZXh0PgoKICA8Zz4KICAgIDxyZWN0IGNsYXNzPSJjYWphIiB4PSI2MCIgIHk9Ijk2IiB3aWR0aD0iMTIyIiBoZWlnaHQ9Ijg2IiBmaWxsPSIjZTNmMmZkIiBzdHJva2U9IiMxNTY1YzAiLz4KICAgIDxyZWN0IGNsYXNzPSJjYWphIiB4PSIyMDAiIHk9Ijk2IiB3aWR0aD0iMTIyIiBoZWlnaHQ9Ijg2IiBmaWxsPSIjZTNmMmZkIiBzdHJva2U9IiMxNTY1YzAiLz4KICAgIDxyZWN0IGNsYXNzPSJjYWphIiB4PSIzNDAiIHk9Ijk2IiB3aWR0aD0iMTIyIiBoZWlnaHQ9Ijg2IiBmaWxsPSIjZTNmMmZkIiBzdHJva2U9IiMxNTY1YzAiLz4KCiAgICA8dGV4dCBjbGFzcz0iZXRpcXVldGEiIHg9IjEyMSIgeT0iMTQ2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5lbmUg4oCTIGFicjwvdGV4dD4KICAgIDx0ZXh0IGNsYXNzPSJldGlxdWV0YSIgeD0iMjYxIiB5PSIxNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPm1heSDigJMgYWdvPC90ZXh0PgogICAgPHRleHQgY2xhc3M9ImV0aXF1ZXRhIiB4PSI0MDEiIHk9IjE0NiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+c2VwIOKAkyBkaWM8L3RleHQ+CiAgPC9nPgoKICA8dGV4dCBjbGFzcz0icGllIiAgIHg9IjYwIiB5PSIyMjIiPmNhZGEgdW5hIHRpZW5lIDx0c3BhbiBjbGFzcz0iY2xhdmUiIGZpbGw9IiMwZDQ3YTEiPlVOQSBQQVJURTwvdHNwYW4+PC90ZXh0PgogIDx0ZXh0IGNsYXNzPSJjbGF2ZSIgeD0iNjAiIHk9IjI1MiIgZmlsbD0iIzBkNDdhMSI+4oaSIHJlc3VlbHZlIHF1ZSBubyBxdWVwYTwvdGV4dD4KCiAgPGc+CiAgICA8cmVjdCB4PSI2MCIgeT0iMjc4IiB3aWR0aD0iNDAyIiBoZWlnaHQ9IjEwNiIgcng9IjkiIGZpbGw9IiNmNWY5ZmYiIHN0cm9rZT0iI2JiZGVmYiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI3OCIgeT0iMzA0Ij5TZSBwYWdhIGNvbiBlc3RvOjwvdGV4dD4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI3OCIgeT0iMzI2Ij7CtyB1bmEgY29uc3VsdGEgcXVlIG5vIHVzYSBsYSBsbGF2ZSBkZSByZXBhcnRvPC90ZXh0PgogICAgPHRleHQgY2xhc3M9Im5vdGEiIHg9Ijc4IiB5PSIzNDYiPiAgdGllbmUgcXVlIHByZWd1bnRhcmxlIGEgdG9kYXMgbGFzIG3DoXF1aW5hczs8L3RleHQ+CiAgICA8dGV4dCBjbGFzcz0ibm90YSIgeD0iNzgiIHk9IjM2OCI+wrcgc2kgbGEgbGxhdmUgY3JlY2Ugc2llbXByZSBoYWNpYSBhZGVsYW50ZSwgY29tbyBlbCBtZXMsPC90ZXh0PgogICAgPHRleHQgY2xhc3M9Im5vdGEiIHg9Ijc4IiB5PSIzODgiPiAgdG9kbyBsbyBudWV2byBjYWUgZW4gbGEgbWlzbWEgbcOhcXVpbmEuPC90ZXh0PgogIDwvZz4KCiAgPCEtLSDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgZGl2aXNvciDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgLS0+CiAgPGxpbmUgY2xhc3M9ImRpdmlzb3IiIHgxPSI1MDAiIHkxPSI0MCIgeDI9IjUwMCIgeTI9IjM5MCIvPgoKICA8IS0tIOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCBSRVBMSUNBUiDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgLS0+CiAgPHRleHQgY2xhc3M9InRpdHVsbyIgeD0iNTQwIiB5PSI0NiIgZmlsbD0iIzFiNWUyMCI+UkVQTElDQVI8L3RleHQ+CiAgPHRleHQgY2xhc3M9Im5vdGEiICAgeD0iNTQwIiB5PSI3MCI+Q2FkYSBtw6FxdWluYSBndWFyZGEgbG8gbWlzbW88L3RleHQ+CgogIDxnPgogICAgPHJlY3QgY2xhc3M9ImNhamEiIHg9IjU0MCIgeT0iOTYiIHdpZHRoPSIxMjIiIGhlaWdodD0iODYiIGZpbGw9IiNlOGY1ZTkiIHN0cm9rZT0iIzJlN2QzMiIvPgogICAgPHJlY3QgY2xhc3M9ImNhamEiIHg9IjY4MCIgeT0iOTYiIHdpZHRoPSIxMjIiIGhlaWdodD0iODYiIGZpbGw9IiNlOGY1ZTkiIHN0cm9rZT0iIzJlN2QzMiIvPgogICAgPHJlY3QgY2xhc3M9ImNhamEiIHg9IjgyMCIgeT0iOTYiIHdpZHRoPSIxMjIiIGhlaWdodD0iODYiIGZpbGw9IiNlOGY1ZTkiIHN0cm9rZT0iIzJlN2QzMiIvPgoKICAgIDx0ZXh0IGNsYXNzPSJldGlxdWV0YSIgeD0iNjAxIiB5PSIxNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlRPRE88L3RleHQ+CiAgICA8dGV4dCBjbGFzcz0iZXRpcXVldGEiIHg9Ijc0MSIgeT0iMTQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5UT0RPPC90ZXh0PgogICAgPHRleHQgY2xhc3M9ImV0aXF1ZXRhIiB4PSI4ODEiIHk9IjE0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VE9ETzwvdGV4dD4KCiAgICA8dGV4dCBjbGFzcz0ibm90YSIgeD0iNjAxIiB5PSIxNjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMyZTdkMzIiPnByaW5jaXBhbDwvdGV4dD4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI3NDEiIHk9IjE2NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+csOpcGxpY2E8L3RleHQ+CiAgICA8dGV4dCBjbGFzcz0ibm90YSIgeD0iODgxIiB5PSIxNjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnLDqXBsaWNhPC90ZXh0PgogIDwvZz4KCiAgPHRleHQgY2xhc3M9InBpZSIgICB4PSI1NDAiIHk9IjIyMiI+Y2FkYSB1bmEgdGllbmUgPHRzcGFuIGNsYXNzPSJjbGF2ZSIgZmlsbD0iIzFiNWUyMCI+RUwgVE9UQUw8L3RzcGFuPjwvdGV4dD4KICA8dGV4dCBjbGFzcz0iY2xhdmUiIHg9IjU0MCIgeT0iMjUyIiBmaWxsPSIjMWI1ZTIwIj7ihpIgcmVzdWVsdmUgY2HDrWRhcyB5IGxlY3R1cmFzPC90ZXh0PgoKICA8Zz4KICAgIDxyZWN0IHg9IjU0MCIgeT0iMjc4IiB3aWR0aD0iNDAyIiBoZWlnaHQ9IjEwNiIgcng9IjkiIGZpbGw9IiNmNGZhZjUiIHN0cm9rZT0iI2M4ZTZjOSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI1NTgiIHk9IjMwNCI+U2UgcGFnYSBjb24gZXN0bzo8L3RleHQ+CiAgICA8dGV4dCBjbGFzcz0ibm90YSIgeD0iNTU4IiB5PSIzMjYiPsK3IG1hbnRlbmVyIGxhcyBjb3BpYXMgZGUgYWN1ZXJkbyBjdWVzdGEgdGllbXBvOzwvdGV4dD4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI1NTgiIHk9IjM0NiI+wrcgc2kgbGVlcyBkZSB1bmEgcsOpcGxpY2EgcXVlIGHDum4gbm8gc2UgZW50ZXLDsyw8L3RleHQ+CiAgICA8dGV4dCBjbGFzcz0ibm90YSIgeD0iNTU4IiB5PSIzNjgiPiAgdmVzIHVuIGRhdG8gcXVlIGZ1ZSB2ZXJkYWQgaGFjZSB1biBtb21lbnRvLjwvdGV4dD4KICAgIDx0ZXh0IGNsYXNzPSJub3RhIiB4PSI1NTgiIHk9IjM4OCI+ICBFc28gZXMgbGEgY29uc2lzdGVuY2lhIGV2ZW50dWFsLjwvdGV4dD4KICA8L2c+Cjwvc3ZnPgo=">
+            </div>
 
             **Cómo leer el dibujo.** Son ejes independientes: un sistema real fragmenta *y* replica cada fragmento.
             Lo que hay que retener es que **fragmentar responde a "no cabe" y replicar responde a "no se puede caer"**.
@@ -784,7 +761,7 @@ def build_cells():
                motor relacional con réplica de lectura tiene exactamente el mismo fenómeno.
 
             > Existe un resultado clásico llamado **CAP** que formaliza este intercambio bajo fallas de red. Lo
-            > nombramos aquí y lo trabajamos con un clúster real en la sesión 4. No entra en el quiz de hoy.
+            > nombramos aquí y lo trabajamos con un clúster real en la sesión 4. Hoy basta con que sepas que existe.
             """
         ),
         question_cell(
@@ -943,7 +920,7 @@ def build_cells():
 
             En los próximos 85 minutos vas a hacer esto, en este orden:
 
-            1. responder el quiz de conceptos básicos (evaluable) **mientras el motor se instala solo**;
+            1. arrancar el motor y ver cuál te tocó, real o de respaldo;
             2. cargar las 987 noticias de contratación en tu propia base de datos;
             3. escribir tres consultas tuyas;
             4. marcar una noticia como revisada;
@@ -973,7 +950,7 @@ def build_cells():
             ---
             # LABORATORIO — 85 minutos
 
-            ## Paso 0 · Arrancar el motor (ejecuta y sigue al quiz)
+            ## Paso 0 · Arrancar el motor (ejecuta y sigue leyendo)
 
             Esta celda **no está oculta a propósito**: si algo falla, tienes que poder leer qué pasó.
 
@@ -988,7 +965,7 @@ def build_cells():
         ),
         code(
             """
-            # Paso 0 — levantar el motor. Ejecuta y pasa al quiz mientras trabaja.
+            # Paso 0 — levantar el motor. Ejecuta y sigue leyendo mientras trabaja.
             import os, subprocess, sys, time, urllib.request
 
             TGZ = "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2204-8.0.14.tgz"
@@ -1083,15 +1060,46 @@ def build_cells():
             **Advertencia sobre el reinicio.** Si el runtime de Colab se desconecta, el servidor muere y tus
             documentos con él. Por eso todas las celdas de carga se pueden volver a ejecutar sin duplicar nada.
 
-            ## Paso 1 · Quiz de conceptos básicos de Big Data (evaluable)
+            ## Cómo se evalúa esta sesión
 
-            Diez minutos, individual. Evalúa las **sesiones 1 y 2**: las V, tipos de dato, BI tradicional frente a
-            Big Data, ciclo analítico y SQL frente a NoSQL. **No pregunta nada de MongoDB ni de hoy.**
+            **No hay un cuestionario de opción múltiple.** Y la razón es honesta: una pregunta como *"¿cuál de las
+            cinco V corresponde a la variedad?"* la responde cualquier asistente de inteligencia artificial en dos
+            segundos, así que evaluar eso no mide lo que tú entendiste, mide que tienes internet.
 
-            > **Enlace del formulario:** lo comparte el docente al inicio del bloque. Inicia sesión con tu correo
-            > institucional. Una sola respuesta por persona.
+            Lo que sí se evalúa es **lo que solo puedes producir tú, ejecutando esta sesión**: tus consultas, sobre
+            la sección que tú elegiste, con los números que te dio tu propia colección, y la interpretación que
+            defiendes de ellos.
 
-            Cuando termines, el motor de arriba ya debería estar listo.
+            ### Lo que entregas
+
+            | # | Qué | Dónde |
+            |---|---|---|
+            | 1 | La línea que imprimió tu motor y el conteo de tu colección | pegado en el hito |
+            | 2 | Tus tres consultas, con la sección que **tú** elegiste y qué encontraste | pegado en el hito |
+            | 3 | El `_id` de la noticia que marcaste como revisada, antes y después | pegado en el hito |
+            | 4 | Una entidad de la tabla del cruce que **tú** elijas, y por qué la revisarías o no | escrito por ti |
+            | 5 | Los dos números de tu cruce (el obvio y el correcto) y por qué se diferencian | escrito por ti |
+            | 6 | Una frase sobre datos de **tu** sector: qué guardarías como documento y qué no | escrito por ti |
+
+            Las tres primeras son evidencia de ejecución: o corriste el cuaderno o no. Las tres últimas son
+            criterio, y no tienen una respuesta única: se evalúa si tu razonamiento se sostiene y si dices con
+            claridad **qué no puedes concluir**.
+
+            > **Dos minutos de conversación al final.** El docente te va a preguntar en voz alta por el punto 4 o
+            > el 5, con tu pantalla a la vista. No es un examen: es la forma más rápida de saber si la explicación
+            > que escribiste es tuya. Si algo no te salió, decirlo cuenta a favor, no en contra.
+
+            ### Cómo se califica
+
+            | Nivel | Qué se ve |
+            |---|---|
+            | Cumple con solvencia | ejecutó todo, eligió con criterio, interpreta y **declara los límites** sin que se los pidan |
+            | Cumple | ejecutó todo y describe correctamente lo que ve |
+            | Incompleto | hay evidencia de ejecución pero la interpretación repite el cuaderno sin aplicarla a su caso |
+            | No cumple | no hay evidencia de ejecución propia |
+
+            No se cuentan commits, ni líneas, ni velocidad. Un laboratorio que falló y está bien explicado vale más
+            que uno perfecto que no se entiende.
             """
         ),
         md(
@@ -1795,26 +1803,39 @@ def build_cells():
             # Hito 3 — Evidencia documental
 
             **Pareja:**
-            **Motor usado:** (MongoDB real en Colab / mongomock)
+
+            ## 0. Evidencia de ejecución
+            - Motor que me tocó (pega la línea que imprimió el Paso 0):
+            - Documentos en mi colección:
+            - `_id` de la noticia que marqué como revisada, antes y después:
 
             ## 1. Por qué esta evidencia no cabía en una tabla
-            (dos frases, con un ejemplo concreto de la colección)
+            Un ejemplo concreto **de un documento que yo abrí**, no del enunciado:
 
             ## 2. Mis tres consultas
-            | # | Pregunta en lenguaje de negocio | Consulta | Qué encontré |
-            |---|---|---|---|
-            | 1 | | | |
-            | 2 | | | |
-            | 3 | | | |
+            | # | Qué quería saber | Consulta que escribí | Cuántas encontré | Qué me llamó la atención |
+            |---|---|---|---|---|
+            | 1 | | | | |
+            | 2 | | | | |
+            | 3 | | | | |
 
-            ## 3. El resumen por sección
-            (pega la tabla y escribe UNA frase con lo que sí se puede afirmar)
+            La sección que elegí fue ____ y la elegí porque:
 
-            ## 4. Qué NO permite concluir
-            (nombra el dato que falta, no digas solo "faltan datos")
+            ## 3. Una entidad de la tabla del cruce
+            Elegí ____ (____ noticias, ____ procesos).
+            ¿La pondría en la fila de revisión de Laura? Sí / No, porque:
 
-            ## 5. El cruce con SECOP
-            (cuántas menciones dio el cruce obvio, cuántas el correcto, y por qué cambia)
+            ## 4. Mi cruce, en dos números
+            - Cruce obvio: ____ noticias
+            - Cruce correcto: ____ noticias
+            - La diferencia sale de:
+
+            ## 5. Qué NO permite concluir mi resultado
+            Nombra el dato que falta, no digas solo "faltan datos":
+
+            ## 6. En mi sector
+            Trabajo en ____. Un dato de mi trabajo que guardaría como documento y no como fila:
+            Y uno que dejaría en una tabla, porque:
             ```
 
             **Fecha de entrega:** domingo. Se evalúa el contenido y la honestidad de los límites, no la cantidad de
