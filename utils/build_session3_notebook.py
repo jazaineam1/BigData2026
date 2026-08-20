@@ -219,7 +219,7 @@ def build_cells():
         ),
         md(
             """
-            # Sesión 3 — Cuando la tabla ya no cabe: bases de datos documentales con MongoDB
+            # Sesión 3 — Cuando una fila ya no representa el dato: bases de datos documentales con MongoDB
 
             ## Universidad Central
             <div align="center">
@@ -252,6 +252,7 @@ def build_cells():
             | fuentes | noticias de El Tiempo (sitemap XML + feed JSON) y muestra de contratación SECOP |
             | entorno | Colab, con MongoDB corriendo dentro de esta misma pestaña |
             | producto | una colección de documentos, tres consultas propias y una interpretación con límites |
+            | cómo recorrerlo | los bloques de la conversación dicen **NÚCLEO** o **MAPA**; lo opcional dice **AMPLIACIÓN**. Todo lo que empieza por «Paso» es laboratorio y hay que hacerlo, salvo lo marcado como ampliación |
             """
         ),
         md(
@@ -350,6 +351,8 @@ def build_cells():
             """
             ---
             # Bloque 1 · Por qué esta evidencia no cabe en una tabla
+
+            **NÚCLEO** · lo necesitas para el laboratorio de hoy.
 
             *El problema es la variedad, no el volumen*
 
@@ -549,6 +552,8 @@ def build_cells():
             ---
             # Bloque 2 · Qué existe en lugar de la tabla
 
+            **MAPA** · hoy lo recorremos hablando. No lo necesitas para ejecutar nada, pero sí para entender por qué el motor se comporta como se comporta.
+
             *Cuatro familias, y cada una renunció a algo distinto*
 
             Ya sabemos qué le sobra a la tabla. La pregunta obvia es qué existe en su lugar. La respuesta incómoda
@@ -621,6 +626,8 @@ def build_cells():
             ---
             # Bloque 3 · Cómo se ve un documento por dentro
 
+            **NÚCLEO** · lo necesitas para el laboratorio de hoy.
+
             *Campos, anidamiento y arreglos*
 
             De las cuatro familias, la documental es la que más se parece a lo que ya tienes en la cabeza: un
@@ -662,6 +669,30 @@ def build_cells():
 
             **La conclusión.** No es que la tabla esté mal hecha: es que el dato tiene una forma
             que la tabla no puede representar sin inventar columnas.
+
+            ## Qué trae cada noticia — el diccionario de datos
+
+            Antes de mirar una noticia por dentro, esta es la referencia completa. Vuelve aquí cada vez que
+            no sepas qué es un campo. **La última columna es la que importa de verdad:** ningún campo mide
+            exactamente lo que su nombre promete.
+
+            | Campo | Qué representa | Tipo | Para qué lo usamos hoy | Su límite |
+            |---|---|---|---|---|
+            | `_id` | identificador del artículo en El Tiempo | número | llave única; es lo que impide duplicados | no dice nada del contenido |
+            | `titulo` | el titular publicado | texto | buscar con `$regex` | **puede no nombrar** la entidad de la que habla la noticia |
+            | `seccion` | sección del periódico | texto, 57 valores | agrupar en la agregación | es una clasificación **editorial**, no temática |
+            | `publicado` | fecha y hora de publicación | texto ISO | serie por mes con `$substr` | es **texto, no fecha**: ordena bien por casualidad del formato |
+            | `etiquetas` | lista de objetos `{id, nombre, slug}` | arreglo, de 1 a 24 (mediana 6) | `$unwind` y notación de punto | las escribe la redacción: hay erratas, y una noticia trae la etiqueta «Coolombia» |
+            | `autores` | lista de objetos con `nombre` y `cargo` | arreglo, de 1 a 2 | ejercicio extra | «UNIDAD INVESTIGATIVA» aparece como autor y **es un equipo**, no una persona |
+            | `cuerpo` | los bloques del artículo, de 25 tipos distintos | arreglo, de 1 a 86 (mediana 25) | justifica el modelo documental | **no todo bloque es texto**: hay foto, video, publicidad y relacionados |
+            | `n_palabras` | extensión del texto | número | promedios en la agregación | mide **extensión**, no profundidad ni calidad |
+            | `premium` | si está detrás del muro de pago | verdadero/falso | ejercicio extra | correlaciona con la extensión, pero eso no dice cuál causa cuál |
+            | `subcategoria` | subsección dentro de la sección | texto, **solo en 807 de 987** | — | **falta en 180 noticias**, y toda consulta tiene que decidir qué hace con ellas |
+
+            **Y tres campos que casi nadie tiene:** `subtitulo` está en 982, `tiene_video` solo en **17**
+            noticias y `descripcion` en **6**. No están vacíos: **no existen** en los demás documentos. Esa
+            es la diferencia que una tabla no puede expresar —donde tendría una celda vacía, aquí no hay
+            campo— y es la primera razón por la que estos datos son documentales y no una tabla.
 
             ## Anatomía de un documento real
 
@@ -772,6 +803,8 @@ def build_cells():
             """
             ---
             # Bloque 4 · Y cuando no cabe en un servidor
+
+            **MAPA** · hoy lo recorremos hablando. No lo necesitas para ejecutar nada, pero sí para entender por qué el motor se comporta como se comporta.
 
             *Repartir y copiar no son lo mismo*
 
@@ -898,6 +931,8 @@ def build_cells():
             """
             ---
             # Bloque 5 · Qué se cede al tener copias
+
+            **MAPA** · hoy lo recorremos hablando. No lo necesitas para ejecutar nada, pero sí para entender por qué el motor se comporta como se comporta.
 
             *ACID, BASE y el dato que fue verdad hace un momento*
 
@@ -1053,6 +1088,8 @@ def build_cells():
             """
             ---
             # Bloque 6 · Cómo le pregunto algo a la base
+
+            **NÚCLEO** · lo necesitas para el laboratorio de hoy.
 
             *MQL, siempre junto a su SQL equivalente*
 
@@ -1743,8 +1780,26 @@ def build_cells():
 
             **Lo importante, y es el punto de toda la sesión:** el campo `revision` **no existía en ningún
             documento** y ahora existe en uno solo. No hubo que alterar la colección, ni avisarle al motor, ni
-            migrar los otros 986 documentos. En una tabla esto habría sido un `ALTER TABLE` que afecta a todas las
-            filas y que en producción exige una ventana de mantenimiento.
+            migrar los otros 986 documentos.
+
+            **Y aquí hay que ser honestos con lo relacional,** porque es fácil exagerar la diferencia. En una
+            base relacional esto **también se puede hacer, y hoy además es barato**: PostgreSQL desde la
+            versión 11 añade una columna con valor por defecto sin reescribir la tabla, y MySQL 8 tiene
+            `ALGORITHM=INSTANT` para lo mismo. La vieja historia del `ALTER TABLE` que tumba el sistema una
+            madrugada ya no aplica al caso simple.
+
+            La diferencia real es otra, y es de diseño, no de velocidad:
+
+            | | En una tabla | En documentos |
+            |---|---|---|
+            | dónde se declara la forma | **una vez, para toda la tabla**: si añades `revision`, existe para las 987 filas, aunque 986 la tengan vacía | **documento por documento**: existe donde tú lo pongas |
+            | quién decide | el esquema, por adelantado y para todos | tu código, en el momento |
+            | qué pagas | pedir el cambio de esquema, aunque hoy sea rápido | que **tus consultas** tengan que lidiar con documentos que no lo traen |
+
+            > **PARA LLEVAR.** Un modelo relacional **puede representar** listas, campos opcionales y bloques
+            > heterogéneos: los reparte en varias tablas relacionadas o en una columna JSON. Lo documental no
+            > es «lo que la tabla no puede»: es **conservar junto lo que se consulta junto**, a cambio de
+            > asumir tú la responsabilidad sobre la duplicación y sobre cómo evoluciona la forma.
 
             **Qué no podemos concluir.** Que esto sea gratis. Ahora tienes documentos con `revision` y documentos
             sin él, y **cualquier consulta futura tiene que decidir qué hacer con los que no lo tienen**. La
@@ -1897,16 +1952,23 @@ def build_cells():
             **Qué le pasa a un documento, exactamente:**
 
             ```
-            ANTES  (1 documento)
-            { "titulo": "La Gran Vía…", "etiquetas": ["Contraloría", "retrasos", "obra vial"] }
+            ANTES  (1 documento, con una lista de 3 objetos adentro)
+            { "titulo": "La Gran Vía…", "etiquetas": [
+                {"id": 2099, "nombre": "Contraloría", "slug": "contraloria"},
+                {"id": 4417, "nombre": "Obras",       "slug": "obras"},
+                {"id":  881, "nombre": "Bogotá",      "slug": "bogota"} ] }
 
                                     ↓  {"$unwind": "$etiquetas"}
 
             DESPUÉS  (3 documentos, iguales en todo menos en la etiqueta)
-            { "titulo": "La Gran Vía…", "etiquetas": "Contraloría" }
-            { "titulo": "La Gran Vía…", "etiquetas": "retrasos"    }
-            { "titulo": "La Gran Vía…", "etiquetas": "obra vial"   }
+            { "titulo": "La Gran Vía…", "etiquetas": {"id": 2099, "nombre": "Contraloría", "slug": "contraloria"} }
+            { "titulo": "La Gran Vía…", "etiquetas": {"id": 4417, "nombre": "Obras",       "slug": "obras"} }
+            { "titulo": "La Gran Vía…", "etiquetas": {"id":  881, "nombre": "Bogotá",      "slug": "bogota"} }
             ```
+
+            **Fíjate en que `etiquetas` deja de ser una lista y pasa a ser un objeto.** Por eso la etapa
+            siguiente agrupa por `"$etiquetas.nombre"` y no por `"$etiquetas"`: después de desenrollar hay
+            que entrar **un nivel más** para llegar al texto.
 
             - **Cómo interpretar la salida:** cada fila es una etiqueta y su conteo.
             - **Error frecuente, y es importante:** después de `$unwind` **los conteos ya no son aditivos**.
@@ -2003,6 +2065,8 @@ def build_cells():
         md(
             """
             ## Ejercicio extra — para ti, si quieres seguir
+
+            **AMPLIACIÓN** · opcional. Si el tiempo aprieta, déjalo para casa: no bloquea nada de lo que sigue.
 
             > **NO es obligatorio y no se califica.** Está aquí porque la única forma de que una consulta
             > deje de parecer magia es escribir una tú, sin que nadie te la dicte. Son dos, y las dos se
@@ -2515,6 +2579,8 @@ def build_cells():
 
             ## Paso 6.5 · Cuando la noticia nombra el contrato
 
+            **AMPLIACIÓN** · opcional. Si el tiempo aprieta, déjalo para casa: no bloquea nada de lo que sigue.
+
             Hasta aquí el enlace fue **entidad ↔ noticia**, y ya dijimos que es débil: la noticia habla del
             Ministerio, no de *este* contrato.
 
@@ -2635,6 +2701,8 @@ def build_cells():
         md(
             """
             ## Paso 6.6 · De vuelta a la tabla: documentos y pandas juntos
+
+            **AMPLIACIÓN** · opcional. Si el tiempo aprieta, déjalo para casa: no bloquea nada de lo que sigue.
 
             Legítima pregunta a esta altura: *si al final quiero una tabla para analizar, ¿para qué
             guardé documentos?*
@@ -2788,6 +2856,20 @@ def build_cells():
             > una simplificación para la clase: es la ruta que funciona en los computadores de la universidad, donde
             > puede que no tengas permisos para instalar nada.
 
+            ### 7.0 — Antes de empezar: ¿en qué estado está tu PR?
+
+            No todas las parejas llegan igual. Busca tu caso y sigue **solo** ese.
+
+            | Tu situación | Qué haces |
+            |---|---|
+            | **El PR sigue abierto** | es el caso normal. Sigue en 7.1 |
+            | **Ya lo integraron la semana pasada** | sáltate 7.1 y 7.2 y ve directo a **7.3**. Ya viviste el merge |
+            | **Nunca lo abrieron, o no encuentran la rama** | no pierdas la noche buscándolo: ve directo a **7.3** y crea el hito en una rama nueva. Cuando abras ese PR habrás hecho el mismo recorrido, con el trabajo de hoy en vez del de la semana pasada |
+            | **Tu pareja no vino** | trabaja solo sobre tu repositorio y en 7.3 pon tu nombre en los dos campos. Anótalo en el PR: «trabajé solo, mi pareja no asistió» |
+
+            > **Que no te falte un PR viejo no te deja sin entrega.** Lo que se evalúa es el hito de hoy,
+            > y ese lo abres en 7.3 partiendo de cero si hace falta.
+
             ### 7.1 — Revisar antes de integrar
 
             1. Entra al repositorio de tu pareja y abre la pestaña **Pull requests**.
@@ -2844,6 +2926,8 @@ def build_cells():
             del 4 al 7.
 
             ### Ejercicio · Provoquen un conflicto a propósito
+
+            **AMPLIACIÓN** · opcional. Si el tiempo aprieta, déjalo para casa: no bloquea nada de lo que sigue.
 
             Diez minutos, en pareja, desde el navegador. Vale la pena verlo una vez en un archivo que no
             importa, para no verlo por primera vez en la entrega.
@@ -3040,6 +3124,8 @@ def build_cells():
             """
             ---
             # Reto final · Hazlo tú, con otros datos
+
+            **AMPLIACIÓN** · opcional. Si el tiempo aprieta, déjalo para casa: no bloquea nada de lo que sigue.
 
             > **MÁS ADELANTE.** Esto **no se hace en clase**: es para el fin de semana, y es opcional. Lo
             > pongo aquí porque es lo único de la sesión donde te enfrentas solo a datos que nunca viste,
