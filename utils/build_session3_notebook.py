@@ -1378,7 +1378,6 @@ def build_cells():
             <details>
             <summary><b>Cómo se califica — ábrelo antes de escribir el hito</b></summary>
 
-            Está aquí, antes de que lo escribas, para que sepas contra qué se mide.
             ### Cómo se califica
 
             El hito vale **sobre 5,0** y se corrige con esta tabla. Está aquí, antes de que lo escribas, para que
@@ -2093,7 +2092,6 @@ def build_cells():
         md(
             """
 
-            No es indispensable hoy. Ábrelo cuando tengas la cabeza fresca: es la misma lección del denominador, aplicada al revés.
             ## Y la tentación que viene después
 
             Tienes dos columnas y vas a querer dividirlas: menciones por proceso. Hazlo mentalmente y mira quién
@@ -2231,6 +2229,11 @@ def build_cells():
             de sede. **Ninguno de esos es raro**; los tres son figuras legales y frecuentes. Lo que la bandeja
             dice es *"aquí hay volumen, poca competencia y atención pública a la vez"*, y eso justifica **mirar**,
             que es exactamente lo que Laura pidió en la sesión 2. No justifica nada más.
+
+            **Y una pregunta incómoda antes de celebrar.** Esta bandeja tiene **200 procesos** y el
+            equipo de Laura revisa **20 por semana**: le acabas de entregar **diez semanas de cola**.
+            Priorizar no es solo ordenar: también es decidir **dónde se corta la lista**, y ese corte lo
+            tiene que justificar alguien. Ahora mismo el tuyo es arbitrario.
 
             **Qué le falta a esta bandeja para ser buena de verdad**, y anótalo porque es el trabajo de las
             próximas semanas:
@@ -2594,11 +2597,20 @@ def build_cells():
             Diez minutos, en pareja, desde el navegador. Vale la pena verlo una vez en un archivo que no
             importa, para no verlo por primera vez en la entrega.
 
-            Se hace sobre `practica/conflicto.md`, un archivo de juguete que el docente ya dejó creado en
-            su repositorio. **No lo hagan sobre el archivo del hito:** ese es el que les califican, y la
-            idea es equivocarse donde no cuesta nada.
+            Se hace sobre un archivo de juguete **en el repositorio de ustedes**, no en el del curso: en el
+            del curso no tienen permiso para guardar. **Y no lo hagan sobre el archivo del hito:** ese es el
+            que les califican, y la idea es equivocarse donde no cuesta nada.
 
-            1. **Los dos a la vez** abren `practica/conflicto.md` en GitHub y pulsan el lápiz de editar.
+            **Paso previo, lo hace uno solo de los dos (30 segundos).** En su repositorio de equipo:
+            **Add file → Create new file**, nombre `practica/conflicto.md`, y dentro una sola línea:
+
+            ```
+            Nuestro color favorito es ____
+            ```
+
+            *Commit changes* y listo. Ya tienen dónde chocar.
+
+            1. **Ahora sí, los dos a la vez** abren `practica/conflicto.md` y pulsan el lápiz de editar.
                **Sin cerrar ninguna de las dos pestañas.**
             2. En la línea que dice «Nuestro color favorito es ____», **cada uno escribe un color distinto**.
             3. **La persona A** pulsa *Commit changes*. Funciona sin problema.
@@ -2749,13 +2761,14 @@ def build_cells():
             |---|---|
             | `AttributeError: Collection has no attribute '____'` | falta el nombre de un **método** |
             | `NameError: name '____' is not defined` | falta el nombre de una **función** |
+            | `Unrecognized pipeline stage name` o `$____ is not a valid operator` | falta el nombre de una **etapa** de agregación |
             | El resultado sale vacío o raro | el hueco era el nombre de un **campo** y quedó mal |
 
             > **OJO.** Si ves `____` en un mensaje de error, ya sabes qué pasó: busca `____` en la celda y
             > complétalo. **Leer el error y saber qué te está diciendo es parte del ejercicio** — es lo que
             > vas a hacer el resto de tu vida profesional.
 
-            Y si te atascas, los seis huecos están resueltos en la caja «Qué deberías estar viendo», al
+            Y si te atascas, los cinco huecos están resueltos en la caja «Qué deberías estar viendo», al
             final del reto. Mirarlos no es hacer trampa: es no perder la noche.
 
             ## Reto, paso 1 · Trae los datos y míralos antes de tocarlos
@@ -2812,7 +2825,7 @@ def build_cells():
         ),
         code(
             """
-            # Reto 2 — cargar. COMPLETA las dos lineas marcadas.
+            # Reto 2 — cargar. COMPLETA la linea marcada.
             articulos_col = db["articulos"]
 
             # Vaciar antes de insertar, para poder repetir la celda sin duplicar.
@@ -2834,8 +2847,17 @@ def build_cells():
                     ],
                 })
 
-            # b) con que metodo insertas MUCHOS documentos de una sola vez?
-            articulos_col.____(docs)
+            # COMPLETA: escribe entre comillas insert_one o insert_many.
+            # Las dos funcionan. Una hace 120 viajes al servidor y la otra uno.
+            METODO = "____"
+
+            if METODO == "insert_many":
+                articulos_col.insert_many(docs)
+            elif METODO == "insert_one":
+                for d in docs:
+                    articulos_col.insert_one(d)     # 120 viajes en vez de 1
+            else:
+                print("Falta completar METODO arriba. Escribe insert_one o insert_many.")
 
             print("Articulos en tu base:", articulos_col.count_documents({}))
             """
@@ -2959,7 +2981,7 @@ def build_cells():
             | Reto 3.3 | 10 autores; los primeros con 4 a 6 artículos cada uno |
             | Reto 4 | una tabla de 120 filas y 5 columnas |
 
-            **Los huecos, si te atascas:** `insert_many` · `sort` · `revista` · `$unwind` · `len`.
+            **Los cinco huecos, si te atascas:** `insert_many` · `sort` · `revista` · `$unwind` · `len`.
 
             **Si el Reto 1 falla con un error de red:** Crossref limita las peticiones muy seguidas. Espera
             un minuto y vuelve a ejecutarlo. No cambies el código.

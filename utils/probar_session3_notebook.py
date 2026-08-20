@@ -48,7 +48,7 @@ RAW = "https://raw.githubusercontent.com/jazaineam1/BigData2026/main"
 # ejecutar el cuaderno de corrido y comprobar que la solucion es la correcta.
 HUECOS = {
     'OPERADOR = "____"': 'OPERADOR = "$gt"',
-    'articulos_col.____(docs)': 'articulos_col.insert_many(docs)',
+    'METODO = "____"': 'METODO = "insert_many"',
     '.____("citas", -1)': '.sort("citas", -1)',
     '"_id": "$____", "n"': '"_id": "$revista", "n"',
     '{"$____": "$autores"}': '{"$unwind": "$autores"}',
