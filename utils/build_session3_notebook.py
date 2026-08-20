@@ -1346,69 +1346,9 @@ def build_cells():
             **Advertencia sobre el reinicio.** Si el runtime de Colab se desconecta, el servidor muere y tus
             documentos con él. Por eso todas las celdas de carga se pueden volver a ejecutar sin duplicar nada.
 
-            ## Cómo se evalúa esta sesión
+            > **MÁS ADELANTE.** Cómo se califica el hito está más abajo, al final del Paso 7,
+            > justo antes de que lo escribas. Hoy no te hace falta: ahora toca cargar datos.
 
-            **No hay un cuestionario de opción múltiple.** Y la razón es honesta: una pregunta como *"¿cuál de las
-            cinco V corresponde a la variedad?"* la responde cualquier asistente de inteligencia artificial en dos
-            segundos, así que evaluar eso no mide lo que tú entendiste, mide que tienes internet.
-
-            Lo que sí se evalúa es **lo que solo puedes producir tú, ejecutando esta sesión**: tus consultas, sobre
-            la sección que tú elegiste, con los números que te dio tu propia colección, y la interpretación que
-            defiendes de ellos.
-
-            ### Lo que entregas
-
-            | # | Qué | Dónde |
-            |---|---|---|
-            | 1 | La línea que imprimió tu motor y el conteo de tu colección | pegado en el hito |
-            | 2 | Tus tres consultas, con la sección que **tú** elegiste y qué encontraste | pegado en el hito |
-            | 3 | El `_id` de la noticia que marcaste como revisada, antes y después | pegado en el hito |
-            | 4 | Una entidad de la tabla del cruce que **tú** elijas, y por qué la revisarías o no | escrito por ti |
-            | 5 | Los dos números de tu cruce (el obvio y el correcto) y por qué se diferencian | escrito por ti |
-            | 6 | Una frase sobre datos de **tu** sector: qué guardarías como documento y qué no | escrito por ti |
-
-            Las tres primeras son evidencia de ejecución: o corriste el cuaderno o no. Las tres últimas son
-            criterio, y no tienen una respuesta única: se evalúa si tu razonamiento se sostiene y si dices con
-            claridad **qué no puedes concluir**.
-
-            > **Una conversación corta al final.** El docente te va a preguntar en voz alta por el punto 4 o
-            > el 5, con tu pantalla a la vista. No es un examen: es la forma más rápida de saber si la explicación
-            > que escribiste es tuya. Si algo no te salió, decirlo cuenta a favor, no en contra.
-
-            <details>
-            <summary><b>Cómo se califica — ábrelo antes de escribir el hito</b></summary>
-
-            ### Cómo se califica
-
-            El hito vale **sobre 5,0** y se corrige con esta tabla. Está aquí, antes de que lo escribas, para que
-            sepas contra qué se mide y no tengas que adivinar.
-
-            | Criterio | Peso | 5,0 · Solvente | 3,5 · Cumple | 2,0 · Incompleto | 0 |
-            |---|---|---|---|---|---|
-            | **Evidencia de ejecución**<br>(motor, conteo, `_id`) | 1,0 | los tres datos están y son coherentes entre sí | están los tres | falta alguno | no hay |
-            | **Tus tres consultas**<br>(con la sección que elegiste y por qué) | 1,0 | las consultas responden preguntas propias y justifica la elección de sección | las tres corren y reporta lo que encontró | copia las del cuaderno sin cambiar nada | no hay |
-            | **La entidad que elegiste**<br>(revisar o no, y por qué) | 1,0 | decide, nombra la alternativa que descartó y sostiene el criterio | decide y da una razón | menciona una entidad sin decidir | no hay |
-            | **Los dos números del cruce**<br>(y por qué se diferencian) | 1,0 | explica el mecanismo —subcadena frente a palabra— con un ejemplo propio | reporta ambos y dice que la diferencia son falsos positivos | reporta un solo número | no hay |
-            | **Qué NO permite concluir** | 1,0 | nombra el **dato que falta**, no solo la limitación | dice correctamente qué no se puede afirmar | escribe "faltan datos" | no hay |
-            | **Por qué no cabía en una tabla** y **tu sector**<br>(puntos 1 y 6) | se reparten dentro de los anteriores | usa un documento que **abrió** y un dato **real de su trabajo** | responde con un ejemplo del cuaderno | repite el enunciado | no hay |
-
-            **Punto adicional de hasta 0,5**, que no sube de 5,0: una observación propia que el cuaderno no hizo.
-            Un patrón que notaste, una consulta que se te ocurrió, un error que encontraste en el material. Se premia
-            porque es lo más difícil de todo esto.
-
-
-            </details>
-
-            **Lo que no se califica:** la cantidad de commits, las líneas escritas, la velocidad, ni si el motor
-            real te arrancó o te tocó el respaldo. **Un laboratorio que falló y está bien explicado vale más que uno
-            perfecto que no se entiende.**
-
-            **Sobre trabajar en pareja.** Es una entrega por pareja y los dos responden por todo. Si compartieron un
-            solo runtime —cosa legítima— decláralo en el hito: no baja la nota, y no declararlo sí es un problema.
-            """
-        ),
-        md(
-            """
             ## Paso 2 · Cargar las noticias en tu base
 
             > **HAZ ESTO AHORA.** Ejecuta la celda de abajo. Es la que pone los datos en tu base.
@@ -2665,6 +2605,69 @@ def build_cells():
             > significa que la decisión esté bien planteada**. La máquina comprueba que el archivo esté completo. Si
             > tu indicador mide lo que no dice medir, el check sigue verde. Eso solo lo ve una persona.
 
+            ## Cómo se evalúa esta sesión
+
+            **No hay un cuestionario de opción múltiple.** Y la razón es honesta: una pregunta como *"¿cuál de las
+            cinco V corresponde a la variedad?"* la responde cualquier asistente de inteligencia artificial en dos
+            segundos, así que evaluar eso no mide lo que tú entendiste, mide que tienes internet.
+
+            Lo que sí se evalúa es **lo que solo puedes producir tú, ejecutando esta sesión**: tus consultas, sobre
+            la sección que tú elegiste, con los números que te dio tu propia colección, y la interpretación que
+            defiendes de ellos.
+
+            ### Lo que entregas
+
+            | # | Qué | Dónde |
+            |---|---|---|
+            | 1 | La línea que imprimió tu motor y el conteo de tu colección | pegado en el hito |
+            | 2 | Tus tres consultas, con la sección que **tú** elegiste y qué encontraste | pegado en el hito |
+            | 3 | El `_id` de la noticia que marcaste como revisada, antes y después | pegado en el hito |
+            | 4 | Una entidad de la tabla del cruce que **tú** elijas, y por qué la revisarías o no | escrito por ti |
+            | 5 | Los dos números de tu cruce (el obvio y el correcto) y por qué se diferencian | escrito por ti |
+            | 6 | Una frase sobre datos de **tu** sector: qué guardarías como documento y qué no | escrito por ti |
+
+            Las tres primeras son evidencia de ejecución: o corriste el cuaderno o no. Las tres últimas son
+            criterio, y no tienen una respuesta única: se evalúa si tu razonamiento se sostiene y si dices con
+            claridad **qué no puedes concluir**.
+
+            > **Una conversación corta al final.** El docente te va a preguntar en voz alta por el punto 4 o
+            > el 5, con tu pantalla a la vista. No es un examen: es la forma más rápida de saber si la explicación
+            > que escribiste es tuya. Si algo no te salió, decirlo cuenta a favor, no en contra.
+
+            <details>
+            <summary><b>Cómo se califica — ábrelo antes de escribir el hito</b></summary>
+
+            ### Cómo se califica
+
+            El hito vale **sobre 5,0** y se corrige con esta tabla. Está aquí, antes de que lo escribas, para que
+            sepas contra qué se mide y no tengas que adivinar.
+
+            | Criterio | Peso | 5,0 · Solvente | 3,5 · Cumple | 2,0 · Incompleto | 0 |
+            |---|---|---|---|---|---|
+            | **Evidencia de ejecución**<br>(motor, conteo, `_id`) | 1,0 | los tres datos están y son coherentes entre sí | están los tres | falta alguno | no hay |
+            | **Tus tres consultas**<br>(con la sección que elegiste y por qué) | 1,0 | las consultas responden preguntas propias y justifica la elección de sección | las tres corren y reporta lo que encontró | copia las del cuaderno sin cambiar nada | no hay |
+            | **La entidad que elegiste**<br>(revisar o no, y por qué) | 1,0 | decide, nombra la alternativa que descartó y sostiene el criterio | decide y da una razón | menciona una entidad sin decidir | no hay |
+            | **Los dos números del cruce**<br>(y por qué se diferencian) | 1,0 | explica el mecanismo —subcadena frente a palabra— con un ejemplo propio | reporta ambos y dice que la diferencia son falsos positivos | reporta un solo número | no hay |
+            | **Qué NO permite concluir** | 1,0 | nombra el **dato que falta**, no solo la limitación | dice correctamente qué no se puede afirmar | escribe "faltan datos" | no hay |
+            | **Por qué no cabía en una tabla** y **tu sector**<br>(puntos 1 y 6) | se reparten dentro de los anteriores | usa un documento que **abrió** y un dato **real de su trabajo** | responde con un ejemplo del cuaderno | repite el enunciado | no hay |
+
+            **Punto adicional de hasta 0,5**, que no sube de 5,0: una observación propia que el cuaderno no hizo.
+            Un patrón que notaste, una consulta que se te ocurrió, un error que encontraste en el material. Se premia
+            porque es lo más difícil de todo esto.
+
+
+            </details>
+
+            **Lo que no se califica:** la cantidad de commits, las líneas escritas, la velocidad, ni si el motor
+            real te arrancó o te tocó el respaldo. **Un laboratorio que falló y está bien explicado vale más que uno
+            perfecto que no se entiende.**
+
+            **Sobre trabajar en pareja.** Es una entrega por pareja y los dos responden por todo. Si compartieron un
+            solo runtime —cosa legítima— decláralo en el hito: no baja la nota, y no declararlo sí es un problema.
+            """
+        ),
+        md(
+            """
             ### 7.3 — Abrir el hito de hoy (puedes terminarlo en casa)
 
             En el mismo repositorio, con el botón **Add file → Create new file**:
