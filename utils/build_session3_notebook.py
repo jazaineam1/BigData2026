@@ -780,6 +780,39 @@ def build_cells():
             **Cómo leer el dibujo.** Son ejes independientes: un sistema real fragmenta *y* replica cada fragmento.
             Lo que hay que retener es que **fragmentar responde a "no cabe" y replicar responde a "no se puede caer"**.
 
+            ## ¿Y qué máquinas hacen falta para esto?
+
+            Es la pregunta correcta, y la respuesta honesta tiene dos partes.
+
+            ### Lo mínimo real, en producción
+
+            | Estrategia | Qué se necesita de verdad | Por qué ese número |
+            |---|---|---|
+            | **Replicar** | **3 servidores** para un conjunto de réplicas | con 3, si uno cae los otros dos son mayoría y pueden elegir un nuevo principal. Con 2 no hay mayoría posible y el sistema se bloquea |
+            | **Fragmentar** | **3 servidores por cada fragmento**, más 3 de configuración, más 1 o más enrutadores | cada fragmento es a su vez un conjunto de réplicas: fragmentar sin replicar significa que si cae una máquina, pierdes esa parte de los datos |
+
+            Es decir: un clúster fragmentado de verdad, con tres fragmentos, arranca en **unas 13
+            máquinas**. Por eso esto no se monta "por si acaso": se monta cuando el volumen o la
+            disponibilidad lo exigen, y cuesta dinero y personas.
+
+            ### ¿Puedo hacerlo en mi computador?
+
+            **Sí, y es más fácil de lo que parece — pero simulado.** Un conjunto de réplicas de tres nodos
+            en un portátil son tres procesos `mongod` en tres puertos distintos, cada uno con su carpeta de
+            datos. Funciona, se comporta igual y sirve para aprender.
+
+            Lo que **no** obtienes en tu máquina es lo único que justifica todo esto: **tolerancia a
+            fallos reales**. Si se apaga tu portátil, se apagan las tres réplicas a la vez. La copia
+            protege contra la caída de *una* máquina, no contra la caída de la máquina que las contiene a
+            todas.
+
+            > **PARA LLEVAR.** Replicar en un solo computador enseña el mecanismo y no da la garantía.
+            > Es exactamente igual que guardar el respaldo de tu disco duro en el mismo disco duro.
+
+            En la práctica, casi nadie monta esto a mano: se contrata. Eso es lo que hace Atlas, y es lo
+            que vas a usar el jueves entrante — un conjunto de réplicas de tres nodos, administrado, en el
+            plan gratuito.
+
             **Error común.** Confundirlos. "Tengo tres servidores" no dice nada por sí solo: hay que preguntar si
             cada uno tiene una parte o si cada uno tiene una copia.
             """
@@ -818,6 +851,42 @@ def build_cells():
 
             > **La frase que hay que llevarse:** la consistencia eventual no te da un dato falso; **te da un dato que
             > fue verdad hace un momento.**
+
+            ## ACID, letra por letra
+
+            ACID es un acuerdo entre tú y la base de datos: si le pides que trate varias operaciones
+            como **una sola transacción**, ella se compromete a cuatro cosas. Se entiende mejor con un
+            caso que con la definición, así que usemos uno que a todos nos importa: **una transferencia
+            de $200 000 de tu cuenta a la mía.** Son dos operaciones —restar de una, sumar a la otra— y
+            tienen que pasar juntas.
+
+            | Letra | Qué promete | En la transferencia | Qué pasa si falla |
+            |---|---|---|---|
+            | **A** · Atomicidad | o pasa todo, o no pasa nada | si el sistema se cae después de restar y antes de sumar, se deshace el resto | los $200 000 desaparecen |
+            | **C** · Consistencia | las reglas del negocio se siguen cumpliendo al terminar | si hay una regla de "el saldo no puede quedar negativo", la transacción se rechaza en vez de violarla | quedan cuentas en estados imposibles |
+            | **I** · Aislamiento | dos transacciones simultáneas no se pisan | si tú transfieres y a la vez te cobran la cuota, cada una ve un estado coherente, no la mitad de la otra | el saldo final depende del azar del orden |
+            | **D** · Durabilidad | lo confirmado sobrevive a un corte de luz | si el sistema dijo "listo", está en disco aunque se vaya la energía un segundo después | el banco dice que pagaste y mañana no |
+
+            ### Las dos confusiones más frecuentes
+
+            **La C de ACID no es "ver siempre el último valor".** Eso es otra cosa y tiene otro nombre;
+            llega en la sesión 4. La C de ACID es que **las reglas que tú declaraste se siguen cumpliendo**:
+            que una llave foránea apunte a algo que existe, que un saldo no quede negativo, que un campo
+            obligatorio no quede vacío.
+
+            **ACID no es "lo relacional".** El MongoDB que vas a levantar en un rato tiene transacciones
+            ACID sobre varios documentos desde la versión 4.0, y una operación sobre **un solo documento
+            siempre fue atómica**, desde la primera versión. No son tecnologías: son **garantías que se
+            eligen**, y se pagan con coordinación, es decir con tiempo.
+
+            ### Y entonces, ¿qué es BASE?
+
+            BASE es lo que queda cuando **renuncias a parte de esa coordinación para ganar disponibilidad**.
+            El nombre es un juego de palabras con ACID —ácido y base— y significa *Basically Available,
+            Soft state, Eventually consistent*: básicamente disponible, estado blando, consistente al final.
+
+            Traducido: el sistema prefiere **responderte con algo** antes que hacerte esperar a que todas
+            las copias se pongan de acuerdo. Y "al final" no tiene número.
 
             ## ACID y BASE, en lenguaje de negocio
 
@@ -1068,7 +1137,47 @@ def build_cells():
             > solo en Colab. En tu computador con Windows no corre: no pierdas la noche intentándolo. La
             > ruta para tu máquina es Atlas, y llega el jueves entrante.
 
-            ## Paso 0 · Arrancar el motor (ejecuta y sigue leyendo)
+            ## Paso 0 · Arrancar el motor
+
+            ### Qué va a hacer esta celda, en cuatro pasos
+
+            Una base de datos **no es una librería de Python**: es un **programa aparte** que queda
+            corriendo y escuchando peticiones. Instalar `pymongo` no instala MongoDB, igual que instalar
+            un navegador no instala un sitio web. Por eso hay dos cosas distintas que preparar.
+
+            | Paso | Qué hace | Equivalente cotidiano |
+            |---|---|---|
+            | 1 | **Descarga** el programa servidor desde el sitio oficial de MongoDB | bajar el instalador |
+            | 2 | **Lo descomprime** en una carpeta de este Colab | instalarlo |
+            | 3 | **Lo arranca** en segundo plano, escuchando en el puerto 27017, guardando en una carpeta de datos | abrir el programa y dejarlo abierto |
+            | 4 | **Se conecta** desde Python con `pymongo`, que es el cliente | abrir la ventana que le habla al programa |
+
+            Los tres nombres que aparecen y conviene entender:
+
+            - **`mongod`** es el servidor. La *d* es de *daemon*: un programa que se queda corriendo en
+              segundo plano. Es quien realmente guarda los datos.
+            - **`--dbpath`** es la carpeta donde escribe. Si la borras, borraste la base.
+            - **`--port 27017`** es la puerta por donde escucha. `pymongo` toca esa puerta.
+
+            ### Si mañana quieres hacerlo en tu propio proyecto
+
+            La secuencia es siempre la misma, cambie el sistema operativo o el proveedor:
+
+            1. **conseguir un servidor** — instalándolo en tu máquina, levantándolo con Docker, o
+               contratándolo ya administrado, que es Atlas;
+            2. **saber su dirección** — `localhost:27017` si es tuyo, o un host en internet si es de un
+               proveedor;
+            3. **instalar el cliente** del lenguaje — `pip install pymongo`;
+            4. **conectarte** con `MongoClient(direccion)`.
+
+            **En tu computador con Windows, lo de esta celda no funciona**: descarga la versión de Linux.
+            Para tu máquina, la ruta es el instalador oficial de MongoDB Community, o Atlas. No pierdas la
+            noche intentándolo con este código.
+
+            > **OJO.** Aquí el servidor vive dentro de esta pestaña. Cuando la cierres, el programa muere y
+            > tus datos con él — igual que si apagaras el computador donde corre la base. Esa es
+            > exactamente la limitación que la sesión 4 viene a resolver.
+
 
             Esta celda **no está oculta a propósito**: si algo falla, tienes que poder leer qué pasó.
 
@@ -1612,10 +1721,35 @@ def build_cells():
                 {"$sort": {"_id": 1}},
             ]
 
-            print("MES      NOTICIAS")
-            print("-" * 34)
-            for fila in coleccion.aggregate(por_mes):
-                print(f"{fila['_id']}  {fila['n']:4d}  {'#' * (fila['n'] // 5)}")
+            resultado = list(coleccion.aggregate(por_mes))
+            meses = [f["_id"] for f in resultado]
+            conteos = [f["n"] for f in resultado]
+
+            import matplotlib.pyplot as plt
+
+            fig, ax = plt.subplots(figsize=(9, 3.4))
+            barras = ax.bar(meses, conteos, color="#1976d2", width=0.62)
+
+            # Agosto esta incompleto: lo pintamos distinto para no comparar peras con manzanas.
+            barras[-1].set_color("#ef6c00")
+            barras[-1].set_hatch("//")
+
+            for barra, n in zip(barras, conteos):
+                ax.text(barra.get_x() + barra.get_width() / 2, n + 3, str(n),
+                        ha="center", fontsize=9)
+
+            ax.set_title("Noticias de contratacion publicadas por mes", fontsize=12)
+            ax.set_ylabel("noticias")
+            ax.set_ylim(0, max(conteos) * 1.18)
+            ax.spines[["top", "right"]].set_visible(False)
+            ax.grid(axis="y", alpha=0.25)
+            ax.annotate("agosto esta incompleto",
+                        xy=(len(meses) - 1, conteos[-1] + 6),
+                        xytext=(len(meses) - 1.9, max(conteos) * 0.95),
+                        fontsize=9, color="#ef6c00",
+                        arrowprops=dict(arrowstyle="->", color="#ef6c00"))
+            plt.tight_layout()
+            plt.show()
             """
         ),
         md(
@@ -1956,26 +2090,38 @@ def build_cells():
         code(
             """
             # Abre UNO. Este es el nivel de detalle con el que Laura decide.
-            from pprint import pprint
+            import pandas as pd
+            from IPython.display import HTML, display
 
             caso = bandeja[0]      # <--- cambia el numero y mira otro
 
-            print("PROCESO   :", caso["id_del_proceso"])
-            print("ENTIDAD   :", caso["entidad"], "|", caso["departamento"])
-            print("OBJETO    :", caso["objeto"])
-            print("VALOR     : $", f"{caso['valor']:,.0f}")
-            print("MODALIDAD :", caso["modalidad"], "| respuestas:", caso["respuestas"])
-            print("ESTADO    :", caso["estado"], "| publicado:", caso["publicado"])
-            print()
-            # .get() y no [ ]: si el campo no viniera, la celda avisa en vez de romperse.
+            # .get() y no [ ]: si un campo no viniera, avisa en vez de romperse.
+            ficha = pd.DataFrame(
+                [
+                    ("Proceso",    caso["id_del_proceso"]),
+                    ("Entidad",    caso["entidad"]),
+                    ("Ubicacion",  caso["departamento"]),
+                    ("Objeto",     caso["objeto"]),
+                    ("Valor",      f"$ {caso['valor']:,.0f}"),
+                    ("Modalidad",  caso["modalidad"]),
+                    ("Respuestas de proveedores", caso["respuestas"]),
+                    ("Estado",     f"{caso['estado']} — publicado {caso['publicado']}"),
+                ],
+                columns=["campo", "valor"],
+            )
+            display(ficha.style.hide(axis="index"))
+
             enlace = caso.get("url_secop", "")
-            print("VELO TU MISMO EN SECOP:")
-            print("  ", enlace or "(este proceso no trae enlace publico)")
-            print()
-            print("LO QUE DIJO LA PRENSA SOBRE ESTA ENTIDAD:")
-            for t in caso["titulares"]:
-                print("  -", t["publicado"], t["titulo"][:88])
-                print("   ", t["url"])
+            if enlace:
+                display(HTML(f'<p><a href="{enlace}" target="_blank">Ver este proceso en SECOP</a></p>'))
+
+            prensa = pd.DataFrame([
+                {"fecha": t["publicado"],
+                 "titular": f'<a href="{t["url"]}" target="_blank">{t["titulo"][:95]}</a>'}
+                for t in caso["titulares"]
+            ])
+            print("Lo que dijo la prensa sobre esta entidad:")
+            display(HTML(prensa.to_html(escape=False, index=False)))
             """
         ),
         md(
@@ -2144,6 +2290,119 @@ def build_cells():
             señal difusa en una identificación.
             """
         ),
+        md(
+            """
+            ## Paso 6.6 · De vuelta a la tabla: documentos y pandas juntos
+
+            Legítima pregunta a esta altura: *si al final quiero una tabla para analizar, ¿para qué
+            guardé documentos?*
+
+            Porque son dos momentos distintos del mismo trabajo:
+
+            | | Documento | Tabla |
+            |---|---|---|
+            | Sirve para | **guardar y consultar** información con forma irregular | **analizar y cruzar** un conjunto ya recortado |
+            | Conserva | todo: listas, anidamiento, campos que solo tienen algunos | solo lo que quepa en columnas fijas |
+            | Cuándo lo usas | cuando llega el dato y no sabes qué vas a preguntar | cuando ya sabes qué quieres calcular |
+
+            La operación que va de uno a otro se llama **aplanar**: elegir qué del árbol se vuelve
+            columna, y aceptar que lo demás se queda atrás. **Aplanar siempre pierde información**, y por
+            eso se hace al final y no al principio.
+            """
+        ),
+        code(
+            """
+            # 6.6.1 — Aplanar: del documento a la fila.
+            import pandas as pd
+
+            filas = []
+            for n in coleccion.find({}, {"titulo": 1, "seccion": 1, "publicado": 1,
+                                         "n_palabras": 1, "etiquetas": 1}):
+                filas.append({
+                    "id": n["_id"],
+                    "titulo": n["titulo"],
+                    "seccion": n["seccion"],
+                    "mes": n["publicado"][:7],
+                    "palabras": n["n_palabras"],
+                    # Las decisiones de aplanado, una por una:
+                    "n_etiquetas": len(n["etiquetas"]),                                  # la lista -> su tamano
+                    "etiquetas": ", ".join(e["nombre"] for e in n["etiquetas"][:4]),     # y un resumen de texto
+                })
+
+            noticias_df = pd.DataFrame(filas)
+            print("Documentos convertidos en filas:", noticias_df.shape)
+            noticias_df.head(4)
+            """
+        ),
+        md(
+            """
+            ### 🔎 Leamos el resultado — qué se perdió al aplanar
+
+            Mira lo que acaba de pasar con `etiquetas`. En el documento era **una lista de objetos**, cada
+            uno con `id`, `nombre` y `slug`. En la tabla es **un texto separado por comas, y solo los
+            primeros cuatro**.
+
+            Lo que perdiste:
+
+            - ya no puedes filtrar por una etiqueta sin buscar subcadenas — y de eso ya sabes lo que pasa;
+            - perdiste el `slug` y el `id` de cada etiqueta;
+            - perdiste las etiquetas de la quinta en adelante.
+
+            **Y no es un defecto del código: es la definición de aplanar.** Por eso la pregunta correcta
+            nunca es *¿tabla o documento?* sino **¿en qué momento de mi trabajo estoy?**
+
+            > **PARA LLEVAR.** Guarda en documentos mientras no sepas qué vas a preguntar. Aplana a tabla
+            > cuando ya lo sepas, y deja el documento intacto para poder volver a aplanar distinto mañana.
+
+            ## Ahora sí, la tabla integral
+
+            Con las noticias ya en forma de tabla, se unen con los procesos de SECOP igual que unirías
+            dos hojas de cálculo. La llave es la entidad.
+            """
+        ),
+        code(
+            """
+            # 6.6.2 — Unir las dos fuentes en UNA tabla, con pandas.
+            bandeja_df = pd.DataFrame(bandeja)[
+                ["entidad", "departamento", "objeto", "valor", "modalidad",
+                 "respuestas", "noticias_de_la_entidad"]
+            ]
+
+            # Cuantas noticias y cuantas palabras aporta cada entidad, desde el lado noticias.
+            #   Nota: aqui no tenemos la entidad en cada noticia, asi que usamos el conteo
+            #   que ya trae la bandeja. En la sesion 4 lo haremos con un $lookup de verdad.
+            integral = (
+                bandeja_df
+                .groupby(["entidad", "departamento"], as_index=False)
+                .agg(procesos_en_bandeja=("objeto", "count"),
+                     valor_total=("valor", "sum"),
+                     noticias=("noticias_de_la_entidad", "max"))
+                .sort_values("valor_total", ascending=False)
+            )
+
+            integral["valor_total"] = integral["valor_total"].map(lambda v: f"$ {v:,.0f}")
+            print("Tabla integral:", integral.shape)
+            integral.head(10)
+            """
+        ),
+        md(
+            """
+            ### 🔎 Leamos el resultado — una sola tabla para decidir
+
+            Ahora tienes en un solo objeto de pandas lo que antes estaba en dos mundos: **cuántos procesos
+            de riesgo tiene cada entidad, cuánto suman, y cuánta atención de prensa recibió**. Eso ya es
+            un tablero: se ordena, se filtra, se exporta a Excel y se lleva a una reunión.
+
+            **Y aquí cabe la advertencia de siempre**, ahora con más fuerza porque la tabla se ve
+            convincente: la columna `noticias` sigue midiendo *aparición en prensa*, con todo lo que eso
+            mezcla. Una tabla ordenada no vuelve verdadero un indicador que mide otra cosa.
+
+            **Lo que ganaste al pasar por documentos primero:** si mañana Laura pregunta algo que hoy no
+            anticipamos —por autor, por etiqueta, por tipo de bloque— los documentos siguen ahí completos
+            y aplanas distinto. Si hubieras guardado directo en esta tabla, esa pregunta ya no se podría
+            responder.
+            """
+        ),
         *question_cell(
             8,
             "El cruce entre dos fuentes",
@@ -2192,6 +2451,79 @@ def build_cells():
             3. Lee la última versión de los dos archivos. **Comprueba una cosa concreta:** que no quede ningún
                `COMPLETAR` y que el indicador tenga responsable y límite.
             4. Si algo falta, escríbelo como comentario en la línea exacta. Si está bien, sigue.
+
+            ### 7.1-bis — Lo que pasa cuando dos personas tocan el mismo archivo
+
+            Esta es la pregunta que todo el mundo tiene y casi nadie hace. Van a trabajar en pareja sobre
+            los mismos archivos, así que conviene resolverla ahora.
+
+            **Primero, tres palabras que no significan lo mismo:**
+
+            | Palabra | Qué hace | Dónde queda |
+            |---|---|---|
+            | **commit** | guarda una versión con tu nombre y la fecha | **solo en tu copia** |
+            | **push** | sube tus commits a GitHub | ahora sí, en el servidor |
+            | **pull** | trae a tu copia lo que otros subieron | en tu copia |
+
+            > **OJO.** Un commit sin push **no lo ve nadie**. Es el malentendido más caro de Git: alguien
+            > dice "ya lo guardé" y en el servidor no hay nada. Cuando trabajas desde github.com, como
+            > nosotros, el commit y el push ocurren juntos al pulsar *Commit changes* — por eso desde el
+            > navegador este problema casi no aparece.
+
+            **Ahora el caso: tú y tu pareja editan el mismo archivo.** Hay dos escenarios, y solo uno
+            duele.
+
+            **Escenario 1 — tocaron partes distintas del archivo.** Tú escribiste el punto 2 y tu pareja
+            el punto 5. Git los combina **solo**, sin preguntar nada. Esto pasa la mayoría de las veces y
+            es la razón por la que Git existe: dos personas trabajando a la vez sin pisarse.
+
+            **Escenario 2 — tocaron la misma línea.** Los dos reescribieron el punto 3. Git **no adivina
+            cuál es la buena**, y hace lo correcto: se detiene y te lo muestra así:
+
+            ```
+            <<<<<<< tu versión
+            La sección que elegí fue salud porque trabajo en una EPS.
+            =======
+            La sección que elegí fue bogota porque vivo aquí.
+            >>>>>>> la versión de tu pareja
+            ```
+
+            Eso es un **conflicto**. No es un error ni algo que rompiste: es Git diciendo *"aquí hace falta
+            una persona"*. Para resolverlo borras las tres líneas de marcas y dejas el texto que acuerden
+            —el tuyo, el de tu pareja, o uno nuevo que combine los dos— y guardas.
+
+            > **PARA LLEVAR.** Git nunca borra el trabajo de nadie sin avisar. Si hay duda, para y
+            > pregunta. Un conflicto es una conversación pendiente, no un accidente.
+
+            **Y la forma de tener menos conflictos no es técnica:** repártanse **secciones distintas** del
+            archivo antes de empezar. En el hito de hoy, por ejemplo, uno toma los puntos 0 a 3 y el otro
+            del 4 al 7.
+
+            ### Ejercicio · Provoquen un conflicto a propósito
+
+            Diez minutos, en pareja, desde el navegador. Vale la pena verlo una vez en un archivo que no
+            importa, para no verlo por primera vez en la entrega.
+
+            1. **Los dos a la vez** abren en GitHub el archivo `hitos/s03/03_evidencia_documental.md` y
+               pulsan el lápiz de editar. **Sin cerrar ninguna de las dos pestañas.**
+            2. En la línea de «La sección que elegí fue», **cada uno escribe una sección distinta**.
+            3. **La persona A** pulsa *Commit changes* y elige **Commit directly to the main branch**.
+               Funciona sin problema.
+            4. **La persona B** pulsa *Commit changes* en su pestaña. GitHub le responde algo como
+               *"this file has changed since you started editing"* y **no la deja guardar**.
+
+            **Qué acaba de pasar, y es lo importante:** GitHub **protegió** el trabajo de A. Si hubiera
+            dejado guardar a B, el texto de A habría desaparecido sin que nadie se enterara. Eso es
+            exactamente lo que Git existe para impedir.
+
+            **Ahora resuélvanlo**, que es la otra mitad del ejercicio:
+
+            5. B copia su texto a otro lado, recarga la página y ve la versión de A.
+            6. Entre los dos deciden qué queda: una, otra, o una frase nueva que diga las dos cosas.
+            7. B edita con el texto acordado y guarda. Ahora sí entra.
+
+            **Escríbanlo en el hito, punto 7:** qué pasó, qué decidieron y por qué. Esa frase vale más que
+            cualquier definición de conflicto que puedan copiar.
 
             ### 7.2 — Integrar
 

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 420" width="980" height="420"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 470" width="980" height="470"
      role="img" aria-labelledby="titulo desc">
   <title id="titulo">Fragmentar frente a replicar</title>
   <desc id="desc">Dos estrategias distintas para repartir datos entre varias máquinas.
@@ -18,7 +18,7 @@
     .divisor  { stroke: #cfd8dc; stroke-width: 2; stroke-dasharray: 7 6; }
   </style>
 
-  <rect class="fondo" x="0" y="0" width="980" height="420"/>
+  <rect class="fondo" x="0" y="0" width="980" height="470"/>
 
   <!-- ─────────────── FRAGMENTAR ─────────────── -->
   <text class="titulo" x="60" y="46" fill="#0d47a1">FRAGMENTAR (sharding)</text>
@@ -38,7 +38,7 @@
   <text class="clave" x="60" y="252" fill="#0d47a1">→ resuelve que no quepa</text>
 
   <g>
-    <rect x="60" y="278" width="402" height="106" rx="9" fill="#f5f9ff" stroke="#bbdefb" stroke-width="1.5"/>
+    <rect x="60" y="278" width="402" height="142" rx="9" fill="#f5f9ff" stroke="#bbdefb" stroke-width="1.5"/>
     <text class="nota" x="78" y="304">Se paga con esto:</text>
     <text class="nota" x="78" y="326">· una consulta que no usa la llave de reparto</text>
     <text class="nota" x="78" y="346">  tiene que preguntarle a todas las máquinas;</text>
@@ -47,7 +47,7 @@
   </g>
 
   <!-- ─────────────── divisor ─────────────── -->
-  <line class="divisor" x1="500" y1="40" x2="500" y2="390"/>
+  <line class="divisor" x1="500" y1="40" x2="500" y2="440"/>
 
   <!-- ─────────────── REPLICAR ─────────────── -->
   <text class="titulo" x="540" y="46" fill="#1b5e20">REPLICAR</text>
@@ -71,7 +71,7 @@
   <text class="clave" x="540" y="252" fill="#1b5e20">→ resuelve caídas y lecturas</text>
 
   <g>
-    <rect x="540" y="278" width="402" height="106" rx="9" fill="#f4faf5" stroke="#c8e6c9" stroke-width="1.5"/>
+    <rect x="540" y="278" width="402" height="142" rx="9" fill="#f4faf5" stroke="#c8e6c9" stroke-width="1.5"/>
     <text class="nota" x="558" y="304">Se paga con esto:</text>
     <text class="nota" x="558" y="326">· mantener las copias de acuerdo cuesta tiempo;</text>
     <text class="nota" x="558" y="346">· si lees de una réplica que aún no se enteró,</text>

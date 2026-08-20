@@ -65,11 +65,13 @@ def main():
 
     entorno = {
         "__name__": "__main__",
-        "display": lambda x: capturado.append(getattr(x, "data", str(x))),
+        # Solo nos interesan los bloques HTML: los DataFrame se ignoran aqui.
+        "display": lambda x: capturado.append(x.data) if isinstance(x, SalidaHTML) else None,
         "HTML": SalidaHTML,
     }
 
     ok, fallos, preguntas = 0, [], 0
+    html_preguntas = []
     for i, celda in enumerate(nb["cells"]):
         if celda["cell_type"] != "code":
             continue
@@ -99,12 +101,15 @@ def main():
                 print(f"[{i:3d}] hueco del estudiante completado: {relleno}")
 
         es_pregunta = "pregunta_interactiva(" in src and "def pregunta_interactiva" not in src
+        antes = len(capturado)
 
         try:
             exec(compile(src, f"celda_{i}", "exec"), entorno)
             ok += 1
             if es_pregunta:
                 preguntas += 1
+                # Solo los bloques que dibujo ESTA celda cuentan como pregunta.
+                html_preguntas.extend(capturado[antes:])
         except Exception:
             fallos.append((i, traceback.format_exc()))
             print(f"[{i:3d}] FALLO")
@@ -114,11 +119,10 @@ def main():
     problemas = []
     if preguntas != 8:
         problemas.append(f"se ejecutaron {preguntas} preguntas y deberian ser 8")
-    for html in capturado:
-        if "Verificar respuesta" not in html:
-            problemas.append("una pregunta se dibujo sin su boton de verificar")
-            break
-    radios = sum(html.count('type="radio"') for html in capturado)
+    sin_boton = [h for h in html_preguntas if "Verificar respuesta" not in h]
+    if sin_boton:
+        problemas.append(f"{len(sin_boton)} pregunta(s) se dibujaron sin su boton de verificar")
+    radios = sum(h.count('type="radio"') for h in html_preguntas)
     if preguntas and radios != preguntas * 4:
         problemas.append(f"hay {radios} opciones dibujadas y deberian ser {preguntas * 4}")
 
@@ -126,7 +130,7 @@ def main():
     print("=" * 64)
     print(f"celdas de codigo ejecutadas : {ok}")
     print(f"  de ellas, preguntas       : {preguntas} de 8")
-    print(f"  bloques HTML dibujados    : {len(capturado)}")
+    print(f"  bloques HTML de preguntas : {len(html_preguntas)}")
     print(f"  opciones dibujadas        : {radios}")
     print(f"fallos                      : {len(fallos)}")
     for p in problemas:
