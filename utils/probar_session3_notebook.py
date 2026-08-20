@@ -44,7 +44,16 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NB = os.path.join(REPO, "Cuadernos", "3_MongoDB_Documental.ipynb")
 RAW = "https://raw.githubusercontent.com/jazaineam1/BigData2026/main"
 
-HUECOS = {'OPERADOR = "____"': 'OPERADOR = "$gt"'}
+# Huecos que el estudiante completa. La prueba los rellena para poder
+# ejecutar el cuaderno de corrido y comprobar que la solucion es la correcta.
+HUECOS = {
+    'OPERADOR = "____"': 'OPERADOR = "$gt"',
+    'articulos_col.____({})': 'articulos_col.delete_many({})',
+    'articulos_col.____(docs)': 'articulos_col.insert_many(docs)',
+    '.____("citas", -1).____(5)': '.sort("citas", -1).limit(5)',
+    '"_id": "$____", "n"': '"_id": "$revista", "n"',
+    '{"$____": "$autores"}': '{"$unwind": "$autores"}',
+}
 
 
 class SalidaHTML:

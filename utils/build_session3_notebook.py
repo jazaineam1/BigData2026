@@ -45,18 +45,25 @@ DATOS_REFERENCIA = f"{RAW}/Datos/cruce_por_referencia_2026.json"
 TOTAL_QUESTIONS = 8
 
 
-import base64 as _b64
 
 
-def svg(nombre, alt, width=940):
-    """Incrusta un SVG de assets/ como imagen. El fuente queda editable en disco."""
+def svg(nombre, alt):
+    """
+    Enlaza un SVG de assets/ desde el repositorio publicado.
+
+    Se enlaza en vez de incrustar en base64 por dos razones: el cuaderno no
+    carga con 6 KB de blob por diagrama, y el archivo sigue siendo editable
+    sin decodificar nada. El precio es que el diagrama solo se ve si el
+    repositorio ya esta publicado, asi que hay que hacer push antes de clase.
+
+    Sin ancho fijo: el SVG trae su propio tamano y se adapta al de la celda.
+    Fijar un ancho en pixeles es lo que lo desbordaba por la derecha.
+    """
     ruta = os.path.join(ROOT, "assets", "diagrams", "session3", f"{nombre}.svg")
-    with open(ruta, encoding="utf-8") as f:
-        datos = _b64.b64encode(f.read().encode("utf-8")).decode("ascii")
-    return (
-        f'<img alt="{alt}" width="{width}" '
-        f'src="data:image/svg+xml;base64,{datos}">'
-    )
+    if not os.path.exists(ruta):
+        raise FileNotFoundError(ruta)
+    url = f"{RAW}/assets/diagrams/session3/{nombre}.svg"
+    return f'<img src="{url}" alt="{alt}" style="max-width:100%;height:auto;">'
 
 
 def hidden(cell, title, *tags):
@@ -2606,6 +2613,204 @@ def build_cells():
         ),
         md(
             """
+            ---
+            # Reto final · Hazlo tú, con otros datos
+
+            Todo lo de esta noche lo hiciste sobre un caso que yo te di preparado. **Este reto es
+            distinto: son datos que nunca has visto, de otro dominio, y el camino lo eliges tú.**
+
+            Si lo terminas, ya no seguiste un tutorial de MongoDB: hiciste un trabajo con MongoDB.
+
+            ## El caso
+
+            Tu programa de maestría quiere saber **qué se está investigando sobre contratación pública en
+            el mundo**: cuánta producción hay, de qué revistas sale, cuántos autores firman cada trabajo y
+            cuáles se citan más.
+
+            La fuente es **Crossref**, el registro donde se inscriben los artículos académicos con su DOI.
+            Es pública, no pide cuenta y devuelve JSON.
+
+            > **OJO.** No la elegí por bonita. La elegí porque tiene la misma forma incómoda que las
+            > noticias: `author` es una **lista de objetos**, cada autor puede traer `affiliation` que es
+            > **otra lista**, `title` es una **lista** aunque casi siempre tenga un elemento, y la fecha
+            > viene como `{"date-parts": [[2024, 3, 27]]}` — una lista dentro de otra lista. Y varios
+            > campos **no siempre vienen**. Otra vez: no cabe en una tabla sin pelear.
+
+            ## Paso 1 · Trae los datos y míralos antes de tocarlos
+
+            La primera regla del oficio: **mira la forma antes de decidir nada**.
+            """
+        ),
+        code(
+            """
+            # Reto 1 — traer y mirar. Cambia el tema si quieres otro.
+            import urllib.request, urllib.parse, json
+            from pprint import pprint
+
+            TEMA = "public procurement corruption"      # <--- cambialo si quieres
+
+            url = (
+                "https://api.crossref.org/works"
+                f"?query={urllib.parse.quote(TEMA)}"
+                "&rows=120"
+                "&select=DOI,title,author,published,container-title,type,is-referenced-by-count"
+            )
+            # Crossref pide identificarse: es cortesia, y da mejor servicio.
+            peticion = urllib.request.Request(
+                url, headers={"User-Agent": "BigData-UCentral/1.0 (mailto:curso@ucentral.edu.co)"}
+            )
+            with urllib.request.urlopen(peticion, timeout=60) as r:
+                respuesta = json.loads(r.read().decode("utf-8"))
+
+            articulos = respuesta["message"]["items"]
+            print("Articulos traidos:", len(articulos))
+            print("Disponibles en Crossref sobre el tema:", respuesta["message"]["total-results"])
+            print()
+            print("UN ARTICULO COMPLETO, tal como viene:")
+            pprint(articulos[0])
+            """
+        ),
+        md(
+            """
+            ### Antes de seguir, contesta mirando esa salida
+
+            No hace falta escribir nada todavía. Solo mira y responde en voz alta:
+
+            1. ¿Qué campos son **listas**? Hay al menos tres.
+            2. ¿Cuál está **anidado dentro de otra lista**?
+            3. ¿Qué campo tiene ese artículo que **quizá otro no tenga**?
+
+            ## Paso 2 · Cárgalos en tu base
+
+            Ya sabes hacer esto. Dos advertencias, y las dos las viste hoy:
+
+            - `_id` tiene que ser **único**. El DOI lo es: úsalo.
+            - Hazlo **idempotente**, para poder repetirlo sin duplicar.
+            """
+        ),
+        code(
+            """
+            # Reto 2 — cargar. COMPLETA las dos lineas marcadas.
+            articulos_col = db["articulos"]
+
+            # a) que hay que hacer antes de insertar, para poder repetir la celda?
+            articulos_col.____({})
+
+            docs = []
+            for a in articulos:
+                docs.append({
+                    "_id": a["DOI"],                                  # el DOI como llave
+                    "titulo": (a.get("title") or ["(sin titulo)"])[0],  # title es LISTA
+                    "revista": (a.get("container-title") or ["(sin revista)"])[0],
+                    "tipo": a.get("type"),
+                    "citas": a.get("is-referenced-by-count", 0),
+                    "anio": (a.get("published", {}).get("date-parts", [[None]])[0][0]),
+                    "autores": [
+                        {"nombre": f"{au.get('given','')} {au.get('family','')}".strip(),
+                         "afiliaciones": [af.get("name") for af in au.get("affiliation", [])]}
+                        for au in a.get("author", [])
+                    ],
+                })
+
+            # b) con que metodo insertas MUCHOS documentos de una sola vez?
+            articulos_col.____(docs)
+
+            print("Articulos en tu base:", articulos_col.count_documents({}))
+            """
+        ),
+        md(
+            """
+            > **OJO — el `.get()` está por todas partes y no es casualidad.** `a.get("title")` en vez de
+            > `a["title"]` es lo que evita que un artículo sin título rompa la carga entera. Cuando los
+            > campos no siempre vienen, indexar directo es una bomba de tiempo.
+
+            ## Paso 3 · Tres preguntas, tres consultas
+
+            Escríbelas tú. Están ordenadas de menor a mayor dificultad, y las tres se responden con lo
+            que hiciste esta noche.
+            """
+        ),
+        code(
+            """
+            # Reto 3.1 — ¿Cuales son los 5 articulos mas citados?
+            # Pista: find(), sort() y limit(). Para ordenar de mayor a menor: sort("campo", -1)
+
+            for a in articulos_col.find({}, {"titulo": 1, "citas": 1, "_id": 0}).____("citas", -1).____(5):
+                print(a["citas"], "|", a["titulo"][:78])
+            """
+        ),
+        code(
+            """
+            # Reto 3.2 — ¿Que revistas publican mas sobre el tema? Top 8.
+            # Pista: es el mismo pipeline del paso 5 de esta noche, cambiando el campo.
+
+            pipeline_revistas = [
+                {"$match": {"revista": {"$ne": "(sin revista)"}}},
+                {"$group": {"_id": "$____", "n": {"$sum": 1}, "citas": {"$sum": "$citas"}}},
+                {"$sort": {"n": -1}},
+                {"$limit": 8},
+            ]
+
+            for r in articulos_col.aggregate(pipeline_revistas):
+                print(f"{r['n']:3d} articulos | {r['citas']:5d} citas | {str(r['_id'])[:62]}")
+            """
+        ),
+        code(
+            """
+            # Reto 3.3 — ¿Quienes son los autores mas frecuentes?
+            # Pista: 'autores' es una LISTA. Para contar por autor hay que
+            # desenrollarla primero, y esa etapa se llama $unwind.
+
+            pipeline_autores = [
+                {"$____": "$autores"},                       # una fila por autor
+                {"$group": {"_id": "$autores.nombre", "articulos": {"$sum": 1}}},
+                {"$sort": {"articulos": -1}},
+                {"$limit": 10},
+            ]
+
+            for a in articulos_col.aggregate(pipeline_autores):
+                print(f"{a['articulos']:3d} | {a['_id']}")
+            """
+        ),
+        md(
+            """
+            ### 🔎 Leamos el resultado — y la trampa que ya sabes ver
+
+            Antes de escribir ninguna conclusión, hazte las preguntas de esta noche:
+
+            | Pregunta | Aplicada a este reto |
+            |---|---|
+            | ¿De dónde salió mi muestra? | de **una búsqueda por palabras**, igual que el corpus de noticias |
+            | ¿El filtro decide el resultado? | sí: buscaste en inglés, así que la producción en español casi no aparece |
+            | ¿Falta un denominador? | sí: no sabes cuántos artículos publicó cada revista **en total** |
+            | ¿El conteo es aditivo? | no: un artículo con cinco autores cuenta cinco veces tras el `$unwind` |
+
+            **Escribe una sola frase defendible** con tu resultado, del estilo: *"entre los 120 artículos
+            que devolvió esta búsqueda, la revista X es la que más aparece; no sé si publica más sobre el
+            tema o si simplemente publica más de todo"*.
+
+            Si puedes escribir esa frase, entendiste la sesión. La sintaxis se busca en Google; **esto no**.
+
+            ## Paso 4 · Llévalo a una tabla
+
+            Aplana tus artículos a un DataFrame y quédate con: título, revista, año, citas y número de
+            autores. **Y anota qué perdiste al aplanar** — ya sabes que siempre se pierde algo.
+
+            ## Si quieres ir más lejos
+
+            - Cambia `TEMA` por algo de **tu sector** —*hospital readmission*, *credit risk*, *urban
+              mobility*— y repite el reto entero. El código no cambia: eso es lo que acabas de aprender.
+            - Sube `rows` a 500 y mira cuánto tarda. ¿Dónde está el cuello: la red o la base?
+            - Cruza los autores con sus `afiliaciones` y mira qué universidades aparecen. **Cuidado:**
+              `affiliation` viene vacía muchísimas veces. ¿Cuántas? Cuéntalo antes de concluir.
+
+            ## Entrega opcional
+
+            Si lo haces, pégalo en el punto 7 del hito. **No suma ni resta nota por estar bien o mal
+            resuelto**: suma por haberlo intentado y por lo que escribas sobre los límites de tu
+            resultado.
+
+            
             ---
             ## Ticket de salida
 
