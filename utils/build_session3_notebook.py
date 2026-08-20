@@ -210,30 +210,11 @@ def build_cells():
             **Acceso público:** [página del curso]({WEB_CURSO})
 
             > **No necesitas instalar nada en tu computador.** Ni MongoDB, ni Git, ni una cuenta de nube. Todo
-            > ocurre dentro de esta pestaña y dentro de GitHub.com. Esto importa porque la clase se dicta en
-            > computadores de la universidad donde no siempre hay permisos de instalación.
+            > ocurre dentro de esta pestaña y dentro de GitHub.com.
 
-            ## Cómo usar este cuaderno
-
-            **Este cuaderno es más largo de lo que se puede leer en una noche, y es a propósito.** No está
-            hecho para que lo leas de corrido hoy: está hecho para que lo sigas hoy y lo consultes después.
-
-            | | En clase | Después, en tu casa |
-            |---|---|---|
-            | **Sigues** | lo que dice el profesor y las celdas que ejecutas | — |
-            | **Lees completo** | los recuadros de color y las tablas | los bloques largos de «🔎 Leamos el resultado» |
-            | **Consultas** | la **hoja de trucos** del final, mientras escribes consultas | la rúbrica y los pasos de GitHub |
-            | **Abres solo si te interesa** | — | todo lo que esté plegado en **▸ Ver más** |
-
-            Las cuatro etiquetas que verás en los recuadros, y que significan siempre lo mismo:
-
-            - **HAZ ESTO AHORA** — lo único que exige que hagas algo en ese momento.
-            - **OJO** — un error frecuente o una advertencia.
-            - **PARA LLEVAR** — la idea que quiero que te quede.
-            - **MÁS ADELANTE** — se ve en otra sesión; hoy puedes ignorarlo sin costo.
-
-            > **PARA LLEVAR.** Si en algún momento sientes que vas atrasado leyendo: no lo estás. Lo que
-            > importa hoy es que **ejecutes, decidas e interpretes**. El texto queda aquí, y no se borra.
+            Los recuadros llevan siempre una de estas cuatro etiquetas:
+            **HAZ ESTO AHORA** (algo que ejecutas) · **OJO** (un error frecuente) ·
+            **PARA LLEVAR** (la idea que se queda) · **MÁS ADELANTE** (otra sesión; hoy puedes saltarlo).
             """
         ),
         md(
