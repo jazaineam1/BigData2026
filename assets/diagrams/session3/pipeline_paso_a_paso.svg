@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 560" width="980" height="560"
+     role="img" aria-labelledby="tp dp">
+  <title id="tp">Cómo funciona un pipeline de agregación, etapa por etapa</title>
+  <desc id="dp">Un pipeline es una tubería. Entran 987 documentos y cada etapa los transforma antes
+    de pasarlos a la siguiente. La etapa match filtra y deja 987. La etapa group junta los que
+    comparten sección y produce una fila por sección: quedan 57. La etapa sort las ordena de mayor a
+    menor. La etapa limit se queda con las primeras 10. Lo que sale de una etapa es lo que entra a la
+    siguiente, y por eso el orden importa.</desc>
+  <style>
+    .bg { fill:#ffffff; }
+    .h  { font:700 16px "Segoe UI",Arial,sans-serif; fill:#1a2027; }
+    .st { font:700 14px "Consolas","SF Mono",monospace; }
+    .s  { font:400 12px "Segoe UI",Arial,sans-serif; fill:#546e7a; }
+    .m  { font:400 11.5px "Consolas",monospace; fill:#37474f; }
+    .n  { font:700 20px "Consolas",monospace; }
+    .cap{ font:600 12px "Segoe UI",Arial,sans-serif; fill:#37474f; }
+  </style>
+  <rect class="bg" x="0" y="0" width="980" height="560"/>
+
+  <text class="h" x="28" y="32">Un pipeline es una tubería: lo que sale de una etapa es lo que entra a la siguiente</text>
+
+  <!-- ENTRADA -->
+  <rect x="28" y="56" width="150" height="92" rx="8" fill="#eceff1" stroke="#78909c" stroke-width="2"/>
+  <text class="cap" x="103" y="80" text-anchor="middle">ENTRA</text>
+  <text class="n"   x="103" y="112" text-anchor="middle" fill="#37474f">987</text>
+  <text class="s"   x="103" y="132" text-anchor="middle">documentos</text>
+
+  <path d="M182 100 l24 0 l0 -7 l16 9 l-16 9 l0 -7 l-24 0 z" fill="#90a4ae"/>
+
+  <!-- $match -->
+  <rect x="228" y="56" width="168" height="92" rx="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text class="st" x="244" y="80" fill="#0d47a1">$match</text>
+  <text class="s"  x="244" y="98">descarta los que no</text>
+  <text class="s"  x="244" y="114">cumplen la condición</text>
+  <text class="m"  x="244" y="136">n_palabras &gt; 0</text>
+
+  <path d="M400 100 l24 0 l0 -7 l16 9 l-16 9 l0 -7 l-24 0 z" fill="#90a4ae"/>
+
+  <rect x="446" y="56" width="132" height="92" rx="8" fill="#eceff1" stroke="#78909c" stroke-width="2"/>
+  <text class="cap" x="512" y="80" text-anchor="middle">quedan</text>
+  <text class="n"   x="512" y="112" text-anchor="middle" fill="#37474f">987</text>
+  <text class="s"   x="512" y="132" text-anchor="middle">ninguna tenía 0</text>
+
+  <path d="M582 100 l24 0 l0 -7 l16 9 l-16 9 l0 -7 l-24 0 z" fill="#90a4ae"/>
+
+  <!-- $group -->
+  <rect x="628" y="56" width="168" height="92" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2"/>
+  <text class="st" x="644" y="80" fill="#1b5e20">$group</text>
+  <text class="s"  x="644" y="98">junta los que comparten</text>
+  <text class="s"  x="644" y="114">el mismo valor y cuenta</text>
+  <text class="m"  x="644" y="136">_id: "$seccion"</text>
+
+  <path d="M800 100 l24 0 l0 -7 l16 9 l-16 9 l0 -7 l-24 0 z" fill="#90a4ae"/>
+
+  <rect x="846" y="56" width="106" height="92" rx="8" fill="#eceff1" stroke="#78909c" stroke-width="2"/>
+  <text class="cap" x="899" y="80" text-anchor="middle">quedan</text>
+  <text class="n"   x="899" y="112" text-anchor="middle" fill="#1b5e20">57</text>
+  <text class="s"   x="899" y="132" text-anchor="middle">una por sección</text>
+
+  <!-- QUE HACE $group, ampliado -->
+  <rect x="28" y="182" width="924" height="176" rx="9" fill="#f4faf5" stroke="#a5d6a7" stroke-width="1.8"/>
+  <text class="h" x="46" y="208" fill="#1b5e20">Lo que hace $group, que es la etapa que cuesta entender</text>
+
+  <text class="cap" x="46" y="238">ANTES — 987 documentos sueltos</text>
+  <text class="m" x="46" y="262">{ "titulo": "La Gran Vía…",   "seccion": "bogota",    "n_palabras": 557 }</text>
+  <text class="m" x="46" y="282">{ "titulo": "Metro de Bogotá…", "seccion": "bogota",    "n_palabras": 431 }</text>
+  <text class="m" x="46" y="302">{ "titulo": "Nueva EPS…",      "seccion": "salud",     "n_palabras": 688 }</text>
+  <text class="m" x="46" y="322">{ "titulo": "Contratos AMVA…", "seccion": "justicia",  "n_palabras": 947 }</text>
+  <text class="s" x="46" y="344">…y otros 983 más</text>
+
+  <path d="M566 275 l0 -8 l22 14 l-22 14 l0 -8 z" fill="#66bb6a"/>
+  <text class="m" x="540" y="256" fill="#2e7d32">agrupa por</text>
+  <text class="m" x="540" y="272" fill="#2e7d32">"seccion"</text>
+
+  <text class="cap" x="628" y="238">DESPUÉS — 57 filas, una por sección</text>
+  <text class="m" x="628" y="262">{ "_id": "bogota",   "n": 53,  "prom": 679 }</text>
+  <text class="m" x="628" y="282">{ "_id": "salud",    "n": 11,  "prom": 586 }</text>
+  <text class="m" x="628" y="302">{ "_id": "justicia", "n": 238, "prom": 561 }</text>
+  <text class="s" x="628" y="326">El campo _id ya no es la llave del documento:</text>
+  <text class="s" x="628" y="344">en $group es <tspan class="m">por qué agrupaste</tspan>.</text>
+
+  <!-- $sort y $limit -->
+  <rect x="28" y="386" width="452" height="146" rx="9" fill="#fff8e1" stroke="#ffca28" stroke-width="1.8"/>
+  <text class="st" x="46" y="412" fill="#8d6e00">$sort</text>
+  <text class="s"  x="46" y="434">ordena las 57 filas por el campo que elijas.</text>
+  <text class="m"  x="46" y="458">{"$sort": {"n": -1}}</text>
+  <text class="s"  x="46" y="478">−1 es de mayor a menor. 1 sería al revés.</text>
+  <text class="s"  x="46" y="504" fill="#8d6e00">Ojo: ordena lo que le llega, no los 987</text>
+  <text class="s"  x="46" y="520" fill="#8d6e00">documentos originales. Esos ya no existen aquí.</text>
+
+  <rect x="500" y="386" width="452" height="146" rx="9" fill="#fce4ec" stroke="#f06292" stroke-width="1.8"/>
+  <text class="st" x="518" y="412" fill="#880e4f">$limit</text>
+  <text class="s"  x="518" y="434">se queda con las primeras y bota el resto.</text>
+  <text class="m"  x="518" y="458">{"$limit": 10}</text>
+  <text class="s"  x="518" y="478">De 57 filas quedan 10.</text>
+  <text class="s"  x="518" y="504" fill="#880e4f">Por eso el orden importa: si pusieras $limit</text>
+  <text class="s"  x="518" y="520" fill="#880e4f">antes de $sort, te quedarías con 10 cualesquiera.</text>
+</svg>

@@ -489,6 +489,17 @@ def build_cells():
             2. **Listas dentro de un registro.** Una noticia tiene entre 1 y 24 etiquetas, y entre 0 y 25 imágenes.
                En una tabla solo hay dos salidas, y las dos son malas: inventar `etiqueta_1` … `etiqueta_24`, o
                partir la noticia en veinticuatro filas repitiendo el título en cada una.
+
+               **Y esto no es un decir: son estas dos noticias, y las puedes abrir.**
+
+               | | Noticia | Etiquetas |
+               |---|---|---|
+               | **La que más trae** | el atentado a una aspirante a la Contraloría en Ciudad Salitre | **24**: Seguridad, Videos, Investigación, Policía de Bogotá, Disparos, Unidad Nacional de Protección, Atentados, Balaceras, Tiroteo, UNP, Candidata, camioneta, Contraloría General de la Nación, Camioneta blindada, balas, aspirante, Bogotá… |
+               | **La que menos** | el vencimiento del contrato de basuras en Cali | **1**, y dice **«Coolombia»** — con dos oes |
+
+               Ese «Coolombia» es un error de digitación de la redacción, y ahora es un dato de tu base. **Los
+               datos reales vienen así**, y ninguna tabla te va a avisar. En total: 46 noticias traen una sola
+               etiqueta y 7 traen veinte o más.
             3. **Partes de tipos distintos.** El cuerpo no es un texto: es una lista de bloques —entre 1 y 86 por
                noticia— y hay **25 tipos diferentes**: párrafo, imagen, subtítulo, artículo relacionado, video,
                cita de Instagram, PDF adjunto. Cada tipo guarda campos distintos. Una tabla necesitaría una
@@ -549,6 +560,26 @@ def build_cells():
             | **Clave-valor** | un valor cualquiera bajo una llave | poder consultar por el contenido | Redis | mención |
             | **Columnar / wide-column** | filas repartidas por una llave de partición | consultas que no anticipaste | Cassandra | sesiones 4 y 5 |
             | **Grafos** | nodos y relaciones como ciudadanos de primera | el rendimiento en agregaciones masivas | Neo4j | sesión 6 |
+
+            ### "Pero un JSON es clave-valor… ¿no son lo mismo?"
+
+            Es la duda correcta y hay que resolverla, porque por dentro un documento **sí** es un montón de
+            pares clave-valor. La diferencia no está en cómo se ve el dato: está en **qué puede hacer el
+            motor con él**.
+
+            | | Clave-valor (Redis) | Documental (MongoDB) |
+            |---|---|---|
+            | Qué guarda | una llave y **un bulto opaco** | una llave y **una estructura que el motor entiende** |
+            | El motor sabe qué hay adentro | **no.** Para él es texto o bytes | **sí.** Sabe que `seccion` es un campo y que `etiquetas` es una lista |
+            | Puedes preguntar «dame las de sección salud» | **no**, sin recorrerlo todo tú | **sí**, y con un índice |
+            | Puedes cambiar un solo campo | **no.** Traes todo, lo cambias y lo vuelves a guardar entero | **sí**: `update_one` con `$set` toca solo ese campo |
+
+            > **PARA LLEVAR.** Si guardas un JSON en Redis, guardaste **una cadena de texto que casualmente
+            > parece un JSON**. Redis no puede buscar dentro. MongoDB sí, y esa es toda la diferencia: no es
+            > el formato del dato, es **si el motor puede consultarlo por dentro**.
+
+            **Y por eso Redis no es peor.** Es mucho más rápido justamente porque no interpreta nada. Sirve
+            para lo que sirve: guardar y recuperar por llave a toda velocidad.
 
             **La idea que hay que llevarse.** Ninguna de las cuatro es "mejor". Cada una hizo un intercambio, y
             elegir bien significa saber **qué consulta vas a hacer** antes de elegir dónde guardar. Esa frase va a
@@ -680,6 +711,8 @@ def build_cells():
 
             **Qué no podemos concluir.** Que anidar sea siempre mejor. Un arreglo que crece sin límite se vuelve un
             problema serio, y es la primera advertencia de diseño de la sesión 4.
+
+            {svg("coleccion_documento_campo", "Cuatro cajas anidadas: la base de datos contiene colecciones, la coleccion contiene documentos y el documento contiene campos, con la equivalencia en Excel al lado")}
 
             ### Vocabulario mínimo (para los que nunca han usado una base de datos)
 
@@ -963,8 +996,31 @@ def build_cells():
                si lees siempre de la principal, no ves consistencia eventual aunque tengas cinco réplicas. Un
                motor relacional con réplica de lectura tiene exactamente el mismo fenómeno.
 
-            > Existe un resultado clásico llamado **CAP** que formaliza este intercambio bajo fallas de red. Lo
-            > nombramos aquí y lo trabajamos con un clúster real en la sesión 4. Hoy basta con que sepas que existe.
+            ## CAP: las tres letras y la que no se puede elegir
+
+            CAP es el nombre formal de lo que acabas de leer. Son tres promesas:
+
+            | Letra | Qué significa |
+            |---|---|
+            | **C** · Consistencia | todas las copias te dan **el mismo valor**, el más reciente |
+            | **A** · Disponibilidad | el sistema **siempre responde algo**, nunca se queda mudo |
+            | **P** · Tolerancia a particiones | el sistema **sigue funcionando aunque se corte la red** entre las copias |
+
+            La forma en que casi siempre se enuncia —«de las tres, escoge dos»— es la que más confunde,
+            porque **la P no es una opción**. Si tienes varias máquinas, la red entre ellas se va a caer
+            alguna vez: eso no lo decides tú, lo decide el mundo. Y cuando se cae, la copia que quedó
+            aislada tiene exactamente **dos** salidas.
+
+            {svg("cap_particion", "Con la red sana las dos copias coinciden y no hay que elegir; cuando el cable se corta la copia aislada solo puede negarse a responder, que es elegir consistencia, o responder con un dato viejo, que es elegir disponibilidad")}
+
+            **Lo único que hay que llevarse de CAP:** la decisión no aparece todos los días. Aparece
+            **el día que se cae la red**, y ese día el sistema hace lo que alguien configuró meses antes.
+            CAP no te dice qué elegir: te dice que **no puedes no elegir**.
+
+            > **Y con esto se cierra el hilo del bloque.** Copiar el dato da tolerancia a fallas; tolerar
+            > fallas obliga a elegir entre esperar y responder viejo; esa elección tiene nombres —ACID y
+            > BASE, C y A— y no la toma la tecnología, la toma **quien conoce la decisión de negocio que
+            > cuelga del dato**. En la sesión 4 lo verás sobre un clúster real de tres nodos en Atlas.
             """
         ),
         *question_cell(
@@ -1315,6 +1371,26 @@ def build_cells():
             """
             ## Paso 1 · Confirma qué motor te tocó
 
+            ### Antes de seguir: qué estás corriendo y qué NO
+
+            Acabamos de hablar de clústeres, réplicas y fragmentos. Conviene ser claro sobre lo que hay en
+            tu pestaña, porque **no es nada de eso**:
+
+            | | ¿Lo tienes ahora? | |
+            |---|---|---|
+            | **Un servidor MongoDB** | **sí** | un `mongod` corriendo, con su carpeta de datos y su puerto |
+            | **Una réplica** | **no** | hay una sola copia. Si se va, se fue |
+            | **Un clúster** | **no** | un clúster son varias máquinas coordinadas; aquí hay una |
+            | **Fragmentación** | **no** | no hay nada que repartir: todo cabe |
+
+            **Tienes el motor, no la infraestructura.** Y está bien: el motor es lo que necesitas para
+            aprender a consultar, que es lo de hoy. La infraestructura llega el jueves entrante con Atlas,
+            que sí te da un conjunto de réplicas de tres nodos — administrado por otros, sin que tengas que
+            montarlo.
+
+            > **PARA LLEVAR.** Aprender a consultar y montar la infraestructura son dos oficios distintos.
+            > Hoy haces el primero.
+
             - Si dice **MongoDB 8.x (real...)**, estás hablando con un servidor de verdad, con su proceso, su
               archivo de datos y su log. Es lo mismo que correría una empresa, en pequeño.
             - Si dice **mongomock (respaldo...)**, el motor real no arrancó y estás usando una imitación en memoria.
@@ -1330,12 +1406,43 @@ def build_cells():
             > **MÁS ADELANTE.** Cómo se califica el hito está más abajo, al final del Paso 7,
             > justo antes de que lo escribas. Hoy no te hace falta: ahora toca cargar datos.
 
+            ## Las seis órdenes que vas a usar esta noche
+
+            Antes de escribir nada, esto es todo el vocabulario de código de la sesión. **Seis órdenes.** No
+            hay más.
+
+            | Lo que escribes | Qué hace | Qué te devuelve |
+            |---|---|---|
+            | `client = MongoClient(direccion)` | **conecta** con el servidor | un cliente. No trae datos: abre la línea |
+            | `db = client["compras_claras"]` | **elige la base**. Si no existe, se crea sola al escribir | la base |
+            | `coleccion = db["noticias"]` | **elige la colección**. Igual: se crea sola | la colección |
+            | `coleccion.insert_many(lista)` | **guarda** muchos documentos de una vez | los `_id` de lo que guardó |
+            | `coleccion.find(filtro, proyección)` | **busca** y devuelve los que cumplen | un cursor, que recorres con un `for` |
+            | `coleccion.update_one(filtro, cambio)` | **modifica** el primero que cumple | cuántos coincidieron y cuántos cambiaron |
+            | `coleccion.delete_many(filtro)` | **borra** los que cumplen | cuántos borró |
+            | `coleccion.aggregate(pipeline)` | **resume**: cuenta, suma, promedia | un cursor con una fila por grupo |
+
+            **Tres cosas que sorprenden y conviene saber antes:**
+
+            1. **No hay que "crear" la base ni la colección.** En MongoDB no existe un `CREATE TABLE`: la
+               primera vez que escribes algo, se crean solas. Por eso `db["noticias"]` funciona aunque
+               `noticias` no exista todavía.
+            2. **`{}` significa «todos».** `delete_many({})` es «borra los que cumplan *nada en particular*»,
+               o sea todos. `find({})` es «tráeme todos». El diccionario vacío es el filtro que no filtra.
+            3. **`find` no te devuelve una lista**, te devuelve un **cursor**: una promesa de resultados que
+               se van trayendo a medida que los recorres. Por eso siempre lo vas a ver dentro de un `for`, o
+               envuelto en `list(...)`.
+
             ## Paso 2 · Cargar las noticias en tu base
 
             > **HAZ ESTO AHORA.** Ejecuta la celda de abajo. Es la que pone los datos en tu base.
 
             Ahora sí, las 987 noticias pasan de ser una lista de Python a ser **documentos dentro de una base de
             datos**. La diferencia importa: en la lista solo puedes recorrer; en la base puedes consultar.
+
+            **Y eso es exactamente lo que hace `insert_many`:**
+
+            {svg("insert_many", "A la izquierda la lista de Python con 987 diccionarios en memoria; insert_many la lleva de un solo viaje a la coleccion de MongoDB en el disco del servidor y devuelve los 987 identificadores")}
             """
         ),
         code(
@@ -1389,7 +1496,28 @@ def build_cells():
             > acabas de cargar tiene 987 y no 991. Una restricción de la base no es un estorbo: es un control de
             > calidad que trabaja gratis.
 
-            ### Mini ficha: `insert_many(lista)`
+            ### Mini ficha: `insert_many(lista)` — guardar muchos de una vez
+
+            **Cómo se escribe, en pequeño:**
+
+            ```python
+            db["prueba"].insert_many([
+                {"_id": 1, "nombre": "Ana"},
+                {"_id": 2, "nombre": "Luis"},
+            ])
+            ```
+
+            **Y qué imprime si le pides el resultado:**
+
+            ```
+            InsertManyResult([1, 2], acknowledged=True)
+            ```
+
+            - `[1, 2]` son los `_id` que quedaron guardados. Si no hubieras puesto `_id`, MongoDB habría
+              inventado dos como `ObjectId('66b1…')`.
+            - `acknowledged=True` significa que **el servidor confirmó** que los escribió. No es un detalle
+              menor: existe un modo en que MongoDB no espera confirmación y va más rápido a cambio de que no
+              sepas si llegó.
 
             - **Para qué sirve:** insertar muchos documentos en una sola operación.
             - **Parámetro usado:** una lista de diccionarios.
@@ -1415,24 +1543,32 @@ def build_cells():
         code(
             """
             # 3.1 — COMPLÉTALA TÚ. Solo cambia el valor de SECCION.
-            # Pregunta: ¿que noticias hay de una seccion que te interese?
 
-            # Pista: estas son las 10 secciones con mas noticias, con su conteo.
-            # Hay 57 secciones en total y muchas tienen una sola noticia: si eliges
-            # una de esas y ves un solo resultado, tu consulta esta bien.
-            conteo = [
-                {"$group": {"_id": "$seccion", "n": {"$sum": 1}}},
-                {"$sort": {"n": -1}},
-                {"$limit": 10},
-            ]
-            for fila in coleccion.aggregate(conteo):
-                print(f"  {fila['_id']:38s} {fila['n']:4d}")
+            # ── Primero, una pista: que secciones existen y cuantas noticias tiene cada una.
+            #    (Esto es una agregacion; la explicamos a fondo en el Paso 5. Por ahora
+            #     solo lee el resultado: nombre de la seccion y su conteo.)
+            print("Las 10 secciones con mas noticias:")
+            for fila in coleccion.aggregate([
+                {"$group": {"_id": "$seccion", "n": {"$sum": 1}}},   # cuenta por seccion
+                {"$sort":  {"n": -1}},                                # de mayor a menor
+                {"$limit": 10},                                        # solo las 10 primeras
+            ]):
+                print(f"   {fila['_id']:38s} {fila['n']:4d} noticias")
 
-            SECCION = "salud"      # <--- cambia esto
+
+            # ── Ahora TU consulta. Elige una seccion de la lista de arriba.
+            SECCION = "salud"      # <--- CAMBIA ESTO
 
             print()
-            for n in coleccion.find({"seccion": SECCION}, {"titulo": 1, "_id": 0}).limit(10):
-                print("-", n["titulo"][:80])
+            print(f"Noticias de la seccion '{SECCION}':")
+
+            resultado = coleccion.find(
+                {"seccion": SECCION},        # el filtro: solo las de esa seccion
+                {"titulo": 1, "_id": 0},     # la proyeccion: solo quiero el titulo
+            ).limit(10)                      # y como mucho 10
+
+            for n in resultado:
+                print("  -", n["titulo"][:78])
             """
         ),
         code(
@@ -1500,11 +1636,28 @@ def build_cells():
         ),
         md(
             """
-            ### Mini ficha: `$regex`
+            ### Mini ficha: `$regex` — buscar texto dentro de un campo
 
-            - **Para qué sirve:** buscar un patrón de texto dentro de un campo. Es el pariente de `LIKE '%...%'`.
-            - **Parámetros usados:** el patrón, y `$options: "i"` para ignorar mayúsculas y minúsculas.
-            - **Qué devuelve:** los documentos cuyo campo contiene ese patrón **en cualquier posición**.
+            **Cómo se escribe:**
+
+            ```python
+            coleccion.find({"titulo": {"$regex": "salud", "$options": "i"}})
+            #                 ↑ campo    ↑ lo que busco   ↑ ignora mayúsculas
+            ```
+
+            **Qué devuelve con nuestros datos:** 34 noticias. Y devuelve estas, entre otras:
+
+            ```
+            Atención: Supersalud habla de supuesta reunión de esposa del ministro…
+            Afidro advierte sobre deterioro crítico del sistema de salud colombiano…
+            Philippe Coutinho rescindió su contrato con Vasco da Gama por 'salud mental'
+            ```
+
+            **Fíjate en la tercera.** Es de deportes y habla de salud mental. `$regex` no entiende de qué
+            trata la noticia: **encuentra la cadena de letras**, esté donde esté.
+
+            - **Es el pariente de `LIKE '%...%'`** de SQL.
+            - **Sin `$options: "i"`**, buscar `"Salud"` no encontraría `"salud"`.
             - **Advertencia que vas a necesitar en el paso 5:** busca **subcadenas**, no palabras completas. Buscar
               `"sena"` encuentra también `señaló`, `senador` y `enseñanza`. Guarda esta frase: más adelante va a
               explicar un resultado que parecerá bueno y no lo es.
@@ -1566,6 +1719,21 @@ def build_cells():
         ),
         md(
             """
+            ### Qué acaba de hacer esa celda, línea por línea
+
+            | La línea | Qué hace |
+            |---|---|
+            | `objetivo = coleccion.find_one({}, {"_id": 1, "titulo": 1})` | trae **un** documento cualquiera —`{}` es «cualquiera»— y de él solo el `_id` y el título |
+            | `coleccion.find_one({"_id": objetivo["_id"]}, ...)` | vuelve a buscar **ese mismo** documento por su `_id`, para ver cómo está antes |
+            | `{"$set": {"revision": {...}}}` | la orden: **pon** el campo `revision` con este contenido |
+            | `cambio.matched_count` | cuántos documentos **cumplían el filtro** |
+            | `cambio.modified_count` | cuántos **cambiaron de verdad** |
+
+            **Y por qué `revision` es un documento dentro del documento:** porque no queremos guardar solo
+            «revisada». Queremos guardar quién la revisó y cuándo. Tres datos que van juntos y solo tienen
+            sentido juntos. En una tabla serían tres columnas nuevas; aquí son un campo con tres cosas
+            adentro.
+
             ### 🔎 Leamos el resultado — `$set` y el campo que no existía
 
             **Cómo se lee.** `matched_count` dice cuántos documentos cumplían el filtro; `modified_count`, cuántos
@@ -1599,8 +1767,23 @@ def build_cells():
             `find()` trae documentos. Pero Laura no necesita documentos: necesita **un resumen**. ¿En qué secciones
             se concentra la cobertura de este mes?
 
-            Para eso existe el *aggregation pipeline*: una tubería de etapas donde la salida de una entra a la
-            siguiente. Es la misma idea de un `GROUP BY`, escrita por pasos.
+            Para eso existe el *aggregation pipeline*. La palabra «pipeline» es literal: **es una tubería**.
+            Le entran los 987 documentos por un lado, pasan por una etapa que los transforma, el resultado
+            entra a la siguiente etapa, y así hasta salir.
+
+            {svg("pipeline_paso_a_paso", "Los 987 documentos entran, match deja 987, group los junta por seccion y quedan 57, sort los ordena de mayor a menor y limit deja 10")}
+
+            **Cómo leerlo, y es lo único que hay que entender de la agregación:**
+
+            - Cada `{...}` de la lista es **una etapa**. Se ejecutan **en el orden en que están escritas**.
+            - Lo que sale de una etapa es **lo único** que ve la siguiente. Después de `$group` ya no
+              existen los documentos originales: solo existen los grupos.
+            - Por eso el orden importa de verdad. `$limit` antes de `$sort` te deja diez cualesquiera; `$sort`
+              antes de `$limit` te deja los diez primeros.
+
+            **La etapa que cuesta es `$group`**, así que míralo con calma en la imagen: entran 987 documentos
+            sueltos y salen 57 filas, una por sección. Y en esas 57 filas el campo `_id` **ya no es la llave
+            del documento**: es *por qué agrupaste*. Si agrupas por sección, `_id` vale «bogota».
 
             ```sql
             -- SQL
@@ -1672,12 +1855,23 @@ def build_cells():
 
             Como tenemos ocho meses, podemos hacer algo que con un solo mes no se podía: mirar la evolución.
 
-            ### Mini ficha auxiliar: `$substr`
+            ### Mini ficha: `$substr` — cortar un pedazo de un texto
 
-            - **Para qué sirve:** cortar un pedazo de un texto dentro de una etapa de agregación.
-            - **Parámetros usados:** el campo, la posición inicial (desde 0) y cuántos caracteres tomar.
-            - **Por qué aquí:** `publicado` es un texto como `2026-03-15T09:41:00-05:00`. Los primeros 7 caracteres
-              son `2026-03`, es decir el mes. Agrupamos por ese pedazo.
+            **Cómo se escribe, y qué corta exactamente:**
+
+            ```
+            El campo publicado vale:   "2026-03-15T09:41:00-05:00"
+            posición:                   0123456
+                                        └─────┘  ← estos 7 caracteres
+
+            {"$substr": ["$publicado", 0, 7]}   →   "2026-03"
+                            ↑campo     ↑ ↑
+                                       │ └── cuántos caracteres tomo
+                                       └──── desde qué posición empiezo (0 = la primera)
+            ```
+
+            Y ese `"2026-03"` es el mes. Por eso agrupamos por él: todas las noticias de marzo producen la
+            misma cadena, así que `$group` las junta.
             - **Advertencia honesta:** esto funciona porque la fecha viene como texto **en formato ISO**, donde el
               orden alfabético coincide con el orden cronológico. Si las fechas estuvieran guardadas como
               `15/03/2026`, este truco daría un resultado sin sentido. Guardar fechas como texto es cómodo y
@@ -1698,6 +1892,20 @@ def build_cells():
                 {"$sort": {"n": -1}},
                 {"$limit": 5},
             ])
+            ```
+
+            **Qué le pasa a un documento, exactamente:**
+
+            ```
+            ANTES  (1 documento)
+            { "titulo": "La Gran Vía…", "etiquetas": ["Contraloría", "retrasos", "obra vial"] }
+
+                                    ↓  {"$unwind": "$etiquetas"}
+
+            DESPUÉS  (3 documentos, iguales en todo menos en la etiqueta)
+            { "titulo": "La Gran Vía…", "etiquetas": "Contraloría" }
+            { "titulo": "La Gran Vía…", "etiquetas": "retrasos"    }
+            { "titulo": "La Gran Vía…", "etiquetas": "obra vial"   }
             ```
 
             - **Cómo interpretar la salida:** cada fila es una etiqueta y su conteo.
@@ -1790,6 +1998,122 @@ def build_cells():
             Comparar un periodo incompleto con periodos completos es el error de conteo más común que vas a
             encontrar en tu vida profesional. Haz esa división antes de creerle a la última barra de cualquier
             serie que te muestren en tu trabajo.
+            """
+        ),
+        md(
+            """
+            ## Ejercicio extra — para ti, si quieres seguir
+
+            > **NO es obligatorio y no se califica.** Está aquí porque la única forma de que una consulta
+            > deje de parecer magia es escribir una tú, sin que nadie te la dicte. Son dos, y las dos se
+            > resuelven con las etapas que ya viste: `$unwind`, `$group`, `$sort`, `$limit`.
+
+            **Ejercicio A — ¿quién firma estas noticias?**
+            El campo `autores` es una **lista de documentos**, así:
+
+            ```json
+            "autores": [{ "nombre": "LEONARDO HERRERA DELGANS", "cargo": "Periodista", "twitter": "@leoher69" }]
+            ```
+
+            Averigua **los cinco periodistas que más noticias de contratación firman**. Dos pistas y ya:
+
+            - una lista se desenrolla con `$unwind`, igual que hiciste con las etiquetas;
+            - para llegar al nombre dentro del documento se usa un punto: `"$autores.nombre"`.
+
+            **Ejercicio B — ¿las de pago son más largas?**
+            El campo `premium` vale `true` o `false`. Agrupa por él y calcula **cuántas hay de cada tipo y
+            cuántas palabras tiene cada una en promedio**. Este no necesita `$unwind`: `premium` no es una
+            lista, es un valor suelto.
+
+            Y cuando veas el resultado del B, hazte la pregunta que importa: **¿el artículo es más largo
+            porque es de pago, o es de pago porque es más largo?** Los datos no responden eso.
+            """
+        ),
+        code(
+            """
+            # EJERCICIO EXTRA A — los cinco periodistas que mas firman.
+            # Completa las etapas que faltan y ejecuta.
+
+            ejercicio_a = [
+                {"$unwind": "$autores"},   # 1. una fila por autor. Esta ya esta escrita.
+                # 2. agrupa:  {"$group": {"_id": ..., "n": {"$sum": 1}}}
+                # 3. ordena:  {"$sort": ...}
+                # 4. corta:   {"$limit": ...}
+            ]
+
+            if len(ejercicio_a) < 4:
+                print("Faltan etapas: tu lista tiene", len(ejercicio_a), "y necesitas 4.")
+                print('Pista: al nombre dentro del documento se llega con "$autores.nombre".')
+            else:
+                for fila in coleccion.aggregate(ejercicio_a):
+                    print(f"{str(fila['_id'])[:40]:40s} {fila['n']:5d}")
+            """
+        ),
+        code(
+            """
+            # EJERCICIO EXTRA B — de pago frente a gratuitas.
+            # Este va casi entero: solo falta que agrupes por el campo correcto.
+
+            ejercicio_b = [
+                {"$group": {
+                    "_id": None,                             # <--- cambia None por "$premium"
+                    "n": {"$sum": 1},
+                    "palabras_promedio": {"$avg": "$n_palabras"},
+                }},
+            ]
+
+            for fila in coleccion.aggregate(ejercicio_b):
+                etiqueta = "de pago" if fila["_id"] is True else "gratuita" if fila["_id"] is False else "TODAS"
+                print(f"{etiqueta:10s} {fila['n']:5d} noticias   {fila['palabras_promedio']:6.0f} palabras de promedio")
+            """
+        ),
+        md(
+            """
+            <details>
+            <summary><b>Si te atascaste o quieres comprobar</b> — soluciones y resultados</summary>
+
+            **Ejercicio A**
+
+            ```python
+            ejercicio_a = [
+                {"$unwind": "$autores"},
+                {"$group": {"_id": "$autores.nombre", "n": {"$sum": 1}}},
+                {"$sort": {"n": -1}},
+                {"$limit": 5},
+            ]
+            ```
+
+            ```
+            CARLOS LÓPEZ                               120
+            JHOAN SEBASTIAN COTE LOZANO                106
+            SARA VALENTINA QUEVEDO DELGADO              83
+            UNIDAD INVESTIGATIVA                        77
+            JUAN DIEGO TORRES LASSO                     49
+            ```
+
+            Hay 125 firmas distintas, y una de las cinco primeras **no es una persona**: «UNIDAD
+            INVESTIGATIVA» es un equipo. Si tu jefe te pide «el ranking de periodistas», esa fila no
+            pertenece ahí, y el dato solo no te lo va a decir.
+
+            **Ejercicio B**
+
+            ```python
+            ejercicio_b = [
+                {"$group": {"_id": "$premium", "n": {"$sum": 1},
+                            "palabras_promedio": {"$avg": "$n_palabras"}}},
+            ]
+            ```
+
+            ```
+            gratuita     731 noticias      520 palabras de promedio
+            de pago      256 noticias      913 palabras de promedio
+            ```
+
+            **Casi el doble de largas.** Y ahí está la pregunta que no se responde con esta tabla: puede que
+            el periódico ponga tras el muro de pago sus piezas de investigación, que son largas por
+            naturaleza. La correlación es clarísima; la dirección de la causa, ninguna.
+
+            </details>
             """
         ),
         *question_cell(
@@ -3210,7 +3534,19 @@ def insertar_diagramas(cells):
                 faltantes.append(m.group(1))
                 return m.group(0)
 
-        celda["source"] = _lineas(patron.sub(reemplazo, texto))
+        texto = patron.sub(reemplazo, texto)
+
+        # Si queda un "{svg(" sin sustituir, el marcador esta mal escrito -- casi
+        # siempre por partirlo en dos lineas, que rompe el patron sin avisar y
+        # deja el marcador crudo en el cuaderno. Es un error, no una advertencia.
+        crudo = texto[texto.index("{svg(") : texto.index("{svg(") + 70] if "{svg(" in texto else ""
+        if crudo and not any(crudo.startswith("{svg(\"" + f + "\"") for f in faltantes):
+            raise ValueError(
+                "Marcador de diagrama sin sustituir. Debe caber en UNA sola linea: "
+                + " ".join(crudo.split())
+            )
+
+        celda["source"] = _lineas(texto)
 
     if faltantes:
         raise FileNotFoundError(

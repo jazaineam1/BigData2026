@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 470" width="980" height="470"
+     role="img" aria-labelledby="tv dv">
+  <title id="tv">Base de datos, colección, documento y campo</title>
+  <desc id="dv">Cuatro cajas anidadas. La más grande es la base de datos, llamada compras_claras.
+    Dentro hay colecciones, que son conjuntos de documentos del mismo tipo: noticias y contratos.
+    Dentro de la colección noticias hay documentos, uno por noticia. Dentro de un documento hay
+    campos: pares de nombre y valor. Un campo puede contener un texto, un número, una lista o incluso
+    otro documento anidado. Al lado, la equivalencia con Excel: el archivo es la base, la hoja es la
+    colección, la fila es el documento y la celda es el campo.</desc>
+  <style>
+    .bg  { fill:#ffffff; }
+    .t   { font:700 14px "Segoe UI",Arial,sans-serif; }
+    .s   { font:400 12px "Segoe UI",Arial,sans-serif; fill:#546e7a; }
+    .m   { font:400 12.5px "Consolas","SF Mono",monospace; fill:#1a2027; }
+    .k   { font:600 12.5px "Consolas",monospace; fill:#0d47a1; }
+    .lbl { font:700 12px "Segoe UI",Arial,sans-serif; letter-spacing:.03em; }
+  </style>
+  <rect class="bg" x="0" y="0" width="980" height="470"/>
+
+  <!-- BASE DE DATOS -->
+  <rect x="24" y="44" width="600" height="404" rx="10" fill="#f3f6fb" stroke="#5c6bc0" stroke-width="2.5"/>
+  <text class="lbl" x="40" y="34" fill="#283593">BASE DE DATOS</text>
+  <text class="m"   x="40" y="68" fill="#283593">compras_claras</text>
+  <text class="s"   x="176" y="68">← el contenedor mayor. Lo eliges con db = client["compras_claras"]</text>
+
+  <!-- COLECCIONES -->
+  <rect x="42" y="84" width="270" height="346" rx="9" fill="#eaf2fd" stroke="#1976d2" stroke-width="2"/>
+  <text class="lbl" x="56" y="106" fill="#0d47a1">COLECCIÓN</text>
+  <text class="m"   x="56" y="126" fill="#0d47a1">noticias</text>
+  <text class="s"   x="56" y="145">un conjunto de documentos</text>
+  <text class="s"   x="56" y="161">del mismo tipo</text>
+
+  <!-- DOCUMENTOS dentro de la coleccion -->
+  <rect x="58" y="176" width="238" height="150" rx="7" fill="#ffffff" stroke="#43a047" stroke-width="2"/>
+  <text class="lbl" x="70" y="196" fill="#1b5e20">DOCUMENTO</text>
+  <text class="m" x="70" y="216">{</text>
+  <text class="k" x="82" y="234">"titulo"</text><text class="m" x="146" y="234">: "La Gran Vía…",</text>
+  <text class="k" x="82" y="252">"seccion"</text><text class="m" x="154" y="252">: "bogota",</text>
+  <text class="k" x="82" y="270">"n_palabras"</text><text class="m" x="178" y="270">: 557,</text>
+  <text class="k" x="82" y="288">"etiquetas"</text><text class="m" x="168" y="288">: [ … ]</text>
+  <text class="m" x="70" y="308">}</text>
+
+  <rect x="58" y="334" width="238" height="34" rx="7" fill="#ffffff" stroke="#a5d6a7" stroke-width="1.5"/>
+  <text class="s" x="70" y="356">{ … otro documento … }</text>
+  <rect x="58" y="376" width="238" height="34" rx="7" fill="#ffffff" stroke="#a5d6a7" stroke-width="1.5"/>
+  <text class="s" x="70" y="398">… 987 en total</text>
+
+  <!-- segunda coleccion -->
+  <rect x="326" y="84" width="282" height="150" rx="9" fill="#eaf2fd" stroke="#1976d2" stroke-width="2"/>
+  <text class="lbl" x="340" y="106" fill="#0d47a1">COLECCIÓN</text>
+  <text class="m"   x="340" y="126" fill="#0d47a1">contratos</text>
+  <text class="s"   x="340" y="148">otra colección, en la misma base.</text>
+  <text class="s"   x="340" y="166">Sus documentos tienen otra forma,</text>
+  <text class="s"   x="340" y="184">y no pasa nada: son otro tipo</text>
+  <text class="s"   x="340" y="202">de cosa.</text>
+
+  <!-- CAMPO, ampliado -->
+  <rect x="326" y="250" width="282" height="180" rx="9" fill="#fffdf3" stroke="#f9a825" stroke-width="2"/>
+  <text class="lbl" x="340" y="272" fill="#8d6e00">CAMPO</text>
+  <text class="s"   x="340" y="292">un nombre y un valor:</text>
+  <text class="k"   x="340" y="316">"seccion"</text><text class="m" x="412" y="316">: "bogota"</text>
+  <text class="s"   x="340" y="336" fill="#8d6e00">↑ nombre        ↑ valor</text>
+  <text class="s"   x="340" y="362">El valor puede ser texto,</text>
+  <text class="s"   x="340" y="380">número, verdadero/falso,</text>
+  <text class="s"   x="340" y="398">una lista, u otro documento</text>
+  <text class="s"   x="340" y="416">entero adentro.</text>
+
+  <!-- EQUIVALENCIA CON EXCEL -->
+  <text class="t" x="656" y="34" fill="#37474f">Si vienes de Excel</text>
+  <g>
+    <rect x="656" y="52" width="300" height="40" rx="6" fill="#f3f6fb" stroke="#5c6bc0" stroke-width="1.6"/>
+    <text class="s" x="670" y="77"><tspan class="t" fill="#283593">base de datos</tspan>  ≈  el archivo .xlsx</text>
+
+    <rect x="656" y="102" width="300" height="40" rx="6" fill="#eaf2fd" stroke="#1976d2" stroke-width="1.6"/>
+    <text class="s" x="670" y="127"><tspan class="t" fill="#0d47a1">colección</tspan>  ≈  una hoja del archivo</text>
+
+    <rect x="656" y="152" width="300" height="40" rx="6" fill="#ffffff" stroke="#43a047" stroke-width="1.6"/>
+    <text class="s" x="670" y="177"><tspan class="t" fill="#1b5e20">documento</tspan>  ≈  una fila</text>
+
+    <rect x="656" y="202" width="300" height="40" rx="6" fill="#fffdf3" stroke="#f9a825" stroke-width="1.6"/>
+    <text class="s" x="670" y="227"><tspan class="t" fill="#8d6e00">campo</tspan>  ≈  una celda con su encabezado</text>
+  </g>
+
+  <g>
+    <rect x="656" y="264" width="300" height="166" rx="8" fill="#fdf1f1" stroke="#ef9a9a" stroke-width="1.6"/>
+    <text class="t" x="672" y="290" fill="#b71c1c">Pero con dos diferencias</text>
+    <text class="s" x="672" y="316">1. Cada documento puede tener</text>
+    <text class="s" x="672" y="334">   campos distintos. En Excel</text>
+    <text class="s" x="672" y="352">   todas las filas comparten</text>
+    <text class="s" x="672" y="370">   las mismas columnas.</text>
+    <text class="s" x="672" y="396">2. Una celda no puede contener</text>
+    <text class="s" x="672" y="414">   una lista. Un campo, sí.</text>
+  </g>
+</svg>

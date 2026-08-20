@@ -40,6 +40,11 @@ import re
 import sys
 import traceback
 
+# El cuaderno llama a plt.show(). Con un backend interactivo eso abre una
+# ventana y se queda esperando a que alguien la cierre: la prueba se cuelga
+# sin decir por que. Agg dibuja en memoria y sigue de largo.
+os.environ.setdefault("MPLBACKEND", "Agg")
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NB = os.path.join(REPO, "Cuadernos", "3_MongoDB_Documental.ipynb")
 RAW = "https://raw.githubusercontent.com/jazaineam1/BigData2026/main"

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520"
+     role="img" aria-labelledby="tc dc">
+  <title id="tc">CAP: qué pasa cuando se corta la red entre dos copias</title>
+  <desc id="dc">Mientras la red funciona, las dos copias se hablan y no hay que elegir nada. Cuando la red
+    se corta, la copia aislada recibe una consulta y solo puede hacer dos cosas: negarse a responder para
+    no dar un dato viejo, que es elegir consistencia, o responder con lo ultimo que sabe, que es elegir
+    disponibilidad. No hay una tercera opcion. Un cajero automatico elige negarse; el tablero de noticias
+    de Laura elige responder.</desc>
+  <style>
+    .h  { font:700 16px "Segoe UI",Arial,sans-serif; fill:#1a2027; }
+    .cap{ font:700 13px "Segoe UI",Arial,sans-serif; fill:#37474f; }
+    .s  { font:400 12px "Segoe UI",Arial,sans-serif; fill:#546e7a; }
+    .b  { font:600 12px "Segoe UI",Arial,sans-serif; fill:#37474f; }
+    .m  { font:400 11.5px "Consolas",monospace; fill:#37474f; }
+    .big{ font:700 22px "Segoe UI",Arial,sans-serif; }
+  </style>
+  <rect x="0" y="0" width="980" height="520" fill="#ffffff"/>
+
+  <text class="h" x="28" y="30">Cuando la red se corta entre dos copias, alguien tiene que elegir. Eso es CAP.</text>
+
+  <!-- ESTADO NORMAL -->
+  <rect x="28" y="50" width="440" height="150" rx="9" fill="#f1f8f4" stroke="#66bb6a" stroke-width="1.8"/>
+  <text class="cap" x="46" y="74" fill="#1b5e20">1 · La red funciona — no hay nada que elegir</text>
+  <rect x="60" y="92" width="120" height="52" rx="7" fill="#ffffff" stroke="#2e7d32" stroke-width="1.6"/>
+  <text class="b" x="120" y="116" text-anchor="middle">copia A</text>
+  <text class="m" x="120" y="134" text-anchor="middle">saldo: 500</text>
+  <rect x="316" y="92" width="120" height="52" rx="7" fill="#ffffff" stroke="#2e7d32" stroke-width="1.6"/>
+  <text class="b" x="376" y="116" text-anchor="middle">copia B</text>
+  <text class="m" x="376" y="134" text-anchor="middle">saldo: 500</text>
+  <path d="M182 118 L314 118" stroke="#2e7d32" stroke-width="2.4"/>
+  <text class="s" x="248" y="110" text-anchor="middle" fill="#1b5e20">se hablan</text>
+  <text class="s" x="46" y="172">Las dos responden y las dos dicen lo mismo. Aquí</text>
+  <text class="s" x="46" y="190">C y A conviven sin problema: CAP no aplica todavía.</text>
+
+  <!-- LA PARTICION -->
+  <rect x="500" y="50" width="452" height="150" rx="9" fill="#fff3e0" stroke="#fb8c00" stroke-width="1.8"/>
+  <text class="cap" x="518" y="74" fill="#e65100">2 · Se corta el cable — la P de CAP (partición)</text>
+  <rect x="532" y="92" width="120" height="52" rx="7" fill="#ffffff" stroke="#fb8c00" stroke-width="1.6"/>
+  <text class="b" x="592" y="116" text-anchor="middle">copia A</text>
+  <text class="m" x="592" y="134" text-anchor="middle">saldo: 300</text>
+  <rect x="808" y="92" width="120" height="52" rx="7" fill="#ffffff" stroke="#fb8c00" stroke-width="1.6"/>
+  <text class="b" x="868" y="116" text-anchor="middle">copia B</text>
+  <text class="m" x="868" y="134" text-anchor="middle">saldo: 500</text>
+  <path d="M654 118 L714 118 M746 118 L806 118" stroke="#e65100" stroke-width="2.4"/>
+  <path d="M712 100 L748 136 M748 100 L712 136" stroke="#d32f2f" stroke-width="3.2"/>
+  <text class="s" x="518" y="172" fill="#e65100">A ya registró un retiro; B no se enteró y no puede enterarse.</text>
+  <text class="s" x="518" y="190" fill="#e65100">Llega una consulta a B. B solo puede hacer dos cosas:</text>
+
+  <path d="M300 208 L300 232 M300 232 L180 232 L180 250 M300 232 L790 232 L790 250" stroke="#90a4ae" stroke-width="2" fill="none"/>
+  <path d="M174 246 l6 12 l6 -12 z" fill="#90a4ae"/>
+  <path d="M784 246 l6 12 l6 -12 z" fill="#90a4ae"/>
+
+  <!-- OPCION CP -->
+  <rect x="28" y="256" width="440" height="238" rx="9" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text class="big" x="46" y="288" fill="#0d47a1">Elegir C</text>
+  <text class="b"   x="46" y="310">B se niega a responder: «no puedo garantizar que</text>
+  <text class="b"   x="46" y="328">este dato sea el bueno, mejor no te lo doy».</text>
+  <rect x="46" y="344" width="404" height="42" rx="6" fill="#ffffff" stroke="#90caf9"/>
+  <text class="m" x="60" y="370">ERROR: no se puede leer. Intente mas tarde.</text>
+  <text class="s" x="46" y="410">Cedes <tspan class="b">disponibilidad</tspan>: el usuario ve un error.</text>
+  <text class="cap" x="46" y="440" fill="#0d47a1">Cuándo se elige esto</text>
+  <text class="s" x="46" y="460">El cajero automático. Prefiere no entregar plata a</text>
+  <text class="s" x="46" y="478">entregarla dos veces contra un saldo que ya no existe.</text>
+
+  <!-- OPCION AP -->
+  <rect x="512" y="256" width="440" height="238" rx="9" fill="#f3e5f5" stroke="#8e24aa" stroke-width="2"/>
+  <text class="big" x="530" y="288" fill="#4a148c">Elegir A</text>
+  <text class="b"   x="530" y="310">B responde con lo último que sabe: «te doy lo que</text>
+  <text class="b"   x="530" y="328">tengo, y puede estar viejo».</text>
+  <rect x="530" y="344" width="404" height="42" rx="6" fill="#ffffff" stroke="#ce93d8"/>
+  <text class="m" x="544" y="370">saldo: 500   (el real es 300)</text>
+  <text class="s" x="530" y="410">Cedes <tspan class="b">consistencia</tspan>: el dato es viejo.</text>
+  <text class="cap" x="530" y="440" fill="#4a148c">Cuándo se elige esto</text>
+  <text class="s" x="530" y="460">El tablero de Laura. Una lista de contratos con dos</text>
+  <text class="s" x="530" y="478">segundos de retraso no cambia ninguna decisión suya.</text>
+</svg>
