@@ -976,6 +976,10 @@ def build_cells():
             ---
             # Puente al laboratorio
 
+            > **PARA LLEVAR.** Las ocho preguntas azules **no se califican**: son el ensayo de la única entrega
+            > que sí. Fállalas aquí, que sale gratis. La retroalimentación explica por qué cada opción está bien o
+            > mal, y varias de esas explicaciones son lo mejor del cuaderno.
+
             De aquí en adelante trabajas tú. Este es el orden:
 
             1. arrancar el motor y ver cuál te tocó, real o de respaldo;
@@ -1158,15 +1162,27 @@ def build_cells():
 
             ### Cómo se califica
 
-            | Nivel | Qué se ve |
-            |---|---|
-            | Cumple con solvencia | ejecutó todo, eligió con criterio, interpreta y **declara los límites** sin que se los pidan |
-            | Cumple | ejecutó todo y describe correctamente lo que ve |
-            | Incompleto | hay evidencia de ejecución pero la interpretación repite el cuaderno sin aplicarla a su caso |
-            | No cumple | no hay evidencia de ejecución propia |
+            El hito vale **sobre 5,0** y se corrige con esta tabla. Está aquí, antes de que lo escribas, para que
+            sepas contra qué se mide y no tengas que adivinar.
 
-            No se cuentan commits, ni líneas, ni velocidad. Un laboratorio que falló y está bien explicado vale más
-            que uno perfecto que no se entiende.
+            | Criterio | Peso | 5,0 · Solvente | 3,5 · Cumple | 2,0 · Incompleto | 0 |
+            |---|---|---|---|---|---|
+            | **Evidencia de ejecución**<br>(motor, conteo, `_id`) | 1,0 | los tres datos están y son coherentes entre sí | están los tres | falta alguno | no hay |
+            | **Tus tres consultas**<br>(con la sección que elegiste y por qué) | 1,0 | las consultas responden preguntas propias y justifica la elección de sección | las tres corren y reporta lo que encontró | copia las del cuaderno sin cambiar nada | no hay |
+            | **La entidad que elegiste**<br>(revisar o no, y por qué) | 1,0 | decide, nombra la alternativa que descartó y sostiene el criterio | decide y da una razón | menciona una entidad sin decidir | no hay |
+            | **Los dos números del cruce**<br>(y por qué se diferencian) | 1,0 | explica el mecanismo —subcadena frente a palabra— con un ejemplo propio | reporta ambos y dice que la diferencia son falsos positivos | reporta un solo número | no hay |
+            | **Qué NO permite concluir** | 1,0 | nombra el **dato que falta**, no solo la limitación | dice correctamente qué no se puede afirmar | escribe "faltan datos" | no hay |
+
+            **Punto adicional de hasta 0,5**, que no sube de 5,0: una observación propia que el cuaderno no hizo.
+            Un patrón que notaste, una consulta que se te ocurrió, un error que encontraste en el material. Se premia
+            porque es lo más difícil de todo esto.
+
+            **Lo que no se califica:** la cantidad de commits, las líneas escritas, la velocidad, ni si el motor
+            real te arrancó o te tocó el respaldo. **Un laboratorio que falló y está bien explicado vale más que uno
+            perfecto que no se entiende.**
+
+            **Sobre trabajar en pareja.** Es una entrega por pareja y los dos responden por todo. Si compartieron un
+            solo runtime —cosa legítima— decláralo en el hito: no baja la nota, y no declararlo sí es un problema.
             """
         ),
         md(
@@ -2043,8 +2059,8 @@ def build_cells():
             Y uno que dejaría en una tabla, porque:
             ```
 
-            **Fecha de entrega:** domingo. Se evalúa el contenido y la honestidad de los límites, no la cantidad de
-            commits.
+            **Fecha de entrega:** domingo. Se corrige con la rúbrica que está más arriba, en «Cómo se evalúa esta
+            sesión». Vuelve a leerla antes de entregar: está escrita para que sepas exactamente qué se mira.
             """
         ),
         md(
@@ -2109,7 +2125,12 @@ def build_cells():
             > pestaña. El equipo de Laura no puede trabajar así. Esta semana la vas a poner donde el equipo entero
             > pueda alcanzarla.
 
-            El docente entrega la guía paso a paso. **El pantallazo del clúster creado se entrega el miércoles**, no
+            **Guía paso a paso:** [`docs/guia_atlas_cuenta_gratuita.md`](https://github.com/jazaineam1/BigData2026/blob/main/docs/guia_atlas_cuenta_gratuita.md).
+            Léela antes de empezar: las tres advertencias del principio son las responsables de casi todos los
+            problemas, y una de ellas —el acceso de red— hace fallar la conexión el jueves aunque hayas hecho
+            todo lo demás bien.
+
+            **El pantallazo del clúster creado se entrega el miércoles**, no
             el jueves a las seis y cinco.
             """
         ),
