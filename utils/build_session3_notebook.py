@@ -53,25 +53,72 @@ def hidden(cell, title, *tags):
 
 
 def question_cell(numero, tema, contexto, pregunta, opciones, correcta, retro_opciones):
-    return hidden(
+    """
+    Devuelve DOS celdas: el enunciado visible en Markdown y el verificador oculto.
+
+    Por que dos y no una. El plegado de Colab (`cellView: form`,
+    `jupyter.source_hidden`) solo lo respetan Colab y JupyterLab. Si el
+    estudiante abre el cuaderno en GitHub —cosa que hace si falto a clase o si
+    esta en el bus— ve el codigo crudo y, con el, la respuesta correcta y toda
+    la retroalimentacion. Las ocho preguntas quedaban inservibles.
+
+    Solucion: el enunciado y las opciones viven en Markdown, que se lee bien en
+    cualquier visor; y la respuesta viaja codificada en base64 dentro de la
+    celda oculta. No es seguridad —quien quiera decodificarla puede—, es evitar
+    que se lea de un vistazo, que es lo que arruina la pregunta.
+    """
+    import base64
+    import json as _json
+
+    carga = base64.b64encode(
+        _json.dumps({"c": correcta, "r": retro_opciones}, ensure_ascii=False).encode("utf-8")
+    ).decode("ascii")
+
+    letras = "ABCD"
+    opciones_md = "\n".join(
+        f"{letras[i]}. {texto}" for i, texto in enumerate(opciones)
+    )
+
+    enunciado = md(
+        f"""
+        <div style="border-left:5px solid #1565c0;background:#e3f2fd;color:#0d1b2a;padding:14px 18px;border-radius:8px;">
+
+        **Pregunta {numero} de {TOTAL_QUESTIONS} — {tema}**
+
+        *Contexto.* {contexto}
+
+        **{pregunta}**
+
+        {opciones_md}
+
+        </div>
+
+        *Ejecuta la celda de abajo para responder y ver por qué cada opción es correcta o incorrecta.*
+        """
+    )
+
+    verificador = hidden(
         code(
             f"""
             # Pregunta {numero} de {TOTAL_QUESTIONS} — {tema}
+            # El enunciado esta en la celda de arriba. La respuesta va codificada
+            # para que no se lea de un vistazo al abrir el cuaderno en GitHub.
             pregunta_interactiva(
                 numero={numero},
                 tema={tema!r},
                 contexto={contexto!r},
                 pregunta={pregunta!r},
                 opciones={opciones!r},
-                correcta={correcta},
-                retro_opciones={retro_opciones!r},
+                carga={carga!r},
             )
             """
         ),
-        f"Activar pregunta {numero} — {tema}",
+        f"Responder pregunta {numero} — {tema}",
         "hide-input",
         "pregunta-interactiva",
     )
+
+    return [enunciado, verificador]
 
 
 def soporte_cells():
@@ -95,8 +142,11 @@ def soporte_cells():
         hidden(
             code(
                 """
-                def pregunta_interactiva(numero, tema, contexto, pregunta, opciones, correcta, retro_opciones):
+                def pregunta_interactiva(numero, tema, contexto, pregunta, opciones, carga):
                     '''Muestra una pregunta autocorregible con explicación específica por opción.'''
+                    import base64
+                    datos = json.loads(base64.b64decode(carga).decode('utf-8'))
+                    correcta, retro_opciones = datos['c'], datos['r']
                     uid = f"pregunta-{numero}"
                     opciones_html = "".join(
                         f'''<label style="display:block;margin:9px 0;cursor:pointer;">
@@ -106,9 +156,9 @@ def soporte_cells():
                     )
                     retro_json = json.dumps(retro_opciones, ensure_ascii=False)
                     bloque = f'''
-                    <div style="border:2px solid #1565c0;border-radius:12px;padding:16px;margin:16px 0;background:#e3f2fd;">
+                    <div style="border:2px solid #1565c0;border-radius:12px;padding:16px;margin:16px 0;background:#e3f2fd;color:#0d1b2a;">
                       <h3 style="color:#0d47a1;margin-top:0;">Pregunta {numero} de {TOTAL_QUESTIONS} — {html_lib.escape(tema)}</h3>
-                      <div style="background:#fff8d6;border-left:5px solid #f9a825;padding:12px;margin:10px 0;">
+                      <div style="background:#fff8d6;color:#3e2c00;border-left:5px solid #f9a825;padding:12px;margin:10px 0;">
                         <strong>Contexto.</strong> {html_lib.escape(contexto)}
                       </div>
                       <p><strong>Pregunta.</strong> {html_lib.escape(pregunta)}</p>
@@ -116,7 +166,7 @@ def soporte_cells():
                       <button onclick="verificar_{numero}()" style="background:#1565c0;color:white;border:0;border-radius:6px;padding:9px 15px;cursor:pointer;">
                         Verificar respuesta
                       </button>
-                      <div id="retro-{numero}" style="margin-top:12px;"></div>
+                      <div id="retro-{numero}" aria-live="polite" style="margin-top:12px;"></div>
                     </div>
                     <script>
                     function verificar_{numero}() {{
@@ -246,8 +296,10 @@ def build_cells():
             Abre el archivo `hitos/s02/01_decision_proceso.md` que tu pareja y tú escribieron hace ocho días. Ahí
             quedó un indicador, con el nombre de ustedes al lado.
 
-            **Hoy vamos a calcular ese indicador por primera vez sobre datos reales.** Y en el camino nos vamos a
-            topar con el problema que hace ocho días no vimos.
+            **Hoy vamos a conseguir la evidencia que ese indicador necesita**, y en el camino nos vamos a topar con
+            el problema que hace ocho días no vimos. El indicador en sí lo calculas el jueves entrante, cuando
+            tengas una base que no se muera al cerrar la pestaña. Hoy resolvemos dónde se guarda la evidencia;
+            la semana que viene, cuánto vale.
 
             ## El ticket de salida de la sesión 2, respondido
 
@@ -276,6 +328,11 @@ def build_cells():
 
             > **Conexión con hoy.** La respuesta 2 dejó una condición: *incorporar fuentes externas con estructuras
             > distintas*. Eso es exactamente lo que vamos a hacer ahora, y es lo que va a romper la tabla.
+
+            Al terminar la sesión vuelve a `02_caso_arquitectura_accion.md`: el motor que vas a levantar vive en
+            el dominio de **tecnología** de la arquitectura que dibujaste, y el documento que vas a diseñar vive
+            en el de **información**. Confirma que las casillas que llenaste hace ocho días siguen teniendo
+            sentido, y actualiza tu condición para reevaluar: hoy la vas a cruzar.
             """
         ),
         md(
@@ -432,7 +489,7 @@ def build_cells():
             > esta pregunta en el minuto 46.
             """
         ),
-        question_cell(
+        *question_cell(
             1,
             "El límite del modelo tabular",
             "Una noticia trae entre 1 y 24 etiquetas. El equipo quiere guardar las noticias en la misma base "
@@ -482,7 +539,7 @@ def build_cells():
             cuándo se decide. Un documento mal diseñado es tan caro como una tabla mal normalizada.
             """
         ),
-        question_cell(
+        *question_cell(
             2,
             "Las cuatro familias NoSQL",
             "El equipo necesita responder rápido, en cualquier momento, una consulta que nadie anticipó: "
@@ -621,7 +678,7 @@ def build_cells():
             > una tabla.
             """
         ),
-        question_cell(
+        *question_cell(
             3,
             "Anatomía de un documento",
             "En el arreglo `cuerpo` de una noticia, un bloque de tipo `paragraph` tiene la clave `texto`, "
@@ -764,7 +821,7 @@ def build_cells():
             > nombramos aquí y lo trabajamos con un clúster real en la sesión 4. Hoy basta con que sepas que existe.
             """
         ),
-        question_cell(
+        *question_cell(
             4,
             "Consistencia eventual",
             "El tablero de Laura lee desde una réplica. Un contrato se modificó hace 1,5 segundos en la copia "
@@ -888,7 +945,7 @@ def build_cells():
             - **Error frecuente:** olvidar que `_id` se incluye siempre, aunque no lo pidas. Para quitarlo: `{"_id": 0}`.
             """
         ),
-        question_cell(
+        *question_cell(
             5,
             "Traducir entre SQL y MongoDB",
             "Necesitas las noticias de la sección 'bogota' que además tengan más de 500 palabras, y quieres ver "
@@ -950,7 +1007,16 @@ def build_cells():
             ---
             # LABORATORIO — 85 minutos
 
-            ## Paso 0 · Arrancar el motor (ejecuta y sigue leyendo)
+            > **HAZ ESTO AHORA.** Ejecuta la celda de abajo antes de seguir leyendo, y déjala trabajando.
+
+> **OJO.** Si en cualquier momento del laboratorio ves un `NameError`, no busques la celda culpable:
+> vuelve al Paso 0 y ejecuta desde ahí hacia abajo. Todas las celdas de carga se pueden repetir.
+
+> **MÁS ADELANTE.** Este arranque descarga MongoDB para Linux y por eso funciona en Colab y solo en
+> Colab. En tu computador con Windows no corre: no pierdas la noche intentándolo. La ruta para tu
+> máquina es Atlas, y llega el jueves entrante.
+
+## Paso 0 · Arrancar el motor (ejecuta y sigue leyendo)
 
             Esta celda **no está oculta a propósito**: si algo falla, tienes que poder leer qué pasó.
 
@@ -1240,6 +1306,34 @@ def build_cells():
         ),
         md(
             """
+            ### Qué deberías estar viendo
+
+            Si trabajas solo, en casa o porque faltaste, esta es la forma de saber si te salió bien. Aquí no hay
+            trampa: saber el resultado esperado no te ahorra pensar, te ahorra quedarte atascado.
+
+            <details>
+            <summary><b>Ver los resultados esperados de las tres consultas</b></summary>
+
+            | Ejercicio | Qué deberías ver |
+            |---|---|
+            | 3.1 con `SECCION = "salud"` | 10 noticias listadas (la sección tiene 11 en total) |
+            | 3.1 con otra sección | el número que aparece en la pista de arriba; si la sección tenía 1, ves 1 y **está bien** |
+            | 3.2 con el operador correcto | 10 títulos, todos con más de 800 palabras. Hay 189 en total; `.limit(10)` muestra las primeras |
+            | 3.3 con `PALABRA = "salud"` | 34 noticias con esa palabra en el título |
+            | 3.3 con `PALABRA = "contrato"` | 299 noticias |
+
+            **El operador que falta en 3.2 es `$gt`** (de *greater than*). Si escribiste `$gte`, obtienes las de
+            exactamente 800 palabras también, y no es un error: es otra pregunta.
+
+            **Si te devuelve 0 resultados**, revisa en este orden: que la sección esté escrita igual que en la
+            pista (con guiones y sin tildes), que no te hayan quedado las comillas por fuera, y que hayas
+            ejecutado el Paso 2 antes.
+
+            </details>
+            """
+        ),
+        md(
+            """
             ### Mini ficha: `$regex`
 
             - **Para qué sirve:** buscar un patrón de texto dentro de un campo. Es el pariente de `LIKE '%...%'`.
@@ -1250,7 +1344,7 @@ def build_cells():
               a explicar un resultado que parecerá bueno y no lo es.
             """
         ),
-        question_cell(
+        *question_cell(
             6,
             "Consultar dentro de un arreglo",
             "Cada noticia tiene un arreglo `etiquetas`, y cada etiqueta es un objeto con `nombre` y `slug`. "
@@ -1477,7 +1571,7 @@ def build_cells():
             serie que te muestren en tu trabajo.
             """
         ),
-        question_cell(
+        *question_cell(
             7,
             "Interpretar una agregación",
             "El conteo por sección muestra que las secciones judiciales encabezan la lista, en una selección de "
@@ -1639,6 +1733,10 @@ def build_cells():
             **Ahora mira la primera fila.** La **Procuraduría General de la Nación** encabeza con muchísima
             diferencia: 195 noticias, contra 31 de la segunda. Y tiene 74 procesos en SECOP.
 
+            """
+        ),
+        md(
+            """
             ## Antes de la explicación elegante, la explicación incómoda
 
             Nosotros construimos este conjunto de noticias filtrando direcciones por una lista de 21 palabras. Y
@@ -1659,6 +1757,10 @@ def build_cells():
             con las que se filtró. Está publicada a propósito, para que puedas auditar el criterio en vez de
             confiar en él.
 
+            """
+        ),
+        md(
+            """
             ## Y ahora sí, la segunda razón
 
             Si Laura ordenara su fila de revisión por esta tabla, **empezaría investigando a la Procuraduría**. Y
@@ -1681,6 +1783,10 @@ def build_cells():
             Fíjate en la cuarta: la Cámara de Representantes tiene 29 noticias y 715 procesos. No investiga, no
             administra el SECOP y no está cuestionada por contratación. Sale en la prensa porque es la Cámara.
 
+            """
+        ),
+        md(
+            """
             ## Y la tentación que viene después
 
             Tienes dos columnas y vas a querer dividirlas: menciones por proceso. Hazlo mentalmente y mira quién
@@ -1720,7 +1826,7 @@ def build_cells():
             > Ahí es donde el curso continúa.
             """
         ),
-        question_cell(
+        *question_cell(
             8,
             "El cruce entre dos fuentes",
             "Un compañero entrega la tabla del cruce y dice: «la Procuraduría es la entidad que más aparece en "
@@ -1906,6 +2012,82 @@ def build_cells():
 
             El docente entrega la guía paso a paso. **El pantallazo del clúster creado se entrega el miércoles**, no
             el jueves a las seis y cinco.
+            """
+        ),
+        md(
+            """
+            ---
+            # Hoja de trucos — imprímela o déjala en otra pestaña
+
+            Todo lo que necesitas para consultar, en un solo lugar. Está repetido a propósito: un material que
+            se consulta debe repetir, no obligarte a hacer scroll.
+
+            ## Las palabras
+
+            | Palabra | Qué es | Lo que ya conoces |
+            |---|---|---|
+            | base de datos | el contenedor mayor | el archivo de Excel |
+            | colección | conjunto de documentos del mismo tipo | una hoja |
+            | documento | un registro completo | una fila, pero con árbol adentro |
+            | campo | un dato dentro del documento | una celda con su encabezado |
+            | `_id` | identificador único, obligatorio | la llave primaria |
+
+            ## Consultar
+
+            ```python
+            coleccion.find_one({})                      # un documento cualquiera
+            coleccion.find({"seccion": "salud"})         # todos los que cumplen
+            coleccion.find(filtro, {"titulo": 1, "_id": 0})   # solo esos campos
+            coleccion.find(filtro).limit(10)             # los primeros 10
+            coleccion.count_documents(filtro)            # cuántos hay
+            coleccion.distinct("seccion")                # valores distintos
+            ```
+
+            | Operador | Significa | En SQL |
+            |---|---|---|
+            | `{"$gt": 800}` | mayor que | `> 800` |
+            | `{"$gte": 800}` | mayor o igual | `>= 800` |
+            | `{"$lt": 800}` / `{"$lte": 800}` | menor / menor o igual | `<` / `<=` |
+            | `{"$ne": "x"}` | distinto de | `<> 'x'` |
+            | `{"$in": ["a", "b"]}` | está en la lista | `IN ('a','b')` |
+            | `{"$exists": False}` | el campo **no está** en el documento | *no existe en SQL* |
+            | `{"$regex": "sal", "$options": "i"}` | contiene ese texto | `LIKE '%sal%'` |
+
+            **Dos claves en el mismo diccionario = AND.** Para OR: `{"$or": [{...}, {...}]}`.
+            **Dentro de un arreglo:** `{"etiquetas.slug": "contraloria"}` busca en cada elemento.
+
+            ## Resumir
+
+            ```python
+            coleccion.aggregate([
+                {"$match":  {"n_palabras": {"$gt": 0}}},          # el WHERE
+                {"$group":  {"_id": "$seccion",                    # el GROUP BY
+                             "n": {"$sum": 1},
+                             "prom": {"$avg": "$n_palabras"}}},
+                {"$sort":   {"n": -1}},                            # el ORDER BY
+                {"$limit":  10},                                   # el LIMIT
+            ])
+            ```
+
+            **Filtra temprano, agrupa después.** `$match` antes de `$group` hace menos trabajo.
+
+            ## Escribir
+
+            ```python
+            coleccion.insert_many(lista_de_documentos)
+            coleccion.update_one(filtro, {"$set": {"campo": valor}})   # NUNCA olvides $set
+            coleccion.delete_many({})                                  # vaciar antes de recargar
+            ```
+
+            ## Los cinco errores que más cuestan
+
+            | Síntoma | Qué pasó |
+            |---|---|
+            | `NameError` | el entorno se reinició: vuelve al Paso 0 y ejecuta hacia abajo |
+            | `E11000 duplicate key` | estás insertando dos veces el mismo `_id`: falta el `delete_many({})` |
+            | 0 resultados y no entiendes por qué | revisa comillas, tildes y que el Paso 2 haya corrido |
+            | `DtypeWarning` en rojo | es un **aviso**, no un error: la celda terminó bien |
+            | el update no cambia nada | te faltó `$set` |
             """
         ),
         md(
