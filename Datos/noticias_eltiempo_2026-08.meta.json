@@ -1,0 +1,87 @@
+{
+ "generado": "2026-08-19T18:59:28.640147+00:00",
+ "fuente_sitemap": "https://www.eltiempo.com/sitemap-articles-2026-08.xml",
+ "fuente_feed": "https://www.eltiempo.com/servicios/feeds/articulo/{id}",
+ "n_documentos": 126,
+ "n_fallos": 14,
+ "fallos": [
+  {
+   "id": 486032,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 548055,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 554956,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 839841,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 548053,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 319112,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 337662,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 554509,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 260658,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 3579174,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 850797,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 544958,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 411384,
+   "error": "HTTP Error 404: Not Found"
+  },
+  {
+   "id": 3578996,
+   "error": "HTTP Error 404: Not Found"
+  }
+ ],
+ "presencia_de_campos": {
+  "_id": 126,
+  "titulo": 126,
+  "seccion": 126,
+  "url": 126,
+  "publicado": 126,
+  "premium": 126,
+  "etiquetas": 126,
+  "autores": 126,
+  "imagenes": 126,
+  "cuerpo": 126,
+  "n_palabras": 126,
+  "subtitulo": 123,
+  "editor": 126,
+  "categoria": 126,
+  "firma": 126,
+  "tiene_audio": 126,
+  "subcategoria": 75,
+  "tiene_video": 8,
+  "descripcion": 2
+ },
+ "nota": "Datos publicos de El Tiempo descargados una sola vez para uso docente. El enlace entre las dos fuentes es el ID numerico final de la URL del sitemap."
+}

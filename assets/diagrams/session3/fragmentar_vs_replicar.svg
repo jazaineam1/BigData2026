@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 420" width="980" height="420"
+     role="img" aria-labelledby="titulo desc">
+  <title id="titulo">Fragmentar frente a replicar</title>
+  <desc id="desc">Dos estrategias distintas para repartir datos entre varias máquinas.
+    Al fragmentar, cada máquina guarda una parte de los datos: enero a abril, mayo a agosto y
+    septiembre a diciembre; entre las tres tienen el total, y eso resuelve el problema de que los
+    datos no caben. Al replicar, cada máquina guarda el total completo, y eso resuelve las caídas
+    del servicio y reparte las lecturas.</desc>
+
+  <style>
+    .fondo    { fill: #ffffff; }
+    .titulo   { font: 700 21px "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+    .caja     { stroke-width: 2.5; rx: 10; }
+    .etiqueta { font: 600 15px "Segoe UI", "Helvetica Neue", Arial, sans-serif; fill: #1a2027; }
+    .pie      { font: 400 15px "Segoe UI", "Helvetica Neue", Arial, sans-serif; fill: #37474f; }
+    .clave    { font: 700 15px "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+    .nota     { font: 400 13.5px "Segoe UI", "Helvetica Neue", Arial, sans-serif; fill: #546e7a; }
+    .divisor  { stroke: #cfd8dc; stroke-width: 2; stroke-dasharray: 7 6; }
+  </style>
+
+  <rect class="fondo" x="0" y="0" width="980" height="420"/>
+
+  <!-- ─────────────── FRAGMENTAR ─────────────── -->
+  <text class="titulo" x="60" y="46" fill="#0d47a1">FRAGMENTAR (sharding)</text>
+  <text class="nota"   x="60" y="70">Cada máquina guarda una parte distinta</text>
+
+  <g>
+    <rect class="caja" x="60"  y="96" width="122" height="86" fill="#e3f2fd" stroke="#1565c0"/>
+    <rect class="caja" x="200" y="96" width="122" height="86" fill="#e3f2fd" stroke="#1565c0"/>
+    <rect class="caja" x="340" y="96" width="122" height="86" fill="#e3f2fd" stroke="#1565c0"/>
+
+    <text class="etiqueta" x="121" y="146" text-anchor="middle">ene – abr</text>
+    <text class="etiqueta" x="261" y="146" text-anchor="middle">may – ago</text>
+    <text class="etiqueta" x="401" y="146" text-anchor="middle">sep – dic</text>
+  </g>
+
+  <text class="pie"   x="60" y="222">cada una tiene <tspan class="clave" fill="#0d47a1">UNA PARTE</tspan></text>
+  <text class="clave" x="60" y="252" fill="#0d47a1">→ resuelve que no quepa</text>
+
+  <g>
+    <rect x="60" y="278" width="402" height="106" rx="9" fill="#f5f9ff" stroke="#bbdefb" stroke-width="1.5"/>
+    <text class="nota" x="78" y="304">Se paga con esto:</text>
+    <text class="nota" x="78" y="326">· una consulta que no usa la llave de reparto</text>
+    <text class="nota" x="78" y="346">  tiene que preguntarle a todas las máquinas;</text>
+    <text class="nota" x="78" y="368">· si la llave crece siempre hacia adelante, como el mes,</text>
+    <text class="nota" x="78" y="388">  todo lo nuevo cae en la misma máquina.</text>
+  </g>
+
+  <!-- ─────────────── divisor ─────────────── -->
+  <line class="divisor" x1="500" y1="40" x2="500" y2="390"/>
+
+  <!-- ─────────────── REPLICAR ─────────────── -->
+  <text class="titulo" x="540" y="46" fill="#1b5e20">REPLICAR</text>
+  <text class="nota"   x="540" y="70">Cada máquina guarda lo mismo</text>
+
+  <g>
+    <rect class="caja" x="540" y="96" width="122" height="86" fill="#e8f5e9" stroke="#2e7d32"/>
+    <rect class="caja" x="680" y="96" width="122" height="86" fill="#e8f5e9" stroke="#2e7d32"/>
+    <rect class="caja" x="820" y="96" width="122" height="86" fill="#e8f5e9" stroke="#2e7d32"/>
+
+    <text class="etiqueta" x="601" y="140" text-anchor="middle">TODO</text>
+    <text class="etiqueta" x="741" y="140" text-anchor="middle">TODO</text>
+    <text class="etiqueta" x="881" y="140" text-anchor="middle">TODO</text>
+
+    <text class="nota" x="601" y="164" text-anchor="middle" fill="#2e7d32">principal</text>
+    <text class="nota" x="741" y="164" text-anchor="middle">réplica</text>
+    <text class="nota" x="881" y="164" text-anchor="middle">réplica</text>
+  </g>
+
+  <text class="pie"   x="540" y="222">cada una tiene <tspan class="clave" fill="#1b5e20">EL TOTAL</tspan></text>
+  <text class="clave" x="540" y="252" fill="#1b5e20">→ resuelve caídas y lecturas</text>
+
+  <g>
+    <rect x="540" y="278" width="402" height="106" rx="9" fill="#f4faf5" stroke="#c8e6c9" stroke-width="1.5"/>
+    <text class="nota" x="558" y="304">Se paga con esto:</text>
+    <text class="nota" x="558" y="326">· mantener las copias de acuerdo cuesta tiempo;</text>
+    <text class="nota" x="558" y="346">· si lees de una réplica que aún no se enteró,</text>
+    <text class="nota" x="558" y="368">  ves un dato que fue verdad hace un momento.</text>
+    <text class="nota" x="558" y="388">  Eso es la consistencia eventual.</text>
+  </g>
+</svg>

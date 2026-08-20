@@ -13,10 +13,11 @@ if str(ROOT) not in sys.path:
 from utils.make_notebook import code, md, save, validate
 
 
-OUTPUT = "Cuadernos/2_Definiciones_gcp.ipynb"
+OUTPUT = "Cuadernos/2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb"
+LEGACY_OUTPUT = "Cuadernos/2_Definiciones_gcp.ipynb"
 COLAB = (
     "https://colab.research.google.com/github/jazaineam1/BigData2026/"
-    "blob/main/Cuadernos/2_Definiciones_gcp.ipynb"
+    "blob/main/Cuadernos/2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb"
 )
 WEB_CURSO = "https://jazaineam1.github.io/BigData2026/"
 DIAGRAMS_RAW = "https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session2"
@@ -100,7 +101,7 @@ def build_cells():
             </div>
 
             > ### Facultad de Ingeniería y Ciencias Básicas
-            > ### Maestría en Analítica de Datos — BIG DATA (64491093), Grupo 2
+            > ### Maestría en Analítica de Datos — BIG DATA (64491093), Grupo 1
 
             **Temas de esta sesión:** arquitectura empresarial · administración de procesos de negocio · ciclo de
             vida de la analítica de Big Data · casos de uso organizacionales · BI tradicional y con Big Data<br>
@@ -936,8 +937,14 @@ def build_cells():
             **Idea principal.** Una iniciativa de Big Data tiene sentido cuando mejora una decisión dentro de un
             proceso y puede explicar cómo la evidencia llega a una persona responsable.
 
-            **Próxima sesión.** En la sesión 4 estudiaremos formalmente OLTP, OLAP, Data Marts, Data Warehouses, Data
-            Lakes y ETL. Esos sistemas se conectarán con el blueprint construido hoy.
+            **Próxima sesión.** En la sesión 3 pasaremos del blueprint al dato. El indicador que escribiste en
+            `01_decision_proceso.md` todavía no se puede calcular, porque la evidencia que Laura necesita no cabe
+            en una tabla: unas fuentes traen listas, otras traen campos que faltan y otras traen un cuerpo con
+            partes de tipos distintos. Ahí aparecen las bases de datos documentales y MongoDB. Además cerraremos
+            el Pull Request que hoy dejamos abierto y responderemos el ticket de salida.
+
+            Más adelante en el curso estudiaremos OLTP, OLAP, Data Marts, Data Warehouses, Data Lakes y ETL, y
+            esos sistemas se conectarán con el blueprint construido hoy.
             """
         ),
         md(
@@ -989,6 +996,8 @@ def main():
     cells = build_cells()
     validate(cells)
     save(cells, OUTPUT)
+    # Conserva la ruta histórica para enlaces antiguos; ambas copias deben ser idénticas.
+    save(cells, LEGACY_OUTPUT)
 
 
 if __name__ == "__main__":
