@@ -91,10 +91,14 @@ def main():
     verificadores = sum(
         1 for c in celdas if "pregunta-interactiva" in c["metadata"].get("tags", [])
     )
-    if enunciados != verificadores:
+    # La pregunta vive en UNA sola celda, la del widget. Si aparece tambien en
+    # markdown, el estudiante la lee dos veces seguidas en Colab.
+    if enunciados:
         errores.append(
-            f"hay {enunciados} enunciados visibles y {verificadores} verificadores: deben coincidir"
+            f"hay {enunciados} enunciados en markdown: la pregunta se veria duplicada en Colab"
         )
+    if verificadores != 8:
+        errores.append(f"hay {verificadores} preguntas y deberian ser 8")
 
     # ── 4. Accesibilidad: fondo sin color de texto ────────────────────────────
     for i, c in enumerate(celdas):
@@ -128,7 +132,7 @@ def main():
 
     # ── Informe ───────────────────────────────────────────────────────────────
     print(f"Cuaderno: {os.path.relpath(NB, REPO)}")
-    print(f"  celdas: {len(celdas)}  |  preguntas: {enunciados}  |  URLs de datos: {len(urls)}")
+    print(f"  celdas: {len(celdas)}  |  preguntas: {verificadores}  |  URLs de datos: {len(urls)}")
     print()
     for u in urls:
         print("  dato:", u.replace("https://raw.githubusercontent.com/jazaineam1/BigData2026/main/", ""))

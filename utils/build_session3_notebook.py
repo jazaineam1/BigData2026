@@ -72,66 +72,47 @@ def hidden(cell, title, *tags):
 
 def question_cell(numero, tema, contexto, pregunta, opciones, correcta, retro_opciones):
     """
-    Devuelve DOS celdas: el enunciado visible en Markdown y el verificador oculto.
+    Devuelve UNA sola celda: el widget interactivo.
 
-    Por que dos y no una. El plegado de Colab (`cellView: form`,
-    `jupyter.source_hidden`) solo lo respetan Colab y JupyterLab. Si el
-    estudiante abre el cuaderno en GitHub —cosa que hace si falto a clase o si
-    esta en el bus— ve el codigo crudo y, con el, la respuesta correcta y toda
-    la retroalimentacion. Las ocho preguntas quedaban inservibles.
+    Antes eran dos —enunciado en Markdown y verificador oculto— para que la
+    pregunta se leyera tambien en GitHub. El efecto en Colab, que es donde se
+    dicta la clase, era que el estudiante veia el enunciado y las cuatro
+    opciones dos veces seguidas, una debajo de la otra. Duplicar contenido
+    cuesta mas que el beneficio de leerlo fuera de Colab.
 
-    Solucion: el enunciado y las opciones viven en Markdown, que se lee bien en
-    cualquier visor; y la respuesta viaja codificada en base64 dentro de la
-    celda oculta. No es seguridad —quien quiera decodificarla puede—, es evitar
-    que se lea de un vistazo, que es lo que arruina la pregunta.
+    La respuesta sigue viajando codificada en base64: quien abra el cuaderno en
+    GitHub vera el codigo, pero no la respuesta correcta de un vistazo.
     """
     import base64
     import json as _json
 
     carga = base64.b64encode(
-        _json.dumps({"c": correcta, "r": retro_opciones}, ensure_ascii=False).encode("utf-8")
+        _json.dumps(
+            {"c": correcta, "r": retro_opciones, "t": tema,
+             "x": contexto, "p": pregunta},
+            ensure_ascii=False,
+        ).encode("utf-8")
     ).decode("ascii")
 
-    letras = "ABCD"
-    opciones_md = "\n\n".join(
-        f"{letras[i]}. {texto}" for i, texto in enumerate(opciones)
-    )
-
-    # Se arma sin indentacion a proposito: cualquier linea con cuatro espacios
-    # al inicio convierte la celda entera en un bloque de codigo en Colab.
-    enunciado = md(
-        "\n".join([
-            f"### Pregunta {numero} de {TOTAL_QUESTIONS} · {tema}",
-            "",
-            f"> **Contexto.** {contexto}",
-            "",
-            f"**{pregunta}**",
-            "",
-            opciones_md,
-            "",
-            "*Responde en la celda de abajo: te dice por qué cada opción es correcta o no.*",
-        ])
-    )
-
-    verificador = hidden(
-        code(
-            f"""
-            # Pregunta {numero} de {TOTAL_QUESTIONS} — {tema}
-            # El enunciado esta en la celda de arriba. La respuesta va codificada
-            # para que no se lea de un vistazo al abrir el cuaderno en GitHub.
-            pregunta_interactiva(
-                numero={numero},
-                opciones={opciones!r},
-                carga={carga!r},
-            )
-            """
-        ),
-        f"Responder pregunta {numero} — {tema}",
-        "hide-input",
-        "pregunta-interactiva",
-    )
-
-    return [enunciado, verificador]
+    return [
+        hidden(
+            code(
+                f"""
+                # Pregunta {numero} de {TOTAL_QUESTIONS} — {tema}
+                # Enunciado, opciones y respuesta van codificados para que no se
+                # lean de un vistazo al abrir el cuaderno fuera de Colab.
+                pregunta_interactiva(
+                    numero={numero},
+                    opciones={opciones!r},
+                    carga={carga!r},
+                )
+                """
+            ),
+            f"Pregunta {numero} de {TOTAL_QUESTIONS} — {tema}",
+            "hide-input",
+            "pregunta-interactiva",
+        )
+    ]
 
 
 def soporte_cells():
@@ -160,6 +141,7 @@ def soporte_cells():
                     import base64
                     datos = json.loads(base64.b64decode(carga).decode('utf-8'))
                     correcta, retro_opciones = datos['c'], datos['r']
+                    tema, contexto, pregunta = datos['t'], datos['x'], datos['p']
                     uid = f"pregunta-{numero}"
                     opciones_html = "".join(
                         f'''<label style="display:block;margin:9px 0;cursor:pointer;">
@@ -170,7 +152,11 @@ def soporte_cells():
                     retro_json = json.dumps(retro_opciones, ensure_ascii=False)
                     bloque = f'''
                     <div style="border:2px solid #1565c0;border-radius:12px;padding:16px;margin:16px 0;background:#e3f2fd;color:#0d1b2a;">
-                      <p style="margin:0 0 10px;color:#0d47a1;"><strong>Pregunta {numero} de {TOTAL_QUESTIONS}</strong> — elige una opción:</p>
+                      <h3 style="color:#0d47a1;margin:0 0 10px;font-size:1.06rem;">Pregunta {numero} de {TOTAL_QUESTIONS} — {html_lib.escape(tema)}</h3>
+                      <div style="background:#fff8d6;color:#3e2c00;border-left:5px solid #f9a825;padding:11px 13px;margin:10px 0;">
+                        <strong>Contexto.</strong> {html_lib.escape(contexto)}
+                      </div>
+                      <p style="margin:12px 0 8px;"><strong>{html_lib.escape(pregunta)}</strong></p>
                       {opciones_html}
                       <button onclick="verificar_{numero}()" style="background:#1565c0;color:white;border:0;border-radius:6px;padding:9px 15px;cursor:pointer;">
                         Verificar respuesta

@@ -95,7 +95,13 @@ Una pregunta sirve cuando: se responde con lo que se acaba de ver en este cuader
 
 Di explícitamente si son autoevaluación no calificable —pero no las presentes como opcionales en la primera pantalla, o el estudiante cansado sabrá exactamente qué saltar. Mejor: *"fállalas aquí, que sale gratis"*.
 
-**El enunciado y las opciones van en Markdown visible.** El plegado de Colab solo lo respetan Colab y JupyterLab: en GitHub el código queda crudo y con él la respuesta correcta. Deja oculto solo el verificador, y codifica la respuesta para que no se lea de un vistazo.
+**Una pregunta vive en UNA sola celda.** No repitas el enunciado en Markdown y otra vez dentro del widget: en Colab el estudiante lo lee dos veces seguidas, con las cuatro opciones duplicadas una debajo de la otra. Duplicar contenido cuesta más que cualquier beneficio de leerlo fuera de Colab.
+
+**Codifica lo que no debe leerse de un vistazo.** El plegado de Colab (`cellView: form`, `jupyter.source_hidden`) solo lo respetan Colab y JupyterLab: en GitHub el código queda crudo y con él la respuesta correcta. Guarda enunciado, opciones y respuesta codificados dentro de la celda del widget.
+
+**Colab descarta el atributo `style` en las celdas Markdown.** El color no puede venir de CSS: solo se respeta HTML en la salida de `display(HTML(...))`. Si necesitas color en el cuerpo de la clase, que venga de una imagen — y que la imagen lleve contenido, no adorno.
+
+**Cómo sabes que se logró:** abres el cuaderno en Colab y cada pregunta aparece una sola vez, con su caja y su botón.
 
 ---
 
