@@ -85,21 +85,15 @@ def question_cell(numero, tema, contexto, pregunta, opciones, correcta, retro_op
     # al inicio convierte la celda entera en un bloque de codigo en Colab.
     enunciado = md(
         "\n".join([
-            '<div style="border-left:5px solid #1565c0;background:#e3f2fd;color:#0d1b2a;'
-            'padding:14px 18px;border-radius:8px;">',
+            f"### Pregunta {numero} de {TOTAL_QUESTIONS} · {tema}",
             "",
-            f"**Pregunta {numero} de {TOTAL_QUESTIONS} — {tema}**",
-            "",
-            f"*Contexto.* {contexto}",
+            f"> **Contexto.** {contexto}",
             "",
             f"**{pregunta}**",
             "",
             opciones_md,
             "",
-            "</div>",
-            "",
-            "*Ejecuta la celda de abajo para responder y ver por qué cada opción es correcta "
-            "o incorrecta.*",
+            "*Responde en la celda de abajo: te dice por qué cada opción es correcta o no.*",
         ])
     )
 
@@ -148,7 +142,7 @@ def soporte_cells():
         hidden(
             code(
                 """
-                def pregunta_interactiva(numero, tema, contexto, pregunta, opciones, carga):
+                def pregunta_interactiva(numero, opciones, carga):
                     '''Muestra una pregunta autocorregible con explicación específica por opción.'''
                     import base64
                     datos = json.loads(base64.b64decode(carga).decode('utf-8'))
@@ -163,11 +157,7 @@ def soporte_cells():
                     retro_json = json.dumps(retro_opciones, ensure_ascii=False)
                     bloque = f'''
                     <div style="border:2px solid #1565c0;border-radius:12px;padding:16px;margin:16px 0;background:#e3f2fd;color:#0d1b2a;">
-                      <h3 style="color:#0d47a1;margin-top:0;">Pregunta {numero} de {TOTAL_QUESTIONS} — {html_lib.escape(tema)}</h3>
-                      <div style="background:#fff8d6;color:#3e2c00;border-left:5px solid #f9a825;padding:12px;margin:10px 0;">
-                        <strong>Contexto.</strong> {html_lib.escape(contexto)}
-                      </div>
-                      <p><strong>Pregunta.</strong> {html_lib.escape(pregunta)}</p>
+                      <p style="margin:0 0 10px;color:#0d47a1;"><strong>Pregunta {numero} de {TOTAL_QUESTIONS}</strong> — elige una opción:</p>
                       {opciones_html}
                       <button onclick="verificar_{numero}()" style="background:#1565c0;color:white;border:0;border-radius:6px;padding:9px 15px;cursor:pointer;">
                         Verificar respuesta
@@ -316,11 +306,9 @@ def build_cells():
         md(
             """
             ---
-            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
-              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 0</div>
-              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">En qué quedamos la semana pasada</div>
-              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">Tu indicador, y la condición que hoy vamos a cruzar</div>
-            </div>
+            # Bloque 0 · En qué quedamos la semana pasada
+
+            *Tu indicador, y la condición que hoy vamos a cruzar*
 
             Abre el archivo `hitos/s02/01_decision_proceso.md` que tu pareja y tú escribieron hace ocho días. Ahí
             quedó un indicador, con el nombre de ustedes al lado.
@@ -367,11 +355,9 @@ def build_cells():
         md(
             """
             ---
-            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
-              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 1</div>
-              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Por qué esta evidencia no cabe en una tabla</div>
-              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">El problema es la variedad, no el volumen</div>
-            </div>
+            # Bloque 1 · Por qué esta evidencia no cabe en una tabla
+
+            *El problema es la variedad, no el volumen*
 
             ## La necesidad, primero
 
@@ -551,11 +537,9 @@ def build_cells():
         md(
             """
             ---
-            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
-              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 2</div>
-              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Qué existe en lugar de la tabla</div>
-              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">Cuatro familias, y cada una renunció a algo distinto</div>
-            </div>
+            # Bloque 2 · Qué existe en lugar de la tabla
+
+            *Cuatro familias, y cada una renunció a algo distinto*
 
             Ya sabemos qué le sobra a la tabla. La pregunta obvia es qué existe en su lugar. La respuesta incómoda
             es que no existe *una* alternativa: existen cuatro, y **cada una renunció a algo distinto de la tabla**.
@@ -605,11 +589,9 @@ def build_cells():
         md(
             """
             ---
-            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
-              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 3</div>
-              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Cómo se ve un documento por dentro</div>
-              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">Campos, anidamiento y arreglos</div>
-            </div>
+            # Bloque 3 · Cómo se ve un documento por dentro
+
+            *Campos, anidamiento y arreglos*
 
             De las cuatro familias, la documental es la que más se parece a lo que ya tienes en la cabeza: un
             documento es lo que llamarías **la ficha completa** de algo. Abramos una.
@@ -746,11 +728,9 @@ def build_cells():
         md(
             """
             ---
-            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
-              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 4</div>
-              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Y cuando no cabe en un servidor</div>
-              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">Repartir y copiar no son lo mismo</div>
-            </div>
+            # Bloque 4 · Y cuando no cabe en un servidor
+
+            *Repartir y copiar no son lo mismo*
 
             Al principio de la sesión quedó una pregunta colgada: nuestras 987 noticias salieron de 57 848 artículos,
             de un solo periódico y ocho meses. Aunque arreglemos la forma, ¿dónde guardamos eso?
@@ -792,11 +772,9 @@ def build_cells():
         md(
             """
             ---
-            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
-              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 5</div>
-              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Qué se cede al tener copias</div>
-              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">ACID, BASE y el dato que fue verdad hace un momento</div>
-            </div>
+            # Bloque 5 · Qué se cede al tener copias
+
+            *ACID, BASE y el dato que fue verdad hace un momento*
 
             Tenemos el dato repartido y el dato copiado. **Las copias resuelven un problema y crean otro**, y el
             otro es el que le importa a Laura.
@@ -899,11 +877,9 @@ def build_cells():
         md(
             """
             ---
-            <div style="background:linear-gradient(90deg,#1a237e,#3949ab);color:#ffffff;border-radius:10px;padding:18px 22px;margin:24px 0 14px 0;">
-              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c5cae9;">Bloque 6</div>
-              <div style="font-size:1.45rem;font-weight:700;line-height:1.25;">Cómo le pregunto algo a la base</div>
-              <div style="color:#e8eaed;font-size:0.97rem;margin-top:6px;">MQL, siempre junto a su SQL equivalente</div>
-            </div>
+            # Bloque 6 · Cómo le pregunto algo a la base
+
+            *MQL, siempre junto a su SQL equivalente*
 
             Bajemos de la nube al teclado. Todo lo anterior no sirve de nada si no sabemos preguntarle algo a la
             base. En SQL escribirías `SELECT` y `WHERE`. Aquí se escribe distinto y se lee igual. **Voy a poner las
@@ -1062,11 +1038,10 @@ def build_cells():
         md(
             """
             ---
-            <div style="background:linear-gradient(90deg,#1b5e20,#2e7d32);color:#ffffff;border-radius:10px;padding:22px 24px;margin:24px 0 14px 0;">
-              <div style="font-size:0.78rem;letter-spacing:.09em;text-transform:uppercase;color:#c8e6c9;">Segunda mitad</div>
-              <div style="font-size:1.7rem;font-weight:700;">Laboratorio — aquí trabajas tú</div>
-              <div style="color:#e8f5e9;font-size:0.97rem;margin-top:6px;">Tu colección, tus consultas, tu interpretación. Lo que produzcas hoy es el insumo de la próxima sesión.</div>
-            </div>
+            # Laboratorio — aquí trabajas tú
+
+            *Tu colección, tus consultas, tu interpretación. Lo que produzcas hoy es el
+            insumo de la próxima sesión.*
 
             > **HAZ ESTO AHORA.** Ejecuta la celda de abajo antes de seguir leyendo, y déjala trabajando.
 
@@ -1091,7 +1066,8 @@ def build_cells():
             en memoria y que alcanza para todo lo de hoy. Te va a decir cuál de los dos quedó activo.
             """
         ),
-        code(
+        hidden(
+            code(
             """
             # Paso 0 — levantar el motor. Ejecuta y sigue leyendo mientras trabaja.
             import os, subprocess, sys, time, urllib.request
@@ -1171,6 +1147,10 @@ def build_cells():
             print("MOTOR ACTIVO:", motor)
             print("=" * 60)
             """
+            ),
+            "Levantar el motor de base de datos",
+            "hide-input",
+            "soporte-motor",
         ),
         md(
             """
@@ -1971,6 +1951,9 @@ def build_cells():
             print("VALOR     : $", f"{caso['valor']:,.0f}")
             print("MODALIDAD :", caso["modalidad"], "| respuestas:", caso["respuestas"])
             print("ESTADO    :", caso["estado"], "| publicado:", caso["publicado"])
+            print()
+            print("VELO TU MISMO EN SECOP:")
+            print("  ", caso["url_secop"])
             print()
             print("LO QUE DIJO LA PRENSA SOBRE ESTA ENTIDAD:")
             for t in caso["titulares"]:

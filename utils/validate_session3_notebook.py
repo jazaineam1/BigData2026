@@ -85,7 +85,8 @@ def main():
     # ── 3. Cada pregunta tiene enunciado visible y verificador oculto ─────────
     enunciados = sum(
         1 for c in celdas
-        if c["cell_type"] == "markdown" and re.search(r"\*\*Pregunta \d+ de \d+", "".join(c["source"]))
+        if c["cell_type"] == "markdown"
+        and re.search(r"^#+ Pregunta \d+ de \d+", "".join(c["source"]), re.M)
     )
     verificadores = sum(
         1 for c in celdas if "pregunta-interactiva" in c["metadata"].get("tags", [])
