@@ -787,6 +787,41 @@ def build_cells():
             **Cómo leer el dibujo.** Son ejes independientes: un sistema real fragmenta *y* replica cada fragmento.
             Lo que hay que retener es que **fragmentar responde a "no cabe" y replicar responde a "no se puede caer"**.
 
+            ## Antes de seguir: ¿qué es un clúster?
+
+            La palabra va a aparecer todo el semestre y conviene fijarla ahora, porque es más simple de
+            lo que suena.
+
+            > **Un clúster son varias máquinas que se coordinan entre ellas y que tú usas como si fueran
+            > una sola.**
+
+            Eso es todo. La parte importante es la segunda mitad: **como si fueran una sola**. Tu código
+            no cambia. Le sigues hablando a una dirección, con la misma línea `MongoClient(...)`, y por
+            dentro esa dirección esconde tres máquinas que se reparten el trabajo y se vigilan.
+
+            {svg("que_es_un_cluster", "A la izquierda un servidor solo: si se apaga no hay servicio. A la derecha un cluster de tres nodos coordinados que la aplicacion usa como si fuera uno")}
+
+            **Cómo leerlo.** A la izquierda está lo que tienes hoy: **una** máquina, dentro de esta
+            pestaña. Si se apaga, se acabó. A la derecha, tres máquinas —llamadas **nodos**— que se hablan
+            entre ellas: si el principal cae, los otros dos lo notan, **votan** cuál toma el relevo, y tu
+            aplicación ni se entera.
+
+            **Tres palabras que ya puedes usar sin miedo:**
+
+            | Palabra | Qué es |
+            |---|---|
+            | **nodo** | cada máquina del clúster |
+            | **principal** *(primary)* | el nodo que recibe las escrituras en ese momento |
+            | **réplica** *(secondary)* | un nodo que mantiene una copia del principal |
+
+            **Y por qué votan.** Porque nadie puede decidir solo que el principal murió: podría ser que
+            *él* esté bien y sea *quien mira* el que perdió la red. Por eso hace falta **mayoría**, y por
+            eso el número mínimo es tres. Con dos nodos no hay mayoría posible y el clúster se queda
+            paralizado justo cuando más lo necesitas.
+
+            > **MÁS ADELANTE.** El clúster que vas a usar el jueves entrante, en Atlas, es exactamente
+            > esto: tres nodos administrados por otros. Tú solo verás una dirección.
+
             ## ¿Y qué máquinas hacen falta para esto?
 
             Es la pregunta correcta, y la respuesta honesta tiene dos partes.

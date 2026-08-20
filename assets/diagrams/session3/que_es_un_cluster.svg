@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 430" width="980" height="430"
+     role="img" aria-labelledby="tc dc">
+  <title id="tc">Qué es un clúster</title>
+  <desc id="dc">Comparación entre un servidor solo y un clúster. A la izquierda, una sola máquina
+    a la que se conecta la aplicación: si esa máquina se apaga, no hay servicio. A la derecha, tres
+    máquinas coordinadas entre sí a las que la aplicación se conecta como si fueran una sola: se
+    reparten el trabajo, se vigilan y si una cae las otras siguen respondiendo. La aplicación usa la
+    misma línea de código en los dos casos.</desc>
+  <style>
+    .bg   { fill:#ffffff; }
+    .h    { font:700 19px "Segoe UI","Helvetica Neue",Arial,sans-serif; }
+    .sub  { font:400 13px "Segoe UI",Arial,sans-serif; fill:#546e7a; }
+    .lbl  { font:600 14px "Segoe UI",Arial,sans-serif; fill:#1a2027; }
+    .tiny { font:400 11.5px "Segoe UI",Arial,sans-serif; fill:#607d8b; }
+    .mono { font:400 12.5px "Consolas","SF Mono",monospace; fill:#1a2027; }
+    .ok   { font:600 13px "Segoe UI",Arial,sans-serif; fill:#1b5e20; }
+    .no   { font:600 13px "Segoe UI",Arial,sans-serif; fill:#b71c1c; }
+  </style>
+
+  <rect class="bg" x="0" y="0" width="980" height="430"/>
+
+  <!-- ── UN SERVIDOR ── -->
+  <text class="h"   x="34" y="34" fill="#b71c1c">Un servidor solo</text>
+  <text class="sub" x="34" y="56">Una máquina hace todo el trabajo</text>
+
+  <g>
+    <rect x="120" y="82" width="150" height="44" rx="7" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+    <text class="lbl" x="195" y="110" text-anchor="middle">Tu aplicación</text>
+    <path d="M191 126 l0 34 l-6 0 l10 14 l10 -14 l-6 0 l0 -34 z" fill="#90a4ae"/>
+
+    <rect x="120" y="176" width="150" height="86" rx="8" fill="#fbe9e7" stroke="#e57373" stroke-width="2"/>
+    <text class="lbl" x="195" y="208" text-anchor="middle">servidor</text>
+    <text class="tiny" x="195" y="228" text-anchor="middle">todos los datos</text>
+    <text class="tiny" x="195" y="246" text-anchor="middle">todas las consultas</text>
+  </g>
+
+  <g>
+    <rect x="34" y="292" width="408" height="106" rx="8" fill="#fff5f5" stroke="#ffcdd2" stroke-width="1.5"/>
+    <text class="no"   x="52" y="318">Si esa máquina se apaga:</text>
+    <text class="sub"  x="52" y="342">no hay servicio, y punto. Nadie consulta nada</text>
+    <text class="sub"  x="52" y="362">hasta que alguien la vuelva a encender.</text>
+    <text class="sub"  x="52" y="386" fill="#b71c1c">Es lo que tienes hoy dentro de este Colab.</text>
+  </g>
+
+  <line x1="490" y1="24" x2="490" y2="406" stroke="#cfd8dc" stroke-width="2" stroke-dasharray="7 6"/>
+
+  <!-- ── UN CLUSTER ── -->
+  <text class="h"   x="524" y="34" fill="#1b5e20">Un clúster</text>
+  <text class="sub" x="524" y="56">Varias máquinas coordinadas que se usan como si fueran una</text>
+
+  <g>
+    <rect x="676" y="82" width="150" height="44" rx="7" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+    <text class="lbl" x="751" y="110" text-anchor="middle">Tu aplicación</text>
+    <path d="M747 126 l0 26 l-6 0 l10 14 l10 -14 l-6 0 l0 -26 z" fill="#90a4ae"/>
+    <text class="tiny" x="838" y="146" text-anchor="middle">una sola dirección</text>
+  </g>
+
+  <g>
+    <rect x="524" y="176" width="126" height="86" rx="8" fill="#e8f5e9" stroke="#43a047" stroke-width="2"/>
+    <text class="lbl"  x="587" y="206" text-anchor="middle">nodo 1</text>
+    <text class="tiny" x="587" y="226" text-anchor="middle">principal</text>
+    <text class="tiny" x="587" y="244" text-anchor="middle">recibe escrituras</text>
+
+    <rect x="664" y="176" width="126" height="86" rx="8" fill="#f1f8f2" stroke="#66bb6a" stroke-width="2"/>
+    <text class="lbl"  x="727" y="206" text-anchor="middle">nodo 2</text>
+    <text class="tiny" x="727" y="226" text-anchor="middle">copia</text>
+
+    <rect x="804" y="176" width="126" height="86" rx="8" fill="#f1f8f2" stroke="#66bb6a" stroke-width="2"/>
+    <text class="lbl"  x="867" y="206" text-anchor="middle">nodo 3</text>
+    <text class="tiny" x="867" y="226" text-anchor="middle">copia</text>
+
+    <path d="M650 214 l14 0" stroke="#43a047" stroke-width="2"/>
+    <path d="M790 214 l14 0" stroke="#43a047" stroke-width="2"/>
+    <text class="tiny" x="727" y="278" text-anchor="middle" fill="#2e7d32">se hablan entre ellos y se vigilan</text>
+  </g>
+
+  <g>
+    <rect x="524" y="292" width="408" height="106" rx="8" fill="#f4faf5" stroke="#c8e6c9" stroke-width="1.5"/>
+    <text class="ok"   x="542" y="318">Si el nodo 1 se apaga:</text>
+    <text class="sub"  x="542" y="342">los otros dos lo notan, votan, y uno pasa a ser</text>
+    <text class="sub"  x="542" y="362">el principal. Tu aplicación sigue funcionando.</text>
+    <text class="mono" x="542" y="386" fill="#1b5e20">MongoClient(...)  ← la misma línea de código</text>
+  </g>
+</svg>
