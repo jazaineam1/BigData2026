@@ -105,9 +105,6 @@ def question_cell(numero, tema, contexto, pregunta, opciones, correcta, retro_op
             # para que no se lea de un vistazo al abrir el cuaderno en GitHub.
             pregunta_interactiva(
                 numero={numero},
-                tema={tema!r},
-                contexto={contexto!r},
-                pregunta={pregunta!r},
                 opciones={opciones!r},
                 carga={carga!r},
             )
