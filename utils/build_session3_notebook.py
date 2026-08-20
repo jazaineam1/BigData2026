@@ -1971,8 +1971,14 @@ def build_cells():
             `NOTICIAS` dice en cuántas apareció; `PROCESOS`, cuántos procesos de contratación tiene en SECOP —de
             los 300 000, no de los 1 000 que viste—.
 
-            **Una advertencia sobre esa columna:** las 142 entidades suman más menciones que noticias hay, porque
-            una noticia que nombra cinco entidades cuenta cinco veces. La columna `NOTICIAS` **no se puede sumar**.
+            **Una advertencia sobre esa columna, y compruébala tú.** Si sumas la columna `NOTICIAS` de las 142
+            entidades te da **738**. Y hay 987 noticias. Alguien podría concluir que 738 noticias nombran alguna
+            entidad — y sería falso en las dos direcciones: **738 no son noticias, son parejas entidad-noticia**.
+            Una sola noticia que nombre cinco entidades aporta cinco. Y al revés, varias de esas 738 son la misma
+            noticia contada otra vez.
+
+            **La columna `NOTICIAS` no se puede sumar.** Que un número se pueda sumar no significa que la suma
+            signifique algo.
 
             **Ahora mira la primera fila.** La **Procuraduría General de la Nación** encabeza con muchísima
             diferencia: 195 noticias, contra 31 de la segunda. Y tiene 74 procesos en SECOP.
