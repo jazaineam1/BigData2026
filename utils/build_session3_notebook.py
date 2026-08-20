@@ -38,6 +38,7 @@ RAW = "https://raw.githubusercontent.com/jazaineam1/BigData2026/main"
 DATOS_NOTICIAS = f"{RAW}/Datos/noticias_contratacion_2026.json"
 DATOS_SECOP = f"{RAW}/Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv"
 DATOS_CRUCE = f"{RAW}/Datos/entidades_en_noticias_2026.json"
+DATOS_BANDEJA = f"{RAW}/Datos/bandeja_revision_2026.json"
 TOTAL_QUESTIONS = 8
 
 
@@ -232,7 +233,7 @@ def build_cells():
             **Finalidad formativa:** comprender el uso e implementación de bases de datos documentales<br>
             **Producción evaluable de hoy:** el hito de la sesión, construido con tu propia ejecución<br>
             **Caso conductor:** Compras Claras — priorizar la revisión de contratación pública<br>
-            **Duración:** 180 minutos — 85 de explicación, 10 de receso y 85 donde trabajas tú<br>
+            **Cómo transcurre:** primero conversamos y decidimos; después trabajas tú, con receso en medio<br>
             **Fecha:** 20 de agosto de 2026
 
             ## Ficha de la sesión
@@ -486,7 +487,7 @@ def build_cells():
             > **Pregunta que dejamos colgada.** Estas 987 noticias salieron de filtrar **57 848 artículos**, y eso
             > es ocho meses de **un solo periódico**. Si Laura quiere vigilar diez medios durante cinco años,
             > hablamos de millones de documentos. Aunque arreglemos la forma, ¿dónde guardamos eso? Volveremos a
-            > esta pregunta en el minuto 46.
+            > esta pregunta más adelante, cuando hablemos de repartir y copiar.
             """
         ),
         *question_cell(
@@ -707,8 +708,8 @@ def build_cells():
             ---
             # 4. Y cuando no cabe en un servidor
 
-            En el minuto 22 quedó una pregunta colgada: nuestras 987 noticias salieron de 57 848 artículos, de un solo
-            periódico y ocho meses. Aunque arreglemos la forma, ¿dónde guardamos eso?
+            Al principio de la sesión quedó una pregunta colgada: nuestras 987 noticias salieron de 57 848 artículos,
+            de un solo periódico y ocho meses. Aunque arreglemos la forma, ¿dónde guardamos eso?
 
             Hay dos respuestas, y hacen cosas distintas.
 
@@ -975,7 +976,7 @@ def build_cells():
             ---
             # Puente al laboratorio
 
-            En los próximos 85 minutos vas a hacer esto, en este orden:
+            De aquí en adelante trabajas tú. Este es el orden:
 
             1. arrancar el motor y ver cuál te tocó, real o de respaldo;
             2. cargar las 987 noticias de contratación en tu propia base de datos;
@@ -1005,7 +1006,7 @@ def build_cells():
         md(
             """
             ---
-            # LABORATORIO — 85 minutos
+            # LABORATORIO — aquí trabajas tú
 
             > **HAZ ESTO AHORA.** Ejecuta la celda de abajo antes de seguir leyendo, y déjala trabajando.
 
@@ -1151,7 +1152,7 @@ def build_cells():
             criterio, y no tienen una respuesta única: se evalúa si tu razonamiento se sostiene y si dices con
             claridad **qué no puedes concluir**.
 
-            > **Dos minutos de conversación al final.** El docente te va a preguntar en voz alta por el punto 4 o
+            > **Una conversación corta al final.** El docente te va a preguntar en voz alta por el punto 4 o
             > el 5, con tu pantalla a la vista. No es un examen: es la forma más rápida de saber si la explicación
             > que escribiste es tuya. Si algo no te salió, decirlo cuenta a favor, no en contra.
 
@@ -1340,8 +1341,8 @@ def build_cells():
             - **Parámetros usados:** el patrón, y `$options: "i"` para ignorar mayúsculas y minúsculas.
             - **Qué devuelve:** los documentos cuyo campo contiene ese patrón **en cualquier posición**.
             - **Advertencia que vas a necesitar en el paso 5:** busca **subcadenas**, no palabras completas. Buscar
-              `"sena"` encuentra también `señaló`, `senador` y `enseñanza`. Guarda esta frase; en veinte minutos va
-              a explicar un resultado que parecerá bueno y no lo es.
+              `"sena"` encuentra también `señaló`, `senador` y `enseñanza`. Guarda esta frase: más adelante va a
+              explicar un resultado que parecerá bueno y no lo es.
             """
         ),
         *question_cell(
@@ -1676,7 +1677,7 @@ def build_cells():
             al no preguntarnos qué significaba "mencionar una entidad".
 
             **Por qué esto es lo más importante de la noche.** Recuerda la advertencia de la mini ficha de `$regex`
-            en el paso 3. Ahí te dijimos que buscaba subcadenas y no palabras. Veinte minutos después, esa línea
+            en el paso 3. Ahí te dijimos que buscaba subcadenas y no palabras. Un rato después, esa misma línea
             explica una tabla entera de resultados falsos. **La documentación te avisó y el resultado igual te
             convenció.** Así se producen los informes equivocados: no por ignorancia, sino por no verificar lo que ya
             sabíamos.
@@ -1826,6 +1827,104 @@ def build_cells():
             > Ahí es donde el curso continúa.
             """
         ),
+        md(
+            """
+            ## Paso 6.4 · La bandeja de revisión de Laura
+
+            Hasta aquí sabemos **qué entidades** salieron en prensa. Pero Laura no revisa entidades: **revisa
+            procesos**. Decir "mire la Superintendencia de Salud" no es accionable; decir "mire este contrato de
+            arrendamiento de 37 mil millones" sí lo es.
+
+            Así que bajemos un nivel. Vamos a cruzar las noticias con los **procesos de contratación** y a armar
+            la bandeja: qué debería mirar Laura el lunes por la mañana, y en qué orden.
+
+            ### Las señales que SECOP sí trae
+
+            | Señal | Qué dice | Por qué importa |
+            |---|---|---|
+            | `modalidad_de_contratacion` | cómo se eligió al contratista | la contratación directa no compite |
+            | `precio_base` | cuánto vale | el riesgo no es igual en 5 millones que en 50 mil millones |
+            | `respuestas_al_procedimiento` | cuántos proveedores respondieron | cero respuestas es un proceso sin pluralidad |
+            | *(externa)* noticias de la entidad | atención pública | contexto que SECOP no puede darte |
+
+            **Y aquí viene la trampa, antes de que la construyas.** Suena razonable decir "contratación directa es
+            sospechosa". Compruébalo antes de creerlo: en nuestros 300 000 procesos, la contratación directa es
+            el **47 %**. Casi la mitad de la contratación del Estado. Una señal que marca a la mitad del universo
+            no prioriza nada.
+
+            Por eso la bandeja no usa una señal: usa **la combinación** de cuatro, y aun así no acusa a nadie.
+            """
+        ),
+        code(
+            """
+            # Paso 6.4 — la bandeja de revision, ya calculada sobre los 300.000 procesos.
+            with urllib.request.urlopen("{bandeja}") as r:
+                bandeja = json.loads(r.read().decode("utf-8"))
+
+            print(f"Procesos en la bandeja: {len(bandeja)}")
+            print()
+            print(f"{'VALOR':>18s}  {'NOT.':>4s}  {'ENTIDAD':34s}  OBJETO")
+            print("-" * 108)
+            for p in bandeja[:10]:
+                print(f"{p['valor']:>18,.0f}  {p['noticias_de_la_entidad']:>4d}  "
+                      f"{p['entidad'][:34]:34s}  {p['objeto'][:36]}")
+            """.replace("{bandeja}", DATOS_BANDEJA)
+        ),
+        code(
+            """
+            # Abre UNO. Este es el nivel de detalle con el que Laura decide.
+            from pprint import pprint
+
+            caso = bandeja[0]      # <--- cambia el numero y mira otro
+
+            print("PROCESO   :", caso["id_del_proceso"])
+            print("ENTIDAD   :", caso["entidad"], "|", caso["departamento"])
+            print("OBJETO    :", caso["objeto"])
+            print("VALOR     : $", f"{caso['valor']:,.0f}")
+            print("MODALIDAD :", caso["modalidad"], "| respuestas:", caso["respuestas"])
+            print("ESTADO    :", caso["estado"], "| publicado:", caso["publicado"])
+            print()
+            print("LO QUE DIJO LA PRENSA SOBRE ESTA ENTIDAD:")
+            for t in caso["titulares"]:
+                print("  -", t["publicado"], t["titulo"][:88])
+                print("   ", t["url"])
+            """
+        ),
+        md(
+            """
+            ### Interpretación docente — lo que sí es y lo que no es esta bandeja
+
+            **Qué acabas de construir.** Una lista priorizada de procesos concretos, con su objeto, su valor, cómo
+            se contrataron, cuántos proveedores respondieron y qué se dijo en prensa sobre la entidad. Eso es un
+            producto de trabajo: Laura puede abrirlo el lunes y empezar por arriba.
+
+            **Y ahora el límite más importante de toda la sesión.** El cruce es **entidad ↔ noticia**, no
+            **contrato ↔ noticia**. La noticia habla del Ministerio; casi nunca habla de *este* contrato. Un
+            proceso puede estar de primero en la bandeja siendo impecable, solo porque su entidad apareció en
+            prensa por un asunto que nada tiene que ver.
+
+            Míralo en la tabla: hay convenios interadministrativos, un empréstito de tesorería y un arrendamiento
+            de sede. **Ninguno de esos es raro**; los tres son figuras legales y frecuentes. Lo que la bandeja
+            dice es *"aquí hay volumen, poca competencia y atención pública a la vez"*, y eso justifica **mirar**,
+            que es exactamente lo que Laura pidió en la sesión 2. No justifica nada más.
+
+            **Qué le falta a esta bandeja para ser buena de verdad**, y anótalo porque es el trabajo de las
+            próximas semanas:
+
+            1. **Enlazar la noticia con el contrato**, no con la entidad. Necesita búsqueda textual sobre el
+               objeto contractual: sesión 7.
+            2. **Un denominador por entidad.** Un ministerio con 746 procesos y 31 noticias no es comparable con
+               uno de 2 procesos y 23 noticias. Lo viste con el cociente de denominador pequeño.
+            3. **El proveedor.** ¿Se repite entre entidades? Eso es una pregunta de relaciones, y se responde con
+               grafos: sesión 6.
+            4. **Que se actualice sola.** Hoy esta bandeja es una foto. Para que sirva tiene que rehacerse cada
+               semana con noticias nuevas: eso es un proceso de ETL, sesiones 10 y 11.
+
+            **PARA LLEVAR.** Ninguna de esas cuatro cosas es un capricho técnico: cada una es una pregunta que tu
+            propio resultado dejó abierta hoy. Así se construye una capacidad de datos — no eligiendo herramientas,
+            sino persiguiendo los límites de lo que ya tienes.
+            """
+        ),
         *question_cell(
             8,
             "El cruce entre dos fuentes",
@@ -1867,7 +1966,7 @@ def build_cells():
             > una simplificación para la clase: es la ruta que funciona en los computadores de la universidad, donde
             > puede que no tengas permisos para instalar nada.
 
-            ### 7.1 — Revisar antes de integrar (3 minutos)
+            ### 7.1 — Revisar antes de integrar
 
             1. Entra al repositorio de tu pareja y abre la pestaña **Pull requests**.
             2. Abre el PR de la sesión 2 y ve a **Files changed**.
@@ -1875,7 +1974,7 @@ def build_cells():
                `COMPLETAR` y que el indicador tenga responsable y límite.
             4. Si algo falta, escríbelo como comentario en la línea exacta. Si está bien, sigue.
 
-            ### 7.2 — Integrar (2 minutos)
+            ### 7.2 — Integrar
 
             1. En la pestaña **Conversation**, revisa los **Checks**.
             2. Pulsa **Merge pull request** y confirma.
@@ -1897,7 +1996,7 @@ def build_cells():
             > significa que la decisión esté bien planteada**. La máquina comprueba que el archivo esté completo. Si
             > tu indicador mide lo que no dice medir, el check sigue verde. Eso solo lo ve una persona.
 
-            ### 7.3 — Abrir el hito de hoy (5 minutos, en casa si falta tiempo)
+            ### 7.3 — Abrir el hito de hoy (puedes terminarlo en casa)
 
             En el mismo repositorio, con el botón **Add file → Create new file**:
 

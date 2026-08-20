@@ -158,6 +158,94 @@ def main():
     for palabra, veces in falsos.most_common(8):
         print(f"    {palabra:16s} {veces}")
 
+    construir_bandeja(hallazgos, por_id)
+
+
+def construir_bandeja(hallazgos, por_id):
+    """
+    Lleva el cruce de ENTIDAD a CONTRATO, que es lo que Laura necesita de verdad.
+
+    Una entidad nombrada en prensa no es accionable: Laura no revisa entidades,
+    revisa procesos concretos. Aqui se arma la bandeja de revision: los procesos
+    de esas entidades, con las senales que SECOP si trae y la senal externa de
+    la prensa al lado.
+
+    Limite que hay que declarar en clase: el enlace es ENTIDAD <-> NOTICIA, no
+    CONTRATO <-> NOTICIA. La noticia habla de la entidad, casi nunca de este
+    proceso en particular. La bandeja ordena por donde empezar a mirar; no dice
+    que haya nada malo en ninguna fila.
+    """
+    print()
+    print("5/5 Construyendo la bandeja de revision (nivel contrato)...")
+
+    columnas = [
+        "entidad", "nombre_del_procedimiento", "precio_base",
+        "modalidad_de_contratacion", "respuestas_al_procedimiento",
+        "estado_del_procedimiento", "fecha_de_publicacion_del",
+        "departamento_entidad", "id_del_proceso",
+    ]
+    procesos = pd.concat(
+        [pd.read_csv(f, usecols=columnas, low_memory=False)
+         for f in sorted(glob.glob(SECOP_GLOB))],
+        ignore_index=True,
+    )
+
+    noticias_por_entidad = {e: len(ids) for e, ids in hallazgos.items()}
+    procesos["noticias_entidad"] = procesos["entidad"].map(noticias_por_entidad)
+    con_prensa = procesos[procesos["noticias_entidad"].notna()].copy()
+
+    print(f"    Procesos totales: {len(procesos)}")
+    print(f"    De entidades que salieron en prensa: {len(con_prensa)} "
+          f"({len(con_prensa) / len(procesos) * 100:.1f}%)")
+
+    # Tres senales, ninguna concluyente por si sola.
+    con_prensa["sin_competencia"] = (
+        con_prensa["modalidad_de_contratacion"].str.contains("directa", case=False, na=False)
+    )
+    con_prensa["sin_respuestas"] = con_prensa["respuestas_al_procedimiento"].fillna(-1).eq(0)
+
+    directa_total = procesos["modalidad_de_contratacion"].str.contains(
+        "directa", case=False, na=False).mean()
+    print(f"    OJO: la contratacion directa es el {directa_total * 100:.0f}% de TODO SECOP.")
+    print("         Por si sola no senala nada; solo sirve combinada.")
+
+    bandeja = con_prensa[
+        con_prensa["sin_competencia"] & con_prensa["sin_respuestas"]
+    ].nlargest(200, "precio_base")
+
+    salida = os.path.join(REPO, "Datos", "bandeja_revision_2026.json")
+    registros = []
+    for _, r in bandeja.iterrows():
+        ids = hallazgos.get(r["entidad"], [])
+        registros.append({
+            "id_del_proceso": r["id_del_proceso"],
+            "entidad": r["entidad"],
+            "departamento": r["departamento_entidad"],
+            "objeto": str(r["nombre_del_procedimiento"])[:180],
+            "valor": float(r["precio_base"]) if pd.notna(r["precio_base"]) else None,
+            "modalidad": r["modalidad_de_contratacion"],
+            "respuestas": int(r["respuestas_al_procedimiento"] or 0),
+            "estado": r["estado_del_procedimiento"],
+            "publicado": str(r["fecha_de_publicacion_del"])[:10],
+            "noticias_de_la_entidad": int(r["noticias_entidad"]),
+            "titulares": [
+                {"titulo": por_id[i]["titulo"], "url": por_id[i]["url"],
+                 "publicado": por_id[i]["publicado"][:10]}
+                for i in ids[:2]
+            ],
+        })
+    with open(salida, "w", encoding="utf-8") as f:
+        json.dump(registros, f, ensure_ascii=False, indent=1)
+    print(f"    {salida}  ({len(registros)} procesos)")
+
+    print()
+    print("=" * 78)
+    print("BANDEJA DE REVISION — los 10 primeros")
+    print("=" * 78)
+    for r in registros[:10]:
+        print(f"  ${r['valor']:>16,.0f}  {r['noticias_de_la_entidad']:3d} not.  "
+              f"{r['entidad'][:32]:32s}  {r['objeto'][:38]}")
+
 
 if __name__ == "__main__":
     main()
