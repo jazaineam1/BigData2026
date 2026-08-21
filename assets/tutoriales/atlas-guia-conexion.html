@@ -308,7 +308,7 @@
       <p class="sub">Son cinco minutos si tienes esto listo antes de abrir el navegador.</p>
       <div class="checklist">
         <div class="check-item"><span class="bola">1</span> Un correo al que tengas acceso ahora mismo (sirve el institucional o uno personal).</div>
-        <div class="check-item"><span class="bola">2</span> Un lugar para <b>guardar una contraseña</b> — un gestor, o incluso un documento temporal.</div>
+        <div class="check-item"><span class="bola">2</span> Un <b>gestor de contraseñas</b>. No escribas la clave en el notebook, el repositorio, una captura ni un archivo compartido.</div>
         <div class="check-item"><span class="bola">3</span> Esta pestaña abierta al lado de <span class="mono">cloud.mongodb.com</span>.</div>
       </div>
       <div class="callout alerta" style="margin-top:18px;">
@@ -335,7 +335,7 @@
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/01-crear-cuenta.png" alt="Pantalla de registro de MongoDB Atlas"
+            <img src="capturas/01-crear-cuenta.png" alt="En el registro de Atlas se puede continuar con Google o completar el formulario con correo"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="marcador-vacio" style="display:none;">
               <span class="ic">🖼️</span>
@@ -366,7 +366,7 @@
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/02-organizacion-proyecto.png" alt="Creación de organización y proyecto en Atlas"
+            <img src="capturas/02-organizacion-proyecto.png" alt="Dentro de la organización Ucentral se crea el proyecto compras-claras"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="marcador-vacio" style="display:none;">
               <span class="ic">🖼️</span>
@@ -382,25 +382,28 @@
     <!-- 5 · PASO 3 ELEGIR M0 -->
     <section class="slide">
       <span class="etiqueta dorada"><span class="num">3</span> Desplegar</span>
-      <h2>Crea el despliegue: elige M0</h2>
-      <p class="sub">Pulsa <b>Create</b> y Atlas te ofrece varios tamaños. Solo uno es gratis.</p>
+      <h2>Crea el despliegue: elige Free (M0)</h2>
+      <p class="sub">Pulsa <b>Create</b> y Atlas te ofrece varios tamaños. En la interfaz actual, el nivel M0 aparece como <b>Free</b>.</p>
       <div class="paso-cuerpo">
         <div class="instrucciones">
           <ol>
             <li>Pulsa el botón <b>Create</b> en la vista general del proyecto.</li>
-            <li>Elige la opción <b>M0</b> — dice literalmente <i>«Free forever»</i>.</li>
+            <li>Selecciona <b>Free</b>: corresponde al clúster <b>M0</b> gratuito de 512 MB.</li>
             <li><b>No</b> elijas M10 ni superiores: esas sí cobran por hora.</li>
           </ol>
           <table class="tabla" style="margin-top:4px;">
-            <tr><th></th><th>M0 (gratis)</th><th>M10 o más</th></tr>
-            <tr><td>Costo</td><td>$0 para siempre</td><td>desde ~60 USD/mes</td></tr>
+            <tr><th></th><th>Free (M0)</th><th>M10 o más</th></tr>
+            <tr><td>Costo</td><td>$0/h; no expira</td><td>cobro por hora</td></tr>
             <tr><td>Almacenamiento</td><td>512 MB</td><td>10 GB o más</td></tr>
             <tr><td>Para esta clase</td><td class="mono" style="color:var(--verde-700)">Sí, sobra</td><td>No hace falta</td></tr>
           </table>
+          <div class="callout info"><span class="ic">💡</span> Atlas permite un solo clúster Free por
+            proyecto. Si este proyecto ya tiene uno, crea otro proyecto; no intentes desplegar un segundo
+            M0 en el mismo.</div>
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/03-boton-create-m0.png" alt="Selección del clúster gratuito M0 en Atlas"
+            <img src="capturas/03-boton-create-m0.png" alt="La tarjeta Free seleccionada muestra 512 MB y precio de cero dólares por hora"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="marcador-vacio" style="display:none;">
               <span class="ic">🖼️</span>
@@ -408,7 +411,7 @@
               <span class="archivo">capturas/03-boton-create-m0.png</span>
             </div>
           </div>
-          <div class="captura-caption">Botón «Create» y la opción M0</div>
+          <div class="captura-caption">La etiqueta vigente «Free» corresponde al nivel M0</div>
         </div>
       </div>
     </section>
@@ -430,7 +433,7 @@
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/04-proveedor-region.png" alt="Selección de proveedor y región en Atlas"
+            <img src="capturas/04-proveedor-region.png" alt="AWS está seleccionado como proveedor y N. Virginia us-east-1 como región"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="marcador-vacio" style="display:none;">
               <span class="ic">🖼️</span>
@@ -447,21 +450,21 @@
     <section class="slide">
       <span class="etiqueta dorada"><span class="num">5</span> Nombrar</span>
       <h2>Dale nombre y crea</h2>
-      <p class="sub">El nombre no se puede cambiar después de creado, así que elígelo con calma —
-        aunque tampoco es grave si te equivocas: puedes crear otro.</p>
+      <p class="sub">El nombre no se puede cambiar después del despliegue. Si necesitas corregirlo,
+        tendrás que eliminar el clúster y recrearlo, o usar otro proyecto.</p>
       <div class="paso-cuerpo">
         <div class="instrucciones">
           <ol>
             <li>En el campo <b>Name</b>, deja el valor por defecto: <code>Cluster0</code>.</li>
             <li>Usar el nombre por defecto evita confusiones si más adelante copias código de ejemplo.</li>
-            <li>Pulsa <b>Create</b>. El asistente de <b>Security Quickstart</b> se abre solo.</li>
+            <li>Comprueba que el precio siga en <b>$0/hour</b> y pulsa <b>Create Deployment</b>. Se abrirá el asistente de conexión y seguridad.</li>
           </ol>
           <div class="callout info"><span class="ic">💡</span> El nombre solo admite letras, números y
             guiones, y máximo 64 caracteres.</div>
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/05-nombre-cluster.png" alt="Campo de nombre del clúster y botón Create"
+            <img src="capturas/05-nombre-cluster.png" alt="El nombre Cluster0, el precio de cero dólares por hora y el botón Create Deployment están listos"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="marcador-vacio" style="display:none;">
               <span class="ic">🖼️</span>
@@ -469,7 +472,7 @@
               <span class="archivo">capturas/05-nombre-cluster.png</span>
             </div>
           </div>
-          <div class="captura-caption">Campo «Name» y botón «Create»</div>
+          <div class="captura-caption">Campo «Name» y botón «Create Deployment»</div>
         </div>
       </div>
     </section>
@@ -484,16 +487,20 @@
         <div class="instrucciones">
           <ol>
             <li>Escribe un <b>Username</b>, por ejemplo <code>estudiante</code>.</li>
-            <li>Pulsa <b>Autogenerate Secure Password</b> y <b>cópiala ya</b> — no se vuelve a mostrar.</li>
+            <li>Usa tu gestor de contraseñas para generar una clave segura, escríbela en <b>Password</b> y guárdala antes de continuar.</li>
             <li>Pulsa <b>Create Database User</b>.</li>
           </ol>
-          <div class="callout riesgo"><span class="ic">🔒</span> Si la contraseña generada trae
-            <code>@</code>, <code>/</code> o <code>:</code>, vas a necesitar codificarla al usarla en el
-            paso 10. Si prefieres evitarlo, escribe tú una propia solo con letras y números.</div>
+          <div class="callout riesgo"><span class="ic">🔒</span> Conserva una contraseña segura,
+            incluso si contiene símbolos. En el paso 10 la codificaremos con
+            <code>quote_plus()</code> sin mostrarla ni guardarla en la celda.</div>
+          <div class="callout"><span class="ic">🧭</span> En la configuración inicial Atlas puede
+            asignar al primer usuario el rol amplio <code>atlasAdmin</code> para facilitar la práctica.
+            Es aceptable únicamente en este entorno de aprendizaje, con datos no sensibles. En un sistema
+            real se aplica mínimo privilegio; por ejemplo, <code>readWrite</code> solo sobre la base necesaria.</div>
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/06-security-quickstart-usuario.png" alt="Security Quickstart: creación de usuario de base de datos"
+            <img src="capturas/06-security-quickstart-usuario.png" alt="El usuario estudiante y una contraseña oculta están listos antes de crear el usuario de base de datos"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="marcador-vacio" style="display:none;">
               <span class="ic">🖼️</span>
@@ -501,7 +508,7 @@
               <span class="archivo">capturas/06-security-quickstart-usuario.png</span>
             </div>
           </div>
-          <div class="captura-caption">Security Quickstart — usuario y contraseña</div>
+          <div class="captura-caption">Asistente Connect — usuario y contraseña oculta</div>
         </div>
       </div>
     </section>
@@ -515,18 +522,20 @@
       <div class="paso-cuerpo">
         <div class="instrucciones">
           <ol>
-            <li>El asistente ofrece <b>Add My Current IP Address</b> — sirve para tu propio computador.</li>
-            <li>Para <b>Colab</b> no sirve: la IP cambia cada vez que abres un entorno nuevo.</li>
-            <li>En vez de eso, escribe <code>0.0.0.0/0</code> — «cualquier dirección» — y pulsa <b>Add Entry</b>.</li>
-            <li>Pulsa <b>Finish and Close</b> y luego <b>Go to Overview</b>.</li>
+            <li><b>Add Your Current IP Address</b> sirve para tu computador, pero no para Colab: allí la IP puede cambiar.</li>
+            <li>Para la prueba en Colab, elige <b>Add a Different IP Address</b> y escribe <code>0.0.0.0/0</code>.</li>
+            <li>Si Atlas ofrece expiración, limita la entrada a siete días como máximo. En el asistente mostrado no apareció esa opción.</li>
+            <li>Pulsa <b>Add IP Address</b> y continúa con <b>Choose a connection method</b>.</li>
+            <li>Después del <i>ping</i>, elimínala en <b>Security → Database &amp; Network Access → IP Access List</b>.</li>
           </ol>
-          <div class="callout riesgo"><span class="ic">⚠️</span><b>0.0.0.0/0 abre la base a internet
-            entero.</b> Es aceptable esta noche, con datos de práctica y una contraseña que solo tú
-            conoces — nunca lo hagas con datos reales o de producción.</div>
+          <div class="callout riesgo"><span class="ic">⚠️</span><b>0.0.0.0/0 permite intentos de
+            conexión desde cualquier dirección.</b> La contraseña sigue siendo obligatoria, pero la
+            exposición aumenta: úsalo solo temporalmente, con datos de práctica, y elimínalo después
+            del <i>ping</i> si no configuraste expiración.</div>
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/07-acceso-red.png" alt="Configuración de acceso de red (Network Access) en Atlas"
+            <img src="capturas/07-acceso-red.png" alt="La regla temporal 0.0.0.0/0 muestra una advertencia de seguridad antes de Add IP Address"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="marcador-vacio" style="display:none;">
               <span class="ic">🖼️</span>
@@ -534,7 +543,7 @@
               <span class="archivo">capturas/07-acceso-red.png</span>
             </div>
           </div>
-          <div class="captura-caption">Network Access — lista de IP permitidas</div>
+          <div class="captura-caption">Asistente Connect — acceso temporal para probar Colab</div>
         </div>
       </div>
     </section>
@@ -548,17 +557,17 @@
       <div class="paso-cuerpo">
         <div class="instrucciones">
           <ol>
-            <li>En <b>Database</b> vas a ver <code>Cluster0</code> con un punto que gira.</li>
-            <li>Cuando el punto se pone <b>verde</b> y dice algo como <i>«Active»</i>, ya está listo.</li>
+            <li>En <b>Project Overview</b> aparecerá la tarjeta de <code>Cluster0</code> mientras termina el despliegue.</li>
+            <li>Cuando Atlas indique que está <b>disponible</b> y habilite <b>Connect</b>, ya está listo.</li>
             <li>No necesitas recargar la página: el estado se actualiza solo.</li>
           </ol>
-          <div class="callout info"><span class="ic">💡</span> Este es el momento para leer el bloque 4
-            de la sesión pasada otra vez: lo que se está creando ahora mismo es exactamente el conjunto
-            de réplicas de tres nodos del que hablamos.</div>
+          <div class="callout info"><span class="ic">💡</span> Atlas administra la infraestructura por ti.
+            Esta pantalla no describe su topología interna: solo confirma que el servicio está disponible
+            y que el botón <b>Connect</b> ya puede usarse.</div>
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/08-cluster-listo.png" alt="Clúster Atlas ya desplegado y activo"
+            <img src="capturas/08-cluster-listo.png" alt="Cluster0 está disponible con Connect habilitado y capacidad de 512 MB"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="marcador-vacio" style="display:none;">
               <span class="ic">🖼️</span>
@@ -587,7 +596,7 @@
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/09-connect-drivers-python.png" alt="Selección de driver Python y cadena de conexión"
+            <img src="capturas/09-connect-drivers-python.png" alt="Python está seleccionado como driver y la URI conserva el marcador de contraseña"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="marcador-vacio" style="display:none;">
               <span class="ic">🖼️</span>
@@ -604,47 +613,58 @@
     <section class="slide">
       <span class="etiqueta dorada"><span class="num">10</span> Comprobar</span>
       <h2>Pruébalo en tu Colab</h2>
-      <p class="sub">Reemplaza <code>usuario</code> y <code>CONTRASENA</code> por los del paso 6, y pega
-        el resto tal como lo copiaste.</p>
+      <p class="sub">Pega la URI copiada desde <b>Drivers</b> sin reemplazar
+        <code>&lt;db_password&gt;</code>. Colab pedirá la contraseña sin mostrarla; el código la codifica en memoria.</p>
       <pre class="codigo"><span class="c"># en una celda nueva de tu Colab de sesion 4</span>
+!pip -q install pymongo
+
+<span class="k">from</span> getpass <span class="k">import</span> getpass
+<span class="k">from</span> urllib.parse <span class="k">import</span> quote_plus
 <span class="k">from</span> pymongo <span class="k">import</span> MongoClient
 
-uri = <span class="s">"mongodb+srv://usuario:CONTRASENA@cluster0.xxxxx.mongodb.net/?retryWrites=true&amp;w=majority"</span>
-client = MongoClient(uri)
+uri_atlas = input(<span class="s">"Pega la URI de Atlas conservando &lt;db_password&gt;: "</span>).strip()
+<span class="k">if</span> <span class="s">"&lt;db_password&gt;"</span> not in uri_atlas:
+    <span class="k">raise</span> ValueError(<span class="s">"La URI debe conservar el marcador &lt;db_password&gt;."</span>)
+
+contrasena = quote_plus(getpass(<span class="s">"Contraseña del usuario de base de datos: "</span>))
+uri = uri_atlas.replace(<span class="s">"&lt;db_password&gt;"</span>, contrasena)
+client = MongoClient(uri, serverSelectionTimeoutMS=10000)
 
 <span class="c"># ping es la forma de decir "¿me escuchas?" sin tocar ningun dato</span>
 client.admin.command(<span class="s">"ping"</span>)
 print(<span class="s">"Conectado a Atlas"</span>)</pre>
       <div class="callout alerta" style="margin-top:14px;">
         <span class="ic">🔐</span>
-        <span>Si tu contraseña tiene <code>@</code>, <code>/</code> o algún símbolo raro, hay que
-        codificarla antes de pegarla en la URL:
-        <code>from urllib.parse import quote_plus</code> y luego <code>quote_plus("tu-contraseña")</code>.</span>
+        <span>No imprimas <code>uri</code> ni compartas la salida de la celda.
+        <code>getpass()</code> oculta la escritura y <code>quote_plus()</code> permite usar la contraseña
+        segura generada por Atlas.</span>
       </div>
     </section>
 
     <!-- 13 · ERRORES COMUNES -->
     <section class="slide">
       <span class="etiqueta"><span class="num">!</span> Si algo falla</span>
-      <h2>Los tres errores que vas a ver</h2>
-      <p class="sub">Ningún error de esta lista significa que rompiste algo. Son los mismos tres para
-        todo el mundo la primera vez.</p>
+      <h2>Tres errores frecuentes</h2>
+      <p class="sub">Ningún error de esta lista significa que rompiste algo. Lee primero el mensaje:
+        cada caso se corrige de una forma distinta.</p>
       <table class="tabla">
         <tr><th>Lo que ves</th><th>Qué pasó</th><th>Cómo se arregla</th></tr>
         <tr>
           <td class="mono">bad auth : Authentication failed</td>
           <td>La contraseña no coincide, o tiene un símbolo sin codificar.</td>
-          <td>Revisa que copiaste el usuario y la contraseña exactos del paso 6.</td>
+          <td>Vuelve a ejecutar la celda e introduce la contraseña con <code>getpass()</code>; no la pegues en el código.</td>
         </tr>
         <tr>
           <td class="mono">ServerSelectionTimeoutError</td>
-          <td>Tu IP actual no está en la lista de acceso.</td>
-          <td>Vuelve al paso 7 y confirma que agregaste <code>0.0.0.0/0</code>.</td>
+          <td>Atlas no respondió dentro del tiempo esperado. Puede deberse a la lista de IP, al estado del clúster,
+            a DNS o a restricciones de la red.</td>
+          <td>Comprueba que el clúster esté disponible y que la entrada temporal no haya expirado. Si debes
+            recrearla, elimínala al terminar; si persiste, prueba otra red o revisa la resolución DNS.</td>
         </tr>
         <tr>
           <td class="mono">could not resolve host</td>
-          <td>El clúster todavía se estaba desplegando cuando copiaste la URI.</td>
-          <td>Espera al punto verde del paso 8 y vuelve a copiar la cadena.</td>
+          <td>La URI está incompleta o el entorno no resolvió el nombre del clúster.</td>
+          <td>Vuelve a copiarla desde <b>Drivers</b>, confirma que el clúster está disponible y prueba de nuevo.</td>
         </tr>
       </table>
     </section>
@@ -657,9 +677,9 @@ print(<span class="s">"Conectado a Atlas"</span>)</pre>
         <code>update_one</code>, <code>aggregate</code> — pero contra tu propio clúster en la nube.</p>
       <div class="checklist">
         <div class="check-item"><span class="bola">✓</span> Cuenta creada y proyecto con nombre reconocible.</div>
-        <div class="check-item"><span class="bola">✓</span> Cluster0 en M0, activo.</div>
-        <div class="check-item"><span class="bola">✓</span> Usuario y contraseña guardados en un lugar seguro.</div>
-        <div class="check-item"><span class="bola">✓</span> <code>0.0.0.0/0</code> en la lista de acceso.</div>
+        <div class="check-item"><span class="bola">✓</span> Cluster0 en Free (M0), disponible y con <b>Connect</b> habilitado.</div>
+        <div class="check-item"><span class="bola">✓</span> Usuario creado y contraseña guardada en un gestor, nunca en el notebook.</div>
+        <div class="check-item"><span class="bola">✓</span> <code>0.0.0.0/0</code> quedó con expiración de máximo siete días o fue eliminado al finalizar.</div>
         <div class="check-item"><span class="bola">✓</span> <code>client.admin.command("ping")</code> imprimió «Conectado a Atlas».</div>
       </div>
     </section>
