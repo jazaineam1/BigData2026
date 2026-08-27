@@ -704,20 +704,58 @@ def build_cells():
         md(
             """
             ---
-            ## Cassandra: una tabla para una sola pregunta
+            ## Cassandra: qué es, y por qué aparece aquí
 
             **MAPA** · esto lo recorremos hablando y viendo una demostración en vivo. No necesitas una
             cuenta de Astra propia.
 
-            Cassandra entra cuando la pregunta de Laura ya es **estable y se repite**:
+            ### Qué es, en una frase que puedas repetir
 
-            > Para una fecha de corte y un departamento, ¿cuáles son los cinco procesos de mayor valor que
-            > debo abrir primero?
+            **Apache Cassandra es un motor de base de datos hecho para escribir muchísimo, muy rápido, sin
+            que nada se caiga — a cambio de que solo respondas las preguntas que decidiste de antemano.**
+            Nació en Facebook en 2008 para una necesidad muy concreta: la bandeja de mensajes de todos sus
+            usuarios, que crecía sin parar y no podía depender de un solo servidor. Hoy la usan, para
+            problemas del mismo tipo, Netflix (qué viste y hasta dónde), Uber (dónde está cada carro ahora
+            mismo) y Apple (el historial de iMessage). Ninguno de esos tres casos es "consultar de mil
+            formas distintas": es **una pregunta fija, repetida sin parar, con una respuesta que tiene que
+            llegar en milisegundos.**
 
-            MongoDB sigue alojando los documentos flexibles — noticias, entidades, vistas. Cassandra **no
-            duplica** eso: guarda una **proyección desnormalizada**, hecha a la medida de esta consulta.
-            Cassandra se modela desde las consultas que vas a hacer, no desde las entidades del negocio —
-            es la diferencia de fondo con el modelo documental que usaste toda la noche.
+            ### Cómo lo logra
+
+            Reparte los datos entre varias máquinas usando la clave de partición —lo que ya viste con
+            `(corte, departamento)`— y **cada máquina responde solo por su porción**. Ninguna consulta
+            típica necesita hablar con todas las máquinas a la vez, y ninguna máquina sola es
+            indispensable: si una se apaga, las demás siguen respondiendo. Ese reparto es lo que le permite
+            escalar horizontalmente —agregar más máquinas en vez de comprar una más grande— sin que las
+            escrituras se vuelvan más lentas a medida que crecen los datos.
+
+            ### Para qué datos sirve, y para cuáles no
+
+            | Sirve muy bien para... | No es la herramienta para... |
+            |---|---|
+            | pocas preguntas **conocidas de antemano**, repetidas millones de veces | preguntas **exploratorias**, que cambian según lo que vayas descubriendo — eso es MongoDB, que usaste toda la noche |
+            | datos que se **escriben una vez y casi nunca se modifican** (mensajes, eventos, lecturas de sensores, el corte de hoy) | datos que se **actualizan y relacionan** todo el tiempo entre sí — eso pide transacciones, más cercano a lo relacional |
+            | volúmenes que **no caben** en una sola máquina | volúmenes pequeños que caben de sobra en una — como los 77 de hoy |
+
+            ### Por qué aparece en el contexto de Laura, siendo honestos con la escala de esta noche
+
+            Con 77 filas, Cassandra es **una herramienta de más**: esa consulta la responde una lista de
+            Python en microsegundos, y nadie necesita repartir 77 filas entre varias máquinas. Si la sesión
+            terminara aquí, la respuesta honesta sería "no lo necesitas todavía".
+
+            **Pero Compras Claras es un piloto, y esta sesión practica para cuando deje de serlo.** Si el
+            programa escala a nivel nacional —miles de entidades, cientos de miles de procesos, un tablero
+            que decenas de analistas de la Contraloría consultan **al mismo tiempo**, cada minuto, siempre
+            con la misma pregunta: *"para este corte y este departamento, ¿qué reviso primero?"*— eso deja
+            de ser un ejercicio de pandas. Se vuelve exactamente el patrón que Cassandra resuelve mejor que
+            cualquier otro motor: escritura constante (cada corte nuevo se agrega sin tocar los anteriores)
+            y lectura ultrarrápida de una pregunta fija, sin que un solo servidor se convierta en cuello de
+            botella cuando todos consultan a la vez.
+
+            > **PARA LLEVAR.** Hoy diseñas la tabla con 77 filas de juguete para que, el día que sean 77
+            > millones y la estén consultando cien personas a la vez, ya sepas cuál es la pregunta que hay
+            > que fijar de antemano y cómo construir la tabla alrededor de ella. Eso es exactamente lo que
+            > sigue: cómo se diseña *para* una pregunta, en vez de diseñar para los datos en general.
 
             > Documentación oficial: [modelado de datos en Apache Cassandra](https://cassandra.apache.org/doc/latest/cassandra/developing/data-modeling/intro.html)
             """
