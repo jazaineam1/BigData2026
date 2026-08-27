@@ -17,6 +17,9 @@ __pycache__/
 databricks.env
 *.secret
 secure-connect-*.zip
+Cassandra/token.json
+Cassandra/bundle.zip
+Cassandra/*.zip
 
 # Ruido de ejecucion
 Cuadernos/dask-worker-space/
