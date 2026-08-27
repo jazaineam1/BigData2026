@@ -36,7 +36,7 @@
   .contador b{color:var(--verde-700)}
   .escenario{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:4px clamp(14px,4vw,48px) 8px;position:relative}
   .marco{position:relative;width:min(1520px,100%);height:100%;min-height:0}
-  .slide{position:absolute;inset:0;overflow:hidden;opacity:0;transform:translateY(14px) scale(.985);pointer-events:none;transition:opacity .35s ease,transform .35s ease;background:#fff;border:1px solid rgba(23,92,60,.08);border-radius:var(--radio);padding:clamp(18px,3vw,38px);box-shadow:var(--sombra)}
+  .slide{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;opacity:0;transform:translateY(14px) scale(.985);pointer-events:none;transition:opacity .35s ease,transform .35s ease;background:#fff;border:1px solid rgba(23,92,60,.08);border-radius:var(--radio);padding:clamp(18px,3vw,38px);box-shadow:var(--sombra)}
   .slide.activa{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
   .slide-contenido{--escala:1;transform-origin:top left;width:calc(100% / var(--escala));transform:scale(var(--escala))}
   .etiqueta{display:inline-flex;align-items:center;gap:8px;margin-bottom:13px;padding:6px 14px;border-radius:999px;background:var(--verde-100);color:var(--verde-700);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
@@ -168,19 +168,9 @@
             <li>Lee los dos conteos que imprime al final.</li>
           </ol>
           <div class="resultado"><b>Controles esperados:</b><br><code>noticias = 987</code><br><code>entidades_noticias = 142</code></div>
-          <div class="callout info"><span class="ic">🧩</span><span><code>delete_many({})</code> antes de cada carga hace que la celda sea segura de ejecutar más de una vez: nunca duplica documentos.</span></div>
-        </div>
-        <div>
-          <div class="captura">
-            <img src="capturas/12-colab-cargar-noticias-entidades.png" alt="Colab imprime noticias 987 y entidades_noticias 142 tras ejecutar insert_many contra el cluster de Atlas" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar los dos conteos impresos, 987 y 142; nunca la URI ni la contraseña.</span><span class="archivo">capturas/12-colab-cargar-noticias-entidades.png</span></div>
-          </div>
-          <div class="captura-caption">Evidencia real prevista: carga completa desde Colab</div>
-        </div>
-      </div>
-      <details>
-        <summary><b>👉 Haz clic aquí para abrir el código copiable — cargar las dos colecciones</b></summary>
-        <pre class="codigo">!pip install -q pymongo dnspython
+          <details>
+            <summary><b>👉 Haz clic aquí para abrir el código copiable</b></summary>
+            <pre class="codigo">!pip install -q pymongo dnspython
 
 from getpass import getpass
 from urllib.parse import quote_plus
@@ -216,7 +206,17 @@ db["entidades_noticias"].insert_many(entidades)
 print("entidades_noticias:", db["entidades_noticias"].count_documents({}))
 
 client.close()</pre>
-      </details>
+          </details>
+          <div class="callout info"><span class="ic">🧩</span><span><code>delete_many({})</code> antes de cada carga hace que la celda sea segura de ejecutar más de una vez: nunca duplica documentos.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/12-colab-cargar-noticias-entidades.png" alt="Colab imprime noticias 987 y entidades_noticias 142 tras ejecutar insert_many contra el cluster de Atlas" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar los dos conteos impresos, 987 y 142; nunca la URI ni la contraseña.</span><span class="archivo">capturas/12-colab-cargar-noticias-entidades.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: carga completa desde Colab</div>
+        </div>
+      </div>
     </section>
 
     <!-- 4 · DATA EXPLORER -->
