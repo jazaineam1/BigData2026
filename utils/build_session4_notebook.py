@@ -215,10 +215,51 @@ def build_cells():
         embed(GUIA_ATLAS, 560, "Guía de conexión a MongoDB Atlas"),
         md(
             """
+            ### ⚠️ El error que casi todo el mundo se encuentra aquí: `ServerSelectionTimeoutError`
+
+            Antes de seguir, un problema que se ve **todos los semestres** y que no tiene nada que ver con
+            tu usuario ni tu contraseña.
+
+            Si tu clúster quedó configurado con **"Add My Current IP Address"** (la opción que Atlas ofrece
+            por defecto en el paso 7 de la guía de arriba), solo tu computador puede conectarse. **Google
+            Colab corre en máquinas de Google, con una IP distinta a la tuya y que además cambia cada vez
+            que abres un entorno nuevo.** Por eso una cadena de conexión que funciona perfecto si la pruebas
+            en tu propio computador puede fallar *exactamente igual* desde Colab, con este error:
+
+            ```
+            No se pudo conectar a Atlas: ServerSelectionTimeoutError
+            ```
+
+            **Cómo distinguirlo de un error de verdad:** si fuera tu usuario o tu contraseña, el error
+            sería `OperationFailure: bad auth`, no `ServerSelectionTimeoutError`. Este error específico
+            significa que **la red te está bloqueando antes de que Atlas siquiera revise quién eres**.
+
+            **La solución, en tu navegador, no en el cuaderno:**
+
+            1. Entra a [cloud.mongodb.com](https://cloud.mongodb.com) → tu proyecto → **Network Access**
+               (en el menú de la izquierda, bajo *Security*).
+            2. Pulsa **+ ADD IP ADDRESS**.
+            3. Elige **ALLOW ACCESS FROM ANYWHERE**, o escribe `0.0.0.0/0` a mano.
+            4. Confirma. Queda activo en menos de un minuto — no hay que reiniciar el clúster.
+            5. Vuelve aquí y ejecuta de nuevo la celda de conexión, con la misma cadena.
+
+            > **PARA LLEVAR.** No es un fallo de tu código ni de tus credenciales: es que le falta permiso
+            > de red a una IP que ni siquiera es tuya. Es el mismo motivo por el que el paso 7 de la guía de
+            > arriba dice explícitamente `0.0.0.0/0` y no "tu IP actual".
+            """
+        ),
+        code(
+            """
+            # Presentacion 2 de 2 — de Compass a Atlas a la bandeja de Laura, con capturas reales.
+            """
+        ),
+        embed(LAB_COMPASS, 560, "Laboratorio: Compass, Atlas y la bandeja de Laura"),
+        md(
+            """
             ### Compass, en tu escritorio: crea la base e importa los dos archivos
 
-            Sigue la diapositiva **"Compass → crear base"** de la segunda presentación (más abajo tienes el
-            enlace directo). Resumen de lo que vas a hacer, sin repetirlo aquí paso a paso:
+            Sigue la diapositiva **"Compass → crear base"** de la presentación de arriba. Resumen de lo que
+            vas a hacer, sin repetirlo aquí paso a paso:
 
             1. **Add New Connection** en Compass, con la misma cadena `mongodb+srv://` de tu clúster.
             2. **Create Database**: `compras_claras`, colección `noticias`.

@@ -554,6 +554,11 @@
             conexión desde cualquier dirección.</b> La contraseña sigue siendo obligatoria, pero la
             exposición aumenta: úsalo solo temporalmente, con datos de práctica, y elimínalo después
             del <i>ping</i> si no configuraste expiración.</div>
+          <div class="callout alerta"><span class="ic">🩺</span><b>Si te saltaste este paso, así se ve
+            el síntoma:</b> la conexión funciona perfecto desde tu computador y falla desde Colab con
+            <code>ServerSelectionTimeoutError</code> — no con un error de usuario o contraseña. Ese error
+            específico significa «la red te bloqueó antes de revisar quién eres»: vuelve aquí y agrega
+            <code>0.0.0.0/0</code>.</div>
         </div>
         <div>
           <div class="captura">
