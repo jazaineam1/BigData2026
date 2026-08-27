@@ -42,10 +42,8 @@ ARTEFACTOS = {
 }
 
 CAPTURAS_ESPERADAS = [
-    "10-compass-conexion-atlas.png",
-    "11-compass-crear-base-noticias.png",
-    "12-compass-importar-noticias.png",
-    "13-compass-importar-entidades.png",
+    "11-atlas-crear-base-noticias.png",
+    "12-colab-cargar-noticias-entidades.png",
     "14-atlas-data-explorer-colecciones.png",
     "15-atlas-editar-revision.png",
     "16-atlas-filtros-regex.png",
@@ -278,13 +276,8 @@ def validar_html(ruta, require_captures, errores, avisos):
         errores.append("la presentación contiene el carácter de reemplazo Unicode U+FFFD")
 
     requeridos = [
-        "MongoDB Compass",
-        "Add New Connection",
         "Create Database",
-        "Add Data",
-        "Import JSON or CSV file",
-        "Stop on errors",
-        "View Log",
+        "insert_many",
         "noticias_contratacion_2026.json",
         "entidades_en_noticias_2026.json",
         "dian-palabra-completa-v1",
@@ -297,6 +290,13 @@ def validar_html(ruta, require_captures, errores, avisos):
         "laura",
         "pandas",
     ]
+    # Compass ya no se usa. Mencionarlo para explicar por qué no hace falta esta bien;
+    # lo que no debe aparecer son sus pasos operativos de siempre.
+    for prohibido_compass in ["add new connection", "import json or csv file", "stop on errors"]:
+        if prohibido_compass in texto_min:
+            errores.append(
+                f"la presentación conserva un paso operativo de Compass: {prohibido_compass!r}"
+            )
     for termino in requeridos:
         if termino.lower() not in texto_min:
             errores.append(f"la presentación no contiene el elemento requerido {termino!r}")
@@ -305,15 +305,6 @@ def validar_html(ruta, require_captures, errores, avisos):
         if nombre not in texto:
             errores.append(f"la presentación no enlaza o menciona {nombre}")
 
-    if "la carga borra y repone" in texto_min or "delete_many(" in texto:
-        errores.append(
-            "la presentación propone borrar antes de cargar; una interrupción dejaría la colección incompleta"
-        )
-    for prohibido in ["insert_many(", "cargar desde colab"]:
-        if prohibido in texto_min:
-            errores.append(
-                f"la presentación conserva el flujo anterior de carga con Colab: {prohibido!r}"
-            )
     if re.search(r"fillna\(\s*0\s*\)\.eq\(\s*0\s*\)", texto):
         errores.append(
             "el cruce convierte respuestas faltantes en cero; faltante y cero no tienen el mismo significado"
@@ -328,8 +319,8 @@ def validar_html(ruta, require_captures, errores, avisos):
         )
     )
     for pieza in [
-        "pymongo[srv]", "getpass(", "quote_plus(", "MongoClient(",
-        "pd.read_csv(", ".merge(", "client.close()",
+        "install", "pymongo", "getpass(", "quote_plus(", "MongoClient(",
+        "insert_many(", "pd.read_csv(", ".merge(", "client.close()",
     ]:
         if pieza not in bloques_codigo:
             errores.append(
@@ -350,8 +341,7 @@ def validar_html(ruta, require_captures, errores, avisos):
         except (OSError, ValueError) as exc:
             errores.append(f"captura inválida {nombre}: {exc}")
             continue
-        ancho_minimo = 800 if nombre == "10-compass-conexion-atlas.png" else 1000
-        if ancho < ancho_minimo or alto < 600:
+        if ancho < 1000 or alto < 600:
             errores.append(f"captura {nombre} demasiado pequeña: {ancho}x{alto}")
 
     if pendientes:

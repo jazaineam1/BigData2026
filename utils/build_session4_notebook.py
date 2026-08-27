@@ -138,7 +138,7 @@ def build_cells():
 
             Al terminar podrás:
 
-            1. distinguir MongoDB Community, Compass y Atlas, y decir para qué usarías cada uno;
+            1. distinguir MongoDB Community de Atlas, y decir para qué usarías cada uno;
             2. conectar Colab a un clúster real en la nube, sin escribir tu contraseña en el cuaderno;
             3. leer una **vista** de Atlas y explicar en qué se diferencia de una consulta guardada y de un pipeline;
             4. cruzar una colección documental con una tabla de pandas aplicando una regla explícita, no un modelo;
@@ -176,31 +176,34 @@ def build_cells():
         ),
         md(
             """
-            ### Tres nombres que no son lo mismo
+            ### Dos nombres que no son lo mismo
 
             Ya viste esta distinción al final de la sesión 3. La regla corta que necesitas hoy:
 
             | | Qué es | Dónde vive el dato |
             |---|---|---|
             | **MongoDB Community** | el servidor que instalas y administras tú | tu computador |
-            | **MongoDB Compass** | una aplicación visual que se conecta a un servidor | no guarda nada propio |
             | **MongoDB Atlas** | MongoDB administrado en la nube | un clúster remoto, el mismo para todo tu equipo |
 
-            **Hoy usas los tres**, en este orden: Compass para *ver e importar* de forma visual, Atlas para
-            que los datos vivan en un solo lugar compartido, y Colab para lo que ninguno de los dos hace —
-            cruzar con datos que no son de Mongo, y hablar con Cassandra—.
+            **Hoy usas Atlas y Colab**, en este orden: Atlas para que los datos vivan en un solo lugar
+            compartido y para *consultarlos*, y Colab para lo único que Atlas no hace por su cuenta —meter
+            el primer archivo, cruzar con datos que no son de Mongo, y hablar con Cassandra—.
 
             > **Y esto es lo importante de todo el cuaderno, dilo en voz alta si hace falta:** las
             > **consultas de MongoDB** —el filtro de DIAN, la agregación por sección, las dos
-            > clasificaciones, las dos vistas— **se escriben y se corren en la interfaz de Mongo:** en
-            > Atlas si trabajas en la nube, en Compass o `mongosh` si trabajas contra tu Community local. **No
-            > en Python.** Un profesional de datos que usa MongoDB todos los días casi nunca escribe
-            > `pymongo` para *explorar*; explora en la interfaz, que para eso existe, y solo escribe código
-            > cuando el resultado tiene que **salir** de Mongo hacia otra cosa. Vas a ver exactamente ese
-            > momento, y solo ese, en la segunda mitad.
+            > clasificaciones, las dos vistas— **se escriben y se corren en la interfaz de Atlas.** No en
+            > Python. Un profesional de datos que usa MongoDB todos los días casi nunca escribe `pymongo`
+            > para *explorar*; explora en la interfaz, que para eso existe.
+            >
+            > **La única excepción de hoy es la carga inicial**, y es una excepción real, no una elección de
+            > estilo: **Atlas no tiene un botón para importar un archivo JSON desde el navegador.** Esa
+            > función existe en la aplicación de escritorio Compass o en la herramienta de línea de comandos
+            > `mongoimport` — ninguna de las dos vas a usar hoy. La alternativa que no depende de instalar
+            > nada es la que ya conoces de la sesión 3: `insert_many()`, ahora apuntando a tu clúster en la
+            > nube en vez de a tu `mongod` local. Fuera de esa única celda, todo lo demás —consultar,
+            > agregar, clasificar, crear vistas— ocurre en la interfaz de Atlas, tal como se explica arriba.
 
-            > Documentación oficial: [entornos de MongoDB](https://www.mongodb.com/docs/deployment/) ·
-            > [MongoDB Compass](https://www.mongodb.com/docs/compass/)
+            > Documentación oficial: [entornos de MongoDB](https://www.mongodb.com/docs/deployment/)
             """
         ),
         code(
@@ -248,39 +251,90 @@ def build_cells():
         ),
         code(
             """
-            # Presentacion 2 de 2 — de Compass a Atlas a la bandeja de Laura, con capturas reales.
+            # Presentacion 2 de 2 — de Atlas a la bandeja de Laura, con capturas reales.
             """
         ),
-        embed(LAB_COMPASS, 780, "Laboratorio: Compass, Atlas y la bandeja de Laura"),
+        embed(LAB_COMPASS, 780, "Laboratorio: Atlas y la bandeja de Laura"),
         md(
             """
-            ### Compass, en tu escritorio: crea la base e importa los dos archivos
+            ### Crea la base en Atlas, y carga los dos archivos con Python
 
-            Sigue la diapositiva **"Compass → crear base"** de la presentación de arriba. Resumen de lo que
-            vas a hacer, sin repetirlo aquí paso a paso:
+            **Crear la base sí es interfaz, sin Compass:** en Atlas, `Database → Browse Collections` sobre tu
+            `Cluster0` → **+ Create Database** → `compras_claras`, colección `noticias`.
 
-            1. **Add New Connection** en Compass, con la misma cadena `mongodb+srv://` de tu clúster.
-            2. **Create Database**: `compras_claras`, colección `noticias`.
-            3. **Add Data → Import JSON or CSV file** con `noticias_contratacion_2026.json` — marca
-               **Stop on errors** para notar de inmediato si algo no cargó, y revisa **View Log** al final.
-            4. Repite para una segunda colección, `entidades_noticias`, con `entidades_en_noticias_2026.json`.
+            **Cargar el archivo es la única excepción de código de esta mitad.** Atlas no tiene un botón
+            para subir un JSON desde el navegador — eso es justo lo que hacía Compass, y hoy no lo usamos.
+            La celda de abajo conecta y carga las dos colecciones con `insert_many()`, el mismo método de
+            la sesión 3. Vas a necesitar tu cadena de conexión y tu contraseña —igual que en la guía de
+            arriba— así que esta es también la primera vez que te conectas hoy.
+            """
+        ),
+        code(
+            """
+            # Conectar a Atlas y cargar las dos colecciones. Esta es la UNICA celda de la
+            # primera mitad que escribe en Mongo con Python -- todo lo demas que sigue,
+            # de aqui a "Segunda mitad", ocurre en la interfaz de Atlas.
+            !pip install -q pymongo dnspython mongomock
 
-            > **OJO — por qué no hay `delete_many({{}})` antes de importar.** En la sesión 3 borrabas y
-            > recargabas porque ejecutabas la misma celda muchas veces. Hoy importas **una sola vez**, desde
-            > la interfaz. Si una importación se interrumpe a la mitad, borrar antes de reintentar te
-            > dejaría sin nada mientras investigas qué pasó — mejor revisar **View Log**, corregir y volver
-            > a intentar sobre lo que ya entró.
+            from getpass import getpass
+            from urllib.parse import quote_plus
+            from pymongo import MongoClient
+            import json, urllib.request
 
-            **Deberías terminar con:** `noticias` → 987 documentos. `entidades_noticias` → 142 documentos.
+            # Pega la cadena TAL COMO Atlas te la dio en "Connect -> Drivers -> Python"
+            # (trae <db_username> y <db_password> literales si aun no personalizaste el
+            # usuario en esa pantalla). NO escribas el host a mano.
+            uri_pegada = input("Pega tu cadena de conexion completa: ").strip()
+            usuario = input("Tu usuario de base de datos (el del paso 6 de la guia): ").strip()
+            contrasena = quote_plus(getpass("Tu contraseña real (no se muestra en pantalla): "))
+
+            uri = uri_pegada
+            if "<db_username>" in uri:
+                uri = uri.replace("<db_username>", quote_plus(usuario))
+            if "<db_password>" in uri:
+                uri = uri.replace("<db_password>", contrasena)
+            if "<db_username>" not in uri_pegada and "<db_password>" not in uri_pegada and usuario not in uri:
+                resto = uri_pegada.split("@", 1)[-1]
+                uri = f"mongodb+srv://{quote_plus(usuario)}:{contrasena}@{resto}"
+
+            try:
+                client = MongoClient(uri, serverSelectionTimeoutMS=6000)
+                client.admin.command("ping")
+                db = client["compras_claras"]
+                motor = "Atlas (conexión real)"
+                print("Conectado a Atlas.")
+
+                RAW = "https://raw.githubusercontent.com/jazaineam1/BigData2026/main"
+                with urllib.request.urlopen(f"{RAW}/Datos/noticias_contratacion_2026.json") as r:
+                    noticias_para_cargar = json.loads(r.read().decode("utf-8"))
+                db["noticias"].delete_many({})   # asi puedes ejecutar esta celda mas de una vez sin duplicar
+                db["noticias"].insert_many(noticias_para_cargar)
+                print("noticias:", db["noticias"].count_documents({}))
+
+                with urllib.request.urlopen(f"{RAW}/Datos/entidades_en_noticias_2026.json") as r:
+                    entidades_para_cargar = json.loads(r.read().decode("utf-8"))
+                db["entidades_noticias"].delete_many({})
+                db["entidades_noticias"].insert_many(entidades_para_cargar)
+                print("entidades_noticias:", db["entidades_noticias"].count_documents({}))
+            except Exception as error:
+                # Modo de respaldo: NO fingimos una conexion que no existe.
+                print("No se pudo conectar a Atlas:", type(error).__name__)
+                print("Modo de respaldo: trabajando con los archivos locales de la sesión 3.")
+                import mongomock
+                client = mongomock.MongoClient()
+                db = client["compras_claras"]
+                motor = "respaldo local (mongomock) — no es una conexión real a Atlas"
+
+            print("Motor activo:", motor)
             """
         ),
         md(
             """
             ### En Atlas: consultas, agregación y dos vistas
 
-            Ahora en el **Data Explorer de Atlas** (no en Compass), sobre las colecciones que acabas de
-            importar. Cada consulta que vas a escribir está **embebida aquí abajo, además de versionada** en
-            el repositorio — no tienes que salir de Colab para comparar: si algo no compila, cópiala tal
+            Ahora en el **Data Explorer de Atlas**, sobre las dos colecciones que acabas de cargar. Cada
+            consulta que vas a escribir está **embebida aquí abajo, además de versionada** en el
+            repositorio — no tienes que salir de Colab para comparar: si algo no compila, cópiala tal
             cual y ejecútala.
 
             **1. Filtro `dian-palabra-completa-v1`** sobre `noticias`. Escríbelo y **guárdalo** con ese
@@ -411,71 +465,19 @@ def build_cells():
 
             | Si la tarea es... | La haces en... | Porque... |
             |---|---|---|
-            | filtrar, agrupar, clasificar, crear una vista | **Atlas** (Data Explorer) o **Community** (Compass / `mongosh`) | es exactamente para eso que existe esa interfaz — y la ves ejecutarse y corregirse al instante, sin reiniciar nada |
-            | cruzar lo que hay en Mongo con algo que **no vive en Mongo** | **Python**, aquí en Colab | ni Atlas ni Compass saben leer un CSV de SECOP. Ese cruce solo existe fuera de Mongo |
+            | filtrar, agrupar, clasificar, crear una vista | **Atlas** (Data Explorer) o **Community** (`mongosh`) | es exactamente para eso que existe esa interfaz — y la ves ejecutarse y corregirse al instante, sin reiniciar nada |
+            | cargar el archivo inicial, o cruzar lo que hay en Mongo con algo que **no vive en Mongo** | **Python**, aquí en Colab | ni Atlas ni su interfaz saben leer un archivo local o un CSV de SECOP. Eso solo existe fuera de Mongo |
             | hablar con **otro motor** (Cassandra, más adelante) | **Python** | son sistemas distintos; algo tiene que estar de puente entre los dos |
 
-            **La `menciones_clasificadas` que vas a leer en la próxima celda ya la construiste tú, en
-            Atlas, en la primera mitad.** Python no la va a volver a calcular ni a mejorar: solo la va a
-            **sacar** de Mongo para poder juntarla con los 1.000 procesos de SECOP, que están en un CSV y
-            nunca estuvieron en tu base. Ese cruce es el **único** motivo por el que aparece código a partir
-            de aquí — no porque Python sea "mejor" para consultar que la interfaz de Mongo. Para consultar,
-            la interfaz es mejor: la ves, la corriges, la exportas con un clic. Python entra cuando hace
-            falta juntar mundos que Mongo no puede juntar solo.
-            """
-        ),
-        code(
-            """
-            # Conectar Colab a tu clúster de Atlas, sin escribir la contraseña en el cuaderno.
-            # Ni pymongo ni mongomock vienen preinstalados en todos los entornos de Colab --
-            # se instalan aqui, una vez, y no se vuelven a pedir mientras no reinicies el entorno.
-            !pip install -q pymongo dnspython mongomock
-
-            from getpass import getpass
-            from urllib.parse import quote_plus
-            from pymongo import MongoClient
-
-            # Pega la cadena TAL COMO Atlas te la dio en "Connect -> Drivers -> Python"
-            # (trae <db_username> y <db_password> literales si aun no personalizaste el
-            # usuario en esa pantalla). NO escribas el host a mano: un solo caracter que
-            # falte -por ejemplo, olvidar ".mongodb.net"- y la conexion falla con un error
-            # de DNS que no dice nada sobre tu usuario ni tu contraseña.
-            uri_pegada = input("Pega tu cadena de conexion completa: ").strip()
-
-            usuario = input("Tu usuario de base de datos (el del paso 6 de la guia): ").strip()
-            contrasena = quote_plus(getpass("Tu contraseña real (no se muestra en pantalla): "))
-
-            uri = uri_pegada
-            if "<db_username>" in uri:
-                uri = uri.replace("<db_username>", quote_plus(usuario))
-            if "<db_password>" in uri:
-                uri = uri.replace("<db_password>", contrasena)
-
-            # Si ninguno de los dos marcadores estaba, seguramente la cadena ya traia
-            # tu usuario real pero no tu contraseña real: reconstruimos por si acaso.
-            if "<db_username>" not in uri_pegada and "<db_password>" not in uri_pegada and usuario not in uri:
-                print("No encontre <db_username> ni <db_password> en lo que pegaste; ")
-                print("arme la cadena con tu usuario y contraseña directamente.")
-                resto = uri_pegada.split("@", 1)[-1]  # todo lo que sigue al '@': host y parametros
-                uri = f"mongodb+srv://{quote_plus(usuario)}:{contrasena}@{resto}"
-
-            try:
-                client = MongoClient(uri, serverSelectionTimeoutMS=6000)
-                client.admin.command("ping")
-                db = client["compras_claras"]
-                motor = "Atlas (conexión real)"
-                print("Conectado a Atlas.")
-            except Exception as error:
-                # Modo de respaldo: NO fingimos una conexion que no existe.
-                # Se avisa explicitamente y se sigue con los mismos datos, en local.
-                print("No se pudo conectar a Atlas:", type(error).__name__)
-                print("Modo de respaldo: trabajando con los archivos locales de la sesión 3.")
-                import mongomock
-                client = mongomock.MongoClient()
-                db = client["compras_claras"]
-                motor = "respaldo local (mongomock) — no es una conexión real a Atlas"
-
-            print("Motor activo:", motor)
+            **Ya estás conectado** — usaste esa misma conexión para cargar `noticias` y `entidades_noticias`
+            al principio de la sesión. No hace falta pegar la cadena otra vez: `client` y `db` siguen vivos
+            en este cuaderno. **La `menciones_clasificadas` que vas a leer en la próxima celda ya la
+            construiste tú, en Atlas, en la primera mitad.** Python no la va a volver a calcular ni a
+            mejorar: solo la va a **sacar** de Mongo para poder juntarla con los 1.000 procesos de SECOP,
+            que están en un CSV y nunca estuvieron en tu base. Ese cruce —y la carga inicial que ya
+            hiciste— son los dos únicos motivos por los que aparece código en toda la sesión: no porque
+            Python sea "mejor" para consultar que la interfaz de Mongo, sino porque hay dos tareas
+            puntuales que la interfaz no puede hacer sola.
             """
         ),
         code(

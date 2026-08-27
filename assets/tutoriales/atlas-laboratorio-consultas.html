@@ -81,10 +81,10 @@
       <div class="portada">
         <span class="kicker">Compras Claras · MongoDB Atlas</span>
         <h1>De documentos<br><em>a una fila para Laura</em></h1>
-        <p class="desc">Conecta MongoDB Compass con Atlas, importa dos archivos JSON, consulta con regex,
+        <p class="desc">Crea la base en Atlas, carga dos archivos JSON con Python, consulta con regex,
           guarda la lógica como pipelines y vistas, y cruza el resultado con la muestra SECOP en pandas.</p>
         <div class="pildoras">
-          <span class="pildora">🧭 <b>Carga visual con Compass</b></span>
+          <span class="pildora">🐍 <b>Carga con Python</b></span>
           <span class="pildora">🧭 <b>Consultas en Atlas</b></span>
           <span class="pildora">🪟 <b>2 vistas</b></span>
           <span class="pildora">🐼 <b>SECOP en pandas</b></span>
@@ -100,8 +100,8 @@
       <p class="sub">Una URI probada solo abre la puerta. El producto útil conserva qué se preguntó, cómo se
         clasificó y por qué un proceso terminó en la fila de revisión.</p>
       <div class="mapa-rotulo">Mapa conceptual del recorrido — no es una captura de Atlas</div>
-      <div class="mapa" role="img" aria-label="Compass carga dos colecciones en Atlas, Atlas consulta y crea vistas, Colab y pandas cruzan la vista con SECOP, y Laura recibe una fila de revisión humana">
-        <div class="nodo"><b>1 · Compass</b><span>importa los JSON en el clúster</span></div><span class="flecha">→</span>
+      <div class="mapa" role="img" aria-label="Colab con Python carga dos colecciones en Atlas, Atlas consulta y crea vistas, Colab y pandas cruzan la vista con SECOP, y Laura recibe una fila de revisión humana">
+        <div class="nodo"><b>1 · Colab</b><span>carga los JSON con insert_many</span></div><span class="flecha">→</span>
         <div class="nodo"><b>2 · Atlas</b><span>filtra, agrega y guarda vistas</span></div><span class="flecha">→</span>
         <div class="nodo"><b>3 · Colab + pandas</b><span>cruza las vistas con SECOP</span></div><span class="flecha">→</span>
         <div class="nodo fin"><b>4 · Laura</b><span>revisa 77 procesos explicables</span></div>
@@ -112,135 +112,117 @@
         no equivale a contrato ↔ noticia. El resultado indica dónde mirar; no prueba fraude, causalidad ni irregularidad.</span></div>
     </section>
 
-    <!-- 2 · PREPARAR COMPASS -->
+    <!-- 2 · PREPARAR -->
     <section class="slide">
-      <span class="etiqueta"><span class="num">✓</span> Antes de importar</span>
-      <h2>Prepara Compass, los dos JSON y el acceso mínimo</h2>
-      <p class="sub">Atlas aloja el clúster. Compass es solamente el cliente gráfico que usaremos para llevar los archivos al clúster sin pegar nueve megabytes en el navegador.</p>
+      <span class="etiqueta"><span class="num">✓</span> Antes de cargar</span>
+      <h2>Prepara Atlas y tu acceso — sin instalar nada</h2>
+      <p class="sub">Todo lo de hoy ocurre en el navegador (Atlas) y en Colab. No hace falta instalar Compass ni ningún otro programa.</p>
       <div class="checklist">
-        <div class="check-item"><span class="bola">1</span><span>Atlas: <code>Cluster0</code> disponible y <code>ping</code> correcto. Si falta, vuelve a la <a href="atlas-guia-conexion.html">presentación 1</a>.</span></div>
-        <div class="check-item"><span class="bola">2</span><span>Compass estándar instalado. La edición <i>Readonly</i> no permite importar ni editar documentos.</span></div>
-        <div class="check-item"><span class="bola">3</span><span>Usuario de base de datos con <code>readWrite</code> solo en <code>compras_claras</code>. No uses <code>atlasAdmin</code>.</span></div>
-        <div class="check-item"><span class="bola">4</span><span>Tu IP actual autorizada en Atlas para que Compass pueda conectarse. La apertura temporal <code>0.0.0.0/0</code> se reservará para el paso final en Colab.</span></div>
-        <div class="check-item"><span class="bola">5</span><span>Descarga <a href="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/noticias_contratacion_2026.json" target="_blank" rel="noopener"><code>noticias_contratacion_2026.json</code></a> y <a href="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/entidades_en_noticias_2026.json" target="_blank" rel="noopener"><code>entidades_en_noticias_2026.json</code></a>.</span></div>
+        <div class="check-item"><span class="bola">1</span><span>Atlas: <code>Cluster0</code> disponible y <code>ping</code> correcto desde Colab. Si falta, vuelve a la <a href="atlas-guia-conexion.html">presentación 1</a>.</span></div>
+        <div class="check-item"><span class="bola">2</span><span>Usuario de base de datos con <code>readWrite</code> solo en <code>compras_claras</code>. No uses <code>atlasAdmin</code> para esto.</span></div>
+        <div class="check-item"><span class="bola">3</span><span><code>0.0.0.0/0</code> en Network Access — la IP de Colab cambia cada sesión, así que no sirve autorizar solo tu IP actual.</span></div>
+        <div class="check-item"><span class="bola">4</span><span>Tu contraseña real del usuario de base de datos, a mano — Python la va a pedir con <code>getpass()</code>, nunca la escribas en una celda.</span></div>
       </div>
-      <div class="callout alerta"><span class="ic">🔐</span><span>La cuenta de Atlas y el usuario de base de datos son identidades distintas. Compass necesita la contraseña del usuario de base de datos. No la guardes en una captura, documento o repositorio.</span></div>
+      <div class="callout alerta"><span class="ic">🔐</span><span>La cuenta de Atlas y el usuario de base de datos son identidades distintas. No guardes la contraseña en una captura, documento o repositorio.</span></div>
       <a class="boton-link" href="atlas-guia-conexion.html">← Volver a la presentación 1</a>
-    </section>
-
-    <!-- 3 · CONECTAR COMPASS -->
-    <section class="slide">
-      <span class="etiqueta dorada"><span class="num">1</span> Conectar Compass</span>
-      <h2>Abre Compass desde el clúster correcto</h2>
-      <p class="sub">Empezar desde <code>Cluster0</code> reduce el riesgo de copiar la conexión de otro proyecto o de intentar conectarse a una base local.</p>
-      <div class="paso-cuerpo">
-        <div class="instrucciones">
-          <ol>
-            <li>En Atlas abre <b>Database → Clusters</b> y pulsa <b>Connect</b> en <code>Cluster0</code>.</li>
-            <li>En <b>Choose a connection method</b>, selecciona <b>Compass</b>.</li>
-            <li>Si Compass ya está instalado, marca <b>I have MongoDB Compass installed</b>.</li>
-            <li>Copia la URI que comienza por <code>mongodb+srv://</code> y abre Compass.</li>
-            <li>En Compass pulsa <b>Add New Connection</b> y pega la URI. En <b>Advanced Connection Options → Authentication</b> escribe el usuario y la contraseña de la base; no los dejes escritos en la URI.</li>
-            <li>Si pide <b>Authentication Database</b>, usa <code>admin</code>. Pulsa <b>Connect</b>, no <b>Save &amp; Connect</b>, si estás en un computador compartido.</li>
-          </ol>
-          <div class="resultado"><b>Resultado esperado:</b> Compass muestra <code>Cluster0</code> y sus bases. Todavía no has importado nada.</div>
-          <div class="callout riesgo"><span class="ic">🔒</span><span>No captures ni compartas la URI completa. Si aparece <code>Authentication Failed</code>, confirma que usaste la contraseña del usuario de base de datos y no la contraseña de tu cuenta de Atlas.</span></div>
-        </div>
-        <div>
-          <div class="captura">
-            <img src="capturas/10-compass-conexion-atlas.png" alt="Atlas ofrece MongoDB Compass como método y Compass muestra la conexión a Cluster0 sin exponer la URI" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar la elección Compass y la conexión abierta, con usuario, host y URI ocultos.</span><span class="archivo">capturas/10-compass-conexion-atlas.png</span></div>
-          </div>
-          <div class="captura-caption">Evidencia real prevista: Compass conectado al clúster de Atlas</div>
-        </div>
-      </div>
     </section>
 
     <!-- 4 · CREAR BASE -->
     <section class="slide">
       <span class="etiqueta dorada"><span class="num">2</span> Crear el destino</span>
-      <h2>Crea una base y una colección con nombres verificables</h2>
-      <p class="sub">El archivo no decide dónde quedará almacenado. Antes de importarlo debemos definir explícitamente la base y la colección de destino.</p>
+      <h2>Crea la base directamente en Atlas</h2>
+      <p class="sub">Nada de esto necesita Compass: Atlas crea bases y colecciones desde su propia interfaz.</p>
       <div class="paso-cuerpo">
         <div class="instrucciones">
           <ol>
-            <li>En Compass, sobre la conexión de <code>Cluster0</code>, pulsa <b>Create Database</b>.</li>
+            <li>En Atlas, <b>Database → Browse Collections</b> sobre tu <code>Cluster0</code>.</li>
+            <li>Pulsa <b>+ Create Database</b>.</li>
             <li>En <b>Database Name</b> escribe <code>compras_claras</code>.</li>
-            <li>En <b>Collection Name</b> escribe <code>noticias</code>.</li>
-            <li>Pulsa <b>Create Database</b> y abre <code>compras_claras → noticias</code>.</li>
+            <li>En <b>Collection Name</b> escribe <code>noticias</code>, y confirma.</li>
           </ol>
-          <div class="resultado"><b>Resultado esperado:</b> la colección <code>noticias</code> existe y muestra cero documentos antes de la primera importación.</div>
+          <div class="resultado"><b>Resultado esperado:</b> la colección <code>noticias</code> existe y muestra cero documentos — todavía no has cargado nada.</div>
           <div class="callout alerta"><span class="ic">🧭</span><span>Si la base ya existe, no crees <code>compras_claras-2</code>. Ábrela y comprueba primero el conteo de cada colección.</span></div>
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/11-compass-crear-base-noticias.png" alt="Compass crea la base compras_claras y su primera colección noticias" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar los nombres compras_claras y noticias, sin URI, usuario ni datos de la cuenta.</span><span class="archivo">capturas/11-compass-crear-base-noticias.png</span></div>
+            <img src="capturas/11-atlas-crear-base-noticias.png" alt="Atlas crea la base compras_claras y su primera colección noticias, con Create Database" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar los nombres compras_claras y noticias, sin URI, usuario ni datos de la cuenta.</span><span class="archivo">capturas/11-atlas-crear-base-noticias.png</span></div>
           </div>
-          <div class="captura-caption">Evidencia real prevista: destino creado antes de importar</div>
+          <div class="captura-caption">Evidencia real prevista: destino creado, sin Compass</div>
         </div>
       </div>
     </section>
 
-    <!-- 5 · IMPORTAR NOTICIAS -->
+    <!-- 5 · CARGAR CON PYTHON -->
     <section class="slide">
-      <span class="etiqueta dorada"><span class="num">3</span> Importar noticias</span>
-      <h2>Carga el JSON grande y detente ante cualquier error</h2>
-      <p class="sub">El archivo contiene un arreglo de 987 documentos. Compass lo divide en inserciones y Atlas conserva cada documento en la colección.</p>
+      <span class="etiqueta dorada"><span class="num">3</span> Cargar los dos archivos</span>
+      <h2>La carga es código, no un asistente de importación</h2>
+      <p class="sub">Atlas no tiene un botón para subir un archivo JSON desde el navegador — esa función existe en Compass, no en Atlas. La alternativa que no depende de Compass es la misma que ya usaste en la sesión 3: <code>insert_many()</code>, ahora apuntando a tu clúster en la nube.</p>
       <div class="paso-cuerpo">
         <div class="instrucciones">
           <ol>
-            <li>En <code>compras_claras → noticias → Documents</code>, pulsa <b>Add Data → Import JSON or CSV file</b>.</li>
-            <li>Selecciona <code>noticias_contratacion_2026.json</code> y confirma el tipo <b>JSON</b>.</li>
-            <li>Deja <b>Ignore empty strings</b> desactivado.</li>
-            <li>Activa <b>Stop on errors</b> y pulsa <b>Import</b>.</li>
-            <li>Espera a que termine y comprueba exactamente <b>987 documentos</b>.</li>
+            <li>Abre Colab y pega la celda de la derecha en una celda nueva.</li>
+            <li>Pega tu cadena de conexión completa cuando la pida (con <code>&lt;db_username&gt;</code>/<code>&lt;db_password&gt;</code> si aún los tiene así).</li>
+            <li>Ejecuta. Carga <code>noticias</code> y <code>entidades_noticias</code> en un solo paso.</li>
+            <li>Lee los dos conteos que imprime al final.</li>
           </ol>
-          <div class="resultado"><b>Control:</b> <code>noticias = 987</code>.</div>
-          <div class="callout riesgo"><span class="ic">⚠️</span><span>Si ya aparecen 987, no vuelvas a importar. Si aparece un número intermedio, detente: abre <b>View Log</b> y pide revisión. Repetir a ciegas puede producir conflictos por <code>_id</code>.</span></div>
+          <div class="resultado"><b>Controles esperados:</b><br><code>noticias = 987</code><br><code>entidades_noticias = 142</code></div>
+          <div class="callout info"><span class="ic">🧩</span><span><code>delete_many({})</code> antes de cada carga hace que la celda sea segura de ejecutar más de una vez: nunca duplica documentos.</span></div>
         </div>
         <div>
           <div class="captura">
-            <img src="capturas/12-compass-importar-noticias.png" alt="Compass importa noticias_contratacion_2026.json como JSON y confirma 987 documentos" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar el archivo, JSON, Stop on errors y el control 987; nunca la URI o contraseña.</span><span class="archivo">capturas/12-compass-importar-noticias.png</span></div>
+            <img src="capturas/12-colab-cargar-noticias-entidades.png" alt="Colab imprime noticias 987 y entidades_noticias 142 tras ejecutar insert_many contra el cluster de Atlas" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar los dos conteos impresos, 987 y 142; nunca la URI ni la contraseña.</span><span class="archivo">capturas/12-colab-cargar-noticias-entidades.png</span></div>
           </div>
-          <div class="captura-caption">Evidencia real prevista: importación completa de noticias</div>
+          <div class="captura-caption">Evidencia real prevista: carga completa desde Colab</div>
         </div>
       </div>
-    </section>
+      <details open>
+        <summary><b>Código copiable — cargar las dos colecciones</b></summary>
+        <pre class="codigo">!pip install -q pymongo dnspython
 
-    <!-- 6 · IMPORTAR ENTIDADES -->
-    <section class="slide">
-      <span class="etiqueta dorada"><span class="num">4</span> Importar entidades</span>
-      <h2>Crea la segunda colección y verifica los dos totales</h2>
-      <p class="sub">Esta colección resume cuántas noticias mencionan a cada entidad. No sustituye las noticias y no contiene procesos SECOP.</p>
-      <div class="paso-cuerpo">
-        <div class="instrucciones">
-          <ol>
-            <li>En <code>compras_claras</code>, pulsa <b>Create Collection</b> y escribe <code>entidades_noticias</code>.</li>
-            <li>Abre la colección y repite <b>Add Data → Import JSON or CSV file</b>.</li>
-            <li>Selecciona <code>entidades_en_noticias_2026.json</code>, tipo <b>JSON</b>, con <b>Stop on errors</b> activado.</li>
-            <li>Comprueba <code>entidades_noticias = 142</code> y regresa a <code>noticias</code> para confirmar <code>987</code>.</li>
-          </ol>
-          <div class="resultado"><b>Controles para avanzar:</b><br><code>noticias = 987</code><br><code>entidades_noticias = 142</code></div>
-          <div class="callout info"><span class="ic">🧩</span><span>El segundo archivo no trae <code>_id</code>; Compass genera un <code>ObjectId</code>. El cruce posterior usa el campo <code>entidad</code>, no ese identificador técnico.</span></div>
-          <div class="callout alerta"><span class="ic">🛑</span><span>Si la colección ya muestra 142, no la importes otra vez: producirías entidades duplicadas.</span></div>
-        </div>
-        <div>
-          <div class="captura">
-            <img src="capturas/13-compass-importar-entidades.png" alt="Compass confirma 142 documentos en entidades_noticias después de validar 987 noticias en el paso anterior" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar entidades_noticias con 142 documentos y el árbol de colecciones, sin datos de conexión.</span><span class="archivo">capturas/13-compass-importar-entidades.png</span></div>
-          </div>
-          <div class="captura-caption">Evidencia real prevista: segunda colección completa</div>
-        </div>
-      </div>
+from getpass import getpass
+from urllib.parse import quote_plus
+from pymongo import MongoClient
+import json, urllib.request
+
+uri_pegada = input("Pega tu cadena de conexion completa: ").strip()
+usuario = input("Tu usuario de base de datos: ").strip()
+contrasena = quote_plus(getpass("Tu contraseña real (no se muestra en pantalla): "))
+
+uri = uri_pegada
+if "&lt;db_username&gt;" in uri:
+    uri = uri.replace("&lt;db_username&gt;", quote_plus(usuario))
+if "&lt;db_password&gt;" in uri:
+    uri = uri.replace("&lt;db_password&gt;", contrasena)
+
+client = MongoClient(uri, serverSelectionTimeoutMS=8000)
+client.admin.command("ping")
+db = client["compras_claras"]
+
+RAW = "https://raw.githubusercontent.com/jazaineam1/BigData2026/main"
+
+with urllib.request.urlopen(f"{RAW}/Datos/noticias_contratacion_2026.json") as r:
+    noticias = json.loads(r.read().decode("utf-8"))
+db["noticias"].delete_many({})
+db["noticias"].insert_many(noticias)
+print("noticias:", db["noticias"].count_documents({}))
+
+with urllib.request.urlopen(f"{RAW}/Datos/entidades_en_noticias_2026.json") as r:
+    entidades = json.loads(r.read().decode("utf-8"))
+db["entidades_noticias"].delete_many({})
+db["entidades_noticias"].insert_many(entidades)
+print("entidades_noticias:", db["entidades_noticias"].count_documents({}))
+
+client.close()</pre>
+      </details>
     </section>
 
     <!-- 4 · DATA EXPLORER -->
     <section class="slide">
       <span class="etiqueta dorada"><span class="num">2</span> Verificar en Atlas</span>
       <h2>Abre Data Explorer y reconoce los documentos</h2>
-      <p class="sub">El conteo de Compass confirma la carga; Data Explorer permite comprobar que los documentos viven en Atlas y reconocer qué forma tienen.</p>
+      <p class="sub">El conteo que imprimió Python confirma la carga; Data Explorer permite comprobar que los documentos viven en Atlas y reconocer qué forma tienen.</p>
       <div class="paso-cuerpo">
         <div class="instrucciones">
           <ol>
