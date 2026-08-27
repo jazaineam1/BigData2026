@@ -189,7 +189,7 @@ def build_cells():
             compartido y para *consultarlos*, y Colab para lo único que Atlas no hace por su cuenta —meter
             el primer archivo, cruzar con datos que no son de Mongo, y hablar con Cassandra—.
 
-            > **Y esto es lo importante de todo el cuaderno, dilo en voz alta si hace falta:** las
+            > **Y esto es lo importante de todo el cuaderno:** las
             > **consultas de MongoDB** —el filtro de DIAN, la agregación por sección, las dos
             > clasificaciones, las dos vistas— **se escriben y se corren en la interfaz de Atlas.** No en
             > Python. Un profesional de datos que usa MongoDB todos los días casi nunca escribe `pymongo`
@@ -715,7 +715,7 @@ def build_cells():
             **MAPA** · esto lo recorremos hablando y viendo una demostración en vivo. No necesitas una
             cuenta de Astra propia.
 
-            ### Qué es, en una frase que puedas repetir
+            ### Qué es, en una frase
 
             **Apache Cassandra es un motor de base de datos hecho para escribir muchísimo, muy rápido, sin
             que nada se caiga — a cambio de que solo respondas las preguntas que decidiste de antemano.**
