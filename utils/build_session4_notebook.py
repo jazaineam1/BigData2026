@@ -397,17 +397,28 @@ def build_cells():
             from pymongo import MongoClient
 
             # Pega la cadena TAL COMO Atlas te la dio en "Connect -> Drivers -> Python"
-            # (trae <db_password> literal). NO escribas el host a mano: un solo caracter
-            # que falte -por ejemplo, olvidar ".mongodb.net"- y la conexion falla con un
-            # error de DNS que no dice nada sobre tu usuario ni tu contraseña.
-            uri_pegada = input("Pega tu cadena de conexion completa (con <db_password>): ").strip()
+            # (trae <db_username> y <db_password> literales si aun no personalizaste el
+            # usuario en esa pantalla). NO escribas el host a mano: un solo caracter que
+            # falte -por ejemplo, olvidar ".mongodb.net"- y la conexion falla con un error
+            # de DNS que no dice nada sobre tu usuario ni tu contraseña.
+            uri_pegada = input("Pega tu cadena de conexion completa: ").strip()
 
-            if "<db_password>" not in uri_pegada:
-                print("Ojo: no encuentro '<db_password>' en lo que pegaste.")
-                print("Copia la cadena completa desde Atlas, sin editarla, y vuelve a intentar.")
-
+            usuario = input("Tu usuario de base de datos (el del paso 6 de la guia): ").strip()
             contrasena = quote_plus(getpass("Tu contraseña real (no se muestra en pantalla): "))
-            uri = uri_pegada.replace("<db_password>", contrasena)
+
+            uri = uri_pegada
+            if "<db_username>" in uri:
+                uri = uri.replace("<db_username>", quote_plus(usuario))
+            if "<db_password>" in uri:
+                uri = uri.replace("<db_password>", contrasena)
+
+            # Si ninguno de los dos marcadores estaba, seguramente la cadena ya traia
+            # tu usuario real pero no tu contraseña real: reconstruimos por si acaso.
+            if "<db_username>" not in uri_pegada and "<db_password>" not in uri_pegada and usuario not in uri:
+                print("No encontre <db_username> ni <db_password> en lo que pegaste; ")
+                print("arme la cadena con tu usuario y contraseña directamente.")
+                resto = uri_pegada.split("@", 1)[-1]  # todo lo que sigue al '@': host y parametros
+                uri = f"mongodb+srv://{quote_plus(usuario)}:{contrasena}@{resto}"
 
             try:
                 client = MongoClient(uri, serverSelectionTimeoutMS=6000)
@@ -775,10 +786,13 @@ def build_cells():
             code(
                 """
                 # DEMOSTRACION DOCENTE — no ejecutes esta celda con tus propias credenciales.
-                # Requiere: pip install "cassandra-driver>=3.29,<4" (3.29.3 es la ultima publicada;
-                # la version 3.30 mencionada en versiones previas de este libreto no existe en PyPI),
-                # un Secure Connect Bundle y un token de Astra generados desde el portal, y el
-                # keyspace compras_claras ya creado (Astra no admite CREATE KEYSPACE por CQL).
+                # Necesita un Secure Connect Bundle y un token de Astra generados desde el
+                # portal, y el keyspace compras_claras ya creado (Astra no admite CREATE
+                # KEYSPACE por CQL). cassandra-driver no viene instalado en Colab por defecto:
+                # se instala aqui (3.29.3 es la ultima version publicada en PyPI; la 3.30
+                # mencionada en borradores previos de este libreto no existe).
+                !pip install -q "cassandra-driver>=3.29,<4"
+
                 from getpass import getpass
                 from datetime import date
                 from cassandra.cluster import Cluster

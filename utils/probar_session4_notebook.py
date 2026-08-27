@@ -91,7 +91,10 @@ def main():
         if "getpass(" in src and "MongoClient" in src:
             src = re.sub(
                 r'uri_pegada = input\([^\n]*\n',
-                'uri_pegada = "mongodb+srv://prueba:<db_password>@host-inexistente.invalid/"\n', src)
+                'uri_pegada = "mongodb+srv://<db_username>:<db_password>@host-inexistente.invalid/"\n', src)
+            src = re.sub(
+                r'usuario = input\([^\n]*\n',
+                'usuario = "prueba"\n', src)
             src = re.sub(
                 r'contrasena = quote_plus\(getpass\([^\n]*\n',
                 'contrasena = quote_plus("x")\n', src)
