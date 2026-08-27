@@ -161,7 +161,8 @@
       <div class="paso-cuerpo">
         <div class="instrucciones">
           <ol>
-            <li>Abre Colab y pega la celda de la derecha en una celda nueva.</li>
+            <li>Abre Colab y crea una celda nueva. Más abajo, bajo <b>«👉 Haz clic aquí para abrir el
+              código copiable»</b>, está el código completo — cópialo entero y pégalo ahí.</li>
             <li>Pega tu cadena de conexión completa cuando la pida (con <code>&lt;db_username&gt;</code>/<code>&lt;db_password&gt;</code> si aún los tiene así).</li>
             <li>Ejecuta. Carga <code>noticias</code> y <code>entidades_noticias</code> en un solo paso.</li>
             <li>Lee los dos conteos que imprime al final.</li>
@@ -177,8 +178,8 @@
           <div class="captura-caption">Evidencia real prevista: carga completa desde Colab</div>
         </div>
       </div>
-      <details open>
-        <summary><b>Código copiable — cargar las dos colecciones</b></summary>
+      <details>
+        <summary><b>👉 Haz clic aquí para abrir el código copiable — cargar las dos colecciones</b></summary>
         <pre class="codigo">!pip install -q pymongo dnspython
 
 from getpass import getpass
@@ -493,8 +494,8 @@ client.close()</pre>
         </div>
       </div>
       <details>
-        <summary><b>Código copiable — conectar, leer vistas y cruzar con SECOP</b></summary>
-        <pre class="codigo">!pip -q install "pymongo[srv]&gt;=4.10,&lt;5" pandas
+        <summary><b>👉 Haz clic aquí para abrir el código copiable — conectar, leer vistas y cruzar con SECOP</b></summary>
+        <pre class="codigo">!pip -q install "pymongo&gt;=4.10,&lt;5" dnspython pandas
 
 from getpass import getpass
 from urllib.parse import quote_plus

@@ -267,6 +267,10 @@ def build_cells():
             La celda de abajo conecta y carga las dos colecciones con `insert_many()`, el mismo método de
             la sesión 3. Vas a necesitar tu cadena de conexión y tu contraseña —igual que en la guía de
             arriba— así que esta es también la primera vez que te conectas hoy.
+
+            > ⬇️ **NO es la presentación de arriba.** El código para copiar y pegar está en la celda de
+            > código que sigue justo debajo de este párrafo — no dentro del recuadro embebido. Ejecútala
+            > directamente en este cuaderno: no hace falta ir a buscarla a ningún otro lado.
             """
         ),
         code(
