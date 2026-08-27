@@ -82,7 +82,7 @@
     padding:4px clamp(14px,4vw,48px) 8px; position:relative;
   }
   .marco{
-    position:relative; width:min(1180px, 100%); height:100%; min-height:0;
+    position:relative; width:min(1520px, 100%); height:100%; min-height:0;
   }
   .slide{
     position:absolute; inset:0;
@@ -252,8 +252,12 @@
   .lightbox img{ max-width:100%; max-height:100%; border-radius:10px; box-shadow:0 30px 60px rgba(0,0,0,.5); }
 
   .modo-embed header.uc,.modo-embed .pie{ display:none; }
-  .modo-embed .escenario{ padding-top:8px; }
-  .modo-embed .marco{ width:100%; }
+  .modo-embed .escenario{ padding:4px 10px 4px; }
+  .modo-embed .marco{ width:100%; max-width:none; }
+  .modo-embed .slide{ padding:clamp(12px,2vw,22px); }
+  .modo-embed .controles{ padding:2px 14px 6px; gap:10px; }
+  .modo-embed .btn-nav{ width:36px; height:36px; font-size:15px; }
+  .modo-embed .punto{ width:9px; height:9px; }
   :fullscreen{ background:var(--crema-50); }
   :fullscreen .escenario{ padding:8px clamp(18px,5vw,72px); }
   @media (max-width:760px){
@@ -765,11 +769,11 @@ print(<span class="s">"Conectado a Atlas"</span>)</pre>
     var disponible = slide.clientHeight;
     var escala = Math.min(1, disponible / alto);
     for(var intento=0; intento<2; intento+=1){
-      contenido.style.setProperty("--escala", Math.max(.55, escala).toFixed(3));
+      contenido.style.setProperty("--escala", Math.max(.4, escala).toFixed(3));
       alto = contenido.scrollHeight;
       escala = Math.min(1, disponible / alto);
     }
-    contenido.style.setProperty("--escala", Math.max(.55, escala).toFixed(3));
+    contenido.style.setProperty("--escala", Math.max(.4, escala).toFixed(3));
   }
 
   function ajustarTodo(){ slides.forEach(ajustarSlide); }

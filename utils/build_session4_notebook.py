@@ -74,12 +74,10 @@ def embed(url, alto_px, titulo):
         from IPython.display import display, HTML
 
         display(HTML('''
-        <div style="border:1px solid #d8dee3;border-radius:12px;overflow:hidden;">
-          <iframe src="{url}?embed=1" width="100%" height="{alto_px}"
-                  style="border:0;display:block;" loading="lazy"></iframe>
-        </div>
+        <iframe src="{url}?embed=1" width="100%" height="{alto_px}"
+                style="border:0;display:block;border-radius:8px;" loading="lazy"></iframe>
         <p style="margin-top:8px;">
-          <a href="{url}" target="_blank" rel="noopener">Abrir en una pestaña aparte ↗</a>
+          <a href="{url}" target="_blank" rel="noopener">Abrir en pantalla completa, en una pestaña aparte ↗</a>
         </p>
         '''))
         """
@@ -212,7 +210,7 @@ def build_cells():
             # abriendo esta URL con ?slide=12 al final.
             """
         ),
-        embed(GUIA_ATLAS, 560, "Guía de conexión a MongoDB Atlas"),
+        embed(GUIA_ATLAS, 780, "Guía de conexión a MongoDB Atlas"),
         md(
             """
             ### ⚠️ El error que casi todo el mundo se encuentra aquí: `ServerSelectionTimeoutError`
@@ -253,7 +251,7 @@ def build_cells():
             # Presentacion 2 de 2 — de Compass a Atlas a la bandeja de Laura, con capturas reales.
             """
         ),
-        embed(LAB_COMPASS, 560, "Laboratorio: Compass, Atlas y la bandeja de Laura"),
+        embed(LAB_COMPASS, 780, "Laboratorio: Compass, Atlas y la bandeja de Laura"),
         md(
             """
             ### Compass, en tu escritorio: crea la base e importa los dos archivos
