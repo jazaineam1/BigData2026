@@ -659,6 +659,29 @@ def build_cells():
             > Documentación oficial: [modelado de datos en Apache Cassandra](https://cassandra.apache.org/doc/latest/cassandra/developing/data-modeling/intro.html)
             """
         ),
+        md(
+            """
+            ### *Query First Design*: se diseña desde la pregunta, no desde la entidad
+
+            En MongoDB —y en SQL— modelas primero las cosas que existen (noticias, procesos, entidades) y
+            preguntas después: si necesitas cruzar dos, usas `$lookup` o un `JOIN`. Cassandra invierte el
+            orden: **primero decides qué vas a preguntar, y la tabla se construye para que esa pregunta sea
+            barata.** No existe `JOIN` en Cassandra — ni falta: si necesitaras cruzar `noticias` con
+            `procesos` en cada consulta, la respuesta de Cassandra no es "cruza más rápido", es "no cruces
+            nunca en el momento de leer: cruza una vez, al escribir, y guarda el resultado ya armado". Eso
+            es exactamente lo que hiciste hoy en pandas —cruzar una vez y guardar la bandeja— y es lo mismo
+            que la tabla `prioridades_por_corte_departamento` hace de forma permanente.
+
+            **Y hay una regla dura que viene con ese diseño:** en un `WHERE`, las claves de partición son
+            **obligatorias y van todas juntas** —no puedes preguntar solo por `corte` y dejar
+            `departamento` suelto—, mientras que las claves de *clustering* (`valor_base`, `id_proceso`)
+            son **opcionales**. Y sobre cualquier otro campo —`entidad`, `nivel_menciones`— Cassandra
+            **se niega a filtrar** a menos que agregues explícitamente `ALLOW FILTERING`, que es la forma en
+            que el motor te avisa: *"esto va a recorrer toda la tabla, y te lo voy a dejar hacer, pero
+            sabiendo que es lento"*. No es una limitación torpe: es el motor obligándote a diseñar para tu
+            consulta en vez de confiar en que ya lo hiciste bien.
+            """
+        ),
         code(
             """
             # CQL — la tabla se modela por como se va a preguntar, no por como se guarda la entidad.
@@ -809,10 +832,10 @@ def build_cells():
         ),
         md(
             """
-            **Lo que deberías ver en Bogotá, si la base está recién creada:** en primer lugar
-            `CO1.REQ.5407319` — el mismo Ministerio del Deporte, los mismos $168.750.000. **Es el mismo
-            número que ya viste en pandas.** Cassandra no cambia la respuesta: solo la sirve distinto —
-            mucho más rápido, y de una tabla hecha exactamente para esta pregunta.
+            **Lo que vas a ver en Bogotá — ya verificado, no es una promesa:** en primer lugar
+            `CO1.REQ.5407319`, Ministerio del Deporte, $168.750.000. **Es el mismo número que ya viste en
+            pandas.** Cassandra no cambia la respuesta: solo la sirve distinto — mucho más rápido, y de una
+            tabla hecha exactamente para esta pregunta.
             """
         ),
         *question_cell(
