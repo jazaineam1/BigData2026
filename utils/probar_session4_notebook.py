@@ -90,14 +90,11 @@ def main():
         # puede pasar en clase si alguien aun no tiene su URI.
         if "getpass(" in src and "MongoClient" in src:
             src = re.sub(
-                r'usuario = input\([^\n]*\n',
-                'usuario = "prueba"\n', src)
+                r'uri_pegada = input\([^\n]*\n',
+                'uri_pegada = "mongodb+srv://prueba:<db_password>@host-inexistente.invalid/"\n', src)
             src = re.sub(
                 r'contrasena = quote_plus\(getpass\([^\n]*\n',
                 'contrasena = quote_plus("x")\n', src)
-            src = re.sub(
-                r'host = input\([^\n]*\n',
-                'host = "host-inexistente.invalid"\n', src)
             src = src.replace(
                 'client = MongoClient(uri, serverSelectionTimeoutMS=6000)',
                 'client = MongoClient(uri, serverSelectionTimeoutMS=1500)')

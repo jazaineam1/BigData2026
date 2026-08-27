@@ -388,19 +388,26 @@ def build_cells():
         code(
             """
             # Conectar Colab a tu clúster de Atlas, sin escribir la contraseña en el cuaderno.
-            # pymongo no siempre viene preinstalado en el entorno de Colab -- se instala aqui,
-            # una vez, y no vuelve a pedirse mientras no se reinicie el entorno.
-            !pip install -q "pymongo[srv]"
+            # Ni pymongo ni mongomock vienen preinstalados en todos los entornos de Colab --
+            # se instalan aqui, una vez, y no se vuelven a pedir mientras no reinicies el entorno.
+            !pip install -q pymongo dnspython mongomock
 
             from getpass import getpass
             from urllib.parse import quote_plus
             from pymongo import MongoClient
 
-            usuario = input("Usuario de base de datos (el del paso 6 de la guia): ").strip()
-            contrasena = quote_plus(getpass("Contraseña (no se muestra en pantalla): "))
-            host = input("Host del cluster, la parte que sigue a '@' en tu URI (ej. cluster0.xxxxx.mongodb.net): ").strip()
+            # Pega la cadena TAL COMO Atlas te la dio en "Connect -> Drivers -> Python"
+            # (trae <db_password> literal). NO escribas el host a mano: un solo caracter
+            # que falte -por ejemplo, olvidar ".mongodb.net"- y la conexion falla con un
+            # error de DNS que no dice nada sobre tu usuario ni tu contraseña.
+            uri_pegada = input("Pega tu cadena de conexion completa (con <db_password>): ").strip()
 
-            uri = f"mongodb+srv://{usuario}:{contrasena}@{host}/?retryWrites=true&w=majority"
+            if "<db_password>" not in uri_pegada:
+                print("Ojo: no encuentro '<db_password>' en lo que pegaste.")
+                print("Copia la cadena completa desde Atlas, sin editarla, y vuelve a intentar.")
+
+            contrasena = quote_plus(getpass("Tu contraseña real (no se muestra en pantalla): "))
+            uri = uri_pegada.replace("<db_password>", contrasena)
 
             try:
                 client = MongoClient(uri, serverSelectionTimeoutMS=6000)
