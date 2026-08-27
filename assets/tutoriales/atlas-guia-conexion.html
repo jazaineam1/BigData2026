@@ -187,7 +187,8 @@
   /* ── Bloques de código ─────────────────────────────────────────── */
   pre.codigo{
     background:var(--verde-950); color:#e8f1ea; border-radius:var(--radio-chico);
-    padding:16px 18px; font-size:13px; line-height:1.6; overflow-x:auto; margin:10px 0 0;
+    padding:16px 18px; font-size:13px; line-height:1.6; overflow-x:auto; overflow-y:auto;
+    max-height:38vh; margin:10px 0 0;
     box-shadow:var(--sombra-chica);
   }
   pre.codigo .c{ color:#8fb89b; } /* comentarios */
@@ -847,6 +848,14 @@ print(<span class="s">"Conectado a Atlas"</span>)</pre>
   });
   function cerrarLightbox(){ lightbox.classList.remove("abierto"); lightboxImg.src = ""; }
   lightbox.addEventListener("click", cerrarLightbox);
+
+  // Abrir un <details> (por ejemplo, un bloque de codigo copiable) cambia la
+  // altura real de la diapositiva, pero el escalado ya se habia calculado
+  // con el contenido cerrado. "toggle" no burbujea: hay que escucharlo en
+  // fase de captura para que un solo listener sirva para todos los <details>.
+  document.addEventListener("toggle", function(e){
+    if (e.target.tagName === "DETAILS") requestAnimationFrame(ajustarTodo);
+  }, true);
 
   window.addEventListener("resize", ajustarTodo);
   window.addEventListener("load", ajustarTodo);
