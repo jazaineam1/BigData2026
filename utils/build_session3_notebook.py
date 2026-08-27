@@ -22,6 +22,7 @@ from __future__ import annotations
 import os
 import re
 import sys
+import base64
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -49,21 +50,18 @@ TOTAL_QUESTIONS = 8
 
 def svg(nombre, alt):
     """
-    Enlaza un SVG de assets/ desde el repositorio publicado.
+    Incrusta un SVG local como data URI para que se vea en Colab antes del push.
 
-    Se enlaza en vez de incrustar en base64 por dos razones: el cuaderno no
-    carga con 6 KB de blob por diagrama, y el archivo sigue siendo editable
-    sin decodificar nada. El precio es que el diagrama solo se ve si el
-    repositorio ya esta publicado, asi que hay que hacer push antes de clase.
-
-    Sin ancho fijo: el SVG trae su propio tamano y se adapta al de la celda.
-    Fijar un ancho en pixeles es lo que lo desbordaba por la derecha.
+    El fuente sigue editable en assets/diagrams/session3/. La copia incrustada
+    evita que el estudiante vea un icono roto si abre una versión aún no
+    publicada del cuaderno.
     """
     ruta = os.path.join(ROOT, "assets", "diagrams", "session3", f"{nombre}.svg")
     if not os.path.exists(ruta):
         raise FileNotFoundError(ruta)
-    url = f"{RAW}/assets/diagrams/session3/{nombre}.svg"
-    return f'<img src="{url}" alt="{alt}" style="max-width:100%;height:auto;">'
+    contenido = Path(ruta).read_bytes()
+    uri = base64.b64encode(contenido).decode("ascii")
+    return f'<img src="data:image/svg+xml;base64,{uri}" alt="{alt}" style="max-width:100%;height:auto;">'
 
 
 def hidden(cell, title, *tags):
@@ -209,8 +207,9 @@ def build_cells():
 
             **Acceso público:** [página del curso]({WEB_CURSO})
 
-            > **No necesitas instalar nada en tu computador.** Ni MongoDB, ni Git, ni una cuenta de nube. Todo
-            > ocurre dentro de esta pestaña y dentro de GitHub.com.
+            > **Ruta principal de clase: no necesitas instalar nada.** El laboratorio corre en Colab. Si instalas
+            > MongoDB Community en tu computador, úsalo como práctica local opcional; no sustituye la base
+            > compartida en Atlas que veremos después.
 
             Los recuadros llevan siempre una de estas cuatro etiquetas:
             **HAZ ESTO AHORA** (algo que ejecutas) · **OJO** (un error frecuente) ·
@@ -228,7 +227,7 @@ def build_cells():
             </div>
 
             > ### Facultad de Ingeniería y Ciencias Básicas
-            > ### Maestría en Analítica de Datos — BIG DATA (64491093), Grupo 1
+            > ### Maestría en Analítica de Datos — BIG DATA (64491093), Grupo 2
 
             <img alt="MongoDB" width="190" src="https://upload.wikimedia.org/wikipedia/commons/9/93/MongoDB_Logo.svg">
 
@@ -242,7 +241,7 @@ def build_cells():
             **Producción evaluable de hoy:** el hito de la sesión, construido con tu propia ejecución<br>
             **Caso conductor:** Compras Claras — priorizar la revisión de contratación pública<br>
             **Cómo transcurre:** primero conversamos y decidimos; después trabajas tú, con receso en medio<br>
-            **Fecha:** 20 de agosto de 2026
+            **Periodo:** 2026-2S
 
             ## Ficha de la sesión
 
@@ -297,6 +296,34 @@ def build_cells():
             La segunda mitad de la sesión es tuya. Lo que produzcas hoy es el insumo de la sesión 4.
             """
         ),
+        md(
+            """
+            ## Antes de ejecutar: tres nombres que no son lo mismo
+
+            Laura necesita guardar noticias ahora y permitir que el equipo las consulte después. Antes de tocar
+            código, separa el **motor**, el **cliente** y el lugar donde vive la base. Si los mezclas, un error de
+            conexión parece un error de consulta y se pierde media clase.
+
+            | Nombre | Qué es | Dónde quedan los datos | Para qué lo usamos en el curso |
+            |---|---|---|---|
+            | **MongoDB Community** | el servidor que instalas y administras tú | en tu computador, normalmente `localhost:27017` | practicar y entender qué es un servidor local |
+            | **MongoDB Compass** | una aplicación visual que se conecta a un servidor | no guarda una base propia | ver documentos, importar JSON y construir consultas sin terminal |
+            | **MongoDB Atlas** | MongoDB administrado en la nube | en un clúster remoto | compartir una base persistente y conectarla luego desde Colab |
+
+            **Si acabas de instalar Community en Windows.** En la pantalla *Service Configuration* deja marcados
+            **Install MongoD as a Service** y **Run service as Network Service user**. Al terminar, Compass se
+            conecta a tu práctica local con `mongodb://localhost:27017`. Esa base es privada de tu computador:
+            no es `Cluster0` y no se sincroniza con Atlas.
+
+            **Cómo leer la ruta de hoy.** Colab levanta un MongoDB temporal para que todos puedan aprender las
+            consultas sin instalaciones. Community local es una práctica opcional equivalente; Compass es el puente
+            visual; Atlas será el destino compartido de la siguiente práctica. El lenguaje de consulta es el mismo,
+            aunque cambie dónde corre el servidor.
+
+            > **OJO.** No expongas el puerto local ni copies datos personales o credenciales a una captura. Para
+            > datos compartidos usa Atlas con usuario de base de datos, permisos mínimos y control de acceso de red.
+            """
+        ),
         *soporte_cells(),
         md(
             """
@@ -309,9 +336,9 @@ def build_cells():
             quedó un indicador, con el nombre de ustedes al lado.
 
             **Hoy vamos a conseguir la evidencia que ese indicador necesita**, y en el camino nos vamos a topar con
-            el problema que hace ocho días no vimos. El indicador en sí lo calculas el jueves entrante, cuando
-            tengas una base que no se muera al cerrar la pestaña. Hoy resolvemos dónde se guarda la evidencia;
-            la semana que viene, cuánto vale.
+            el problema que hace ocho días no vimos. El indicador en sí lo completarás en la práctica siguiente,
+            cuando tengas una base que no se muera al cerrar la pestaña. Hoy resolvemos dónde se guarda la
+            evidencia; después mediremos cuánto cuesta leerla.
 
             ## El ticket de salida de la sesión 2, respondido
 
@@ -422,7 +449,7 @@ def build_cells():
             """
             ### 🔎 Leamos el resultado — la tabla ya nos está avisando
 
-            **Cómo se lee.** De 59 columnas, 2 están completamente vacías y otras 6 están vacías en más del 80 % de
+            **Cómo se lee.** De 59 columnas, 2 están completamente vacías y otras 8 están vacías en más del 80 % de
             las filas — el 8 que imprime la celda incluye esas 2 totalmente vacías. Al mismo tiempo, 48 columnas no tienen un solo hueco.
 
             **Qué nos dice.** La tabla está pagando el precio de un esquema rígido: para que quepan los procesos que
@@ -1039,9 +1066,9 @@ def build_cells():
             > culpable: vuelve al Paso 0 y ejecuta desde ahí hacia abajo. Todas las celdas de carga se
             > pueden repetir sin romper nada.
 
-            > **MÁS ADELANTE.** Este arranque descarga MongoDB para Linux y por eso funciona en Colab y
-            > solo en Colab. En tu computador con Windows no corre: no pierdas la noche intentándolo. La
-            > ruta para tu máquina es Atlas, y llega el jueves entrante.
+            > **MÁS ADELANTE.** Este arranque descarga MongoDB para Linux y por eso funciona solo en Colab.
+            > En Windows puedes practicar con MongoDB Community y Compass en `localhost:27017`; para trabajo
+            > compartido usaremos Atlas. No intentes ejecutar este bloque Linux directamente en Windows.
 
             ## Paso 0 · Arrancar el motor
 
@@ -1065,7 +1092,7 @@ def build_cells():
             - **`--dbpath`** es la carpeta donde escribe. Si la borras, borraste la base.
             - **`--port 27017`** es la puerta por donde escucha. `pymongo` toca esa puerta.
 
-            ### Si mañana quieres hacerlo en tu propio proyecto
+            ### Si quieres hacerlo en tu propio proyecto
 
             La secuencia es siempre la misma, cambie el sistema operativo o el proveedor:
 
@@ -1077,8 +1104,8 @@ def build_cells():
             4. **conectarte** con `MongoClient(direccion)`.
 
             **En tu computador con Windows, lo de esta celda no funciona**: descarga la versión de Linux.
-            Para tu máquina, la ruta es el instalador oficial de MongoDB Community, o Atlas. No pierdas la
-            noche intentándolo con este código.
+            Para una práctica individual usa el instalador oficial de MongoDB Community y Compass; para una
+            práctica compartida usa Atlas. No pierdas la noche intentando ejecutar este bloque Linux localmente.
 
             > **OJO.** Aquí el servidor vive dentro de esta pestaña. Cuando la cierres, el programa muere y
             > tus datos con él — igual que si apagaras el computador donde corre la base. Esa es
@@ -1199,9 +1226,8 @@ def build_cells():
             | **Fragmentación** | **no** | no hay nada que repartir: todo cabe |
 
             **Tienes el motor, no la infraestructura.** Y está bien: el motor es lo que necesitas para
-            aprender a consultar, que es lo de hoy. La infraestructura llega el jueves entrante con Atlas,
-            que sí te da un conjunto de réplicas de tres nodos — administrado por otros, sin que tengas que
-            montarlo.
+            aprender a consultar, que es lo de hoy. Community en tu PC también sería un solo servidor;
+            Atlas añade una infraestructura administrada y persistente sin que tengas que montarla.
 
             > **PARA LLEVAR.** Aprender a consultar y montar la infraestructura son dos oficios distintos.
             > Hoy haces el primero.
@@ -1214,6 +1240,10 @@ def build_cells():
             - En los dos casos, la variable se llama `client` y la base se llama `db`. El resto del cuaderno no
               cambia ni una línea. **Que el código no dependa de dónde corre la base es una idea de ingeniería, no
               un truco.**
+
+            - Si practicas después con **Community + Compass**, Compass se conecta a `mongodb://localhost:27017`.
+              Si practicas con **Atlas + Compass**, la dirección empieza por `mongodb+srv://`. Compass es el mismo
+              cliente; cambió el servidor al que le habla.
 
             **Advertencia sobre el reinicio.** Si el runtime de Colab se desconecta, el servidor muere y tus
             documentos con él. Por eso todas las celdas de carga se pueden volver a ejecutar sin duplicar nada.
@@ -3828,15 +3858,13 @@ def build_cells():
             Trabajo en ____. Un dato de mi trabajo que guardaría como documento y no como fila:
             Y uno que dejaría en una tabla, porque:
 
-            ## 7. Extras (opcional, hasta +0,5)
-            Marca lo que hayas hecho y escribe dos líneas de cada uno:
-            - [ ] El ejercicio de conflicto de Git: qué pasó y qué decidimos.
-            - [ ] El reto de Crossref: qué encontré y qué NO permite concluir.
-            - [ ] Una observación propia que el cuaderno no hizo.
+            ## 7. Observación propia (opcional)
+            Si encontraste un patrón, una excepción o una pregunta que el cuaderno no anticipó, descríbela en dos
+            líneas y declara qué evidencia adicional necesitarías para interpretarla.
             ```
 
-            **Fecha de entrega:** domingo. Se corrige con la rúbrica que está más arriba, en «Cómo se evalúa esta
-            sesión». Vuelve a leerla antes de entregar: está escrita para que sepas exactamente qué se mira.
+            **Entrega:** usa la fecha y el canal que confirme el docente. Antes de cerrar, vuelve a leer la rúbrica
+            de «Cómo se evalúa esta sesión»: está escrita para que sepas exactamente qué se mira.
             """
         ),
         md(
@@ -4175,18 +4203,18 @@ def build_cells():
             Cuando cierres esta pestaña, **el servidor que levantamos se muere y tus documentos con él.** Eso no es
             un defecto del ejercicio: es la razón de ser de la sesión 4.
 
-            El jueves cada pareja va a tener su propia base corriendo en un servidor que no se apaga, va a subir
-            estas mismas noticias ahí, y va a calcular el indicador de su archivo `01_decision_proceso.md`. También
-            vamos a medir por primera vez **cuánto cuesta leer** un dato, y ahí aparecerá el almacenamiento
-            columnar.
+            La siguiente práctica pondrá estas mismas noticias en un servidor que no se apaga: Atlas para el trabajo
+            compartido. Si quieres seguir explorando por tu cuenta, Community en tu computador sigue siendo un buen
+            espacio local; solo recuerda que `localhost` y Atlas son bases separadas. También mediremos por primera
+            vez **cuánto cuesta leer** un dato, y ahí aparecerá el almacenamiento columnar.
 
             **Tarea de la semana, y es la que habilita la clase:** crear tu cuenta gratuita en MongoDB Atlas.
 
             > La colección de noticias que construiste hoy vive dentro de tu Colab y se muere cuando cierres la
-            > pestaña. El equipo de Laura no puede trabajar así. Esta semana la vas a poner donde el equipo entero
-            > pueda alcanzarla.
+            > pestaña. Community local sirve para practicar tú; el equipo de Laura necesita Atlas para alcanzar la
+            > misma base desde más de un lugar.
 
-            **Guía paso a paso:** [`docs/guia_atlas_cuenta_gratuita.md`](https://github.com/jazaineam1/BigData2026/blob/main/docs/guia_atlas_cuenta_gratuita.md).
+            **Guía visual vigente:** [crear y conectar un clúster gratuito de MongoDB Atlas](https://jazaineam1.github.io/BigData2026/assets/tutoriales/atlas-guia-conexion.html).
             Léela antes de empezar: las tres advertencias del principio son las responsables de casi todos los
             problemas, y una de ellas —el acceso de red— hace fallar la conexión el jueves aunque hayas hecho
             todo lo demás bien.
@@ -4198,7 +4226,7 @@ def build_cells():
         md(
             """
             ---
-            # Hoja de trucos — imprímela o déjala en otra pestaña
+            # Diccionario de datos y hoja de trucos — imprímela o déjala en otra pestaña
 
             Todo lo que necesitas para consultar, en un solo lugar. Está repetido a propósito: un material que
             se consulta debe repetir, no obligarte a hacer scroll.
@@ -4415,6 +4443,77 @@ def build_cells():
     return cells
 
 
+def ajustar_alcance_para_una_sesion(cells):
+    """Deja fuera del cuaderno base un reto que requiere otra API y más tiempo.
+
+    Crossref es útil como extensión autónoma, pero introduce una fuente viva,
+    huecos de código y nuevas preguntas cuando el objetivo de esta sesión es
+    comprender el modelo documental y ejecutar el caso Compras Claras. La
+    extensión se conserva en el generador como material reutilizable, pero no
+    forma parte de la experiencia estudiantil de 180 minutos.
+    """
+    inicio = next(
+        i
+        for i, celda in enumerate(cells)
+        if "# Reto final · Hazlo tú, con otros datos" in "".join(celda["source"])
+    )
+    fin = next(
+        i
+        for i, celda in enumerate(cells)
+        if "# Diccionario de datos y hoja de trucos" in "".join(celda["source"])
+    )
+
+    cierre = md(
+        """
+        ---
+        ## Ticket de salida
+
+        Responde en tres frases, antes de irte:
+
+        1. ¿Qué característica concreta de las noticias hace que una tabla se quede corta? Da un ejemplo real de
+           la colección.
+        2. ¿Qué diferencia hay entre fragmentar y replicar, y qué problema resuelve cada uno?
+        3. El cruce obvio con SECOP dio más menciones que el correcto. ¿Por qué, y qué aprendiste de eso?
+
+        ---
+        # Cierre de la sesión
+
+        ## Recapitulación
+
+        1. Una tabla se queda corta ante la **variedad**: campos que faltan, listas dentro de un registro y partes
+           de tipos distintos.
+        2. Un **documento** es un árbol con `_id`; el modelo documental conserva juntas las partes que se leen
+           juntas.
+        3. **Fragmentar** responde a «no cabe»; **replicar** responde a «no se puede caer». Son problemas distintos.
+        4. `find()` trae documentos y `aggregate()` construye resúmenes. Primero se filtra y después se agrupa.
+        5. El cruce con SECOP ayuda a **priorizar revisión humana**; una mención o un conteo no prueban una
+           irregularidad.
+        6. GitHub conserva la propuesta, la objeción y la corrección: el historial apoya la conversación, no la
+           reemplaza.
+
+        ## La idea más importante
+
+        > **El modelo de datos se elige por la pregunta que se necesita responder.** Hoy elegimos documentos porque
+        > las noticias tienen partes variables y anidadas; no porque una tecnología sea «mejor» en general.
+
+        ## Errores comunes de hoy
+
+        - Creer que NoSQL significa «sin estructura». Significa sin esquema fijo impuesto por el motor.
+        - Confundir fragmentar con replicar.
+        - Aceptar un conteo sin preguntar cuál es el denominador.
+        - Buscar una subcadena cuando se necesitaba una palabra completa.
+        - Interpretar una señal descriptiva como una acusación.
+
+        ## Continuidad
+
+        Colab nos permitió aprender sin instalaciones, pero su servidor es temporal. En la práctica siguiente
+        conservaremos la evidencia en Atlas y la veremos con Compass. Community local sigue siendo útil para
+        practicar, pero `localhost` y Atlas son bases distintas.
+        """
+    )
+    return cells[:inicio] + [cierre] + cells[fin:]
+
+
 def insertar_diagramas(cells):
     """
     Sustituye los marcadores {svg("nombre", "texto alternativo")} por la imagen.
@@ -4466,7 +4565,7 @@ def _lineas(texto):
 
 
 def main():
-    cells = insertar_diagramas(build_cells())
+    cells = insertar_diagramas(ajustar_alcance_para_una_sesion(build_cells()))
     validate(cells)
     save(cells, OUTPUT)
 

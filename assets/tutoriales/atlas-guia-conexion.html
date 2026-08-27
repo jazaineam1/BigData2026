@@ -31,7 +31,7 @@
     --sombra-chica:0 8px 18px -8px rgba(11,36,28,.22);
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+  html,body{height:100%;margin:0;padding:0;overflow:hidden;}
   body{
     background:
       radial-gradient(1100px 600px at 85% -10%, rgba(201,162,39,.10), transparent 60%),
@@ -39,10 +39,9 @@
       var(--crema-50);
     color:var(--tinta);
     font-family:"IBM Plex Sans", Arial, sans-serif;
-    min-height:100vh;
+    height:100dvh; min-height:0;
     display:flex;
     flex-direction:column;
-    overflow-x:hidden;
   }
   h1,h2,h3{font-family:"Fraunces", Georgia, serif; margin:0; letter-spacing:-.01em;}
   code, .mono{font-family:"IBM Plex Mono", Consolas, monospace;}
@@ -56,8 +55,8 @@
 
   /* ── Encabezado ─────────────────────────────────────────────────── */
   header.uc{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:18px clamp(18px,4vw,48px) 10px;
+    flex:none; display:flex; align-items:center; justify-content:space-between;
+    padding:10px clamp(18px,4vw,48px) 7px;
   }
   .marca{ display:flex; align-items:center; gap:12px; }
   .escudo{
@@ -79,11 +78,11 @@
 
   /* ── Escenario de diapositivas ─────────────────────────────────── */
   .escenario{
-    flex:1; display:flex; align-items:center; justify-content:center;
-    padding:6px clamp(14px,4vw,48px) 18px; position:relative;
+    flex:1; min-height:0; display:flex; align-items:center; justify-content:center;
+    padding:4px clamp(14px,4vw,48px) 8px; position:relative;
   }
   .marco{
-    position:relative; width:min(980px, 100%); height:min(600px, 78vh);
+    position:relative; width:min(1180px, 100%); height:100%; min-height:0;
   }
   .slide{
     position:absolute; inset:0;
@@ -91,15 +90,14 @@
     border-radius:var(--radio);
     box-shadow:var(--sombra);
     border:1px solid rgba(23,92,60,.08);
-    padding:clamp(24px,4vw,52px);
-    overflow-y:auto;
+    padding:clamp(18px,3vw,38px);
+    overflow:hidden;
     opacity:0; transform:translateY(14px) scale(.985);
     pointer-events:none;
     transition:opacity .38s ease, transform .38s ease;
   }
   .slide.activa{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
-  .slide::-webkit-scrollbar{ width:8px; }
-  .slide::-webkit-scrollbar-thumb{ background:var(--linea); border-radius:8px; }
+  .slide-contenido{ --escala:1; transform-origin:top left; width:calc(100% / var(--escala)); transform:scale(var(--escala)); }
 
   .etiqueta{
     display:inline-flex; align-items:center; gap:8px;
@@ -212,11 +210,17 @@
     width:24px; height:24px; border-radius:50%; background:var(--verde-100); color:var(--verde-700);
     display:flex; align-items:center; justify-content:center; font-size:13px; flex:none;
   }
+  .continuar{
+    display:inline-flex; align-items:center; gap:8px; margin-top:16px; padding:11px 16px;
+    border-radius:9px; background:var(--verde-700); color:#fff; text-decoration:none;
+    font-size:14px; font-weight:600; box-shadow:var(--sombra-chica);
+  }
+  .continuar:hover,.continuar:focus{ background:var(--verde-800); text-decoration:underline; }
 
   /* ── Controles inferiores ─────────────────────────────────────── */
   .controles{
-    display:flex; align-items:center; justify-content:center; gap:18px;
-    padding:6px 20px clamp(18px,3vh,30px);
+    flex:none; display:flex; align-items:center; justify-content:center; gap:14px;
+    padding:5px 20px 10px;
   }
   .btn-nav{
     width:46px; height:46px; border-radius:50%; border:1px solid var(--linea);
@@ -224,18 +228,19 @@
     display:flex; align-items:center; justify-content:center; color:var(--verde-800);
     font-size:18px; transition:transform .15s ease, background .15s ease;
   }
-  .btn-nav:hover{ background:var(--verde-700); color:#fff; transform:translateY(-2px); }
+  .btn-nav:hover,.btn-nav:focus-visible{ background:var(--verde-700); color:#fff; transform:translateY(-2px); }
   .btn-nav:disabled{ opacity:.35; cursor:default; transform:none; background:#fff; color:var(--verde-800); }
+  .btn-pantalla{ width:auto; min-width:46px; padding:0 13px; border-radius:999px; font-size:12px; font-weight:700; }
   .puntos{ display:flex; gap:7px; align-items:center; flex-wrap:wrap; justify-content:center; max-width:56vw; }
   .punto{
-    width:9px; height:9px; border-radius:50%; background:var(--linea); border:none; cursor:pointer;
+    width:12px; height:12px; border-radius:50%; background:var(--linea); border:none; cursor:pointer;
     padding:0; transition:all .2s ease;
   }
   .punto:hover{ background:var(--dorado-400); }
   .punto.activo{ background:var(--verde-700); width:22px; border-radius:5px; }
 
   .pie{
-    text-align:center; font-size:11.5px; color:var(--gris-claro); padding-bottom:10px;
+    flex:none; text-align:center; font-size:11.5px; color:var(--gris); padding:0 14px 7px;
   }
 
   /* ── Lightbox de imagen ───────────────────────────────────────── */
@@ -245,6 +250,23 @@
   }
   .lightbox.abierto{ display:flex; }
   .lightbox img{ max-width:100%; max-height:100%; border-radius:10px; box-shadow:0 30px 60px rgba(0,0,0,.5); }
+
+  .modo-embed header.uc,.modo-embed .pie{ display:none; }
+  .modo-embed .escenario{ padding-top:8px; }
+  .modo-embed .marco{ width:100%; }
+  :fullscreen{ background:var(--crema-50); }
+  :fullscreen .escenario{ padding:8px clamp(18px,5vw,72px); }
+  @media (max-width:760px){
+    header.uc{ padding:7px 14px; }
+    .marca-texto .u{ display:none; }
+    .contador{ padding:5px 9px; }
+    .escenario{ padding:3px 8px 5px; }
+    .slide{ padding:16px; }
+    .puntos{ max-width:50vw; }
+    .punto{ width:10px; height:10px; }
+    .btn-pantalla{ padding:0 10px; }
+    .pie{ display:none; }
+  }
 
   @media (prefers-reduced-motion:reduce){
     .slide, .barra-progreso, .btn-nav, .punto{ transition:none !important; }
@@ -682,6 +704,7 @@ print(<span class="s">"Conectado a Atlas"</span>)</pre>
         <div class="check-item"><span class="bola">✓</span> <code>0.0.0.0/0</code> quedó con expiración de máximo siete días o fue eliminado al finalizar.</div>
         <div class="check-item"><span class="bola">✓</span> <code>client.admin.command("ping")</code> imprimió «Conectado a Atlas».</div>
       </div>
+      <a class="continuar" href="atlas-laboratorio-consultas.html">Continuar: conectar Compass, cargar JSON y consultar en Atlas →</a>
     </section>
 
   </div>
@@ -691,6 +714,7 @@ print(<span class="s">"Conectado a Atlas"</span>)</pre>
   <button class="btn-nav" id="btnPrev" aria-label="Diapositiva anterior">←</button>
   <div class="puntos" id="puntos"></div>
   <button class="btn-nav" id="btnNext" aria-label="Siguiente diapositiva">→</button>
+  <button class="btn-nav btn-pantalla" id="btnFullscreen" aria-label="Abrir en pantalla completa" title="Pantalla completa">⛶ <span>Pantalla completa</span></button>
 </div>
 <div class="pie">Universidad Central · Maestría en Analítica de Datos · Big Data — usa las flechas del teclado para avanzar</div>
 
@@ -698,7 +722,15 @@ print(<span class="s">"Conectado a Atlas"</span>)</pre>
 
 <script>
 (function(){
+  "use strict";
+  if(new URLSearchParams(window.location.search).get("embed") === "1") document.body.classList.add("modo-embed");
   var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  slides.forEach(function(slide){
+    var contenido = document.createElement("div");
+    contenido.className = "slide-contenido";
+    while(slide.firstChild) contenido.appendChild(slide.firstChild);
+    slide.appendChild(contenido);
+  });
   var total = slides.length;
   var actual = 0;
 
@@ -717,7 +749,25 @@ print(<span class="s">"Conectado a Atlas"</span>)</pre>
   var barra = document.getElementById("barraProgreso");
   var btnPrev = document.getElementById("btnPrev");
   var btnNext = document.getElementById("btnNext");
+  var btnFullscreen = document.getElementById("btnFullscreen");
   numTotal.textContent = total;
+
+  function ajustarSlide(slide){
+    var contenido = slide.querySelector(".slide-contenido");
+    if(!contenido) return;
+    contenido.style.setProperty("--escala", "1");
+    var alto = contenido.scrollHeight;
+    var disponible = slide.clientHeight;
+    var escala = Math.min(1, disponible / alto);
+    for(var intento=0; intento<2; intento+=1){
+      contenido.style.setProperty("--escala", Math.max(.55, escala).toFixed(3));
+      alto = contenido.scrollHeight;
+      escala = Math.min(1, disponible / alto);
+    }
+    contenido.style.setProperty("--escala", Math.max(.55, escala).toFixed(3));
+  }
+
+  function ajustarTodo(){ slides.forEach(ajustarSlide); }
 
   function ir(i){
     if (i < 0 || i >= total) return;
@@ -726,22 +776,40 @@ print(<span class="s">"Conectado a Atlas"</span>)</pre>
     actual = i;
     slides[actual].classList.add("activa");
     puntos[actual].classList.add("activo");
-    slides[actual].scrollTop = 0;
     numActual.textContent = actual + 1;
     barra.style.width = ((actual + 1) / total * 100) + "%";
     btnPrev.disabled = actual === 0;
     btnNext.disabled = actual === total - 1;
+    requestAnimationFrame(function(){ ajustarSlide(slides[actual]); });
   }
 
   btnPrev.addEventListener("click", function(){ ir(actual - 1); });
   btnNext.addEventListener("click", function(){ ir(actual + 1); });
 
+  function actualizarBotonPantalla(){
+    var abierta = Boolean(document.fullscreenElement);
+    btnFullscreen.setAttribute("aria-label", abierta ? "Salir de pantalla completa" : "Abrir en pantalla completa");
+    btnFullscreen.title = abierta ? "Salir de pantalla completa" : "Pantalla completa";
+    btnFullscreen.querySelector("span").textContent = abierta ? "Salir de pantalla completa" : "Pantalla completa";
+    requestAnimationFrame(ajustarTodo);
+  }
+  btnFullscreen.addEventListener("click", function(){
+    if(!document.fullscreenElement){
+      (document.documentElement.requestFullscreen ? document.documentElement.requestFullscreen() : Promise.reject())
+        .catch(function(){ window.open(window.location.href, "_blank", "noopener"); });
+    } else if(document.exitFullscreen){
+      document.exitFullscreen();
+    }
+  });
+  document.addEventListener("fullscreenchange", actualizarBotonPantalla);
+
   document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && lightbox.classList.contains("abierto")){ cerrarLightbox(); return; }
     if (e.key === "ArrowRight" || e.key === "PageDown") ir(actual + 1);
     if (e.key === "ArrowLeft" || e.key === "PageUp") ir(actual - 1);
     if (e.key === "Home") ir(0);
     if (e.key === "End") ir(total - 1);
-    if (e.key === "Escape") cerrarLightbox();
+    if (e.key.toLowerCase() === "f") btnFullscreen.click();
   });
 
   // Deslizar con el dedo en pantallas tactiles
@@ -771,7 +839,14 @@ print(<span class="s">"Conectado a Atlas"</span>)</pre>
   function cerrarLightbox(){ lightbox.classList.remove("abierto"); lightboxImg.src = ""; }
   lightbox.addEventListener("click", cerrarLightbox);
 
-  ir(0);
+  window.addEventListener("resize", ajustarTodo);
+  window.addEventListener("load", ajustarTodo);
+
+  // ?slide=N abre directo en la diapositiva N (1-indexada, como el contador
+  // en pantalla). Util para saltar a "Connect -> Drivers -> Python" en vivo
+  // sin recorrer las diez anteriores frente al grupo.
+  var deseada = parseInt(new URLSearchParams(window.location.search).get("slide"), 10);
+  ir(Number.isInteger(deseada) ? Math.min(Math.max(deseada - 1, 0), total - 1) : 0);
 })();
 </script>
 

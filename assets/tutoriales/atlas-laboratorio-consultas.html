@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio Atlas — consultas y vistas para Laura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde-950:#0b241c; --verde-800:#123f2b; --verde-700:#175c3c;
+    --verde-600:#1d7249; --verde-100:#e3efe6; --dorado-500:#c9a227;
+    --dorado-400:#dab949; --dorado-100:#f7ecc9; --crema-50:#faf7f0;
+    --crema-100:#f1ead9; --tinta:#172019; --gris:#5c6b63; --gris-claro:#77877e;
+    --rojo:#a53828; --linea:#e2dcc8; --radio:20px; --radio-chico:12px;
+    --sombra:0 24px 48px -18px rgba(11,36,28,.28),0 4px 10px -4px rgba(11,36,28,.12);
+    --sombra-chica:0 8px 18px -8px rgba(11,36,28,.22);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;padding:0;overflow:hidden}
+  body{
+    height:100dvh; min-height:0; display:flex; flex-direction:column;
+    color:var(--tinta); font-family:"IBM Plex Sans",Arial,sans-serif;
+    background:radial-gradient(1100px 600px at 85% -10%,rgba(201,162,39,.10),transparent 60%),
+               radial-gradient(900px 500px at -10% 110%,rgba(23,92,60,.10),transparent 55%),var(--crema-50);
+  }
+  h1,h2,h3{font-family:"Fraunces",Georgia,serif;margin:0;letter-spacing:-.01em}
+  code,.mono{font-family:"IBM Plex Mono",Consolas,monospace}
+  .barra-progreso{position:fixed;top:0;left:0;height:4px;width:0;background:var(--dorado-500);z-index:50;transition:width .3s ease}
+  header.uc{flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px clamp(18px,4vw,48px) 7px}
+  .marca{display:flex;align-items:center;gap:12px}
+  .escudo{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(from 220deg,var(--verde-600),var(--verde-800) 60%,var(--dorado-500));color:#fff;font:700 16px "Fraunces",serif;box-shadow:var(--sombra-chica)}
+  .marca-texto{line-height:1.15}.marca-texto .u{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);font-weight:600}.marca-texto .n{font-size:15px;font-weight:600;color:var(--verde-800)}
+  .contador{font:13px "IBM Plex Mono",monospace;color:var(--gris);background:#fff;border:1px solid var(--linea);padding:6px 14px;border-radius:999px;box-shadow:var(--sombra-chica)}
+  .contador b{color:var(--verde-700)}
+  .escenario{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:4px clamp(14px,4vw,48px) 8px;position:relative}
+  .marco{position:relative;width:min(1180px,100%);height:100%;min-height:0}
+  .slide{position:absolute;inset:0;overflow:hidden;opacity:0;transform:translateY(14px) scale(.985);pointer-events:none;transition:opacity .35s ease,transform .35s ease;background:#fff;border:1px solid rgba(23,92,60,.08);border-radius:var(--radio);padding:clamp(18px,3vw,38px);box-shadow:var(--sombra)}
+  .slide.activa{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+  .slide-contenido{--escala:1;transform-origin:top left;width:calc(100% / var(--escala));transform:scale(var(--escala))}
+  .etiqueta{display:inline-flex;align-items:center;gap:8px;margin-bottom:13px;padding:6px 14px;border-radius:999px;background:var(--verde-100);color:var(--verde-700);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+  .etiqueta.dorada{color:#6b5100;background:var(--dorado-100)}
+  .etiqueta .num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--verde-700);color:#fff;font:11px "IBM Plex Mono",monospace}
+  .etiqueta.dorada .num{background:var(--dorado-500);color:#2f2500}
+  .slide h2{font-size:clamp(23px,3vw,33px);color:var(--verde-800);margin-bottom:6px}
+  .sub{color:var(--gris);font-size:15px;line-height:1.5;margin:0 0 18px;max-width:70ch}
+  .portada{display:flex;flex-direction:column;justify-content:center;height:100%}.portada .kicker{color:var(--dorado-500);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px;margin-bottom:10px}.portada h1{font-size:clamp(36px,5.4vw,60px);line-height:1.03;color:var(--verde-950)}.portada h1 em{font-style:normal;color:var(--verde-600)}.portada .desc{margin-top:16px;color:var(--gris);font-size:16px;max-width:58ch;line-height:1.55}
+  .pildoras{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}.pildora{padding:8px 14px;border-radius:999px;background:var(--crema-100);border:1px solid var(--linea);font-size:13px}.pildora b{color:var(--verde-700)}
+  .paso-cuerpo{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.12fr);gap:24px;align-items:start}
+  .instrucciones ol{margin:0;padding-left:21px;display:flex;flex-direction:column;gap:9px}.instrucciones li{font-size:14px;line-height:1.5}.instrucciones code{padding:1px 5px;border-radius:5px;background:var(--crema-100);border:1px solid var(--linea);color:var(--verde-800);font-size:12.5px}
+  .callout{display:flex;gap:9px;align-items:flex-start;margin-top:10px;padding:11px 14px;border-radius:10px;font-size:13px;line-height:1.45}.callout.info{background:var(--verde-100);color:#0e3524;border:1px solid #c7e0cf}.callout.alerta{background:#fff5dd;color:#604500;border:1px solid #ead69d}.callout.riesgo{background:#fbe9e5;color:#692719;border:1px solid #ecc0b6}.callout .ic{flex:none}
+  .captura{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:16/10.2;overflow:hidden;border:1px solid var(--linea);border-radius:var(--radio-chico);background:var(--verde-950);box-shadow:var(--sombra-chica)}
+  .captura img{display:block;width:100%;height:100%;object-fit:contain;background:var(--verde-950);cursor:zoom-in}.marcador-vacio{position:absolute;inset:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px;text-align:center;color:var(--crema-100);background:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 12px,transparent 12px 24px),linear-gradient(160deg,var(--verde-800),var(--verde-950));border:1.5px dashed rgba(250,247,240,.38);border-radius:10px}.marcador-vacio .ic{font-size:26px}.marcador-vacio .titulo{font-weight:700;font-size:13px}.marcador-vacio .nota{font-size:11.5px;color:#d8e4dc;max-width:36ch}.marcador-vacio .archivo{font:11px "IBM Plex Mono",monospace;color:var(--dorado-400);background:rgba(0,0,0,.25);padding:3px 8px;border-radius:6px}.captura-caption{text-align:center;color:var(--gris-claro);font-size:11.5px;margin-top:7px}
+  .mapa{display:flex;align-items:stretch;gap:8px;margin:10px 0 14px;padding:13px;border-radius:var(--radio-chico);border:1px solid var(--linea);background:var(--crema-50);overflow-x:auto}.nodo{flex:1 0 135px;min-width:135px;padding:12px 10px;border:1px solid #d2ddcf;border-radius:9px;background:#fff;text-align:center}.nodo b{display:block;color:var(--verde-800);font-size:13.5px;margin-bottom:4px}.nodo span{display:block;color:var(--gris);font-size:12px;line-height:1.35}.nodo.fin{background:var(--verde-800);border-color:var(--verde-800)}.nodo.fin b,.nodo.fin span{color:#fff}.flecha{align-self:center;color:var(--dorado-500);font-size:20px;font-weight:700;flex:none}.mapa-rotulo{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gris);margin-top:8px}
+  table.tabla{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}table.tabla th,table.tabla td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--linea);vertical-align:top}table.tabla th{color:var(--gris);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em}table.tabla td.mono{font-family:"IBM Plex Mono",monospace;color:var(--verde-800);font-size:11.8px;overflow-wrap:anywhere}
+  pre.codigo{margin:8px 0 0;padding:14px 16px;overflow-x:auto;border-radius:10px;background:var(--verde-950);color:#e8f1ea;font:12.3px/1.55 "IBM Plex Mono",monospace;box-shadow:var(--sombra-chica)}
+  .resultado{margin-top:10px;padding:11px 14px;border-left:4px solid var(--dorado-500);border-radius:8px;background:#fff7dc;color:#3f3512;font-size:13px;line-height:1.45}
+  .lectura-4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:11px}.lectura-4>div{padding:9px 11px;border:1px solid var(--linea);border-radius:8px;background:#fff;color:var(--tinta);font-size:12px;line-height:1.4}.lectura-4 b{display:block;color:var(--verde-800);margin-bottom:2px}
+  .boton-link,.archivo-json{display:inline-flex;align-items:center;gap:7px;margin:9px 6px 0 0;padding:9px 12px;border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:600}.boton-link{background:var(--verde-700);color:#fff}.boton-link:hover,.boton-link:focus{background:var(--verde-800);text-decoration:underline}.archivo-json{background:var(--verde-100);color:#0e3524;border:1px solid #bdd6c5;font-family:"IBM Plex Mono",monospace}.archivo-json:hover,.archivo-json:focus{text-decoration:underline}
+  .checklist{display:flex;flex-direction:column;gap:9px;margin-top:12px}.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;border:1px solid var(--linea);border-radius:9px;background:var(--crema-50);font-size:13.5px;line-height:1.4}.bola{display:flex;align-items:center;justify-content:center;width:23px;height:23px;flex:none;border-radius:50%;background:var(--verde-100);color:var(--verde-700);font-size:12px;font-weight:700}
+  .controles{flex:none;display:flex;align-items:center;justify-content:center;gap:14px;padding:5px 20px 10px}.btn-nav{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;border:1px solid var(--linea);background:#fff;color:var(--verde-800);font-size:18px;cursor:pointer;box-shadow:var(--sombra-chica)}.btn-nav:hover,.btn-nav:focus-visible{background:var(--verde-700);color:#fff}.btn-nav:disabled{opacity:.35;cursor:default;background:#fff;color:var(--verde-800)}.btn-pantalla{width:auto;min-width:46px;padding:0 13px;border-radius:999px;font-size:12px;font-weight:700}.puntos{display:flex;gap:7px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:58vw}.punto{width:12px;height:12px;padding:0;border:none;border-radius:50%;background:var(--linea);cursor:pointer}.punto.activo{width:24px;border-radius:5px;background:var(--verde-700)}.pie{flex:none;text-align:center;color:var(--gris);font-size:11.5px;padding:0 14px 7px}
+  .lightbox{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:5vh 4vw;background:rgba(11,36,28,.88);cursor:zoom-out}.lightbox.abierto{display:flex}.lightbox img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 30px 60px rgba(0,0,0,.5)}
+  .modo-embed header.uc,.modo-embed .pie{display:none}.modo-embed .escenario{padding-top:8px}.modo-embed .marco{width:100%}
+  :fullscreen{background:var(--crema-50)}:fullscreen .escenario{padding:8px clamp(18px,5vw,72px)}
+  @media(max-width:760px){header.uc{padding:7px 14px}.marca-texto .u{display:none}.contador{padding:5px 9px}.escenario{padding:3px 8px 5px}.slide{padding:16px}.paso-cuerpo{grid-template-columns:1fr}.lectura-4{grid-template-columns:1fr}.puntos{max-width:50vw}.punto{width:10px;height:10px}.btn-pantalla{padding:0 10px}.pie{display:none}}
+  @media(prefers-reduced-motion:reduce){.slide,.barra-progreso{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="barra-progreso" id="barraProgreso"></div>
+<header class="uc">
+  <div class="marca"><div class="escudo">UC</div><div class="marca-texto"><div class="u">Universidad Central · Big Data</div><div class="n">Presentación 2 · Laboratorio Atlas</div></div></div>
+  <div class="contador"><b id="numActual">1</b> / <span id="numTotal">20</span></div>
+</header>
+<main class="escenario">
+  <div class="marco" id="marco">
+
+    <!-- 0 · PORTADA -->
+    <section class="slide activa">
+      <div class="portada">
+        <span class="kicker">Compras Claras · MongoDB Atlas</span>
+        <h1>De documentos<br><em>a una fila para Laura</em></h1>
+        <p class="desc">Conecta MongoDB Compass con Atlas, importa dos archivos JSON, consulta con regex,
+          guarda la lógica como pipelines y vistas, y cruza el resultado con la muestra SECOP en pandas.</p>
+        <div class="pildoras">
+          <span class="pildora">🧭 <b>Carga visual con Compass</b></span>
+          <span class="pildora">🧭 <b>Consultas en Atlas</b></span>
+          <span class="pildora">🪟 <b>2 vistas</b></span>
+          <span class="pildora">🐼 <b>SECOP en pandas</b></span>
+          <span class="pildora">⚖️ <b>Priorizar</b>, no acusar</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1 · PRODUCTO Y RECORRIDO -->
+    <section class="slide">
+      <span class="etiqueta"><span class="num">i</span> El problema</span>
+      <h2>Conectarse no basta: Laura necesita una decisión trazable</h2>
+      <p class="sub">Una URI probada solo abre la puerta. El producto útil conserva qué se preguntó, cómo se
+        clasificó y por qué un proceso terminó en la fila de revisión.</p>
+      <div class="mapa-rotulo">Mapa conceptual del recorrido — no es una captura de Atlas</div>
+      <div class="mapa" role="img" aria-label="Compass carga dos colecciones en Atlas, Atlas consulta y crea vistas, Colab y pandas cruzan la vista con SECOP, y Laura recibe una fila de revisión humana">
+        <div class="nodo"><b>1 · Compass</b><span>importa los JSON en el clúster</span></div><span class="flecha">→</span>
+        <div class="nodo"><b>2 · Atlas</b><span>filtra, agrega y guarda vistas</span></div><span class="flecha">→</span>
+        <div class="nodo"><b>3 · Colab + pandas</b><span>cruza las vistas con SECOP</span></div><span class="flecha">→</span>
+        <div class="nodo fin"><b>4 · Laura</b><span>revisa 77 procesos explicables</span></div>
+      </div>
+      <div class="callout info"><span class="ic">📦</span><span><b>Producto:</b> una consulta guardada,
+        tres pipelines guardados, dos vistas de solo lectura y una fila priorizada con sus límites.</span></div>
+      <div class="callout riesgo"><span class="ic">⚠️</span><span><b>Límite desde el inicio:</b> entidad ↔ noticia
+        no equivale a contrato ↔ noticia. El resultado indica dónde mirar; no prueba fraude, causalidad ni irregularidad.</span></div>
+    </section>
+
+    <!-- 2 · PREPARAR COMPASS -->
+    <section class="slide">
+      <span class="etiqueta"><span class="num">✓</span> Antes de importar</span>
+      <h2>Prepara Compass, los dos JSON y el acceso mínimo</h2>
+      <p class="sub">Atlas aloja el clúster. Compass es solamente el cliente gráfico que usaremos para llevar los archivos al clúster sin pegar nueve megabytes en el navegador.</p>
+      <div class="checklist">
+        <div class="check-item"><span class="bola">1</span><span>Atlas: <code>Cluster0</code> disponible y <code>ping</code> correcto. Si falta, vuelve a la <a href="atlas-guia-conexion.html">presentación 1</a>.</span></div>
+        <div class="check-item"><span class="bola">2</span><span>Compass estándar instalado. La edición <i>Readonly</i> no permite importar ni editar documentos.</span></div>
+        <div class="check-item"><span class="bola">3</span><span>Usuario de base de datos con <code>readWrite</code> solo en <code>compras_claras</code>. No uses <code>atlasAdmin</code>.</span></div>
+        <div class="check-item"><span class="bola">4</span><span>Tu IP actual autorizada en Atlas para que Compass pueda conectarse. La apertura temporal <code>0.0.0.0/0</code> se reservará para el paso final en Colab.</span></div>
+        <div class="check-item"><span class="bola">5</span><span>Descarga <a href="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/noticias_contratacion_2026.json" target="_blank" rel="noopener"><code>noticias_contratacion_2026.json</code></a> y <a href="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/entidades_en_noticias_2026.json" target="_blank" rel="noopener"><code>entidades_en_noticias_2026.json</code></a>.</span></div>
+      </div>
+      <div class="callout alerta"><span class="ic">🔐</span><span>La cuenta de Atlas y el usuario de base de datos son identidades distintas. Compass necesita la contraseña del usuario de base de datos. No la guardes en una captura, documento o repositorio.</span></div>
+      <a class="boton-link" href="atlas-guia-conexion.html">← Volver a la presentación 1</a>
+    </section>
+
+    <!-- 3 · CONECTAR COMPASS -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">1</span> Conectar Compass</span>
+      <h2>Abre Compass desde el clúster correcto</h2>
+      <p class="sub">Empezar desde <code>Cluster0</code> reduce el riesgo de copiar la conexión de otro proyecto o de intentar conectarse a una base local.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>En Atlas abre <b>Database → Clusters</b> y pulsa <b>Connect</b> en <code>Cluster0</code>.</li>
+            <li>En <b>Choose a connection method</b>, selecciona <b>Compass</b>.</li>
+            <li>Si Compass ya está instalado, marca <b>I have MongoDB Compass installed</b>.</li>
+            <li>Copia la URI que comienza por <code>mongodb+srv://</code> y abre Compass.</li>
+            <li>En Compass pulsa <b>Add New Connection</b> y pega la URI. En <b>Advanced Connection Options → Authentication</b> escribe el usuario y la contraseña de la base; no los dejes escritos en la URI.</li>
+            <li>Si pide <b>Authentication Database</b>, usa <code>admin</code>. Pulsa <b>Connect</b>, no <b>Save &amp; Connect</b>, si estás en un computador compartido.</li>
+          </ol>
+          <div class="resultado"><b>Resultado esperado:</b> Compass muestra <code>Cluster0</code> y sus bases. Todavía no has importado nada.</div>
+          <div class="callout riesgo"><span class="ic">🔒</span><span>No captures ni compartas la URI completa. Si aparece <code>Authentication Failed</code>, confirma que usaste la contraseña del usuario de base de datos y no la contraseña de tu cuenta de Atlas.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/10-compass-conexion-atlas.png" alt="Atlas ofrece MongoDB Compass como método y Compass muestra la conexión a Cluster0 sin exponer la URI" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar la elección Compass y la conexión abierta, con usuario, host y URI ocultos.</span><span class="archivo">capturas/10-compass-conexion-atlas.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: Compass conectado al clúster de Atlas</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · CREAR BASE -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">2</span> Crear el destino</span>
+      <h2>Crea una base y una colección con nombres verificables</h2>
+      <p class="sub">El archivo no decide dónde quedará almacenado. Antes de importarlo debemos definir explícitamente la base y la colección de destino.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>En Compass, sobre la conexión de <code>Cluster0</code>, pulsa <b>Create Database</b>.</li>
+            <li>En <b>Database Name</b> escribe <code>compras_claras</code>.</li>
+            <li>En <b>Collection Name</b> escribe <code>noticias</code>.</li>
+            <li>Pulsa <b>Create Database</b> y abre <code>compras_claras → noticias</code>.</li>
+          </ol>
+          <div class="resultado"><b>Resultado esperado:</b> la colección <code>noticias</code> existe y muestra cero documentos antes de la primera importación.</div>
+          <div class="callout alerta"><span class="ic">🧭</span><span>Si la base ya existe, no crees <code>compras_claras-2</code>. Ábrela y comprueba primero el conteo de cada colección.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/11-compass-crear-base-noticias.png" alt="Compass crea la base compras_claras y su primera colección noticias" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar los nombres compras_claras y noticias, sin URI, usuario ni datos de la cuenta.</span><span class="archivo">capturas/11-compass-crear-base-noticias.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: destino creado antes de importar</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 · IMPORTAR NOTICIAS -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">3</span> Importar noticias</span>
+      <h2>Carga el JSON grande y detente ante cualquier error</h2>
+      <p class="sub">El archivo contiene un arreglo de 987 documentos. Compass lo divide en inserciones y Atlas conserva cada documento en la colección.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>En <code>compras_claras → noticias → Documents</code>, pulsa <b>Add Data → Import JSON or CSV file</b>.</li>
+            <li>Selecciona <code>noticias_contratacion_2026.json</code> y confirma el tipo <b>JSON</b>.</li>
+            <li>Deja <b>Ignore empty strings</b> desactivado.</li>
+            <li>Activa <b>Stop on errors</b> y pulsa <b>Import</b>.</li>
+            <li>Espera a que termine y comprueba exactamente <b>987 documentos</b>.</li>
+          </ol>
+          <div class="resultado"><b>Control:</b> <code>noticias = 987</code>.</div>
+          <div class="callout riesgo"><span class="ic">⚠️</span><span>Si ya aparecen 987, no vuelvas a importar. Si aparece un número intermedio, detente: abre <b>View Log</b> y pide revisión. Repetir a ciegas puede producir conflictos por <code>_id</code>.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/12-compass-importar-noticias.png" alt="Compass importa noticias_contratacion_2026.json como JSON y confirma 987 documentos" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar el archivo, JSON, Stop on errors y el control 987; nunca la URI o contraseña.</span><span class="archivo">capturas/12-compass-importar-noticias.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: importación completa de noticias</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 · IMPORTAR ENTIDADES -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">4</span> Importar entidades</span>
+      <h2>Crea la segunda colección y verifica los dos totales</h2>
+      <p class="sub">Esta colección resume cuántas noticias mencionan a cada entidad. No sustituye las noticias y no contiene procesos SECOP.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>En <code>compras_claras</code>, pulsa <b>Create Collection</b> y escribe <code>entidades_noticias</code>.</li>
+            <li>Abre la colección y repite <b>Add Data → Import JSON or CSV file</b>.</li>
+            <li>Selecciona <code>entidades_en_noticias_2026.json</code>, tipo <b>JSON</b>, con <b>Stop on errors</b> activado.</li>
+            <li>Comprueba <code>entidades_noticias = 142</code> y regresa a <code>noticias</code> para confirmar <code>987</code>.</li>
+          </ol>
+          <div class="resultado"><b>Controles para avanzar:</b><br><code>noticias = 987</code><br><code>entidades_noticias = 142</code></div>
+          <div class="callout info"><span class="ic">🧩</span><span>El segundo archivo no trae <code>_id</code>; Compass genera un <code>ObjectId</code>. El cruce posterior usa el campo <code>entidad</code>, no ese identificador técnico.</span></div>
+          <div class="callout alerta"><span class="ic">🛑</span><span>Si la colección ya muestra 142, no la importes otra vez: producirías entidades duplicadas.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/13-compass-importar-entidades.png" alt="Compass confirma 142 documentos en entidades_noticias después de validar 987 noticias en el paso anterior" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar entidades_noticias con 142 documentos y el árbol de colecciones, sin datos de conexión.</span><span class="archivo">capturas/13-compass-importar-entidades.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: segunda colección completa</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · DATA EXPLORER -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">2</span> Verificar en Atlas</span>
+      <h2>Abre Data Explorer y reconoce los documentos</h2>
+      <p class="sub">El conteo de Compass confirma la carga; Data Explorer permite comprobar que los documentos viven en Atlas y reconocer qué forma tienen.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>En Atlas abre <b>Database → Browse Collections</b> o <b>Data Explorer</b>, según la etiqueta visible.</li>
+            <li>Selecciona <code>compras_claras → noticias → Documents</code>.</li>
+            <li>Comprueba <code>titulo</code>, <code>seccion</code>, <code>publicado</code> y <code>n_palabras</code>.</li>
+            <li>Abre <code>entidades_noticias</code> y comprueba <code>entidad</code>, <code>noticias</code> y la lista <code>ejemplos</code>.</li>
+          </ol>
+          <div class="callout alerta"><span class="ic">🧭</span><span>Si no ves las colecciones, confirma que abriste la base <code>compras_claras</code> dentro de tu propio clúster.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/14-atlas-data-explorer-colecciones.png" alt="Data Explorer muestra la base del equipo con las colecciones noticias y entidades_noticias" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar la base anonimizada y las dos colecciones, sin correo, organización ni identificadores privados.</span><span class="archivo">capturas/14-atlas-data-explorer-colecciones.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: las dos colecciones en Data Explorer</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 · EDITAR -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">3</span> Editar un documento</span>
+      <h2>Registra una revisión sin cambiar la estructura de los demás</h2>
+      <p class="sub">Un documento admite un objeto nuevo aunque los otros 986 no lo tengan. Esa flexibilidad es útil, pero exige gobernar el significado.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>En <code>noticias → Documents</code>, abre un artículo y pulsa el lápiz o <b>Edit Document</b>.</li>
+            <li>Agrega el objeto <code>revision</code> con <code>estado</code> y <code>responsable</code>.</li>
+            <li>Guarda y vuelve a abrir el documento para comprobarlo.</li>
+          </ol>
+          <pre class="codigo">"revision": {
+  "estado": "pendiente",
+  "responsable": "Laura"
+}</pre>
+          <div class="resultado"><b>Resultado esperado:</b> el artículo conserva sus campos y ahora incluye el objeto anidado <code>revision</code>.</div>
+          <div class="callout alerta"><span class="ic">🪟</span><span>Esto se hace en la <b>colección</b>. Las vistas que crearás más adelante son de solo lectura.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/15-atlas-editar-revision.png" alt="Un documento de noticias conserva sus campos y añade el objeto revision con estado pendiente" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar el editor del documento y el nuevo objeto revision, sin datos de la cuenta.</span><span class="archivo">capturas/15-atlas-editar-revision.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: objeto anidado agregado desde Atlas</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 · FILTROS -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">4</span> Consultar documentos</span>
+      <h2>Haz que Atlas responda cuatro preguntas</h2>
+      <p class="sub">En <code>noticias → Documents</code>, pega un filtro a la vez y pulsa <b>Find</b>. No ejecutes estas consultas en pandas.</p>
+      <div class="paso-cuerpo">
+        <div>
+          <table class="tabla">
+            <tr><th>Filtro exacto</th><th>Esperado</th></tr>
+            <tr><td class="mono">{"n_palabras":{"$gt":800}}</td><td><b>189</b></td></tr>
+            <tr><td class="mono">{"titulo":{"$regex":"salud","$options":"i"}}</td><td><b>34</b></td></tr>
+            <tr><td class="mono">{"titulo":{"$regex":"dian","$options":"i"}}</td><td><b>8</b></td></tr>
+            <tr><td class="mono">{"titulo":{"$regex":"\\bdian\\b","$options":"i"}}</td><td><b>1</b></td></tr>
+          </table>
+          <div class="callout info"><span class="ic">🔎</span><span><code>$regex</code> busca patrones;
+            <code>i</code> ignora mayúsculas. <code>\\b</code> exige un límite de palabra.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/16-atlas-filtros-regex.png" alt="Data Explorer compara ocho coincidencias de la subcadena dian con una coincidencia de la palabra DIAN" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe componer dos resultados reales: subcadena dian y palabra completa DIAN.</span><span class="archivo">capturas/16-atlas-filtros-regex.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: comparación del regex amplio y el preciso</div>
+        </div>
+      </div>
+      <div class="lectura-4">
+        <div><b>Cómo se lee</b>Cada conteo pertenece al filtro activo dentro de este corpus.</div>
+        <div><b>Qué nos dice</b>La subcadena da 8; la palabra completa deja 1. El patrón cambia la evidencia.</div>
+        <div><b>Qué NO permite concluir todavía</b>No sabemos cuántos artículos publicó el medio fuera del corpus; falta ese denominador.</div>
+        <div><b>Qué error común aparece aquí</b>Confundir coincidencia literal con significado o acusación.</div>
+      </div>
+    </section>
+
+    <!-- 7 · GUARDAR CONSULTA -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">5</span> Guardar la pregunta</span>
+      <h2>Conserva el filtro preciso en My Queries</h2>
+      <p class="sub">Una captura congela un resultado. Una consulta guardada conserva el criterio para volver a ejecutarlo.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>Deja activo el filtro de palabra completa <code>\\bdian\\b</code>.</li>
+            <li>Abre el historial de consultas, normalmente identificado con un reloj.</li>
+            <li>Marca la consulta con la estrella y nómbrala <code>dian-palabra-completa-v1</code>.</li>
+            <li>Ábrela desde <b>My Queries</b> y confirma que devuelve <b>1</b>.</li>
+          </ol>
+          <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/dian-palabra-completa-v1.json">dian-palabra-completa-v1.json ↗</a>
+          <div class="callout alerta"><span class="ic">💡</span><span>My Queries guarda filtro, proyección y orden; <b>no guarda una copia del documento</b>. Si cambian los datos, puede cambiar el resultado.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/17-atlas-guardar-consulta.png" alt="My Queries conserva el filtro de palabra completa DIAN con el nombre dian-palabra-completa-v1" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar el nombre de la consulta y el filtro; ocultar usuario, proyecto e identificadores.</span><span class="archivo">capturas/17-atlas-guardar-consulta.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: consulta guardada en My Queries</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 · AGREGACION -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">6</span> Resumir</span>
+      <h2>Construye y guarda el resumen por sección</h2>
+      <p class="sub">Un filtro devuelve documentos. Un pipeline encadena transformaciones y produce una fila por grupo.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>Abre <code>noticias → Aggregations</code>.</li>
+            <li>Agrega en orden <code>$match</code>, <code>$group</code>, <code>$sort</code> y <code>$limit</code>.</li>
+            <li>Usa el JSON versionado como fuente; ejecuta y revisa la primera fila.</li>
+            <li>Pulsa <b>Save → Save as</b> y nómbralo <code>resumen-secciones-v1</code>.</li>
+          </ol>
+          <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/resumen-secciones-v1.json">resumen-secciones-v1.json ↗</a>
+          <div class="resultado"><b>Control esperado:</b> <code>justicia/investigacion</code> · <b>238</b> noticias · promedio aproximado <b>560,5</b> palabras.</div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/18-atlas-pipeline-resumen.png" alt="El pipeline guardado resume 238 noticias de justicia e investigación con promedio de 560,5 palabras" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar las cuatro etapas y la primera fila del resultado, sin datos de cuenta.</span><span class="archivo">capturas/18-atlas-pipeline-resumen.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: pipeline ejecutado y resultado de control</div>
+        </div>
+      </div>
+      <div class="callout alerta"><span class="ic">📏</span><span>Más documentos en el corpus no significa más publicaciones de la sección. Falta el total de artículos publicados por cada sección.</span></div>
+      <details>
+        <summary><b>Ampliación opcional — resumen mensual</b></summary>
+        <p class="sub">Cuando el pipeline central ya funcione, abre el JSON mensual y ejecútalo en
+          <code>noticias → Aggregations</code>. Control: ene 141 · feb 129 · mar 120 · abr 140 · may 110 ·
+          jun 92 · jul 175 · ago 80.</p>
+        <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/resumen-mensual-ampliacion-v1.json">resumen-mensual-ampliacion-v1.json ↗</a>
+      </details>
+    </section>
+
+    <!-- 9 · TRES OBJETOS -->
+    <section class="slide">
+      <span class="etiqueta"><span class="num">i</span> Antes de crear vistas</span>
+      <h2>Consulta, pipeline y vista conservan cosas distintas</h2>
+      <p class="sub">Esta distinción evita guardar un nombre y creer que ya se publicó una salida reutilizable.</p>
+      <table class="tabla">
+        <tr><th>Objeto</th><th>Qué conserva</th><th>Qué no conserva</th><th>Uso aquí</th></tr>
+        <tr><td><b>Consulta guardada</b></td><td>filtro, proyección y orden</td><td>los resultados</td><td><code>dian-palabra-completa-v1</code></td></tr>
+        <tr><td><b>Pipeline guardado</b></td><td>receta editable por etapas</td><td>una colección virtual</td><td><code>clasificar-noticias-v1</code></td></tr>
+        <tr><td><b>Vista</b></td><td>definición que se calcula al leer</td><td>una copia física editable</td><td><code>noticias_clasificadas</code></td></tr>
+      </table>
+      <div class="mapa-rotulo">Mapa conceptual — no es una captura de Atlas</div>
+      <div class="mapa" role="img" aria-label="La colección alimenta un pipeline guardado; al crear la vista se obtiene una ventana de solo lectura que refleja los datos actuales">
+        <div class="nodo"><b>Colección</b><span>documentos editables</span></div><span class="flecha">→</span>
+        <div class="nodo"><b>Pipeline</b><span>reglas en orden</span></div><span class="flecha">→</span>
+        <div class="nodo fin"><b>Vista</b><span>resultado actual de solo lectura</span></div>
+      </div>
+      <div class="callout riesgo"><span class="ic">⚠️</span><span>Crear la vista no guarda automáticamente una copia editable del pipeline. Guarda primero el pipeline y después crea la vista.</span></div>
+    </section>
+
+    <!-- 10 · VISTA NOTICIAS -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">7</span> Clasificar noticias</span>
+      <h2>Crea la vista noticias_clasificadas</h2>
+      <p class="sub">La regla une título y subtítulo, evalúa los regex en orden y asigna una categoría descriptiva.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>En <code>noticias → Aggregations</code>, agrega las cuatro etapas del JSON en el mismo orden.</li>
+            <li>Ejecuta y revisa <code>clasificacion</code> en la salida.</li>
+            <li>Guarda el pipeline como <code>clasificar-noticias-v1</code>.</li>
+            <li>Usa <b>Save → Create view</b> y nombra la vista <code>noticias_clasificadas</code>.</li>
+          </ol>
+          <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/clasificar-noticias-v1.json">clasificar-noticias-v1.json ↗</a>
+          <div class="resultado"><b>Orden literal de la regla:</b><br>
+            <code>terminos_control</code> → <code>proceso_contractual</code> →
+            <code>ejecucion_obra</code> → <code>contexto</code>.<br>
+            Si una noticia coincide con dos, recibe la primera.</div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/19-atlas-vista-noticias.png" alt="Atlas crea la vista noticias_clasificadas a partir del pipeline con regex y switch" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar el nombre de la vista y una salida con clasificacion; ocultar cualquier identificador privado.</span><span class="archivo">capturas/19-atlas-vista-noticias.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: vista creada desde el pipeline de regex</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 · VISTA MENCIONES -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">8</span> Clasificar menciones</span>
+      <h2>Crea la vista menciones_clasificadas</h2>
+      <p class="sub">Esta vista clasifica cantidad de apariciones. No clasifica riesgo, gravedad ni responsabilidad.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>Abre <code>entidades_noticias → Aggregations</code> y agrega las etapas del JSON.</li>
+            <li>Comprueba los límites: <b>alta</b> ≥ 20; <b>media</b> 5–19; <b>baja</b> &lt; 5 noticias.</li>
+            <li>Guarda el pipeline como <code>clasificar-menciones-v1</code>.</li>
+            <li>Crea la vista <code>menciones_clasificadas</code>.</li>
+          </ol>
+          <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/menciones-clasificadas-v1.json">menciones-clasificadas-v1.json ↗</a>
+          <div class="resultado"><b>Conteo esperado:</b> alta <b>6</b> · media <b>25</b> · baja <b>111</b> = 142 entidades.</div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/20-atlas-vista-menciones.png" alt="Atlas crea la vista menciones_clasificadas con seis entidades de mención alta, veinticinco media y ciento once baja" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar la vista y algunos niveles de menciones, sin nombres de usuario ni proyecto.</span><span class="archivo">capturas/20-atlas-vista-menciones.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: vista de niveles descriptivos de mención</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12 · VALIDAR VISTAS -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">9</span> Validar antes de integrar</span>
+      <h2>Cuenta categorías y revisa los bordes</h2>
+      <p class="sub">Una vista puede crearse sin error y aun así contener una regla incorrecta. El conteo de control permite detectarlo.</p>
+      <div class="instrucciones">
+        <ol>
+          <li>En <code>noticias_clasificadas → Aggregations</code>, agrupa por <code>$clasificacion</code> y suma uno.</li>
+          <li>Repite en <code>menciones_clasificadas</code> agrupando por <code>$nivel_menciones</code>.</li>
+          <li>En <b>Documents</b>, comprueba que 20 sea alta, 5 media y 4 baja.</li>
+          <li>Intenta editar una vista: Atlas debe impedirlo porque es de solo lectura.</li>
+        </ol>
+      </div>
+      <table class="tabla">
+        <tr><th>Vista</th><th>Distribución de control</th></tr>
+        <tr><td><code>noticias_clasificadas</code></td><td>313 términos de control · 349 proceso contractual · 26 ejecución de obra · 299 contexto = <b>987</b></td></tr>
+        <tr><td><code>menciones_clasificadas</code></td><td>6 alta · 25 media · 111 baja = <b>142</b></td></tr>
+      </table>
+      <div class="lectura-4">
+        <div><b>Cómo se lee</b>Cada documento cae en una categoría porque <code>$switch</code> toma la primera regla coincidente.</div>
+        <div><b>Qué nos dice</b>Los totales cuadran con las colecciones fuente y los umbrales se aplicaron.</div>
+        <div><b>Qué NO permite concluir todavía</b>La etiqueta no identifica si la entidad investiga, regula o es cuestionada; falta su papel semántico.</div>
+        <div><b>Qué error común aparece aquí</b>Renombrar «mención alta» como «riesgo alto». Son conceptos distintos.</div>
+      </div>
+      <div class="callout alerta"><span class="ic">🧪</span><span>El corpus fue seleccionado mediante palabras clave. Por eso estos conteos describen <b>este corpus</b>, no toda la cobertura del medio.</span></div>
+    </section>
+
+    <!-- 13 · VOLVER A COLAB -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">10</span> Integrar con SECOP</span>
+      <h2>Vuelve a Colab y cruza la vista con pandas</h2>
+      <p class="sub">La consulta documental queda en Atlas. pandas conserva la muestra SECOP de 1.000 procesos y hace la unión exacta por entidad.</p>
+      <div class="paso-cuerpo">
+        <div class="instrucciones">
+          <ol>
+            <li>En Atlas autoriza temporalmente el acceso que usará Colab. Si necesitas <code>0.0.0.0/0</code>, fija expiración máxima de siete días y elimínalo al terminar.</li>
+            <li>Abre un Colab nuevo y ejecuta el bloque completo de abajo.</li>
+            <li>Pega la URI conservando <code>&lt;db_password&gt;</code>; <code>getpass()</code> solicitará la contraseña sin mostrarla.</li>
+            <li>El código lee las dos vistas desde Atlas y la muestra SECOP de 1.000 procesos desde el repositorio.</li>
+            <li>La unión exacta encuentra <b>163</b> procesos y la regla explicable deja <b>77</b> para revisión.</li>
+          </ol>
+          <div class="resultado"><b>Resultado esperado:</b> 77 procesos para revisión humana.</div>
+          <div class="callout info"><span class="ic">📏</span><span>Cerca del 45 % de toda la muestra usa contratación directa. Esa modalidad sola no prioriza; por eso se combina con otra señal.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/21-colab-cruce-secop.png" alt="Colab cruza 142 entidades de la vista con 1000 procesos SECOP y obtiene 77 procesos priorizados" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar 1.000, 163 y 77 como controles; ocultar URI, contraseña y nombres de cuentas.</span><span class="archivo">capturas/21-colab-cruce-secop.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: cruce Atlas ↔ SECOP en pandas</div>
+        </div>
+      </div>
+      <details>
+        <summary><b>Código copiable — conectar, leer vistas y cruzar con SECOP</b></summary>
+        <pre class="codigo">!pip -q install "pymongo[srv]&gt;=4.10,&lt;5" pandas
+
+from getpass import getpass
+from urllib.parse import quote_plus
+from pymongo import MongoClient
+import pandas as pd
+
+uri_base = getpass("Pega la URI conservando &lt;db_password&gt;: ").strip()
+if "&lt;db_password&gt;" not in uri_base:
+    raise ValueError("La URI debe conservar &lt;db_password&gt;.")
+
+clave = quote_plus(getpass("Contraseña del usuario de base de datos: "))
+uri = uri_base.replace("&lt;db_password&gt;", clave)
+client = MongoClient(uri, serverSelectionTimeoutMS=10000)
+client.admin.command("ping")
+db = client["compras_claras"]
+
+SECOP_URL = (
+    "https://raw.githubusercontent.com/jazaineam1/BigData2026/"
+    "main/Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv"
+)
+
+noticias_clasificadas = pd.DataFrame(list(
+    db["noticias_clasificadas"].find({}, {"_id": 0})
+))
+menciones = pd.DataFrame(list(
+    db["menciones_clasificadas"].find({}, {"_id": 0})
+))
+secop = pd.read_csv(SECOP_URL, low_memory=False)
+
+secop["entidad"] = secop["entidad"].astype("string").str.strip().str.upper()
+menciones["entidad"] = menciones["entidad"].astype("string").str.strip().str.upper()
+cruce = secop.merge(menciones, on="entidad", how="inner", validate="many_to_one")
+
+es_directa = cruce["modalidad_de_contratacion"].fillna("").str.contains(
+    "directa", case=False, regex=False
+)
+sin_respuestas = pd.to_numeric(
+    cruce["respuestas_al_procedimiento"], errors="coerce"
+).eq(0)
+cruce["precio_base"] = pd.to_numeric(cruce["precio_base"], errors="coerce")
+
+bandeja_laura = (
+    cruce.loc[es_directa &amp; sin_respuestas]
+    .sort_values("precio_base", ascending=False)
+    .reset_index(drop=True)
+)
+
+print("Noticias clasificadas:", len(noticias_clasificadas))
+print("Procesos SECOP:", len(secop), "· entidades:", secop["entidad"].nunique())
+print("Procesos con cruce exacto:", len(cruce))
+print("Procesos en la fila de Laura:", len(bandeja_laura))
+
+if (len(noticias_clasificadas), len(cruce), len(bandeja_laura)) != (987, 163, 77):
+    raise RuntimeError("Los controles no coinciden; revisa carga, vistas y filtros.")
+
+columnas = [
+    "id_del_proceso", "entidad", "precio_base",
+    "modalidad_de_contratacion", "respuestas_al_procedimiento",
+    "noticias", "nivel_menciones"
+]
+display(bandeja_laura[columnas].head(10))
+
+client.close()
+print("Conexión con Atlas cerrada; los resultados permanecen en memoria.")</pre>
+      </details>
+    </section>
+
+    <!-- 14 · RESULTADO LAURA -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">11</span> Leer el resultado</span>
+      <h2>El primer proceso de la fila de Laura</h2>
+      <p class="sub">La fila explica por qué mirar primero. No dice qué encontrará la revisión.</p>
+      <div class="paso-cuerpo">
+        <div>
+          <table class="tabla">
+            <tr><th>Campo</th><th>Control esperado</th></tr>
+            <tr><td>Proceso</td><td><code>CO1.REQ.5407319</code></td></tr>
+            <tr><td>Entidad</td><td>MINISTERIO DEL DEPORTE</td></tr>
+            <tr><td>Valor</td><td><b>$168.750.000</b></td></tr>
+            <tr><td>Señales</td><td>modalidad directa · 0 respuestas · 3 noticias · mención baja</td></tr>
+          </table>
+          <div class="callout riesgo"><span class="ic">⚖️</span><span>La acción correcta es abrir SECOP y revisar los soportes. No afirmar irregularidad ni usar la fila como acusación.</span></div>
+        </div>
+        <div>
+          <div class="captura">
+            <img src="capturas/22-colab-bandeja-laura.png" alt="La fila de Laura muestra 77 procesos y encabeza con CO1.REQ.5407319 del Ministerio del Deporte por 168750000 pesos" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="marcador-vacio" style="display:none"><span class="ic">🖼️</span><span class="titulo">Captura pendiente</span><span class="nota">Debe mostrar el primer proceso y el total 77; no debe mostrar credenciales ni datos personales.</span><span class="archivo">capturas/22-colab-bandeja-laura.png</span></div>
+          </div>
+          <div class="captura-caption">Evidencia real prevista: salida final para Laura</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15 · INTERPRETAR -->
+    <section class="slide">
+      <span class="etiqueta"><span class="num">!</span> La parte más importante</span>
+      <h2>La fila es útil precisamente porque declara su límite</h2>
+      <p class="sub">Un número sin lectura parece objetivo, pero puede responder una pregunta distinta de la que Laura hizo.</p>
+      <div class="lectura-4">
+        <div><b>Cómo se lee</b>El primer proceso es el de mayor valor entre 77 que cumplen una regla explícita y reproducible.</div>
+        <div><b>Qué nos dice</b>En la muestra coinciden modalidad directa, cero respuestas registradas y una entidad presente en la vista de menciones.</div>
+        <div><b>Qué NO permite concluir todavía</b>No sabemos si las tres noticias hablan de ese proceso. Falta una referencia contractual verificable dentro del texto.</div>
+        <div><b>Qué error común aparece aquí</b>Tratar entidad ↔ noticia como contrato ↔ noticia y convertir prioridad de lectura en sospecha.</div>
+      </div>
+      <table class="tabla">
+        <tr><th>Lo que sí puede hacer Laura</th><th>Lo que no puede hacer</th></tr>
+        <tr><td>ordenar el trabajo del equipo</td><td>afirmar que hubo fraude</td></tr>
+        <tr><td>abrir el proceso y leer soportes</td><td>atribuir causalidad a una noticia</td></tr>
+        <tr><td>pedir el dato contractual que falta</td><td>suponer que cero respuestas significa cero competencia real</td></tr>
+      </table>
+      <div class="callout info"><span class="ic">🎯</span><span><b>Decisión:</b> revisar primero, documentar lo encontrado y mejorar la regla con evidencia; no automatizar una acusación.</span></div>
+    </section>
+
+    <!-- 16 · CIERRE -->
+    <section class="slide">
+      <span class="etiqueta dorada"><span class="num">✓</span> Cerrar bien</span>
+      <h2>Conserva la lógica y cierra la puerta temporal</h2>
+      <p class="sub">El trabajo permanece en Atlas. La exposición de red no debe permanecer abierta sin necesidad.</p>
+      <div class="checklist">
+        <div class="check-item"><span class="bola">1</span><span>Confirma que el bloque de Colab terminó con <code>client.close()</code>. Cierra la conexión; no borra datos.</span></div>
+        <div class="check-item"><span class="bola">2</span><span>En Atlas elimina <code>0.0.0.0/0</code> en <b>Security → Database &amp; Network Access → IP Access List</b>, o confirma su expiración máxima de siete días.</span></div>
+        <div class="check-item"><span class="bola">3</span><span>Confirma <code>readWrite</code> solo sobre <code>compras_claras</code>.</span></div>
+        <div class="check-item"><span class="bola">4</span><span>Conserva <code>dian-palabra-completa-v1</code>, los tres pipelines y las vistas <code>noticias_clasificadas</code> y <code>menciones_clasificadas</code>.</span></div>
+      </div>
+      <div class="resultado"><b>Producto terminado:</b> 987 noticias y 142 entidades persistentes; una consulta y tres pipelines guardados; dos vistas de solo lectura; 77 procesos priorizados con un límite explícito.</div>
+      <div class="callout info"><span class="ic">🧠</span><span><b>Para llevar:</b> Atlas conserva y ejecuta la lógica documental; pandas integra SECOP; Laura decide con revisión humana.</span></div>
+    </section>
+
+  </div>
+</main>
+<div class="controles">
+  <button class="btn-nav" id="btnPrev" aria-label="Diapositiva anterior">←</button>
+  <div class="puntos" id="puntos"></div>
+  <button class="btn-nav" id="btnNext" aria-label="Diapositiva siguiente">→</button>
+  <button class="btn-nav btn-pantalla" id="btnFullscreen" aria-label="Abrir en pantalla completa" title="Pantalla completa">⛶ <span>Pantalla completa</span></button>
+</div>
+<div class="pie">Universidad Central · Maestría en Analítica de Datos · Big Data — usa las flechas del teclado para avanzar</div>
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Captura ampliada"><img id="lightboxImg" src="" alt=""></div>
+<script>
+(function(){
+  "use strict";
+  if(new URLSearchParams(window.location.search).get("embed")==="1")document.body.classList.add("modo-embed");
+  var slides=Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  slides.forEach(function(slide){var contenido=document.createElement("div");contenido.className="slide-contenido";while(slide.firstChild)contenido.appendChild(slide.firstChild);slide.appendChild(contenido)});
+  var actual=0,total=slides.length,puntosCont=document.getElementById("puntos");
+  slides.forEach(function(_,i){var b=document.createElement("button");b.className="punto"+(i===0?" activo":"");b.setAttribute("aria-label","Ir a la diapositiva "+(i+1));b.addEventListener("click",function(){ir(i)});puntosCont.appendChild(b)});
+  var puntos=Array.prototype.slice.call(puntosCont.children),numActual=document.getElementById("numActual"),numTotal=document.getElementById("numTotal"),barra=document.getElementById("barraProgreso"),btnPrev=document.getElementById("btnPrev"),btnNext=document.getElementById("btnNext"),btnFullscreen=document.getElementById("btnFullscreen");
+  numTotal.textContent=total;
+  function ajustarSlide(slide){var contenido=slide.querySelector(".slide-contenido");if(!contenido)return;contenido.style.setProperty("--escala","1");var alto=contenido.scrollHeight,disponible=slide.clientHeight;var escala=Math.min(1,disponible/alto);for(var intento=0;intento<2;intento+=1){contenido.style.setProperty("--escala",Math.max(.55,escala).toFixed(3));alto=contenido.scrollHeight;escala=Math.min(1,disponible/alto)}contenido.style.setProperty("--escala",Math.max(.55,escala).toFixed(3))}
+  function ajustarTodo(){slides.forEach(ajustarSlide)}
+  function ir(i){if(i<0||i>=total)return;slides[actual].classList.remove("activa");puntos[actual].classList.remove("activo");actual=i;slides[actual].classList.add("activa");puntos[actual].classList.add("activo");numActual.textContent=actual+1;barra.style.width=((actual+1)/total*100)+"%";btnPrev.disabled=actual===0;btnNext.disabled=actual===total-1;requestAnimationFrame(function(){ajustarSlide(slides[actual])})}
+  btnPrev.addEventListener("click",function(){ir(actual-1)});btnNext.addEventListener("click",function(){ir(actual+1)});
+  function actualizarBotonPantalla(){var abierta=Boolean(document.fullscreenElement);btnFullscreen.setAttribute("aria-label",abierta?"Salir de pantalla completa":"Abrir en pantalla completa");btnFullscreen.title=abierta?"Salir de pantalla completa":"Pantalla completa";btnFullscreen.querySelector("span").textContent=abierta?"Salir de pantalla completa":"Pantalla completa";requestAnimationFrame(ajustarTodo)}
+  btnFullscreen.addEventListener("click",function(){if(!document.fullscreenElement){(document.documentElement.requestFullscreen?document.documentElement.requestFullscreen():Promise.reject()).catch(function(){window.open(window.location.href,"_blank","noopener")})}else{document.exitFullscreen&&document.exitFullscreen()}});document.addEventListener("fullscreenchange",actualizarBotonPantalla);
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&lightbox.classList.contains("abierto")){cerrarLightbox();return}if(e.key==="ArrowRight"||e.key==="PageDown")ir(actual+1);if(e.key==="ArrowLeft"||e.key==="PageUp")ir(actual-1);if(e.key==="Home")ir(0);if(e.key==="End")ir(total-1);if(e.key.toLowerCase()==="f")btnFullscreen.click()});
+  var xInicio=null,marco=document.getElementById("marco");marco.addEventListener("touchstart",function(e){xInicio=e.touches[0].clientX},{passive:true});marco.addEventListener("touchend",function(e){if(xInicio===null)return;var dx=e.changedTouches[0].clientX-xInicio;if(dx>50)ir(actual-1);if(dx< -50)ir(actual+1);xInicio=null},{passive:true});
+  var lightbox=document.getElementById("lightbox"),lightboxImg=document.getElementById("lightboxImg");document.querySelectorAll(".captura img").forEach(function(img){img.addEventListener("click",function(){if(img.style.display==="none")return;lightboxImg.src=img.src;lightboxImg.alt=img.alt;lightbox.classList.add("abierto")})});function cerrarLightbox(){lightbox.classList.remove("abierto");lightboxImg.src=""}lightbox.addEventListener("click",cerrarLightbox);
+  window.addEventListener("resize",ajustarTodo);window.addEventListener("load",ajustarTodo);ir(0);
+})();
+</script>
+</body>
+</html>

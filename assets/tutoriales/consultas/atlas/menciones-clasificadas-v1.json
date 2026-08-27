@@ -1,0 +1,53 @@
+[
+  {
+    "$set": {
+      "nivel_menciones": {
+        "$switch": {
+          "branches": [
+            {
+              "case": {
+                "$gte": [
+                  "$noticias",
+                  20
+                ]
+              },
+              "then": "alta"
+            },
+            {
+              "case": {
+                "$gte": [
+                  "$noticias",
+                  5
+                ]
+              },
+              "then": "media"
+            }
+          ],
+          "default": "baja"
+        }
+      }
+    }
+  },
+  {
+    "$project": {
+      "_id": 0,
+      "entidad": 1,
+      "departamento": 1,
+      "procesos_en_secop": 1,
+      "noticias": 1,
+      "nivel_menciones": 1,
+      "ejemplos": {
+        "$slice": [
+          "$ejemplos",
+          2
+        ]
+      }
+    }
+  },
+  {
+    "$sort": {
+      "noticias": -1,
+      "entidad": 1
+    }
+  }
+]

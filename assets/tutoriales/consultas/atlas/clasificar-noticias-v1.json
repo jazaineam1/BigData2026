@@ -1,0 +1,80 @@
+[
+  {
+    "$set": {
+      "texto_clasificar": {
+        "$concat": [
+          {
+            "$ifNull": [
+              "$titulo",
+              ""
+            ]
+          },
+          " ",
+          {
+            "$ifNull": [
+              "$subtitulo",
+              ""
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$set": {
+      "clasificacion": {
+        "$switch": {
+          "branches": [
+            {
+              "case": {
+                "$regexMatch": {
+                  "input": "$texto_clasificar",
+                  "regex": "sobrecost|detriment|peculad|corrupci(?:o|ó)n|irregular",
+                  "options": "i"
+                }
+              },
+              "then": "terminos_control"
+            },
+            {
+              "case": {
+                "$regexMatch": {
+                  "input": "$texto_clasificar",
+                  "regex": "contrat|licitaci(?:o|ó)n|adjudic|secop|convenio",
+                  "options": "i"
+                }
+              },
+              "then": "proceso_contractual"
+            },
+            {
+              "case": {
+                "$regexMatch": {
+                  "input": "$texto_clasificar",
+                  "regex": "obra|retras|incumpl|ejecuci(?:o|ó)n",
+                  "options": "i"
+                }
+              },
+              "then": "ejecucion_obra"
+            }
+          ],
+          "default": "contexto"
+        }
+      }
+    }
+  },
+  {
+    "$project": {
+      "_id": 0,
+      "titulo": 1,
+      "seccion": 1,
+      "publicado": 1,
+      "url": 1,
+      "n_palabras": 1,
+      "clasificacion": 1
+    }
+  },
+  {
+    "$sort": {
+      "publicado": -1
+    }
+  }
+]

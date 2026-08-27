@@ -1,0 +1,33 @@
+{
+  "nombre": "dian-palabra-completa-v1",
+  "tipo": "consulta_guardada_data_explorer",
+  "coleccion": "noticias",
+  "filter": {
+    "titulo": {
+      "$regex": "\\bdian\\b",
+      "$options": "i"
+    }
+  },
+  "project": {
+    "_id": 0,
+    "titulo": 1,
+    "seccion": 1,
+    "publicado": 1,
+    "url": 1
+  },
+  "sort": {
+    "publicado": -1
+  },
+  "limit": 20,
+  "comparacion": {
+    "filter": {
+      "titulo": {
+        "$regex": "dian",
+        "$options": "i"
+      }
+    },
+    "coincidencias_subcadena": 8,
+    "coincidencias_palabra_completa": 1
+  },
+  "nota": "No es un pipeline. Data Explorer guarda Filter, Project, Sort y Limit como la configuracion de una consulta de Documents."
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "$match": {
+      "n_palabras": {
+        "$gt": 0
+      }
+    }
+  },
+  {
+    "$group": {
+      "_id": "$seccion",
+      "noticias": {
+        "$sum": 1
+      },
+      "promedio_palabras": {
+        "$avg": "$n_palabras"
+      }
+    }
+  },
+  {
+    "$sort": {
+      "noticias": -1,
+      "_id": 1
+    }
+  },
+  {
+    "$limit": 10
+  }
+]
