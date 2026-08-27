@@ -819,17 +819,26 @@ def build_cells():
             > MongoDB, Astra **no admite** `CREATE KEYSPACE` por CQL. Documentación oficial:
             > [gestión de keyspaces en Astra](https://docs.datastax.com/en/astra-db-serverless/databases/manage-keyspaces.html) ·
             > [conexión con Python, token y Secure Connect Bundle](https://docs.datastax.com/en/astra-db-serverless/drivers/python-driver.html)
+
+            **Docente: dónde están tus dos datos, antes de ejecutar la celda.** Colab corre en un
+            servidor de Google, no en tu computador: el bundle tiene que **subirse**, no solo indicar
+            una ruta local.
+
+            | Lo que pide la celda | Dónde lo consigues |
+            |---|---|
+            | El Secure Connect Bundle | El archivo `Cassandra/bundle.zip` de tu repositorio local. La celda abre un botón **Choose Files** — selecciónalo ahí, no escribas una ruta |
+            | El token | Ábrelo con un editor de texto: `Cassandra/token.json`, campo `"token"`. Empieza por `AstraCS:` |
             """
         ),
         hidden(
             code(
                 """
                 # DEMOSTRACION DOCENTE — no ejecutes esta celda con tus propias credenciales.
-                # Necesita un Secure Connect Bundle y un token de Astra generados desde el
-                # portal, y el keyspace compras_claras ya creado (Astra no admite CREATE
-                # KEYSPACE por CQL). cassandra-driver no viene instalado en Colab por defecto:
-                # se instala aqui (3.29.3 es la ultima version publicada en PyPI; la 3.30
-                # mencionada en borradores previos de este libreto no existe).
+                # Necesita el Secure Connect Bundle y el token de Astra (ver la tabla de arriba
+                # para saber donde estan), y el keyspace compras_claras ya creado (Astra no
+                # admite CREATE KEYSPACE por CQL). cassandra-driver no viene instalado en Colab
+                # por defecto: se instala aqui (3.29.3 es la ultima version publicada en PyPI;
+                # la 3.30 mencionada en borradores previos de este libreto no existe).
                 !pip install -q "cassandra-driver>=3.29,<4"
 
                 from getpass import getpass
@@ -837,7 +846,17 @@ def build_cells():
                 from cassandra.cluster import Cluster
                 from cassandra.auth import PlainTextAuthProvider
 
-                bundle = input("Ruta al Secure Connect Bundle (.zip): ").strip()
+                # En Colab real aparece un boton "Choose Files": ahi seleccionas
+                # Cassandra/bundle.zip desde tu computador. Fuera de Colab (por ejemplo
+                # probando esta celda en un Jupyter local), se pide la ruta en el disco.
+                try:
+                    from google.colab import files
+                    print("Sube tu Secure Connect Bundle (Cassandra/bundle.zip):")
+                    subido = files.upload()
+                    bundle = list(subido.keys())[0]
+                except ImportError:
+                    bundle = input("Ruta al Secure Connect Bundle (.zip): ").strip()
+
                 token = getpass("Token de Astra (empieza por AstraCS:...): ")
 
                 cluster = Cluster(
