@@ -189,8 +189,17 @@ def build_cells():
             | **MongoDB Atlas** | MongoDB administrado en la nube | un clúster remoto, el mismo para todo tu equipo |
 
             **Hoy usas los tres**, en este orden: Compass para *ver e importar* de forma visual, Atlas para
-            que los datos vivan en un solo lugar compartido, y Colab para lo que Compass no hace —cruzar con
-            pandas y automatizar—.
+            que los datos vivan en un solo lugar compartido, y Colab para lo que ninguno de los dos hace —
+            cruzar con datos que no son de Mongo, y hablar con Cassandra—.
+
+            > **Y esto es lo importante de todo el cuaderno, dilo en voz alta si hace falta:** las
+            > **consultas de MongoDB** —el filtro de DIAN, la agregación por sección, las dos
+            > clasificaciones, las dos vistas— **se escriben y se corren en la interfaz de Mongo:** en
+            > Atlas si trabajas en la nube, en Compass o `mongosh` si trabajas contra tu Community local. **No
+            > en Python.** Un profesional de datos que usa MongoDB todos los días casi nunca escribe
+            > `pymongo` para *explorar*; explora en la interfaz, que para eso existe, y solo escribe código
+            > cuando el resultado tiene que **salir** de Mongo hacia otra cosa. Vas a ver exactamente ese
+            > momento, y solo ese, en la segunda mitad.
 
             > Documentación oficial: [entornos de MongoDB](https://www.mongodb.com/docs/deployment/) ·
             > [MongoDB Compass](https://www.mongodb.com/docs/compass/)
@@ -355,7 +364,25 @@ def build_cells():
             ---
             ## Segunda mitad · De la vista de Atlas a la bandeja de Laura
 
-            **NÚCLEO** · aquí sí escribes Python. Todo lo que sigue corre en esta pestaña de Colab.
+            **NÚCLEO** · aquí sí escribes Python. Y aquí está la respuesta completa a la pregunta que te
+            quedó dando vueltas en la primera mitad: **¿por qué toda esa parte fue en Atlas y esta es en
+            Colab?**
+
+            ### La regla, sin excepciones, y por qué existe
+
+            | Si la tarea es... | La haces en... | Porque... |
+            |---|---|---|
+            | filtrar, agrupar, clasificar, crear una vista | **Atlas** (Data Explorer) o **Community** (Compass / `mongosh`) | es exactamente para eso que existe esa interfaz — y la ves ejecutarse y corregirse al instante, sin reiniciar nada |
+            | cruzar lo que hay en Mongo con algo que **no vive en Mongo** | **Python**, aquí en Colab | ni Atlas ni Compass saben leer un CSV de SECOP. Ese cruce solo existe fuera de Mongo |
+            | hablar con **otro motor** (Cassandra, más adelante) | **Python** | son sistemas distintos; algo tiene que estar de puente entre los dos |
+
+            **La `menciones_clasificadas` que vas a leer en la próxima celda ya la construiste tú, en
+            Atlas, en la primera mitad.** Python no la va a volver a calcular ni a mejorar: solo la va a
+            **sacar** de Mongo para poder juntarla con los 1.000 procesos de SECOP, que están en un CSV y
+            nunca estuvieron en tu base. Ese cruce es el **único** motivo por el que aparece código a partir
+            de aquí — no porque Python sea "mejor" para consultar que la interfaz de Mongo. Para consultar,
+            la interfaz es mejor: la ves, la corriges, la exportas con un clic. Python entra cuando hace
+            falta juntar mundos que Mongo no puede juntar solo.
             """
         ),
         code(
@@ -396,8 +423,9 @@ def build_cells():
         ),
         code(
             """
-            # Leer la vista menciones_clasificadas. Si estas en modo de respaldo, la
-            # reconstruimos localmente con la MISMA regla que usaste en Atlas.
+            # Sacar de Atlas la vista que YA construiste en la interfaz -- no se vuelve a
+            # calcular aqui, solo se trae para poder cruzarla con SECOP. Si estas en modo
+            # de respaldo, la reconstruimos localmente con la MISMA regla que usaste en Atlas.
             import json, urllib.request
 
             if "menciones_clasificadas" in db.list_collection_names():
