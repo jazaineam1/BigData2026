@@ -20,7 +20,7 @@ import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NB = os.path.join(REPO, "Cuadernos", "4_Atlas_Cassandra_Laura.ipynb")
-TOTAL_PREGUNTAS = 8
+TOTAL_PREGUNTAS = 4
 
 
 def lineas_indentadas_fuera_de_fence(fuente):

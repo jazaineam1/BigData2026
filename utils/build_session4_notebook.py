@@ -34,6 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from utils import build_session3_notebook as _s3
 from utils.make_notebook import code, md, save, validate
 from utils.build_session3_notebook import hidden, question_cell as _question_cell, soporte_cells
 
@@ -49,11 +50,13 @@ LAB_COMPASS = f"{WEB_CURSO}assets/tutoriales/atlas-laboratorio-consultas.html"
 DATOS_NOTICIAS = f"{RAW}/Datos/noticias_contratacion_2026.json"
 DATOS_ENTIDADES = f"{RAW}/Datos/entidades_en_noticias_2026.json"
 DATOS_SECOP_1000 = f"{RAW}/Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv"
-TOTAL_QUESTIONS = 8
+TOTAL_QUESTIONS = 4
 
-# question_cell en build_session3_notebook.py usa el TOTAL_QUESTIONS de ESE
-# modulo para el titulo de la celda ("Pregunta N de 8"). Aqui tambien son 8,
-# asi que basta con reutilizar la funcion tal cual.
+# question_cell (definida en build_session3_notebook.py) toma el numero total
+# de preguntas del TOTAL_QUESTIONS de SU PROPIO modulo, no del de aqui, porque
+# ahi es donde vive el closure que arma "Pregunta N de #". Se sobreescribe ese
+# atributo antes de generar para que el titulo de cada celda diga "de 4".
+_s3.TOTAL_QUESTIONS = TOTAL_QUESTIONS
 question_cell = _question_cell
 
 
@@ -193,25 +196,6 @@ def build_cells():
             > [MongoDB Compass](https://www.mongodb.com/docs/compass/)
             """
         ),
-        *question_cell(
-            1,
-            "Los tres roles",
-            "Vas a usar MongoDB Community, Compass y Atlas en la misma sesión, cada uno para algo distinto.",
-            "¿Cuál de estas tres tareas le corresponde específicamente a Compass, y no a Atlas ni a Community?",
-            [
-                "Guardar los 987 documentos de forma permanente para que el equipo los consulte después.",
-                "Importar visualmente un archivo JSON a una colección, sin escribir código.",
-                "Ejecutar el servidor mongod en tu propio computador.",
-                "Coordinar tres nodos que se reparten el trabajo y se vigilan entre sí.",
-            ],
-            1,
-            [
-                "Eso lo hace Atlas: es el clúster remoto donde persisten los datos. Compass solo se conecta a él, no guarda nada por su cuenta.",
-                "Correcto. Compass es la aplicación visual: conectas, arrastras un archivo y lo importa. Ni Community ni Atlas hacen eso por sí solos — son servidores, no interfaces.",
-                "Eso es Community: el servidor autoadministrado que corre en tu máquina. Compass se conecta a un servidor, no lo reemplaza.",
-                "Eso describe un clúster de Atlas con réplicas, que viste en la sesión 3. Compass no coordina nodos: solo habla con uno.",
-            ],
-        ),
         code(
             """
             # Presentacion 1 de 2 — guia de conexion a Atlas.
@@ -242,48 +226,78 @@ def build_cells():
             **Deberías terminar con:** `noticias` → 987 documentos. `entidades_noticias` → 142 documentos.
             """
         ),
-        *question_cell(
-            2,
-            "$regex: subcadena o palabra completa",
-            "Buscas noticias que mencionen la DIAN. `{\"titulo\": {\"$regex\": \"dian\", \"$options\": \"i\"}}` "
-            "encuentra 8 noticias. Cambiar el patrón a `\"\\\\bdian\\\\b\"` lo baja a 1.",
-            "¿Qué explica la diferencia entre 8 y 1?",
-            [
-                "El segundo patrón tiene un error de sintaxis y por eso encuentra menos.",
-                "El primero busca 'dian' como subcadena dentro de cualquier palabra; el segundo exige que sea una palabra completa, delimitada por \\b.",
-                "$options: \"i\" solo funciona en el primer patrón.",
-                "La colección cambió entre una consulta y otra.",
-            ],
-            1,
-            [
-                "\\b es sintaxis válida de expresiones regulares: son los límites de palabra. No es un error, es una restricción deliberada.",
-                "Correcto. Sin \\b, 'dian' aparece dentro de palabras como 'guardian' o 'mediante'. Con \\b, solo cuenta cuando 'dian' es la palabra completa — por eso 8 baja a 1.",
-                "$options se aplica igual en los dos: ambos ignoran mayúsculas y minúsculas. La diferencia está en el patrón, no en las opciones.",
-                "Es la misma colección, las mismas 987 noticias, en el mismo momento. El cambio está solo en el patrón.",
-            ],
-        ),
         md(
             """
             ### En Atlas: consultas, agregación y dos vistas
 
             Ahora en el **Data Explorer de Atlas** (no en Compass), sobre las colecciones que acabas de
-            importar. Cada consulta que vas a escribir está también versionada en el repositorio, así que
-            si algo no compila puedes compararla:
-            [`assets/tutoriales/consultas/atlas/`](https://github.com/jazaineam1/BigData2026/tree/main/assets/tutoriales/consultas/atlas).
+            importar. Cada consulta que vas a escribir está **embebida aquí abajo, además de versionada** en
+            el repositorio — no tienes que salir de Colab para comparar: si algo no compila, cópiala tal
+            cual y ejecútala.
 
-            1. Escribe el filtro `{"titulo": {"$regex": "\\\\bdian\\\\b", "$options": "i"}}` sobre `noticias` y
-               **guárdalo** como consulta con el nombre `dian-palabra-completa-v1`.
-            2. Construye la agregación de resumen por sección (`$match → $group → $sort → $limit`, la misma
-               forma que viste en la sesión 3) y guárdala como `resumen-secciones-v1`.
-            3. Con **Export Code → Python 3**, exporta esa agregación — es el puente hacia Colab que usarás
-               en un momento.
-            4. Con `$set` + `$switch`, clasifica cada noticia según su título y subtítulo en tres categorías
-               —`terminos_control`, `proceso_contractual`, `ejecucion_obra`— o `contexto` si no encaja en
-               ninguna. Guárdalo como `clasificar-noticias-v1`.
-            5. Sobre `entidades_noticias`, clasifica cada entidad por su número de menciones: **alta** (20 o
-               más), **media** (5 a 19), **baja** (menos de 5). Guárdalo como `menciones-clasificadas-v1`.
-            6. Crea dos **vistas** (*Views*, no colecciones): `noticias_clasificadas` desde el pipeline del
-               paso 4, y `menciones_clasificadas` desde el del paso 5.
+            **1. Filtro `dian-palabra-completa-v1`** sobre `noticias`. Escríbelo y **guárdalo** con ese
+            nombre exacto:
+
+            ```json
+            {"titulo": {"$regex": "\\bdian\\b", "$options": "i"}}
+            ```
+
+            *(archivo completo, con la comparación 8 → 1 documentada:*
+            [`dian-palabra-completa-v1.json`](https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/tutoriales/consultas/atlas/dian-palabra-completa-v1.json)*)*
+
+            **2. Agregación `resumen-secciones-v1`** (`$match → $group → $sort → $limit`, la misma forma que
+            viste en la sesión 3):
+
+            ```json
+            [
+              {"$match": {"n_palabras": {"$gt": 0}}},
+              {"$group": {"_id": "$seccion", "noticias": {"$sum": 1}, "promedio_palabras": {"$avg": "$n_palabras"}}},
+              {"$sort": {"noticias": -1, "_id": 1}},
+              {"$limit": 10}
+            ]
+            ```
+
+            [`resumen-secciones-v1.json`](https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/tutoriales/consultas/atlas/resumen-secciones-v1.json)
+
+            **3.** Con **Export Code → Python 3**, exporta esa misma agregación — es el puente hacia Colab
+            que usarás en un momento.
+
+            **4. Pipeline `clasificar-noticias-v1`** — clasifica cada noticia por su título y subtítulo en
+            tres categorías, o `contexto` si no encaja en ninguna:
+
+            ```json
+            [
+              {"$set": {"texto_clasificar": {"$concat": [{"$ifNull": ["$titulo", ""]}, " ", {"$ifNull": ["$subtitulo", ""]}]}}},
+              {"$set": {"clasificacion": {"$switch": {"branches": [
+                {"case": {"$regexMatch": {"input": "$texto_clasificar", "regex": "sobrecost|detriment|peculad|corrupci(?:o|ó)n|irregular", "options": "i"}}, "then": "terminos_control"},
+                {"case": {"$regexMatch": {"input": "$texto_clasificar", "regex": "contrat|licitaci(?:o|ó)n|adjudic|secop|convenio", "options": "i"}}, "then": "proceso_contractual"},
+                {"case": {"$regexMatch": {"input": "$texto_clasificar", "regex": "obra|retras|incumpl|ejecuci(?:o|ó)n", "options": "i"}}, "then": "ejecucion_obra"}
+              ], "default": "contexto"}}}},
+              {"$project": {"_id": 0, "titulo": 1, "seccion": 1, "publicado": 1, "url": 1, "n_palabras": 1, "clasificacion": 1}},
+              {"$sort": {"publicado": -1}}
+            ]
+            ```
+
+            [`clasificar-noticias-v1.json`](https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/tutoriales/consultas/atlas/clasificar-noticias-v1.json)
+
+            **5. Pipeline `menciones-clasificadas-v1`** sobre `entidades_noticias` — nivel de mención por
+            número de noticias: **alta** (≥ 20), **media** (5 a 19), **baja** (< 5):
+
+            ```json
+            [
+              {"$set": {"nivel_menciones": {"$switch": {"branches": [
+                {"case": {"$gte": ["$noticias", 20]}, "then": "alta"},
+                {"case": {"$gte": ["$noticias", 5]}, "then": "media"}
+              ], "default": "baja"}}}},
+              {"$project": {"_id": 0, "entidad": 1, "departamento": 1, "procesos_en_secop": 1, "noticias": 1, "nivel_menciones": 1, "ejemplos": {"$slice": ["$ejemplos", 2]}}},
+              {"$sort": {"noticias": -1, "entidad": 1}}
+            ]
+            ```
+
+            [`menciones-clasificadas-v1.json`](https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/tutoriales/consultas/atlas/menciones-clasificadas-v1.json)
+
+            **6.** Crea dos **vistas** (*Views*, no colecciones): `noticias_clasificadas` desde el pipeline
+            del paso 4, y `menciones_clasificadas` desde el del paso 5.
 
             > **Una vista no es una copia.** Es de solo lectura y se recalcula desde su pipeline cada vez que
             > la consultas — nunca queda desactualizada, pero tampoco puedes escribir en ella directamente.
@@ -291,7 +305,7 @@ def build_cells():
             """
         ),
         *question_cell(
-            3,
+            1,
             "Consulta, pipeline y vista",
             "Guardaste una consulta simple, construiste un pipeline de agregación, y luego creaste una vista a partir de ese pipeline.",
             "¿Cuál de estas afirmaciones describe correctamente la diferencia?",
@@ -335,27 +349,6 @@ def build_cells():
             una clasificación nueva.
             """
         ),
-        *question_cell(
-            4,
-            "Leer una tabla de clasificación",
-            "313 noticias caen en 'terminos_control' (palabras como corrupción, peculado, sobrecosto) "
-            "y 6 entidades tienen nivel de mención 'alta' (20 o más noticias).",
-            "¿Cuál de estas lecturas es la correcta?",
-            [
-                "313 noticias demuestran 313 casos de corrupción distintos en contratación pública.",
-                "313 noticias contienen palabras asociadas a control o irregularidad en su título o subtítulo; eso mide lenguaje, no hechos comprobados.",
-                "Las 6 entidades de mención 'alta' son, por esa razón, las que más contratos irregulares tienen.",
-                "Como 299 noticias no entraron en ninguna categoría de control, se pueden descartar del análisis.",
-            ],
-            1,
-            [
-                "Ese es el salto que hay que evitar: una palabra en un título no es una sentencia. El patrón detecta lenguaje, no verifica si hubo irregularidad real.",
-                "Correcto. Es exactamente lo que el patrón puede afirmar: presencia de ciertas palabras. Confirmar si hay corrupción de verdad exige leer la noticia completa y, después, revisar el contrato.",
-                "Mención alta significa que esa entidad aparece mucho en prensa — puede ser porque es grande, porque maneja presupuestos grandes, o porque efectivamente tiene problemas. La cobertura mide atención, no culpa.",
-                "'Contexto' no es descartable: son noticias reales de contratación que simplemente no usan ese vocabulario. Siguen siendo evidencia externa válida.",
-            ],
-        ),
-
         # ── SEGUNDA MITAD ────────────────────────────────────────────────
         md(
             """
@@ -368,6 +361,10 @@ def build_cells():
         code(
             """
             # Conectar Colab a tu clúster de Atlas, sin escribir la contraseña en el cuaderno.
+            # pymongo no siempre viene preinstalado en el entorno de Colab -- se instala aqui,
+            # una vez, y no vuelve a pedirse mientras no se reinicie el entorno.
+            !pip install -q "pymongo[srv]"
+
             from getpass import getpass
             from urllib.parse import quote_plus
             from pymongo import MongoClient
@@ -418,25 +415,6 @@ def build_cells():
             print("Entidades por nivel de mencion:", dict(niveles))
             assert dict(niveles) == {"baja": 111, "media": 25, "alta": 6}, "deberia coincidir con Atlas"
             """.replace("{DATOS_ENTIDADES}", DATOS_ENTIDADES)
-        ),
-        *question_cell(
-            5,
-            "Filtrar frente a ordenar",
-            "La regla de priorización primero descarta procesos (filtra) y solo al final decide el orden (ordena).",
-            "¿Por qué importa hacerlo en ese orden y no al revés?",
-            [
-                "No importa: filtrar y ordenar dan el mismo resultado en cualquier orden.",
-                "Porque ordenar primero un millón de filas para luego filtrar desperdicia trabajo: es más barato descartar temprano y ordenar solo lo que sobrevivió.",
-                "Porque pandas no permite ordenar antes de filtrar.",
-                "Porque el orden alfabético del id_del_proceso cambia si filtras después.",
-            ],
-            1,
-            [
-                "El resultado final es el mismo, pero el costo no: es exactamente la regla de 'filtra temprano, agrupa después' que viste con $match y $group en la sesión 3, aplicada ahora a pandas.",
-                "Correcto. Con 1.000 filas la diferencia es invisible, pero la regla es la misma que con $match antes de $group: descartar primero reduce el trabajo de lo que sigue.",
-                "pandas ordena sin problema en cualquier momento — .sort_values() no exige haber filtrado antes.",
-                "El id_del_proceso de cada fila no cambia por el orden en que ejecutes las operaciones; es un dato, no una posición.",
-            ],
         ),
         code(
             """
@@ -618,7 +596,7 @@ def build_cells():
             """
         ),
         *question_cell(
-            6,
+            2,
             "MongoDB frente a Cassandra",
             "MongoDB Atlas ya guarda las noticias, las vistas y hasta podría guardar la bandeja de 77 candidatos.",
             "Si Atlas ya lo tiene todo, ¿para qué añadir Cassandra en el mismo flujo?",
@@ -725,7 +703,7 @@ def build_cells():
             """
         ),
         *question_cell(
-            7,
+            3,
             "Clave de partición y claves de clustering",
             "La tabla tiene PRIMARY KEY ((corte, departamento), valor_base, id_proceso) "
             "y CLUSTERING ORDER BY (valor_base DESC, id_proceso ASC).",
@@ -839,7 +817,7 @@ def build_cells():
             """
         ),
         *question_cell(
-            8,
+            4,
             "El límite analítico de hoy",
             "77 candidatos, priorizados por tres señales objetivas: entidad en prensa, contratación directa, cero respuestas de proveedores.",
             "¿Cuál es la afirmación que un analista responsable puede sostener frente a su jefe hoy?",
@@ -864,7 +842,7 @@ def build_cells():
 
             Igual que en la sesión 3: **no hay cuestionario de opción múltiple como instrumento**. Lo que se
             evalúa es tu ejecución —la bandeja que exportaste, con el número correcto de candidatos y el
-            primer caso verificado— y tu interpretación del límite. Las ocho preguntas son formativas: te
+            primer caso verificado— y tu interpretación del límite. Las cuatro preguntas son formativas: te
             avisan si un concepto quedó suelto, no son la nota.
 
             ## Qué sigue

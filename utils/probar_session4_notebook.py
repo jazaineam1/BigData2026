@@ -10,7 +10,7 @@ Que se prueba y que no
 - Se prueba: la reactivacion, la vista menciones_clasificadas en modo de
   respaldo, la regla de priorizacion completa (163 -> 77), la verificacion
   del primer candidato, el enriquecimiento de filas, la tabla HTML para
-  Laura, la exportacion a CSV/MD, y las ocho preguntas.
+  Laura, la exportacion a CSV/MD, y las cuatro preguntas.
 - NO se prueba en automatico: la celda de conexion a Atlas via input()/
   getpass() (pide entrada interactiva; se simula forzando el modo de
   respaldo), ni la demostracion docente de Cassandra/Astra (necesita
@@ -81,6 +81,9 @@ def main():
             continue
 
         src = re.sub(r"^\s*from IPython\.display import .*$", "", src, flags=re.M)
+        # Magia de shell de Jupyter (!pip install ...): no es Python valido para
+        # compile(). El paquete ya esta instalado en este entorno de prueba.
+        src = re.sub(r"^\s*!.*$", "", src, flags=re.M)
 
         # La celda de conexion pide input()/getpass(): la forzamos a fallar
         # rapido para probar el modo de respaldo, que es lo que de verdad
@@ -121,8 +124,8 @@ def main():
             print(traceback.format_exc()[-800:])
 
     problemas = []
-    if preguntas != 8:
-        problemas.append(f"se ejecutaron {preguntas} preguntas y deberian ser 8")
+    if preguntas != 4:
+        problemas.append(f"se ejecutaron {preguntas} preguntas y deberian ser 4")
     sin_boton = [h for h in html_preguntas if "Verificar respuesta" not in h]
     if sin_boton:
         problemas.append(f"{len(sin_boton)} pregunta(s) se dibujaron sin su boton de verificar")
@@ -153,7 +156,7 @@ def main():
     print()
     print("=" * 64)
     print(f"celdas de codigo ejecutadas : {ok}")
-    print(f"  de ellas, preguntas       : {preguntas} de 8")
+    print(f"  de ellas, preguntas       : {preguntas} de 4")
     print(f"  bloques HTML de preguntas : {len(html_preguntas)}")
     print(f"  opciones dibujadas        : {radios}")
     print(f"fallos                      : {len(fallos)}")
@@ -161,7 +164,7 @@ def main():
         print("  ✗", p)
     if not fallos and not problemas:
         print()
-        print("Todo ejecuta, incluidas las ocho preguntas y la regla de priorizacion.")
+        print("Todo ejecuta, incluidas las cuatro preguntas y la regla de priorizacion.")
     return 1 if (fallos or problemas) else 0
 
 
