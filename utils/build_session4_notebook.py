@@ -341,18 +341,27 @@ def build_cells():
             repositorio — no tienes que salir de Colab para comparar: si algo no compila, cópiala tal
             cual y ejecútala.
 
-            **1. Filtro `dian-palabra-completa-v1`** sobre `noticias`. Escríbelo y **guárdalo** con ese
-            nombre exacto:
+            > **Antes del primer pipeline, un detalle que cambia dónde pegas cada cosa.** En
+            > `Aggregations`, arriba a la derecha del editor hay dos modos: el visual (etapa por etapa, con
+            > un menú desplegable) y el modo **Texto** —ícono `</>`—. En modo Texto pegas **el arreglo
+            > completo de una sola vez**, exactamente como aparece abajo. Es el que vas a usar siempre en
+            > esta sesión: más simple, y es tal cual como está guardado el JSON.
+
+            **1. Filtro `dian-palabra-completa-v1`.** Este no es un pipeline: va directo en la barra de
+            **`noticias → Documents`**, en el cuadro de filtro. Escríbelo y pulsa **Find**:
 
             ```json
             {"titulo": {"$regex": "\\bdian\\b", "$options": "i"}}
             ```
 
-            *(archivo completo, con la comparación 8 → 1 documentada:*
+            Debe darte **1** resultado. Guárdalo con el nombre exacto `dian-palabra-completa-v1` desde el
+            historial de consultas (ícono de reloj → estrella → nombrarla).
+
+            *(archivo versionado, con la comparación 8 → 1 documentada:*
             [`dian-palabra-completa-v1.json`](https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/tutoriales/consultas/atlas/dian-palabra-completa-v1.json)*)*
 
-            **2. Agregación `resumen-secciones-v1`** (`$match → $group → $sort → $limit`, la misma forma que
-            viste en la sesión 3):
+            **2. Agregación `resumen-secciones-v1`.** En `noticias → Aggregations`, modo Texto, pega esto
+            completo y pulsa **Run**:
 
             ```json
             [
@@ -363,13 +372,22 @@ def build_cells():
             ]
             ```
 
+            | Etapa | Qué hace |
+            |---|---|
+            | `$match` | descarta documentos con 0 palabras (hoy no elimina ninguno, pero deja la regla explícita) |
+            | `$group` | junta las noticias por `seccion`; `$sum: 1` cuenta cuántas hay, `$avg` promedia sus palabras |
+            | `$sort` | ordena las secciones de mayor a menor número de noticias |
+            | `$limit` | se queda con las 10 primeras |
+
+            Guárdalo: **Save → Save as** → `resumen-secciones-v1`.
             [`resumen-secciones-v1.json`](https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/tutoriales/consultas/atlas/resumen-secciones-v1.json)
 
             **3.** Con **Export Code → Python 3**, exporta esa misma agregación — es el puente hacia Colab
             que usarás en un momento.
 
-            **4. Pipeline `clasificar-noticias-v1`** — clasifica cada noticia por su título y subtítulo en
-            tres categorías, o `contexto` si no encaja en ninguna:
+            **4. Pipeline `clasificar-noticias-v1`.** Mismo procedimiento — modo Texto, pegar completo,
+            Run — sobre `noticias`. Clasifica cada noticia por su título y subtítulo en tres categorías, o
+            `contexto` si no encaja en ninguna:
 
             ```json
             [
@@ -384,10 +402,20 @@ def build_cells():
             ]
             ```
 
+            | Etapa | Qué hace |
+            |---|---|
+            | `$set` #1 | pega `titulo` y `subtitulo` en un solo texto `texto_clasificar`, para buscar en los dos a la vez. `$ifNull` evita el error si `subtitulo` no existe en esa noticia |
+            | `$set` #2 | `$switch` prueba cada `case` en orden y se queda con el primero que haga match; si ninguno hace match, usa `default: "contexto"` |
+            | `$project` | elige qué campos conservar en la salida |
+            | `$sort` | ordena por fecha, de más reciente a más antigua |
+
+            Guárdalo como `clasificar-noticias-v1` (**Save → Save as**), y con el mismo pipeline abierto,
+            **Save → Create view** → `noticias_clasificadas`.
             [`clasificar-noticias-v1.json`](https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/tutoriales/consultas/atlas/clasificar-noticias-v1.json)
 
-            **5. Pipeline `menciones-clasificadas-v1`** sobre `entidades_noticias` — nivel de mención por
-            número de noticias: **alta** (≥ 20), **media** (5 a 19), **baja** (< 5):
+            **5. Pipeline `menciones-clasificadas-v1`.** Mismo procedimiento, ahora sobre
+            `entidades_noticias` — nivel de mención por número de noticias: **alta** (≥ 20), **media** (5 a
+            19), **baja** (< 5):
 
             ```json
             [
@@ -400,10 +428,17 @@ def build_cells():
             ]
             ```
 
+            | Etapa | Qué hace |
+            |---|---|
+            | `$set` | `$switch` revisa `noticias` de cada entidad: 20+ → `"alta"`, 5-19 → `"media"`, menos de 5 → `"baja"` |
+            | `$project` | elige los campos a conservar; `$slice` recorta `ejemplos` a solo 2, para no arrastrar el detalle completo |
+            | `$sort` | ordena por número de noticias, de mayor a menor |
+
+            Guárdalo como `clasificar-menciones-v1`, y crea la vista `menciones_clasificadas`.
             [`menciones-clasificadas-v1.json`](https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/tutoriales/consultas/atlas/menciones-clasificadas-v1.json)
 
-            **6.** Crea dos **vistas** (*Views*, no colecciones): `noticias_clasificadas` desde el pipeline
-            del paso 4, y `menciones_clasificadas` desde el del paso 5.
+            **6.** Ya deberías tener las dos **vistas** creadas (*Views*, no colecciones):
+            `noticias_clasificadas` desde el paso 4, y `menciones_clasificadas` desde el paso 5.
 
             > **Una vista no es una copia.** Es de solo lectura y se recalcula desde su pipeline cada vez que
             > la consultas — nunca queda desactualizada, pero tampoco puedes escribir en ella directamente.

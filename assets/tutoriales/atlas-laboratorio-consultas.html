@@ -341,12 +341,33 @@ client.close()</pre>
         <div class="instrucciones">
           <ol>
             <li>Abre <code>noticias → Aggregations</code>.</li>
-            <li>Agrega en orden <code>$match</code>, <code>$group</code>, <code>$sort</code> y <code>$limit</code>.</li>
-            <li>Usa el JSON versionado como fuente; ejecuta y revisa la primera fila.</li>
+            <li>Arriba a la derecha del editor, cambia al ícono <code>&lt;/&gt;</code> — <b>modo Texto</b>. En modo Texto pegas el pipeline <b>completo de una sola vez</b>; en el modo visual tendrías que armar cada etapa a mano, una por una.</li>
+            <li>Borra lo que haya y pega el pipeline de abajo <b>tal cual, las 4 etapas juntas</b> — no lo dividas.</li>
+            <li>Pulsa <b>Run</b> y revisa la primera fila.</li>
             <li>Pulsa <b>Save → Save as</b> y nómbralo <code>resumen-secciones-v1</code>.</li>
           </ol>
-          <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/resumen-secciones-v1.json">resumen-secciones-v1.json ↗</a>
           <div class="resultado"><b>Control esperado:</b> <code>justicia/investigacion</code> · <b>238</b> noticias · promedio aproximado <b>560,5</b> palabras.</div>
+          <details>
+            <summary><b>👉 Haz clic aquí para ver el pipeline — cópialo entero, tal cual</b></summary>
+            <pre class="codigo">[
+  {"$match": {"n_palabras": {"$gt": 0}}},
+  {"$group": {
+    "_id": "$seccion",
+    "noticias": {"$sum": 1},
+    "promedio_palabras": {"$avg": "$n_palabras"}
+  }},
+  {"$sort": {"noticias": -1, "_id": 1}},
+  {"$limit": 10}
+]</pre>
+            <table class="tabla" style="margin-top:10px;">
+              <tr><th>Etapa</th><th>Qué hace</th></tr>
+              <tr><td><code>$match</code></td><td>descarta documentos con 0 palabras (hoy no elimina ninguno, pero deja la regla explícita para cuando los datos cambien)</td></tr>
+              <tr><td><code>$group</code></td><td>junta las noticias por <code>seccion</code>; <code>$sum: 1</code> cuenta cuántas hay, <code>$avg</code> promedia sus palabras</td></tr>
+              <tr><td><code>$sort</code></td><td>ordena las secciones de mayor a menor número de noticias</td></tr>
+              <tr><td><code>$limit</code></td><td>se queda con las 10 primeras</td></tr>
+            </table>
+            <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/resumen-secciones-v1.json">Ver también el archivo versionado ↗</a>
+          </details>
         </div>
         <div>
           <div class="captura">
@@ -359,10 +380,18 @@ client.close()</pre>
       <div class="callout alerta"><span class="ic">📏</span><span>Más documentos en el corpus no significa más publicaciones de la sección. Falta el total de artículos publicados por cada sección.</span></div>
       <details>
         <summary><b>Ampliación opcional — resumen mensual</b></summary>
-        <p class="sub">Cuando el pipeline central ya funcione, abre el JSON mensual y ejecútalo en
-          <code>noticias → Aggregations</code>. Control: ene 141 · feb 129 · mar 120 · abr 140 · may 110 ·
-          jun 92 · jul 175 · ago 80.</p>
-        <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/resumen-mensual-ampliacion-v1.json">resumen-mensual-ampliacion-v1.json ↗</a>
+        <p class="sub">Cuando el pipeline central ya funcione, repite exactamente el mismo procedimiento —modo
+          Texto, pegar entero, Run— con este pipeline. Agrupa por los primeros 7 caracteres de
+          <code>publicado</code> (por ejemplo <code>"2026-01"</code>), que es el año-mes.
+          Control: ene 141 · feb 129 · mar 120 · abr 140 · may 110 · jun 92 · jul 175 · ago 80.</p>
+        <pre class="codigo">[
+  {"$group": {
+    "_id": {"$substr": ["$publicado", 0, 7]},
+    "noticias": {"$sum": 1}
+  }},
+  {"$sort": {"_id": 1}}
+]</pre>
+        <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/resumen-mensual-ampliacion-v1.json">Ver también el archivo versionado ↗</a>
       </details>
     </section>
 
@@ -394,16 +423,52 @@ client.close()</pre>
       <div class="paso-cuerpo">
         <div class="instrucciones">
           <ol>
-            <li>En <code>noticias → Aggregations</code>, agrega las cuatro etapas del JSON en el mismo orden.</li>
-            <li>Ejecuta y revisa <code>clasificacion</code> en la salida.</li>
-            <li>Guarda el pipeline como <code>clasificar-noticias-v1</code>.</li>
-            <li>Usa <b>Save → Create view</b> y nombra la vista <code>noticias_clasificadas</code>.</li>
+            <li>En <code>noticias → Aggregations</code>, cambia al <b>modo Texto</b> (<code>&lt;/&gt;</code>).</li>
+            <li>Pega el pipeline de abajo <b>completo, tal cual</b> — son 4 etapas juntas, no una por una.</li>
+            <li>Pulsa <b>Run</b> y revisa el campo <code>clasificacion</code> en la salida.</li>
+            <li>Pulsa <b>Save → Save as</b> → <code>clasificar-noticias-v1</code>.</li>
+            <li>Con el mismo pipeline abierto, usa <b>Save → Create view</b> y nombra la vista <code>noticias_clasificadas</code>.</li>
           </ol>
-          <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/clasificar-noticias-v1.json">clasificar-noticias-v1.json ↗</a>
           <div class="resultado"><b>Orden literal de la regla:</b><br>
             <code>terminos_control</code> → <code>proceso_contractual</code> →
             <code>ejecucion_obra</code> → <code>contexto</code>.<br>
             Si una noticia coincide con dos, recibe la primera.</div>
+          <details>
+            <summary><b>👉 Haz clic aquí para ver el pipeline — cópialo entero, tal cual</b></summary>
+            <pre class="codigo">[
+  {"$set": {
+    "texto_clasificar": {"$concat": [
+      {"$ifNull": ["$titulo", ""]}, " ", {"$ifNull": ["$subtitulo", ""]}
+    ]}
+  }},
+  {"$set": {
+    "clasificacion": {"$switch": {
+      "branches": [
+        {"case": {"$regexMatch": {"input": "$texto_clasificar",
+          "regex": "sobrecost|detriment|peculad|corrupci(?:o|ó)n|irregular", "options": "i"}},
+         "then": "terminos_control"},
+        {"case": {"$regexMatch": {"input": "$texto_clasificar",
+          "regex": "contrat|licitaci(?:o|ó)n|adjudic|secop|convenio", "options": "i"}},
+         "then": "proceso_contractual"},
+        {"case": {"$regexMatch": {"input": "$texto_clasificar",
+          "regex": "obra|retras|incumpl|ejecuci(?:o|ó)n", "options": "i"}},
+         "then": "ejecucion_obra"}
+      ],
+      "default": "contexto"
+    }}
+  }},
+  {"$project": {"_id": 0, "titulo": 1, "seccion": 1, "publicado": 1, "url": 1, "n_palabras": 1, "clasificacion": 1}},
+  {"$sort": {"publicado": -1}}
+]</pre>
+            <table class="tabla" style="margin-top:10px;">
+              <tr><th>Etapa</th><th>Qué hace</th></tr>
+              <tr><td><code>$set</code> #1</td><td>pega <code>titulo</code> y <code>subtitulo</code> en un solo texto <code>texto_clasificar</code>, para buscar en los dos a la vez. <code>$ifNull</code> evita el error si <code>subtitulo</code> no existe en esa noticia</td></tr>
+              <tr><td><code>$set</code> #2</td><td><code>$switch</code> prueba cada <code>case</code> en orden y se queda con el primero que haga match; si ninguno hace match, usa <code>default: "contexto"</code></td></tr>
+              <tr><td><code>$project</code></td><td>elige qué campos conservar en la salida — así no arrastras el documento completo</td></tr>
+              <tr><td><code>$sort</code></td><td>ordena por fecha, de más reciente a más antigua</td></tr>
+            </table>
+            <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/clasificar-noticias-v1.json">Ver también el archivo versionado ↗</a>
+          </details>
         </div>
         <div>
           <div class="captura">
@@ -423,13 +488,38 @@ client.close()</pre>
       <div class="paso-cuerpo">
         <div class="instrucciones">
           <ol>
-            <li>Abre <code>entidades_noticias → Aggregations</code> y agrega las etapas del JSON.</li>
-            <li>Comprueba los límites: <b>alta</b> ≥ 20; <b>media</b> 5–19; <b>baja</b> &lt; 5 noticias.</li>
-            <li>Guarda el pipeline como <code>clasificar-menciones-v1</code>.</li>
-            <li>Crea la vista <code>menciones_clasificadas</code>.</li>
+            <li>Abre <code>entidades_noticias → Aggregations</code> y cambia al <b>modo Texto</b> (<code>&lt;/&gt;</code>).</li>
+            <li>Pega el pipeline de abajo <b>completo, tal cual</b> — son 3 etapas juntas.</li>
+            <li>Pulsa <b>Run</b>. Comprueba los límites: <b>alta</b> ≥ 20; <b>media</b> 5–19; <b>baja</b> &lt; 5 noticias.</li>
+            <li>Pulsa <b>Save → Save as</b> → <code>clasificar-menciones-v1</code>, y luego <b>Save → Create view</b> → <code>menciones_clasificadas</code>.</li>
           </ol>
-          <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/menciones-clasificadas-v1.json">menciones-clasificadas-v1.json ↗</a>
           <div class="resultado"><b>Conteo esperado:</b> alta <b>6</b> · media <b>25</b> · baja <b>111</b> = 142 entidades.</div>
+          <details>
+            <summary><b>👉 Haz clic aquí para ver el pipeline — cópialo entero, tal cual</b></summary>
+            <pre class="codigo">[
+  {"$set": {
+    "nivel_menciones": {"$switch": {
+      "branches": [
+        {"case": {"$gte": ["$noticias", 20]}, "then": "alta"},
+        {"case": {"$gte": ["$noticias", 5]}, "then": "media"}
+      ],
+      "default": "baja"
+    }}
+  }},
+  {"$project": {
+    "_id": 0, "entidad": 1, "departamento": 1, "procesos_en_secop": 1,
+    "noticias": 1, "nivel_menciones": 1, "ejemplos": {"$slice": ["$ejemplos", 2]}
+  }},
+  {"$sort": {"noticias": -1, "entidad": 1}}
+]</pre>
+            <table class="tabla" style="margin-top:10px;">
+              <tr><th>Etapa</th><th>Qué hace</th></tr>
+              <tr><td><code>$set</code></td><td><code>$switch</code> revisa <code>noticias</code> de cada entidad: 20 o más → <code>"alta"</code>, 5 a 19 → <code>"media"</code>, menos de 5 → <code>"baja"</code> (el <code>default</code>)</td></tr>
+              <tr><td><code>$project</code></td><td>elige los campos a conservar; <code>$slice</code> recorta la lista <code>ejemplos</code> a solo 2, para no arrastrar el detalle completo</td></tr>
+              <tr><td><code>$sort</code></td><td>ordena por número de noticias, de mayor a menor</td></tr>
+            </table>
+            <a class="archivo-json" target="_blank" rel="noopener" href="consultas/atlas/menciones-clasificadas-v1.json">Ver también el archivo versionado ↗</a>
+          </details>
         </div>
         <div>
           <div class="captura">
