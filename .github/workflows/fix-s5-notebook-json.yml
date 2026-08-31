@@ -1,0 +1,56 @@
+name: Reparar JSON de la sesión 5
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/fix-s5-notebook-json.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v6
+
+      - name: Reparar escapes inválidos y validar notebook
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path('Cuadernos/5_Atlas_Cassandra_Query_First.ipynb')
+          raw = p.read_text(encoding='utf-8')
+          repaired = raw.replace('\\ ', ' ')
+          data = json.loads(repaired)
+
+          assert data.get('nbformat') == 4
+          assert len(data.get('cells', [])) >= 35
+
+          p.write_text(
+              json.dumps(data, ensure_ascii=False, indent=1) + '\n',
+              encoding='utf-8',
+          )
+          print('JSON válido. Celdas:', len(data['cells']))
+          PY
+
+      - name: Ejecutar validador de la sesión 5
+        run: python utils/validate_session5_notebook.py
+
+      - name: Publicar reparación
+        shell: bash
+        run: |
+          if git diff --quiet -- Cuadernos/5_Atlas_Cassandra_Query_First.ipynb; then
+            echo 'No hubo cambios.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Cuadernos/5_Atlas_Cassandra_Query_First.ipynb
+          git commit -m 'Repara JSON del cuaderno de la sesión 5'
+          git push
