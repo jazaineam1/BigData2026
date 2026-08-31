@@ -1,0 +1,24 @@
+{
+  "version": "s06-v1",
+  "fuente": "bandeja S05 + chunks SECOP versionados",
+  "regla_s05": "1.000→163→77",
+  "filas_total": 2109,
+  "candidatos_s05": 77,
+  "historicos_adjudicados": 2032,
+  "entidades_candidatas_s05": 34,
+  "entidades_candidatas_con_historial": 32,
+  "proveedores_historicos": 416,
+  "proveedores_compartidos_entre_entidades": 216,
+  "ancla_pedagogica": {
+    "id_proceso": "CO1.REQ.2622868",
+    "entidad": "FUERZA AEROESPACIAL COLOMBIANA",
+    "nit_entidad": "899999102",
+    "departamento": "Distrito Capital de Bogotá",
+    "noticias_entidad": 5,
+    "nivel_menciones": "media",
+    "procesos_historicos": 47,
+    "proveedores": 53,
+    "proveedores_compartidos": 41
+  },
+  "limite": "Una conexión contractual describe relaciones registradas; no demuestra irregularidad, favorecimiento ni colusión."
+}
