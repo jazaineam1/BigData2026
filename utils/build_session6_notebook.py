@@ -29,6 +29,39 @@ DATA = f"{RAW}/Datos/s06_contexto_relacional.csv"
 MANIFEST = f"{RAW}/Datos/s06_contexto_relacional_manifest.json"
 TUTORIAL = f"{WEB}/assets/tutoriales/neo4j-aura-s06-paso-a-paso.html"
 
+INTERACTIVITY = r'''
+import base64, json, html as html_lib
+from IPython.display import display, HTML
+
+def pregunta_codificada(token):
+    p = json.loads(base64.b64decode(token).decode("utf-8"))
+    uid = f"s06-p{p['numero']}"
+    opts = "".join(
+        f'<label style="display:block;margin:8px 0"><input type="radio" name="{uid}" value="{i}"> {html_lib.escape(op)}</label>'
+        for i, op in enumerate(p["opciones"])
+    )
+    retro = json.dumps(p["retro"], ensure_ascii=False)
+    box = (
+        f'<div style="border:2px solid #175c3c;background:#f4faf6;color:#172019;border-radius:12px;padding:15px;margin:14px 0">'
+        f'<strong>Pregunta {p["numero"]} · {html_lib.escape(p["tema"])}</strong>'
+        f'<p>{html_lib.escape(p["pregunta"])}</p>{opts}'
+        f'<button onclick="(function(){{const e=document.querySelector(\'input[name={uid}]:checked\');'
+        f'const s=document.getElementById(\'r-{uid}\');if(!e){{s.textContent=\'Selecciona una opción.\';return;}}'
+        f'const i=Number(e.value),r={retro};const ok=i==={p["correcta"]};'
+        f's.innerHTML=\'<div style=&quot;margin-top:8px;padding:8px;border-radius:7px;background:#ffffff;color:#172019;border:1px solid #c7d8cd&quot;><strong>\'+(ok?\'Correcto. \':\'Revisa. \')+\'</strong>\'+r[i]+\'</div>\';}})()" '
+        f'style="background:#175c3c;color:white;border:0;border-radius:7px;padding:8px 12px">Verificar</button>'
+        f'<div id="r-{uid}" aria-live="polite"></div></div>'
+    )
+    display(HTML(box))
+
+def tutorial(url, alto=720):
+    box = f'<iframe src="{url}?embed=1" width="100%" height="{alto}" style="border:0;border-radius:10px;background:#faf7ef"></iframe>'
+    box += f'<p><a href="{url}" target="_blank">Abrir tutorial en pantalla completa ↗</a></p>'
+    display(HTML(box))
+
+print("Soporte S6 listo.")
+'''
+
 
 def hidden(cell, title: str):
     cell["source"] = [f'#@title {title} {{ display-mode: "form" }}\n'] + cell["source"]
@@ -71,8 +104,9 @@ Al terminar tendrás una **ficha relacional de revisión** con:
 3. procesos históricos adjudicados de su entidad;
 4. proveedores y otras entidades conectadas cuando el dato lo sostenga;
 5. una comprobación pandas ↔ Neo4j;
-6. un límite concreto;
-7. `s06_contexto_procesos.jsonl`, entrada de la siguiente sesión.
+6. una decisión de modelado y una alternativa descartada;
+7. un límite concreto;
+8. `s06_contexto_procesos.jsonl`, entrada de la siguiente sesión.
 '''),
         md('''
 ## El hilo del evaluador
@@ -82,7 +116,7 @@ S3  evidencia documental
  ↓
 S4  persistencia compartida en Atlas
  ↓
-S5  qué revisar primero → bandeja operacional
+S5  qué revisar primero → bandeja operacional + ancla elegida
  ↓
 S6  qué hay alrededor de lo que Laura va a revisar
 ```
@@ -103,38 +137,7 @@ S6  qué hay alrededor de lo que Laura va a revisar
 | 7. Verificar | ¿Neo4j conserva la respuesta? | pandas = Neo4j |
 | 8. Hito | ¿qué puede sostener Laura? | ficha + límite + export |
 '''),
-        hidden(code("""
-import base64, json, html as html_lib
-from IPython.display import display, HTML
-
-def pregunta_codificada(token):
-    p = json.loads(base64.b64decode(token).decode("utf-8"))
-    uid = f"s06-p{p['numero']}"
-    opts = "".join(
-        f'<label style="display:block;margin:8px 0"><input type="radio" name="{uid}" value="{i}"> {html_lib.escape(op)}</label>'
-        for i, op in enumerate(p["opciones"])
-    )
-    retro = json.dumps(p["retro"], ensure_ascii=False)
-    box = (
-        f'<div style="border:2px solid #175c3c;background:#f4faf6;color:#172019;border-radius:12px;padding:15px;margin:14px 0">'
-        f'<strong>Pregunta {p["numero"]} · {html_lib.escape(p["tema"])}</strong>'
-        f'<p>{html_lib.escape(p["pregunta"])}</p>{opts}'
-        f'<button onclick="(function(){{const e=document.querySelector(\'input[name={uid}]:checked\');'
-        f'const s=document.getElementById(\'r-{uid}\');if(!e){{s.textContent=\'Selecciona una opción.\';return;}}'
-        f'const i=Number(e.value),r={retro};const ok=i==={p["correcta"]};'
-        f's.innerHTML=\'<div><strong>\'+(ok?\'Correcto. \':\'Revisa. \')+\'</strong>\'+r[i]+\'</div>\';}})()" '
-        f'style="background:#175c3c;color:white;border:0;border-radius:7px;padding:8px 12px">Verificar</button>'
-        f'<div id="r-{uid}" aria-live="polite"></div></div>'
-    )
-    display(HTML(box))
-
-def tutorial(url, alto=720):
-    box = f'<iframe src="{url}?embed=1" width="100%" height="{alto}" style="border:0;border-radius:10px;background:#faf7ef"></iframe>'
-    box += f'<p><a href="{url}" target="_blank">Abrir tutorial en pantalla completa ↗</a></p>'
-    display(HTML(box))
-
-print("Soporte S6 listo.")
-"""), "Preparar interactividad"),
+        hidden(code(INTERACTIVITY), "Preparar interactividad"),
         md('''
 ---
 ## 1. Recuperar el proceso que Laura abrió en S5
@@ -145,6 +148,7 @@ S5 dejó `s05_ancla_s06.json`. Súbelo al panel **Archivos** de Colab y escribe 
 '''),
         code(f"""
 import json
+import urllib.request
 from pathlib import Path
 import pandas as pd
 
@@ -152,7 +156,7 @@ DATA_URL = {DATA!r}
 MANIFEST_URL = {MANIFEST!r}
 
 datos = pd.read_csv(DATA_URL, low_memory=False)
-with __import__("urllib.request").request.urlopen(MANIFEST_URL) as r:
+with urllib.request.urlopen(MANIFEST_URL) as r:
     manifest = json.loads(r.read().decode("utf-8"))
 
 ruta = input("Ruta de s05_ancla_s06.json (Enter = respaldo): ").strip()
@@ -190,9 +194,9 @@ Proceso candidato ← Entidad
                     └─ Proceso histórico ─→ Proveedor B ─← otra Entidad
 ```
 
-El candidato puede no estar adjudicado: **no inventamos un proveedor**. El historial adjudicado aporta las relaciones reales.
+El candidato puede no estar adjudicado: **no inventamos un proveedor**. El historial adjudicado aporta las relaciones observadas.
 '''),
-        question_cell(1, "Modelo", "¿Por qué el candidato de S5 no necesita una relación ADJUDICADO_A?", [
+        question_cell(1, "Modelo", "¿Por qué el candidato de S5 no necesita todavía una relación hacia un proveedor?", [
             "Porque Neo4j no soporta proveedores en procesos recientes.",
             "Porque puede no estar adjudicado; sirve como ancla y el historial aporta proveedores reales.",
             "Porque los proveedores pertenecen a Elasticsearch.",
@@ -214,15 +218,50 @@ if hist_ancla.empty:
     uso_respaldo_s06 = True
 else:
     ancla_trabajo = ancla_original
-    uso_respaldo_s06 = False
+    uso_respaldo_s06 = origen_ancla != "archivo propio S5"
 
 print("Entidad de trabajo:", ancla_trabajo["entidad"])
 print("Procesos históricos:", hist_ancla["id_proceso"].nunique())
 print("Proveedores distintos:", hist_ancla["nit_proveedor"].nunique())
 """),
         md('''
+### Interpretación del contexto histórico
+
+**Cómo se lee.** Los conteos corresponden al historial adjudicado disponible para la entidad de trabajo, no al proceso candidato aislado.
+
+**Qué nos dice.** Hay material relacional suficiente para preguntar por proveedores y conexiones entre procesos.
+
+**Qué NO permite concluir todavía.** Más procesos o proveedores no equivalen a mayor riesgo. Faltan criterios sobre competencia, temporalidad y comportamiento esperado de la entidad.
+
+**Error frecuente.** Usar el número de contratos como una puntuación de sospecha.
+'''),
+        md('''
 ---
-## 3. Diseñar el grafo antes de escribir Cypher
+## 3. Diseñar el grafo antes de escribir la consulta final
+
+### EJERCICIO S06-PATRON — un solo hueco
+
+Completa **solo** el nombre de la relación entre un proceso histórico y el proveedor al que fue adjudicado.
+
+**Qué debe verse si salió bien:** `(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)`.  
+**Error probable:** dejar `____` o inventar un verbo que no representa el hecho del dato.  
+**Qué significa:** el modelo aún no expresa la semántica contractual que luego recorrerá `MATCH`.
+
+<details><summary><strong>Recuperación si te atascaste</strong></summary>
+La relación se llama <code>ADJUDICADO_A</code>. Cámbiala y vuelve a ejecutar.
+</details>
+'''),
+        code("""
+RELACION_PROCESO_PROVEEDOR = "____"  # reemplaza únicamente ____
+patron_estudiante = f"(p:Proceso)-[:{RELACION_PROCESO_PROVEEDOR}]->(v:Proveedor)"
+print(patron_estudiante)
+
+if RELACION_PROCESO_PROVEEDOR != "ADJUDICADO_A":
+    raise ValueError("Revisa el hecho contractual que conecta Proceso con Proveedor.")
+print("Patrón correcto: la relación expresa una adjudicación observada.")
+"""),
+        md('''
+### Modelo mínimo que usaremos
 
 ```text
 (e:Entidad)-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)
@@ -236,19 +275,21 @@ print("Proveedores distintos:", hist_ancla["nit_proveedor"].nunique())
 | `PUBLICA` | relación | quién publica el proceso |
 | `ADJUDICADO_A` | relación | a quién se adjudicó un proceso histórico |
 
-`Proceso` queda como nodo porque hoy participa en caminos y la próxima sesión reutilizará su texto.
+`Proceso` queda como nodo porque hoy participa en caminos y la siguiente sesión reutilizará su texto.
 '''),
         md('''
 ### Cypher mínimo
 
-| Construcción | Para qué sirve | Error frecuente |
-|---|---|---|
-| `MERGE` | encuentra o crea | creer que siempre crea otro nodo |
-| `MATCH` | busca patrones | ignorar las relaciones del patrón |
-| `WHERE` | filtra | usarlo sin comprender qué se conectó |
-| `WITH` | encadena etapas | olvidar variables |
-| `RETURN` | define la salida | confundir salida con persistencia |
-| `ORDER BY` | orden explícito | asumir que el motor ya ordenó |
+| Construcción | Para qué sirve | Qué devuelve/cambia | Error frecuente |
+|---|---|---|---|
+| `MERGE` | encuentra o crea un patrón | nodos/relaciones persistidos | creer que siempre crea otro nodo |
+| `MATCH` | busca patrones | filas con coincidencias | leerlo como un `SELECT *` sin relaciones |
+| `WHERE` | filtra | menos coincidencias | filtrar antes de entender el patrón |
+| `WITH` | encadena etapas | variables para la etapa siguiente | olvidar qué variables siguen vivas |
+| `RETURN` | define la salida | columnas del resultado | confundir salida con persistencia |
+| `ORDER BY` / `LIMIT` | ordena y acota | resultado priorizado | asumir orden si no se pidió |
+
+**PARA LLEVAR.** La flecha es parte de la consulta: no es decoración visual.
 '''),
         question_cell(2, "Cypher", "¿Por qué usaremos MERGE y restricciones únicas?", [
             "Para poder repetir la carga sin fabricar duplicados del mismo identificador.",
@@ -293,10 +334,76 @@ esperado_pd
 **Error frecuente.** Llamar “sospechoso” al proveedor que queda primero.
 '''),
         md('''
+### RECUPERACIÓN S06 — si Colab reinició antes de Aura
+
+Ejecuta la siguiente celda siempre que vuelvas del receso. Si el estado sigue vivo, solo lo confirma. Si se perdió, reconstruye datos, ancla de trabajo, historial y contrato pandas.
+
+**OJO.** Después de un reinicio también se recuperan los helpers de las autoevaluaciones y del tutorial. El respaldo pedagógico queda declarado; no se presenta como evidencia propia de S5.
+'''),
+        hidden(code(f"""
+# RECUPERACIÓN S06
+if "pregunta_codificada" not in globals() or "tutorial" not in globals():
+    exec({INTERACTIVITY!r})
+
+estado_necesario = ["datos", "manifest", "ancla_original", "hist", "hist_ancla", "ancla_trabajo", "esperado_pd", "nit_deseado"]
+if not all(nombre in globals() for nombre in estado_necesario):
+    import json, urllib.request
+    from pathlib import Path
+    import pandas as pd
+
+    DATA_URL = {DATA!r}
+    MANIFEST_URL = {MANIFEST!r}
+    datos = pd.read_csv(DATA_URL, low_memory=False)
+    with urllib.request.urlopen(MANIFEST_URL) as r:
+        manifest = json.loads(r.read().decode("utf-8"))
+
+    ruta_recuperacion = input("Ruta de s05_ancla_s06.json (Enter = respaldo): ").strip()
+    if ruta_recuperacion and Path(ruta_recuperacion).is_file():
+        ancla_original = json.loads(Path(ruta_recuperacion).read_text(encoding="utf-8"))
+        origen_ancla = "archivo propio S5"
+    else:
+        ancla_original = dict(manifest["ancla_pedagogica"])
+        origen_ancla = "ancla pedagógica versionada"
+
+    nit_deseado = str(ancla_original.get("nit_entidad", "")).strip()
+    hist = datos[datos["tipo_registro"].eq("historico_adjudicado")].copy()
+    hist_ancla = hist[hist["nit_entidad"].astype(str).str.strip().eq(nit_deseado)]
+    if hist_ancla.empty:
+        ancla_trabajo = dict(manifest["ancla_pedagogica"])
+        nit_deseado = str(ancla_trabajo["nit_entidad"]).strip()
+        hist_ancla = hist[hist["nit_entidad"].astype(str).str.strip().eq(nit_deseado)]
+        uso_respaldo_s06 = True
+    else:
+        ancla_trabajo = ancla_original
+        uso_respaldo_s06 = origen_ancla != "archivo propio S5"
+
+    prov_ancla = (
+        hist_ancla.groupby(["nit_proveedor", "proveedor"], dropna=False)["id_proceso"]
+        .nunique().rename("procesos_con_entidad").reset_index()
+    )
+    prov_global = (
+        hist.groupby(["nit_proveedor", "proveedor"], dropna=False)["nit_entidad"]
+        .nunique().rename("entidades_conectadas").reset_index()
+    )
+    esperado_pd = (
+        prov_ancla.merge(prov_global, on=["nit_proveedor", "proveedor"], how="left")
+        .sort_values(["entidades_conectadas", "procesos_con_entidad", "nit_proveedor"], ascending=[False, False, True])
+        .head(10).reset_index(drop=True)
+    )
+    print("Estado S6 reconstruido desde archivos versionados.")
+else:
+    print("Estado S6 sigue en memoria; no fue necesario reconstruirlo.")
+
+print("Entidad de trabajo:", ancla_trabajo["entidad"])
+print("Filas contrato pandas:", len(esperado_pd))
+"""), "Recuperar estado S6"),
+        md('''
 ---
 ## 5. Tutorial visual — AuraDB
 
 **HAZ ESTO AHORA.** Vuelve cuando `RETURN 1 AS conexion` funcione en Query y tengas URI, usuario y contraseña.
+
+El HTML es **instrumental**: muestra el camino de interfaz. Las pantallas dibujadas están rotuladas como representaciones; no se presentan como capturas autenticadas.
 '''),
         hidden(code(f'tutorial({TUTORIAL!r})'), "Abrir tutorial Neo4j Aura"),
         code("""
@@ -319,6 +426,9 @@ print("Conexión Neo4j verificada.")
 ## 6. Identidad y carga idempotente
 
 Primero creamos restricciones. Después `UNWIND` recibe una lista de filas desde Python y `MERGE` reutiliza nodos ya existentes.
+
+**Qué debe verse:** tres restricciones válidas y una carga que puede repetirse sin multiplicar el mismo NIT/ID.  
+**Error probable:** autenticación o conectividad antes de ejecutar Cypher. Eso es un problema instrumental, no un problema del modelo; usa el diagnóstico del tutorial.
 '''),
         code("""
 constraints = [
@@ -426,7 +536,11 @@ assert coinciden, "La respuesta Neo4j no coincide con el contrato pandas."
 ---
 ## 8. CRUD seguro y evidencia individual
 
-El CRUD usa `S06-DEMO`; no modificamos un proceso real. Después eliges un proveedor de tu resultado y abres su vecindario.
+El CRUD usa `S06-DEMO`; no modificamos un proceso real. Después eliges un proveedor de **tu resultado** y abres su vecindario.
+
+**Qué debe verse:** una tabla con entidades y procesos relacionados con el proveedor elegido.  
+**Error probable:** escoger un número fuera del top mostrado. Significa que tu decisión no corresponde al resultado ejecutado.  
+**Recuperación:** vuelve a ejecutar y elige un número de la lista; no inventes un NIT.
 '''),
         code("""
 driver.execute_query('''
@@ -460,15 +574,34 @@ vecindario_df = pd.DataFrame([r.data() for r in vec.records])
 vecindario_df
 """),
         md('''
+### Interpretación de tu vecindario
+
+**Cómo se lee.** Cada fila es un proceso conectado al proveedor que elegiste; una misma entidad puede aportar varios procesos.
+
+**Qué nos dice.** Puedes observar qué entidades y procesos del extracto comparten ese actor contractual y abrir casos concretos para revisión.
+
+**Qué NO permite concluir todavía.** Compartir proveedor no demuestra coordinación, favorecimiento ni irregularidad. Faltan, como mínimo, cronología comparable, condiciones de competencia y vínculos de propiedad/representación cuando la hipótesis los requiera.
+
+**Error frecuente.** Convertir el número de conexiones en un “score de riesgo” sin modelo ni denominador.
+'''),
+        md('''
 ### La evidencia no termina en el grafo
 
-Escribe un límite que nombre **qué dato faltaría** antes de convertir la conexión observada en una afirmación de riesgo o irregularidad. “Faltan datos” no es suficiente.
+Ahora registra dos decisiones que una respuesta genérica no puede inventar por ti:
+
+1. un límite que nombre **qué dato faltaría** antes de una afirmación de riesgo/irregularidad;
+2. una alternativa de modelado que descartaste y por qué.
 '''),
         code("""
 from pathlib import Path
 limite_estudiante = input("Límite concreto y dato faltante: ").strip()
+alternativa_modelo = input("Alternativa de modelado descartada: ").strip()
+razon_alternativa = input("¿Por qué la descartaste para esta pregunta?: ").strip()
+
 if len(limite_estudiante) < 25:
     raise ValueError("Nombra la conclusión que no puedes sostener y el dato que falta.")
+if len(alternativa_modelo) < 5 or len(razon_alternativa) < 15:
+    raise ValueError("Nombra una alternativa real y explica por qué no sirve igual de bien para esta pregunta.")
 
 export = vecindario_df.merge(
     datos[["id_proceso", "descripcion", "modalidad", "url_secop"]].drop_duplicates("id_proceso"),
@@ -476,7 +609,7 @@ export = vecindario_df.merge(
 )
 export.to_json("s06_contexto_procesos.jsonl", orient="records", lines=True, force_ascii=False)
 
-hito = f'''# Hito S06 — Ficha relacional de revisión\n\n- Origen del ancla: {origen_ancla}\n- Proceso S5: {ancla_original.get("id_proceso", "")}\n- Entidad de trabajo: {ancla_trabajo.get("entidad", "")}\n- Noticias / nivel: {ancla_trabajo.get("noticias_entidad", "")} / {ancla_trabajo.get("nivel_menciones", "")}\n- Respaldo pedagógico: {uso_respaldo_s06}\n- pandas == Neo4j: {coinciden}\n- Proveedor elegido: {proveedor_elegido["proveedor"]}\n- Entidades conectadas: {int(proveedor_elegido["entidades_conectadas"])}\n- Procesos en el vecindario: {len(vecindario_df)}\n\n## Límite\n{limite_estudiante}\n\n## Decisión de modelado\nProceso es nodo porque participa en caminos y su texto será reutilizado en S7.\n'''
+hito = f'''# Hito S06 — Ficha relacional de revisión\n\n- Origen del ancla: {origen_ancla}\n- Proceso elegido en S5: {ancla_original.get("id_proceso", "")}\n- Proceso/entidad usados para el grafo: {ancla_trabajo.get("id_proceso", "")} — {ancla_trabajo.get("entidad", "")}\n- Noticias / nivel: {ancla_trabajo.get("noticias_entidad", "")} / {ancla_trabajo.get("nivel_menciones", "")}\n- Respaldo pedagógico: {uso_respaldo_s06}\n- pandas == Neo4j: {coinciden}\n- Proveedor elegido: {proveedor_elegido["proveedor"]}\n- Entidades conectadas: {int(proveedor_elegido["entidades_conectadas"])}\n- Procesos en el vecindario: {len(vecindario_df)}\n\n## Límite\n{limite_estudiante}\n\n## Decisión de modelado\nProceso se modeló como nodo porque participa en caminos y su texto será reutilizado en la siguiente sesión.\n\n### Alternativa descartada\n{alternativa_modelo}\n\nRazón: {razon_alternativa}\n'''
 Path("hito_s06_ficha_relacional.md").write_text(hito, encoding="utf-8")
 print(hito)
 
@@ -493,11 +626,13 @@ except Exception:
 | Criterio | Completo | Parcial | Sin evidencia | Peso |
 |---|---|---|---|---:|
 | Continuidad | identifica proceso S5 y declara respaldo | solo entidad | no conecta con S5 | 15 |
-| Modelo | justifica nodos y relaciones | describe sin justificar | copia el patrón | 20 |
+| Modelo | justifica nodos/relaciones + alternativa descartada | describe sin alternativa | copia el patrón | 20 |
 | Ejecución | vecindario propio ejecutado | solo consulta común | no hay salida | 20 |
 | Verificación | `pandas == Neo4j` comprobado | muestra ambos | solo uno | 15 |
 | Evidencia propia | proveedor + entidades + procesos | incompleta | genérica | 15 |
 | Límite | conclusión inválida + dato específico faltante | genérico | afirma irregularidad | 15 |
+
+Las autoevaluaciones son formativas. El hito es la evidencia revisable de la sesión.
 '''),
         md('''
 ---
