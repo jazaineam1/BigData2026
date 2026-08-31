@@ -60,7 +60,7 @@ def main():
         "ficha relacional de revisión",
         "Entidad)-[:PUBLICA]",
         "ADJUDICADO_A",
-        "contrato de corrección",
+        "Contrato de resultado: primero pandas",
         "esperado_pd",
         "pandas == Neo4j",
         "verify_connectivity",
