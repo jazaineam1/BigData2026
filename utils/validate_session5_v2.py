@@ -70,21 +70,18 @@ def main() -> None:
         if item not in text:
             errors.append(f"Falta elemento S5: {item!r}")
 
-    # El tutorial viejo o el quiz no deben formar parte del camino del estudiante.
     for prohibited in [
         "https://jazaineam1.github.io/BigData2026/assets/tutoriales/atlas-s05-pipelines-vistas.html",
         "https://jazaineam1.github.io/BigData2026/assets/tutoriales/astra-cassandra-paso-a-paso.html",
         "quiz_sesiones_1_a_4_borrador",
     ]:
         if prohibited in text:
-            errors.append(f"S5 todavía enlaza un recurso que debe quedar fuera: {prohibited}")
+            errors.append(f"S5 enlaza un recurso que debe quedar fuera: {prohibited}")
 
-    # No volver a afirmar que las representaciones de Astra son capturas reales.
     for stale in ["capturas reales de referencia", "Tutorial 2 — Astra/Cassandra con capturas"]:
         if stale in text:
             errors.append(f"Quedó texto visual engañoso: {stale!r}")
 
-    # Las tres preguntas viven codificadas: GitHub no debe mostrar opciones/clave de un vistazo.
     qcalls = text.count("pregunta_interactiva_codificada(") - text.count("def pregunta_interactiva_codificada")
     if qcalls != 3:
         errors.append(f"Se esperaban 3 autoevaluaciones codificadas y hay {qcalls}")
@@ -93,12 +90,10 @@ def main() -> None:
     if "¿Cuál afirmación puede sostener Laura" in text:
         errors.append("La segunda autoevaluación sigue visible en crudo")
 
-    # Interpretación: al menos vista, embudo, 0/77 y prueba CQL.
     for label in ["**Cómo se lee.**", "**Qué nos dice.**", "**Qué NO permite concluir todavía.**", "**Error frecuente.**"]:
         if text.count(label) < 4:
             errors.append(f"El rótulo {label} aparece menos de 4 veces")
 
-    # Hechos de control y semántica del faltante.
     for fact in [
         '"baja": 111', '"media": 25', '"alta": 6',
         "assert len(paso1) == 163", "assert len(candidatos) == 77", "assert con_referencia == 0",
@@ -107,7 +102,6 @@ def main() -> None:
         if fact not in text:
             errors.append(f"Falta control reproducible: {fact}")
 
-    # Seguridad.
     secret_patterns = {
         "token Astra": r"AstraCS:[A-Za-z0-9_-]{20,}",
         "token GitHub": r"(?:ghp_|github_pat_)[A-Za-z0-9_]{20,}",
@@ -131,8 +125,9 @@ def main() -> None:
     ]:
         if item not in atlas:
             errors.append(f"Tutorial Atlas v2 incompleto: {item!r}")
-    # DIAN/resumen pueden aparecer solo como ampliación, nunca como paso operativo principal.
-    if "Paso 2 · calentamiento" in atlas or "Abre Aggregations en modo Texto" in atlas and "resumen-secciones-v1" in atlas:
+    if "Paso 2 · calentamiento" in atlas or (
+        "Abre Aggregations en modo Texto" in atlas and "resumen-secciones-v1" in atlas
+    ):
         errors.append("Tutorial Atlas v2 conserva la ruta larga de S4")
 
     astra = ASTRA.read_text(encoding="utf-8")
@@ -140,14 +135,13 @@ def main() -> None:
         "Fraunces", "IBM Plex Sans", "Serverless (non-vector)", "token@cqlsh&gt;",
         "noticias_entidad int", "nivel_menciones text", "Connection details",
         "Download SCB", "Generate token", "representación", "mismos IDs y orden que pandas",
-        "Pantalla",
+        "3,'baja','pendiente'", "Pantalla",
     ]:
         if item not in astra:
             errors.append(f"Tutorial Astra v2 incompleto: {item!r}")
     for bad_host in ("docs.vectorize.io", "miro.medium.com", "learn.microsoft.com"):
         if bad_host in astra:
             errors.append(f"Tutorial Astra usa imagen externa no controlada: {bad_host}")
-    # Evita la sentencia CQL inválida que existía en la versión anterior.
     if "entidad en prensa; contratación directa; 0 respuestas');" in astra and "'entidad en prensa; contratación directa; 0 respuestas'" not in astra:
         errors.append("El criterio del INSERT Astra quedó sin comillas CQL")
 
@@ -165,6 +159,7 @@ def main() -> None:
     print("[OK] Hilo: vista Atlas → bandeja enriquecida → contrato pandas → Cassandra → verificación cruzada.")
     print("[OK] Cuatro rótulos de interpretación, hito individual y rúbrica observable presentes.")
     print("[OK] Tutoriales v2 presentes; Astra no finge capturas y conserva ruta vigente.")
+    print("[OK] Primer candidato en tutorial Astra: 3 noticias, nivel baja.")
     print("[OK] Quiz S1–S4 sigue en el repo, pero fuera de enlaces de S5.")
     print("[INFO] Astra real requiere prueba manual con cuenta autorizada; CI no usa credenciales.")
 
