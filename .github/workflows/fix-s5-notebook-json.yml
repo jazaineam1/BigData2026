@@ -17,17 +17,36 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v6
 
-      - name: Reparar escapes inválidos y validar notebook
+      - name: Diagnosticar y reparar JSON
         shell: bash
         run: |
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
 
           p = Path('Cuadernos/5_Atlas_Cassandra_Query_First.ipynb')
           raw = p.read_text(encoding='utf-8')
-          repaired = raw.replace('\\ ', ' ')
-          data = json.loads(repaired)
+
+          print('Longitud original:', len(raw))
+          print('Contexto original 6100:6260:', repr(raw[6100:6260]))
+
+          # En JSON solo son válidos estos escapes: \" \\ \/ \b \f \n \r \t \uXXXX.
+          invalid = list(re.finditer(r'\\([^"\\/bfnrtu])', raw))
+          print('Escapes JSON inválidos detectados:', len(invalid))
+          for m in invalid[:20]:
+              pos = m.start()
+              print(' - pos', pos, '=>', repr(raw[max(0,pos-45):pos+70]))
+
+          # Eliminar únicamente la barra invertida de escapes que JSON no reconoce.
+          repaired = re.sub(r'\\([^"\\/bfnrtu])', r'\1', raw)
+
+          try:
+              data = json.loads(repaired)
+          except json.JSONDecodeError as e:
+              print('ERROR tras reparar escapes:', e)
+              print('Contexto del error:', repr(repaired[max(0,e.pos-100):e.pos+140]))
+              raise
 
           assert data.get('nbformat') == 4
           assert len(data.get('cells', [])) >= 35
