@@ -19,8 +19,12 @@ required = [
     "bandeja operacional",
     "s05_ancla_s06.json",
     "PUENTE S05-S06",
-    "qué hay alrededor de lo que voy a revisar",
+    "seleccion_ancla",
+    "origen_eleccion_s06",
+    '"criterio_priorizacion": "entidad en prensa; contratación directa; 0 respuestas"',
     '"origen": "bandeja operacional S05: 1.000→163→77"',
+    "Interpretación del ancla elegida",
+    "qué relaciones alrededor de su entidad",
     "noticias_entidad",
     "nivel_menciones",
 ]
@@ -31,4 +35,8 @@ if missing:
 if len(nb.get("cells", [])) < 60:
     raise SystemExit("S5 quedó demasiado corta tras la regeneración")
 
-print(f"[OK] S5 v3 válida: {len(nb['cells'])} celdas y puente S6 presente.")
+for label in ["**Cómo se lee.**", "**Qué nos dice.**", "**Qué NO permite concluir todavía.**", "**Error frecuente.**"]:
+    if text.count(label) < 5:
+        raise SystemExit(f"S5 perdió interpretación estructurada: {label}")
+
+print(f"[OK] S5 v3 válida: {len(nb['cells'])} celdas; puente S6 individual y explicable presente.")
