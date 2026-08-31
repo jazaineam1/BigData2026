@@ -55,38 +55,8 @@ def insert_once(cells: list[dict], anchor: str, marker: str, new_cells: list[dic
     cells[pos:pos] = new_cells
 
 
-def main() -> None:
-    nb = json.loads(NB.read_text(encoding="utf-8"))
-    cells = nb["cells"]
-
-    insert_once(cells, "## Mapa de la sesión", "CONTINUIDAD S03-S05", [md('''
-### CONTINUIDAD S03-S05 — del prototipo a la bandeja operacional
-
-En S3 apareció una primera bandeja de **200 procesos**. Ese resultado fue un **prototipo exploratorio**: servía para demostrar que las señales podían reducir el universo, pero todavía mezclaba decisiones que no habíamos convertido en una regla operacional estable.
-
-Hoy no estamos “corrigiendo 200 por 77” ni comparando el mismo indicador. En S5 fijamos una regla distinta, explícita y reproducible sobre la muestra de 1.000 procesos:
-
-```text
-entidad presente en prensa
-+ modalidad contiene "directa"
-+ respuestas al procedimiento = 0
-────────────────────────────────
-77 candidatos
-```
-
-**PARA LLEVAR.** El número importante no es 77 por sí solo. Lo importante es que Laura puede explicar exactamente **cómo entró cada proceso** y qué evidencia todavía falta.
-''')], after=False)
-
-    i = find(cells, "### Producto observable de hoy")
-    text = src(cells[i])
-    if "s05_ancla_s06.json" not in text:
-        text = text.replace(
-            "8. un hito descargable con tu decisión y su límite.",
-            "8. un hito descargable con tu decisión y su límite;\n9. `s05_ancla_s06.json`: el proceso que tú eliges para que Laura abra en S6 y estudie su contexto relacional.",
-        )
-        put(cells[i], text)
-
-    insert_once(cells, "# Hito S05 — De la priorización al servicio", "PUENTE S05-S06", [
+def bridge_cells() -> list[dict]:
+    return [
         md('''
 ---
 ## PUENTE S05-S06 — elige la fila que Laura abrirá después
@@ -160,7 +130,49 @@ except Exception:
 
 **Error frecuente.** Tratar la posición en la bandeja como una probabilidad de fraude.
 '''),
-    ], after=False)
+    ]
+
+
+def main() -> None:
+    nb = json.loads(NB.read_text(encoding="utf-8"))
+    cells = nb["cells"]
+
+    insert_once(cells, "## Mapa de la sesión", "CONTINUIDAD S03-S05", [md('''
+### CONTINUIDAD S03-S05 — del prototipo a la bandeja operacional
+
+En S3 apareció una primera bandeja de **200 procesos**. Ese resultado fue un **prototipo exploratorio**: servía para demostrar que las señales podían reducir el universo, pero todavía mezclaba decisiones que no habíamos convertido en una regla operacional estable.
+
+Hoy no estamos “corrigiendo 200 por 77” ni comparando el mismo indicador. En S5 fijamos una regla distinta, explícita y reproducible sobre la muestra de 1.000 procesos:
+
+```text
+entidad presente en prensa
++ modalidad contiene "directa"
++ respuestas al procedimiento = 0
+────────────────────────────────
+77 candidatos
+```
+
+**PARA LLEVAR.** El número importante no es 77 por sí solo. Lo importante es que Laura puede explicar exactamente **cómo entró cada proceso** y qué evidencia todavía falta.
+''')], after=False)
+
+    i = find(cells, "### Producto observable de hoy")
+    text = src(cells[i])
+    if "s05_ancla_s06.json" not in text:
+        text = text.replace(
+            "8. un hito descargable con tu decisión y su límite.",
+            "8. un hito descargable con tu decisión y su límite;\n9. `s05_ancla_s06.json`: el proceso que tú eliges para que Laura abra en S6 y estudie su contexto relacional.",
+        )
+        put(cells[i], text)
+
+    new_bridge = bridge_cells()
+    try:
+        b = find(cells, "PUENTE S05-S06")
+        # La versión previa del puente tenía exactamente dos celdas: explicación y código.
+        # Sustituimos esas dos por la nueva secuencia de tres, en vez de duplicarla.
+        cells[b:b + 2] = new_bridge
+    except RuntimeError:
+        h = find(cells, "# Hito S05 — De la priorización al servicio")
+        cells[h:h] = new_bridge
 
     i = find_any(cells, ("## Lo que sigue", "# Cierre"))
     put(cells[i], '''
