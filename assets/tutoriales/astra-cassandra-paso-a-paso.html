@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Astra DB y Cassandra — Sesión 5</title>
+<style>
+:root{--v:#175c3c;--vd:#0b241c;--vc:#e3efe6;--d:#c9a227;--c:#faf7f0;--t:#172019;--g:#5c6b63;--l:#e2dcc8}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}body{font-family:Arial,sans-serif;background:var(--c);color:var(--t);display:flex;flex-direction:column}
+#p{position:fixed;top:0;left:0;height:4px;background:var(--d);z-index:5}header{display:flex;justify-content:space-between;padding:10px 3vw 6px;color:var(--vd)}main{flex:1;min-height:0;padding:4px 2.5vw}.m{height:100%;position:relative;max-width:1450px;margin:auto}
+.s{position:absolute;inset:0;background:#fff;border:1px solid var(--l);border-radius:18px;padding:clamp(16px,3vw,34px);overflow:auto;opacity:0;pointer-events:none;transform:translateY(10px);transition:.25s}.s.a{opacity:1;pointer-events:auto;transform:none}
+h1{font-size:clamp(34px,5vw,58px);margin:.1em 0;color:var(--vd)}h2{font-size:clamp(24px,3vw,34px);margin:.1em 0;color:var(--v)}p,li{line-height:1.5}.sub{color:var(--g);max-width:75ch}
+.k{display:inline-block;background:var(--vc);color:var(--v);padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;text-transform:uppercase}.k.d{background:#f7ecc9;color:#6b5100}
+.g2{display:grid;grid-template-columns:minmax(250px,.9fr) minmax(300px,1.1fr);gap:22px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card,.ok{border:1px solid var(--l);border-radius:10px;padding:12px;background:var(--c)}.call{padding:10px 12px;border-radius:9px;margin-top:10px;background:var(--vc);color:#103822}.warn{background:#fff5dd;color:#604500}.bad{background:#fbe9e5;color:#692719}
+pre{background:var(--vd);color:#e8f1ea;padding:13px;border-radius:9px;overflow:auto;max-height:44vh;font:12px/1.55 Consolas,monospace}
+.pic{border:1px solid var(--l);border-radius:10px;overflow:hidden;background:#111}.pic img{display:block;width:100%;max-height:52vh;object-fit:contain;background:#fff}.cap{font-size:11px;color:var(--g);padding:6px 8px;background:#fff}
+nav{display:flex;justify-content:center;align-items:center;gap:9px;padding:5px}nav button{border:1px solid var(--l);background:#fff;color:var(--v);border-radius:999px;min-width:38px;height:38px;cursor:pointer}.dots{display:flex;gap:5px;flex-wrap:wrap;max-width:55vw}.dot{width:9px;min-width:9px;height:9px;padding:0;border:0;background:#d8d3c7}.dot.on{width:22px;background:var(--v)}
+.embed header{display:none}.embed main{padding:4px 8px}.embed .s{padding:clamp(13px,2vw,22px)}a{color:var(--v)}@media(max-width:800px){.g2,.g3{grid-template-columns:1fr}.pic img{max-height:34vh}}
+</style></head><body><div id="p"></div>
+<header><b>Big Data 2026-2S · Sesión 5</b><span><b id="n">1</b>/<span id="tot"></span></span></header><main><div class="m">
+
+<section class="s a"><div class="k d">Tutorial visual 2</div><h1>Astra DB + Cassandra</h1><p class="sub">De cero a una tabla query-first, CQL Console y conexión desde Python.</p>
+<div class="g3"><div class="card"><b>Pregunta</b><p>corte + departamento → top 5.</p></div><div class="card"><b>Producto</b><p>tabla diseñada para esa consulta.</p></div><div class="card"><b>Vigencia</b><p>pasos verificados 30-ago-2026.</p></div></div></section>
+
+<section class="s"><div class="k">Paso 1</div><h2>Entra y crea la base</h2><div class="g2"><div><ol><li>Abre <a href="https://astra.datastax.com/" target="_blank">astra.datastax.com ↗</a>.</li><li><b>Create database</b>.</li><li>Elige <b>Serverless (non-vector)</b>.</li><li>Nombre: <code>compras-claras-s05</code>.</li><li>Keyspace: <code>compras_claras</code>.</li><li>Selecciona una región Free y crea.</li></ol><div class="call warn"><b>OJO.</b> El CQL del cuaderno usa exactamente <code>compras_claras</code>.</div></div>
+<div class="pic"><img src="https://docs.vectorize.io/assets/images/datastax-2-616c11a29dfbad9b736641eccc607a4e.png" alt="Captura real del formulario Create Database de Astra con tipo, nombre, proveedor, región y botón Create Database"><div class="cap">Captura real de referencia. En la imagen está seleccionado vector; en clase selecciona <b>non-vector</b>. Fuente: Vectorize Docs.</div></div></div></section>
+
+<section class="s"><div class="k">Paso 2</div><h2>Espera Active</h2><p class="sub">No avances mientras la base esté inicializando.</p><div class="g2"><div class="ok">✓ Serverless (non-vector)<br>✓ <code>compras_claras</code><br>✓ Estado <b>Active</b></div>
+<div class="pic"><img src="https://learn.microsoft.com/en-us/microsoftsearch/media/datastax-api-endpoint.png" alt="Captura real de una base Astra activa con identificador y opciones de conexión"><div class="cap">Referencia real de una base activa. La navegación varía por tipo de base. Fuente: Microsoft Learn.</div></div></div></section>
+
+<section class="s"><div class="k">Paso 3</div><h2>Abre CQL Console</h2><div class="g2"><div><ol><li>Entra a la base.</li><li>Pulsa <b>CQL console</b>.</li><li>Espera <code>token@cqlsh&gt;</code>.</li></ol><div class="call"><b>Control.</b> Ese prompt significa que la consola web está conectada.</div></div>
+<div class="pic"><img src="https://miro.medium.com/v2/resize%3Afit%3A1400/0%2A7RGLjaDPahYeA3BB" alt="Captura real de Astra con la pestaña CQL Console activa y una consulta SELECT"><div class="cap">Captura real de CQL Console. El encabezado puede variar; el prompt CQL es el control. Fuente: TDS Archive.</div></div></div></section>
+
+<section class="s"><div class="k">Paso 4</div><h2>Selecciona keyspace y crea tabla</h2><pre>USE compras_claras;
+
+CREATE TABLE IF NOT EXISTS prioridades_por_corte_departamento (
+  corte date, departamento text, valor_base bigint,
+  id_proceso text, entidad text, estado_revision text,
+  url_secop text, criterio text,
+  PRIMARY KEY ((corte, departamento), valor_base, id_proceso)
+) WITH CLUSTERING ORDER BY (valor_base DESC, id_proceso ASC);</pre><div class="call warn"><b>No uses CREATE KEYSPACE.</b> Astra crea el keyspace desde el portal.</div></section>
+
+<section class="s"><div class="k">Paso 5</div><h2>Lee la llave antes de insertar</h2><div class="g3"><div class="card"><b>(corte, departamento)</b><p>partición: localiza el grupo.</p></div><div class="card"><b>valor_base DESC</b><p>clustering: más caros primero.</p></div><div class="card"><b>id_proceso ASC</b><p>desempate estable.</p></div></div><div class="call"><b>Pregunta objetivo:</b> “para este corte y este departamento, dame los cinco de mayor valor”.</div></section>
+
+<section class="s"><div class="k">Paso 6</div><h2>INSERT + READ con una fila</h2><pre>INSERT INTO compras_claras.prioridades_por_corte_departamento
+(corte,departamento,valor_base,id_proceso,entidad,estado_revision,url_secop,criterio)
+VALUES ('2026-09-03','Distrito Capital de Bogotá',168750000,
+'CO1.REQ.5407319','MINISTERIO DEL DEPORTE','pendiente','',
+'entidad en prensa; contratación directa; 0 respuestas');
+
+SELECT id_proceso,entidad,valor_base,estado_revision
+FROM compras_claras.prioridades_por_corte_departamento
+WHERE corte='2026-09-03' AND departamento='Distrito Capital de Bogotá'
+LIMIT 5;</pre><div class="call"><b>Esperado:</b> CO1.REQ.5407319 · Ministerio del Deporte · $168.750.000.</div></section>
+
+<section class="s"><div class="k">Paso 7</div><h2>UPDATE con llave completa</h2><pre>UPDATE compras_claras.prioridades_por_corte_departamento
+SET estado_revision='en_revision'
+WHERE corte='2026-09-03'
+  AND departamento='Distrito Capital de Bogotá'
+  AND valor_base=168750000
+  AND id_proceso='CO1.REQ.5407319';</pre><div class="call">Repite el SELECT y verifica <code>estado_revision = en_revision</code>.</div></section>
+
+<section class="s"><div class="k">Paso 8</div><h2>DELETE sin tocar la bandeja</h2><pre>INSERT INTO compras_claras.prioridades_por_corte_departamento
+(corte,departamento,valor_base,id_proceso,entidad,estado_revision,url_secop,criterio)
+VALUES ('2026-09-03','DEMO',1,'S05-DEMO','FILA DE PRACTICA','pendiente','','DELETE');
+
+DELETE FROM compras_claras.prioridades_por_corte_departamento
+WHERE corte='2026-09-03' AND departamento='DEMO'
+AND valor_base=1 AND id_proceso='S05-DEMO';</pre></section>
+
+<section class="s"><div class="k d">Error plantado</div><h2>La columna existe… pero la consulta no encaja</h2><pre>SELECT *
+FROM compras_claras.prioridades_por_corte_departamento
+WHERE entidad='MINISTERIO DEL DEPORTE';</pre><div class="call bad"><b>Predice antes de ejecutar.</b> La tabla no está particionada por entidad.</div><p>Si aparece <code>ALLOW FILTERING</code>, no lo leas como “la sintaxis que faltaba”, sino como una advertencia de que este no es el patrón de acceso para el que diseñaste la tabla.</p></section>
+
+<section class="s"><div class="k">Paso 9</div><h2>Connection details — nombre vigente en 2026</h2><p class="sub">Desde el 9-jul-2026, en Serverless non-vector DataStax reemplazó Connect por <b>Connection details</b>.</p><ol><li>Vuelve a tu base y abre <b>Connection details</b>.</li><li><b>Get Secure Connect Bundle → Download SCB</b>.</li><li>Conserva el ZIP completo.</li><li>Genera un application token para la base.</li></ol><div class="call bad"><b>SECRETO.</b> No publiques token ni SCB en GitHub o en el chat.</div></section>
+
+<section class="s"><div class="k">Paso 10</div><h2>SCB, token y el usuario literal “token”</h2><div class="g3"><div class="card"><b>SCB</b><p>certificados y datos de conexión mTLS.</p></div><div class="card"><b>Application token</b><p>autentica y autoriza.</p></div><div class="card"><b>"token"</b><p>usuario literal del driver con token unificado.</p></div></div><div class="call warn">Un SCB pertenece a una base/región específica; no lo reutilices como si fuera universal.</div></section>
+
+<section class="s"><div class="k">Paso 11</div><h2>Vuelve a Colab: Python usa la misma tabla</h2><pre>!pip install -q cassandra-driver
+from cassandra.cluster import Cluster
+from cassandra.auth import PlainTextAuthProvider
+
+cluster = Cluster(
+  cloud={"secure_connect_bundle": scb},
+  auth_provider=PlainTextAuthProvider("token", token_astra),
+)
+session = cluster.connect()</pre><div class="call">El cuaderno carga las 77 filas y completa CRUD. Desde 3.30, <code>cassandra-driver</code> es mantenido por Apache Software Foundation; el nombre del paquete sigue igual.</div></section>
+
+<section class="s"><div class="k">Paso 12</div><h2>Checklist</h2><div class="ok">☐ Base Serverless (non-vector) Active<br>☐ keyspace <code>compras_claras</code><br>☐ tabla creada<br>☐ SELECT por corte + departamento funciona<br>☐ entendiste por qué entidad no es una lectura barata aquí<br>☐ SCB descargado<br>☐ token guardado fuera del cuaderno</div><div class="call"><b>Listo:</b> vuelve al cuaderno.</div></section>
+
+<section class="s"><div class="k d">Fuentes</div><h2>Vigencia y documentación</h2><p><a href="https://docs.datastax.com/en/astra-db-serverless/databases/create-database.html" target="_blank">Crear base ↗</a> · <a href="https://docs.datastax.com/en/astra-db-serverless/cql/develop-with-cql.html" target="_blank">CQL Console ↗</a> · <a href="https://docs.datastax.com/en/astra-db-serverless/databases/secure-connect-bundle.html" target="_blank">Secure Connect Bundle ↗</a> · <a href="https://docs.datastax.com/en/astra-db-serverless/drivers/python-driver.html" target="_blank">Python driver ↗</a> · <a href="https://docs.datastax.com/en/astra-db-serverless/release-notes.html" target="_blank">Release notes ↗</a></p><div class="call warn">Las capturas son reales y externas. El portal cambia con frecuencia; para nombres de botones mandan los pasos verificados el <b>30-ago-2026</b>.</div></section>
+
+</div></main><nav><button id="b">←</button><div class="dots" id="ds"></div><button id="f">→</button></nav>
+<script>
+const s=[...document.querySelectorAll('.s')],q=new URLSearchParams(location.search);if(q.get('embed')==='1')document.body.classList.add('embed');let i=Math.max(0,Math.min(s.length-1,(+q.get('slide')||1)-1)),ds=document.getElementById('ds');document.getElementById('tot').textContent=s.length;
+s.forEach((_,j)=>{let x=document.createElement('button');x.className='dot';x.onclick=()=>show(j);ds.appendChild(x)});
+function show(j){i=Math.max(0,Math.min(s.length-1,j));s.forEach((x,k)=>x.classList.toggle('a',k===i));[...ds.children].forEach((x,k)=>x.classList.toggle('on',k===i));document.getElementById('n').textContent=i+1;document.getElementById('p').style.width=((i+1)/s.length*100)+'%';document.getElementById('b').disabled=i===0;document.getElementById('f').disabled=i===s.length-1}
+document.getElementById('b').onclick=()=>show(i-1);document.getElementById('f').onclick=()=>show(i+1);addEventListener('keydown',e=>{if(e.key==='ArrowRight')show(i+1);if(e.key==='ArrowLeft')show(i-1)});show(i);
+</script></body></html>
