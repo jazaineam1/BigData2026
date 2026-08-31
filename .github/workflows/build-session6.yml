@@ -44,10 +44,12 @@ jobs:
       - name: Publicar artefactos generados
         shell: bash
         run: |
-          if git diff --quiet -- Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json; then
+          CAMBIOS="$(git status --porcelain -- Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json)"
+          if [ -z "$CAMBIOS" ]; then
             echo 'S6 ya estaba sincronizada.'
             exit 0
           fi
+          printf '%s\n' "$CAMBIOS"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json
