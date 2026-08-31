@@ -29,7 +29,10 @@ class Counter(HTMLParser):
         self.images = []
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
-        if tag == "section" and "slide" in a.get("class", "").split():
+        classes = a.get("class", "").split()
+        # El tutorial compacto usa la clase `s`; se acepta también `slide`
+        # para conservar compatibilidad con el motor visual de la sesión 4.
+        if tag == "section" and ("s" in classes or "slide" in classes):
             self.slides += 1
         if tag == "img":
             self.images.append((a.get("src", ""), a.get("alt", "")))
