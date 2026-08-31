@@ -4,7 +4,7 @@
 
 Se ejecuta después de improve_session5_v2.py. No cambia la regla 1.000→163→77;
 explicita que los 200 de S3 fueron un prototipo exploratorio y convierte la
-salida de S5 en una entrada concreta para S6: s05_ancla_s06.json.
+salida de S5 en una entrada concreta e individual para S6: s05_ancla_s06.json.
 """
 from __future__ import annotations
 
@@ -74,26 +74,44 @@ entidad presente en prensa
     if "s05_ancla_s06.json" not in text:
         text = text.replace(
             "8. un hito descargable con tu decisión y su límite.",
-            "8. un hito descargable con tu decisión y su límite;\n9. `s05_ancla_s06.json`: el proceso que Laura abrirá en la sesión 6 para estudiar su contexto relacional.",
+            "8. un hito descargable con tu decisión y su límite;\n9. `s05_ancla_s06.json`: el proceso que tú eliges para que Laura abra en S6 y estudie su contexto relacional.",
         )
         put(cells[i], text)
 
     insert_once(cells, "# Hito S05 — De la priorización al servicio", "PUENTE S05-S06", [
         md('''
 ---
-## PUENTE S05-S06 — guarda la fila que Laura abrirá después
+## PUENTE S05-S06 — elige la fila que Laura abrirá después
 
-Hasta aquí S5 respondió **qué mirar primero**. La próxima sesión ya no vuelve a construir esa decisión: toma uno de tus procesos priorizados y pregunta **qué relaciones existen alrededor de él**.
+Hasta aquí S5 respondió **qué mirar primero**. La próxima sesión no vuelve a construir esa decisión: toma **uno de tus procesos priorizados** y pregunta **qué relaciones existen alrededor de él**.
 
-El archivo `s05_ancla_s06.json` conserva el proceso elegido, su entidad y el contexto heredado de las noticias. Si lo conservas, S6 comienza exactamente desde tu propia ejecución. Si lo pierdes, S6 podrá reconstruir la misma bandeja sin bloquearte.
+Si ejecutaste el contrato individual, verás tu top de pandas y escogerás cuál proceso llevar. Esa pequeña decisión hace que S6 empiece desde tu propia ejecución y no desde una fila impuesta por el cuaderno.
+
+**Qué debe verse si salió bien:** un JSON con el ID, entidad, NIT, departamento, valor, contexto de prensa y criterio de priorización.  
+**Error probable:** elegir un número fuera de la lista. Significa que la selección no corresponde a tu top disponible.  
+**Recuperación:** vuelve a ejecutar la celda y elige uno de los números mostrados; si no existe el top individual, la celda usa el primer candidato como respaldo explícito.
 '''),
         code('''
 import json
 
 if "top5_esperado_pd" in globals() and len(top5_esperado_pd):
-    fila_ancla = top5_esperado_pd.iloc[0]
+    opciones_ancla = top5_esperado_pd.reset_index(drop=True)
+    print("Elige el proceso que quieres llevar a S6:")
+    for i, fila in opciones_ancla.iterrows():
+        print(
+            f"{i+1:>2}. {fila['id_del_proceso']} | {fila['entidad']} | "
+            f"$ {float(fila['precio_base']):,.0f}"
+        )
+    seleccion_ancla = int(input("Número de proceso para S6: ").strip())
+    if not 1 <= seleccion_ancla <= len(opciones_ancla):
+        raise ValueError("El número debe corresponder a uno de los procesos mostrados.")
+    fila_ancla = opciones_ancla.iloc[seleccion_ancla - 1]
+    origen_eleccion_s06 = "selección propia dentro del top pandas S05"
 else:
     fila_ancla = candidatos.iloc[0]
+    seleccion_ancla = 1
+    origen_eleccion_s06 = "respaldo: primer candidato de la bandeja S05"
+    print("No existe top individual en memoria; se usa el primer candidato como respaldo.")
 
 ancla_s06 = {
     "id_proceso": str(fila_ancla["id_del_proceso"]),
@@ -106,7 +124,9 @@ ancla_s06 = {
     "noticias_entidad": int(fila_ancla["noticias_entidad"]),
     "nivel_menciones": str(fila_ancla["nivel_menciones"]),
     "url_secop": str(fila_ancla.get("urlproceso", "")),
+    "criterio_priorizacion": "entidad en prensa; contratación directa; 0 respuestas",
     "origen": "bandeja operacional S05: 1.000→163→77",
+    "origen_eleccion": origen_eleccion_s06,
 }
 
 with open("s05_ancla_s06.json", "w", encoding="utf-8") as f:
@@ -121,6 +141,17 @@ try:
 except Exception:
     print("Archivo guardado como s05_ancla_s06.json")
 '''),
+        md('''
+### Interpretación del ancla elegida
+
+**Cómo se lee.** El JSON conserva una fila que ya pasó la regla `1.000→163→77` y registra si fue una elección propia o un respaldo.
+
+**Qué nos dice.** S6 puede comenzar desde un proceso concreto sin rehacer la priorización.
+
+**Qué NO permite concluir todavía.** Elegir una fila para profundizar no significa que sea irregular ni la “más riesgosa”. Faltan relaciones contractuales históricas y evidencia específica del proceso.
+
+**Error frecuente.** Tratar la posición en la bandeja como una probabilidad de fraude.
+'''),
     ], after=False)
 
     i = find(cells, "## Lo que sigue")
@@ -129,9 +160,9 @@ except Exception:
 
 S5 terminó con una fila que Laura puede justificar y consultar repetidamente. Pero una fila sigue siendo una fila.
 
-La próxima sesión empieza cuando Laura abre **ese proceso** y pregunta:
+La próxima sesión empieza cuando Laura abre **el proceso que acabas de elegir** y pregunta:
 
-> **“Ya sé por qué este proceso llegó primero a mi bandeja. Antes de asignarlo a un auditor, ¿qué relaciones alrededor de su entidad y sus procesos históricos necesito ver?”**
+> **“Ya sé por qué este proceso llegó a mi bandeja. Antes de asignarlo a un auditor, ¿qué relaciones alrededor de su entidad y sus procesos históricos necesito ver?”**
 
 El candidato de S5 será el **ancla**. Los procesos históricos adjudicados aportarán el contexto que ese candidato todavía no tiene: proveedores, otras contrataciones y conexiones con otras entidades.
 
@@ -140,7 +171,7 @@ S3  evidencia documental
  ↓
 S4  persistencia compartida
  ↓
-S5  qué revisar primero
+S5  qué revisar primero + ancla elegida
  ↓
 S6  qué hay alrededor de lo que voy a revisar
 ```
@@ -149,7 +180,7 @@ Ahí aparece Neo4j. No para declarar irregularidades, sino para hacer de las **r
 ''')
 
     NB.write_text(json.dumps(nb, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"[OK] S5 v3: {len(cells)} celdas; continuidad y puente S6 aplicados.")
+    print(f"[OK] S5 v3: {len(cells)} celdas; continuidad y puente individual S6 aplicados.")
 
 
 if __name__ == "__main__":
