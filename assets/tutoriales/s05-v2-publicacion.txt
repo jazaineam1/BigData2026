@@ -1,0 +1,5 @@
+Sesión 5 — auditoría integral v2
+Publicado: 2026-08-31
+
+Este marcador fuerza el despliegue de GitHub Pages después de validar y corregir los tutoriales Atlas/Astra de S5.
+No contiene credenciales ni material evaluativo.
