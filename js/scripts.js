@@ -23,37 +23,31 @@ window.addEventListener('DOMContentLoaded', event => {
 
     };
 
-    // Shrink the navbar
     navbarShrink();
-
-    // Shrink the navbar when page is scrolled
     document.addEventListener('scroll', navbarShrink);
 
-    // Activate Bootstrap scrollspy on the main nav element
     const mainNav = document.body.querySelector('#mainNav');
     if (mainNav) {
         new bootstrap.ScrollSpy(document.body, {
             target: '#mainNav',
             rootMargin: '0px 0px -40%',
         });
-    };
+    }
 
-    // Collapse responsive navbar when toggler is visible
-    const navbarToggler = document.body.querySelector('.navbar-toggler');
-    const responsiveNavItems = [].slice.call(
-        document.querySelectorAll('#navbarResponsive .nav-link')
-    );
+    const navbarToggler = document.querySelector('.navbar-toggler');
+    const responsiveNavItems = [].slice.call(document.querySelectorAll('#navbarResponsive .nav-link'));
     responsiveNavItems.map(function (responsiveNavItem) {
         responsiveNavItem.addEventListener('click', () => {
-            if (window.getComputedStyle(navbarToggler).display !== 'none') {
+            if (navbarToggler && window.getComputedStyle(navbarToggler).display !== 'none') {
                 navbarToggler.click();
             }
         });
     });
 
-    // Sesión 5: se agrega aquí para no alterar el bloque histórico oculto
+    // Las sesiones 5 y 6 se agregan aquí para no alterar el bloque histórico
     // de sesiones futuras que conserva index.html.
     const courseRow = document.querySelector('#portfolio .row.g-4');
+
     if (courseRow && !document.querySelector('[data-session="5"]')) {
         const card = document.createElement('div');
         card.className = 'col-lg-4 col-md-6';
@@ -64,10 +58,30 @@ window.addEventListener('DOMContentLoaded', event => {
                target="_blank" rel="noopener noreferrer">
                 <div class="course-emoji" aria-hidden="true">🧱</div>
                 <div class="course-category">Sesión 5 · Atlas → Cassandra</div>
-                <div class="course-title">De la priorización a una consulta operacional</div>
+                <div class="course-title">De la evidencia a la bandeja operacional</div>
                 <p class="course-description">
-                    Termina pipelines y vistas en Atlas, reproduce 1.000 → 163 → 77 y el límite 0/77;
-                    después diseña Cassandra desde la consulta con tutorial visual de Astra, CQL y CRUD en Python.
+                    Laura transforma el contexto de prensa en una vista, reproduce 1.000 → 163 → 77,
+                    comprueba el límite 0/77 y diseña Cassandra desde una consulta repetitiva.
+                    La sesión deja el proceso que abrirá S6.
+                </p>
+            </a>`;
+        courseRow.appendChild(card);
+    }
+
+    if (courseRow && !document.querySelector('[data-session="6"]')) {
+        const card = document.createElement('div');
+        card.className = 'col-lg-4 col-md-6';
+        card.setAttribute('data-session', '6');
+        card.innerHTML = `
+            <a class="course-card"
+               href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/6_Neo4j_Contexto_Relacional.ipynb"
+               target="_blank" rel="noopener noreferrer">
+                <div class="course-emoji" aria-hidden="true">🕸️</div>
+                <div class="course-category">Sesión 6 · Neo4j</div>
+                <div class="course-title">De la fila priorizada al contexto relacional</div>
+                <p class="course-description">
+                    Laura abre un proceso de S5 y construye su contexto real: entidad, procesos históricos
+                    y proveedores. Compara pandas con Neo4j, documenta el límite y exporta texto para la siguiente sesión.
                 </p>
             </a>`;
         courseRow.appendChild(card);
@@ -76,7 +90,9 @@ window.addEventListener('DOMContentLoaded', event => {
     // Actualiza el mensaje visible sin reescribir el index histórico.
     document.querySelectorAll('.masthead p').forEach(p => {
         if (p.textContent.includes('sesiones 1 a 4')) {
-            p.innerHTML = p.innerHTML.replace('sesiones 1 a 4', 'sesiones 1 a 5');
+            p.innerHTML = p.innerHTML.replace('sesiones 1 a 4', 'sesiones 1 a 6');
+        } else if (p.textContent.includes('sesiones 1 a 5')) {
+            p.innerHTML = p.innerHTML.replace('sesiones 1 a 5', 'sesiones 1 a 6');
         }
     });
 
