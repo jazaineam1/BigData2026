@@ -39,6 +39,14 @@ def find(cells: list[dict], needle: str) -> int:
     raise RuntimeError(f"No se encontró el marcador {needle!r}")
 
 
+def find_any(cells: list[dict], needles: tuple[str, ...]) -> int:
+    for needle in needles:
+        for i, cell in enumerate(cells):
+            if needle in src(cell):
+                return i
+    raise RuntimeError(f"No se encontró ninguno de los marcadores: {needles!r}")
+
+
 def insert_once(cells: list[dict], anchor: str, marker: str, new_cells: list[dict], *, after: bool) -> None:
     if any(marker in src(c) for c in cells):
         return
@@ -154,7 +162,7 @@ except Exception:
 '''),
     ], after=False)
 
-    i = find(cells, "## Lo que sigue")
+    i = find_any(cells, ("## Lo que sigue", "# Cierre"))
     put(cells[i], '''
 ## Lo que sigue
 
