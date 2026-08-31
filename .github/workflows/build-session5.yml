@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - utils/build_session5_notebook.py
+      - utils/normalize_session5_for_improve.py
       - utils/improve_session5_v2.py
       - utils/fix_session5_assets.py
       - utils/validate_session5_v2.py
@@ -26,6 +27,9 @@ jobs:
 
       - name: Construir base del notebook S5
         run: python utils/build_session5_notebook.py
+
+      - name: Normalizar marcadores para la auditoría
+        run: python utils/normalize_session5_for_improve.py
 
       - name: Aplicar auditoría integral S5
         run: python utils/improve_session5_v2.py
