@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Alinea S5 con el hilo S3→S4→S5→S6 del caso Compras Claras.
+"""Alinea S5 con el hilo real S3→S4→S5→S6 del caso Compras Claras.
 
-Se ejecuta después de improve_session5_v2.py. No cambia la regla 1.000→163→77;
-explicita que los 200 de S3 fueron un prototipo exploratorio y convierte la
-salida de S5 en una entrada concreta e individual para S6: s05_ancla_s06.json.
+Se ejecuta después de improve_session5_v2.py. No cambia la regla 1.000→163→77.
+Hace explícita la deuda que dejó la S4 real, fortalece la recuperación post-receso,
+convierte la salida de S5 en una entrada individual para S6 y limpia artefactos
+duplicados que puedan aparecer por regeneraciones históricas del notebook.
 """
 from __future__ import annotations
 
@@ -29,7 +30,13 @@ def md(text: str) -> dict:
 
 
 def code(text: str) -> dict:
-    return {"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": text.strip()}
+    return {
+        "cell_type": "code",
+        "execution_count": None,
+        "metadata": {},
+        "outputs": [],
+        "source": text.strip(),
+    }
 
 
 def find(cells: list[dict], needle: str) -> int:
@@ -37,14 +44,6 @@ def find(cells: list[dict], needle: str) -> int:
         if needle in src(cell):
             return i
     raise RuntimeError(f"No se encontró el marcador {needle!r}")
-
-
-def find_any(cells: list[dict], needles: tuple[str, ...]) -> int:
-    for needle in needles:
-        for i, cell in enumerate(cells):
-            if needle in src(cell):
-                return i
-    raise RuntimeError(f"No se encontró ninguno de los marcadores: {needles!r}")
 
 
 def insert_once(cells: list[dict], anchor: str, marker: str, new_cells: list[dict], *, after: bool) -> None:
@@ -137,6 +136,44 @@ def main() -> None:
     nb = json.loads(NB.read_text(encoding="utf-8"))
     cells = nb["cells"]
 
+    # La pregunta de S5 nace del punto donde terminó realmente S4.
+    for cell in cells:
+        text = src(cell)
+        if text.startswith("# Sesión 5 —"):
+            text = text.replace(
+                "# Sesión 5 — De una vista de Atlas a una consulta operacional con Cassandra",
+                "# Sesión 5 — De datos persistidos en Atlas a una consulta operacional con Cassandra",
+                1,
+            )
+            text = text.replace(
+                "**Pregunta profesional:** **¿cómo convierte Laura una priorización analítica en una consulta que pueda repetir sin reconstruir todo cada vez?**",
+                "**Pregunta profesional:** **¿cómo convierte Laura la evidencia que ya dejó persistida en Atlas en una bandeja priorizada y luego en una consulta que pueda repetir sin reconstruir todo cada vez?**",
+                1,
+            )
+            put(cell, text)
+            break
+
+    insert_once(cells, "### CONTINUIDAD S03-S05", "DEUDA ABIERTA S04", [md('''
+### DEUDA ABIERTA S04 — la clase terminó con datos, no con una decisión
+
+La sesión 4 alcanzó un punto concreto y útil:
+
+```text
+Atlas
+└── compras_claras
+    ├── noticias               → 987 documentos
+    └── entidades_noticias     → 142 documentos
+```
+
+Eso resolvió **dónde vive la evidencia y cómo la comparte el equipo**, pero dejó abierta la pregunta que daba nombre a S4:
+
+> **¿Qué contrato debe revisar Laura primero?**
+
+S5 existe para cerrar esa deuda. Primero convierte las 142 entidades en una vista explicable; después cruza esa señal con SECOP para construir la bandeja; solo cuando la bandeja existe aparece Cassandra como problema de servicio repetitivo.
+
+**PARA LLEVAR.** S4 dejó persistencia compartida. S5 debe producir una decisión operacional reproducible.
+''')], after=False)
+
     insert_once(cells, "## Mapa de la sesión", "CONTINUIDAD S03-S05", [md('''
 ### CONTINUIDAD S03-S05 — del prototipo a la bandeja operacional
 
@@ -164,17 +201,130 @@ entidad presente en prensa
         )
         put(cells[i], text)
 
+    # Recuperación post-receso: restaura también el contexto que Cassandra necesita.
+    i = find(cells, "# RECUPERACIÓN S05")
+    put(cells[i], '''
+# RECUPERACIÓN S05
+if "candidatos" not in globals():
+    import json, urllib.request
+    import pandas as pd
+    from collections import Counter
+
+    RAW = "https://raw.githubusercontent.com/jazaineam1/BigData2026/main"
+
+    with urllib.request.urlopen(f"{RAW}/Datos/entidades_en_noticias_2026.json") as r:
+        menciones = json.loads(r.read().decode("utf-8"))
+
+    for e in menciones:
+        n = e.get("noticias", 0)
+        e["nivel_menciones"] = "alta" if n >= 20 else "media" if n >= 5 else "baja"
+
+    niveles = Counter(m["nivel_menciones"] for m in menciones)
+    contexto_menciones = (
+        pd.DataFrame(menciones)[["entidad", "noticias", "nivel_menciones"]]
+        .rename(columns={"noticias": "noticias_entidad"})
+    )
+    assert contexto_menciones["entidad"].is_unique
+    vista_real = False
+
+    secop = pd.read_csv(
+        f"{RAW}/Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv",
+        low_memory=False,
+    )
+    entidades_en_prensa = set(contexto_menciones["entidad"])
+    paso1 = secop[secop["entidad"].isin(entidades_en_prensa)]
+    paso2 = paso1[
+        paso1["modalidad_de_contratacion"].str.contains("directa", case=False, na=False)
+    ]
+    respuestas = pd.to_numeric(paso2["respuestas_al_procedimiento"], errors="coerce")
+    paso3 = paso2[respuestas.eq(0)]
+    candidatos = (
+        paso3
+        .merge(contexto_menciones, on="entidad", how="left", validate="many_to_one")
+        .sort_values(["precio_base", "id_del_proceso"], ascending=[False, True])
+        .reset_index(drop=True)
+    )
+
+    with urllib.request.urlopen(f"{RAW}/Datos/noticias_contratacion_2026.json") as r:
+        noticias = json.loads(r.read().decode("utf-8"))
+    texto_prensa = " ".join(
+        f'{n.get("titulo") or ""} {n.get("subtitulo") or ""}' for n in noticias
+    ).casefold()
+    referencias = candidatos["referencia_del_proceso"].fillna("").astype(str).str.strip()
+    con_referencia = sum(
+        bool(x) and len(x) >= 6 and x.casefold() in texto_prensa
+        for x in referencias
+    )
+
+    assert len(menciones) == 142
+    assert dict(niveles) == {"baja": 111, "media": 25, "alta": 6}
+    assert len(secop) == 1000
+    assert len(paso1) == 163
+    assert len(candidatos) == 77
+    assert candidatos["noticias_entidad"].notna().all()
+    assert candidatos["nivel_menciones"].notna().all()
+    assert con_referencia == 0
+    print("Runtime recuperado: 142 entidades · 1.000 → 163 → 77 · 0/77 · contexto Atlas restaurado.")
+else:
+    print("La bandeja sigue en memoria:", len(candidatos), "candidatos. No fue necesario reconstruirla.")
+''')
+
     new_bridge = bridge_cells()
     try:
         b = find(cells, "PUENTE S05-S06")
-        # La versión previa del puente tenía exactamente dos celdas: explicación y código.
-        # Sustituimos esas dos por la nueva secuencia de tres, en vez de duplicarla.
-        cells[b:b + 2] = new_bridge
+        end = b + 1
+        while end < len(cells) and (
+            "s05_ancla_s06.json" in src(cells[end])
+            or "Interpretación del ancla elegida" in src(cells[end])
+        ):
+            end += 1
+        cells[b:end] = new_bridge
     except RuntimeError:
         h = find(cells, "# Hito S05 — De la priorización al servicio")
         cells[h:h] = new_bridge
 
-    i = find_any(cells, ("## Lo que sigue", "# Cierre"))
+    # Una sola celda de cierre de conexiones, aunque el constructor histórico se haya ejecutado varias veces.
+    indices_cierre = [
+        i for i, cell in enumerate(cells)
+        if "#@title Cerrar conexiones" in src(cell)
+        or "# Buena práctica: cerrar clientes al terminar la sesión." in src(cell)
+    ]
+    if indices_cierre:
+        keep = indices_cierre[0]
+        cierre_src = src(cells[keep])
+        if "CERRAR CONEXIONES S05" not in cierre_src:
+            cierre_src = cierre_src.replace(
+                "# Buena práctica: cerrar clientes al terminar la sesión.",
+                "# CERRAR CONEXIONES S05\n# Buena práctica: cerrar clientes al terminar la sesión.",
+                1,
+            )
+            put(cells[keep], cierre_src)
+        for idx in reversed(indices_cierre[1:]):
+            del cells[idx]
+
+    insert_once(cells, "## Lo que sigue", "CIERRE PEDAGÓGICO S05", [md('''
+# CIERRE PEDAGÓGICO S05 — la pregunta de S4 por fin tiene una respuesta operacional
+
+S4 terminó con **datos persistidos y compartidos**. S5 convirtió ese estado en una cadena defendible:
+
+```text
+142 entidades en Atlas
+→ 6 alta / 25 media / 111 baja
+→ 1.000 procesos SECOP
+→ 163 con entidad presente en prensa
+→ 77 candidatos con contratación directa y 0 respuestas
+→ 0/77 referencias de proceso citadas literalmente en títulos/subtítulos
+→ top esperado con pandas
+→ misma respuesta servida por Cassandra
+→ un proceso elegido como ancla para S6
+```
+
+**PARA LLEVAR.** Laura ya puede explicar por qué un proceso llegó a su bandeja y consultar repetidamente esa priorización. La bandeja **prioriza revisión**; no declara fraude, irregularidad ni causalidad.
+
+Lo más importante de Cassandra hoy no fue la sintaxis CQL: fue comprobar que **el diseño de almacenamiento nació de una pregunta concreta** y que el nuevo servicio devolvió la misma respuesta que la lógica analítica que lo alimentó.
+''')], after=False)
+
+    i = find(cells, "## Lo que sigue")
     put(cells[i], '''
 ## Lo que sigue
 
@@ -199,8 +349,9 @@ S6  qué hay alrededor de lo que voy a revisar
 Ahí aparece Neo4j. No para declarar irregularidades, sino para hacer de las **relaciones** una parte explícita de la revisión.
 ''')
 
-    NB.write_text(json.dumps(nb, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"[OK] S5 v3: {len(cells)} celdas; continuidad y puente individual S6 aplicados.")
+    NB.write_text(json.dumps(nb, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    json.loads(NB.read_text(encoding="utf-8"))
+    print(f"[OK] S5 v3: {len(cells)} celdas; hilo S4→S5→S6, recuperación y cierre saneados.")
 
 
 if __name__ == "__main__":
