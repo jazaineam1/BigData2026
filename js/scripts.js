@@ -5,7 +5,7 @@
 */
 //
 // Scripts
-// 
+//
 
 window.addEventListener('DOMContentLoaded', event => {
 
@@ -23,7 +23,7 @@ window.addEventListener('DOMContentLoaded', event => {
 
     };
 
-    // Shrink the navbar 
+    // Shrink the navbar
     navbarShrink();
 
     // Shrink the navbar when page is scrolled
@@ -49,6 +49,35 @@ window.addEventListener('DOMContentLoaded', event => {
                 navbarToggler.click();
             }
         });
+    });
+
+    // Sesión 5: se agrega aquí para no alterar el bloque histórico oculto
+    // de sesiones futuras que conserva index.html.
+    const courseRow = document.querySelector('#portfolio .row.g-4');
+    if (courseRow && !document.querySelector('[data-session="5"]')) {
+        const card = document.createElement('div');
+        card.className = 'col-lg-4 col-md-6';
+        card.setAttribute('data-session', '5');
+        card.innerHTML = `
+            <a class="course-card"
+               href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/5_Atlas_Cassandra_Query_First.ipynb"
+               target="_blank" rel="noopener noreferrer">
+                <div class="course-emoji" aria-hidden="true">🧱</div>
+                <div class="course-category">Sesión 5 · Atlas → Cassandra</div>
+                <div class="course-title">De la priorización a una consulta operacional</div>
+                <p class="course-description">
+                    Termina pipelines y vistas en Atlas, reproduce 1.000 → 163 → 77 y el límite 0/77;
+                    después diseña Cassandra desde la consulta con tutorial visual de Astra, CQL y CRUD en Python.
+                </p>
+            </a>`;
+        courseRow.appendChild(card);
+    }
+
+    // Actualiza el mensaje visible sin reescribir el index histórico.
+    document.querySelectorAll('.masthead p').forEach(p => {
+        if (p.textContent.includes('sesiones 1 a 4')) {
+            p.innerHTML = p.innerHTML.replace('sesiones 1 a 4', 'sesiones 1 a 5');
+        }
     });
 
 });
