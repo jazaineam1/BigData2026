@@ -46,6 +46,14 @@ def find(cells: list[dict], needle: str) -> int:
     raise RuntimeError(f"No se encontró el marcador {needle!r}")
 
 
+def find_any(cells: list[dict], needles: tuple[str, ...]) -> int:
+    for needle in needles:
+        for i, cell in enumerate(cells):
+            if needle in src(cell):
+                return i
+    raise RuntimeError(f"No se encontró ninguno de los marcadores: {needles!r}")
+
+
 def insert_once(cells: list[dict], anchor: str, marker: str, new_cells: list[dict], *, after: bool) -> None:
     if any(marker in src(c) for c in cells):
         return
@@ -136,7 +144,6 @@ def main() -> None:
     nb = json.loads(NB.read_text(encoding="utf-8"))
     cells = nb["cells"]
 
-    # La pregunta de S5 nace del punto donde terminó realmente S4.
     for cell in cells:
         text = src(cell)
         if text.startswith("# Sesión 5 —"):
@@ -201,7 +208,6 @@ entidad presente en prensa
         )
         put(cells[i], text)
 
-    # Recuperación post-receso: restaura también el contexto que Cassandra necesita.
     i = find(cells, "# RECUPERACIÓN S05")
     put(cells[i], '''
 # RECUPERACIÓN S05
@@ -283,7 +289,6 @@ else:
         h = find(cells, "# Hito S05 — De la priorización al servicio")
         cells[h:h] = new_bridge
 
-    # Una sola celda de cierre de conexiones, aunque el constructor histórico se haya ejecutado varias veces.
     indices_cierre = [
         i for i, cell in enumerate(cells)
         if "#@title Cerrar conexiones" in src(cell)
@@ -302,7 +307,9 @@ else:
         for idx in reversed(indices_cierre[1:]):
             del cells[idx]
 
-    insert_once(cells, "## Lo que sigue", "CIERRE PEDAGÓGICO S05", [md('''
+    if not any("CIERRE PEDAGÓGICO S05" in src(c) for c in cells):
+        cierre_anchor = find_any(cells, ("## Lo que sigue", "# Cierre"))
+        cells[cierre_anchor:cierre_anchor] = [md('''
 # CIERRE PEDAGÓGICO S05 — la pregunta de S4 por fin tiene una respuesta operacional
 
 S4 terminó con **datos persistidos y compartidos**. S5 convirtió ese estado en una cadena defendible:
@@ -322,9 +329,9 @@ S4 terminó con **datos persistidos y compartidos**. S5 convirtió ese estado en
 **PARA LLEVAR.** Laura ya puede explicar por qué un proceso llegó a su bandeja y consultar repetidamente esa priorización. La bandeja **prioriza revisión**; no declara fraude, irregularidad ni causalidad.
 
 Lo más importante de Cassandra hoy no fue la sintaxis CQL: fue comprobar que **el diseño de almacenamiento nació de una pregunta concreta** y que el nuevo servicio devolvió la misma respuesta que la lógica analítica que lo alimentó.
-''')], after=False)
+''')]
 
-    i = find(cells, "## Lo que sigue")
+    i = find_any(cells, ("## Lo que sigue", "# Cierre"))
     put(cells[i], '''
 ## Lo que sigue
 
