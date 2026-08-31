@@ -1,0 +1,41 @@
+name: Construir sesión 5
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - utils/build_session5_notebook.py
+      - utils/validate_session5_notebook.py
+      - assets/tutoriales/atlas-s05-pipelines-vistas.html
+      - assets/tutoriales/astra-cassandra-paso-a-paso.html
+      - .github/workflows/build-session5.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v6
+
+      - name: Construir notebook S5
+        run: python utils/build_session5_notebook.py
+
+      - name: Validar notebook y tutoriales
+        run: python utils/validate_session5_notebook.py
+
+      - name: Publicar notebook regenerado
+        shell: bash
+        run: |
+          if git diff --quiet -- Cuadernos/5_Atlas_Cassandra_Query_First.ipynb; then
+            echo 'El notebook ya estaba sincronizado.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Cuadernos/5_Atlas_Cassandra_Query_First.ipynb
+          git commit -m 'Regenera sesión 5 con feedback del estudiante'
+          git push
