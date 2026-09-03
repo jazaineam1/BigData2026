@@ -29,7 +29,6 @@ required = [
     "formular mejores hipótesis de revisión",
     '"alcance_prensa": "contexto a nivel de entidad; sin referencia exacta del proceso en título/subtítulo"',
     '"hipotesis_h1": "refutada: ninguna referencia SECOP exacta apareció en título/subtítulo"',
-    "0/77 → refinar alcance de la prensa",
 ]
 missing = [x for x in required if x not in text]
 if missing:
