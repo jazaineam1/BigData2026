@@ -26,11 +26,22 @@ def find(cells: list[dict], needle: str) -> int:
     raise RuntimeError(f"No se encontró {needle!r}")
 
 
+def find_any(cells: list[dict], needles: tuple[str, ...]) -> int:
+    for needle in needles:
+        for i, cell in enumerate(cells):
+            if needle in src(cell):
+                return i
+    raise RuntimeError(f"No se encontró ninguno de {needles!r}")
+
+
 nb = json.loads(NB.read_text(encoding="utf-8"))
 cells = nb["cells"]
 
 # 1) La sección deja de anunciar un cero y anuncia una pregunta falsable.
-i = find(cells, "## 6. El límite que debe viajar con la bandeja")
+i = find_any(cells, (
+    "## 6. El límite que debe viajar con la bandeja",
+    "## 6. Antes de afirmar: formula una hipótesis que pueda fallar",
+))
 put(cells[i], '''
 ---
 ## 6. Antes de afirmar: formula una hipótesis que pueda fallar
