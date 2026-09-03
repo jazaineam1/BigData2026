@@ -12,12 +12,14 @@ on:
       - utils/improve_session5_v4.py
       - utils/improve_session5_v5.py
       - utils/improve_session5_v6.py
+      - utils/improve_session5_v7.py
       - utils/fix_session5_assets.py
       - utils/validate_session5_v2.py
       - utils/validate_session5_v3.py
       - utils/validate_session5_v4.py
       - utils/validate_session5_v5.py
       - utils/validate_session5_v6.py
+      - utils/validate_session5_v7.py
       - assets/tutoriales/atlas-s05-pipelines-vistas-v2.html
       - assets/tutoriales/astra-cassandra-paso-a-paso-v2.html
       - assets/tutoriales/atlas-s05-pipelines-vistas-v3.html
@@ -56,6 +58,9 @@ jobs:
       - name: Cerrar S5 con hipótesis refinada y puente a S6
         run: python utils/improve_session5_v6.py
 
+      - name: Reducir carga cognitiva sin quitar herramientas
+        run: python utils/improve_session5_v7.py
+
       - name: Ajustar assets deterministas
         run: python utils/fix_session5_assets.py
 
@@ -66,16 +71,17 @@ jobs:
           python utils/validate_session5_v4.py
           python utils/validate_session5_v5.py
           python utils/validate_session5_v6.py
+          python utils/validate_session5_v7.py
 
       - name: Publicar artefactos regenerados
         shell: bash
         run: |
-          if git diff --quiet -- Cuadernos/5_Atlas_Cassandra_Query_First.ipynb assets/tutoriales/astra-cassandra-paso-a-paso-v2.html; then
+          if git diff --quiet -- Cuadernos/5_Atlas_Cassandra_Query_First.ipynb assets/tutoriales/astra-cassandra-paso-a-paso-v2.html assets/tutoriales/astra-cassandra-paso-a-paso-v3.html; then
             echo 'S5 y sus assets ya estaban sincronizados.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add Cuadernos/5_Atlas_Cassandra_Query_First.ipynb assets/tutoriales/astra-cassandra-paso-a-paso-v2.html
-          git commit -m 'Regenera S5 con contraste de hipótesis y puente relacional'
+          git add Cuadernos/5_Atlas_Cassandra_Query_First.ipynb assets/tutoriales/astra-cassandra-paso-a-paso-v2.html assets/tutoriales/astra-cassandra-paso-a-paso-v3.html
+          git commit -m 'Regenera S5 para principiantes sin quitar herramientas'
           git push
