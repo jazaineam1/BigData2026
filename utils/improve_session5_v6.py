@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Ajusta el cierre de S5 para que 0/77 sea método, no protagonista."""
+"""Ajusta S5 para que 0/77 sea método de contraste, no protagonista."""
 from __future__ import annotations
 
 import json
@@ -29,7 +29,68 @@ def find(cells: list[dict], needle: str) -> int:
 nb = json.loads(NB.read_text(encoding="utf-8"))
 cells = nb["cells"]
 
-# Cierre: la cadena principal es decisión → contraste → especificación → servicio.
+# 1) La sección deja de anunciar un cero y anuncia una pregunta falsable.
+i = find(cells, "## 6. El límite que debe viajar con la bandeja")
+put(cells[i], '''
+---
+## 6. Antes de afirmar: formula una hipótesis que pueda fallar
+
+La bandeja ya existe. Ahora hacemos algo distinto de filtrar: **ponemos a prueba una afirmación sobre la prensa**.
+
+La pregunta no es “¿la prensa sirve o no sirve?”. Esa pregunta es demasiado vaga. La hacemos observable:
+
+> **H1: al menos una de las 77 referencias SECOP exactas aparece literalmente en los títulos o subtítulos examinados.**
+
+¿Por qué esta formulación es mejor?
+
+```text
+afirmación vaga
+"la prensa habla de estos contratos"
+        ↓
+hipótesis observable
+"aparece al menos un ID exacto"
+        ↓
+regla de comprobación
+buscar los 77 IDs en título + subtítulo
+```
+
+Si aparece al menos uno, H1 sobrevive a esta prueba literal. Si aparecen cero, H1 queda refutada **bajo esta operacionalización**.
+
+**Importante:** esto no es todavía un test estadístico inferencial. Es un contraste empírico de una hipótesis de trabajo sobre este corpus.
+
+**PARA LLEVAR.** La prensa no entra al evaluador para dictar culpabilidad. Entra para aportar contexto, permitir formular hipótesis y ayudarnos a decidir cuál debe ser la siguiente evidencia.
+''')
+
+# 2) El hito conserva explícitamente hipótesis, observación y decisión.
+i = find(cells, "hito = f'''# Hito S05")
+text = src(cells[i])
+marker = '- Contexto desde Atlas: {primer_noticias} noticias — nivel {primer_nivel}'
+if marker in text and "## Contraste de hipótesis de prensa" not in text:
+    text = text.replace(
+        marker,
+        marker + '''
+
+## Contraste de hipótesis de prensa
+- H1: al menos una de las 77 referencias SECOP exactas aparece en título/subtítulo.
+- Operacionalización: búsqueda literal de las 77 referencias exactas.
+- Resultado observado: {con_referencia}/77 coincidencias exactas.
+- Decisión sobre H1: {"refutada bajo esta prueba literal" if con_referencia == 0 else "no refutada por esta prueba literal"}.
+- Alcance de la prensa: contexto a nivel de entidad; falta todavía evidencia textual específica del proceso.
+- Hipótesis siguiente: relación temática o relacional mediante objeto, proveedor, fechas, cuerpo completo o relevancia textual.''',
+        1,
+    )
+put(cells[i], text)
+
+# 3) La rúbrica evalúa razonamiento de hipótesis, no memorización del cero.
+i = find(cells, "## Rúbrica de calidad del hito")
+text = src(cells[i])
+text = text.replace(
+    "| Regla + límite | 1.000→163→77 y explica 0/77 | números sin límite concreto | llama “irregulares” a los 77 | 20 |",
+    "| Regla + contraste | 1.000→163→77 + H1 + operacionalización + conclusión correcta | reporta 0/77 sin explicar qué hipótesis probó | convierte prensa o bandeja en acusación | 20 |",
+)
+put(cells[i], text)
+
+# 4) Cierre: la cadena principal es decisión → contraste → especificación → servicio.
 i = find(cells, "CIERRE PEDAGÓGICO S05")
 put(cells[i], '''
 # CIERRE PEDAGÓGICO S05 — la pregunta de S4 por fin tiene una respuesta operacional
@@ -77,7 +138,7 @@ formular hipótesis
 Lo más importante de Cassandra hoy tampoco fue la sintaxis CQL: fue comprobar que **el diseño de almacenamiento nació de una pregunta concreta** y que el nuevo servicio devolvió la misma respuesta que la lógica analítica que lo alimentó.
 ''')
 
-# Puente: S6 continúa H2 por relaciones y S7 por texto/relevancia.
+# 5) Puente: S6 continúa H2 por relaciones y S7 por texto/relevancia.
 i = find(cells, "## Lo que sigue")
 put(cells[i], '''
 ## Lo que sigue — una hipótesis refutada produce una pregunta mejor
@@ -109,4 +170,4 @@ Ahí aparece Neo4j. No para declarar irregularidades, sino para **probar una nue
 
 NB.write_text(json.dumps(nb, ensure_ascii=False, indent=1), encoding="utf-8")
 json.loads(NB.read_text(encoding="utf-8"))
-print(f"[OK] S5 v6: {len(cells)} celdas; cierre y puente S6 alineados con contraste de hipótesis.")
+print(f"[OK] S5 v6: {len(cells)} celdas; hipótesis integrada en sección, hito, rúbrica, cierre y puente S6.")
