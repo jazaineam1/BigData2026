@@ -10,10 +10,12 @@ on:
       - utils/improve_session5_v2.py
       - utils/improve_session5_v3.py
       - utils/improve_session5_v4.py
+      - utils/improve_session5_v5.py
       - utils/fix_session5_assets.py
       - utils/validate_session5_v2.py
       - utils/validate_session5_v3.py
       - utils/validate_session5_v4.py
+      - utils/validate_session5_v5.py
       - assets/tutoriales/atlas-s05-pipelines-vistas-v2.html
       - assets/tutoriales/astra-cassandra-paso-a-paso-v2.html
       - assets/tutoriales/atlas-s05-pipelines-vistas-v3.html
@@ -46,6 +48,9 @@ jobs:
       - name: Añadir microejemplos y fundamento de negocio
         run: python utils/improve_session5_v4.py
 
+      - name: Reformular control de prensa como contraste de hipótesis
+        run: python utils/improve_session5_v5.py
+
       - name: Ajustar assets deterministas
         run: python utils/fix_session5_assets.py
 
@@ -54,6 +59,7 @@ jobs:
           python utils/validate_session5_v2.py
           python utils/validate_session5_v3.py
           python utils/validate_session5_v4.py
+          python utils/validate_session5_v5.py
 
       - name: Publicar artefactos regenerados
         shell: bash
@@ -65,5 +71,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Cuadernos/5_Atlas_Cassandra_Query_First.ipynb assets/tutoriales/astra-cassandra-paso-a-paso-v2.html
-          git commit -m 'Regenera S5 con microejemplos y fundamento de negocio'
+          git commit -m 'Regenera S5 con contraste de hipótesis y alcance de prensa'
           git push
