@@ -59,32 +59,32 @@ def main() -> None:
     )
     put(cells[i], text)
 
-    # 3) Sustituir el bloque de precisión por un bloque de hipótesis más potente.
+    # 3) Sustituir el bloque de precisión por un bloque de hipótesis falsable.
     i = find(cells, "### PRECISIÓN 0/77 S05")
     put(cells[i], '''
 ### CONTRASTE DE HIPÓTESIS S05 — usar la prensa para preguntar mejor, no para acusar
 
-Hasta ahora sabemos que las noticias aportan **contexto sobre entidades**. Antes de convertir ese contexto en una afirmación sobre contratos concretos, formulamos una hipótesis de trabajo que podamos intentar refutar.
+Hasta ahora sabemos que las noticias aportan **contexto sobre entidades**. Antes de convertir ese contexto en una afirmación sobre contratos concretos, formulamos una hipótesis de trabajo que pueda fallar de forma observable.
 
-> **Hipótesis de trabajo H1:** si la evidencia periodística disponible es específica de los 77 procesos priorizados, entonces deberíamos encontrar al menos algunas de sus referencias SECOP exactas en los títulos o subtítulos examinados.
+> **Hipótesis de trabajo H1:** al menos una de las 77 referencias SECOP exactas aparece literalmente en los títulos o subtítulos examinados del corpus de prensa.
 
-La operacionalizamos de forma observable:
+Esta H1 es útil pedagógicamente porque no depende de opiniones: sabemos exactamente qué observar para sostenerla o refutarla.
 
 ```text
 77 referencias SECOP exactas
         ↓
 búsqueda literal en título + subtítulo
         ↓
-coincidencias observadas
+¿aparece al menos una?
 ```
 
-**Resultado del contraste:** `0/77` coincidencias exactas.
+**Resultado del contraste:** `0/77` coincidencias exactas. En este corpus y bajo esta definición literal, **H1 queda refutada**.
 
-Eso **no es un test estadístico inferencial**: no hay p-valor ni estimación poblacional. Es un **contraste empírico de una hipótesis de trabajo** sobre este corpus y esta definición de coincidencia.
+Eso **no es un test estadístico inferencial**: no hay p-valor ni estimación poblacional. Es un **contraste empírico de una hipótesis de trabajo** sobre datos concretos y una regla de observación concreta.
 
 #### ¿Qué decisión permite tomar?
 
-La evidencia **no apoya H1 bajo esta operacionalización exacta**. Por tanto, debemos refinar la afirmación:
+El resultado no invalida la prensa; obliga a **especificar mejor qué evidencia aporta**:
 
 ```text
 ANTES, demasiado fuerte:
@@ -95,18 +95,18 @@ DESPUÉS, mejor especificada:
  todavía falta evidencia textual específica del proceso"
 ```
 
-Aquí la prensa **gana especificidad analítica** porque ahora sabemos con precisión cuál es su unidad de evidencia:
+Aquí la prensa **gana especificidad analítica** porque ahora conocemos con precisión su unidad de evidencia:
 
 - **unidad observada en prensa:** la entidad y su intensidad de mención;
 - **unidad que Laura revisa:** el proceso contractual;
 - **puente actual:** contexto de entidad, no identificación literal del proceso.
 
-**Cómo se lee.** No encontramos referencias exactas de los 77 procesos en los títulos o subtítulos examinados.  
+**Cómo se lee.** Ninguna de las 77 referencias exactas apareció en los títulos o subtítulos examinados.  
 **Qué nos dice.** La prensa sigue siendo útil para **formular y refinar hipótesis**, priorizar contexto y decidir qué evidencia adicional buscar.  
 **Qué NO permite concluir todavía.** No demuestra que ninguna noticia sea relevante para esos procesos: no examinamos aquí cuerpos completos, nombres alternativos, objeto contractual, proveedor, fechas ni similitud semántica.  
-**Error frecuente.** Confundir “H1 no fue apoyada por esta prueba” con “la prensa no sirve”. El contraste justamente nos dice **para qué sí sirve y hasta dónde llega**.
+**Error frecuente.** Confundir “H1 literal fue refutada” con “la prensa no sirve”. El contraste justamente nos dice **para qué sí sirve y hasta dónde llega**.
 
-**PARA LLEVAR.** Una buena analítica no busca confirmar la primera historia; formula una hipótesis, define cómo podría fallar, mira la evidencia y **reformula la afirmación al nivel que los datos soportan**.
+**PARA LLEVAR.** Una buena analítica no busca confirmar la primera historia; formula una hipótesis falsable, define cómo observarla, mira la evidencia y **reformula la afirmación al nivel que los datos soportan**.
 ''')
 
     # 4) Inmediatamente después, dejar una hipótesis revisada que conecte S6/S7.
@@ -151,7 +151,7 @@ S7 → texto: relevancia, no solo coincidencia literal
                 '"criterio_priorizacion": "entidad en prensa; contratación directa; 0 respuestas",',
                 '"criterio_priorizacion": "entidad en prensa; contratación directa; 0 respuestas",\n'
                 '    "alcance_prensa": "contexto a nivel de entidad; sin referencia exacta del proceso en título/subtítulo",\n'
-                '    "hipotesis_h1": "no apoyada por búsqueda literal de referencia exacta en título/subtítulo",',
+                '    "hipotesis_h1": "refutada: ninguna referencia SECOP exacta apareció en título/subtítulo",',
                 1,
             )
             put(cell, text)
@@ -163,11 +163,11 @@ S7 → texto: relevancia, no solo coincidencia literal
         if "CIERRE PEDAGÓGICO S05" in text:
             text = text.replace(
                 "1.000 → 163 → 77\n        ↓\n       0 / 77\n        ↓\ncontrato pandas",
-                "1.000 → 163 → 77\n        ↓\ncontrastar H1: ¿hay evidencia literal del proceso?\n        ↓\n0/77 → refinar alcance de la prensa\n        ↓\ncontrato pandas",
+                "1.000 → 163 → 77\n        ↓\ncontrastar H1: ¿aparece algún ID exacto?\n        ↓\n0/77 → refinar alcance de la prensa\n        ↓\ncontrato pandas",
             )
             text = text.replace(
                 "No encontró evidencia literal a nivel de proceso en los títulos/subtítulos (`0/77`), así que la señal periodística debe seguir tratándose como **contexto de entidad**, no como acusación sobre contratos concretos.",
-                "Contrastó una hipótesis de especificidad y obtuvo `0/77` referencias exactas en títulos/subtítulos. El valor del resultado no es el cero: es que obliga a **especificar correctamente la evidencia de prensa como contexto de entidad** y a formular la siguiente hipótesis en vez de sobreafirmar.",
+                "Contrastó una hipótesis literal y obtuvo `0/77` referencias exactas en títulos/subtítulos. El valor del resultado no es el cero: es que obliga a **especificar correctamente la evidencia de prensa como contexto de entidad** y a formular la siguiente hipótesis en vez de sobreafirmar.",
             )
             put(cell, text)
 
@@ -177,7 +177,7 @@ S7 → texto: relevancia, no solo coincidencia literal
         if "# Hito S05 — De la priorización al servicio" in text and "hipótesis" not in text.lower():
             text = text.replace(
                 "## Mi límite concreto",
-                "## Mi contraste de hipótesis\n\n- **H1 de trabajo:** la prensa identifica de forma literal algunos procesos priorizados.\n- **Cómo la operacionalicé:** busqué la referencia SECOP exacta en título/subtítulo.\n- **Resultado:** 0/77 coincidencias exactas.\n- **Decisión:** H1 no queda apoyada bajo esta prueba; la prensa se conserva como contexto de entidad.\n- **Hipótesis siguiente:** buscar relación temática mediante objeto, proveedor, fechas, cuerpo completo o relevancia textual.\n\n## Mi límite concreto",
+                "## Mi contraste de hipótesis\n\n- **H1 de trabajo:** al menos una de las 77 referencias SECOP exactas aparece en título/subtítulo.\n- **Cómo la operacionalicé:** busqué literalmente las 77 referencias en esos dos campos.\n- **Resultado:** 0/77 coincidencias exactas.\n- **Decisión:** H1 queda refutada en este corpus y bajo esta regla literal; la prensa se conserva como contexto de entidad.\n- **Hipótesis siguiente:** buscar relación temática mediante objeto, proveedor, fechas, cuerpo completo o relevancia textual.\n\n## Mi límite concreto",
                 1,
             )
             put(cell, text)
