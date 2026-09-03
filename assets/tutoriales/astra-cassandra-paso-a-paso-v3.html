@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Astra DB + Cassandra — S05 query-first</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--v950:#0b241c;--v800:#123f2b;--v700:#175c3c;--v100:#e3efe6;--d500:#c9a227;--d100:#f7ecc9;--c50:#faf7f0;--t:#172019;--g:#5c6b63;--line:#e2dcc8;--red:#a53828;--shadow:0 24px 48px -18px rgba(11,36,28,.28),0 4px 10px -4px rgba(11,36,28,.12)}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}body{height:100dvh;display:flex;flex-direction:column;color:var(--t);font-family:"IBM Plex Sans",Arial,sans-serif;background:radial-gradient(1000px 540px at 90% -10%,rgba(201,162,39,.1),transparent 60%),var(--c50)}h1,h2,h3{font-family:"Fraunces",Georgia,serif;margin:0}code,pre,.mono{font-family:"IBM Plex Mono",Consolas,monospace}.bar{position:fixed;top:0;left:0;height:4px;background:var(--d500);z-index:30}header{flex:none;display:flex;justify-content:space-between;align-items:center;padding:10px clamp(18px,4vw,48px) 7px}.brand{font-weight:700;color:var(--v800)}.count{font:13px "IBM Plex Mono";color:var(--g);background:#fff;border:1px solid var(--line);padding:6px 14px;border-radius:999px}main{flex:1;min-height:0;padding:4px clamp(14px,4vw,48px) 8px}.stage{height:100%;position:relative;max-width:1520px;margin:auto}.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transform:translateY(12px) scale(.99);transition:.28s;background:#fff;border:1px solid rgba(23,92,60,.08);border-radius:20px;padding:clamp(18px,3vw,38px);overflow:auto;box-shadow:var(--shadow)}.slide.on{opacity:1;pointer-events:auto;transform:none}.tag{display:inline-flex;padding:6px 14px;border-radius:999px;background:var(--v100);color:var(--v700);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px}.tag.gold{background:var(--d100);color:#6b5100}.slide h1{font-size:clamp(34px,5vw,58px);line-height:1.03;color:var(--v950)}.slide h2{font-size:clamp(23px,3vw,33px);color:var(--v800);margin-bottom:7px}.sub{color:var(--g);font-size:15px;line-height:1.5;max-width:78ch}.grid{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.12fr);gap:24px;align-items:start}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.card{border:1px solid var(--line);border-radius:11px;padding:12px;background:var(--c50);font-size:13px;line-height:1.4}.call{margin-top:10px;padding:11px 14px;border-radius:10px;font-size:13px;line-height:1.45;background:var(--v100);color:#0e3524;border:1px solid #c7e0cf}.call.warn{background:#fff5dd;color:#604500;border-color:#ead69d}.call.bad{background:#fbe9e5;color:#692719;border-color:#ecc0b6}.result{margin-top:10px;padding:11px 14px;border-left:4px solid var(--d500);border-radius:8px;background:#fff7dc;color:#3f3512;font-size:13px}pre{background:var(--v950);color:#e8f1ea;padding:14px;border-radius:10px;overflow:auto;max-height:38vh;font-size:12px;line-height:1.5}.ui{min-height:300px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 8px 18px -8px rgba(11,36,28,.22);overflow:hidden}.ui-top{padding:11px 14px;background:#f6f7f7;border-bottom:1px solid #dde3df;display:flex;justify-content:space-between;font-size:12px}.ui-body{padding:18px}.label{font-size:11px;color:var(--g);text-transform:uppercase;letter-spacing:.04em;margin-top:12px}.field{margin-top:5px;border:1px solid #cbd6d0;border-radius:7px;padding:9px 10px;background:#fff;font:12px "IBM Plex Mono"}.choices{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}.choices span{border:1px solid #cbd6d0;border-radius:8px;padding:9px 11px;font-size:12px}.choices .sel{border:2px solid var(--v700);background:var(--v100);font-weight:700}.uibtn{display:inline-block;margin-top:14px;background:var(--v700);color:#fff;padding:9px 14px;border-radius:7px;font-weight:700;font-size:12px}.prompt{background:var(--v950);color:#dff0e5;border-radius:9px;padding:14px;font:13px/1.55 "IBM Plex Mono"}.flow{display:grid;gap:8px;justify-items:center;margin:12px 0}.node{width:min(100%,620px);padding:12px 16px;border:1px solid var(--line);border-radius:11px;background:var(--c50);text-align:center}.arrow{color:var(--d500);font-size:23px;font-weight:700}.drawer{border:1px solid var(--line);border-radius:12px;padding:13px;margin:10px 0;background:var(--c50)}.drawer b{color:var(--v800)}.item{display:grid;grid-template-columns:90px 1fr;gap:10px;padding:7px 9px;margin-top:6px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:12px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--g);font-size:11px;text-transform:uppercase}a{color:var(--v700)}nav{flex:none;display:flex;justify-content:center;align-items:center;gap:12px;padding:5px 18px 10px}nav button{min-width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--v800);font-size:18px;cursor:pointer}.full{width:auto!important;border-radius:999px!important;padding:0 13px;font:700 12px "IBM Plex Sans"}.dots{display:flex;gap:6px;flex-wrap:wrap;max-width:55vw}.dot{width:10px;min-width:10px;height:10px;border:0;border-radius:50%;background:var(--line);padding:0}.dot.on{width:24px;background:var(--v700);border-radius:5px}.embed header{display:none}.embed main{padding:4px 10px}.embed .slide{padding:clamp(12px,2vw,22px)}@media(max-width:760px){.grid,.cards{grid-template-columns:1fr}.ui{min-height:250px}.full{display:none}}
+</style></head>
+<body><div class="bar" id="bar"></div><header><div class="brand">Universidad Central · Big Data · S05</div><div class="count"><b id="n">1</b>/<span id="tot"></span></div></header>
+<main><div class="stage">
+<section class="slide on"><div class="tag gold">Tutorial visual 2</div><h1>Astra DB + Cassandra: servir una pregunta conocida</h1><p class="sub">La bandeja ya existe. Ahora la pregunta es operacional: para un corte y un departamento, devolver primero los procesos de mayor valor. pandas ya fijó qué respuesta esperamos; Cassandra debe servir la misma.</p><div class="cards"><div class="card"><b>Pregunta</b><p><code>corte + departamento → top 5</code>.</p></div><div class="card"><b>Diseño</b><p>la tabla nace del patrón de acceso.</p></div><div class="card"><b>Control</b><p>mismos IDs y mismo orden que pandas.</p></div></div><div class="call warn"><b>Transparencia visual.</b> No tenemos capturas autenticadas de una cuenta del curso para estas pantallas. Las cajas de interfaz están rotuladas como <b>representación</b>; no son fotografías de Astra.</div></section>
+
+<section class="slide"><div class="tag">Antes de hacer clic</div><h2>¿Por qué Cassandra si hoy solo tenemos 77 filas?</h2><div class="grid"><div><p class="sub">No la necesitamos por volumen. La usamos para aprender a diseñar un servicio cuando una lectura se vuelve estable y repetitiva.</p><pre>GET /prioridades
+  ?corte=2026-09-03
+  &departamento=Bogota
+  &limit=5</pre><div class="call"><b>Pregunta de Laura:</b> “para este corte y este departamento, ¿qué cinco procesos abro primero?”</div></div><div><table><tr><th>dato</th><th>papel de negocio</th></tr><tr><td><code>corte</code></td><td>versión/fecha de la bandeja</td></tr><tr><td><code>departamento</code></td><td>cola territorial de trabajo</td></tr><tr><td><code>valor DESC</code></td><td>orden por exposición económica</td></tr><tr><td><code>LIMIT 5</code></td><td>primeras filas que atiende el revisor</td></tr></table><div class="call warn"><b>No es benchmark.</b> 77 filas caben perfectamente en pandas. Aquí estudiamos <b>query-first design</b>, no demostramos necesidad de infraestructura distribuida.</div></div></div></section>
+
+<section class="slide"><div class="tag">Modelo mental</div><h2>Astra, Cassandra, CQL y keyspace no son lo mismo</h2><div class="cards"><div class="card"><b>Astra DB</b><p>servicio administrado: evita instalar un servidor Cassandra en Windows.</p></div><div class="card"><b>Cassandra</b><p>motor/modelo wide-column que estamos estudiando.</p></div><div class="card"><b>CQL</b><p>lenguaje con el que definimos y consultamos tablas Cassandra.</p></div></div><div class="flow"><div class="node"><b>Astra database</b></div><div class="arrow">↓</div><div class="node"><b>keyspace compras_claras</b><br><span class="sub">contenedor lógico de tablas</span></div><div class="arrow">↓</div><div class="node"><b>prioridades_por_corte_departamento</b></div></div><div class="call"><b>Keyspace:</b> para esta clase, imagínalo como el espacio lógico que agrupa las tablas de Compras Claras. No necesitamos entrar hoy en estrategias de replicación.</div></section>
+
+<section class="slide"><div class="tag">Paso 1</div><h2>Crea Serverless (non-vector)</h2><div class="grid"><div><ol><li>Abre <a href="https://astra.datastax.com/" target="_blank" rel="noopener">Astra Portal ↗</a> e inicia sesión.</li><li>Pulsa <b>Create database</b>.</li><li>Selecciona <b>Serverless (non-vector)</b>.</li><li>Nombre: <code>compras-claras-s05</code>.</li><li>Primer keyspace: <code>compras_claras</code>.</li><li>Elige proveedor y una región disponible en tu plan.</li><li>Pulsa <b>Create database</b>.</li></ol><div class="call"><b>¿Por qué non-vector?</b> Hoy consultamos una tabla Cassandra/CQL por claves. No estamos trabajando embeddings ni búsqueda vectorial.</div></div><div class="ui" aria-label="Representación del formulario de creación de una base non-vector"><div class="ui-top"><b>Create database</b><span>representación</span></div><div class="ui-body"><div class="label">Database type</div><div class="choices"><span>Serverless (vector)</span><span class="sel">Serverless (non-vector)</span></div><div class="label">Database name</div><div class="field">compras-claras-s05</div><div class="label">First keyspace</div><div class="field">compras_claras</div><div class="label">Provider / region</div><div class="field">elige una región disponible</div><div class="uibtn">Create database</div></div></div></div></section>
+
+<section class="slide"><div class="tag">Paso 2</div><h2>Espera hasta ver <code>Active</code></h2><div class="grid"><div><p class="sub">El servicio necesita aprovisionarse. No avances mientras el estado siga cambiando.</p><div class="cards"><div class="card">✓ non-vector</div><div class="card">✓ keyspace <code>compras_claras</code></div><div class="card">✓ estado <b>Active</b></div></div><div class="call warn">Si tarda, espera o recarga. Crear otra base solo multiplica la confusión.</div></div><div class="ui" aria-label="Representación de una base Astra en estado Active"><div class="ui-top"><b>compras-claras-s05</b><span>representación</span></div><div class="ui-body"><div class="choices"><span class="sel">Active</span><span>CQL console</span><span>Connection details</span></div><p class="sub">El control que importa aquí es el estado <b>Active</b>.</p></div></div></div></section>
+
+<section class="slide"><div class="tag">Paso 3</div><h2>Abre CQL Console</h2><div class="grid"><div><ol><li>Entra a la base.</li><li>Abre <b>CQL console</b>.</li><li>Espera a ver <code>token@cqlsh&gt;</code>.</li></ol><div class="call"><b>Control:</b> ese prompt significa que la consola embebida ya está conectada. No instalamos terminal, Bash ni servidor local.</div><div class="call warn"><b>No ejecutes <code>CREATE KEYSPACE</code>.</b> El primer keyspace ya se creó desde el portal.</div></div><div class="prompt">Connecting to Astra DB…<br><br><b>token@cqlsh&gt;</b> <span style="opacity:.65">▌</span></div></div></section>
+
+<section class="slide"><div class="tag">Concepto clave</div><h2>Partition = cajón; clustering = orden dentro del cajón</h2><div class="grid"><div><div class="drawer"><b>Cajón: 2026-09-03 + Bogotá</b><div class="item"><span>$180 M</span><span>P8</span></div><div class="item"><span>$120 M</span><span>P3</span></div><div class="item"><span>$40 M</span><span>P5</span></div></div><div class="drawer"><b>Cajón: 2026-09-03 + Antioquia</b><div class="item"><span>$250 M</span><span>P9</span></div><div class="item"><span>$70 M</span><span>P2</span></div></div></div><div><p><b>Partition key:</b> <code>(corte, departamento)</code> = etiqueta que localiza el cajón.</p><p><b>Clustering:</b> <code>valor_base DESC, id_proceso ASC</code> = orden de filas dentro de ese cajón.</p><pre>PRIMARY KEY ((corte, departamento), valor_base, id_proceso)</pre><div class="call warn"><b>Error frecuente.</b> En Cassandra la PRIMARY KEY no solo identifica: también determina localización y organización de los datos para la consulta.</div></div></div></section>
+
+<section class="slide"><div class="tag">Paso 4 · CQL mínimo</div><h2>Lee cinco comandos dentro de la misma historia</h2><table><tr><th>comando</th><th>qué hace hoy</th><th>qué debes mirar</th></tr><tr><td><code>USE</code></td><td>trabaja en <code>compras_claras</code></td><td>cambia el contexto</td></tr><tr><td><code>CREATE TABLE</code></td><td>define la tabla query-first</td><td>la PK nace de la consulta</td></tr><tr><td><code>INSERT</code></td><td>escribe/actualiza una fila por PK</td><td>comportamiento de upsert</td></tr><tr><td><code>SELECT ... WHERE</code></td><td>lee una partición</td><td>conoce corte + departamento</td></tr><tr><td><code>UPDATE / DELETE</code></td><td>modifica/elimina una fila identificada</td><td>necesita la clave suficiente</td></tr></table><div class="call"><b>CQL se parece a SQL en la forma.</b> Eso no significa que Cassandra herede el mismo modelo de consultas ad hoc.</div></section>
+
+<section class="slide"><div class="tag">Paso 5</div><h2>Crea la tabla query-first</h2><pre>USE compras_claras;
+
+CREATE TABLE IF NOT EXISTS prioridades_por_corte_departamento (
+  corte date,
+  departamento text,
+  valor_base bigint,
+  id_proceso text,
+  entidad text,
+  noticias_entidad int,
+  nivel_menciones text,
+  estado_revision text,
+  url_secop text,
+  criterio text,
+  PRIMARY KEY ((corte, departamento), valor_base, id_proceso)
+) WITH CLUSTERING ORDER BY (
+  valor_base DESC,
+  id_proceso ASC
+);</pre><div class="cards"><div class="card"><b>corte + departamento</b><p>localizan la partición.</p></div><div class="card"><b>valor DESC + id ASC</b><p>ordenan de forma estable dentro de la partición.</p></div><div class="card"><b>noticias + nivel</b><p>contexto que viajó desde Atlas; no forman la PK.</p></div></div></section>
+
+<section class="slide"><div class="tag">Paso 6</div><h2>INSERT es upsert: repetir la misma PK no duplica la fila</h2><pre>INSERT INTO compras_claras.prioridades_por_corte_departamento
+(corte,departamento,valor_base,id_proceso,entidad,
+ noticias_entidad,nivel_menciones,estado_revision,url_secop,criterio)
+VALUES (
+ '2026-09-03','Distrito Capital de Bogotá',168750000,
+ 'CO1.REQ.5407319','MINISTERIO DEL DEPORTE',
+ 3,'baja','pendiente','',
+ 'entidad en prensa; contratación directa; 0 respuestas'
+);</pre><div class="grid"><div><div class="flow"><div class="node">1.ª ejecución · la PK no existe</div><div class="arrow">↓</div><div class="node"><b>crea la fila</b></div></div></div><div><div class="flow"><div class="node">2.ª ejecución · misma PK</div><div class="arrow">↓</div><div class="node"><b>actualiza esa fila</b><br>no crea un duplicado con la misma clave</div></div></div></div><div class="call warn"><b>Didáctica ≠ carga masiva.</b> Después Python escribirá 77 filas de forma simple para que podamos seguir la lógica. Eso no es un benchmark ni una receta para millones de registros.</div></section>
+
+<section class="slide"><div class="tag">Paso 7</div><h2>SELECT: formula exactamente la pregunta que diseñó la tabla</h2><pre>SELECT id_proceso, entidad, valor_base,
+       noticias_entidad, nivel_menciones, estado_revision
+FROM compras_claras.prioridades_por_corte_departamento
+WHERE corte='2026-09-03'
+  AND departamento='Distrito Capital de Bogotá'
+LIMIT 5;</pre><div class="call"><b>Cómo se lee.</b> Primero localiza el cajón <code>corte + departamento</code>. Como las filas ya están ordenadas por <code>valor_base DESC</code>, el <code>LIMIT 5</code> obtiene las primeras prioridades de esa cola.</div><div class="call warn"><b>Control posterior.</b> El notebook comparará los IDs y el orden con el top que pandas calculó antes. Cambiar de motor no debería cambiar la decisión de negocio.</div></section>
+
+<section class="slide"><div class="tag">Paso 8</div><h2>UPDATE: escribe y vuelve a leer</h2><pre>UPDATE compras_claras.prioridades_por_corte_departamento
+SET estado_revision='en_revision'
+WHERE corte='2026-09-03'
+  AND departamento='Distrito Capital de Bogotá'
+  AND valor_base=168750000
+  AND id_proceso='CO1.REQ.5407319';
+
+SELECT estado_revision
+FROM compras_claras.prioridades_por_corte_departamento
+WHERE corte='2026-09-03'
+  AND departamento='Distrito Capital de Bogotá'
+  AND valor_base=168750000
+  AND id_proceso='CO1.REQ.5407319';</pre><div class="call"><b>Control:</b> el segundo comando debe mostrar <code>en_revision</code>. Imprimir “actualizado” sin releer no demuestra que el estado haya cambiado.</div></section>
+
+<section class="slide"><div class="tag">Paso 9</div><h2>DELETE: usa solamente una fila de demostración</h2><p class="sub">En el notebook la eliminación se practica con una fila centinela, no borrando procesos reales de la bandeja.</p><pre>DELETE FROM compras_claras.prioridades_por_corte_departamento
+WHERE corte='2026-09-03'
+  AND departamento='Distrito Capital de Bogotá'
+  AND valor_base=1
+  AND id_proceso='S05-DEMO';</pre><div class="call warn"><b>Regla de seguridad.</b> CRUD es una capacidad técnica; no necesitamos destruir evidencia real para demostrarla.</div></section>
+
+<section class="slide"><div class="tag gold">Error plantado</div><h2>La columna <code>entidad</code> existe, pero no localiza la partición</h2><pre>SELECT *
+FROM compras_claras.prioridades_por_corte_departamento
+WHERE entidad='MINISTERIO DEL DEPORTE';</pre><div class="call bad"><b>Predice antes de ejecutar.</b> La tabla está particionada por <code>corte + departamento</code>. Que <code>entidad</code> exista no la convierte en clave de acceso.</div><div class="call"><b>Si esta consulta fuera frecuente:</b> diseñaríamos otra tabla para el patrón <code>entidad → prioridades</code>. <code>ALLOW FILTERING</code> no es un parche conceptual para un patrón de acceso que la tabla no fue diseñada para atender.</div></section>
+
+<section class="slide"><div class="tag">Paso 10</div><h2>Connection details → SCB + token</h2><div class="grid"><div><ol><li>Vuelve a la base.</li><li>Abre <b>Connection details</b>.</li><li>En <b>Get Secure Connect Bundle</b>, descarga el SCB.</li><li>Genera un application token para la base.</li><li>Conserva el SCB como archivo <code>.zip</code> completo.</li></ol><div class="call bad"><b>SECRETO.</b> Token y SCB no se publican en GitHub, correo, chat ni capturas.</div></div><div class="ui" aria-label="Representación de Connection details con descarga de SCB y generación de token"><div class="ui-top"><b>Connection details</b><span>representación</span></div><div class="ui-body"><div class="label">Secure Connect Bundle</div><div class="field">compras-claras-s05-scb.zip</div><div class="uibtn">Download SCB</div><div class="label">Application token</div><div class="field">AstraCS:••••••••••••••</div><div class="uibtn">Generate token</div></div></div></div></section>
+
+<section class="slide"><div class="tag">Paso 11</div><h2>Python: cada objeto cumple una función</h2><div class="grid"><div><table><tr><th>objeto</th><th>pregunta mental</th></tr><tr><td>SCB</td><td>¿cómo llega el driver de forma segura a esta base?</td></tr><tr><td>token</td><td>¿con qué credencial me autentico?</td></tr><tr><td><code>Cluster</code></td><td>cliente Python configurado</td></tr><tr><td><code>Session</code></td><td>canal con el que ejecuto CQL</td></tr><tr><td><code>prepare</code></td><td>plantilla CQL con lugares <code>?</code></td></tr><tr><td><code>execute</code></td><td>envía plantilla + valores reales</td></tr></table></div><div><pre>from cassandra.auth import PlainTextAuthProvider
+from cassandra.cluster import Cluster
+
+auth = PlainTextAuthProvider("token", ASTRA_TOKEN)
+cluster = Cluster(
+  cloud={"secure_connect_bundle": SCB},
+  auth_provider=auth
+)
+session = cluster.connect()</pre><div class="call"><b>OJO.</b> <code>"token"</code> es el usuario literal esperado por esta ruta del driver. <code>Cluster(...)</code> aquí crea un objeto cliente en Python; no aprovisiona otra base en Astra.</div></div></div></section>
+
+<section class="slide"><div class="tag">Paso 12</div><h2><code>prepare()</code>: una plantilla con valores que llegan después</h2><pre>consulta = session.prepare("""
+SELECT id_proceso, entidad, valor_base
+FROM compras_claras.prioridades_por_corte_departamento
+WHERE corte = ? AND departamento = ?
+LIMIT 5
+""")
+
+session.execute(
+    consulta,
+    (CORTE_CLASE, departamento_elegido)
+)</pre><div class="cards"><div class="card"><b><code>corte = ?</code></b><p>se completa con <code>2026-09-03</code>.</p></div><div class="card"><b><code>departamento = ?</code></b><p>se completa con el departamento elegido.</p></div><div class="card"><b>Resultado</b><p>filas que después compararemos contra pandas.</p></div></div><div class="call"><b>Los <code>?</code> son lugares reservados</b>, no datos faltantes del dataset.</div></section>
+
+<section class="slide"><div class="tag">Diagnóstico</div><h2>Si algo falla, clasifica el síntoma antes de cambiar código</h2><table><tr><th>ves</th><th>qué suele significar</th><th>acción</th></tr><tr><td>base no <b>Active</b></td><td>aún se aprovisiona</td><td>esperar/recargar; no crear otra</td></tr><tr><td>no aparece <code>token@cqlsh&gt;</code></td><td>consola aún no conectó</td><td>reabrir o esperar</td></tr><tr><td><code>Unauthorized</code></td><td>token/permisos</td><td>revisar o generar token</td></tr><tr><td>SCB no conecta</td><td>bundle de otra base/región o ZIP alterado</td><td>descargar de nuevo desde esta base</td></tr><tr><td>consulta por entidad falla</td><td>patrón de acceso, no instalación</td><td>revisar diseño de partición</td></tr></table><div class="call"><b>No rediseñes la PRIMARY KEY por un error de autenticación.</b> Plataforma y modelo son problemas diferentes.</div></section>
+
+<section class="slide"><div class="tag gold">Cierre</div><h2>Vuelve al notebook y exige la misma respuesta que pandas</h2><div class="flow"><div class="node">pandas → IDs esperados</div><div class="arrow">↓ contrato de corrección</div><div class="node">Cassandra → IDs servidos</div><div class="arrow">↓</div><div class="node"><b>mismos IDs + mismo orden</b></div></div><div class="call"><b>Qué demuestra:</b> corrección de la consulta objetivo sobre los datos cargados.</div><div class="call warn"><b>Qué NO demuestra:</b> que Cassandra sea más rápida, necesaria para 77 filas o superior para cualquier consulta.</div><div class="call">Regresa al mismo Colab. El siguiente paso es cargar la bandeja, consultar tu partición y comparar <b>pandas ↔ CQL</b>.</div></section>
+</div></main>
+<nav><button id="prev" aria-label="Anterior">←</button><div class="dots" id="dots"></div><button id="next" aria-label="Siguiente">→</button><button id="full" class="full" aria-label="Pantalla completa">⛶ Pantalla</button></nav>
+<script>
+const s=[...document.querySelectorAll('.slide')],q=new URLSearchParams(location.search);if(q.get('embed')==='1')document.body.classList.add('embed');let i=Math.max(0,Math.min(s.length-1,(Number(q.get('slide'))||1)-1));const dots=document.getElementById('dots');document.getElementById('tot').textContent=s.length;s.forEach((_,j)=>{const b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Ir a '+(j+1));b.onclick=()=>show(j);dots.appendChild(b)});function show(j){i=Math.max(0,Math.min(s.length-1,j));s.forEach((x,k)=>x.classList.toggle('on',k===i));[...dots.children].forEach((x,k)=>x.classList.toggle('on',k===i));document.getElementById('n').textContent=i+1;document.getElementById('bar').style.width=((i+1)/s.length*100)+'%'}document.getElementById('prev').onclick=()=>show(i-1);document.getElementById('next').onclick=()=>show(i+1);document.getElementById('full').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')show(i+1);if(e.key==='ArrowLeft')show(i-1)});show(i);
+</script></body></html>
