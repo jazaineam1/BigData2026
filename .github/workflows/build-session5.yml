@@ -1,4 +1,5 @@
 name: Construir sesión 5
+# S5 v7 conserva todas las herramientas y agrupa la experiencia en tres productos.
 
 on:
   push:
