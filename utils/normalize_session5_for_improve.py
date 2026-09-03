@@ -4,8 +4,8 @@
 
 El constructor histórico de S5 transforma el notebook publicado en lugar de
 reconstruirlo desde cero. Esta capa restaura únicamente los marcadores que las
-pasadas v2-v6 esperan encontrar. La pasada v7 vuelve a aplicar al final la
-presentación vigente de tres productos y el semáforo cognitivo.
+pasadas v2-v6 y la propia v7 esperan encontrar. La pasada v7 vuelve a aplicar
+al final la presentación vigente de tres productos y el semáforo cognitivo.
 """
 
 from __future__ import annotations
@@ -43,6 +43,15 @@ def main() -> None:
             text = text.replace(
                 "### CONTRATO DE ÉXITO S05 — tres productos, las mismas herramientas",
                 "### Producto observable de hoy",
+                1,
+            )
+
+        # v7 renombra la parte Python como tramo B. En una reconstrucción,
+        # restauramos el ancla histórica y v7 la vuelve a presentar al final.
+        if "## 9. PRODUCTO 3 · Tramo B — la misma tabla, ahora desde Python" in text:
+            text = text.replace(
+                "## 9. PRODUCTO 3 · Tramo B — la misma tabla, ahora desde Python",
+                "## 9. La misma tabla, ahora desde Python",
                 1,
             )
 
