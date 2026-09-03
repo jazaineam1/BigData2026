@@ -9,11 +9,15 @@ on:
       - utils/normalize_session5_for_improve.py
       - utils/improve_session5_v2.py
       - utils/improve_session5_v3.py
+      - utils/improve_session5_v4.py
       - utils/fix_session5_assets.py
       - utils/validate_session5_v2.py
       - utils/validate_session5_v3.py
+      - utils/validate_session5_v4.py
       - assets/tutoriales/atlas-s05-pipelines-vistas-v2.html
       - assets/tutoriales/astra-cassandra-paso-a-paso-v2.html
+      - assets/tutoriales/atlas-s05-pipelines-vistas-v3.html
+      - assets/tutoriales/astra-cassandra-paso-a-paso-v3.html
       - evaluaciones/quiz_sesiones_1_a_4_borrador.md
       - .github/workflows/build-session5.yml
 
@@ -39,6 +43,9 @@ jobs:
       - name: Alinear S5 con el hilo S3 a S6
         run: python utils/improve_session5_v3.py
 
+      - name: Añadir microejemplos y fundamento de negocio
+        run: python utils/improve_session5_v4.py
+
       - name: Ajustar assets deterministas
         run: python utils/fix_session5_assets.py
 
@@ -46,6 +53,7 @@ jobs:
         run: |
           python utils/validate_session5_v2.py
           python utils/validate_session5_v3.py
+          python utils/validate_session5_v4.py
 
       - name: Publicar artefactos regenerados
         shell: bash
@@ -57,5 +65,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Cuadernos/5_Atlas_Cassandra_Query_First.ipynb assets/tutoriales/astra-cassandra-paso-a-paso-v2.html
-          git commit -m 'Regenera S5 con puente explícito a Neo4j'
+          git commit -m 'Regenera S5 con microejemplos y fundamento de negocio'
           git push
