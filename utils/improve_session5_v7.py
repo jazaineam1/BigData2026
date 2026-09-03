@@ -71,7 +71,7 @@ La diferencia es que no vas a sentir nueve entregables distintos. Todo queda agr
 | Producto | Qué construyes | Controles/evidencias que viven dentro |
 |---|---|---|
 | **1 · Vista Atlas** | `menciones_clasificadas` | 142 entidades · 6 alta / 25 media / 111 baja |
-| **2 · Bandeja explicable** | 77 candidatos de revisión | `1.000 → 163 → 77` + contraste de H1 + límite de la prensa |
+| **2 · Bandeja explicable** | 77 candidatos de revisión | `1.000 → 163 → 77` + contraste de hipótesis H1 + límite de la prensa |
 | **3 · Consulta operacional** | `corte + departamento → top 5` en Cassandra | diseño query-first + CQL + CRUD/automatización desde Python + comparación con pandas |
 
 El **hito descargable** y `s05_ancla_s06.json` son salidas automáticas que documentan esos tres productos; no son productos adicionales.
