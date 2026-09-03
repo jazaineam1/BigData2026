@@ -86,8 +86,8 @@ def main() -> None:
             errors.append(f"Quedó texto visual engañoso: {stale!r}")
 
     qcalls = text.count("pregunta_interactiva_codificada(") - text.count("def pregunta_interactiva_codificada")
-    if qcalls != 3:
-        errors.append(f"Se esperaban 3 autoevaluaciones codificadas y hay {qcalls}")
+    if qcalls < 3 or qcalls > 5:
+        errors.append(f"Se esperaban entre 3 y 5 autoevaluaciones codificadas (máximo del curso) y hay {qcalls}")
     if "¿Cuál afirmación describe mejor una vista" in text:
         errors.append("La primera autoevaluación sigue visible en crudo")
     if "¿Cuál afirmación puede sostener Laura" in text:

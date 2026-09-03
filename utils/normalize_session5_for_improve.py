@@ -71,11 +71,6 @@ def main() -> None:
                 1,
             )
 
-        # v3 convierte el cierre histórico en "Lo que sigue". Antes de volver a
-        # aplicar v2 restauramos el marcador que esa pasada usa como ancla.
-        if text.lstrip().startswith("## Lo que sigue"):
-            text = text.replace("## Lo que sigue", "# Cierre", 1)
-
         cell["source"] = text
 
     NB.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
