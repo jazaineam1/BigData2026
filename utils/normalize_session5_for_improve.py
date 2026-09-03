@@ -39,9 +39,9 @@ def main() -> None:
         # v3 y v5 todavía usan el encabezado histórico como ancla. Si el
         # notebook ya fue publicado por v7, restauramos solo el encabezado de
         # forma temporal; v7 vuelve a generar el contrato de tres productos.
-        if "### CONTRATO DE ÉXITO S05 — tres productos, las mismas herramientas" in text:
+        if "### Contrato de éxito — tres productos, las mismas herramientas" in text:
             text = text.replace(
-                "### CONTRATO DE ÉXITO S05 — tres productos, las mismas herramientas",
+                "### Contrato de éxito — tres productos, las mismas herramientas",
                 "### Producto observable de hoy",
                 1,
             )

@@ -53,18 +53,22 @@ def main() -> None:
     cells = nb["cells"]
 
     # 1) Tres productos, sin eliminar ninguna tecnología ni evidencia.
-    i = find(cells, "### Producto observable de hoy")
-    text = src(cells[i])
-    prefix = text.split("### Producto observable de hoy", 1)[0].rstrip()
-    put(cells[i], prefix + '''
+    # Esta transformación ya quedó aplicada en una corrida anterior del
+    # pipeline (el marcador se convierte en "Contrato de éxito" y no
+    # reaparece), así que se omite en vez de fallar buscándolo de nuevo.
+    if any("### Producto observable de hoy" in src(c) for c in cells):
+        i = find(cells, "### Producto observable de hoy")
+        text = src(cells[i])
+        prefix = text.split("### Producto observable de hoy", 1)[0].rstrip()
+        put(cells[i], prefix + '''
 
-### CONTRATO DE ÉXITO S05 — tres productos, las mismas herramientas
+### Contrato de éxito — tres productos, las mismas herramientas
 
 Hoy seguimos usando **todo** el recorrido técnico del curso:
 
-```text
-Colab → MongoDB Atlas → tutorial visual → Colab/pandas → Astra/CQL → Colab/Python
-```
+<div align="center">
+<svg style="max-width:900px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 1090 92" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama horizontal"><defs><marker id="s5pipe-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/></marker></defs><style>.s5pipe-b{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}.s5pipe-t{font:700 13px system-ui,sans-serif;fill:#123f2b;}.s5pipe-s{font:11px system-ui,sans-serif;fill:#3a4a41;}</style><rect x="10" y="10" width="150" height="64" rx="9" class="s5pipe-b"/><text x="85.0" y="37" text-anchor="middle" class="s5pipe-t">Colab</text><text x="85.0" y="55" text-anchor="middle" class="s5pipe-s">entrada</text><line x1="160" y1="42.0" x2="194" y2="42.0" stroke="#175c3c" stroke-width="2" marker-end="url(#s5pipe-a)"/><rect x="194" y="10" width="150" height="64" rx="9" class="s5pipe-b"/><text x="269.0" y="37" text-anchor="middle" class="s5pipe-t">MongoDB Atlas</text><text x="269.0" y="55" text-anchor="middle" class="s5pipe-s">persistencia</text><line x1="344" y1="42.0" x2="378" y2="42.0" stroke="#175c3c" stroke-width="2" marker-end="url(#s5pipe-a)"/><rect x="378" y="10" width="150" height="64" rx="9" class="s5pipe-b"/><text x="453.0" y="37" text-anchor="middle" class="s5pipe-t">Tutorial visual</text><text x="453.0" y="55" text-anchor="middle" class="s5pipe-s">guía paso a paso</text><line x1="528" y1="42.0" x2="562" y2="42.0" stroke="#175c3c" stroke-width="2" marker-end="url(#s5pipe-a)"/><rect x="562" y="10" width="150" height="64" rx="9" class="s5pipe-b"/><text x="637.0" y="37" text-anchor="middle" class="s5pipe-t">Colab / pandas</text><text x="637.0" y="55" text-anchor="middle" class="s5pipe-s">bandeja SECOP</text><line x1="712" y1="42.0" x2="746" y2="42.0" stroke="#175c3c" stroke-width="2" marker-end="url(#s5pipe-a)"/><rect x="746" y="10" width="150" height="64" rx="9" class="s5pipe-b"/><text x="821.0" y="37" text-anchor="middle" class="s5pipe-t">Astra / CQL</text><text x="821.0" y="55" text-anchor="middle" class="s5pipe-s">tabla operativa</text><line x1="896" y1="42.0" x2="930" y2="42.0" stroke="#175c3c" stroke-width="2" marker-end="url(#s5pipe-a)"/><rect x="930" y="10" width="150" height="64" rx="9" class="s5pipe-b"/><text x="1005.0" y="37" text-anchor="middle" class="s5pipe-t">Colab / Python</text><text x="1005.0" y="55" text-anchor="middle" class="s5pipe-s">CRUD + comparación</text></svg>
+</div>
 
 La diferencia es que no vas a sentir nueve entregables distintos. Todo queda agrupado en **tres productos**:
 
@@ -95,7 +99,7 @@ El **hito descargable** y `s05_ancla_s06.json` son salidas automáticas que docu
 | 7. Automatizar | ▶️ + ✏️ **MODIFICA** | ¿cómo usa una aplicación la misma tabla? | Colab + Python | producto 3, tramo B |
 | 8. Cerrar | 🧠 **EXPLICA** | ¿qué resolvió cada motor y qué límite queda? | cuaderno | hito + ancla S6 |
 
-### SEMÁFORO DE CÓDIGO S05
+### Semáforo de código
 
 - 🧠 **ENTIENDE:** debes poder explicarlo con tus palabras.
 - ▶️ **EJECUTA:** corre la celda y verifica la salida; **no necesitas escribirla de memoria**.
@@ -105,8 +109,8 @@ El **hito descargable** y `s05_ancla_s06.json` son salidas automáticas que docu
 ''')
 
     # 3) Cassandra: problema manual antes de vocabulario y sintaxis.
-    insert_once(cells, "### ESCENA OPERACIONAL CASSANDRA S05", "MICROEJEMPLO PAPEL CASSANDRA S05", [md('''
-### MICROEJEMPLO PAPEL CASSANDRA S05 — resuelve la consulta antes de conocer Cassandra
+    insert_once(cells, "### Escena operacional", "Microejemplo en papel", [md('''
+### Microejemplo en papel — resuelve la consulta antes de conocer Cassandra
 
 Laura tiene estas cinco filas:
 
@@ -120,11 +124,9 @@ Laura tiene estas cinco filas:
 
 Pregunta: **para el corte 03-sep y Bogotá, ¿qué tres procesos debe abrir primero si ordenamos por valor?**
 
-```text
-1. P2 → 180
-2. P3 →  90
-3. P1 →  50
-```
+<div align="center">
+<svg style="max-width:260px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de flujo"><defs><marker id="s5rank-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/></marker></defs><style>.s5rank-b{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}.s5rank-t{font:700 14px system-ui,sans-serif;fill:#123f2b;}.s5rank-s{font:12px system-ui,sans-serif;fill:#3a4a41;}</style><rect x="20" y="14" width="260" height="42" rx="10" class="s5rank-b"/><text x="150.0" y="36" text-anchor="middle" class="s5rank-t">1 · P2</text><text x="150.0" y="54" text-anchor="middle" class="s5rank-s">$ 180 M</text><line x1="150.0" y1="56" x2="150.0" y2="74" stroke="#175c3c" stroke-width="2" marker-end="url(#s5rank-a)"/><rect x="20" y="74" width="260" height="42" rx="10" class="s5rank-b"/><text x="150.0" y="96" text-anchor="middle" class="s5rank-t">2 · P3</text><text x="150.0" y="114" text-anchor="middle" class="s5rank-s">$ 90 M</text><line x1="150.0" y1="116" x2="150.0" y2="134" stroke="#175c3c" stroke-width="2" marker-end="url(#s5rank-a)"/><rect x="20" y="134" width="260" height="42" rx="10" class="s5rank-b"/><text x="150.0" y="156" text-anchor="middle" class="s5rank-t">3 · P1</text><text x="150.0" y="174" text-anchor="middle" class="s5rank-s">$ 50 M</text></svg>
+</div>
 
 Antes de pensar en sintaxis ya sabemos dos cosas:
 
@@ -134,8 +136,8 @@ Antes de pensar en sintaxis ya sabemos dos cosas:
 Cassandra aparecerá después como una forma de materializar exactamente esas dos decisiones.
 ''')])
 
-    insert_once(cells, "### EJERCICIO S05-PK", "TRADUCCIÓN PK EN TRES PASOS S05", [md('''
-### TRADUCCIÓN PK EN TRES PASOS S05 — no memorices los paréntesis
+    insert_once(cells, "### Ejercicio", "Traducción de la PK en tres pasos", [md('''
+### Traducción de la PK en tres pasos — no memorices los paréntesis
 
 ```text
 PASO 1 · localizar el cajón
@@ -150,10 +152,9 @@ PRIMARY KEY ((corte, departamento), valor_base, id_proceso)
 
 Se lee así:
 
-```text
-((corte, departamento))  → PARTITION KEY → dónde buscar
-valor_base, id_proceso   → CLUSTERING    → cómo ordenar dentro
-```
+<div align="center">
+<svg style="max-width:560px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Traducción de la PK"><defs><marker id="s5pktr-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/></marker></defs><style>.s5pktr-b{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}.s5pktr-t{font:700 12.5px system-ui,sans-serif;fill:#123f2b;}.s5pktr-g{font:700 11px system-ui,sans-serif;fill:#fff;}</style><rect x="10" y="14" width="230" height="44" rx="8" class="s5pktr-b"/><text x="125" y="41" text-anchor="middle" class="s5pktr-t">((corte, departamento))</text><line x1="240" y1="36" x2="290" y2="36" stroke="#175c3c" stroke-width="2" marker-end="url(#s5pktr-a)"/><rect x="292" y="14" width="140" height="44" rx="8" fill="#175c3c"/><text x="362" y="41" text-anchor="middle" class="s5pktr-g">PARTITION KEY</text><line x1="432" y1="36" x2="460" y2="36" stroke="#175c3c" stroke-width="2" marker-end="url(#s5pktr-a)"/><text x="468" y="41" class="s5pktr-t">dónde buscar</text><rect x="10" y="72" width="230" height="44" rx="8" class="s5pktr-b"/><text x="125" y="99" text-anchor="middle" class="s5pktr-t">valor_base, id_proceso</text><line x1="240" y1="94" x2="290" y2="94" stroke="#175c3c" stroke-width="2" marker-end="url(#s5pktr-a)"/><rect x="292" y="72" width="140" height="44" rx="8" fill="#175c3c"/><text x="362" y="99" text-anchor="middle" class="s5pktr-g">CLUSTERING</text><line x1="432" y1="94" x2="460" y2="94" stroke="#175c3c" stroke-width="2" marker-end="url(#s5pktr-a)"/><text x="468" y="99" class="s5pktr-t">cómo ordenar dentro</text></svg>
+</div>
 
 **Objetivo de aprendizaje.** No debes reconstruir los paréntesis de memoria. Debes mirar una clave y poder decir **qué localiza la partición y qué organiza sus filas**.
 ''')])
@@ -174,8 +175,8 @@ valor_base, id_proceso   → CLUSTERING    → cómo ordenar dentro
 
 ''' + body)
 
-    insert_once(cells, "## 9. La misma tabla, ahora desde Python", "CHECKPOINT CQL S05", [md('''
-### CHECKPOINT CQL S05 — ya entendiste Cassandra antes de conectar Python
+    insert_once(cells, "## 9. La misma tabla, ahora desde Python", "Checkpoint", [md('''
+### Checkpoint — ya entendiste Cassandra antes de conectar Python
 
 Antes de abrir SCB/token, comprueba que puedes contestar:
 
@@ -187,8 +188,12 @@ Antes de abrir SCB/token, comprueba que puedes contestar:
 Si puedes responder esas cuatro preguntas, **la comprensión central de Cassandra ya está**. El siguiente tramo conserva Python porque el PDA pide CRUD e integración, pero no introduce otro modelo de datos: automatiza **la misma tabla**.
 ''')])
 
-    i = find(cells, "## 9. La misma tabla, ahora desde Python")
-    put(cells[i], '''
+    # Esta cabecera se reemplaza a sí misma (pasa a "PRODUCTO 3 · Tramo B") y
+    # no reaparece en corridas posteriores del pipeline: se omite si ya fue
+    # aplicada antes, en vez de fallar buscándola de nuevo.
+    if any("## 9. La misma tabla, ahora desde Python" in src(c) for c in cells):
+        i = find(cells, "## 9. La misma tabla, ahora desde Python")
+        put(cells[i], '''
 ---
 ## 9. PRODUCTO 3 · Tramo B — la misma tabla, ahora desde Python
 
@@ -201,13 +206,9 @@ El PDA pide CRUD con Python. **No es un cuarto producto ni otro motor.** Una apl
 - ✏️ **MODIFICA** el departamento/consulta en los puntos señalados y compara el resultado.
 - 🧠 **ENTIENDE** CRUD como cuatro operaciones sobre la misma tabla; no memorices la ceremonia de conexión.
 
-```text
-CQL Console                 Python
------------                 ------
-CREATE / INSERT / SELECT →  session.execute(...)
-misma tabla              →  misma pregunta
-misma partition key      →  mismo resultado esperado
-```
+<div align="center">
+<svg style="max-width:560px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 560 146" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparación CQL Console y Python"><style>.s5cqlpy-h{fill:#175c3c;}.s5cqlpy-hd{font:700 12px system-ui,sans-serif;fill:#fff;}.s5cqlpy-c{fill:#f4faf6;stroke:#175c3c;stroke-width:1;}.s5cqlpy-t{font:12px "IBM Plex Mono",monospace;fill:#123f2b;}</style><rect x="10" y="10" width="270.0" height="30" rx="6" class="s5cqlpy-h"/><text x="145.0" y="30" text-anchor="middle" class="s5cqlpy-hd">CQL Console</text><rect x="282.0" y="10" width="268.0" height="30" rx="6" class="s5cqlpy-h"/><text x="417.0" y="30" text-anchor="middle" class="s5cqlpy-hd">Python</text><rect x="10" y="44" width="270.0" height="30" class="s5cqlpy-c"/><text x="20" y="63" class="s5cqlpy-t">CREATE / INSERT / SELECT</text><rect x="282.0" y="44" width="268.0" height="30" class="s5cqlpy-c"/><text x="292.0" y="63" class="s5cqlpy-t">session.execute(...)</text><rect x="10" y="78" width="270.0" height="30" class="s5cqlpy-c"/><text x="20" y="97" class="s5cqlpy-t">misma tabla</text><rect x="282.0" y="78" width="268.0" height="30" class="s5cqlpy-c"/><text x="292.0" y="97" class="s5cqlpy-t">misma pregunta</text><rect x="10" y="112" width="270.0" height="30" class="s5cqlpy-c"/><text x="20" y="131" class="s5cqlpy-t">misma partition key</text><rect x="282.0" y="112" width="268.0" height="30" class="s5cqlpy-c"/><text x="292.0" y="131" class="s5cqlpy-t">mismo resultado esperado</text></svg>
+</div>
 
 **PARA LLEVAR.** Python automatiza lo que ya comprendiste en CQL; no cambia el modelo Cassandra.
 ''')
@@ -227,8 +228,8 @@ misma partition key      →  mismo resultado esperado
             put(cell, "# 🧠 ENTIENDE · verifica que pandas y Cassandra respondan la misma pregunta.\n" + text)
 
     # 6) Recap final: tres productos, no nueve tareas sueltas.
-    insert_once(cells, "## 12. Hito de la sesión", "CHECKPOINT TRES PRODUCTOS S05", [md('''
-### CHECKPOINT TRES PRODUCTOS S05 — antes de generar el hito
+    insert_once(cells, "## 12. Hito de la sesión", "Checkpoint de los tres productos", [md('''
+### Checkpoint de los tres productos — antes de generar el hito
 
 | Producto | Señal de que está listo |
 |---|---|
@@ -250,6 +251,13 @@ El hito y el ancla S6 que siguen **documentan** este trabajo. No agregan un cuar
         extra = '''<section class="slide"><div class="tag gold">🧠 ENTIENDE · antes de hacer clic</div><h2>Resuélvelo en papel antes de tocar Cassandra</h2><p class="sub">Para el corte 03-sep y Bogotá aparecen P1=$50 M, P2=$180 M y P3=$90 M. Laura pide los tres de mayor valor.</p><div class="flow"><div class="node"><b>1. Localizar</b><br>03-sep + Bogotá</div><div class="arrow">↓</div><div class="node"><b>2. Ordenar</b><br>P2 → P3 → P1</div><div class="arrow">↓</div><div class="node"><b>3. Después traducir</b><br>partition + clustering</div></div><div class="call"><b>Regla de la sesión.</b> Primero resuelve la pregunta con sentido común; después aprende cómo Cassandra organiza los datos para servirla.</div></section>\n\n'''
         if anchor not in html:
             raise RuntimeError("Tutorial Astra v3 perdió el ancla '¿Por qué Cassandra...?'")
+        html = html.replace(anchor, extra + anchor, 1)
+
+    if "Por qué Cassandra + Astra" not in html:
+        anchor = '<section class="slide"><div class="tag">Modelo mental</div><h2>Astra, Cassandra, CQL y keyspace no son lo mismo</h2>'
+        extra = '''<section class="slide"><div class="tag">Por qué Cassandra + Astra</div><h2>Dos motores, dos trabajos distintos en la misma historia</h2><div class="grid"><div><table><tr><th>criterio</th><th>MongoDB / Atlas</th><th>Cassandra / Astra</th></tr><tr><td>modelado</td><td>schema-first: modelas los datos y después preguntas</td><td>query-first: la tabla nace de la consulta que vas a servir</td></tr><tr><td>arquitectura</td><td>replica set primario/secundario</td><td>anillo peer-to-peer, sin nodo maestro</td></tr><tr><td>fortaleza</td><td>exploración, transformación, esquema flexible</td><td>lecturas/escrituras masivas y predecibles por clave de partición</td></tr><tr><td>rol en S05</td><td>capa de análisis: clasifica, cruza, formula hipótesis</td><td>capa de servicio: responde la misma pregunta miles de veces</td></tr></table><div class="call"><b>En una frase.</b> Mongo transforma y explora; Cassandra sirve, a escala, una pregunta ya conocida.</div></div><div><div class="call"><b>¿Por qué escala horizontal sin nodo maestro?</b> Si un nodo cae, el anillo sigue sirviendo sin coordinación central: importa para un servicio 24/7 con contratación pública de todo el país.</div><div class="call"><b>¿Por qué Astra y no Cassandra instalado a mano?</b> Administrar un clúster real (anillos, reparación, compactación, tokens) es una carga operativa considerable. Astra la esconde como servicio administrado para que el foco pedagógico sea el <b>modelado de datos</b>, no la infraestructura.</div><div class="call warn"><b>No es &quot;Cassandra es mejor&quot;.</b> Es una decisión de <b>ajuste al patrón de acceso</b>: consulta repetitiva y conocida → Cassandra. Exploración flexible y cambiante → MongoDB.</div></div></div></section>\n\n'''
+        if anchor not in html:
+            raise RuntimeError("Tutorial Astra v3 perdió el ancla 'Modelo mental'")
         html = html.replace(anchor, extra + anchor, 1)
 
     if "Tres pasos antes de leer la PRIMARY KEY" not in html:

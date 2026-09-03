@@ -21,29 +21,32 @@ text = "\n".join(csrc(c) for c in nb.get("cells", []))
 astra = ASTRA.read_text(encoding="utf-8")
 
 required_nb = [
-    "CONTRATO DE ÉXITO S05 — tres productos, las mismas herramientas",
-    "Colab → MongoDB Atlas → tutorial visual → Colab/pandas → Astra/CQL → Colab/Python",
+    "Contrato de éxito — tres productos, las mismas herramientas",
+    "guía paso a paso",
+    "bandeja SECOP",
+    "tabla operativa",
+    "CRUD + comparación",
     "**1 · Vista Atlas**",
     "**2 · Bandeja explicable**",
     "**3 · Consulta operacional**",
-    "SEMÁFORO DE CÓDIGO S05",
+    "Semáforo de código",
     "🧠 **ENTIENDE**",
     "▶️ **EJECUTA**",
     "✏️ **MODIFICA**",
-    "MICROEJEMPLO PAPEL CASSANDRA S05",
-    "TRADUCCIÓN PK EN TRES PASOS S05",
+    "Microejemplo en papel",
+    "Traducción de la PK en tres pasos",
     "PRODUCTO 3 · Tramo A",
-    "CHECKPOINT CQL S05",
+    "Checkpoint",
     "PRODUCTO 3 · Tramo B",
     "No es un cuarto producto ni otro motor",
-    "CHECKPOINT TRES PRODUCTOS S05",
+    "Checkpoint de los tres productos",
     "Python automatiza lo que ya comprendiste en CQL",
     "SCB/token",
     "cassandra-driver",
     "session.execute",
     "menciones_clasificadas",
     "1.000 → 163 → 77",
-    "CONTRASTE DE HIPÓTESIS S05",
+    "Contraste de hipótesis",
     "s05_ancla_s06.json",
 ]
 missing = [x for x in required_nb if x not in text]
@@ -56,7 +59,7 @@ if "### Producto observable de hoy" in text:
 
 # Deben permanecer las herramientas que el docente pidió conservar.
 for tool_marker in [
-    "MongoDB Atlas", "pandas", "Astra/CQL", "Colab/Python",
+    "MongoDB Atlas", "pandas", "Astra/CQL", "Colab / Python",
     "Secure Connect Bundle", "Application token", "Cluster", "Session",
 ]:
     if tool_marker not in text:

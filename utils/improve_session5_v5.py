@@ -38,17 +38,22 @@ def main() -> None:
     cells = nb["cells"]
 
     # 1) Producto: 0/77 deja de ser un titular; pasa a ser un contraste empírico.
-    i = find(cells, "### Producto observable de hoy")
-    text = src(cells[i])
-    text = text.replace(
-        "4. el límite analítico `0 de 77` referencias de proceso citadas literalmente en prensa;",
-        "4. un **contraste de hipótesis** que separa contexto de prensa a nivel de entidad de evidencia específica a nivel de proceso;",
-    )
-    text = text.replace(
-        "9. `s05_ancla_s06.json`: el proceso que Laura abrirá en la sesión 6 para estudiar su contexto relacional.",
-        "9. `s05_ancla_s06.json`: el proceso que Laura abrirá en la sesión 6, conservando también el alcance real de la evidencia de prensa.",
-    )
-    put(cells[i], text)
+    # improve_session5_v7.py reemplaza por completo esta celda (pasa a "Contrato
+    # de éxito" con una tabla de 3 productos) en cada corrida del pipeline, así
+    # que en la siguiente corrida completa este marcador ya no existe. Si ya fue
+    # reemplazada, este paso queda superado y se omite en vez de fallar.
+    if any("### Producto observable de hoy" in src(c) for c in cells):
+        i = find(cells, "### Producto observable de hoy")
+        text = src(cells[i])
+        text = text.replace(
+            "4. el límite analítico `0 de 77` referencias de proceso citadas literalmente en prensa;",
+            "4. un **contraste de hipótesis** que separa contexto de prensa a nivel de entidad de evidencia específica a nivel de proceso;",
+        )
+        text = text.replace(
+            "9. `s05_ancla_s06.json`: el proceso que Laura abrirá en la sesión 6 para estudiar su contexto relacional.",
+            "9. `s05_ancla_s06.json`: el proceso que Laura abrirá en la sesión 6, conservando también el alcance real de la evidencia de prensa.",
+        )
+        put(cells[i], text)
 
     # 2) Mapa: la etapa ahora es contrastar una hipótesis, no celebrar el 0/77.
     i = find(cells, "## Mapa de la sesión")
@@ -60,9 +65,13 @@ def main() -> None:
     put(cells[i], text)
 
     # 3) Sustituir el bloque de precisión por un bloque de hipótesis falsable.
-    i = find(cells, "### PRECISIÓN 0/77 S05")
-    put(cells[i], '''
-### CONTRASTE DE HIPÓTESIS S05 — usar la prensa para preguntar mejor, no para acusar
+    # Ya convertida en una corrida anterior (o nunca insertada porque el paso 1
+    # de improve_session5_v4.py también la detecta ya presente): no hay nada
+    # que sustituir, se omite en vez de fallar.
+    if any("### PRECISIÓN 0/77 S05" in src(c) for c in cells):
+        i = find(cells, "### PRECISIÓN 0/77 S05")
+        put(cells[i], '''
+### Contraste de hipótesis — usar la prensa para preguntar mejor, no para acusar
 
 Hasta ahora sabemos que las noticias aportan **contexto sobre entidades**. Antes de convertir ese contexto en una afirmación sobre contratos concretos, formulamos una hipótesis de trabajo que pueda fallar de forma observable.
 
@@ -70,13 +79,9 @@ Hasta ahora sabemos que las noticias aportan **contexto sobre entidades**. Antes
 
 Esta H1 es útil pedagógicamente porque no depende de opiniones: sabemos exactamente qué observar para sostenerla o refutarla.
 
-```text
-77 referencias SECOP exactas
-        ↓
-búsqueda literal en título + subtítulo
-        ↓
-¿aparece al menos una?
-```
+<div align="center">
+<svg style="max-width:500px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 500 208" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de flujo"><defs><marker id="s5cflow-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/></marker></defs><style>.s5cflow-b{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}.s5cflow-t{font:700 14px system-ui,sans-serif;fill:#123f2b;}.s5cflow-s{font:12px system-ui,sans-serif;fill:#3a4a41;}</style><rect x="20" y="14" width="460" height="44" rx="10" class="s5cflow-b"/><text x="250.0" y="41.0" text-anchor="middle" class="s5cflow-t">77 referencias SECOP exactas</text><line x1="250.0" y1="58" x2="250.0" y2="82" stroke="#175c3c" stroke-width="2" marker-end="url(#s5cflow-a)"/><rect x="20" y="82" width="460" height="44" rx="10" class="s5cflow-b"/><text x="250.0" y="109.0" text-anchor="middle" class="s5cflow-t">Búsqueda literal en título + subtítulo</text><line x1="250.0" y1="126" x2="250.0" y2="150" stroke="#175c3c" stroke-width="2" marker-end="url(#s5cflow-a)"/><rect x="20" y="150" width="460" height="44" rx="10" class="s5cflow-b"/><text x="250.0" y="177.0" text-anchor="middle" class="s5cflow-t">¿Aparece al menos una?</text></svg>
+</div>
 
 **Resultado del contraste:** `0/77` coincidencias exactas. En este corpus y bajo esta definición literal, **H1 queda refutada**.
 
@@ -108,15 +113,17 @@ Aquí la prensa **gana especificidad analítica** porque ahora conocemos con pre
 
 **PARA LLEVAR.** Una buena analítica no busca confirmar la primera historia; formula una hipótesis falsable, define cómo observarla, mira la evidencia y **reformula la afirmación al nivel que los datos soportan**.
 ''')
+    else:
+        i = find(cells, "### Contraste de hipótesis")
 
     # 4) Inmediatamente después, dejar una hipótesis revisada que conecte S6/S7.
-    if not any("HIPÓTESIS REVISADA S05" in src(c) for c in cells):
+    if not any("Hipótesis revisada" in src(c) for c in cells):
         pos = i + 1
         cells[pos:pos] = [{
             "cell_type": "markdown",
             "metadata": {},
             "source": '''
-### HIPÓTESIS REVISADA S05 — ¿qué evidencia buscaríamos después?
+### Hipótesis revisada — ¿qué evidencia buscaríamos después?
 
 El `0/77` no cierra la investigación: **mejora la siguiente pregunta**.
 
@@ -134,10 +141,9 @@ Para evaluar H2 necesitaríamos evidencia más específica, por ejemplo:
 
 Esto prepara dos pasos del semestre:
 
-```text
-S6 → relaciones: entidad → proceso → proveedor
-S7 → texto: relevancia, no solo coincidencia literal
-```
+<div align="center">
+<svg style="max-width:520px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 520 158" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de flujo"><defs><marker id="s5s6s7-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/></marker></defs><style>.s5s6s7-b{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}.s5s6s7-t{font:700 14px system-ui,sans-serif;fill:#123f2b;}.s5s6s7-s{font:12px system-ui,sans-serif;fill:#3a4a41;}</style><rect x="20" y="14" width="480" height="50" rx="10" class="s5s6s7-b"/><text x="260.0" y="36" text-anchor="middle" class="s5s6s7-t">S6</text><text x="260.0" y="54" text-anchor="middle" class="s5s6s7-s">relaciones: entidad → proceso → proveedor</text><line x1="260.0" y1="64" x2="260.0" y2="94" stroke="#175c3c" stroke-width="2" marker-end="url(#s5s6s7-a)"/><rect x="20" y="94" width="480" height="50" rx="10" class="s5s6s7-b"/><text x="260.0" y="116" text-anchor="middle" class="s5s6s7-t">S7</text><text x="260.0" y="134" text-anchor="middle" class="s5s6s7-s">texto: relevancia, no solo coincidencia literal</text></svg>
+</div>
 
 **Pregunta de negocio.** Laura no necesita que la prensa “condene” un contrato. Necesita que le ayude a **formular mejores hipótesis de revisión y pedir la siguiente evidencia correcta**.
 '''.strip(),
@@ -146,7 +152,10 @@ S7 → texto: relevancia, no solo coincidencia literal
     # 5) El ancla hacia S6 conserva explícitamente el alcance de la prensa.
     for cell in cells:
         text = src(cell)
-        if '"criterio_priorizacion": "entidad en prensa; contratación directa; 0 respuestas"' in text:
+        if (
+            '"criterio_priorizacion": "entidad en prensa; contratación directa; 0 respuestas"' in text
+            and '"alcance_prensa"' not in text
+        ):
             text = text.replace(
                 '"criterio_priorizacion": "entidad en prensa; contratación directa; 0 respuestas",',
                 '"criterio_priorizacion": "entidad en prensa; contratación directa; 0 respuestas",\n'
@@ -160,7 +169,7 @@ S7 → texto: relevancia, no solo coincidencia literal
     # 6) Cierre: 0/77 aparece como método de contraste, no como hito equivalente a 77.
     for cell in cells:
         text = src(cell)
-        if "CIERRE PEDAGÓGICO S05" in text:
+        if "Cierre" in text:
             text = text.replace(
                 "1.000 → 163 → 77\n        ↓\n       0 / 77\n        ↓\ncontrato pandas",
                 "1.000 → 163 → 77\n        ↓\ncontrastar H1: ¿aparece algún ID exacto?\n        ↓\n0/77 → refinar alcance de la prensa\n        ↓\ncontrato pandas",

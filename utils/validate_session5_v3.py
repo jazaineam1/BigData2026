@@ -15,15 +15,15 @@ texts = [
 text = "\n".join(texts)
 
 required = [
-    "DEUDA ABIERTA S04",
+    "Deuda abierta",
     "la clase terminó con datos, no con una decisión",
     "De datos persistidos en Atlas a una consulta operacional con Cassandra",
     "evidencia que ya dejó persistida en Atlas en una bandeja priorizada",
-    "CONTINUIDAD S03-S05",
+    "Continuidad",
     "prototipo exploratorio",
     "bandeja operacional",
     "s05_ancla_s06.json",
-    "PUENTE S05-S06",
+    "Puente hacia la sesión 6",
     "seleccion_ancla",
     "origen_eleccion_s06",
     '"criterio_priorizacion": "entidad en prensa; contratación directa; 0 respuestas"',
@@ -34,7 +34,7 @@ required = [
     "nivel_menciones",
     "contexto Atlas restaurado",
     ".merge(contexto_menciones, on=\"entidad\", how=\"left\", validate=\"many_to_one\")",
-    "CIERRE PEDAGÓGICO S05",
+    "Cierre",
     "la pregunta de S4 por fin tiene una respuesta operacional",
 ]
 missing = [x for x in required if x not in text]
@@ -53,7 +53,7 @@ if "CERRAR CONEXIONES S05" not in close_cells[0]:
     raise SystemExit("La celda única de cierre perdió su marcador estable")
 
 # La recuperación debe dejar disponibles las columnas que usa la carga Cassandra.
-recovery = next((t for t in texts if "# RECUPERACIÓN S05" in t), "")
+recovery = next((t for t in texts if "# Recuperación" in t), "")
 for token in ["contexto_menciones", "noticias_entidad", "nivel_menciones", "merge(contexto_menciones"]:
     if token not in recovery:
         raise SystemExit(f"La recuperación S5 no restaura {token}")

@@ -17,14 +17,14 @@ text = "\n".join(
 
 required = [
     "contraste de hipótesis",
-    "CONTRASTE DE HIPÓTESIS S05",
+    "Contraste de hipótesis",
     "Hipótesis de trabajo H1",
     "al menos una de las 77 referencias SECOP exactas",
     "H1 queda refutada",
     "no es un test estadístico inferencial",
     "unidad observada en prensa",
     "unidad que Laura revisa",
-    "HIPÓTESIS REVISADA S05",
+    "Hipótesis revisada",
     "H2:",
     "formular mejores hipótesis de revisión",
     '"alcance_prensa": "contexto a nivel de entidad; sin referencia exacta del proceso en título/subtítulo"',

@@ -103,10 +103,10 @@ Lo que debe quedar al regresar al **mismo** cuaderno S5:
     insert_once(
         cells,
         "### La llave se lee en dos partes",
-        "EJERCICIO S05-PK",
+        "Ejercicio",
         [
             md("""
-### EJERCICIO S05-PK — Elige antes de mirar la respuesta
+### Ejercicio — Elige antes de mirar la respuesta
 
 La consulta profesional es:
 
@@ -141,9 +141,9 @@ print("Alternativa descartada:", razon_descartada or "PENDIENTE")
     insert_once(
         cells,
         "## 8. Tutorial visual 2",
-        "CHULETA CQL S05",
+        "Chuleta CQL",
         [md("""
-### CHULETA CQL S05 — cinco comandos, una sola historia
+### Chuleta CQL — cinco comandos, una sola historia
 
 | Comando | Para qué sirve hoy | Qué debes observar | Error frecuente |
 |---|---|---|---|
@@ -162,10 +162,10 @@ print("Alternativa descartada:", razon_descartada or "PENDIENTE")
     insert_once(
         cells,
         "## 8. Tutorial visual 2",
-        "RECUPERACIÓN S05",
+        "Recuperación",
         [
             md("""
-### RECUPERACIÓN S05 — si Colab reinició durante el receso
+### Recuperación — si Colab reinició durante el receso
 
 La siguiente celda es segura de ejecutar siempre. Si `candidatos` sigue en memoria, no hace nada.
 Si el runtime se perdió, reconstruye la bandeja desde los archivos versionados y vuelve a comprobar
@@ -174,7 +174,7 @@ Si el runtime se perdió, reconstruye la bandeja desde los archivos versionados 
 **OJO.** Este respaldo recupera el trabajo analítico; no reemplaza la evidencia de haber creado la vista real en Atlas.
 """),
             code("""
-# RECUPERACIÓN S05
+# Recuperación
 if "candidatos" not in globals():
     import json, urllib.request
     import pandas as pd
@@ -244,9 +244,9 @@ else:
     insert_once(
         cells,
         "Sube el Secure Connect Bundle",
-        "DIAGNÓSTICO ASTRA S05",
+        "Diagnóstico",
         [md("""
-### DIAGNÓSTICO ASTRA S05 — si algo falla, identifica primero el síntoma
+### Diagnóstico — si algo falla, identifica primero el síntoma
 
 | Ves | Qué suele significar | Qué haces |
 |---|---|---|
@@ -265,10 +265,10 @@ Antes del código recuerda cuatro objetos: **SCB = conexión**, **token = autent
     insert_once(
         cells,
         'print("Top 5 —", bogota)',
-        "EVIDENCIA INDIVIDUAL S05",
+        "Evidencia individual",
         [
             md("""
-### EVIDENCIA INDIVIDUAL S05 — ahora cambia una decisión
+### Evidencia individual — ahora cambia una decisión
 
 No repitas Bogotá. Mira los departamentos que realmente aparecen en **tu** bandeja, elige uno y ejecuta la misma consulta.
 El resultado se guardará para tu hito.
@@ -321,9 +321,9 @@ if not top5_propio:
     insert_once(
         cells,
         "## 12. Hito de la sesión",
-        "HOJA DE TRUCOS S05",
+        "Hoja de trucos",
         [md("""
-### HOJA DE TRUCOS S05 — para consultar sin volver veinte celdas
+### Hoja de trucos — para consultar sin volver veinte celdas
 
 | Necesidad | Recuerda |
 |---|---|

@@ -25,8 +25,8 @@ required = [
     "| Regla + contraste |",
     "H1 + operacionalización + conclusión correcta",
     "una hipótesis refutada produce una pregunta mejor",
-    "S6  especificidad relacional",
-    "S7  especificidad textual",
+    "S6 — especificidad relacional",
+    "S7 — especificidad textual",
     "probar una nueva hipótesis con evidencia relacional",
 ]
 missing = [x for x in required if x not in text]

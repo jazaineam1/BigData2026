@@ -66,7 +66,7 @@ def bridge_cells() -> list[dict]:
     return [
         md('''
 ---
-## PUENTE S05-S06 — elige la fila que Laura abrirá después
+## Puente hacia la sesión 6 — elige la fila que Laura abrirá después
 
 Hasta aquí S5 respondió **qué mirar primero**. La próxima sesión no vuelve a construir esa decisión: toma **uno de tus procesos priorizados** y pregunta **qué relaciones existen alrededor de él**.
 
@@ -160,43 +160,22 @@ def main() -> None:
             put(cell, text)
             break
 
-    insert_once(cells, "### CONTINUIDAD S03-S05", "DEUDA ABIERTA S04", [md('''
-### DEUDA ABIERTA S04 — la clase terminó con datos, no con una decisión
+    insert_once(cells, "## Mapa de la sesión", "Deuda abierta", [md('''
+### Deuda abierta — la clase terminó con datos, no con una decisión
 
-La sesión 4 alcanzó un punto concreto y útil:
+**El problema.** Laura necesita decidir, de forma repetible y explicable, qué contrato de Compras Claras revisar primero. Sesiones anteriores dejaron los datos guardados y compartidos en MongoDB Atlas, pero **la clase terminó con datos, no con una decisión**: sabíamos dónde vivía la evidencia, no cómo convertirla en una prioridad defendible.
 
-```text
-Atlas
-└── compras_claras
-    ├── noticias               → 987 documentos
-    └── entidades_noticias     → 142 documentos
-```
+### Continuidad — de la exploración a la bandeja operacional
 
-Eso resolvió **dónde vive la evidencia y cómo la comparte el equipo**, pero dejó abierta la pregunta que daba nombre a S4:
+**Qué hemos hecho (resumen; no necesitas recordar los detalles exactos de clases anteriores).** Ya probamos una primera bandeja como **prototipo exploratorio**: sirvió para ver que las señales de prensa podían ayudar a reducir el universo de contratos, pero todavía no era una regla reproducible.
 
-> **¿Qué contrato debe revisar Laura primero?**
+**Qué haremos hoy.** Convertimos esa exploración en una **bandeja operacional** en tres pasos: (1) publicamos en Atlas una vista que clasifica cada entidad según su presencia en prensa, (2) usamos esa vista para construir, con una regla explícita, la bandeja de candidatos, y (3) diseñamos en Cassandra una tabla que sirve esa misma consulta una y otra vez, rápido.
 
-S5 existe para cerrar esa deuda. Primero convierte las 142 entidades en una vista explicable; después cruza esa señal con SECOP para construir la bandeja; solo cuando la bandeja existe aparece Cassandra como problema de servicio repetitivo.
+**Enfoque.** Cada paso deja una evidencia verificable —una vista, una regla reproducible, una tabla que responde lo mismo que ya validaste en pandas—, no una sintaxis para memorizar.
 
-**PARA LLEVAR.** S4 dejó persistencia compartida. S5 debe producir una decisión operacional reproducible.
-''')], after=False)
+**Para qué.** Para que puedas defender, con evidencia, por qué un proceso llegó a la bandeja y por qué Cassandra responde correctamente esa pregunta repetitiva.
 
-    insert_once(cells, "## Mapa de la sesión", "CONTINUIDAD S03-S05", [md('''
-### CONTINUIDAD S03-S05 — del prototipo a la bandeja operacional
-
-En S3 apareció una primera bandeja de **200 procesos**. Ese resultado fue un **prototipo exploratorio**: servía para demostrar que las señales podían reducir el universo, pero todavía mezclaba decisiones que no habíamos convertido en una regla operacional estable.
-
-Hoy no estamos “corrigiendo 200 por 77” ni comparando el mismo indicador. En S5 fijamos una regla distinta, explícita y reproducible sobre la muestra de 1.000 procesos:
-
-```text
-entidad presente en prensa
-+ modalidad contiene "directa"
-+ respuestas al procedimiento = 0
-────────────────────────────────
-77 candidatos
-```
-
-**PARA LLEVAR.** El número importante no es 77 por sí solo. Lo importante es que Laura puede explicar exactamente **cómo entró cada proceso** y qué evidencia todavía falta.
+**Qué se espera al final.** Que expliques la vista, justifiques la bandeja de candidatos y razones por qué la tabla Cassandra responde el top 5 — sin depender de la memoria de sesiones pasadas.
 ''')], after=False)
 
     i = find(cells, "### Producto observable de hoy")
@@ -208,9 +187,9 @@ entidad presente en prensa
         )
         put(cells[i], text)
 
-    i = find(cells, "# RECUPERACIÓN S05")
+    i = find(cells, "# Recuperación")
     put(cells[i], '''
-# RECUPERACIÓN S05
+# Recuperación
 if "candidatos" not in globals():
     import json, urllib.request
     import pandas as pd
@@ -277,7 +256,7 @@ else:
 
     new_bridge = bridge_cells()
     try:
-        b = find(cells, "PUENTE S05-S06")
+        b = find(cells, "Puente hacia la sesión 6")
         end = b + 1
         while end < len(cells) and (
             "s05_ancla_s06.json" in src(cells[end])
@@ -307,10 +286,10 @@ else:
         for idx in reversed(indices_cierre[1:]):
             del cells[idx]
 
-    if not any("CIERRE PEDAGÓGICO S05" in src(c) for c in cells):
+    if not any("Cierre" in src(c) for c in cells):
         cierre_anchor = find_any(cells, ("## Lo que sigue", "# Cierre"))
         cells[cierre_anchor:cierre_anchor] = [md('''
-# CIERRE PEDAGÓGICO S05 — la pregunta de S4 por fin tiene una respuesta operacional
+# Cierre — la pregunta de S4 por fin tiene una respuesta operacional
 
 S4 terminó con **datos persistidos y compartidos**. S5 convirtió ese estado en una cadena defendible:
 

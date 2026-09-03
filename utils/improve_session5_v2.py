@@ -110,12 +110,9 @@ def main() -> None:
 
 Antes de entrar a consultas, verifica el estado esperado:
 
-```text
-Atlas
-└── compras_claras
-    ├── noticias               → 987 documentos
-    └── entidades_noticias     → 142 documentos
-```
+<div align="center">
+<svg style="max-width:420px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 460 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama jerárquico"><style>.s5atree-r{fill:#eef6f1;stroke:#175c3c;stroke-width:2;}.s5atree-c{fill:#f4faf6;stroke:#175c3c;stroke-width:1.5;}.s5atree-t{font:700 13px system-ui,sans-serif;fill:#123f2b;}.s5atree-s{font:11px system-ui,sans-serif;fill:#3a4a41;}.s5atree-l{stroke:#175c3c;stroke-width:1.5;}</style><rect x="20" y="14" width="220" height="34" rx="8" class="s5atree-r"/><text x="30" y="36" class="s5atree-t">compras_claras</text><line x1="40" y1="48" x2="40" y2="68.0" class="s5atree-l"/><line x1="40" y1="68.0" x2="70" y2="68.0" class="s5atree-l"/><rect x="74" y="52.0" width="366" height="32" rx="7" class="s5atree-c"/><text x="84" y="73.0" class="s5atree-t">noticias</text><text x="430" y="73.0" text-anchor="end" class="s5atree-s">987 documentos</text><line x1="40" y1="48" x2="40" y2="108.0" class="s5atree-l"/><line x1="40" y1="108.0" x2="70" y2="108.0" class="s5atree-l"/><rect x="74" y="92.0" width="366" height="32" rx="7" class="s5atree-c"/><text x="84" y="113.0" class="s5atree-t">entidades_noticias</text><text x="430" y="113.0" text-anchor="end" class="s5atree-s">142 documentos</text></svg>
+</div>
 
 La siguiente celda solo recupera la conexión. La contraseña se pide con `getpass()` y no queda escrita.
 
@@ -258,10 +255,17 @@ assert len(candidatos) == 77
 assert candidatos["nivel_menciones"].notna().all()
 ''')
 
-    insert_once(cells, "### El detalle estadístico que importa", "INTERPRETACIÓN EMBUDO S05", [md('''
-### INTERPRETACIÓN EMBUDO S05
+    insert_once(cells, "### El detalle estadístico que importa", "Interpretación del embudo", [md('''
+### Interpretación del embudo
 
-**Cómo se lee.** Partimos de 1.000 procesos, 163 pertenecen a entidades presentes en noticias y 77 sobreviven a modalidad directa + cero respuestas. Cada candidato conserva `noticias_entidad` y `nivel_menciones` de la vista.
+**Cómo se lee, filtro por filtro (cada uno reduce al anterior, no son listas aparte):**
+
+- **1.000 procesos SECOP** — el total del corte, antes de aplicar cualquier regla.
+- **→ 163** — Filtro 1: la `entidad` del proceso aparece en la vista de prensa `menciones_clasificadas`.
+- **→ 81** — Filtro 2: de esos 163, la `modalidad_de_contratacion` contiene "directa".
+- **→ 77** — Filtro 3: de esos 81, `respuestas_al_procedimiento` es igual a 0.
+
+Los tres filtros van encadenados con **Y** (AND): un proceso solo llega a los 77 si cumple los tres a la vez, no si cumple cualquiera de ellos. Cada uno de esos 77 candidatos conserva además `noticias_entidad` y `nivel_menciones` de la vista, pero eso es **contexto que viaja con la fila**, no un cuarto filtro que decida quién entra.
 
 **Qué nos dice.** La vista aporta contexto explicable a cada fila que Laura recibirá.
 
@@ -286,9 +290,9 @@ assert int(primero["precio_base"]) == 168750000
 ''')
 
     # Resultado individual antes de la nube: permite seguir aunque Astra falle.
-    insert_once(cells, "### RECUPERACIÓN S05", "CONTRATO DE RESULTADO S05", [
+    insert_once(cells, "### Recuperación", "Contrato de resultado", [
         md('''
-### CONTRATO DE RESULTADO S05 — fija primero qué debería devolver Cassandra
+### Contrato de resultado — fija primero qué debería devolver Cassandra
 
 Elige un departamento mediante número. pandas calcula el top 5 esperado; después Cassandra debe devolver los mismos IDs y en el mismo orden.
 '''),
@@ -318,7 +322,7 @@ print("IDs esperados por pandas:", ids_esperados_pd)
     ], after=False)
 
     # Recuperación post-receso también restaura el contexto de la vista.
-    i = find(cells, "# RECUPERACIÓN S05")
+    i = find(cells, "# Recuperación")
     r = src(cells[i])
     if "noticias_entidad" not in r:
         r = r.replace(
@@ -353,8 +357,8 @@ Ruta contrastada con documentación oficial vigente el **31 de agosto de 2026**.
     ).replace("Tutorial 2 — Astra/Cassandra con capturas", "Tutorial 2 — Astra/Cassandra: guía visual"))
 
     # Driver: mini ficha y validación de archivos/credenciales.
-    insert_once(cells, "!pip install -q cassandra-driver", "MINI FICHA DRIVER S05", [md('''
-### MINI FICHA DRIVER S05
+    insert_once(cells, "!pip install -q cassandra-driver", "Ficha del driver", [md('''
+### Ficha del driver
 
 | Objeto | Para qué sirve | Qué recibe | Qué deja |
 |---|---|---|---|
@@ -472,9 +476,9 @@ if not top5:
     print("No aparecieron filas. Revisa el nombre exacto del departamento.")
 """)
 
-    i = find(cells, "### EVIDENCIA INDIVIDUAL S05")
+    i = find(cells, "### Evidencia individual")
     put(cells[i], '''
-### EVIDENCIA INDIVIDUAL S05 — compara dos motores
+### Evidencia individual — compara dos motores
 
 Ya fijaste el top 5 esperado con pandas. Ahora pregunta lo mismo a Cassandra. La evidencia es una prueba de **corrección**, no un benchmark de velocidad.
 ''')
@@ -482,7 +486,7 @@ Ya fijaste el top 5 esperado con pandas. Ahora pregunta lo mismo a Cassandra. La
         raise RuntimeError("Falta celda de evidencia individual")
     put(cells[i + 1], '''
 if "departamento_elegido" not in globals() or "ids_esperados_pd" not in globals():
-    raise RuntimeError("Ejecuta primero CONTRATO DE RESULTADO S05.")
+    raise RuntimeError("Ejecuta primero Contrato de resultado.")
 
 top5_propio = list(session.execute(consulta, (CORTE_CLASE, departamento_elegido)))
 ids_cql = [str(f.id_proceso) for f in top5_propio]
@@ -497,8 +501,8 @@ if not coinciden_cql_pd:
     raise AssertionError("Revisa corte, departamento, carga y orden: los dos resultados no coinciden.")
 ''')
 
-    insert_once(cells, "coinciden_cql_pd = ids_cql == ids_esperados_pd", "INTERPRETACIÓN CQL S05", [md('''
-### INTERPRETACIÓN CQL S05
+    insert_once(cells, "coinciden_cql_pd = ids_cql == ids_esperados_pd", "Interpretación del resultado CQL", [md('''
+### Interpretación del resultado CQL
 
 **Cómo se lee.** Comparamos, en orden, los IDs del top 5 calculado con pandas y el servido por Cassandra.
 
@@ -603,7 +607,7 @@ MongoDB transforma documentos; pandas materializa una regla auditable; Cassandra
 with open("hito_s05_servicio_prioridades.md", "w", encoding="utf-8") as f:
     f.write(hito)
 print(hito)
-print("\nArchivos creados: s05_priorizacion.csv, hito_s05_servicio_prioridades.md")
+print("\\nArchivos creados: s05_priorizacion.csv, hito_s05_servicio_prioridades.md")
 """)
 
     put(cells[find(cells, "## Rúbrica de calidad del hito")], '''

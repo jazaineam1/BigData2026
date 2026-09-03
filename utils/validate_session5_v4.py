@@ -18,27 +18,27 @@ text = "\n".join(
 )
 
 required = [
-    "MICROEJEMPLO SWITCH S05",
+    "Microejemplo",
     "regla pedagógica versionada",
-    "MODELO MENTAL VISTA S05",
-    "MICROEJEMPLO MERGE S05",
+    "Modelo mental",
+    "Microejemplo",
     'validate="many_to_one"',
-    "FUNDAMENTO REGLA S05",
+    "Fundamento de la regla",
     "heurística pedagógica versionada",
     "probabilidad de irregularidad",
     "impacto económico potencial",
-    "MICROEJEMPLO NAN S05",
-    "ESCENA OPERACIONAL CASSANDRA S05",
+    "Microejemplo",
+    "Escena operacional",
     "GET /prioridades?corte=2026-09-03",
-    "MICROEJEMPLO PARTICIONES S05",
+    "Microejemplo",
     "Partition key",
     "Clustering",
-    "MODELO MENTAL ASTRA S05",
+    "Modelo mental",
     "Serverless (non-vector)",
     "keyspace",
-    "MODELO CONEXIÓN PYTHON S05",
+    "Modelo de conexión",
     "lugares reservados",
-    "UPSERT S05",
+    "Upsert",
     "Cambiar de motor no debería cambiar la decisión de negocio",
     "atlas-s05-pipelines-vistas-v3.html",
     "astra-cassandra-paso-a-paso-v3.html",
@@ -48,7 +48,7 @@ if missing:
     raise SystemExit("Faltan marcadores S5 v4: " + ", ".join(missing))
 
 # El control textual puede conservar el rótulo v4 o haber sido refinado por v5.
-if "PRECISIÓN 0/77 S05" not in text and "CONTRASTE DE HIPÓTESIS S05" not in text:
+if "PRECISIÓN 0/77 S05" not in text and "Contraste de hipótesis" not in text:
     raise SystemExit("Falta el bloque que interpreta el control textual de 0/77")
 
 for path in (ATLAS, ASTRA):
