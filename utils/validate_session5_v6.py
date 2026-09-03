@@ -15,10 +15,15 @@ text = "\n".join(
 )
 
 required = [
+    "Antes de afirmar: formula una hipótesis que pueda fallar",
     "0/77 → H1 literal refutada",
     "la prensa queda mejor especificada",
     "formular hipótesis",
     "pedir la siguiente evidencia correcta",
+    "## Contraste de hipótesis de prensa",
+    "Resultado observado: {con_referencia}/77",
+    "| Regla + contraste |",
+    "H1 + operacionalización + conclusión correcta",
     "una hipótesis refutada produce una pregunta mejor",
     "S6  especificidad relacional",
     "S7  especificidad textual",
@@ -33,4 +38,4 @@ old = "→ 77 candidatos con contratación directa y 0 respuestas\n→ 0/77 refe
 if old in text:
     raise SystemExit("El cierre antiguo todavía presenta 0/77 como hito central")
 
-print(f"[OK] S5 v6 válida: {len(nb['cells'])} celdas; cierre por hipótesis y puente S6/S7 coherentes.")
+print(f"[OK] S5 v6 válida: {len(nb['cells'])} celdas; hipótesis integrada en contenido, hito, rúbrica y puente S6/S7.")
