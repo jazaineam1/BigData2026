@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Valida la versión final de S5 después de la auditoría docente/estudiante."""
+"""Valida la base S5 después de la auditoría docente/estudiante.
+
+Los tutoriales vigentes v3 se validan en validate_session5_v4.py. Este validador
+conserva los controles históricos de datos, hilo, interpretación y assets v2,
+pero no obliga al notebook a seguir enlazando una versión visual anterior.
+"""
 
 from __future__ import annotations
 
@@ -44,8 +49,6 @@ def main() -> None:
         errors.append("Hay celdas vacías")
 
     required = [
-        "atlas-s05-pipelines-vistas-v2.html",
-        "astra-cassandra-paso-a-paso-v2.html",
         "menciones_clasificadas",
         "noticias_entidad",
         "nivel_menciones",
@@ -150,16 +153,15 @@ def main() -> None:
         errors.append("El borrador del quiz perdió su regla de no enlace")
 
     if errors:
-        print("Validación S5 v2 fallida:")
+        print("Validación S5 base fallida:")
         for e in errors:
             print("[ERROR]", e)
         raise SystemExit(1)
 
-    print(f"[OK] S5 v2 válida: {len(cells)} celdas; JSON válido y sin celdas vacías.")
+    print(f"[OK] S5 base válida: {len(cells)} celdas; JSON válido y sin celdas vacías.")
     print("[OK] Hilo: vista Atlas → bandeja enriquecida → contrato pandas → Cassandra → verificación cruzada.")
     print("[OK] Cuatro rótulos de interpretación, hito individual y rúbrica observable presentes.")
-    print("[OK] Tutoriales v2 presentes; Astra no finge capturas y conserva ruta vigente.")
-    print("[OK] Primer candidato en tutorial Astra: 3 noticias, nivel baja.")
+    print("[OK] Assets v2 históricos siguen íntegros; enlaces vigentes se validan en S5 v4.")
     print("[OK] Quiz S1–S4 sigue en el repo, pero fuera de enlaces de S5.")
     print("[INFO] Astra real requiere prueba manual con cuenta autorizada; CI no usa credenciales.")
 
