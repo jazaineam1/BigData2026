@@ -61,7 +61,7 @@ astra = ASTRA.read_text(encoding="utf-8")
 for marker in [
     "Fraunces", "IBM Plex Sans", "IBM Plex Mono", "embed", "requestFullscreen",
     "aria-label", "Representación, no captura", "menciones_clasificadas",
-    "4→baja", "5→media", "20→alta", "no es una segunda copia",
+    "4→baja", "5→media", "20→alta", "Una vista no es otra copia",
 ]:
     if marker not in atlas:
         raise SystemExit(f"Tutorial Atlas v3 perdió: {marker}")
