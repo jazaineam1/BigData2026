@@ -19,6 +19,8 @@ required = [
     "contraste de hipótesis",
     "CONTRASTE DE HIPÓTESIS S05",
     "Hipótesis de trabajo H1",
+    "al menos una de las 77 referencias SECOP exactas",
+    "H1 queda refutada",
     "no es un test estadístico inferencial",
     "unidad observada en prensa",
     "unidad que Laura revisa",
@@ -26,7 +28,7 @@ required = [
     "H2:",
     "formular mejores hipótesis de revisión",
     '"alcance_prensa": "contexto a nivel de entidad; sin referencia exacta del proceso en título/subtítulo"',
-    '"hipotesis_h1": "no apoyada por búsqueda literal de referencia exacta en título/subtítulo"',
+    '"hipotesis_h1": "refutada: ninguna referencia SECOP exacta apareció en título/subtítulo"',
     "0/77 → refinar alcance de la prensa",
 ]
 missing = [x for x in required if x not in text]
@@ -42,4 +44,4 @@ for marker in ["assert con_referencia == 0", "assert len(candidatos) == 77"]:
     if marker not in text:
         raise SystemExit(f"Se perdió baseline reproducible: {marker}")
 
-print(f"[OK] S5 v5 válida: {len(nb['cells'])} celdas; hipótesis, operacionalización y alcance de prensa explícitos.")
+print(f"[OK] S5 v5 válida: {len(nb['cells'])} celdas; hipótesis falsable, operacionalización y alcance de prensa explícitos.")
