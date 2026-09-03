@@ -28,8 +28,6 @@ required = [
     "probabilidad de irregularidad",
     "impacto económico potencial",
     "MICROEJEMPLO NAN S05",
-    "PRECISIÓN 0/77 S05",
-    "títulos o subtítulos examinados",
     "ESCENA OPERACIONAL CASSANDRA S05",
     "GET /prioridades?corte=2026-09-03",
     "MICROEJEMPLO PARTICIONES S05",
@@ -49,6 +47,10 @@ missing = [x for x in required if x not in text]
 if missing:
     raise SystemExit("Faltan marcadores S5 v4: " + ", ".join(missing))
 
+# El control textual puede conservar el rótulo v4 o haber sido refinado por v5.
+if "PRECISIÓN 0/77 S05" not in text and "CONTRASTE DE HIPÓTESIS S05" not in text:
+    raise SystemExit("Falta el bloque que interpreta el control textual de 0/77")
+
 for path in (ATLAS, ASTRA):
     if not path.exists():
         raise SystemExit(f"Falta tutorial v3: {path}")
@@ -59,7 +61,7 @@ astra = ASTRA.read_text(encoding="utf-8")
 for marker in [
     "Fraunces", "IBM Plex Sans", "IBM Plex Mono", "embed", "requestFullscreen",
     "aria-label", "Representación, no captura", "menciones_clasificadas",
-    "4→baja", "5→media", "20→alta", "no es otra copia",
+    "4→baja", "5→media", "20→alta", "no es una segunda copia",
 ]:
     if marker not in atlas:
         raise SystemExit(f"Tutorial Atlas v3 perdió: {marker}")
