@@ -69,9 +69,7 @@ else:
 
 MongoDB no introduce una lógica diferente: `$switch` expresa esa misma decisión dentro del pipeline. Evalúa las ramas **en orden** y usa la primera condición verdadera.
 
-<div align="center">
-<svg style="max-width:500px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 500 158" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de flujo"><defs><marker id="s5switch-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/></marker></defs><style>.s5switch-b{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}.s5switch-t{font:700 14px system-ui,sans-serif;fill:#123f2b;}.s5switch-s{font:12px system-ui,sans-serif;fill:#3a4a41;}</style><rect x="20" y="14" width="460" height="50" rx="10" class="s5switch-b"/><text x="250.0" y="36" text-anchor="middle" class="s5switch-t">noticias = 25</text><text x="250.0" y="54" text-anchor="middle" class="s5switch-s">¿≥20? sí → alta (deja de evaluar)</text><line x1="250.0" y1="64" x2="250.0" y2="94" stroke="#175c3c" stroke-width="2" marker-end="url(#s5switch-a)"/><rect x="20" y="94" width="460" height="50" rx="10" class="s5switch-b"/><text x="250.0" y="116" text-anchor="middle" class="s5switch-t">noticias = 8</text><text x="250.0" y="134" text-anchor="middle" class="s5switch-s">¿≥20? no → ¿≥5? sí → media</text></svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/03_switch_traza.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/03_switch_traza.png" width="500" alt="Traza de decision del operador switch para clasificar por numero de noticias"></a></div>
 
 **OJO.** Los cortes `5` y `20` son una **regla pedagógica versionada** para resumir intensidad de menciones. No son umbrales oficiales de riesgo ni fueron estimados con un modelo estadístico.
 
@@ -82,35 +80,7 @@ MongoDB no introduce una lógica diferente: `$switch` expresa esa misma decisió
     insert_once(cells, "## 3. Tutorial visual 1", "Modelo mental", [md('''
 ### Modelo mental — publicar una transformación sin copiar los datos
 
-<div align="center">
-<svg style="max-width:460px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 460 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama: entidades_noticias pasa por un pipeline y se publica como la vista menciones_clasificadas">
-  <defs>
-    <marker id="s5v1-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/>
-    </marker>
-  </defs>
-  <style>
-    .s5v1-box-fill{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}
-    .s5v1-view-fill{fill:#eef6f1;stroke:#175c3c;stroke-width:2;stroke-dasharray:6 4;}
-    .s5v1-title{font:700 15px system-ui,sans-serif;fill:#123f2b;}
-    .s5v1-sub{font:12px system-ui,sans-serif;fill:#3a4a41;}
-    .s5v1-label{font:600 12px system-ui,sans-serif;fill:#175c3c;}
-    .s5v1-tag{font:700 10px system-ui,sans-serif;fill:#ffffff;}
-  </style>
-  <rect x="60" y="18" width="340" height="64" rx="10" class="s5v1-box-fill"/>
-  <text x="230" y="44" text-anchor="middle" class="s5v1-title">entidades_noticias</text>
-  <text x="230" y="66" text-anchor="middle" class="s5v1-sub">colección real · 142 documentos</text>
-
-  <line x1="230" y1="82" x2="230" y2="150" stroke="#175c3c" stroke-width="2" marker-end="url(#s5v1-arrow)"/>
-  <rect x="170" y="98" width="120" height="24" rx="5" fill="#175c3c"/>
-  <text x="230" y="114" text-anchor="middle" class="s5v1-tag">PIPELINE (agregación)</text>
-
-  <rect x="60" y="164" width="340" height="78" rx="10" class="s5v1-view-fill"/>
-  <text x="230" y="192" text-anchor="middle" class="s5v1-title">menciones_clasificadas</text>
-  <text x="230" y="212" text-anchor="middle" class="s5v1-sub">VIEW · definición guardada, solo lectura</text>
-  <text x="230" y="230" text-anchor="middle" class="s5v1-sub">se recalcula sobre entidades_noticias en cada consulta</text>
-</svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/04_vista_pipeline.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/04_vista_pipeline.png" width="460" alt="entidades_noticias pasa por un pipeline y se publica como la vista menciones_clasificadas"></a></div>
 
 Piensa en una vista como una **pregunta guardada y consultable**, parecida mentalmente a una `VIEW` de SQL:
 
@@ -150,42 +120,7 @@ Antes del cruce real, mira este caso diminuto.
 
 Al unir por `entidad`, P1 y P2 reciben el mismo contexto de A. Eso es un patrón **many-to-one**: muchos procesos pueden apuntar a una sola fila de contexto por entidad.
 
-<div align="center">
-<svg style="max-width:460px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 460 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama: los procesos P1 y P2 se cruzan con la entidad A y heredan su contexto de 24 noticias, nivel alta">
-  <defs>
-    <marker id="s5v2-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/>
-    </marker>
-  </defs>
-  <style>
-    .s5v2-box{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}
-    .s5v2-out{fill:#eef6f1;stroke:#175c3c;stroke-width:2;stroke-dasharray:6 4;}
-    .s5v2-title{font:700 14px system-ui,sans-serif;fill:#123f2b;}
-    .s5v2-sub{font:11px system-ui,sans-serif;fill:#3a4a41;}
-    .s5v2-line{stroke:#175c3c;stroke-width:2;fill:none;}
-  </style>
-  <rect x="20" y="20" width="90" height="40" rx="8" class="s5v2-box"/>
-  <text x="65" y="45" text-anchor="middle" class="s5v2-title">P1</text>
-
-  <rect x="20" y="140" width="90" height="40" rx="8" class="s5v2-box"/>
-  <text x="65" y="165" text-anchor="middle" class="s5v2-title">P2</text>
-
-  <path d="M110,40 C150,40 150,98 168,99" class="s5v2-line"/>
-  <path d="M110,160 C150,160 150,102 168,101" class="s5v2-line"/>
-
-  <rect x="170" y="80" width="120" height="40" rx="8" class="s5v2-box"/>
-  <text x="230" y="105" text-anchor="middle" class="s5v2-title">Entidad A</text>
-
-  <line x1="290" y1="100" x2="348" y2="100" class="s5v2-line" marker-end="url(#s5v2-arrow)"/>
-
-  <rect x="350" y="70" width="90" height="60" rx="8" class="s5v2-out"/>
-  <text x="395" y="94" text-anchor="middle" class="s5v2-title">24 noticias</text>
-  <text x="395" y="114" text-anchor="middle" class="s5v2-sub">nivel: alta</text>
-
-  <text x="65" y="200" text-anchor="middle" class="s5v2-sub">P1 y P2 heredan</text>
-  <text x="65" y="212" text-anchor="middle" class="s5v2-sub">el mismo contexto</text>
-</svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/05_merge_many_to_one.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/05_merge_many_to_one.png" width="460" alt="Los procesos P1 y P2 heredan el contexto de la entidad A"></a></div>
 
 Por eso usamos `validate="many_to_one"`: pandas comprueba que la tabla de contexto no tenga dos filas distintas para la misma entidad. Si esa suposición se rompe, preferimos un error explícito a duplicar procesos silenciosamente.
 
@@ -282,18 +217,14 @@ Ahora cada término tiene sentido de negocio:
 '''), md('''
 ### Microejemplo — piensa en cajones antes de mirar la `PRIMARY KEY`
 
-<div align="center">
-<svg style="max-width:560px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Archivador de prioridades por cajón"><style>.s5caj-h{fill:#eef6f1;stroke:#175c3c;stroke-width:2;}.s5caj-r{fill:#fff;stroke:#175c3c;stroke-width:1;}.s5caj-t{font:700 13px system-ui,sans-serif;fill:#123f2b;}.s5caj-s{font:12px system-ui,sans-serif;fill:#3a4a41;}</style><rect x="15" y="14" width="250" height="24" rx="6" class="s5caj-h"/><text x="25" y="31" class="s5caj-t">Cajón: 2026-09-03 + Bogotá</text><rect x="15" y="44" width="250" height="26" class="s5caj-r"/><text x="25" y="62" class="s5caj-s">$180 M</text><text x="255" y="62" text-anchor="end" class="s5caj-t">P8</text><rect x="15" y="70" width="250" height="26" class="s5caj-r"/><text x="25" y="88" class="s5caj-s">$120 M</text><text x="255" y="88" text-anchor="end" class="s5caj-t">P3</text><rect x="15" y="96" width="250" height="26" class="s5caj-r"/><text x="25" y="114" class="s5caj-s">$40 M</text><text x="255" y="114" text-anchor="end" class="s5caj-t">P5</text><rect x="295" y="14" width="250" height="24" rx="6" class="s5caj-h"/><text x="305" y="31" class="s5caj-t">Cajón: 2026-09-03 + Antioquia</text><rect x="295" y="44" width="250" height="26" class="s5caj-r"/><text x="305" y="62" class="s5caj-s">$250 M</text><text x="535" y="62" text-anchor="end" class="s5caj-t">P9</text><rect x="295" y="70" width="250" height="26" class="s5caj-r"/><text x="305" y="88" class="s5caj-s">$70 M</text><text x="535" y="88" text-anchor="end" class="s5caj-t">P2</text></svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/08_cajones_particion.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/08_cajones_particion.png" width="560" alt="Archivador de prioridades organizado por cajon de corte y departamento"></a></div>
 
 - **Partition key `(corte, departamento)`** = la etiqueta del cajón que permite localizar el grupo.
 - **Clustering `valor_base DESC, id_proceso ASC`** = cómo quedan ordenadas las filas **dentro** del cajón.
 
 Por eso, en esta sesión `PRIMARY KEY` significa más que “un identificador único”:
 
-<div align="center">
-<svg style="max-width:420px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 460 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama jerárquico"><style>.s5pktree-r{fill:#eef6f1;stroke:#175c3c;stroke-width:2;}.s5pktree-c{fill:#f4faf6;stroke:#175c3c;stroke-width:1.5;}.s5pktree-t{font:700 13px system-ui,sans-serif;fill:#123f2b;}.s5pktree-s{font:11px system-ui,sans-serif;fill:#3a4a41;}.s5pktree-l{stroke:#175c3c;stroke-width:1.5;}</style><rect x="20" y="14" width="220" height="34" rx="8" class="s5pktree-r"/><text x="30" y="36" class="s5pktree-t">PRIMARY KEY</text><line x1="40" y1="48" x2="40" y2="68.0" class="s5pktree-l"/><line x1="40" y1="68.0" x2="70" y2="68.0" class="s5pktree-l"/><rect x="74" y="52.0" width="366" height="32" rx="7" class="s5pktree-c"/><text x="84" y="73.0" class="s5pktree-t">partition key</text><text x="430" y="73.0" text-anchor="end" class="s5pktree-s">dónde viven los datos</text><line x1="40" y1="48" x2="40" y2="108.0" class="s5pktree-l"/><line x1="40" y1="108.0" x2="70" y2="108.0" class="s5pktree-l"/><rect x="74" y="92.0" width="366" height="32" rx="7" class="s5pktree-c"/><text x="84" y="113.0" class="s5pktree-t">clustering columns</text><text x="430" y="113.0" text-anchor="end" class="s5pktree-s">cómo se organizan dentro de la partición</text></svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/09_primary_key_arbol.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/09_primary_key_arbol.png" width="420" alt="PRIMARY KEY compuesta por partition key y clustering columns"></a></div>
 
 **Error frecuente.** Diseñar la clave mirando qué columnas parecen importantes. En Cassandra la pregunta profesional va primero.
 ''')])
@@ -309,9 +240,7 @@ Por eso, en esta sesión `PRIMARY KEY` significa más que “un identificador ú
 | **CQL** | lenguaje para definir y consultar tablas Cassandra |
 | **keyspace** | contenedor lógico donde agrupamos las tablas de `compras_claras` |
 
-<div align="center">
-<svg style="max-width:460px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 460 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Astra database, keyspace y tabla"><style>.s5astree2-r{fill:#eef6f1;stroke:#175c3c;stroke-width:2;}.s5astree2-c{fill:#f4faf6;stroke:#175c3c;stroke-width:1.5;}.s5astree2-t{font:700 13px system-ui,sans-serif;fill:#123f2b;}.s5astree2-l{stroke:#175c3c;stroke-width:1.5;}</style><rect x="20" y="14" width="220" height="32" rx="8" class="s5astree2-r"/><text x="30" y="35" class="s5astree2-t">Astra database</text><line x1="40" y1="46" x2="40" y2="78" class="s5astree2-l"/><line x1="40" y1="78" x2="70" y2="78" class="s5astree2-l"/><rect x="74" y="62" width="300" height="32" rx="8" class="s5astree2-c"/><text x="84" y="83" class="s5astree2-t">keyspace compras_claras</text><line x1="74" y1="78" x2="74" y2="126" class="s5astree2-l"/><line x1="74" y1="126" x2="104" y2="126" class="s5astree2-l"/><rect x="108" y="110" width="330" height="32" rx="8" fill="#fff" stroke="#175c3c" stroke-width="1.5"/><text x="118" y="131" class="s5astree2-t">prioridades_por_corte_departamento</text></svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/11_astra_jerarquia.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/11_astra_jerarquia.png" width="460" alt="Jerarquia Astra database, keyspace y tabla"></a></div>
 
 Elegimos **Serverless (non-vector)** porque hoy trabajamos una tabla Cassandra/CQL por claves. No estamos haciendo embeddings ni búsqueda vectorial.
 
@@ -322,9 +251,7 @@ Elegimos **Serverless (non-vector)** porque hoy trabajamos una tabla Cassandra/C
     insert_once(cells, "### Ficha del driver", "Modelo de conexión", [md('''
 ### Modelo de conexión — no memorices objetos: asigna una función a cada uno
 
-<div align="center">
-<svg style="max-width:560px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 560 204" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Objetos de conexión Python y su función"><style>.s5scb-k{fill:#175c3c;}.s5scb-kt{font:700 12px "IBM Plex Mono",monospace;fill:#fff;}.s5scb-v{fill:#f4faf6;stroke:#175c3c;stroke-width:1;}.s5scb-vt{font:12px system-ui,sans-serif;fill:#123f2b;}</style><rect x="10" y="6" width="120" height="28" rx="6" class="s5scb-k"/><text x="70.0" y="25" text-anchor="middle" class="s5scb-kt">SCB</text><rect x="138" y="6" width="412" height="28" rx="6" class="s5scb-v"/><text x="146" y="25" class="s5scb-vt">¿cómo llega el driver de forma segura a esta base?</text><rect x="10" y="38" width="120" height="28" rx="6" class="s5scb-k"/><text x="70.0" y="57" text-anchor="middle" class="s5scb-kt">TOKEN</text><rect x="138" y="38" width="412" height="28" rx="6" class="s5scb-v"/><text x="146" y="57" class="s5scb-vt">¿con qué credencial me autentico?</text><rect x="10" y="70" width="120" height="28" rx="6" class="s5scb-k"/><text x="70.0" y="89" text-anchor="middle" class="s5scb-kt">Cluster</text><rect x="138" y="70" width="412" height="28" rx="6" class="s5scb-v"/><text x="146" y="89" class="s5scb-vt">cliente Python configurado</text><rect x="10" y="102" width="120" height="28" rx="6" class="s5scb-k"/><text x="70.0" y="121" text-anchor="middle" class="s5scb-kt">Session</text><rect x="138" y="102" width="412" height="28" rx="6" class="s5scb-v"/><text x="146" y="121" class="s5scb-vt">canal con el que ejecuto CQL</text><rect x="10" y="134" width="120" height="28" rx="6" class="s5scb-k"/><text x="70.0" y="153" text-anchor="middle" class="s5scb-kt">prepare</text><rect x="138" y="134" width="412" height="28" rx="6" class="s5scb-v"/><text x="146" y="153" class="s5scb-vt">plantilla CQL con espacios ? para valores</text><rect x="10" y="166" width="120" height="28" rx="6" class="s5scb-k"/><text x="70.0" y="185" text-anchor="middle" class="s5scb-kt">execute</text><rect x="138" y="166" width="412" height="28" rx="6" class="s5scb-v"/><text x="146" y="185" class="s5scb-vt">envía la plantilla + los valores reales</text></svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/13_scb_objetos.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/13_scb_objetos.png" width="560" alt="Objetos de conexion Python: SCB, token, Cluster, Session, prepare, execute"></a></div>
 
 **Ejemplo de `prepare()`:**
 
@@ -356,9 +283,7 @@ Los `?` no son valores desconocidos del dataset: son **lugares reservados** que 
 
 En Cassandra, un `INSERT` con la misma `PRIMARY KEY` tiene comportamiento de **upsert**: si la fila no existe, la crea; si ya existe, escribe/actualiza los valores de esa misma fila.
 
-<div align="center">
-<svg style="max-width:520px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 520 158" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de flujo"><defs><marker id="s5ups-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/></marker></defs><style>.s5ups-b{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}.s5ups-t{font:700 14px system-ui,sans-serif;fill:#123f2b;}.s5ups-s{font:12px system-ui,sans-serif;fill:#3a4a41;}</style><rect x="20" y="14" width="480" height="50" rx="10" class="s5ups-b"/><text x="260.0" y="36" text-anchor="middle" class="s5ups-t">1.ª ejecución: P1 no existe</text><text x="260.0" y="54" text-anchor="middle" class="s5ups-s">→ crea P1</text><line x1="260.0" y1="64" x2="260.0" y2="94" stroke="#175c3c" stroke-width="2" marker-end="url(#s5ups-a)"/><rect x="20" y="94" width="480" height="50" rx="10" class="s5ups-b"/><text x="260.0" y="116" text-anchor="middle" class="s5ups-t">2.ª ejecución: misma PK P1</text><text x="260.0" y="134" text-anchor="middle" class="s5ups-s">→ actualiza P1, no crea un duplicado</text></svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/14_upsert_ejemplo.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/14_upsert_ejemplo.png" width="520" alt="Ejemplo de upsert: la segunda ejecucion actualiza en vez de duplicar"></a></div>
 
 Esto ayuda a que la carga del laboratorio sea repetible. **No significa** que 77 escrituras síncronas sean la estrategia recomendada para cargas masivas; aquí priorizamos claridad y trazabilidad.
 ''')])

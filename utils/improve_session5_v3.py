@@ -160,12 +160,10 @@ def main() -> None:
             put(cell, text)
             break
 
-    insert_once(cells, "## Mapa de la sesión", "Deuda abierta", [md('''
-### Deuda abierta — la clase terminó con datos, no con una decisión
+    insert_once(cells, "## Mapa de la sesión", "Punto de partida", [md('''
+## Punto de partida
 
-**El problema.** Laura necesita decidir, de forma repetible y explicable, qué contrato de Compras Claras revisar primero. Sesiones anteriores dejaron los datos guardados y compartidos en MongoDB Atlas, pero **la clase terminó con datos, no con una decisión**: sabíamos dónde vivía la evidencia, no cómo convertirla en una prioridad defendible.
-
-### Continuidad — de la exploración a la bandeja operacional
+**El problema.** Laura necesita decidir, de forma repetible y explicable, qué contrato de Compras Claras revisar primero.
 
 **Qué hemos hecho (resumen; no necesitas recordar los detalles exactos de clases anteriores).** Ya probamos una primera bandeja como **prototipo exploratorio**: sirvió para ver que las señales de prensa podían ayudar a reducir el universo de contratos, pero todavía no era una regla reproducible.
 

@@ -110,9 +110,7 @@ def main() -> None:
 
 Antes de entrar a consultas, verifica el estado esperado:
 
-<div align="center">
-<svg style="max-width:420px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 460 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama jerárquico"><style>.s5atree-r{fill:#eef6f1;stroke:#175c3c;stroke-width:2;}.s5atree-c{fill:#f4faf6;stroke:#175c3c;stroke-width:1.5;}.s5atree-t{font:700 13px system-ui,sans-serif;fill:#123f2b;}.s5atree-s{font:11px system-ui,sans-serif;fill:#3a4a41;}.s5atree-l{stroke:#175c3c;stroke-width:1.5;}</style><rect x="20" y="14" width="220" height="34" rx="8" class="s5atree-r"/><text x="30" y="36" class="s5atree-t">compras_claras</text><line x1="40" y1="48" x2="40" y2="68.0" class="s5atree-l"/><line x1="40" y1="68.0" x2="70" y2="68.0" class="s5atree-l"/><rect x="74" y="52.0" width="366" height="32" rx="7" class="s5atree-c"/><text x="84" y="73.0" class="s5atree-t">noticias</text><text x="430" y="73.0" text-anchor="end" class="s5atree-s">987 documentos</text><line x1="40" y1="48" x2="40" y2="108.0" class="s5atree-l"/><line x1="40" y1="108.0" x2="70" y2="108.0" class="s5atree-l"/><rect x="74" y="92.0" width="366" height="32" rx="7" class="s5atree-c"/><text x="84" y="113.0" class="s5atree-t">entidades_noticias</text><text x="430" y="113.0" text-anchor="end" class="s5atree-s">142 documentos</text></svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/02_atlas_coleccion.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/02_atlas_coleccion.png" width="420" alt="Coleccion compras_claras en Atlas: noticias y entidades_noticias"></a></div>
 
 La siguiente celda solo recupera la conexión. La contraseña se pide con `getpass()` y no queda escrita.
 

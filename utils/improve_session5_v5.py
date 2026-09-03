@@ -79,9 +79,7 @@ Hasta ahora sabemos que las noticias aportan **contexto sobre entidades**. Antes
 
 Esta H1 es útil pedagógicamente porque no depende de opiniones: sabemos exactamente qué observar para sostenerla o refutarla.
 
-<div align="center">
-<svg style="max-width:500px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 500 208" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de flujo"><defs><marker id="s5cflow-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/></marker></defs><style>.s5cflow-b{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}.s5cflow-t{font:700 14px system-ui,sans-serif;fill:#123f2b;}.s5cflow-s{font:12px system-ui,sans-serif;fill:#3a4a41;}</style><rect x="20" y="14" width="460" height="44" rx="10" class="s5cflow-b"/><text x="250.0" y="41.0" text-anchor="middle" class="s5cflow-t">77 referencias SECOP exactas</text><line x1="250.0" y1="58" x2="250.0" y2="82" stroke="#175c3c" stroke-width="2" marker-end="url(#s5cflow-a)"/><rect x="20" y="82" width="460" height="44" rx="10" class="s5cflow-b"/><text x="250.0" y="109.0" text-anchor="middle" class="s5cflow-t">Búsqueda literal en título + subtítulo</text><line x1="250.0" y1="126" x2="250.0" y2="150" stroke="#175c3c" stroke-width="2" marker-end="url(#s5cflow-a)"/><rect x="20" y="150" width="460" height="44" rx="10" class="s5cflow-b"/><text x="250.0" y="177.0" text-anchor="middle" class="s5cflow-t">¿Aparece al menos una?</text></svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/15_contraste_flujo.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/15_contraste_flujo.png" width="500" alt="Flujo del contraste de hipotesis H1 sobre las 77 referencias SECOP"></a></div>
 
 **Resultado del contraste:** `0/77` coincidencias exactas. En este corpus y bajo esta definición literal, **H1 queda refutada**.
 
@@ -141,9 +139,7 @@ Para evaluar H2 necesitaríamos evidencia más específica, por ejemplo:
 
 Esto prepara dos pasos del semestre:
 
-<div align="center">
-<svg style="max-width:520px;width:100%;height:auto;display:block;margin:0 auto;" viewBox="0 0 520 158" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de flujo"><defs><marker id="s5s6s7-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#175c3c"/></marker></defs><style>.s5s6s7-b{fill:#f4faf6;stroke:#175c3c;stroke-width:2;}.s5s6s7-t{font:700 14px system-ui,sans-serif;fill:#123f2b;}.s5s6s7-s{font:12px system-ui,sans-serif;fill:#3a4a41;}</style><rect x="20" y="14" width="480" height="50" rx="10" class="s5s6s7-b"/><text x="260.0" y="36" text-anchor="middle" class="s5s6s7-t">S6</text><text x="260.0" y="54" text-anchor="middle" class="s5s6s7-s">relaciones: entidad → proceso → proveedor</text><line x1="260.0" y1="64" x2="260.0" y2="94" stroke="#175c3c" stroke-width="2" marker-end="url(#s5s6s7-a)"/><rect x="20" y="94" width="480" height="50" rx="10" class="s5s6s7-b"/><text x="260.0" y="116" text-anchor="middle" class="s5s6s7-t">S7</text><text x="260.0" y="134" text-anchor="middle" class="s5s6s7-s">texto: relevancia, no solo coincidencia literal</text></svg>
-</div>
+<div align="center"><a href="https://github.com/jazaineam1/BigData2026/blob/main/assets/diagrams/session5/16_puente_s6_s7.svg" target="_blank"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/assets/diagrams/session5/16_puente_s6_s7.png" width="520" alt="Puente hacia S6 relaciones y S7 texto"></a></div>
 
 **Pregunta de negocio.** Laura no necesita que la prensa “condene” un contrato. Necesita que le ayude a **formular mejores hipótesis de revisión y pedir la siguiente evidencia correcta**.
 '''.strip(),

@@ -22,10 +22,7 @@ astra = ASTRA.read_text(encoding="utf-8")
 
 required_nb = [
     "Contrato de éxito — tres productos, las mismas herramientas",
-    "guía paso a paso",
-    "bandeja SECOP",
-    "tabla operativa",
-    "CRUD + comparación",
+    "assets/diagrams/session5/01_pipeline_sesion.png",
     "**1 · Vista Atlas**",
     "**2 · Bandeja explicable**",
     "**3 · Consulta operacional**",

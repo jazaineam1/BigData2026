@@ -15,11 +15,9 @@ texts = [
 text = "\n".join(texts)
 
 required = [
-    "Deuda abierta",
-    "la clase terminó con datos, no con una decisión",
+    "Punto de partida",
     "De datos persistidos en Atlas a una consulta operacional con Cassandra",
     "evidencia que ya dejó persistida en Atlas en una bandeja priorizada",
-    "Continuidad",
     "prototipo exploratorio",
     "bandeja operacional",
     "s05_ancla_s06.json",
