@@ -60,9 +60,9 @@ window.addEventListener('DOMContentLoaded', event => {
                 <div class="course-category">Sesión 5 · Atlas → Cassandra</div>
                 <div class="course-title">De la evidencia a la bandeja operacional</div>
                 <p class="course-description">
-                    Laura transforma el contexto de prensa en una vista, reproduce 1.000 → 163 → 77,
-                    comprueba el límite 0/77 y diseña Cassandra desde una consulta repetitiva.
-                    La sesión deja el proceso que abrirá S6.
+                    Laura transforma el contexto de prensa en una vista, reproduce 1.000 → 163 → 77 y
+                    contrasta una hipótesis para precisar qué evidencia aporta realmente la prensa.
+                    Luego diseña Cassandra desde una consulta repetitiva y deja el proceso que abrirá S6.
                 </p>
             </a>`;
         courseRow.appendChild(card);
