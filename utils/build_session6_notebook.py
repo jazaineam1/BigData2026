@@ -41,7 +41,7 @@ def pregunta_codificada(token):
         f'<label style="display:block;margin:8px 0"><input type="radio" name="{uid}" value="{i}"> {html_lib.escape(op)}</label>'
         for i, op in enumerate(p["opciones"])
     )
-    retro = json.dumps(p["retro"], ensure_ascii=False)
+    retro = html_lib.escape(json.dumps(p["retro"], ensure_ascii=False))
     box = (
         f'<div style="border:2px solid #175c3c;background:#f4faf6;color:#172019;border-radius:12px;padding:15px;margin:14px 0">'
         f'<strong>Pregunta {p["numero"]} · {html_lib.escape(p["tema"])}</strong>'
