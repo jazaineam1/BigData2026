@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Genera S6: contexto relacional del proceso priorizado por Laura.
 
-S6 parte del producto de S5 (`s05_ancla_s06.json`). Neo4j aparece porque Laura
+S6 parte del producto de S5, cuya ancla pedagógica ya viene incluida en el manifest versionado. Neo4j aparece porque Laura
 ya sabe qué revisar primero, pero necesita entender qué relaciones existen alrededor
 del proceso antes de asignarlo a un auditor.
 
@@ -151,21 +151,11 @@ print("Huella SHA256 del extracto:", huella_datos)
 '''
 
 SELECT_ANCHOR = r'''
-ruta = input("Ruta de s05_ancla_s06.json (Enter = respaldo): ").strip()
-if ruta:
-    if not Path(ruta).is_file():
-        raise FileNotFoundError("No encontré tu archivo. Corrige la ruta o deja Enter para elegir el respaldo explícitamente.")
-    ancla_original = json.loads(Path(ruta).read_text(encoding="utf-8-sig"))
-    if not isinstance(ancla_original, dict) or not ancla_original.get("nit_entidad") or not ancla_original.get("id_proceso"):
-        raise ValueError("El ancla debe contener nit_entidad e id_proceso.")
-    par = datos["id_proceso"].eq(str(ancla_original["id_proceso"]).strip()) & datos["nit_entidad"].eq(str(ancla_original["nit_entidad"]).strip()) & datos["tipo_registro"].eq("candidato_s05")
-    if not par.any():
-        raise ValueError("El proceso y su entidad no corresponden a los candidatos S5 de este extracto. Revisa el archivo.")
-    origen_ancla = "archivo propio S5"
-else:
-    ancla_original = dict(manifest["ancla_pedagogica"])
-    origen_ancla = "ancla pedagógica versionada"
+# El cuaderno trae el ancla pedagógica versionada; no necesitas ningún archivo de otra sesión.
+ancla_original = dict(manifest["ancla_pedagogica"])
+origen_ancla = "ancla pedagógica versionada incluida en S6"
 print("Origen:", origen_ancla)
+print("El ancla ya está disponible en el manifest de S6; no se solicita información de S5.")
 print(json.dumps(ancla_original, ensure_ascii=False, indent=2))
 '''
 
@@ -322,9 +312,9 @@ Estos son ejemplos conceptuales de modelado; no afirmaciones sobre qué motor us
 ---
 ## 1. Recuperar el proceso que Laura abrió en S5
 
-S5 dejó `s05_ancla_s06.json`. Súbelo al panel **Archivos** de Colab y escribe su ruta. Si lo perdiste, la clase no se bloquea: el dataset trae una **ancla pedagógica real** con historial útil.
+S6 trae el ancla pedagógica dentro del manifest y la carga automáticamente. No necesitas subir ni escribir la ruta de ningún archivo de S5.
 
-**OJO.** El respaldo permite aprender Neo4j, pero el hito declara que no se usó el archivo propio.
+**OJO.** La ancla incluida es una entrada versionada del curso; se declara como tal en el hito.
 '''),
         hidden(code(LOAD_DATA), "Cargar o recuperar el extracto"),
         code(SELECT_ANCHOR),
@@ -463,24 +453,21 @@ Guarda ficha y JSONL en `hitos/s06/` del repositorio **privado** del equipo. Peg
         md("""
 ### EJERCICIO S06-PATRON — un solo hueco
 
-Completa **solo** el nombre de la relación entre un proceso histórico y el proveedor al que fue adjudicado.
+Lee el nombre de la relación entre un proceso histórico y el proveedor al que fue adjudicado.
 
-**Qué debe verse si salió bien:** el patrón expresa el hecho contractual y aparece la confirmación “Patrón correcto”.
-**Error probable:** dejar `____` o inventar un verbo que no representa el hecho del dato.  
-**Qué significa:** el modelo aún no expresa la semántica contractual que luego recorrerá `MATCH`.
+**Qué debe verse:** `(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)` y la confirmación “Patrón correcto”.
+**Error común:** confundir el ID del proceso, por ejemplo `CO1.REQ.2622868`, con el nombre de la relación. El ID identifica un nodo `Proceso`; `ADJUDICADO_A` nombra la flecha hacia `Proveedor`.
 
 <details><summary><strong>Recuperación si te atascaste</strong></summary>
 La relación se llama <code>ADJUDICADO_A</code>. Cámbiala y vuelve a ejecutar.
 </details>
 """),
         code("""
-RELACION_PROCESO_PROVEEDOR = "____"  # reemplaza únicamente ____
+RELACION_PROCESO_PROVEEDOR = "ADJUDICADO_A"
 patron_estudiante = f"(p:Proceso)-[:{RELACION_PROCESO_PROVEEDOR}]->(v:Proveedor)"
 print(patron_estudiante)
 
-if RELACION_PROCESO_PROVEEDOR != "ADJUDICADO_A":
-    raise ValueError("Revisa el hecho contractual que conecta Proceso con Proveedor.")
-print("Patrón correcto: la relación expresa una adjudicación observada.")
+print("Patrón correcto: ADJUDICADO_A expresa una adjudicación observada.")
 """),
         md(f'''
 ### Modelo mínimo que usaremos
@@ -558,9 +545,9 @@ Antes de usar Neo4j calculamos qué proveedores de la entidad ancla también apa
         question_cell(1, 'Mediana de referencia', '¿Qué representa la mediana H2-R?', ['La mediana del número de contratos de todos los proveedores.', 'El umbral que prueba riesgo.', 'El punto central de los máximos de conectividad por entidad candidata con historial.', 'El promedio de conexiones del proveedor elegido para explorar.'], 2, ['H2-R cuenta entidades conectadas, no contratos, y resume un máximo por entidad candidata.', 'Es una referencia descriptiva de una muestra seleccionada; no existe aquí un modelo de riesgo.', 'Cada NIT de entidad aporta un máximo; ordenar esos máximos permite calcular la mediana de comparación.', 'El proveedor explorado puede no ser el máximo. La referencia se construye con todas las entidades candidatas con historial.'], 'El cuaderno calcula un máximo por cada entidad candidata que tiene historial.', 10),
         md("""
 ### RECUPERACIÓN S06 — si Colab reinició
-Si perdiste las variables, ejecuta la celda siguiente: reconstruye interactividad, datos, ancla y contrato pandas. Vuelve a indicar el archivo propio o el respaldo. Si todo sigue en memoria, continúa con Aura.
+Si perdiste las variables, ejecuta la celda siguiente: reconstruye interactividad, datos, ancla incluida en S6 y contrato pandas. No solicita información de otra sesión.
 
-**OJO.** Después debes volver a conectar y repetir la carga; las consultas posteriores necesitan esa conexión. La reconstrucción reutiliza los archivos descargados o subidos. Si el runtime perdió también los archivos y no hay red, sube las copias que entregó el docente.
+**OJO.** Después debes volver a conectar y repetir la carga; las consultas posteriores necesitan esa conexión. La reconstrucción reutiliza los archivos versionados del curso. Si el runtime perdió los archivos y no hay red, el docente debe compartir las copias del curso.
 """),
         hidden(code("# RECUPERACIÓN S06\n" + INTERACTIVITY + "\n" + LOAD_DATA + "\n" + SELECT_ANCHOR + "\n" + PREPARE_HIST + "\n" + CONTRACT_PANDAS + '\nprint("Estado S6 reconstruido desde archivos versionados o copia local.")'), "Recuperar estado S6"),
         md("""
@@ -1248,9 +1235,9 @@ def build_checklist(cells):
 
     pasos = [
         ("abrir", "entiende", "Abre el caso y lee la rúbrica", "# Sesión 6", "Identifica el producto, la pregunta profesional y los criterios antes del laboratorio.", "Lee el mapa, la procedencia y la rúbrica S06; responde las autoevaluaciones a medida que aparecen.", "La ficha pide proceso, dos proveedores si difieren, máximo, mediana, límite, decisión y traza."),
-        ("cargar", "ejecuta", "Carga el extracto y elige el ancla", "#@title Cargar o recuperar", "Conservas la selección S5 sin fabricar un proveedor para el candidato.", "Ejecuta carga y selección de ancla. Si falla la red, sube CSV y manifest; si falta S5, elige Enter explícitamente.", "Filas disponibles: 2109; huella SHA256; Origen: archivo propio S5 o ancla pedagógica versionada."),
+        ("cargar", "ejecuta", "Carga el extracto y recupera el ancla incluida", "#@title Cargar o recuperar", "Conservas una selección versionada sin solicitar archivos de otra sesión.", "Ejecuta carga y recuperación del ancla pedagógica incluida. Si falla la red, el docente comparte el CSV y manifest del curso.", "Filas disponibles: 2109; huella SHA256; ancla pedagógica versionada incluida en S6."),
         ("historial", "entiende", "Lee el historial y la identidad", "nit_deseado =", "NIT es la clave; el nombre puede tener variantes.", "Observa fechas, entidad de trabajo, procesos históricos y proveedores distintos; responde las preguntas de evidencia e identidad.", "NIT de proveedor con varios nombres: 2; Entidad de trabajo; Procesos históricos; Proveedores distintos."),
-        ("patron", "decide", "Completa el patrón contractual", "RELACION_PROCESO_PROVEEDOR =", "El verbo de la relación debe representar un hecho observado.", "Completa el hueco del patrón; usa el apoyo plegado si te atascas.", "Patrón correcto: la relación expresa una adjudicación observada."),
+        ("patron", "entiende", "Lee el patrón contractual", "RELACION_PROCESO_PROVEEDOR =", "El ID del proceso identifica un nodo; el tipo de relación identifica la flecha.", "Observa el patrón ya resuelto y responde la autoevaluación cuando aparezca.", "Patrón correcto: ADJUDICADO_A expresa una adjudicación observada."),
         ("contrato", "ejecuta", "Calcula el contrato pandas y H2-R", "# Ambas métricas", "Fijas una respuesta comparable antes de usar Neo4j.", "Ejecuta y explica máximo y mediana; identifica al proveedor que determina H2-R. Responde la pregunta de mediana.", "Entidades de referencia: 28; Mediana de referencia (candidatas S5): 21.0; Proveedor que determina H2-R; tabla de hasta 10 proveedores."),
         ("aura", "externo", "Conecta Aura o declara el respaldo", "#@title Conectar Aura o activar respaldo", "Distingues ejecución del motor real de continuidad con pandas.", "Si Colab reinició, ejecuta RECUPERACIÓN S06. Sigue el <a href='neo4j-aura-s06-paso-a-paso.html' target='_blank' rel='noopener'>tutorial Aura</a>; elige RESPALDO si no puedes conectar.", "Conexión Neo4j verificada. O RESPALDO pandas: Neo4j y CRUD pendientes; no se declarará equivalencia comprobada."),
         ("carga", "ejecuta", "Crea restricciones y carga adjudicaciones válidas", "cols =", "Los 77 candidatos sin proveedor no deben producir adjudicaciones inventadas.", "Ejecuta restricciones y carga. Responde la pregunta UNWIND.", "Carga preparada: 2109 filas; 2032 adjudicaciones válidas. En Aura, también Carga lista; en respaldo, carga pendiente."),

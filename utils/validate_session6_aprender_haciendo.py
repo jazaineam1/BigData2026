@@ -81,7 +81,7 @@ def main():
         "Laura ya sabe qué proceso revisar primero",
         "H2-R",
         "EJERCICIO S06-PATRON",
-        'RELACION_PROCESO_PROVEEDOR = "____"',
+        'RELACION_PROCESO_PROVEEDOR = "ADJUDICADO_A"',
         "EJERCICIO — identifica las tres piezas",
         "ADJUDICADO_A",
         "Contrato de resultado: primero pandas",

@@ -280,26 +280,23 @@ print("Correcto: variable=v, label=Proveedor, propiedad=nit:\\"900123456\\"")
 
 Con eso ya puedes leer un patrón completo: `(e:Entidad)-[:PUBLICA]->(p:Proceso)` es "un nodo Entidad conectado, mediante la relación PUBLICA, a un nodo Proceso".
 
-### EJERCICIO S06-PATRON — un solo hueco
+### EJERCICIO S06-PATRON — identifica la relación
 
-Completa **solo** el nombre de la relación entre un proceso histórico y el proveedor al que fue adjudicado.
+Lee el nombre de la relación entre un proceso histórico y el proveedor al que fue adjudicado.
 
-**Qué debe verse si salió bien:** `(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)`.
-**Error probable:** dejar `____` o inventar un verbo que no representa el hecho del dato.
-**Qué significa:** el modelo aún no expresa la semántica contractual que luego recorrerá `MATCH`.
+**Qué debe verse:** `(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)`.
+**Error común:** confundir el ID de un proceso con el nombre de la relación. El ID identifica el nodo; `ADJUDICADO_A` nombra la flecha.
 
 <details><summary><strong>Recuperación si te atascaste</strong></summary>
-La relación se llama <code>ADJUDICADO_A</code>. Cámbiala y vuelve a ejecutar.
+La relación se llama <code>ADJUDICADO_A</code>; el cuaderno ya la deja preparada.
 </details>
 '''),
         code("""
-RELACION_PROCESO_PROVEEDOR = "____"  # reemplaza únicamente ____
+RELACION_PROCESO_PROVEEDOR = "ADJUDICADO_A"
 patron_estudiante = f"(p:Proceso)-[:{RELACION_PROCESO_PROVEEDOR}]->(v:Proveedor)"
 print(patron_estudiante)
 
-if RELACION_PROCESO_PROVEEDOR != "ADJUDICADO_A":
-    raise ValueError("Revisa el hecho contractual que conecta Proceso con Proveedor.")
-print("Patrón correcto: la relación expresa una adjudicación observada.")
+print("Patrón correcto: ADJUDICADO_A expresa una adjudicación observada.")
 """),
         md(f'''
 ### Modelo mínimo que usaremos
