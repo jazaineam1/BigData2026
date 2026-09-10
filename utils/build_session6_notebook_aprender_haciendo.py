@@ -1052,10 +1052,7 @@ vecindario_df
         md('''
 ### La evidencia no termina en el grafo
 
-Ahora registra dos decisiones que una respuesta genérica no puede inventar por ti:
-
-1. un límite que nombre **qué dato faltaría** antes de una afirmación de riesgo/irregularidad;
-2. una alternativa de modelado que descartaste y por qué.
+**OJO — esta versión no te pregunta el límite ni la alternativa.** Quedan fijos en el texto de abajo (revísalos, son reales para este caso), y por eso la rúbrica ya no los evalúa como criterio individual — lo que sigue midiendo tu propia ejecución es el proveedor que elegiste y el desenlace de H2-R.
 '''),
         code("""
 if neo_df.empty:
@@ -1070,14 +1067,10 @@ print("Desenlace H2-R (Neo4j):", desenlace_h2r_neo)
 """),
         code("""
 from pathlib import Path
-limite_estudiante = input("Límite concreto y dato faltante: ").strip()
-alternativa_modelo = input("Alternativa de modelado descartada: ").strip()
-razon_alternativa = input("¿Por qué la descartaste para esta pregunta?: ").strip()
 
-if len(limite_estudiante) < 25:
-    raise ValueError("Nombra la conclusión que no puedes sostener y el dato que falta.")
-if len(alternativa_modelo) < 5 or len(razon_alternativa) < 15:
-    raise ValueError("Nombra una alternativa real y explica por qué no sirve igual de bien para esta pregunta.")
+limite_estudiante = "El extracto no incluye fechas de pago ni historial de cumplimiento contractual previo del proveedor."
+alternativa_modelo = "Proceso como propiedad de la relación Entidad-Proveedor"
+razon_alternativa = "Porque necesitamos que Proceso sea un nodo recorrible para S7, no solo un atributo"
 
 export = vecindario_df.merge(
     datos[["id_proceso", "descripcion", "modalidad", "url_secop"]].drop_duplicates("id_proceso"),
@@ -1102,11 +1095,12 @@ except Exception:
 | Criterio | Completo | Parcial | Sin evidencia | Peso |
 |---|---|---|---|---:|
 | Continuidad | identifica la entidad de trabajo y su historial | solo entidad | no ejecuta la celda | 15 |
-| Modelo | justifica nodos/relaciones + alternativa descartada | describe sin alternativa | copia el patrón | 20 |
+| Modelo | resuelve el hueco `ADJUDICADO_A` y el ejercicio de vocabulario correctamente | solo uno de los dos | copia el patrón sin resolverlo | 20 |
 | Ejecución | vecindario propio ejecutado | solo consulta común | no hay salida | 20 |
 | Verificación | `pandas == Neo4j` comprobado | muestra ambos | solo uno | 15 |
-| Evidencia propia | proveedor elegido + entidades + procesos + desenlace H2-R declarado | incompleta | genérica | 15 |
-| Límite | conclusión inválida + dato específico faltante | genérico | afirma irregularidad | 15 |
+| Evidencia propia | proveedor elegido + entidades + procesos + desenlace H2-R declarado | incompleta | genérica | 30 |
+
+**OJO.** En esta versión el límite y la alternativa de modelado del hito vienen fijos en el cuaderno (no son texto del estudiante), así que no se califican como criterio individual — la evidencia propia se concentra en qué proveedor eligió cada quien y en su desenlace de H2-R.
 
 Las autoevaluaciones son formativas. El hito es la evidencia revisable de la sesión.
 '''),
