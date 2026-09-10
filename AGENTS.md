@@ -169,6 +169,15 @@ El cuaderno sí lleva un **mapa sin relojes**: la secuencia de bloques, qué res
 - Las celdas de carga deben ser **idempotentes**: repetibles sin duplicar ni fallar. El runtime se reinicia por inactividad, y eso pasa en el receso.
 - Una celda que depende de una variable creada mucho antes debe poder recuperarla sola. Un `NameError` a mitad del laboratorio cuesta el bloque entero.
 
+### Laboratorio guiado (checklist)
+
+- Toda sesión con un laboratorio ejecutable produce, además del cuaderno, un HTML de checklist en `assets/tutoriales/` — no lo reemplaza ni repite tutoriales de plataforma ya existentes: los enlaza.
+- Cada paso del checklist declara qué hacer, por qué, y la **evidencia exacta que ese paso realmente produce** (la salida real del cuaderno, no una aproximación inventada) — y trae un control de verificación propio.
+- El progreso se guarda en el navegador del estudiante (no hay servidor detrás de las páginas del curso) y se muestra de forma incremental: cuánto lleva, qué ya marcó, sin tener que releer desde el inicio. No es la evidencia entregable — esa sigue siendo el hito que ya genera el cuaderno.
+- Enlaza el checklist desde la primera celda del cuaderno al que acompaña.
+
+**Cómo sabes que se logró:** cada paso corresponde a una celda real (o una acción externa real) y su evidencia esperada es texto que ese paso efectivamente imprime o produce — puedes verificarlo leyendo el generador, no de memoria.
+
 ### Plataformas gestionadas
 
 - Antes de escribir código para una plataforma gestionada, **verifica en su documentación vigente qué sigue disponible en el plan gratuito**, y anota la fecha de esa verificación en el generador. Lo que funcionaba hace un año puede haber desaparecido, y el estudiante se estrella en clase.

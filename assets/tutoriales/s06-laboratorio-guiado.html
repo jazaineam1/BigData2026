@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Laboratorio guiado · S06 Neo4j</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--v950:#0b241c;--v800:#123f2b;--v700:#175c3c;--v100:#e3efe6;--d500:#c9a227;--d100:#f7ecc9;--c50:#faf7f0;--t:#172019;--g:#5c6b63;--line:#e2dcc8;--red:#a53828;--shadow:0 20px 40px -18px rgba(11,36,28,.22)}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{color:var(--t);font-family:"IBM Plex Sans",Arial,sans-serif;background:var(--c50);line-height:1.5}
+h1,h2,h3{font-family:"Fraunces",Georgia,serif;margin:0}
+code,pre,.mono{font-family:"IBM Plex Mono",Consolas,monospace}
+a{color:var(--v700)}
+.wrap{max-width:880px;margin:0 auto;padding:20px 16px 80px}
+header.top{position:sticky;top:0;z-index:20;background:var(--c50);border-bottom:1px solid var(--line);padding:14px 0}
+.top-inner{max-width:880px;margin:0 auto;padding:0 16px}
+.brand{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--v700)}
+h1.titulo{font-size:clamp(22px,4vw,30px);color:var(--v950);margin:4px 0 10px}
+.acompana{font-size:13.5px;color:var(--g);max-width:70ch}
+.acompana a{font-weight:600}
+.progreso-bar{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:999px;height:14px;overflow:hidden}
+.progreso-fill{height:100%;background:var(--v700);width:0%;transition:width .25s}
+.progreso-txt{margin-top:6px;font:12.5px "IBM Plex Mono";color:var(--v800);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+button.reset{background:none;border:1px solid var(--line);border-radius:7px;padding:5px 10px;font:12px "IBM Plex Sans";color:var(--g);cursor:pointer}
+button.reset:hover{border-color:var(--red);color:var(--red)}
+.receso{margin:26px 0;text-align:center;color:var(--d500);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12.5px}
+.receso::before,.receso::after{content:"";display:inline-block;width:40px;border-top:2px dashed var(--d500);vertical-align:middle;margin:0 10px}
+.fase{margin-top:34px}
+.fase h2{font-size:19px;color:var(--v950);display:flex;align-items:baseline;gap:10px}
+.fase .num{font:700 13px "IBM Plex Mono";color:#fff;background:var(--v700);border-radius:999px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.fase-progreso{font:12px "IBM Plex Mono";color:var(--g);margin-left:auto}
+.paso{margin-top:10px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow)}
+.paso.hecho{background:var(--v100);border-color:#bfd8c6}
+.paso-head{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;cursor:pointer}
+.paso-check{flex:none;width:22px;height:22px;margin-top:2px;accent-color:var(--v700);cursor:pointer}
+.paso-tipo{flex:none;font-size:16px;line-height:1;margin-top:1px}
+.paso-titulo{font-weight:600;font-size:14.5px;color:var(--t)}
+.paso.hecho .paso-titulo{color:var(--v800)}
+.paso-celda{font:11px "IBM Plex Mono";color:var(--g);margin-top:2px}
+.paso-estado{margin-left:auto;flex:none;font:11px "IBM Plex Sans";font-weight:700;color:var(--g);white-space:nowrap;align-self:center}
+.paso.hecho .paso-estado{color:var(--v700)}
+.paso-chevron{flex:none;color:var(--g);font-size:13px;align-self:center;transition:transform .15s}
+.paso-body{display:none;padding:0 14px 16px 48px;font-size:13.5px}
+.paso-body.abierto{display:block}
+.paso-body p{margin:8px 0}
+.paso-body .lbl{font-weight:700;color:var(--v800)}
+.paso-body pre{background:var(--v950);color:#e8f1ea;padding:10px 12px;border-radius:8px;overflow:auto;font-size:12px;margin:8px 0}
+.paso-body .caja{background:var(--c50);border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin:8px 0}
+[hidden]{display:none!important}
+footer.fin{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--g)}
+@media(max-width:520px){.paso-body{padding-left:16px}.paso-estado{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">Universidad Central · Big Data · S06</div>
+    <h1 class="titulo">Laboratorio guiado — Neo4j y el contexto relacional</h1>
+    <p class="acompana">Esta guía <strong>acompaña</strong> a
+      <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/6_Neo4j_Contexto_Relacional.ipynb" target="_blank" rel="noopener">6_Neo4j_Contexto_Relacional.ipynb ↗</a>
+      — no lo reemplaza. Ábrelo en otra pestaña y ve marcando aquí cada paso a medida que lo completas ahí.
+      Tu progreso se guarda solo en este navegador.</p>
+    <div class="progreso-bar" role="progressbar" aria-label="Progreso del laboratorio" aria-valuemin="0" aria-valuemax="100" id="pbar-outer"><div class="progreso-fill" id="pbar"></div></div>
+    <div class="progreso-txt">
+      <span id="ptxt" aria-live="polite">0 de 0 pasos completados</span>
+      <button class="reset" id="btn-reset" type="button">Reiniciar progreso</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="acompana" style="margin-top:18px">
+    <span class="paso-tipo">🧠</span> entiende y explica &nbsp;·&nbsp;
+    <span class="paso-tipo">▶️</span> ejecuta en el cuaderno &nbsp;·&nbsp;
+    <span class="paso-tipo">✏️</span> decide o responde &nbsp;·&nbsp;
+    <span class="paso-tipo">🌐</span> ocurre fuera de Colab (Aura)
+  </p>
+  <div id="fases"></div>
+  <footer class="fin">
+    Generado a mano como guía de acompañamiento del laboratorio S06. No ejecuta código —
+    el código real corre en <code>6_Neo4j_Contexto_Relacional.ipynb</code>. Los pasos externos
+    (🌐) remiten al tutorial de acceso
+    <a href="neo4j-aura-s06-paso-a-paso.html" target="_blank" rel="noopener">neo4j-aura-s06-paso-a-paso.html ↗</a>
+    en vez de repetir su contenido aquí.
+  </footer>
+</div>
+
+<script>
+const DATA = [
+  { titulo: "Antes de empezar", pasos: [
+    { id:"s00", tipo:"externo", titulo:"Abre el cuaderno en Colab", celda:"portada",
+      explicacion:"Esta guía no reemplaza al cuaderno: lo acompaña, celda por celda.",
+      instruccion:"Abre 6_Neo4j_Contexto_Relacional.ipynb en Colab en una pestaña aparte y déjala junto a esta guía.",
+      evidencia:"El cuaderno abre con 58 celdas, empezando por el badge de Colab." },
+  ]},
+  { titulo: "Orientarte antes de tocar código", pasos: [
+    { id:"s01", tipo:"entiende", titulo:"Lee la pregunta profesional y la respuesta corta", celda:"celda 2",
+      explicacion:"La sesión abre con la pregunta de Laura, no con una definición de grafos.",
+      instruccion:"Lee el encabezado completo, incluida la línea “Respuesta corta y herramienta”.",
+      evidencia:"Puedes decir, con tus palabras, por qué la herramienta de hoy es Neo4j y no otra." },
+    { id:"s02", tipo:"entiende", titulo:"Lee “Neo4j: qué es, y por qué aparece aquí”", celda:"celda 4",
+      explicacion:"Compara Neo4j con MongoDB/SQL y con Cassandra (S5) antes de escribir una sola línea de Cypher.",
+      instruccion:"Lee las tres tablas de esa sección.",
+      evidencia:"Puedes explicar la diferencia entre “recalcular el cruce” (Mongo/SQL) y “recorrer la relación ya guardada” (Neo4j)." },
+    { id:"s03", tipo:"entiende", titulo:"Revisa el mapa de la sesión", celda:"celda 5",
+      explicacion:"Ocho bloques, sin relojes — el orden importa más que el tiempo.",
+      instruccion:"Lee la tabla completa y el semáforo 🧠/▶️/✏️.",
+      evidencia:"Puedes nombrar los 8 bloques de la sesión en orden, sin mirar." },
+    { id:"s04", tipo:"ejecuta", titulo:"Ejecuta “Preparar interactividad”", celda:"celda 6",
+      explicacion:"Celda oculta (#@title): prepara las autoevaluaciones y el tutorial embebido.",
+      instruccion:"Ejecútala tal cual; no necesitas leer su código.",
+      evidencia:"Imprime exactamente: “Soporte S6 listo.”" },
+  ]},
+  { titulo: "Recuperar tu ancla de S5", pasos: [
+    { id:"s05", tipo:"ejecuta", titulo:"Carga los datos y tu ancla de S5", celda:"celda 8",
+      explicacion:"S6 no vuelve a construir los 77 candidatos: retoma el proceso que tú elegiste en S5.",
+      instruccion:"Si tienes tu s05_ancla_s06.json, súbelo al panel Archivos de Colab y escribe su ruta cuando se te pida. Si no lo tienes, presiona Enter — el cuaderno trae un respaldo pedagógico real.",
+      evidencia:"Imprime “Origen: …”, el JSON completo de tu ancla, y “Filas disponibles: 2109”." },
+    { id:"s06", tipo:"entiende", titulo:"Lee la interpretación del ancla", celda:"celda 9",
+      explicacion:"Cómo se lee / qué nos dice / qué NO permite concluir / error frecuente.",
+      instruccion:"Lee los cuatro rótulos fijos.",
+      evidencia:"Puedes decir qué NO permite concluir todavía tener un proceso priorizado." },
+  ]},
+  { titulo: "H2-R: la hipótesis de esta sesión", pasos: [
+    { id:"s07", tipo:"entiende", titulo:"Lee la hipótesis H2-R", celda:"celda 10",
+      explicacion:"H2-R continúa a H1 de S5 (0/77 → refutada); no la reemplaza.",
+      instruccion:"Lee el enunciado formal de H2-R y la tabla “sabemos / no sabemos”.",
+      evidencia:"Puedes repetir H2-R con tus palabras: compara el proveedor más conectado de tu entidad contra la mediana de las 32 candidatas de S5." },
+    { id:"s08", tipo:"entiende", titulo:"Lee el ejemplo manual", celda:"celda 11",
+      explicacion:"Nombres inventados, para pensar antes de programar.",
+      instruccion:"Sigue el dibujo Alcaldía/Gobernación/Constructora Ejemplo.",
+      evidencia:"Entiendes por qué “Constructora Ejemplo S.A.S.” conecta a las dos entidades del dibujo, sin ninguna tabla." },
+    { id:"s09", tipo:"decide", titulo:"Responde la Autoevaluación 1 — H2-R", celda:"celda 12",
+      instruccion:"Elige tu respuesta y pulsa Verificar.",
+      evidencia:"El recuadro muestra “Correcto.” con la explicación." },
+    { id:"s10", tipo:"decide", titulo:"Responde la Autoevaluación 2 — Modelo", celda:"celda 13",
+      instruccion:"Elige tu respuesta y pulsa Verificar.",
+      evidencia:"El recuadro muestra “Correcto.”" },
+    { id:"s11", tipo:"ejecuta", titulo:"Calcula el historial de tu entidad", celda:"celda 14",
+      explicacion:"Filtra el histórico adjudicado por el NIT de tu entidad ancla.",
+      instruccion:"Ejecuta la celda tal cual.",
+      evidencia:"Imprime “Entidad de trabajo: …”, “Procesos históricos: N”, “Proveedores distintos: N” — o el aviso de respaldo, si tu ancla no tiene historial en este extracto (le pasa a 2 de las 34 candidatas de S5)." },
+    { id:"s12", tipo:"entiende", titulo:"Lee la interpretación del historial", celda:"celda 15",
+      evidencia:"Puedes decir por qué más contratos históricos no equivale a más sospecha." },
+  ]},
+  { titulo: "Diseñar el grafo antes de escribir Cypher", pasos: [
+    { id:"s13", tipo:"entiende", titulo:"Lee el vocabulario de grafos", celda:"celda 17",
+      explicacion:"Cinco palabras y nada más: Nodo, Label, Propiedad, Relación, Camino.",
+      instruccion:"Lee la tabla de conceptos y la lectura de (e:Entidad {nit:\"123\"}).",
+      evidencia:"Puedes nombrar los 5 conceptos usando el ejemplo del proveedor." },
+    { id:"s14", tipo:"decide", titulo:"Completa el ejercicio del hueco", celda:"celda 18",
+      explicacion:"EJERCICIO S06-PATRON: un solo hueco, sin código comentado que descomentar.",
+      instruccion:"Reemplaza únicamente ____ por el nombre de la relación (una sola palabra) y ejecuta.",
+      evidencia:"Imprime “Patrón correcto: la relación expresa una adjudicación observada.” Si ves un ValueError, todavía no acertaste la palabra — no es un error de Colab." },
+    { id:"s15", tipo:"entiende", titulo:"Lee el modelo mínimo y la alternativa descartada", celda:"celda 19",
+      instruccion:"Lee la tabla del modelo y la tabla “la alternativa que descartamos”.",
+      evidencia:"Puedes explicar por qué Proceso se modeló como nodo y no como propiedad de una relación directa." },
+    { id:"s16", tipo:"entiende", titulo:"Lee la mini-ficha de MERGE", celda:"celda 20",
+      evidencia:"Puedes explicar la diferencia entre MERGE y CREATE con el ejemplo de “buscar por cédula”." },
+    { id:"s17", tipo:"entiende", titulo:"Lee la tabla de Cypher mínimo", celda:"celda 21",
+      evidencia:"Reconoces MERGE, MATCH, WHERE, WITH, RETURN, ORDER BY/LIMIT y para qué sirve cada uno." },
+    { id:"s18", tipo:"decide", titulo:"Responde la Autoevaluación 3 — Cypher", celda:"celda 22",
+      evidencia:"El recuadro muestra “Correcto.”" },
+  ]},
+  { titulo: "El contrato: primero pandas, luego el desenlace", pasos: [
+    { id:"s19", tipo:"ejecuta", titulo:"Construye tu contrato de resultado (esperado_pd)", celda:"celda 24",
+      explicacion:"Antes de usar Neo4j, pandas calcula qué debería responder el grafo.",
+      instruccion:"Ejecuta la celda tal cual.",
+      evidencia:"Imprime la mediana de referencia, tu “Desenlace H2-R (pandas): …”, y una tabla de hasta 10 proveedores." },
+    { id:"s20", tipo:"entiende", titulo:"Lee la interpretación del contrato y del desenlace", celda:"celda 25",
+      evidencia:"Puedes explicar por qué el desenlace no se llama “aceptada” ni “rechazada”, sino una comparación descriptiva." },
+    { id:"s21", tipo:"ejecuta", titulo:"Si el runtime se reinició, ejecuta RECUPERACIÓN S06", celda:"celda 27",
+      explicacion:"Solo hace falta si perdiste el estado — por ejemplo, después del receso.",
+      instruccion:"Ejecútala siempre que vuelvas a Colab tras una pausa larga; si todo sigue en memoria, solo lo confirma.",
+      evidencia:"“Estado S6 sigue en memoria…” o “Estado S6 reconstruido desde archivos versionados.”" },
+  ]},
+]
+
+const DATA2 = [
+  { titulo: "Conectar con AuraDB", pasos: [
+    { id:"s22", tipo:"externo", titulo:"Completa el tutorial visual de Aura", celda:"celda 29 (embebida)",
+      explicacion:"El HTML del tutorial es instrumental: dónde hacer clic y qué debe aparecer.",
+      instruccion:"Sigue las 10 pantallas de neo4j-aura-s06-paso-a-paso.html hasta su checklist final.",
+      evidencia:"Tienes URI, usuario y contraseña, y RETURN 1 AS conexion funcionó en la pestaña Query de tu instancia." },
+    { id:"s23", tipo:"ejecuta", titulo:"Conecta Colab con el driver oficial", celda:"celda 30",
+      instruccion:"Pega URI, usuario y contraseña cuando se te pidan (la contraseña no se muestra en pantalla).",
+      evidencia:"Imprime “Conexión Neo4j verificada.”" },
+  ]},
+  { titulo: "Cargar el grafo", pasos: [
+    { id:"s24", tipo:"ejecuta", titulo:"Crea las restricciones únicas", celda:"celda 32",
+      explicacion:"Tres CREATE CONSTRAINT: Entidad.nit, Proceso.id, Proveedor.nit.",
+      evidencia:"Imprime “Restricciones listas.”" },
+    { id:"s25", tipo:"entiende", titulo:"Lee la mini-ficha de UNWIND", celda:"celda 33",
+      evidencia:"Puedes explicar por qué UNWIND evita mandar una consulta por fila." },
+    { id:"s26", tipo:"ejecuta", titulo:"Ejecuta la carga completa (UNWIND + MERGE)", celda:"celda 34",
+      instruccion:"Puede tardar; es una sola celda que carga miles de filas.",
+      evidencia:"Imprime “Carga lista: 2109 filas; N adjudicaciones.”" },
+  ]},
+  { titulo: "La progresión MATCH", pasos: [
+    { id:"s27", tipo:"ejecuta", titulo:"Ejecuta 0 y 1 salto", celda:"celda 36",
+      evidencia:"Dos tablas cortas: solo entidades, y entidades con lo que publicaron." },
+    { id:"s28", tipo:"ejecuta", titulo:"Ejecuta 2 saltos", celda:"celda 37",
+      evidencia:"Una tabla con entidad, proceso y proveedor." },
+    { id:"s29", tipo:"entiende", titulo:"Lee qué agregó cada salto", celda:"celda 38",
+      evidencia:"Puedes decir qué pregunta nueva habilita cada flecha agregada." },
+  ]},
+  { titulo: "La consulta que justifica Neo4j", pasos: [
+    { id:"s30", tipo:"ejecuta", titulo:"Ejecuta la consulta de contexto (query_contexto)", celda:"celda 40",
+      evidencia:"Tabla neo_df con hasta 10 proveedores, en el mismo orden que tu contrato pandas." },
+    { id:"s31", tipo:"ejecuta", titulo:"Verifica pandas == Neo4j", celda:"celda 41",
+      evidencia:"Imprime “pandas == Neo4j: True”. Si ves un AssertionError, algo no coincide — no sigas sin resolverlo." },
+    { id:"s32", tipo:"entiende", titulo:"Lee la interpretación pandas ↔ Neo4j", celda:"celda 42",
+      evidencia:"Puedes explicar por qué esto prueba corrección, no velocidad." },
+    { id:"s33", tipo:"decide", titulo:"Responde la Autoevaluación 4 — Interpretación", celda:"celda 43",
+      evidencia:"El recuadro muestra “Correcto.”" },
+  ]},
+  { titulo: "Demostración guiada: el vecindario más rico", pasos: [
+    { id:"s34", tipo:"ejecuta", titulo:"Ejecuta el top-5 de la ancla pedagógica", celda:"celda 45",
+      explicacion:"Demostración guiada; no es tu evidencia individual todavía.",
+      evidencia:"Tabla neo_demo_df con hasta 5 proveedores muy conectados." },
+    { id:"s35", tipo:"entiende", titulo:"Lee la interpretación de la demostración", celda:"celda 46",
+      evidencia:"Entiendes que esta demo usa la ancla pedagógica, no la tuya — tu resultado puede ser más modesto y sigue siendo válido." },
+    { id:"s36", tipo:"ejecuta", titulo:"Imprime la consulta de visualización", celda:"celda 47",
+      evidencia:"Se imprime un bloque de texto Cypher con camino_ancla, camino_otras y LIMIT 8." },
+    { id:"s37", tipo:"externo", titulo:"Pega la consulta en Query y ejecútala ahí", celda:"fuera de Colab",
+      explicacion:"Aura dibuja el grafo con nodos y flechas cuando devuelves caminos (RETURN camino) — algo que una tabla de pandas no puede mostrar.",
+      instruccion:"Copia el texto Cypher completo que acabas de imprimir, ve a tu instancia AuraDB → pestaña Query, pégalo y ejecútalo ahí (no en Colab).",
+      evidencia:"Un grafo dibujado con tu entidad ancla, el proveedor, y hasta 8 entidades más conectadas por flechas." },
+    { id:"s38", tipo:"decide", titulo:"Responde en el salón las dos preguntas de discusión", celda:"celda 48",
+      evidencia:"Puedes nombrar el nodo puente del grafo y decir qué NO demuestra por sí solo." },
+  ]},
+  { titulo: "Tu propio vecindario", pasos: [
+    { id:"s39", tipo:"ejecuta", titulo:"Ejecuta el CRUD sentinela", celda:"celda 50",
+      explicacion:"Usa nodos S06-DEMO/S06-E/S06-V; no toca un proceso real.",
+      evidencia:"Imprime “CRUD demo completado y limpiado.”" },
+    { id:"s40", tipo:"decide", titulo:"Elige uno de tus 5 proveedores más conectados", celda:"celda 51",
+      instruccion:"Escribe el número de la lista impresa (no de toda tu tabla); no inventes un NIT.",
+      evidencia:"Tabla vecindario_df + “Tamaño observable de tu vecindario:” con tus tres números." },
+    { id:"s41", tipo:"entiende", titulo:"Lee la interpretación de tu vecindario", celda:"celda 52",
+      evidencia:"Puedes decir qué NO demuestra compartir proveedor." },
+  ]},
+  { titulo: "Cierre: límite, alternativa y evidencia exportable", pasos: [
+    { id:"s42", tipo:"decide", titulo:"Escribe tu límite, tu alternativa y su razón", celda:"celda 54",
+      explicacion:"Una respuesta genérica de IA no puede inventar esto por ti.",
+      instruccion:"Responde los tres input(): un límite con el dato que falta, una alternativa de modelado descartada, y por qué la descartaste.",
+      evidencia:"Se descargan hito_s06_ficha_relacional.md y s06_contexto_procesos.jsonl; el hito incluye tu desenlace H2-R en pandas y en Neo4j." },
+    { id:"s43", tipo:"entiende", titulo:"Revisa la rúbrica S06", celda:"celda 55",
+      evidencia:"Puedes ubicar tu propio trabajo en Completo/Parcial/Sin evidencia para cada criterio." },
+    { id:"s44", tipo:"ejecuta", titulo:"Cierra la conexión Neo4j", celda:"celda 57",
+      evidencia:"Imprime “Conexión Neo4j cerrada.”" },
+  ]},
+]
+
+const ICONS = { entiende:"🧠", ejecuta:"▶️", decide:"✏️", externo:"🌐" }
+const KEY = id => "s06lab:" + id
+const fasesEl = document.getElementById("fases")
+
+function render(){
+  fasesEl.innerHTML = ""
+  let faseNum = 0
+  const todas = [...DATA]
+  const insertarReceso = todas.length
+  todas.push(...DATA2)
+  todas.forEach((fase, fi) => {
+    if (fi === insertarReceso) {
+      const div = document.createElement("div")
+      div.className = "receso"
+      div.textContent = "receso"
+      fasesEl.appendChild(div)
+    }
+    faseNum++
+    const secc = document.createElement("section")
+    secc.className = "fase"
+    const doneCount = fase.pasos.filter(p => localStorage.getItem(KEY(p.id)) === "1").length
+    secc.innerHTML = `<h2><span class="num">${faseNum}</span>${fase.titulo}<span class="fase-progreso">${doneCount}/${fase.pasos.length}</span></h2>`
+    fase.pasos.forEach(p => secc.appendChild(pasoEl(p)))
+    fasesEl.appendChild(secc)
+  })
+  actualizarProgresoGlobal()
+}
+
+function pasoEl(p){
+  const hecho = localStorage.getItem(KEY(p.id)) === "1"
+  const div = document.createElement("div")
+  div.className = "paso" + (hecho ? " hecho" : "")
+  div.id = "paso-" + p.id
+  div.innerHTML = `
+    <div class="paso-head">
+      <input type="checkbox" class="paso-check" ${hecho ? "checked" : ""} aria-label="Marcar '${p.titulo}' como hecho">
+      <span class="paso-tipo" aria-hidden="true">${ICONS[p.tipo] || ""}</span>
+      <div style="flex:1">
+        <div class="paso-titulo">${p.titulo}</div>
+        <div class="paso-celda">${p.celda || ""}</div>
+      </div>
+      <span class="paso-estado">${hecho ? "Hecho" : "Pendiente"}</span>
+      <span class="paso-chevron" aria-hidden="true">${hecho ? "▸" : "▾"}</span>
+    </div>
+    <div class="paso-body ${hecho ? "" : "abierto"}">
+      ${p.explicacion ? `<p><span class="lbl">Por qué:</span> ${p.explicacion}</p>` : ""}
+      ${p.instruccion ? `<p><span class="lbl">Instrucción:</span> ${p.instruccion}</p>` : ""}
+      <div class="caja"><span class="lbl">Evidencia esperada:</span> ${p.evidencia}</div>
+    </div>
+  `
+  const check = div.querySelector(".paso-check")
+  const body = div.querySelector(".paso-body")
+  const head = div.querySelector(".paso-head")
+  check.addEventListener("change", () => {
+    if (check.checked) localStorage.setItem(KEY(p.id), "1")
+    else localStorage.removeItem(KEY(p.id))
+    render()
+    document.getElementById("paso-" + p.id)?.scrollIntoView({ block:"nearest" })
+  })
+  head.addEventListener("click", (ev) => {
+    if (ev.target === check) return
+    body.classList.toggle("abierto")
+    div.querySelector(".paso-chevron").textContent = body.classList.contains("abierto") ? "▾" : "▸"
+  })
+  return div
+}
+
+function todosLosPasos(){
+  return [...DATA, ...DATA2].flatMap(f => f.pasos)
+}
+
+function actualizarProgresoGlobal(){
+  const pasos = todosLosPasos()
+  const hechos = pasos.filter(p => localStorage.getItem(KEY(p.id)) === "1").length
+  const pct = pasos.length ? Math.round((hechos / pasos.length) * 100) : 0
+  document.getElementById("pbar").style.width = pct + "%"
+  document.getElementById("pbar-outer").setAttribute("aria-valuenow", String(pct))
+  document.getElementById("ptxt").textContent = `${hechos} de ${pasos.length} pasos completados (${pct}%)`
+}
+
+document.getElementById("btn-reset").addEventListener("click", () => {
+  if (!confirm("¿Borrar tu progreso guardado en este navegador?")) return
+  todosLosPasos().forEach(p => localStorage.removeItem(KEY(p.id)))
+  render()
+})
+
+render()
+</script>
+</body>
+</html>
