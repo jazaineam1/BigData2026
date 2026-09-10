@@ -29,6 +29,20 @@ DATA = f"{RAW}/Datos/s06_contexto_relacional.csv"
 MANIFEST = f"{RAW}/Datos/s06_contexto_relacional_manifest.json"
 TUTORIAL = f"{WEB}/assets/tutoriales/neo4j-aura-s06-paso-a-paso.html"
 LABORATORIO = f"{WEB}/assets/tutoriales/s06-laboratorio-guiado.html"
+DIAGRAMS_DIR = ROOT / "assets" / "diagrams" / "session6"
+
+
+def svg(nombre: str, alt: str) -> str:
+    """Incrusta un SVG local (assets/diagrams/session6/) como data URI.
+
+    El fuente sigue editable en esa carpeta; la copia incrustada evita que
+    el estudiante vea un ícono roto si abre una versión aún no publicada.
+    """
+    ruta = DIAGRAMS_DIR / f"{nombre}.svg"
+    if not ruta.exists():
+        raise FileNotFoundError(ruta)
+    uri = base64.b64encode(ruta.read_bytes()).decode("ascii")
+    return f'<img src="data:image/svg+xml;base64,{uri}" alt="{alt}" style="max-width:100%;height:auto;">'
 
 INTERACTIVITY = r'''
 import base64, json, html as html_lib
@@ -111,21 +125,18 @@ Al terminar tendrás una **ficha relacional de revisión** con:
 7. un límite concreto;
 8. `s06_contexto_procesos.jsonl`, entrada de la siguiente sesión.
 '''),
-        md('''
+        md(f'''
 ## El hilo del evaluador
 
-```text
-S3  evidencia documental
- ↓
-S4  persistencia compartida en Atlas
- ↓
-S5  qué revisar primero → bandeja operacional + ancla elegida
-    H1 (prensa): 0/77 → refutada literalmente
- ↓
-S6  qué hay alrededor de lo que Laura va a revisar
-    H2-R (relacional): ¿el proveedor más conectado del ancla supera
-                        la mediana de sus pares (las candidatas de S5)?
-```
+{svg("01_hilo_s06", "Cadena S3 evidencia documental, S4 persistencia en Atlas, S5 bandeja priorizada con H1 refutada 0 de 77, S6 contexto relacional con la hipótesis H2-R")}
+
+**Cómo se lee.** Cada sesión entrega el producto que abre la siguiente; nada se recalcula desde cero.
+
+**Qué nos dice.** S6 no es un tema nuevo suelto: es la siguiente pregunta sobre el mismo caso.
+
+**Qué NO permite concluir todavía.** Que S6 continúe la cadena no significa que ya sepamos si hay algo irregular — seguimos sin esa evidencia.
+
+**Error frecuente.** Tratar cada sesión como un capítulo independiente en vez de un paso de la misma investigación.
 '''),
         md('''
 ## Neo4j: qué es, y por qué aparece aquí
@@ -154,6 +165,19 @@ Cada nodo (`Entidad`, `Proceso`, `Proveedor`) y cada relación (`PUBLICA`, `ADJU
 | Neo4j (hoy) | guarda la relación como dato y la recorre | un salto más es una flecha más, no un cruce más |
 
 **PARA LLEVAR.** Neo4j no aparece porque “toca grafos”. Aparece porque la pregunta de Laura —qué hay alrededor de este proceso, y alrededor de eso— ya es, literalmente, una pregunta de relaciones.
+
+### ¿Dónde se usa esto en la vida real?
+
+No es una herramienta exótica. La usan a diario sistemas que ya conoces, resolviendo exactamente el mismo tipo de pregunta —“qué hay conectado con esto”— sobre datos distintos:
+
+| Sistema que ya conoces | Nodo | Relación | Pregunta que responde |
+|---|---|---|---|
+| LinkedIn / Facebook | una persona | `ES_AMIGO_DE`, `TRABAJA_EN` | “¿Cuál es el contacto en común entre tú y un desconocido?” (los “grados de separación”) |
+| Google Maps / Waze | una intersección | `CONECTA_CON` (una calle) | “¿Cuál es la ruta más corta entre dos puntos?” |
+| Netflix / Spotify | un usuario o un contenido | `VIO`, `ESCUCHÓ` | “¿Qué otros usuarios con gustos parecidos vieron algo que tú no?” |
+| Un banco antifraude | una cuenta | `TRANSFIRIÓ_A` | “¿Esta cuenta nueva está conectada, en pocos saltos, con cuentas ya marcadas?” |
+
+Hoy tu grafo es más pequeño (`Entidad`, `Proceso`, `Proveedor`), pero la pregunta es la misma familia: **quién está conectado con quién, y a través de qué**.
 '''),
         md('''
 ## Mapa de la sesión
@@ -239,17 +263,13 @@ No es una prueba estadística inferencial: es una comparación empírica y falsa
 
 Lo que sigue, con nombres inventados, es exactamente H2-R en miniatura.
 '''),
-        md('''
+        md(f'''
 ---
 ## 2. El candidato y el historial cumplen funciones distintas
 
 ### Ejemplo manual pequeño (nombres inventados, para pensar antes de programar)
 
-```text
-Alcaldía de Ejemplo ──PUBLICA──> Proceso 2024-001 ──ADJUDICADO_A──> Constructora Ejemplo S.A.S.
-                                                                              ▲
-Gobernación de Prueba ──PUBLICA──> Proceso 2023-045 ──ADJUDICADO_A───────────┘
-```
+{svg("02_ejemplo_manual", "La Alcaldía de Ejemplo y la Gobernación de Prueba publican procesos distintos, ambos adjudicados a Constructora Ejemplo S.A.S.")}
 
 Mirando solo este dibujo, sin ninguna tabla: **Constructora Ejemplo S.A.S. aparece conectada con dos entidades distintas** —la Alcaldía de Ejemplo y la Gobernación de Prueba— a través de dos procesos separados. Verlo así, de un vistazo, es exactamente lo que un grafo deja hacer y una tabla plana no. Esto es H2-R con nombres inventados: Constructora Ejemplo S.A.S. es justo el tipo de proveedor que la hipótesis busca — uno conectado con más de una entidad.
 
@@ -317,6 +337,8 @@ Antes de escribir Cypher, cinco palabras y nada más.
 | Relación | un hecho dirigido entre dos nodos | `ADJUDICADO_A` |
 | Camino | una secuencia de nodos y relaciones | Entidad → Proceso → Proveedor |
 
+**Los mismos 5 conceptos, en LinkedIn:** Nodo = una persona · Label = `Persona` o `Empresa` · Propiedad = `nombre: "Ana"` · Relación = `ES_CONTACTO_DE` · Camino = la cadena de contactos que te conecta con alguien que nunca has visto. Es exactamente el mismo vocabulario, sobre datos distintos.
+
 ### Cómo se lee `(e:Entidad {nit:"123"})`
 
 - `e` — variable con la que nombras este nodo en el resto de la consulta.
@@ -347,12 +369,12 @@ if RELACION_PROCESO_PROVEEDOR != "ADJUDICADO_A":
     raise ValueError("Revisa el hecho contractual que conecta Proceso con Proveedor.")
 print("Patrón correcto: la relación expresa una adjudicación observada.")
 """),
-        md('''
+        md(f'''
 ### Modelo mínimo que usaremos
 
-```text
-(e:Entidad)-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)
-```
+{svg("03_modelo_minimo", "Entidad publica un Proceso, que es adjudicado a un Proveedor")}
+
+`(e:Entidad)-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)` — así se escribe ese mismo dibujo en Cypher.
 
 | Elemento | Identificador | Decisión |
 |---|---|---|
@@ -367,7 +389,7 @@ print("Patrón correcto: la relación expresa una adjudicación observada.")
 | Opción | Cómo se vería | Por qué no la usamos hoy |
 |---|---|---|
 | **Proceso como nodo** (la que usamos) | `(e)-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v)` | `Proceso` participa en caminos propios y S7 reutiliza su texto |
-| Proceso como propiedad de una relación directa | `(e:Entidad)-[:CONTRATO {id_proceso:"...", valor:...}]->(v:Proveedor)` | más simple, pero un proceso deja de ser algo que puedas recorrer o conectar con otra cosa por sí mismo |
+| Proceso como propiedad de una relación directa | `(e:Entidad)-[:CONTRATO {{id_proceso:"...", valor:...}}]->(v:Proveedor)` | más simple, pero un proceso deja de ser algo que puedas recorrer o conectar con otra cosa por sí mismo |
 
 `Proceso` queda como nodo porque hoy participa en caminos y la siguiente sesión reutilizará su texto.
 '''),
@@ -744,23 +766,12 @@ LIMIT 8
 '''
 print(query_visual_demo)
 """),
-        md('''
+        md(f'''
 **HAZ ESTO AHORA.** Copia la consulta que acabas de imprimir, ve a tu instancia AuraDB → pestaña **Query** (no Colab), pégala y ejecútala ahí. Aura dibuja nodos y flechas automáticamente cuando devuelves caminos (`RETURN camino`).
 
-Deberías ver algo con esta forma (representación conceptual, no una captura de Aura):
+Deberías ver algo con esta forma:
 
-```text
-                     Entidad 2
-                         │
-                      Proceso
-                         │
-                         ▼
-   Entidad ancla ──Proceso──▶ PROVEEDOR ◀──Proceso── Entidad 3
-                         ▲
-                      Proceso
-                         │
-                     Entidad 4   (...hasta 8 entidades)
-```
+{svg("04_demo_vecindario", "Representación conceptual: la entidad ancla y otras entidades llegan al mismo proveedor, cada una por su propio proceso")}
 
 **OJO.** El grafo muestra hasta 8 de las entidades conectadas con este proveedor — se acota para que se pueda leer, no porque las demás no existan.
 
@@ -892,7 +903,7 @@ except Exception:
 
 Las autoevaluaciones son formativas. El hito es la evidencia revisable de la sesión.
 '''),
-        md('''
+        md(f'''
 ---
 ## Hoja de trucos y puente
 
@@ -905,9 +916,9 @@ WITH   → encadena
 SET    → modifica una propiedad
 RETURN → salida
 DETACH DELETE → elimina nodo y relaciones
-
-Entidad -PUBLICA-> Proceso -ADJUDICADO_A-> Proveedor
 ```
+
+{svg("03_modelo_minimo", "Entidad publica un Proceso, que es adjudicado a un Proveedor")}
 
 **Idea central.** Cassandra organizó datos para una pregunta repetitiva conocida. Neo4j hace de las relaciones una parte explícita de la pregunta.
 

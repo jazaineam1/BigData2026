@@ -5,9 +5,14 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from utils.notebook_checks import check_question_widget_renders
 NB = ROOT / "Cuadernos" / "6_Neo4j_Contexto_Relacional.ipynb"
 DATA = ROOT / "Datos" / "s06_contexto_relacional.csv"
 MANIFEST = ROOT / "Datos" / "s06_contexto_relacional_manifest.json"
@@ -55,6 +60,21 @@ def main():
         errors.append(f"S6 tiene pocas celdas: {len(cells)}")
     if any(not src(c).strip() for c in cells):
         errors.append("S6 contiene celdas vacías")
+
+    caja_ascii = set("─│└┘┌┐")
+    if any(ch in text for ch in caja_ascii):
+        errors.append("S6 todavía tiene diagramas dibujados con caracteres ASCII; deben ser SVG reales embebidos")
+    if text.count("data:image/svg+xml;base64") < 4:
+        errors.append("Faltan diagramas SVG embebidos (se esperan al menos 4)")
+    if "{svg(" in text:
+        errors.append("Quedó un llamado a svg() sin interpolar como texto literal — revisa que la celda use md(f'''...''')")
+
+    src_generador = GEN.read_text(encoding="utf-8")
+    match = re.search(r"INTERACTIVITY = r'''(.*?)'''", src_generador, re.S)
+    if not match:
+        errors.append("No se encontró INTERACTIVITY en el generador para probar el widget de preguntas")
+    else:
+        errors.extend(check_question_widget_renders(match.group(1)))
 
     required = [
         "Laura ya sabe qué proceso revisar primero",
