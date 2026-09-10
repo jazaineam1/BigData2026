@@ -105,11 +105,11 @@ const DATA = [
       {
         "id": "cargar",
         "tipo": "ejecuta",
-        "titulo": "Carga el extracto y elige el ancla",
+        "titulo": "Carga el extracto y recupera el ancla incluida",
         "celda": "celda 8",
-        "explicacion": "Conservas la selección S5 sin fabricar un proveedor para el candidato.",
-        "instruccion": "Ejecuta carga y selección de ancla. Si falla la red, sube CSV y manifest; si falta S5, elige Enter explícitamente.",
-        "evidencia": "Filas disponibles: 2109; huella SHA256; Origen: archivo propio S5 o ancla pedagógica versionada."
+        "explicacion": "Conservas una selección versionada sin solicitar archivos de otra sesión.",
+        "instruccion": "Ejecuta carga y recuperación del ancla pedagógica incluida. Si falla la red, el docente comparte el CSV y manifest del curso.",
+        "evidencia": "Filas disponibles: 2109; huella SHA256; ancla pedagógica versionada incluida en S6."
       },
       {
         "id": "historial",
@@ -122,12 +122,12 @@ const DATA = [
       },
       {
         "id": "patron",
-        "tipo": "decide",
-        "titulo": "Completa el patrón contractual",
+        "tipo": "entiende",
+        "titulo": "Lee el patrón contractual",
         "celda": "celda 24",
-        "explicacion": "El verbo de la relación debe representar un hecho observado.",
-        "instruccion": "Completa el hueco del patrón; usa el apoyo plegado si te atascas.",
-        "evidencia": "Patrón correcto: la relación expresa una adjudicación observada."
+        "explicacion": "El ID del proceso identifica un nodo; el tipo de relación identifica la flecha.",
+        "instruccion": "Observa el patrón ya resuelto y responde la autoevaluación cuando aparezca.",
+        "evidencia": "Patrón correcto: ADJUDICADO_A expresa una adjudicación observada."
       },
       {
         "id": "contrato",
