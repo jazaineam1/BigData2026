@@ -38,6 +38,8 @@ def main():
         errors.append("Ninguna entidad candidata tiene historial")
     if manifest.get("proveedores_compartidos_entre_entidades", 0) <= 0:
         errors.append("No hay ningún proveedor compartido entre entidades; falta el patrón relacional central")
+    if manifest.get("mediana_maximo_conectadas_candidatas", 0) <= 0:
+        errors.append("Falta la mediana de referencia de H2-R entre las candidatas de S5")
     if not manifest.get("ancla_pedagogica", {}).get("id_proceso"):
         errors.append("Falta ancla pedagógica")
     size_mb = DATA.stat().st_size / 1024 / 1024
@@ -72,6 +74,15 @@ def main():
         "UNWIND $filas AS fila",
         "MERGE (e:Entidad",
         "S06-DEMO",
+        "H2-R",
+        "conexión más fuerte que la mediana",
+        "conexión igual o menor que la mediana",
+        "no evaluable con mi ancla",
+        "mediana_maximo_conectadas_candidatas",
+        "desenlace_h2r_neo",
+        "desenlace_h2r_pd",
+        "### Función usada: `UNWIND`",
+        "MATCH (e:Entidad) RETURN",
         "Interpretación de tu vecindario",
         "alternativa_modelo",
         "razon_alternativa",

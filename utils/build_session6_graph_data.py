@@ -170,6 +170,16 @@ def main() -> None:
         procesos_historicos=("id_proceso", "nunique"),
         proveedores=("nit_proveedor", "nunique"),
     ).reset_index()
+
+    # Mediana de H2-R: se compara contra las propias entidades candidatas de S5, no
+    # contra el universo de 416 proveedores. Las candidatas son entidades grandes y
+    # visibles (filtro de prensa + contratación directa de S5), así que casi todas
+    # superan la mediana global de conexión (~4); comparar entre pares similares sí
+    # produce un desenlace que varía según el ancla real del estudiante.
+    maximo_conectadas_por_entidad = candidate_hist.groupby(["nit_entidad", "entidad"])[
+        "nit_proveedor"
+    ].apply(lambda nits: provider_entity_counts.reindex(nits.dropna().unique()).fillna(1).max())
+    mediana_maximo_candidatas = float(maximo_conectadas_por_entidad.median())
     shared_counts = (
         candidate_hist[candidate_hist["nit_proveedor"].isin(shared_provider_nits)]
         .groupby(["nit_entidad", "entidad"])["nit_proveedor"].nunique()
@@ -204,6 +214,7 @@ def main() -> None:
         "entidades_candidatas_con_historial": int(per_entity.shape[0]),
         "proveedores_historicos": int(hist["nit_proveedor"].nunique()),
         "proveedores_compartidos_entre_entidades": int(len(shared_provider_nits)),
+        "mediana_maximo_conectadas_candidatas": mediana_maximo_candidatas,
         "ancla_pedagogica": {
             "id_proceso": clean_text(anchor["id_del_proceso"]),
             "entidad": clean_text(anchor["entidad"]),

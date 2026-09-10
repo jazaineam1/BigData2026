@@ -9,6 +9,7 @@
   "entidades_candidatas_con_historial": 32,
   "proveedores_historicos": 416,
   "proveedores_compartidos_entre_entidades": 216,
+  "mediana_maximo_conectadas_candidatas": 22.0,
   "ancla_pedagogica": {
     "id_proceso": "CO1.REQ.2622868",
     "entidad": "FUERZA AEROESPACIAL COLOMBIANA",
