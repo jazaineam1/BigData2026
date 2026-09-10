@@ -477,6 +477,193 @@ print("Conexión Neo4j verificada.")
 """),
         md('''
 ---
+## Antes de cargar los datos reales: un grafo de juguete
+
+**Calentamiento; no es evidencia de tu hito.** Antes de cargar 2.109 filas de Compras Claras, practica los mismos movimientos de Cypher con un grafo mínimo y conocido: una película, tres actores, y una red de amigos. Si algo falla aquí, es mucho más fácil de diagnosticar que si falla con el dataset real.
+
+### 1. Crear un nodo — `MERGE`
+
+Ya conoces `MERGE` de la mini-ficha anterior. Ahora lo usas por primera vez contra Aura, con un ejemplo mínimo.
+'''),
+        code("""
+driver.execute_query("MERGE (:Movie {title: $title})", title="The Matrix", database_="neo4j")
+driver.execute_query("MERGE (:Person {name: $name})", name="Keanu Reeves", database_="neo4j")
+driver.execute_query("MERGE (:Person {name: $name})", name="Carrie-Anne Moss", database_="neo4j")
+driver.execute_query("MERGE (:Person {name: $name})", name="Laurence Fishburne", database_="neo4j")
+print("Nodos de juguete creados: 1 Movie, 3 Person.")
+"""),
+        md('''
+### 2. Crear una relación — patrón `MATCH` + `MATCH` + `MERGE`
+
+Para conectar dos nodos que ya existen, primero los *encuentras* con `MATCH` (uno por cada lado) y luego creas el puente entre ellos con `MERGE`.
+'''),
+        code("""
+for actor in ["Keanu Reeves", "Carrie-Anne Moss", "Laurence Fishburne"]:
+    driver.execute_query('''
+        MATCH (actor:Person {name:$name})
+        MATCH (pelicula:Movie {title:$title})
+        MERGE (actor)-[:ACTED_IN]->(pelicula)
+    ''', name=actor, title="The Matrix", database_="neo4j")
+print("Relaciones ACTED_IN creadas para los 3 actores.")
+"""),
+        md('''
+**Cómo se lee.** Cada `MATCH` encuentra un nodo que ya existía; `MERGE` no vuelve a crearlo, solo agrega la flecha entre los dos.
+
+**Qué nos dice.** Es el mismo patrón de tres pasos (encontrar, encontrar, conectar) que usarás con Entidad → Proceso → Proveedor.
+
+**Qué NO permite concluir todavía.** Que dos nodos estén conectados no dice nada sobre la calidad de esa conexión — apenas estamos practicando la mecánica.
+
+**Error frecuente.** Usar `MERGE` también para los dos `MATCH` — eso arriesga crear un actor o película duplicados si el nombre no coincide exactamente.
+
+**HAZ ESTO AHORA.** Copia la consulta que imprime la siguiente celda, pégala en la pestaña **Query** de tu instancia Aura (no en Colab) y ejecútala ahí. Vas a ver, por primera vez en esta sesión, un grafo real dibujado con nodos y flechas — tres actores apuntando hacia una película.
+'''),
+        code("""
+print('''
+MATCH camino = (p:Person)-[:ACTED_IN]->(m:Movie)
+RETURN camino
+''')
+"""),
+        md('''
+**OJO.** Son apenas 4 nodos — el "poder" de un grafo no está en que se vea bonito con pocos datos, está en que la MISMA consulta, sin cambiar una palabra, funcionaría igual de bien con 3 millones de actores y películas. Eso es justo lo que vas a comprobar más adelante con 2.109 filas reales.
+
+### 3. Actualizar una propiedad — `SET`
+
+`SET` agrega o cambia una propiedad de un nodo que ya existe. No crea nada nuevo.
+'''),
+        code("""
+driver.execute_query("MATCH (p:Person {name:$name}) SET p.age = $age", name="Keanu Reeves", age=41, database_="neo4j")
+driver.execute_query("MATCH (p:Person {name:$name}) SET p.age = $age", name="Laurence Fishburne", age=52, database_="neo4j")
+print("Edad asignada a dos actores.")
+"""),
+        md('''
+### 4. Consultar — `MATCH` + `RETURN`, con filtros y conteo
+
+Cuatro consultas, cada una agregando algo nuevo.
+'''),
+        code("""
+r1 = driver.execute_query("MATCH (p:Person) RETURN p.name AS name", database_="neo4j")
+print("Todas las personas:", [r["name"] for r in r1.records])
+
+r2 = driver.execute_query("MATCH (p:Person {age:$age}) RETURN p.name AS name", age=41, database_="neo4j")
+print("Personas de 41 años:", [r["name"] for r in r2.records])
+
+r3 = driver.execute_query('''
+    MATCH (p:Person)-[:ACTED_IN]->(m:Movie)
+    RETURN p.name AS actor, m.title AS pelicula
+''', database_="neo4j")
+print("Quién actuó en qué:", [r.data() for r in r3.records])
+
+r4 = driver.execute_query("MATCH (p:Person) WHERE p.age > 40 RETURN count(p) AS mayores_40", database_="neo4j")
+print("Personas mayores de 40:", r4.records[0]["mayores_40"])
+"""),
+        md('''
+**Cómo se lee.** Cada consulta agrega una pieza: filtrar por propiedad, recorrer una relación, contar con una condición.
+
+**Qué nos dice.** Con las mismas piezas (`MATCH`, `WHERE`, recorrer una relación, `count()`) vas a construir la consulta real de Compras Claras más adelante.
+
+**Qué NO permite concluir todavía.** Nada — este grafo es de juguete y no representa ningún caso real.
+
+**Error frecuente.** Olvidar que `age` es un número, no un texto: `age:"41"` no encontraría nada.
+
+### 5. Borrar — `DETACH DELETE`
+
+Borrar un nodo que tiene relaciones falla con `DELETE` a secas — hay que borrar también sus relaciones en el mismo paso, con `DETACH DELETE`.
+'''),
+        code("""
+driver.execute_query("MATCH (p:Person {name:$name}) DETACH DELETE p", name="Laurence Fishburne", database_="neo4j")
+check = driver.execute_query("MATCH (p:Person {name:$name}) RETURN p.name AS name", name="Laurence Fishburne", database_="neo4j")
+print("¿Sigue existiendo Laurence Fishburne?", len(check.records) > 0)
+"""),
+        md('''
+**Cómo se lee.** `DETACH DELETE` borra el nodo y, en el mismo paso, todas sus relaciones — aquí, su `ACTED_IN` hacia The Matrix.
+
+**Qué nos dice.** La consulta de verificación debe devolver una lista vacía: el nodo ya no está.
+
+**Qué NO permite concluir todavía.** No aplica — es un borrado de práctica, no una decisión sobre datos reales.
+
+**Error frecuente.** Usar `DELETE p` sin `DETACH` cuando el nodo todavía tiene relaciones — Neo4j lo rechaza con un error explícito en vez de borrar a medias.
+
+### 6. Carga masiva desde Python — el mismo patrón `UNWIND` que usarás con 2.109 filas
+
+Hasta ahora creaste nodos uno por uno. Cuando los datos ya viven en una lista de Python, `UNWIND` los recorre todos en una sola consulta — exactamente lo que vas a hacer con el extracto real en un momento.
+'''),
+        code("""
+amigos = [
+    {"name": "Alice", "age": 42, "friends": ["Bob", "Peter", "Anna"]},
+    {"name": "Bob", "age": 19},
+    {"name": "Peter", "age": 50},
+    {"name": "Anna", "age": 30},
+]
+
+driver.execute_query('''
+    UNWIND $filas AS fila
+    MERGE (p:Person {name: fila.name})
+    SET p.age = fila.age
+''', filas=amigos, database_="neo4j")
+
+con_amigos = [a for a in amigos if a.get("friends")]
+driver.execute_query('''
+    UNWIND $filas AS fila
+    MATCH (p:Person {name: fila.name})
+    UNWIND fila.friends AS nombre_amigo
+    MATCH (amigo:Person {name: nombre_amigo})
+    MERGE (p)-[:KNOWS]->(amigo)
+''', filas=con_amigos, database_="neo4j")
+
+print("Red de amigos cargada: 4 personas, relaciones KNOWS desde Alice.")
+"""),
+        md('''
+**Cómo se lee.** El primer `UNWIND` crea las 4 personas de una vez; el segundo recorre, para cada persona, su lista de amigos y crea la relación `KNOWS`.
+
+**Qué nos dice.** Es exactamente la misma mecánica que usarás para cargar 2.109 filas de Compras Claras en un momento — la única diferencia es el tamaño de la lista.
+
+**Qué NO permite concluir todavía.** Nada — sigue siendo el grafo de juguete.
+
+**Error frecuente.** Anidar `UNWIND` dentro de `UNWIND` sin distinguir bien las variables — aquí `fila` y `nombre_amigo` son cosas distintas, no las confundas.
+
+### Extra: una consulta que una tabla no responde tan fácil — "amigos de amigos"
+
+En SQL esto pide un `JOIN` de la tabla contra sí misma. En Cypher es una flecha más en el mismo patrón.
+'''),
+        code("""
+r5 = driver.execute_query('''
+    MATCH (yo:Person {name:$name})-[:KNOWS]->(amigo)-[:KNOWS]->(amigo_de_amigo)
+    WHERE amigo_de_amigo <> yo
+    RETURN DISTINCT amigo_de_amigo.name AS nombre
+''', name="Alice", database_="neo4j")
+print("Amigos de amigos de Alice (2 saltos):", [r["nombre"] for r in r5.records])
+"""),
+        md('''
+**Cómo se lee.** La consulta recorre dos flechas `KNOWS` seguidas: de Alice a su amigo, y de ese amigo a los suyos.
+
+**Qué nos dice.** Como en este grafo nadie tiene un segundo salto todavía (Bob, Peter y Anna no tienen amigos propios cargados), la lista sale vacía — y eso también es una lectura válida: el patrón está bien escrito, simplemente el dato no lo sostiene.
+
+**Qué NO permite concluir todavía.** Nada nuevo — sigue siendo el grafo de juguete.
+
+**Error frecuente.** Pensar que una lista vacía significa que la consulta está mal. Antes de asumir un error, confirma si el patrón realmente tiene datos que lo satisfagan.
+
+**HAZ ESTO AHORA.** Pega esta consulta en la pestaña Query de Aura y mira el grafo completo de amigos:
+'''),
+        code("""
+print('''
+MATCH camino = (p:Person)-[:KNOWS]-(otra:Person)
+RETURN camino
+''')
+"""),
+        md('''
+**PARA LLEVAR.** Con solo 7 nodos ya viste tres formas distintas de "preguntar por relaciones": contar cuántas salen de alguien, seguir dos saltos seguidos, y dibujar el grafo completo. Esas mismas tres formas son las que vas a usar en Compras Claras, con miles de nodos en vez de 7.
+
+### Limpieza antes del caso real
+
+Antes de cargar Compras Claras, borra el grafo de juguete completo para que no se mezcle con Entidad/Proceso/Proveedor.
+'''),
+        code("""
+driver.execute_query("MATCH (n) WHERE n:Movie OR n:Person DETACH DELETE n", database_="neo4j")
+check = driver.execute_query("MATCH (n) WHERE n:Movie OR n:Person RETURN count(n) AS restantes", database_="neo4j")
+print("Nodos de juguete restantes (debe ser 0):", check.records[0]["restantes"])
+"""),
+        md('''
+---
 ## 6. Identidad y carga idempotente
 
 Primero creamos restricciones. Después `UNWIND` recibe una lista de filas desde Python y `MERGE` reutiliza nodos ya existentes.
@@ -624,6 +811,61 @@ assert coinciden, "La respuesta Neo4j no coincide con el contrato pandas."
             "La conectividad por sí sola no prueba coordinación.",
             "La conectividad por sí sola no prueba irregularidad.",
         ]),
+        md('''
+---
+## Lo que un grafo puede hacer y una tabla no: el camino más corto
+
+Hasta ahora contaste conexiones. Ahora vas a preguntar algo distinto: **¿cuál es el camino más corto entre tu entidad y otra, sin importar cuántos proveedores intermedios haga falta recorrer?** En SQL esto exige escribir un `JOIN` distinto por cada número de saltos que quieras probar, sin saber de antemano cuántos hacen falta. En Cypher es una sola palabra: `shortestPath`.
+'''),
+        code("""
+if neo_df.empty:
+    print("No hay proveedores conectados para calcular un camino.")
+else:
+    top_nit_proveedor = str(neo_df.iloc[0]["nit_proveedor"])
+    otra_entidad = driver.execute_query('''
+        MATCH (otra:Entidad)-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$nit_proveedor})
+        WHERE otra.nit <> $nit_propio
+        RETURN otra.nit AS nit, otra.nombre AS nombre
+        LIMIT 1
+    ''', nit_proveedor=top_nit_proveedor, nit_propio=nit_deseado, database_="neo4j")
+
+    if not otra_entidad.records:
+        print("No se encontró otra entidad conectada para comparar caminos.")
+    else:
+        nit_destino_camino = str(otra_entidad.records[0]["nit"])
+        nombre_destino_camino = otra_entidad.records[0]["nombre"]
+        camino = driver.execute_query('''
+            MATCH (origen:Entidad {nit:$nit_origen}), (destino:Entidad {nit:$nit_destino})
+            MATCH ruta = shortestPath((origen)-[*..6]-(destino))
+            RETURN [n IN nodes(ruta) | coalesce(n.nombre, n.id)] AS pasos, length(ruta) AS saltos
+        ''', nit_origen=nit_deseado, nit_destino=nit_destino_camino, database_="neo4j")
+        if camino.records:
+            r = camino.records[0]
+            print(f"Camino más corto hasta \\"{nombre_destino_camino}\\": {r['saltos']} saltos")
+            print(" -> ".join(str(p) for p in r["pasos"]))
+        else:
+            print("No se encontró un camino en 6 saltos o menos.")
+"""),
+        md('''
+**Cómo se lee.** `shortestPath` explora el grafo por ti y devuelve la ruta más corta que conecta los dos nodos, sin que tengas que decidir de antemano cuántos saltos probar.
+
+**Qué nos dice.** Existe al menos una cadena de relaciones registradas entre tu entidad y la otra — a través de procesos y proveedores intermedios.
+
+**Qué NO permite concluir todavía.** Un camino corto no es lo mismo que una relación sospechosa. Conecta datos registrados; no mide intención ni coordinación.
+
+**Error frecuente.** Confundir "camino más corto" con "relación más fuerte" — `shortestPath` no pesa las relaciones, solo cuenta saltos.
+
+**HAZ ESTO AHORA.** Pega esto en la pestaña Query de tu instancia Aura para ver el camino dibujado, nodo por nodo:
+'''),
+        code("""
+print(f'''
+MATCH origen = (e:Entidad {{nit:"{nit_deseado}"}})
+MATCH ruta = shortestPath((e)-[*..6]-(destino:Entidad))
+WHERE destino.nit <> "{nit_deseado}"
+RETURN ruta
+LIMIT 1
+''')
+"""),
         md('''
 ---
 ## Demostración guiada — el vecindario más rico del extracto
