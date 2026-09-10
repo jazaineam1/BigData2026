@@ -800,11 +800,20 @@ if modo_neo4j:
     pd_cmp = esperado_pd[cols_cmp].copy()
     neo_cmp = neo_df[cols_cmp].copy()
     for tabla in [pd_cmp, neo_cmp]:
-        tabla["nit_proveedor"] = tabla["nit_proveedor"].astype(str)
+        # "123.0" y "123" deben tratarse como el mismo NIT (una conversión de
+        # tipo intermedia puede volver flotante un entero antes de cargarlo).
+        tabla["nit_proveedor"] = tabla["nit_proveedor"].astype(str).str.strip().str.replace(r"\\.0$", "", regex=True)
         for columna in cols_cmp[1:]:
             tabla[columna] = tabla[columna].astype("int64")
     coinciden = pd_cmp.reset_index(drop=True).equals(neo_cmp.reset_index(drop=True))
     print("pandas == Neo4j:", coinciden)
+    if not coinciden:
+        print("\\nFilas esperadas (pandas):")
+        print(pd_cmp.reset_index(drop=True))
+        print("\\nFilas obtenidas (Neo4j):")
+        print(neo_cmp.reset_index(drop=True))
+        if len(neo_cmp) < len(pd_cmp):
+            print("\\nNeo4j devolvió MENOS filas que pandas — la carga probablemente no terminó de escribir todo el extracto.")
     assert coinciden, "Revisa NIT, extracto y datos previos en la instancia; no sigas con una comparación distinta."
 else:
     print("pandas == Neo4j: PENDIENTE; solo se ejecutó pandas.")

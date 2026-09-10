@@ -515,13 +515,29 @@ print("Relaciones ACTED_IN creadas para los 3 actores.")
 
 **Error frecuente.** Usar `MERGE` también para los dos `MATCH` — eso arriesga crear un actor o película duplicados si el nombre no coincide exactamente.
 
-**HAZ ESTO AHORA.** Copia la consulta que imprime la siguiente celda, pégala en la pestaña **Query** de tu instancia Aura (no en Colab) y ejecútala ahí. Vas a ver, por primera vez en esta sesión, un grafo real dibujado con nodos y flechas — tres actores apuntando hacia una película.
+**HAZ ESTO AHORA.** Ejecuta la siguiente celda: va a **dibujar el grafo aquí mismo, en Colab** — nodos y flechas de verdad, con los datos que tú acabas de crear. No necesitas salir a Aura para esto.
 '''),
         code("""
-print('''
-MATCH camino = (p:Person)-[:ACTED_IN]->(m:Movie)
-RETURN camino
+import networkx as nx
+import matplotlib.pyplot as plt
+
+resultado_grafo = driver.execute_query('''
+    MATCH (p:Person)-[:ACTED_IN]->(m:Movie)
+    RETURN p.name AS persona, m.title AS pelicula
 ''')
+
+G = nx.DiGraph()
+for r in resultado_grafo.records:
+    G.add_edge(r["persona"], r["pelicula"])
+
+plt.figure(figsize=(6, 4))
+pos = nx.spring_layout(G, seed=7)
+colores = ["#c9a227" if n == "The Matrix" else "#175c3c" for n in G.nodes()]
+nx.draw(G, pos, with_labels=True, node_color=colores, font_color="white", font_size=9, font_weight="bold", node_size=2400, edgecolors="black")
+nx.draw_networkx_edge_labels(G, pos, edge_labels={e: "ACTED_IN" for e in G.edges()}, font_size=8)
+plt.title("Tu primer grafo dibujado: actores → película")
+plt.axis("off")
+plt.show()
 """),
         md('''
 **OJO.** Son apenas 4 nodos — el "poder" de un grafo no está en que se vea bonito con pocos datos, está en que la MISMA consulta, sin cambiar una palabra, funcionaría igual de bien con 3 millones de actores y películas. Eso es justo lo que vas a comprobar más adelante con 2.109 filas reales.
@@ -642,13 +658,25 @@ print("Amigos de amigos de Alice (2 saltos):", [r["nombre"] for r in r5.records]
 
 **Error frecuente.** Pensar que una lista vacía significa que la consulta está mal. Antes de asumir un error, confirma si el patrón realmente tiene datos que lo satisfagan.
 
-**HAZ ESTO AHORA.** Pega esta consulta en la pestaña Query de Aura y mira el grafo completo de amigos:
+**HAZ ESTO AHORA.** Dibuja el grafo completo de amigos, aquí mismo en Colab:
 '''),
         code("""
-print('''
-MATCH camino = (p:Person)-[:KNOWS]-(otra:Person)
-RETURN camino
+resultado_amigos = driver.execute_query('''
+    MATCH (p:Person)-[:KNOWS]-(otra:Person)
+    RETURN p.name AS persona, otra.name AS otra_persona
 ''')
+
+G_amigos = nx.Graph()
+for r in resultado_amigos.records:
+    G_amigos.add_edge(r["persona"], r["otra_persona"])
+
+plt.figure(figsize=(6, 4))
+pos = nx.spring_layout(G_amigos, seed=3)
+colores_amigos = ["#c9a227" if n == "Alice" else "#3b5bab" for n in G_amigos.nodes()]
+nx.draw(G_amigos, pos, with_labels=True, node_color=colores_amigos, font_color="white", font_size=9, font_weight="bold", node_size=2200, edgecolors="black")
+plt.title("Red de amigos completa (KNOWS)")
+plt.axis("off")
+plt.show()
 """),
         md('''
 **PARA LLEVAR.** Con solo 7 nodos ya viste tres formas distintas de "preguntar por relaciones": contar cuántas salen de alguien, seguir dos saltos seguidos, y dibujar el grafo completo. Esas mismas tres formas son las que vas a usar en Compras Claras, con miles de nodos en vez de 7.
@@ -782,13 +810,28 @@ neo_df = pd.DataFrame([r.data() for r in neo.records])
 neo_df
 """),
         code("""
+def normalizar_nit(serie):
+    # "123.0" y "123" deben tratarse como el mismo NIT (una conversión de
+    # tipo intermedia puede volver flotante un entero antes de cargarlo).
+    return serie.astype(str).str.strip().str.replace(r"\\.0$", "", regex=True)
+
 cols_cmp = ["nit_proveedor", "procesos_con_entidad", "entidades_conectadas"]
 pd_cmp = esperado_pd[cols_cmp].copy()
 neo_cmp = neo_df[cols_cmp].copy()
-pd_cmp["nit_proveedor"] = pd_cmp["nit_proveedor"].astype(str)
-neo_cmp["nit_proveedor"] = neo_cmp["nit_proveedor"].astype(str)
+pd_cmp["nit_proveedor"] = normalizar_nit(pd_cmp["nit_proveedor"])
+neo_cmp["nit_proveedor"] = normalizar_nit(neo_cmp["nit_proveedor"])
 coinciden = pd_cmp.reset_index(drop=True).equals(neo_cmp.reset_index(drop=True))
 print("pandas == Neo4j:", coinciden)
+
+if not coinciden:
+    print("\\nFilas esperadas (pandas):")
+    print(pd_cmp.reset_index(drop=True))
+    print("\\nFilas obtenidas (Neo4j):")
+    print(neo_cmp.reset_index(drop=True))
+    if len(neo_cmp) < len(pd_cmp):
+        print("\\nNeo4j devolvió MENOS filas que pandas — la carga de 2.109 filas probablemente no terminó.")
+        print("Vuelve a ejecutar la celda 'Carga lista: ...' y espera a que termine antes de continuar.")
+
 assert coinciden, "La respuesta Neo4j no coincide con el contrato pandas."
 """),
         md('''
@@ -903,10 +946,43 @@ LIMIT 8
 '''
 print(query_visual_demo)
 """),
-        md(f'''
-**HAZ ESTO AHORA.** Copia la consulta que acabas de imprimir, ve a tu instancia AuraDB → pestaña **Query** (no Colab), pégala y ejecútala ahí. Aura dibuja nodos y flechas automáticamente cuando devuelves caminos (`RETURN camino`).
+        md('''
+**HAZ ESTO AHORA.** La siguiente celda dibuja este vecindario **aquí mismo en Colab**, con el mismo proveedor y hasta 8 entidades conectadas.
+'''),
+        code("""
+otras_entidades_demo = driver.execute_query('''
+    MATCH (otra:Entidad)-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$nit_proveedor})
+    WHERE otra.nit <> $nit_ancla
+    RETURN DISTINCT otra.nombre AS nombre
+    LIMIT 8
+''', nit_proveedor=nit_proveedor_demo, nit_ancla=nit_ancla_demo)
 
-Deberías ver algo con esta forma:
+G_demo = nx.Graph()
+nombre_ancla_demo = str(manifest["ancla_pedagogica"]["entidad"])
+nombre_proveedor_demo = str(top_demo["proveedor"])
+G_demo.add_edge(nombre_ancla_demo, nombre_proveedor_demo)
+for r in otras_entidades_demo.records:
+    G_demo.add_edge(r["nombre"], nombre_proveedor_demo)
+
+plt.figure(figsize=(9, 7))
+pos = nx.spring_layout(G_demo, seed=11, k=1.3)
+colores_demo = []
+for n in G_demo.nodes():
+    if n == nombre_proveedor_demo:
+        colores_demo.append("#c9a227")
+    elif n == nombre_ancla_demo:
+        colores_demo.append("#175c3c")
+    else:
+        colores_demo.append("#3b5bab")
+nx.draw(G_demo, pos, with_labels=True, node_color=colores_demo, font_color="white", font_size=8, font_weight="bold", node_size=2600, edgecolors="black")
+plt.title(f"Vecindario real de Compras Claras: {nombre_proveedor_demo}")
+plt.axis("off")
+plt.show()
+"""),
+        md(f'''
+**Cómo se lee.** El punto dorado es el proveedor; el verde es tu entidad ancla; los azules son las demás entidades conectadas al mismo proveedor.
+
+**Opcional — verlo interactivo en Aura.** Si quieres poder arrastrar los nodos y hacer zoom, copia la consulta que imprimió la celda anterior, ve a tu instancia AuraDB → pestaña **Query** (no Colab), pégala y ejecútala ahí. Debería verse parecido a esto:
 
 {svg("04_demo_vecindario", "Representación conceptual: la entidad ancla y otras entidades llegan al mismo proveedor, cada una por su propio proceso")}
 
