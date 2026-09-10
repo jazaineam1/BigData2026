@@ -76,46 +76,41 @@ def main():
     else:
         errors.extend(check_question_widget_renders(match.group(1)))
 
-    required = [
-        "Laura ya sabe qué proceso revisar primero",
-        "s05_ancla_s06.json",
-        "ficha relacional de revisión",
-        "EJERCICIO S06-PATRON",
-        'RELACION_PROCESO_PROVEEDOR = "____"',
-        "Entidad)-[:PUBLICA]",
-        "ADJUDICADO_A",
-        "Contrato de resultado: primero pandas",
-        "esperado_pd",
-        "RECUPERACIÓN S06",
-        "Estado S6 reconstruido desde archivos versionados",
-        "pandas == Neo4j",
-        "verify_connectivity",
-        "CREATE CONSTRAINT entidad_nit IF NOT EXISTS",
-        "UNWIND $filas AS fila",
-        "MERGE (e:Entidad",
-        "S06-DEMO",
-        "H2-R",
-        "conexión más fuerte que la mediana",
-        "conexión igual o menor que la mediana",
-        "no evaluable con mi ancla",
-        "mediana_maximo_conectadas_candidatas",
-        "desenlace_h2r_neo",
-        "desenlace_h2r_pd",
-        "### Función usada: `UNWIND`",
-        "MATCH (e:Entidad) RETURN",
-        "Interpretación de tu vecindario",
-        "alternativa_modelo",
-        "razon_alternativa",
-        "hito_s06_ficha_relacional.md",
-        "s06_contexto_procesos.jsonl",
-        "Completo | Parcial | Sin evidencia",
-        "Elasticsearch/BM25",
-    ]
-    for item in required:
-        if item not in text:
-            errors.append(f"Falta elemento S6: {item!r}")
+    # Hechos verificables: sincronización, sintaxis y cobertura de preguntas.
+    import ast
+    import base64
+    from utils.build_session6_notebook import build_cells
+    if cells != build_cells():
+        errors.append("Generador y cuaderno S6 desincronizados")
+    questions = []
+    for i, cell in enumerate(cells, 1):
+        if cell["cell_type"] == "code":
+            try:
+                ast.parse(src(cell))
+            except SyntaxError as exc:
+                errors.append(f"Sintaxis inválida en celda {i}: {exc}")
+        match_q = re.search(r'^pregunta_codificada\("([^\"]+)"\)', src(cell), re.M)
+        if match_q:
+            q = json.loads(base64.b64decode(match_q.group(1)))
+            questions.append(q)
+            if len(q["opciones"]) != 4 or len(q["retro"]) != 4:
+                errors.append(f"La pregunta {q['numero']} no tiene cuatro opciones y retroalimentaciones")
+            if not q.get("contexto") or not 0 <= q["correcta"] < 4:
+                errors.append(f"Pregunta {q['numero']} sin contexto o respuesta válida")
+    if [q["numero"] for q in questions] != list(range(1, 11)):
+        errors.append("Se esperan diez preguntas consecutivas que cubran los bloques")
+    if any(q.get("total") != len(questions) for q in questions):
+        errors.append("Contador de preguntas incorrecto")
+    checklist = (ROOT / "assets/tutoriales/s06-laboratorio-guiado.html").read_text(encoding="utf-8")
+    steps = json.loads(checklist.split("const DATA = ", 1)[1].split(";\nconst DATA2", 1)[0])[0]["pasos"]
+    for step in steps:
+        number = int(step["celda"].split()[1])
+        if not 1 <= number <= len(cells) or not step.get("evidencia") or not step.get("instruccion"):
+            errors.append(f"Paso del checklist incompleto: {step['id']}")
+    if manifest.get("entidades_candidatas_con_historial_por_nit") != 28 or manifest.get("mediana_maximo_conectadas_por_nit") != 21:
+        errors.append("La referencia por NIT debe ser 28 entidades y mediana 21")
 
-    for label in ["**Cómo se lee.**", "**Qué nos dice.**", "**Qué NO permite concluir todavía.**", "**Error frecuente.**"]:
+    for label in ["**Cómo se lee.**", "**Qué nos dice.**", "**Qué NO permite concluir todavía.**", "**Qué error común.**"]:
         if text.count(label) < 4:
             errors.append(f"El rótulo {label} aparece menos de cuatro veces")
 

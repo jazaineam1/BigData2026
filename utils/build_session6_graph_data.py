@@ -180,6 +180,9 @@ def main() -> None:
         "nit_proveedor"
     ].apply(lambda nits: provider_entity_counts.reindex(nits.dropna().unique()).fillna(1).max())
     mediana_maximo_candidatas = float(maximo_conectadas_por_entidad.median())
+    # S6 usa NIT como identidad del nodo, también en el denominador.
+    # Conservamos la referencia histórica por NIT+nombre para materiales previos.
+    maximos_por_nit = maximo_conectadas_por_entidad.groupby(level="nit_entidad").max()
     shared_counts = (
         candidate_hist[candidate_hist["nit_proveedor"].isin(shared_provider_nits)]
         .groupby(["nit_entidad", "entidad"])["nit_proveedor"].nunique()
@@ -215,6 +218,11 @@ def main() -> None:
         "proveedores_historicos": int(hist["nit_proveedor"].nunique()),
         "proveedores_compartidos_entre_entidades": int(len(shared_provider_nits)),
         "mediana_maximo_conectadas_candidatas": mediana_maximo_candidatas,
+        "entidades_candidatas_con_historial_por_nit": int(len(maximos_por_nit)),
+        "mediana_maximo_conectadas_por_nit": float(maximos_por_nit.median()),
+        "revision_identidad": "2026-09-10: referencia por NIT; campos anteriores conservan agrupacion por NIT y nombre",
+        "script_productor": "utils/build_session6_graph_data.py",
+        "fecha_recoleccion_original": None,
         "ancla_pedagogica": {
             "id_proceso": clean_text(anchor["id_del_proceso"]),
             "entidad": clean_text(anchor["entidad"]),

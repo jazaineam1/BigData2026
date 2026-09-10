@@ -8,6 +8,12 @@ on:
       - utils/build_session6_graph_data.py
       - utils/build_session6_notebook.py
       - utils/validate_session6.py
+      - utils/check_session6_execution.py
+      - utils/build_session6_notebook_aprender_haciendo.py
+      - utils/validate_session6_aprender_haciendo.py
+      - utils/notebook_checks.py
+      - assets/diagrams/session6/**
+      - assets/tutoriales/s06-laboratorio-guiado.html
       - assets/tutoriales/neo4j-aura-s06-paso-a-paso.html
       - .github/workflows/build-session6.yml
 
@@ -27,7 +33,7 @@ jobs:
           python-version: '3.12'
 
       - name: Instalar dependencias de construcción
-        run: python -m pip install -q pandas
+        run: python -m pip install -q pandas ipython nbformat
 
       - name: Comprobar sintaxis de generadores
         run: python -m py_compile utils/build_session6_graph_data.py utils/build_session6_notebook.py utils/validate_session6.py
@@ -36,15 +42,20 @@ jobs:
         run: python utils/build_session6_graph_data.py
 
       - name: Generar notebook S6
-        run: python utils/build_session6_notebook.py
+        run: |
+          python utils/build_session6_notebook.py
+          python utils/build_session6_notebook_aprender_haciendo.py
 
       - name: Validar datos, notebook y tutorial
-        run: python utils/validate_session6.py
+        run: |
+          python utils/validate_session6.py
+          python utils/validate_session6_aprender_haciendo.py
+          python utils/check_session6_execution.py
 
       - name: Publicar artefactos generados
         shell: bash
         run: |
-          CAMBIOS="$(git status --porcelain -- Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json)"
+          CAMBIOS="$(git status --porcelain -- Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json assets/tutoriales/s06-laboratorio-guiado.html)"
           if [ -z "$CAMBIOS" ]; then
             echo 'S6 ya estaba sincronizada.'
             exit 0
@@ -52,6 +63,6 @@ jobs:
           printf '%s\n' "$CAMBIOS"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json
+          git add Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json assets/tutoriales/s06-laboratorio-guiado.html
           git commit -m 'Regenera sesión 6 desde la bandeja de Laura'
           git push

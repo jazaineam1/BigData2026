@@ -10,6 +10,11 @@
   "proveedores_historicos": 416,
   "proveedores_compartidos_entre_entidades": 216,
   "mediana_maximo_conectadas_candidatas": 22.0,
+  "entidades_candidatas_con_historial_por_nit": 28,
+  "mediana_maximo_conectadas_por_nit": 21.0,
+  "revision_identidad": "2026-09-10: referencia por NIT; campos anteriores conservan agrupacion por NIT y nombre",
+  "script_productor": "utils/build_session6_graph_data.py",
+  "fecha_recoleccion_original": null,
   "ancla_pedagogica": {
     "id_proceso": "CO1.REQ.2622868",
     "entidad": "FUERZA AEROESPACIAL COLOMBIANA",

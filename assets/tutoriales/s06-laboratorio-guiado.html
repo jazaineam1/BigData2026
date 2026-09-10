@@ -80,7 +80,7 @@ footer.fin{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);fon
   </p>
   <div id="fases"></div>
   <footer class="fin">
-    Generado a mano como guía de acompañamiento del laboratorio S06. No ejecuta código —
+    Guía de acompañamiento del laboratorio S06. No ejecuta código —
     el código real corre en <code>6_Neo4j_Contexto_Relacional.ipynb</code>. Los pasos externos
     (🌐) remiten al tutorial de acceso
     <a href="neo4j-aura-s06-paso-a-paso.html" target="_blank" rel="noopener">neo4j-aura-s06-paso-a-paso.html ↗</a>
@@ -90,172 +90,151 @@ footer.fin{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);fon
 
 <script>
 const DATA = [
-  { titulo: "Antes de empezar", pasos: [
-    { id:"s00", tipo:"externo", titulo:"Abre el cuaderno en Colab", celda:"portada",
-      explicacion:"Esta guía no reemplaza al cuaderno: lo acompaña, celda por celda.",
-      instruccion:"Abre 6_Neo4j_Contexto_Relacional.ipynb en Colab en una pestaña aparte y déjala junto a esta guía.",
-      evidencia:"El cuaderno abre con 58 celdas, empezando por el badge de Colab." },
-  ]},
-  { titulo: "Orientarte antes de tocar código", pasos: [
-    { id:"s01", tipo:"entiende", titulo:"Lee la pregunta profesional y la respuesta corta", celda:"celda 2",
-      explicacion:"La sesión abre con la pregunta de Laura, no con una definición de grafos.",
-      instruccion:"Lee el encabezado completo, incluida la línea “Respuesta corta y herramienta”.",
-      evidencia:"Puedes decir, con tus palabras, por qué la herramienta de hoy es Neo4j y no otra." },
-    { id:"s02", tipo:"entiende", titulo:"Lee “Neo4j: qué es, y por qué aparece aquí”", celda:"celda 4",
-      explicacion:"Compara Neo4j con MongoDB/SQL y con Cassandra (S5) antes de escribir una sola línea de Cypher.",
-      instruccion:"Lee las tres tablas de esa sección.",
-      evidencia:"Puedes explicar la diferencia entre “recalcular el cruce” (Mongo/SQL) y “recorrer la relación ya guardada” (Neo4j)." },
-    { id:"s03", tipo:"entiende", titulo:"Revisa el mapa de la sesión", celda:"celda 5",
-      explicacion:"Ocho bloques, sin relojes — el orden importa más que el tiempo.",
-      instruccion:"Lee la tabla completa y el semáforo 🧠/▶️/✏️.",
-      evidencia:"Puedes nombrar los 8 bloques de la sesión en orden, sin mirar." },
-    { id:"s04", tipo:"ejecuta", titulo:"Ejecuta “Preparar interactividad”", celda:"celda 6",
-      explicacion:"Celda oculta (#@title): prepara las autoevaluaciones y el tutorial embebido.",
-      instruccion:"Ejecútala tal cual; no necesitas leer su código.",
-      evidencia:"Imprime exactamente: “Soporte S6 listo.”" },
-  ]},
-  { titulo: "Recuperar tu ancla de S5", pasos: [
-    { id:"s05", tipo:"ejecuta", titulo:"Carga los datos y tu ancla de S5", celda:"celda 8",
-      explicacion:"S6 no vuelve a construir los 77 candidatos: retoma el proceso que tú elegiste en S5.",
-      instruccion:"Si tienes tu s05_ancla_s06.json, súbelo al panel Archivos de Colab y escribe su ruta cuando se te pida. Si no lo tienes, presiona Enter — el cuaderno trae un respaldo pedagógico real.",
-      evidencia:"Imprime “Origen: …”, el JSON completo de tu ancla, y “Filas disponibles: 2109”." },
-    { id:"s06", tipo:"entiende", titulo:"Lee la interpretación del ancla", celda:"celda 9",
-      explicacion:"Cómo se lee / qué nos dice / qué NO permite concluir / error frecuente.",
-      instruccion:"Lee los cuatro rótulos fijos.",
-      evidencia:"Puedes decir qué NO permite concluir todavía tener un proceso priorizado." },
-  ]},
-  { titulo: "H2-R: la hipótesis de esta sesión", pasos: [
-    { id:"s07", tipo:"entiende", titulo:"Lee la hipótesis H2-R", celda:"celda 10",
-      explicacion:"H2-R continúa a H1 de S5 (0/77 → refutada); no la reemplaza.",
-      instruccion:"Lee el enunciado formal de H2-R y la tabla “sabemos / no sabemos”.",
-      evidencia:"Puedes repetir H2-R con tus palabras: compara el proveedor más conectado de tu entidad contra la mediana de las 32 candidatas de S5." },
-    { id:"s08", tipo:"entiende", titulo:"Lee el ejemplo manual", celda:"celda 11",
-      explicacion:"Nombres inventados, para pensar antes de programar.",
-      instruccion:"Sigue el dibujo Alcaldía/Gobernación/Constructora Ejemplo.",
-      evidencia:"Entiendes por qué “Constructora Ejemplo S.A.S.” conecta a las dos entidades del dibujo, sin ninguna tabla." },
-    { id:"s09", tipo:"decide", titulo:"Responde la Autoevaluación 1 — H2-R", celda:"celda 12",
-      instruccion:"Elige tu respuesta y pulsa Verificar.",
-      evidencia:"El recuadro muestra “Correcto.” con la explicación." },
-    { id:"s10", tipo:"decide", titulo:"Responde la Autoevaluación 2 — Modelo", celda:"celda 13",
-      instruccion:"Elige tu respuesta y pulsa Verificar.",
-      evidencia:"El recuadro muestra “Correcto.”" },
-    { id:"s11", tipo:"ejecuta", titulo:"Calcula el historial de tu entidad", celda:"celda 14",
-      explicacion:"Filtra el histórico adjudicado por el NIT de tu entidad ancla.",
-      instruccion:"Ejecuta la celda tal cual.",
-      evidencia:"Imprime “Entidad de trabajo: …”, “Procesos históricos: N”, “Proveedores distintos: N” — o el aviso de respaldo, si tu ancla no tiene historial en este extracto (le pasa a 2 de las 34 candidatas de S5)." },
-    { id:"s12", tipo:"entiende", titulo:"Lee la interpretación del historial", celda:"celda 15",
-      evidencia:"Puedes decir por qué más contratos históricos no equivale a más sospecha." },
-  ]},
-  { titulo: "Diseñar el grafo antes de escribir Cypher", pasos: [
-    { id:"s13", tipo:"entiende", titulo:"Lee el vocabulario de grafos", celda:"celda 17",
-      explicacion:"Cinco palabras y nada más: Nodo, Label, Propiedad, Relación, Camino.",
-      instruccion:"Lee la tabla de conceptos y la lectura de (e:Entidad {nit:\"123\"}).",
-      evidencia:"Puedes nombrar los 5 conceptos usando el ejemplo del proveedor." },
-    { id:"s14", tipo:"decide", titulo:"Completa el ejercicio del hueco", celda:"celda 18",
-      explicacion:"EJERCICIO S06-PATRON: un solo hueco, sin código comentado que descomentar.",
-      instruccion:"Reemplaza únicamente ____ por el nombre de la relación (una sola palabra) y ejecuta.",
-      evidencia:"Imprime “Patrón correcto: la relación expresa una adjudicación observada.” Si ves un ValueError, todavía no acertaste la palabra — no es un error de Colab." },
-    { id:"s15", tipo:"entiende", titulo:"Lee el modelo mínimo y la alternativa descartada", celda:"celda 19",
-      instruccion:"Lee la tabla del modelo y la tabla “la alternativa que descartamos”.",
-      evidencia:"Puedes explicar por qué Proceso se modeló como nodo y no como propiedad de una relación directa." },
-    { id:"s16", tipo:"entiende", titulo:"Lee la mini-ficha de MERGE", celda:"celda 20",
-      evidencia:"Puedes explicar la diferencia entre MERGE y CREATE con el ejemplo de “buscar por cédula”." },
-    { id:"s17", tipo:"entiende", titulo:"Lee la tabla de Cypher mínimo", celda:"celda 21",
-      evidencia:"Reconoces MERGE, MATCH, WHERE, WITH, RETURN, ORDER BY/LIMIT y para qué sirve cada uno." },
-    { id:"s18", tipo:"decide", titulo:"Responde la Autoevaluación 3 — Cypher", celda:"celda 22",
-      evidencia:"El recuadro muestra “Correcto.”" },
-  ]},
-  { titulo: "El contrato: primero pandas, luego el desenlace", pasos: [
-    { id:"s19", tipo:"ejecuta", titulo:"Construye tu contrato de resultado (esperado_pd)", celda:"celda 24",
-      explicacion:"Antes de usar Neo4j, pandas calcula qué debería responder el grafo.",
-      instruccion:"Ejecuta la celda tal cual.",
-      evidencia:"Imprime la mediana de referencia, tu “Desenlace H2-R (pandas): …”, y una tabla de hasta 10 proveedores." },
-    { id:"s20", tipo:"entiende", titulo:"Lee la interpretación del contrato y del desenlace", celda:"celda 25",
-      evidencia:"Puedes explicar por qué el desenlace no se llama “aceptada” ni “rechazada”, sino una comparación descriptiva." },
-    { id:"s21", tipo:"ejecuta", titulo:"Si el runtime se reinició, ejecuta RECUPERACIÓN S06", celda:"celda 27",
-      explicacion:"Solo hace falta si perdiste el estado — por ejemplo, después del receso.",
-      instruccion:"Ejecútala siempre que vuelvas a Colab tras una pausa larga; si todo sigue en memoria, solo lo confirma.",
-      evidencia:"“Estado S6 sigue en memoria…” o “Estado S6 reconstruido desde archivos versionados.”" },
-  ]},
-]
-
-const DATA2 = [
-  { titulo: "Conectar con AuraDB", pasos: [
-    { id:"s22", tipo:"externo", titulo:"Completa el tutorial visual de Aura", celda:"celda 29 (embebida)",
-      explicacion:"El HTML del tutorial es instrumental: dónde hacer clic y qué debe aparecer.",
-      instruccion:"Sigue las 10 pantallas de neo4j-aura-s06-paso-a-paso.html hasta su checklist final.",
-      evidencia:"Tienes URI, usuario y contraseña, y RETURN 1 AS conexion funcionó en la pestaña Query de tu instancia." },
-    { id:"s23", tipo:"ejecuta", titulo:"Conecta Colab con el driver oficial", celda:"celda 30",
-      instruccion:"Pega URI, usuario y contraseña cuando se te pidan (la contraseña no se muestra en pantalla).",
-      evidencia:"Imprime “Conexión Neo4j verificada.”" },
-  ]},
-  { titulo: "Cargar el grafo", pasos: [
-    { id:"s24", tipo:"ejecuta", titulo:"Crea las restricciones únicas", celda:"celda 32",
-      explicacion:"Tres CREATE CONSTRAINT: Entidad.nit, Proceso.id, Proveedor.nit.",
-      evidencia:"Imprime “Restricciones listas.”" },
-    { id:"s25", tipo:"entiende", titulo:"Lee la mini-ficha de UNWIND", celda:"celda 33",
-      evidencia:"Puedes explicar por qué UNWIND evita mandar una consulta por fila." },
-    { id:"s26", tipo:"ejecuta", titulo:"Ejecuta la carga completa (UNWIND + MERGE)", celda:"celda 34",
-      instruccion:"Puede tardar; es una sola celda que carga miles de filas.",
-      evidencia:"Imprime “Carga lista: 2109 filas; N adjudicaciones.”" },
-  ]},
-  { titulo: "La progresión MATCH", pasos: [
-    { id:"s27", tipo:"ejecuta", titulo:"Ejecuta 0 y 1 salto", celda:"celda 36",
-      evidencia:"Dos tablas cortas: solo entidades, y entidades con lo que publicaron." },
-    { id:"s28", tipo:"ejecuta", titulo:"Ejecuta 2 saltos", celda:"celda 37",
-      evidencia:"Una tabla con entidad, proceso y proveedor." },
-    { id:"s29", tipo:"entiende", titulo:"Lee qué agregó cada salto", celda:"celda 38",
-      evidencia:"Puedes decir qué pregunta nueva habilita cada flecha agregada." },
-  ]},
-  { titulo: "La consulta que justifica Neo4j", pasos: [
-    { id:"s30", tipo:"ejecuta", titulo:"Ejecuta la consulta de contexto (query_contexto)", celda:"celda 40",
-      evidencia:"Tabla neo_df con hasta 10 proveedores, en el mismo orden que tu contrato pandas." },
-    { id:"s31", tipo:"ejecuta", titulo:"Verifica pandas == Neo4j", celda:"celda 41",
-      evidencia:"Imprime “pandas == Neo4j: True”. Si ves un AssertionError, algo no coincide — no sigas sin resolverlo." },
-    { id:"s32", tipo:"entiende", titulo:"Lee la interpretación pandas ↔ Neo4j", celda:"celda 42",
-      evidencia:"Puedes explicar por qué esto prueba corrección, no velocidad." },
-    { id:"s33", tipo:"decide", titulo:"Responde la Autoevaluación 4 — Interpretación", celda:"celda 43",
-      evidencia:"El recuadro muestra “Correcto.”" },
-  ]},
-  { titulo: "Demostración guiada: el vecindario más rico", pasos: [
-    { id:"s34", tipo:"ejecuta", titulo:"Ejecuta el top-5 de la ancla pedagógica", celda:"celda 45",
-      explicacion:"Demostración guiada; no es tu evidencia individual todavía.",
-      evidencia:"Tabla neo_demo_df con hasta 5 proveedores muy conectados." },
-    { id:"s35", tipo:"entiende", titulo:"Lee la interpretación de la demostración", celda:"celda 46",
-      evidencia:"Entiendes que esta demo usa la ancla pedagógica, no la tuya — tu resultado puede ser más modesto y sigue siendo válido." },
-    { id:"s36", tipo:"ejecuta", titulo:"Imprime la consulta de visualización", celda:"celda 47",
-      evidencia:"Se imprime un bloque de texto Cypher con camino_ancla, camino_otras y LIMIT 8." },
-    { id:"s37", tipo:"externo", titulo:"Pega la consulta en Query y ejecútala ahí", celda:"fuera de Colab",
-      explicacion:"Aura dibuja el grafo con nodos y flechas cuando devuelves caminos (RETURN camino) — algo que una tabla de pandas no puede mostrar.",
-      instruccion:"Copia el texto Cypher completo que acabas de imprimir, ve a tu instancia AuraDB → pestaña Query, pégalo y ejecútalo ahí (no en Colab).",
-      evidencia:"Un grafo dibujado con tu entidad ancla, el proveedor, y hasta 8 entidades más conectadas por flechas." },
-    { id:"s38", tipo:"decide", titulo:"Responde en el salón las dos preguntas de discusión", celda:"celda 48",
-      evidencia:"Puedes nombrar el nodo puente del grafo y decir qué NO demuestra por sí solo." },
-  ]},
-  { titulo: "Tu propio vecindario", pasos: [
-    { id:"s39", tipo:"ejecuta", titulo:"Ejecuta el CRUD sentinela", celda:"celda 50",
-      explicacion:"Usa nodos S06-DEMO/S06-E/S06-V; no toca un proceso real.",
-      evidencia:"Imprime “CRUD demo completado y limpiado.”" },
-    { id:"s40", tipo:"decide", titulo:"Elige uno de tus 5 proveedores más conectados", celda:"celda 51",
-      instruccion:"Escribe el número de la lista impresa (no de toda tu tabla); no inventes un NIT.",
-      evidencia:"Tabla vecindario_df + “Tamaño observable de tu vecindario:” con tus tres números." },
-    { id:"s41", tipo:"entiende", titulo:"Lee la interpretación de tu vecindario", celda:"celda 52",
-      evidencia:"Puedes decir qué NO demuestra compartir proveedor." },
-  ]},
-  { titulo: "Cierre: límite, alternativa y evidencia exportable", pasos: [
-    { id:"s42", tipo:"decide", titulo:"Escribe tu límite, tu alternativa y su razón", celda:"celda 54",
-      explicacion:"Una respuesta genérica de IA no puede inventar esto por ti.",
-      instruccion:"Responde los tres input(): un límite con el dato que falta, una alternativa de modelado descartada, y por qué la descartaste.",
-      evidencia:"Se descargan hito_s06_ficha_relacional.md y s06_contexto_procesos.jsonl; el hito incluye tu desenlace H2-R en pandas y en Neo4j." },
-    { id:"s43", tipo:"entiende", titulo:"Revisa la rúbrica S06", celda:"celda 55",
-      evidencia:"Puedes ubicar tu propio trabajo en Completo/Parcial/Sin evidencia para cada criterio." },
-    { id:"s44", tipo:"ejecuta", titulo:"Cierra la conexión Neo4j", celda:"celda 57",
-      evidencia:"Imprime “Conexión Neo4j cerrada.”" },
-  ]},
-]
+  {
+    "titulo": "Del ancla al producto verificable",
+    "pasos": [
+      {
+        "id": "abrir",
+        "tipo": "entiende",
+        "titulo": "Abre el caso y lee la rúbrica",
+        "celda": "celda 2",
+        "explicacion": "Identifica el producto, la pregunta profesional y los criterios antes del laboratorio.",
+        "instruccion": "Lee el mapa, la procedencia y la rúbrica S06; responde las autoevaluaciones a medida que aparecen.",
+        "evidencia": "La ficha pide proceso, dos proveedores si difieren, máximo, mediana, límite, decisión y traza."
+      },
+      {
+        "id": "cargar",
+        "tipo": "ejecuta",
+        "titulo": "Carga el extracto y elige el ancla",
+        "celda": "celda 8",
+        "explicacion": "Conservas la selección S5 sin fabricar un proveedor para el candidato.",
+        "instruccion": "Ejecuta carga y selección de ancla. Si falla la red, sube CSV y manifest; si falta S5, elige Enter explícitamente.",
+        "evidencia": "Filas disponibles: 2109; huella SHA256; Origen: archivo propio S5 o ancla pedagógica versionada."
+      },
+      {
+        "id": "historial",
+        "tipo": "entiende",
+        "titulo": "Lee el historial y la identidad",
+        "celda": "celda 18",
+        "explicacion": "NIT es la clave; el nombre puede tener variantes.",
+        "instruccion": "Observa fechas, entidad de trabajo, procesos históricos y proveedores distintos; responde las preguntas de evidencia e identidad.",
+        "evidencia": "NIT de proveedor con varios nombres: 2; Entidad de trabajo; Procesos históricos; Proveedores distintos."
+      },
+      {
+        "id": "patron",
+        "tipo": "decide",
+        "titulo": "Completa el patrón contractual",
+        "celda": "celda 24",
+        "explicacion": "El verbo de la relación debe representar un hecho observado.",
+        "instruccion": "Completa el hueco del patrón; usa el apoyo plegado si te atascas.",
+        "evidencia": "Patrón correcto: la relación expresa una adjudicación observada."
+      },
+      {
+        "id": "contrato",
+        "tipo": "ejecuta",
+        "titulo": "Calcula el contrato pandas y H2-R",
+        "celda": "celda 30",
+        "explicacion": "Fijas una respuesta comparable antes de usar Neo4j.",
+        "instruccion": "Ejecuta y explica máximo y mediana; identifica al proveedor que determina H2-R. Responde la pregunta de mediana.",
+        "evidencia": "Entidades de referencia: 28; Mediana de referencia (candidatas S5): 21.0; Proveedor que determina H2-R; tabla de hasta 10 proveedores."
+      },
+      {
+        "id": "aura",
+        "tipo": "externo",
+        "titulo": "Conecta Aura o declara el respaldo",
+        "celda": "celda 37",
+        "explicacion": "Distingues ejecución del motor real de continuidad con pandas.",
+        "instruccion": "Si Colab reinició, ejecuta RECUPERACIÓN S06. Sigue el <a href='neo4j-aura-s06-paso-a-paso.html' target='_blank' rel='noopener'>tutorial Aura</a>; elige RESPALDO si no puedes conectar.",
+        "evidencia": "Conexión Neo4j verificada. O RESPALDO pandas: Neo4j y CRUD pendientes; no se declarará equivalencia comprobada."
+      },
+      {
+        "id": "carga",
+        "tipo": "ejecuta",
+        "titulo": "Crea restricciones y carga adjudicaciones válidas",
+        "celda": "celda 42",
+        "explicacion": "Los 77 candidatos sin proveedor no deben producir adjudicaciones inventadas.",
+        "instruccion": "Ejecuta restricciones y carga. Responde la pregunta UNWIND.",
+        "evidencia": "Carga preparada: 2109 filas; 2032 adjudicaciones válidas. En Aura, también Carga lista; en respaldo, carga pendiente."
+      },
+      {
+        "id": "repetir",
+        "tipo": "ejecuta",
+        "titulo": "Repite la carga y compara conteos",
+        "celda": "celda 43",
+        "explicacion": "Un reinicio no debe multiplicar nodos y relaciones.",
+        "instruccion": "Ejecuta la comprobación de repetición sin borrar los datos de tu instancia.",
+        "evidencia": "Carga repetida sin crecimiento: True y los conteos; o Idempotencia en Neo4j: PENDIENTE."
+      },
+      {
+        "id": "comparar",
+        "tipo": "ejecuta",
+        "titulo": "Recorre caminos y verifica el contrato",
+        "celda": "celda 53",
+        "explicacion": "Una tabla coincidente prueba la respuesta de esta consulta, no velocidad ni irregularidad.",
+        "instruccion": "Ejecuta patrones de 0, 1 y 2 relaciones, consulta completa y comparación. Responde WITH y límites.",
+        "evidencia": "pandas == Neo4j: True. En respaldo: PENDIENTE; solo se ejecutó pandas."
+      },
+      {
+        "id": "visual",
+        "tipo": "externo",
+        "titulo": "Dibuja el ejemplo guiado",
+        "celda": "celda 59",
+        "explicacion": "Un camino muestra cómo se conectan los actores.",
+        "instruccion": "En Aura copia la consulta impresa en Query. En respaldo usa el SVG conceptual y conserva Cypher para después.",
+        "evidencia": "Consulta con camino_ancla y camino_otras; en Aura, dibujo de hasta 8 entidades adicionales."
+      },
+      {
+        "id": "vecindario",
+        "tipo": "decide",
+        "titulo": "Ejecuta CRUD demo y elige proveedor",
+        "celda": "celda 63",
+        "explicacion": "Tu exploración puede elegir un proveedor diferente del que determina H2-R.",
+        "instruccion": "Ejecuta CRUD demo cuando uses Aura y elige un número válido del listado de proveedores.",
+        "evidencia": "Tamaño observable de tu vecindario: procesos con mi entidad, entidades conectadas y procesos visibles; tabla del proveedor elegido."
+      },
+      {
+        "id": "excluir",
+        "tipo": "decide",
+        "titulo": "Cuenta otras entidades",
+        "celda": "celda 66",
+        "explicacion": "El conteo inicial incluye la entidad ancla.",
+        "instruccion": "Completa el operador de exclusión y justifica la exploración con números y una alternativa descartada. Responde la pregunta de los dos proveedores.",
+        "evidencia": "Otras entidades: N | esperado: N; debe ser una menos que entidades_conectadas."
+      },
+      {
+        "id": "propia",
+        "tipo": "decide",
+        "titulo": "Construye tu consulta",
+        "celda": "celda 70",
+        "explicacion": "Defiendes el patrón con una consulta que escribiste.",
+        "instruccion": "Escribe el conteo de procesos distintos para el par entidad–proveedor. Consulta el apoyo plegado si lo necesitas.",
+        "evidencia": "Consulta propia: N | esperado: N. En respaldo se declara que Cypher está pendiente de ejecución."
+      },
+      {
+        "id": "hito",
+        "tipo": "decide",
+        "titulo": "Genera ficha y JSONL",
+        "celda": "celda 75",
+        "explicacion": "La siguiente sesión necesita texto rastreable y una selección justificada.",
+        "instruccion": "Ejecuta el desenlace H2-R y completa autor/alias, modelado, límite y alternativa. Guarda en el repositorio privado y entrega el enlace al commit.",
+        "evidencia": "Exportación S7: N procesos; ficha y JSONL guardados. Incluye motor real, proveedor H2-R, máximo, mediana y proveedor explorado."
+      },
+      {
+        "id": "cerrar",
+        "tipo": "ejecuta",
+        "titulo": "Cierra y revisa el puente a S7",
+        "celda": "celda 79",
+        "explicacion": "Conservas resultados y reconoces qué queda pendiente.",
+        "instruccion": "Revisa la hoja de trucos y el cierre; ejecuta el cierre de conexión.",
+        "evidencia": "Conexión Neo4j cerrada. O Sin conexión Neo4j abierta (respaldo)."
+      }
+    ]
+  }
+];
+const DATA2 = [];
 
 const ICONS = { entiende:"🧠", ejecuta:"▶️", decide:"✏️", externo:"🌐" }
-const KEY = id => "s06lab:" + id
+const KEY = id => "s06lab:nit-v2:" + id
 const fasesEl = document.getElementById("fases")
 
 function render(){
