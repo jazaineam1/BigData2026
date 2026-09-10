@@ -73,22 +73,21 @@ if "driver" not in globals():
 driver.verify_connectivity()
 comprobacion = driver.execute_query(
     "MATCH (n) WHERE n:Movie OR n:Person RETURN count(n) AS nodos_de_juguete",
-    database_="neo4j",
 )
 nodos = comprobacion.records[0]["nodos_de_juguete"]
 
 if nodos == 0:
     print("No había grafo de juguete en esta instancia (o ya lo limpiaste). Reconstruyéndolo...")
-    driver.execute_query("MERGE (:Movie {title: $title})", title="The Matrix", database_="neo4j")
-    driver.execute_query("MERGE (:Person {name: $name})", name="Keanu Reeves", database_="neo4j")
-    driver.execute_query("MERGE (:Person {name: $name})", name="Carrie-Anne Moss", database_="neo4j")
+    driver.execute_query("MERGE (:Movie {title: $title})", title="The Matrix")
+    driver.execute_query("MERGE (:Person {name: $name})", name="Keanu Reeves")
+    driver.execute_query("MERGE (:Person {name: $name})", name="Carrie-Anne Moss")
     for actor in ["Keanu Reeves", "Carrie-Anne Moss"]:
         driver.execute_query('''
             MATCH (actor:Person {name:$name})
             MATCH (pelicula:Movie {title:$title})
             MERGE (actor)-[:ACTED_IN]->(pelicula)
-        ''', name=actor, title="The Matrix", database_="neo4j")
-    driver.execute_query("MATCH (p:Person {name:$name}) SET p.age = $age", name="Keanu Reeves", age=41, database_="neo4j")
+        ''', name=actor, title="The Matrix")
+    driver.execute_query("MATCH (p:Person {name:$name}) SET p.age = $age", name="Keanu Reeves", age=41)
 
     amigos = [
         {"name": "Alice", "age": 42, "friends": ["Bob", "Peter", "Anna"]},
@@ -100,7 +99,7 @@ if nodos == 0:
         UNWIND $filas AS fila
         MERGE (p:Person {name: fila.name})
         SET p.age = fila.age
-    ''', filas=amigos, database_="neo4j")
+    ''', filas=amigos)
     con_amigos = [a for a in amigos if a.get("friends")]
     driver.execute_query('''
         UNWIND $filas AS fila
@@ -108,11 +107,10 @@ if nodos == 0:
         UNWIND fila.friends AS nombre_amigo
         MATCH (amigo:Person {name: nombre_amigo})
         MERGE (p)-[:KNOWS]->(amigo)
-    ''', filas=con_amigos, database_="neo4j")
+    ''', filas=con_amigos)
 
     comprobacion = driver.execute_query(
         "MATCH (n) WHERE n:Movie OR n:Person RETURN count(n) AS nodos_de_juguete",
-        database_="neo4j",
     )
     nodos = comprobacion.records[0]["nodos_de_juguete"]
 
@@ -228,7 +226,7 @@ mensaje_error = ""  # pega aquí el texto exacto del error
 explicacion = ""  # por qué Neo4j bloquea este DELETE
 
 try:
-    driver.execute_query("MATCH (p:Person {name:$name}) DELETE p", name="Bob", database_="neo4j")
+    driver.execute_query("MATCH (p:Person {name:$name}) DELETE p", name="Bob")
 except Exception as e:
     mensaje_error = str(e)
 

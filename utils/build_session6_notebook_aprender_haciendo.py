@@ -486,10 +486,10 @@ print("Conexión Neo4j verificada.")
 Ya conoces `MERGE` de la mini-ficha anterior. Ahora lo usas por primera vez contra Aura, con un ejemplo mínimo.
 '''),
         code("""
-driver.execute_query("MERGE (:Movie {title: $title})", title="The Matrix", database_="neo4j")
-driver.execute_query("MERGE (:Person {name: $name})", name="Keanu Reeves", database_="neo4j")
-driver.execute_query("MERGE (:Person {name: $name})", name="Carrie-Anne Moss", database_="neo4j")
-driver.execute_query("MERGE (:Person {name: $name})", name="Laurence Fishburne", database_="neo4j")
+driver.execute_query("MERGE (:Movie {title: $title})", title="The Matrix")
+driver.execute_query("MERGE (:Person {name: $name})", name="Keanu Reeves")
+driver.execute_query("MERGE (:Person {name: $name})", name="Carrie-Anne Moss")
+driver.execute_query("MERGE (:Person {name: $name})", name="Laurence Fishburne")
 print("Nodos de juguete creados: 1 Movie, 3 Person.")
 """),
         md('''
@@ -503,7 +503,7 @@ for actor in ["Keanu Reeves", "Carrie-Anne Moss", "Laurence Fishburne"]:
         MATCH (actor:Person {name:$name})
         MATCH (pelicula:Movie {title:$title})
         MERGE (actor)-[:ACTED_IN]->(pelicula)
-    ''', name=actor, title="The Matrix", database_="neo4j")
+    ''', name=actor, title="The Matrix")
 print("Relaciones ACTED_IN creadas para los 3 actores.")
 """),
         md('''
@@ -531,8 +531,8 @@ RETURN camino
 `SET` agrega o cambia una propiedad de un nodo que ya existe. No crea nada nuevo.
 '''),
         code("""
-driver.execute_query("MATCH (p:Person {name:$name}) SET p.age = $age", name="Keanu Reeves", age=41, database_="neo4j")
-driver.execute_query("MATCH (p:Person {name:$name}) SET p.age = $age", name="Laurence Fishburne", age=52, database_="neo4j")
+driver.execute_query("MATCH (p:Person {name:$name}) SET p.age = $age", name="Keanu Reeves", age=41)
+driver.execute_query("MATCH (p:Person {name:$name}) SET p.age = $age", name="Laurence Fishburne", age=52)
 print("Edad asignada a dos actores.")
 """),
         md('''
@@ -541,19 +541,19 @@ print("Edad asignada a dos actores.")
 Cuatro consultas, cada una agregando algo nuevo.
 '''),
         code("""
-r1 = driver.execute_query("MATCH (p:Person) RETURN p.name AS name", database_="neo4j")
+r1 = driver.execute_query("MATCH (p:Person) RETURN p.name AS name")
 print("Todas las personas:", [r["name"] for r in r1.records])
 
-r2 = driver.execute_query("MATCH (p:Person {age:$age}) RETURN p.name AS name", age=41, database_="neo4j")
+r2 = driver.execute_query("MATCH (p:Person {age:$age}) RETURN p.name AS name", age=41)
 print("Personas de 41 años:", [r["name"] for r in r2.records])
 
 r3 = driver.execute_query('''
     MATCH (p:Person)-[:ACTED_IN]->(m:Movie)
     RETURN p.name AS actor, m.title AS pelicula
-''', database_="neo4j")
+''')
 print("Quién actuó en qué:", [r.data() for r in r3.records])
 
-r4 = driver.execute_query("MATCH (p:Person) WHERE p.age > 40 RETURN count(p) AS mayores_40", database_="neo4j")
+r4 = driver.execute_query("MATCH (p:Person) WHERE p.age > 40 RETURN count(p) AS mayores_40")
 print("Personas mayores de 40:", r4.records[0]["mayores_40"])
 """),
         md('''
@@ -570,8 +570,8 @@ print("Personas mayores de 40:", r4.records[0]["mayores_40"])
 Borrar un nodo que tiene relaciones falla con `DELETE` a secas — hay que borrar también sus relaciones en el mismo paso, con `DETACH DELETE`.
 '''),
         code("""
-driver.execute_query("MATCH (p:Person {name:$name}) DETACH DELETE p", name="Laurence Fishburne", database_="neo4j")
-check = driver.execute_query("MATCH (p:Person {name:$name}) RETURN p.name AS name", name="Laurence Fishburne", database_="neo4j")
+driver.execute_query("MATCH (p:Person {name:$name}) DETACH DELETE p", name="Laurence Fishburne")
+check = driver.execute_query("MATCH (p:Person {name:$name}) RETURN p.name AS name", name="Laurence Fishburne")
 print("¿Sigue existiendo Laurence Fishburne?", len(check.records) > 0)
 """),
         md('''
@@ -599,7 +599,7 @@ driver.execute_query('''
     UNWIND $filas AS fila
     MERGE (p:Person {name: fila.name})
     SET p.age = fila.age
-''', filas=amigos, database_="neo4j")
+''', filas=amigos)
 
 con_amigos = [a for a in amigos if a.get("friends")]
 driver.execute_query('''
@@ -608,7 +608,7 @@ driver.execute_query('''
     UNWIND fila.friends AS nombre_amigo
     MATCH (amigo:Person {name: nombre_amigo})
     MERGE (p)-[:KNOWS]->(amigo)
-''', filas=con_amigos, database_="neo4j")
+''', filas=con_amigos)
 
 print("Red de amigos cargada: 4 personas, relaciones KNOWS desde Alice.")
 """),
@@ -630,7 +630,7 @@ r5 = driver.execute_query('''
     MATCH (yo:Person {name:$name})-[:KNOWS]->(amigo)-[:KNOWS]->(amigo_de_amigo)
     WHERE amigo_de_amigo <> yo
     RETURN DISTINCT amigo_de_amigo.name AS nombre
-''', name="Alice", database_="neo4j")
+''', name="Alice")
 print("Amigos de amigos de Alice (2 saltos):", [r["nombre"] for r in r5.records])
 """),
         md('''
@@ -658,8 +658,8 @@ RETURN camino
 Antes de cargar Compras Claras, borra el grafo de juguete completo para que no se mezcle con Entidad/Proceso/Proveedor.
 '''),
         code("""
-driver.execute_query("MATCH (n) WHERE n:Movie OR n:Person DETACH DELETE n", database_="neo4j")
-check = driver.execute_query("MATCH (n) WHERE n:Movie OR n:Person RETURN count(n) AS restantes", database_="neo4j")
+driver.execute_query("MATCH (n) WHERE n:Movie OR n:Person DETACH DELETE n")
+check = driver.execute_query("MATCH (n) WHERE n:Movie OR n:Person RETURN count(n) AS restantes")
 print("Nodos de juguete restantes (debe ser 0):", check.records[0]["restantes"])
 """),
         md('''
@@ -827,7 +827,7 @@ else:
         WHERE otra.nit <> $nit_propio
         RETURN otra.nit AS nit, otra.nombre AS nombre
         LIMIT 1
-    ''', nit_proveedor=top_nit_proveedor, nit_propio=nit_deseado, database_="neo4j")
+    ''', nit_proveedor=top_nit_proveedor, nit_propio=nit_deseado)
 
     if not otra_entidad.records:
         print("No se encontró otra entidad conectada para comparar caminos.")
@@ -838,7 +838,7 @@ else:
             MATCH (origen:Entidad {nit:$nit_origen}), (destino:Entidad {nit:$nit_destino})
             MATCH ruta = shortestPath((origen)-[*..6]-(destino))
             RETURN [n IN nodes(ruta) | coalesce(n.nombre, n.id)] AS pasos, length(ruta) AS saltos
-        ''', nit_origen=nit_deseado, nit_destino=nit_destino_camino, database_="neo4j")
+        ''', nit_origen=nit_deseado, nit_destino=nit_destino_camino)
         if camino.records:
             r = camino.records[0]
             print(f"Camino más corto hasta \\"{nombre_destino_camino}\\": {r['saltos']} saltos")
