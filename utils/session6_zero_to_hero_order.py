@@ -29,6 +29,40 @@ def replace_once(cells, old, new):
     put(cells[i], src(cells[i]).replace(old, new, 1))
 
 
+def hide(cell, title="Infraestructura técnica — no necesitas memorizarla"):
+    if cell.get("cell_type") != "code":
+        return
+    text = src(cell)
+    if not text.startswith("#@title"):
+        put(cell, f'#@title {title} {{ display-mode: "form" }}\n' + text)
+    meta = dict(cell.get("metadata", {}))
+    tags = list(meta.get("tags", []))
+    if "hide-input" not in tags:
+        tags.append("hide-input")
+    meta["tags"] = tags
+    meta["jupyter"] = {**meta.get("jupyter", {}), "source_hidden": True}
+    meta["cellView"] = "form"
+    meta["colab"] = {**meta.get("colab", {}), "formView": "both"}
+    cell["metadata"] = meta
+
+
+def hide_infrastructure(cells):
+    """Oculta Python de preparación; el objetivo visible de S06 es Cypher."""
+    technical_tokens = [
+        "groupby(",
+        "pd.concat(",
+        'to_dict("records")',
+        "to_dict('records')",
+        "str(nit_deseado).replace",
+    ]
+    for cell in cells:
+        if cell.get("cell_type") != "code":
+            continue
+        body = src(cell)
+        if any(token in body for token in technical_tokens):
+            hide(cell)
+
+
 def renumber_questions(cells):
     pattern = re.compile(r'pregunta_codificada\("([^\"]+)"\)')
     question_cells = []
@@ -86,4 +120,7 @@ def reorder_zero_to_hero(cells):
 
     # 4) Al mover preguntas entre bloques, sus números también deben seguir el nuevo orden.
     renumber_questions(cells)
+
+    # 5) La reordenación puede dejar código Python técnico fuera de bloques previamente plegados.
+    hide_infrastructure(cells)
     return cells
