@@ -95,8 +95,9 @@ def main() -> None:
     slides = tutorial.count('<section class="slide')
     if slides < 19:
         errors.append(f"El tutorial Graph Lab debe tener al menos 19 pantallas; tiene {slides}")
-    if "más conexiones no significa" not in tutorial.lower() and "no significa irregularidad" not in tutorial.lower():
-        errors.append("El tutorial debe separar conectividad visual de irregularidad")
+    tutorial_lower = tutorial.lower()
+    if "sospechoso" not in tutorial_lower or "layout" not in tutorial_lower or "escala de riesgo" not in tutorial_lower:
+        errors.append("El tutorial debe advertir que centralidad visual/layout no equivale a sospecha o riesgo")
 
     checklist = CHECKLIST.read_text(encoding="utf-8")
     try:
