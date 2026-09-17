@@ -118,9 +118,21 @@ def reorder_zero_to_hero(cells):
     if any("## 8. Ejemplo guiado — explorar un proveedor" in src(c) for c in cells):
         replace_once(cells, "## 8. Ejemplo guiado — explorar un proveedor", "## 9. Ejemplo guiado — explorar un proveedor")
 
-    # 4) Al mover preguntas entre bloques, sus números también deben seguir el nuevo orden.
+    # 4) La introducción debe describir el curso real, no el antiguo mini-tour de seis consultas.
+    replace_once(
+        cells,
+        "cómo leer seis consultas Cypher muy pequeñas",
+        "cómo construir y leer consultas Cypher de dificultad creciente",
+    )
+    replace_once(
+        cells,
+        "| 4 | Cypher básico | ejecutas 6 consultas guiadas |",
+        "| 4 | Cypher de cero a carga real | construyes, consultas, cuentas y cargas un grafo paso a paso |",
+    )
+
+    # 5) Al mover preguntas entre bloques, sus números también deben seguir el nuevo orden.
     renumber_questions(cells)
 
-    # 5) La reordenación puede dejar código Python técnico fuera de bloques previamente plegados.
+    # 6) La reordenación puede dejar código Python técnico fuera de bloques previamente plegados.
     hide_infrastructure(cells)
     return cells
