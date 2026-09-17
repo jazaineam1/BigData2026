@@ -65,6 +65,7 @@ RETURN count(DISTINCT p) AS procesos"""'''
 def patch_generator() -> bool:
     text = GENERATOR.read_text(encoding="utf-8")
     original = text
+
     old = "    build_checklist(cells)\n    enhance_checklist(cells)\n"
     new = "    # El checklist beginner tiene plantilla canónica; no depende de números de celda.\n    enhance_checklist(cells)\n"
     if old in text:
@@ -74,6 +75,18 @@ def patch_generator() -> bool:
         print("[OK] Generador ya usa solo el checklist beginner canónico")
     else:
         raise SystemExit("No se encontró la llamada histórica build_checklist/enhance_checklist")
+
+    # La recuperación post-receso no debe cambiar la ruta que el estudiante eligió.
+    old_origin = 'origen_ancla = "ancla pedagógica versionada incluida en S6"'
+    new_origin = 'origen_ancla = globals().get("origen_ancla", "ejemplo del curso")'
+    if old_origin in text:
+        text = text.replace(old_origin, new_origin)
+        print("[OK] Recuperación conserva el origen del ancla elegido")
+    elif new_origin in text:
+        print("[OK] Recuperación ya conserva el origen del ancla")
+    else:
+        raise SystemExit("No se encontró la etiqueta histórica de origen del ancla")
+
     if text != original:
         GENERATOR.write_text(text, encoding="utf-8")
         return True
