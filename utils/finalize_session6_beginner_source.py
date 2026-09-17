@@ -24,6 +24,19 @@ def main() -> None:
     else:
         raise SystemExit("No se encontró el bloque enhance_cells esperado")
 
+    # make_notebook.validate prohíbe triple-comillas dobles dentro de celdas.
+    old_query = '''consulta_propia = """MATCH (e:Entidad {nit:$ancla})-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$proveedor})
+RETURN count(DISTINCT p) AS procesos"""'''
+    new_query = '''consulta_propia = ("MATCH (e:Entidad {nit:$ancla})-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$proveedor})\\n"
+                    "RETURN count(DISTINCT p) AS procesos")'''
+    if old_query in text:
+        text = text.replace(old_query, new_query, 1)
+        print("[OK] Consulta guiada normalizada sin triple-comillas dobles")
+    elif "consulta_propia = (\"MATCH (e:Entidad {nit:$ancla})" in text:
+        print("[OK] Consulta guiada ya estaba normalizada")
+    else:
+        raise SystemExit("No se encontró consulta_propia guiada")
+
     pattern = re.compile(r'def enhance_checklist\(cells\):\n(?:    .*\n?)*?\Z', re.M)
     replacement = '''def enhance_checklist(cells):\n    """Restaura el checklist beginner después del build histórico del generador."""\n    template = ROOT / "assets" / "tutoriales" / "templates" / "s06-laboratorio-guiado.html"\n    target = ROOT / "assets" / "tutoriales" / "s06-laboratorio-guiado.html"\n    if not template.is_file():\n        raise FileNotFoundError(template)\n    target.write_text(template.read_text(encoding="utf-8"), encoding="utf-8")\n'''
     new_text, count = pattern.subn(replacement, text, count=1)
