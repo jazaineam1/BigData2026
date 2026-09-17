@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - s06-graph-lab-upgrade
     paths:
       - utils/build_session6_graph_data.py
       - utils/build_session6_notebook.py
