@@ -5,12 +5,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 GEN = ROOT / "utils" / "build_session6_notebook.py"
+ENH = ROOT / "utils" / "session6_graphlab_enhancements.py"
 
 
 def main() -> None:
+    # El validador del curso prohíbe triple-comillas dobles dentro de celdas.
+    enh = ENH.read_text(encoding="utf-8")
+    enh_original = enh
+    enh = enh.replace('    t=t.strip("\\n"); t=(', '    t=t.strip("\\n").replace(\'"""\', "\'\'\'"); t=(', 1)
+    if enh != enh_original:
+        ENH.write_text(enh, encoding="utf-8")
+        print("[OK] Consultas Graph Lab normalizadas a triple-comillas simples")
+
     text = GEN.read_text(encoding="utf-8")
     original = text
-
     import_line = "from utils.session6_graphlab_enhancements import enhance_cells, enhance_checklist"
     if import_line not in text:
         anchor = "from utils.make_notebook import code, md, save, validate"
