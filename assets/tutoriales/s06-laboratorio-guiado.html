@@ -42,10 +42,9 @@
 const key='s06:beginner-checklist:v1';
 const boxes=[...document.querySelectorAll('input[type=checkbox]')];
 const saved=JSON.parse(localStorage.getItem(key)||'[]');
-boxes.forEach((b,i)=>{b.checked=!!saved[i]; b.closest('.item').classList.toggle('done',b.checked); b.addEventListener('change',save)});
+boxes.forEach((b,i)=>{b.checked=!!saved[i];b.closest('.item').classList.toggle('done',b.checked);b.addEventListener('change',save)});
 function save(){const state=boxes.map(b=>b.checked);localStorage.setItem(key,JSON.stringify(state));boxes.forEach(b=>b.closest('.item').classList.toggle('done',b.checked));const n=state.filter(Boolean).length;document.getElementById('count').textContent=`${n} de ${boxes.length} pasos`;document.getElementById('fill').style.width=`${100*n/boxes.length}%`}
-document.getElementById('reset').onclick=()=>{boxes.forEach(b=>b.checked=false);save()};
-save();
+document.getElementById('reset').onclick=()=>{boxes.forEach(b=>b.checked=false);save()};save();
 </script>
 </body>
 </html>

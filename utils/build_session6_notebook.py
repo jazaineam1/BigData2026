@@ -154,7 +154,7 @@ print("Huella SHA256 del extracto:", huella_datos)
 SELECT_ANCHOR = r'''
 # El cuaderno trae el ancla pedagógica versionada; no necesitas ningún archivo de otra sesión.
 ancla_original = dict(manifest["ancla_pedagogica"])
-origen_ancla = "ancla pedagógica versionada incluida en S6"
+origen_ancla = globals().get("origen_ancla", "ejemplo del curso")
 print("Origen:", origen_ancla)
 print("El ancla ya está disponible en el manifest de S6; no se solicita información de S5.")
 print(json.dumps(ancla_original, ensure_ascii=False, indent=2))
@@ -1282,7 +1282,7 @@ def main():
     cells = build_cells()
     validate(cells)
     save(cells, OUTPUT)
-    build_checklist(cells)
+    # El checklist beginner tiene plantilla canónica; no depende de números de celda.
     enhance_checklist(cells)
     print(f"[OK] S6 generada: {len(cells)} celdas")
 

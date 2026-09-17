@@ -616,8 +616,8 @@ def simplify_operational_choices(cells):
 
     i = find(cells, "# Escribe tu consulta entre las comillas triples")
     put(cells[i], r'''#@title Ejecutar la consulta guiada para el par Entidad–Proveedor { display-mode: "form" }
-consulta_propia = """MATCH (e:Entidad {nit:$ancla})-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$proveedor})
-RETURN count(DISTINCT p) AS procesos"""
+consulta_propia = ("MATCH (e:Entidad {nit:$ancla})-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$proveedor})\n"
+                    "RETURN count(DISTINCT p) AS procesos")
 print("Consulta guiada:\n", consulta_propia)
 if modo_neo4j:
     procesos_propios = int(driver.execute_query(
@@ -654,6 +654,9 @@ print("Ejemplo de respuesta — límite:", limite_estudiante)
 
 def hide_python_infrastructure(cells):
     tokens = [
+        "groupby(",
+        "to_dict(\"records\")",
+        "pd.concat(",
         "import urllib.request",
         'hist = datos[datos["tipo_registro"]',
         'prov_ancla = hist_ancla.groupby',
@@ -676,16 +679,18 @@ def enhance_cells(cells):
     simplify_intro(cells)
     simplify_anchor(cells)
     simplify_concepts(cells)
-    improve_contract(cells)
     improve_graph_properties(cells)
     move_contract_and_insert_lab(cells)
+    improve_contract(cells)
     simplify_operational_choices(cells)
     hide_python_infrastructure(cells)
     return cells
 
 
 def enhance_checklist(cells):
-    """El checklist es ahora un artefacto editorial independiente; aquí solo verificamos que exista."""
-    path = ROOT / "assets" / "tutoriales" / "s06-laboratorio-guiado.html"
-    if not path.is_file():
-        raise FileNotFoundError(path)
+    """Restaura el checklist beginner desde su plantilla canónica."""
+    template = ROOT / "assets" / "tutoriales" / "templates" / "s06-laboratorio-guiado.html"
+    target = ROOT / "assets" / "tutoriales" / "s06-laboratorio-guiado.html"
+    if not template.is_file():
+        raise FileNotFoundError(template)
+    target.write_text(template.read_text(encoding="utf-8"), encoding="utf-8")
