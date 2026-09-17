@@ -3,71 +3,190 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>S06 · Graph Lab Neo4j Aura · Compras Claras</title>
+<title>S06 · Mini curso visual de Cypher</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--v950:#0b241c;--v850:#103525;--v800:#123f2b;--v700:#175c3c;--v100:#e3efe6;--d500:#c9a227;--d100:#f7ecc9;--c50:#faf7f0;--t:#172019;--g:#5c6b63;--line:#e2dcc8;--red:#a53828;--red100:#fbe9e5;--blue100:#e8f1ff;--shadow:0 24px 48px -18px rgba(11,36,28,.28),0 4px 10px -4px rgba(11,36,28,.12)}
-*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}body{height:100dvh;display:flex;flex-direction:column;color:var(--t);font-family:"IBM Plex Sans",Arial,sans-serif;background:radial-gradient(1000px 540px at 90% -10%,rgba(201,162,39,.10),transparent 60%),var(--c50)}h1,h2,h3{font-family:"Fraunces",Georgia,serif;margin:0}code,pre,.mono{font-family:"IBM Plex Mono",Consolas,monospace}.bar{position:fixed;top:0;left:0;height:4px;background:var(--d500);z-index:30}header{flex:none;display:flex;justify-content:space-between;align-items:center;padding:10px clamp(18px,4vw,48px) 7px}.brand{font-weight:700;color:var(--v800)}.count{font:13px "IBM Plex Mono";color:var(--g);background:#fff;border:1px solid var(--line);padding:6px 14px;border-radius:999px}main{flex:1;min-height:0;padding:4px clamp(14px,4vw,48px) 8px}.stage{height:100%;position:relative;max-width:1520px;margin:auto}.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transform:translateY(12px) scale(.99);transition:.28s;background:#fff;border:1px solid rgba(23,92,60,.08);border-radius:20px;padding:clamp(18px,3vw,38px);overflow:auto;box-shadow:var(--shadow)}.slide.on{opacity:1;pointer-events:auto;transform:none}.tag{display:inline-flex;padding:6px 14px;border-radius:999px;background:var(--v100);color:var(--v700);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px}.tag.gold{background:var(--d100);color:#6b5100}.tag.blue{background:var(--blue100);color:#244e86}.slide h1{font-size:clamp(34px,5vw,60px);line-height:1.03;color:var(--v950)}.slide h2{font-size:clamp(23px,3vw,34px);color:var(--v800);margin-bottom:8px}.slide h3{font-size:18px;color:var(--v800);margin:12px 0 6px}.sub{color:var(--g);font-size:15px;line-height:1.55;max-width:80ch}.lead{font-size:clamp(18px,2vw,25px);line-height:1.45;color:var(--v850);max-width:42ch}.grid{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.08fr);gap:24px;align-items:start}.grid.equal{grid-template-columns:1fr 1fr}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.card{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--c50);font-size:13px;line-height:1.45}.card strong{display:block;color:var(--v800);font-size:14px;margin-bottom:5px}.call{margin-top:12px;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5;background:var(--v100);color:#0e3524;border:1px solid #c7e0cf}.call.warn{background:#fff5dd;color:#604500;border-color:#ead69d}.call.bad{background:var(--red100);color:#692719;border-color:#ecc0b6}.call.blue{background:var(--blue100);color:#173c6e;border-color:#c8daf4}.result{margin-top:12px;padding:12px 14px;border-left:4px solid var(--d500);border-radius:8px;background:#fff7dc;color:#3f3512;font-size:13px}.result.ok{border-color:var(--v700);background:#eef8f1;color:#153c29}pre{background:var(--v950);color:#e8f1ea;padding:14px;border-radius:10px;overflow:auto;max-height:38vh;font-size:12px;line-height:1.5}.ui{min-height:285px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 8px 18px -8px rgba(11,36,28,.22);overflow:hidden}.ui-top{padding:11px 14px;background:#f6f7f7;border-bottom:1px solid #dde3df;display:flex;justify-content:space-between;gap:8px;font-size:12px}.ui-body{padding:18px}.tabs{display:flex;gap:7px;margin-bottom:12px}.tabs span{padding:7px 10px;border:1px solid #cbd6d0;border-radius:7px;font-size:12px}.tabs .sel{background:var(--v100);border-color:var(--v700);font-weight:700}.graph{position:relative;min-height:220px;border:1px dashed #c9d4ce;border-radius:10px;background:#fbfcfb}.node{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;border-radius:50%;padding:8px;font-size:10px;font-weight:700;border:2px solid var(--v700);background:var(--v100);z-index:2}.node.p{border-color:#3b5bab;background:#eef4ff}.node.v{border-color:#c9a227;background:#fff3c2}.edge{position:absolute;height:2px;background:#789589;transform-origin:left center;z-index:1}.small{font-size:12px;color:var(--g)}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--g);font-size:11px;text-transform:uppercase}a{color:var(--v700)}nav{flex:none;display:flex;justify-content:center;align-items:center;gap:12px;padding:5px 18px 10px}nav button{min-width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--v800);font-size:18px;cursor:pointer}.full{width:auto!important;border-radius:999px!important;padding:0 13px;font:700 12px "IBM Plex Sans"}.dots{display:flex;gap:6px;flex-wrap:wrap;max-width:55vw}.dot{width:10px;min-width:10px;height:10px;border:0;border-radius:50%;background:var(--line);padding:0}.dot.on{width:24px;background:var(--v700);border-radius:5px}.embed header{display:none}.embed main{padding:4px 10px}.embed .slide{padding:clamp(12px,2vw,22px)}@media(max-width:860px){.grid,.grid.equal,.cards{grid-template-columns:1fr}.ui{min-height:235px}.full{display:none}}
+:root{--ink:#172019;--green:#123f2b;--green2:#175c3c;--mint:#e3efe6;--gold:#c9a227;--cream:#faf7f0;--line:#e2dcc8;--blue:#e8f1ff;--warn:#fff5dd;--bad:#fbe9e5}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:"IBM Plex Sans",sans-serif;line-height:1.55}main{max-width:980px;margin:auto;padding:24px 18px 80px}h1,h2,h3{font-family:"Fraunces",serif;color:var(--green);margin-top:0}h1{font-size:clamp(32px,5vw,52px);line-height:1.05}h2{font-size:27px}h3{font-size:20px}code,pre{font-family:"IBM Plex Mono",monospace}pre{background:#0b241c;color:#eef7f0;padding:14px 16px;border-radius:12px;overflow:auto;font-size:13px;line-height:1.55}.hero,.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;margin:14px 0;box-shadow:0 12px 28px -22px rgba(11,36,28,.4)}.tag{display:inline-block;background:var(--mint);color:var(--green2);font-size:12px;font-weight:700;border-radius:999px;padding:5px 10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.explain{background:var(--mint);border-left:4px solid var(--green2);padding:12px 14px;border-radius:9px}.look{background:var(--blue);padding:12px 14px;border-radius:9px}.warn{background:var(--warn);border-left:4px solid var(--gold);padding:12px 14px;border-radius:9px}.bad{background:var(--bad);padding:12px 14px;border-radius:9px}.diagram{font-family:"IBM Plex Mono",monospace;background:#fbfcfb;border:1px dashed #b8c8be;border-radius:12px;padding:18px;white-space:pre;overflow:auto}.steps{counter-reset:s}.steps>div{counter-increment:s;margin:10px 0;padding:12px 14px 12px 48px;position:relative;background:#fff;border:1px solid var(--line);border-radius:10px}.steps>div:before{content:counter(s);position:absolute;left:13px;top:11px;background:var(--green2);color:#fff;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;font-weight:700}.mini{font-size:13px;color:#5c6b63}.rule{font-weight:700;color:var(--green)}@media(max-width:720px){.grid{grid-template-columns:1fr}main{padding:14px 10px 60px}}
 </style>
 </head>
 <body>
-<div class="bar" id="bar"></div>
-<header><div class="brand">Universidad Central · Big Data · S06 · Graph Lab</div><div class="count"><b id="n">1</b>/<span id="tot"></span></div></header>
-<main><div class="stage">
-<section class="slide on"><div class="tag gold">Laboratorio visual · Aura Query</div><h1>Del Cypher al grafo que puedes tocar</h1><p class="lead">Vas a ejecutar consultas en Aura, cambiar a <b>Graph</b>, inspeccionar propiedades, distinguir grado de conectividad y terminar con dos grafos “WOW” que sí enseñan algo.</p><div class="cards"><div class="card"><strong>Ver</strong>Nodos, relaciones y caminos como objetos.</div><div class="card"><strong>Inspeccionar</strong>NIT, ID, precio base y propiedades de la relación.</div><div class="card"><strong>Interpretar</strong>Separar estructura observada de una conclusión sobre riesgo.</div></div><div class="call warn"><b>Transparencia.</b> Las pantallas de esta guía son representaciones pedagógicas de la interfaz, no capturas autenticadas. Los nombres exactos pueden cambiar ligeramente.</div></section>
-<section class="slide"><div class="tag blue">1 · Resultado</div><h2>Graph, Table y RAW cuentan la misma consulta</h2><div class="grid"><div><p class="sub">En AuraDB → <b>Query</b>, una consulta puede producir distintas vistas del mismo resultado. Para aprender grafos, usa <b>Graph</b> cuando devuelvas nodos, relaciones o caminos; usa <b>Table</b> para comprobar valores y conteos.</p><pre>MATCH (e:Entidad)-[r:PUBLICA]-&gt;(p:Proceso)
-RETURN e, r, p
-LIMIT 10</pre><div class="call"><b>Regla:</b> si devuelves solo <code>e.nombre</code> y un conteo, no esperes un grafo navegable. Devuelve <code>e</code>, <code>r</code>, <code>p</code> o un <code>camino</code>.</div></div><div class="ui" aria-label="Representación del resultado de Aura Query con pestañas Graph Table RAW"><div class="ui-top"><b>Result</b><span>representación</span></div><div class="ui-body"><div class="tabs"><span class="sel">Graph</span><span>Table</span><span>RAW</span></div><div class="graph"><div class="node" style="left:9%;top:34%;width:80px;height:80px">Entidad</div><div class="node p" style="left:58%;top:34%;width:80px;height:80px">Proceso</div><div class="edge" style="left:22%;top:51%;width:36%;transform:rotate(0deg)"></div></div></div></div></div></section>
-<section class="slide"><div class="tag">2 · Tu primer camino</div><h2>Entidad → Proceso → Proveedor</h2><pre>MATCH (e:Entidad)-[pub:PUBLICA]-&gt;(p:Proceso)-[adj:ADJUDICADO_A]-&gt;(v:Proveedor)
+<main>
+<section class="hero">
+<div class="tag">S06 · desde cero</div>
+<h1>Mini curso visual de Cypher</h1>
+<p>Esta guía supone que nunca has usado Neo4j. No tienes que saber Python. Aquí solo aprenderás a <b>leer un grafo</b>, escribir consultas básicas en <b>Cypher</b> y entender qué aparece en <b>Aura Query</b>.</p>
+<div class="explain"><b>Meta final:</b> poder explicar el camino <code>Entidad → Proceso → Proveedor ← Proceso ← otra Entidad</code> sin mirar una solución.</div>
+</section>
+
+<section class="card">
+<div class="tag">0 · nombres</div>
+<h2>Neo4j, AuraDB, Cypher y Aura Query</h2>
+<div class="grid">
+<div><b>Neo4j</b><br>Motor de base de datos de grafos.</div>
+<div><b>AuraDB</b><br>Servicio en la nube donde corre Neo4j.</div>
+<div><b>Cypher</b><br>Lenguaje con el que consultas Neo4j.</div>
+<div><b>Aura Query</b><br>Pantalla donde escribes Cypher y ves Graph/Table/Raw.</div>
+</div>
+<p class="rule">Flujo: escribes Cypher → Aura Query lo envía a Neo4j → Neo4j responde → Graph o Table lo muestran.</p>
+</section>
+
+<section class="card">
+<div class="tag">1 · conexión</div>
+<h2>Primera consulta: comprobar que responde</h2>
+<pre>RETURN 1 AS conexion</pre>
+<div class="grid">
+<div class="explain"><b>Qué hace</b><br><code>RETURN</code> muestra un resultado. <code>AS conexion</code> nombra la columna.</div>
+<div class="look"><b>Qué debes ver</b><br>En <b>Table</b>: una columna <code>conexion</code> con el valor <code>1</code>.</div>
+</div>
+</section>
+
+<section class="card">
+<div class="tag">2 · conceptos</div>
+<h2>¿Qué es un nodo?</h2>
+<p>Un <b>nodo</b> es una cosa que queremos representar. En esta sesión hay tres tipos principales:</p>
+<div class="diagram">(Entidad)      (Proceso)      (Proveedor)</div>
+<p>Cada nodo puede tener propiedades. Ejemplos: una Entidad tiene <code>nit</code>; un Proceso tiene <code>id</code> y <code>precio_base</code>; un Proveedor tiene <code>nit</code> y <code>nombre</code>.</p>
+<pre>MATCH (e:Entidad)
+RETURN e
+LIMIT 5</pre>
+<div class="look"><b>Qué debes ver</b><br>En Graph aparecen hasta cinco nodos Entidad. No hay flechas porque todavía no pedimos relaciones.</div>
+</section>
+
+<section class="card">
+<div class="tag">3 · conceptos</div>
+<h2>¿Qué es una relación?</h2>
+<p>Una <b>relación</b> es una conexión con significado entre dos nodos.</p>
+<div class="diagram">Entidad ──PUBLICA──► Proceso</div>
+<pre>MATCH (e:Entidad)-[pub:PUBLICA]-&gt;(p:Proceso)
+RETURN e, pub, p
+LIMIT 5</pre>
+<div class="explain"><b>Cómo leerlo</b><br>“Busca una Entidad que PUBLICA un Proceso.”</div>
+<div class="look"><b>Qué debes ver</b><br>Pares Entidad→Proceso unidos por la flecha <code>PUBLICA</code>.</div>
+</section>
+
+<section class="card">
+<div class="tag">4 · camino</div>
+<h2>Entidad → Proceso → Proveedor</h2>
+<div class="diagram">Entidad ──PUBLICA──► Proceso ──ADJUDICADO_A──► Proveedor</div>
+<pre>MATCH (e:Entidad)-[pub:PUBLICA]-&gt;(p:Proceso)-[adj:ADJUDICADO_A]-&gt;(v:Proveedor)
 RETURN e, pub, p, adj, v
-LIMIT 20</pre><div class="grid"><div><h3>Qué debes localizar</h3><p class="sub">Tres tipos de nodo y dos tipos de relación. La flecha no es decoración: expresa el sentido del hecho modelado.</p><div class="result ok">Si puedes narrar “la Entidad publica el Proceso y el Proceso fue adjudicado al Proveedor”, ya estás leyendo Cypher como patrón.</div></div><div><h3>Qué no debes hacer</h3><p class="sub">No saltes visualmente de Entidad a Proveedor. El nodo Proceso conserva la unidad contractual y propiedades que usarás después.</p></div></div></section>
-<section class="slide"><div class="tag">3 · Inspección</div><h2>Haz clic: el grafo tiene datos, no solo formas</h2><div class="grid equal"><div><h3>Nodos</h3><p class="sub">Selecciona un nodo para revisar sus propiedades. Busca:</p><table><tr><th>Label</th><th>Propiedades útiles</th></tr><tr><td>Entidad</td><td><code>nit</code>, <code>nombre</code>, departamento</td></tr><tr><td>Proceso</td><td><code>id</code>, <code>precio_base</code>, modalidad, descripción</td></tr><tr><td>Proveedor</td><td><code>nit</code>, <code>nombre</code></td></tr></table></div><div><h3>Relaciones</h3><p class="sub">Selecciona <code>PUBLICA</code> y <code>ADJUDICADO_A</code>. La relación también se puede inspeccionar. En esta práctica, <code>valor_adjudicado</code> puede estar en <code>ADJUDICADO_A</code>.</p><div class="call warn"><b>No mezcles:</b> <code>precio_base</code> describe el proceso; <code>valor_adjudicado</code> describe el hecho de adjudicación reportado.</div></div></div></section>
-<section class="slide"><div class="tag">4 · Navegación</div><h2>Ordena el dibujo antes de interpretarlo</h2><div class="cards"><div class="card"><strong>Fit to screen</strong>Reencuadra todos los elementos visibles.</div><div class="card"><strong>Zoom</strong>Acerca una zona densa sin perder el resto.</div><div class="card"><strong>Arrastrar</strong>Separa ramas y coloca el hub en el centro.</div></div><p class="sub">La interfaz de Query permite interactuar con el resultado gráfico. Dependiendo de la versión, puedes usar el menú contextual y expansión de vecinos para explorar más conexiones.</p><div class="call bad"><b>Advertencia esencial:</b> el layout coloca nodos para que el dibujo sea legible. Que dos nodos se vean cerca, grandes o centrados <b>no</b> significa que tengan mayor riesgo, afinidad o causalidad.</div></section>
-<section class="slide"><div class="tag">5 · Grado exacto</div><h2>Table mide; Graph explica</h2><!-- GRAPH-DEGREE-S06-V1 --><div class="grid"><div><p class="sub">Primero mide el <b>grado contractual directo</b>: cuántas relaciones <code>ADJUDICADO_A</code> llegan a cada Proveedor.</p><pre>MATCH (p:Proceso)-[r:ADJUDICADO_A]-&gt;(v:Proveedor)
-RETURN v.nit AS nit_proveedor,
-       v.nombre AS proveedor,
-       count(r) AS grado_adjudicaciones
-ORDER BY grado_adjudicaciones DESC, nit_proveedor ASC
-LIMIT 10</pre><div class="result ok">Abre <b>Table</b>. <code>count(r)</code> es el valor que debes reportar: no lo adivines mirando el dibujo.</div></div><div><h3>Qué significa aquí “grado”</h3><table><tr><th>Métrica</th><th>Pregunta</th></tr><tr><td><b>grado_adjudicaciones</b></td><td>¿Cuántas relaciones directas de adjudicación llegan al Proveedor?</td></tr><tr><td><b>entidades_conectadas</b></td><td>¿Cuántas Entidades distintas alcanzan al Proveedor pasando por Proceso?</td></tr></table><div class="call warn"><b>No confundas métricas.</b> Diez procesos adjudicados por una sola entidad producen grado 10, pero conectividad institucional 1.</div></div></div></section>
-<section class="slide"><div class="tag">5.1 · Grado gráfico</div><h2>Ahora comprueba de dónde sale el número</h2><div class="grid"><div><pre>MATCH (p:Proceso)-[r:ADJUDICADO_A]-&gt;(v:Proveedor)
-WITH v, count(r) AS grado_adjudicaciones
-ORDER BY grado_adjudicaciones DESC, v.nit ASC
-LIMIT 1
-MATCH (p:Proceso)-[r:ADJUDICADO_A]-&gt;(v)
-RETURN v, r, p
-ORDER BY p.id
-LIMIT 40</pre><p class="sub">Cambia a <b>Graph</b>, usa Fit to screen, arrastra el Proveedor al centro y sigue cada línea <code>ADJUDICADO_A</code> hasta sus Procesos. Graph hace visible la estructura que Table acaba de medir.</p></div><div><div class="ui" aria-label="Representación de un proveedor central con múltiples adjudicaciones"><div class="ui-top"><b>Result · Graph</b><span>representación</span></div><div class="ui-body"><div class="tabs"><span class="sel">Graph</span><span>Table</span><span>RAW</span></div><div class="graph"><div class="node v" style="left:42%;top:31%;width:92px;height:92px">Proveedor<br>hub</div><div class="node p" style="left:6%;top:8%;width:62px;height:62px">P1</div><div class="node p" style="left:7%;top:66%;width:62px;height:62px">P2</div><div class="node p" style="left:75%;top:8%;width:62px;height:62px">P3</div><div class="node p" style="left:76%;top:66%;width:62px;height:62px">P4</div><div class="edge" style="left:17%;top:24%;width:29%;transform:rotate(22deg)"></div><div class="edge" style="left:17%;top:72%;width:30%;transform:rotate(-22deg)"></div><div class="edge" style="left:57%;top:43%;width:22%;transform:rotate(-35deg)"></div><div class="edge" style="left:57%;top:58%;width:23%;transform:rotate(34deg)"></div></div></div></div><div class="call bad"><b>Muy importante:</b> el tamaño, la posición o la cercanía automática del nodo no codifican grado. El grado exacto viene de <code>count(r)</code>; las líneas del Graph te ayudan a explicarlo.</div></div></div></section>
-<section class="slide"><div class="tag gold">WOW 1</div><h2>Encuentra la estrella contractual más visible</h2><pre>MATCH (v:Proveedor)&lt;-[:ADJUDICADO_A]-(p:Proceso)&lt;-[:PUBLICA]-(e:Entidad)
+LIMIT 5</pre>
+<div class="grid">
+<div class="explain"><b>Qué hace</b><br>Busca el patrón completo: quién publica el proceso y a qué proveedor fue adjudicado.</div>
+<div class="look"><b>Qué debes ver</b><br>Tres tipos de nodo y dos tipos de relación.</div>
+</div>
+<p><b>Haz clic</b> en un nodo y mira sus propiedades. Haz clic en <code>ADJUDICADO_A</code> para inspeccionar la relación.</p>
+</section>
+
+<section class="card">
+<div class="tag">5 · vistas</div>
+<h2>Graph y Table no son dos grafos</h2>
+<p>Son dos formas de mirar <b>el mismo resultado</b>.</p>
+<div class="grid">
+<div class="look"><b>Graph</b><br>Sirve para entender quién se conecta con quién.</div>
+<div class="look"><b>Table</b><br>Sirve para leer conteos y valores exactos.</div>
+</div>
+<p><b>Raw</b> muestra la representación cruda. Si una consulta devuelve solo nombres y números, Table suele ser más útil. Si devuelve nodos, relaciones o un <code>camino</code>, Graph puede dibujarlo.</p>
+</section>
+
+<section class="card">
+<div class="tag">6 · medir</div>
+<h2>¿Qué es el grado?</h2>
+<p>El <b>grado</b> es cuántas relaciones directas tiene un nodo, según la relación que estamos contando.</p>
+<div class="diagram">Proceso 1 ─┐
+Proceso 2 ─┤
+Proceso 3 ─┼──► Proveedor X
+Proceso 4 ─┤
+Proceso 5 ─┘</div>
+<p>Aquí el proveedor tiene grado 5 respecto de <code>ADJUDICADO_A</code>.</p>
+<pre>MATCH (p:Proceso)-[r:ADJUDICADO_A]-&gt;(v:Proveedor)
+RETURN v.nombre AS proveedor,
+       count(r) AS grado
+ORDER BY grado DESC
+LIMIT 5</pre>
+<div class="explain"><b><code>count(r)</code></b> = cuenta las relaciones <code>r</code>.</div>
+<div class="warn"><b>No adivines el grado por el dibujo.</b> La posición, tamaño o cercanía automática del círculo en Aura no equivale al grado. Table mide el número; Graph ayuda a explicarlo.</div>
+</section>
+
+<section class="card">
+<div class="tag">7 · interpretar</div>
+<h2>¿Qué es un hub?</h2>
+<p>Un <b>hub</b>, o <b>nodo concentrador</b>, es un nodo que reúne muchas conexiones.</p>
+<div class="diagram">Proceso ─┐
+Proceso ─┤
+Proceso ─┼──► PROVEEDOR HUB
+Proceso ─┤
+Proceso ─┘</div>
+<p>Pero “muchas conexiones” depende de qué cuentes.</p>
+<div class="grid">
+<div class="explain"><b>Grado de adjudicaciones</b><br>¿Cuántos procesos llegan directamente al proveedor?</div>
+<div class="explain"><b>Entidades conectadas</b><br>¿Cuántas entidades distintas llegan a él pasando por Proceso?</div>
+</div>
+<div class="warn">Un proveedor puede tener 25 procesos de una sola entidad: grado alto, pero solo 1 entidad conectada.</div>
+</section>
+
+<section class="card">
+<div class="tag">8 · vista gráfica 1</div>
+<h2>Vista gráfica 1 — un proveedor con muchas conexiones</h2>
+<pre>MATCH (v:Proveedor)&lt;-[:ADJUDICADO_A]-(p:Proceso)&lt;-[:PUBLICA]-(e:Entidad)
 WITH v, count(DISTINCT e) AS entidades,
-     count(DISTINCT p) AS grado_adjudicaciones
-ORDER BY entidades DESC, grado_adjudicaciones DESC, v.nit ASC
+     count(DISTINCT p) AS procesos
+ORDER BY entidades DESC, procesos DESC, v.nit ASC
 LIMIT 1
 MATCH camino=(e:Entidad)-[:PUBLICA]-&gt;(:Proceso)-[:ADJUDICADO_A]-&gt;(v)
 RETURN camino
-LIMIT 40</pre><div class="call"><b>Qué esperas ver:</b> un Proveedor central y muchas ramas Entidad → Proceso → Proveedor. El efecto WOW viene de reconocer el patrón repetido, no de decorar el grafo.</div></section>
-<section class="slide"><div class="tag gold">WOW 1 · lectura</div><h2>Desarma la estrella antes de contarla</h2><div class="grid equal"><div><h3>Lectura correcta</h3><ol><li>Identifica el proveedor central.</li><li>Cuenta visualmente entidades distintas.</li><li>Observa que cada rama pasa por un Proceso.</li><li>Haz clic en una rama y revisa IDs/propiedades.</li><li>Cambia a Table y valida lo que viste.</li></ol></div><div><h3>Preguntas del docente</h3><ul><li>¿Cuál es el nodo puente?</li><li>¿Hay varias ramas de una misma entidad?</li><li>¿Qué propiedad identifica cada actor?</li><li>¿Qué relación sostiene cada salto?</li><li>¿Qué NO se puede afirmar con este dibujo?</li></ul></div></div><div class="call warn">Una estrella grande puede ser normal en un mercado con proveedores de alcance nacional. La conectividad es un hecho estructural; la anomalía necesita un denominador o modelo adicional.</div></section>
-<section class="slide"><div class="tag gold">WOW 2</div><h2>Ahora parte de tu Entidad ancla</h2><pre>MATCH (ancla:Entidad {nit:"TU_NIT"})-[:PUBLICA]-&gt;(:Proceso)-[:ADJUDICADO_A]-&gt;(v:Proveedor)
-WITH ancla, v, count(*) AS procesos_ancla
-ORDER BY procesos_ancla DESC, v.nit ASC
-LIMIT 1
-MATCH camino=(ancla)-[:PUBLICA]-&gt;(:Proceso)-[:ADJUDICADO_A]-&gt;(v)
-             &lt;-[:ADJUDICADO_A]-(:Proceso)&lt;-[:PUBLICA]-(otra:Entidad)
-WHERE otra.nit &lt;&gt; ancla.nit
-RETURN camino
-LIMIT 30</pre><div class="result ok"><b>Patrón visual:</b> Entidad ancla → Proceso → Proveedor ← Proceso ← otra Entidad.</div></section>
-<section class="slide"><div class="tag">8 · Verificación</div><h2>Cómo revisar un camino completo</h2><div class="cards"><div class="card"><strong>1 · Extremos</strong>Confirma que los NIT de Entidad ancla y otra Entidad sean distintos.</div><div class="card"><strong>2 · Puente</strong>Confirma que ambos procesos lleguen al mismo NIT de Proveedor.</div><div class="card"><strong>3 · Hechos</strong>Revisa ID de proceso, modalidad, precio base y relación de adjudicación.</div></div><div class="call blue"><b>Después</b> de verificar propiedades, redacta una frase factual: “En el extracto, las entidades X e Y tienen procesos adjudicados al proveedor Z”. No agregues intención ni causalidad.</div></section>
-<section class="slide"><div class="tag">9 · Estilo útil</div><h2>Haz legible el grafo, no espectacular por sí mismo</h2><p class="sub">Query/Browser permite personalizar el estilo visual. Cuando esté disponible en tu interfaz, usa captions útiles: <code>Entidad.nombre</code>, <code>Proceso.id</code>, <code>Proveedor.nombre</code>. Puedes ajustar tamaño o apariencia para diferenciar labels.</p><div class="call"><b>Criterio:</b> una personalización es buena si ayuda a responder “¿qué nodo es este?” y “¿qué relación estoy siguiendo?”. Evita tamaños que parezcan codificar riesgo si en realidad solo son estilo.</div><p class="small">Referencia oficial: Neo4j Browser styling y result frames.</p></section>
-<section class="slide"><div class="tag">10 · Diagnóstico</div><h2>Si no aparece el grafo que esperabas</h2><table><tr><th>Problema</th><th>Revisa</th></tr><tr><td>Solo aparece Table</td><td>Devuelve nodos/relaciones/caminos, no únicamente escalares.</td></tr><tr><td>Demasiados nodos</td><td>Reduce con <code>LIMIT</code> o empieza desde un NIT concreto.</td></tr><tr><td>Grafo ilegible</td><td>Fit, zoom, arrastre y un límite menor.</td></tr><tr><td>Nodo sin nombre claro</td><td>Haz clic y revisa propiedades; configura caption si está disponible.</td></tr><tr><td>Conteos no cuadran</td><td>Cambia a Table y verifica <code>DISTINCT</code>, NIT y patrón.</td></tr></table><div class="call bad"><b>No “arregles” un resultado borrando ramas a mano.</b> Si la consulta trae demasiado, cambia la consulta y conserva el criterio reproducible.</div></section>
-<section class="slide"><div class="tag gold">Cierre</div><h2>Tu evidencia visual debe ser explicable</h2><p class="lead">El objetivo se cumple cuando puedes mirar un grafo en Aura y explicar el camino, las propiedades y el límite de interpretación sin depender de que el profesor te diga qué estás viendo.</p><div class="cards"><div class="card"><strong>Puedo leer</strong>Nodo, relación, dirección y camino.</div><div class="card"><strong>Puedo verificar</strong>Propiedades y Table antes de concluir.</div><div class="card"><strong>Puedo limitar</strong>Conectividad no es irregularidad.</div></div><div class="result ok">Regresa al cuaderno. Después del Graph Lab, H2-R tendrá sentido como una métrica sobre una estructura que ya sabes ver.</div><p class="small">Documentación: <a href="https://neo4j.com/docs/browser/operations/result-frames/" target="_blank" rel="noopener">Result frames ↗</a> · <a href="https://neo4j.com/docs/browser/operations/browser-styling/" target="_blank" rel="noopener">Browser styling ↗</a></p></section>
-</div></main>
-<nav aria-label="Navegación del tutorial"><button id="prev" aria-label="Anterior">←</button><div class="dots" id="dots"></div><button id="next" aria-label="Siguiente">→</button><button class="full" id="full">Pantalla completa</button></nav>
-<script>
-const slides=[...document.querySelectorAll('.slide')],dots=document.getElementById('dots'),bar=document.getElementById('bar'),num=document.getElementById('n'),tot=document.getElementById('tot');let i=0;tot.textContent=slides.length;
-slides.forEach((_,k)=>{const b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Ir a '+(k+1));b.onclick=()=>show(k);dots.appendChild(b)});
-function show(k){i=Math.max(0,Math.min(slides.length-1,k));slides.forEach((s,j)=>s.classList.toggle('on',j===i));[...dots.children].forEach((d,j)=>d.classList.toggle('on',j===i));num.textContent=i+1;bar.style.width=((i+1)/slides.length*100)+'%';document.getElementById('prev').disabled=i===0;document.getElementById('next').disabled=i===slides.length-1}
-document.getElementById('prev').onclick=()=>show(i-1);document.getElementById('next').onclick=()=>show(i+1);document.getElementById('full').onclick=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()};document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown')show(i+1);if(e.key==='ArrowLeft'||e.key==='PageUp')show(i-1)});if(new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('embed');show(0);
-</script>
+LIMIT 40</pre>
+<div class="steps">
+<div><b>Qué debes ver:</b> un Proveedor compartido por varias rutas Entidad→Proceso→Proveedor.</div>
+<div><b>Qué mirar:</b> haz clic en el Proveedor, después en uno de los Procesos y después en una Entidad.</div>
+<div><b>Qué significa:</b> varias entidades del extracto tienen procesos adjudicados al mismo proveedor.</div>
+<div><b>Qué NO significa:</b> no demuestra fraude, colusión ni irregularidad.</div>
+</div>
+</section>
+
+<section class="card">
+<div class="tag">9 · islas</div>
+<h2>¿Por qué a veces veo varias islas?</h2>
+<p>Una consulta global con <code>LIMIT</code> puede traer coincidencias que no se conectan entre sí dentro de ese resultado. Aura las dibuja separadas.</p>
+<div class="diagram">isla 1                         isla 2
+Entidad→Proceso→Proveedor         Entidad→Proceso→Proveedor</div>
+<div class="explain">No son dos bases ni dos grafos diferentes. Es una sola base Neo4j y un solo resultado con grupos desconectados.</div>
+</section>
+
+<section class="card">
+<div class="tag">10 · vista gráfica 2</div>
+<h2>Vista gráfica 2 — dos entidades conectadas por un proveedor compartido</h2>
+<div class="diagram">Entidad ancla
+     │ PUBLICA
+     ▼
+  Proceso
+     │ ADJUDICADO_A
+     ▼
+ Proveedor
+     ▲ ADJUDICADO_A
+     │
+  Proceso
+     ▲ PUBLICA
+     │
+otra Entidad</div>
+<p>En el cuaderno encontrarás la consulta preparada con el NIT de tu entidad. Ejecútala en Aura Query.</p>
+<div class="steps">
+<div><b>Qué debes ver:</b> un camino que empieza en tu Entidad y termina en otra Entidad.</div>
+<div><b>Qué comprobar:</b> los dos NIT de Entidad son diferentes.</div>
+<div><b>Qué comprobar:</b> ambos lados pasan por el mismo Proveedor.</div>
+<div><b>Qué significa:</b> las dos entidades comparten proveedor en registros adjudicados del extracto.</div>
+<div><b>Qué NO significa:</b> no demuestra coordinación, favorecimiento, causalidad ni irregularidad.</div>
+</div>
+</section>
+
+<section class="hero">
+<div class="tag">final</div>
+<h2>Si puedes decir esto, ya entendiste el núcleo</h2>
+<p>“Neo4j representa objetos como nodos y conexiones como relaciones. Cypher usa <code>MATCH</code> para buscar patrones. Puedo recorrer Entidad→Proceso→Proveedor, contar relaciones para medir grado y encontrar otras entidades que comparten un proveedor.”</p>
+</section>
+</main>
 </body>
 </html>
