@@ -60,9 +60,12 @@ def main():
     else: errors.extend(check_question_widget_renders(m.group(1)))
 
     for item in [
-        "S06-NOVATOS-V3","esta no es una clase de Python","Mini curso de Cypher en Aura Query",
-        "Consulta 1 — ver nodos Entidad","Consulta 4 — qué es el grado","Consulta 5 — qué es un hub",
-        "Consulta 6 — responder la pregunta profesional","Profundización — comparar conectividad",
+        "S06-NOVATOS-V3","S06-ZERO-TO-HERO-V1","esta no es una clase de Python",
+        "Laboratorio zero-to-hero","Primer nodo: `CREATE`, label, variable y propiedades",
+        "count(r) AS grado","count(DISTINCT e)","WITH v, count(r) AS grado",
+        "MERGE (e:EntidadDemo","CREATE CONSTRAINT demo_entidad_nit","SHOW CONSTRAINTS",
+        "UNWIND [","UNWIND $filas AS fila","Transferencia al caso real",
+        "Aplicación guiada — consultar los datos reales","Profundización — comparar conectividad",
         "Consulta guiada — contar procesos del par entidad–proveedor","AUTOR_ALIAS","s06_contexto_procesos.jsonl"
     ]:
         if item not in text: errors.append(f"Falta contenido principal {item!r}")
@@ -73,6 +76,16 @@ def main():
     ]:
         if bad in text: errors.append(f"Persistió interacción no apta para novatos: {bad!r}")
 
+    # Orden macro pedagógico.
+    order=[
+        text.find("## 4. Laboratorio zero-to-hero"),
+        text.find("## 5. Transferencia al caso real"),
+        text.find("## 6. Aplicación guiada — consultar los datos reales"),
+        text.find("## H2-R: la hipótesis relacional de esta sesión"),
+        text.find("## 7. Profundización — comparar conectividad"),
+    ]
+    if any(x<0 for x in order) or order!=sorted(order): errors.append("Orden pedagógico zero-to-hero roto")
+
     # Generadores Python que crean Cypher o seleccionan ejemplos deben estar plegados.
     for needle in ["nit_literal = str(nit_deseado)", "query_demo_top =", "query_visual_demo =", "Cinco proveedores de ejemplo"]:
         hits=[c for c in cells if c["cell_type"]=="code" and needle in src(c)]
@@ -80,11 +93,14 @@ def main():
             errors.append(f"Python de infraestructura visible: {needle!r}")
 
     aura=AURA.read_text(encoding="utf-8"); graph=GRAPH.read_text(encoding="utf-8"); checklist=CHECKLIST.read_text(encoding="utf-8")
-    for item in ["AuraDB desde cero","RETURN 1 AS conexion","Connection URI","User name","Password"]:
+    for item in ["AuraDB desde cero","RETURN 1 AS conexion","Connection URI","User name","Password","crear manualmente un nodo"]:
         if item not in aura: errors.append(f"Tutorial Aura incompleto: {item}")
-    for item in ["Mini curso visual de Cypher","¿Qué es el grado?","¿Qué es un hub?","proveedor compartido"]:
-        if item not in graph: errors.append(f"Mini curso visual incompleto: {item}")
-    for item in ["Checklist para no perderse","Mide el grado","Responde la pregunta","Entrega"]:
+    for item in [
+        "Neo4j y Cypher de cero al caso Compras Claras","Tu primer grafo de juguete",
+        "CREATE (e:EntidadDemo","SHOW CONSTRAINTS","UNWIND $filas AS fila","Pregunta profesional"
+    ]:
+        if item not in graph: errors.append(f"Curso visual incompleto: {item}")
+    for item in ["Checklist zero-to-hero","Crea tu primer nodo","Protege la identidad","Carga Compras Claras","Responde la pregunta profesional"]:
         if item not in checklist: errors.append(f"Checklist incompleto: {item}")
 
     secret_patterns=[r"neo4j\+s://[A-Za-z0-9.-]+\.databases\.neo4j\.io",r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",r"github_pat_[A-Za-z0-9_]{20,}"]
@@ -96,8 +112,8 @@ def main():
         for e in errors: print("[ERROR]",e)
         raise SystemExit(1)
     print(f"[OK] S06 válida: {len(cells)} celdas; datos {size_mb:.1f} MB")
-    print("[OK] Notebook, mini curso, checklist y tutorial Aura sincronizados")
-    print("[OK] Sin retos a ciegas; Python de infraestructura plegado; Cypher visible")
+    print("[OK] Notebook, curso zero-to-hero, checklist y tutorial Aura sincronizados")
+    print("[OK] Cypher se enseña antes de la carga real; H2-R queda al final")
     print("[INFO] CI no autentica Aura; esa prueba sigue siendo manual con credenciales propias")
 
 if __name__=="__main__": main()
