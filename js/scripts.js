@@ -97,11 +97,12 @@ window.addEventListener('DOMContentLoaded', event => {
                target="_blank" rel="noopener noreferrer">
                 <div class="course-emoji" aria-hidden="true">🧪</div>
                 <div class="course-category">Taller domiciliario 1 · S1–S6</div>
-                <div class="course-title">De datos crudos a una decisión explicable</div>
+                <div class="course-title">De 6 CSV a Atlas, Cassandra y Neo4j</div>
                 <p class="course-description">
-                    Proyecto en parejas paso a paso: perfilar fuentes, construir una regla SECOP,
-                    consultar evidencia documental, diseñar Cassandra query-first y desarrollar contexto relacional con Neo4j.
-                    Sin selección múltiple; Git/GitHub es opcional.
+                    Proyecto en parejas: integren 6.000 procesos SECOP, construyan su propio JSON,
+                    cárguenlo realmente en MongoDB Atlas y resuelvan consultas nuevas.
+                    Luego lleven la salida a un diseño Cassandra y a un análisis relacional con Neo4j.
+                    Git/GitHub es opcional.
                 </p>
             </a>`;
         courseRow.appendChild(card);
