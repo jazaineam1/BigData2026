@@ -3,7 +3,7 @@
 ## De datos crudos a una decisión explicable: SECOP + prensa + Cassandra + Neo4j
 
 **Curso:** Big Data — Maestría en Analítica de Datos  
-**Modalidad:** individual, para desarrollar en casa  
+**Modalidad:** en parejas, para desarrollar en casa  
 **Tiempo de referencia:** 6–8 horas de trabajo efectivo  
 **Valor:** 100 puntos  
 **Git/GitHub:** opcional; no suma ni resta puntos  
