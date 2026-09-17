@@ -44,8 +44,8 @@ window.addEventListener('DOMContentLoaded', event => {
         });
     });
 
-    // Las sesiones 5 y 6 se agregan aquí para no alterar el bloque histórico
-    // de sesiones futuras que conserva index.html.
+    // Las sesiones 5 y 6 y el primer taller de control se agregan aquí
+    // para no alterar el bloque histórico de sesiones futuras que conserva index.html.
     const courseRow = document.querySelector('#portfolio .row.g-4');
 
     if (courseRow && !document.querySelector('[data-session="5"]')) {
@@ -82,6 +82,26 @@ window.addEventListener('DOMContentLoaded', event => {
                 <p class="course-description">
                     Laura abre un proceso de S5 y construye su contexto real: entidad, procesos históricos
                     y proveedores. Compara pandas con Neo4j, documenta el límite y exporta texto para la siguiente sesión.
+                </p>
+            </a>`;
+        courseRow.appendChild(card);
+    }
+
+    if (courseRow && !document.querySelector('[data-workshop="control-1"]')) {
+        const card = document.createElement('div');
+        card.className = 'col-lg-4 col-md-6';
+        card.setAttribute('data-workshop', 'control-1');
+        card.innerHTML = `
+            <a class="course-card"
+               href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb"
+               target="_blank" rel="noopener noreferrer">
+                <div class="course-emoji" aria-hidden="true">🧪</div>
+                <div class="course-category">Taller de Control 1 · S1–S6</div>
+                <div class="course-title">Control determinístico y autocorregible</div>
+                <p class="course-description">
+                    100 puntos verificables: fundamentos, ingesta, MongoDB, bandeja S5,
+                    diseño query-first en Cassandra y contexto relacional con Neo4j.
+                    Git/GitHub es opcional y la entrega se genera desde Colab.
                 </p>
             </a>`;
         courseRow.appendChild(card);
