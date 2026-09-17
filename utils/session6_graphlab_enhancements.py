@@ -111,7 +111,7 @@ def graph_props(cells):
     t=t.replace("    p.valor = fila.precio_base,","    p.precio_base = fila.precio_base,").replace("MERGE (p)-[:ADJUDICADO_A]->(v)","MERGE (p)-[a:ADJUDICADO_A]->(v)\nSET a.valor_adjudicado = fila.valor_adjudicado")
     put(cells[i],t)
     for c in cells:
-        if "p.valor AS precio_base" in s(c): put(c,s(c).replace("p.valor AS precio_base","p.precio_base AS precio_base"))
+        if "p.valor AS precio_base" in s(c): put(c,s(c).replace("p.valor AS precio_base","p.precio_base AS precio_base").replace("ORDER BY entidad, valor DESC","ORDER BY entidad, precio_base DESC"))
 
 def graphlab():
     return [
