@@ -9,12 +9,14 @@ on:
       - utils/build_session6_notebook.py
       - utils/validate_session6.py
       - utils/validate_session6_graphlab_runtime.py
+      - utils/validate_session6_degree_visual.py
       - utils/check_session6_execution.py
       - utils/build_session6_notebook_aprender_haciendo.py
       - utils/validate_session6_aprender_haciendo.py
       - utils/notebook_checks.py
       - utils/apply_session6_graphlab_upgrade.py
       - utils/session6_graphlab_enhancements.py
+      - utils/upgrade_session6_degree_visual.py
       - assets/diagrams/session6/**
       - assets/tutoriales/s06-laboratorio-guiado.html
       - assets/tutoriales/neo4j-aura-s06-paso-a-paso.html
@@ -68,6 +70,7 @@ jobs:
               raise SystemExit("No se encontró el punto de parche del checklist Graph Lab")
           path.write_text(text, encoding="utf-8")
           PY
+          python utils/upgrade_session6_degree_visual.py
 
       - name: Comprobar sintaxis de generadores
         run: |
@@ -76,8 +79,10 @@ jobs:
             utils/build_session6_notebook.py \
             utils/validate_session6.py \
             utils/validate_session6_graphlab_runtime.py \
+            utils/validate_session6_degree_visual.py \
             utils/session6_graphlab_enhancements.py \
-            utils/apply_session6_graphlab_upgrade.py
+            utils/apply_session6_graphlab_upgrade.py \
+            utils/upgrade_session6_degree_visual.py
 
       - name: Construir extracto relacional desde S5 y SECOP
         run: python utils/build_session6_graph_data.py
@@ -91,6 +96,7 @@ jobs:
         run: |
           python utils/validate_session6.py
           python utils/validate_session6_graphlab_runtime.py
+          python utils/validate_session6_degree_visual.py
           python utils/validate_session6_aprender_haciendo.py
           python utils/check_session6_execution.py
 
