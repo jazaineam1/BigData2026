@@ -64,7 +64,7 @@ def main() -> None:
 
     graph_pos = notebook_text.find("## 5. Graph Lab")
     degree_pos = notebook_text.find("### Grado ≠ entidades conectadas")
-    h2r_pos = notebook_text.find("Contrato de resultado: primero pandas")
+    h2r_pos = notebook_text.find("## 6. Contrato de resultado: ahora sí, primero pandas")
     if min(graph_pos, degree_pos, h2r_pos) < 0 or not (graph_pos < degree_pos < h2r_pos):
         errors.append("El grado visual debe enseñarse dentro de Graph Lab y antes de H2-R")
 
