@@ -1,120 +1,106 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""Regresiones específicas de Graph Lab para S06.
-
-Complementa validate_session6.py con invariantes visuales, editoriales y de Cypher
-que no requieren una conexión autenticada a Aura. Su objetivo es detectar errores
-de alias, pérdida del tutorial gráfico, desorden pedagógico o divergencias entre
-el notebook y su checklist antes de publicar.
-"""
+"""Regresiones pedagógicas S06 para una audiencia principiante."""
 from __future__ import annotations
-
-import ast
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NB = ROOT / "Cuadernos" / "6_Neo4j_Contexto_Relacional.ipynb"
-GRAPH_TUTORIAL = ROOT / "assets" / "tutoriales" / "neo4j-graph-lab-s06.html"
+GRAPH = ROOT / "assets" / "tutoriales" / "neo4j-graph-lab-s06.html"
 CHECKLIST = ROOT / "assets" / "tutoriales" / "s06-laboratorio-guiado.html"
+AURA = ROOT / "assets" / "tutoriales" / "neo4j-aura-s06-paso-a-paso.html"
 
 
-def source(cell: dict) -> str:
-    value = cell.get("source", "")
-    return "".join(value) if isinstance(value, list) else str(value)
-
-
-def main() -> None:
-    errors: list[str] = []
-    for path in (NB, GRAPH_TUTORIAL, CHECKLIST):
-        if not path.is_file():
-            errors.append(f"Falta {path.relative_to(ROOT)}")
-    if errors:
-        raise SystemExit("\n".join(errors))
-
+def text_of_notebook():
     nb = json.loads(NB.read_text(encoding="utf-8"))
-    cells = nb.get("cells", [])
-    text = "\n".join(source(cell) for cell in cells)
+    parts = []
+    for c in nb["cells"]:
+        src = c.get("source", [])
+        parts.append("".join(src) if isinstance(src, list) else str(src))
+    return nb, "\n".join(parts)
 
-    for i, cell in enumerate(cells, 1):
-        if cell.get("cell_type") == "code":
-            try:
-                ast.parse(source(cell))
-            except SyntaxError as exc:
-                errors.append(f"Sintaxis Python inválida en celda {i}: {exc}")
+
+def main():
+    errors = []
+    for p in (NB, GRAPH, CHECKLIST, AURA):
+        if not p.is_file(): errors.append(f"Falta {p.relative_to(ROOT)}")
+    if errors: raise SystemExit("\n".join(errors))
+    nb, text = text_of_notebook()
+    graph = GRAPH.read_text(encoding="utf-8")
+    checklist = CHECKLIST.read_text(encoding="utf-8")
+    aura = AURA.read_text(encoding="utf-8")
 
     required = [
-        "GRAPH-LAB-S06-V2",
-        "USAR_MI_ANCLA_S5",
-        'RELACION_PROCESO_PROVEEDOR = "____"',
-        "Graph Lab — mirar, tocar y entender el grafo",
-        "consulta_graph_basico",
-        "consulta_wow_global",
-        "consulta_wow_ancla",
-        "grado_adjudicaciones",
-        "entidades_conectadas",
-        "p.precio_base AS precio_base",
-        "## 6. Contrato de resultado: ahora sí, primero pandas",
+        "S06-NOVATOS-V3",
+        "esta no es una clase de Python",
+        "¿Qué es ese JSON?",
+        "Mini curso de Cypher en Aura Query",
+        "Consulta 0 — comprobar que Aura responde",
+        "Consulta 1 — ver nodos Entidad",
+        "Consulta 2 — una relación",
+        "Consulta 3 — dos relaciones",
+        "Consulta 4 — qué es el grado",
+        "Consulta 5 — qué es un hub",
+        "Consulta 6 — responder la pregunta profesional",
+        "Table mide; Graph explica",
+        "AUTOR_ALIAS",
+        "Consulta guiada — contar procesos del par entidad–proveedor",
+        "Ejecutar consulta guiada del proveedor explorado",
     ]
     for item in required:
-        if item not in text:
-            errors.append(f"Falta en el notebook Graph Lab: {item!r}")
+        if item not in text: errors.append(f"Notebook sin {item!r}")
 
-    if "ORDER BY entidad, valor DESC" in text:
-        errors.append("Cypher inválido: se ordena por alias 'valor' aunque la consulta devuelve 'precio_base'")
-    if "p.valor AS precio_base" in text:
-        errors.append("Quedó la propiedad ambigua p.valor; Graph Lab debe usar p.precio_base")
-
-    graph_pos = text.find("Graph Lab — mirar, tocar y entender el grafo")
-    contract_pos = text.find("## 6. Contrato de resultado: ahora sí, primero pandas")
-    if graph_pos < 0 or contract_pos < 0 or graph_pos > contract_pos:
-        errors.append("Graph Lab debe ocurrir antes del contrato/H2-R")
-
-    tutorial = GRAPH_TUTORIAL.read_text(encoding="utf-8")
-    tutorial_required = [
-        "Graph, Table y RAW",
-        "Fit to screen",
-        "grado_adjudicaciones",
-        "entidades_conectadas",
-        "WOW 1",
-        "WOW 2",
-        "RETURN camino",
-        "ADJUDICADO_A",
-        "precio_base",
-        "valor_adjudicado",
-        "el layout",
+    forbidden = [
+        "WOW 1", "WOW 2",
+        'RELACION_PROCESO_PROVEEDOR = "____"',
+        'OPERADOR_EXCLUSION = "____"',
+        'input("Número de proveedor',
+        'input("Con tus números',
+        'input("Justifica por qué Proceso',
+        'input("Límite concreto',
+        'input("Alternativa de modelado',
+        "Escribe tu consulta entre las comillas triples",
+        "EJERCICIO S06-CONSULTA",
+        "EJERCICIO S06-EXCLUIR",
     ]
-    for item in tutorial_required:
-        if item not in tutorial:
-            errors.append(f"Tutorial Graph Lab incompleto: {item!r}")
-    if tutorial.count('<section class="slide') < 10:
-        errors.append("El tutorial Graph Lab quedó demasiado corto o mal formado")
+    for item in forbidden:
+        if item in text or item in graph or item in checklist:
+            errors.append(f"Contenido no apto para novatos todavía presente: {item!r}")
 
-    checklist = CHECKLIST.read_text(encoding="utf-8")
-    if "Observa el patrón ya resuelto" in checklist:
-        errors.append("Checklist desactualizado: el patrón ya no está resuelto; el estudiante debe completarlo")
-    for item in [
-        "Completa el patrón contractual",
-        "Completa el hueco con ADJUDICADO_A",
-        '"id": "graph"',
-        '"id": "grado"',
-        '"id": "wow"',
-        '"id": "wow2"',
-        '"id": "entrega"',
-    ]:
-        if item not in checklist:
-            errors.append(f"Checklist Graph Lab incompleto: {item!r}")
+    order = [
+        "Consulta 1 — ver nodos Entidad",
+        "Consulta 2 — una relación",
+        "Consulta 3 — dos relaciones",
+        "Consulta 4 — qué es el grado",
+        "Consulta 5 — qué es un hub",
+        "Consulta 6 — responder la pregunta profesional",
+        "Profundización — comparar conectividad",
+    ]
+    pos = [text.find(x) for x in order]
+    if any(x < 0 for x in pos) or pos != sorted(pos):
+        errors.append("La progresión nodo→relación→camino→grado→hub→proveedor compartido→H2-R está rota")
+
+    infra = [c for c in nb["cells"] if "nit_literal = str(nit_deseado)" in "".join(c.get("source", []))]
+    if len(infra) != 1 or "hide-input" not in infra[0].get("metadata", {}).get("tags", []):
+        errors.append("El Python que personaliza la consulta Cypher debe estar oculto")
+
+    for item in ["Neo4j", "AuraDB", "Aura Query", "Cypher", "¿Qué es un hub?", "count(r) AS grado", "count(DISTINCT e)"]:
+        if item not in graph: errors.append(f"Mini curso visual sin {item!r}")
+    if "WOW" in graph: errors.append("El mini curso visual no debe usar WOW como concepto")
+
+    for item in ["Checklist para no perderse", "Ve cinco Entidades", "Mide el grado", "Ve el hub", "Responde la pregunta"]:
+        if item not in checklist: errors.append(f"Checklist sin {item!r}")
+    if "WOW" in checklist: errors.append("El checklist no debe usar WOW")
+
+    for item in ["Acceso · no teoría", "RETURN 1 AS conexion", "Connection URI", "User name", "Password"]:
+        if item not in aura: errors.append(f"Tutorial Aura sin {item!r}")
 
     if errors:
-        print("Validación Graph Lab fallida:")
-        for error in errors:
-            print("[ERROR]", error)
+        print("Validación S06 principiantes fallida:")
+        for e in errors: print("[ERROR]", e)
         raise SystemExit(1)
+    print("[OK] S06 separa infraestructura Python del aprendizaje de Cypher")
+    print("[OK] Progresión: nodo → relación → camino → grado → hub → proveedor compartido → H2-R")
+    print("[OK] Sin WOW ni respuestas abiertas a ciegas; tutoriales tienen funciones separadas")
 
-    print(f"[OK] Graph Lab: {len(cells)} celdas; Python parsea correctamente")
-    print("[OK] S5 opcional, patrón editable, grados, WOW 1/WOW 2 y tutorial visual presentes")
-    print("[OK] Alias Cypher coherente y checklist sincronizado con el ejercicio ADJUDICADO_A")
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()

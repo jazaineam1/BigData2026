@@ -1,89 +1,10 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>S06 · AuraDB desde cero</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--ink:#172019;--green:#123f2b;--green2:#175c3c;--mint:#e3efe6;--cream:#faf7f0;--line:#e2dcc8;--muted:#5c6b63;--warn:#fff5dd;--bad:#fbe9e5}
-*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:"IBM Plex Sans",sans-serif;line-height:1.55}main{max-width:900px;margin:auto;padding:24px 16px 80px}h1,h2{font-family:"Fraunces",serif;color:var(--green)}h1{font-size:clamp(32px,5vw,48px);line-height:1.08}h2{font-size:25px}code,pre{font-family:"IBM Plex Mono",monospace}pre{background:#0b241c;color:#eef7f0;padding:14px;border-radius:11px;overflow:auto}.hero,.step{background:#fff;border:1px solid var(--line);border-radius:17px;padding:20px;margin:14px 0}.tag{display:inline-block;background:var(--mint);color:var(--green2);font-size:12px;font-weight:700;border-radius:999px;padding:5px 10px}.call{background:var(--mint);border-left:4px solid var(--green2);padding:12px 14px;border-radius:8px}.warn{background:var(--warn);padding:12px 14px;border-radius:8px}.bad{background:var(--bad);padding:12px 14px;border-radius:8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mock{border:1px solid var(--line);border-radius:11px;padding:13px;background:#fbfcfb}.mock b{display:block;margin-bottom:8px}.field{border:1px solid #ccd6d0;border-radius:7px;padding:9px;margin:6px 0;font-family:"IBM Plex Mono",monospace;font-size:12px}.button{display:inline-block;background:var(--green2);color:#fff;border-radius:7px;padding:8px 12px;font-weight:700;margin-top:8px}.mini{font-size:13px;color:var(--muted)}@media(max-width:700px){.grid{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<main>
-<section class="hero">
-<div class="tag">S06 · conexión</div>
-<h1>AuraDB desde cero</h1>
-<p>Este tutorial solo responde una pregunta: <b>¿cómo creo o abro una instancia Neo4j en Aura y verifico que funciona?</b></p>
-<div class="call"><b>Cuatro nombres:</b> Neo4j = motor de grafos · AuraDB = servicio en la nube · Cypher = lenguaje de consulta · Aura Query = editor donde escribes Cypher.</div>
-</section>
-
-<section class="step">
-<h2>1. Entra a Aura Console</h2>
-<ol>
-<li>Abre <a href="https://console.neo4j.io/" target="_blank" rel="noopener">Aura Console ↗</a>.</li>
-<li>Inicia sesión.</li>
-<li>Elige <b>AuraDB</b>, no AuraDS.</li>
-</ol>
-<div class="mock"><b>Qué buscas en la pantalla</b><div class="field">Producto: AuraDB</div><div class="field">Instancias</div></div>
-</section>
-
-<section class="step">
-<h2>2. Crea o reutiliza una instancia</h2>
-<p>Si ya tienes una instancia de práctica, úsala. Si no, crea una instancia AuraDB disponible para tu cuenta. Nombre sugerido:</p>
-<pre>compras-claras-s06</pre>
-<div class="warn"><b>Hoy no necesitas Graph Data Science ni configuraciones avanzadas.</b> El objetivo es tener Neo4j disponible para consultas Cypher básicas.</div>
-</section>
-
-<section class="step">
-<h2>3. Guarda tres datos</h2>
-<p>Al crear o abrir la instancia necesitarás estos datos para Colab:</p>
-<div class="grid">
-<div class="mock"><b>URI</b><div class="field">neo4j+s://...</div></div>
-<div class="mock"><b>Usuario</b><div class="field">neo4j</div></div>
-<div class="mock"><b>Contraseña</b><div class="field">••••••••</div></div>
-<div class="mock"><b>Nombre de instancia</b><div class="field">compras-claras-s06</div></div>
-</div>
-<p class="mini">No publiques la contraseña en GitHub ni la pegues en una celda visible.</p>
-</section>
-
-<section class="step">
-<h2>4. Abre Aura Query</h2>
-<p>Dentro de la instancia abre <b>Query</b>. Ese es el lugar donde escribirás Cypher.</p>
-<pre>RETURN 1 AS conexion</pre>
-<p>Presiona <b>Run</b>.</p>
-<div class="call"><b>Resultado esperado:</b> en Table aparece una columna <code>conexion</code> con el valor <code>1</code>. Si eso ocurre, Neo4j está respondiendo.</div>
-</section>
-
-<section class="step">
-<h2>5. Vuelve a Colab y conecta el Driver</h2>
-<p>En el cuaderno S06 selecciona <b>Aura</b> como modo de ejecución. La celda te pedirá URI, usuario y contraseña. El código de conexión está oculto porque no es el contenido que debes memorizar.</p>
-<div class="bad"><b>No subas el JSON de S5 a Aura.</b> El archivo <code>s05_ancla_s06.json</code> se usa en Colab para recuperar el proceso y la entidad elegidos. Aura recibe los datos del grafo mediante las celdas de carga del cuaderno.</div>
-</section>
-
-<section class="step">
-<h2>6. ¿Qué hace Colab y qué hace Aura?</h2>
-<div class="grid">
-<div class="mock"><b>Colab</b><p>Lee CSV/JSON, prepara datos y usa el Driver.</p></div>
-<div class="mock"><b>AuraDB / Neo4j</b><p>Guarda nodos/relaciones y ejecuta Cypher.</p></div>
-</div>
-<div class="call"><b>Flujo:</b> Colab → Driver de Neo4j → AuraDB → Neo4j.</div>
-</section>
-
-<section class="step">
-<h2>7. Cuando ya conectó</h2>
-<p>Regresa al cuaderno y ejecuta las celdas de carga. Luego abre el <b>Mini curso visual de Cypher</b>. Allí aprenderás <code>MATCH</code>, relaciones, caminos, grado y hub.</p>
-<p><a href="neo4j-graph-lab-s06.html" target="_blank" rel="noopener">Abrir mini curso visual de Cypher ↗</a></p>
-</section>
-
-<section class="hero">
-<h2>Prueba de éxito</h2>
-<p>Antes de continuar debes poder decir:</p>
-<blockquote>“AuraDB es donde está mi instancia Neo4j; Cypher es el lenguaje; Aura Query es donde ejecuto las consultas. Ya comprobé <code>RETURN 1 AS conexion</code>.”</blockquote>
-</section>
-</main>
-</body>
-</html>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>S06 · AuraDB desde cero</title><style>body{margin:0;background:#faf7f0;color:#172019;font:16px/1.55 Arial,sans-serif}.wrap{max-width:900px;margin:auto;padding:24px}h1,h2{color:#123f2b}.card{background:white;border:1px solid #e2dcc8;border-radius:14px;padding:18px;margin:14px 0}.tag{display:inline-block;background:#e3efe6;color:#175c3c;padding:5px 10px;border-radius:999px;font-weight:700;font-size:12px}pre{background:#0b241c;color:#eff8f1;padding:14px;border-radius:10px;overflow:auto}.ok{background:#eef8f1;border-left:4px solid #175c3c;padding:10px}.warn{background:#fff7dc;border-left:4px solid #c9a227;padding:10px}</style></head><body><main class="wrap"><span class="tag">Acceso · no teoría</span><h1>AuraDB desde cero</h1><p>Este tutorial solo sirve para entrar al servicio y dejarlo listo. La teoría y Cypher están en el Mini curso visual.</p>
+<div class="card"><h2>1. Qué es cada cosa</h2><p><b>Neo4j</b> = motor. <b>AuraDB</b> = servicio en la nube. <b>Aura Query</b> = pantalla para consultar. <b>Cypher</b> = lenguaje de consulta.</p></div>
+<div class="card"><h2>2. Entra a Aura</h2><p>Abre la consola de Neo4j Aura con tu cuenta. Crea o reutiliza una instancia de práctica de <b>AuraDB</b>. No necesitas entender todavía nodos ni relaciones.</p></div>
+<div class="card"><h2>3. Guarda tres datos</h2><p>Necesitas exactamente: <b>Connection URI</b>, <b>User name</b> y <b>Password</b>.</p><div class="warn">La contraseña es privada. No la pegues en el notebook como texto visible ni la subas a GitHub.</div></div>
+<div class="card"><h2>4. Abre Query</h2><p>En tu instancia abre la herramienta <b>Query</b>. Verás un editor y un botón Run.</p></div>
+<div class="card"><h2>5. Primera prueba</h2><pre>RETURN 1 AS conexion</pre><p>Presiona <b>Run</b>. Abre <b>Table</b>.</p><div class="ok">Resultado esperado: una columna <code>conexion</code> y el valor <code>1</code>.</div></div>
+<div class="card"><h2>6. Vuelve a Colab</h2><p>En la celda de conexión elige <b>AURA</b>. Copia URI y usuario; escribe la contraseña cuando Colab la solicite de forma oculta.</p></div>
+<div class="card"><h2>7. Si no puedes usar Aura</h2><p>Elige <b>RESPALDO</b>. Podrás continuar con pandas, pero el cuaderno indicará claramente que la ejecución real de Cypher queda pendiente.</p></div>
+<div class="card"><h2>8. Qué sigue</h2><p>Regresa al cuaderno y abre <b>Mini curso de Cypher en Aura Query</b>. Allí empezarás por <code>MATCH (e:Entidad)</code>; no saltes directamente a hubs o caminos largos.</p></div>
+</main></body></html>
