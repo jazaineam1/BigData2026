@@ -3,6 +3,10 @@
 """Reordena S06 para que ningún concepto avanzado aparezca antes de enseñarse."""
 from __future__ import annotations
 
+import base64
+import json
+import re
+
 
 def src(cell):
     value = cell.get("source", "")
@@ -23,6 +27,29 @@ def find(cells, needle):
 def replace_once(cells, old, new):
     i = find(cells, old)
     put(cells[i], src(cells[i]).replace(old, new, 1))
+
+
+def renumber_questions(cells):
+    pattern = re.compile(r'pregunta_codificada\("([^\"]+)"\)')
+    question_cells = []
+    for cell in cells:
+        if cell.get("cell_type") != "code":
+            continue
+        m = pattern.search(src(cell))
+        if m:
+            question_cells.append((cell, m))
+
+    total = len(question_cells)
+    for numero, (cell, _) in enumerate(question_cells, 1):
+        text = src(cell)
+        m = pattern.search(text)
+        payload = json.loads(base64.b64decode(m.group(1)).decode("utf-8"))
+        payload["numero"] = numero
+        payload["total"] = total
+        token = base64.b64encode(json.dumps(payload, ensure_ascii=False).encode("utf-8")).decode("ascii")
+        text = text[:m.start(1)] + token + text[m.end(1):]
+        text = re.sub(r'#@title Autoevaluación \d+', f'#@title Autoevaluación {numero}', text, count=1)
+        put(cell, text)
 
 
 def reorder_zero_to_hero(cells):
@@ -57,4 +84,6 @@ def reorder_zero_to_hero(cells):
     if any("## 8. Ejemplo guiado — explorar un proveedor" in src(c) for c in cells):
         replace_once(cells, "## 8. Ejemplo guiado — explorar un proveedor", "## 9. Ejemplo guiado — explorar un proveedor")
 
+    # 4) Al mover preguntas entre bloques, sus números también deben seguir el nuevo orden.
+    renumber_questions(cells)
     return cells
