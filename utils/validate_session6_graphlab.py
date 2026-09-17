@@ -70,7 +70,7 @@ def main() -> None:
         'OPERADOR_EXCLUSION = "____"',
         "hitos/s06/",
         "s06_contexto_procesos.jsonl",
-        "Abre el commit, no solo el archivo",
+        "Abre el **commit**, no solo el archivo",
     ]
     for item in required:
         if item not in text:
@@ -78,14 +78,16 @@ def main() -> None:
 
     if "p.valor = fila.precio_base" in text:
         errors.append("La propiedad de Proceso no debe llamarse valor; usa precio_base")
-    if text.find("# 4. Graph Lab") > text.find("# 5. Ahora sí: H2-R y el contrato pandas"):
+    graph_pos = text.find("# 4. Graph Lab")
+    h2_pos = text.find("# 5. Ahora sí: H2-R y el contrato pandas")
+    if graph_pos < 0 or h2_pos < 0 or graph_pos > h2_pos:
         errors.append("Graph Lab debe aparecer antes de H2-R")
 
     tutorial = TUTORIAL.read_text(encoding="utf-8")
     tutorial_required = [
         "Graph", "Table", "RAW", "Fit to screen", "WOW 1", "WOW 2",
         "Grado directo", "ADJUDICADO_A", "RETURN camino", "grado_adjudicaciones",
-        "entidades_conectadas", "17 de septiembre de 2026",
+        "Entidades conectadas", "dos saltos", "17 de septiembre de 2026",
     ]
     for item in tutorial_required:
         if item not in tutorial:
