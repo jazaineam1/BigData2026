@@ -47,7 +47,6 @@ jobs:
           from pathlib import Path
           path = Path("utils/session6_graphlab_enhancements.py")
           text = path.read_text(encoding="utf-8")
-
           old_alias = 'put(c,s(c).replace("p.valor AS precio_base","p.precio_base AS precio_base"))'
           new_alias = 'put(c,s(c).replace("p.valor AS precio_base","p.precio_base AS precio_base").replace("ORDER BY entidad, valor DESC","ORDER BY entidad, precio_base DESC"))'
           if old_alias in text:
@@ -57,17 +56,9 @@ jobs:
               print("[OK] Alias Graph Lab ya estaba corregido")
           else:
               raise SystemExit("No se encontró el punto de parche del alias Graph Lab")
-
           old_checklist = 'html=p.read_text(encoding="utf-8"); data=json.loads(html.split("const DATA = ",1)[1].split(";\\nconst DATA2",1)[0]); pasos=data[0]["pasos"]\n    ids={"ancla","graph","grado","wow","wow2","entrega"}'
-          new_checklist = '''html=p.read_text(encoding="utf-8"); data=json.loads(html.split("const DATA = ",1)[1].split(";\\nconst DATA2",1)[0]); pasos=data[0]["pasos"]
-    for paso in pasos:
-        if paso.get("id")=="patron":
-            paso["tipo"]="decide"
-            paso["titulo"]="Completa el patrón contractual"
-            paso["explicacion"]="El ID del proceso identifica un nodo; el tipo de relación identifica la flecha."
-            paso["instruccion"]="Completa el hueco con ADJUDICADO_A y ejecuta la validación antes de continuar."
-            paso["evidencia"]="Patrón correcto: ADJUDICADO_A expresa una adjudicación observada."
-    ids={"ancla","graph","grado","wow","wow2","entrega"}'''
+          checklist_lines = ['html=p.read_text(encoding="utf-8"); data=json.loads(html.split("const DATA = ",1)[1].split(";\\nconst DATA2",1)[0]); pasos=data[0]["pasos"]', '    for paso in pasos:', '        if paso.get("id")=="patron":', '            paso["tipo"]="decide"', '            paso["titulo"]="Completa el patrón contractual"', '            paso["explicacion"]="El ID del proceso identifica un nodo; el tipo de relación identifica la flecha."', '            paso["instruccion"]="Completa el hueco con ADJUDICADO_A y ejecuta la validación antes de continuar."', '            paso["evidencia"]="Patrón correcto: ADJUDICADO_A expresa una adjudicación observada."', '    ids={"ancla","graph","grado","wow","wow2","entrega"}']
+          new_checklist = "\n".join(checklist_lines)
           if old_checklist in text:
               text = text.replace(old_checklist, new_checklist)
               print("[OK] Checklist alineado con el ejercicio editable ADJUDICADO_A")
@@ -75,7 +66,6 @@ jobs:
               print("[OK] Checklist del patrón ya estaba alineado")
           else:
               raise SystemExit("No se encontró el punto de parche del checklist Graph Lab")
-
           path.write_text(text, encoding="utf-8")
           PY
 
