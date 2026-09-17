@@ -8,6 +8,7 @@ on:
       - utils/build_session6_graph_data.py
       - utils/build_session6_notebook.py
       - utils/validate_session6.py
+      - utils/validate_session6_graphlab_runtime.py
       - utils/check_session6_execution.py
       - utils/build_session6_notebook_aprender_haciendo.py
       - utils/validate_session6_aprender_haciendo.py
@@ -39,10 +40,34 @@ jobs:
         run: python -m pip install -q pandas ipython nbformat
 
       - name: Aplicar mejora Graph Lab al generador
-        run: python utils/apply_session6_graphlab_upgrade.py
+        shell: bash
+        run: |
+          python utils/apply_session6_graphlab_upgrade.py
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("utils/session6_graphlab_enhancements.py")
+          text = path.read_text(encoding="utf-8")
+          old = 'put(c,s(c).replace("p.valor AS precio_base","p.precio_base AS precio_base"))'
+          new = 'put(c,s(c).replace("p.valor AS precio_base","p.precio_base AS precio_base").replace("ORDER BY entidad, valor DESC","ORDER BY entidad, precio_base DESC"))'
+          if old in text:
+              text = text.replace(old, new)
+              path.write_text(text, encoding="utf-8")
+              print("[OK] Corregido alias de ordenamiento del vecindario Graph Lab")
+          elif "ORDER BY entidad, precio_base DESC" in text:
+              print("[OK] Alias Graph Lab ya estaba corregido")
+          else:
+              raise SystemExit("No se encontró el punto de parche del alias Graph Lab")
+          PY
 
       - name: Comprobar sintaxis de generadores
-        run: python -m py_compile utils/build_session6_graph_data.py utils/build_session6_notebook.py utils/validate_session6.py utils/session6_graphlab_enhancements.py utils/apply_session6_graphlab_upgrade.py
+        run: |
+          python -m py_compile \
+            utils/build_session6_graph_data.py \
+            utils/build_session6_notebook.py \
+            utils/validate_session6.py \
+            utils/validate_session6_graphlab_runtime.py \
+            utils/session6_graphlab_enhancements.py \
+            utils/apply_session6_graphlab_upgrade.py
 
       - name: Construir extracto relacional desde S5 y SECOP
         run: python utils/build_session6_graph_data.py
@@ -55,13 +80,14 @@ jobs:
       - name: Validar datos, notebook y tutorial
         run: |
           python utils/validate_session6.py
+          python utils/validate_session6_graphlab_runtime.py
           python utils/validate_session6_aprender_haciendo.py
           python utils/check_session6_execution.py
 
       - name: Publicar artefactos generados
         shell: bash
         run: |
-          CAMBIOS="$(git status --porcelain -- utils/build_session6_notebook.py utils/session6_graphlab_enhancements.py Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json assets/tutoriales/s06-laboratorio-guiado.html)"
+          CAMBIOS="$(git status --porcelain -- utils/build_session6_notebook.py utils/session6_graphlab_enhancements.py Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json assets/tutoriales/s06-laboratorio-guiado.html assets/tutoriales/neo4j-graph-lab-s06.html)"
           if [ -z "$CAMBIOS" ]; then
             echo 'S6 ya estaba sincronizada.'
             exit 0
@@ -69,6 +95,6 @@ jobs:
           printf '%s\n' "$CAMBIOS"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add utils/build_session6_notebook.py utils/session6_graphlab_enhancements.py Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json assets/tutoriales/s06-laboratorio-guiado.html
+          git add utils/build_session6_notebook.py utils/session6_graphlab_enhancements.py Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json assets/tutoriales/s06-laboratorio-guiado.html assets/tutoriales/neo4j-graph-lab-s06.html
           git commit -m 'Mejora sesión 6 con Graph Lab y visualización Aura'
           git push
