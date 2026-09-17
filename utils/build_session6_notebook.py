@@ -23,6 +23,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from utils.make_notebook import code, md, save, validate
+from utils.session6_graphlab_enhancements import enhance_cells, enhance_checklist
 
 OUTPUT = "Cuadernos/6_Neo4j_Contexto_Relacional.ipynb"
 WEB = "https://jazaineam1.github.io/BigData2026"
@@ -1219,6 +1220,8 @@ else:
     ]
 
 
+    cells = enhance_cells(cells)
+
     # Numeración calculada: una sola pregunta por celda, payload oculto al vistazo.
     preguntas = [c for c in cells if c["cell_type"] == "code" and "pregunta_codificada(\"" in "".join(c["source"]) and "def pregunta_codificada" not in "".join(c["source"])]
     for numero, celda in enumerate(preguntas, 1):
@@ -1280,6 +1283,7 @@ def main():
     validate(cells)
     save(cells, OUTPUT)
     build_checklist(cells)
+    enhance_checklist(cells)
     print(f"[OK] S6 generada: {len(cells)} celdas")
 
 

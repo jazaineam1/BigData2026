@@ -112,6 +112,15 @@ const DATA = [
         "evidencia": "Filas disponibles: 2109; huella SHA256; ancla pedagógica versionada incluida en S6."
       },
       {
+        "id": "ancla",
+        "tipo": "decide",
+        "titulo": "Declara el origen del ancla",
+        "celda": "celda 9",
+        "explicacion": "Distingues continuidad real de respaldo.",
+        "instruccion": "Usa tu JSON de S5 si lo conservaste; si no, declara respaldo.",
+        "evidencia": "Origen del ancla explícito."
+      },
+      {
         "id": "historial",
         "tipo": "entiende",
         "titulo": "Lee el historial y la identidad",
@@ -133,7 +142,7 @@ const DATA = [
         "id": "contrato",
         "tipo": "ejecuta",
         "titulo": "Calcula el contrato pandas y H2-R",
-        "celda": "celda 30",
+        "celda": "celda 58",
         "explicacion": "Fijas una respuesta comparable antes de usar Neo4j.",
         "instruccion": "Ejecuta y explica máximo y mediana; identifica al proveedor que determina H2-R. Responde la pregunta de mediana.",
         "evidencia": "Entidades de referencia: 28; Mediana de referencia (candidatas S5): 21.0; Proveedor que determina H2-R; tabla de hasta 10 proveedores."
@@ -142,7 +151,7 @@ const DATA = [
         "id": "aura",
         "tipo": "externo",
         "titulo": "Conecta Aura o declara el respaldo",
-        "celda": "celda 37",
+        "celda": "celda 33",
         "explicacion": "Distingues ejecución del motor real de continuidad con pandas.",
         "instruccion": "Si Colab reinició, ejecuta RECUPERACIÓN S06. Sigue el <a href='neo4j-aura-s06-paso-a-paso.html' target='_blank' rel='noopener'>tutorial Aura</a>; elige RESPALDO si no puedes conectar.",
         "evidencia": "Conexión Neo4j verificada. O RESPALDO pandas: Neo4j y CRUD pendientes; no se declarará equivalencia comprobada."
@@ -151,7 +160,7 @@ const DATA = [
         "id": "carga",
         "tipo": "ejecuta",
         "titulo": "Crea restricciones y carga adjudicaciones válidas",
-        "celda": "celda 42",
+        "celda": "celda 38",
         "explicacion": "Los 77 candidatos sin proveedor no deben producir adjudicaciones inventadas.",
         "instruccion": "Ejecuta restricciones y carga. Responde la pregunta UNWIND.",
         "evidencia": "Carga preparada: 2109 filas; 2032 adjudicaciones válidas. En Aura, también Carga lista; en respaldo, carga pendiente."
@@ -160,16 +169,52 @@ const DATA = [
         "id": "repetir",
         "tipo": "ejecuta",
         "titulo": "Repite la carga y compara conteos",
-        "celda": "celda 43",
+        "celda": "celda 39",
         "explicacion": "Un reinicio no debe multiplicar nodos y relaciones.",
         "instruccion": "Ejecuta la comprobación de repetición sin borrar los datos de tu instancia.",
         "evidencia": "Carga repetida sin crecimiento: True y los conteos; o Idempotencia en Neo4j: PENDIENTE."
       },
       {
+        "id": "graph",
+        "tipo": "externo",
+        "titulo": "Abre el resultado como grafo",
+        "celda": "celda 49",
+        "explicacion": "Graph y Table son dos lecturas del mismo resultado.",
+        "instruccion": "Ejecuta en Aura, usa Graph/Fit y revisa propiedades de nodos y relaciones.",
+        "evidencia": "Explicas Entidad → Proceso → Proveedor."
+      },
+      {
+        "id": "grado",
+        "tipo": "entiende",
+        "titulo": "Distingue grado y conectividad",
+        "celda": "celda 52",
+        "explicacion": "Grado alto no implica muchas entidades.",
+        "instruccion": "Compara grado_adjudicaciones y entidades_conectadas.",
+        "evidencia": "Top 10 con ambas métricas."
+      },
+      {
+        "id": "wow",
+        "tipo": "externo",
+        "titulo": "WOW 1: proveedor-hub",
+        "celda": "celda 53",
+        "explicacion": "Lees una estrella sin convertir layout en riesgo.",
+        "instruccion": "Centra hub, separa ramas, revisa propiedades y contrasta Table.",
+        "evidencia": "Grafo estrella explicado por anillos."
+      },
+      {
+        "id": "wow2",
+        "tipo": "externo",
+        "titulo": "WOW 2: desde el ancla",
+        "celda": "celda 55",
+        "explicacion": "Lees un camino de cuatro relaciones.",
+        "instruccion": "Confirma NIT/ID en un camino completo antes de interpretar.",
+        "evidencia": "Lees ancla → Proceso → Proveedor ← Proceso ← otra Entidad."
+      },
+      {
         "id": "comparar",
         "tipo": "ejecuta",
         "titulo": "Recorre caminos y verifica el contrato",
-        "celda": "celda 53",
+        "celda": "celda 63",
         "explicacion": "Una tabla coincidente prueba la respuesta de esta consulta, no velocidad ni irregularidad.",
         "instruccion": "Ejecuta patrones de 0, 1 y 2 relaciones, consulta completa y comparación. Responde WITH y límites.",
         "evidencia": "pandas == Neo4j: True. En respaldo: PENDIENTE; solo se ejecutó pandas."
@@ -178,7 +223,7 @@ const DATA = [
         "id": "visual",
         "tipo": "externo",
         "titulo": "Dibuja el ejemplo guiado",
-        "celda": "celda 59",
+        "celda": "celda 69",
         "explicacion": "Un camino muestra cómo se conectan los actores.",
         "instruccion": "En Aura copia la consulta impresa en Query. En respaldo usa el SVG conceptual y conserva Cypher para después.",
         "evidencia": "Consulta con camino_ancla y camino_otras; en Aura, dibujo de hasta 8 entidades adicionales."
@@ -187,7 +232,7 @@ const DATA = [
         "id": "vecindario",
         "tipo": "decide",
         "titulo": "Ejecuta CRUD demo y elige proveedor",
-        "celda": "celda 63",
+        "celda": "celda 73",
         "explicacion": "Tu exploración puede elegir un proveedor diferente del que determina H2-R.",
         "instruccion": "Ejecuta CRUD demo cuando uses Aura y elige un número válido del listado de proveedores.",
         "evidencia": "Tamaño observable de tu vecindario: procesos con mi entidad, entidades conectadas y procesos visibles; tabla del proveedor elegido."
@@ -196,7 +241,7 @@ const DATA = [
         "id": "excluir",
         "tipo": "decide",
         "titulo": "Cuenta otras entidades",
-        "celda": "celda 66",
+        "celda": "celda 76",
         "explicacion": "El conteo inicial incluye la entidad ancla.",
         "instruccion": "Completa el operador de exclusión y justifica la exploración con números y una alternativa descartada. Responde la pregunta de los dos proveedores.",
         "evidencia": "Otras entidades: N | esperado: N; debe ser una menos que entidades_conectadas."
@@ -205,7 +250,7 @@ const DATA = [
         "id": "propia",
         "tipo": "decide",
         "titulo": "Construye tu consulta",
-        "celda": "celda 70",
+        "celda": "celda 80",
         "explicacion": "Defiendes el patrón con una consulta que escribiste.",
         "instruccion": "Escribe el conteo de procesos distintos para el par entidad–proveedor. Consulta el apoyo plegado si lo necesitas.",
         "evidencia": "Consulta propia: N | esperado: N. En respaldo se declara que Cypher está pendiente de ejecución."
@@ -214,7 +259,7 @@ const DATA = [
         "id": "hito",
         "tipo": "decide",
         "titulo": "Genera ficha y JSONL",
-        "celda": "celda 75",
+        "celda": "celda 85",
         "explicacion": "La siguiente sesión necesita texto rastreable y una selección justificada.",
         "instruccion": "Ejecuta el desenlace H2-R y completa autor/alias, modelado, límite y alternativa. Guarda en el repositorio privado y entrega el enlace al commit.",
         "evidencia": "Exportación S7: N procesos; ficha y JSONL guardados. Incluye motor real, proveedor H2-R, máximo, mediana y proveedor explorado."
@@ -223,10 +268,19 @@ const DATA = [
         "id": "cerrar",
         "tipo": "ejecuta",
         "titulo": "Cierra y revisa el puente a S7",
-        "celda": "celda 79",
+        "celda": "celda 89",
         "explicacion": "Conservas resultados y reconoces qué queda pendiente.",
         "instruccion": "Revisa la hoja de trucos y el cierre; ejecuta el cierre de conexión.",
         "evidencia": "Conexión Neo4j cerrada. O Sin conexión Neo4j abierta (respaldo)."
+      },
+      {
+        "id": "entrega",
+        "tipo": "decide",
+        "titulo": "Cierra con un commit verificable",
+        "celda": "celda 87",
+        "explicacion": "La evidencia queda versionada.",
+        "instruccion": "Sube ficha+JSONL a hitos/s06 y entrega URL exacta del commit.",
+        "evidencia": "Commit privado con ambos archivos."
       }
     ]
   }
@@ -234,7 +288,7 @@ const DATA = [
 const DATA2 = [];
 
 const ICONS = { entiende:"🧠", ejecuta:"▶️", decide:"✏️", externo:"🌐" }
-const KEY = id => "s06lab:nit-v2:" + id
+const KEY = id => "s06lab:graph-v3:" + id
 const fasesEl = document.getElementById("fases")
 
 function render(){

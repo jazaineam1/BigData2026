@@ -17,7 +17,7 @@ def find(cells,x,starts=False):
     return h[0]
 def md(t): return {"cell_type":"markdown","metadata":{},"source":t.strip("\n").splitlines(keepends=True)}
 def code(t,hidden=False,title=None):
-    t=t.strip("\n"); t=(f'#@title {title} {{ display-mode: "form" }}\n'+t) if title else t
+    t=t.strip("\n").replace('"""', "'''"); t=(f'#@title {title} {{ display-mode: "form" }}\n'+t) if title else t
     c={"cell_type":"code","execution_count":None,"metadata":{},"outputs":[],"source":t.splitlines(keepends=True)}
     if hidden:c["metadata"]={"tags":["hide-input"],"jupyter":{"source_hidden":True},"cellView":"form","colab":{"formView":"both"}}
     return c
