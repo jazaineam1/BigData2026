@@ -28,7 +28,7 @@ def upgrade_module() -> None:
         r"por eso H2-R no usa simplemente el grado\.\n'''\),",
         re.S,
     )
-    replacement = r'''    md(r'''### Grado ≠ entidades conectadas
+    replacement = r"""    md(r'''### Grado ≠ entidades conectadas
 
 <!-- GRAPH-DEGREE-S06-V1 -->
 **Grado contractual directo del Proveedor:** cuántas relaciones `ADJUDICADO_A` llegan al nodo.  
@@ -65,7 +65,7 @@ LIMIT 40
 En **Graph**, coloca el Proveedor en el centro y cuenta conceptualmente las líneas `ADJUDICADO_A`: son las relaciones que Cypher acaba de medir. Luego vuelve a **Table** para conservar el valor exacto.
 
 Un proveedor puede tener grado alto porque una sola entidad le adjudicó muchos procesos; por eso H2-R usa `entidades_conectadas` y no simplemente el grado.
-'''),'''
+'''),"""
 
     new_text, n = pattern.subn(replacement, text, count=1)
     if n != 1:
