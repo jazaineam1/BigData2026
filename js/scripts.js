@@ -96,12 +96,12 @@ window.addEventListener('DOMContentLoaded', event => {
                href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb"
                target="_blank" rel="noopener noreferrer">
                 <div class="course-emoji" aria-hidden="true">🧪</div>
-                <div class="course-category">Taller de Control 1 · S1–S6</div>
-                <div class="course-title">Control determinístico y autocorregible</div>
+                <div class="course-category">Taller domiciliario 1 · S1–S6</div>
+                <div class="course-title">De datos crudos a una decisión explicable</div>
                 <p class="course-description">
-                    100 puntos verificables: fundamentos, ingesta, MongoDB, bandeja S5,
-                    diseño query-first en Cassandra y contexto relacional con Neo4j.
-                    Git/GitHub es opcional y la entrega se genera desde Colab.
+                    Proyecto individual paso a paso: perfilar fuentes, construir una regla SECOP,
+                    consultar evidencia documental, diseñar Cassandra query-first y desarrollar contexto relacional con Neo4j.
+                    Sin selección múltiple; Git/GitHub es opcional.
                 </p>
             </a>`;
         courseRow.appendChild(card);
