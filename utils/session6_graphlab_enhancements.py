@@ -1,263 +1,726 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Parche pedagógico/visual S06: continuidad S5, Graph Lab, grados y WOW."""
+"""Capa editorial S06 para principiantes: Neo4j/Cypher primero, Python oculto."""
 from __future__ import annotations
-import json, re
+
+import re
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
-GRAPH_TUTORIAL="https://jazaineam1.github.io/BigData2026/assets/tutoriales/neo4j-graph-lab-s06.html"
-MARKER="GRAPH-LAB-S06-V2"
 
-def s(c):
-    v=c.get("source",""); return "".join(v) if isinstance(v,list) else str(v)
-def put(c,t): c["source"]=t.splitlines(keepends=True)
-def find(cells,x,starts=False):
-    h=[i for i,c in enumerate(cells) if (s(c).startswith(x) if starts else x in s(c))]
-    if len(h)!=1: raise ValueError(f"Referencia S06 ambigua {x!r}: {h}")
-    return h[0]
-def md(t): return {"cell_type":"markdown","metadata":{},"source":t.strip("\n").splitlines(keepends=True)}
-def code(t,hidden=False,title=None):
-    t=t.strip("\n").replace('"""', "'''"); t=(f'#@title {title} {{ display-mode: "form" }}\n'+t) if title else t
-    c={"cell_type":"code","execution_count":None,"metadata":{},"outputs":[],"source":t.splitlines(keepends=True)}
-    if hidden:c["metadata"]={"tags":["hide-input"],"jupyter":{"source_hidden":True},"cellView":"form","colab":{"formView":"both"}}
-    return c
+ROOT = Path(__file__).resolve().parents[1]
+GRAPH_TUTORIAL = "https://jazaineam1.github.io/BigData2026/assets/tutoriales/neo4j-graph-lab-s06.html"
+MARKER = "S06-BEGINNER-V1"
 
-def anchor(cells):
-    i=find(cells,"## 1. Recuperar el proceso que Laura abrió en S5")
-    put(cells[i],'''---
+
+def s(cell):
+    value = cell.get("source", "")
+    return "".join(value) if isinstance(value, list) else str(value)
+
+
+def put(cell, text):
+    cell["source"] = text.strip("\n").splitlines(keepends=True)
+
+
+def find(cells, needle, starts=False):
+    hits = [i for i, c in enumerate(cells) if (s(c).startswith(needle) if starts else needle in s(c))]
+    if len(hits) != 1:
+        raise ValueError(f"Referencia S06 ambigua {needle!r}: {hits}")
+    return hits[0]
+
+
+def md(text):
+    return {"cell_type": "markdown", "metadata": {}, "source": text.strip("\n").splitlines(keepends=True)}
+
+
+def code(text, hidden=False, title=None):
+    text = text.strip("\n").replace('"""', "'''")
+    if title:
+        text = f'#@title {title} {{ display-mode: "form" }}\n' + text
+    cell = {"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": text.splitlines(keepends=True)}
+    if hidden:
+        cell["metadata"] = {
+            "tags": ["hide-input"],
+            "jupyter": {"source_hidden": True},
+            "cellView": "form",
+            "colab": {"formView": "both"},
+        }
+    return cell
+
+
+def hide(cell, title=None):
+    meta = cell.setdefault("metadata", {})
+    tags = set(meta.get("tags", []))
+    tags.add("hide-input")
+    meta["tags"] = sorted(tags)
+    meta["jupyter"] = {**meta.get("jupyter", {}), "source_hidden": True}
+    meta["cellView"] = "form"
+    meta["colab"] = {**meta.get("colab", {}), "formView": "both"}
+    if title and not s(cell).lstrip().startswith("#@title"):
+        cell["source"] = [f'#@title {title} {{ display-mode: "form" }}\n'] + cell.get("source", [])
+
+
+def simplify_intro(cells):
+    i = find(cells, "# Sesión 6 — De la fila priorizada")
+    put(cells[i], r'''
+# Sesión 6 — De la fila priorizada al contexto relacional con Neo4j
+
+## Universidad Central
+> ### Facultad de Ingeniería y Ciencias Básicas
+> ### Maestría en Analítica de Datos — BIG DATA (64491093)
+
+**Caso conductor:** Compras Claras
+
+### La pregunta de hoy
+
+En S5 Laura eligió un proceso para revisar. Ese registro candidato **no trae un proveedor adjudicado observado en este extracto**, así que no vamos a inventarlo. En S6 usamos la **entidad que publicó ese proceso** y preguntamos:
+
+> **¿Qué proveedores aparecen en el historial adjudicado de esa entidad y cuáles de ellos también aparecen vinculados con otras entidades?**
+
+Eso sí lo puede responder un grafo: **Entidad → Proceso → Proveedor → otros Procesos → otras Entidades**.
+
+### Lo importante de esta sesión
+
+1. entender qué es un **nodo**, una **relación** y un **camino**;
+2. aprender las primeras consultas en **Cypher**;
+3. ver los resultados en **Aura Query** como tabla y como grafo;
+4. contar conexiones, entender qué es el **grado** y qué significa **hub o nodo concentrador**;
+5. encontrar proveedores compartidos entre entidades;
+6. explicar qué demuestra el grafo y qué **no** demuestra.
+
+> **No necesitas saber Python.** Python prepara y verifica los datos por detrás. El lenguaje que aprenderás hoy es **Cypher**, el lenguaje de consulta de Neo4j.
+
+### Producto observable
+
+Al terminar tendrás una ficha sencilla con el proceso de S5, la entidad de trabajo, el proveedor explorado, cuántas entidades conecta, una consulta Cypher explicada y un límite interpretativo. El archivo `s06_contexto_procesos.jsonl` queda preparado para S7.
+''')
+
+    i = find(cells, "## El hilo del evaluador")
+    put(cells[i], r'''
+## Del proceso de S5 al grafo de S6
+
+```text
+S5
+Proceso elegido
+      │
+      ▼
+Entidad que lo publicó
+      │
+      │  S6 mira el historial adjudicado de esa entidad
+      ▼
+Procesos históricos ──► Proveedores
+                            │
+                            ▼
+                     otras Entidades
+```
+
+**Importante:** el proceso candidato de S5 sirve como punto de partida para identificar la entidad. Las relaciones con proveedores provienen de los **registros históricos adjudicados** del extracto; no inventamos una adjudicación para el proceso candidato.
+''')
+
+    i = find(cells, "## Mapa de la sesión")
+    put(cells[i], r'''
+## Mapa de la sesión
+
+| Paso | Qué aprenderás | Herramienta | Resultado visible |
+|---|---|---|---|
+| 1 | recuperar el proceso y la entidad | Colab | ancla clara |
+| 2 | nodo, relación, propiedad y camino | cuaderno | modelo mínimo |
+| 3 | conectar Aura | AuraDB | `RETURN 1` |
+| 4 | cargar el grafo | Colab → Neo4j | nodos y relaciones |
+| 5 | aprender Cypher desde cero | Aura Query | consultas 1–6 |
+| 6 | interpretar conexiones | Graph + Table | grado, hub y proveedor compartido |
+| 7 | profundización opcional | pandas + Neo4j | H2-R y verificación |
+| 8 | guardar evidencia | Colab | ficha + JSONL |
+
+- 🧠 **ENTIENDE:** primero lee el ejemplo.
+- ▶️ **EJECUTA:** copia/ejecuta la consulta indicada.
+- 🔎 **MIRA:** compara lo que esperabas con Graph o Table.
+- ✏️ **MODIFICA:** solo cambios pequeños y guiados; no tendrás que adivinar una solución completa.
+''')
+
+
+def simplify_anchor(cells):
+    i = find(cells, "## 1. Recuperar el proceso que Laura abrió en S5")
+    put(cells[i], r'''
+---
 ## 1. Recuperar el proceso que Laura abrió en S5
 
-S6 tiene **dos rutas transparentes**. Si conservaste `s05_ancla_s06.json`, usa tu proceso real de S5; si no, usa la ancla pedagógica versionada. El respaldo permite aprender sin bloquear la clase, pero **no se presenta como si fuera tu elección**. H2-R solo se interpreta como resultado individual cuando el origen sea `archivo propio S5`.
+### ¿Qué es `s05_ancla_s06.json`?
+
+Es un archivo pequeño que guarda **la selección de S5**. No es una base de datos y **no se carga en Aura**.
+
+Ejemplo:
+
+```json
+{
+  "id_proceso": "CO1.REQ.2622868",
+  "entidad": "FUERZA AEROESPACIAL COLOMBIANA",
+  "nit_entidad": "899999102"
+}
+```
+
+- `id_proceso`: el proceso elegido;
+- `entidad`: quién lo publicó;
+- `nit_entidad`: el identificador que usaremos para buscar esa entidad en Neo4j.
+
+**Ruta recomendada para la primera vez:** usa **Ejemplo del curso**. Si conservaste el JSON de S5, puedes elegir **Mi archivo de S5**. El código que lee el JSON queda oculto porque hoy no estamos aprendiendo Python.
 ''')
-    i=find(cells,"# El cuaderno trae el ancla pedagógica versionada",True)
-    put(cells[i],r'''#@title Elegir ancla propia S5 o respaldo { display-mode: "form" }
+
+    i = find(cells, "# El cuaderno trae el ancla pedagógica versionada", starts=True)
+    put(cells[i], r'''#@title Elegir el punto de partida { display-mode: "form" }
 from pathlib import Path
 import json
-USAR_MI_ANCLA_S5 = False  #@param {type:"boolean"}
+RUTA_ANCLA = "Ejemplo del curso"  #@param ["Ejemplo del curso", "Mi archivo de S5"]
 archivo_s5 = Path("s05_ancla_s06.json")
-if USAR_MI_ANCLA_S5 and not archivo_s5.is_file():
-    try:
-        from google.colab import files
-        print("Selecciona s05_ancla_s06.json, descargado al final de S5.")
-        subidos=files.upload()
-        if "s05_ancla_s06.json" not in subidos: raise ValueError("Selecciona exactamente s05_ancla_s06.json o desactiva USAR_MI_ANCLA_S5.")
-        archivo_s5.write_bytes(subidos["s05_ancla_s06.json"])
-    except ImportError:
-        raise FileNotFoundError("Copia s05_ancla_s06.json junto al cuaderno o usa el respaldo.")
-if USAR_MI_ANCLA_S5:
-    ancla_original=json.loads(archivo_s5.read_text(encoding="utf-8-sig"))
-    faltantes=[k for k in ["id_proceso","entidad","nit_entidad"] if not str(ancla_original.get(k,"")).strip()]
-    if faltantes: raise ValueError(f"Archivo S5 incompleto: {faltantes}")
-    origen_ancla="archivo propio S5"
+
+if RUTA_ANCLA == "Mi archivo de S5":
+    if not archivo_s5.is_file():
+        try:
+            from google.colab import files
+            print("Selecciona el archivo s05_ancla_s06.json que descargaste en S5.")
+            subidos = files.upload()
+            if "s05_ancla_s06.json" not in subidos:
+                print("No se seleccionó el archivo esperado. Usaremos el ejemplo del curso.")
+                RUTA_ANCLA = "Ejemplo del curso"
+            else:
+                archivo_s5.write_bytes(subidos["s05_ancla_s06.json"])
+        except ImportError:
+            print("No se encontró el archivo local. Usaremos el ejemplo del curso.")
+            RUTA_ANCLA = "Ejemplo del curso"
+
+if RUTA_ANCLA == "Mi archivo de S5" and archivo_s5.is_file():
+    candidato = json.loads(archivo_s5.read_text(encoding="utf-8-sig"))
+    faltantes = [k for k in ["id_proceso", "entidad", "nit_entidad"] if not str(candidato.get(k, "")).strip()]
+    if faltantes:
+        print("El JSON no tiene los campos esperados. Usaremos el ejemplo del curso.")
+        ancla_original = dict(manifest["ancla_pedagogica"])
+        origen_ancla = "ejemplo del curso"
+    else:
+        ancla_original = candidato
+        origen_ancla = "archivo propio S5"
 else:
-    ancla_original=dict(manifest["ancla_pedagogica"]); origen_ancla="ancla pedagógica versionada incluida en S6"
-print("Origen del ancla:",origen_ancla)
-print(json.dumps(ancla_original,ensure_ascii=False,indent=2))
+    ancla_original = dict(manifest["ancla_pedagogica"])
+    origen_ancla = "ejemplo del curso"
+
+print("✅ Punto de partida cargado")
+print("Proceso:", ancla_original["id_proceso"])
+print("Entidad:", ancla_original["entidad"])
+print("NIT:", ancla_original["nit_entidad"])
+print("Origen:", origen_ancla)
 ''')
+    hide(cells[i], "Elegir ejemplo del curso o mi archivo S5")
 
-def concepts(cells):
-    i=find(cells,"Antes de escribir Cypher, cinco palabras y nada más")
-    t=s(cells[i]).replace("cinco palabras y nada más","seis conceptos y nada más").replace("**Los mismos 5 conceptos, en LinkedIn:**","**Los mismos conceptos, en LinkedIn:**")
-    t=t.replace("| Camino | una secuencia de nodos y relaciones | Entidad → Proceso → Proveedor |","| Camino | una secuencia de nodos y relaciones | Entidad → Proceso → Proveedor |\n| Patrón | la forma que quieres encontrar | `(e)-[:PUBLICA]->(p)` |")
-    put(cells[i],t+'\n**Regla mental:** `MATCH` significa “encuentra coincidencias con esta forma”. El patrón es el corazón de Cypher.\n')
-    i=find(cells,'RELACION_PROCESO_PROVEEDOR = "ADJUDICADO_A"',True)
-    put(cells[i],'''RELACION_PROCESO_PROVEEDOR = "____"  # completa el nombre de la flecha
-if RELACION_PROCESO_PROVEEDOR != "ADJUDICADO_A":
-    raise ValueError("La flecha Proceso → Proveedor se llama ADJUDICADO_A.")
-patron_estudiante=f"(p:Proceso)-[:{RELACION_PROCESO_PROVEEDOR}]->(v:Proveedor)"
-print(patron_estudiante); print("Patrón correcto: ADJUDICADO_A expresa una adjudicación observada.")
-''')
-    i=find(cells,"### La alternativa que descartamos")
-    put(cells[i],s(cells[i])+r'''
 
-### Dos decisiones adicionales de modelado
+def simplify_concepts(cells):
+    i = find(cells, "Antes de escribir Cypher, cinco palabras y nada más")
+    put(cells[i], r'''
+## 3. Antes de Cypher: cuatro ideas y un patrón
 
-- **Roles:** aquí `:Entidad` y `:Proveedor` son nodos separados para facilitar la lectura. Un modelo general podría usar `(:Organizacion {nit})` con roles. El grafo es una decisión de diseño, no algo que “sale solo” del CSV.
-- **Propiedades en relaciones:** `precio_base` pertenece al `Proceso`; `valor_adjudicado` puede vivir en `ADJUDICADO_A`:
+No memorices sintaxis todavía. Primero aprende a leer el dibujo.
 
-```cypher
-(p:Proceso)-[:ADJUDICADO_A {valor_adjudicado:125000000}]->(v:Proveedor)
+| Concepto | En palabras simples | En S6 |
+|---|---|---|
+| **Nodo** | una cosa que queremos representar | una Entidad, un Proceso o un Proveedor |
+| **Propiedad** | un dato de ese nodo | `nit`, `nombre`, `precio_base` |
+| **Relación** | una conexión con significado | `PUBLICA`, `ADJUDICADO_A` |
+| **Camino** | una secuencia de nodos y relaciones | Entidad → Proceso → Proveedor |
+| **Patrón** | la forma que queremos encontrar | `(e)-[:PUBLICA]->(p)` |
+
+```text
+Entidad ──PUBLICA──► Proceso ──ADJUDICADO_A──► Proveedor
 ```
 
-Lo comprobarás haciendo clic sobre nodos y relaciones en Aura.
+Cuando veas esto en Cypher:
+
+```cypher
+MATCH (e:Entidad)-[:PUBLICA]->(p:Proceso)
+```
+
+léelo así:
+
+> **Busca una Entidad que PUBLICA un Proceso.**
+
+Esa traducción de dibujo ↔ patrón es más importante que memorizar símbolos.
 ''')
 
-def contract(cells):
-    i=find(cells,"# Ambas métricas usan NIT",True)
-    put(cells[i],r'''# Ambas métricas usan NIT; el nombre es una etiqueta, no una segunda clave.
-prov_ancla=hist_ancla.groupby("nit_proveedor")["id_proceso"].nunique().rename("procesos_con_entidad")
-prov_global=hist.groupby("nit_proveedor")["nit_entidad"].nunique().rename("entidades_conectadas")
-resultado_completo_pd=pd.concat([prov_ancla,prov_global],axis=1).loc[prov_ancla.index].reset_index()
-resultado_completo_pd["procesos_con_entidad"]=resultado_completo_pd["procesos_con_entidad"].astype(int)
-resultado_completo_pd["proveedor"]=resultado_completo_pd["nit_proveedor"].map(nombres_proveedor)
-resultado_completo_pd=resultado_completo_pd.sort_values(["entidades_conectadas","procesos_con_entidad","nit_proveedor"],ascending=[False,False,True]).reset_index(drop=True)
-esperado_pd=resultado_completo_pd.head(10).copy()  # top 10 es vista, no universo analítico
-candidatas_hist=hist[hist["es_entidad_candidata_s05"]].copy(); candidatas_hist["conexiones_proveedor"]=candidatas_hist["nit_proveedor"].map(prov_global)
-maximos_candidatas=candidatas_hist.groupby("nit_entidad")["conexiones_proveedor"].max(); MEDIANA_H2R=float(maximos_candidatas.median())
-if "mediana_maximo_conectadas_por_nit" in manifest: assert MEDIANA_H2R==float(manifest["mediana_maximo_conectadas_por_nit"]),"La referencia por NIT no coincide."
-proveedor_h2r=resultado_completo_pd.iloc[0].copy(); maximo_h2r=int(proveedor_h2r["entidades_conectadas"])
-if uso_respaldo_s06: desenlace_h2r_pd="no evaluable con mi ancla"
-elif maximo_h2r>MEDIANA_H2R: desenlace_h2r_pd="conexión más fuerte que la mediana de las candidatas de S5"
-else: desenlace_h2r_pd="conexión igual o menor que la mediana de las candidatas de S5"
-print("Entidades de referencia:",len(maximos_candidatas)); print("Mediana de referencia (candidatas S5):",MEDIANA_H2R)
-print("Proveedor que determina H2-R:",proveedor_h2r["nit_proveedor"],"| máximo:",maximo_h2r); print("Desenlace H2-R (pandas):",desenlace_h2r_pd)
-if uso_respaldo_s06: print("Comparación descriptiva del respaldo:",maximo_h2r,">",MEDIANA_H2R,"=",maximo_h2r>MEDIANA_H2R)
+    i = find(cells, 'RELACION_PROCESO_PROVEEDOR = "ADJUDICADO_A"', starts=True)
+    put(cells[i], r'''RELACION_PROCESO_PROVEEDOR = "ADJUDICADO_A"
+patron_estudiante = f"(p:Proceso)-[:{RELACION_PROCESO_PROVEEDOR}]->(v:Proveedor)"
+print("✅ Patrón de ejemplo:")
+print(patron_estudiante)
+print("Se lee: un Proceso fue ADJUDICADO_A un Proveedor.")
+''')
+
+    i = find(cells, "### La alternativa que descartamos")
+    put(cells[i], s(cells[i]) + r'''
+
+### Por qué `Proceso` es un nodo
+
+No tienes que inventar una justificación. Usa esta idea:
+
+> **Ejemplo de respuesta:** “Proceso es un nodo porque tiene identidad y propiedades propias y queremos recorrer relaciones desde la Entidad hasta el Proveedor pasando por ese proceso.”
+
+Una alternativa sería guardar el proceso como propiedad de una relación directa Entidad→Proveedor. Es más corta, pero perderíamos al proceso como objeto que podemos consultar, inspeccionar y reutilizar en S7.
+''')
+
+
+def improve_contract(cells):
+    i = find(cells, "# Ambas métricas usan NIT", starts=True)
+    put(cells[i], r'''# Infraestructura de verificación: pandas calcula la referencia sin ser contenido a memorizar.
+prov_ancla = hist_ancla.groupby("nit_proveedor")["id_proceso"].nunique().rename("procesos_con_entidad")
+prov_global = hist.groupby("nit_proveedor")["nit_entidad"].nunique().rename("entidades_conectadas")
+resultado_completo_pd = pd.concat([prov_ancla, prov_global], axis=1).loc[prov_ancla.index].reset_index()
+resultado_completo_pd["procesos_con_entidad"] = resultado_completo_pd["procesos_con_entidad"].astype(int)
+resultado_completo_pd["proveedor"] = resultado_completo_pd["nit_proveedor"].map(nombres_proveedor)
+resultado_completo_pd = resultado_completo_pd.sort_values(
+    ["entidades_conectadas", "procesos_con_entidad", "nit_proveedor"],
+    ascending=[False, False, True]
+).reset_index(drop=True)
+esperado_pd = resultado_completo_pd.head(10).copy()
+candidatas_hist = hist[hist["es_entidad_candidata_s05"]].copy()
+candidatas_hist["conexiones_proveedor"] = candidatas_hist["nit_proveedor"].map(prov_global)
+maximos_candidatas = candidatas_hist.groupby("nit_entidad")["conexiones_proveedor"].max()
+MEDIANA_H2R = float(maximos_candidatas.median())
+if "mediana_maximo_conectadas_por_nit" in manifest:
+    assert MEDIANA_H2R == float(manifest["mediana_maximo_conectadas_por_nit"])
+proveedor_h2r = resultado_completo_pd.iloc[0].copy()
+maximo_h2r = int(proveedor_h2r["entidades_conectadas"])
+if uso_respaldo_s06:
+    desenlace_h2r_pd = "comparación descriptiva del ejemplo del curso"
+elif maximo_h2r > MEDIANA_H2R:
+    desenlace_h2r_pd = "conectividad mayor que la mediana de referencia"
+else:
+    desenlace_h2r_pd = "conectividad igual o menor que la mediana de referencia"
+print("Proveedor de mayor conectividad:", proveedor_h2r["proveedor"])
+print("Entidades conectadas:", maximo_h2r)
+print("Mediana de referencia:", MEDIANA_H2R)
+print("Lectura:", desenlace_h2r_pd)
 esperado_pd
 ''')
+    hide(cells[i], "Calcular referencia H2-R con pandas (infraestructura)")
 
-def graph_props(cells):
-    i=find(cells,"cols = [",True); t=s(cells[i])
-    t=t.replace('"nombre_proceso", "descripcion", "precio_base", "modalidad", "proveedor",','"nombre_proceso", "descripcion", "precio_base", "valor_adjudicado", "modalidad", "proveedor",')
-    t=t.replace("    p.valor = fila.precio_base,","    p.precio_base = fila.precio_base,").replace("MERGE (p)-[:ADJUDICADO_A]->(v)","MERGE (p)-[a:ADJUDICADO_A]->(v)\nSET a.valor_adjudicado = fila.valor_adjudicado")
-    put(cells[i],t)
-    for c in cells:
-        if "p.valor AS precio_base" in s(c): put(c,s(c).replace("p.valor AS precio_base","p.precio_base AS precio_base").replace("ORDER BY entidad, valor DESC","ORDER BY entidad, precio_base DESC"))
 
-def graphlab():
+def improve_graph_properties(cells):
+    i = find(cells, "cols = [", starts=True)
+    text = s(cells[i])
+    text = text.replace(
+        '"nombre_proceso", "descripcion", "precio_base", "modalidad", "proveedor",',
+        '"nombre_proceso", "descripcion", "precio_base", "valor_adjudicado", "modalidad", "proveedor",',
+    )
+    text = text.replace("    p.valor = fila.precio_base,", "    p.precio_base = fila.precio_base,")
+    text = text.replace(
+        "MERGE (p)-[:ADJUDICADO_A]->(v)",
+        "MERGE (p)-[a:ADJUDICADO_A]->(v)\nSET a.valor_adjudicado = fila.valor_adjudicado",
+    )
+    put(cells[i], text)
+    for cell in cells:
+        body = s(cell)
+        if "p.valor AS precio_base" in body:
+            put(cell, body.replace("p.valor AS precio_base", "p.precio_base AS precio_base").replace("ORDER BY entidad, valor DESC", "ORDER BY entidad, precio_base DESC"))
+
+
+def beginner_lab():
     return [
-    md(f'''---
-## 5. Graph Lab — mirar, tocar y entender el grafo
+        md(f'''
+---
+## 5. Mini curso de Cypher — de cero al proveedor compartido
 
 <!-- {MARKER} -->
-Antes de H2-R, **vas a ver el grafo real en Aura Query**. La meta no es una imagen bonita: debes identificar el hub, seguir flechas, revisar propiedades y comprobar el mismo resultado en Table.
 
-**Tutorial visual:** [Graph Lab S06 — Aura Query paso a paso ↗]({GRAPH_TUTORIAL})
+**Objetivo:** aprender Neo4j y Cypher, no Python. Las consultas que debes leer están visibles; las celdas Python que preparan datos permanecen plegadas.
+
+**Tutorial corto:** [Mini curso visual de Cypher ↗]({GRAPH_TUTORIAL})
 '''),
-    code(f"tutorial('{GRAPH_TUTORIAL}', alto=820)",True,"Abrir Graph Lab visual"),
-    code(r'''consulta_graph_basico="""
-MATCH (e:Entidad)-[pub:PUBLICA]->(p:Proceso)-[adj:ADJUDICADO_A]->(v:Proveedor)
-RETURN e,pub,p,adj,v
-LIMIT 20
-"""
-print("Copia en AuraDB → Query:\n"); print(consulta_graph_basico)
+        code(f"tutorial('{GRAPH_TUTORIAL}', alto=820)", hidden=True, title="Abrir mini curso visual de Cypher"),
+        md(r'''
+### Primero: Neo4j, AuraDB, Cypher y Aura Query no son lo mismo
+
+| Nombre | Qué es | Analogía |
+|---|---|---|
+| **Neo4j** | el motor de base de datos de grafos | PostgreSQL |
+| **AuraDB** | el servicio en la nube donde corre Neo4j | Supabase administrando PostgreSQL |
+| **Cypher** | el lenguaje para consultar el grafo | SQL |
+| **Aura Query** | la pantalla donde escribes Cypher y ves resultados | editor SQL web |
+
+En esta sesión trabajas así:
+
+```text
+Tú escribes Cypher → Aura Query → Neo4j busca el patrón → Graph/Table muestran el resultado
+```
 '''),
-    md(r'''### Tu primera lectura en Graph
+        md(r'''
+### Consulta 0 — comprobar que Aura responde
 
-En AuraDB → **Query** ejecuta la consulta y:
-
-1. cambia a **Graph**; 2. usa **Fit to screen**; 3. arrastra nodos para separar ramas; 4. haz clic en `Entidad`, `Proceso` y `Proveedor`; 5. haz clic en `PUBLICA` y `ADJUDICADO_A`; 6. revisa las propiedades; 7. abre **Table** y vuelve a **Graph**.
-
-Debes poder narrar: “esta Entidad llega a este Proveedor pasando por este Proceso”. Si solo ves tabla, devuelve nodos/relaciones/caminos, no únicamente strings y conteos.
-'''),
-    md(r'''### Grado ≠ entidades conectadas
-
-<!-- GRAPH-DEGREE-S06-V1 -->
-**Grado contractual directo del Proveedor:** cuántas relaciones `ADJUDICADO_A` llegan al nodo.  
-**Conectividad a dos saltos:** cuántas Entidades distintas llegan al mismo Proveedor pasando por Proceso.
-
-> **Table mide; Graph explica.** El número exacto del grado se obtiene con Cypher. En Graph compruebas visualmente de qué relaciones incidentes sale ese número. El tamaño, la cercanía o la posición automática de un círculo **no representan su grado** salvo que tú hayas configurado explícitamente un estilo para codificarlo.
-
-**1 · Mide el grado exacto en Aura Query → Table**
+Ejecuta en **Aura Query**:
 
 ```cypher
-MATCH (p:Proceso)-[r:ADJUDICADO_A]->(v:Proveedor)
-RETURN v.nit AS nit_proveedor,
-       v.nombre AS proveedor,
-       count(r) AS grado_adjudicaciones
-ORDER BY grado_adjudicaciones DESC, nit_proveedor ASC
-LIMIT 10
+RETURN 1 AS conexion
 ```
 
-`count(r)` cuenta las relaciones directas `ADJUDICADO_A` que llegan a cada Proveedor en este modelo.
+- `RETURN`: muestra un resultado.
+- `1`: es un valor de prueba.
+- `AS conexion`: le pone nombre a la columna.
 
-**2 · Comprueba gráficamente el proveedor de mayor grado**
+**Qué debes ver en Table:** una columna `conexion` con el valor `1`.
+'''),
+        md(r'''
+### Consulta 1 — ver nodos
+
+```cypher
+MATCH (e:Entidad)
+RETURN e
+LIMIT 5
+```
+
+Línea por línea:
+
+- `MATCH`: busca algo en el grafo.
+- `(e:Entidad)`: busca nodos con etiqueta `Entidad` y los llama `e`.
+- `RETURN e`: devuelve los nodos completos.
+- `LIMIT 5`: muestra solo cinco.
+
+**Qué debes ver:** cinco nodos de tipo `Entidad`. Si cambias a **Graph**, verás círculos sin relaciones entre sí porque todavía no pedimos relaciones.
+'''),
+        md(r'''
+### Consulta 2 — una relación
+
+```cypher
+MATCH (e:Entidad)-[pub:PUBLICA]->(p:Proceso)
+RETURN e, pub, p
+LIMIT 5
+```
+
+Se lee literalmente:
+
+> **Busca una Entidad que PUBLICA un Proceso.**
+
+```text
+Entidad ──PUBLICA──► Proceso
+```
+
+**Qué debes ver en Graph:** pares Entidad→Proceso unidos por una flecha `PUBLICA`.
+'''),
+        md(r'''
+### Consulta 3 — dos relaciones
+
+```cypher
+MATCH (e:Entidad)-[pub:PUBLICA]->(p:Proceso)-[adj:ADJUDICADO_A]->(v:Proveedor)
+RETURN e, pub, p, adj, v
+LIMIT 5
+```
+
+Se lee:
+
+> **Busca una Entidad que PUBLICA un Proceso que fue ADJUDICADO_A un Proveedor.**
+
+```text
+Entidad ──PUBLICA──► Proceso ──ADJUDICADO_A──► Proveedor
+```
+
+**Qué debes ver:** tres tipos de nodo y dos tipos de flecha. Haz clic en cada nodo y revisa sus propiedades.
+'''),
+        md(r'''
+### Graph y Table responden la misma consulta
+
+- **Graph** sirve para entender la estructura: quién se conecta con quién.
+- **Table** sirve para leer valores y conteos exactos.
+- **Raw** muestra la representación cruda del resultado.
+
+> **Regla:** Graph explica la forma; Table confirma los números.
+
+Si una consulta devuelve solo nombres y conteos, la vista útil suele ser Table. Si devuelve nodos, relaciones o un `camino`, Graph puede dibujarlos.
+'''),
+        code(r'''
+consulta_mi_entidad = f'''MATCH (e:Entidad {{nit:"{nit_deseado}"}})-[pub:PUBLICA]->(p:Proceso)-[adj:ADJUDICADO_A]->(v:Proveedor)
+RETURN e, pub, p, adj, v
+LIMIT 15'''
+print("Copia esta consulta en Aura Query:\n")
+print(consulta_mi_entidad)
+''', hidden=True, title="Preparar una consulta para mi Entidad"),
+        md(r'''
+### ¿Qué es el grado?
+
+El **grado** de un nodo es, en esta práctica, cuántas relaciones directas llegan a ese nodo.
+
+```text
+Proceso 1 ─┐
+Proceso 2 ─┤
+Proceso 3 ─┼──► Proveedor X
+Proceso 4 ─┤
+Proceso 5 ─┘
+```
+
+Aquí `Proveedor X` tiene **grado 5** respecto de `ADJUDICADO_A`.
+
+Cypher lo mide así:
 
 ```cypher
 MATCH (p:Proceso)-[r:ADJUDICADO_A]->(v:Proveedor)
-WITH v, count(r) AS grado_adjudicaciones
-ORDER BY grado_adjudicaciones DESC, v.nit ASC
+RETURN v.nombre AS proveedor,
+       count(r) AS grado
+ORDER BY grado DESC
+LIMIT 5
+```
+
+`count(r)` significa **cuenta las relaciones `r`**. No adivines el grado por el tamaño o la posición del círculo en Aura.
+'''),
+        md(r'''
+### ¿Qué es un hub?
+
+Un **hub**, o **nodo concentrador**, es un nodo que reúne muchas conexiones.
+
+Si un proveedor recibe muchas relaciones `ADJUDICADO_A`, puede actuar como un hub de procesos:
+
+```text
+Proceso ─┐
+Proceso ─┤
+Proceso ─┼──► PROVEEDOR HUB
+Proceso ─┤
+Proceso ─┘
+```
+
+Pero “muy conectado” depende de qué contemos. Mira estos dos casos:
+
+```text
+CASO A                           CASO B
+Entidad A → P1 ─┐               Entidad A → P1 ─┐
+          → P2 ─┤               Entidad B → P2 ─┤
+          → P3 ─┼→ Proveedor    Entidad C → P3 ─┼→ Proveedor
+          → P4 ─┤               Entidad D → P4 ─┤
+          → P5 ─┘               Entidad E → P5 ─┘
+
+grado = 5                       grado = 5
+entidades distintas = 1         entidades distintas = 5
+```
+
+Los dos tienen grado 5, pero el segundo conecta más **entidades diferentes**. Por eso más adelante contamos también `entidades_conectadas`.
+'''),
+        code(r'''
+grado_rel = hist.groupby("nit_proveedor")["id_proceso"].nunique().rename("grado_adjudicaciones")
+entidades_2saltos = hist.groupby("nit_proveedor")["nit_entidad"].nunique().rename("entidades_conectadas")
+grado_df = pd.concat([grado_rel, entidades_2saltos], axis=1).reset_index()
+grado_df["proveedor"] = grado_df["nit_proveedor"].map(nombres_proveedor)
+grado_df = grado_df.sort_values(["entidades_conectadas", "grado_adjudicaciones", "nit_proveedor"], ascending=[False, False, True]).head(10).reset_index(drop=True)
+grado_df[["nit_proveedor", "proveedor", "grado_adjudicaciones", "entidades_conectadas"]]
+''', hidden=True, title="Ver tabla de grado y entidades conectadas"),
+        md(r'''
+### Vista gráfica 1 — un proveedor con muchas conexiones
+
+Ahora buscamos **un ejemplo claro** de proveedor compartido por varias entidades:
+
+```cypher
+MATCH (v:Proveedor)<-[:ADJUDICADO_A]-(p:Proceso)<-[:PUBLICA]-(e:Entidad)
+WITH v,
+     count(DISTINCT e) AS entidades,
+     count(DISTINCT p) AS procesos
+ORDER BY entidades DESC, procesos DESC, v.nit ASC
 LIMIT 1
-MATCH (p:Proceso)-[r:ADJUDICADO_A]->(v)
-RETURN v, r, p
-ORDER BY p.id
+MATCH camino=(e:Entidad)-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v)
+RETURN camino
 LIMIT 40
 ```
 
-En **Graph**, coloca el Proveedor en el centro y cuenta conceptualmente las líneas `ADJUDICADO_A`: son las relaciones que Cypher acaba de medir. Luego vuelve a **Table** para conservar el valor exacto.
+**Qué hace:** encuentra el proveedor que aparece con más entidades distintas y luego devuelve caminos que llegan a él.
 
-Un proveedor puede tener grado alto porque una sola entidad le adjudicó muchos procesos; por eso H2-R usa `entidades_conectadas` y no simplemente el grado.
-'''),
-    code(r'''grado_rel=hist.groupby("nit_proveedor")["id_proceso"].nunique().rename("grado_adjudicaciones")
-entidades_2saltos=hist.groupby("nit_proveedor")["nit_entidad"].nunique().rename("entidades_conectadas")
-grado_df=pd.concat([grado_rel,entidades_2saltos],axis=1).reset_index(); grado_df["proveedor"]=grado_df["nit_proveedor"].map(nombres_proveedor)
-grado_df=grado_df.sort_values(["entidades_conectadas","grado_adjudicaciones","nit_proveedor"],ascending=[False,False,True]).head(10).reset_index(drop=True)
-grado_df[["nit_proveedor","proveedor","grado_adjudicaciones","entidades_conectadas"]]
-'''),
-    code(r'''consulta_wow_global="""
-MATCH (v:Proveedor)<-[:ADJUDICADO_A]-(p:Proceso)<-[:PUBLICA]-(e:Entidad)
-WITH v,count(DISTINCT e) AS entidades,count(DISTINCT p) AS grado_adjudicaciones
-ORDER BY entidades DESC,grado_adjudicaciones DESC,v.nit ASC LIMIT 1
-MATCH camino=(e:Entidad)-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v)
-RETURN camino LIMIT 40
-"""
-print("WOW 1 — proveedor-hub global. Ejecuta en Aura Query:\n"); print(consulta_wow_global)
-'''),
-    md(r'''### WOW 1 — la estrella contractual
+**Qué debes ver:** un proveedor compartido en el centro de muchas rutas Entidad→Proceso→Proveedor.
 
-En **Graph** identifica el Proveedor central, los Procesos del primer anillo y las Entidades del segundo. Haz clic en el hub para confirmar NIT/nombre; selecciona `ADJUDICADO_A` y revisa `valor_adjudicado`; selecciona Proceso y contrasta `precio_base`. Arrastra el hub al centro, usa Fit y luego abre **Table**.
+**Qué significa:** varias entidades del extracto tienen procesos adjudicados al mismo proveedor.
 
-**WOW correcto:** varios caminos comparten un actor. **WOW incorrecto:** “el nodo central es sospechoso”. El layout no codifica riesgo ni causalidad.
+**Qué NO significa:** que ese proveedor o esas entidades hayan cometido una irregularidad.
 '''),
-    code(r'''nit_literal=str(nit_deseado).replace('"','\\"')
-consulta_wow_ancla=f"""
-MATCH (ancla:Entidad {{nit:\"{nit_literal}\"}})-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)
-WITH ancla,v,count(*) AS procesos_ancla ORDER BY procesos_ancla DESC,v.nit ASC LIMIT 1
+        md(r'''
+### ¿Por qué puedo ver varias islas?
+
+Si ejecutas una consulta global con `LIMIT 20`, Neo4j puede devolver coincidencias que **no están conectadas entre sí dentro de ese resultado**. Aura las dibuja como varias islas o componentes.
+
+```text
+isla 1                 isla 2
+Entidad→Proceso→Prov   Entidad→Proceso→Prov
+```
+
+No son dos bases ni dos grafos distintos: es **una sola base** y **un solo resultado** con grupos desconectados. Para aprender, primero usamos consultas centradas en una entidad o proveedor concreto.
+'''),
+        code(r'''
+nit_literal = str(nit_deseado).replace('"', '\\"')
+consulta_compartida = f'''MATCH (ancla:Entidad {{nit:"{nit_literal}"}})-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)
+WITH ancla, v, count(*) AS procesos_ancla
+ORDER BY procesos_ancla DESC, v.nit ASC
+LIMIT 1
 MATCH camino=(ancla)-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v)<-[:ADJUDICADO_A]-(:Proceso)<-[:PUBLICA]-(otra:Entidad)
 WHERE otra.nit <> ancla.nit
-RETURN camino LIMIT 30
-"""
-print("WOW 2 — desde tu ancla hacia otras entidades:\n"); print(consulta_wow_ancla)
+RETURN camino
+LIMIT 20'''
+print("Copia esta consulta en Aura Query:\n")
+print(consulta_compartida)
+''', hidden=True, title="Preparar la consulta de proveedor compartido"),
+        md(r'''
+### Vista gráfica 2 — dos entidades conectadas por un proveedor compartido
+
+La consulta preparada arriba busca este camino:
+
+```text
+Entidad ancla
+     │ PUBLICA
+     ▼
+  Proceso
+     │ ADJUDICADO_A
+     ▼
+ Proveedor
+     ▲ ADJUDICADO_A
+     │
+  Proceso
+     ▲ PUBLICA
+     │
+otra Entidad
+```
+
+**Qué debes hacer en Aura:**
+
+1. ejecuta la consulta preparada;
+2. abre **Graph**;
+3. elige un camino y síguelo nodo por nodo;
+4. haz clic en las dos Entidades y confirma que sus NIT son diferentes;
+5. confirma que ambas rutas pasan por el **mismo Proveedor**.
+
+**Qué significa:** esas dos entidades comparten un proveedor en registros adjudicados del extracto.
+
+**Qué NO significa:** coordinación, colusión, favorecimiento, causalidad o irregularidad.
 '''),
-    md(r'''### WOW 2 — lee un camino completo
+    ]
 
-Busca `Entidad ancla → Proceso → Proveedor ← Proceso ← otra Entidad`. Recorre un camino nodo por nodo y confirma que los extremos tienen NIT distintos y que el puente es el mismo NIT de proveedor.
 
-**Sí demuestra:** esos registros comparten un proveedor. **No demuestra:** coordinación, colusión, favorecimiento, causalidad o irregularidad. Cuando puedas explicar el dibujo sin mirar Cypher, estás listo para H2-R.
-''')]
+def move_contract_and_insert_lab(cells):
+    h = find(cells, "## 4. Contrato de resultado: primero pandas")
+    block = cells[h:h + 4]
+    if len(block) != 4 or "# Ambas métricas" not in s(block[1]):
+        raise ValueError("Cambió la estructura del contrato pandas S06")
+    del cells[h:h + 4]
 
-def move(cells):
-    h=find(cells,"## 4. Contrato de resultado: primero pandas"); block=cells[h:h+4]
-    if len(block)!=4 or "# Ambas métricas" not in s(block[1]): raise ValueError("Cambió estructura contrato S06")
-    del cells[h:h+4]
-    i=find(cells,"## 5. Tutorial visual — AuraDB"); put(cells[i],s(cells[i]).replace("## 5. Tutorial visual — AuraDB","## 4. AuraDB — del modelo al motor"))
-    i=find(cells,"## 6. Identidad y carga idempotente"); put(cells[i],s(cells[i]).replace("## 6. Identidad y carga idempotente","## 4.1 Identidad y carga idempotente"))
-    d=find(cells,"## 7. La consulta que justifica Neo4j"); put(block[0],s(block[0]).replace("## 4. Contrato de resultado: primero pandas","## 6. Contrato de resultado: ahora sí, primero pandas"))
-    cells[d:d]=graphlab()+block
+    i = find(cells, "## 5. Tutorial visual — AuraDB")
+    put(cells[i], s(cells[i]).replace("## 5. Tutorial visual — AuraDB", "## 4. AuraDB — conectar el motor real"))
+    i = find(cells, "## 6. Identidad y carga idempotente")
+    put(cells[i], s(cells[i]).replace("## 6. Identidad y carga idempotente", "## 4.1 Cargar nodos y relaciones sin duplicarlos"))
 
-def delivery(cells):
-    i=find(cells,"### Comprueba tu entrega")
-    put(cells[i],s(cells[i])+'''\n### Última milla — deja evidencia en el repositorio privado\n\n1. Crea o abre `hitos/s06/`. 2. Sube `hito_s06_ficha_relacional.md`. 3. Sube `s06_contexto_procesos.jsonl`. 4. Crea un commit descriptivo. 5. Entrega la **URL exacta de ese commit**, no solo la del repositorio.\n\nConfirma en la ficha: origen real del ancla, motor real, proveedor H2-R, proveedor explorado, máximo, mediana, consulta propia y límite interpretativo.\n''')
+    d = find(cells, "## 7. La consulta que justifica Neo4j")
+    put(block[0], s(block[0]).replace("## 4. Contrato de resultado: primero pandas", "## 6. Profundización opcional — ¿esta conectividad es alta o baja?") + r'''
+
+Hasta aquí ya aprendiste lo esencial de Neo4j/Cypher. Esta sección añade una comparación estadística; **no es necesaria para entender qué es un grafo**.
+''')
+    cells[d:d] = beginner_lab() + block
+
+    i = find(cells, "## 7. La consulta que justifica Neo4j")
+    put(cells[i], s(cells[i]).replace("## 7. La consulta que justifica Neo4j", "## 7. Verificación final — Neo4j y pandas responden la misma pregunta"))
+
+
+def simplify_operational_choices(cells):
+    # Elegir Aura/Respaldo mediante un formulario, no mediante una caja de texto ambigua.
+    for cell in cells:
+        body = s(cell)
+        if 'modo = input("Enter = Aura; escribe RESPALDO' in body:
+            body = body.replace(
+                'modo = input("Enter = Aura; escribe RESPALDO si no puedes usar el servicio: ").strip().upper()\nif modo not in ["", "RESPALDO"]:\n    raise ValueError("Usa Enter o RESPALDO.")\nmodo_neo4j = modo != "RESPALDO"',
+                'MODO_EJECUCION = "Aura"  #@param ["Aura", "RESPALDO"]\nmodo = "" if MODO_EJECUCION == "Aura" else "RESPALDO"\nmodo_neo4j = MODO_EJECUCION == "Aura"'
+            )
+            put(cell, body)
+            hide(cell, "Elegir Aura o respaldo y conectar")
+
+    # El primer proveedor es el ejemplo recomendado; el estudiante no debe adivinar un número.
+    for cell in cells:
+        body = s(cell)
+        if 'sel = int(input("Número de proveedor:' in body:
+            body = body.replace('sel = int(input("Número de proveedor: ").strip())', 'sel = 1  # ejemplo guiado: primera opción de la lista')
+            body = body.replace('if not 1 <= sel <= len(opciones):\n    raise ValueError("Número fuera de rango")', 'if not 1 <= sel <= len(opciones):\n    sel = 1')
+            body = body.replace('proveedor_elegido = opciones.iloc[sel-1]', 'proveedor_elegido = opciones.iloc[sel-1]\nprint("✅ Usaremos como ejemplo:", proveedor_elegido["proveedor"], "| entidades=", int(proveedor_elegido["entidades_conectadas"]))')
+            put(cell, body)
+            hide(cell, "Elegir automáticamente un proveedor de ejemplo")
+
+    # La exclusión deja de ser un acertijo y la explicación se genera con los datos reales.
+    for cell in cells:
+        body = s(cell)
+        if body.startswith('OPERADOR_EXCLUSION ='):
+            body = body.replace('OPERADOR_EXCLUSION = "____"', 'OPERADOR_EXCLUSION = "<>"')
+            body = re.sub(r'if OPERADOR_EXCLUSION != "<>":\n\s+raise ValueError\([^\n]+\)\n', '', body)
+            body = re.sub(
+                r'razon_exploracion = input\([^\n]+\)\.strip\(\)\nif len\(razon_exploracion\) < 25:\n\s+raise ValueError\([^\n]+\)',
+                'razon_exploracion = (f"Exploramos {proveedor_elegido[\'proveedor\']} porque conecta "\n                      f"{int(proveedor_elegido[\'entidades_conectadas\'])} entidades en el extracto. "\n                      "Este dato describe conectividad, no irregularidad.")\nprint("Ejemplo de respuesta:", razon_exploracion)',
+                body,
+                flags=re.S,
+            )
+            put(cell, body)
+            hide(cell, "Contar otras entidades sin adivinar sintaxis")
+
+    # La consulta antes vacía ahora viene completa y comentada.
+    i = find(cells, "# Escribe tu consulta entre las comillas triples")
+    put(cells[i], r'''#@title Ejecutar la consulta guiada para el par Entidad–Proveedor { display-mode: "form" }
+consulta_propia = '''MATCH (e:Entidad {nit:$ancla})-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$proveedor})
+RETURN count(DISTINCT p) AS procesos'''
+print("Consulta guiada:\n", consulta_propia)
+if modo_neo4j:
+    procesos_propios = int(driver.execute_query(
+        consulta_propia,
+        ancla=nit_deseado,
+        proveedor=str(proveedor_elegido["nit_proveedor"])
+    ).records[0]["procesos"])
+else:
+    procesos_propios = int(vecindario_df.loc[vecindario_df["nit_entidad"].eq(nit_deseado), "proceso"].nunique())
+    print("En RESPALDO verificamos el número con pandas; ejecuta el Cypher en Aura cuando tengas conexión.")
+esperados_propios = int(proveedor_elegido["procesos_con_entidad"])
+assert procesos_propios == esperados_propios
+print("Procesos para este par Entidad–Proveedor:", procesos_propios)
+''')
+    hide(cells[i], "Ejecutar consulta Cypher ya preparada")
+
+    # La ficha usa respuestas modelo editables; ya no hay preguntas abiertas sin ejemplo.
+    i = find(cells, 'autor = input("Autor o alias')
+    put(cells[i], r'''#@title Datos mínimos de la ficha { display-mode: "form" }
+from pathlib import Path
+from datetime import datetime, timezone
+AUTOR = "estudiante"  #@param {type:"string"}
+autor = AUTOR.strip() or "estudiante"
+decision_modelo = "Proceso es nodo porque tiene identidad y propiedades propias y participa en el camino Entidad → Proceso → Proveedor."
+limite_estudiante = "Las conexiones observadas no demuestran irregularidad; faltan contexto competitivo, temporal y evidencia adicional del proceso."
+alternativa_modelo = "Relación directa Entidad → Proveedor con el proceso guardado como propiedad."
+razon_alternativa = "La descartamos porque perderíamos al Proceso como nodo consultable y reutilizable en S7."
+fecha_ejecucion = datetime.now(timezone.utc).isoformat()
+print("✅ Respuestas modelo cargadas. Puedes explicarlas con tus palabras en clase.")
+print("Ejemplo de respuesta — modelo:", decision_modelo)
+print("Ejemplo de respuesta — límite:", limite_estudiante)
+''')
+    hide(cells[i], "Completar autor; respuestas modelo incluidas")
+
+
+def hide_python_infrastructure(cells):
+    tokens = [
+        "import urllib.request",
+        'hist = datos[datos["tipo_registro"]',
+        'prov_ancla = hist_ancla.groupby',
+        'cols = [',
+        'para_carga = datos[cols].copy()',
+        'pd.concat([prov_ancla',
+        'str(nit_deseado).replace',
+    ]
+    for cell in cells:
+        if cell.get("cell_type") != "code":
+            continue
+        body = s(cell)
+        if any(token in body for token in tokens):
+            hide(cell, "Infraestructura automática — ejecutar, no memorizar")
+
 
 def enhance_cells(cells):
-    if any(MARKER in s(c) for c in cells): return cells
-    anchor(cells); concepts(cells); contract(cells); graph_props(cells); move(cells); delivery(cells); return cells
+    if any(MARKER in s(c) for c in cells):
+        return cells
+    simplify_intro(cells)
+    simplify_anchor(cells)
+    simplify_concepts(cells)
+    improve_contract(cells)
+    improve_graph_properties(cells)
+    move_contract_and_insert_lab(cells)
+    simplify_operational_choices(cells)
+    hide_python_infrastructure(cells)
+    return cells
+
 
 def enhance_checklist(cells):
-    p=ROOT/"assets/tutoriales/s06-laboratorio-guiado.html"
-    if not p.is_file(): return
-    html=p.read_text(encoding="utf-8"); data=json.loads(html.split("const DATA = ",1)[1].split(";\nconst DATA2",1)[0]); pasos=data[0]["pasos"]
-    for paso in pasos:
-        if paso.get("id")=="patron":
-            paso["tipo"]="decide"
-            paso["titulo"]="Completa el patrón contractual"
-            paso["explicacion"]="El ID del proceso identifica un nodo; el tipo de relación identifica la flecha."
-            paso["instruccion"]="Completa el hueco con ADJUDICADO_A y ejecuta la validación antes de continuar."
-            paso["evidencia"]="Patrón correcto: ADJUDICADO_A expresa una adjudicación observada."
-    ids={"ancla","graph","grado","wow","wow2","entrega"}; pasos[:]=[x for x in pasos if x.get("id") not in ids]
-    def cn(x):
-        h=[i for i,c in enumerate(cells,1) if x in s(c)]
-        if len(h)!=1: raise ValueError(f"Checklist Graph Lab ambiguo {x}: {h}")
-        return f"celda {h[0]}"
-    extra=[
-      dict(id="ancla",tipo="decide",titulo="Declara el origen del ancla",celda=cn("USAR_MI_ANCLA_S5 = False"),explicacion="Distingues continuidad real de respaldo.",instruccion="Usa tu JSON de S5 si lo conservaste; si no, declara respaldo.",evidencia="Origen del ancla explícito."),
-      dict(id="graph",tipo="externo",titulo="Abre el resultado como grafo",celda=cn("consulta_graph_basico="),explicacion="Graph y Table son dos lecturas del mismo resultado.",instruccion="Ejecuta en Aura, usa Graph/Fit y revisa propiedades de nodos y relaciones.",evidencia="Explicas Entidad → Proceso → Proveedor."),
-      dict(id="grado",tipo="entiende",titulo="Distingue grado y conectividad",celda=cn("grado_df="),explicacion="Grado alto no implica muchas entidades.",instruccion="Compara grado_adjudicaciones y entidades_conectadas.",evidencia="Top 10 con ambas métricas."),
-      dict(id="wow",tipo="externo",titulo="WOW 1: proveedor-hub",celda=cn("consulta_wow_global="),explicacion="Lees una estrella sin convertir layout en riesgo.",instruccion="Centra hub, separa ramas, revisa propiedades y contrasta Table.",evidencia="Grafo estrella explicado por anillos."),
-      dict(id="wow2",tipo="externo",titulo="WOW 2: desde el ancla",celda=cn("consulta_wow_ancla="),explicacion="Lees un camino de cuatro relaciones.",instruccion="Confirma NIT/ID en un camino completo antes de interpretar.",evidencia="Lees ancla → Proceso → Proveedor ← Proceso ← otra Entidad."),
-      dict(id="entrega",tipo="decide",titulo="Cierra con un commit verificable",celda=cn("Última milla — deja evidencia"),explicacion="La evidencia queda versionada.",instruccion="Sube ficha+JSONL a hitos/s06 y entrega URL exacta del commit.",evidencia="Commit privado con ambos archivos."),]
-    k=next((i+1 for i,x in enumerate(pasos) if x.get("id")=="cargar"),1); pasos[k:k]=[extra[0]]
-    k=next((i+1 for i,x in enumerate(pasos) if x.get("id")=="repetir"),len(pasos)); pasos[k:k]=extra[1:5]; pasos.append(extra[5])
-    new="const DATA = "+json.dumps(data,ensure_ascii=False,indent=2)+";\nconst DATA2"
-    html=re.sub(r"const DATA = \[.*?;\nconst DATA2",lambda _:new,html,count=1,flags=re.S)
-    html=html.replace('"s06lab:nit-v2:" + id','"s06lab:graph-v3:" + id').replace('"s06lab:" + id','"s06lab:graph-v3:" + id')
-    p.write_text(html,encoding="utf-8")
+    """El checklist es ahora un artefacto editorial independiente; aquí solo verificamos que exista."""
+    path = ROOT / "assets" / "tutoriales" / "s06-laboratorio-guiado.html"
+    if not path.is_file():
+        raise FileNotFoundError(path)
