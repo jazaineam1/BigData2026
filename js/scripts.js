@@ -99,7 +99,7 @@ window.addEventListener('DOMContentLoaded', event => {
                 <div class="course-category">Taller domiciliario 1 · S1–S6</div>
                 <div class="course-title">De datos crudos a una decisión explicable</div>
                 <p class="course-description">
-                    Proyecto individual paso a paso: perfilar fuentes, construir una regla SECOP,
+                    Proyecto en parejas paso a paso: perfilar fuentes, construir una regla SECOP,
                     consultar evidencia documental, diseñar Cassandra query-first y desarrollar contexto relacional con Neo4j.
                     Sin selección múltiple; Git/GitHub es opcional.
                 </p>
