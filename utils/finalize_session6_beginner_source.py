@@ -37,6 +37,16 @@ RETURN count(DISTINCT p) AS procesos"""'''
     else:
         raise SystemExit("No se encontró consulta_propia guiada")
 
+    old_tokens = '''    tokens = [\n        "import urllib.request",'''
+    new_tokens = '''    tokens = [\n        "groupby(",\n        "to_dict(\\\"records\\\")",\n        "pd.concat(",\n        "import urllib.request",'''
+    if old_tokens in text:
+        text = text.replace(old_tokens, new_tokens, 1)
+        print("[OK] Regla de ocultamiento ampliada a pandas avanzado")
+    elif '        "groupby(",' in text and '        "to_dict(\\"records\\")",' in text:
+        print("[OK] Regla de ocultamiento pandas ya estaba ampliada")
+    else:
+        raise SystemExit("No se encontró la lista de tokens de infraestructura")
+
     pattern = re.compile(r'def enhance_checklist\(cells\):\n(?:    .*\n?)*?\Z', re.M)
     replacement = '''def enhance_checklist(cells):\n    """Restaura el checklist beginner desde su plantilla canónica."""\n    template = ROOT / "assets" / "tutoriales" / "templates" / "s06-laboratorio-guiado.html"\n    target = ROOT / "assets" / "tutoriales" / "s06-laboratorio-guiado.html"\n    if not template.is_file():\n        raise FileNotFoundError(template)\n    target.write_text(template.read_text(encoding="utf-8"), encoding="utf-8")\n'''
     new_text, count = pattern.subn(replacement, text, count=1)
