@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 """Regresiones específicas de Graph Lab para S06.
 
-Complementa validate_session6.py con invariantes visuales y de Cypher que no
-requieren una conexión autenticada a Aura. Su objetivo es detectar errores de
-alias, pérdida del tutorial gráfico o desorden pedagógico antes de publicar.
+Complementa validate_session6.py con invariantes visuales, editoriales y de Cypher
+que no requieren una conexión autenticada a Aura. Su objetivo es detectar errores
+de alias, pérdida del tutorial gráfico, desorden pedagógico o divergencias entre
+el notebook y su checklist antes de publicar.
 """
 from __future__ import annotations
 
@@ -15,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 NB = ROOT / "Cuadernos" / "6_Neo4j_Contexto_Relacional.ipynb"
 GRAPH_TUTORIAL = ROOT / "assets" / "tutoriales" / "neo4j-graph-lab-s06.html"
+CHECKLIST = ROOT / "assets" / "tutoriales" / "s06-laboratorio-guiado.html"
 
 
 def source(cell: dict) -> str:
@@ -24,7 +26,7 @@ def source(cell: dict) -> str:
 
 def main() -> None:
     errors: list[str] = []
-    for path in (NB, GRAPH_TUTORIAL):
+    for path in (NB, GRAPH_TUTORIAL, CHECKLIST):
         if not path.is_file():
             errors.append(f"Falta {path.relative_to(ROOT)}")
     if errors:
@@ -88,6 +90,21 @@ def main() -> None:
     if tutorial.count('<section class="slide') < 10:
         errors.append("El tutorial Graph Lab quedó demasiado corto o mal formado")
 
+    checklist = CHECKLIST.read_text(encoding="utf-8")
+    if "Observa el patrón ya resuelto" in checklist:
+        errors.append("Checklist desactualizado: el patrón ya no está resuelto; el estudiante debe completarlo")
+    for item in [
+        "Completa el patrón contractual",
+        "Completa el hueco con ADJUDICADO_A",
+        '"id": "graph"',
+        '"id": "grado"',
+        '"id": "wow"',
+        '"id": "wow2"',
+        '"id": "entrega"',
+    ]:
+        if item not in checklist:
+            errors.append(f"Checklist Graph Lab incompleto: {item!r}")
+
     if errors:
         print("Validación Graph Lab fallida:")
         for error in errors:
@@ -96,7 +113,7 @@ def main() -> None:
 
     print(f"[OK] Graph Lab: {len(cells)} celdas; Python parsea correctamente")
     print("[OK] S5 opcional, patrón editable, grados, WOW 1/WOW 2 y tutorial visual presentes")
-    print("[OK] Alias Cypher del vecindario coherente: precio_base se devuelve y se ordena")
+    print("[OK] Alias Cypher coherente y checklist sincronizado con el ejercicio ADJUDICADO_A")
 
 
 if __name__ == "__main__":
