@@ -205,6 +205,13 @@ def enhance_checklist(cells):
     p=ROOT/"assets/tutoriales/s06-laboratorio-guiado.html"
     if not p.is_file(): return
     html=p.read_text(encoding="utf-8"); data=json.loads(html.split("const DATA = ",1)[1].split(";\nconst DATA2",1)[0]); pasos=data[0]["pasos"]
+    for paso in pasos:
+        if paso.get("id")=="patron":
+            paso["tipo"]="decide"
+            paso["titulo"]="Completa el patrón contractual"
+            paso["explicacion"]="El ID del proceso identifica un nodo; el tipo de relación identifica la flecha."
+            paso["instruccion"]="Completa el hueco con ADJUDICADO_A y ejecuta la validación antes de continuar."
+            paso["evidencia"]="Patrón correcto: ADJUDICADO_A expresa una adjudicación observada."
     ids={"ancla","graph","grado","wow","wow2","entrega"}; pasos[:]=[x for x in pasos if x.get("id") not in ids]
     def cn(x):
         h=[i for i,c in enumerate(cells,1) if x in s(c)]
