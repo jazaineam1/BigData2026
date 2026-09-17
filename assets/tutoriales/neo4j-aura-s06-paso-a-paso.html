@@ -3,264 +3,87 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>S06 · Neo4j + AuraDB desde cero · Compras Claras</title>
+<title>S06 · AuraDB desde cero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--v950:#0b241c;--v850:#103525;--v800:#123f2b;--v700:#175c3c;--v500:#2b7d58;--v100:#e3efe6;--d500:#c9a227;--d100:#f7ecc9;--c50:#faf7f0;--t:#172019;--g:#5c6b63;--line:#e2dcc8;--red:#a53828;--red100:#fbe9e5;--blue100:#e8f1ff;--shadow:0 24px 48px -18px rgba(11,36,28,.28),0 4px 10px -4px rgba(11,36,28,.12)}
-*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}body{height:100dvh;display:flex;flex-direction:column;color:var(--t);font-family:"IBM Plex Sans",Arial,sans-serif;background:radial-gradient(1000px 540px at 90% -10%,rgba(201,162,39,.10),transparent 60%),var(--c50)}h1,h2,h3{font-family:"Fraunces",Georgia,serif;margin:0}code,pre,.mono{font-family:"IBM Plex Mono",Consolas,monospace}.bar{position:fixed;top:0;left:0;height:4px;background:var(--d500);z-index:30}header{flex:none;display:flex;justify-content:space-between;align-items:center;padding:10px clamp(18px,4vw,48px) 7px}.brand{font-weight:700;color:var(--v800)}.count{font:13px "IBM Plex Mono";color:var(--g);background:#fff;border:1px solid var(--line);padding:6px 14px;border-radius:999px}main{flex:1;min-height:0;padding:4px clamp(14px,4vw,48px) 8px}.stage{height:100%;position:relative;max-width:1520px;margin:auto}.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transform:translateY(12px) scale(.99);transition:.28s;background:#fff;border:1px solid rgba(23,92,60,.08);border-radius:20px;padding:clamp(18px,3vw,38px);overflow:auto;box-shadow:var(--shadow)}.slide.on{opacity:1;pointer-events:auto;transform:none}.tag{display:inline-flex;padding:6px 14px;border-radius:999px;background:var(--v100);color:var(--v700);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px}.tag.gold{background:var(--d100);color:#6b5100}.tag.blue{background:var(--blue100);color:#244e86}.slide h1{font-size:clamp(34px,5vw,60px);line-height:1.03;color:var(--v950)}.slide h2{font-size:clamp(23px,3vw,34px);color:var(--v800);margin-bottom:8px}.slide h3{font-size:18px;color:var(--v800);margin-bottom:6px}.sub{color:var(--g);font-size:15px;line-height:1.55;max-width:80ch}.lead{font-size:clamp(18px,2.1vw,26px);line-height:1.4;color:var(--v850);max-width:38ch}.grid{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.08fr);gap:24px;align-items:start}.grid.equal{grid-template-columns:1fr 1fr}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}.cards.three{grid-template-columns:repeat(3,1fr)}.card{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--c50);font-size:13px;line-height:1.45}.card strong{display:block;color:var(--v800);font-size:14px;margin-bottom:5px}.call{margin-top:12px;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5;background:var(--v100);color:#0e3524;border:1px solid #c7e0cf}.call.warn{background:#fff5dd;color:#604500;border-color:#ead69d}.call.bad{background:var(--red100);color:#692719;border-color:#ecc0b6}.call.blue{background:var(--blue100);color:#173c6e;border-color:#c8daf4}.result{margin-top:12px;padding:12px 14px;border-left:4px solid var(--d500);border-radius:8px;background:#fff7dc;color:#3f3512;font-size:13px}.result.ok{border-color:var(--v700);background:#eef8f1;color:#153c29}pre{background:var(--v950);color:#e8f1ea;padding:14px;border-radius:10px;overflow:auto;max-height:38vh;font-size:12px;line-height:1.5}.ui{min-height:280px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 8px 18px -8px rgba(11,36,28,.22);overflow:hidden}.ui-top{padding:11px 14px;background:#f6f7f7;border-bottom:1px solid #dde3df;display:flex;justify-content:space-between;gap:8px;font-size:12px}.ui-body{padding:18px}.label{font-size:11px;color:var(--g);text-transform:uppercase;letter-spacing:.04em;margin-top:12px}.field{margin-top:5px;border:1px solid #cbd6d0;border-radius:7px;padding:9px 10px;background:#fff;font:12px "IBM Plex Mono"}.choices{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}.choices span{border:1px solid #cbd6d0;border-radius:8px;padding:9px 11px;font-size:12px}.choices .sel{border:2px solid var(--v700);background:var(--v100);font-weight:700}.uibtn{display:inline-block;margin-top:14px;background:var(--v700);color:#fff;padding:9px 14px;border-radius:7px;font-weight:700;font-size:12px}.prompt{background:var(--v950);color:#dff0e5;border-radius:9px;padding:14px;font:13px/1.55 "IBM Plex Mono"}.route{font:14px/1.8 "IBM Plex Mono";background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}.caption{text-align:center;color:var(--g);font-size:11.5px;margin-top:7px}.big-eq{font-family:"IBM Plex Mono";font-weight:700;font-size:clamp(16px,2vw,22px);line-height:1.7;background:var(--c50);border:1px solid var(--line);border-radius:14px;padding:18px}.check{display:grid;grid-template-columns:30px 1fr;gap:8px 10px;align-items:start;margin:9px 0}.check b{display:flex;width:24px;height:24px;border-radius:50%;background:var(--v100);color:var(--v700);align-items:center;justify-content:center}.x{color:var(--red);font-weight:700}.ok{color:var(--v700);font-weight:700}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--g);font-size:11px;text-transform:uppercase}a{color:var(--v700)}nav{flex:none;display:flex;justify-content:center;align-items:center;gap:12px;padding:5px 18px 10px}nav button{min-width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--v800);font-size:18px;cursor:pointer}.full{width:auto!important;border-radius:999px!important;padding:0 13px;font:700 12px "IBM Plex Sans"}.dots{display:flex;gap:6px;flex-wrap:wrap;max-width:55vw}.dot{width:10px;min-width:10px;height:10px;border:0;border-radius:50%;background:var(--line);padding:0}.dot.on{width:24px;background:var(--v700);border-radius:5px}.embed header{display:none}.embed main{padding:4px 10px}.embed .slide{padding:clamp(12px,2vw,22px)}@media(max-width:880px){.cards{grid-template-columns:repeat(2,1fr)}}@media(max-width:760px){.grid,.grid.equal,.cards,.cards.three{grid-template-columns:1fr}.ui{min-height:230px}.full{display:none}.slide h1{font-size:34px}}
+:root{--ink:#172019;--green:#123f2b;--green2:#175c3c;--mint:#e3efe6;--cream:#faf7f0;--line:#e2dcc8;--muted:#5c6b63;--warn:#fff5dd;--bad:#fbe9e5}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:"IBM Plex Sans",sans-serif;line-height:1.55}main{max-width:900px;margin:auto;padding:24px 16px 80px}h1,h2{font-family:"Fraunces",serif;color:var(--green)}h1{font-size:clamp(32px,5vw,48px);line-height:1.08}h2{font-size:25px}code,pre{font-family:"IBM Plex Mono",monospace}pre{background:#0b241c;color:#eef7f0;padding:14px;border-radius:11px;overflow:auto}.hero,.step{background:#fff;border:1px solid var(--line);border-radius:17px;padding:20px;margin:14px 0}.tag{display:inline-block;background:var(--mint);color:var(--green2);font-size:12px;font-weight:700;border-radius:999px;padding:5px 10px}.call{background:var(--mint);border-left:4px solid var(--green2);padding:12px 14px;border-radius:8px}.warn{background:var(--warn);padding:12px 14px;border-radius:8px}.bad{background:var(--bad);padding:12px 14px;border-radius:8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mock{border:1px solid var(--line);border-radius:11px;padding:13px;background:#fbfcfb}.mock b{display:block;margin-bottom:8px}.field{border:1px solid #ccd6d0;border-radius:7px;padding:9px;margin:6px 0;font-family:"IBM Plex Mono",monospace;font-size:12px}.button{display:inline-block;background:var(--green2);color:#fff;border-radius:7px;padding:8px 12px;font-weight:700;margin-top:8px}.mini{font-size:13px;color:var(--muted)}@media(max-width:700px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="bar" id="bar"></div>
-<header><div class="brand">Universidad Central · Big Data · S06</div><div class="count"><b id="n">1</b>/<span id="tot"></span></div></header>
-<main><div class="stage">
-
-<section class="slide on">
-  <div class="tag gold">Tutorial instrumental · desde cero</div>
-  <h1>Neo4j + AuraDB: de cero a una conexión real</h1>
-  <p class="lead">Este tutorial asume que nunca has usado Neo4j. Al terminar tendrás una instancia <b>AuraDB Free</b> funcionando y Colab podrá conectarse a ella.</p>
-  <div class="cards three">
-    <div class="card"><strong>1 · Entender</strong>Neo4j, AuraDB, Cypher y Driver no son lo mismo.</div>
-    <div class="card"><strong>2 · Entrar</strong>Crear o reutilizar una instancia y guardar credenciales.</div>
-    <div class="card"><strong>3 · Verificar</strong>Probar Query y luego <code>verify_connectivity()</code> desde Colab.</div>
-  </div>
-  <div class="call warn"><b>Transparencia visual.</b> Las pantallas dibujadas en este tutorial son <b>representaciones de interfaz, no capturas autenticadas</b>. Los nombres de botones pueden cambiar ligeramente; la ruta conceptual se mantiene.</div>
+<main>
+<section class="hero">
+<div class="tag">S06 · conexión</div>
+<h1>AuraDB desde cero</h1>
+<p>Este tutorial solo responde una pregunta: <b>¿cómo creo o abro una instancia Neo4j en Aura y verifico que funciona?</b></p>
+<div class="call"><b>Cuatro nombres:</b> Neo4j = motor de grafos · AuraDB = servicio en la nube · Cypher = lenguaje de consulta · Aura Query = editor donde escribes Cypher.</div>
 </section>
 
-<section class="slide">
-  <div class="tag gold">Antes de hacer clic</div>
-  <h2>Neo4j ≠ AuraDB ≠ Cypher ≠ Driver</h2>
-  <p class="sub">Esta distinción evita la confusión más común de la sesión.</p>
-  <div class="cards">
-    <div class="card"><strong>Neo4j</strong>La base de datos de grafos. Guarda nodos, relaciones y propiedades y permite recorrer conexiones.</div>
-    <div class="card"><strong>AuraDB</strong>El servicio administrado en la nube donde hoy ejecutaremos Neo4j sin instalar un servidor en tu computador.</div>
-    <div class="card"><strong>Cypher</strong>El lenguaje con el que consultas Neo4j. <code>MATCH</code>, <code>MERGE</code> y <code>RETURN</code> son palabras de Cypher.</div>
-    <div class="card"><strong>Neo4j Driver</strong>La librería que permite a Python/Colab conectarse a una instancia Neo4j, incluida AuraDB.</div>
-  </div>
-  <div class="big-eq" style="margin-top:16px">Colab → Neo4j Driver → AuraDB → Neo4j<br>                             ↑<br>                           Cypher</div>
-  <div class="call"><b>Frase para recordar:</b> hoy aprendes <b>Neo4j</b>; <b>AuraDB</b> es el lugar administrado donde lo ejecutas.</div>
+<section class="step">
+<h2>1. Entra a Aura Console</h2>
+<ol>
+<li>Abre <a href="https://console.neo4j.io/" target="_blank" rel="noopener">Aura Console ↗</a>.</li>
+<li>Inicia sesión.</li>
+<li>Elige <b>AuraDB</b>, no AuraDS.</li>
+</ol>
+<div class="mock"><b>Qué buscas en la pantalla</b><div class="field">Producto: AuraDB</div><div class="field">Instancias</div></div>
 </section>
 
-<section class="slide">
-  <div class="tag blue">Conecta con S5</div>
-  <h2>Astra y Aura tampoco son lo mismo</h2>
-  <table>
-    <tr><th>Sesión</th><th>Tecnología</th><th>Servicio administrado</th><th>Lenguaje</th><th>Conector Python</th></tr>
-    <tr><td>S5</td><td><b>Cassandra</b></td><td>Astra DB</td><td>CQL</td><td><code>cassandra-driver</code></td></tr>
-    <tr><td>S6</td><td><b>Neo4j</b></td><td>AuraDB</td><td>Cypher</td><td><code>neo4j</code></td></tr>
-  </table>
-  <div class="call bad"><b>No intercambies nombres.</b> Astra fue el servicio de Cassandra en S5. AuraDB es el servicio de Neo4j en S6.</div>
-  <div class="result"><b>Objetivo de hoy:</b> terminar con <code>RETURN 1 AS conexion</code> funcionando en Aura y con <code>driver.verify_connectivity()</code> funcionando en Colab.</div>
+<section class="step">
+<h2>2. Crea o reutiliza una instancia</h2>
+<p>Si ya tienes una instancia de práctica, úsala. Si no, crea una instancia AuraDB disponible para tu cuenta. Nombre sugerido:</p>
+<pre>compras-claras-s06</pre>
+<div class="warn"><b>Hoy no necesitas Graph Data Science ni configuraciones avanzadas.</b> El objetivo es tener Neo4j disponible para consultas Cypher básicas.</div>
 </section>
 
-<section class="slide">
-  <div class="tag">Paso 1</div>
-  <h2>Entra a Aura Console</h2>
-  <div class="grid">
-    <div>
-      <div class="check"><b>1</b><div>Abre <a href="https://console.neo4j.io/" target="_blank" rel="noopener">Aura Console ↗</a>.</div></div>
-      <div class="check"><b>2</b><div>Inicia sesión o crea tu cuenta.</div></div>
-      <div class="check"><b>3</b><div>Cuando veas los productos de Aura, elige <b>AuraDB</b>.</div></div>
-      <div class="call warn"><b>No elijas AuraDS.</b> AuraDS está orientado a Graph Data Science. En esta sesión necesitamos una base Neo4j normal: <b>AuraDB</b>.</div>
-    </div>
-    <div class="ui" aria-label="Representación de Aura Console con AuraDB seleccionado">
-      <div class="ui-top"><b>Aura Console</b><span>representación</span></div>
-      <div class="ui-body">
-        <div class="label">Product</div>
-        <div class="choices"><span class="sel">AuraDB</span><span>AuraDS</span></div>
-        <div class="label">Tus instancias</div>
-        <div class="field">Todavía no hay una instancia / o aparece tu instancia existente</div>
-      </div>
-    </div>
-  </div>
+<section class="step">
+<h2>3. Guarda tres datos</h2>
+<p>Al crear o abrir la instancia necesitarás estos datos para Colab:</p>
+<div class="grid">
+<div class="mock"><b>URI</b><div class="field">neo4j+s://...</div></div>
+<div class="mock"><b>Usuario</b><div class="field">neo4j</div></div>
+<div class="mock"><b>Contraseña</b><div class="field">••••••••</div></div>
+<div class="mock"><b>Nombre de instancia</b><div class="field">compras-claras-s06</div></div>
+</div>
+<p class="mini">No publiques la contraseña en GitHub ni la pegues en una celda visible.</p>
 </section>
 
-<section class="slide">
-  <div class="tag">Paso 2</div>
-  <h2>Crea o reutiliza una instancia Free</h2>
-  <div class="grid">
-    <div>
-      <div class="check"><b>1</b><div>Si ya tienes una instancia <b>Free</b>, reutilízala.</div></div>
-      <div class="check"><b>2</b><div>Si no tienes, crea una instancia de tipo <b>AuraDB</b> y nivel <b>Free</b>.</div></div>
-      <div class="check"><b>3</b><div>Nombre sugerido: <code>compras-claras-s06</code>.</div></div>
-      <div class="check"><b>4</b><div>Si aparecen opciones avanzadas —Graph Analytics, vector optimization u otras— déjalas en sus valores predeterminados; no son parte del objetivo de hoy.</div></div>
-      <div class="call blue"><b>Importante.</b> Aura Free permite una instancia Free por cuenta. No necesitas un plan de pago para esta práctica.</div>
-    </div>
-    <div class="ui" aria-label="Representación de creación de una instancia AuraDB Free">
-      <div class="ui-top"><b>Create instance</b><span>representación</span></div>
-      <div class="ui-body">
-        <div class="label">Product</div><div class="field">AuraDB</div>
-        <div class="label">Tier</div><div class="field" style="border:2px solid var(--v700);background:var(--v100)">Free</div>
-        <div class="label">Instance name</div><div class="field">compras-claras-s06</div>
-        <div class="uibtn">Create / Next</div>
-      </div>
-    </div>
-  </div>
+<section class="step">
+<h2>4. Abre Aura Query</h2>
+<p>Dentro de la instancia abre <b>Query</b>. Ese es el lugar donde escribirás Cypher.</p>
+<pre>RETURN 1 AS conexion</pre>
+<p>Presiona <b>Run</b>.</p>
+<div class="call"><b>Resultado esperado:</b> en Table aparece una columna <code>conexion</code> con el valor <code>1</code>. Si eso ocurre, Neo4j está respondiendo.</div>
 </section>
 
-<section class="slide">
-  <div class="tag">Paso 3</div>
-  <h2>Guarda las credenciales: son la llave de la base</h2>
-  <div class="grid">
-    <div>
-      <p class="sub">Al crear la instancia, Aura genera información de conexión. Necesitarás:</p>
-      <table><tr><th>Dato</th><th>Para qué sirve</th></tr>
-        <tr><td><code>Connection URI</code></td><td>dirección de tu instancia; en Aura suele comenzar con <code>neo4j+s://</code></td></tr>
-        <tr><td><code>User name</code></td><td>usuario de la base, normalmente <code>neo4j</code></td></tr>
-        <tr><td><code>Password</code></td><td>contraseña generada para esa instancia</td></tr>
-      </table>
-      <div class="call bad"><b>No publiques la contraseña.</b> No debe aparecer en GitHub, capturas, hito ni celdas visibles. En Colab la pediremos con <code>getpass()</code>.</div>
-      <div class="call warn"><b>Guárdala ahora.</b> La documentación de Aura advierte que la contraseña generada al crear la instancia debe copiarse o descargarse en ese momento porque no se muestra después como texto recuperable.</div>
-    </div>
-    <div class="ui" aria-label="Representación de credenciales de una instancia AuraDB">
-      <div class="ui-top"><b>Instance credentials</b><span>representación</span></div>
-      <div class="ui-body">
-        <div class="label">Connection URI</div><div class="field">neo4j+s://••••••••.databases.neo4j.io</div>
-        <div class="label">User name</div><div class="field">neo4j</div>
-        <div class="label">Password</div><div class="field">••••••••••••••••</div>
-        <div class="uibtn">Copy / Download credentials</div>
-      </div>
-    </div>
-  </div>
+<section class="step">
+<h2>5. Vuelve a Colab y conecta el Driver</h2>
+<p>En el cuaderno S06 selecciona <b>Aura</b> como modo de ejecución. La celda te pedirá URI, usuario y contraseña. El código de conexión está oculto porque no es el contenido que debes memorizar.</p>
+<div class="bad"><b>No subas el JSON de S5 a Aura.</b> El archivo <code>s05_ancla_s06.json</code> se usa en Colab para recuperar el proceso y la entidad elegidos. Aura recibe los datos del grafo mediante las celdas de carga del cuaderno.</div>
 </section>
 
-<section class="slide">
-  <div class="tag">Paso 4</div>
-  <h2>Abre Query y conecta la interfaz a tu instancia</h2>
-  <div class="grid">
-    <div>
-      <div class="check"><b>1</b><div>Espera a que la instancia esté disponible.</div></div>
-      <div class="check"><b>2</b><div>En la consola abre <b>Query</b>.</div></div>
-      <div class="check"><b>3</b><div>Si la barra de conexión lo pide, selecciona tu instancia y escribe usuario/contraseña.</div></div>
-      <div class="call"><b>Qué es Query.</b> Es el editor donde escribes y ejecutas <b>Cypher</b> directamente contra Neo4j. No es otra base de datos.</div>
-    </div>
-    <div class="ui" aria-label="Representación de Neo4j Query conectado a una instancia AuraDB">
-      <div class="ui-top"><b>Query</b><span>representación</span></div>
-      <div class="ui-body">
-        <div class="label">Connection</div><div class="field" style="border-color:var(--v700)">compras-claras-s06 · connected</div>
-        <div class="label">Editor Cypher</div><div class="prompt">// aquí escribirás una consulta</div>
-        <div class="uibtn">Run</div>
-      </div>
-    </div>
-  </div>
+<section class="step">
+<h2>6. ¿Qué hace Colab y qué hace Aura?</h2>
+<div class="grid">
+<div class="mock"><b>Colab</b><p>Lee CSV/JSON, prepara datos y usa el Driver.</p></div>
+<div class="mock"><b>AuraDB / Neo4j</b><p>Guarda nodos/relaciones y ejecuta Cypher.</p></div>
+</div>
+<div class="call"><b>Flujo:</b> Colab → Driver de Neo4j → AuraDB → Neo4j.</div>
 </section>
 
-<section class="slide">
-  <div class="tag">Paso 5 · prueba mínima</div>
-  <h2>Comprueba que Neo4j responde antes de cargar datos</h2>
-  <div class="grid equal">
-    <div>
-      <p class="sub">Copia exactamente esta consulta en Query y ejecútala:</p>
-      <pre>RETURN 1 AS conexion;</pre>
-      <div class="result ok"><b>Esperado:</b> una fila con la columna <code>conexion</code> y el valor <code>1</code>.</div>
-    </div>
-    <div>
-      <h3>¿Qué demuestra?</h3>
-      <div class="check"><b>✓</b><div>La interfaz Query puede hablar con tu instancia.</div></div>
-      <div class="check"><b>✓</b><div>Tus credenciales funcionan en la consola.</div></div>
-      <h3 style="margin-top:18px">¿Qué NO demuestra?</h3>
-      <div class="check"><b class="x">×</b><div>Que el grafo de Compras Claras ya esté cargado.</div></div>
-      <div class="check"><b class="x">×</b><div>Que el modelo <code>Entidad → Proceso → Proveedor</code> sea correcto.</div></div>
-      <div class="check"><b class="x">×</b><div>Que Python pueda conectarse todavía.</div></div>
-    </div>
-  </div>
-  <div class="call"><b>Regla de diagnóstico:</b> primero prueba la plataforma; después prueba Python. Así no mezclas dos problemas diferentes.</div>
+<section class="step">
+<h2>7. Cuando ya conectó</h2>
+<p>Regresa al cuaderno y ejecuta las celdas de carga. Luego abre el <b>Mini curso visual de Cypher</b>. Allí aprenderás <code>MATCH</code>, relaciones, caminos, grado y hub.</p>
+<p><a href="neo4j-graph-lab-s06.html" target="_blank" rel="noopener">Abrir mini curso visual de Cypher ↗</a></p>
 </section>
 
-<section class="slide">
-  <div class="tag">Paso 6</div>
-  <h2>Vuelve a Colab: instala el Neo4j Driver</h2>
-  <div class="grid">
-    <div>
-      <p class="sub">El driver es el conector oficial que permite a Python hablar con Neo4j. AuraDB no cambia esa idea: sigue siendo una instancia Neo4j remota.</p>
-      <pre>!pip install -q "neo4j&gt;=6,&lt;7"</pre>
-      <div class="call blue"><b>No memorices la instalación.</b> El concepto importante es la arquitectura: Python necesita un driver para comunicarse con la base.</div>
-    </div>
-    <div class="route">Colab / Python<br>↓<br><b>Neo4j Driver</b><br>↓<br>Connection URI + usuario + contraseña<br>↓<br><b>AuraDB</b><br>↓<br>Neo4j</div>
-  </div>
+<section class="hero">
+<h2>Prueba de éxito</h2>
+<p>Antes de continuar debes poder decir:</p>
+<blockquote>“AuraDB es donde está mi instancia Neo4j; Cypher es el lenguaje; Aura Query es donde ejecuto las consultas. Ya comprobé <code>RETURN 1 AS conexion</code>.”</blockquote>
 </section>
-
-<section class="slide">
-  <div class="tag">Paso 7</div>
-  <h2>Conecta Python sin escribir la contraseña en pantalla</h2>
-  <div class="grid">
-    <div>
-      <pre>from neo4j import GraphDatabase
-from getpass import getpass
-
-URI = input("Connection URI: ").strip()
-USER = input("User name: ").strip()
-PASSWORD = getpass("Password: ")
-
-driver = GraphDatabase.driver(
-    URI,
-    auth=(USER, PASSWORD)
-)
-
-driver.verify_connectivity()
-print("Conexión Neo4j verificada")</pre>
-    </div>
-    <div>
-      <div class="call"><b><code>GraphDatabase.driver(...)</code></b> configura el cliente con la URI y las credenciales.</div>
-      <div class="call"><b><code>getpass()</code></b> permite escribir la contraseña sin dejarla visible en la celda.</div>
-      <div class="call"><b><code>verify_connectivity()</code></b> obliga al driver a comprobar que realmente puede llegar a la base.</div>
-      <div class="result ok"><b>Esperado:</b> <code>Conexión Neo4j verificada</code>.</div>
-    </div>
-  </div>
-</section>
-
-<section class="slide">
-  <div class="tag gold">Diagnóstico</div>
-  <h2>Si falla, no cambies todo: identifica la capa</h2>
-  <table>
-    <tr><th>Qué observas</th><th>Qué significa probablemente</th><th>Qué revisar primero</th></tr>
-    <tr><td>Query no conecta</td><td>problema de instancia o credenciales en Aura</td><td>estado de instancia, selección de instancia, usuario y contraseña</td></tr>
-    <tr><td><code>RETURN 1</code> funciona, Python no</td><td>la base está viva; el problema está entre Colab y Aura</td><td><code>Connection URI</code>, credenciales copiadas, red, instalación del driver</td></tr>
-    <tr><td><code>AuthenticationError</code></td><td>autenticación rechazada</td><td>usuario/contraseña</td></tr>
-    <tr><td><code>ServiceUnavailable</code> o timeout</td><td>el driver no logra alcanzar la instancia</td><td>URI, estado de Aura, red</td></tr>
-    <tr><td>Conecta pero luego una consulta devuelve cero</td><td>la conexión puede estar bien</td><td>carga del grafo, NIT/ID usado y patrón Cypher</td></tr>
-  </table>
-  <div class="call warn"><b>No confundas capas.</b> Un error de datos no se arregla cambiando la contraseña; un error de autenticación no se arregla cambiando el modelo del grafo.</div>
-</section>
-
-<section class="slide">
-  <div class="tag blue">Qué sigue en el cuaderno</div>
-  <h2>El tutorial de acceso termina aquí</h2>
-  <div class="route">AuraDB disponible<br>+<br><code>RETURN 1 AS conexion</code> funciona<br>+<br><code>verify_connectivity()</code> funciona<br>↓<br><b>vuelve al notebook S6</b><br>↓<br>constraints → <code>UNWIND + MERGE</code> → <code>MATCH</code> → pandas = Neo4j → vecindario</div>
-  <div class="call"><b>Por diseño, este tutorial NO enseña toda la clase.</b> El modelado, la carga, <code>MERGE</code>, <code>MATCH</code>, la comparación con pandas, H2-R y los límites analíticos se trabajan en el cuaderno.</div>
-  <div class="call bad"><b>Hoy NO necesitas explorar</b> Bloom, Dashboards, Import, Graph Analytics, GraphQL, Agents ni otras funciones del panel. Son herramientas distintas o posteriores y solo aumentan la carga cognitiva en este punto.</div>
-</section>
-
-<section class="slide">
-  <div class="tag gold">Checklist final</div>
-  <h2>Antes de volver al notebook, verifica cinco cosas</h2>
-  <div class="grid equal">
-    <div>
-      <div class="check"><b>1</b><div>Sé explicar en una frase la diferencia: <b>Neo4j es la base; AuraDB es el servicio administrado.</b></div></div>
-      <div class="check"><b>2</b><div>Mi instancia AuraDB está disponible.</div></div>
-      <div class="check"><b>3</b><div>Guardé <code>Connection URI</code>, usuario y contraseña sin publicarlos.</div></div>
-      <div class="check"><b>4</b><div>Query devuelve <code>conexion = 1</code>.</div></div>
-      <div class="check"><b>5</b><div>Colab imprime <code>Conexión Neo4j verificada</code>.</div></div>
-    </div>
-    <div>
-      <div class="result ok"><b>Si las cinco están listas:</b> ya puedes cargar Compras Claras y comenzar el análisis relacional.</div>
-      <div class="call warn"><b>Si Aura falla durante clase:</b> vuelve al cuaderno y usa la ruta de respaldo. El objetivo analítico no debe depender de que una plataforma externa esté disponible.</div>
-      <div class="caption">Verificación docente: 30 de agosto de 2026 · revalidado 16 de septiembre de 2026 con documentación oficial de Neo4j Aura y Neo4j Python Driver.</div>
-    </div>
-  </div>
-</section>
-
-</div></main>
-<nav aria-label="Navegación del tutorial">
-  <button id="prev" aria-label="Anterior">←</button>
-  <div class="dots" id="dots" aria-label="Diapositivas"></div>
-  <button id="next" aria-label="Siguiente">→</button>
-  <button id="full" class="full" aria-label="Pantalla completa">Pantalla completa</button>
-</nav>
-<script>
-const s=[...document.querySelectorAll('.slide')],q=new URLSearchParams(location.search);if(q.get('embed')==='1')document.body.classList.add('embed');let i=Math.max(0,Math.min(s.length-1,(Number(q.get('slide'))||1)-1));const dots=document.getElementById('dots');document.getElementById('tot').textContent=s.length;s.forEach((_,j)=>{const b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Ir a '+(j+1));b.onclick=()=>show(j);dots.appendChild(b)});function show(j){i=Math.max(0,Math.min(s.length-1,j));s.forEach((x,k)=>x.classList.toggle('on',k===i));[...dots.children].forEach((x,k)=>x.classList.toggle('on',k===i));document.getElementById('n').textContent=i+1;document.getElementById('bar').style.width=((i+1)/s.length*100)+'%';history.replaceState(null,'',location.pathname+'?'+new URLSearchParams({...Object.fromEntries(q),slide:i+1}).toString())}document.getElementById('prev').onclick=()=>show(i-1);document.getElementById('next').onclick=()=>show(i+1);document.getElementById('full').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown')show(i+1);if(e.key==='ArrowLeft'||e.key==='PageUp')show(i-1);if(e.key==='Home')show(0);if(e.key==='End')show(s.length-1)});show(i);
-</script>
+</main>
 </body>
 </html>
