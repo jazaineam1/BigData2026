@@ -5,13 +5,17 @@ on:
     branches:
       - main
       - s06-novatos-v3
+      - s06-zero-to-hero-cypher-v5
     paths:
       - utils/build_session6_graph_data.py
       - utils/build_session6_notebook.py
       - utils/build_session6_novice.py
       - utils/session6_graphlab_enhancements.py
       - utils/session6_novice_finalize.py
+      - utils/session6_zero_to_hero.py
+      - utils/session6_zero_to_hero_order.py
       - utils/validate_session6.py
+      - utils/validate_session6_beginner.py
       - utils/validate_session6_graphlab_runtime.py
       - utils/validate_session6_degree_visual.py
       - utils/check_session6_execution.py
@@ -48,7 +52,10 @@ jobs:
             utils/build_session6_novice.py \
             utils/session6_graphlab_enhancements.py \
             utils/session6_novice_finalize.py \
+            utils/session6_zero_to_hero.py \
+            utils/session6_zero_to_hero_order.py \
             utils/validate_session6.py \
+            utils/validate_session6_beginner.py \
             utils/validate_session6_graphlab_runtime.py \
             utils/validate_session6_degree_visual.py \
             utils/check_session6_execution.py
@@ -56,12 +63,13 @@ jobs:
       - name: Construir extracto relacional
         run: python utils/build_session6_graph_data.py
 
-      - name: Generar notebook S6 para principiantes
+      - name: Generar notebook S6 zero-to-hero
         run: python utils/build_session6_novice.py
 
       - name: Validar S6
         run: |
           python utils/validate_session6.py
+          python utils/validate_session6_beginner.py
           python utils/validate_session6_graphlab_runtime.py
           python utils/validate_session6_degree_visual.py
           python utils/check_session6_execution.py
@@ -79,5 +87,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json
-          git commit -m 'Regenera sesión 6 para principiantes en Neo4j y Cypher'
+          git commit -m 'Regenera sesión 6 zero-to-hero de Neo4j y Cypher'
           git push
