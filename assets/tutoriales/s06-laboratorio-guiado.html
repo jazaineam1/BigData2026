@@ -8,318 +8,241 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--v950:#0b241c;--v800:#123f2b;--v700:#175c3c;--v100:#e3efe6;--d500:#c9a227;--d100:#f7ecc9;--c50:#faf7f0;--t:#172019;--g:#5c6b63;--line:#e2dcc8;--red:#a53828;--shadow:0 20px 40px -18px rgba(11,36,28,.22)}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{color:var(--t);font-family:"IBM Plex Sans",Arial,sans-serif;background:var(--c50);line-height:1.5}
-h1,h2,h3{font-family:"Fraunces",Georgia,serif;margin:0}
-code,pre,.mono{font-family:"IBM Plex Mono",Consolas,monospace}
-a{color:var(--v700)}
-.wrap{max-width:880px;margin:0 auto;padding:20px 16px 80px}
-header.top{position:sticky;top:0;z-index:20;background:var(--c50);border-bottom:1px solid var(--line);padding:14px 0}
-.top-inner{max-width:880px;margin:0 auto;padding:0 16px}
-.brand{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--v700)}
-h1.titulo{font-size:clamp(22px,4vw,30px);color:var(--v950);margin:4px 0 10px}
-.acompana{font-size:13.5px;color:var(--g);max-width:70ch}
-.acompana a{font-weight:600}
-.progreso-bar{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:999px;height:14px;overflow:hidden}
-.progreso-fill{height:100%;background:var(--v700);width:0%;transition:width .25s}
-.progreso-txt{margin-top:6px;font:12.5px "IBM Plex Mono";color:var(--v800);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+*{box-sizing:border-box}html,body{margin:0;padding:0}body{color:var(--t);font-family:"IBM Plex Sans",Arial,sans-serif;background:var(--c50);line-height:1.5}
+h1,h2,h3{font-family:"Fraunces",Georgia,serif;margin:0}code,pre,.mono{font-family:"IBM Plex Mono",Consolas,monospace}a{color:var(--v700)}
+.wrap{max-width:920px;margin:0 auto;padding:20px 16px 80px}header.top{position:sticky;top:0;z-index:20;background:var(--c50);border-bottom:1px solid var(--line);padding:14px 0}.top-inner{max-width:920px;margin:0 auto;padding:0 16px}
+.brand{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--v700)}h1.titulo{font-size:clamp(22px,4vw,30px);color:var(--v950);margin:4px 0 10px}.acompanha{font-size:13.5px;color:var(--g);max-width:76ch}
+.progreso-bar{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:999px;height:14px;overflow:hidden}.progreso-fill{height:100%;background:var(--v700);width:0%;transition:width .25s}.progreso-txt{margin-top:6px;font:12.5px "IBM Plex Mono";color:var(--v800);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 button.reset{background:none;border:1px solid var(--line);border-radius:7px;padding:5px 10px;font:12px "IBM Plex Sans";color:var(--g);cursor:pointer}
-button.reset:hover{border-color:var(--red);color:var(--red)}
-.receso{margin:26px 0;text-align:center;color:var(--d500);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12.5px}
-.receso::before,.receso::after{content:"";display:inline-block;width:40px;border-top:2px dashed var(--d500);vertical-align:middle;margin:0 10px}
-.fase{margin-top:34px}
-.fase h2{font-size:19px;color:var(--v950);display:flex;align-items:baseline;gap:10px}
-.fase .num{font:700 13px "IBM Plex Mono";color:#fff;background:var(--v700);border-radius:999px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;flex:none}
-.fase-progreso{font:12px "IBM Plex Mono";color:var(--g);margin-left:auto}
-.paso{margin-top:10px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow)}
-.paso.hecho{background:var(--v100);border-color:#bfd8c6}
-.paso-head{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;cursor:pointer}
-.paso-check{flex:none;width:22px;height:22px;margin-top:2px;accent-color:var(--v700);cursor:pointer}
-.paso-tipo{flex:none;font-size:16px;line-height:1;margin-top:1px}
-.paso-titulo{font-weight:600;font-size:14.5px;color:var(--t)}
-.paso.hecho .paso-titulo{color:var(--v800)}
-.paso-celda{font:11px "IBM Plex Mono";color:var(--g);margin-top:2px}
-.paso-estado{margin-left:auto;flex:none;font:11px "IBM Plex Sans";font-weight:700;color:var(--g);white-space:nowrap;align-self:center}
-.paso.hecho .paso-estado{color:var(--v700)}
-.paso-chevron{flex:none;color:var(--g);font-size:13px;align-self:center;transition:transform .15s}
-.paso-body{display:none;padding:0 14px 16px 48px;font-size:13.5px}
-.paso-body.abierto{display:block}
-.paso-body p{margin:8px 0}
-.paso-body .lbl{font-weight:700;color:var(--v800)}
-.paso-body pre{background:var(--v950);color:#e8f1ea;padding:10px 12px;border-radius:8px;overflow:auto;font-size:12px;margin:8px 0}
-.paso-body .caja{background:var(--c50);border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin:8px 0}
-[hidden]{display:none!important}
-footer.fin{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--g)}
-@media(max-width:520px){.paso-body{padding-left:16px}.paso-estado{display:none}}
+.leyenda{margin:18px 0;padding:11px 13px;background:#fff;border:1px solid var(--line);border-radius:10px;font-size:13px}.paso{margin-top:10px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow)}.paso.hecho{background:var(--v100);border-color:#bfd8c6}
+.paso-head{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;cursor:pointer}.paso-check{flex:none;width:22px;height:22px;margin-top:2px;accent-color:var(--v700)}.paso-tipo{flex:none;font-size:16px;line-height:1;margin-top:1px}.paso-titulo{font-weight:600;font-size:14.5px}.paso-celda{font:11px "IBM Plex Mono";color:var(--g);margin-top:2px}.paso-estado{margin-left:auto;font-size:11px;font-weight:700;color:var(--g);white-space:nowrap;align-self:center}.paso.hecho .paso-estado{color:var(--v700)}.paso-chevron{color:var(--g);align-self:center}
+.paso-body{display:none;padding:0 14px 16px 48px;font-size:13.5px}.paso-body.abierto{display:block}.paso-body p{margin:7px 0}.lbl{font-weight:700;color:var(--v800)}footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--g)}@media(max-width:520px){.paso-body{padding-left:16px}.paso-estado{display:none}}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="top-inner">
-    <div class="brand">Universidad Central · Big Data · S06</div>
-    <h1 class="titulo">Laboratorio guiado — Neo4j y el contexto relacional</h1>
-    <p class="acompana">Esta guía <strong>acompaña</strong> a
-      <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/6_Neo4j_Contexto_Relacional.ipynb" target="_blank" rel="noopener">6_Neo4j_Contexto_Relacional.ipynb ↗</a>
-      — no lo reemplaza. Ábrelo en otra pestaña y ve marcando aquí cada paso a medida que lo completas ahí.
-      Tu progreso se guarda solo en este navegador.</p>
-    <div class="progreso-bar" role="progressbar" aria-label="Progreso del laboratorio" aria-valuemin="0" aria-valuemax="100" id="pbar-outer"><div class="progreso-fill" id="pbar"></div></div>
-    <div class="progreso-txt">
-      <span id="ptxt" aria-live="polite">0 de 0 pasos completados</span>
-      <button class="reset" id="btn-reset" type="button">Reiniciar progreso</button>
-    </div>
-  </div>
-</header>
-
+<header class="top"><div class="top-inner">
+<div class="brand">Universidad Central · Big Data · S06</div>
+<h1 class="titulo">Laboratorio guiado — Neo4j, Cypher y Graph Lab</h1>
+<p class="acompanha">Acompaña al <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/6_Neo4j_Contexto_Relacional.ipynb" target="_blank" rel="noopener">cuaderno S06 ↗</a>. Los pasos 🌐 se hacen en Aura Query y el <a href="https://jazaineam1.github.io/BigData2026/assets/tutoriales/neo4j-aura-s06-paso-a-paso.html" target="_blank" rel="noopener">tutorial visual ↗</a> explica la interfaz desde cero.</p>
+<div class="progreso-bar" role="progressbar" aria-label="Progreso del laboratorio" aria-valuemin="0" aria-valuemax="100"><div class="progreso-fill" id="pbar"></div></div>
+<div class="progreso-txt"><span id="ptxt">0 de 0 pasos completados</span><button class="reset" id="reset">Reiniciar progreso</button></div>
+</div></header>
 <div class="wrap">
-  <p class="acompana" style="margin-top:18px">
-    <span class="paso-tipo">🧠</span> entiende y explica &nbsp;·&nbsp;
-    <span class="paso-tipo">▶️</span> ejecuta en el cuaderno &nbsp;·&nbsp;
-    <span class="paso-tipo">✏️</span> decide o responde &nbsp;·&nbsp;
-    <span class="paso-tipo">🌐</span> ocurre fuera de Colab (Aura)
-  </p>
-  <div id="fases"></div>
-  <footer class="fin">
-    Guía de acompañamiento del laboratorio S06. No ejecuta código —
-    el código real corre en <code>6_Neo4j_Contexto_Relacional.ipynb</code>. Los pasos externos
-    (🌐) remiten al tutorial de acceso
-    <a href="neo4j-aura-s06-paso-a-paso.html" target="_blank" rel="noopener">neo4j-aura-s06-paso-a-paso.html ↗</a>
-    en vez de repetir su contenido aquí.
-  </footer>
+<div class="leyenda">🧠 entiende · ▶️ ejecuta en Colab · ✏️ decide/modifica · 🌐 ejecuta o inspecciona en Aura Query</div>
+<div id="pasos"></div>
+<footer>El progreso se guarda solo en este navegador. Esta guía no ejecuta código. Usa el cuaderno para los cálculos y Aura Query para la experiencia gráfica.</footer>
 </div>
-
 <script>
 const DATA = [
   {
-    "titulo": "Del ancla al producto verificable",
+    "titulo": "S06 · del ancla al grafo verificable",
     "pasos": [
       {
         "id": "abrir",
         "tipo": "entiende",
-        "titulo": "Abre el caso y lee la rúbrica",
+        "titulo": "Lee la pregunta, mapa y rúbrica",
         "celda": "celda 2",
-        "explicacion": "Identifica el producto, la pregunta profesional y los criterios antes del laboratorio.",
-        "instruccion": "Lee el mapa, la procedencia y la rúbrica S06; responde las autoevaluaciones a medida que aparecen.",
-        "evidencia": "La ficha pide proceso, dos proveedores si difieren, máximo, mediana, límite, decisión y traza."
+        "explicacion": "Ubica el producto final y la regla de interpretación antes de ejecutar.",
+        "instruccion": "Lee pregunta profesional, producto observable, mapa y rúbrica.",
+        "evidencia": "Puedes explicar por qué S6 usa grafos y qué no permite concluir la conectividad."
       },
       {
         "id": "cargar",
         "tipo": "ejecuta",
-        "titulo": "Carga el extracto y recupera el ancla incluida",
-        "celda": "celda 8",
-        "explicacion": "Conservas una selección versionada sin solicitar archivos de otra sesión.",
-        "instruccion": "Ejecuta carga y recuperación del ancla pedagógica incluida. Si falla la red, el docente comparte el CSV y manifest del curso.",
-        "evidencia": "Filas disponibles: 2109; huella SHA256; ancla pedagógica versionada incluida en S6."
+        "titulo": "Carga el extracto relacional",
+        "celda": "celda 9",
+        "explicacion": "Obtienes el archivo versionado y su huella.",
+        "instruccion": "Ejecuta la carga y verifica número de filas + SHA256.",
+        "evidencia": "Filas disponibles y huella SHA256 aparecen sin error."
       },
       {
-        "id": "historial",
+        "id": "ancla",
+        "tipo": "decide",
+        "titulo": "Declara si usas tu ancla S5 o el respaldo",
+        "celda": "celda 10",
+        "explicacion": "Evita confundir una selección propia con la ancla pedagógica.",
+        "instruccion": "Marca True solo si conservaste s05_ancla_s06.json; si no, deja False.",
+        "evidencia": "La salida imprime Origen: archivo propio S5 o ancla pedagógica versionada incluida en S6."
+      },
+      {
+        "id": "modelo",
         "tipo": "entiende",
-        "titulo": "Lee el historial y la identidad",
-        "celda": "celda 18",
-        "explicacion": "NIT es la clave; el nombre puede tener variantes.",
-        "instruccion": "Observa fechas, entidad de trabajo, procesos históricos y proveedores distintos; responde las preguntas de evidencia e identidad.",
-        "evidencia": "NIT de proveedor con varios nombres: 2; Entidad de trabajo; Procesos históricos; Proveedores distintos."
+        "titulo": "Lee el ejemplo manual y los seis conceptos",
+        "celda": "celda 17",
+        "explicacion": "Construyes el modelo mental antes de memorizar sintaxis.",
+        "instruccion": "Identifica nodo, label, propiedad, relación, camino y patrón.",
+        "evidencia": "Puedes leer Entidad → Proceso → Proveedor en palabras."
       },
       {
         "id": "patron",
-        "tipo": "entiende",
-        "titulo": "Lee el patrón contractual",
-        "celda": "celda 24",
-        "explicacion": "El ID del proceso identifica un nodo; el tipo de relación identifica la flecha.",
-        "instruccion": "Observa el patrón ya resuelto y responde la autoevaluación cuando aparezca.",
-        "evidencia": "Patrón correcto: ADJUDICADO_A expresa una adjudicación observada."
-      },
-      {
-        "id": "contrato",
-        "tipo": "ejecuta",
-        "titulo": "Calcula el contrato pandas y H2-R",
-        "celda": "celda 30",
-        "explicacion": "Fijas una respuesta comparable antes de usar Neo4j.",
-        "instruccion": "Ejecuta y explica máximo y mediana; identifica al proveedor que determina H2-R. Responde la pregunta de mediana.",
-        "evidencia": "Entidades de referencia: 28; Mediana de referencia (candidatas S5): 21.0; Proveedor que determina H2-R; tabla de hasta 10 proveedores."
+        "tipo": "decide",
+        "titulo": "Completa ADJUDICADO_A",
+        "celda": "celda 22",
+        "explicacion": "El ejercicio ahora tiene un hueco real.",
+        "instruccion": "Sustituye ____ por el tipo de relación correcto.",
+        "evidencia": "Aparece Patrón correcto."
       },
       {
         "id": "aura",
         "tipo": "externo",
-        "titulo": "Conecta Aura o declara el respaldo",
-        "celda": "celda 37",
-        "explicacion": "Distingues ejecución del motor real de continuidad con pandas.",
-        "instruccion": "Si Colab reinició, ejecuta RECUPERACIÓN S06. Sigue el <a href='neo4j-aura-s06-paso-a-paso.html' target='_blank' rel='noopener'>tutorial Aura</a>; elige RESPALDO si no puedes conectar.",
-        "evidencia": "Conexión Neo4j verificada. O RESPALDO pandas: Neo4j y CRUD pendientes; no se declarará equivalencia comprobada."
+        "titulo": "Conecta Aura o activa RESPALDO",
+        "celda": "celda 28",
+        "explicacion": "Distingues motor real de continuidad con pandas.",
+        "instruccion": "Sigue el tutorial visual; vuelve cuando RETURN 1 AS conexion funcione y el driver verifique conectividad.",
+        "evidencia": "Conexión Neo4j verificada, o RESPALDO explícito."
+      },
+      {
+        "id": "restricciones",
+        "tipo": "ejecuta",
+        "titulo": "Crea restricciones de identidad",
+        "celda": "celda 30",
+        "explicacion": "Proteges NIT e ID antes de MERGE.",
+        "instruccion": "Ejecuta las tres restricciones.",
+        "evidencia": "Restricciones listas, o PENDIENTE en respaldo."
       },
       {
         "id": "carga",
         "tipo": "ejecuta",
-        "titulo": "Crea restricciones y carga adjudicaciones válidas",
-        "celda": "celda 42",
-        "explicacion": "Los 77 candidatos sin proveedor no deben producir adjudicaciones inventadas.",
-        "instruccion": "Ejecuta restricciones y carga. Responde la pregunta UNWIND.",
-        "evidencia": "Carga preparada: 2109 filas; 2032 adjudicaciones válidas. En Aura, también Carga lista; en respaldo, carga pendiente."
+        "titulo": "Carga nodos, relaciones y propiedades",
+        "celda": "celda 33",
+        "explicacion": "Carga Proceso con precio_base y ADJUDICADO_A con valor_adjudicado.",
+        "instruccion": "Ejecuta la carga y revisa filas/adjudicaciones válidas.",
+        "evidencia": "Carga preparada: 2109 filas; 2032 adjudicaciones válidas. En Aura, Carga lista."
       },
       {
         "id": "repetir",
         "tipo": "ejecuta",
-        "titulo": "Repite la carga y compara conteos",
-        "celda": "celda 43",
-        "explicacion": "Un reinicio no debe multiplicar nodos y relaciones.",
-        "instruccion": "Ejecuta la comprobación de repetición sin borrar los datos de tu instancia.",
-        "evidencia": "Carga repetida sin crecimiento: True y los conteos; o Idempotencia en Neo4j: PENDIENTE."
+        "titulo": "Comprueba idempotencia",
+        "celda": "celda 34",
+        "explicacion": "Repetir el notebook no debe multiplicar nodos y relaciones.",
+        "instruccion": "Ejecuta la carga repetida.",
+        "evidencia": "Carga repetida sin crecimiento: True, o PENDIENTE en respaldo."
+      },
+      {
+        "id": "graph",
+        "tipo": "externo",
+        "titulo": "Abre Graph Lab en Aura Query",
+        "celda": "celda 41",
+        "explicacion": "Pasas de tablas a nodos y flechas reales.",
+        "instruccion": "Copia consulta_graph_basico en Query, ejecuta y selecciona Graph.",
+        "evidencia": "Ves Entidad —PUBLICA→ Proceso —ADJUDICADO_A→ Proveedor."
+      },
+      {
+        "id": "grado",
+        "tipo": "entiende",
+        "titulo": "Distingue grado y entidades a dos saltos",
+        "celda": "celda 45",
+        "explicacion": "Evitas llamar grado a cualquier conteo.",
+        "instruccion": "Compara grado_adjudicaciones con entidades_conectadas.",
+        "evidencia": "Puedes explicar un caso con muchas adjudicaciones y pocas entidades."
+      },
+      {
+        "id": "wow",
+        "tipo": "externo",
+        "titulo": "Ejecuta WOW 1 — proveedor hub",
+        "celda": "celda 47",
+        "explicacion": "La consulta elige un proveedor central y devuelve sus caminos.",
+        "instruccion": "Pega la consulta en Aura Query, usa Graph, Fit, drag e inspecciona propiedades.",
+        "evidencia": "Ves una estructura tipo estrella y puedes identificar proveedor, procesos y entidades."
+      },
+      {
+        "id": "contrato",
+        "tipo": "ejecuta",
+        "titulo": "Calcula H2-R en pandas",
+        "celda": "celda 52",
+        "explicacion": "La complejidad analítica llega después de entender el grafo.",
+        "instruccion": "Ejecuta y registra mediana, máximo y proveedor H2-R.",
+        "evidencia": "Entidades de referencia: 28; mediana 21.0; máximo/proveedor aparecen."
       },
       {
         "id": "comparar",
         "tipo": "ejecuta",
-        "titulo": "Recorre caminos y verifica el contrato",
-        "celda": "celda 53",
-        "explicacion": "Una tabla coincidente prueba la respuesta de esta consulta, no velocidad ni irregularidad.",
-        "instruccion": "Ejecuta patrones de 0, 1 y 2 relaciones, consulta completa y comparación. Responde WITH y límites.",
-        "evidencia": "pandas == Neo4j: True. En respaldo: PENDIENTE; solo se ejecutó pandas."
+        "titulo": "Verifica pandas = Neo4j",
+        "celda": "celda 56",
+        "explicacion": "Compruebas la respuesta, no la velocidad.",
+        "instruccion": "Ejecuta query_contexto y la comparación.",
+        "evidencia": "pandas == Neo4j: True, o PENDIENTE si usaste respaldo."
       },
       {
-        "id": "visual",
+        "id": "wow2",
         "tipo": "externo",
-        "titulo": "Dibuja el ejemplo guiado",
+        "titulo": "Ejecuta WOW 2 — cuatro saltos desde tu ancla",
         "celda": "celda 59",
-        "explicacion": "Un camino muestra cómo se conectan los actores.",
-        "instruccion": "En Aura copia la consulta impresa en Query. En respaldo usa el SVG conceptual y conserva Cypher para después.",
-        "evidencia": "Consulta con camino_ancla y camino_otras; en Aura, dibujo de hasta 8 entidades adicionales."
+        "explicacion": "Lees el camino completo Entidad → Proveedor → otra Entidad.",
+        "instruccion": "Pega la consulta impresa en Aura Query y sigue el camino desde ancla hasta otra entidad.",
+        "evidencia": "Puedes señalar el nodo puente y explicar el sentido de las relaciones."
       },
       {
         "id": "vecindario",
         "tipo": "decide",
-        "titulo": "Ejecuta CRUD demo y elige proveedor",
+        "titulo": "Elige un proveedor para explorar",
         "celda": "celda 63",
-        "explicacion": "Tu exploración puede elegir un proveedor diferente del que determina H2-R.",
-        "instruccion": "Ejecuta CRUD demo cuando uses Aura y elige un número válido del listado de proveedores.",
-        "evidencia": "Tamaño observable de tu vecindario: procesos con mi entidad, entidades conectadas y procesos visibles; tabla del proveedor elegido."
+        "explicacion": "La exploración puede diferir del proveedor H2-R.",
+        "instruccion": "Elige una opción válida y revisa la tabla de procesos/entidades.",
+        "evidencia": "Procesos con mi entidad, entidades conectadas y procesos visibles aparecen."
       },
       {
         "id": "excluir",
         "tipo": "decide",
-        "titulo": "Cuenta otras entidades",
+        "titulo": "Cuenta solo otras entidades",
         "celda": "celda 66",
-        "explicacion": "El conteo inicial incluye la entidad ancla.",
-        "instruccion": "Completa el operador de exclusión y justifica la exploración con números y una alternativa descartada. Responde la pregunta de los dos proveedores.",
-        "evidencia": "Otras entidades: N | esperado: N; debe ser una menos que entidades_conectadas."
+        "explicacion": "El total inicial incluye el ancla.",
+        "instruccion": "Completa <> y justifica tu elección frente a otra opción.",
+        "evidencia": "Otras entidades: N | esperado: N."
       },
       {
         "id": "propia",
         "tipo": "decide",
-        "titulo": "Construye tu consulta",
-        "celda": "celda 70",
-        "explicacion": "Defiendes el patrón con una consulta que escribiste.",
-        "instruccion": "Escribe el conteo de procesos distintos para el par entidad–proveedor. Consulta el apoyo plegado si lo necesitas.",
-        "evidencia": "Consulta propia: N | esperado: N. En respaldo se declara que Cypher está pendiente de ejecución."
+        "titulo": "Escribe una consulta Cypher propia",
+        "celda": "celda 69",
+        "explicacion": "Pasas de modificar un token a construir una consulta breve.",
+        "instruccion": "Usa $ancla, $proveedor, DISTINCT y alias procesos.",
+        "evidencia": "Consulta propia: N | esperado: N."
       },
       {
-        "id": "hito",
-        "tipo": "decide",
+        "id": "guardar",
+        "tipo": "ejecuta",
         "titulo": "Genera ficha y JSONL",
         "celda": "celda 75",
-        "explicacion": "La siguiente sesión necesita texto rastreable y una selección justificada.",
-        "instruccion": "Ejecuta el desenlace H2-R y completa autor/alias, modelado, límite y alternativa. Guarda en el repositorio privado y entrega el enlace al commit.",
-        "evidencia": "Exportación S7: N procesos; ficha y JSONL guardados. Incluye motor real, proveedor H2-R, máximo, mediana y proveedor explorado."
+        "explicacion": "Conservas números, motor, decisiones y consulta.",
+        "instruccion": "Completa las respuestas finales y ejecuta guardar.",
+        "evidencia": "Se generan hito_s06_ficha_relacional.md y s06_contexto_procesos.jsonl."
       },
       {
-        "id": "cerrar",
-        "tipo": "ejecuta",
-        "titulo": "Cierra y revisa el puente a S7",
-        "celda": "celda 79",
-        "explicacion": "Conservas resultados y reconoces qué queda pendiente.",
-        "instruccion": "Revisa la hoja de trucos y el cierre; ejecuta el cierre de conexión.",
-        "evidencia": "Conexión Neo4j cerrada. O Sin conexión Neo4j abierta (respaldo)."
+        "id": "entrega",
+        "tipo": "decide",
+        "titulo": "Sube a hitos/s06 y entrega el commit",
+        "celda": "celda 76",
+        "explicacion": "Cierras la última milla de trazabilidad.",
+        "instruccion": "Sube ambos archivos al repo privado, crea commit y entrega la URL del commit.",
+        "evidencia": "El aula recibe una URL de commit que contiene los dos artefactos."
       }
     ]
   }
 ];
 const DATA2 = [];
-
-const ICONS = { entiende:"🧠", ejecuta:"▶️", decide:"✏️", externo:"🌐" }
-const KEY = id => "s06lab:nit-v2:" + id
-const fasesEl = document.getElementById("fases")
-
-function render(){
-  fasesEl.innerHTML = ""
-  let faseNum = 0
-  const todas = [...DATA]
-  const insertarReceso = todas.length
-  todas.push(...DATA2)
-  todas.forEach((fase, fi) => {
-    if (fi === insertarReceso) {
-      const div = document.createElement("div")
-      div.className = "receso"
-      div.textContent = "receso"
-      fasesEl.appendChild(div)
-    }
-    faseNum++
-    const secc = document.createElement("section")
-    secc.className = "fase"
-    const doneCount = fase.pasos.filter(p => localStorage.getItem(KEY(p.id)) === "1").length
-    secc.innerHTML = `<h2><span class="num">${faseNum}</span>${fase.titulo}<span class="fase-progreso">${doneCount}/${fase.pasos.length}</span></h2>`
-    fase.pasos.forEach(p => secc.appendChild(pasoEl(p)))
-    fasesEl.appendChild(secc)
-  })
-  actualizarProgresoGlobal()
+const iconos={entiende:"🧠",ejecuta:"▶️",decide:"✏️",externo:"🌐"};
+const KEY="s06-lab-v2";
+let done=new Set(JSON.parse(localStorage.getItem(KEY)||"[]"));
+const root=document.getElementById("pasos");
+const pasos=DATA[0].pasos;
+function guardar(){localStorage.setItem(KEY,JSON.stringify([...done]));actualizar();}
+function actualizar(){
+  const n=done.size,total=pasos.length,p=Math.round(n/total*100);
+  document.getElementById("pbar").style.width=p+"%";
+  document.getElementById("ptxt").textContent=`${n} de ${total} pasos completados · ${p}%`;
+  root.querySelectorAll(".paso").forEach(el=>el.classList.toggle("hecho",done.has(el.dataset.id)));
+  root.querySelectorAll(".paso-estado").forEach(el=>el.textContent=done.has(el.closest(".paso").dataset.id)?"Hecho":"Pendiente");
 }
-
-function pasoEl(p){
-  const hecho = localStorage.getItem(KEY(p.id)) === "1"
-  const div = document.createElement("div")
-  div.className = "paso" + (hecho ? " hecho" : "")
-  div.id = "paso-" + p.id
-  div.innerHTML = `
-    <div class="paso-head">
-      <input type="checkbox" class="paso-check" ${hecho ? "checked" : ""} aria-label="Marcar '${p.titulo}' como hecho">
-      <span class="paso-tipo" aria-hidden="true">${ICONS[p.tipo] || ""}</span>
-      <div style="flex:1">
-        <div class="paso-titulo">${p.titulo}</div>
-        <div class="paso-celda">${p.celda || ""}</div>
-      </div>
-      <span class="paso-estado">${hecho ? "Hecho" : "Pendiente"}</span>
-      <span class="paso-chevron" aria-hidden="true">${hecho ? "▸" : "▾"}</span>
-    </div>
-    <div class="paso-body ${hecho ? "" : "abierto"}">
-      ${p.explicacion ? `<p><span class="lbl">Por qué:</span> ${p.explicacion}</p>` : ""}
-      ${p.instruccion ? `<p><span class="lbl">Instrucción:</span> ${p.instruccion}</p>` : ""}
-      <div class="caja"><span class="lbl">Evidencia esperada:</span> ${p.evidencia}</div>
-    </div>
-  `
-  const check = div.querySelector(".paso-check")
-  const body = div.querySelector(".paso-body")
-  const head = div.querySelector(".paso-head")
-  check.addEventListener("change", () => {
-    if (check.checked) localStorage.setItem(KEY(p.id), "1")
-    else localStorage.removeItem(KEY(p.id))
-    render()
-    document.getElementById("paso-" + p.id)?.scrollIntoView({ block:"nearest" })
-  })
-  head.addEventListener("click", (ev) => {
-    if (ev.target === check) return
-    body.classList.toggle("abierto")
-    div.querySelector(".paso-chevron").textContent = body.classList.contains("abierto") ? "▾" : "▸"
-  })
-  return div
-}
-
-function todosLosPasos(){
-  return [...DATA, ...DATA2].flatMap(f => f.pasos)
-}
-
-function actualizarProgresoGlobal(){
-  const pasos = todosLosPasos()
-  const hechos = pasos.filter(p => localStorage.getItem(KEY(p.id)) === "1").length
-  const pct = pasos.length ? Math.round((hechos / pasos.length) * 100) : 0
-  document.getElementById("pbar").style.width = pct + "%"
-  document.getElementById("pbar-outer").setAttribute("aria-valuenow", String(pct))
-  document.getElementById("ptxt").textContent = `${hechos} de ${pasos.length} pasos completados (${pct}%)`
-}
-
-document.getElementById("btn-reset").addEventListener("click", () => {
-  if (!confirm("¿Borrar tu progreso guardado en este navegador?")) return
-  todosLosPasos().forEach(p => localStorage.removeItem(KEY(p.id)))
-  render()
-})
-
-render()
+pasos.forEach(p=>{
+  const el=document.createElement("section");el.className="paso";el.dataset.id=p.id;
+  el.innerHTML=`<div class="paso-head"><input class="paso-check" type="checkbox" aria-label="Marcar ${p.titulo}"><span class="paso-tipo">${iconos[p.tipo]||"•"}</span><div><div class="paso-titulo">${p.titulo}</div><div class="paso-celda">${p.celda}</div></div><span class="paso-estado">Pendiente</span><span class="paso-chevron">⌄</span></div><div class="paso-body"><p><span class="lbl">Por qué:</span> ${p.explicacion}</p><p><span class="lbl">Haz:</span> ${p.instruccion}</p><p><span class="lbl">Comprueba:</span> ${p.evidencia}</p></div>`;
+  const cb=el.querySelector("input");cb.checked=done.has(p.id);cb.addEventListener("click",e=>e.stopPropagation());cb.addEventListener("change",()=>{cb.checked?done.add(p.id):done.delete(p.id);guardar();});
+  el.querySelector(".paso-head").addEventListener("click",()=>el.querySelector(".paso-body").classList.toggle("abierto"));
+  root.appendChild(el);
+});
+document.getElementById("reset").onclick=()=>{done.clear();guardar();root.querySelectorAll("input").forEach(x=>x.checked=false)};
+actualizar();
 </script>
 </body>
 </html>
