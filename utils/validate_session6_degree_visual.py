@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regresiones de grado/hub para S06."""
+"""Regresiones de grado/hub para S06 zero-to-hero."""
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -14,26 +14,38 @@ def main():
     graph = GRAPH.read_text(encoding="utf-8")
     errors = []
     required = [
-        "**Grado** significa cuántas relaciones directas",
+        "Contar conexiones: `count`, `AS`, `ORDER BY`, `DESC`",
         "count(r) AS grado",
-        "Un **hub**, o **nodo concentrador**",
-        "No significa “sospechoso” ni “anómalo”",
-        "count(DISTINCT e) AS entidades_conectadas",
+        "hub** o **nodo concentrador",
+        "No significa fraude ni riesgo",
+        "count(DISTINCT e)",
+        "grado` y `entidades_conectadas` no son la misma métrica",
         "Table mide; Graph explica",
     ]
     for x in required:
         if x not in text and x not in graph: errors.append(f"Falta enseñanza de grado/hub: {x!r}")
-    g = text.find("Consulta 4 — qué es el grado")
-    h = text.find("Consulta 5 — qué es un hub")
-    c = text.find("Hub por procesos ≠ proveedor compartido por muchas entidades")
-    if min(g,h,c) < 0 or not (g < h < c): errors.append("Hub debe aparecer después de grado y antes de comparar entidades")
-    if "grado_adjudicaciones" in graph: errors.append("El tutorial inicial debe usar primero el término simple 'grado'")
+
+    g = text.find("### 4.6 Contar conexiones")
+    d = text.find("### 4.7 `DISTINCT`")
+    w = text.find("### 4.8 `WITH`")
+    if min(g, d, w) < 0 or not (g < d < w):
+        errors.append("Grado debe enseñarse antes de DISTINCT y WITH")
+
+    graph_g = graph.find("11. Cuenta relaciones")
+    graph_h = graph.find("13. ¿Qué es un hub?")
+    graph_d = graph.find("14. DISTINCT")
+    if min(graph_g, graph_h, graph_d) < 0 or not (graph_g < graph_h < graph_d):
+        errors.append("En Graph Lab: grado → hub → DISTINCT")
+
+    if "grado_adjudicaciones" in graph:
+        errors.append("El tutorial inicial debe usar primero el término simple 'grado'")
+
     if errors:
         print("Validación grado/hub fallida:")
         for e in errors: print("[ERROR]", e)
         raise SystemExit(1)
-    print("[OK] Grado se define con ejemplo antes de hub")
-    print("[OK] Hub se presenta como nodo concentrador, no como riesgo")
-    print("[OK] Grado y entidades_conectadas permanecen separados")
+    print("[OK] Grado se construye desde count(r) antes de introducir hub")
+    print("[OK] Hub se presenta como nodo concentrador según una métrica, no como riesgo")
+    print("[OK] DISTINCT separa filas/caminos de entidades distintas")
 
 if __name__ == "__main__": main()
