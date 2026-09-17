@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Migración única: consolida el rediseño beginner dentro de la fuente editorial S06."""
+"""Migración única: consolida el rediseño beginner dentro de las fuentes editoriales S06."""
 from __future__ import annotations
 
 import re
@@ -8,9 +8,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE = ROOT / "utils" / "session6_graphlab_enhancements.py"
+GENERATOR = ROOT / "utils" / "build_session6_notebook.py"
 
 
-def main() -> None:
+def patch_enhancements() -> bool:
     text = MODULE.read_text(encoding="utf-8")
     original = text
 
@@ -24,7 +25,6 @@ def main() -> None:
     else:
         raise SystemExit("No se encontró el bloque enhance_cells esperado")
 
-    # make_notebook.validate prohíbe triple-comillas dobles dentro de celdas.
     old_query = '''consulta_propia = """MATCH (e:Entidad {nit:$ancla})-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$proveedor})
 RETURN count(DISTINCT p) AS procesos"""'''
     new_query = '''consulta_propia = ("MATCH (e:Entidad {nit:$ancla})-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$proveedor})\\n"
@@ -38,7 +38,7 @@ RETURN count(DISTINCT p) AS procesos"""'''
         raise SystemExit("No se encontró consulta_propia guiada")
 
     pattern = re.compile(r'def enhance_checklist\(cells\):\n(?:    .*\n?)*?\Z', re.M)
-    replacement = '''def enhance_checklist(cells):\n    """Restaura el checklist beginner después del build histórico del generador."""\n    template = ROOT / "assets" / "tutoriales" / "templates" / "s06-laboratorio-guiado.html"\n    target = ROOT / "assets" / "tutoriales" / "s06-laboratorio-guiado.html"\n    if not template.is_file():\n        raise FileNotFoundError(template)\n    target.write_text(template.read_text(encoding="utf-8"), encoding="utf-8")\n'''
+    replacement = '''def enhance_checklist(cells):\n    """Restaura el checklist beginner desde su plantilla canónica."""\n    template = ROOT / "assets" / "tutoriales" / "templates" / "s06-laboratorio-guiado.html"\n    target = ROOT / "assets" / "tutoriales" / "s06-laboratorio-guiado.html"\n    if not template.is_file():\n        raise FileNotFoundError(template)\n    target.write_text(template.read_text(encoding="utf-8"), encoding="utf-8")\n'''
     new_text, count = pattern.subn(replacement, text, count=1)
     if count != 1:
         raise SystemExit("No se pudo consolidar enhance_checklist")
@@ -46,9 +46,33 @@ RETURN count(DISTINCT p) AS procesos"""'''
 
     if text != original:
         MODULE.write_text(text, encoding="utf-8")
-        print("[OK] Fuente beginner consolidada")
+        print("[OK] Fuente de mejoras beginner consolidada")
+        return True
+    print("[OK] Fuente de mejoras beginner ya estaba consolidada")
+    return False
+
+
+def patch_generator() -> bool:
+    text = GENERATOR.read_text(encoding="utf-8")
+    original = text
+    old = "    build_checklist(cells)\n    enhance_checklist(cells)\n"
+    new = "    # El checklist beginner tiene plantilla canónica; no depende de números de celda.\n    enhance_checklist(cells)\n"
+    if old in text:
+        text = text.replace(old, new, 1)
+        print("[OK] Retirada reconstrucción histórica del checklist")
+    elif new in text:
+        print("[OK] Generador ya usa solo el checklist beginner canónico")
     else:
-        print("[OK] Fuente beginner ya estaba consolidada")
+        raise SystemExit("No se encontró la llamada histórica build_checklist/enhance_checklist")
+    if text != original:
+        GENERATOR.write_text(text, encoding="utf-8")
+        return True
+    return False
+
+
+def main() -> None:
+    changed = patch_enhancements() | patch_generator()
+    print("[OK] Fuentes beginner actualizadas" if changed else "[OK] Fuentes beginner sin cambios")
 
 
 if __name__ == "__main__":
