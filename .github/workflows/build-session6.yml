@@ -72,7 +72,7 @@ jobs:
       - name: Publicar artefactos generados
         shell: bash
         run: |
-          CAMBIOS="$(git status --porcelain -- utils/session6_graphlab_enhancements.py Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json assets/tutoriales/s06-laboratorio-guiado.html)"
+          CAMBIOS="$(git status --porcelain -- utils/build_session6_notebook.py utils/session6_graphlab_enhancements.py Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json assets/tutoriales/s06-laboratorio-guiado.html)"
           if [ -z "$CAMBIOS" ]; then
             echo 'S06 ya estaba sincronizada.'
             exit 0
@@ -80,6 +80,6 @@ jobs:
           printf '%s\n' "$CAMBIOS"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add utils/session6_graphlab_enhancements.py Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json assets/tutoriales/s06-laboratorio-guiado.html
+          git add utils/build_session6_notebook.py utils/session6_graphlab_enhancements.py Cuadernos/6_Neo4j_Contexto_Relacional.ipynb Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb Datos/s06_contexto_relacional.csv Datos/s06_contexto_relacional_manifest.json assets/tutoriales/s06-laboratorio-guiado.html
           git commit -m 'Regenera S06 con ruta Neo4j/Cypher para principiantes'
           git push
