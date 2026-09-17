@@ -9,11 +9,20 @@ def src(cell):
     return "".join(value) if isinstance(value, list) else str(value)
 
 
+def put(cell, text):
+    cell["source"] = text.strip("\n").splitlines(keepends=True)
+
+
 def find(cells, needle):
     hits = [i for i, cell in enumerate(cells) if needle in src(cell)]
     if len(hits) != 1:
         raise ValueError(f"Referencia ambigua {needle!r}: {hits}")
     return hits[0]
+
+
+def replace_once(cells, old, new):
+    i = find(cells, old)
+    put(cells[i], src(cells[i]).replace(old, new, 1))
 
 
 def reorder_zero_to_hero(cells):
@@ -38,5 +47,14 @@ def reorder_zero_to_hero(cells):
 
     transfer = find(cells, "## 4.2 Transferencia al caso real — cargar el grafo sin duplicar")
     cells[transfer:transfer] = merge_block
+
+    # 3) Numeración visible coherente después de insertar el curso zero-to-hero.
+    replace_once(cells, "## 4.2 Transferencia al caso real — cargar el grafo sin duplicar", "## 5. Transferencia al caso real — cargar el grafo sin duplicar")
+    replace_once(cells, "## 5. Aplicación guiada — consultar los datos reales en Aura Query", "## 6. Aplicación guiada — consultar los datos reales en Aura Query")
+    replace_once(cells, "## 6. Profundización — comparar conectividad con una referencia (H2-R)", "## 7. Profundización — comparar conectividad con una referencia (H2-R)")
+    if any("## 7. Verificación — ¿Neo4j y pandas cuentan lo mismo?" in src(c) for c in cells):
+        replace_once(cells, "## 7. Verificación — ¿Neo4j y pandas cuentan lo mismo?", "## 8. Verificación — ¿Neo4j y pandas cuentan lo mismo?")
+    if any("## 8. Ejemplo guiado — explorar un proveedor" in src(c) for c in cells):
+        replace_once(cells, "## 8. Ejemplo guiado — explorar un proveedor", "## 9. Ejemplo guiado — explorar un proveedor")
 
     return cells
