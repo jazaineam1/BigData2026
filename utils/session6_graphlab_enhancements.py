@@ -98,18 +98,15 @@ Al terminar tendrás una ficha sencilla con el proceso de S5, la entidad de trab
 ## Del proceso de S5 al grafo de S6
 
 ```text
-S5
-Proceso elegido
-      │
-      ▼
+S5: Proceso elegido
+        ↓
 Entidad que lo publicó
-      │
-      │  S6 mira el historial adjudicado de esa entidad
-      ▼
-Procesos históricos ──► Proveedores
-                            │
-                            ▼
-                     otras Entidades
+        ↓
+procesos históricos adjudicados
+        ↓
+Proveedores
+        ↓
+otras Entidades
 ```
 
 **Importante:** el proceso candidato de S5 sirve como punto de partida para identificar la entidad. Las relaciones con proveedores provienen de los **registros históricos adjudicados** del extracto; no inventamos una adjudicación para el proceso candidato.
@@ -225,7 +222,7 @@ No memorices sintaxis todavía. Primero aprende a leer el dibujo.
 | **Patrón** | la forma que queremos encontrar | `(e)-[:PUBLICA]->(p)` |
 
 ```text
-Entidad ──PUBLICA──► Proceso ──ADJUDICADO_A──► Proveedor
+Entidad → PUBLICA → Proceso → ADJUDICADO_A → Proveedor
 ```
 
 Cuando veas esto en Cypher:
@@ -393,7 +390,7 @@ Se lee literalmente:
 > **Busca una Entidad que PUBLICA un Proceso.**
 
 ```text
-Entidad ──PUBLICA──► Proceso
+Entidad → PUBLICA → Proceso
 ```
 
 **Qué debes ver en Graph:** pares Entidad→Proceso unidos por una flecha `PUBLICA`.
@@ -412,7 +409,7 @@ Se lee:
 > **Busca una Entidad que PUBLICA un Proceso que fue ADJUDICADO_A un Proveedor.**
 
 ```text
-Entidad ──PUBLICA──► Proceso ──ADJUDICADO_A──► Proveedor
+Entidad → PUBLICA → Proceso → ADJUDICADO_A → Proveedor
 ```
 
 **Qué debes ver:** tres tipos de nodo y dos tipos de flecha. Haz clic en cada nodo y revisa sus propiedades.
@@ -429,9 +426,9 @@ Entidad ──PUBLICA──► Proceso ──ADJUDICADO_A──► Proveedor
 Si una consulta devuelve solo nombres y conteos, la vista útil suele ser Table. Si devuelve nodos, relaciones o un `camino`, Graph puede dibujarlos.
 '''),
         code(r'''
-consulta_mi_entidad = f'''MATCH (e:Entidad {{nit:"{nit_deseado}"}})-[pub:PUBLICA]->(p:Proceso)-[adj:ADJUDICADO_A]->(v:Proveedor)
+consulta_mi_entidad = f"""MATCH (e:Entidad {{nit:\"{nit_deseado}\"}})-[pub:PUBLICA]->(p:Proceso)-[adj:ADJUDICADO_A]->(v:Proveedor)
 RETURN e, pub, p, adj, v
-LIMIT 15'''
+LIMIT 15"""
 print("Copia esta consulta en Aura Query:\n")
 print(consulta_mi_entidad)
 ''', hidden=True, title="Preparar una consulta para mi Entidad"),
@@ -441,11 +438,11 @@ print(consulta_mi_entidad)
 El **grado** de un nodo es, en esta práctica, cuántas relaciones directas llegan a ese nodo.
 
 ```text
-Proceso 1 ─┐
-Proceso 2 ─┤
-Proceso 3 ─┼──► Proveedor X
-Proceso 4 ─┤
-Proceso 5 ─┘
+Proceso 1 → Proveedor X
+Proceso 2 → Proveedor X
+Proceso 3 → Proveedor X
+Proceso 4 → Proveedor X
+Proceso 5 → Proveedor X
 ```
 
 Aquí `Proveedor X` tiene **grado 5** respecto de `ADJUDICADO_A`.
@@ -467,28 +464,13 @@ LIMIT 5
 
 Un **hub**, o **nodo concentrador**, es un nodo que reúne muchas conexiones.
 
-Si un proveedor recibe muchas relaciones `ADJUDICADO_A`, puede actuar como un hub de procesos:
+Si un proveedor recibe muchas relaciones `ADJUDICADO_A`, puede actuar como un hub de procesos.
+
+Pero “muy conectado” depende de qué contemos:
 
 ```text
-Proceso ─┐
-Proceso ─┤
-Proceso ─┼──► PROVEEDOR HUB
-Proceso ─┤
-Proceso ─┘
-```
-
-Pero “muy conectado” depende de qué contemos. Mira estos dos casos:
-
-```text
-CASO A                           CASO B
-Entidad A → P1 ─┐               Entidad A → P1 ─┐
-          → P2 ─┤               Entidad B → P2 ─┤
-          → P3 ─┼→ Proveedor    Entidad C → P3 ─┼→ Proveedor
-          → P4 ─┤               Entidad D → P4 ─┤
-          → P5 ─┘               Entidad E → P5 ─┘
-
-grado = 5                       grado = 5
-entidades distintas = 1         entidades distintas = 5
+CASO A: cinco procesos de una sola Entidad → grado 5, entidades distintas 1
+CASO B: cinco procesos de cinco Entidades      → grado 5, entidades distintas 5
 ```
 
 Los dos tienen grado 5, pero el segundo conecta más **entidades diferentes**. Por eso más adelante contamos también `entidades_conectadas`.
@@ -520,7 +502,7 @@ LIMIT 40
 
 **Qué hace:** encuentra el proveedor que aparece con más entidades distintas y luego devuelve caminos que llegan a él.
 
-**Qué debes ver:** un proveedor compartido en el centro de muchas rutas Entidad→Proceso→Proveedor.
+**Qué debes ver:** un proveedor compartido en muchas rutas Entidad→Proceso→Proveedor.
 
 **Qué significa:** varias entidades del extracto tienen procesos adjudicados al mismo proveedor.
 
@@ -532,22 +514,22 @@ LIMIT 40
 Si ejecutas una consulta global con `LIMIT 20`, Neo4j puede devolver coincidencias que **no están conectadas entre sí dentro de ese resultado**. Aura las dibuja como varias islas o componentes.
 
 ```text
-isla 1                 isla 2
-Entidad→Proceso→Prov   Entidad→Proceso→Prov
+isla 1: Entidad→Proceso→Proveedor
+isla 2: Entidad→Proceso→Proveedor
 ```
 
 No son dos bases ni dos grafos distintos: es **una sola base** y **un solo resultado** con grupos desconectados. Para aprender, primero usamos consultas centradas en una entidad o proveedor concreto.
 '''),
         code(r'''
 nit_literal = str(nit_deseado).replace('"', '\\"')
-consulta_compartida = f'''MATCH (ancla:Entidad {{nit:"{nit_literal}"}})-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)
+consulta_compartida = f"""MATCH (ancla:Entidad {{nit:\"{nit_literal}\"}})-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)
 WITH ancla, v, count(*) AS procesos_ancla
 ORDER BY procesos_ancla DESC, v.nit ASC
 LIMIT 1
 MATCH camino=(ancla)-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v)<-[:ADJUDICADO_A]-(:Proceso)<-[:PUBLICA]-(otra:Entidad)
 WHERE otra.nit <> ancla.nit
 RETURN camino
-LIMIT 20'''
+LIMIT 20"""
 print("Copia esta consulta en Aura Query:\n")
 print(consulta_compartida)
 ''', hidden=True, title="Preparar la consulta de proveedor compartido"),
@@ -557,19 +539,7 @@ print(consulta_compartida)
 La consulta preparada arriba busca este camino:
 
 ```text
-Entidad ancla
-     │ PUBLICA
-     ▼
-  Proceso
-     │ ADJUDICADO_A
-     ▼
- Proveedor
-     ▲ ADJUDICADO_A
-     │
-  Proceso
-     ▲ PUBLICA
-     │
-otra Entidad
+Entidad ancla → Proceso → Proveedor ← Proceso ← otra Entidad
 ```
 
 **Qué debes hacer en Aura:**
@@ -611,7 +581,6 @@ Hasta aquí ya aprendiste lo esencial de Neo4j/Cypher. Esta sección añade una 
 
 
 def simplify_operational_choices(cells):
-    # Elegir Aura/Respaldo mediante un formulario, no mediante una caja de texto ambigua.
     for cell in cells:
         body = s(cell)
         if 'modo = input("Enter = Aura; escribe RESPALDO' in body:
@@ -622,7 +591,6 @@ def simplify_operational_choices(cells):
             put(cell, body)
             hide(cell, "Elegir Aura o respaldo y conectar")
 
-    # El primer proveedor es el ejemplo recomendado; el estudiante no debe adivinar un número.
     for cell in cells:
         body = s(cell)
         if 'sel = int(input("Número de proveedor:' in body:
@@ -632,7 +600,6 @@ def simplify_operational_choices(cells):
             put(cell, body)
             hide(cell, "Elegir automáticamente un proveedor de ejemplo")
 
-    # La exclusión deja de ser un acertijo y la explicación se genera con los datos reales.
     for cell in cells:
         body = s(cell)
         if body.startswith('OPERADOR_EXCLUSION ='):
@@ -647,11 +614,10 @@ def simplify_operational_choices(cells):
             put(cell, body)
             hide(cell, "Contar otras entidades sin adivinar sintaxis")
 
-    # La consulta antes vacía ahora viene completa y comentada.
     i = find(cells, "# Escribe tu consulta entre las comillas triples")
     put(cells[i], r'''#@title Ejecutar la consulta guiada para el par Entidad–Proveedor { display-mode: "form" }
-consulta_propia = '''MATCH (e:Entidad {nit:$ancla})-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$proveedor})
-RETURN count(DISTINCT p) AS procesos'''
+consulta_propia = """MATCH (e:Entidad {nit:$ancla})-[:PUBLICA]->(p:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {nit:$proveedor})
+RETURN count(DISTINCT p) AS procesos"""
 print("Consulta guiada:\n", consulta_propia)
 if modo_neo4j:
     procesos_propios = int(driver.execute_query(
@@ -668,7 +634,6 @@ print("Procesos para este par Entidad–Proveedor:", procesos_propios)
 ''')
     hide(cells[i], "Ejecutar consulta Cypher ya preparada")
 
-    # La ficha usa respuestas modelo editables; ya no hay preguntas abiertas sin ejemplo.
     i = find(cells, 'autor = input("Autor o alias')
     put(cells[i], r'''#@title Datos mínimos de la ficha { display-mode: "form" }
 from pathlib import Path
