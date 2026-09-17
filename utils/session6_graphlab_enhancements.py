@@ -141,10 +141,41 @@ Debes poder narrar: “esta Entidad llega a este Proveedor pasando por este Proc
 '''),
     md(r'''### Grado ≠ entidades conectadas
 
-**Grado directo del Proveedor:** cuántos procesos distintos llegan por `ADJUDICADO_A`.  
-**Conectividad a dos saltos:** cuántas Entidades distintas llegan pasando por Proceso.
+<!-- GRAPH-DEGREE-S06-V1 -->
+**Grado contractual directo del Proveedor:** cuántas relaciones `ADJUDICADO_A` llegan al nodo.  
+**Conectividad a dos saltos:** cuántas Entidades distintas llegan al mismo Proveedor pasando por Proceso.
 
-Un proveedor puede tener grado alto porque una sola entidad le adjudicó muchos procesos; por eso H2-R no usa simplemente el grado.
+> **Table mide; Graph explica.** El número exacto del grado se obtiene con Cypher. En Graph compruebas visualmente de qué relaciones incidentes sale ese número. El tamaño, la cercanía o la posición automática de un círculo **no representan su grado** salvo que tú hayas configurado explícitamente un estilo para codificarlo.
+
+**1 · Mide el grado exacto en Aura Query → Table**
+
+```cypher
+MATCH (p:Proceso)-[r:ADJUDICADO_A]->(v:Proveedor)
+RETURN v.nit AS nit_proveedor,
+       v.nombre AS proveedor,
+       count(r) AS grado_adjudicaciones
+ORDER BY grado_adjudicaciones DESC, nit_proveedor ASC
+LIMIT 10
+```
+
+`count(r)` cuenta las relaciones directas `ADJUDICADO_A` que llegan a cada Proveedor en este modelo.
+
+**2 · Comprueba gráficamente el proveedor de mayor grado**
+
+```cypher
+MATCH (p:Proceso)-[r:ADJUDICADO_A]->(v:Proveedor)
+WITH v, count(r) AS grado_adjudicaciones
+ORDER BY grado_adjudicaciones DESC, v.nit ASC
+LIMIT 1
+MATCH (p:Proceso)-[r:ADJUDICADO_A]->(v)
+RETURN v, r, p
+ORDER BY p.id
+LIMIT 40
+```
+
+En **Graph**, coloca el Proveedor en el centro y cuenta conceptualmente las líneas `ADJUDICADO_A`: son las relaciones que Cypher acaba de medir. Luego vuelve a **Table** para conservar el valor exacto.
+
+Un proveedor puede tener grado alto porque una sola entidad le adjudicó muchos procesos; por eso H2-R usa `entidades_conectadas` y no simplemente el grado.
 '''),
     code(r'''grado_rel=hist.groupby("nit_proveedor")["id_proceso"].nunique().rename("grado_adjudicaciones")
 entidades_2saltos=hist.groupby("nit_proveedor")["nit_entidad"].nunique().rename("entidades_conectadas")
