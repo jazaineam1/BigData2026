@@ -23,7 +23,7 @@ def src(c):
 
 def main():
     errors=[]
-    for p in (NB,DATA,MANIFEST,AURA,GRAPH,CHECKLIST,GEN,DATA_GEN):
+    for p in (NB,DATA,MANIFEST,AURA,GRAPH,CHECKLIST,GEN,DATA_GEN,ADV):
         if not p.is_file(): errors.append(f"Falta {p.relative_to(ROOT)}")
     if errors: raise SystemExit("\n".join(errors))
     manifest=json.loads(MANIFEST.read_text(encoding="utf-8"))
@@ -113,7 +113,7 @@ def main():
         raise SystemExit(1)
     print(f"[OK] S06 válida: {len(cells)} celdas; datos {size_mb:.1f} MB")
     print("[OK] Notebook, curso zero-to-hero, checklist y tutorial Aura sincronizados")
-    print("[OK] Cypher se enseña antes de la carga real; H2-R queda al final")
+    print("[OK] Cypher se enseña antes de la carga real; H2-R precede el cierre avanzado")\n    print("[OK] Cierre avanzado: 53 proveedores → 41 compartidos → Jaccard → subgrafo explicable")
     print("[INFO] CI no autentica Aura; esa prueba sigue siendo manual con credenciales propias")
 
 if __name__=="__main__": main()
