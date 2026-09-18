@@ -14,6 +14,7 @@ on:
       - utils/session6_novice_finalize.py
       - utils/session6_zero_to_hero.py
       - utils/session6_zero_to_hero_order.py
+      - utils/session6_advanced_ecosystem.py
       - utils/validate_session6.py
       - utils/validate_session6_beginner.py
       - utils/validate_session6_graphlab_runtime.py
@@ -56,6 +57,7 @@ jobs:
             utils/session6_novice_finalize.py \
             utils/session6_zero_to_hero.py \
             utils/session6_zero_to_hero_order.py \
+            utils/session6_advanced_ecosystem.py \
             utils/validate_session6.py \
             utils/validate_session6_beginner.py \
             utils/validate_session6_graphlab_runtime.py \
