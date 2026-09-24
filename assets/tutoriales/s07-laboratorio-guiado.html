@@ -3,23 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Laboratorio activo S07: Elasticsearch, Console, Python y evaluación de relevancia.">
-<title>S07 · Laboratorio activo Elasticsearch</title>
+<meta name="description" content="S07 Elasticsearch Search Lab · laboratorio integral con Console, Python, relevancia y S07 Live.">
+<title>S07 · Elasticsearch Search Lab</title>
 <style>
 :root{
   --navy:#122253;--red:#B11F16;--orange:#E95D0F;--teal:#0B8689;--blue:#1472B8;
   --purple:#634998;--beige:#F3E7CE;--paper:#fffdfa;--ink:#1f2338;--muted:#667085;
-  --line:#e4e7ef;--soft:#f7f2e9;--ok:#e8f6f3;--bad:#fce8e6;--code:#101936;
+  --line:#e4e7ef;--soft:#f7f2e9;--ok:#e8f6f3;--bad:#fce8e6;--code:#101936;--gold:#F3B61F;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Roboto,"Segoe UI",Arial,sans-serif}
-a{color:inherit}button,input,textarea{font:inherit}code,pre{font-family:Consolas,"Cascadia Mono",monospace}
-.top{position:sticky;top:0;z-index:30;background:rgba(255,253,250,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.nav{max-width:1180px;margin:auto;padding:10px 16px;display:flex;gap:10px;align-items:center}
+a{color:inherit}button,input,textarea,select{font:inherit}code,pre{font-family:Consolas,"Cascadia Mono",monospace}
+.top{position:sticky;top:0;z-index:50;background:rgba(255,253,250,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav{max-width:1220px;margin:auto;padding:10px 16px;display:flex;gap:10px;align-items:center}
 .nav a{text-decoration:none;font-weight:900;border-radius:10px;padding:8px 10px}.nav a:hover{background:var(--soft)}
-.brand{margin-right:auto;color:var(--red)}.launch{background:var(--red)!important;color:white!important}
-.wrap{max-width:1180px;margin:auto;padding:28px 16px 80px;display:grid;grid-template-columns:270px 1fr;gap:24px}
+.brand{margin-right:auto;color:var(--red)}.launch{background:var(--red)!important;color:#fff!important}
+.wrap{max-width:1220px;margin:auto;padding:28px 16px 96px;display:grid;grid-template-columns:280px 1fr;gap:24px}
 .side{position:sticky;top:72px;align-self:start;display:grid;gap:12px}
 .panel,.stage,.hero{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 8px 28px rgba(18,34,83,.06)}
 .panel h2{font-size:18px;margin:0 0 8px;color:var(--navy)}
@@ -27,21 +27,30 @@ a{color:inherit}button,input,textarea{font:inherit}code,pre{font-family:Consolas
 .steps{display:grid;gap:5px;margin-top:14px}.steps a{text-decoration:none;padding:8px;border-radius:10px;color:#5a6078;font-weight:800;font-size:13px}.steps a:hover{background:var(--soft);color:var(--red)}
 .ey{display:inline-block;background:#fff2ea;color:var(--red);border-radius:999px;padding:7px 10px;font-weight:900;text-transform:uppercase;font-size:12px;letter-spacing:.06em}
 h1{font-size:clamp(38px,6vw,68px);line-height:.98;margin:.2em 0;color:var(--navy)}
-h2{color:var(--navy);font-size:28px;margin:.2em 0}.lead{font-size:20px;color:#46506b;max-width:850px}
-.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:10px 14px;text-decoration:none;font-weight:900;display:inline-flex;align-items:center;justify-content:center;background:var(--teal);color:white;cursor:pointer}.btn:hover{filter:brightness(.96)}.btn:disabled{opacity:.5;cursor:not-allowed}.btn.red{background:var(--red)}.btn.soft{background:#e7f3f4;color:#075f62;border:1px solid #b9dddd}.btn.purple{background:var(--purple)}
-.stage{margin-top:18px;scroll-margin-top:80px}.stage-head{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start}.n{width:42px;height:42px;border-radius:14px;background:var(--teal);color:white;display:grid;place-items:center;font-weight:900}.done{display:flex;gap:7px;align-items:center;color:#086c70;font-weight:900}
+h2{color:var(--navy);font-size:28px;margin:.2em 0}.lead{font-size:20px;color:#46506b;max-width:900px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:10px 14px;text-decoration:none;font-weight:900;display:inline-flex;align-items:center;justify-content:center;background:var(--teal);color:#fff;cursor:pointer}.btn:hover{filter:brightness(.96)}.btn:disabled{opacity:.5;cursor:not-allowed}.btn.red{background:var(--red)}.btn.soft{background:#e7f3f4;color:#075f62;border:1px solid #b9dddd}.btn.purple{background:var(--purple)}.btn.orange{background:var(--orange)}
+.stage{margin-top:18px;scroll-margin-top:80px}.stage-head{display:grid;grid-template-columns:48px 1fr auto;gap:14px;align-items:start}.n{width:46px;height:46px;border-radius:14px;background:var(--teal);color:#fff;display:grid;place-items:center;font-weight:900}.done{display:flex;gap:7px;align-items:center;color:#086c70;font-weight:900}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.box{border:1px solid var(--line);border-radius:15px;padding:14px;background:#fff}.box h3{margin:.1em 0 .4em;color:#086c70}.task{margin-top:12px;border-left:6px solid var(--orange);background:#fff3e8;border-radius:12px;padding:12px;color:#3c2e26}
-.code{margin-top:12px}.code pre{background:var(--code);color:#f7fbff;border-radius:14px;padding:14px;white-space:pre-wrap;overflow:auto}
-.quiz{border:2px solid #0B8689;border-radius:15px;padding:14px;margin-top:14px;background:#fbffff;color:var(--ink)}.quiz label{display:block;margin:9px 0;cursor:pointer}.feedback{display:none;margin-top:10px;font-weight:800;border-radius:10px;padding:10px 12px}.feedback.ok{display:block;background:var(--ok);color:#155e5f}.feedback.bad{display:block;background:var(--bad);color:#8d1e18}.feedback.info{display:block;background:#eef5fc;color:#24527f}
+.code{margin-top:12px}.code pre,pre.codeblock{background:var(--code);color:#f7fbff;border-radius:14px;padding:14px;white-space:pre-wrap;overflow:auto}
+.activity{border:2px solid var(--purple);border-radius:17px;padding:16px;margin-top:16px;background:#fcfaff;color:var(--ink)}.activity-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.activity-head b{color:var(--purple);font-size:17px}.points{background:#f1ebfb;color:#5a3b91;padding:5px 8px;border-radius:999px;font-size:12px;font-weight:900}.activity label{display:block;margin:9px 0}.activity select,.activity input[type=text],.activity input[type=number]{width:100%;border:1px solid #cfd5e2;border-radius:10px;padding:9px 10px;background:#fff;color:var(--ink)}
+.feedback{display:none;margin-top:10px;font-weight:800;border-radius:10px;padding:10px 12px}.feedback.ok{display:block;background:var(--ok);color:#155e5f}.feedback.bad{display:block;background:var(--bad);color:#8d1e18}.feedback.info{display:block;background:#eef5fc;color:#24527f}
+.mapping-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:8px;align-items:center;margin-top:10px}.mapping-grid .field{font-weight:900}.mapping-grid select{margin:0}
+.sequence{display:grid;gap:7px;margin:10px 0}.seq-item{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}.seq-item button{border:0;background:#edf1f8;color:var(--navy);border-radius:8px;width:34px;height:34px;font-weight:900;cursor:pointer}
+.fill-grid{display:grid;grid-template-columns:.45fr 1.2fr .8fr;gap:8px;align-items:end}.fill-grid small{display:block;color:var(--muted)}
+.builder-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.preview{background:var(--code);color:#f7fbff;border-radius:12px;padding:12px;margin-top:10px;white-space:pre-wrap;font-family:Consolas,monospace;font-size:13px}
 .plan{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.plan .box{background:#fffdf8}
 .log textarea,.log input,.live-form input{width:100%;border:1px solid #cfd5e2;border-radius:10px;padding:10px;background:#fff;color:var(--ink)}.log-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .warn{background:#fff7ed;color:#3f3128;border-left:6px solid var(--orange);border-radius:12px;padding:12px;margin-top:12px}
-.live-panel{border:2px solid var(--purple);background:#fbf9ff}.live-badge{display:inline-flex;align-items:center;gap:7px;color:#5b3f91;font-weight:900;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#a4a4aa}.dot.on{background:#17a36b;box-shadow:0 0 0 5px rgba(23,163,107,.12)}
+.live-panel{border:2px solid var(--purple);background:#fbf9ff}.live-panel.top-live{margin-top:18px}.live-badge{display:inline-flex;align-items:center;gap:7px;color:#5b3f91;font-weight:900;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#a4a4aa}.dot.on{background:#17a36b;box-shadow:0 0 0 5px rgba(23,163,107,.12)}
 .live-form{display:grid;gap:8px}.mini{font-size:12px;color:var(--muted)}.live-self{font-weight:900;color:var(--navy);font-size:13px}
 .scoreboard{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}.scoreboard table{width:100%;border-collapse:collapse;min-width:430px}.scoreboard th,.scoreboard td{text-align:left;padding:10px;border-bottom:1px solid var(--line)}.scoreboard th{background:#f4f0fa;color:#4d347d}.scoreboard tr.me{background:#eaf6f6}.rank{font-weight:900;color:var(--purple)}.score{font-weight:900;color:var(--teal)}
-.live-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:14px;margin-top:14px}.statline{font-size:13px;color:var(--muted);margin-top:8px}.stats{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}.stat-chip{background:#f3eff9;color:#55398b;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:900}
+.live-grid{display:grid;grid-template-columns:.78fr 1.22fr;gap:14px;margin-top:14px}.statline{font-size:13px;color:var(--muted);margin-top:8px}.stats{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}.stat-chip{background:#f3eff9;color:#55398b;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:900}.stat-chip.weak{background:#fde9e7;color:#9b241d}.stat-chip.strong{background:#e7f5ef;color:#146e51}
 .side-score{display:grid;gap:5px;margin-top:8px}.side-score div{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:6px 8px;background:#f6f3fb;border-radius:8px}.side-score b{color:var(--purple)}
-@media(max-width:850px){.wrap{grid-template-columns:1fr}.side{position:relative;top:0}.cols,.plan,.log-grid,.live-grid{grid-template-columns:1fr}.stage-head{grid-template-columns:42px 1fr}.done{grid-column:2}.nav{overflow:auto}.lead{font-size:17px}}
+.industry{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}.industry .box{border-left:5px solid var(--blue)}.industry code{font-size:13px}
+.mobile-livebar{display:none;position:fixed;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));z-index:60;background:rgba(18,34,83,.97);color:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.28);padding:9px 12px;text-decoration:none;align-items:center;justify-content:space-between;gap:10px}.mobile-livebar b{font-size:13px}.mobile-livebar span{font-size:12px;color:#dfe6ff}
+@media(max-width:850px){
+  .wrap{grid-template-columns:1fr}.side{position:relative;top:0}.cols,.plan,.log-grid,.live-grid,.industry,.builder-grid{grid-template-columns:1fr}.stage-head{grid-template-columns:42px 1fr}.done{grid-column:2}.nav{overflow:auto}.lead{font-size:17px}.mobile-livebar{display:flex}.side .live-panel{display:none}.fill-grid{grid-template-columns:1fr}.activity{padding:13px}
+}
 </style>
 </head>
 <body>
@@ -53,6 +62,11 @@ h2{color:var(--navy);font-size:28px;margin:.2em 0}.lead{font-size:20px;color:#46
   </nav>
 </header>
 
+<a id="mobileLiveBar" class="mobile-livebar" href="#live">
+  <div><b>● S07 LIVE</b><br><span id="mobileLiveText">Toca para entrar o ver ranking</span></div>
+  <strong id="mobileLiveScore">—</strong>
+</a>
+
 <div class="wrap">
 <aside class="side">
   <div class="panel">
@@ -60,8 +74,8 @@ h2{color:var(--navy);font-size:28px;margin:.2em 0}.lead{font-size:20px;color:#46
     <div class="meter"><i id="progressBar"></i></div>
     <small><b id="progressCount">0</b> de 7 etapas verificadas</small>
     <div class="steps">
-      <a href="#uso">Cómo se dicta</a><a href="#e0">0 · Problema</a><a href="#e1">1 · Modelar</a><a href="#e2">2 · Analyzer</a>
-      <a href="#e3">3 · Elastic directo</a><a href="#e4">4 · Python</a><a href="#e5">5 · Evaluar</a><a href="#e6">6 · Transferir</a><a href="#live">S07 Live</a>
+      <a href="#live">S07 Live · inicio</a><a href="#e0">0 · Problema</a><a href="#e1">1 · Modelar</a><a href="#e2">2 · Analyzer</a>
+      <a href="#e3">3 · Elastic directo</a><a href="#e4">4 · Python</a><a href="#e5">5 · Evaluar</a><a href="#e6">6 · Transferir</a>
     </div>
   </div>
 
@@ -76,8 +90,8 @@ h2{color:var(--navy);font-size:28px;margin:.2em 0}.lead{font-size:20px;color:#46
 <main>
 <section class="hero">
   <span class="ey">Universidad Central · Sesión 7</span>
-  <h1>Laboratorio activo: Elasticsearch</h1>
-  <p class="lead">La presentación enseña los conceptos y ejemplos; aquí ejecutas, verificas evidencia y respondes checkpoints. S07 Live registra respuestas y actualiza el ranking de la clase en tiempo real.</p>
+  <h1>Elasticsearch Search Lab</h1>
+  <p class="lead">Aprendes construyendo: primero entiendes el problema y la API en Console; luego automatizas desde Python; finalmente demuestras que puedes modelar, consultar, verificar y evaluar un buscador sin copiar una receta.</p>
   <div class="actions">
     <a class="btn red" href="../../Presentaciones/s07-del-vecindario-al-texto.html#s1">Abrir presentación</a>
     <a class="btn" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Abrir / reutilizar Colab</a>
@@ -85,96 +99,8 @@ h2{color:var(--navy);font-size:28px;margin:.2em 0}.lead{font-size:20px;color:#46
   </div>
 </section>
 
-<section class="stage" id="uso">
-  <div class="stage-head"><div class="n">?</div><div><h2>Cómo se dicta la clase</h2><p>No es tarea silenciosa ni lista de chequeo. Es el guion operativo para alternar explicación, Console y Python.</p></div></div>
-  <div class="plan">
-    <div class="box"><h3>1 · Presentación</h3><p>Tú explicas definiciones, ejemplos, errores frecuentes y la equivalencia Console ↔ Python.</p></div>
-    <div class="box"><h3>2 · Laboratorio</h3><p>El grupo ejecuta el paso indicado, verifica evidencia y responde el checkpoint S07 Live.</p></div>
-    <div class="box"><h3>3 · Cuaderno</h3><p>Se usa cuando toca automatizar. El código importante está explicado; el plumbing no domina la clase.</p></div>
-  </div>
-  <div class="warn"><b>Orden de clase:</b> presentación → ejecutar el paso → responder checkpoint → revisar ranking/distribución → continuar. El reto de noticias puede terminarse después si falta tiempo.</div>
-</section>
-
-<section class="stage" id="e0">
-  <div class="stage-head"><div class="n">0</div><div><h2>Problema: buscar no es filtrar</h2><p>Capacidad: distinguir identidad, filtro y ranking textual.</p></div><label class="done"><input type="checkbox" data-step="0"> verificado</label></div>
-  <div class="cols"><div class="box"><h3>Concepto</h3><p>Filtrar responde si un documento cumple una condición. Buscar ordena documentos según relevancia frente a una necesidad textual.</p></div><div class="box"><h3>Evidencia</h3><p>En Colab reconoces 2.109 filas fuente y 1.994 procesos únicos.</p></div></div>
-  <div class="quiz" data-question="q0" data-fallback="b"><b>Checkpoint 1</b><p>¿Qué tarea necesita ranking?</p>
-    <label><input name="q0" type="radio" value="a"> registros de Bogotá</label>
-    <label><input name="q0" type="radio" value="b"> procesos que mejor responden a “mantenimiento aeronaves”</label>
-    <label><input name="q0" type="radio" value="c"> contar documentos</label>
-    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
-  </div>
-</section>
-
-<section class="stage" id="e1">
-  <div class="stage-head"><div class="n">1</div><div><h2>Modelar documentos</h2><p>Capacidad: explicar documento, campo, índice, mapping, <code>text</code> y <code>keyword</code>.</p></div><label class="done"><input type="checkbox" data-step="1"> verificado</label></div>
-  <div class="cols"><div class="box"><h3>Ejemplo</h3><p><code>descripcion</code> es <code>text</code> porque buscamos palabras. <code>entidad</code> es <code>keyword</code> porque filtramos valores completos.</p></div><div class="box"><h3>Error frecuente</h3><p>Elegir <code>text</code> porque el valor “parece texto”. El tipo depende del uso, no de la apariencia.</p></div></div>
-  <div class="quiz" data-question="q1" data-fallback="c"><b>Checkpoint 2</b><p>¿Cuál mapping es más razonable?</p>
-    <label><input name="q1" type="radio" value="a"> todo <code>text</code></label>
-    <label><input name="q1" type="radio" value="b"> todo <code>keyword</code></label>
-    <label><input name="q1" type="radio" value="c"> título <code>text</code>, categoría <code>keyword</code>, premium <code>boolean</code></label>
-    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
-  </div>
-</section>
-
-<section class="stage" id="e2">
-  <div class="stage-head"><div class="n">2</div><div><h2>Analyzer e índice invertido</h2><p>Capacidad: observar cómo Elasticsearch transforma texto antes de buscar.</p></div><label class="done"><input type="checkbox" data-step="2"> verificado</label></div>
-  <div class="code"><pre>POST s07-demo/_analyze
-{
-  "analyzer": "spanish",
-  "text": "Servicios de mantenimiento de las aeronaves"
-}</pre></div>
-  <div class="task"><b>Evidencia:</b> puedes explicar al menos un token producido y por qué no coincide exactamente con la frase original.</div>
-  <div class="quiz" data-question="q2" data-fallback="a"><b>Checkpoint 3</b><p>¿Qué componente produce los tokens?</p>
-    <label><input name="q2" type="radio" value="a"> analyzer</label>
-    <label><input name="q2" type="radio" value="b"> bulk</label>
-    <label><input name="q2" type="radio" value="c"> filter</label>
-    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
-  </div>
-</section>
-
-<section class="stage" id="e3">
-  <div class="stage-head"><div class="n">3</div><div><h2>Usar Elasticsearch directamente</h2><p>Capacidad: entrar a Console, crear índice, indexar tres documentos y ejecutar <code>_search</code>.</p></div><label class="done"><input type="checkbox" data-step="3"> verificado</label></div>
-  <div class="cols"><div class="box"><h3>Console</h3><p>Primero ejecutas APIs directamente. Así entiendes método, endpoint, JSON y respuesta.</p></div><div class="box"><h3>UI</h3><p>Después inspeccionas el índice en Index Management / Discover para verificar que existe y tiene documentos.</p></div></div>
-  <div class="quiz" data-question="q3" data-fallback="b"><b>Checkpoint 4</b><p>En una respuesta de búsqueda, ¿dónde viene el documento original?</p>
-    <label><input name="q3" type="radio" value="a"> <code>_score</code></label>
-    <label><input name="q3" type="radio" value="b"> <code>_source</code></label>
-    <label><input name="q3" type="radio" value="c"> <code>took</code></label>
-    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
-  </div>
-</section>
-
-<section class="stage" id="e4">
-  <div class="stage-head"><div class="n">4</div><div><h2>Automatizar desde Python</h2><p>Capacidad: conectar con <code>Elasticsearch(...)</code>, cargar con <code>bulk()</code> y verificar <code>count()</code>.</p></div><label class="done"><input type="checkbox" data-step="4"> verificado</label></div>
-  <div class="code"><pre>client = Elasticsearch(endpoint, api_key=api_key)
-client.info()</pre></div>
-  <div class="task"><b>Explicación obligatoria:</b> <code>client</code> es la conexión; no contiene los datos. Python automatiza la API que viste en Console.</div>
-  <div class="quiz" data-question="q4" data-fallback="c"><b>Checkpoint 5</b><p>¿Qué prueba mínima confirma que Python habla con Elasticsearch?</p>
-    <label><input name="q4" type="radio" value="a"> <code>import pandas</code></label>
-    <label><input name="q4" type="radio" value="b"> <code>display(corpus)</code></label>
-    <label><input name="q4" type="radio" value="c"> <code>client.info()</code></label>
-    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
-  </div>
-</section>
-
-<section class="stage" id="e5">
-  <div class="stage-head"><div class="n">5</div><div><h2>Diseñar y evaluar búsqueda</h2><p>Capacidad: construir <code>match</code>, <code>multi_match</code>, boost, filter, highlight y medir P@5.</p></div><label class="done"><input type="checkbox" data-step="5"> verificado</label></div>
-  <div class="cols"><div class="box"><h3>Query DSL</h3><p><code>must</code> aporta relevancia. <code>filter</code> restringe sin sumar score. <code>highlight</code> ayuda a inspeccionar evidencia textual.</p></div><div class="box"><h3>Evaluación</h3><p>Precision@5 exige criterio de relevancia antes de etiquetar los resultados.</p></div></div>
-  <div class="quiz" data-question="q5" data-fallback="a"><b>Checkpoint 6</b><p>Si 3 de 5 resultados son relevantes, ¿cuál es Precision@5?</p>
-    <label><input name="q5" type="radio" value="a"> 0,60</label>
-    <label><input name="q5" type="radio" value="b"> 0,40</label>
-    <label><input name="q5" type="radio" value="c"> 3,00</label>
-    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
-  </div>
-</section>
-
-<section class="stage" id="e6">
-  <div class="stage-head"><div class="n">6</div><div><h2>Transferir a noticias</h2><p>Capacidad: repetir el proceso en otro dominio y explicar qué cambia.</p></div><label class="done"><input type="checkbox" data-step="6"> verificado</label></div>
-  <div class="cols"><div class="box"><h3>Reto</h3><p>Indexa 987 noticias, aplica un brief editorial, filtra <code>premium=false</code> y compara baseline vs ranking ajustado.</p></div><div class="box"><h3>Entrega</h3><p>Recomienda A o B con P@5, un ejemplo concreto, un falso positivo y una mejora siguiente.</p></div></div>
-</section>
-
-<section class="stage live-panel" id="live">
-  <div class="stage-head"><div class="n">LIVE</div><div><h2>S07 Live · ranking en tiempo real</h2><p>Escribe un nombre o alias. Cada checkpoint correcto suma un punto; el ranking se actualiza cuando cualquier estudiante responde.</p></div></div>
+<section class="stage live-panel top-live" id="live">
+  <div class="stage-head"><div class="n">LIVE</div><div><h2>S07 Live · entra antes de comenzar</h2><p>El ranking queda visible durante toda la clase. Cada desafío aporta puntos distintos: no medimos solo selección múltiple, también modelado, secuencias, código, resultados reales y construcción de consultas.</p></div></div>
   <div class="live-grid">
     <div class="box">
       <h3>Entrar a la sesión</h3>
@@ -186,28 +112,191 @@ client.info()</pre></div>
       </div>
       <p id="liveStatus" class="statline">Conectando servicio…</p>
       <p id="myLiveScore" class="live-self"></p>
-      <div class="warn"><b>Uso formativo:</b> el ranking sirve para detectar conceptos que debemos volver a explicar; no reemplaza la evidencia del notebook.</div>
+      <div class="warn"><b>21 puntos formativos:</b> el puntaje muestra progreso en habilidades; la evidencia real sigue estando en Console y en el notebook.</div>
     </div>
     <div>
       <div class="scoreboard">
         <table>
-          <thead><tr><th>#</th><th>Estudiante</th><th>Puntos</th><th>Respondidas</th></tr></thead>
+          <thead><tr><th>#</th><th>Estudiante</th><th>Puntos</th><th>Actividades</th></tr></thead>
           <tbody id="leaderBody"><tr><td colspan="4">Esperando participantes…</td></tr></tbody>
         </table>
       </div>
       <div id="liveMeta" class="statline">0 participantes</div>
-      <h3 style="margin:14px 0 4px;color:var(--navy)">Distribución por checkpoint</h3>
+      <h3 style="margin:14px 0 4px;color:var(--navy)">Dominio por actividad</h3>
       <div id="liveStats" class="stats"></div>
     </div>
+  </div>
+</section>
+
+<section class="stage" id="uso">
+  <div class="stage-head"><div class="n">↻</div><div><h2>Ritmo de trabajo</h2><p>La explicación detallada está en la presentación. Este laboratorio aparece cuando necesitas hacer algo, demostrarlo y recibir feedback.</p></div></div>
+  <div class="plan">
+    <div class="box"><h3>Explica</h3><p>Concepto + ejemplo detallado + error frecuente.</p></div>
+    <div class="box"><h3>Hazlo</h3><p>Console o Colab según la etapa. Debe aparecer una salida verificable.</p></div>
+    <div class="box"><h3>Demuestra</h3><p>Resuelve el desafío sin mirar la solución; S07 Live registra el resultado.</p></div>
+  </div>
+</section>
+
+<section class="stage" id="e0">
+  <div class="stage-head"><div class="n">0</div><div><h2>Problema: buscar no es filtrar</h2><p>Capacidad: reconocer cuándo necesitas recuperación textual y ranking.</p></div><label class="done"><input type="checkbox" data-step="0"> verificado</label></div>
+  <div class="industry">
+    <div class="box"><h3>E-commerce</h3><p>“zapatos de senderismo impermeables” necesita ranking textual. <code>talla=42</code> y <code>stock=true</code> son filtros.</p></div>
+    <div class="box"><h3>Empleo</h3><p>“científico de datos con experiencia en NLP” necesita relevancia textual. <code>remoto=true</code> y <code>pais=Colombia</code> restringen candidatos.</p></div>
+  </div>
+  <div class="activity" data-question="q0" data-kind="single" data-fallback="b">
+    <div class="activity-head"><b>Desafío 1 · decisión de búsqueda</b><span class="points">1 punto</span></div>
+    <p>¿Qué tarea necesita ranking de relevancia?</p>
+    <label><input name="q0" type="radio" value="a"> registros de Bogotá</label>
+    <label><input name="q0" type="radio" value="b"> procesos que mejor responden a “mantenimiento aeronaves”</label>
+    <label><input name="q0" type="radio" value="c"> contar documentos</label>
+    <button class="btn soft submit-activity" type="button">Comprobar</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e1">
+  <div class="stage-head"><div class="n">1</div><div><h2>Modelar: el mapping condiciona lo que podrás buscar</h2><p>Capacidad: asignar tipos a partir del uso, no de la apariencia del dato.</p></div><label class="done"><input type="checkbox" data-step="1"> verificado</label></div>
+  <div class="cols">
+    <div class="box"><h3>Catálogo realista</h3><pre class="codeblock">{
+  "titulo": "Trail Runner Pro",
+  "categoria": "Calzado",
+  "premium": false,
+  "publicado": "2026-09-18"
+}</pre></div>
+    <div class="box"><h3>La decisión</h3><p><b>titulo</b> debe poder analizarse; <b>categoria</b> debe compararse completa; <b>premium</b> es binario; <b>publicado</b> debe admitir rangos temporales.</p></div>
+  </div>
+  <div class="activity" data-question="q1" data-kind="mapping" data-fallback="text|keyword|boolean|date">
+    <div class="activity-head"><b>Desafío 2 · construye el mapping</b><span class="points">4 puntos</span></div>
+    <p>Selecciona el tipo más defendible para cada campo.</p>
+    <div class="mapping-grid">
+      <span class="field">titulo</span><select data-map="titulo"><option value="">— elige —</option><option>text</option><option>keyword</option><option>boolean</option><option>date</option></select>
+      <span class="field">categoria</span><select data-map="categoria"><option value="">— elige —</option><option>text</option><option>keyword</option><option>boolean</option><option>date</option></select>
+      <span class="field">premium</span><select data-map="premium"><option value="">— elige —</option><option>text</option><option>keyword</option><option>boolean</option><option>date</option></select>
+      <span class="field">publicado</span><select data-map="publicado"><option value="">— elige —</option><option>text</option><option>keyword</option><option>boolean</option><option>date</option></select>
+    </div>
+    <button class="btn soft submit-activity" type="button">Validar mapping</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e2">
+  <div class="stage-head"><div class="n">2</div><div><h2>Analyzer: observa el mecanismo, no memorices tokens</h2><p>Capacidad: explicar cómo el texto se convierte en términos buscables y comprobarlo en Console.</p></div><label class="done"><input type="checkbox" data-step="2"> verificado</label></div>
+  <div class="code"><pre>POST s07-demo/_analyze
+{
+  "analyzer": "spanish",
+  "text": "Servicios de mantenimiento de las aeronaves"
+}</pre></div>
+
+  <div class="activity" data-question="q2" data-kind="sequence" data-fallback="texto>tokenizer>filtros>tokens">
+    <div class="activity-head"><b>Desafío 3 · ordena el pipeline</b><span class="points">2 puntos</span></div>
+    <p>Ordena las piezas desde la entrada hasta los términos indexables.</p>
+    <div class="sequence" data-sequence>
+      <div class="seq-item" data-value="tokens"><span>Tokens indexables</span><button type="button" data-up>↑</button><button type="button" data-down>↓</button></div>
+      <div class="seq-item" data-value="texto"><span>Texto original</span><button type="button" data-up>↑</button><button type="button" data-down>↓</button></div>
+      <div class="seq-item" data-value="filtros"><span>Filtros: lowercase / stop / stem</span><button type="button" data-up>↑</button><button type="button" data-down>↓</button></div>
+      <div class="seq-item" data-value="tokenizer"><span>Tokenizer</span><button type="button" data-up>↑</button><button type="button" data-down>↓</button></div>
+    </div>
+    <button class="btn soft submit-activity" type="button">Comprobar secuencia</button><div class="feedback"></div>
+  </div>
+
+  <div class="activity" data-question="q3" data-kind="codefill" data-fallback="POST|s07-demo/_analyze|spanish">
+    <div class="activity-head"><b>Desafío 4 · completa la API</b><span class="points">2 puntos</span></div>
+    <p>Sin copiar el ejemplo superior, completa la llamada mínima para inspeccionar el analyzer.</p>
+    <div class="fill-grid">
+      <div><small>Método</small><input type="text" data-fill="method" placeholder="GET / POST"></div>
+      <div><small>Ruta</small><input type="text" data-fill="path" placeholder="indice/_..."></div>
+      <div><small>Analyzer</small><input type="text" data-fill="analyzer" placeholder="..."></div>
+    </div>
+    <button class="btn soft submit-activity" type="button">Validar API</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e3">
+  <div class="stage-head"><div class="n">3</div><div><h2>Elastic directo: crea, indexa, busca e inspecciona</h2><p>Capacidad: usar Console y la UI sin depender de Python.</p></div><label class="done"><input type="checkbox" data-step="3"> verificado</label></div>
+  <div class="cols">
+    <div class="box"><h3>Console</h3><p><code>PUT índice</code> crea estructura; <code>PUT índice/_doc/id</code> agrega un documento; <code>GET índice/_search</code> consulta.</p></div>
+    <div class="box"><h3>UI</h3><p>Index Management confirma mapping y conteo. Discover te deja inspeccionar documentos concretos y campos disponibles.</p></div>
+  </div>
+  <div class="task"><b>Prueba de autonomía:</b> crea un índice demo, agrega tres documentos, ejecuta una búsqueda y localiza <code>_id</code>, <code>_score</code> y <code>_source</code> en la respuesta.</div>
+</section>
+
+<section class="stage" id="e4">
+  <div class="stage-head"><div class="n">4</div><div><h2>Python: automatiza lo que ya entendiste</h2><p>Capacidad: conectar, cargar el corpus real y comprobar que el estado remoto coincide con el local.</p></div><label class="done"><input type="checkbox" data-step="4"> verificado</label></div>
+  <div class="code"><pre>client = Elasticsearch(endpoint, api_key=api_key)
+client.info()
+
+ok, errors = bulk(client, acciones)
+client.count(index=INDEX_NAME)</pre></div>
+  <div class="task"><b>Regla profesional:</b> “la celda no falló” no es evidencia. Debes comparar el conteo local con el conteo remoto.</div>
+  <div class="activity" data-question="q4" data-kind="number" data-fallback="1994">
+    <div class="activity-head"><b>Desafío 5 · resultado real de tu ingesta</b><span class="points">2 puntos</span></div>
+    <p>Después de ejecutar <code>bulk()</code> y <code>count()</code>, escribe cuántos procesos únicos deben quedar indexados en el corpus principal.</p>
+    <input type="number" data-number placeholder="Escribe el conteo remoto">
+    <button class="btn soft submit-activity" type="button">Verificar evidencia</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e5">
+  <div class="stage-head"><div class="n">5</div><div><h2>Search engineering: diseña una consulta y demuéstrala</h2><p>Capacidad: separar relevancia de restricciones, hacer explícita la estrategia y medir si el cambio ayuda.</p></div><label class="done"><input type="checkbox" data-step="5"> verificado</label></div>
+  <div class="industry">
+    <div class="box"><h3>Productos</h3><p>Consulta: “red lipstick”. El texto recupera productos; <code>brand</code>, <code>price</code> o disponibilidad pueden ser filtros. Boosts posteriores pueden incorporar reglas de negocio.</p></div>
+    <div class="box"><h3>Noticias</h3><p>Consulta: “sobrecostos en contratación”. Coincidencia en <b>título</b> puede pesar más que una mención perdida en el cuerpo, pero el peso debe evaluarse con juicios de relevancia.</p></div>
+  </div>
+
+  <div class="activity" data-question="q5" data-kind="querybuilder" data-fallback="nombre_proceso^3,descripcion|tipo_registro=historico_adjudicado|highlight">
+    <div class="activity-head"><b>Desafío 6 · construye Query DSL</b><span class="points">4 puntos</span></div>
+    <p>Configura una búsqueda que priorice el nombre, use la descripción como evidencia secundaria, filtre por registro adjudicado y muestre fragmentos coincidentes.</p>
+    <div class="builder-grid">
+      <label>Campos y pesos<select data-query="fields"><option value="">— elige —</option><option value="nombre_proceso,descripcion">nombre_proceso + descripcion</option><option value="nombre_proceso^3,descripcion">nombre_proceso^3 + descripcion</option><option value="descripcion^3,nombre_proceso">descripcion^3 + nombre_proceso</option></select></label>
+      <label>Filtro<select data-query="filter"><option value="">— elige —</option><option value="tipo_registro=historico_adjudicado">tipo_registro = historico_adjudicado</option><option value="tipo_registro=historico">tipo_registro = historico</option><option value="sin_filtro">sin filtro</option></select></label>
+      <label style="grid-column:1/-1"><input type="checkbox" data-query="highlight"> Incluir highlight para inspeccionar coincidencias</label>
+    </div>
+    <div class="preview" data-query-preview>Configura la consulta para ver una vista previa.</div>
+    <button class="btn soft submit-activity" type="button">Validar diseño</button><div class="feedback"></div>
+  </div>
+
+  <div class="activity" data-question="q6" data-kind="numeric" data-fallback="0.6">
+    <div class="activity-head"><b>Desafío 7 · evalúa el ranking</b><span class="points">2 puntos</span></div>
+    <p>Tu top 5 es: relevante, no relevante, relevante, relevante, no relevante. Escribe Precision@5.</p>
+    <input type="text" data-numeric placeholder="Ej. 0,60">
+    <button class="btn soft submit-activity" type="button">Calcular y validar</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e6">
+  <div class="stage-head"><div class="n">6</div><div><h2>Transferencia: diseña el buscador editorial</h2><p>Capacidad: reconstruir la solución para otro dominio sin copiar el mapping de contratos.</p></div><label class="done"><input type="checkbox" data-step="6"> verificado</label></div>
+  <div class="box"><h3>Brief</h3><p>Una editora busca antecedentes sobre <b>sobrecostos en contratación</b>. Quiere que títulos muy relacionados pesen más, excluir contenido premium y recuperar cinco historias defendibles.</p></div>
+  <div class="activity" data-question="q7" data-kind="transfer" data-fallback="text|keyword|boolean|date|titulo^4,subtitulo^2,cuerpo|premium=false">
+    <div class="activity-head"><b>Desafío 8 · diseña una solución nueva</b><span class="points">4 puntos</span></div>
+    <div class="mapping-grid">
+      <span class="field">titulo</span><select data-transfer="titulo"><option value="">—</option><option>text</option><option>keyword</option><option>boolean</option><option>date</option></select>
+      <span class="field">categoria</span><select data-transfer="categoria"><option value="">—</option><option>text</option><option>keyword</option><option>boolean</option><option>date</option></select>
+      <span class="field">premium</span><select data-transfer="premium"><option value="">—</option><option>text</option><option>keyword</option><option>boolean</option><option>date</option></select>
+      <span class="field">publicado</span><select data-transfer="publicado"><option value="">—</option><option>text</option><option>keyword</option><option>boolean</option><option>date</option></select>
+    </div>
+    <div class="builder-grid" style="margin-top:10px">
+      <label>Estrategia de campos<select data-transfer="fields"><option value="">— elige —</option><option value="titulo,cuerpo">titulo + cuerpo</option><option value="titulo^4,subtitulo^2,cuerpo">titulo^4 + subtitulo^2 + cuerpo</option><option value="cuerpo^4,titulo">cuerpo^4 + titulo</option></select></label>
+      <label>Restricción<select data-transfer="filter"><option value="">— elige —</option><option value="premium=false">premium = false</option><option value="premium=true">premium = true</option><option value="sin_filtro">sin filtro</option></select></label>
+    </div>
+    <button class="btn soft submit-activity" type="button">Validar solución editorial</button><div class="feedback"></div>
+  </div>
+  <div class="task"><b>Entrega real:</b> después del puntaje automático, todavía debes justificar A/B con P@5, señalar un falso positivo y proponer el siguiente experimento. Eso no se reemplaza con el leaderboard.</div>
+</section>
+
+<section class="stage">
+  <h2>Extensión profesional · qué haría un equipo de búsqueda después</h2>
+  <div class="industry">
+    <div class="box"><h3>Ranking Evaluation API</h3><p>Formaliza juicios de relevancia sobre consultas típicas y calcula métricas de recuperación a escala.</p></div>
+    <div class="box"><h3>Search Profiler</h3><p>Sirve para inspeccionar cómo se ejecuta una consulta y diagnosticar costo/tiempo cuando la búsqueda deja de ser un ejercicio pequeño.</p></div>
+    <div class="box"><h3>Search UI</h3><p>Convierte el motor en una experiencia de producto: caja de búsqueda, filtros, facets, paginación y estado de consulta.</p></div>
+    <div class="box"><h3>Semantic / hybrid</h3><p>Cuando las palabras ya no bastan, combina búsqueda lexical con recuperación por significado. Ese es el puente a la siguiente etapa del curso.</p></div>
   </div>
 </section>
 
 <section class="stage log">
   <h2>Bitácora mínima</h2>
   <div class="log-grid"><div><label>Índice personal</label><input data-log="indice" placeholder="s07-compras-claras-alias"></div><div><label>Documentos indexados</label><input data-log="conteo" placeholder="1994"></div><div><label>Consulta</label><input data-log="consulta" placeholder="mantenimiento aeronaves"></div><div><label>Precision@5 B</label><input data-log="p5" placeholder="0.8"></div></div>
-  <p><label>Qué puedo hacer solo después de S07</label><textarea data-log="autonomia" rows="4" placeholder="Sé crear índice, diseñar mapping..."></textarea></p>
+  <p><label>Qué puedo hacer solo después de S07</label><textarea data-log="autonomia" rows="4" placeholder="Sé crear un índice, diseñar mapping, usar Console, automatizar con Python..."></textarea></p>
   <button class="btn" id="exportSummary" type="button">Exportar resumen JSON</button>
-  <pre id="summary" style="margin-top:12px">{}</pre>
+  <pre id="summary" class="codeblock">{}</pre>
 </section>
 </main>
 </div>
@@ -215,9 +304,11 @@ client.info()</pre></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
-  const PROGRESS_KEY='s07lab:v7';
+  const PROGRESS_KEY='s07lab:v8';
   const CLIENT_KEY='s07live:client:v1';
   const LIVE_CODE='ELASTIC-S07';
+  const MAX_POINTS=21;
+  const TOTAL_ACTIVITIES=8;
   const SUPABASE_URL='https://gnpouhsvsisqoxketlfr.supabase.co';
   const SUPABASE_KEY='sb_publishable_9l_od2Dg78hu1mPrmxAabA_erL2Tlge';
 
@@ -225,75 +316,45 @@ client.info()</pre></div>
   try{state=Object.assign(state,JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}'))}catch(e){}
   state.steps=state.steps||{};state.quiz=state.quiz||{};state.log=state.log||{};state.live=state.live||{};
 
-  const progressBar=document.getElementById('progressBar');
-  const progressCount=document.getElementById('progressCount');
-  const summary=document.getElementById('summary');
-  const nickname=document.getElementById('nickname');
-  const joinLiveBtn=document.getElementById('joinLive');
-  const changeAliasBtn=document.getElementById('changeAlias');
-  const liveStatus=document.getElementById('liveStatus');
-  const myLiveScore=document.getElementById('myLiveScore');
-  const leaderBody=document.getElementById('leaderBody');
-  const liveMeta=document.getElementById('liveMeta');
-  const liveStats=document.getElementById('liveStats');
-  const sideDot=document.getElementById('sideDot');
-  const sideIdentity=document.getElementById('sideIdentity');
-  const sideScore=document.getElementById('sideScore');
-  const exportSummaryBtn=document.getElementById('exportSummary');
+  const $=id=>document.getElementById(id);
+  const progressBar=$('progressBar'),progressCount=$('progressCount'),summary=$('summary'),nickname=$('nickname');
+  const joinLiveBtn=$('joinLive'),changeAliasBtn=$('changeAlias'),liveStatus=$('liveStatus'),myLiveScore=$('myLiveScore');
+  const leaderBody=$('leaderBody'),liveMeta=$('liveMeta'),liveStats=$('liveStats'),sideDot=$('sideDot'),sideIdentity=$('sideIdentity'),sideScore=$('sideScore');
+  const mobileLiveText=$('mobileLiveText'),mobileLiveScore=$('mobileLiveScore'),exportSummaryBtn=$('exportSummary');
 
-  let sb=null;
-  let channel=null;
+  let sb=null,channel=null,pollTimer=null,lastRealtimeAt=0;
   try{
-    if(window.supabase && window.supabase.createClient){
+    if(window.supabase&&window.supabase.createClient){
       sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
-      liveStatus.textContent='Servicio S07 Live disponible. Escribe tu alias para entrar.';
-    }else{
-      liveStatus.textContent='No se pudo cargar S07 Live. Los checkpoints seguirán funcionando en modo local.';
-    }
-  }catch(err){
-    liveStatus.textContent='S07 Live no está disponible; continúa en modo local.';
-  }
+      liveStatus.textContent='Servicio disponible. Entra con tu alias antes de comenzar.';
+    }else liveStatus.textContent='No se pudo cargar S07 Live; el laboratorio seguirá en modo local.';
+  }catch(err){liveStatus.textContent='S07 Live no está disponible; continúa en modo local.'}
 
-  function save(){
-    localStorage.setItem(PROGRESS_KEY,JSON.stringify(state));
-    renderLocal();
-  }
-
+  function save(){localStorage.setItem(PROGRESS_KEY,JSON.stringify(state));renderLocal()}
   function renderLocal(){
     let done=0;
-    document.querySelectorAll('[data-step]').forEach(el=>{
-      el.checked=!!state.steps[el.dataset.step];
-      if(el.checked)done++;
-    });
-    progressCount.textContent=done;
-    progressBar.style.width=(done/7*100)+'%';
-    document.querySelectorAll('[data-log]').forEach(el=>{
-      if(document.activeElement!==el) el.value=state.log[el.dataset.log]||'';
-    });
+    document.querySelectorAll('[data-step]').forEach(el=>{el.checked=!!state.steps[el.dataset.step];if(el.checked)done++});
+    progressCount.textContent=done;progressBar.style.width=(done/7*100)+'%';
+    document.querySelectorAll('[data-log]').forEach(el=>{if(document.activeElement!==el)el.value=state.log[el.dataset.log]||''});
     nickname.value=state.live.nickname||nickname.value||'';
     summary.textContent=JSON.stringify(state,null,2);
     if(state.live.participant_id){
       sideDot.classList.add('on');
-      sideIdentity.textContent=state.live.nickname+' · '+(state.live.score||0)+'/'+(state.live.answered||0)+' puntos/respondidas';
+      sideIdentity.textContent=state.live.nickname+' · '+(state.live.score||0)+'/'+MAX_POINTS+' pts';
+      mobileLiveText.textContent=state.live.nickname+' · '+(state.live.answered||0)+'/'+TOTAL_ACTIVITIES+' actividades';
+      mobileLiveScore.textContent=(state.live.score||0)+'/'+MAX_POINTS;
     }else{
-      sideDot.classList.remove('on');
-      sideIdentity.textContent='Aún no te has unido.';
+      sideDot.classList.remove('on');sideIdentity.textContent='Aún no te has unido.';
+      mobileLiveText.textContent='Toca para entrar o ver ranking';mobileLiveScore.textContent='—';
     }
   }
 
-  document.querySelectorAll('[data-step]').forEach(el=>{
-    el.addEventListener('change',()=>{state.steps[el.dataset.step]=el.checked;save()});
-  });
-  document.querySelectorAll('[data-log]').forEach(el=>{
-    el.addEventListener('input',()=>{state.log[el.dataset.log]=el.value;save()});
-  });
+  document.querySelectorAll('[data-step]').forEach(el=>el.addEventListener('change',()=>{state.steps[el.dataset.step]=el.checked;save()}));
+  document.querySelectorAll('[data-log]').forEach(el=>el.addEventListener('input',()=>{state.log[el.dataset.log]=el.value;save()}));
 
   function clientId(){
     let id=localStorage.getItem(CLIENT_KEY);
-    if(!id){
-      id=(crypto.randomUUID?crypto.randomUUID():('00000000-0000-4000-8000-'+Math.random().toString(16).slice(2).padEnd(12,'0').slice(0,12)));
-      localStorage.setItem(CLIENT_KEY,id);
-    }
+    if(!id){id=crypto.randomUUID?crypto.randomUUID():('00000000-0000-4000-8000-'+Math.random().toString(16).slice(2).padEnd(12,'0').slice(0,12));localStorage.setItem(CLIENT_KEY,id)}
     return id;
   }
 
@@ -301,22 +362,17 @@ client.info()</pre></div>
     if(!sb){liveStatus.textContent='S07 Live no está disponible; usa modo local.';return}
     const name=nickname.value.trim();
     if(name.length<2){liveStatus.textContent='Escribe un nombre o alias de al menos 2 caracteres.';return}
-    joinLiveBtn.disabled=true;
-    liveStatus.textContent='Entrando a la sesión…';
+    joinLiveBtn.disabled=true;liveStatus.textContent='Entrando…';
     const {data,error}=await sb.rpc('s07_live_join',{p_code:LIVE_CODE,p_nickname:name,p_client_id:clientId()});
     joinLiveBtn.disabled=false;
     if(error){liveStatus.textContent='No pude entrar: '+error.message;return}
     const row=Array.isArray(data)?data[0]:data;
     if(!row){liveStatus.textContent='La sesión no devolvió un participante.';return}
     state.live={participant_id:row.participant_id,session_id:row.session_id,nickname:row.nickname,score:row.score,answered:row.answered};
-    save();
-    liveStatus.textContent='Conectado en tiempo real.';
-    await refreshLeaderboard();
-    startRealtime();
+    save();liveStatus.textContent='Conectado. El ranking se sincroniza automáticamente.';
+    await refreshAll();
   }
-
-  joinLiveBtn.addEventListener('click',joinLive);
-  changeAliasBtn.addEventListener('click',joinLive);
+  joinLiveBtn.addEventListener('click',joinLive);changeAliasBtn.addEventListener('click',joinLive);
   nickname.addEventListener('keydown',e=>{if(e.key==='Enter')joinLive()});
 
   async function refreshLeaderboard(){
@@ -324,131 +380,142 @@ client.info()</pre></div>
     const {data,error}=await sb.rpc('s07_live_leaderboard',{p_code:LIVE_CODE});
     if(error){liveMeta.textContent='No pude actualizar ranking: '+error.message;return}
     const rows=data||[];
-    liveMeta.textContent=rows.length+' participante'+(rows.length===1?'':'s')+' conectado'+(rows.length===1?'':'s');
+    liveMeta.textContent=rows.length+' participante'+(rows.length===1?'':'s')+' · última sincronización '+new Date().toLocaleTimeString();
     leaderBody.innerHTML=rows.length?rows.map(r=>{
-      const me=state.live.participant_id && r.participant_id===state.live.participant_id;
-      return '<tr class="'+(me?'me':'')+'"><td class="rank">'+r.rank+'</td><td>'+escapeHtml(r.nickname)+'</td><td class="score">'+r.score+'</td><td>'+r.answered+'/6</td></tr>';
+      const me=state.live.participant_id&&r.participant_id===state.live.participant_id;
+      return '<tr class="'+(me?'me':'')+'"><td class="rank">'+r.rank+'</td><td>'+escapeHtml(r.nickname)+'</td><td class="score">'+r.score+'/'+MAX_POINTS+'</td><td>'+r.answered+'/'+TOTAL_ACTIVITIES+'</td></tr>';
     }).join(''):'<tr><td colspan="4">Esperando participantes…</td></tr>';
-    sideScore.innerHTML=rows.slice(0,3).map(r=>'<div><span>#'+r.rank+' '+escapeHtml(r.nickname)+'</span><b>'+r.score+'</b></div>').join('');
-    if(state.live.nickname){
+    sideScore.innerHTML=rows.slice(0,4).map(r=>'<div><span>#'+r.rank+' '+escapeHtml(r.nickname)+'</span><b>'+r.score+'</b></div>').join('');
+    if(state.live.participant_id){
       const mine=rows.find(r=>r.participant_id===state.live.participant_id);
       if(mine){
         state.live.score=mine.score;state.live.answered=mine.answered;
-        myLiveScore.textContent='Tu posición: #'+mine.rank+' · '+mine.score+' puntos · '+mine.answered+'/6 respondidas';
-        sideIdentity.textContent=state.live.nickname+' · #'+mine.rank+' · '+mine.score+' puntos';
+        myLiveScore.textContent='Tu posición: #'+mine.rank+' · '+mine.score+'/'+MAX_POINTS+' puntos · '+mine.answered+'/'+TOTAL_ACTIVITIES+' actividades';
+        sideIdentity.textContent=state.live.nickname+' · #'+mine.rank+' · '+mine.score+'/'+MAX_POINTS+' pts';
+        mobileLiveText.textContent='#'+mine.rank+' · '+mine.answered+'/'+TOTAL_ACTIVITIES+' actividades';
+        mobileLiveScore.textContent=mine.score+'/'+MAX_POINTS;
         localStorage.setItem(PROGRESS_KEY,JSON.stringify(state));
       }
     }
   }
 
+  async function refreshStats(){
+    if(!sb)return;
+    const {data,error}=await sb.rpc('s07_live_activity_stats',{p_code:LIVE_CODE});
+    if(error)return;
+    liveStats.innerHTML=(data||[]).map(r=>{
+      const pct=Number(r.pct_correct||0);
+      const cls=r.responses===0?'':pct<60?' weak':pct>=80?' strong':'';
+      return '<span class="stat-chip'+cls+'">D'+r.q_position+': '+r.correct+'/'+r.responses+' · '+pct+'%</span>';
+    }).join('');
+  }
+
+  async function refreshAll(){await Promise.all([refreshLeaderboard(),refreshStats()])}
+
   function startRealtime(){
     if(!sb)return;
-    if(channel) sb.removeChannel(channel);
-    channel=sb.channel('s07-live-scoreboard')
-      .on('postgres_changes',{event:'*',schema:'public',table:'s07_live_scores'},async()=>{
-        await refreshLeaderboard();
-        await refreshAllStats();
+    if(channel)sb.removeChannel(channel);
+    channel=sb.channel('s07:elastic-s07')
+      .on('broadcast',{event:'score_changed'},async()=>{
+        lastRealtimeAt=Date.now();
+        await refreshAll();
       })
       .subscribe(status=>{
         if(status==='SUBSCRIBED'){
-          liveStatus.textContent=state.live.participant_id?'Conectado en tiempo real.':'Ranking sincronizado en tiempo real. Entra con tu alias para puntuar.';
           sideDot.classList.add('on');
+          liveStatus.textContent=state.live.participant_id?'Conectado · actualización instantánea activa.':'Ranking en vivo activo. Entra con tu alias para puntuar.';
         }
       });
+
+    if(pollTimer)clearInterval(pollTimer);
+    pollTimer=setInterval(()=>{
+      if(document.visibilityState!=='visible')return;
+      // Respaldo deliberado: si un móvil pierde WebSocket, el tablero converge sin recargar.
+      refreshAll();
+    },3000);
   }
 
-  async function refreshAllStats(){
-    if(!sb)return;
-    const labels={q0:'Q1',q1:'Q2',q2:'Q3',q3:'Q4',q4:'Q5',q5:'Q6'};
-    const chunks=[];
-    for(const qid of Object.keys(labels)){
-      const {data,error}=await sb.rpc('s07_live_question_stats',{p_code:LIVE_CODE,p_question:qid});
-      if(error)continue;
-      const rows=data||[];
-      const total=rows.reduce((a,r)=>a+Number(r.responses||0),0);
-      if(!total){chunks.push('<span class="stat-chip">'+labels[qid]+': 0</span>');continue}
-      const dist=rows.map(r=>r.option.toUpperCase()+' '+r.responses).join(' · ');
-      chunks.push('<span class="stat-chip">'+labels[qid]+' · '+dist+'</span>');
+  document.querySelectorAll('[data-sequence]').forEach(seq=>{
+    seq.addEventListener('click',e=>{
+      const btn=e.target.closest('button');if(!btn)return;
+      const item=btn.closest('.seq-item');
+      if(btn.hasAttribute('data-up')&&item.previousElementSibling)seq.insertBefore(item,item.previousElementSibling);
+      if(btn.hasAttribute('data-down')&&item.nextElementSibling)seq.insertBefore(item.nextElementSibling,item);
+    });
+  });
+
+  function answerFor(activity){
+    const kind=activity.dataset.kind;
+    if(kind==='single')return activity.querySelector('input:checked')?.value||'';
+    if(kind==='mapping')return ['titulo','categoria','premium','publicado'].map(k=>activity.querySelector('[data-map="'+k+'"]').value).join('|');
+    if(kind==='sequence')return [...activity.querySelectorAll('.seq-item')].map(x=>x.dataset.value).join('>');
+    if(kind==='codefill')return ['method','path','analyzer'].map(k=>activity.querySelector('[data-fill="'+k+'"]').value.trim()).join('|');
+    if(kind==='number')return activity.querySelector('[data-number]').value.trim();
+    if(kind==='numeric')return activity.querySelector('[data-numeric]').value.trim();
+    if(kind==='querybuilder'){
+      const fields=activity.querySelector('[data-query="fields"]').value;
+      const filter=activity.querySelector('[data-query="filter"]').value;
+      const hl=activity.querySelector('[data-query="highlight"]').checked?'highlight':'sin_highlight';
+      return fields+'|'+filter+'|'+hl;
     }
-    liveStats.innerHTML=chunks.join('');
-  }
-
-  async function showStats(questionId,feedback){
-    if(!sb)return;
-    const {data}=await sb.rpc('s07_live_question_stats',{p_code:LIVE_CODE,p_question:questionId});
-    if(!data)return;
-    const total=data.reduce((a,r)=>a+Number(r.responses||0),0);
-    liveStats.innerHTML=data.map(r=>'<span class="stat-chip">'+r.option.toUpperCase()+': '+r.responses+'</span>').join('');
-    if(total && feedback){
-      const dist=data.map(r=>r.option.toUpperCase()+' '+r.responses).join(' · ');
-      feedback.innerHTML += '<div class="statline">Clase ahora: '+dist+'</div>';
+    if(kind==='transfer'){
+      return ['titulo','categoria','premium','publicado'].map(k=>activity.querySelector('[data-transfer="'+k+'"]').value).join('|')+'|'+activity.querySelector('[data-transfer="fields"]').value+'|'+activity.querySelector('[data-transfer="filter"]').value;
     }
+    return '';
   }
 
-  document.querySelectorAll('.quizbtn').forEach(btn=>{
+  function updateQueryPreview(){
+    const a=document.querySelector('[data-kind="querybuilder"]');if(!a)return;
+    const fields=a.querySelector('[data-query="fields"]').value;
+    const filter=a.querySelector('[data-query="filter"]').value;
+    const hl=a.querySelector('[data-query="highlight"]').checked;
+    const preview=a.querySelector('[data-query-preview]');
+    if(!fields){preview.textContent='Configura la consulta para ver una vista previa.';return}
+    const obj={query:{bool:{must:[{multi_match:{query:'mantenimiento aeronaves',fields:fields.split(',')}}]}}};
+    if(filter&&filter!=='sin_filtro'){const [k,v]=filter.split('=');obj.query.bool.filter=[{term:{[k]:v}}]}
+    if(hl)obj.highlight={fields:{nombre_proceso:{},descripcion:{}}};
+    preview.textContent=JSON.stringify(obj,null,2);
+  }
+  document.querySelectorAll('[data-query]').forEach(el=>el.addEventListener('change',updateQueryPreview));
+
+  document.querySelectorAll('.submit-activity').forEach(btn=>{
     btn.addEventListener('click',async()=>{
-      const quiz=btn.closest('.quiz');
-      const qid=quiz.dataset.question;
-      const selected=quiz.querySelector('input:checked');
-      const feedback=quiz.querySelector('.feedback');
-      if(!selected){
-        feedback.className='feedback bad';
-        feedback.textContent='Elige una opción antes de comprobar.';
-        return;
+      const activity=btn.closest('.activity'),qid=activity.dataset.question,answer=answerFor(activity),feedback=activity.querySelector('.feedback');
+      if(!answer||answer.includes('||')||answer.startsWith('|')||answer.endsWith('|')){
+        feedback.className='feedback bad';feedback.textContent='Completa todas las partes antes de validar.';return;
       }
       btn.disabled=true;
-
-      if(sb && state.live.participant_id && state.live.session_id){
-        feedback.className='feedback info';
-        feedback.textContent='Registrando respuesta…';
-        const {data,error}=await sb.rpc('s07_live_submit',{
-          p_session:state.live.session_id,
-          p_participant:state.live.participant_id,
-          p_question:qid,
-          p_answer:selected.value
-        });
+      if(sb&&state.live.participant_id&&state.live.session_id){
+        feedback.className='feedback info';feedback.textContent='Validando evidencia…';
+        const {data,error}=await sb.rpc('s07_live_submit',{p_session:state.live.session_id,p_participant:state.live.participant_id,p_question:qid,p_answer:answer});
         btn.disabled=false;
-        if(error){
-          feedback.className='feedback bad';
-          feedback.textContent='No pude registrar en vivo: '+error.message;
-          return;
-        }
-        const result=data||{};
-        const ok=!!result.correct;
-        state.quiz[qid]={answer:selected.value,ok:ok,live:true};
-        state.live.score=result.score;state.live.answered=result.answered;
-        save();
+        if(error){feedback.className='feedback bad';feedback.textContent='No pude registrar: '+error.message;return}
+        const result=data||{},ok=!!result.correct;
+        state.quiz[qid]={answer:answer,ok:ok,live:true,points:result.points_earned||0};
+        state.live.score=result.score;state.live.answered=result.answered;save();
         feedback.className='feedback '+(ok?'ok':'bad');
-        feedback.textContent=(ok?'✓ Correcto. ':'✗ Revisa. ')+(result.explanation||'');
-        await refreshLeaderboard();
-        await showStats(qid,feedback);
+        feedback.textContent=(ok?'✓ Correcto · +'+result.points_earned+' pts. ':'✗ Aún no. ')+(result.explanation||'');
+        await refreshAll();
       }else{
         btn.disabled=false;
-        const ok=selected.value===quiz.dataset.fallback;
-        state.quiz[qid]={answer:selected.value,ok:ok,live:false};
-        save();
+        const normalize=x=>String(x).trim().toLowerCase().replace(/\s+/g,'').replace(',','.');
+        const ok=normalize(answer)===normalize(activity.dataset.fallback||'');
+        state.quiz[qid]={answer:answer,ok:ok,live:false};save();
         feedback.className='feedback '+(ok?'ok':'bad');
-        feedback.textContent=(ok?'✓ Correcto. ':'✗ Revisa la explicación en la presentación. ')+'Modo local: entra a S07 Live para sumar al ranking.';
+        feedback.textContent=(ok?'✓ Correcto en modo local. ':'✗ Revisa tu diseño. ')+'Entra a S07 Live para que cuente en el ranking.';
       }
     });
   });
 
   exportSummaryBtn.addEventListener('click',()=>{
-    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     a.href=url;a.download='s07_resumen_'+(state.live.nickname||'estudiante').replace(/[^a-z0-9_-]+/gi,'_')+'.json';
     document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
   });
 
-  function escapeHtml(s){
-    return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  }
+  function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 
-  renderLocal();
-  refreshLeaderboard();
-  refreshAllStats();
-  startRealtime();
+  renderLocal();updateQueryPreview();refreshAll();startRealtime();
 })();
 </script>
 </body>
