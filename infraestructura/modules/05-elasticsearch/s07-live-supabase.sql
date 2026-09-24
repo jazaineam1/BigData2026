@@ -7,6 +7,23 @@
 -- - 8 actividades / 21 puntos;
 -- - Broadcast para actualización inmediata + polling de respaldo en frontend.
 
+alter table public.s07_live_questions
+  add column if not exists hint text;
+
+update public.s07_live_questions q
+set hint = case q.question_id
+  when 'q0' then 'Distingue una condición exacta de una necesidad que requiere ordenar candidatos por relevancia.'
+  when 'q1' then 'Piensa en qué campos deben analizar palabras y cuáles deben conservar valores exactos o tipos estructurados.'
+  when 'q2' then 'Empieza por la entrada original y termina en los términos que realmente quedan indexados.'
+  when 'q3' then 'La operación inspecciona el análisis de texto de un índice; revisa método, ruta y analyzer.'
+  when 'q4' then 'Compara el conteo remoto con el número de procesos únicos que preparaste antes de la ingesta.'
+  when 'q5' then 'Separa lo que debe aportar score de lo que solo debe restringir; luego añade evidencia visible.'
+  when 'q6' then 'Cuenta cuántos de los cinco primeros resultados cumplen el criterio de relevancia y divide por cinco.'
+  when 'q7' then 'Separa tipos de campo, pesos de relevancia y filtro de negocio antes de validar el diseño.'
+  else 'Revisa la regla del concepto antes de volver a intentarlo.'
+end
+where q.session_id=(select id from public.s07_live_sessions where code='ELASTIC-S07');
+
 alter table public.s07_live_scores
   add column if not exists first_score integer not null default 0,
   add column if not exists mastery_score integer not null default 0,
@@ -29,20 +46,38 @@ create or replace function public.s07_live_submit(
 returns jsonb
 language plpgsql
 security definer
-set search_path=public
+set search_path = public
 as $$
 declare
-  v_correct_option text; v_explanation text; v_points integer; v_kind text;
-  v_ok boolean; v_first boolean; v_attempts integer;
-  v_first_score integer; v_mastery_score integer; v_answered integer; v_mastered_count integer;
-  v_norm_answer text; v_norm_correct text;
+  v_correct_option text;
+  v_explanation text;
+  v_hint text;
+  v_points integer;
+  v_kind text;
+  v_ok boolean;
+  v_existing public.s07_live_responses%rowtype;
+  v_first_attempt boolean;
+  v_first_correct boolean;
+  v_attempt_count integer;
+  v_first_score integer;
+  v_mastery_score integer;
+  v_answered integer;
+  v_mastery_answered integer;
+  v_norm_answer text;
+  v_norm_correct text;
+  v_rank_delta integer;
+  v_mastery_delta integer;
 begin
-  if not exists (select 1 from public.s07_live_scores where participant_id=p_participant and session_id=p_session) then
+  if not exists (
+    select 1 from public.s07_live_scores
+    where participant_id=p_participant and session_id=p_session
+  ) then
     raise exception 'Participante no válido para esta sesión.';
   end if;
 
-  select q.correct_option,q.explanation,q.points,q.kind
-  into v_correct_option,v_explanation,v_points,v_kind
+  select q.correct_option,q.explanation,q.points,q.kind,
+         coalesce(q.hint,'Revisa la regla del concepto antes de volver a intentarlo.')
+  into v_correct_option,v_explanation,v_points,v_kind,v_hint
   from public.s07_live_questions q
   where q.session_id=p_session and q.question_id=p_question and q.active=true;
 
@@ -50,51 +85,87 @@ begin
 
   v_norm_answer:=replace(regexp_replace(lower(trim(coalesce(p_answer,''))),'\s+','','g'),',','.');
   v_norm_correct:=replace(regexp_replace(lower(trim(v_correct_option)),'\s+','','g'),',','.');
+
   if v_kind in ('numeric','result_number') then
-    begin v_ok:=abs(v_norm_answer::numeric-v_norm_correct::numeric)<0.0001; exception when others then v_ok:=false; end;
+    begin
+      v_ok:=abs(v_norm_answer::numeric-v_norm_correct::numeric)<0.0001;
+    exception when others then
+      v_ok:=false;
+    end;
   else
     v_ok:=v_norm_answer=v_norm_correct;
   end if;
 
-  select not exists (select 1 from public.s07_live_responses where participant_id=p_participant and session_id=p_session and question_id=p_question) into v_first;
+  select * into v_existing
+  from public.s07_live_responses
+  where participant_id=p_participant and question_id=p_question;
 
-  insert into public.s07_live_responses(session_id,participant_id,question_id,answer,correct,answered_at,attempt_count,first_answer,first_correct,mastered,last_answer,last_correct)
-  values (p_session,p_participant,p_question,trim(p_answer),v_ok,now(),1,trim(p_answer),v_ok,v_ok,trim(p_answer),v_ok)
-  on conflict (participant_id,question_id)
-  do update set answer=excluded.answer, correct=excluded.correct, answered_at=now(), attempt_count=public.s07_live_responses.attempt_count+1,
-                mastered=public.s07_live_responses.mastered or excluded.correct, last_answer=excluded.answer, last_correct=excluded.correct;
+  v_first_attempt := not found;
 
-  select r.attempt_count into v_attempts from public.s07_live_responses r
-  where r.participant_id=p_participant and r.session_id=p_session and r.question_id=p_question;
+  if v_first_attempt then
+    insert into public.s07_live_responses(
+      session_id,participant_id,question_id,answer,correct,answered_at,
+      first_answer,first_correct,attempt_count,mastered,last_answer,last_correct
+    ) values (
+      p_session,p_participant,p_question,trim(p_answer),v_ok,now(),
+      trim(p_answer),v_ok,1,v_ok,trim(p_answer),v_ok
+    );
+    v_rank_delta := case when v_ok then v_points else 0 end;
+    v_mastery_delta := case when v_ok then v_points else 0 end;
+  else
+    update public.s07_live_responses
+    set answer=trim(p_answer),
+        correct=v_ok,
+        answered_at=now(),
+        attempt_count=coalesce(attempt_count,1)+1,
+        mastered=coalesce(mastered,false) or v_ok,
+        last_answer=trim(p_answer),
+        last_correct=v_ok
+    where participant_id=p_participant and question_id=p_question;
+    v_rank_delta := 0;
+    v_mastery_delta := case when v_ok and not coalesce(v_existing.mastered,false) then v_points else 0 end;
+  end if;
 
-  select count(*)::integer,
-         count(*) filter(where r.mastered)::integer,
-         coalesce(sum(case when r.first_correct then q.points else 0 end),0)::integer,
-         coalesce(sum(case when r.mastered then q.points else 0 end),0)::integer
-  into v_answered,v_mastered_count,v_first_score,v_mastery_score
+  select
+    count(*)::integer,
+    count(*) filter(where coalesce(r.mastered,false))::integer,
+    coalesce(sum(case when coalesce(r.first_correct,false) then q.points else 0 end),0)::integer,
+    coalesce(sum(case when coalesce(r.mastered,false) then q.points else 0 end),0)::integer
+  into v_answered,v_mastery_answered,v_first_score,v_mastery_score
   from public.s07_live_responses r
-  join public.s07_live_questions q on q.session_id=r.session_id and q.question_id=r.question_id
+  join public.s07_live_questions q
+    on q.session_id=r.session_id and q.question_id=r.question_id
   where r.participant_id=p_participant and r.session_id=p_session;
 
   update public.s07_live_scores
-  set score=v_first_score, first_score=v_first_score, mastery_score=v_mastery_score,
-      answered=v_answered, mastery_answered=v_mastered_count, updated_at=now()
+  set score=v_first_score,
+      first_score=v_first_score,
+      mastery_score=v_mastery_score,
+      answered=v_answered,
+      mastery_answered=v_mastery_answered,
+      updated_at=now()
   where participant_id=p_participant and session_id=p_session;
+
+  select first_correct,attempt_count into v_first_correct,v_attempt_count
+  from public.s07_live_responses
+  where participant_id=p_participant and question_id=p_question;
 
   return jsonb_build_object(
     'correct',v_ok,
-    'first_attempt',v_first,
-    'locked_for_ranking',not v_first,
-    'attempt_count',v_attempts,
-    'explanation',case when v_first and not v_ok then 'Pista: revisa la regla del concepto antes de reintentar. La explicación completa aparece después del segundo intento.' else v_explanation end,
+    'first_attempt',v_first_attempt,
+    'first_correct',v_first_correct,
+    'attempt_count',v_attempt_count,
+    'locked_for_ranking',not v_first_attempt,
+    'explanation',case when v_ok or v_attempt_count>=2 then v_explanation else v_hint end,
     'full_explanation',v_explanation,
     'points_possible',v_points,
-    'points_earned_first',case when v_first and v_ok then v_points else 0 end,
-    'points_earned_mastery',case when v_ok then v_points else 0 end,
+    'points_earned_first',v_rank_delta,
+    'points_earned_mastery',v_mastery_delta,
+    'points_earned',v_rank_delta,
     'score',v_first_score,
     'mastery_score',v_mastery_score,
     'answered',v_answered,
-    'mastery_answered',v_mastered_count
+    'mastery_answered',v_mastery_answered
   );
 end;
 $$;

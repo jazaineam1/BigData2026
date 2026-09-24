@@ -141,3 +141,35 @@ Migración canónica:
 - Confirmar que el cuaderno no tiene rutas de Console clicables.
 - Ejecutar `client.info()`, `_analyze`, `bulk`, `count` y al menos una búsqueda real.
 - Verificar que `Precision@5` acepte `0.6`, `0.60`, `0,6` y `0,60`.
+
+
+## Estándar de explicación de conceptos
+
+S07 no acepta definiciones de una sola línea para los conceptos núcleo. Cada concepto importante debe responder, cuando aplique, estas preguntas:
+
+1. **Qué es:** definición precisa y breve.
+2. **Para qué sirve:** problema que resuelve.
+3. **Ejemplo mínimo:** caso de 1–3 líneas que pueda razonarse sin ejecutar nada.
+4. **Cómo se observa o mide:** campo de respuesta, conteo, propiedad o API que permite comprobarlo.
+5. **Error frecuente o límite:** interpretación que no debe hacerse.
+6. **Ejemplo aplicado:** contratación, noticias, e-commerce, empleo o knowledge base.
+
+Ejemplo obligatorio para tokenización:
+
+```text
+"Quick brown fox"
+→ [quick] [brown] [fox]
+→ 3 tokens
+```
+
+Un token no tiene longitud fija. `_analyze` devuelve `token`, `position`, `start_offset` y `end_offset`. El tokenizer `standard` tiene `max_token_length=255` por defecto; un tokenizer `keyword` puede tratar una cadena completa como un único token.
+
+## Regla de navegación: tres recursos, tres pestañas reutilizables
+
+Para conservar el contexto durante la clase:
+
+- **Presentación** → `target="bigdata-presentation"`
+- **Laboratorio** → `target="bigdata-lab"`
+- **Colab** → `target="bigdata-workspace"`
+
+No se usa `_blank` indiscriminadamente: cada recurso reutiliza su propia pestaña y no genera decenas de tabs.
