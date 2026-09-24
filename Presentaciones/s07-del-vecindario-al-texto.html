@@ -70,7 +70,7 @@ mark{background:var(--y);padding:0 .08em}
   html,body{background:var(--cream)}
   .stage{position:fixed;inset:52px 0 72px;width:auto;height:auto;transform:none;background:var(--cream)}
   .slide{padding:18px 16px 30px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y pinch-zoom;border-radius:0}
-  .kicker{font-size:11px}.title{font-size:clamp(29px,9vw,40px);max-width:none}.lead{font-size:clamp(18px,5.3vw,23px);max-width:none}
+  .kicker{font-size:11px}.title{font-size:clamp(27px,7.8vw,34px);line-height:1.05;max-width:none}.lead{font-size:clamp(16px,4.8vw,20px);line-height:1.32;max-width:none}
   .grid,.grid.two,.grid.four{grid-template-columns:1fr;gap:10px;margin-top:14px}
   .card{border-radius:14px;padding:14px;font-size:16px}.card b,.card h3{font-size:18px}.call{font-size:16px;border-left-width:6px;border-radius:12px;padding:12px;margin-top:12px}
   .flow{display:grid;grid-template-columns:1fr;gap:7px}.flow .node{font-size:16px;border-radius:12px;padding:12px}.flow .arrow{font-size:20px;transform:rotate(90deg);text-align:center}
@@ -340,6 +340,29 @@ ok, errores = bulk(client, acciones, refresh=True)</pre>
 {c:'Experimento',k:'PRECISION@5',t:'Una métrica mínima de calidad',l:'De los cinco primeros resultados, ¿cuántos juzgaste relevantes?',b:`
 <div class="grid two"><div class="card green"><b>P@5 = relevantes / 5</b><span class="bigmetric">0.8</span><span class="small">significa 4 de 5 relevantes.</span></div><div class="card"><b>Camino profesional</b>Con muchas consultas y ratings, Elasticsearch ofrece <code>_rank_eval</code> con precision, MRR y DCG.</div></div>
 <div class="call">Ahora sí puedes preguntar: <b>¿el boost movió documentos y además mejoró P@5?</b></div>`},
+{c:'Transferencia',k:'RETO S07',t:'Sala de redacción: 987 noticias, otro problema',l:'Ahora demuestra que aprendiste Elasticsearch y no solo el caso contractual.',b:`
+<div class="grid">
+<div class="card blue"><b>Documento</b>Una noticia con título, subtítulo, cuerpo, etiquetas y fecha.</div>
+<div class="card green"><b>Pregunta</b>¿Qué cinco antecedentes debe abrir primero un editor?</div>
+<div class="card orange"><b>Regla</b>Solo contenido de acceso abierto: <code>premium = false</code>.</div>
+</div>
+<div class="call">Estas son las mismas 987 noticias usadas en sesiones anteriores, pero ahora el problema es <b>recuperación editorial</b>.</div>`},
+{c:'Transferencia',k:'BRIEF EDITORIAL',t:'Cada equipo recibe un tema distinto',l:'El alias asigna una necesidad de búsqueda reproducible.',b:`
+<div class="grid">
+<div class="card"><b>Radar IA</b>inteligencia artificial</div>
+<div class="card blue"><b>Bienestar</b>salud mental</div>
+<div class="card green"><b>Bogotá segura</b>seguridad bogota</div>
+<div class="card orange"><b>Energía</b>energia colombia</div>
+<div class="card"><b>Trabajo</b>empleo colombia</div>
+<div class="card blue"><b>Universidad</b>educacion superior</div>
+</div>
+<div class="call">El criterio de relevancia se define <b>antes</b> de juzgar cuál ranking ganó.</div>`},
+{c:'Transferencia',k:'TUNING',t:'A vs B: misma necesidad, otra arquitectura de relevancia',l:'El filtro permanece fijo; solo cambia cómo pesamos los campos.',b:`
+<div class="grid two">
+<div class="card"><b>A · baseline</b><code>titulo + subtitulo + cuerpo</code></div>
+<div class="card green"><b>B · editorial</b><code>titulo^4 + etiquetas^3 + subtitulo^2 + cuerpo</code></div>
+</div>
+<div class="call">Entrega del reto: <b>P@5 A, P@5 B, recomendación editorial, falso positivo y siguiente experimento</b>.</div>`},
 {c:'Errores',k:'CLÍNICA DE ERRORES',t:'Un fallo técnico también debe ser interpretable',l:'Reconoce el síntoma antes de cambiar código al azar.',b:`
 <table class="table"><tr><th>Síntoma</th><th>Lectura probable</th><th>Primera acción</th></tr>
 <tr><td>401 / 403</td><td>autorización</td><td>revisar/regenerar API key</td></tr>
