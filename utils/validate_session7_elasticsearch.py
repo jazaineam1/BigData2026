@@ -12,6 +12,8 @@ LEGACY = [
     ROOT / "assets" / "tutoriales" / "s07-laboratorio-guiado.html",
     ROOT / "assets" / "tutoriales" / "s07-tokenizer-lab.html",
     ROOT / "assets" / "tutoriales" / "s07-recursos.html",
+    ROOT / "assets" / "tutoriales" / "s07-despliegue-elasticsearch.html",
+    ROOT / "Cuadernos" / "7B_Despliegue_Elastic_Cloud.ipynb",
 ]
 
 
