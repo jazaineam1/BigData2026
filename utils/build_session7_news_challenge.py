@@ -1,0 +1,229 @@
+# -*- coding: utf-8 -*-
+"""Genera el reto de transferencia S07: Elasticsearch sobre noticias."""
+from pathlib import Path
+import json
+import nbformat
+
+ROOT = Path(__file__).resolve().parents[1]
+OUTPUT = ROOT / "Cuadernos" / "7_Reto_Elasticsearch_Noticias.ipynb"
+NOTEBOOK_JSON = r'''{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "<a href=\"https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Reto_Elasticsearch_Noticias.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Abrir reto en Google Colab\"></a>\n\n# Reto de transferencia S07 — Radar de noticias\n\nYa construiste un buscador sobre procesos contractuales. Ahora demuestra que aprendiste **Elasticsearch y no solo el caso**.\n\n## Producto\n\nUna mesa editorial necesita recuperar rápidamente las **5 noticias más relevantes** para una necesidad informativa.\n\nVas a construir un segundo índice con **126 noticias públicas de agosto de 2026**, usadas previamente en el curso, y entregar:\n\n- un ranking A;\n- un ranking B después de cambiar solo el peso del título;\n- una medida de calidad <code>Precision@5</code>;\n- una recomendación sobre cuál configuración conservar.\n\n**No hay datos de contratación en este reto.** El dominio cambia; las herramientas no."
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "## Reglas del reto\n\n1. Usa el mismo proyecto Elasticsearch que ya tienes.\n2. Crea un índice diferente; no reutilices el índice contractual.\n3. No copies API keys dentro del notebook.\n4. Mantén constante corpus, consulta y número de resultados.\n5. Entre A y B cambia **solo el peso de los campos**.\n6. Evalúa relevancia usando el criterio asignado antes de decidir cuál ranking es mejor.\n\n### Datos\n\nFuente versionada del curso:\n\n<code>Datos/noticias_eltiempo_2026-08.json</code>\n\nMetadatos del archivo indican 126 documentos recuperados de fuentes públicas de EL TIEMPO para uso docente."
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "---\n# 1 · Cargar y preparar las noticias\n\nEl JSON conserva estructuras ricas: etiquetas, imágenes y bloques del cuerpo. Para búsqueda no necesitamos indexar todo.\n\nCrearemos un documento más pequeño con:\n\n- <code>titulo</code>\n- <code>subtitulo</code>\n- <code>texto</code>\n- <code>categoria</code>\n- <code>seccion</code>\n- <code>publicado</code>\n- <code>premium</code>\n- <code>url</code>"
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "import pandas as pd\nimport json, re, unicodedata\nfrom pathlib import Path\nfrom IPython.display import display\n\nURL_NOTICIAS = \"https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/noticias_eltiempo_2026-08.json\"\n\nnoticias_raw = pd.read_json(URL_NOTICIAS)\nprint(\"Noticias cargadas:\", len(noticias_raw))\ndisplay(\n    noticias_raw[[\"titulo\",\"categoria\",\"seccion\",\"publicado\",\"premium\"]]\n    .head(8)\n)"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "### Limpiar el cuerpo\n\nEl campo <code>cuerpo</code> incluye imágenes, HTML, enlaces y texto editorial.\n\nPara el buscador conservaremos solo bloques textuales útiles. Excluimos HTML incrustado para evitar indexar CSS, botones o fragmentos de interfaz como si fueran contenido periodístico."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "TIPOS_TEXTO = {\"title\",\"subtitle\",\"paragraph\",\"subtitle-h2\",\"extra-subtitle\"}\n\ndef extraer_texto_cuerpo(bloques):\n    piezas = []\n    if not isinstance(bloques, list):\n        return \"\"\n    for bloque in bloques:\n        if not isinstance(bloque, dict):\n            continue\n        if bloque.get(\"tipo\") in TIPOS_TEXTO and bloque.get(\"texto\"):\n            piezas.append(str(bloque[\"texto\"]).strip())\n    return \" \".join(piezas)\n\nnoticias = pd.DataFrame({\n    \"id_noticia\": noticias_raw[\"_id\"].astype(str),\n    \"titulo\": noticias_raw[\"titulo\"].fillna(\"\").astype(str),\n    \"subtitulo\": noticias_raw.get(\"subtitulo\", \"\").fillna(\"\").astype(str),\n    \"texto\": noticias_raw[\"cuerpo\"].map(extraer_texto_cuerpo),\n    \"categoria\": noticias_raw[\"categoria\"].fillna(\"Sin categoría\").astype(str),\n    \"seccion\": noticias_raw[\"seccion\"].fillna(\"sin-seccion\").astype(str),\n    \"publicado\": noticias_raw[\"publicado\"].astype(str),\n    \"premium\": noticias_raw[\"premium\"].astype(bool),\n    \"url\": noticias_raw[\"url\"].astype(str)\n})\n\nprint(\"Documentos listos:\", len(noticias))\nprint(\"Categorías:\", noticias[\"categoria\"].nunique())\ndisplay(noticias[[\"titulo\",\"categoria\",\"texto\"]].head(5))"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "### Lectura rápida del corpus\n\nAntes de indexar, mira la distribución por categoría. Elasticsearch no corrige una mala comprensión de los datos de entrada."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "categorias = (\n    noticias[\"categoria\"]\n    .value_counts()\n    .rename_axis(\"categoria\")\n    .reset_index(name=\"n\")\n)\ndisplay(categorias)"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "---\n# 2 · Conectar al mismo proyecto Elasticsearch\n\nUsa la misma **Project URL** y una API key válida. Crearemos un índice aislado por alias."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "!pip -q install -U elasticsearch pandas tabulate"
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "from getpass import getpass\nfrom elasticsearch import Elasticsearch\nfrom elasticsearch.helpers import bulk\n\nALIAS = \"equipo_demo\" #@param {type:\"string\"}\n\ndef slug(valor):\n    valor = unicodedata.normalize(\"NFKD\", str(valor))\n    valor = \"\".join(c for c in valor if not unicodedata.combining(c)).lower()\n    valor = re.sub(r\"[^a-z0-9]+\", \"-\", valor).strip(\"-\")\n    return (valor or \"equipo-demo\")[:35]\n\nalias_seguro = slug(ALIAS)\nINDEX_NAME = f\"s07-noticias-{alias_seguro}\"\n\nendpoint = input(\"Project URL de Elasticsearch: \").strip()\napi_key = getpass(\"API key: \").strip()\n\nclient = Elasticsearch(endpoint, api_key=api_key, request_timeout=30)\ninfo = client.info()\n\nprint(\"Conexión verificada.\")\nprint(\"Índice del reto:\", INDEX_NAME)"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "---\n# 3 · Diseñar el mapping\n\nAquí el dominio cambió, por lo tanto también cambian los campos.\n\n| Campo | Uso | Tipo |\n|---|---|---|\n| título | full-text, muy informativo | <code>text</code> |\n| subtítulo | full-text | <code>text</code> |\n| texto | full-text extenso | <code>text</code> |\n| categoría | filtro exacto | <code>keyword</code> |\n| sección | filtro exacto | <code>keyword</code> |\n| publicado | rango temporal | <code>date</code> |\n| premium | filtro booleano | <code>boolean</code> |\n| URL | recuperar, no buscar | <code>keyword</code> no indexado |"
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "mappings = {\n    \"properties\": {\n        \"id_noticia\": {\"type\":\"keyword\"},\n        \"titulo\": {\"type\":\"text\",\"analyzer\":\"spanish\"},\n        \"subtitulo\": {\"type\":\"text\",\"analyzer\":\"spanish\"},\n        \"texto\": {\"type\":\"text\",\"analyzer\":\"spanish\"},\n        \"categoria\": {\"type\":\"keyword\"},\n        \"seccion\": {\"type\":\"keyword\"},\n        \"publicado\": {\"type\":\"date\"},\n        \"premium\": {\"type\":\"boolean\"},\n        \"url\": {\"type\":\"keyword\",\"index\":False}\n    }\n}\n\nif client.indices.exists(index=INDEX_NAME):\n    client.indices.delete(index=INDEX_NAME)\n\nclient.indices.create(index=INDEX_NAME, mappings=mappings)\nprint(\"Índice creado:\", INDEX_NAME)"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "---\n# 4 · Ingestar y comprobar\n\nIndexaremos los 126 documentos con <code>bulk()</code>. El ID de Elasticsearch será el ID de la noticia."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "acciones = (\n    {\n        \"_index\": INDEX_NAME,\n        \"_id\": d[\"id_noticia\"],\n        \"_source\": d\n    }\n    for d in noticias.to_dict(\"records\")\n)\n\nok, errores = bulk(\n    client,\n    acciones,\n    refresh=True,\n    raise_on_error=False\n)\n\nprint(\"Documentos indexados:\", ok)\nprint(\"Errores:\", len(errores))\n\nconteo = client.count(index=INDEX_NAME)[\"count\"]\nprint(\"Conteo Elasticsearch:\", conteo)\nassert conteo == len(noticias) == 126"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "---\n# 5 · Tu necesidad editorial\n\nEl alias asigna un reto reproducible.\n\nNo cambies la consulta para favorecer tus resultados."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "RETOS = [\n    {\n        \"consulta\":\"terremoto colombia\",\n        \"criterio\":\"La noticia trata directamente el terremoto ocurrido en Colombia, sus impactos, respuesta, reconstrucción o explicación científica.\"\n    },\n    {\n        \"consulta\":\"salud publica\",\n        \"criterio\":\"La noticia trata directamente instituciones, políticas, riesgos, servicios o acciones de salud pública.\"\n    },\n    {\n        \"consulta\":\"tecnologia inteligencia artificial\",\n        \"criterio\":\"La noticia aborda tecnología digital o inteligencia artificial como tema central, no como mención incidental.\"\n    },\n    {\n        \"consulta\":\"futbol colombia\",\n        \"criterio\":\"La noticia trata fútbol colombiano, equipos colombianos o participación colombiana en competiciones de fútbol.\"\n    },\n    {\n        \"consulta\":\"educacion colombia\",\n        \"criterio\":\"La noticia aborda educación, instituciones educativas, estudiantes, docentes o políticas educativas en Colombia.\"\n    }\n]\n\nreto = RETOS[sum(ord(c) for c in alias_seguro) % len(RETOS)]\nCONSULTA = reto[\"consulta\"]\nCRITERIO = reto[\"criterio\"]\n\nprint(\"Consulta asignada:\", CONSULTA)\nprint(\"Criterio de relevancia:\", CRITERIO)"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "---\n# 6 · Configuración A\n\nTodos los campos textuales tienen el mismo peso.\n\nLa función también solicita <code>highlight</code> para que puedas inspeccionar por qué apareció cada noticia."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "def ejecutar_busqueda(campos, categoria=None):\n    bool_query = {\n        \"must\": [{\n            \"multi_match\": {\n                \"query\": CONSULTA,\n                \"fields\": campos\n            }\n        }]\n    }\n    if categoria:\n        bool_query[\"filter\"] = [{\"term\":{\"categoria\":categoria}}]\n\n    return client.search(\n        index=INDEX_NAME,\n        query={\"bool\": bool_query},\n        highlight={\n            \"fields\":{\n                \"titulo\":{},\n                \"subtitulo\":{},\n                \"texto\":{\"fragment_size\":180,\"number_of_fragments\":1}\n            }\n        },\n        size=5\n    )\n\ndef tabla_hits(resp):\n    filas=[]\n    for rank,h in enumerate(resp[\"hits\"][\"hits\"],start=1):\n        s=h[\"_source\"]\n        frag=[]\n        for parts in h.get(\"highlight\",{}).values():\n            frag.extend(parts)\n        filas.append({\n            \"rank\":rank,\n            \"id_noticia\":s[\"id_noticia\"],\n            \"score\":h[\"_score\"],\n            \"titulo\":s[\"titulo\"],\n            \"categoria\":s[\"categoria\"],\n            \"publicado\":s[\"publicado\"],\n            \"fragmento\":\" ... \".join(frag),\n            \"url\":s[\"url\"]\n        })\n    return pd.DataFrame(filas)\n\nresp_A = ejecutar_busqueda([\"titulo\",\"subtitulo\",\"texto\"])\ntabla_A = tabla_hits(resp_A)\ndisplay(tabla_A)"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "---\n# 7 · Configuración B\n\nAhora cambia **una sola decisión**:\n\n- título × 4;\n- subtítulo × 2;\n- cuerpo × 1.\n\nLa hipótesis es que una coincidencia en el título debe tener mayor peso editorial que una mención perdida en el cuerpo."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "resp_B = ejecutar_busqueda([\"titulo^4\",\"subtitulo^2\",\"texto\"])\ntabla_B = tabla_hits(resp_B)\ndisplay(tabla_B)"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "## ¿Qué se movió?\n\nCompara posiciones de los IDs, no solo scores."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "comparacion = (\n    tabla_A[[\"id_noticia\",\"rank\"]]\n    .rename(columns={\"rank\":\"rank_A\"})\n    .merge(\n        tabla_B[[\"id_noticia\",\"rank\"]].rename(columns={\"rank\":\"rank_B\"}),\n        on=\"id_noticia\",\n        how=\"outer\"\n    )\n)\ncomparacion[\"cambio\"] = comparacion[\"rank_A\"] - comparacion[\"rank_B\"]\ndisplay(comparacion.sort_values([\"rank_A\",\"rank_B\"], na_position=\"last\"))"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "---\n# 8 · Evaluar la calidad: Precision@5\n\nNo decidas que B es mejor solo porque cambió.\n\nUsa el criterio que ya estaba fijado **antes de etiquetar**:\n\n> **Criterio:** <span id=\"criterio\"></span>\n\nPara cada resultado marca:\n\n- <code>1</code> si responde al criterio;\n- <code>0</code> si no."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "def etiquetar(tabla, nombre):\n    etiquetas=[]\n    print(f\"\\n=== {nombre} ===\")\n    print(\"Consulta:\", CONSULTA)\n    print(\"Criterio:\", CRITERIO)\n    for _,fila in tabla.iterrows():\n        print(\"\\nRank\", int(fila[\"rank\"]), \"·\", fila[\"titulo\"])\n        print(\"Fragmento:\", str(fila[\"fragmento\"])[:500])\n        while True:\n            x=input(\"¿Relevante? [1/0]: \").strip()\n            if x in {\"0\",\"1\"}:\n                etiquetas.append(int(x))\n                break\n            print(\"Escribe 1 o 0.\")\n    return etiquetas\n\net_A = etiquetar(tabla_A,\"A\")\net_B = etiquetar(tabla_B,\"B\")\n\np5_A = sum(et_A)/5\np5_B = sum(et_B)/5\n\nprint(\"\\nP@5 A:\", p5_A)\nprint(\"P@5 B:\", p5_B)\nprint(\"Δ P@5:\", round(p5_B-p5_A,3))"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "### Cómo interpretar\n\n- Si B cambia posiciones y mejora P@5, tienes evidencia local de que el boost ayudó para esta consulta.\n- Si B cambia posiciones pero P@5 no mejora, “más tuning” no significa “mejor búsqueda”.\n- Una sola consulta y cinco juicios **no** validan un buscador de producción.\n\nEl paso profesional sería ampliar el conjunto de consultas y ratings y usar herramientas de evaluación como <code>_rank_eval</code>."
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "---\n# 9 · Reto adicional: filtro exacto\n\nEl editor ahora pide restringir la búsqueda a una categoría.\n\nElige una categoría **solo si tiene sentido para tu necesidad**. Si no, deja el texto vacío."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "CATEGORIA = \"\" #@param {type:\"string\"}\n\nif CATEGORIA.strip():\n    if CATEGORIA not in set(noticias[\"categoria\"]):\n        print(\"Categoría no encontrada. Revisa la tabla de categorías del inicio.\")\n    else:\n        filtrada = tabla_hits(\n            ejecutar_busqueda(\n                [\"titulo^4\",\"subtitulo^2\",\"texto\"],\n                categoria=CATEGORIA\n            )\n        )\n        display(filtrada)\nelse:\n    print(\"Sin filtro de categoría.\")"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "---\n# 10 · Entrega del radar editorial\n\nLa entrega debe ser pequeña y reproducible:\n\n- ranking A y B;\n- consulta y criterio;\n- P@5 A y B;\n- una recomendación entre A y B;\n- un resultado dudoso y por qué;\n- una limitación concreta."
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "RECOMENDACION = \"Elige A o B y justifica con P@5 y un cambio de ranking.\" #@param {type:\"string\"}\nDUDOSO = \"Identifica un resultado dudoso y explica por qué apareció.\" #@param {type:\"string\"}\nLIMITE = \"Escribe una limitación concreta de tu evaluación.\" #@param {type:\"string\"}\n\nsalida = pd.concat([\n    tabla_A.assign(configuracion=\"A\", relevante=et_A),\n    tabla_B.assign(configuracion=\"B\", relevante=et_B)\n], ignore_index=True)\nsalida[\"consulta\"] = CONSULTA\nsalida.to_csv(\"s07_reto_noticias_resultados.csv\", index=False, encoding=\"utf-8-sig\")\n\nconfig = {\n    \"alias\": alias_seguro,\n    \"index_name\": INDEX_NAME,\n    \"documentos\": len(noticias),\n    \"consulta\": CONSULTA,\n    \"criterio\": CRITERIO,\n    \"config_A\":[\"titulo\",\"subtitulo\",\"texto\"],\n    \"config_B\":[\"titulo^4\",\"subtitulo^2\",\"texto\"],\n    \"precision_at_5_A\":p5_A,\n    \"precision_at_5_B\":p5_B,\n    \"categoria_filtro\": CATEGORIA.strip() or None\n}\nPath(\"s07_reto_noticias_config.json\").write_text(\n    json.dumps(config,ensure_ascii=False,indent=2),\n    encoding=\"utf-8\"\n)\n\ninforme=f\"\"\"# Reto S07 · Radar de noticias\n\n- Alias: {alias_seguro}\n- Documentos: {len(noticias)}\n- Consulta: {CONSULTA}\n- Criterio: {CRITERIO}\n- P@5 A: {p5_A}\n- P@5 B: {p5_B}\n\n## Recomendación\n{RECOMENDACION}\n\n## Resultado dudoso\n{DUDOSO}\n\n## Limitación\n{LIMITE}\n\"\"\"\nPath(\"s07_reto_noticias.md\").write_text(informe,encoding=\"utf-8\")\n\nprint(\"Archivos creados:\")\nprint(\"- s07_reto_noticias_resultados.csv\")\nprint(\"- s07_reto_noticias_config.json\")\nprint(\"- s07_reto_noticias.md\")"
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": "try:\n    from google.colab import files\n    for archivo in [\n        \"s07_reto_noticias_resultados.csv\",\n        \"s07_reto_noticias_config.json\",\n        \"s07_reto_noticias.md\"\n    ]:\n        files.download(archivo)\nexcept ImportError:\n    print(\"Fuera de Colab: los archivos quedaron en el directorio de trabajo.\")"
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": "## Cierre\n\nEl dominio cambió de contratos a noticias, pero la arquitectura permaneció:\n\n**documento → mapping → analyzer → bulk → query → ranking → evaluación**\n\nSi pudiste trasladar esas decisiones sin copiar el ejemplo contractual, el aprendizaje ya es transferible."
+  }
+ ],
+ "metadata": {
+  "colab": {
+   "name": "7_Reto_Elasticsearch_Noticias.ipynb",
+   "provenance": []
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "name": "python",
+   "version": "3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}'''
+
+def main():
+    nb = nbformat.from_dict(json.loads(NOTEBOOK_JSON))
+    nbformat.validate(nb)
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    nbformat.write(nb, OUTPUT)
+    print(f"[OK] Reto S07 noticias generado: {len(nb.cells)} celdas")
+
+if __name__ == "__main__":
+    main()
