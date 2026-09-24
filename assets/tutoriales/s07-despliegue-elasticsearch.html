@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>S07 · Guía de despliegue Elasticsearch</title><style>:root{--cream:#faf7ef;--ink:#172019;--green:#123f2b;--gold:#c9a227;--line:#e4ddcd;--soft:#eef5f0;--red:#8f352b;--code:#0b241c}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,Segoe UI,Arial,system-ui,sans-serif;line-height:1.5}.wrap{max-width:1080px;margin:auto;padding:28px}h1{font-family:Georgia,serif;font-size:clamp(32px,5vw,58px);line-height:1.05;color:#0b241c;margin:.2em 0}h2{margin-top:34px;color:var(--green)}.lead{font-size:21px;color:#3d4b43}.panel,.step{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin:16px 0;box-shadow:0 8px 24px rgba(16,24,32,.06)}.step{border-left:7px solid var(--gold)}.step h3{margin-top:0}.ok{border-left-color:var(--green)}.warn{border-left-color:var(--red);background:#fff7f5}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:#fbfaf6;border:1px solid var(--line);border-radius:14px;padding:16px}pre{background:var(--code);color:#eef9f1;padding:16px;border-radius:14px;overflow:auto;line-height:1.45}code{background:#eef5f0;border-radius:6px;padding:.15em .35em}.links{display:flex;gap:10px;flex-wrap:wrap}.links a{background:var(--green);color:white;text-decoration:none;border-radius:999px;padding:10px 14px;font-weight:800}.check label{display:block;margin:8px 0;font-weight:700}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left}@media(max-width:760px){.grid{grid-template-columns:1fr}.wrap{padding:18px}.lead{font-size:18px}}</style></head><body><main class="wrap"><p><a href="../../Presentaciones/s07-del-vecindario-al-texto.html">← Volver a la presentación</a></p><h1>Guía integral S07 · desplegar Elasticsearch y buscar con BM25</h1><p class="lead">Esta guía está escrita para estudiantes que saben ejecutar Python en Colab, pero no necesariamente administran nube, Bash o servidores. El objetivo es que puedan repetir solos el despliegue mínimo.</p><div class="links"><a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb" target="_blank">Abrir cuaderno Colab</a><a href="s07-laboratorio-guiado.html">Checklist de laboratorio</a></div><section class="panel"><h2>Mapa de la práctica</h2><div class="grid"><div class="card"><b>1. Preparar</b><br>cuenta, proyecto, endpoint y API key.</div><div class="card"><b>2. Indexar</b><br>mapping, índice y bulk desde Python.</div><div class="card"><b>3. Consultar</b><br>match, multi_match, filtro, highlight y evidencia.</div></div></section><section class="step"><h2>Paso 0 · Antes de crear nada</h2><p>Decide si trabajarás con el JSONL exportado en S6 o con el respaldo del cuaderno. El respaldo sirve para aprender; si usas tu archivo S6, la evidencia queda mejor trazada.</p><div class="check"><label><input type="checkbox"> Tengo abierto el cuaderno Colab.</label><label><input type="checkbox"> Sé si usaré archivo propio de S6 o respaldo.</label><label><input type="checkbox"> Entiendo que las credenciales no se pegan en celdas públicas.</label></div></section><section class="step"><h2>Paso 1 · Crear el proyecto en Elastic Cloud</h2><ol><li>Entrar a Elastic Cloud.</li><li>Crear un proyecto de Elasticsearch/Serverless o deployment equivalente.</li><li>Esperar a que el servicio esté listo.</li><li>Copiar el <b>endpoint HTTPS</b>.</li><li>Crear una <b>API key</b> para conectarte desde Python.</li></ol><div class="panel warn"><b>Regla de seguridad.</b> Si la API key aparece en GitHub, en un pantallazo o en una entrega pública, se revoca y se crea otra.</div></section><section class="step"><h2>Paso 2 · Conectar desde Colab</h2><p>El patrón seguro usa <code>getpass()</code>. La clave se escribe en ejecución, pero no queda guardada en el notebook.</p><pre>!pip -q install "elasticsearch&gt;=9,&lt;10"
+from getpass import getpass
+from elasticsearch import Elasticsearch
+
+endpoint = input("Endpoint https://...")
+api_key = getpass("API key: ")
+client = Elasticsearch(endpoint, api_key=api_key)
+client.info()</pre><table><tr><th>Si pasa esto</th><th>Qué significa</th><th>Qué haces</th></tr><tr><td>401/403</td><td>API key inválida o sin permiso</td><td>regenerar clave</td></tr><tr><td>timeout</td><td>endpoint mal copiado/red</td><td>verificar URL completa</td></tr><tr><td>info() responde</td><td>conexión lista</td><td>seguir al índice</td></tr></table></section><section class="step"><h2>Paso 3 · Crear índice y mapping</h2><p>No subas datos “a ciegas”. Primero define qué campos son texto y cuáles son exactos.</p><pre>mapping = {
+  "mappings": {"properties": {
+    "id_proceso": {"type":"keyword"},
+    "entidad": {"type":"keyword"},
+    "nombre_proceso": {"type":"text", "analyzer":"spanish"},
+    "descripcion": {"type":"text", "analyzer":"spanish"},
+    "url_secop": {"type":"keyword", "index": False}
+}}}
+
+INDEX = "s07_compras_claras"
+if client.indices.exists(index=INDEX):
+    client.indices.delete(index=INDEX)
+client.indices.create(index=INDEX, **mapping)</pre></section><section class="step"><h2>Paso 4 · Cargar documentos con bulk</h2><pre>from elasticsearch.helpers import bulk
+acciones = []
+for d in corpus.to_dict("records"):
+    acciones.append({
+      "_index": INDEX,
+      "_id": d["id_proceso"],
+      "_source": d
+    })
+ok, errores = bulk(client, acciones, refresh=True, raise_on_error=False)
+print(ok, len(errores))</pre><p>Si <code>ok</code> es mayor que cero, ya tienes un índice cargado.</p></section><section class="step"><h2>Paso 5 · Consultar y leer resultados</h2><pre>query = {
+  "query": {"bool": {
+    "must": [{"multi_match": {
+      "query": "mantenimiento aeronaves",
+      "fields": ["nombre_proceso^2", "descripcion"]
+    }}],
+    "filter": [{"term": {"entidad": "FUERZA AEROESPACIAL COLOMBIANA"}}]
+  }},
+  "highlight": {"fields": {"nombre_proceso": {}, "descripcion": {}}},
+  "size": 5
+}
+resp = client.search(index=INDEX, **query)</pre><p>Lee tres cosas: <b>_score</b>, <b>documento</b> y <b>highlight</b>. El score ordena, pero el highlight ayuda a entender por qué.</p></section><section class="step"><h2>Paso 6 · Entrega</h2><p>La práctica no termina cuando aparecen resultados. Termina cuando justificas una decisión.</p><div class="grid"><div class="card"><b>CSV</b><br><code>s07_resultados_busqueda.csv</code><br>Top 5, score, URL, consulta y motor.</div><div class="card"><b>Hito</b><br><code>hito_s07_relevancia.md</code><br>Necesidad, decisión, cambio A/B, falso positivo y límite.</div><div class="card"><b>Límite</b><br>La relevancia textual no demuestra irregularidad.</div></div></section></main></body></html>
