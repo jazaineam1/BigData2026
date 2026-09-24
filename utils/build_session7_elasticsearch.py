@@ -20,6 +20,10 @@ Principios del rediseño:
 - Python como automatización de la API;
 - cuaderno con explicación de código, evidencia y errores esperados;
 - laboratorio como tablero de clase, no como cuarta fuente de contenido;
+- S07 Live entra al inicio, permanece visible y evalúa habilidades diversas (no solo opción múltiple);
+- ejemplos de industria: e-commerce, empleo, noticias y bases de conocimiento;
+- evaluación de relevancia explícita y puente a _rank_eval / Search Profiler / Search UI;
+- Supabase Broadcast como sincronización principal con polling móvil de respaldo;
 - reto de noticias como transferencia.
 
 Este script se conserva para documentar la arquitectura y evitar que una
