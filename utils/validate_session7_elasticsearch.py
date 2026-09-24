@@ -30,7 +30,11 @@ def main():
         "CUANDO FALLA",
         "FLUJO A/B",
         "#d1", "#d2", "#d3", "#d4", "#d5", "#d6", "#d7", "#d8",
-        "s07-laboratorio-guiado.html#d6",
+        "Qué es exactamente un token",
+        "start_offset",
+        "end_offset",
+        "max_token_length",
+        'target="bigdata-lab"',
     ]:
         if marker not in pres:
             errors.append(f"Presentación: falta {marker}")
@@ -39,7 +43,9 @@ def main():
         errors.append("Presentación: no debe tener slides Live separadas; los retos deben integrarse al flujo.")
 
     for marker in [
-        "Primer intento puntúa",
+        "primer intento",
+        "Dominio",
+        'target="bigdata-presentation"',
         "mastery",
         "locked_for_ranking",
         "first_attempt",
@@ -75,6 +81,10 @@ def main():
 
     for marker in [
         "ELASTIC CONSOLE · NO SE EJECUTA EN COLAB",
+        "Glosario operativo con ejemplos mínimos",
+        "¿Cuánto mide un token?",
+        "tokens[]",
+        "start_offset",
         "match` vs `term",
         "Qué queremos hacer",
         "Evidencia esperada",
@@ -95,7 +105,7 @@ def main():
 
     if errors:
         raise SystemExit("\n".join("[ERROR] " + e for e in errors))
-    print(f"[OK] S07 validada: {slide_count} pantallas, {len(nb.cells)} celdas, {len(code_cells)} celdas de código, Live primer intento + mastery.")
+    print(f"[OK] S07 validada: {slide_count} pantallas, {len(nb.cells)} celdas, {len(code_cells)} celdas de código, definición+ejemplo+medición y Live primer intento + dominio.")
 
 
 if __name__ == "__main__":
