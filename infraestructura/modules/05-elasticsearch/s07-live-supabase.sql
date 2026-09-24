@@ -164,12 +164,14 @@ begin
   );
 end $$;
 
-create or replace function public.s07_live_leaderboard(p_code text)
-returns table(rank bigint,nickname text,score integer,answered integer,updated_at timestamptz)
+drop function if exists public.s07_live_leaderboard(text);
+
+create function public.s07_live_leaderboard(p_code text)
+returns table(rank bigint,participant_id uuid,nickname text,score integer,answered integer,updated_at timestamptz)
 language sql security definer set search_path=public
-as $$
+as $
   select row_number() over(order by sc.score desc,sc.answered desc,sc.updated_at asc),
-         sc.nickname,sc.score,sc.answered,sc.updated_at
+         sc.participant_id,sc.nickname,sc.score,sc.answered,sc.updated_at
   from public.s07_live_scores sc
   join public.s07_live_sessions s on s.id=sc.session_id
   where upper(s.code)=upper(trim(p_code)) and s.active=true
