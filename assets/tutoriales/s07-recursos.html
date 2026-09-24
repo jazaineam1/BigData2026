@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>S07 · Recursos Elasticsearch y BM25</title>
+<style>
+:root{--bg:#faf7ef;--ink:#172019;--g:#146c43;--b:#124e78;--y:#ffd600;--line:#e5dece;--s:#fff}*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}main{max-width:1100px;margin:auto;padding:32px 18px 60px}h1{font-family:Georgia,serif;font-size:clamp(34px,7vw,64px);line-height:1;margin:.2em 0}.lead{font-size:20px;max-width:760px;line-height:1.45}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:26px}.card{background:#fff;border:1px solid var(--line);border-left:8px solid var(--y);border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(23,32,25,.07);text-decoration:none;color:var(--ink)}.card h2{margin:.1em 0 .35em;color:#0b241c}.card p{color:#526056;line-height:1.45}.primary{border-left-color:var(--g)}.secondary{border-left-color:var(--b)}.warn{background:#fff7d1;border-left:8px solid var(--y);border-radius:16px;padding:18px;margin-top:24px}.pill{display:inline-block;background:#e9f8ef;color:var(--g);font-weight:800;padding:7px 12px;border-radius:999px;font-size:13px}@media(max-width:760px){.grid{grid-template-columns:1fr}main{padding-top:20px}.lead{font-size:18px}}
+</style>
+</head>
+<body><main>
+<span class="pill">Sesión 7 · Elasticsearch y BM25</span>
+<h1>Del vecindario al texto</h1>
+<p class="lead">Entrada única para estudiantes. La sesión está pensada para un grupo de tercer semestre con Python medio, SQL medio, poco Bash y poca experiencia cloud. Empieza por la presentación, ejecuta el cuaderno y usa la guía de despliegue cuando tengas Elastic Cloud listo.</p>
+<div class="grid">
+<a class="card primary" href="../../Presentaciones/s07-del-vecindario-al-texto.html"><h2>1 · Presentación guiada</h2><p>Explicación completa: contexto, BM25, Elasticsearch, despliegue, errores esperados y entrega.</p></a>
+<a class="card primary" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb" target="_blank"><h2>2 · Cuaderno principal</h2><p>Laboratorio con corpus, BM25 local, consultas, experimento A/B y generación de evidencia.</p></a>
+<a class="card secondary" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7B_Despliegue_Elastic_Cloud.ipynb" target="_blank"><h2>3 · Cuaderno de despliegue</h2><p>Ruta paso a paso para conectar Elastic Cloud desde Python: endpoint, API key, índice, bulk y búsqueda.</p></a>
+<a class="card secondary" href="s07-despliegue-elasticsearch.html"><h2>4 · Guía de despliegue</h2><p>Checklist visual para crear o usar Elastic Cloud sin depender de Bash ni de administración avanzada.</p></a>
+<a class="card" href="s07-laboratorio-guiado.html"><h2>5 · Checklist de laboratorio</h2><p>Lista de verificación para completar la práctica y no olvidar evidencia, límite y motor realmente usado.</p></a>
+<a class="card" href="../../Datos/s07_corpus_respaldo.jsonl"><h2>6 · Corpus de respaldo</h2><p>Datos mínimos para que la clase no se caiga si el archivo de S6 no está disponible.</p></a>
+</div>
+<div class="warn"><b>Regla de honestidad técnica:</b> si ejecutas solo BM25 local, decláralo. Si ejecutas Elastic Cloud, guarda evidencia de conexión, índice y consulta. Un score alto no demuestra irregularidad.</div>
+</main></body></html>
