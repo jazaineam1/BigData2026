@@ -196,6 +196,7 @@ client.info()</pre></div>
         </table>
       </div>
       <div id="liveMeta" class="statline">0 participantes</div>
+      <h3 style="margin:14px 0 4px;color:var(--navy)">Distribución por checkpoint</h3>
       <div id="liveStats" class="stats"></div>
     </div>
   </div>
@@ -341,13 +342,35 @@ client.info()</pre></div>
   }
 
   function startRealtime(){
-    if(!sb||!state.live.session_id)return;
+    if(!sb)return;
     if(channel) sb.removeChannel(channel);
-    channel=sb.channel('s07-live-'+state.live.session_id)
-      .on('postgres_changes',{event:'*',schema:'public',table:'s07_live_scores',filter:'session_id=eq.'+state.live.session_id},()=>refreshLeaderboard())
+    channel=sb.channel('s07-live-scoreboard')
+      .on('postgres_changes',{event:'*',schema:'public',table:'s07_live_scores'},async()=>{
+        await refreshLeaderboard();
+        await refreshAllStats();
+      })
       .subscribe(status=>{
-        if(status==='SUBSCRIBED'){liveStatus.textContent='Conectado en tiempo real.';sideDot.classList.add('on')}
+        if(status==='SUBSCRIBED'){
+          liveStatus.textContent=state.live.participant_id?'Conectado en tiempo real.':'Ranking sincronizado en tiempo real. Entra con tu alias para puntuar.';
+          sideDot.classList.add('on');
+        }
       });
+  }
+
+  async function refreshAllStats(){
+    if(!sb)return;
+    const labels={q0:'Q1',q1:'Q2',q2:'Q3',q3:'Q4',q4:'Q5',q5:'Q6'};
+    const chunks=[];
+    for(const qid of Object.keys(labels)){
+      const {data,error}=await sb.rpc('s07_live_question_stats',{p_code:LIVE_CODE,p_question:qid});
+      if(error)continue;
+      const rows=data||[];
+      const total=rows.reduce((a,r)=>a+Number(r.responses||0),0);
+      if(!total){chunks.push('<span class="stat-chip">'+labels[qid]+': 0</span>');continue}
+      const dist=rows.map(r=>r.option.toUpperCase()+' '+r.responses).join(' · ');
+      chunks.push('<span class="stat-chip">'+labels[qid]+' · '+dist+'</span>');
+    }
+    liveStats.innerHTML=chunks.join('');
   }
 
   async function showStats(questionId,feedback){
@@ -424,7 +447,8 @@ client.info()</pre></div>
 
   renderLocal();
   refreshLeaderboard();
-  if(state.live.participant_id) startRealtime();
+  refreshAllStats();
+  startRealtime();
 })();
 </script>
 </body>
