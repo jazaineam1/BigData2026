@@ -74,6 +74,7 @@ def main():
         "Buscar",
         "Evaluar",
         "7_Elasticsearch_BM25_Compras_Claras.ipynb",
+        "Precision@5",
     ]:
         if marker.lower() not in route.lower():
             errors.append("Ruta: falta " + marker)
