@@ -36,6 +36,8 @@ def main():
         "hito_s07_relevancia.md",
         "Precision@5",
         "relevancia textual",
+        "s07_reto_sala_redaccion.json",
+        "987 noticias",
     ]
     for marker in required_nb:
         if marker not in text:
@@ -46,8 +48,8 @@ def main():
 
     pres = PRES.read_text(encoding="utf-8")
     slide_count = pres.count("{c:'")
-    if slide_count < 46:
-        errors.append(f"Presentación: solo {slide_count} slides; se esperan al menos 46.")
+    if slide_count < 49:
+        errors.append(f"Presentación: solo {slide_count} slides; se esperan al menos 49.")
     for marker in [
         "Construye un buscador con Elasticsearch",
         "1.994 procesos únicos",
@@ -58,6 +60,10 @@ def main():
         "PRECISION@5",
         "touchstart",
         "requestFullscreen",
+        "Sala de redacción",
+        "#122253",
+        "#0B8689",
+        "#E95D0F",
     ]:
         if marker not in pres:
             errors.append("Presentación: falta " + marker)
@@ -75,6 +81,7 @@ def main():
         "Evaluar",
         "7_Elasticsearch_BM25_Compras_Claras.ipynb",
         "Precision@5",
+        "Transferir",
     ]:
         if marker.lower() not in route.lower():
             errors.append("Ruta: falta " + marker)
@@ -92,9 +99,9 @@ def main():
             errors.append("Despliegue: falta " + marker)
 
     checklist = CHECK.read_text(encoding="utf-8")
-    if checklist.count('class="step"') < 17:
+    if checklist.count('class="step"') < 21:
         errors.append("Checklist: faltan pasos.")
-    for marker in ["Conexión verificada", "Tokens Elastic", "Errores bulk: 0", "Precision@5", "s07_config_busqueda.json"]:
+    for marker in ["Conexión verificada", "Tokens Elastic", "Errores bulk: 0", "Precision@5", "s07_config_busqueda.json", "s07_reto_sala_redaccion.json"]:
         if marker not in checklist:
             errors.append("Checklist: falta evidencia " + marker)
 
