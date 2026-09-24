@@ -93,10 +93,10 @@ window.addEventListener('DOMContentLoaded', event => {
         card.setAttribute('data-session', '7');
         card.innerHTML = `
             <a class="course-card"
-               href="Presentaciones/s07-del-vecindario-al-texto.html">
+               href="assets/tutoriales/s07-recursos.html">
                 <div class="course-emoji" aria-hidden="true">🔎</div>
                 <div class="course-category">Sesión 7 · Elasticsearch y BM25</div>
-                <div class="course-title">Del vecindario al texto: ¿qué procesos debe leer Laura primero?</div>
+                <div class="course-title">Construye un buscador: del corpus contractual al ranking</div>
                 <p class="course-description">
                     Búsqueda textual desde cero: documentos, campos, índice invertido y BM25.
                     La presentación guía la clase y enlaza el laboratorio en Colab con una ruta local garantizada y Elastic opcional.
