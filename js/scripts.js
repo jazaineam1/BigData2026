@@ -114,10 +114,10 @@ window.addEventListener('DOMContentLoaded', event => {
                href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb"
                target="_blank" rel="noopener noreferrer">
                 <div class="course-emoji" aria-hidden="true">🧪</div>
-                <div class="course-category">Taller domiciliario 1 · S1–S6</div>
+                <div class="course-category">Sesión 8 · Primer taller NoSQL</div>
                 <div class="course-title">De 6 CSV a Atlas, Cassandra y Neo4j</div>
                 <p class="course-description">
-                    Proyecto en parejas: integren 6.000 procesos SECOP, construyan su propio JSON,
+                    Primer taller evaluativo: integren 6.000 procesos SECOP, construyan su propio JSON,
                     cárguenlo realmente en MongoDB Atlas y resuelvan consultas nuevas.
                     Luego lleven la salida a un diseño Cassandra y a un análisis relacional con Neo4j.
                     Git/GitHub es opcional.
