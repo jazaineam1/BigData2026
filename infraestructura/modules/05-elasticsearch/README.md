@@ -47,9 +47,9 @@ bulk + search + evaluación
 
 Los materiales locales históricos pueden conservarse como referencia, pero no deben competir con esta ruta durante la clase.
 
-## S07 Live · ranking tipo Kahoot
+## S07 Live · laboratorio de dominio, no solo Kahoot
 
-El laboratorio incluye seis checkpoints formativos con ranking en tiempo real.
+El laboratorio incluye **ocho desafíos formativos** con ranking en tiempo real y un máximo de **21 puntos**. No son solo preguntas de selección múltiple: hay modelado de campos, ordenamiento de pipeline, completado de API, verificación de un resultado real, construcción de Query DSL, cálculo numérico y transferencia a noticias.
 
 Arquitectura:
 
@@ -88,7 +88,7 @@ La migración reproducible está en:
 - RLS está activado.
 - Las respuestas no tienen lectura pública directa.
 - Las escrituras pasan por RPC acotadas a S07.
-- `s07_live_scores` expone solo alias y puntaje para poder renderizar el leaderboard.
+- `s07_live_scores` expone solo alias y puntaje para poder renderizar el leaderboard.\n- La ruta principal de sincronización usa **Supabase Broadcast**, no `postgres_changes`; esto sigue la recomendación vigente de Supabase para notificaciones de cambios.
 - Este ranking es **formativo**, no reemplaza la evidencia del notebook ni debe usarse como nota oficial por sí solo.
 
 ## QA mínimo antes de dictar
