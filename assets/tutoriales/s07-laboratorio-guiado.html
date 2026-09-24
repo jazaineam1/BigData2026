@@ -326,12 +326,12 @@ client.info()</pre></div>
     const rows=data||[];
     liveMeta.textContent=rows.length+' participante'+(rows.length===1?'':'s')+' conectado'+(rows.length===1?'':'s');
     leaderBody.innerHTML=rows.length?rows.map(r=>{
-      const me=state.live.nickname && r.nickname===state.live.nickname;
+      const me=state.live.participant_id && r.participant_id===state.live.participant_id;
       return '<tr class="'+(me?'me':'')+'"><td class="rank">'+r.rank+'</td><td>'+escapeHtml(r.nickname)+'</td><td class="score">'+r.score+'</td><td>'+r.answered+'/6</td></tr>';
     }).join(''):'<tr><td colspan="4">Esperando participantes…</td></tr>';
     sideScore.innerHTML=rows.slice(0,3).map(r=>'<div><span>#'+r.rank+' '+escapeHtml(r.nickname)+'</span><b>'+r.score+'</b></div>').join('');
     if(state.live.nickname){
-      const mine=rows.find(r=>r.nickname===state.live.nickname);
+      const mine=rows.find(r=>r.participant_id===state.live.participant_id);
       if(mine){
         state.live.score=mine.score;state.live.answered=mine.answered;
         myLiveScore.textContent='Tu posición: #'+mine.rank+' · '+mine.score+' puntos · '+mine.answered+'/6 respondidas';
