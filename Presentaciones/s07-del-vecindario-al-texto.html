@@ -323,6 +323,12 @@ ok, errores = bulk(client, acciones, refresh=True)</pre>
 {c:'Experimento',k:'LECTURA PROFESIONAL',t:'El resultado propio importa más que el query bonito',l:'Cada equipo trabaja con una consulta asignada por alias y debe justificar el ranking que obtuvo.',b:`
 <div class="grid two"><div class="card"><b>Evidencia</b>Top 5 A + Top 5 B + documentos que cambiaron posición.</div><div class="card green"><b>Decisión</b>Cuál leerías primero, cuál descartas y qué dato adicional necesitarías.</div></div>
 <div class="call">No basta con decir “funcionó”: debes explicar <b>qué cambió y por qué tu decisión sigue siendo limitada</b>.</div>`},
+{c:'Experimento',k:'CALIDAD',t:'Cambiar el ranking no significa mejorarlo',l:'Necesitas una definición de relevancia antes de decidir si el tuning ayudó.',b:`
+<div class="grid two"><div class="card blue"><b>Información necesaria</b>¿Qué quiere encontrar Laura con esta consulta?</div><div class="card green"><b>Juicio</b>Para cada hit: ¿responde o no a esa necesidad?</div></div>
+<div class="call">Primero defines el criterio; después etiquetas. No ajustes el criterio para favorecer el ranking que ya viste.</div>`},
+{c:'Experimento',k:'PRECISION@5',t:'Una métrica mínima de calidad',l:'De los cinco primeros resultados, ¿cuántos juzgaste relevantes?',b:`
+<div class="grid two"><div class="card green"><b>P@5 = relevantes / 5</b><span class="bigmetric">0.8</span><span class="small">significa 4 de 5 relevantes.</span></div><div class="card"><b>Camino profesional</b>Con muchas consultas y ratings, Elasticsearch ofrece <code>_rank_eval</code> con precision, MRR y DCG.</div></div>
+<div class="call">Ahora sí puedes preguntar: <b>¿el boost movió documentos y además mejoró P@5?</b></div>`},
 {c:'Errores',k:'CLÍNICA DE ERRORES',t:'Un fallo técnico también debe ser interpretable',l:'Reconoce el síntoma antes de cambiar código al azar.',b:`
 <table class="table"><tr><th>Síntoma</th><th>Lectura probable</th><th>Primera acción</th></tr>
 <tr><td>401 / 403</td><td>autorización</td><td>revisar/regenerar API key</td></tr>
@@ -337,14 +343,14 @@ ok, errores = bulk(client, acciones, refresh=True)</pre>
 <div class="grid">
 <div class="card green"><b>s07_resultados_busqueda.csv</b>ranking A y B, score, URL, motor.</div>
 <div class="card blue"><b>s07_config_busqueda.json</b>índice, consulta, mapping resumido, conteos.</div>
-<div class="card yellow"><b>hito_s07_relevancia.md</b>decisión, alternativa, cambio, falso positivo y límite.</div>
+<div class="card yellow"><b>hito_s07_relevancia.md</b>decisión, alternativa, P@5, falso positivo y límite.</div>
 </div>`},
 {c:'Entrega',k:'RÚBRICA',t:'Qué hace que una entrega sea fuerte',l:'Se califica evidencia propia, despliegue verificable e interpretación.',b:`
 <table class="table"><tr><th>Criterio</th><th>Peso</th></tr>
 <tr><td>Conexión + índice + conteo verificado</td><td>25</td></tr>
 <tr><td>Mapping + analyzer interpretados</td><td>15</td></tr>
 <tr><td>Consulta escalonada y ranking</td><td>20</td></tr>
-<tr><td>Experimento A/B controlado</td><td>20</td></tr>
+<tr><td>Experimento A/B + juicios de relevancia / P@5</td><td>20</td></tr>
 <tr><td>Decisión + alternativa + límite</td><td>15</td></tr>
 <tr><td>Trazabilidad sin secretos</td><td>5</td></tr></table>`},
 {c:'Cierre',k:'PARA LLEVAR',t:'Ya no tienes “una búsqueda”; tienes una arquitectura',l:'Datos → análisis → índice → ingesta → consulta → ranking → decisión.',dark:true,b:`
