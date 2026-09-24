@@ -1,2 +1,80 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>S07 · Guía de despliegue Elasticsearch</title><style>:root{--bg:#faf7ef;--ink:#172019;--g:#146c43;--b:#124e78;--y:#ffd600;--r:#a52a2a;--line:#e5dece}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}main{max-width:1050px;margin:auto;padding:28px 16px 70px}h1{font-family:Georgia,serif;font-size:clamp(34px,7vw,62px);line-height:1;margin:.2em 0}h2{margin-top:2rem;color:#0b241c}.lead{font-size:20px;line-height:1.45;max-width:760px}.step{background:#fff;border:1px solid var(--line);border-left:8px solid var(--g);border-radius:18px;padding:18px 20px;margin:14px 0;box-shadow:0 8px 24px rgba(23,32,25,.07)}.step h3{margin:.1em 0 .4em}.warn{border-left-color:var(--y);background:#fff8d8}.danger{border-left-color:var(--r);background:#fff1f0}code,pre{font-family:Consolas,Cascadia Mono,monospace}pre{background:#0d1b26;color:#eef6fb;border-radius:14px;padding:16px;overflow:auto;white-space:pre-wrap}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.btn{display:inline-block;margin-top:8px;background:var(--g);color:#fff;text-decoration:none;padding:10px 14px;border-radius:10px;font-weight:800}.tbl{width:100%;border-collapse:collapse;background:#fff}.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:10px;text-align:left}.tbl th{background:#f1ede2}@media(max-width:760px){.grid{grid-template-columns:1fr}.lead{font-size:18px}}</style></head><body><main><a class="btn" href="s07-recursos.html">← Recursos S07</a><h1>Guía de despliegue: Elasticsearch desde cero</h1><p class="lead">Esta guía está pensada para estudiantes con Python básico/intermedio y poca experiencia en cloud. No exige Bash. La ruta principal es navegador + Elastic Cloud + Google Colab.</p><div class="step warn"><h3>Antes de crear cuentas</h3><p>Si no tienes Elastic Cloud listo, puedes completar la sesión con BM25 local en el cuaderno principal. El despliegue real se hace cuando tengas endpoint y API key.</p></div><h2>Ruta de despliegue</h2><div class="step"><h3>1. Entrar a Elastic Cloud</h3><p>Usa una cuenta personal o institucional. Crea un proyecto/deployment de prueba. Conserva el nombre del proyecto para tu hito.</p></div><div class="step"><h3>2. Copiar el endpoint</h3><p>Busca el endpoint de Elasticsearch. Debe empezar por <code>https://</code>. No uses URL de Kibana como si fuera endpoint de Elasticsearch.</p></div><div class="step"><h3>3. Crear API key</h3><p>Crea una API key para pruebas. No la publiques en GitHub, capturas de pantalla o entregas. En Colab pégala con <code>getpass()</code> o Colab Secrets.</p></div><div class="step"><h3>4. Abrir el cuaderno de despliegue</h3><a class="btn" target="_blank" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7B_Despliegue_Elastic_Cloud.ipynb">Abrir cuaderno S07B</a><p>Ejecuta instalación, carga del corpus, conexión, creación del índice, carga bulk y búsqueda.</p></div><div class="step"><h3>5. Verificar conexión</h3><pre>client.info()</pre><p>Si responde con información de versión/cluster, la conexión existe. Si falla, revisa la tabla de errores.</p></div><div class="step"><h3>6. Crear índice y mapping</h3><p>El mapping define cómo se interpreta cada campo. La descripción se analiza como <code>text</code>; el ID y la entidad se tratan como <code>keyword</code>.</p></div><div class="step"><h3>7. Cargar documentos con bulk</h3><p>El patrón <code>bulk</code> es la forma profesional de cargar muchos documentos. En clase usamos pocos, pero el patrón escala.</p></div><div class="step"><h3>8. Ejecutar búsqueda</h3><p>Usa <code>multi_match</code> sobre <code>nombre_proceso</code> y <code>descripcion</code>. Guarda top 5, score, ID y URL.</p></div><div class="step"><h3>9. Comparar una modificación</h3><p>Cambia una sola cosa: consulta, filtro o ponderación. Explica qué cambió en el ranking.</p></div><div class="step"><h3>10. Cerrar responsablemente</h3><p>Si estás usando un proyecto de prueba, revisa costos o elimina recursos que no necesites.</p></div><h2>Errores frecuentes</h2><table class="tbl"><tr><th>Error</th><th>Lectura</th><th>Acción</th></tr><tr><td>401 / 403</td><td>API key inválida o sin permisos</td><td>Crear nueva API key</td></tr><tr><td>404 index_not_found</td><td>No existe el índice</td><td>Ejecutar la celda de creación</td></tr><tr><td>Timeout</td><td>endpoint o red</td><td>Revisar URL y conexión</td></tr><tr><td>0 resultados</td><td>consulta/campos/analyzer</td><td>Probar otra consulta y revisar mapping</td></tr></table><div class="step danger"><h3>Regla de seguridad</h3><p>Nunca subas API keys al repositorio. Si una clave se publica por error, revócala y crea otra.</p></div></main></body></html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Tutorial de despliegue de Elasticsearch Serverless para la sesión 7 de Big Data.">
+<title>S07 · Desplegar Elasticsearch Serverless</title>
+<style>
+:root{--bg:#f7f3e9;--ink:#172019;--g:#146c43;--b:#124e78;--y:#ffd600;--r:#a52a2a;--line:#ded8c9;--muted:#5a665f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",Arial,sans-serif}
+main{max-width:1040px;margin:auto;padding:26px 16px 80px}h1{font:700 clamp(36px,7vw,66px)/1 Georgia,serif;margin:.2em 0;color:#0b241c}h2{font:700 30px Georgia,serif;color:#0b241c;margin-top:34px}.lead{font-size:20px;color:#405047;max-width:840px}
+.nav{display:flex;gap:8px;flex-wrap:wrap}.btn{display:inline-block;text-decoration:none;background:var(--g);color:#fff;border-radius:10px;padding:9px 12px;font-weight:800}.btn.alt{background:#e9f4ff;color:var(--b);border:1px solid #c9dced}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:center;margin:22px 0}.node{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center;font-weight:800}.arrow{text-align:center;font-size:26px;color:var(--b);font-weight:900}
+.step{background:#fff;border:1px solid var(--line);border-left:7px solid var(--g);border-radius:16px;padding:17px 18px;margin:13px 0;box-shadow:0 8px 24px rgba(23,32,25,.06)}.step h3{margin:.1em 0 .4em;color:#0b241c}.step .evidence{background:#e9f8ef;border-radius:10px;padding:9px 11px;margin-top:9px}.step .why{color:var(--muted);font-size:14px}
+pre{background:#0d1b26;color:#eaf6ee;padding:15px;border-radius:13px;overflow:auto;white-space:pre-wrap;font:14px/1.45 Consolas,monospace}code{font-family:Consolas,monospace}
+.warn{background:#fff6c9;border-left-color:var(--y)}.danger{background:#fff1f0;border-left-color:var(--r)}
+.table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line)}.table th,.table td{padding:10px;border-bottom:1px solid var(--line);text-align:left}.table th{background:#f0ecdf}
+.concept{background:#eef5f0;border:1px dashed #90aa9a;border-radius:14px;padding:14px;margin:14px 0}.concept b{color:var(--g)}
+.official{background:#e9f4ff;border-left:7px solid var(--b);border-radius:14px;padding:14px;margin-top:22px}
+@media(max-width:760px){.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}.lead{font-size:18px}}
+</style></head>
+<body><main>
+<div class="nav"><a class="btn" href="s07-recursos.html">← Ruta S07</a><a class="btn alt" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Abrir cuaderno</a></div>
+
+<h1>Desplegar Elasticsearch Serverless</h1>
+<p class="lead">Tutorial operativo de la sesión. Está diseñado para repetir el despliegue sin depender del docente: crear proyecto, obtener credenciales, conectar Colab, crear índice, observar el analyzer, cargar 1.994 documentos y comprobar que quedaron en el motor.</p>
+
+<div class="official"><b>Verificación documental: 23-sep-2026.</b> La ruta principal sigue el quickstart oficial “Keyword search with Python”. Elastic recomienda Serverless como una forma simple de empezar. La interfaz puede cambiar de posición; si un botón no aparece exactamente donde se muestra aquí, usa el buscador global de Elastic para localizar <b>API keys</b> o <b>Index Management</b>.</div>
+
+<h2>Mapa del despliegue</h2>
+<div class="flow"><div class="node">Elastic Cloud<br><small>cuenta</small></div><div class="arrow">→</div><div class="node">Elasticsearch project<br><small>Serverless</small></div><div class="arrow">→</div><div class="node">Project URL + API key</div><div class="arrow">→</div><div class="node">Google Colab<br><small>cliente Python</small></div></div>
+
+<div class="step warn"><h3>Antes de empezar</h3><p>No necesitas instalar Elasticsearch localmente. Tampoco necesitas Bash, Docker o una VM. Para la clase usamos navegador + Colab + un proyecto Elasticsearch.</p><p class="why">La documentación oficial muestra actualmente una prueba de 14 días para usuarios nuevos; la disponibilidad depende de la cuenta y puede cambiar. Si tu cuenta no puede crear proyecto, trabaja con un compañero o usa la contingencia BM25 local y documenta la limitación.</p></div>
+
+<div class="step"><h3>1 · Entra a Elastic Cloud</h3><p>Abre <a href="https://cloud.elastic.co/" target="_blank" rel="noopener">cloud.elastic.co</a> e inicia sesión.</p><p>Busca la opción para crear un proyecto nuevo y elige el tipo <b>Elasticsearch</b>.</p><div class="evidence"><b>Evidencia:</b> puedes ver el nombre de tu proyecto y entrar a él.</div></div>
+
+<div class="step"><h3>2 · Conserva la Project URL</h3><p>Dentro del flujo de inicio/keyword search, Elastic muestra la URL que usará el cliente. Copia la <b>Project URL</b> completa, empezando por <code>https://</code>.</p><div class="concept"><b>Esquema conceptual:</b> esta URL identifica el servicio. No es tu API key y no es una contraseña.</div><div class="evidence"><b>Evidencia:</b> tienes una URL HTTPS que podrás pegar en Colab.</div></div>
+
+<div class="step"><h3>3 · Crea una API key del proyecto</h3><p>Usa la opción <b>Create an API Key</b> del flujo de búsqueda o busca <b>API keys</b> dentro del proyecto. Para esta práctica, la clave debe poder crear/usar el índice de tu equipo.</p><p><b>No uses una clave pegada en el código.</b> El cuaderno la pide con <code>getpass()</code>.</p><div class="concept"><b>Distinción:</b> Elastic también tiene Elastic Cloud API keys para administración a nivel de Cloud. En esta clase usa la clave de acceso al proyecto Elasticsearch que te entrega el flujo del proyecto.</div><div class="evidence"><b>Evidencia:</b> tienes una clave guardada temporalmente y no la publicaste.</div></div>
+
+<div class="step danger"><h3>Regla de seguridad</h3><p>Una API key es un secreto. No la pongas en GitHub, capturas, archivos de entrega ni mensajes del grupo. Si se expone, revócala y genera otra.</p></div>
+
+<div class="step"><h3>4 · Abre el cuaderno único</h3><p>No necesitas el viejo cuaderno 7B durante la clase. Toda la ruta está integrada en el notebook principal.</p><a class="btn" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Abrir notebook principal</a><div class="evidence"><b>Evidencia:</b> estás en el bloque B · Desplegar.</div></div>
+
+<div class="step"><h3>5 · Instala el cliente oficial</h3><pre>!pip -q install -U elasticsearch pandas tabulate</pre><p class="why">El paquete <code>elasticsearch</code> es el cliente Python oficial. El curso no implementa HTTP manualmente porque hoy queremos aprender búsqueda, no reinventar el cliente.</p><div class="evidence"><b>Evidencia:</b> la celda termina sin error.</div></div>
+
+<div class="step"><h3>6 · Conecta y prueba</h3><pre>client = Elasticsearch(endpoint, api_key=api_key)
+client.info()</pre><p>La prueba de conexión ocurre <b>antes</b> de crear índice o escribir queries.</p><div class="evidence"><b>Evidencia:</b> aparece “Conexión verificada” y el notebook cambia a <code>Modo: Elasticsearch real</code>.</div></div>
+
+<div class="step"><h3>7 · Crea tu índice personal</h3><p>El notebook convierte tu alias a un nombre seguro como:</p><pre>s07-compras-claras-equipo-demo</pre><p class="why">Así varios estudiantes pueden compartir un proyecto sin sobrescribir el mismo índice.</p><div class="evidence"><b>Evidencia:</b> aparece “Índice creado: True ...”.</div></div>
+
+<div class="step"><h3>8 · Observa el analyzer real</h3><pre>client.indices.analyze(
+    index=INDEX_NAME,
+    analyzer="spanish",
+    text="Servicios de mantenimiento de las aeronaves"
+)</pre><p>No memorices los tokens: compáralos con la frase de entrada y explica qué transformaciones notas.</p><div class="evidence"><b>Evidencia:</b> el notebook imprime <code>Tokens Elastic: [...]</code>.</div></div>
+
+<div class="step"><h3>9 · Carga el corpus con bulk</h3><p>El notebook prepara 1.994 documentos únicos y usa <code>elasticsearch.helpers.bulk</code>.</p><div class="evidence"><b>Evidencia:</b> con el corpus principal debes ver <b>Documentos indexados: 1994</b> y <b>Errores bulk: 0</b>.</div></div>
+
+<div class="step"><h3>10 · Comprueba desde el motor</h3><pre>client.count(index=INDEX_NAME)</pre><p>La carga no está terminada hasta que el índice confirma la misma cantidad que el DataFrame.</p><div class="evidence"><b>Evidencia:</b> <code>Conteo local: 1994</code>, <code>Conteo Elasticsearch: 1994</code>, <code>¿Coinciden?: True</code>.</div></div>
+
+<h2>Clínica de errores</h2>
+<table class="table"><tr><th>Síntoma</th><th>Qué significa primero</th><th>Qué revisar</th></tr>
+<tr><td>401 / 403</td><td>autorización</td><td>API key correcta y permisos del proyecto</td></tr>
+<tr><td>timeout</td><td>URL/red</td><td>Project URL completa y conectividad</td></tr>
+<tr><td>SSL / esquema</td><td>URL incompleta</td><td>debe empezar por <code>https://</code></td></tr>
+<tr><td>resource_already_exists</td><td>índice existente</td><td>re-ejecuta la celda idempotente del notebook</td></tr>
+<tr><td>index_not_found</td><td>nombre o secuencia</td><td><code>INDEX_NAME</code> y celda de creación</td></tr>
+<tr><td>bulk errors &gt; 0</td><td>algún documento no entró</td><td>inspecciona <code>bulk_errores[:3]</code></td></tr>
+<tr><td>0 hits</td><td>consulta/campo/analyzer</td><td>prueba término simple y <code>_analyze</code></td></tr></table>
+
+<div class="step warn"><h3>Contingencia de clase</h3><p>Si el servicio no conecta, completa el ranking BM25 local y registra el error exacto. Eso mantiene el aprendizaje de relevancia, pero <b>no cuenta como despliegue Elasticsearch</b>. Repite los pasos 1–10 cuando recuperes acceso.</p></div>
+
+<h2>Fuentes oficiales</h2>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/docs/solutions/search/get-started/keyword-search-python">Keyword search with Python</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/docs/solutions/search/get-started">Get started with search</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/docs/reference/elasticsearch/clients/python/getting-started">Python client · getting started</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/docs/deploy-manage/api-keys/serverless-project-api-keys">Serverless project API keys</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/docs/reference/elasticsearch/clients/python/client-helpers">Bulk helpers</a></li>
+</ul>
+</main></body></html>

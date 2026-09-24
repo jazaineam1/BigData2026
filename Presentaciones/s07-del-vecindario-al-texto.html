@@ -1,45 +1,390 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>S07 · Elasticsearch y BM25</title><style>:root{--cream:#faf7ef;--paper:#fffefb;--ink:#172019;--muted:#59675f;--green:#123f2b;--gold:#c9a227;--line:#e4ddcd;--soft:#eef5f0;--code:#0b241c}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1218;color:var(--ink);font-family:Inter,Segoe UI,Arial,system-ui,sans-serif}.stage{position:relative;width:min(100vw,177.77dvh);height:min(100dvh,56.25vw);margin:auto;top:50%;transform:translateY(-50%);background:var(--paper);overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.45);container-type:size}.slide{position:absolute;inset:0;display:none;overflow:auto;padding:5.2cqh 6cqw 8.5cqh;background:var(--paper);touch-action:pan-y pinch-zoom}.slide.on{display:block}.tag{display:inline-block;background:var(--soft);border:1px solid #cfe8d8;color:var(--green);border-radius:999px;padding:.55em .9em;font-size:2cqh;font-weight:900;letter-spacing:.06em;text-transform:uppercase}.title{font-family:Georgia,serif;font-size:6.7cqh;line-height:1;margin:.18em 0;color:#0b241c}.sub{font-size:3.1cqh;line-height:1.25;color:#3d4b43;max-width:36em}.lead{font-size:2.75cqh;line-height:1.35;max-width:48em}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2cqh;margin-top:2.5cqh}.two{grid-template-columns:repeat(2,1fr)}.card{background:#fbfaf6;border:1px solid var(--line);border-radius:1.8cqh;padding:2.2cqh;font-size:2.3cqh;line-height:1.35;box-shadow:0 8px 24px rgba(16,24,32,.07)}.card b{display:block;color:var(--green);font-size:2.65cqh;margin-bottom:.35em}.call{background:#fff6c9;border-left:.75cqh solid var(--gold);border-radius:1.5cqh;padding:2.1cqh;margin-top:2.4cqh;font-size:2.45cqh;line-height:1.35}.diagram{display:flex;align-items:center;gap:1.2cqh;flex-wrap:wrap;margin-top:2.7cqh}.node{background:#fff;border:1px solid var(--line);border-radius:1.5cqh;padding:1.5cqh 2cqh;font-size:2.35cqh;font-weight:900;box-shadow:0 6px 18px rgba(16,24,32,.07)}.arrow{font-size:3cqh;color:var(--gold);font-weight:900}pre{background:var(--code);color:#eef9f1;border-radius:1.5cqh;padding:1.9cqh;font-size:2.05cqh;line-height:1.42;overflow:auto;max-height:47cqh}code{background:#e9f5ee;border-radius:.5em;padding:.12em .35em}.tasks{counter-reset:s;display:grid;gap:1.1cqh;margin-top:2cqh}.task{counter-increment:s;background:#fff;border:1px solid var(--line);border-radius:1.5cqh;padding:1.5cqh;font-size:2.2cqh}.task:before{content:counter(s);display:inline-grid;place-items:center;width:3cqh;height:3cqh;border-radius:50%;background:var(--green);color:#fff;font-weight:900;margin-right:.8cqh}.table{width:100%;border-collapse:collapse;font-size:2.1cqh;margin-top:2cqh}.table th,.table td{border-bottom:1px solid var(--line);padding:1.2cqh;text-align:left}.search{display:grid;grid-template-columns:1fr auto;gap:1cqh;margin-top:2cqh}.search input{font-size:2.15cqh;padding:1.3cqh;border:1px solid var(--line);border-radius:1.2cqh}.search button{font-size:2.15cqh;padding:1.3cqh 2cqh;border:0;border-radius:1.2cqh;background:var(--green);color:#fff;font-weight:900}.results{margin-top:1.2cqh;max-height:22cqh;overflow:auto}.result{font-size:1.85cqh;padding:1cqh;border-bottom:1px solid var(--line);background:#fbfaf6}.score{font-family:ui-monospace;color:#705600;font-weight:900}.links{position:absolute;right:1.3cqh;top:1.3cqh;z-index:20;display:flex;gap:.7cqh}.links a{background:#fff;color:var(--green);border:1px solid var(--line);border-radius:999px;padding:.75cqh 1.1cqh;font-size:1.7cqh;font-weight:900;text-decoration:none}.barwrap{position:absolute;left:0;right:0;bottom:6.4cqh;height:.6cqh;background:#263746}.bar{height:100%;background:var(--gold);width:0}.toolbar{position:absolute;left:0;right:0;bottom:0;height:6.4cqh;background:#0b1218;color:#fff;display:flex;align-items:center;justify-content:center;gap:1.2cqh}.ctl{min-width:5cqh;height:4.5cqh;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:#172634;color:#fff;font-size:2.1cqh;font-weight:900}.ctl:disabled{opacity:.35}.count{font-weight:900;min-width:9cqh;text-align:center}@media(max-width:820px){.stage{width:100vw;height:100dvh;border-radius:0}.slide{padding:7cqh 4cqw 12cqh}.title{font-size:5.4cqh}.sub{font-size:2.55cqh}.lead,.card,.call,.task,.node{font-size:2.25cqh}.grid,.two{grid-template-columns:1fr}pre{font-size:1.72cqh}.links{display:none}.toolbar{height:8cqh;padding-bottom:env(safe-area-inset-bottom)}.barwrap{bottom:8cqh}.search{grid-template-columns:1fr}.ctl{min-width:6cqh;height:5.4cqh}}</style></head><body><div class="stage" id="stage"><div class="links"><a href="../assets/tutoriales/s07-recursos.html">Recursos</a><a href="../assets/tutoriales/s07-despliegue-elasticsearch.html">Guía despliegue</a><a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb" target="_blank">Colab</a></div><main id="deck"></main><div class="barwrap"><div id="bar" class="bar"></div></div><nav class="toolbar"><span id="count" class="count">1 / 1</span><button id="prev" class="ctl">←</button><button id="next" class="ctl">→</button></nav></div><script>const slides=[['S07','Elasticsearch y BM25','Del vecindario contractual a un buscador desplegado por ustedes',`<p class="lead">Hoy el objetivo no es solo entender BM25: cada equipo debe poder <b>crear un índice de búsqueda</b>, cargar documentos, consultar y justificar una decisión.</p><div class="diagram"><span class="node">S6 · Neo4j</span><span class="arrow">→</span><span class="node">procesos</span><span class="arrow">→</span><span class="node">Elastic Cloud</span><span class="arrow">→</span><span class="node">ranking</span></div>`],['Diagnóstico del grupo','Python medio, nube baja','Diseño para tercer semestre',`<div class="grid"><div class="card"><b>Fortaleza</b>Python entre 3 y 8; ya pueden ejecutar cuadernos.</div><div class="card"><b>Riesgo</b>Bash casi 1; nube y bases cloud con poca experiencia.</div><div class="card"><b>Respuesta</b>Ruta guiada: crear servicio, conectar, cargar, consultar y evidenciar.</div></div>`],['Producto real','Qué debe quedar funcionando','No basta con mirar la presentación',`<div class="tasks"><div class="task">Endpoint y API key creados o limitación documentada.</div><div class="task">Índice <code>s07_compras_claras</code> con mapping.</div><div class="task">Carga por <code>bulk()</code>.</div><div class="task">Consulta <code>multi_match</code> con filtro y highlight.</div><div class="task">CSV + hito de relevancia.</div></div>`],['Arquitectura completa','Colab + Elastic Cloud','La solución mínima especializada',`<div class="diagram"><span class="node">Colab</span><span class="arrow">envía</span><span class="node">JSON</span><span class="arrow">a</span><span class="node">Elasticsearch</span><span class="arrow">devuelve</span><span class="node">score + highlight</span></div><div class="call">BM25 local es respaldo; Elastic Cloud es la ruta profesional.</div>`],['Buscar no es filtrar','Tres operaciones distintas','Evita confundir la herramienta',`<div class="grid"><div class="card"><b>Identificar</b><code>id_proceso</code> exacto.</div><div class="card"><b>Filtrar</b><code>entidad = FAC</code>.</div><div class="card"><b>Buscar texto</b><code>mantenimiento aeronaves</code> y ordenar.</div></div>`],['Documento','Un proceso SECOP como unidad','Esto es lo que indexamos',`<pre>{
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Sesión 7 de Big Data: Elasticsearch, BM25 y despliegue desde Python sobre el caso Compras Claras.">
+<title>S07 · Elasticsearch y BM25</title>
+<style>
+:root{
+  --y:#ffd600;--o:#ff8a24;--b:#124e78;--g:#146c43;--r:#a52a2a;
+  --paper:#fff;--cream:#f7f3e9;--ink:#18211b;--soft:#58645d;--dark:#0d1b26;
+  --blue:#e9f4ff;--green:#e9f8ef;--yellow:#fff6c9;--red:#fff1f0;--orange:#fff3e7;
+  --line:#ded8c9;--shadow:0 2px 6px rgba(16,24,32,.06),0 18px 44px rgba(16,24,32,.12)
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#081117;color:var(--ink);font-family:"Segoe UI",Arial,system-ui,sans-serif}
+button,a,input{font:inherit}
+.stage{
+  position:absolute;left:50%;top:50%;
+  width:min(100vw,177.777vh);height:min(100vh,56.25vw);
+  transform:translate(-50%,-50%);
+  background:var(--paper);overflow:hidden;container-type:size;container-name:stage
+}
+.slide{position:absolute;inset:0;display:none;padding:5.4% 6.2% 7.2%;overflow:hidden;background:var(--paper)}
+.slide.on{display:block}
+.slide.dark{background:linear-gradient(135deg,#0d1b26,#17364d);color:#fff}
+.kicker{font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--g);font-size:2.05cqw}
+.dark .kicker{color:var(--y)}
+.title{font-family:Georgia,serif;font-size:5.2cqw;line-height:1.02;margin:.16em 0 .18em;color:#0b241c;max-width:18ch}
+.dark .title{color:#fff}
+.lead{font-size:2.55cqw;line-height:1.24;color:#405047;max-width:36ch;margin:.25em 0 .8em}
+.dark .lead{color:#dbe8ef}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.45cqw;margin-top:1.5cqw}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:#fbfaf6;border:1px solid var(--line);border-radius:1.4cqw;padding:1.45cqw;box-shadow:0 .25cqw 1.3cqw rgba(23,32,25,.07);font-size:1.72cqw;line-height:1.35}
+.card b,.card h3{display:block;color:var(--g);margin:0 0 .45em;font-size:1.9cqw}
+.card.blue{background:var(--blue)}.card.green{background:var(--green)}.card.yellow{background:var(--yellow)}.card.red{background:var(--red)}.card.orange{background:var(--orange)}
+.call{margin-top:1.5cqw;background:var(--yellow);border-left:.52cqw solid var(--y);border-radius:1cqw;padding:1.15cqw 1.35cqw;font-size:1.65cqw;line-height:1.35;color:var(--ink)}
+.flow{display:flex;align-items:center;gap:1cqw;margin-top:1.6cqw}.flow .node{flex:1;background:#fbfaf6;border:1px solid var(--line);border-radius:1.2cqw;padding:1.25cqw;text-align:center;font-size:1.65cqw}.flow .arrow{font-size:2.3cqw;font-weight:900;color:var(--b)}
+pre{margin:1.2cqw 0 0;background:var(--dark);color:#eaf6ee;border-radius:1.2cqw;padding:1.35cqw;overflow:auto;font:1.45cqw/1.38 Consolas,"Cascadia Mono",monospace;white-space:pre-wrap}
+code{font-family:Consolas,"Cascadia Mono",monospace}
+.table{width:100%;border-collapse:collapse;margin-top:1.25cqw;font-size:1.55cqw;background:#fff}.table th,.table td{padding:.78cqw .9cqw;border-bottom:1px solid var(--line);text-align:left}.table th{background:#f0ecdf;color:#26342c}
+.step{display:flex;gap:.8cqw;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:1.2cqw;padding:1cqw;font-size:1.55cqw}.step strong{display:flex;align-items:center;justify-content:center;min-width:2.5cqw;height:2.5cqw;border-radius:50%;background:var(--g);color:#fff}
+.chip{display:inline-block;border-radius:999px;background:var(--green);color:var(--g);padding:.42cqw .75cqw;font-size:1.28cqw;font-weight:800;margin:.25cqw .3cqw .25cqw 0}
+.bigmetric{font-family:Georgia,serif;font-weight:700;font-size:5cqw;color:var(--g)}
+.small{font-size:1.35cqw;color:var(--soft);line-height:1.4}
+.checkpoint{margin-top:1.3cqw}.choices{display:grid;grid-template-columns:1fr 1fr;gap:.8cqw}.choice{border:1px solid var(--line);background:#fff;border-radius:1cqw;padding:1cqw;text-align:left;font-size:1.45cqw;cursor:pointer}.choice:hover,.choice:focus{outline:3px solid rgba(255,214,0,.5)}.feedback{margin-top:.8cqw;min-height:3.2cqw;padding:.8cqw 1cqw;border-radius:.8cqw;background:#f3f1e9;font-size:1.4cqw}
+.searchbox{display:grid;grid-template-columns:1fr auto;gap:.8cqw;margin-top:1.1cqw}.searchbox input{border:1px solid var(--line);border-radius:.9cqw;padding:.9cqw 1cqw;font-size:1.55cqw}.searchbox button,.cta{border:0;background:var(--g);color:#fff;border-radius:.9cqw;padding:.9cqw 1.15cqw;font-weight:800;text-decoration:none;cursor:pointer}.results{margin-top:.8cqw;max-height:19cqw;overflow:auto}.result{padding:.7cqw .85cqw;border-bottom:1px solid var(--line);background:#fbfaf6;font-size:1.3cqw}.score{font-family:Consolas,monospace;color:#6e5500;font-weight:800}
+.topbar{position:fixed;z-index:40;top:max(8px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.55);box-shadow:0 8px 28px rgba(0,0,0,.17);border-radius:999px;padding:6px 8px;backdrop-filter:blur(10px)}
+.topbar a,.topbar button{border:0;background:transparent;color:#173329;text-decoration:none;font-size:12px;font-weight:800;padding:6px 9px;border-radius:999px;cursor:pointer}.topbar a:hover,.topbar button:hover{background:#eef5f0}
+.count{font:700 12px/1 Consolas,monospace;padding:0 5px}
+.progress{position:fixed;z-index:42;top:0;left:0;right:0;height:4px;background:rgba(255,255,255,.2)}.progress i{display:block;height:100%;background:var(--y);width:0}
+.toolbar{position:fixed;z-index:45;left:50%;bottom:max(9px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:rgba(13,27,38,.9);padding:7px 11px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.28);backdrop-filter:blur(8px)}
+.ctl{width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:#10261c;font-size:21px;font-weight:900;cursor:pointer}.ctl:disabled{opacity:.35}.chapter{color:#fff;font-size:12px;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast{position:fixed;z-index:60;left:50%;bottom:76px;transform:translateX(-50%);background:#10261c;color:#fff;border-radius:999px;padding:8px 12px;font-size:12px;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1}
+mark{background:var(--y);padding:0 .08em}
+@media(max-width:720px){
+  html,body{background:var(--cream)}
+  .stage{position:fixed;inset:52px 0 72px;width:auto;height:auto;transform:none;background:var(--cream)}
+  .slide{padding:18px 16px 30px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y pinch-zoom;border-radius:0}
+  .kicker{font-size:11px}.title{font-size:clamp(29px,9vw,40px);max-width:none}.lead{font-size:clamp(18px,5.3vw,23px);max-width:none}
+  .grid,.grid.two,.grid.four{grid-template-columns:1fr;gap:10px;margin-top:14px}
+  .card{border-radius:14px;padding:14px;font-size:16px}.card b,.card h3{font-size:18px}.call{font-size:16px;border-left-width:6px;border-radius:12px;padding:12px;margin-top:12px}
+  .flow{display:grid;grid-template-columns:1fr;gap:7px}.flow .node{font-size:16px;border-radius:12px;padding:12px}.flow .arrow{font-size:20px;transform:rotate(90deg);text-align:center}
+  pre{font-size:13px;border-radius:12px;padding:13px;margin-top:12px}.table{font-size:13px}.table th,.table td{padding:8px}
+  .step{font-size:15px;padding:11px}.step strong{min-width:28px;height:28px}.chip{font-size:12px;padding:5px 8px}.small{font-size:13px}.bigmetric{font-size:44px}
+  .choices{grid-template-columns:1fr}.choice{font-size:15px;padding:11px}.feedback{font-size:14px;min-height:48px}.searchbox{grid-template-columns:1fr}.searchbox input{font-size:16px;padding:12px}.searchbox button{min-height:46px}.results{max-height:none}.result{font-size:13px;padding:9px}
+  .topbar{top:max(5px,env(safe-area-inset-top));width:calc(100% - 12px);justify-content:center;gap:2px;padding:4px}.topbar a{display:none}.topbar button{font-size:11px}.count{font-size:11px}
+  .toolbar{bottom:max(6px,env(safe-area-inset-bottom));gap:16px}.ctl{width:48px;height:48px}.chapter{font-size:11px;max-width:130px}
+}
+</style>
+</head>
+<body>
+<div class="progress"><i id="bar"></i></div>
+<div class="topbar" aria-label="Recursos de la sesión">
+  <a href="../assets/tutoriales/s07-recursos.html">Ruta S07</a>
+  <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb" target="_blank" rel="noopener">Cuaderno</a>
+  <a href="../assets/tutoriales/s07-despliegue-elasticsearch.html">Despliegue</a>
+  <button id="fs" type="button" aria-label="Pantalla completa">⛶</button>
+  <span class="count"><b id="n">1</b>/<span id="tot"></span></span>
+</div>
+<div class="stage" id="stage" aria-live="polite"></div>
+<nav class="toolbar" aria-label="Navegación">
+  <button id="prev" class="ctl" type="button" aria-label="Anterior">←</button>
+  <span class="chapter" id="chapter">Inicio</span>
+  <button id="next" class="ctl" type="button" aria-label="Siguiente">→</button>
+</nav>
+<div id="toast" class="toast">Usa ← → o desliza</div>
+<script>
+const slides = [
+{c:'Inicio',k:'SESIÓN 7',t:'Construye un buscador con Elasticsearch',l:'Del contexto contractual de S6 a un ranking textual que puedas desplegar y defender.',dark:true,b:`
+<div class="flow"><div class="node">S6 · procesos + texto</div><div class="arrow">→</div><div class="node">Elasticsearch</div><div class="arrow">→</div><div class="node">Top 5 + score + highlight</div></div>
+<div class="call"><b>Meta profesional:</b> al cerrar, cada equipo tendrá un índice real, documentos cargados y una consulta reproducible desde Python.</div>`},
+{c:'Inicio',k:'PRODUCTO',t:'No vienes a mirar una demo',l:'Vas a construir una solución mínima de búsqueda de extremo a extremo.',b:`
+<div class="grid">
+<div class="card green"><b>1 · Desplegar</b>Proyecto Elasticsearch + acceso desde Colab.</div>
+<div class="card blue"><b>2 · Indexar</b>Mapping consciente + carga masiva.</div>
+<div class="card yellow"><b>3 · Buscar</b>match → multi_match → boost → filter → highlight.</div>
+</div>
+<div class="call">La evidencia final debe mostrar <b>qué buscaste, qué apareció, qué decisión tomaste y qué no puedes concluir</b>.</div>`},
+{c:'Inicio',k:'PUENTE',t:'No empezamos desde cero',l:'Reutilizamos capacidades que ya aparecieron en las sesiones anteriores.',b:`
+<div class="grid four">
+<div class="card"><b>Colab + Python</b>instalar librerías, leer datos, DataFrames.</div>
+<div class="card blue"><b>JSON / NoSQL</b>documentos, campos y consultas.</div>
+<div class="card green"><b>Nube</b>credenciales, conexión y verificación desde Python.</div>
+<div class="card orange"><b>S6</b>un corpus contractual con texto listo para buscar.</div>
+</div>
+<div class="call">Lo nuevo hoy es <b>cómo un motor de búsqueda analiza, indexa y ordena texto</b>.</div>`},
+{c:'Inicio',k:'ARQUITECTURA',t:'La solución que vamos a levantar',l:'Cada bloque de la clase corresponde a una pieza de este flujo.',b:`
+<div class="flow"><div class="node">s06_contexto_relacional.csv<br><span class="small">1.994 procesos únicos</span></div><div class="arrow">→</div><div class="node">Python / Colab</div><div class="arrow">→</div><div class="node">Elasticsearch Serverless</div><div class="arrow">→</div><div class="node">ranking + explicación</div></div>
+<div class="call">El corpus versionado tiene 2.109 registros y 1.994 IDs de proceso únicos. La clase usa ese activo, no un juguete aislado.</div>`},
+{c:'Problema',k:'ANTES DE ELASTIC',t:'Identificar, filtrar y buscar son preguntas distintas',l:'Elegir bien la operación evita usar una herramienta poderosa para una pregunta trivial.',b:`
+<div class="grid">
+<div class="card"><b>Identificar</b><code>id_proceso == "CO1.REQ..."</code><br><span class="small">Quiero una identidad exacta.</span></div>
+<div class="card blue"><b>Filtrar</b><code>departamento == "Meta"</code><br><span class="small">Quiero cumplir una condición.</span></div>
+<div class="card green"><b>Buscar texto</b><code>"mantenimiento aeronaves"</code><br><span class="small">Quiero candidatos ordenados por relevancia.</span></div>
+</div>`},
+{c:'Problema',k:'DOCUMENTO',t:'¿Qué unidad entra al buscador?',l:'Un proceso contractual se convierte en un documento JSON.',b:`
+<pre>{
   "id_proceso": "CO1.REQ.3755377",
   "entidad": "FUERZA AEROESPACIAL COLOMBIANA",
-  "nombre_proceso": "Mantenimiento aeronaves KFIR",
-  "descripcion": "SERVICIOS DE MANTENIMIENTO...",
-  "url_secop": "https://..."
-}</pre>`],['Campos','text frente a keyword','La pregunta define el tipo',`<table class="table"><tr><th>Campo</th><th>Uso</th><th>Tipo</th></tr><tr><td>descripcion</td><td>buscar palabras</td><td><code>text</code></td></tr><tr><td>nombre_proceso</td><td>buscar con más peso</td><td><code>text</code></td></tr><tr><td>id_proceso</td><td>valor exacto</td><td><code>keyword</code></td></tr><tr><td>entidad</td><td>filtro exacto</td><td><code>keyword</code></td></tr></table>`],['Analyzer','Texto → términos','El buscador prepara el lenguaje',`<div class="diagram"><span class="node">Servicios de MANTENIMIENTO de las Aeronaves</span><span class="arrow">→</span><span class="node">normalizar</span><span class="arrow">→</span><span class="node">mantenimiento · aeronaves</span></div><div class="call">Por eso <code>match</code> no es lo mismo que buscar caracteres exactos.</div>`],['Índice invertido','Término → documentos','La estructura base del buscador',`<table class="table"><tr><th>Término</th><th>Documentos</th></tr><tr><td>mantenimiento</td><td>D1, D2</td></tr><tr><td>aeronaves</td><td>D1</td></tr><tr><td>blindajes</td><td>D4</td></tr></table>`],['BM25','Tres fuerzas','Repetición, rareza y longitud',`<div class="grid"><div class="card"><b>TF</b>Más apariciones ayudan, pero se saturan.</div><div class="card"><b>IDF</b>Palabras raras discriminan más.</div><div class="card"><b>Longitud</b>Una coincidencia en 5 palabras no pesa igual que en 500.</div></div><div class="call">El score ordena; no prueba irregularidad.</div>`],['Demo BM25','Cambien la consulta','Vean ranking antes de ir a Elastic',`<div class="search"><input id="q" value="mantenimiento aeronaves"><button id="go">Buscar</button></div><div id="out" class="results"></div><div class="call">Prueben: <code>blindajes aeronáuticos</code>, <code>mantenimiento c130</code>.</div>`],['Despliegue','Ruta que deben poder repetir solos','No requiere Bash',`<div class="tasks"><div class="task">Crear proyecto en Elastic Cloud.</div><div class="task">Copiar endpoint HTTPS.</div><div class="task">Crear API key.</div><div class="task">Conectar desde Colab con <code>getpass()</code>.</div><div class="task">Crear índice y cargar con <code>bulk()</code>.</div></div>`],['Conexión segura','Nunca publicar claves','Patrón para el cuaderno',`<pre>from getpass import getpass
-from elasticsearch import Elasticsearch
+  "nombre_proceso": "Mantenimiento de aeronaves KFIR",
+  "descripcion": "Servicios de mantenimiento programado...",
+  "departamento_entidad": "Bogotá D.C."
+}</pre>
+<div class="call"><b>Documento</b> no significa PDF. En Elasticsearch es la unidad JSON que indexamos y recuperamos.</div>`},
+{c:'Problema',k:'MICROCORPUS',t:'Primero piensa con cuatro documentos',l:'Antes del motor real, predice qué debería quedar arriba.',b:`
+<table class="table"><tr><th>ID</th><th>Texto</th></tr>
+<tr><td>D1</td><td>mantenimiento programado de aeronaves KFIR</td></tr>
+<tr><td>D2</td><td>inspección y mantenimiento estructural de aeronave C-130</td></tr>
+<tr><td>D3</td><td>construcción de centro de investigación aeronáutica</td></tr>
+<tr><td>D4</td><td>adquisición de blindajes aeronáuticos</td></tr></table>
+<div class="call">Consulta: <code>mantenimiento aeronaves</code>. ¿Qué pondrías primero y por qué?</div>`},
+{c:'Problema',k:'LÍNEA BASE',t:'contains() encuentra; no construye relevancia',l:'Una coincidencia binaria no responde cuál documento merece leerse primero.',b:`
+<div class="grid two"><div class="card red"><b>Coincide / no coincide</b><code>str.contains("mantenimiento")</code><br>No usa rareza, frecuencia ni longitud.</div>
+<div class="card green"><b>Ranking</b>Asigna puntuaciones relativas para ordenar candidatos respecto a una consulta.</div></div>
+<div class="call">Necesitamos entender qué ocurre entre el texto crudo y ese ranking.</div>`},
+{c:'Indexación',k:'VOCABULARIO',t:'Documento, campo e índice',l:'Tres piezas suficientes para empezar a razonar como Elasticsearch.',b:`
+<div class="grid">
+<div class="card"><b>Documento</b>Una unidad recuperable.</div>
+<div class="card blue"><b>Campo</b>Una propiedad del documento.</div>
+<div class="card green"><b>Índice</b>Una colección de documentos preparada para búsqueda.</div>
+</div>`},
+{c:'Indexación',k:'ANALYZER',t:'El texto no entra crudo al índice',l:'El analyzer transforma la cadena en términos que el motor puede buscar.',b:`
+<div class="flow"><div class="node">Servicios de <b>MANTENIMIENTO</b> de las Aeronaves</div><div class="arrow">→</div><div class="node">analyzer <code>spanish</code></div><div class="arrow">→</div><div class="node">tokens normalizados</div></div>
+<div class="call">En el laboratorio no simularemos esta parte: luego preguntaremos al <b>API <code>_analyze</code> real</b> qué tokens produjo.</div>`},
+{c:'Indexación',k:'SPANISH ANALYZER',t:'Normalizar no es solo poner minúsculas',l:'El analyzer de idioma combina tokenización, stopwords y stemming ligero.',b:`
+<div class="grid">
+<div class="card"><b>Tokenizar</b>separar unidades.</div>
+<div class="card blue"><b>Stopwords</b>reducir palabras funcionales frecuentes.</div>
+<div class="card green"><b>Stemming</b>acercar variantes morfológicas a una raíz.</div>
+</div>
+<div class="call">Por eso la búsqueda textual puede comportarse distinto a <code>contains()</code>.</div>`},
+{c:'Indexación',k:'ÍNDICE INVERTIDO',t:'La tabla al revés',l:'El motor guarda una ruta de término → documentos para localizar candidatos rápidamente.',b:`
+<table class="table"><tr><th>Término</th><th>Documentos</th></tr>
+<tr><td>mantenim...</td><td>D1, D2</td></tr><tr><td>aeron...</td><td>D1, D2, D3, D4</td></tr><tr><td>kfir</td><td>D1</td></tr></table>
+<div class="call">El índice invertido encuentra candidatos. <b>Todavía falta decidir su orden.</b></div>`},
+{c:'Indexación',k:'CHECKPOINT 1',t:'¿Qué cambió realmente?',l:'Elige la explicación más precisa.',b:`
+<div class="checkpoint" data-check="c1">
+<div class="choices">
+<button class="choice" data-ok="0">A · Elasticsearch guarda cada frase exactamente como llegó y recorre todos los textos.</button>
+<button class="choice" data-ok="1">B · Analiza el texto y construye estructuras término → documentos para recuperar candidatos.</button>
+<button class="choice" data-ok="0">C · Convierte automáticamente cualquier texto en embeddings semánticos.</button>
+<button class="choice" data-ok="0">D · Ordena por fecha y llama a eso relevancia.</button>
+</div><div class="feedback" aria-live="polite">Elige una opción.</div></div>`},
+{c:'Relevancia',k:'BM25',t:'¿Por qué uno aparece primero?',l:'Elasticsearch usa BM25 por defecto para la similitud de campos de texto.',b:`
+<div class="grid">
+<div class="card"><b>Frecuencia</b>que un término aparezca ayuda.</div>
+<div class="card blue"><b>Rareza</b>un término poco común discrimina más.</div>
+<div class="card green"><b>Longitud</b>la coincidencia se interpreta respecto al tamaño del documento.</div>
+</div>
+<div class="call">Hoy importa la intuición y la lectura del resultado, no memorizar la ecuación.</div>`},
+{c:'Relevancia',k:'BM25 · TF',t:'Repetir ayuda, pero se satura',l:'Diez repeticiones no hacen un documento diez veces mejor.',b:`
+<div class="grid two"><div class="card"><b>D1</b>mantenimiento aeronaves</div><div class="card green"><b>D2</b>mantenimiento mantenimiento mantenimiento aeronaves</div></div>
+<div class="call">BM25 reconoce más evidencia de término, pero aplica una ganancia decreciente.</div>`},
+{c:'Relevancia',k:'BM25 · IDF',t:'“KFIR” informa más que “servicio”',l:'Un término raro en el corpus suele discriminar mejor que uno presente en casi todos los documentos.',b:`
+<div class="grid two"><div class="card red"><b>Muy común</b>servicio</div><div class="card green"><b>Más específico</b>KFIR</div></div>
+<div class="call">La importancia de un término depende del <b>corpus</b>, no solo de la frase consultada.</div>`},
+{c:'Relevancia',k:'BM25 · LONGITUD',t:'La misma coincidencia no pesa igual en 5 y 500 palabras',l:'La normalización de longitud evita favorecer automáticamente textos enormes.',b:`
+<div class="grid two"><div class="card green"><b>Texto corto</b>mantenimiento aeronaves KFIR</div><div class="card"><b>Texto largo</b>... 500 palabras ... mantenimiento ... aeronaves ...</div></div>`},
+{c:'Relevancia',k:'SCORE',t:'Un número relativo, no una probabilidad',l:'El score sirve para ordenar resultados de una búsqueda; no es “87 % relevante”.',b:`
+<div class="grid two"><div class="card green"><b>Lectura válida</b>“Dentro de esta consulta, este hit queda por encima de aquel.”</div><div class="card red"><b>Lectura inválida</b>“Score 9.3 significa 93 % de pertinencia o evidencia de irregularidad.”</div></div>
+<div class="call">No compares scores de consultas distintas como si estuvieran en una escala universal.</div>`},
+{c:'Relevancia',k:'DEMO',t:'Manipula el ranking antes de tocar Cloud',l:'Esta mini demo usa BM25 sobre cuatro textos. Cambia la consulta y observa el orden.',b:`
+<div class="searchbox"><input id="demoQuery" value="mantenimiento aeronaves" aria-label="Consulta"><button id="demoSearch" type="button">Buscar</button></div>
+<div class="small">Prueba: <code>blindajes aeronáuticos</code> · <code>mantenimiento C-130</code> · <code>investigación aeronáutica</code>.</div>
+<div id="demoResults" class="results" aria-live="polite"></div>`},
+{c:'Relevancia',k:'AHORA TÚ',t:'Cuaderno · Bloque A',l:'Ejecuta la línea base y el BM25 local sobre los 1.994 procesos del corpus.',b:`
+<div class="grid two">
+<div class="card green"><b>Haz</b>carga → contains → ranking local.</div>
+<div class="card blue"><b>Observa</b>qué cambia cuando pasas de coincidencia binaria a ranking.</div>
+</div>
+<div class="call"><a class="cta" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Abrir cuaderno único ↗</a></div>`},
+{c:'Despliegue',k:'ELASTICSEARCH REAL',t:'Ahora desplegamos el motor',l:'La ruta de clase usa un proyecto Elasticsearch Serverless y el cliente oficial de Python.',b:`
+<div class="flow"><div class="node">Elastic Cloud</div><div class="arrow">→</div><div class="node">Elasticsearch project</div><div class="arrow">→</div><div class="node">Project URL + API key</div><div class="arrow">→</div><div class="node">Colab</div></div>
+<div class="call">BM25 local es respaldo pedagógico. <b>El objetivo profesional es que el motor real quede accesible desde Python.</b></div>`},
+{c:'Despliegue',k:'SERVERLESS',t:'Qué debes crear en Elastic Cloud',l:'Para esta sesión: un proyecto de tipo Elasticsearch. No necesitamos Docker, Bash ni una VM.',b:`
+<div class="grid">
+<div class="step"><strong>1</strong><span>Entrar a Elastic Cloud.</span></div>
+<div class="step"><strong>2</strong><span>Crear un proyecto <b>Elasticsearch</b>.</span></div>
+<div class="step"><strong>3</strong><span>Obtener la URL del proyecto y una API key.</span></div>
+</div>
+<div class="call">La guía oficial vigente ofrece Serverless como la ruta simple para empezar.</div>`},
+{c:'Despliegue',k:'CREDENCIALES',t:'Dos valores; cero secretos en el notebook',l:'La URL identifica el servicio. La API key autoriza la llamada.',b:`
+<div class="grid two"><div class="card blue"><b>Project URL</b><code>https://...elastic.cloud</code><br><span class="small">No es una contraseña.</span></div><div class="card red"><b>API key</b>Secreto. Se captura con <code>getpass()</code> o Colab Secrets.</div></div>
+<div class="call"><b>Regla:</b> nunca publiques la clave en GitHub, capturas ni entregas.</div>`},
+{c:'Despliegue',k:'PYTHON CLIENT',t:'La prueba mínima de conexión',l:'Ya conocen este patrón por Atlas: conectar y verificar antes de construir.',b:`
+<pre>from elasticsearch import Elasticsearch
+from getpass import getpass
 
-endpoint = input("Endpoint https://...")
+endpoint = input("Project URL: ").strip()
 api_key = getpass("API key: ")
+
 client = Elasticsearch(endpoint, api_key=api_key)
-client.info()</pre>`],['Mapping','Crear el índice conscientemente','No subir datos a ciegas',`<pre>mapping = {
-  "mappings": {"properties": {
-    "id_proceso": {"type":"keyword"},
-    "entidad": {"type":"keyword"},
-    "nombre_proceso": {"type":"text", "analyzer":"spanish"},
-    "descripcion": {"type":"text", "analyzer":"spanish"}
-}}}</pre>`],['Bulk','Cargar muchos documentos','Python envía JSON al índice',`<pre>from elasticsearch.helpers import bulk
-acciones = []
-for d in corpus.to_dict("records"):
-    acciones.append({
-      "_index": INDEX,
-      "_id": d["id_proceso"],
-      "_source": d
-    })
-bulk(client, acciones, refresh=True)</pre>`],['match','Primera consulta textual','Un campo, una necesidad',`<pre>{
-  "query": {
+client.info()</pre>
+<div class="call">Si <code>client.info()</code> responde, Python ya habla con Elasticsearch.</div>`},
+{c:'Mapping',k:'MAPPING',t:'Antes de cargar: decide cómo se indexa cada campo',l:'Un mapping es una decisión de diseño, no decoración JSON.',b:`
+<table class="table"><tr><th>Campo</th><th>Necesidad</th><th>Tipo</th></tr>
+<tr><td>nombre_proceso</td><td>buscar palabras</td><td><code>text</code></td></tr>
+<tr><td>descripcion</td><td>buscar palabras</td><td><code>text</code></td></tr>
+<tr><td>entidad</td><td>filtrar exactamente</td><td><code>keyword</code></td></tr>
+<tr><td>departamento_entidad</td><td>filtrar/agrupar</td><td><code>keyword</code></td></tr>
+<tr><td>id_proceso</td><td>identidad exacta</td><td><code>keyword</code></td></tr></table>`},
+{c:'Mapping',k:'TEXT VS KEYWORD',t:'Una decisión que cambia la consulta',l:'No elijas el tipo por “parece texto”; elige por cómo lo vas a usar.',b:`
+<div class="grid two"><div class="card green"><b>text</b>Se analiza. Ideal para full-text search.</div><div class="card blue"><b>keyword</b>Conserva el valor como unidad exacta. Ideal para filtros, IDs y categorías.</div></div>
+<div class="call"><code>term</code> sobre un <code>text</code> analizado suele ser una señal de que el diseño mental está mezclando conceptos.</div>`},
+{c:'Mapping',k:'_ANALYZE',t:'Pregúntale al motor qué tokens produjo',l:'Esta es la unión entre la teoría y la infraestructura real.',b:`
+<pre>client.indices.analyze(
+    index=INDEX_NAME,
+    analyzer="spanish",
+    text="Servicios de mantenimiento de las aeronaves"
+)</pre>
+<div class="call">No imagines el analyzer: <b>obsérvalo</b>.</div>`},
+{c:'Mapping',k:'CREATE INDEX',t:'Cada estudiante usa un índice propio',l:'El cuaderno deriva un nombre seguro desde tu alias para evitar colisiones.',b:`
+<pre>INDEX_NAME = f"s07-compras-claras-{alias_seguro}"
+
+client.indices.create(
+    index=INDEX_NAME,
+    mappings=mappings
+)</pre>
+<div class="call">Esto también permite trabajar en parejas o incluso compartir un proyecto sin pisar el índice de otro equipo.</div>`},
+{c:'Ingesta',k:'BULK',t:'Cargar 1.994 procesos de una vez',l:'El helper bulk es el patrón recomendado para ingesta masiva desde Python.',b:`
+<pre>from elasticsearch.helpers import bulk
+
+acciones = (
+  {"_index": INDEX_NAME,
+   "_id": d["id_proceso"],
+   "_source": d}
+  for d in corpus.to_dict("records")
+)
+
+ok, errores = bulk(client, acciones, refresh=True)</pre>
+<div class="call">El patrón importa más que el volumen de hoy: iterar documento por documento no escala igual.</div>`},
+{c:'Ingesta',k:'VERIFICACIÓN',t:'No asumas que cargar = haber cargado',l:'Toda ingesta debe terminar con una comprobación.',b:`
+<div class="grid two"><div class="card green"><b>Esperado</b><span class="bigmetric">1.994</span><span class="small">documentos únicos del corpus.</span></div><div class="card"><b>Comprobación</b><code>client.count(index=INDEX_NAME)</code><br><br>Debe coincidir con <code>len(corpus)</code>.</div></div>`},
+{c:'Consulta',k:'MATCH',t:'Primera búsqueda de texto completo',l:'match analiza la consulta usando la lógica del campo.',b:`
+<pre>client.search(
+  index=INDEX_NAME,
+  query={
     "match": {
       "descripcion": "mantenimiento aeronaves"
     }
+  },
+  size=5
+)</pre>`},
+{c:'Consulta',k:'MULTI_MATCH',t:'La información vive en más de un campo',l:'Busca a la vez en el nombre y la descripción.',b:`
+<pre>{
+  "multi_match": {
+    "query": "mantenimiento aeronaves",
+    "fields": ["nombre_proceso", "descripcion"]
   }
-}</pre>`],['multi_match','Buscar en varios campos','Y ponderar el nombre',`<pre>{
+}</pre>
+<div class="call">Ahora el ranking puede usar coincidencias en cualquiera de los dos campos.</div>`},
+{c:'Consulta',k:'BOOST',t:'El nombre puede valer más que la descripción',l:'Un boost representa una decisión de relevancia que debes poder defender.',b:`
+<pre>{
   "multi_match": {
     "query": "mantenimiento aeronaves",
     "fields": ["nombre_proceso^2", "descripcion"]
   }
-}</pre><div class="call"><code>^2</code> es una decisión: el nombre pesa más.</div>`],['filter','Restringir sin cambiar score','Relevancia ≠ condición',`<pre>"filter": [
-  {"term": {"entidad": "FUERZA AEROESPACIAL COLOMBIANA"}}
-]</pre>`],['highlight','Leer dónde coincidió','No aceptar números a ciegas',`<pre>"highlight": {
+}</pre>
+<div class="call"><code>^2</code> no significa “doble de probabilidad”; significa <b>más peso relativo</b> para ese campo dentro de la consulta.</div>`},
+{c:'Consulta',k:'FILTER',t:'Restringir sin convertir la condición en relevancia',l:'El contexto filter aplica condiciones exactas y no aporta score.',b:`
+<pre>{
+  "bool": {
+    "must":  [ ... búsqueda textual ... ],
+    "filter":[
+      {"term":{"tipo_registro":"historico_adjudicado"}}
+    ]
+  }
+}</pre>
+<div class="call">Buscar “qué tan relevante” y filtrar “qué debe cumplir” son dos operaciones distintas.</div>`},
+{c:'Consulta',k:'HIGHLIGHT',t:'Muéstrame dónde coincidió',l:'El score ordena; el highlight ayuda a inspeccionar por qué apareció.',b:`
+<pre>"highlight": {
   "fields": {
     "nombre_proceso": {},
     "descripcion": {}
   }
-}</pre>`],['Arquitectura distribuida','Shard y réplica','Lo mínimo para entender Elastic',`<div class="diagram"><span class="node">índice</span><span class="arrow">→</span><span class="node">primary shards</span><span class="arrow">+</span><span class="node">replicas</span><span class="arrow">→</span><span class="node">lectura y tolerancia</span></div>`],['Práctica A/B','Un solo cambio',`Consulta o ponderación`, `<div class="grid"><div class="card"><b>Consulta A</b><code>mantenimiento aeronaves</code></div><div class="card"><b>Consulta B</b><code>mantenimiento aeronautico</code></div><div class="card"><b>Regla</b>No cambiar consulta, filtro y boost al tiempo.</div></div>`],['Entrega','CSV + hito','Evidencia de aprendizaje',`<div class="grid two"><div class="card"><b>s07_resultados_busqueda.csv</b>rank, id, nombre, score, URL, consulta y motor.</div><div class="card"><b>hito_s07_relevancia.md</b>necesidad, decisión, cambio A/B, dudoso, alternativa y límite.</div></div>`],['Errores esperados','No son fracaso','Son parte del despliegue',`<table class="table"><tr><th>Error</th><th>Lectura</th><th>Acción</th></tr><tr><td>401/403</td><td>credencial</td><td>regenerar API key</td></tr><tr><td>timeout</td><td>endpoint/red</td><td>validar URL</td></tr><tr><td>0 resultados</td><td>consulta/analyzer</td><td>probar términos simples</td></tr></table>`],['Cierre','Herramienta especializada e integral','De datos a decisión defendible',`<p class="lead">Construyeron una mini solución: datos → índice → despliegue → consulta → ranking → decisión con límites.</p><div class="call">S8 evaluará la selección de herramienta: MongoDB, Cassandra, Neo4j y Elasticsearch según la pregunta.</div>`]];const docs=[['CO1.REQ.3755377','Mantenimiento aeronaves KFIR','mantenimiento programado aeronaves kfir fuerza aerea'],['CO1.REQ.3714823','Inspección PDM C-130','mantenimiento inspeccion aeronave c130'],['CO1.REQ.8018431','Blindajes aeronáuticos','adquisicion blindajes aeronauticos'],['CO1.REQ.3730074','Centro investigación aeronáutica','construccion investigacion aeronautica']];const deck=document.getElementById('deck');deck.innerHTML=slides.map((s,i)=>`<section class="slide ${i?'':'on'}"><div class="tag">${s[0]}</div><h1 class="title">${s[1]}</h1><p class="sub">${s[2]}</p>${s[3]}</section>`).join('');const all=[...document.querySelectorAll('.slide')],count=document.getElementById('count'),bar=document.getElementById('bar'),prev=document.getElementById('prev'),next=document.getElementById('next'),stage=document.getElementById('stage');let i=0;function show(n){i=Math.max(0,Math.min(all.length-1,n));all.forEach((s,k)=>s.classList.toggle('on',k===i));count.textContent=`${i+1} / ${all.length}`;bar.style.width=((i+1)/all.length*100)+'%';prev.disabled=i===0;next.disabled=i===all.length-1}prev.onclick=()=>show(i-1);next.onclick=()=>show(i+1);addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(i+1)}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1)}});let st=null;stage.addEventListener('touchstart',e=>{if(e.touches.length!==1||e.target.closest('input,button,a,pre,.results')){st=null;return}const t=e.touches[0];st={x:t.clientX,y:t.clientY}},{passive:true});stage.addEventListener('touchend',e=>{if(!st)return;const t=e.changedTouches[0],dx=t.clientX-st.x,dy=t.clientY-st.y;st=null;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25)dx<0?show(i+1):show(i-1)},{passive:true});function toks(x){return (x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[a-z0-9]+/g)||[]}function bm(q){const qq=toks(q);return docs.map(d=>{let sc=0;qq.forEach(t=>{if(toks(d[1]+' '+d[2]).includes(t))sc+=1});return{id:d[0],t:d[1],score:sc}}).filter(x=>x.score).sort((a,b)=>b.score-a.score)}function render(){const q=document.getElementById('q'),o=document.getElementById('out');if(!q||!o)return;const rows=bm(q.value);o.innerHTML=rows.length?rows.map((r,k)=>`<div class="result"><b>${k+1}. ${r.t}</b><br><span class="score">score ${r.score}</span> · <code>${r.id}</code></div>`).join(''):'<div class="result">Sin coincidencias</div>'}document.addEventListener('click',e=>{if(e.target?.id==='go')render()});document.addEventListener('keydown',e=>{if(e.target?.id==='q'&&e.key==='Enter')render()});show(0);render();</script></body></html>
+}</pre>
+<div class="card green" style="margin-top:1.1cqw">SERVICIOS DE <mark>MANTENIMIENTO</mark> ... DE LAS <mark>AERONAVES</mark> KFIR ...</div>`},
+{c:'Consulta',k:'CHECKPOINT 2',t:'Diseña la consulta',l:'¿Cuál combinación expresa mejor “buscar texto y luego restringir por tipo de registro”?',b:`
+<div class="checkpoint" data-check="c2"><div class="choices">
+<button class="choice" data-ok="0">A · Dos term queries: una para descripción y otra para tipo.</button>
+<button class="choice" data-ok="1">B · multi_match en must + term dentro de filter.</button>
+<button class="choice" data-ok="0">C · filter para el texto y match para el ID exacto.</button>
+<button class="choice" data-ok="0">D · ordenar por id_proceso y usar el orden como score.</button>
+</div><div class="feedback" aria-live="polite">Elige una opción.</div></div>`},
+{c:'Consulta',k:'AHORA TÚ',t:'Cuaderno · Bloques B–E',l:'Conecta, crea el índice, observa el analyzer, carga y construye la consulta paso a paso.',b:`
+<div class="grid four">
+<div class="step"><strong>1</strong><span><b>Conecta</b><br>client.info()</span></div>
+<div class="step"><strong>2</strong><span><b>Indexa</b><br>mapping + _analyze</span></div>
+<div class="step"><strong>3</strong><span><b>Ingiere</b><br>bulk + count</span></div>
+<div class="step"><strong>4</strong><span><b>Busca</b><br>match → highlight</span></div>
+</div>
+<div class="call"><a class="cta" href="../assets/tutoriales/s07-despliegue-elasticsearch.html">Abrir guía de despliegue</a></div>`},
+{c:'Experimento',k:'RELEVANCIA',t:'Tocar una sola perilla',l:'La mejora de búsqueda empieza con experimentos controlados, no con “poner más cosas”.',b:`
+<div class="grid">
+<div class="card green"><b>Experimento A</b><code>nombre_proceso^1</code></div>
+<div class="card blue"><b>Experimento B</b><code>nombre_proceso^3</code></div>
+<div class="card yellow"><b>Observa</b>qué IDs suben, bajan o permanecen.</div>
+</div>
+<div class="call">Mantén consulta, filtro y corpus constantes. Así sí puedes atribuir el cambio al boost.</div>`},
+{c:'Experimento',k:'LECTURA PROFESIONAL',t:'El resultado propio importa más que el query bonito',l:'Cada equipo trabaja con una consulta asignada por alias y debe justificar el ranking que obtuvo.',b:`
+<div class="grid two"><div class="card"><b>Evidencia</b>Top 5 A + Top 5 B + documentos que cambiaron posición.</div><div class="card green"><b>Decisión</b>Cuál leerías primero, cuál descartas y qué dato adicional necesitarías.</div></div>
+<div class="call">No basta con decir “funcionó”: debes explicar <b>qué cambió y por qué tu decisión sigue siendo limitada</b>.</div>`},
+{c:'Experimento',k:'CALIDAD',t:'Cambiar el ranking no significa mejorarlo',l:'Necesitas una definición de relevancia antes de decidir si el tuning ayudó.',b:`
+<div class="grid two"><div class="card blue"><b>Información necesaria</b>¿Qué quiere encontrar Laura con esta consulta?</div><div class="card green"><b>Juicio</b>Para cada hit: ¿responde o no a esa necesidad?</div></div>
+<div class="call">Primero defines el criterio; después etiquetas. No ajustes el criterio para favorecer el ranking que ya viste.</div>`},
+{c:'Experimento',k:'PRECISION@5',t:'Una métrica mínima de calidad',l:'De los cinco primeros resultados, ¿cuántos juzgaste relevantes?',b:`
+<div class="grid two"><div class="card green"><b>P@5 = relevantes / 5</b><span class="bigmetric">0.8</span><span class="small">significa 4 de 5 relevantes.</span></div><div class="card"><b>Camino profesional</b>Con muchas consultas y ratings, Elasticsearch ofrece <code>_rank_eval</code> con precision, MRR y DCG.</div></div>
+<div class="call">Ahora sí puedes preguntar: <b>¿el boost movió documentos y además mejoró P@5?</b></div>`},
+{c:'Errores',k:'CLÍNICA DE ERRORES',t:'Un fallo técnico también debe ser interpretable',l:'Reconoce el síntoma antes de cambiar código al azar.',b:`
+<table class="table"><tr><th>Síntoma</th><th>Lectura probable</th><th>Primera acción</th></tr>
+<tr><td>401 / 403</td><td>autorización</td><td>revisar/regenerar API key</td></tr>
+<tr><td>timeout</td><td>URL/red</td><td>validar Project URL</td></tr>
+<tr><td>index_not_found</td><td>índice no creado/nombre distinto</td><td>revisar INDEX_NAME</td></tr>
+<tr><td>0 hits</td><td>consulta/campo/analyzer</td><td>probar términos simples + _analyze</td></tr>
+<tr><td>count ≠ corpus</td><td>fallo de ingesta</td><td>inspeccionar bulk errors</td></tr></table>`},
+{c:'Puente',k:'LÍMITE LÉXICO',t:'BM25 no entiende intención como un humano',l:'Si las palabras cambian demasiado, una búsqueda léxica puede perder documentos conceptualmente cercanos.',b:`
+<div class="grid two"><div class="card green"><b>Consulta</b>“mantenimiento aeronaves”</div><div class="card red"><b>Documento</b>“reparación de aviones militares”</div></div>
+<div class="call">Aquí nace la pregunta de S9: <b>¿podemos buscar por significado además de por palabras?</b> Hoy no la resolvemos todavía.</div>`},
+{c:'Entrega',k:'EVIDENCIA',t:'Qué debe quedar al final',l:'Tres archivos pequeños; ninguno contiene credenciales.',b:`
+<div class="grid">
+<div class="card green"><b>s07_resultados_busqueda.csv</b>ranking A y B, score, URL, motor.</div>
+<div class="card blue"><b>s07_config_busqueda.json</b>índice, consulta, mapping resumido, conteos.</div>
+<div class="card yellow"><b>hito_s07_relevancia.md</b>decisión, alternativa, P@5, falso positivo y límite.</div>
+</div>`},
+{c:'Entrega',k:'RÚBRICA',t:'Qué hace que una entrega sea fuerte',l:'Se califica evidencia propia, despliegue verificable e interpretación.',b:`
+<table class="table"><tr><th>Criterio</th><th>Peso</th></tr>
+<tr><td>Conexión + índice + conteo verificado</td><td>25</td></tr>
+<tr><td>Mapping + analyzer interpretados</td><td>15</td></tr>
+<tr><td>Consulta escalonada y ranking</td><td>20</td></tr>
+<tr><td>Experimento A/B + juicios de relevancia / P@5</td><td>20</td></tr>
+<tr><td>Decisión + alternativa + límite</td><td>15</td></tr>
+<tr><td>Trazabilidad sin secretos</td><td>5</td></tr></table>`},
+{c:'Cierre',k:'PARA LLEVAR',t:'Ya no tienes “una búsqueda”; tienes una arquitectura',l:'Datos → análisis → índice → ingesta → consulta → ranking → decisión.',dark:true,b:`
+<div class="flow"><div class="node">corpus</div><div class="arrow">→</div><div class="node">mapping + analyzer</div><div class="arrow">→</div><div class="node">BM25</div><div class="arrow">→</div><div class="node">decisión con límites</div></div>
+<div class="call"><b>Siguiente frontera:</b> cuando las palabras no alcanzan, necesitaremos representación semántica.</div>`}
+];
+
+const demoDocs=[
+ {id:'D1',t:'Mantenimiento KFIR',text:'mantenimiento programado mantenimiento aeronaves kfir'},
+ {id:'D2',t:'Inspección C-130',text:'inspeccion mantenimiento estructural aeronave c130'},
+ {id:'D3',t:'Centro aeronáutico',text:'construccion centro investigacion aeronautica'},
+ {id:'D4',t:'Blindajes',text:'adquisicion blindajes aeronauticos'}
+];
+function toks(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[a-z0-9]+/g)||[]}
+function bm25(q){
+ const docs=demoDocs.map(d=>toks(d.text)), qt=toks(q), N=docs.length, avg=docs.reduce((a,d)=>a+d.length,0)/N;
+ const df={};docs.forEach(d=>new Set(d).forEach(t=>df[t]=(df[t]||0)+1));
+ return demoDocs.map((d,i)=>{const tf={};docs[i].forEach(t=>tf[t]=(tf[t]||0)+1);let sc=0;
+ qt.forEach(t=>{const f=tf[t]||0;if(!f)return;const n=df[t]||0,idf=Math.log(1+(N-n+.5)/(n+.5));sc+=idf*(f*2.2)/(f+1.2*(1-.75+.75*docs[i].length/avg));});
+ return {...d,score:sc};}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+}
+const stage=document.getElementById('stage'),bar=document.getElementById('bar'),n=document.getElementById('n'),tot=document.getElementById('tot'),chapter=document.getElementById('chapter'),prev=document.getElementById('prev'),next=document.getElementById('next'),toast=document.getElementById('toast');
+stage.innerHTML=slides.map((s,i)=>`<section id="s${i+1}" class="slide ${i===0?'on':''} ${s.dark?'dark':''}" data-chapter="${s.c}"><div class="kicker">${s.k}</div><h1 class="title">${s.t}</h1><p class="lead">${s.l}</p>${s.b}</section>`).join('');
+const all=[...document.querySelectorAll('.slide')];tot.textContent=all.length;let i=0;
+function show(j,push=true){i=Math.max(0,Math.min(all.length-1,j));all.forEach((s,k)=>s.classList.toggle('on',k===i));n.textContent=i+1;bar.style.width=((i+1)/all.length*100)+'%';chapter.textContent=slides[i].c;prev.disabled=i===0;next.disabled=i===all.length-1;if(push)history.replaceState(null,'','#s'+(i+1));bindDynamic()}
+function bindDynamic(){
+ const q=document.getElementById('demoQuery'),o=document.getElementById('demoResults'),btn=document.getElementById('demoSearch');
+ if(q&&o&&btn&&!btn.dataset.bound){btn.dataset.bound='1';const render=()=>{const rows=bm25(q.value);o.innerHTML=rows.length?rows.map((r,k)=>`<div class="result"><b>${k+1}. ${r.t}</b><br><span class="score">${r.score.toFixed(3)}</span> · ${r.id}</div>`).join(''):'<div class="result">Sin coincidencias.</div>'};btn.onclick=render;q.onkeydown=e=>{if(e.key==='Enter')render()};render();}
+ document.querySelectorAll('.checkpoint').forEach(box=>{if(box.dataset.bound)return;box.dataset.bound='1';box.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{const ok=b.dataset.ok==='1',fb=box.querySelector('.feedback');fb.textContent=ok?'✓ Correcto. La operación textual analiza e indexa términos para recuperar candidatos.':'No todavía. Revisa qué parte corresponde a análisis/indexación y cuál a ranking.';fb.style.background=ok?'#e9f8ef':'#fff1f0';});});
+}
+prev.onclick=()=>show(i-1);next.onclick=()=>show(i+1);
+addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(i+1)}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1)}});
+let st=null;stage.addEventListener('touchstart',e=>{if(e.touches.length!==1||e.target.closest('input,button,a,pre,.results')){st=null;return}const t=e.touches[0];st={x:t.clientX,y:t.clientY,time:Date.now()}},{passive:true});stage.addEventListener('touchend',e=>{if(!st||!e.changedTouches.length)return;const t=e.changedTouches[0],dx=t.clientX-st.x,dy=t.clientY-st.y,dt=Date.now()-st.time;st=null;if(dt<900&&Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25){dx<0?show(i+1):show(i-1)}},{passive:true});
+document.getElementById('fs').onclick=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()};
+const m=location.hash.match(/^#s(\d+)$/);if(m)i=Math.min(all.length-1,Math.max(0,Number(m[1])-1));show(i,false);setTimeout(()=>{toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1700)},500);
+</script>
+</body></html>
