@@ -299,12 +299,10 @@ begin
   select count(*)::integer into v_responses from public.s07_live_responses where session_id=v_session;
 
   delete from public.s07_live_responses where session_id=v_session;
-  update public.s07_live_scores
-  set score=0,first_score=0,mastery_score=0,answered=0,mastery_answered=0,updated_at=now()
-  where session_id=v_session;
+  delete from public.s07_live_scores where session_id=v_session;
 
   return jsonb_build_object('ok',true,'code',upper(trim(p_code)),
-    'participants_preserved',v_participants,'responses_deleted',v_responses);
+    'participants_deleted',v_participants,'responses_deleted',v_responses);
 end;
 $$;
 
