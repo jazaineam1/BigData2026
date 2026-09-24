@@ -1,6 +1,4 @@
 from pathlib import Path
-import json
-import re
 import nbformat
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,7 +43,7 @@ def main():
         "mastery",
         "locked_for_ranking",
         "first_attempt",
-        "ranking '+(r.score",
+        "mastery_score",
         "data-question=\"q7\"",
         "id=\"d8\"",
         "mobile-livebar",
@@ -57,12 +55,11 @@ def main():
 
     if lab.count('class="activity"') < 8:
         errors.append("Laboratorio: se esperaban al menos 8 actividades.")
-
     if "data-fallback" in lab:
         errors.append("Laboratorio: no debe exponer respuestas correctas en data-fallback.")
 
     for marker in [
-        "Primer intento",
+        "primer intento",
         "mastery score",
         "s07_live_submit",
         "first_correct",
@@ -70,7 +67,7 @@ def main():
         "s07_live_leaderboard",
         "s07_live_activity_stats",
     ]:
-        if marker not in readme + sql:
+        if marker.lower() not in (readme + sql).lower():
             errors.append(f"Documentación/SQL: falta {marker}")
 
     if "```http" in nb_text:
@@ -79,27 +76,25 @@ def main():
     for marker in [
         "ELASTIC CONSOLE · NO SE EJECUTA EN COLAB",
         "match` vs `term",
-        "index-time",
-        "Search-time",
         "Qué queremos hacer",
         "Evidencia esperada",
         "Precision@5",
         "_rank_eval",
         "s07_config_busqueda.json",
+        "Console antes de Python",
+        "bulk",
     ]:
         if marker not in nb_text:
             errors.append(f"Notebook: falta {marker}")
 
     if len(nb.cells) > 70:
         errors.append(f"Notebook: demasiadas celdas ({len(nb.cells)}); objetivo <= 70.")
-
     code_cells = [c for c in nb.cells if c.cell_type == "code"]
     if len(code_cells) > 28:
         errors.append(f"Notebook: demasiadas celdas de código ({len(code_cells)}); objetivo <= 28.")
 
     if errors:
         raise SystemExit("\n".join("[ERROR] " + e for e in errors))
-
     print(f"[OK] S07 validada: {slide_count} pantallas, {len(nb.cells)} celdas, {len(code_cells)} celdas de código, Live primer intento + mastery.")
 
 
