@@ -1,28 +1,108 @@
 from pathlib import Path
-import json, re, nbformat
-ROOT=Path(__file__).resolve().parents[1]
-NB=ROOT/"Cuadernos"/"7_Elasticsearch_BM25_Compras_Claras.ipynb"
-PRES=ROOT/"Presentaciones"/"s07-del-vecindario-al-texto.html"
-CHECK=ROOT/"assets"/"tutoriales"/"s07-laboratorio-guiado.html"
-DATA=ROOT/"Datos"/"s07_corpus_respaldo.jsonl"
-def main():
-    errors=[]
-    nb=nbformat.read(NB,as_version=4); nbformat.validate(nb)
-    text="\n".join(c.source if isinstance(c.source,str) else "".join(c.source) for c in nb.cells)
-    for item in ["Rúbrica de la práctica S07","índice invertido","BM25","multi_match","s07_resultados_busqueda.csv","hito_s07_relevancia.md","relevancia textual no demuestra irregularidad"]:
-        if item not in text: errors.append("Falta: "+item)
-    if re.search(r"\b\d{1,3}\s*min(?:uto)?s?\b",text,re.I): errors.append("El notebook contiene tiempos.")
-    for p in [PRES,CHECK,DATA]:
-        if not p.exists() or p.stat().st_size<500: errors.append("Falta recurso: "+str(p))
+import json
+import re
+import nbformat
 
-    # La presentación debe ser usable en teléfono: viewport dinámico,
-    # controles en zona segura y swipe horizontal sin bloquear scroll vertical.
+ROOT = Path(__file__).resolve().parents[1]
+NB = ROOT / "Cuadernos" / "7_Elasticsearch_BM25_Compras_Claras.ipynb"
+PRES = ROOT / "Presentaciones" / "s07-del-vecindario-al-texto.html"
+ROUTE = ROOT / "assets" / "tutoriales" / "s07-recursos.html"
+DEPLOY = ROOT / "assets" / "tutoriales" / "s07-despliegue-elasticsearch.html"
+CHECK = ROOT / "assets" / "tutoriales" / "s07-laboratorio-guiado.html"
+INDEX = ROOT / "index.html"
+
+def main():
+    errors = []
+
+    nb = nbformat.read(NB, as_version=4)
+    nbformat.validate(nb)
+    text = "\n".join(c.source if isinstance(c.source, str) else "".join(c.source) for c in nb.cells)
+
+    required_nb = [
+        "s06_contexto_relacional.csv",
+        "2.109 filas fuente",
+        "1.994 procesos",
+        "client.info()",
+        "client.indices.analyze",
+        "mappings=mappings",
+        "elasticsearch.helpers",
+        "bulk(",
+        "client.count",
+        "multi_match",
+        "nombre_proceso^3",
+        "highlight",
+        "s07_resultados_busqueda.csv",
+        "s07_config_busqueda.json",
+        "hito_s07_relevancia.md",
+        "relevancia textual",
+    ]
+    for marker in required_nb:
+        if marker not in text:
+            errors.append("Notebook: falta " + marker)
+
+    if re.search(r"\b\d{1,3}\s*min(?:uto)?s?\b", text, re.I):
+        errors.append("Notebook: contiene tiempos minuto a minuto.")
+
     pres = PRES.read_text(encoding="utf-8")
-    for marker in ["100dvh", "safe-area-inset-bottom", "touchstart", "touchend", "touch-action:pan-y"]:
+    slide_count = pres.count("{c:'")
+    if slide_count < 40:
+        errors.append(f"Presentación: solo {slide_count} slides; se esperan al menos 40.")
+    for marker in [
+        "Construye un buscador con Elasticsearch",
+        "1.994 procesos únicos",
+        "_ANALYZE",
+        "BULK",
+        "CHECKPOINT 1",
+        "CHECKPOINT 2",
+        "touchstart",
+        "requestFullscreen",
+    ]:
         if marker not in pres:
-            errors.append("Falta soporte móvil en presentación: "+marker)
-    rows=[json.loads(x) for x in DATA.read_text(encoding="utf-8").splitlines() if x.strip()]
-    if len(rows)<8: errors.append("Corpus de respaldo insuficiente.")
-    if errors: raise SystemExit("\n".join("[ERROR] "+e for e in errors))
-    print(f"[OK] S07 validada: {len(nb.cells)} celdas.")
-if __name__=="__main__": main()
+            errors.append("Presentación: falta " + marker)
+    if "Diagnóstico del grupo" in pres:
+        errors.append("Presentación: no debe exponer el diagnóstico del grupo.")
+
+    route = ROUTE.read_text(encoding="utf-8")
+    for marker in [
+        "Ruta única",
+        "Entiende",
+        "Experimenta",
+        "Despliega",
+        "Indexar",
+        "Buscar",
+        "Evaluar",
+        "7_Elasticsearch_BM25_Compras_Claras.ipynb",
+    ]:
+        if marker.lower() not in route.lower():
+            errors.append("Ruta: falta " + marker)
+
+    deploy = DEPLOY.read_text(encoding="utf-8")
+    for marker in [
+        "Elasticsearch Serverless",
+        "Project URL",
+        "API key",
+        "23-sep-2026",
+        "Documentos indexados: 1994",
+        "Conteo Elasticsearch: 1994",
+    ]:
+        if marker not in deploy:
+            errors.append("Despliegue: falta " + marker)
+
+    checklist = CHECK.read_text(encoding="utf-8")
+    if checklist.count('class="step"') < 16:
+        errors.append("Checklist: faltan pasos.")
+    for marker in ["Conexión verificada", "Tokens Elastic", "Errores bulk: 0", "s07_config_busqueda.json"]:
+        if marker not in checklist:
+            errors.append("Checklist: falta evidencia " + marker)
+
+    index_text = INDEX.read_text(encoding="utf-8")
+    if 'href="assets/tutoriales/s07-recursos.html"' not in index_text:
+        errors.append("Index: S07 no apunta a la ruta única.")
+
+    if errors:
+        raise SystemExit("\n".join("[ERROR] " + e for e in errors))
+
+    print(f"[OK] S07 integral validada: {len(nb.cells)} celdas, {slide_count} diapositivas, ruta, despliegue y checklist.")
+
+if __name__ == "__main__":
+    main()
