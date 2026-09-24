@@ -44,8 +44,15 @@ def main():
         "keyword",
         "edge n-gram",
         "Analyzer: tokenizer más filtros",
-        "BM25 es un modelo de scoring lexical",
+        "BM25 es el modelo de scoring lexical",
         "No lo instalas aparte",
+        "cloud.elastic.co",
+        "Create project",
+        "Elasticsearch endpoint / Project URL",
+        "Create API key",
+        "Respuesta esperada",
+        "start_offset",
+        "Ahora interpreta la respuesta",
         "corpus",
         "S07 Teacher Wall",
         "s07_teacher_create_round",
@@ -61,6 +68,8 @@ def main():
     for q in range(8):
         if f'data-question=\\"q{q}\\"' not in pres:
             errors.append(f"Presentación: falta desafío embebido q{q}.")
+    if 'data-kind=\\"analyzerread\\"' not in pres:
+        errors.append("Presentación: D4 debe evaluar la lectura del retorno de _analyze.")
 
     for forbidden in [
         "s07-laboratorio-guiado.html",
@@ -91,6 +100,10 @@ def main():
         "Precision@5",
         "Console antes de Python",
         "bulk",
+        "De Elastic Cloud a Colab",
+        "Elasticsearch endpoint",
+        "API key",
+        "Número de tokens devueltos por Elasticsearch",
     ]:
         if marker.lower() not in nb_text.lower():
             errors.append(f"Notebook: falta {marker}")
