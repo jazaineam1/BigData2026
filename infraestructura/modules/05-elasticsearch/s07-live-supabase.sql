@@ -15,7 +15,7 @@ set hint = case q.question_id
   when 'q0' then 'Distingue una condición exacta de una necesidad que requiere ordenar candidatos por relevancia.'
   when 'q1' then 'Piensa en qué campos deben analizar palabras y cuáles deben conservar valores exactos o tipos estructurados.'
   when 'q2' then 'Empieza por la entrada original y termina en los términos que realmente quedan indexados.'
-  when 'q3' then 'Separa la solicitud en método HTTP + ruta + cuerpo JSON. Para este reto no necesitas que s07-demo exista todavía.'
+  when 'q3' then 'No reconstruyas la petición. Lee el JSON de respuesta: cuenta tokens[], busca position=1 y luego start_offset del token fox.'
   when 'q4' then 'Compara el conteo remoto con el número de procesos únicos que preparaste antes de la ingesta.'
   when 'q5' then 'Separa lo que debe aportar score de lo que solo debe restringir; luego añade evidencia visible.'
   when 'q6' then 'Cuenta cuántos de los cinco primeros resultados cumplen el criterio de relevancia y divide por cinco.'
@@ -25,8 +25,12 @@ end
 where q.session_id=(select id from public.s07_live_sessions where code='ELASTIC-S07');
 
 update public.s07_live_questions
-set correct_option='POST|/_analyze|spanish',
-    explanation='En S07 usamos POST /_analyze: POST es el método HTTP elegido, /_analyze es la ruta y analyzer/text viajan en el cuerpo JSON. La Analyze API también acepta GET. Cuando exista un índice, también puedes usar POST /mi_indice/_analyze.'
+set prompt='Lee una respuesta real de _analyze: indica número de tokens, token en position=1 y start_offset de fox.',
+    correct_option='3|brown|12',
+    explanation='La respuesta contiene 3 objetos en tokens[]. brown está en position 1 y fox comienza en start_offset 12. _analyze devuelve tokens y su ubicación; no devuelve un ranking ni una predicción.',
+    hint='No reconstruyas la petición. Lee el JSON de respuesta: cuenta tokens[], busca position=1 y luego start_offset del token fox.',
+    kind='analyzerread',
+    points=2
 where question_id='q3';
 
 
