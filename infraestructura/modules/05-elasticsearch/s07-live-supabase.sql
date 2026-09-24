@@ -351,7 +351,8 @@ begin
   from public.s07_live_sessions s
   left join public.s07_live_scores sc on sc.session_id=s.id
   left join public.s07_live_responses r on r.session_id=s.id
-  where s.code='ELASTIC-S07' or s.code like 'S07-%' or s.code like 'ELASTIC-S07-%'
+  where (s.code like 'S07-%' or s.code like 'ELASTIC-S07-%')
+    and s.code <> 'ELASTIC-S07-QA'
   group by s.id,s.code,s.title,s.active,s.created_at
   order by s.created_at desc
   limit 30;
@@ -364,3 +365,6 @@ grant execute on function public.s07_teacher_reset_round(text,text) to anon,auth
 grant execute on function public.s07_teacher_close_round(text,text) to anon,authenticated;
 grant execute on function public.s07_teacher_reopen_round(text,text) to anon,authenticated;
 grant execute on function public.s07_teacher_rounds(text) to anon,authenticated;
+
+-- La ronda ELASTIC-S07 es una plantilla, no una partida para estudiantes.
+update public.s07_live_sessions set active=false where code='ELASTIC-S07';
