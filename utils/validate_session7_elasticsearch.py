@@ -14,6 +14,13 @@ def main():
     if re.search(r"\b\d{1,3}\s*min(?:uto)?s?\b",text,re.I): errors.append("El notebook contiene tiempos.")
     for p in [PRES,CHECK,DATA]:
         if not p.exists() or p.stat().st_size<500: errors.append("Falta recurso: "+str(p))
+
+    # La presentación debe ser usable en teléfono: viewport dinámico,
+    # controles en zona segura y swipe horizontal sin bloquear scroll vertical.
+    pres = PRES.read_text(encoding="utf-8")
+    for marker in ["100dvh", "safe-area-inset-bottom", "touchstart", "touchend", "touch-action:pan-y"]:
+        if marker not in pres:
+            errors.append("Falta soporte móvil en presentación: "+marker)
     rows=[json.loads(x) for x in DATA.read_text(encoding="utf-8").splitlines() if x.strip()]
     if len(rows)<8: errors.append("Corpus de respaldo insuficiente.")
     if errors: raise SystemExit("\n".join("[ERROR] "+e for e in errors))
