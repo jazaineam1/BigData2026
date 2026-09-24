@@ -4,87 +4,77 @@ import nbformat
 
 ROOT = Path(__file__).resolve().parents[1]
 PRES = ROOT / "Presentaciones" / "s07-del-vecindario-al-texto.html"
-LAB = ROOT / "assets" / "tutoriales" / "s07-laboratorio-guiado.html"
 NB = ROOT / "Cuadernos" / "7_Elasticsearch_BM25_Compras_Claras.ipynb"
 README = ROOT / "infraestructura" / "modules" / "05-elasticsearch" / "README.md"
 SQL = ROOT / "infraestructura" / "modules" / "05-elasticsearch" / "s07-live-supabase.sql"
-TOKENIZER = ROOT / "assets" / "tutoriales" / "s07-tokenizer-lab.html"
+
+LEGACY = [
+    ROOT / "assets" / "tutoriales" / "s07-laboratorio-guiado.html",
+    ROOT / "assets" / "tutoriales" / "s07-tokenizer-lab.html",
+    ROOT / "assets" / "tutoriales" / "s07-recursos.html",
+]
 
 
 def main():
     errors = []
     pres = PRES.read_text(encoding="utf-8")
-    lab = LAB.read_text(encoding="utf-8")
     readme = README.read_text(encoding="utf-8")
     sql = SQL.read_text(encoding="utf-8")
-    tokenizer = TOKENIZER.read_text(encoding="utf-8")
     nb = nbformat.read(NB, as_version=4)
     nbformat.validate(nb)
     nb_text = "\n".join(c.source if isinstance(c.source, str) else "".join(c.source) for c in nb.cells)
 
-    slide_count = len(re.findall(r"\{c:'[^']*',k:'[^']*',t:'", pres))
+    slide_count = pres.count('{"c":')
     if slide_count != 35:
-        errors.append(f"Presentación: se esperaban 35 pantallas; hay {slide_count}.")
+        errors.append(f"Presentación: se esperaban 35 diapositivas; hay {slide_count}.")
 
     for marker in [
+        "Solo usaremos dos recursos",
         "Mapping: el plano de interpretación de los campos",
-        "Tokenizer y token: partir un texto en unidades observables",
-        "Analyzer: tokenizer más filtros",
+        "Método HTTP",
         "POST /_analyze",
-        "Cómo abrir Console",
-        "BM25 es el modelo de scoring lexical",
-        "No instalas BM25 aparte",
-        "Corpus",
-        "No todas las consultas buscan igual",
-        "Saber diagnosticar es parte de saber usar la herramienta",
-        "Una comparación defendible tiene pasos",
-        "#d1", "#d2", "#d3", "#d4", "#d5", "#d6", "#d7", "#d8",
-        "start_offset",
-        "end_offset",
-        'target="bigdata-lab"',
+        "Dev Tools",
+        "Console",
+        "Tokenizer y token: pruébalos aquí mismo",
+        'id=\\"tokText\\"',
+        "standard",
+        "whitespace",
+        "keyword",
+        "edge n-gram",
+        "Analyzer: tokenizer más filtros",
+        "BM25 es un modelo de scoring lexical",
+        "No lo instalas aparte",
+        "corpus",
+        "S07 Teacher Wall",
+        "s07_teacher_create_round",
+        "s07_teacher_reset_round",
+        "?wall=docente",
+        ".dark .card",
+        ".dark .note",
+        'target=\\"bigdata-workspace\\"',
     ]:
-        if marker not in pres:
+        if marker.lower() not in pres.lower():
             errors.append(f"Presentación: falta {marker}")
 
-    if "S07 LIVE 1" in pres or "S07 LIVE 2" in pres:
-        errors.append("Presentación: no debe tener slides Live separadas; los retos deben integrarse al flujo.")
+    for q in range(8):
+        if f'data-question=\\"q{q}\\"' not in pres:
+            errors.append(f"Presentación: falta desafío embebido q{q}.")
 
-    for marker in [
-        "primer intento",
-        "Dominio",
-        'target="bigdata-presentation"',
-        "mastery",
-        "locked_for_ranking",
-        "first_attempt",
-        "mastery_score",
-        "data-question=\"q7\"",
-        "id=\"d8\"",
-        "mobile-livebar",
-        ".on('broadcast'",
-        "setInterval",
+    for forbidden in [
+        "s07-laboratorio-guiado.html",
+        "s07-tokenizer-lab.html",
+        'target=\\"bigdata-lab\\"',
+        "data-fallback=",
     ]:
-        if marker not in lab:
-            errors.append(f"Laboratorio: falta {marker}")
+        if forbidden in pres:
+            errors.append(f"Presentación: referencia prohibida {forbidden}")
 
-    if lab.count('class="activity"') < 8:
-        errors.append("Laboratorio: se esperaban al menos 8 actividades.")
-    if "data-fallback" in lab:
-        errors.append("Laboratorio: no debe exponer respuestas correctas en data-fallback.")
-
-    for marker in [
-        "primer intento",
-        "mastery score",
-        "s07_live_submit",
-        "first_correct",
-        "mastered",
-        "s07_live_leaderboard",
-        "s07_live_activity_stats",
-    ]:
-        if marker.lower() not in (readme + sql).lower():
-            errors.append(f"Documentación/SQL: falta {marker}")
+    for path in LEGACY:
+        if path.exists():
+            errors.append(f"Arquitectura: recurso S07 externo prohibido todavía existe: {path.relative_to(ROOT)}")
 
     if "```http" in nb_text:
-        errors.append("Notebook: no debe usar fences ```http porque Colab vuelve clicables las rutas.")
+        errors.append("Notebook: no debe usar fences http porque Colab vuelve clicables las rutas.")
 
     for marker in [
         "API y Console desde cero",
@@ -93,34 +83,45 @@ def main():
         "Glosario operativo con ejemplos mínimos",
         "corpus",
         "BM25 no es un paquete",
-        "S07 ya no los necesita",
         "tokens[]",
         "start_offset",
         "match` vs `term",
         "Precision@5",
-        "_rank_eval",
-        "s07_config_busqueda.json",
         "Console antes de Python",
         "bulk",
     ]:
-        if marker not in nb_text:
+        if marker.lower() not in nb_text.lower():
             errors.append(f"Notebook: falta {marker}")
 
-    for marker in [
-        "Tokenizer Lab",
-        "texto → tokenizer → filtros → tokens",
-        "Cómo abrir Console",
-        "POST /_analyze",
-        "Copiar solicitud para Console",
-        "edge_ngram",
-        "start_offset",
-        "end_offset",
-    ]:
-        if marker not in tokenizer:
-            errors.append(f"Tokenizer Lab: falta {marker}")
+    if "BM25Okapi" in nb_text:
+        errors.append("Notebook: volvió a usar BM25Okapi; BM25 debe observarse en Elasticsearch.")
+    if re.search(r"pip[^\n]*rank-bm25", nb_text, flags=re.I):
+        errors.append("Notebook: volvió a instalar rank-bm25.")
 
-    if '"analyzer": "custom edge_ngram"' in tokenizer:
-        errors.append("Tokenizer Lab: no debe generar un analyzer inexistente para edge n-gram.")
+    for marker in [
+        "s07_teacher_config",
+        "s07_teacher_auth",
+        "s07_teacher_create_round",
+        "s07_teacher_reset_round",
+        "s07_teacher_close_round",
+        "s07_teacher_reopen_round",
+        "pin_hash",
+        "s07_live_submit",
+    ]:
+        if marker not in sql:
+            errors.append(f"SQL canónico: falta {marker}")
+
+    if "S07-UCENTRAL-2026" in sql or "S07-UCENTRAL-2026" in pres:
+        errors.append("Seguridad: el PIN docente no debe aparecer en SQL ni presentación.")
+
+    for marker in [
+        "exactamente dos recursos",
+        "Teacher Wall",
+        "No crear una tercera",
+        "actividades D1–D8",
+    ]:
+        if marker.lower() not in readme.lower():
+            errors.append(f"README: falta regla {marker}")
 
     if len(nb.cells) > 70:
         errors.append(f"Notebook: demasiadas celdas ({len(nb.cells)}); objetivo <= 70.")
@@ -130,7 +131,11 @@ def main():
 
     if errors:
         raise SystemExit("\n".join("[ERROR] " + e for e in errors))
-    print(f"[OK] S07 validada: {slide_count} pantallas, {len(nb.cells)} celdas, {len(code_cells)} celdas de código, definición+ejemplo+medición y Live primer intento + dominio.")
+
+    print(
+        f"[OK] S07 validada: 35 diapositivas, D1-D8 + tokenizer + Teacher Wall embebidos, "
+        f"{len(nb.cells)} celdas de notebook y exactamente dos recursos visibles."
+    )
 
 
 if __name__ == "__main__":
