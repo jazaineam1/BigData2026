@@ -87,6 +87,24 @@ window.addEventListener('DOMContentLoaded', event => {
         courseRow.appendChild(card);
     }
 
+    if (courseRow && !document.querySelector('[data-session="7"]')) {
+        const card = document.createElement('div');
+        card.className = 'col-lg-4 col-md-6';
+        card.setAttribute('data-session', '7');
+        card.innerHTML = `
+            <a class="course-card"
+               href="Presentaciones/s07-del-vecindario-al-texto.html">
+                <div class="course-emoji" aria-hidden="true">🔎</div>
+                <div class="course-category">Sesión 7 · Elasticsearch y BM25</div>
+                <div class="course-title">Del vecindario al texto: ¿qué procesos debe leer Laura primero?</div>
+                <p class="course-description">
+                    Búsqueda textual desde cero: documentos, campos, índice invertido y BM25.
+                    La presentación guía la clase y enlaza el laboratorio en Colab con una ruta local garantizada y Elastic opcional.
+                </p>
+            </a>`;
+        courseRow.appendChild(card);
+    }
+
     if (courseRow && !document.querySelector('[data-workshop="control-1"]')) {
         const card = document.createElement('div');
         card.className = 'col-lg-4 col-md-6';
@@ -111,9 +129,9 @@ window.addEventListener('DOMContentLoaded', event => {
     // Actualiza el mensaje visible sin reescribir el index histórico.
     document.querySelectorAll('.masthead p').forEach(p => {
         if (p.textContent.includes('sesiones 1 a 4')) {
-            p.innerHTML = p.innerHTML.replace('sesiones 1 a 4', 'sesiones 1 a 6');
+            p.innerHTML = p.innerHTML.replace('sesiones 1 a 4', 'sesiones 1 a 7');
         } else if (p.textContent.includes('sesiones 1 a 5')) {
-            p.innerHTML = p.innerHTML.replace('sesiones 1 a 5', 'sesiones 1 a 6');
+            p.innerHTML = p.innerHTML.replace('sesiones 1 a 5', 'sesiones 1 a 7');
         }
     });
 
