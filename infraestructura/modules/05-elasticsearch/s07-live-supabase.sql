@@ -15,7 +15,7 @@ set hint = case q.question_id
   when 'q0' then 'Distingue una condición exacta de una necesidad que requiere ordenar candidatos por relevancia.'
   when 'q1' then 'Piensa en qué campos deben analizar palabras y cuáles deben conservar valores exactos o tipos estructurados.'
   when 'q2' then 'Empieza por la entrada original y termina en los términos que realmente quedan indexados.'
-  when 'q3' then 'La operación inspecciona el análisis de texto de un índice; revisa método, ruta y analyzer.'
+  when 'q3' then 'No reconstruyas la petición. Lee el JSON de respuesta: cuenta tokens[], busca position=1 y luego start_offset del token fox.'
   when 'q4' then 'Compara el conteo remoto con el número de procesos únicos que preparaste antes de la ingesta.'
   when 'q5' then 'Separa lo que debe aportar score de lo que solo debe restringir; luego añade evidencia visible.'
   when 'q6' then 'Cuenta cuántos de los cinco primeros resultados cumplen el criterio de relevancia y divide por cinco.'
@@ -23,6 +23,16 @@ set hint = case q.question_id
   else 'Revisa la regla del concepto antes de volver a intentarlo.'
 end
 where q.session_id=(select id from public.s07_live_sessions where code='ELASTIC-S07');
+
+update public.s07_live_questions
+set prompt='Lee una respuesta real de _analyze: indica número de tokens, token en position=1 y start_offset de fox.',
+    correct_option='3|brown|12',
+    explanation='La respuesta contiene 3 objetos en tokens[]. brown está en position 1 y fox comienza en start_offset 12. _analyze devuelve tokens y su ubicación; no devuelve un ranking ni una predicción.',
+    hint='No reconstruyas la petición. Lee el JSON de respuesta: cuenta tokens[], busca position=1 y luego start_offset del token fox.',
+    kind='analyzerread',
+    points=2
+where question_id='q3';
+
 
 alter table public.s07_live_scores
   add column if not exists first_score integer not null default 0,
@@ -203,3 +213,162 @@ $$;
 grant execute on function public.s07_live_submit(uuid,uuid,text,text) to anon,authenticated;
 grant execute on function public.s07_live_leaderboard(text) to anon,authenticated;
 grant execute on function public.s07_live_activity_stats(text) to anon,authenticated;
+
+
+
+-- ============================================================
+-- Teacher Wall seguro · misma presentación, no tercera herramienta
+-- ============================================================
+
+create table if not exists public.s07_teacher_config (
+  id integer primary key check (id = 1),
+  pin_hash text not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.s07_teacher_config enable row level security;
+
+-- Solo se versiona el SHA-256; el PIN en texto plano NO vive en el repositorio.
+insert into public.s07_teacher_config(id,pin_hash)
+values (1,'7848a2ecb7dc286be8a1abb7441f0e9cb305876e94f31b051b7349dbea07a78c')
+on conflict (id) do update set pin_hash=excluded.pin_hash, updated_at=now();
+
+revoke all on public.s07_teacher_config from anon, authenticated;
+
+create or replace function public.s07_teacher_auth(p_pin text)
+returns boolean
+language sql security definer
+set search_path=public,extensions
+as $$
+  select exists (
+    select 1 from public.s07_teacher_config
+    where id=1
+      and pin_hash=encode(extensions.digest(coalesce(p_pin,''),'sha256'),'hex')
+  );
+$$;
+
+create or replace function public.s07_teacher_create_round(p_pin text,p_label text default null)
+returns jsonb
+language plpgsql security definer
+set search_path=public,extensions
+as $$
+declare
+  v_source uuid;
+  v_new uuid;
+  v_code text;
+  v_try integer:=0;
+begin
+  if not public.s07_teacher_auth(p_pin) then raise exception 'PIN docente inválido.'; end if;
+
+  select id into v_source from public.s07_live_sessions where upper(code)='ELASTIC-S07' limit 1;
+  if v_source is null then raise exception 'No existe la sesión plantilla ELASTIC-S07.'; end if;
+
+  loop
+    v_try:=v_try+1;
+    v_code:='S07-'||upper(substr(replace(gen_random_uuid()::text,'-',''),1,6));
+    exit when not exists(select 1 from public.s07_live_sessions where code=v_code);
+    if v_try>20 then raise exception 'No fue posible generar código único.'; end if;
+  end loop;
+
+  insert into public.s07_live_sessions(code,title,active)
+  values(v_code,coalesce(nullif(trim(p_label),''),'S07 · Elasticsearch Search Lab'),true)
+  returning id into v_new;
+
+  insert into public.s07_live_questions(session_id,question_id,position,prompt,correct_option,explanation,kind,points,active,hint)
+  select v_new,question_id,position,prompt,correct_option,explanation,kind,points,active,hint
+  from public.s07_live_questions
+  where session_id=v_source;
+
+  return jsonb_build_object('ok',true,'code',v_code,'session_id',v_new);
+end;
+$$;
+
+create or replace function public.s07_teacher_reset_round(p_pin text,p_code text)
+returns jsonb
+language plpgsql security definer
+set search_path=public,extensions
+as $$
+declare
+  v_session uuid;
+  v_participants integer;
+  v_responses integer;
+begin
+  if not public.s07_teacher_auth(p_pin) then raise exception 'PIN docente inválido.'; end if;
+
+  select id into v_session from public.s07_live_sessions
+  where upper(code)=upper(trim(p_code)) limit 1;
+  if v_session is null then raise exception 'Partida no encontrada.'; end if;
+
+  select count(*)::integer into v_participants from public.s07_live_scores where session_id=v_session;
+  select count(*)::integer into v_responses from public.s07_live_responses where session_id=v_session;
+
+  delete from public.s07_live_responses where session_id=v_session;
+  delete from public.s07_live_scores where session_id=v_session;
+
+  return jsonb_build_object('ok',true,'code',upper(trim(p_code)),
+    'participants_deleted',v_participants,'responses_deleted',v_responses);
+end;
+$$;
+
+create or replace function public.s07_teacher_close_round(p_pin text,p_code text)
+returns jsonb
+language plpgsql security definer
+set search_path=public,extensions
+as $$
+declare v_session uuid;
+begin
+  if not public.s07_teacher_auth(p_pin) then raise exception 'PIN docente inválido.'; end if;
+  update public.s07_live_sessions set active=false
+  where upper(code)=upper(trim(p_code)) returning id into v_session;
+  if v_session is null then raise exception 'Partida no encontrada.'; end if;
+  return jsonb_build_object('ok',true,'code',upper(trim(p_code)),'active',false);
+end;
+$$;
+
+create or replace function public.s07_teacher_reopen_round(p_pin text,p_code text)
+returns jsonb
+language plpgsql security definer
+set search_path=public,extensions
+as $$
+declare v_session uuid;
+begin
+  if not public.s07_teacher_auth(p_pin) then raise exception 'PIN docente inválido.'; end if;
+  update public.s07_live_sessions set active=true
+  where upper(code)=upper(trim(p_code)) returning id into v_session;
+  if v_session is null then raise exception 'Partida no encontrada.'; end if;
+  return jsonb_build_object('ok',true,'code',upper(trim(p_code)),'active',true);
+end;
+$$;
+
+drop function if exists public.s07_teacher_rounds(text);
+create function public.s07_teacher_rounds(p_pin text)
+returns table(code text,title text,active boolean,created_at timestamptz,participants bigint,responses bigint)
+language plpgsql security definer
+set search_path=public,extensions
+as $$
+begin
+  if not public.s07_teacher_auth(p_pin) then raise exception 'PIN docente inválido.'; end if;
+  return query
+  select s.code,s.title,s.active,s.created_at,
+         count(distinct sc.participant_id)::bigint,
+         count(distinct r.id)::bigint
+  from public.s07_live_sessions s
+  left join public.s07_live_scores sc on sc.session_id=s.id
+  left join public.s07_live_responses r on r.session_id=s.id
+  where (s.code like 'S07-%' or s.code like 'ELASTIC-S07-%')
+    and s.code <> 'ELASTIC-S07-QA'
+  group by s.id,s.code,s.title,s.active,s.created_at
+  order by s.created_at desc
+  limit 30;
+end;
+$$;
+
+grant execute on function public.s07_teacher_auth(text) to anon,authenticated;
+grant execute on function public.s07_teacher_create_round(text,text) to anon,authenticated;
+grant execute on function public.s07_teacher_reset_round(text,text) to anon,authenticated;
+grant execute on function public.s07_teacher_close_round(text,text) to anon,authenticated;
+grant execute on function public.s07_teacher_reopen_round(text,text) to anon,authenticated;
+grant execute on function public.s07_teacher_rounds(text) to anon,authenticated;
+
+-- La ronda ELASTIC-S07 es una plantilla, no una partida para estudiantes.
+update public.s07_live_sessions set active=false where code='ELASTIC-S07';
