@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import nbformat
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -7,6 +8,7 @@ LAB = ROOT / "assets" / "tutoriales" / "s07-laboratorio-guiado.html"
 NB = ROOT / "Cuadernos" / "7_Elasticsearch_BM25_Compras_Claras.ipynb"
 README = ROOT / "infraestructura" / "modules" / "05-elasticsearch" / "README.md"
 SQL = ROOT / "infraestructura" / "modules" / "05-elasticsearch" / "s07-live-supabase.sql"
+TOKENIZER = ROOT / "assets" / "tutoriales" / "s07-tokenizer-lab.html"
 
 
 def main():
@@ -15,25 +17,30 @@ def main():
     lab = LAB.read_text(encoding="utf-8")
     readme = README.read_text(encoding="utf-8")
     sql = SQL.read_text(encoding="utf-8")
+    tokenizer = TOKENIZER.read_text(encoding="utf-8")
     nb = nbformat.read(NB, as_version=4)
     nbformat.validate(nb)
     nb_text = "\n".join(c.source if isinstance(c.source, str) else "".join(c.source) for c in nb.cells)
 
-    slide_count = pres.count("{c:")
+    slide_count = len(re.findall(r"\{c:'[^']*',k:'[^']*',t:'", pres))
     if slide_count != 35:
         errors.append(f"Presentación: se esperaban 35 pantallas; hay {slide_count}.")
 
     for marker in [
-        "MATCH VS TERM",
-        "INDEX-TIME VS SEARCH-TIME",
-        "BM25 TRABAJADO",
-        "CUANDO FALLA",
-        "FLUJO A/B",
+        "Mapping: el plano de interpretación de los campos",
+        "Tokenizer y token: partir un texto en unidades observables",
+        "Analyzer: tokenizer más filtros",
+        "POST /_analyze",
+        "Cómo abrir Console",
+        "BM25 es el modelo de scoring lexical",
+        "No instalas BM25 aparte",
+        "Corpus",
+        "No todas las consultas buscan igual",
+        "Saber diagnosticar es parte de saber usar la herramienta",
+        "Una comparación defendible tiene pasos",
         "#d1", "#d2", "#d3", "#d4", "#d5", "#d6", "#d7", "#d8",
-        "Qué es exactamente un token",
         "start_offset",
         "end_offset",
-        "max_token_length",
         'target="bigdata-lab"',
     ]:
         if marker not in pres:
@@ -80,14 +87,16 @@ def main():
         errors.append("Notebook: no debe usar fences ```http porque Colab vuelve clicables las rutas.")
 
     for marker in [
-        "ELASTIC CONSOLE · NO SE EJECUTA EN COLAB",
+        "API y Console desde cero",
+        "¿Cómo abro Console en Elastic?",
+        "POST /_analyze",
         "Glosario operativo con ejemplos mínimos",
-        "¿Cuánto mide un token?",
+        "corpus",
+        "BM25 no es un paquete",
+        "S07 ya no los necesita",
         "tokens[]",
         "start_offset",
         "match` vs `term",
-        "Qué queremos hacer",
-        "Evidencia esperada",
         "Precision@5",
         "_rank_eval",
         "s07_config_busqueda.json",
@@ -96,6 +105,22 @@ def main():
     ]:
         if marker not in nb_text:
             errors.append(f"Notebook: falta {marker}")
+
+    for marker in [
+        "Tokenizer Lab",
+        "texto → tokenizer → filtros → tokens",
+        "Cómo abrir Console",
+        "POST /_analyze",
+        "Copiar solicitud para Console",
+        "edge_ngram",
+        "start_offset",
+        "end_offset",
+    ]:
+        if marker not in tokenizer:
+            errors.append(f"Tokenizer Lab: falta {marker}")
+
+    if '"analyzer": "custom edge_ngram"' in tokenizer:
+        errors.append("Tokenizer Lab: no debe generar un analyzer inexistente para edge n-gram.")
 
     if len(nb.cells) > 70:
         errors.append(f"Notebook: demasiadas celdas ({len(nb.cells)}); objetivo <= 70.")
