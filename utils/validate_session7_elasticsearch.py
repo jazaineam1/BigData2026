@@ -63,6 +63,9 @@ def main():
         "Gemini Notebook",
         "Laboratorio",
         "bigdata-workspace",
+        ".dark .note{background:#ffffff",
+        "prevBtn.addEventListener",
+        "Abrir S07 Live",
     ]:
         if marker not in pres:
             errors.append("Presentación: falta " + marker)
@@ -71,11 +74,13 @@ def main():
 
     lab = LAB.read_text(encoding="utf-8")
     for marker in [
-        "Solo tres recursos visibles",
         "Cómo se dicta la clase",
         "Presentación",
         "Abrir / reutilizar Colab",
-        "S07 Live local",
+        "S07 Live · ranking en tiempo real",
+        "s07_live_submit",
+        "postgres_changes",
+        "id=\"joinLive\"",
         "Exportar resumen JSON",
         "target=\"bigdata-workspace\"",
     ]:
@@ -91,6 +96,10 @@ def main():
     idx = INDEX.read_text(encoding="utf-8")
     if "s07-laboratorio-guiado.html" not in idx:
         errors.append("Index: debe enlazar el laboratorio activo.")
+    if 'href="assets/tutoriales/s07-recursos.html"' in idx:
+        errors.append("Index: S07 todavía usa la ruta antigua en lugar del laboratorio.")
+    if '>Repositorio</a>' in idx:
+        errors.append("Index: no debe mostrar el botón general Repositorio en la portada.")
 
     if errors:
         raise SystemExit("\n".join("[ERROR] " + e for e in errors))

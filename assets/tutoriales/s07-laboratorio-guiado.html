@@ -1,7 +1,455 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>S07 · Laboratorio activo</title><style>:root{--navy:#122253;--red:#B11F16;--orange:#E95D0F;--teal:#0B8689;--beige:#F3E7CE;--paper:#fffdfa;--ink:#1f2338;--muted:#667085;--line:#e4e7ef;--soft:#f7f2e9}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Roboto,"Segoe UI",Arial,sans-serif}a{color:inherit}code,pre{font-family:Consolas,"Cascadia Mono",monospace}.top{position:sticky;top:0;z-index:20;background:rgba(255,253,250,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.nav{max-width:1180px;margin:auto;padding:10px 16px;display:flex;gap:10px;align-items:center}.nav a{text-decoration:none;font-weight:900;border-radius:10px;padding:8px 10px}.nav a:hover{background:var(--soft)}.brand{margin-right:auto;color:var(--red)}.launch{background:var(--red)!important;color:white!important}.wrap{max-width:1180px;margin:auto;padding:28px 16px 80px;display:grid;grid-template-columns:260px 1fr;gap:24px}.side{position:sticky;top:72px;align-self:start}.panel,.stage,.hero{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 8px 28px rgba(18,34,83,.06)}.panel h2{font-size:18px;margin:0 0 8px}.meter{height:9px;background:#ece6dc;border-radius:999px;overflow:hidden}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--orange))}.steps{display:grid;gap:5px;margin-top:14px}.steps a{text-decoration:none;padding:8px;border-radius:10px;color:#5a6078;font-weight:800;font-size:13px}.steps a:hover{background:var(--soft);color:var(--red)}.ey{display:inline-block;background:#fff2ea;color:var(--red);border-radius:999px;padding:7px 10px;font-weight:900;text-transform:uppercase;font-size:12px;letter-spacing:.06em}h1{font-size:clamp(38px,6vw,68px);line-height:.98;margin:.2em 0;color:var(--navy)}h2{color:var(--navy);font-size:28px;margin:.2em 0}.lead{font-size:20px;color:#46506b;max-width:850px}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:10px 14px;text-decoration:none;font-weight:900;display:inline-block;background:var(--teal);color:white;cursor:pointer}.btn.red{background:var(--red)}.btn.soft{background:#edf5f6;color:var(--teal)}.stage{margin-top:18px}.stage-head{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start}.n{width:42px;height:42px;border-radius:14px;background:var(--teal);color:white;display:grid;place-items:center;font-weight:900}.done{display:flex;gap:7px;align-items:center;color:var(--teal);font-weight:900}.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.box{border:1px solid var(--line);border-radius:15px;padding:14px;background:#fff}.box h3{margin:.1em 0 .4em;color:var(--teal)}.task{margin-top:12px;border-left:6px solid var(--orange);background:#fff3e8;border-radius:12px;padding:12px}.code{margin-top:12px}.code pre{background:#101936;color:#f7fbff;border-radius:14px;padding:14px;white-space:pre-wrap;overflow:auto}.quiz{border:2px solid var(--teal);border-radius:15px;padding:14px;margin-top:14px;background:#fbffff}.quiz label{display:block;margin:8px 0}.feedback{margin-top:8px;font-weight:900}.plan{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.plan .box{background:#fffdf8}.log textarea,.log input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px}.log-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.warn{background:#fff7ed;border-left:6px solid var(--orange);border-radius:12px;padding:12px;margin-top:12px}@media(max-width:850px){.wrap{grid-template-columns:1fr}.side{position:relative;top:0}.cols,.plan,.log-grid{grid-template-columns:1fr}.stage-head{grid-template-columns:42px 1fr}.done{grid-column:2}.nav{overflow:auto}.lead{font-size:17px}}</style></head><body><header class="top"><nav class="nav"><a class="brand" href="../../index.html">Big Data 2026-2S</a><a href="../../Presentaciones/s07-del-vecindario-al-texto.html#s1">Presentación</a><a class="launch" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Abrir / reutilizar Colab</a></nav></header><div class="wrap"><aside class="side"><div class="panel"><h2>Progreso S07</h2><div class="meter"><i id="bar"></i></div><small><b id="count">0</b> de 7 etapas verificadas</small><div class="steps"><a href="#uso">Cómo se dicta</a><a href="#e0">0 · Problema</a><a href="#e1">1 · Modelar</a><a href="#e2">2 · Analyzer</a><a href="#e3">3 · Elastic directo</a><a href="#e4">4 · Python</a><a href="#e5">5 · Evaluar</a><a href="#e6">6 · Transferir</a><a href="#live">S07 Live local</a></div><div class="warn"><b>Solo tres recursos visibles:</b> presentación, cuaderno y este laboratorio. No uses páginas sueltas durante la clase.</div></div></aside><main><section class="hero"><span class="ey">Universidad Central · Sesión 7</span><h1>Laboratorio activo: Elasticsearch</h1><p class="lead">Este laboratorio no reemplaza la explicación. Sirve como tablero de clase: te dice qué se hace, qué evidencia se espera y qué pregunta corta confirma comprensión. La explicación detallada de conceptos y ejemplos debe darse en la presentación principal.</p><div class="actions"><a class="btn red" href="../../Presentaciones/s07-del-vecindario-al-texto.html#s1">Abrir presentación</a><a class="btn" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Abrir / reutilizar Colab</a></div></section><section class="stage" id="uso"><div class="stage-head"><div class="n">?</div><div><h2>Cómo se dicta la clase</h2><p>No es tarea silenciosa ni lista de chequeo. Es un guion operativo para alternar explicación, Console y Python.</p></div></div><div class="plan"><div class="box"><h3>En clase</h3><p>Se explican todas las definiciones y ejemplos en la presentación: mapping, analyzer, Console, Query DSL, Python, bulk y P@5.</p></div><div class="box"><h3>Con el cuaderno</h3><p>Se ejecuta cuando la presentación lo indique. El código importante trae explicación; el plumbing queda oculto o resumido.</p></div><div class="box"><h3>Cierre/tarea</h3><p>Si el tiempo no alcanza, el reto de noticias se inicia en clase y se termina como entrega corta.</p></div></div><div class="warn"><b>Orden recomendado:</b> diapositivas 1–18 → Console; diapositivas 19–28 → Console + Live; diapositivas 29–34 → Colab + reto.</div></section><section class="stage" id="e0"><div class="stage-head"><div class="n">0</div><div><h2>Problema: buscar no es filtrar</h2><p>Capacidad: distinguir identidad, filtro y ranking textual.</p></div><label class="done"><input type="checkbox" data-step="0"> verificado</label></div><div class="cols"><div class="box"><h3>Concepto</h3><p>Filtrar responde si un documento cumple una condición. Buscar ordena documentos según relevancia frente a una necesidad textual.</p></div><div class="box"><h3>Evidencia</h3><p>En Colab reconoces 2.109 filas fuente y 1.994 procesos únicos.</p></div></div><div class="quiz" data-q="q0" data-answer="b"><b>Checkpoint:</b><p>¿Qué necesita ranking?</p><label><input name="q0" type="radio" value="a"> registros de Bogotá</label><label><input name="q0" type="radio" value="b"> procesos que mejor responden a “mantenimiento aeronaves”</label><label><input name="q0" type="radio" value="c"> contar documentos</label><button class="btn soft quizbtn">Comprobar</button><div class="feedback"></div></div></section><section class="stage" id="e1"><div class="stage-head"><div class="n">1</div><div><h2>Modelar documentos</h2><p>Capacidad: explicar documento, campo, índice, mapping, text y keyword.</p></div><label class="done"><input type="checkbox" data-step="1"> verificado</label></div><div class="cols"><div class="box"><h3>Ejemplo</h3><p><code>descripcion</code> es <code>text</code> porque buscamos palabras. <code>entidad</code> es <code>keyword</code> porque filtramos valores completos.</p></div><div class="box"><h3>Error frecuente</h3><p>Elegir <code>text</code> porque el valor “parece texto”. El tipo depende del uso, no de la apariencia.</p></div></div><div class="quiz" data-q="q1" data-answer="c"><b>Checkpoint:</b><p>¿Cuál mapping es más razonable?</p><label><input name="q1" type="radio" value="a"> todo text</label><label><input name="q1" type="radio" value="b"> todo keyword</label><label><input name="q1" type="radio" value="c"> título text, categoría keyword, premium boolean</label><button class="btn soft quizbtn">Comprobar</button><div class="feedback"></div></div></section><section class="stage" id="e2"><div class="stage-head"><div class="n">2</div><div><h2>Analyzer e índice invertido</h2><p>Capacidad: observar cómo Elasticsearch transforma texto antes de buscar.</p></div><label class="done"><input type="checkbox" data-step="2"> verificado</label></div><div class="code"><pre>POST s07-demo/_analyze
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Laboratorio activo S07: Elasticsearch, Console, Python y evaluación de relevancia.">
+<title>S07 · Laboratorio activo Elasticsearch</title>
+<style>
+:root{
+  --navy:#122253;--red:#B11F16;--orange:#E95D0F;--teal:#0B8689;--blue:#1472B8;
+  --purple:#634998;--beige:#F3E7CE;--paper:#fffdfa;--ink:#1f2338;--muted:#667085;
+  --line:#e4e7ef;--soft:#f7f2e9;--ok:#e8f6f3;--bad:#fce8e6;--code:#101936;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Roboto,"Segoe UI",Arial,sans-serif}
+a{color:inherit}button,input,textarea{font:inherit}code,pre{font-family:Consolas,"Cascadia Mono",monospace}
+.top{position:sticky;top:0;z-index:30;background:rgba(255,253,250,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav{max-width:1180px;margin:auto;padding:10px 16px;display:flex;gap:10px;align-items:center}
+.nav a{text-decoration:none;font-weight:900;border-radius:10px;padding:8px 10px}.nav a:hover{background:var(--soft)}
+.brand{margin-right:auto;color:var(--red)}.launch{background:var(--red)!important;color:white!important}
+.wrap{max-width:1180px;margin:auto;padding:28px 16px 80px;display:grid;grid-template-columns:270px 1fr;gap:24px}
+.side{position:sticky;top:72px;align-self:start;display:grid;gap:12px}
+.panel,.stage,.hero{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 8px 28px rgba(18,34,83,.06)}
+.panel h2{font-size:18px;margin:0 0 8px;color:var(--navy)}
+.meter{height:9px;background:#ece6dc;border-radius:999px;overflow:hidden}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--orange))}
+.steps{display:grid;gap:5px;margin-top:14px}.steps a{text-decoration:none;padding:8px;border-radius:10px;color:#5a6078;font-weight:800;font-size:13px}.steps a:hover{background:var(--soft);color:var(--red)}
+.ey{display:inline-block;background:#fff2ea;color:var(--red);border-radius:999px;padding:7px 10px;font-weight:900;text-transform:uppercase;font-size:12px;letter-spacing:.06em}
+h1{font-size:clamp(38px,6vw,68px);line-height:.98;margin:.2em 0;color:var(--navy)}
+h2{color:var(--navy);font-size:28px;margin:.2em 0}.lead{font-size:20px;color:#46506b;max-width:850px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:10px 14px;text-decoration:none;font-weight:900;display:inline-flex;align-items:center;justify-content:center;background:var(--teal);color:white;cursor:pointer}.btn:hover{filter:brightness(.96)}.btn:disabled{opacity:.5;cursor:not-allowed}.btn.red{background:var(--red)}.btn.soft{background:#e7f3f4;color:#075f62;border:1px solid #b9dddd}.btn.purple{background:var(--purple)}
+.stage{margin-top:18px;scroll-margin-top:80px}.stage-head{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start}.n{width:42px;height:42px;border-radius:14px;background:var(--teal);color:white;display:grid;place-items:center;font-weight:900}.done{display:flex;gap:7px;align-items:center;color:#086c70;font-weight:900}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.box{border:1px solid var(--line);border-radius:15px;padding:14px;background:#fff}.box h3{margin:.1em 0 .4em;color:#086c70}.task{margin-top:12px;border-left:6px solid var(--orange);background:#fff3e8;border-radius:12px;padding:12px;color:#3c2e26}
+.code{margin-top:12px}.code pre{background:var(--code);color:#f7fbff;border-radius:14px;padding:14px;white-space:pre-wrap;overflow:auto}
+.quiz{border:2px solid #0B8689;border-radius:15px;padding:14px;margin-top:14px;background:#fbffff;color:var(--ink)}.quiz label{display:block;margin:9px 0;cursor:pointer}.feedback{display:none;margin-top:10px;font-weight:800;border-radius:10px;padding:10px 12px}.feedback.ok{display:block;background:var(--ok);color:#155e5f}.feedback.bad{display:block;background:var(--bad);color:#8d1e18}.feedback.info{display:block;background:#eef5fc;color:#24527f}
+.plan{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.plan .box{background:#fffdf8}
+.log textarea,.log input,.live-form input{width:100%;border:1px solid #cfd5e2;border-radius:10px;padding:10px;background:#fff;color:var(--ink)}.log-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.warn{background:#fff7ed;color:#3f3128;border-left:6px solid var(--orange);border-radius:12px;padding:12px;margin-top:12px}
+.live-panel{border:2px solid var(--purple);background:#fbf9ff}.live-badge{display:inline-flex;align-items:center;gap:7px;color:#5b3f91;font-weight:900;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#a4a4aa}.dot.on{background:#17a36b;box-shadow:0 0 0 5px rgba(23,163,107,.12)}
+.live-form{display:grid;gap:8px}.mini{font-size:12px;color:var(--muted)}.live-self{font-weight:900;color:var(--navy);font-size:13px}
+.scoreboard{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}.scoreboard table{width:100%;border-collapse:collapse;min-width:430px}.scoreboard th,.scoreboard td{text-align:left;padding:10px;border-bottom:1px solid var(--line)}.scoreboard th{background:#f4f0fa;color:#4d347d}.scoreboard tr.me{background:#eaf6f6}.rank{font-weight:900;color:var(--purple)}.score{font-weight:900;color:var(--teal)}
+.live-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:14px;margin-top:14px}.statline{font-size:13px;color:var(--muted);margin-top:8px}.stats{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}.stat-chip{background:#f3eff9;color:#55398b;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:900}
+.side-score{display:grid;gap:5px;margin-top:8px}.side-score div{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:6px 8px;background:#f6f3fb;border-radius:8px}.side-score b{color:var(--purple)}
+@media(max-width:850px){.wrap{grid-template-columns:1fr}.side{position:relative;top:0}.cols,.plan,.log-grid,.live-grid{grid-template-columns:1fr}.stage-head{grid-template-columns:42px 1fr}.done{grid-column:2}.nav{overflow:auto}.lead{font-size:17px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav">
+    <a class="brand" href="../../index.html">Big Data 2026-2S</a>
+    <a href="../../Presentaciones/s07-del-vecindario-al-texto.html#s1">Presentación</a>
+    <a class="launch" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Abrir / reutilizar Colab</a>
+  </nav>
+</header>
+
+<div class="wrap">
+<aside class="side">
+  <div class="panel">
+    <h2>Progreso S07</h2>
+    <div class="meter"><i id="progressBar"></i></div>
+    <small><b id="progressCount">0</b> de 7 etapas verificadas</small>
+    <div class="steps">
+      <a href="#uso">Cómo se dicta</a><a href="#e0">0 · Problema</a><a href="#e1">1 · Modelar</a><a href="#e2">2 · Analyzer</a>
+      <a href="#e3">3 · Elastic directo</a><a href="#e4">4 · Python</a><a href="#e5">5 · Evaluar</a><a href="#e6">6 · Transferir</a><a href="#live">S07 Live</a>
+    </div>
+  </div>
+
+  <div class="panel live-panel">
+    <div class="live-badge"><span id="sideDot" class="dot"></span>S07 LIVE</div>
+    <div id="sideIdentity" class="mini" style="margin-top:7px">Aún no te has unido.</div>
+    <div id="sideScore" class="side-score"></div>
+    <a href="#live" class="btn purple" style="margin-top:9px">Ver ranking en vivo</a>
+  </div>
+</aside>
+
+<main>
+<section class="hero">
+  <span class="ey">Universidad Central · Sesión 7</span>
+  <h1>Laboratorio activo: Elasticsearch</h1>
+  <p class="lead">La presentación enseña los conceptos y ejemplos; aquí ejecutas, verificas evidencia y respondes checkpoints. S07 Live registra respuestas y actualiza el ranking de la clase en tiempo real.</p>
+  <div class="actions">
+    <a class="btn red" href="../../Presentaciones/s07-del-vecindario-al-texto.html#s1">Abrir presentación</a>
+    <a class="btn" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Abrir / reutilizar Colab</a>
+    <a class="btn purple" href="#live">Entrar a S07 Live</a>
+  </div>
+</section>
+
+<section class="stage" id="uso">
+  <div class="stage-head"><div class="n">?</div><div><h2>Cómo se dicta la clase</h2><p>No es tarea silenciosa ni lista de chequeo. Es el guion operativo para alternar explicación, Console y Python.</p></div></div>
+  <div class="plan">
+    <div class="box"><h3>1 · Presentación</h3><p>Tú explicas definiciones, ejemplos, errores frecuentes y la equivalencia Console ↔ Python.</p></div>
+    <div class="box"><h3>2 · Laboratorio</h3><p>El grupo ejecuta el paso indicado, verifica evidencia y responde el checkpoint S07 Live.</p></div>
+    <div class="box"><h3>3 · Cuaderno</h3><p>Se usa cuando toca automatizar. El código importante está explicado; el plumbing no domina la clase.</p></div>
+  </div>
+  <div class="warn"><b>Orden de clase:</b> presentación → ejecutar el paso → responder checkpoint → revisar ranking/distribución → continuar. El reto de noticias puede terminarse después si falta tiempo.</div>
+</section>
+
+<section class="stage" id="e0">
+  <div class="stage-head"><div class="n">0</div><div><h2>Problema: buscar no es filtrar</h2><p>Capacidad: distinguir identidad, filtro y ranking textual.</p></div><label class="done"><input type="checkbox" data-step="0"> verificado</label></div>
+  <div class="cols"><div class="box"><h3>Concepto</h3><p>Filtrar responde si un documento cumple una condición. Buscar ordena documentos según relevancia frente a una necesidad textual.</p></div><div class="box"><h3>Evidencia</h3><p>En Colab reconoces 2.109 filas fuente y 1.994 procesos únicos.</p></div></div>
+  <div class="quiz" data-question="q0" data-fallback="b"><b>Checkpoint 1</b><p>¿Qué tarea necesita ranking?</p>
+    <label><input name="q0" type="radio" value="a"> registros de Bogotá</label>
+    <label><input name="q0" type="radio" value="b"> procesos que mejor responden a “mantenimiento aeronaves”</label>
+    <label><input name="q0" type="radio" value="c"> contar documentos</label>
+    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e1">
+  <div class="stage-head"><div class="n">1</div><div><h2>Modelar documentos</h2><p>Capacidad: explicar documento, campo, índice, mapping, <code>text</code> y <code>keyword</code>.</p></div><label class="done"><input type="checkbox" data-step="1"> verificado</label></div>
+  <div class="cols"><div class="box"><h3>Ejemplo</h3><p><code>descripcion</code> es <code>text</code> porque buscamos palabras. <code>entidad</code> es <code>keyword</code> porque filtramos valores completos.</p></div><div class="box"><h3>Error frecuente</h3><p>Elegir <code>text</code> porque el valor “parece texto”. El tipo depende del uso, no de la apariencia.</p></div></div>
+  <div class="quiz" data-question="q1" data-fallback="c"><b>Checkpoint 2</b><p>¿Cuál mapping es más razonable?</p>
+    <label><input name="q1" type="radio" value="a"> todo <code>text</code></label>
+    <label><input name="q1" type="radio" value="b"> todo <code>keyword</code></label>
+    <label><input name="q1" type="radio" value="c"> título <code>text</code>, categoría <code>keyword</code>, premium <code>boolean</code></label>
+    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e2">
+  <div class="stage-head"><div class="n">2</div><div><h2>Analyzer e índice invertido</h2><p>Capacidad: observar cómo Elasticsearch transforma texto antes de buscar.</p></div><label class="done"><input type="checkbox" data-step="2"> verificado</label></div>
+  <div class="code"><pre>POST s07-demo/_analyze
 {
   "analyzer": "spanish",
   "text": "Servicios de mantenimiento de las aeronaves"
-}</pre></div><div class="task"><b>Evidencia:</b> puedes explicar al menos un token producido y por qué no coincide exactamente con la frase original.</div><div class="quiz" data-q="q2" data-answer="a"><b>Checkpoint:</b><p>¿Qué componente produce los tokens?</p><label><input name="q2" type="radio" value="a"> analyzer</label><label><input name="q2" type="radio" value="b"> bulk</label><label><input name="q2" type="radio" value="c"> filter</label><button class="btn soft quizbtn">Comprobar</button><div class="feedback"></div></div></section><section class="stage" id="e3"><div class="stage-head"><div class="n">3</div><div><h2>Usar Elasticsearch directamente</h2><p>Capacidad: entrar a Console, crear índice, indexar tres documentos y ejecutar _search.</p></div><label class="done"><input type="checkbox" data-step="3"> verificado</label></div><div class="cols"><div class="box"><h3>Console</h3><p>Primero ejecutas APIs directamente. Así entiendes request, endpoint, JSON y respuesta.</p></div><div class="box"><h3>UI</h3><p>Después inspeccionas el índice en Index Management / Discover para verificar que existe y tiene documentos.</p></div></div><div class="quiz" data-q="q3" data-answer="b"><b>Checkpoint:</b><p>En una respuesta de búsqueda, ¿dónde viene el documento original?</p><label><input name="q3" type="radio" value="a"> _score</label><label><input name="q3" type="radio" value="b"> _source</label><label><input name="q3" type="radio" value="c"> took</label><button class="btn soft quizbtn">Comprobar</button><div class="feedback"></div></div></section><section class="stage" id="e4"><div class="stage-head"><div class="n">4</div><div><h2>Automatizar desde Python</h2><p>Capacidad: conectar con <code>Elasticsearch(...)</code>, crear índice, cargar con <code>bulk()</code> y verificar <code>count()</code>.</p></div><label class="done"><input type="checkbox" data-step="4"> verificado</label></div><div class="code"><pre>client = Elasticsearch(endpoint, api_key=api_key)
-client.info()</pre></div><div class="task"><b>Explicación obligatoria:</b> <code>client</code> es la conexión; no contiene los datos. Python automatiza la API que viste en Console.</div><div class="quiz" data-q="q4" data-answer="c"><b>Checkpoint:</b><p>¿Qué prueba mínima confirma que Python habla con Elasticsearch?</p><label><input name="q4" type="radio" value="a"> import pandas</label><label><input name="q4" type="radio" value="b"> display(corpus)</label><label><input name="q4" type="radio" value="c"> client.info()</label><button class="btn soft quizbtn">Comprobar</button><div class="feedback"></div></div></section><section class="stage" id="e5"><div class="stage-head"><div class="n">5</div><div><h2>Diseñar y evaluar búsqueda</h2><p>Capacidad: construir match, multi_match, boost, filter, highlight y medir P@5.</p></div><label class="done"><input type="checkbox" data-step="5"> verificado</label></div><div class="cols"><div class="box"><h3>Query DSL</h3><p><code>must</code> aporta relevancia. <code>filter</code> restringe sin sumar score. <code>highlight</code> ayuda a inspeccionar evidencia textual.</p></div><div class="box"><h3>Evaluación</h3><p>Precision@5 exige criterio de relevancia antes de etiquetar los resultados.</p></div></div><div class="quiz" data-q="q5" data-answer="a"><b>Checkpoint:</b><p>Si 3 de 5 resultados son relevantes, ¿cuál es Precision@5?</p><label><input name="q5" type="radio" value="a"> 0,60</label><label><input name="q5" type="radio" value="b"> 0,40</label><label><input name="q5" type="radio" value="c"> 3,00</label><button class="btn soft quizbtn">Comprobar</button><div class="feedback"></div></div></section><section class="stage" id="e6"><div class="stage-head"><div class="n">6</div><div><h2>Transferir a noticias</h2><p>Capacidad: repetir el proceso en otro dominio y explicar qué cambia.</p></div><label class="done"><input type="checkbox" data-step="6"> verificado</label></div><div class="cols"><div class="box"><h3>Reto</h3><p>Indexa 987 noticias, aplica un brief editorial, filtra <code>premium=false</code> y compara baseline vs ranking ajustado.</p></div><div class="box"><h3>Entrega</h3><p>Recomienda A o B con P@5, un ejemplo concreto, un falso positivo y una mejora siguiente.</p></div></div></section><section class="stage" id="live"><h2>S07 Live local</h2><p>Esta versión registra el avance en este navegador. Para ver resultados por estudiante en tiempo real se requiere backend; mientras tanto, exporta el resumen local al final.</p><button class="btn" id="export">Exportar resumen JSON</button><pre id="summary">{}</pre></section><section class="stage log"><h2>Bitácora mínima</h2><div class="log-grid"><div><label>Índice personal</label><input data-log="indice" placeholder="s07-compras-claras-alias"></div><div><label>Documentos indexados</label><input data-log="conteo" placeholder="1994"></div><div><label>Consulta</label><input data-log="consulta" placeholder="mantenimiento aeronaves"></div><div><label>Precision@5 B</label><input data-log="p5" placeholder="0.8"></div></div><p><label>Qué puedo hacer solo después de S07</label><textarea data-log="autonomia" rows="4" placeholder="Sé crear índice, diseñar mapping..."></textarea></p></section></main></div><script>const key='s07lab:v6',state=JSON.parse(localStorage.getItem(key)||'{"steps":{},"quiz":{},"log":{}}');function save(){localStorage.setItem(key,JSON.stringify(state));render()}function render(){let n=0;document.querySelectorAll('[data-step]').forEach(x=>{x.checked=!!state.steps[x.dataset.step];if(x.checked)n++});count.textContent=n;bar.style.width=(n/7*100)+'%';document.querySelectorAll('[data-log]').forEach(x=>{x.value=state.log[x.dataset.log]||''});summary.textContent=JSON.stringify(state,null,2)}document.querySelectorAll('[data-step]').forEach(x=>x.onchange=()=>{state.steps[x.dataset.step]=x.checked;save()});document.querySelectorAll('[data-log]').forEach(x=>x.oninput=()=>{state.log[x.dataset.log]=x.value;save()});document.querySelectorAll('.quizbtn').forEach(btn=>btn.onclick=()=>{const q=btn.closest('.quiz'),name=q.dataset.q,ans=q.dataset.answer,sel=q.querySelector('input:checked'),fb=q.querySelector('.feedback');if(!sel){fb.textContent='Elige una opción.';return}const ok=sel.value===ans;state.quiz[name]={answer:sel.value,ok};fb.textContent=ok?'✓ Correcto':'Revisa la explicación en la presentación.';fb.style.color=ok?'#0B8689':'#B11F16';save()});export.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='s07_live_local.json';a.click()};render();</script></body></html>
+}</pre></div>
+  <div class="task"><b>Evidencia:</b> puedes explicar al menos un token producido y por qué no coincide exactamente con la frase original.</div>
+  <div class="quiz" data-question="q2" data-fallback="a"><b>Checkpoint 3</b><p>¿Qué componente produce los tokens?</p>
+    <label><input name="q2" type="radio" value="a"> analyzer</label>
+    <label><input name="q2" type="radio" value="b"> bulk</label>
+    <label><input name="q2" type="radio" value="c"> filter</label>
+    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e3">
+  <div class="stage-head"><div class="n">3</div><div><h2>Usar Elasticsearch directamente</h2><p>Capacidad: entrar a Console, crear índice, indexar tres documentos y ejecutar <code>_search</code>.</p></div><label class="done"><input type="checkbox" data-step="3"> verificado</label></div>
+  <div class="cols"><div class="box"><h3>Console</h3><p>Primero ejecutas APIs directamente. Así entiendes método, endpoint, JSON y respuesta.</p></div><div class="box"><h3>UI</h3><p>Después inspeccionas el índice en Index Management / Discover para verificar que existe y tiene documentos.</p></div></div>
+  <div class="quiz" data-question="q3" data-fallback="b"><b>Checkpoint 4</b><p>En una respuesta de búsqueda, ¿dónde viene el documento original?</p>
+    <label><input name="q3" type="radio" value="a"> <code>_score</code></label>
+    <label><input name="q3" type="radio" value="b"> <code>_source</code></label>
+    <label><input name="q3" type="radio" value="c"> <code>took</code></label>
+    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e4">
+  <div class="stage-head"><div class="n">4</div><div><h2>Automatizar desde Python</h2><p>Capacidad: conectar con <code>Elasticsearch(...)</code>, cargar con <code>bulk()</code> y verificar <code>count()</code>.</p></div><label class="done"><input type="checkbox" data-step="4"> verificado</label></div>
+  <div class="code"><pre>client = Elasticsearch(endpoint, api_key=api_key)
+client.info()</pre></div>
+  <div class="task"><b>Explicación obligatoria:</b> <code>client</code> es la conexión; no contiene los datos. Python automatiza la API que viste en Console.</div>
+  <div class="quiz" data-question="q4" data-fallback="c"><b>Checkpoint 5</b><p>¿Qué prueba mínima confirma que Python habla con Elasticsearch?</p>
+    <label><input name="q4" type="radio" value="a"> <code>import pandas</code></label>
+    <label><input name="q4" type="radio" value="b"> <code>display(corpus)</code></label>
+    <label><input name="q4" type="radio" value="c"> <code>client.info()</code></label>
+    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e5">
+  <div class="stage-head"><div class="n">5</div><div><h2>Diseñar y evaluar búsqueda</h2><p>Capacidad: construir <code>match</code>, <code>multi_match</code>, boost, filter, highlight y medir P@5.</p></div><label class="done"><input type="checkbox" data-step="5"> verificado</label></div>
+  <div class="cols"><div class="box"><h3>Query DSL</h3><p><code>must</code> aporta relevancia. <code>filter</code> restringe sin sumar score. <code>highlight</code> ayuda a inspeccionar evidencia textual.</p></div><div class="box"><h3>Evaluación</h3><p>Precision@5 exige criterio de relevancia antes de etiquetar los resultados.</p></div></div>
+  <div class="quiz" data-question="q5" data-fallback="a"><b>Checkpoint 6</b><p>Si 3 de 5 resultados son relevantes, ¿cuál es Precision@5?</p>
+    <label><input name="q5" type="radio" value="a"> 0,60</label>
+    <label><input name="q5" type="radio" value="b"> 0,40</label>
+    <label><input name="q5" type="radio" value="c"> 3,00</label>
+    <button class="btn soft quizbtn" type="button">Comprobar</button><div class="feedback"></div>
+  </div>
+</section>
+
+<section class="stage" id="e6">
+  <div class="stage-head"><div class="n">6</div><div><h2>Transferir a noticias</h2><p>Capacidad: repetir el proceso en otro dominio y explicar qué cambia.</p></div><label class="done"><input type="checkbox" data-step="6"> verificado</label></div>
+  <div class="cols"><div class="box"><h3>Reto</h3><p>Indexa 987 noticias, aplica un brief editorial, filtra <code>premium=false</code> y compara baseline vs ranking ajustado.</p></div><div class="box"><h3>Entrega</h3><p>Recomienda A o B con P@5, un ejemplo concreto, un falso positivo y una mejora siguiente.</p></div></div>
+</section>
+
+<section class="stage live-panel" id="live">
+  <div class="stage-head"><div class="n">LIVE</div><div><h2>S07 Live · ranking en tiempo real</h2><p>Escribe un nombre o alias. Cada checkpoint correcto suma un punto; el ranking se actualiza cuando cualquier estudiante responde.</p></div></div>
+  <div class="live-grid">
+    <div class="box">
+      <h3>Entrar a la sesión</h3>
+      <div class="live-form">
+        <label for="nickname">Nombre o alias</label>
+        <input id="nickname" maxlength="40" autocomplete="name" placeholder="Ej. Andrea C.">
+        <button id="joinLive" class="btn purple" type="button">Entrar a S07 Live</button>
+        <button id="changeAlias" class="btn soft" type="button">Actualizar alias</button>
+      </div>
+      <p id="liveStatus" class="statline">Conectando servicio…</p>
+      <p id="myLiveScore" class="live-self"></p>
+      <div class="warn"><b>Uso formativo:</b> el ranking sirve para detectar conceptos que debemos volver a explicar; no reemplaza la evidencia del notebook.</div>
+    </div>
+    <div>
+      <div class="scoreboard">
+        <table>
+          <thead><tr><th>#</th><th>Estudiante</th><th>Puntos</th><th>Respondidas</th></tr></thead>
+          <tbody id="leaderBody"><tr><td colspan="4">Esperando participantes…</td></tr></tbody>
+        </table>
+      </div>
+      <div id="liveMeta" class="statline">0 participantes</div>
+      <h3 style="margin:14px 0 4px;color:var(--navy)">Distribución por checkpoint</h3>
+      <div id="liveStats" class="stats"></div>
+    </div>
+  </div>
+</section>
+
+<section class="stage log">
+  <h2>Bitácora mínima</h2>
+  <div class="log-grid"><div><label>Índice personal</label><input data-log="indice" placeholder="s07-compras-claras-alias"></div><div><label>Documentos indexados</label><input data-log="conteo" placeholder="1994"></div><div><label>Consulta</label><input data-log="consulta" placeholder="mantenimiento aeronaves"></div><div><label>Precision@5 B</label><input data-log="p5" placeholder="0.8"></div></div>
+  <p><label>Qué puedo hacer solo después de S07</label><textarea data-log="autonomia" rows="4" placeholder="Sé crear índice, diseñar mapping..."></textarea></p>
+  <button class="btn" id="exportSummary" type="button">Exportar resumen JSON</button>
+  <pre id="summary" style="margin-top:12px">{}</pre>
+</section>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  const PROGRESS_KEY='s07lab:v7';
+  const CLIENT_KEY='s07live:client:v1';
+  const LIVE_CODE='ELASTIC-S07';
+  const SUPABASE_URL='https://gnpouhsvsisqoxketlfr.supabase.co';
+  const SUPABASE_KEY='sb_publishable_9l_od2Dg78hu1mPrmxAabA_erL2Tlge';
+
+  let state={steps:{},quiz:{},log:{},live:{}};
+  try{state=Object.assign(state,JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}'))}catch(e){}
+  state.steps=state.steps||{};state.quiz=state.quiz||{};state.log=state.log||{};state.live=state.live||{};
+
+  const progressBar=document.getElementById('progressBar');
+  const progressCount=document.getElementById('progressCount');
+  const summary=document.getElementById('summary');
+  const nickname=document.getElementById('nickname');
+  const joinLiveBtn=document.getElementById('joinLive');
+  const changeAliasBtn=document.getElementById('changeAlias');
+  const liveStatus=document.getElementById('liveStatus');
+  const myLiveScore=document.getElementById('myLiveScore');
+  const leaderBody=document.getElementById('leaderBody');
+  const liveMeta=document.getElementById('liveMeta');
+  const liveStats=document.getElementById('liveStats');
+  const sideDot=document.getElementById('sideDot');
+  const sideIdentity=document.getElementById('sideIdentity');
+  const sideScore=document.getElementById('sideScore');
+  const exportSummaryBtn=document.getElementById('exportSummary');
+
+  let sb=null;
+  let channel=null;
+  try{
+    if(window.supabase && window.supabase.createClient){
+      sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+      liveStatus.textContent='Servicio S07 Live disponible. Escribe tu alias para entrar.';
+    }else{
+      liveStatus.textContent='No se pudo cargar S07 Live. Los checkpoints seguirán funcionando en modo local.';
+    }
+  }catch(err){
+    liveStatus.textContent='S07 Live no está disponible; continúa en modo local.';
+  }
+
+  function save(){
+    localStorage.setItem(PROGRESS_KEY,JSON.stringify(state));
+    renderLocal();
+  }
+
+  function renderLocal(){
+    let done=0;
+    document.querySelectorAll('[data-step]').forEach(el=>{
+      el.checked=!!state.steps[el.dataset.step];
+      if(el.checked)done++;
+    });
+    progressCount.textContent=done;
+    progressBar.style.width=(done/7*100)+'%';
+    document.querySelectorAll('[data-log]').forEach(el=>{
+      if(document.activeElement!==el) el.value=state.log[el.dataset.log]||'';
+    });
+    nickname.value=state.live.nickname||nickname.value||'';
+    summary.textContent=JSON.stringify(state,null,2);
+    if(state.live.participant_id){
+      sideDot.classList.add('on');
+      sideIdentity.textContent=state.live.nickname+' · '+(state.live.score||0)+'/'+(state.live.answered||0)+' puntos/respondidas';
+    }else{
+      sideDot.classList.remove('on');
+      sideIdentity.textContent='Aún no te has unido.';
+    }
+  }
+
+  document.querySelectorAll('[data-step]').forEach(el=>{
+    el.addEventListener('change',()=>{state.steps[el.dataset.step]=el.checked;save()});
+  });
+  document.querySelectorAll('[data-log]').forEach(el=>{
+    el.addEventListener('input',()=>{state.log[el.dataset.log]=el.value;save()});
+  });
+
+  function clientId(){
+    let id=localStorage.getItem(CLIENT_KEY);
+    if(!id){
+      id=(crypto.randomUUID?crypto.randomUUID():('00000000-0000-4000-8000-'+Math.random().toString(16).slice(2).padEnd(12,'0').slice(0,12)));
+      localStorage.setItem(CLIENT_KEY,id);
+    }
+    return id;
+  }
+
+  async function joinLive(){
+    if(!sb){liveStatus.textContent='S07 Live no está disponible; usa modo local.';return}
+    const name=nickname.value.trim();
+    if(name.length<2){liveStatus.textContent='Escribe un nombre o alias de al menos 2 caracteres.';return}
+    joinLiveBtn.disabled=true;
+    liveStatus.textContent='Entrando a la sesión…';
+    const {data,error}=await sb.rpc('s07_live_join',{p_code:LIVE_CODE,p_nickname:name,p_client_id:clientId()});
+    joinLiveBtn.disabled=false;
+    if(error){liveStatus.textContent='No pude entrar: '+error.message;return}
+    const row=Array.isArray(data)?data[0]:data;
+    if(!row){liveStatus.textContent='La sesión no devolvió un participante.';return}
+    state.live={participant_id:row.participant_id,session_id:row.session_id,nickname:row.nickname,score:row.score,answered:row.answered};
+    save();
+    liveStatus.textContent='Conectado en tiempo real.';
+    await refreshLeaderboard();
+    startRealtime();
+  }
+
+  joinLiveBtn.addEventListener('click',joinLive);
+  changeAliasBtn.addEventListener('click',joinLive);
+  nickname.addEventListener('keydown',e=>{if(e.key==='Enter')joinLive()});
+
+  async function refreshLeaderboard(){
+    if(!sb)return;
+    const {data,error}=await sb.rpc('s07_live_leaderboard',{p_code:LIVE_CODE});
+    if(error){liveMeta.textContent='No pude actualizar ranking: '+error.message;return}
+    const rows=data||[];
+    liveMeta.textContent=rows.length+' participante'+(rows.length===1?'':'s')+' conectado'+(rows.length===1?'':'s');
+    leaderBody.innerHTML=rows.length?rows.map(r=>{
+      const me=state.live.participant_id && r.participant_id===state.live.participant_id;
+      return '<tr class="'+(me?'me':'')+'"><td class="rank">'+r.rank+'</td><td>'+escapeHtml(r.nickname)+'</td><td class="score">'+r.score+'</td><td>'+r.answered+'/6</td></tr>';
+    }).join(''):'<tr><td colspan="4">Esperando participantes…</td></tr>';
+    sideScore.innerHTML=rows.slice(0,3).map(r=>'<div><span>#'+r.rank+' '+escapeHtml(r.nickname)+'</span><b>'+r.score+'</b></div>').join('');
+    if(state.live.nickname){
+      const mine=rows.find(r=>r.participant_id===state.live.participant_id);
+      if(mine){
+        state.live.score=mine.score;state.live.answered=mine.answered;
+        myLiveScore.textContent='Tu posición: #'+mine.rank+' · '+mine.score+' puntos · '+mine.answered+'/6 respondidas';
+        sideIdentity.textContent=state.live.nickname+' · #'+mine.rank+' · '+mine.score+' puntos';
+        localStorage.setItem(PROGRESS_KEY,JSON.stringify(state));
+      }
+    }
+  }
+
+  function startRealtime(){
+    if(!sb)return;
+    if(channel) sb.removeChannel(channel);
+    channel=sb.channel('s07-live-scoreboard')
+      .on('postgres_changes',{event:'*',schema:'public',table:'s07_live_scores'},async()=>{
+        await refreshLeaderboard();
+        await refreshAllStats();
+      })
+      .subscribe(status=>{
+        if(status==='SUBSCRIBED'){
+          liveStatus.textContent=state.live.participant_id?'Conectado en tiempo real.':'Ranking sincronizado en tiempo real. Entra con tu alias para puntuar.';
+          sideDot.classList.add('on');
+        }
+      });
+  }
+
+  async function refreshAllStats(){
+    if(!sb)return;
+    const labels={q0:'Q1',q1:'Q2',q2:'Q3',q3:'Q4',q4:'Q5',q5:'Q6'};
+    const chunks=[];
+    for(const qid of Object.keys(labels)){
+      const {data,error}=await sb.rpc('s07_live_question_stats',{p_code:LIVE_CODE,p_question:qid});
+      if(error)continue;
+      const rows=data||[];
+      const total=rows.reduce((a,r)=>a+Number(r.responses||0),0);
+      if(!total){chunks.push('<span class="stat-chip">'+labels[qid]+': 0</span>');continue}
+      const dist=rows.map(r=>r.option.toUpperCase()+' '+r.responses).join(' · ');
+      chunks.push('<span class="stat-chip">'+labels[qid]+' · '+dist+'</span>');
+    }
+    liveStats.innerHTML=chunks.join('');
+  }
+
+  async function showStats(questionId,feedback){
+    if(!sb)return;
+    const {data}=await sb.rpc('s07_live_question_stats',{p_code:LIVE_CODE,p_question:questionId});
+    if(!data)return;
+    const total=data.reduce((a,r)=>a+Number(r.responses||0),0);
+    liveStats.innerHTML=data.map(r=>'<span class="stat-chip">'+r.option.toUpperCase()+': '+r.responses+'</span>').join('');
+    if(total && feedback){
+      const dist=data.map(r=>r.option.toUpperCase()+' '+r.responses).join(' · ');
+      feedback.innerHTML += '<div class="statline">Clase ahora: '+dist+'</div>';
+    }
+  }
+
+  document.querySelectorAll('.quizbtn').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const quiz=btn.closest('.quiz');
+      const qid=quiz.dataset.question;
+      const selected=quiz.querySelector('input:checked');
+      const feedback=quiz.querySelector('.feedback');
+      if(!selected){
+        feedback.className='feedback bad';
+        feedback.textContent='Elige una opción antes de comprobar.';
+        return;
+      }
+      btn.disabled=true;
+
+      if(sb && state.live.participant_id && state.live.session_id){
+        feedback.className='feedback info';
+        feedback.textContent='Registrando respuesta…';
+        const {data,error}=await sb.rpc('s07_live_submit',{
+          p_session:state.live.session_id,
+          p_participant:state.live.participant_id,
+          p_question:qid,
+          p_answer:selected.value
+        });
+        btn.disabled=false;
+        if(error){
+          feedback.className='feedback bad';
+          feedback.textContent='No pude registrar en vivo: '+error.message;
+          return;
+        }
+        const result=data||{};
+        const ok=!!result.correct;
+        state.quiz[qid]={answer:selected.value,ok:ok,live:true};
+        state.live.score=result.score;state.live.answered=result.answered;
+        save();
+        feedback.className='feedback '+(ok?'ok':'bad');
+        feedback.textContent=(ok?'✓ Correcto. ':'✗ Revisa. ')+(result.explanation||'');
+        await refreshLeaderboard();
+        await showStats(qid,feedback);
+      }else{
+        btn.disabled=false;
+        const ok=selected.value===quiz.dataset.fallback;
+        state.quiz[qid]={answer:selected.value,ok:ok,live:false};
+        save();
+        feedback.className='feedback '+(ok?'ok':'bad');
+        feedback.textContent=(ok?'✓ Correcto. ':'✗ Revisa la explicación en la presentación. ')+'Modo local: entra a S07 Live para sumar al ranking.';
+      }
+    });
+  });
+
+  exportSummaryBtn.addEventListener('click',()=>{
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='s07_resumen_'+(state.live.nickname||'estudiante').replace(/[^a-z0-9_-]+/gi,'_')+'.json';
+    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  });
+
+  function escapeHtml(s){
+    return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  renderLocal();
+  refreshLeaderboard();
+  refreshAllStats();
+  startRealtime();
+})();
+</script>
+</body>
+</html>
