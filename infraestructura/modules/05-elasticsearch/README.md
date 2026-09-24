@@ -1,175 +1,194 @@
 # Módulo 05 · Elasticsearch — arquitectura vigente de S07
 
-## Objetivo de aprendizaje
+## Objetivo
 
-S07 enseña a construir y evaluar un buscador textual de forma reproducible. La clase no presenta Elasticsearch como una librería de Python: primero se usa **Elasticsearch directamente** mediante UI/Console; después se automatizan las mismas operaciones desde Python/Colab.
+S07 enseña a construir y evaluar un buscador textual de forma reproducible. Elasticsearch se enseña primero como **motor independiente** mediante Console y después se automatiza desde Python.
 
-El estudiante debe salir pudiendo explicar y repetir:
+Al terminar, el estudiante debe poder explicar y repetir:
 
-1. documento, campo, índice y mapping;
-2. `text`, `keyword` y multi-fields;
-3. analyzer en index-time y search-time;
-4. índice invertido, BM25 y lectura de `_score`;
-5. `match` vs `term`;
-6. uso de Console para `PUT`, `_analyze`, indexación y `_search`;
-7. `multi_match`, boost, `bool.must`, `filter` y `highlight`;
-8. conexión desde Python con `Elasticsearch(...)`;
-9. carga masiva con `bulk()` y verificación con `count()`;
-10. diagnóstico de errores comunes;
-11. evaluación A/B con criterios de relevancia y Precision@5;
-12. transferencia al corpus de noticias.
+1. documento, campo, índice, corpus y mapping;
+2. `text`, `keyword` y full-text search;
+3. tokenizer, token, analyzer, index-time y search-time;
+4. `/_analyze`, índice invertido, `match`, `term`, BM25 y `_score`;
+5. uso de Elastic Console para crear un índice, indexar documentos y buscar;
+6. cliente Python, `bulk()` y verificación con `count()`;
+7. `multi_match`, `bool`, `must`, `filter`, boost y highlight;
+8. diagnóstico con API/UI;
+9. Precision@5 y comparación A/B;
+10. transferencia del caso contractual a noticias.
 
-## Tres recursos visibles
+## Regla estricta: solo dos recursos visibles
 
-- **Presentación:** `Presentaciones/s07-del-vecindario-al-texto.html`
-- **Cuaderno:** `Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb`
-- **Laboratorio:** `assets/tutoriales/s07-laboratorio-guiado.html`
+S07 tiene **exactamente dos recursos para el estudiante**:
 
-La presentación enseña. El cuaderno automatiza. El laboratorio registra desempeño, progreso y mastery.
+1. **Presentación interactiva:** `Presentaciones/s07-del-vecindario-al-texto.html`
+2. **Cuaderno Python:** `Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb`
 
-## Ruta de clase
+No existe un laboratorio separado. Las actividades D1–D8, S07 Live y el simulador de tokenización están **embebidos en la presentación**.
 
-```text
-Explicación con ejemplo resuelto
-        ↓
-Console / Colab
-        ↓
-Desafío D1–D8
-        ↓
-Primer intento puntúa ranking
-        ↓
-Pista
-        ↓
-Reintento puntúa mastery, no ranking
-```
+No crear una tercera página, tutorial o herramienta para S07. Si aparece una nueva actividad, debe agregarse como una nueva diapositiva o integrarse en una diapositiva existente.
 
-Los deep links de la presentación apuntan al desafío exacto:
-
-- `#d1` ranking vs filtro;
-- `#d2` mapping;
-- `#d3` analyzer;
-- `#d4` API `_analyze`;
-- `#d5` bulk/count;
-- `#d6` Query DSL;
-- `#d7` Precision@5;
-- `#d8` transferencia a noticias.
-
-## S07 Live · primer intento y mastery
-
-El ranking ya no se autocorrige. Cada actividad conserva dos métricas:
-
-- **ranking / first score:** puntos obtenidos en el primer intento;
-- **mastery score:** puntos dominados después de pistas y reintentos.
-
-Esto permite ver:
+## Secuencia de clase
 
 ```text
-D2 Mapping
-Primer intento correcto: 6/10
-Mastery después de pista: 9/10
+definición
+  ↓
+ejemplo mínimo
+  ↓
+demostración / herramienta
+  ↓
+desafío embebido D1–D8
+  ↓
+primer intento
+  ↓
+pista si falla
+  ↓
+reintento para dominio
+  ↓
+cuaderno Python cuando toca automatizar
 ```
 
-Así el laboratorio conserva valor formativo sin maquillar la medición inicial.
+### Regla terminológica
+
+Ningún término técnico debe utilizarse como requisito previo antes de haber sido definido.
+
+Una definición núcleo debe incluir, cuando aplique:
+
+- qué es;
+- para qué sirve;
+- ejemplo mínimo;
+- cómo observarlo o medirlo;
+- error frecuente o límite.
+
+Ejemplo: antes de pedir `POST /_analyze`, S07 define **API**, **método HTTP**, **POST**, **ruta**, **cuerpo JSON**, **Console**, **analyzer** y **token**.
+
+## Tokenización
+
+La presentación incluye un laboratorio interactivo embebido:
+
+```text
+texto
+  ↓
+tokenizer
+  ↓
+filtros
+  ↓
+tokens
+```
+
+Permite comparar al menos:
+
+- `standard`;
+- `whitespace`;
+- `keyword`;
+- `letter`;
+- `edge n-gram`.
+
+La simulación es pedagógica. Para verificar tokens reales se usa `POST /_analyze` en Elastic Console.
+
+## BM25
+
+BM25 **no se instala aparte para usarlo en Elasticsearch**. Es la similitud lexical predeterminada para campos de texto, salvo configuración diferente.
+
+S07 ya no necesita `rank-bm25` en Python para enseñar este concepto. El estudiante observa BM25 a través del ranking y `_score` del propio Elasticsearch.
+
+`corpus` significa el conjunto de documentos sobre el que se busca o evalúa.
+
+## S07 Live embebido
+
+Las ocho actividades están dentro de la presentación:
+
+- D1 ranking vs filtro;
+- D2 mapping;
+- D3 analyzer;
+- D4 API `/_analyze`;
+- D5 bulk/count;
+- D6 Query DSL;
+- D7 Precision@5;
+- D8 transferencia a noticias.
+
+La respuesta correcta nunca se expone en HTML.
+
+Se guardan dos métricas:
+
+- **primer intento:** fija el puntaje de ranking;
+- **dominio:** puede mejorar después de pistas y reintentos.
+
+## Teacher Wall
+
+El control docente vive **dentro del mismo archivo de presentación**, no es una tercera herramienta.
+
+Modo docente:
+
+```text
+Presentaciones/s07-del-vecindario-al-texto.html?wall=docente
+```
+
+Funciones:
+
+- autenticación por PIN validado en Supabase;
+- crear una nueva partida con código aleatorio;
+- copiar enlace estudiante;
+- ver ranking en vivo;
+- ver primer intento y dominio por desafío;
+- reiniciar la partida actual conservando alias;
+- cerrar/reabrir una partida;
+- seleccionar rondas anteriores.
+
+El PIN no debe aparecer en HTML, JavaScript, README ni SQL en texto plano. El backend conserva únicamente su hash.
+
+## Contraste y accesibilidad
+
+Regla visual obligatoria:
+
+> toda caja clara debe definir texto oscuro incluso cuando está dentro de una diapositiva oscura.
+
+El validador debe comprobar reglas para `.dark .card`, `.dark .note` y tablas.
+
+La presentación debe conservar:
+
+- navegación táctil;
+- controles ≥ 44 px en móvil;
+- scroll vertical dentro de la diapositiva;
+- inputs de al menos 16 px en móvil;
+- soporte para safe areas.
 
 ## Backend
 
-Arquitectura:
+Supabase mantiene:
 
-```text
-GitHub Pages
-   ↓ publishable key
-Supabase RPC
-   ├── s07_live_join
-   ├── s07_live_submit
-   ├── s07_live_leaderboard
-   └── s07_live_activity_stats
-        ↓
-s07_live_scores / s07_live_responses
-        ↓
-realtime.send() / Broadcast
-        ↓
-ranking actualizado
-        ↓
-polling de 3 s como respaldo móvil
-```
+- sesiones/partidas;
+- preguntas;
+- participantes;
+- respuestas;
+- ranking por primer intento;
+- dominio;
+- control docente protegido.
 
-Datos guardados:
-
-- alias;
-- respuesta;
-- first answer / first correct;
-- mastered;
-- attempt count;
-- ranking score;
-- mastery score.
-
-No se guardan correos, contraseñas ni credenciales de Elasticsearch.
-
-Migración canónica:
+La migración canónica vive en:
 
 `infraestructura/modules/05-elasticsearch/s07-live-supabase.sql`
 
-## Reglas pedagógicas vigentes
+No se guardan correos, contraseñas ni credenciales de Elasticsearch.
 
-1. No revelar solución completa después del primer error.
-2. La primera respuesta fija ranking.
-3. Los reintentos sirven para mastery.
-4. Cada reto debe ser isomorfo al ejemplo, no idéntico.
-5. Los bloques de Console en el notebook deben decir **NO SE EJECUTA EN COLAB**.
-6. No usar fences `http` que Colab convierta en enlaces clicables.
-7. La sesión mantiene máximo 35 pantallas.
-8. No crear más de tres recursos visibles.
+## QA
 
-## Referentes técnicos usados
+Ejecutar:
 
-- Elastic Search Labs · Search Tutorial: construcción incremental de una solución completa de búsqueda.
-- Elastic · Keyword search with Python: proyecto, índice, mapping, cliente oficial, bulk y búsqueda.
-- Elastic · Query DSL: query context vs filter context.
-- Elastic · Match query y Term query: full-text vs exact matching.
-- Elastic · Ranking Evaluation API: evaluación con necesidades de información y documentos juzgados.
-- Elastic · Search Profiler: diagnóstico de costo de ejecución.
-- Elastic · Search UI / e-commerce: patrones de caja de búsqueda, filtros, facets y experiencia de producto.
-- Supabase Realtime · Broadcast: Broadcast para notificaciones de cambios; polling como respaldo móvil.
-
-## QA mínimo antes de dictar
-
-- Abrir presentación en portátil y teléfono.
-- Probar botones D1–D8 desde la presentación.
-- Entrar a S07 Live en dos navegadores.
-- Responder mal y luego bien: ranking no debe subir; mastery sí.
-- Ver actualización sin recargar.
-- Confirmar que el cuaderno no tiene rutas de Console clicables.
-- Ejecutar `client.info()`, `_analyze`, `bulk`, `count` y al menos una búsqueda real.
-- Verificar que `Precision@5` acepte `0.6`, `0.60`, `0,6` y `0,60`.
-
-
-## Estándar de explicación de conceptos
-
-S07 no acepta definiciones de una sola línea para los conceptos núcleo. Cada concepto importante debe responder, cuando aplique, estas preguntas:
-
-1. **Qué es:** definición precisa y breve.
-2. **Para qué sirve:** problema que resuelve.
-3. **Ejemplo mínimo:** caso de 1–3 líneas que pueda razonarse sin ejecutar nada.
-4. **Cómo se observa o mide:** campo de respuesta, conteo, propiedad o API que permite comprobarlo.
-5. **Error frecuente o límite:** interpretación que no debe hacerse.
-6. **Ejemplo aplicado:** contratación, noticias, e-commerce, empleo o knowledge base.
-
-Ejemplo obligatorio para tokenización:
-
-```text
-"Quick brown fox"
-→ [quick] [brown] [fox]
-→ 3 tokens
+```bash
+python utils/validate_session7_elasticsearch.py
 ```
 
-Un token no tiene longitud fija. `_analyze` devuelve `token`, `position`, `start_offset` y `end_offset`. El tokenizer `standard` tiene `max_token_length=255` por defecto; un tokenizer `keyword` puede tratar una cadena completa como un único token.
+Debe comprobar, como mínimo:
 
-## Regla de navegación: tres recursos, tres pestañas reutilizables
-
-Para conservar el contexto durante la clase:
-
-- **Presentación** → `target="bigdata-presentation"`
-- **Laboratorio** → `target="bigdata-lab"`
-- **Colab** → `target="bigdata-workspace"`
-
-No se usa `_blank` indiscriminadamente: cada recurso reutiliza su propia pestaña y no genera decenas de tabs.
+- exactamente 35 diapositivas;
+- D1–D8 embebidos en la presentación;
+- tokenizador interactivo embebido;
+- Teacher Wall embebido;
+- ausencia de enlaces a laboratorio/tokenizer externos;
+- solo dos recursos S07;
+- definición previa de API/POST/Console;
+- BM25 explicado como parte de Elasticsearch;
+- notebook sin `rank-bm25`;
+- contraste en fondos oscuros;
+- respuestas correctas no expuestas en HTML.
