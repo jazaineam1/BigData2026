@@ -51,8 +51,8 @@ button,a,input{font:inherit}
 .flow{display:flex;align-items:center;gap:1cqw;margin-top:1.6cqw}.flow .node{flex:1;background:#fff;color:var(--uc-navy);border:1px solid var(--line);border-radius:1.2cqw;padding:1.25cqw;text-align:center;font-size:1.65cqw;font-weight:700}.flow .arrow{font-size:2.3cqw;font-weight:900;color:var(--uc-teal)}
 pre{margin:1.2cqw 0 0;background:var(--dark);color:#F7FAFF;border-radius:1.2cqw;padding:1.35cqw;overflow:auto;font:1.45cqw/1.38 Consolas,"Cascadia Mono",monospace;white-space:pre-wrap}
 code{font-family:Consolas,"Cascadia Mono",monospace}
-.table{width:100%;border-collapse:collapse;margin-top:1.25cqw;font-size:1.55cqw;background:#fff}.table th,.table td{padding:.78cqw .9cqw;border-bottom:1px solid var(--line);text-align:left}.table th{background:var(--uc-beige);color:var(--uc-navy)}
-.step{display:flex;gap:.8cqw;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:1.2cqw;padding:1cqw;font-size:1.55cqw}.step strong{display:flex;align-items:center;justify-content:center;min-width:2.5cqw;height:2.5cqw;border-radius:50%;background:var(--g);color:#fff}
+.table{width:100%;border-collapse:collapse;margin-top:1.25cqw;font-size:1.55cqw;background:#fff;color:var(--ink)}.table th,.table td{padding:.78cqw .9cqw;border-bottom:1px solid var(--line);text-align:left}.table th{background:var(--uc-beige);color:var(--uc-navy)}
+.step{display:flex;gap:.8cqw;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:1.2cqw;padding:1cqw;font-size:1.55cqw;color:var(--ink)}.step strong{display:flex;align-items:center;justify-content:center;min-width:2.5cqw;height:2.5cqw;border-radius:50%;background:var(--g);color:#fff}
 .chip{display:inline-block;border-radius:999px;background:var(--green);color:var(--g);padding:.42cqw .75cqw;font-size:1.28cqw;font-weight:800;margin:.25cqw .3cqw .25cqw 0}
 .bigmetric{font-family:Roboto,"Segoe UI",Arial,sans-serif;font-weight:850;font-size:5cqw;color:var(--uc-teal)}
 .small{font-size:1.35cqw;color:var(--soft);line-height:1.4}
@@ -65,7 +65,7 @@ code{font-family:Consolas,"Cascadia Mono",monospace}
 .toolbar{position:fixed;z-index:45;left:50%;bottom:max(9px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:rgba(18,34,83,.95);padding:7px 11px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.28);backdrop-filter:blur(8px)}
 .ctl{width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:var(--uc-navy);font-size:21px;font-weight:900;cursor:pointer}.ctl:disabled{opacity:.35}.chapter{color:#fff;font-size:12px;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .toast{position:fixed;z-index:60;left:50%;bottom:76px;transform:translateX(-50%);background:var(--uc-navy);color:#fff;border-radius:999px;padding:8px 12px;font-size:12px;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1}
-mark{background:var(--y);padding:0 .08em}
+mark{background:#ffd7c9;color:#542113;padding:0 .08em}
 @media(max-width:720px){
   html,body{background:var(--cream)}
   .stage{position:fixed;inset:52px 0 72px;width:auto;height:auto;transform:none;background:var(--cream)}
@@ -85,7 +85,7 @@ mark{background:var(--y);padding:0 .08em}
 </head>
 <body>
 <div class="progress"><i id="bar"></i></div>
-<div class="topbar" aria-label="Recursos de la sesión">
+<div class="topbar" aria-label="Recursos de la sesión"><span class="ucbrand">UCENTRAL · BIG DATA</span>
   <span class="ucbrand">Universidad Central · Big Data</span>
   <a href="../assets/tutoriales/s07-recursos.html">Ruta S07</a>
   <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb" target="_blank" rel="noopener">Cuaderno</a>
@@ -102,8 +102,8 @@ mark{background:var(--y);padding:0 .08em}
 <div id="toast" class="toast">Usa ← → o desliza</div>
 <script>
 const slides = [
-{c:'Inicio',k:'SESIÓN 7',t:'Construye un buscador con Elasticsearch',l:'Universidad Central · Maestría en Analítica de Datos · Big Data. Del contexto contractual de S6 a un ranking textual que puedas desplegar y defender.',dark:true,b:`
-<div class="flow"><div class="node">S6 · procesos + texto</div><div class="arrow">→</div><div class="node">Elasticsearch</div><div class="arrow">→</div><div class="node">Top 5 + score + highlight</div></div>
+{c:'Inicio',k:'SESIÓN 7',t:'Construye un buscador con Elasticsearch',l:'Universidad Central · Maestría en Analítica de Datos · Big Data. Diseña, despliega y evalúa un buscador de texto completo desde Python.',dark:true,b:`
+<div class="flow"><div class="node">Documentos</div><div class="arrow">→</div><div class="node">Elasticsearch</div><div class="arrow">→</div><div class="node">Resultados relevantes</div></div>
 <div class="call"><b>Meta profesional:</b> al cerrar, cada equipo tendrá un índice real, documentos cargados y una consulta reproducible desde Python.</div>`},
 {c:'Inicio',k:'PRODUCTO',t:'No vienes a mirar una demo',l:'Vas a construir una solución mínima de búsqueda de extremo a extremo.',b:`
 <div class="grid">
