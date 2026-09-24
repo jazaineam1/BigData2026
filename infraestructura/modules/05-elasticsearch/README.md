@@ -2,54 +2,76 @@
 
 ## Objetivo de aprendizaje
 
-S07 enseña a construir y evaluar un buscador textual de forma reproducible. La clase no presenta Elasticsearch como una librería de Python: primero se usa **Elasticsearch directamente** mediante la UI y Console; después se automatizan las mismas operaciones desde Python/Colab.
+S07 enseña a construir y evaluar un buscador textual de forma reproducible. La clase no presenta Elasticsearch como una librería de Python: primero se usa **Elasticsearch directamente** mediante UI/Console; después se automatizan las mismas operaciones desde Python/Colab.
 
 El estudiante debe salir pudiendo explicar y repetir:
 
 1. documento, campo, índice y mapping;
-2. `text` vs `keyword`;
-3. analyzer e índice invertido;
-4. ranking BM25 y lectura de `_score`;
-5. uso de Console para `PUT`, `_analyze`, indexación y `_search`;
-6. `match`, `multi_match`, boost, `bool.must`, `filter` y `highlight`;
-7. conexión desde Python con `Elasticsearch(...)`;
-8. carga masiva con `bulk()` y verificación con `count()`;
-9. evaluación A/B con juicios de relevancia y Precision@5;
-10. transferencia al corpus de noticias.
+2. `text`, `keyword` y multi-fields;
+3. analyzer en index-time y search-time;
+4. índice invertido, BM25 y lectura de `_score`;
+5. `match` vs `term`;
+6. uso de Console para `PUT`, `_analyze`, indexación y `_search`;
+7. `multi_match`, boost, `bool.must`, `filter` y `highlight`;
+8. conexión desde Python con `Elasticsearch(...)`;
+9. carga masiva con `bulk()` y verificación con `count()`;
+10. diagnóstico de errores comunes;
+11. evaluación A/B con criterios de relevancia y Precision@5;
+12. transferencia al corpus de noticias.
 
-## Tres recursos visibles para estudiantes
-
-La sesión se limita deliberadamente a:
+## Tres recursos visibles
 
 - **Presentación:** `Presentaciones/s07-del-vecindario-al-texto.html`
 - **Cuaderno:** `Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb`
 - **Laboratorio:** `assets/tutoriales/s07-laboratorio-guiado.html`
 
-La presentación contiene la explicación principal.  
-El laboratorio funciona como guía de ejecución y checkpoints.  
-El cuaderno automatiza lo que primero se comprende en Console.
+La presentación enseña. El cuaderno automatiza. El laboratorio registra desempeño, progreso y mastery.
 
-## Ruta de infraestructura de clase
-
-La ruta principal de 2026-2S usa **Elasticsearch Serverless** y Google Colab. Docker/local no forma parte del recorrido obligatorio de S07.
+## Ruta de clase
 
 ```text
-Elastic Cloud
-   ↓
-Elasticsearch project
-   ↓
-Console / Index Management / Discover
-   ↓
-Python client en Colab
-   ↓
-bulk + search + evaluación
+Explicación con ejemplo resuelto
+        ↓
+Console / Colab
+        ↓
+Desafío D1–D8
+        ↓
+Primer intento puntúa ranking
+        ↓
+Pista
+        ↓
+Reintento puntúa mastery, no ranking
 ```
 
-Los materiales locales históricos pueden conservarse como referencia, pero no deben competir con esta ruta durante la clase.
+Los deep links de la presentación apuntan al desafío exacto:
 
-## S07 Live · laboratorio de dominio, no solo Kahoot
+- `#d1` ranking vs filtro;
+- `#d2` mapping;
+- `#d3` analyzer;
+- `#d4` API `_analyze`;
+- `#d5` bulk/count;
+- `#d6` Query DSL;
+- `#d7` Precision@5;
+- `#d8` transferencia a noticias.
 
-El laboratorio incluye **ocho desafíos formativos** con ranking en tiempo real y un máximo de **21 puntos**. No son solo preguntas de selección múltiple: hay modelado de campos, ordenamiento de pipeline, completado de API, verificación de un resultado real, construcción de Query DSL, cálculo numérico y transferencia a noticias.
+## S07 Live · primer intento y mastery
+
+El ranking ya no se autocorrige. Cada actividad conserva dos métricas:
+
+- **ranking / first score:** puntos obtenidos en el primer intento;
+- **mastery score:** puntos dominados después de pistas y reintentos.
+
+Esto permite ver:
+
+```text
+D2 Mapping
+Primer intento correcto: 6/10
+Mastery después de pista: 9/10
+```
+
+Así el laboratorio conserva valor formativo sin maquillar la medición inicial.
+
+## Backend
 
 Arquitectura:
 
@@ -57,84 +79,65 @@ Arquitectura:
 GitHub Pages
    ↓ publishable key
 Supabase RPC
-   ├── join
-   ├── submit
-   ├── leaderboard
-   └── question_stats
+   ├── s07_live_join
+   ├── s07_live_submit
+   ├── s07_live_leaderboard
+   └── s07_live_activity_stats
         ↓
-s07_live_scores
+s07_live_scores / s07_live_responses
         ↓
-Supabase Realtime
+realtime.send() / Broadcast
         ↓
-ranking actualizado en todos los navegadores
+ranking actualizado
+        ↓
+polling de 3 s como respaldo móvil
 ```
 
-Se almacenan únicamente:
+Datos guardados:
 
-- alias elegido por el estudiante;
-- respuesta a cada checkpoint;
-- correcto/incorrecto;
-- puntaje y cantidad respondida.
+- alias;
+- respuesta;
+- first answer / first correct;
+- mastered;
+- attempt count;
+- ranking score;
+- mastery score.
 
-No se almacenan correos, contraseñas ni credenciales de Elasticsearch.
+No se guardan correos, contraseñas ni credenciales de Elasticsearch.
 
-La migración reproducible está en:
+Migración canónica:
 
 `infraestructura/modules/05-elasticsearch/s07-live-supabase.sql`
 
-### Seguridad
+## Reglas pedagógicas vigentes
 
-- El frontend usa una **publishable key**, no una service-role key.
-- RLS está activado.
-- Las respuestas no tienen lectura pública directa.
-- Las escrituras pasan por RPC acotadas a S07.
-- `s07_live_scores` expone solo alias y puntaje para poder renderizar el leaderboard.\n- La ruta principal de sincronización usa **Supabase Broadcast**, no `postgres_changes`; esto sigue la recomendación vigente de Supabase para notificaciones de cambios.
-- Este ranking es **formativo**, no reemplaza la evidencia del notebook ni debe usarse como nota oficial por sí solo.
+1. No revelar solución completa después del primer error.
+2. La primera respuesta fija ranking.
+3. Los reintentos sirven para mastery.
+4. Cada reto debe ser isomorfo al ejemplo, no idéntico.
+5. Los bloques de Console en el notebook deben decir **NO SE EJECUTA EN COLAB**.
+6. No usar fences `http` que Colab convierta en enlaces clicables.
+7. La sesión mantiene máximo 35 pantallas.
+8. No crear más de tres recursos visibles.
+
+## Referentes técnicos usados
+
+- Elastic Search Labs · Search Tutorial: construcción incremental de una solución completa de búsqueda.
+- Elastic · Keyword search with Python: proyecto, índice, mapping, cliente oficial, bulk y búsqueda.
+- Elastic · Query DSL: query context vs filter context.
+- Elastic · Match query y Term query: full-text vs exact matching.
+- Elastic · Ranking Evaluation API: evaluación con necesidades de información y documentos juzgados.
+- Elastic · Search Profiler: diagnóstico de costo de ejecución.
+- Elastic · Search UI / e-commerce: patrones de caja de búsqueda, filtros, facets y experiencia de producto.
+- Supabase Realtime · Broadcast: Broadcast para notificaciones de cambios; polling como respaldo móvil.
 
 ## QA mínimo antes de dictar
 
-Comprobar en escritorio y teléfono:
-
-- contraste de slides oscuras;
-- botones anterior/siguiente/fullscreen;
-- swipe horizontal;
-- botones **Comprobar** del laboratorio;
-- ingreso con alias a S07 Live;
-- actualización del ranking en dos navegadores;
-- distribución de respuestas por checkpoint;
-- apertura/reutilización de una sola pestaña de Colab;
-- Console y proyecto Elasticsearch real;
-- `client.info()`, `_analyze`, `bulk`, `count` y búsquedas.
-
-Validador:
-
-```bash
-python utils/validate_session7_elasticsearch.py
-```
-
-
-## Referentes técnicos usados para el diseño
-
-La sesión toma como referencia rutas actuales de producto y formación, no solo ejemplos inventados:
-
-- Elastic Search Labs · Search Tutorial: construcción incremental de una solución completa de búsqueda.
-  https://www.elastic.co/search-labs/tutorials/search-tutorial/welcome
-- Elastic · Keyword search with Python: proyecto, índice, mapping, cliente oficial, bulk y búsqueda.
-  https://www.elastic.co/docs/solutions/search/get-started/keyword-search-python
-- Elastic · Query DSL: diferencia entre query context, filter context y relevancia.
-  https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl/
-- Elastic · Ranking Evaluation API: evaluación con necesidades de información y documentos juzgados.
-  https://www.elastic.co/docs/reference/elasticsearch/rest-apis/search-rank-eval
-- Elastic · Search Profiler: diagnóstico del costo de ejecución de consultas.
-  https://www.elastic.co/docs/explore-analyze/query-filter/tools/search-profiler
-- Elastic · Search UI / e-commerce: patrones de caja de búsqueda, filtros, facets y experiencia de producto.
-  https://www.elastic.co/docs/solutions/search/site-or-app/search-ui
-- Supabase Realtime · Broadcast: Broadcast es la ruta recomendada para notificaciones de cambios; Postgres Changes queda como alternativa simple.
-  https://supabase.com/docs/guides/realtime/subscribing-to-database-changes
-
-Estos referentes justifican cuatro decisiones pedagógicas de S07:
-
-1. construir en pasos pequeños y ejecutables;
-2. enseñar Console antes de esconder la API detrás de Python;
-3. tratar relevancia como algo que se **evalúa**, no como un score que se acepta;
-4. llevar el laboratorio hasta patrones reconocibles de producto: e-commerce, empleo, noticias y bases de conocimiento.
+- Abrir presentación en portátil y teléfono.
+- Probar botones D1–D8 desde la presentación.
+- Entrar a S07 Live en dos navegadores.
+- Responder mal y luego bien: ranking no debe subir; mastery sí.
+- Ver actualización sin recargar.
+- Confirmar que el cuaderno no tiene rutas de Console clicables.
+- Ejecutar `client.info()`, `_analyze`, `bulk`, `count` y al menos una búsqueda real.
+- Verificar que `Precision@5` acepte `0.6`, `0.60`, `0,6` y `0,60`.
