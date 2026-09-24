@@ -66,6 +66,10 @@ def main():
         ".dark .note{background:#ffffff",
         "prevBtn.addEventListener",
         "Abrir S07 Live",
+        "red lipstick",
+        "data scientist NLP",
+        "_rank_eval",
+        "Search Profiler",
     ]:
         if marker not in pres:
             errors.append("Presentación: falta " + marker)
@@ -74,20 +78,33 @@ def main():
 
     lab = LAB.read_text(encoding="utf-8")
     for marker in [
-        "Cómo se dicta la clase",
+        "Elasticsearch Search Lab",
         "Presentación",
         "Abrir / reutilizar Colab",
-        "S07 Live · ranking en tiempo real",
+        "S07 Live · entra antes de comenzar",
         "s07_live_submit",
-        "postgres_changes",
+        ".on('broadcast'",
+        "setInterval",
+        "MAX_POINTS=21",
+        'data-kind="mapping"',
+        'data-kind="sequence"',
+        'data-kind="codefill"',
+        'data-kind="querybuilder"',
+        'data-kind="transfer"',
         "id=\"joinLive\"",
         "Exportar resumen JSON",
+        "Search Profiler",
+        "Ranking Evaluation API",
         "target=\"bigdata-workspace\"",
     ]:
         if marker not in lab:
             errors.append("Laboratorio: falta " + marker)
     if "Repositorio" in lab or "github.com/jazaineam1/BigData2026" in lab.replace("colab.research.google.com/github/jazaineam1/BigData2026", ""):
         errors.append("Laboratorio: no debe mostrar enlace general al repo.")
+    if lab.count('class="activity"') < 8:
+        errors.append("Laboratorio: se esperan al menos 8 desafíos de dominio.")
+    if "mobile-livebar" not in lab:
+        errors.append("Laboratorio: falta scoreboard móvil persistente.")
 
     route = ROUTE.read_text(encoding="utf-8")
     if "refresh" not in route or "s07-laboratorio-guiado.html" not in route:
