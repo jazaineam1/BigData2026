@@ -2,22 +2,60 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>S07 · Recursos Elasticsearch y BM25</title>
+<meta name="description" content="Ruta única de la sesión 7 de Big Data: Elasticsearch y BM25.">
+<title>S07 · Ruta de aprendizaje Elasticsearch</title>
 <style>
-:root{--bg:#faf7ef;--ink:#172019;--g:#146c43;--b:#124e78;--y:#ffd600;--line:#e5dece;--s:#fff}*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}main{max-width:1100px;margin:auto;padding:32px 18px 60px}h1{font-family:Georgia,serif;font-size:clamp(34px,7vw,64px);line-height:1;margin:.2em 0}.lead{font-size:20px;max-width:760px;line-height:1.45}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:26px}.card{background:#fff;border:1px solid var(--line);border-left:8px solid var(--y);border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(23,32,25,.07);text-decoration:none;color:var(--ink)}.card h2{margin:.1em 0 .35em;color:#0b241c}.card p{color:#526056;line-height:1.45}.primary{border-left-color:var(--g)}.secondary{border-left-color:var(--b)}.warn{background:#fff7d1;border-left:8px solid var(--y);border-radius:16px;padding:18px;margin-top:24px}.pill{display:inline-block;background:#e9f8ef;color:var(--g);font-weight:800;padding:7px 12px;border-radius:999px;font-size:13px}@media(max-width:760px){.grid{grid-template-columns:1fr}main{padding-top:20px}.lead{font-size:18px}}
+:root{--bg:#f7f3e9;--ink:#172019;--g:#146c43;--b:#124e78;--y:#ffd600;--r:#a52a2a;--line:#ded8c9;--white:#fff;--muted:#5a665f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",Arial,sans-serif}
+main{max-width:1080px;margin:auto;padding:28px 18px 80px}.ey{display:inline-block;background:#e9f8ef;color:var(--g);font-size:12px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;border-radius:999px;padding:7px 11px}
+h1{font:700 clamp(38px,7vw,72px)/.98 Georgia,serif;margin:.22em 0;color:#0b241c;max-width:12ch}.lead{font-size:21px;line-height:1.42;max-width:830px;color:#405047}
+.start{display:inline-block;background:var(--g);color:#fff;text-decoration:none;font-weight:900;border-radius:13px;padding:14px 18px;margin:10px 0 24px}
+.map{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:18px 0 26px}.map span{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-weight:800;font-size:13px}.map i{font-style:normal;color:var(--g);font-weight:900}
+.route{display:grid;gap:14px}.phase{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 26px rgba(23,32,25,.07);display:grid;grid-template-columns:54px 1fr auto;gap:15px;align-items:start}.n{width:48px;height:48px;border-radius:50%;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900}.phase h2{margin:0 0 5px;font-size:21px;color:#0b241c}.phase p{margin:0;color:var(--muted)}.phase .why{margin-top:8px;background:#f4f1e8;border-radius:10px;padding:9px 11px;color:#33433a;font-size:14px}.actions{display:flex;flex-direction:column;gap:7px;min-width:180px}.btn{display:block;text-align:center;text-decoration:none;border-radius:10px;padding:9px 11px;font-weight:800;background:var(--g);color:#fff}.btn.alt{background:#e9f4ff;color:var(--b);border:1px solid #c9dced}.done{display:flex;gap:7px;align-items:center;font-size:13px;font-weight:800;color:var(--g);margin-top:4px}.done input{width:18px;height:18px}
+.call{margin:24px 0;background:#fff6c9;border-left:7px solid var(--y);border-radius:14px;padding:16px 18px}.call b{color:#5d4b00}
+.resources{margin-top:34px}.resources h2{font:700 30px Georgia,serif;color:#0b241c}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;text-decoration:none;color:var(--ink)}.card b{display:block;color:var(--g);margin-bottom:5px}.progress{position:sticky;top:0;z-index:20;background:rgba(247,243,233,.94);backdrop-filter:blur(8px);padding:9px 0 8px;margin-bottom:12px}.meter{height:8px;background:#e2dccf;border-radius:999px;overflow:hidden}.meter i{display:block;height:100%;background:var(--g);width:0}.status{font-size:12px;color:var(--muted);margin-top:4px}
+@media(max-width:760px){main{padding:18px 12px 70px}.lead{font-size:18px}.phase{grid-template-columns:42px 1fr}.n{width:38px;height:38px}.actions{grid-column:2;min-width:0;width:100%}.grid{grid-template-columns:1fr}.map{display:none}}
 </style>
 </head>
 <body><main>
-<span class="pill">Sesión 7 · Elasticsearch y BM25</span>
-<h1>Del vecindario al texto</h1>
-<p class="lead">Entrada única para estudiantes. La sesión está pensada para un grupo de tercer semestre con Python medio, SQL medio, poco Bash y poca experiencia cloud. Empieza por la presentación, ejecuta el cuaderno y usa la guía de despliegue cuando tengas Elastic Cloud listo.</p>
+<span class="ey">Sesión 7 · ruta única</span>
+<h1>Elasticsearch: de datos a buscador</h1>
+<p class="lead">Este es el único punto de entrada. En clase alternarás <b>explicación visual → ejecución en un único cuaderno → explicación → ejecución</b>. No abras seis recursos al tiempo.</p>
+<a class="start" href="../../Presentaciones/s07-del-vecindario-al-texto.html#s1">Empezar la sesión →</a>
+<div class="map"><span>Entender</span><i>→</i><span>Experimentar</span><i>→</i><span>Desplegar</span><i>→</i><span>Indexar</span><i>→</i><span>Buscar</span><i>→</i><span>Evaluar</span></div>
+
+<div class="progress"><div class="meter"><i id="bar"></i></div><div class="status"><b id="done">0</b> de 6 etapas marcadas</div></div>
+
+<section class="route">
+<div class="phase"><div class="n">1</div><div><h2>Entiende qué problema resuelve Elasticsearch</h2><p>Presentación · desde el inicio hasta el primer “Ahora tú”.</p><div class="why"><b>Debes salir con:</b> identificar ≠ filtrar ≠ buscar; analyzer → índice invertido → BM25; score relativo.</div><label class="done"><input type="checkbox" data-k="1"> listo</label></div><div class="actions"><a class="btn" href="../../Presentaciones/s07-del-vecindario-al-texto.html#s1">Presentación · inicio</a></div></div>
+
+<div class="phase"><div class="n">2</div><div><h2>Experimenta con el corpus real de S6</h2><p>Cuaderno único · Bloque A.</p><div class="why"><b>Debes ver:</b> 2.109 filas cargadas, 1.994 procesos únicos, una línea base literal y un ranking BM25 local. El ranking local es pedagógico: sus scores no se comparan con Elastic.</div><label class="done"><input type="checkbox" data-k="2"> listo</label></div><div class="actions"><a class="btn" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Cuaderno único</a></div></div>
+
+<div class="phase"><div class="n">3</div><div><h2>Comprende qué vas a desplegar</h2><p>Presentación · Serverless, credenciales, mapping, analyzer e ingesta.</p><div class="why"><b>Debes poder explicar:</b> Project URL, API key, <code>text</code> vs <code>keyword</code>, <code>_analyze</code> y por qué usamos <code>bulk()</code>.</div><label class="done"><input type="checkbox" data-k="3"> listo</label></div><div class="actions"><a class="btn" href="../../Presentaciones/s07-del-vecindario-al-texto.html#s21">Presentación · despliegue</a><a class="btn alt" href="s07-despliegue-elasticsearch.html">Guía visual</a></div></div>
+
+<div class="phase"><div class="n">4</div><div><h2>Despliega e indexa tú mismo</h2><p>Mismo cuaderno · Bloques B, C y D.</p><div class="why"><b>Debes obtener:</b> <code>client.info()</code> exitoso, índice personal, tokens reales del analyzer, <code>bulk</code> sin errores y <code>count == 1994</code>.</div><label class="done"><input type="checkbox" data-k="4"> listo</label></div><div class="actions"><a class="btn" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Continuar cuaderno</a><a class="btn alt" href="s07-laboratorio-guiado.html">Checklist</a></div></div>
+
+<div class="phase"><div class="n">5</div><div><h2>Construye la consulta por capas</h2><p>Mismo cuaderno · Bloque E: <code>match → multi_match → boost → filter → highlight</code>.</p><div class="why"><b>Debes explicar:</b> qué parte aporta relevancia, qué parte restringe y dónde ves la evidencia textual que justifica un hit.</div><label class="done"><input type="checkbox" data-k="5"> listo</label></div><div class="actions"><a class="btn" href="../../Presentaciones/s07-del-vecindario-al-texto.html#s31">Presentación · consultas</a><a class="btn alt" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Continuar cuaderno</a></div></div>
+
+<div class="phase"><div class="n">6</div><div><h2>Experimenta, interpreta y entrega</h2><p>Cuaderno · Bloque F + cierre de presentación.</p><div class="why"><b>Debes dejar:</b> top 5 A/B, cambio de una sola decisión, proceso priorizado, alternativa descartada, falso positivo/dudoso, límite concreto y tres archivos sin secretos.</div><label class="done"><input type="checkbox" data-k="6"> listo</label></div><div class="actions"><a class="btn" href="../../Presentaciones/s07-del-vecindario-al-texto.html#s38">Presentación · experimento</a><a class="btn alt" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Finalizar cuaderno</a></div></div>
+</section>
+
+<div class="call"><b>Regla de contingencia:</b> si Elastic Cloud falla, no pierdes la sesión: completas BM25 local y documentas el error. Pero la evidencia de despliegue solo existe cuando <code>client.info()</code>, creación del índice, <code>bulk</code> y <code>count</code> fueron ejecutados contra Elasticsearch real.</div>
+
+<section class="resources">
+<h2>Recursos de apoyo</h2>
 <div class="grid">
-<a class="card primary" href="../../Presentaciones/s07-del-vecindario-al-texto.html"><h2>1 · Presentación guiada</h2><p>Explicación completa: contexto, BM25, Elasticsearch, despliegue, errores esperados y entrega.</p></a>
-<a class="card primary" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb" target="_blank"><h2>2 · Cuaderno principal</h2><p>Laboratorio con corpus, BM25 local, consultas, experimento A/B y generación de evidencia.</p></a>
-<a class="card secondary" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7B_Despliegue_Elastic_Cloud.ipynb" target="_blank"><h2>3 · Cuaderno de despliegue</h2><p>Ruta paso a paso para conectar Elastic Cloud desde Python: endpoint, API key, índice, bulk y búsqueda.</p></a>
-<a class="card secondary" href="s07-despliegue-elasticsearch.html"><h2>4 · Guía de despliegue</h2><p>Checklist visual para crear o usar Elastic Cloud sin depender de Bash ni de administración avanzada.</p></a>
-<a class="card" href="s07-laboratorio-guiado.html"><h2>5 · Checklist de laboratorio</h2><p>Lista de verificación para completar la práctica y no olvidar evidencia, límite y motor realmente usado.</p></a>
-<a class="card" href="../../Datos/s07_corpus_respaldo.jsonl"><h2>6 · Corpus de respaldo</h2><p>Datos mínimos para que la clase no se caiga si el archivo de S6 no está disponible.</p></a>
+<a class="card" href="s07-despliegue-elasticsearch.html"><b>Tutorial de despliegue</b>Serverless paso a paso y clínica de errores.</a>
+<a class="card" href="s07-laboratorio-guiado.html"><b>Checklist técnico</b>Qué hacer, por qué y qué evidencia debe aparecer.</a>
+<a class="card" href="../../Datos/s06_contexto_relacional.csv"><b>Corpus del curso</b>Fuente versionada que llega desde S6.</a>
+<a class="card" href="https://www.elastic.co/docs/solutions/search/get-started/keyword-search-python" target="_blank" rel="noopener"><b>Quickstart oficial</b>Keyword search con Python.</a>
+<a class="card" href="https://www.elastic.co/docs/reference/elasticsearch/clients/python" target="_blank" rel="noopener"><b>Cliente Python oficial</b>Referencia vigente del cliente.</a>
+<a class="card" href="https://www.elastic.co/search-labs/tutorials/search-tutorial/welcome" target="_blank" rel="noopener"><b>Elastic Search Tutorial</b>Ruta incremental oficial para profundizar.</a>
 </div>
-<div class="warn"><b>Regla de honestidad técnica:</b> si ejecutas solo BM25 local, decláralo. Si ejecutas Elastic Cloud, guarda evidencia de conexión, índice y consulta. Un score alto no demuestra irregularidad.</div>
-</main></body></html>
+</section>
+</main>
+<script>
+const key='s07:ruta:v4',boxes=[...document.querySelectorAll('input[type=checkbox]')],saved=JSON.parse(localStorage.getItem(key)||'{}');
+function update(){let n=0;boxes.forEach(b=>{b.checked=!!saved[b.dataset.k];if(b.checked)n++});document.getElementById('done').textContent=n;document.getElementById('bar').style.width=(n/boxes.length*100)+'%'}
+boxes.forEach(b=>b.addEventListener('change',()=>{saved[b.dataset.k]=b.checked;localStorage.setItem(key,JSON.stringify(saved));update()}));update();
+</script></body></html>
