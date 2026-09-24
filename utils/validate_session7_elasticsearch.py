@@ -34,6 +34,7 @@ def main():
         "s07_resultados_busqueda.csv",
         "s07_config_busqueda.json",
         "hito_s07_relevancia.md",
+        "Precision@5",
         "relevancia textual",
     ]
     for marker in required_nb:
@@ -45,8 +46,8 @@ def main():
 
     pres = PRES.read_text(encoding="utf-8")
     slide_count = pres.count("{c:'")
-    if slide_count < 40:
-        errors.append(f"Presentación: solo {slide_count} slides; se esperan al menos 40.")
+    if slide_count < 46:
+        errors.append(f"Presentación: solo {slide_count} slides; se esperan al menos 46.")
     for marker in [
         "Construye un buscador con Elasticsearch",
         "1.994 procesos únicos",
@@ -54,6 +55,7 @@ def main():
         "BULK",
         "CHECKPOINT 1",
         "CHECKPOINT 2",
+        "PRECISION@5",
         "touchstart",
         "requestFullscreen",
     ]:
@@ -89,9 +91,9 @@ def main():
             errors.append("Despliegue: falta " + marker)
 
     checklist = CHECK.read_text(encoding="utf-8")
-    if checklist.count('class="step"') < 16:
+    if checklist.count('class="step"') < 17:
         errors.append("Checklist: faltan pasos.")
-    for marker in ["Conexión verificada", "Tokens Elastic", "Errores bulk: 0", "s07_config_busqueda.json"]:
+    for marker in ["Conexión verificada", "Tokens Elastic", "Errores bulk: 0", "Precision@5", "s07_config_busqueda.json"]:
         if marker not in checklist:
             errors.append("Checklist: falta evidencia " + marker)
 
