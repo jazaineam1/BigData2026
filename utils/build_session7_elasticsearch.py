@@ -16,13 +16,16 @@ organizado como tres recursos docentes versionados directamente:
 Principios vigentes del rediseño:
 - máximo 35 pantallas en la presentación;
 - explicación conceptual completa en la presentación;
+- toda definición núcleo debe incluir: qué es, ejemplo mínimo, cómo observarla/medirla y error o límite;
+- tokenización explicada explícitamente: token, conteo, posición, offsets y tamaño dependiente del tokenizer;
+- presentación, laboratorio y Colab usan pestañas reutilizables distintas para no destruir el contexto de clase;
 - Console antes de Python;
 - Python como automatización de la API;
 - cuaderno con explicación de código, evidencia, salidas esperadas y errores;
 - laboratorio como tablero de clase, no como cuarta fuente de contenido;
 - deep links D1-D8 desde la presentación al desafío exacto;
 - ranking por primer intento para evitar autocorrección inflada;
-- mastery por reintentos para conservar aprendizaje con feedback;
+- dominio por reintentos para conservar aprendizaje con feedback, separado del ranking por primer intento;
 - no exponer respuestas correctas en data-fallback del HTML;
 - ejemplos de industria: e-commerce, empleo, noticias y bases de conocimiento;
 - match vs term, index-time/search-time, BM25 trabajado, troubleshooting y P@5;
