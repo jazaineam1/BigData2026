@@ -37,14 +37,14 @@ button,a,input{font:inherit}
 .slide.dark{background:linear-gradient(135deg,var(--uc-navy),#0B3F72);color:#fff}
 .kicker{font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--g);font-size:2.05cqw}
 .dark .kicker{color:#FFD9C6}
-.title{font-family:Roboto,"Segoe UI",Arial,sans-serif;font-weight:850;font-size:5.2cqw;line-height:1.02;margin:.16em 0 .18em;color:#0b241c;max-width:18ch}
+.title{font-family:Roboto,"Segoe UI",Arial,sans-serif;font-weight:850;font-size:5.2cqw;line-height:1.02;margin:.16em 0 .18em;color:var(--uc-blue);max-width:18ch}
 .dark .title{color:#fff}
-.lead{font-size:2.55cqw;line-height:1.24;color:#405047;max-width:36ch;margin:.25em 0 .8em}
+.lead{font-size:2.55cqw;line-height:1.24;color:#3f4964;max-width:36ch;margin:.25em 0 .8em}
 .dark .lead{color:#F0F4FA}
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.45cqw;margin-top:1.5cqw}
 .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
 .grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
-.card{background:#fff;color:var(--uc-navy);border:1px solid var(--line);border-radius:1.4cqw;padding:1.45cqw;box-shadow:0 .25cqw 1.3cqw rgba(23,32,25,.07);font-size:1.72cqw;line-height:1.35}
+.card{background:#fff;color:var(--uc-navy);border:1px solid var(--line);border-radius:1.4cqw;padding:1.45cqw;box-shadow:0 .25cqw 1.3cqw rgba(20,33,83,.07);font-size:1.72cqw;line-height:1.35}
 .card b,.card h3{display:block;color:var(--uc-teal);margin:0 0 .45em;font-size:1.9cqw}
 .card.blue{background:var(--blue)}.card.green{background:var(--green)}.card.yellow{background:var(--yellow)}.card.red{background:var(--red)}.card.orange{background:var(--orange)}
 .call{margin-top:1.5cqw;background:#EAF6F6;border-left:.52cqw solid var(--uc-teal);border-radius:1cqw;padding:1.15cqw 1.35cqw;font-size:1.65cqw;line-height:1.35;color:var(--ink)}
@@ -59,7 +59,7 @@ code{font-family:Consolas,"Cascadia Mono",monospace}
 .checkpoint{margin-top:1.3cqw}.choices{display:grid;grid-template-columns:1fr 1fr;gap:.8cqw}.choice{border:1px solid var(--line);background:#fff;border-radius:1cqw;padding:1cqw;text-align:left;font-size:1.45cqw;cursor:pointer}.choice:hover,.choice:focus{outline:3px solid rgba(11,134,137,.35)}.feedback{margin-top:.8cqw;min-height:3.2cqw;padding:.8cqw 1cqw;border-radius:.8cqw;background:#F2F5F9;font-size:1.4cqw}
 .searchbox{display:grid;grid-template-columns:1fr auto;gap:.8cqw;margin-top:1.1cqw}.searchbox input{border:1px solid var(--line);border-radius:.9cqw;padding:.9cqw 1cqw;font-size:1.55cqw}.searchbox button,.cta{border:0;background:var(--uc-teal);color:#fff;border-radius:.9cqw;padding:.9cqw 1.15cqw;font-weight:800;text-decoration:none;cursor:pointer}.results{margin-top:.8cqw;max-height:19cqw;overflow:auto}.result{padding:.7cqw .85cqw;border-bottom:1px solid var(--line);background:#fff;font-size:1.3cqw}.score{font-family:Consolas,monospace;color:var(--uc-blue);font-weight:800}
 .topbar{position:fixed;z-index:40;top:max(8px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.55);box-shadow:0 8px 28px rgba(0,0,0,.17);border-radius:999px;padding:6px 8px;backdrop-filter:blur(10px)}
-.topbar a,.topbar button{border:0;background:transparent;color:var(--uc-navy);text-decoration:none;font-size:12px;font-weight:800;padding:6px 9px;border-radius:999px;cursor:pointer}.topbar a:hover,.topbar button:hover{background:var(--green)}
+.ucbrand{font-size:12px;font-weight:900;color:var(--uc-blue);padding:0 8px 0 4px;white-space:nowrap}.topbar a,.topbar button{border:0;background:transparent;color:var(--uc-navy);text-decoration:none;font-size:12px;font-weight:800;padding:6px 9px;border-radius:999px;cursor:pointer}.topbar a:hover,.topbar button:hover{background:var(--green)}
 .count{font:700 12px/1 Consolas,monospace;padding:0 5px}
 .progress{position:fixed;z-index:42;top:0;left:0;right:0;height:4px;background:rgba(255,255,255,.2)}.progress i{display:block;height:100%;background:var(--uc-orange);width:0}
 .toolbar{position:fixed;z-index:45;left:50%;bottom:max(9px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:rgba(18,34,83,.95);padding:7px 11px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.28);backdrop-filter:blur(8px)}
@@ -77,14 +77,16 @@ mark{background:var(--y);padding:0 .08em}
   pre{font-size:13px;border-radius:12px;padding:13px;margin-top:12px}.table{font-size:13px}.table th,.table td{padding:8px}
   .step{font-size:15px;padding:11px}.step strong{min-width:28px;height:28px}.chip{font-size:12px;padding:5px 8px}.small{font-size:13px}.bigmetric{font-size:44px}
   .choices{grid-template-columns:1fr}.choice{font-size:15px;padding:11px}.feedback{font-size:14px;min-height:48px}.searchbox{grid-template-columns:1fr}.searchbox input{font-size:16px;padding:12px}.searchbox button{min-height:46px}.results{max-height:none}.result{font-size:13px;padding:9px}
-  .topbar{top:max(5px,env(safe-area-inset-top));width:calc(100% - 12px);justify-content:center;gap:2px;padding:4px}.topbar a{display:none}.topbar button{font-size:11px}.count{font-size:11px}
+  .topbar{top:max(5px,env(safe-area-inset-top));left:auto;right:7px;transform:none;width:auto;max-width:calc(100% - 14px);justify-content:flex-end;gap:2px;padding:4px 6px}.ucbrand{font-size:10px;padding:0 5px}.topbar a{display:none}.topbar button{font-size:11px}.count{font-size:11px}
   .toolbar{bottom:max(6px,env(safe-area-inset-bottom));gap:16px}.ctl{width:48px;height:48px}.chapter{font-size:11px;max-width:130px}
 }
+/* Paleta institucional UCentral: #142153 #0B8689 #E5E5E3 #ACAA00 */
 </style>
 </head>
 <body>
 <div class="progress"><i id="bar"></i></div>
 <div class="topbar" aria-label="Recursos de la sesión">
+  <span class="ucbrand">Universidad Central · Big Data</span>
   <a href="../assets/tutoriales/s07-recursos.html">Ruta S07</a>
   <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb" target="_blank" rel="noopener">Cuaderno</a>
   <a href="../assets/tutoriales/s07-despliegue-elasticsearch.html">Despliegue</a>
@@ -373,6 +375,9 @@ ok, errores = bulk(client, acciones, refresh=True)</pre>
 {c:'Puente',k:'LÍMITE LÉXICO',t:'BM25 no entiende intención como un humano',l:'Si las palabras cambian demasiado, una búsqueda léxica puede perder documentos conceptualmente cercanos.',b:`
 <div class="grid two"><div class="card green"><b>Consulta</b>“mantenimiento aeronaves”</div><div class="card red"><b>Documento</b>“reparación de aviones militares”</div></div>
 <div class="call">Aquí nace la pregunta de S9: <b>¿podemos buscar por significado además de por palabras?</b> Hoy no la resolvemos todavía.</div>`},
+{c:'Transferencia',k:'RADAR DE NOTICIAS',t:'¿Puedes llevarlo a otro dominio?',l:'Reto opcional: construye un buscador editorial con 126 noticias que ya conoces de sesiones anteriores.',b:`
+<div class="grid two"><div class="card blue"><b>Dataset</b>Noticias de agosto de 2026: título, subtítulo, categoría, fecha y cuerpo.</div><div class="card green"><b>Producto</b>Un radar que devuelve las 5 noticias que un editor debería revisar primero para una necesidad informativa.</div></div>
+<div class="call"><a class="cta" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Reto_Elasticsearch_Noticias.ipynb">Abrir reto de transferencia ↗</a></div>`},
 {c:'Entrega',k:'EVIDENCIA',t:'Qué debe quedar al final',l:'Tres archivos pequeños; ninguno contiene credenciales.',b:`
 <div class="grid">
 <div class="card green"><b>s07_resultados_busqueda.csv</b>ranking A y B, score, URL, motor.</div>
