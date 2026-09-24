@@ -47,6 +47,9 @@ def main():
         errors.append("Notebook: contiene tiempos minuto a minuto.")
 
     pres = PRES.read_text(encoding="utf-8")
+    for color in ["#142153", "#0B8689", "#E5E5E3", "#ACAA00"]:
+        if color not in pres:
+            errors.append("Presentación: falta color institucional UCentral " + color)
     slide_count = pres.count("{c:'")
     if slide_count < 49:
         errors.append(f"Presentación: solo {slide_count} slides; se esperan al menos 49.")
@@ -71,6 +74,8 @@ def main():
         errors.append("Presentación: no debe exponer el diagnóstico del grupo.")
 
     route = ROUTE.read_text(encoding="utf-8")
+    if "No abras seis recursos" in route or "Este es el único punto de entrada" in route:
+        errors.append("Ruta: contiene meta-instrucciones del proceso de diseño en lugar del producto.")
     for marker in [
         "Ruta única",
         "Entiende",
