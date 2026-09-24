@@ -131,7 +131,7 @@ Funciones:
 - copiar enlace estudiante;
 - ver ranking en vivo;
 - ver primer intento y dominio por desafío;
-- reiniciar la partida actual conservando alias;
+- reiniciar la partida actual borrando participantes, respuestas y puntajes;
 - cerrar/reabrir una partida;
 - seleccionar rondas anteriores.
 
