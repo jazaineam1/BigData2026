@@ -13,18 +13,21 @@ organizado como tres recursos docentes versionados directamente:
 3. Laboratorio activo / guía de clase:
    assets/tutoriales/s07-laboratorio-guiado.html
 
-Principios del rediseño:
+Principios vigentes del rediseño:
 - máximo 35 pantallas en la presentación;
 - explicación conceptual completa en la presentación;
 - Console antes de Python;
 - Python como automatización de la API;
-- cuaderno con explicación de código, evidencia y errores esperados;
+- cuaderno con explicación de código, evidencia, salidas esperadas y errores;
 - laboratorio como tablero de clase, no como cuarta fuente de contenido;
-- S07 Live entra al inicio, permanece visible y evalúa habilidades diversas (no solo opción múltiple);
+- deep links D1-D8 desde la presentación al desafío exacto;
+- ranking por primer intento para evitar autocorrección inflada;
+- mastery por reintentos para conservar aprendizaje con feedback;
+- no exponer respuestas correctas en data-fallback del HTML;
 - ejemplos de industria: e-commerce, empleo, noticias y bases de conocimiento;
-- evaluación de relevancia explícita y puente a _rank_eval / Search Profiler / Search UI;
+- match vs term, index-time/search-time, BM25 trabajado, troubleshooting y P@5;
 - Supabase Broadcast como sincronización principal con polling móvil de respaldo;
-- reto de noticias como transferencia.
+- bloques Console marcados como NO SE EJECUTA EN COLAB para evitar rutas clicables.
 
 Este script se conserva para documentar la arquitectura y evitar que una
 regeneración antigua sobrescriba el notebook vigente. Para QA usa:
