@@ -95,7 +95,7 @@ mark{background:#ffd7c9;color:#542113;padding:0 .08em}
 <div id="toast" class="toast">Usa ← → o desliza</div>
 <script>
 const slides = [
-{c:'Inicio',k:'SESIÓN 7',t:'Construye un buscador con Elasticsearch',l:'Universidad Central · Maestría en Analítica de Datos · Big Data. Diseña, despliega y evalúa un buscador de texto completo desde Python.',dark:true,b:`
+{c:'Inicio',k:'UNIVERSIDAD CENTRAL · SESIÓN 7',t:'Construye un buscador con Elasticsearch',l:'Universidad Central · Maestría en Analítica de Datos · Big Data. Diseña, despliega y evalúa un buscador de texto completo desde Python.',dark:true,b:`
 <div class="flow"><div class="node">Documentos</div><div class="arrow">→</div><div class="node">Elasticsearch</div><div class="arrow">→</div><div class="node">Resultados relevantes</div></div>
 <div class="call"><b>Meta profesional:</b> al cerrar, cada equipo tendrá un índice real, documentos cargados y una consulta reproducible desde Python.</div>`},
 {c:'Inicio',k:'PRODUCTO',t:'No vienes a mirar una demo',l:'Vas a construir una solución mínima de búsqueda de extremo a extremo.',b:`
@@ -385,6 +385,9 @@ ok, errores = bulk(client, acciones, refresh=True)</pre>
 <tr><td>Experimento A/B + juicios de relevancia / P@5</td><td>20</td></tr>
 <tr><td>Decisión + alternativa + límite</td><td>15</td></tr>
 <tr><td>Trazabilidad sin secretos</td><td>5</td></tr></table>`},
+{c:'Transferencia',k:'RETO DE TRANSFERENCIA',t:'¿Funciona lo aprendido con otro tipo de documento?',l:'Cambiamos procesos por noticias: el objetivo es construir un buscador editorial y medir relevancia.',b:`
+<div class="grid two"><div class="card blue"><b>Nuevo corpus</b>Noticias usadas en sesiones anteriores: título, subtítulo, cuerpo y sección.</div><div class="card green"><b>Nueva tarea</b>Diseñar pesos para recuperar historias útiles para una mesa de edición y comparar Precision@5.</div></div>
+<div class="call">El reto vive al final del mismo cuaderno: no introduce otra herramienta, solo prueba si puedes transferir Elasticsearch a un dominio distinto.</div>`},
 {c:'Cierre',k:'PARA LLEVAR',t:'Ya no tienes “una búsqueda”; tienes una arquitectura',l:'Datos → análisis → índice → ingesta → consulta → ranking → decisión.',dark:true,b:`
 <div class="flow"><div class="node">corpus</div><div class="arrow">→</div><div class="node">mapping + analyzer</div><div class="arrow">→</div><div class="node">BM25</div><div class="arrow">→</div><div class="node">decisión con límites</div></div>
 <div class="call"><b>Siguiente frontera:</b> cuando las palabras no alcanzan, necesitaremos representación semántica.</div>`}
