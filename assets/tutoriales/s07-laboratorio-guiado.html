@@ -1,11 +1,429 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>S07 · Checklist técnico</title><style>
-:root{--bg:#FFF9F1;--ink:#122253;--g:#0B8689;--b:#122253;--y:#E95D0F;--line:#DDE0E8;--muted:#596078;--uc-blue:#1472B8;--uc-beige:#F3E7CE}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.48 Roboto,"Segoe UI",Arial,sans-serif}.wrap{max-width:900px;margin:auto;padding:24px 14px 70px}h1{font:700 clamp(34px,7vw,58px)/1 Roboto,"Segoe UI",Arial,sans-serif;margin:.2em 0;color:#122253}.lead{color:#505975;font-size:18px}.links{display:flex;gap:8px;flex-wrap:wrap}.links a{background:var(--g);color:#fff;text-decoration:none;border-radius:10px;padding:9px 11px;font-weight:800}.links a.alt{background:#EEF5FC;color:var(--b);border:1px solid #C7D8EB}.progress{position:sticky;top:0;z-index:10;background:rgba(255,249,241,.94);backdrop-filter:blur(8px);padding:10px 0}.meter{height:9px;background:#DDE0E8;border-radius:999px;overflow:hidden}.meter i{display:block;height:100%;background:var(--g);width:0}.status{font-size:12px;color:var(--muted);margin-top:5px}.step{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;margin:11px 0;box-shadow:0 7px 20px rgba(23,32,25,.055)}label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}label input{width:20px;height:20px;margin-top:7px}.n{display:flex;width:34px;height:34px;min-width:34px;align-items:center;justify-content:center;border-radius:50%;background:var(--g);color:#fff;font-weight:900}.row b{display:block;font-size:18px;color:#122253}.row small{display:block;color:var(--muted);margin-top:2px}.evidence{margin:10px 0 0 64px;background:#EAF6F6;border-left:4px solid var(--g);border-radius:8px;padding:8px 10px;font-size:14px}.warn{background:#FFF0E8;border-left:6px solid var(--y);border-radius:12px;padding:13px;margin-top:20px}@media(max-width:620px){.evidence{margin-left:0}.row small{font-size:13px}}
-</style></head><body><main class="wrap"><div class="links"><a href="s07-recursos.html">← Ruta S07</a><a class="alt" href="s07-despliegue-elasticsearch.html">Guía de despliegue</a><a class="alt" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Cuaderno</a></div><h1>Checklist técnico S07</h1><p class="lead">No enseña teoría nueva: controla que cada paso del notebook produjo la evidencia que realmente debe producir. Marca solo después de verificar la salida.</p><div class="progress"><div class="meter"><i id="bar"></i></div><div class="status"><b id="done">0</b> de 21 pasos</div></div><article class="step"><div class="row"><label><input type="checkbox" data-k="1"><span class="n">1</span><span><b>Abre la ruta única</b><small>Empieza en la página S07 y no en un archivo suelto.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Ves la secuencia Entender → Experimentar → Desplegar → Indexar → Buscar → Evaluar.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="2"><span class="n">2</span><span><b>Carga el corpus S6</b><small>Ejecuta A1 para leer el archivo versionado y deduplicar procesos.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Con corpus principal: Filas fuente: 2109 y Procesos únicos: 1994.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="3"><span class="n">3</span><span><b>Ejecuta la línea base</b><small>Busca literalmente mantenimiento + aeronaves.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Obtienes un número de coincidencias, todavía sin ranking.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="4"><span class="n">4</span><span><b>Construye la intuición del índice</b><small>Ejecuta tokens e índice invertido del microcorpus.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Puedes señalar término → documentos.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="5"><span class="n">5</span><span><b>Obtén BM25 local</b><small>Ejecuta el helper oculto y la consulta demo.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Aparece un top ordenado con score local.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="6"><span class="n">6</span><span><b>Prepara tu proyecto Elastic</b><small>Sigue la guía Serverless hasta tener Project URL y API key.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Tienes los dos datos sin haber publicado la clave.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="7"><span class="n">7</span><span><b>Define tu índice personal</b><small>Cambia ALIAS y ejecuta el slug del índice.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Se imprime s07-compras-claras-<tu-alias>.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="8"><span class="n">8</span><span><b>Verifica conexión</b><small>Ejecuta la celda con Elasticsearch(...) y client.info().</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Se imprime Conexión verificada y Modo: Elasticsearch real.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="9"><span class="n">9</span><span><b>Revisa el mapping</b><small>Lee text vs keyword y ejecuta la tabla de mappings.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Puedes explicar por qué descripción es text e id_proceso es keyword.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="10"><span class="n">10</span><span><b>Crea el índice</b><small>Ejecuta la celda idempotente de creación.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Aparece Índice creado: True y el nombre de tu índice.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="11"><span class="n">11</span><span><b>Observa el analyzer real</b><small>Ejecuta client.indices.analyze con analyzer spanish.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Se imprime Tokens Elastic: [...].</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="12"><span class="n">12</span><span><b>Carga con bulk</b><small>Ejecuta la ingesta de documentos.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Con corpus principal: Documentos indexados: 1994 y Errores bulk: 0.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="13"><span class="n">13</span><span><b>Comprueba la ingesta</b><small>Ejecuta client.count.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Conteo local = 1994, Conteo Elasticsearch = 1994, ¿Coinciden? = True.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="14"><span class="n">14</span><span><b>Construye la query ladder</b><small>Ejecuta match, multi_match, boost, filter y highlight en orden.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Puedes decir qué aporta score, qué restringe y dónde se ve el texto coincidente.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="15"><span class="n">15</span><span><b>Ejecuta el experimento A/B</b><small>Usa tu consulta asignada por alias y cambia solo el boost del nombre.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Aparecen Top A, Top B y una tabla de cambio de posiciones.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="16"><span class="n">16</span><span><b>Define y aplica juicios de relevancia</b><small>Escribe un criterio observable, etiqueta 1/0 los top 5 de A y B y calcula P@5.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Se imprimen Precision@5 A, Precision@5 B y Cambio P@5 (B - A).</div></article>
-<article class="step"><div class="row"><label><input type="checkbox" data-k="17"><span class="n">17</span><span><b>Genera la entrega</b><small>Completa decisión, alternativa, cambio, dudoso y límite; exporta.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Existen s07_resultados_busqueda.csv, s07_config_busqueda.json y hito_s07_relevancia.md; el JSON conserva P@5 y el criterio, no secretos.</div></article><article class="step"><div class="row"><label><input type="checkbox" data-k="18"><span class="n">18</span><span><b>Carga las 987 noticias</b><small>Ve al bloque H y transforma cuerpo/etiquetas en campos buscables.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Se imprime Noticias únicas: 987.</div></article>
-<article class="step"><div class="row"><label><input type="checkbox" data-k="19"><span class="n">19</span><span><b>Crea el índice editorial</b><small>Usa un mapping nuevo y carga las noticias con bulk.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Indexadas: 987, Errores: 0 y Conteo Elasticsearch: 987.</div></article>
-<article class="step"><div class="row"><label><input type="checkbox" data-k="20"><span class="n">20</span><span><b>Resuelve el brief editorial</b><small>Compara baseline vs boosts con <code>premium = false</code> fijo.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Obtienes P@5 para NOTICIAS A y NOTICIAS B.</div></article>
-<article class="step"><div class="row"><label><input type="checkbox" data-k="21"><span class="n">21</span><span><b>Exporta el reto de transferencia</b><small>Justifica ranking, primer artículo, falso positivo y siguiente prueba.</small></span></label></div><div class="evidence"><b>Evidencia exacta:</b> Existe <code>s07_reto_sala_redaccion.json</code>.</div></article><div class="warn"><b>Contingencia:</b> si Cloud falla, marca únicamente los pasos que sí ejecutaste. El ranking local mantiene el laboratorio, pero no convierte los pasos de conexión/indexación en “hechos”.</div></main><script>
-const key='s07:check:v5',boxes=[...document.querySelectorAll('input[type=checkbox]')],saved=JSON.parse(localStorage.getItem(key)||'{}');
-function upd(){let n=0;boxes.forEach(b=>{b.checked=!!saved[b.dataset.k];if(b.checked)n++});done.textContent=n;bar.style.width=(n/boxes.length*100)+'%'}
-boxes.forEach(b=>b.onchange=()=>{saved[b.dataset.k]=b.checked;localStorage.setItem(key,JSON.stringify(saved));upd()});upd();
-</script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Laboratorio activo de la sesión 7: Elasticsearch y BM25.">
+<meta name="theme-color" content="#B11F16">
+<title>S07 · Laboratorio activo Elasticsearch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Titillium+Web:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --olive:#636F03;--black:#1A171B;--red:#B11F16;--lime:#ACAA00;--beige:#F3E7CE;
+  --orange:#E95D0F;--navy:#122253;--teal:#0B8689;--blue:#1472B8;--purple:#634998;
+  --paper:#FFFCF7;--surface:#fff;--ink:#211D22;--muted:#68626A;--line:#E5DFD6;--soft:#F7F2EA;
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Roboto,"Segoe UI",Arial,sans-serif}
+a{color:inherit}button,input,textarea{font:inherit}code,pre{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}
+.top{
+  position:sticky;top:0;z-index:50;background:rgba(255,252,247,.94);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(177,31,22,.12)
+}
+.nav{max-width:1240px;margin:auto;padding:10px 18px;display:flex;align-items:center;gap:10px}
+.nav a{text-decoration:none;font-weight:800;border-radius:10px;padding:8px 10px}
+.nav a:hover{background:var(--soft)}
+.brand{margin-right:auto;color:var(--red)}
+.launch{background:var(--red)!important;color:#fff!important}
+.layout{max-width:1240px;margin:auto;padding:28px 18px 80px;display:grid;grid-template-columns:270px minmax(0,1fr);gap:26px}
+.side{position:sticky;top:78px;align-self:start}
+.side-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px;box-shadow:0 10px 30px rgba(26,23,27,.06)}
+.side h2{font:700 18px "Titillium Web",sans-serif;margin:0 0 8px}
+.meter{height:9px;background:#ECE5DC;border-radius:999px;overflow:hidden}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--orange));transition:width .2s}
+.side small{color:var(--muted)}
+.steps{display:grid;gap:4px;margin-top:14px}
+.steps a{display:flex;align-items:center;gap:8px;text-decoration:none;color:#5A5359;padding:8px;border-radius:10px;font-size:13px;font-weight:700}
+.steps a:hover{background:var(--soft);color:var(--red)}
+.steps b{width:25px;height:25px;border-radius:8px;background:#F0EBE4;display:grid;place-items:center;font-size:11px}
+.tip{margin-top:14px;background:#FFF2EB;border-left:4px solid var(--orange);border-radius:10px;padding:10px;font-size:12px;color:#6F3C22}
+.hero{padding:16px 0 25px}
+.ey{display:inline-flex;gap:8px;align-items:center;background:#FCE8E6;color:var(--red);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;border-radius:999px;padding:7px 10px}
+h1,h2,h3{font-family:"Titillium Web",sans-serif}
+h1{font-size:clamp(42px,6vw,72px);line-height:.98;letter-spacing:-.03em;margin:15px 0 14px;max-width:13ch}
+.lead{font-size:20px;color:#595159;max-width:850px}
+.hero-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+.btn{border:0;border-radius:11px;padding:10px 13px;font-weight:900;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn.red{background:var(--red);color:#fff}.btn.dark{background:var(--black);color:#fff}.btn.soft{background:#F2EDE6;color:var(--black);border:1px solid #E5DDD3}
+.note{background:#EFF8F7;border:1px solid #CFE9E6;border-radius:16px;padding:13px 15px;color:#365C59;margin:18px 0}
+.stage{background:#fff;border:1px solid var(--line);border-radius:24px;margin:18px 0;overflow:hidden;box-shadow:0 10px 28px rgba(26,23,27,.045)}
+.stage-head{display:grid;grid-template-columns:58px 1fr auto;gap:14px;align-items:start;padding:21px;border-bottom:1px solid #EEE7DE}
+.n{width:50px;height:50px;border-radius:16px;background:var(--black);color:#fff;display:grid;place-items:center;font:900 20px "Titillium Web",sans-serif}
+.stage.current .n{background:var(--red)}
+.stage h2{font-size:30px;line-height:1;margin:2px 0 7px}
+.stage-head p{margin:0;color:var(--muted)}
+.done-wrap{display:flex;align-items:center;gap:7px;color:var(--teal);font-weight:900;font-size:12px;white-space:nowrap}
+.done-wrap input{width:19px;height:19px;accent-color:var(--teal)}
+.stage-body{padding:21px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box{border:1px solid var(--line);border-radius:16px;padding:15px;background:#fff}
+.box.concept{background:#FBF7F1}.box.example{background:#F5F8FC}.box.evidence{background:#EFF8F7}
+.box h3{font-size:19px;margin:0 0 7px}.box p{margin:0;color:#5E575E;font-size:14px}
+.box ul{margin:7px 0 0;padding-left:18px;color:#5E575E;font-size:14px}
+.code{margin:15px 0;border-radius:16px;overflow:hidden;border:1px solid #2F2A31;background:#19171A;color:#F8F3ED}
+.code-head{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:9px 12px;background:#252126;border-bottom:1px solid #383239;color:#D8D0D7;font-size:12px}
+.copy{background:#3A343B;color:#fff;border:1px solid #4B444C;border-radius:8px;padding:6px 8px;cursor:pointer;font-size:11px;font-weight:800}
+pre{margin:0;padding:15px;overflow:auto;font-size:13px;line-height:1.55}
+details{border:1px solid var(--line);border-radius:13px;margin-top:12px;background:#fff}
+summary{cursor:pointer;padding:12px 14px;font-weight:900;color:var(--navy)}
+.explain{padding:0 14px 14px;color:#5D565D;font-size:14px}
+.explain li{margin:5px 0}
+.task{margin-top:14px;border-left:6px solid var(--red);background:#FFF5F4;border-radius:13px;padding:14px}
+.task b{color:var(--red)}
+.checkpoint{margin-top:16px;border:1px solid #D9D0E6;background:#FAF8FD;border-radius:16px;padding:15px}
+.checkpoint h3{margin:0 0 7px;color:var(--purple);font-size:18px}.checkpoint p{margin:0 0 9px;color:#5E575E}
+.options{display:grid;gap:7px}.option{display:flex;gap:8px;align-items:flex-start;padding:9px;border-radius:10px;background:#fff;border:1px solid #E6DFF0;cursor:pointer}
+.option input{margin-top:4px;accent-color:var(--purple)}
+.feedback{display:none;margin-top:10px;padding:10px;border-radius:10px;font-size:13px;font-weight:700}
+.feedback.ok{display:block;background:#E8F6F3;color:#166760}.feedback.bad{display:block;background:#FCE8E6;color:#8D1E18}
+.quiz-btn{margin-top:10px;background:var(--purple);color:#fff}
+.log{background:linear-gradient(120deg,var(--black),var(--navy));color:#fff;border-radius:24px;padding:22px;margin-top:24px}
+.log h2{font-size:31px;margin:0 0 8px}.log p{color:rgba(255,255,255,.72)}
+.log-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.field label{display:block;font-size:12px;font-weight:800;margin-bottom:4px}
+.field input,.field textarea{width:100%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;border-radius:10px;padding:10px;outline:none}
+.field textarea{min-height:80px;resize:vertical}.field input:focus,.field textarea:focus{border-color:#fff}
+.export{margin-top:12px;background:#fff;color:var(--black)}
+footer{max-width:1240px;margin:auto;padding:0 18px 40px;color:var(--muted);font-size:12px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.side{position:static}.steps{grid-template-columns:repeat(4,1fr)}.steps a{justify-content:center}.steps a span{display:none}}
+@media(max-width:680px){.nav a:not(.launch):not(.brand-link){display:none}.layout{padding:18px 12px 65px}.cols,.log-grid{grid-template-columns:1fr}.stage-head{grid-template-columns:44px 1fr}.done-wrap{grid-column:2}.n{width:42px;height:42px;border-radius:12px}.stage h2{font-size:25px}.steps{grid-template-columns:repeat(2,1fr)}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav">
+    <a class="brand-link" href="../../index.html">← Big Data 2026-2S</a>
+    <a href="s07-recursos.html">Ruta S07</a>
+    <a href="../../Presentaciones/s07-del-vecindario-al-texto.html#s1">Presentación</a>
+    <a class="launch" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Abrir / reutilizar Colab</a>
+  </nav>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <div class="side-card">
+      <h2>Tu progreso del laboratorio</h2>
+      <div class="meter"><i id="bar"></i></div>
+      <small><b id="count">0</b> de 7 etapas verificadas</small>
+      <div class="steps">
+        <a href="#e0"><b>0</b><span>Preparar</span></a>
+        <a href="#e1"><b>1</b><span>Analizar</span></a>
+        <a href="#e2"><b>2</b><span>Modelar</span></a>
+        <a href="#e3"><b>3</b><span>Indexar</span></a>
+        <a href="#e4"><b>4</b><span>Consultar</span></a>
+        <a href="#e5"><b>5</b><span>Evaluar</span></a>
+        <a href="#e6"><b>6</b><span>Transferir</span></a>
+      </div>
+      <div class="tip"><b>Una sola pestaña de trabajo.</b> El botón de Colab usa siempre el mismo destino. Si vuelves a pulsarlo, el navegador reutiliza esa pestaña en vez de crear copias.</div>
+    </div>
+  </aside>
+
+  <main>
+    <section class="hero">
+      <span class="ey">Universidad Central · Big Data · S07</span>
+      <h1>Laboratorio activo: construye un buscador real.</h1>
+      <p class="lead">No es un checklist. En cada etapa vas a <b>entender el concepto, ver un ejemplo, leer el código, ejecutarlo, verificar evidencia y responder una pregunta corta</b>. La meta es que después puedas hacerlo sin esta página.</p>
+      <div class="hero-actions">
+        <a class="btn red" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Abrir / reutilizar Colab</a>
+        <a class="btn dark" href="s07-despliegue-elasticsearch.html">Guía visual de Elastic</a>
+        <a class="btn soft" href="../../Presentaciones/s07-del-vecindario-al-texto.html#s1">Volver a explicación</a>
+      </div>
+      <div class="note"><b>Regla de seguridad:</b> nunca pegues API keys en el repositorio, una captura o una entrega. El cuaderno usa entrada oculta. La evidencia válida es la salida de la conexión, no la clave.</div>
+    </section>
+
+    <section class="stage" id="e0">
+      <div class="stage-head">
+        <div class="n">0</div>
+        <div><h2>Preparar el entorno y reconocer el problema</h2><p>Antes de Elasticsearch, distingue búsqueda de filtro y confirma que trabajas con el corpus correcto.</p></div>
+        <label class="done-wrap"><input type="checkbox" data-step="0"> etapa verificada</label>
+      </div>
+      <div class="stage-body">
+        <div class="cols">
+          <div class="box concept"><h3>Concepto</h3><p><b>Filtrar</b> responde si un documento cumple una condición. <b>Buscar</b> ordena documentos por relevancia respecto a una necesidad textual. No son la misma operación.</p></div>
+          <div class="box example"><h3>Ejemplo</h3><p><code>departamento == "Bogotá"</code> es filtro. “mantenimiento de aeronaves” requiere analizar texto, encontrar coincidencias y producir un ranking.</p></div>
+        </div>
+        <div class="task"><b>Hazlo:</b> abre el Bloque A del cuaderno. Carga el corpus de S6, deduplica por proceso y ejecuta la línea base literal.</div>
+        <div class="box evidence" style="margin-top:12px"><h3>Evidencia esperada</h3><p>Con el corpus principal debes reconocer <b>2.109 filas fuente</b> y <b>1.994 procesos únicos</b>. Si no coincide, detente y revisa la fuente antes de seguir.</p></div>
+        <div class="checkpoint" data-quiz="q0" data-correct="b">
+          <h3>Checkpoint 0</h3><p>¿Cuál de estas tareas necesita ranking de relevancia?</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q0" value="a"> Mostrar solo registros del departamento de Antioquia.</label>
+            <label class="option"><input type="radio" name="q0" value="b"> Encontrar los procesos que mejor responden a “mantenimiento de aeronaves”.</label>
+            <label class="option"><input type="radio" name="q0" value="c"> Contar cuántos documentos hay en un índice.</label>
+          </div>
+          <button class="btn quiz-btn" type="button">Comprobar</button>
+          <div class="feedback" data-feedback></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage current" id="e1">
+      <div class="stage-head">
+        <div class="n">1</div>
+        <div><h2>Analyzer → tokens → índice invertido</h2><p>Primero entiende qué transforma Elasticsearch antes de hablar de score.</p></div>
+        <label class="done-wrap"><input type="checkbox" data-step="1"> etapa verificada</label>
+      </div>
+      <div class="stage-body">
+        <div class="cols">
+          <div class="box concept"><h3>Concepto</h3><p>El <b>analyzer</b> transforma texto en tokens normalizados. El <b>índice invertido</b> guarda término → documentos. Esa estructura evita recorrer todo el corpus en cada búsqueda.</p></div>
+          <div class="box example"><h3>Ejemplo</h3><p>“Mantenimiento de aeronaves” puede terminar en tokens como <code>mantenimiento</code> y <code>aeronave</code>. Después el motor sabe en qué documentos aparece cada término.</p></div>
+        </div>
+        <div class="code">
+          <div class="code-head"><span>Idea mínima · análisis de texto</span><button class="copy" data-copy="code1">Copiar</button></div>
+          <pre id="code1">tokens = client.indices.analyze(
+    index=INDEX_NAME,
+    analyzer="spanish",
+    text="mantenimiento de aeronaves"
+)
+print([t["token"] for t in tokens["tokens"]])</pre>
+        </div>
+        <details><summary>¿Qué hace cada línea?</summary><div class="explain"><ul>
+          <li><code>client.indices.analyze(...)</code> pide al servidor ejecutar el mismo análisis que usa el índice.</li>
+          <li><code>index=INDEX_NAME</code> hace que la prueba respete la configuración real del índice.</li>
+          <li><code>analyzer="spanish"</code> aplica normalización lingüística adecuada para español.</li>
+          <li>El <code>print</code> no “hace búsqueda”: solo permite observar el texto ya transformado.</li>
+        </ul></div></details>
+        <div class="task"><b>Hazlo:</b> ejecuta el microcorpus del Bloque A y después, cuando tu índice exista, compara esos tokens didácticos con <code>client.indices.analyze</code> real.</div>
+        <div class="checkpoint" data-quiz="q1" data-correct="a">
+          <h3>Checkpoint 1</h3><p>¿Qué componente decide cómo “Mantenimiento” se transforma antes de entrar al índice?</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q1" value="a"> El analyzer.</label>
+            <label class="option"><input type="radio" name="q1" value="b"> El filtro por departamento.</label>
+            <label class="option"><input type="radio" name="q1" value="c"> Precision@5.</label>
+          </div>
+          <button class="btn quiz-btn" type="button">Comprobar</button><div class="feedback" data-feedback></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage" id="e2">
+      <div class="stage-head">
+        <div class="n">2</div>
+        <div><h2>Mapping: decidir qué significa cada campo</h2><p>El esquema no es decoración: determina qué se analiza, qué se filtra y qué conserva coincidencia exacta.</p></div>
+        <label class="done-wrap"><input type="checkbox" data-step="2"> etapa verificada</label>
+      </div>
+      <div class="stage-body">
+        <div class="cols">
+          <div class="box concept"><h3><code>text</code></h3><p>Para lenguaje natural que debe tokenizarse y participar en relevancia: descripciones, objeto contractual, nombre de entidad cuando buscas palabras.</p></div>
+          <div class="box example"><h3><code>keyword</code></h3><p>Para valores exactos: ID de proceso, código, departamento normalizado o una etiqueta usada para filtrar/agrupar.</p></div>
+        </div>
+        <div class="code"><div class="code-head"><span>Mapping reducido para razonar</span><button class="copy" data-copy="code2">Copiar</button></div><pre id="code2">mappings = {
+  "properties": {
+    "id_proceso": {"type": "keyword"},
+    "descripcion": {"type": "text", "analyzer": "spanish"},
+    "departamento": {"type": "keyword"}
+  }
+}</pre></div>
+        <details><summary>¿Por qué importa?</summary><div class="explain"><ul>
+          <li>Si un ID se trata como <code>text</code>, el analyzer puede fragmentarlo y perder la semántica de “valor exacto”.</li>
+          <li>Si una descripción se trata solo como <code>keyword</code>, buscar palabras dentro del texto deja de comportarse como búsqueda de lenguaje natural.</li>
+          <li>El mapping es una decisión de producto de búsqueda: debe responder a cómo consultarás después.</li>
+        </ul></div></details>
+        <div class="task"><b>Hazlo:</b> lee el mapping completo del Bloque C. Para tres campos, di en voz alta “este es text/keyword porque…”. Después crea tu índice personal de forma idempotente.</div>
+        <div class="box evidence" style="margin-top:12px"><h3>Evidencia esperada</h3><p>El nombre de índice contiene tu alias y la creación puede repetirse sin romper el flujo.</p></div>
+        <div class="checkpoint" data-quiz="q2" data-correct="c">
+          <h3>Checkpoint 2</h3><p>¿Qué campo debería ser <code>keyword</code> si necesitas coincidencia exacta?</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q2" value="a"> Una descripción contractual de tres párrafos.</label>
+            <label class="option"><input type="radio" name="q2" value="b"> El objeto del contrato usado para búsqueda libre.</label>
+            <label class="option"><input type="radio" name="q2" value="c"> <code>id_proceso</code>.</label>
+          </div>
+          <button class="btn quiz-btn" type="button">Comprobar</button><div class="feedback" data-feedback></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage" id="e3">
+      <div class="stage-head">
+        <div class="n">3</div>
+        <div><h2>Conectar e indexar en Elasticsearch real</h2><p>Ahora pasas del modelo mental al servicio: conexión, creación, bulk y control de conteo.</p></div>
+        <label class="done-wrap"><input type="checkbox" data-step="3"> etapa verificada</label>
+      </div>
+      <div class="stage-body">
+        <div class="cols">
+          <div class="box concept"><h3>¿Qué es <code>bulk</code>?</h3><p>Una forma de enviar muchas operaciones de indexación en lotes. Reduce el costo de hacer una petición HTTP separada por documento.</p></div>
+          <div class="box example"><h3>Control indispensable</h3><p>“No dio error” no basta. Debes comparar documentos que pretendías cargar vs <code>client.count()</code> en el índice.</p></div>
+        </div>
+        <div class="task"><b>Hazlo:</b> sigue la guía visual hasta obtener Project URL y API key; vuelve al mismo Colab, verifica <code>client.info()</code>, crea el índice y ejecuta la carga bulk.</div>
+        <div class="box evidence" style="margin-top:12px"><h3>Evidencia esperada</h3><ul>
+          <li>“Conexión verificada” y modo Elasticsearch real.</li>
+          <li>Errores bulk = 0.</li>
+          <li>Conteo Elasticsearch = 1.994 y coincide con el corpus deduplicado.</li>
+        </ul></div>
+        <div class="checkpoint" data-quiz="q3" data-correct="b">
+          <h3>Checkpoint 3</h3><p>Después de un <code>bulk</code> sin excepciones, ¿qué control es más fuerte?</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q3" value="a"> Confiar en que el notebook terminó la celda.</label>
+            <label class="option"><input type="radio" name="q3" value="b"> Comparar el número esperado con <code>client.count()</code> y revisar errores del bulk.</label>
+            <label class="option"><input type="radio" name="q3" value="c"> Hacer una captura del botón “Run”.</label>
+          </div>
+          <button class="btn quiz-btn" type="button">Comprobar</button><div class="feedback" data-feedback></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage" id="e4">
+      <div class="stage-head">
+        <div class="n">4</div>
+        <div><h2>Construir la consulta por capas</h2><p>No memorices JSON. Aprende qué añade cada capa y qué cambia en el ranking.</p></div>
+        <label class="done-wrap"><input type="checkbox" data-step="4"> etapa verificada</label>
+      </div>
+      <div class="stage-body">
+        <div class="cols">
+          <div class="box concept"><h3>Capas</h3><ul><li><code>match</code>: búsqueda textual básica.</li><li><code>multi_match</code>: busca en varios campos.</li><li><code>boost</code>: cambia importancia relativa.</li><li><code>filter</code>: restringe sin aportar score.</li><li><code>highlight</code>: muestra evidencia textual.</li></ul></div>
+          <div class="box example"><h3>Ejemplo mental</h3><p>Si “aeronaves” aparece en el nombre del proceso y en la descripción, puedes decidir que una coincidencia en el nombre pese más. Eso es una decisión explícita de ranking, no una verdad universal.</p></div>
+        </div>
+        <div class="code"><div class="code-head"><span>Estructura de razonamiento</span><button class="copy" data-copy="code4">Copiar</button></div><pre id="code4">query = {
+  "bool": {
+    "must": [{
+      "multi_match": {
+        "query": "mantenimiento de aeronaves",
+        "fields": ["nombre^2", "descripcion"]
+      }
+    }],
+    "filter": [{"term": {"departamento": "Bogotá D.C."}}]
+  }
+}</pre></div>
+        <details><summary>Lee el código como una frase</summary><div class="explain"><p><b>must:</b> “debe responder a este texto”. <b>multi_match:</b> “búscalo en estos campos”. <b>nombre^2:</b> “una coincidencia en nombre vale relativamente más”. <b>filter:</b> “además restringe el universo a este departamento, pero sin premiar el score”.</p></div></details>
+        <div class="task"><b>Hazlo:</b> ejecuta la query ladder del Bloque E en orden. Después de cada cambio responde: “¿qué comportamiento nuevo acabo de introducir?”.</div>
+        <div class="checkpoint" data-quiz="q4" data-correct="c">
+          <h3>Checkpoint 4</h3><p>¿Qué pieza restringe documentos sin incrementar por sí sola la relevancia?</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q4" value="a"> <code>boost</code>.</label>
+            <label class="option"><input type="radio" name="q4" value="b"> <code>multi_match</code>.</label>
+            <label class="option"><input type="radio" name="q4" value="c"> <code>filter</code>.</label>
+          </div>
+          <button class="btn quiz-btn" type="button">Comprobar</button><div class="feedback" data-feedback></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage" id="e5">
+      <div class="stage-head">
+        <div class="n">5</div>
+        <div><h2>Evaluar relevancia, no admirar scores</h2><p>El score de Elastic sirve para ordenar dentro de una consulta. La calidad del buscador la evalúas contra un criterio de relevancia.</p></div>
+        <label class="done-wrap"><input type="checkbox" data-step="5"> etapa verificada</label>
+      </div>
+      <div class="stage-body">
+        <div class="cols">
+          <div class="box concept"><h3>Precision@5</h3><p>De los cinco primeros resultados, ¿cuántos cumplen tu criterio de relevancia? Si 4 son relevantes, Precision@5 = 4/5 = 0,8.</p></div>
+          <div class="box example"><h3>Experimento A/B</h3><p>Cambia una sola decisión —por ejemplo, el boost— y compara top 5 A vs B. Si cambias cinco cosas a la vez, no sabes cuál produjo la diferencia.</p></div>
+        </div>
+        <div class="task"><b>Hazlo:</b> completa el Bloque F. Define el criterio antes de evaluar, etiqueta los 5 resultados de A y B y calcula ambas precisiones.</div>
+        <div class="box evidence" style="margin-top:12px"><h3>Tu salida debe permitir explicar</h3><ul><li>Qué versión funcionó mejor para tu criterio.</li><li>Qué documento cambió de posición y por qué.</li><li>Un falso positivo o caso dudoso.</li><li>Un límite concreto de tu evaluación.</li></ul></div>
+        <div class="checkpoint" data-quiz="q5" data-correct="a">
+          <h3>Checkpoint 5</h3><p>Tu top 5 tiene 3 documentos relevantes. ¿Cuál es Precision@5?</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q5" value="a"> 0,60.</label>
+            <label class="option"><input type="radio" name="q5" value="b"> 0,40.</label>
+            <label class="option"><input type="radio" name="q5" value="c"> 3,00.</label>
+          </div>
+          <button class="btn quiz-btn" type="button">Comprobar</button><div class="feedback" data-feedback></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage" id="e6">
+      <div class="stage-head">
+        <div class="n">6</div>
+        <div><h2>Transferencia: úsalo en otro dominio</h2><p>Si solo puedes repetir el ejemplo de contratos, todavía no dominaste la herramienta.</p></div>
+        <label class="done-wrap"><input type="checkbox" data-step="6"> etapa verificada</label>
+      </div>
+      <div class="stage-body">
+        <div class="cols">
+          <div class="box concept"><h3>Reto</h3><p>Indexa las 987 noticias ya conocidas por el curso y resuelve un brief editorial con un baseline y una versión ajustada por campos.</p></div>
+          <div class="box example"><h3>Restricción</h3><p>Mantén <code>premium = false</code>, define relevancia antes de mirar la métrica y cambia una sola decisión entre A y B.</p></div>
+        </div>
+        <div class="task"><b>Hazlo:</b> completa el Bloque H sin copiar literalmente la query del caso contractual. Debes adaptar campos y criterio al nuevo problema.</div>
+        <div class="box evidence" style="margin-top:12px"><h3>Se considera transferencia si puedes decir</h3><p>“Sé qué hace el analyzer, por qué elegí cada tipo de campo, cómo indexé, qué parte de mi consulta puntúa, qué parte filtra y cómo comprobé que el ranking sirve para mi objetivo”.</p></div>
+      </div>
+    </section>
+
+    <section class="log" id="bitacora">
+      <h2>Bitácora mínima de salida</h2>
+      <p>No sustituye la entrega del notebook. Sirve para que cierres la sesión con seis hechos concretos y puedas exportarlos como JSON local.</p>
+      <div class="log-grid">
+        <div class="field"><label for="f-index">Índice personal</label><input id="f-index" data-log placeholder="s07-compras-claras-tu-alias"></div>
+        <div class="field"><label for="f-count">Documentos indexados</label><input id="f-count" data-log placeholder="1994"></div>
+        <div class="field"><label for="f-a">Precision@5 A</label><input id="f-a" data-log placeholder="0.00–1.00"></div>
+        <div class="field"><label for="f-b">Precision@5 B</label><input id="f-b" data-log placeholder="0.00–1.00"></div>
+        <div class="field"><label for="f-decision">Decisión que cambiaste</label><textarea id="f-decision" data-log placeholder="Ej.: aumenté el peso del campo nombre..."></textarea></div>
+        <div class="field"><label for="f-limit">Límite observado</label><textarea id="f-limit" data-log placeholder="Ej.: solo evalué una consulta y cinco resultados..."></textarea></div>
+      </div>
+      <button class="btn export" id="exportBtn" type="button">Exportar bitácora JSON</button>
+    </section>
+  </main>
+</div>
+
+<footer>Big Data 2026-2S · Universidad Central · Sesión 7. El progreso y la bitácora se guardan solo en este navegador.</footer>
+
+<script>
+(function(){
+  var progressKey="bigdata2026:s07lab:v2";
+  var logKey="bigdata2026:s07lab:log:v2";
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem(progressKey)||"{}")}catch(e){saved={}}
+  var boxes=[].slice.call(document.querySelectorAll("[data-step]"));
+  var bar=document.getElementById("bar"), count=document.getElementById("count");
+
+  function render(){
+    var n=0;
+    boxes.forEach(function(b){var k=b.getAttribute("data-step");b.checked=!!saved[k];if(b.checked)n++});
+    count.textContent=n;bar.style.width=((n/boxes.length)*100)+"%";
+  }
+  boxes.forEach(function(b){b.addEventListener("change",function(){saved[b.getAttribute("data-step")]=b.checked;localStorage.setItem(progressKey,JSON.stringify(saved));render()})});
+  render();
+
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var el=document.getElementById(btn.getAttribute("data-copy"));
+      navigator.clipboard.writeText(el.innerText).then(function(){
+        var old=btn.textContent;btn.textContent="Copiado ✓";setTimeout(function(){btn.textContent=old},1200);
+      });
+    });
+  });
+
+  var explanations={
+    q0:"Buscar por necesidad textual requiere ordenar por relevancia; un filtro solo incluye o excluye.",
+    q1:"El analyzer transforma el texto antes de indexarlo o consultarlo.",
+    q2:"Un identificador se compara como valor exacto: keyword conserva esa semántica.",
+    q3:"La evidencia fuerte combina errores del bulk y conteo real del índice.",
+    q4:"filter restringe el universo, pero no está diseñado para aportar score.",
+    q5:"Precision@5 = relevantes en top 5 / 5 = 3/5 = 0,60."
+  };
+  document.querySelectorAll("[data-quiz]").forEach(function(q){
+    q.querySelector(".quiz-btn").addEventListener("click",function(){
+      var name=q.getAttribute("data-quiz"), correct=q.getAttribute("data-correct");
+      var selected=q.querySelector("input[type=radio]:checked"), fb=q.querySelector("[data-feedback]");
+      if(!selected){fb.className="feedback bad";fb.textContent="Selecciona una opción antes de comprobar.";return}
+      var ok=selected.value===correct;
+      fb.className="feedback "+(ok?"ok":"bad");
+      fb.textContent=(ok?"Correcto. ":"Revisa la idea. ")+explanations[name];
+    });
+  });
+
+  var log={};
+  try{log=JSON.parse(localStorage.getItem(logKey)||"{}")}catch(e){log={}}
+  var fields=[].slice.call(document.querySelectorAll("[data-log]"));
+  fields.forEach(function(f){
+    if(log[f.id])f.value=log[f.id];
+    f.addEventListener("input",function(){log[f.id]=f.value;localStorage.setItem(logKey,JSON.stringify(log))});
+  });
+  document.getElementById("exportBtn").addEventListener("click",function(){
+    var payload={
+      curso:"Big Data 2026-2S",
+      sesion:"S07 Elasticsearch y BM25",
+      progreso:saved,
+      bitacora:log,
+      generado_en:new Date().toISOString()
+    };
+    var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);a.download="s07_bitacora_local.json";a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href)},1000);
+  });
+})();
+</script>
+</body>
+</html>
