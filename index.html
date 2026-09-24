@@ -1,492 +1,561 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta
-            name="description"
-            content="Ruta guiada del curso Big Data 2026-2S de la Maestría en Analítica de Datos de la Universidad Central."
-        />
-        <meta name="author" content="Antonino Zainea" />
-        <title>Big Data 2026-2S | Universidad Central</title>
-        <link
-            href="https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700"
-            rel="stylesheet"
-        />
-        <link
-            href="https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic"
-            rel="stylesheet"
-            type="text/css"
-        />
-        <link href="css/styles.css" rel="stylesheet" />
-        <style>
-            .course-intro {
-                background: #f8f9fa;
-                padding: 4rem 0;
-            }
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Plataforma de aprendizaje de Big Data 2026-2S de la Maestría en Analítica de Datos de la Universidad Central.">
+  <meta name="author" content="Antonino Zainea">
+  <meta name="theme-color" content="#B11F16">
+  <title>Big Data 2026-2S · Universidad Central</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Titillium+Web:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --uc-olive:#636F03;
+      --uc-black:#1A171B;
+      --uc-red:#B11F16;
+      --uc-lime:#ACAA00;
+      --uc-beige:#F3E7CE;
+      --uc-orange:#E95D0F;
+      --uc-navy:#122253;
+      --uc-teal:#0B8689;
+      --uc-blue:#1472B8;
+      --uc-purple:#634998;
+      --paper:#FFFCF7;
+      --surface:#FFFFFF;
+      --ink:#211D22;
+      --muted:#68626A;
+      --line:#E5DFD6;
+      --soft:#F7F2EA;
+      --shadow:0 18px 48px rgba(26,23,27,.10);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:var(--paper);
+      color:var(--ink);
+      font-family:Roboto,"Segoe UI",Arial,sans-serif;
+      line-height:1.55;
+    }
+    a{color:inherit}
+    button,input{font:inherit}
+    .skip{
+      position:absolute;left:-999px;top:0;background:#fff;color:var(--uc-red);
+      padding:10px 14px;z-index:1000;border-radius:0 0 10px 10px
+    }
+    .skip:focus{left:16px}
+    .topbar{
+      position:sticky;top:0;z-index:50;
+      background:rgba(255,252,247,.92);
+      backdrop-filter:blur(18px);
+      border-bottom:1px solid rgba(177,31,22,.12);
+    }
+    .nav{
+      max-width:1200px;margin:auto;padding:12px 22px;display:flex;align-items:center;gap:18px;
+    }
+    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:max-content}
+    .brand-mark{
+      width:38px;height:38px;border-radius:12px;
+      display:grid;place-items:center;background:var(--uc-red);color:#fff;font-weight:900;
+      box-shadow:0 8px 18px rgba(177,31,22,.25)
+    }
+    .brand strong{font-family:"Titillium Web",sans-serif;font-size:18px;line-height:1}
+    .brand small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+    .nav-links{display:flex;gap:6px;margin-left:auto;align-items:center}
+    .nav-links a{
+      text-decoration:none;color:#4D474E;font-weight:700;font-size:14px;padding:9px 11px;border-radius:10px
+    }
+    .nav-links a:hover,.nav-links a:focus{background:var(--soft);color:var(--uc-red)}
+    .nav-cta{background:var(--uc-red)!important;color:#fff!important}
+    .hero{
+      min-height:690px;display:grid;place-items:center;
+      background:
+        linear-gradient(115deg,rgba(26,23,27,.91) 0%,rgba(18,34,83,.84) 54%,rgba(177,31,22,.68) 100%),
+        url("assets/img/bg-masthead.jpg") center/cover no-repeat;
+      color:#fff;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:after{
+      content:"";position:absolute;inset:auto -12vw -230px auto;width:640px;height:640px;border-radius:50%;
+      border:110px solid rgba(243,231,206,.08);pointer-events:none
+    }
+    .hero-grid{
+      width:min(1200px,100%);padding:96px 22px 70px;
+      display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.65fr);gap:44px;align-items:center;position:relative;z-index:1
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.20);
+      padding:7px 11px;border-radius:999px;font-weight:800;font-size:13px
+    }
+    .eyebrow i{width:8px;height:8px;background:var(--uc-orange);border-radius:50%;box-shadow:0 0 0 6px rgba(233,93,15,.16)}
+    h1,h2,h3{font-family:"Titillium Web",Roboto,sans-serif}
+    h1{font-size:clamp(48px,7vw,86px);line-height:.96;margin:20px 0 18px;max-width:10ch;letter-spacing:-.035em}
+    .hero-lead{font-size:clamp(18px,2vw,23px);color:rgba(255,255,255,.84);max-width:720px;margin:0 0 26px}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      border:0;border-radius:13px;padding:13px 17px;font-weight:900;text-decoration:none;cursor:pointer;
+      transition:transform .18s ease,box-shadow .18s ease,background .18s ease
+    }
+    .btn:hover{transform:translateY(-2px)}
+    .btn-primary{background:var(--uc-red);color:#fff;box-shadow:0 12px 30px rgba(177,31,22,.30)}
+    .btn-light{background:#fff;color:var(--uc-black)}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.38);color:#fff}
+    .today{
+      background:rgba(255,255,255,.96);color:var(--ink);border-radius:26px;padding:24px;
+      box-shadow:0 28px 70px rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.5)
+    }
+    .today-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+    .kicker{text-transform:uppercase;letter-spacing:.1em;font-size:11px;font-weight:900;color:var(--uc-red)}
+    .today h2{font-size:29px;line-height:1.05;margin:6px 0 8px}
+    .status{
+      display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:999px;
+      background:#EAF6F6;color:#086C70;font-weight:800;font-size:12px;white-space:nowrap
+    }
+    .status:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--uc-teal)}
+    .today ul{margin:16px 0 18px;padding:0;list-style:none;display:grid;gap:9px}
+    .today li{display:flex;gap:10px;color:#4F4950;font-size:14px}
+    .today li:before{content:"✓";color:var(--uc-teal);font-weight:900}
+    .today .btn{width:100%}
+    .shell{max-width:1200px;margin:auto;padding:0 22px}
+    .section{padding:78px 0}
+    .section.alt{background:#F8F3EB;border-top:1px solid #EEE6DA;border-bottom:1px solid #EEE6DA}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px}
+    .section-head h2{font-size:clamp(34px,4vw,52px);line-height:1;margin:0;color:var(--uc-black)}
+    .section-head p{max-width:680px;margin:8px 0 0;color:var(--muted)}
+    .progress-card{
+      min-width:270px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 15px
+    }
+    .progress-card strong{font-size:13px}
+    .meter{height:9px;background:#EDE7DE;border-radius:999px;margin:9px 0 5px;overflow:hidden}
+    .meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--uc-red),var(--uc-orange));transition:width .25s ease}
+    .progress-card small{color:var(--muted)}
+    .route-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+    .search{
+      flex:1;min-width:260px;border:1px solid var(--line);border-radius:13px;background:#fff;
+      padding:12px 14px;color:var(--ink);outline:none
+    }
+    .search:focus{border-color:var(--uc-red);box-shadow:0 0 0 4px rgba(177,31,22,.08)}
+    .filter{
+      border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 13px;font-weight:800;color:#4F4950;cursor:pointer
+    }
+    .filter.active{background:var(--uc-black);border-color:var(--uc-black);color:#fff}
+    .route{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .session{
+      background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;
+      display:grid;grid-template-columns:64px 1fr;gap:18px;box-shadow:0 8px 28px rgba(26,23,27,.045);
+      transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease
+    }
+    .session:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#D6CDC1}
+    .session.current{border:2px solid var(--uc-red);box-shadow:0 18px 44px rgba(177,31,22,.11)}
+    .session.evaluation{border-left:6px solid var(--uc-purple)}
+    .session-num{
+      width:56px;height:56px;border-radius:18px;background:var(--uc-black);color:#fff;
+      display:grid;place-items:center;font:900 22px "Titillium Web",sans-serif
+    }
+    .current .session-num{background:var(--uc-red)}
+    .evaluation .session-num{background:var(--uc-purple)}
+    .session-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:5px}
+    .pill{font-size:11px;font-weight:900;border-radius:999px;padding:5px 8px;background:#F2EEE8;color:#6A6269}
+    .pill.live{background:#FCE6E5;color:var(--uc-red)}
+    .pill.eval{background:#EEE9F6;color:var(--uc-purple)}
+    .session h3{font-size:24px;line-height:1.08;margin:6px 0 8px}
+    .session p{margin:0;color:var(--muted);font-size:14px}
+    .skills{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+    .skill{font-size:11px;background:#F7F3ED;border:1px solid #ECE4D9;border-radius:8px;padding:4px 7px;color:#5A5359}
+    .session-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .action{
+      display:inline-flex;align-items:center;justify-content:center;text-decoration:none;
+      border-radius:10px;padding:9px 11px;font-weight:800;font-size:13px;background:var(--uc-black);color:#fff
+    }
+    .action.secondary{background:#F3EFE8;color:var(--uc-black);border:1px solid #E6DED2}
+    .action.accent{background:var(--uc-red)}
+    .mark{
+      margin-left:auto;border:0;background:transparent;color:var(--uc-teal);font-weight:900;font-size:12px;cursor:pointer;padding:8px
+    }
+    .mark.done{background:#EAF6F6;border-radius:9px}
+    .session.hidden{display:none}
+    .principles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .principle{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px}
+    .principle b{display:block;font-family:"Titillium Web",sans-serif;font-size:22px;margin-bottom:7px}
+    .principle p{margin:0;color:var(--muted);font-size:14px}
+    .principle .icon{font-size:26px;margin-bottom:12px}
+    .support-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+    .support-main,.library{background:#fff;border:1px solid var(--line);border-radius:24px;padding:24px}
+    .support-main h3,.library h3{font-size:28px;margin:0 0 8px}
+    .support-main p,.library p{color:var(--muted);margin-top:0}
+    .support-list{display:grid;gap:10px;margin-top:18px}
+    .support-link{
+      display:flex;justify-content:space-between;gap:14px;align-items:center;text-decoration:none;
+      padding:13px 14px;background:#F8F4ED;border-radius:13px;border:1px solid #ECE4D9;font-weight:800
+    }
+    .support-link span{font-size:13px;color:var(--muted);font-weight:500}
+    .support-link:hover{border-color:var(--uc-red)}
+    .library-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+    .library-grid a{
+      text-decoration:none;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;font-weight:800;font-size:13px
+    }
+    .library-grid a:hover{background:#F8F4ED}
+    .manifesto{
+      border-radius:28px;padding:32px;color:#fff;
+      background:linear-gradient(120deg,var(--uc-black),var(--uc-navy) 60%,var(--uc-red));
+      display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center
+    }
+    .manifesto h2{font-size:clamp(32px,4vw,48px);margin:0 0 10px}
+    .manifesto p{color:rgba(255,255,255,.78);margin:0}
+    .manifesto ol{margin:0;padding-left:20px;display:grid;gap:8px;color:#fff}
+    footer{padding:34px 22px 46px;color:#746D73;text-align:center;font-size:13px}
+    footer strong{color:var(--uc-black)}
+    @media(max-width:900px){
+      .hero-grid{grid-template-columns:1fr;padding-top:82px}
+      .hero{min-height:auto}
+      .today{max-width:620px}
+      .route{grid-template-columns:1fr}
+      .principles{grid-template-columns:1fr 1fr}
+      .support-grid,.manifesto{grid-template-columns:1fr}
+      .section-head{align-items:flex-start;flex-direction:column}
+      .progress-card{width:100%}
+    }
+    @media(max-width:680px){
+      .nav{padding:10px 14px}.brand small{display:none}.nav-links a:not(.nav-cta){display:none}
+      .hero-grid,.shell{padding-left:14px;padding-right:14px}
+      h1{font-size:50px}
+      .section{padding:58px 0}
+      .session{grid-template-columns:48px 1fr;padding:17px;gap:13px}
+      .session-num{width:44px;height:44px;border-radius:13px;font-size:18px}
+      .session h3{font-size:21px}
+      .principles{grid-template-columns:1fr}
+      .library-grid{grid-template-columns:1fr}
+      .mark{margin-left:0}
+    }
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
 
-            .course-card {
-                min-height: 100%;
-                display: block;
-                color: #122253;
-                text-decoration: none;
-                background: #fff;
-                border: 1px solid #e5e7eb;
-                border-radius: 8px;
-                padding: 1.5rem;
-                transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-            }
+<header class="topbar">
+  <nav class="nav" aria-label="Navegación principal">
+    <a class="brand" href="#inicio">
+      <span class="brand-mark">BD</span>
+      <span><strong>Big Data 2026-2S</strong><small>Maestría en Analítica de Datos · Universidad Central</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="#ruta">Ruta</a>
+      <a href="#metodo">Método</a>
+      <a href="#apoyo">Apoyo</a>
+      <a class="nav-cta" href="assets/tutoriales/s07-recursos.html">Continuar S07</a>
+    </div>
+  </nav>
+</header>
 
-            .course-card:hover,
-            .course-card:focus {
-                color: #122253;
-                transform: translateY(-4px);
-                border-color: #E95D0F;
-                box-shadow: 0 0.75rem 1.75rem rgba(33, 37, 41, 0.12);
-            }
+<main id="contenido">
+  <section class="hero" id="inicio">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow"><i></i> Universidad Central · 2026-2S</span>
+        <h1>Big Data para construir, decidir y explicar.</h1>
+        <p class="hero-lead">Una ruta práctica para pasar de datos crudos a sistemas reproducibles: documentos, grafos, búsqueda, procesamiento distribuido y plataformas modernas.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="assets/tutoriales/s07-recursos.html">▶ Continuar sesión 7</a>
+          <a class="btn btn-light" href="#ruta">Ver ruta completa</a>
+          <a class="btn btn-ghost" href="https://github.com/jazaineam1/BigData2026" target="bigdata-repo">Repositorio</a>
+        </div>
+      </div>
 
-            .course-emoji {
-                font-size: 2.5rem;
-                line-height: 1;
-                margin-bottom: 1rem;
-            }
+      <aside class="today" aria-label="Sesión actual">
+        <div class="today-top">
+          <div><span class="kicker">Ahora</span><h2>Sesión 7 · Elasticsearch y BM25</h2></div>
+          <span class="status">Activa</span>
+        </div>
+        <p>Construye un buscador real sobre el caso Compras Claras y aprende qué hace cada pieza antes de usarla.</p>
+        <ul>
+          <li>Analyzer → índice invertido → ranking BM25.</li>
+          <li>Elasticsearch Serverless real, mapping e ingesta bulk.</li>
+          <li>Consultas por capas: match, multi_match, boost, filter y highlight.</li>
+          <li>Evaluación con Precision@5 y reto de transferencia.</li>
+        </ul>
+        <a class="btn btn-primary" href="assets/tutoriales/s07-laboratorio-guiado.html">Entrar al laboratorio activo →</a>
+      </aside>
+    </div>
+  </section>
 
-            .course-category {
-                color: #E95D0F;
-                font-family: "Merriweather Sans", sans-serif;
-                font-size: 0.78rem;
-                font-weight: 700;
-                letter-spacing: 0.04em;
-                text-transform: uppercase;
-            }
+  <section class="section" id="ruta">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <span class="kicker">Ruta del semestre</span>
+          <h2>No abras archivos sueltos. Sigue una secuencia.</h2>
+          <p>Cada sesión debe dejar una capacidad observable: entender el problema, ejecutar una herramienta, verificar evidencia y poder repetir el procedimiento sin depender del profesor.</p>
+        </div>
+        <div class="progress-card" aria-live="polite">
+          <strong>Progreso personal en este navegador</strong>
+          <div class="meter"><span id="progressBar"></span></div>
+          <small><b id="progressCount">0</b> de 8 sesiones marcadas como revisadas.</small>
+        </div>
+      </div>
 
-            .course-title {
-                margin-top: 0.35rem;
-                margin-bottom: 0.75rem;
-                font-family: "Merriweather Sans", sans-serif;
-                font-size: 1.1rem;
-                font-weight: 700;
-            }
+      <div class="route-toolbar">
+        <input id="sessionSearch" class="search" type="search" placeholder="Buscar sesión, herramienta o competencia…" aria-label="Buscar en la ruta">
+        <button class="filter active" data-filter="all">Todas</button>
+        <button class="filter" data-filter="current">Actual</button>
+        <button class="filter" data-filter="evaluation">Evaluación</button>
+      </div>
 
-            .course-description {
-                margin-bottom: 0;
-                color: #596078;
-                font-size: 0.95rem;
-                line-height: 1.55;
-            }
-        </style>
-    </head>
-    <body id="page-top">
-        <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
-            <div class="container px-4 px-lg-5">
-                <a class="navbar-brand" href="#page-top">Big Data UCE - Maestría en Analítica de Datos</a>
-                <button
-                    class="navbar-toggler navbar-toggler-right"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarResponsive"
-                    aria-controls="navbarResponsive"
-                    aria-expanded="false"
-                    aria-label="Alternar navegación"
-                >
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarResponsive">
-                    <ul class="navbar-nav ms-auto my-2 my-lg-0">
-                        <li class="nav-item"><a class="nav-link" href="#portfolio">Sesiones</a></li>
-                    </ul>
-                </div>
+      <div class="route" id="routeGrid">
+        <article class="session" data-kind="published" data-search="sesion 1 fundamentos big data ingesta csv json xml secop">
+          <div class="session-num">01</div>
+          <div>
+            <div class="session-meta"><span class="pill">Fundamentos</span><button class="mark" data-mark="1">○ Marcar revisada</button></div>
+            <h3>Introducción a Big Data e ingesta</h3>
+            <p>De las 5 V a la lectura reproducible de fuentes estructuradas y semiestructuradas usando Python y SECOP.</p>
+            <div class="skills"><span class="skill">5 V</span><span class="skill">CSV / JSON / XML</span><span class="skill">API</span></div>
+            <div class="session-actions">
+              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/sesion1_introducci_n.ipynb">Abrir cuaderno</a>
             </div>
-        </nav>
+          </div>
+        </article>
 
-        <header class="masthead">
-            <div class="container px-4 px-lg-5 h-100">
-                <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center">
-                    <div class="col-lg-8 align-self-end">
-                        <div class="display-1 mb-3" aria-hidden="true">📊</div>
-                        <h1 class="text-white font-weight-bold">Big Data 2026-2S</h1>
-                        <hr class="divider" />
-                    </div>
-                    <div class="col-lg-8 align-self-baseline">
-                        <p class="text-white-75 mb-5">
-                            Ruta actual de la asignatura Big Data de la Maestría en Analítica de
-                            Datos. En este momento están disponibles las sesiones 1 a 7; las
-                            siguientes se habilitarán progresivamente durante el semestre.
-                        </p>
-                        <a class="btn btn-primary btn-xl" href="#portfolio">Ver sesiones</a>
-                    </div>
-                </div>
+        <article class="session" data-kind="published" data-search="sesion 2 negocio procesos arquitectura git github ciclo analitico">
+          <div class="session-num">02</div>
+          <div>
+            <div class="session-meta"><span class="pill">Arquitectura</span><button class="mark" data-mark="2">○ Marcar revisada</button></div>
+            <h3>Del problema de negocio a una arquitectura</h3>
+            <p>Conecta proceso, decisión, caso de uso, arquitectura y trazabilidad del trabajo con GitHub.</p>
+            <div class="skills"><span class="skill">BPM</span><span class="skill">Arquitectura</span><span class="skill">Git</span></div>
+            <div class="session-actions">
+              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb">Abrir cuaderno</a>
             </div>
-        </header>
+          </div>
+        </article>
 
-        <section class="course-intro">
-            <div class="container px-4 px-lg-5 text-center">
-                <h2 class="mt-0">Sesiones disponibles</h2>
-                <hr class="divider" />
-                <p class="text-muted mb-0">
-                    Comenzamos con los fundamentos de Big Data y avanzamos desde la decisión empresarial
-                    hasta documentos, consultas y una fila reproducible de revisión para Compras Claras.
-                </p>
+        <article class="session" data-kind="published" data-search="sesion 3 mongodb documental mql agregacion noticias secop nosql">
+          <div class="session-num">03</div>
+          <div>
+            <div class="session-meta"><span class="pill">NoSQL documental</span><button class="mark" data-mark="3">○ Marcar revisada</button></div>
+            <h3>Cuando una fila ya no representa el dato</h3>
+            <p>Modelo documental, MQL, agregaciones y decisiones de diseño sobre noticias reales relacionadas con contratación.</p>
+            <div class="skills"><span class="skill">MongoDB</span><span class="skill">MQL</span><span class="skill">Aggregation</span></div>
+            <div class="session-actions">
+              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/3_MongoDB_Documental.ipynb">Abrir cuaderno</a>
             </div>
-        </section>
+          </div>
+        </article>
 
-        <section id="portfolio" class="py-5">
-            <div class="container px-4 px-lg-5">
-                <div class="row g-4">
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/sesion1_introducci_n.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🌐</div>
-                            <div class="course-category">Sesión 1 · Fundamentos</div>
-                            <div class="course-title">Introducción a Big Data e ingesta de datos</div>
-                            <p class="course-description">
-                                Clase guiada sobre las 5 V, datos estructurados y no estructurados,
-                                on-premise frente a nube e ingesta con CSV, JSON, XML y la API de SECOP.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🏛️</div>
-                            <div class="course-category">Sesión 2 · Negocio, procesos y arquitectura</div>
-                            <div class="course-title">De la necesidad empresarial a una decisión apoyada por datos</div>
-                            <p class="course-description">
-                                Conecta procesos de negocio, casos de uso, BI y arquitectura empresarial;
-                                recorre el ciclo analítico y usa GitHub como puente de revisión.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/3_MongoDB_Documental.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🗂️</div>
-                            <div class="course-category">Sesión 3 · Bases de datos documentales</div>
-                            <div class="course-title">Cuando una fila ya no representa el dato: MongoDB sobre noticias de contratación</div>
-                            <p class="course-description">
-                                Modelo documental, consultas MQL y agregación sobre 987 noticias reales
-                                cruzadas con SECOP. El problema no es el volumen: es la variedad.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/4_Atlas_Cassandra_Laura.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🧭</div>
-                            <div class="course-category">Sesión 4 · MongoDB Atlas y Cassandra</div>
-                            <div class="course-title">¿Qué contrato debe revisar Laura primero?</div>
-                            <p class="course-description">
-                                Lleva las noticias a Atlas, cruza una vista con SECOP y construye una
-                                priorización explicable; Cassandra sirve la consulta repetitiva por territorio.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6" data-session="5">
-                        <a class="course-card"
-                           href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/5_Atlas_Cassandra_Query_First.ipynb"
-                           target="_blank" rel="noopener noreferrer">
-                            <div class="course-emoji" aria-hidden="true">🧱</div>
-                            <div class="course-category">Sesión 5 · Atlas → Cassandra</div>
-                            <div class="course-title">De la evidencia a la bandeja operacional</div>
-                            <p class="course-description">
-                                Laura transforma el contexto de prensa en una vista, reproduce la priorización y diseña Cassandra desde una consulta repetitiva.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6" data-session="6">
-                        <a class="course-card"
-                           href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/6_Neo4j_Contexto_Relacional.ipynb"
-                           target="_blank" rel="noopener noreferrer">
-                            <div class="course-emoji" aria-hidden="true">🕸️</div>
-                            <div class="course-category">Sesión 6 · Neo4j</div>
-                            <div class="course-title">De la fila priorizada al contexto relacional</div>
-                            <p class="course-description">
-                                Laura abre un proceso de S5 y construye su contexto real con Neo4j y Cypher; exporta el texto que abre la S7.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6" data-session="7">
-                        <a class="course-card"
-                           href="assets/tutoriales/s07-recursos.html">
-                            <div class="course-emoji" aria-hidden="true">🔎</div>
-                            <div class="course-category">Sesión 7 · Elasticsearch y BM25</div>
-                            <div class="course-title">Construye un buscador: del corpus contractual al ranking</div>
-                            <p class="course-description">
-                                Ruta integral: relevancia léxica, Elasticsearch Serverless, mapping, analyzer, bulk y un reto de transferencia con 987 noticias reales.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6" data-workshop="control-1">
-                        <a class="course-card"
-                           href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb"
-                           target="_blank" rel="noopener noreferrer">
-                            <div class="course-emoji" aria-hidden="true">🧪</div>
-                            <div class="course-category">Sesión 8 · Primer taller NoSQL</div>
-                            <div class="course-title">De 6 CSV a Atlas, Cassandra y Neo4j</div>
-                            <p class="course-description">
-                                Primer taller evaluativo del bloque NoSQL con MongoDB Atlas, Cassandra y Neo4j.
-                            </p>
-                        </a>
-                    </div>
-
-                    <template id="sesiones-futuras">
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/3_Arquitectura%20Big%20Data%20End-to-End.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🏗️</div>
-                            <div class="course-category">Arquitectura</div>
-                            <div class="course-title">3. Solución empresarial End-to-End</div>
-                            <p class="course-description">
-                                Conecta fuentes, ingesta, almacenamiento, procesamiento, gobierno y consumo
-                                para entender una solución Big Data completa.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/4_etl_elt_.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🔄</div>
-                            <div class="course-category">Integración</div>
-                            <div class="course-title">4. ETL y ELT</div>
-                            <p class="course-description">
-                                Explica cómo se extraen, transforman y cargan datos, y cuándo conviene
-                                transformar antes o después de cargar.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/5_Computacion_distribuida_Hadoop_Spark_intro.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🧩</div>
-                            <div class="course-category">Distribuido</div>
-                            <div class="course-title">5. Hadoop y Spark: introducción</div>
-                            <p class="course-description">
-                                Introduce el pensamiento distribuido: dividir trabajo, coordinar recursos
-                                y procesar datos más grandes que una sola máquina.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🗄️</div>
-                            <div class="course-category">Contexto relacional</div>
-                            <div class="course-title">6. ¿Qué relaciones rodean el proceso priorizado?</div>
-                            <p class="course-description">
-                                Modela entidades, procesos y proveedores con Neo4j; verifica los resultados
-                                con pandas y entrega una ficha con su decisión y límites.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/prueba/Cuadernos/Dask.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">⚙️</div>
-                            <div class="course-category">Python distribuido</div>
-                            <div class="course-title">7. Dask</div>
-                            <p class="course-description">
-                                Presenta Dask como alternativa para escalar flujos de Python y Pandas
-                                usando particiones y ejecución paralela.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_2_Dask_SECOP.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🧪</div>
-                            <div class="course-category">Taller aplicado</div>
-                            <div class="course-title">8. Taller Dask SECOP</div>
-                            <p class="course-description">
-                                Aplica Dask sobre datos públicos para practicar lectura, transformación,
-                                agregación y análisis exploratorio a mayor escala.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Hadoop_YARN_Spark_Databricks.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🔥</div>
-                            <div class="course-category">Spark</div>
-                            <div class="course-title">9. Hadoop, YARN, Spark y Databricks</div>
-                            <p class="course-description">
-                                Conecta el ecosistema Hadoop con Spark y Databricks para entender cómo
-                                se ejecuta procesamiento distribuido en plataformas modernas.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Databricks_Serverless_Completo.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">💎</div>
-                            <div class="course-category">Databricks</div>
-                            <div class="course-title">10. Databricks</div>
-                            <p class="course-description">
-                                Tutorial guiado de Databricks, PySpark, SQL, archivos locales, Parquet,
-                                Delta Lake, jobs y buenas prácticas de ejecución.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/11_Spark_SECOP_Solucion_Taller.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">⚡</div>
-                            <div class="course-category">Spark aplicado</div>
-                            <div class="course-title">11. Solución Taller SECOP con Spark</div>
-                            <p class="course-description">
-                                Resuelve el taller SECOP en Databricks con Volumes, Parquet,
-                                comparación de latencia y buenas prácticas de optimización.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/12_MongoDB_Atlas_NoSQL_Moderno.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">🍃</div>
-                            <div class="course-category">NoSQL aplicado</div>
-                            <div class="course-title">12. MongoDB Atlas y NoSQL moderno</div>
-                            <p class="course-description">
-                                Clase guiada de MongoDB Atlas, modelo documental, agregaciones,
-                                índices, geodatos, time series y búsqueda moderna.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/13_NoSQL_Grafos_Columnar_Colab.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">G</div>
-                            <div class="course-category">NoSQL aplicado</div>
-                            <div class="course-title">13. NoSQL: grafos y columnares</div>
-                            <p class="course-description">
-                                Completa el bloque NoSQL del PDA con grafos, Neo4j Aura,
-                                KuzuDB en Colab, Cassandra/Astra y modelado wide-column.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/14_Elasticsearch_Busqueda_Analitica_Colab.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">ES</div>
-                            <div class="course-category">Busqueda y texto</div>
-                            <div class="course-title">14. Elasticsearch</div>
-                            <p class="course-description">
-                                Clase guiada para Colab y Elastic Cloud sobre indices,
-                                mappings, analyzers, busqueda, filtros, agregaciones y Kibana.
-                            </p>
-                        </a>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <a
-                            class="course-card"
-                            href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/13_Taller_Final_MongoDB_SECOP_Tiempo_Real.ipynb"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <div class="course-emoji" aria-hidden="true">PF</div>
-                            <div class="course-category">Proyecto final</div>
-                            <div class="course-title">Proyecto final. Taller SECOP y MongoDB</div>
-                            <p class="course-description">
-                                Integra SECOP II desde 2021, texto no estructurado, MongoDB,
-                                micro-batches y dashboard para un observatorio operativo.
-                            </p>
-                        </a>
-                    </div>
-                    </template>
-                </div>
+        <article class="session" data-kind="published" data-search="sesion 4 mongodb atlas cassandra nube priorizacion query first">
+          <div class="session-num">04</div>
+          <div>
+            <div class="session-meta"><span class="pill">Cloud + NoSQL</span><button class="mark" data-mark="4">○ Marcar revisada</button></div>
+            <h3>Atlas y Cassandra: dos preguntas, dos modelos</h3>
+            <p>Pasa de la exploración documental a una priorización reproducible y diseña Cassandra desde la consulta que debe servir.</p>
+            <div class="skills"><span class="skill">Atlas</span><span class="skill">Cassandra</span><span class="skill">Query-first</span></div>
+            <div class="session-actions">
+              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/4_Atlas_Cassandra_Laura.ipynb">Abrir cuaderno</a>
+              <a class="action secondary" href="assets/tutoriales/atlas-guia-conexion.html">Guía Atlas</a>
             </div>
-        </section>
+          </div>
+        </article>
 
-        <footer class="bg-light py-5">
-            <div class="container px-4 px-lg-5">
-                <div class="small text-center text-muted">
-                    Big Data 2026-2S · Universidad Central · Antonino Zainea &copy; 2026
-                </div>
+        <article class="session" data-kind="published" data-search="sesion 5 cassandra astra query first atlas vistas pipeline">
+          <div class="session-num">05</div>
+          <div>
+            <div class="session-meta"><span class="pill">Operacionalización</span><button class="mark" data-mark="5">○ Marcar revisada</button></div>
+            <h3>De evidencia a bandeja operacional</h3>
+            <p>Transforma evidencia de Atlas en una vista reutilizable y diseña una tabla wide-column desde un patrón de acceso explícito.</p>
+            <div class="skills"><span class="skill">Views</span><span class="skill">Astra</span><span class="skill">CQL</span></div>
+            <div class="session-actions">
+              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/5_Atlas_Cassandra_Query_First.ipynb">Abrir cuaderno</a>
+              <a class="action secondary" href="assets/tutoriales/astra-cassandra-paso-a-paso-v3.html">Guía Astra</a>
             </div>
-        </footer>
+          </div>
+        </article>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="js/scripts.js?v=20260923-s07"></script>
-    </body>
+        <article class="session" data-kind="published" data-search="sesion 6 neo4j cypher grafos aura contexto relacional entidades proveedores">
+          <div class="session-num">06</div>
+          <div>
+            <div class="session-meta"><span class="pill">Grafos</span><button class="mark" data-mark="6">○ Marcar revisada</button></div>
+            <h3>De la fila priorizada al contexto relacional</h3>
+            <p>Modela Entidad → Proceso → Proveedor, ejecuta Cypher en Aura y contrasta resultados con una referencia tabular.</p>
+            <div class="skills"><span class="skill">Neo4j Aura</span><span class="skill">Cypher</span><span class="skill">Graph thinking</span></div>
+            <div class="session-actions">
+              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/6_Neo4j_Contexto_Relacional.ipynb">Abrir cuaderno</a>
+              <a class="action secondary" href="assets/tutoriales/neo4j-aura-s06-paso-a-paso.html">Guía Aura</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="session current" data-kind="current" data-search="sesion 7 elasticsearch bm25 busqueda analyzer indice invertido ranking relevancia precision">
+          <div class="session-num">07</div>
+          <div>
+            <div class="session-meta"><span class="pill live">Sesión actual</span><button class="mark" data-mark="7">○ Marcar revisada</button></div>
+            <h3>Construye un buscador: del corpus al ranking</h3>
+            <p>Aprende relevancia léxica y opera Elasticsearch real: analyzer, mapping, bulk, query ladder, highlight y evaluación.</p>
+            <div class="skills"><span class="skill">Elasticsearch</span><span class="skill">BM25</span><span class="skill">Precision@5</span></div>
+            <div class="session-actions">
+              <a class="action accent" href="assets/tutoriales/s07-recursos.html">Ruta S07</a>
+              <a class="action" href="assets/tutoriales/s07-laboratorio-guiado.html">Laboratorio activo</a>
+              <a class="action secondary" href="Presentaciones/s07-del-vecindario-al-texto.html#s1">Presentación</a>
+              <a class="action secondary" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Cuaderno</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="session evaluation" data-kind="evaluation" data-search="sesion 8 taller control evaluacion mongodb cassandra neo4j csv historico">
+          <div class="session-num">08</div>
+          <div>
+            <div class="session-meta"><span class="pill eval">Taller de control</span><button class="mark" data-mark="8">○ Marcar revisada</button></div>
+            <h3>Integra 6 CSV y construye una solución NoSQL</h3>
+            <p>Taller evaluativo determinista: histórico SECOP → MongoDB Atlas → bandeja → Cassandra → Neo4j → informe técnico.</p>
+            <div class="skills"><span class="skill">Integración</span><span class="skill">Atlas</span><span class="skill">Cassandra</span><span class="skill">Neo4j</span></div>
+            <div class="session-actions">
+              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb">Abrir taller</a>
+              <a class="action secondary" href="https://github.com/jazaineam1/BigData2026/blob/main/Talleres/Taller_Control_1.md" target="bigdata-repo">Instrucciones</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="metodo">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <span class="kicker">Método de aprendizaje</span>
+          <h2>Cada herramienta debe terminar en autonomía.</h2>
+          <p>La plataforma deja de medir “abrí un notebook” y pasa a organizar cuatro comportamientos que sí puedes repetir fuera de clase.</p>
+        </div>
+      </div>
+      <div class="principles">
+        <article class="principle"><div class="icon">①</div><b>Entender</b><p>Qué problema resuelve la herramienta, qué objeto manipula y por qué no usarías otra cosa.</p></article>
+        <article class="principle"><div class="icon">②</div><b>Ejecutar</b><p>Seguir un laboratorio guiado con el entorno real, no solo una simulación del profesor.</p></article>
+        <article class="principle"><div class="icon">③</div><b>Verificar</b><p>Comprobar salidas, conteos, errores y evidencias esperadas antes de seguir.</p></article>
+        <article class="principle"><div class="icon">④</div><b>Explicar y transferir</b><p>Decir qué hizo el código y resolver una variante que no sea idéntica al ejemplo.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="apoyo">
+    <div class="shell">
+      <div class="support-grid">
+        <article class="support-main">
+          <span class="kicker">Rutas de apoyo</span>
+          <h3>Si una herramienta base te frena, entra aquí.</h3>
+          <p>Estas rutas no son “prerrequisitos que ya deberías saber”. Son apoyos breves para que la infraestructura no opaque el concepto de Big Data.</p>
+          <div class="support-list">
+            <a class="support-link" target="bigdata-repo" href="https://github.com/jazaineam1/BigData2026/tree/main/infraestructura/git-ejemplo"><b>Git y GitHub desde cero</b><span>repositorio · cambios · commit · push</span></a>
+            <a class="support-link" target="bigdata-repo" href="https://github.com/jazaineam1/BigData2026/blob/main/infraestructura/INSTALACION_DESDE_CERO.md"><b>Entorno e infraestructura</b><span>instalación reproducible</span></a>
+            <a class="support-link" href="assets/tutoriales/atlas-guia-conexion.html"><b>Cloud: primera conexión real</b><span>cuenta · credenciales · red · prueba</span></a>
+            <a class="support-link" href="assets/tutoriales/s07-despliegue-elasticsearch.html"><b>Elastic Cloud paso a paso</b><span>proyecto · API key · endpoint · diagnóstico</span></a>
+          </div>
+        </article>
+
+        <aside class="library">
+          <span class="kicker">Biblioteca</span>
+          <h3>Todo el material, sin ensuciar la ruta.</h3>
+          <p>La portada muestra el camino vigente; la biblioteca conserva el repositorio completo para consulta.</p>
+          <div class="library-grid">
+            <a target="bigdata-repo" href="https://github.com/jazaineam1/BigData2026/tree/main/Cuadernos">Cuadernos</a>
+            <a target="bigdata-repo" href="https://github.com/jazaineam1/BigData2026/tree/main/Datos">Datos</a>
+            <a target="bigdata-repo" href="https://github.com/jazaineam1/BigData2026/tree/main/infraestructura">Infraestructura</a>
+            <a target="bigdata-repo" href="https://github.com/jazaineam1/BigData2026/tree/main/docs">Documentación</a>
+            <a target="bigdata-repo" href="https://github.com/jazaineam1/BigData2026/tree/main/evaluaciones">Evaluaciones</a>
+            <a target="bigdata-repo" href="https://github.com/jazaineam1/BigData2026/tree/main/resultados">Resultados reproducibles</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="shell">
+      <div class="manifesto">
+        <div>
+          <span class="kicker" style="color:#F3E7CE">Regla del curso</span>
+          <h2>No basta con que el código corra.</h2>
+          <p>Al terminar una sesión debes poder reconstruir el flujo con ayuda mínima y explicar qué hace cada decisión técnica.</p>
+        </div>
+        <ol>
+          <li>Puedo nombrar el problema que resuelve la herramienta.</li>
+          <li>Puedo ejecutar el flujo en el servicio real.</li>
+          <li>Puedo detectar qué salida demuestra que funcionó.</li>
+          <li>Puedo explicar el código importante.</li>
+          <li>Puedo adaptar el ejemplo a otra pregunta.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <strong>Big Data 2026-2S · Universidad Central · Antonino Zainea</strong><br>
+  Plataforma académica del curso · progreso guardado únicamente en este navegador.
+</footer>
+
+<script>
+(function(){
+  var key="bigdata2026:index:v2";
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem(key)||"{}")}catch(e){saved={}}
+
+  var marks=[].slice.call(document.querySelectorAll("[data-mark]"));
+  var bar=document.getElementById("progressBar");
+  var count=document.getElementById("progressCount");
+
+  function renderProgress(){
+    var n=0;
+    marks.forEach(function(btn){
+      var id=btn.getAttribute("data-mark");
+      var done=!!saved[id];
+      if(done)n++;
+      btn.classList.toggle("done",done);
+      btn.textContent=done?"✓ Revisada":"○ Marcar revisada";
+      btn.setAttribute("aria-pressed",done?"true":"false");
+    });
+    count.textContent=n;
+    bar.style.width=((n/marks.length)*100)+"%";
+  }
+
+  marks.forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var id=btn.getAttribute("data-mark");
+      saved[id]=!saved[id];
+      localStorage.setItem(key,JSON.stringify(saved));
+      renderProgress();
+    });
+  });
+  renderProgress();
+
+  var search=document.getElementById("sessionSearch");
+  var filters=[].slice.call(document.querySelectorAll(".filter"));
+  var sessions=[].slice.call(document.querySelectorAll(".session"));
+  var activeFilter="all";
+
+  function applyFilters(){
+    var q=(search.value||"").trim().toLowerCase();
+    sessions.forEach(function(card){
+      var kind=card.getAttribute("data-kind");
+      var hay=(card.getAttribute("data-search")+" "+card.textContent).toLowerCase();
+      var filterOK=activeFilter==="all" || kind===activeFilter;
+      var searchOK=!q || hay.indexOf(q)>=0;
+      card.classList.toggle("hidden",!(filterOK&&searchOK));
+    });
+  }
+
+  search.addEventListener("input",applyFilters);
+  filters.forEach(function(btn){
+    btn.addEventListener("click",function(){
+      activeFilter=btn.getAttribute("data-filter");
+      filters.forEach(function(x){x.classList.toggle("active",x===btn)});
+      applyFilters();
+    });
+  });
+})();
+</script>
+</body>
 </html>
