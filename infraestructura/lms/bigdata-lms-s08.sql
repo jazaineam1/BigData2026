@@ -56,11 +56,20 @@ create table if not exists public.bd_lms_activity_progress(
 );
 create table if not exists public.bd_lms_s08_submissions(
  id uuid primary key default gen_random_uuid(),user_id uuid not null references public.lms_users(id) on delete cascade,
- course_run_id uuid not null references public.lms_course_runs(id) on delete cascade,pair_id text not null check(char_length(pair_id) between 3 and 160),
+ course_run_id uuid not null references public.lms_course_runs(id) on delete cascade,pair_hash text not null check(pair_hash ~ '^[0-9a-f]{64}$'),
  manifest_version text not null,score integer not null check(score between 0 and 100),max_score integer not null default 100 check(max_score=100),
  note_5 numeric(3,2) not null check(note_5 between 1 and 5),sha256 text not null check(sha256 ~ '^[0-9a-f]{64}$'),
  controls jsonb not null default '{}'::jsonb,validated boolean not null default false,submitted_at timestamptz not null default now(),
  updated_at timestamptz not null default now(),unique(user_id,course_run_id)
+);
+
+create table if not exists public.bd_lms_session_windows(
+ course_run_id uuid not null references public.lms_course_runs(id) on delete cascade,
+ session_number smallint not null check(session_number between 1 and 16),
+ opened_at timestamptz not null default now(),
+ opened_by uuid not null references public.lms_users(id),
+ created_at timestamptz not null default now(),
+ primary key(course_run_id,session_number)
 );
 
 alter table public.bd_lms_sessions enable row level security;
@@ -69,9 +78,18 @@ alter table public.bd_lms_events enable row level security;
 alter table public.bd_lms_session_progress enable row level security;
 alter table public.bd_lms_activity_progress enable row level security;
 alter table public.bd_lms_s08_submissions enable row level security;
-revoke all on public.bd_lms_sessions,public.bd_lms_activities,public.bd_lms_events,public.bd_lms_session_progress,public.bd_lms_activity_progress,public.bd_lms_s08_submissions from anon,authenticated;
-grant all on public.bd_lms_sessions,public.bd_lms_activities,public.bd_lms_events,public.bd_lms_session_progress,public.bd_lms_activity_progress,public.bd_lms_s08_submissions to service_role;
+alter table public.bd_lms_session_windows enable row level security;
+revoke all on public.bd_lms_sessions,public.bd_lms_activities,public.bd_lms_events,public.bd_lms_session_progress,public.bd_lms_activity_progress,public.bd_lms_s08_submissions,public.bd_lms_session_windows from anon,authenticated;
+grant all on public.bd_lms_sessions,public.bd_lms_activities,public.bd_lms_events,public.bd_lms_session_progress,public.bd_lms_activity_progress,public.bd_lms_s08_submissions,public.bd_lms_session_windows to service_role;
 grant usage,select on sequence public.bd_lms_events_id_seq to service_role;
+
+-- Índices detectados por el advisor para las FK usadas por el WALL.
+create index if not exists bd_lms_activity_progress_run_idx on public.bd_lms_activity_progress(course_run_id);
+create index if not exists bd_lms_activity_progress_activity_idx on public.bd_lms_activity_progress(activity_code);
+create index if not exists bd_lms_events_activity_idx on public.bd_lms_events(activity_code);
+create index if not exists bd_lms_s08_submissions_run_idx on public.bd_lms_s08_submissions(course_run_id);
+create index if not exists bd_lms_session_progress_run_idx on public.bd_lms_session_progress(course_run_id);
+create index if not exists bd_lms_session_windows_opened_by_idx on public.bd_lms_session_windows(opened_by);
 
 insert into public.bd_lms_sessions(course_code,session_number,title,path,position,required,metadata)
 values('bigdata',8,'Integra 6 CSV y construye una solución NoSQL','lms/session-08.html',8,true,
