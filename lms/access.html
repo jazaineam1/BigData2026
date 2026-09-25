@@ -1,0 +1,11 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153"><title>Big Data · Solicitar acceso</title><link rel="stylesheet" href="assets/bigdata-lms.css?v=20260925-1"></head>
+<body><header class="appbar"><div class="inner"><a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · acceso</small></a><span class="spacer"></span><a class="navlink" href="portal.html">Ingresar</a></div></header>
+<main class="wrap"><div class="ey">Acceso LMS</div><h1>Solicita tu matrícula.</h1><p class="lead">La solicitud queda pendiente de aprobación docente. No crees otra si ya enviaste una.</p>
+<section class="card" style="max-width:620px"><div id="status" class="status hidden"></div><form id="request" class="form">
+<div class="field"><label for="name">Nombre completo</label><input class="input" id="name" name="full_name" maxlength="120" autocomplete="name" required></div>
+<div class="field"><label for="email">Correo</label><input class="input" id="email" name="email" type="email" maxlength="180" autocomplete="email" required></div>
+<input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+<button class="btn primary" type="submit">Enviar solicitud</button></form><p class="muted">El docente aprobará el acceso desde el WALL. Las credenciales se comparten de forma separada; nunca se publican en GitHub.</p></section></main>
+<script src="assets/bigdata-lms.js?v=20260925-1"></script><script>
+(()=>{'use strict';const L=window.BIGDATA_LMS,s=L.$('status'),f=L.$('request');f.addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(f),b=f.querySelector('button');b.disabled=true;b.textContent='Enviando…';try{const x=await L.requestAccess({full_name:fd.get('full_name'),email:fd.get('email'),website:fd.get('website')});L.msg(s,x.message||'Solicitud registrada.','ok');f.reset()}catch(ex){L.msg(s,ex.message,'err')}finally{b.disabled=false;b.textContent='Enviar solicitud'}})})();
+</script></body></html>
