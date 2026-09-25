@@ -160,15 +160,16 @@ async function teacherUserDetail(ctx:any,run:any,target:string){
  requireTeacher(ctx);if(!target)throw new Error("Usuario requerido");
  const {data:ce}=await db.from("lms_enrollments").select("user_id,role,status,enrolled_at").eq("user_id",target).eq("course_code",COURSE).maybeSingle();
  if(!ce)throw new Error("El usuario no pertenece a Big Data");
- const [{data:u},{data:re},{data:p},{data:a},{data:s},{data:sessions},{data:auditRows},{data:reqs}] = await Promise.all([
-  db.from("lms_users").select("id,username,display_name,email,role,active,created_at,updated_at").eq("id",target).maybeSingle(),
+ const {data:u}=await db.from("lms_users").select("id,username,display_name,email,role,active,created_at,updated_at").eq("id",target).maybeSingle();
+ if(!u)throw new Error("Usuario no encontrado");
+ const [{data:re},{data:p},{data:a},{data:s},{data:sessions},{data:auditRows},{data:reqs}] = await Promise.all([
   db.from("lms_run_enrollments").select("role,status,enrolled_at,completed_at").eq("user_id",target).eq("course_run_id",run.id).maybeSingle(),
   db.from("bd_lms_session_progress").select("*").eq("user_id",target).eq("course_run_id",run.id).eq("session_number",SESSION).maybeSingle(),
   db.from("bd_lms_activity_progress").select("*").eq("user_id",target).eq("course_run_id",run.id).order("activity_code"),
   db.from("bd_lms_s08_submissions").select("score,max_score,note_5,validated,submitted_at,updated_at,sha256").eq("user_id",target).eq("course_run_id",run.id).maybeSingle(),
   db.from("lms_auth_sessions").select("id,user_agent,created_at,last_seen_at,expires_at,persistent,revoked_at").eq("user_id",target).order("last_seen_at",{ascending:false}).limit(20),
   db.from("lms_audit_log").select("id,actor_user_id,action,metadata,created_at").eq("entity_id",target).order("created_at",{ascending:false}).limit(30),
-  u?.email?db.from("lms_access_requests").select("id,status,created_at,reviewed_at,notes").eq("course_code",COURSE).ilike("email",u.email).order("created_at",{ascending:false}).limit(10):Promise.resolve({data:[]} as any)
+  db.from("lms_access_requests").select("id,status,created_at,reviewed_at,notes").eq("course_code",COURSE).ilike("email",u.email||u.username).order("created_at",{ascending:false}).limit(10)
  ]);
  return {user:u,course_enrollment:ce,run_enrollment:re,session_progress:p,activity_progress:a||[],submission:s,
   sessions:(sessions||[]).filter(sessionAlive).map((x:any)=>({...x,revoked_at:undefined})),audit:auditRows||[],access_requests:reqs||[]}
@@ -176,7 +177,7 @@ async function teacherUserDetail(ctx:any,run:any,target:string){
 async function teacherSetEnrollment(ctx:any,run:any,target:string,status:string){
  requireTeacher(ctx);if(!target||!["active","suspended"].includes(status))throw new Error("Acción de matrícula inválida");
  const {data:u}=await db.from("lms_users").select("id,role,active,display_name,username").eq("id",target).maybeSingle();
- if(!u)throw new Error("Usuario no encontrado");if(u.role!=="student")throw new Error("Solo se administra matrícula de estudiantes desde este panel");
+ if(!u)throw new Error("Usuario no encontrado");if(status==="active"&&!u.active)throw new Error("La cuenta global está inactiva");if(u.role!=="student")throw new Error("Solo se administra matrícula de estudiantes desde este panel");
  const {data:ce}=await db.from("lms_enrollments").select("role,status,enrolled_at").eq("user_id",target).eq("course_code",COURSE).maybeSingle();
  if(!ce)throw new Error("El estudiante no está matriculado en Big Data");
  const now=new Date().toISOString();
