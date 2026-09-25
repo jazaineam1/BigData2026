@@ -1,0 +1,42 @@
+name: Validar LMS Big Data S08
+
+on:
+  push:
+    branches:
+      - main
+      - feat/bigdata-lms-s08
+    paths:
+      - index.html
+      - lms/**
+      - infraestructura/lms/**
+      - utils/validate_lms_s08.py
+      - Presentaciones/s07-del-vecindario-al-texto.html
+      - .github/workflows/lms-s08-qa.yml
+  pull_request:
+    paths:
+      - index.html
+      - lms/**
+      - infraestructura/lms/**
+      - utils/validate_lms_s08.py
+      - Presentaciones/s07-del-vecindario-al-texto.html
+      - .github/workflows/lms-s08-qa.yml
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Comprobar sintaxis del validador
+        run: python -m py_compile utils/validate_lms_s08.py
+      - name: Validar LMS S08 y guardia S07
+        run: python utils/validate_lms_s08.py
