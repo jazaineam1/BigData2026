@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "course": "bigdata",
+  "run": "bigdata-2026-2",
+  "title": "Big Data 2026-2S",
+  "institution": "Universidad Central",
+  "total_sessions": 16,
+  "current_tracked_session": 8,
+  "tracking_policy": "S08 es el primer vertical slice LMS. S07 conserva su implementación existente sin modificaciones.",
+  "sessions": [
+    {
+      "n": 8,
+      "title": "Integra 6 CSV y construye una solución NoSQL",
+      "status": "tracked",
+      "path": "session-08.html",
+      "source": "../Cuadernos/Taller_Control_1.ipynb"
+    }
+  ]
+}
