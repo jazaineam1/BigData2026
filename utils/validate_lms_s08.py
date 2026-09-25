@@ -29,7 +29,8 @@ portal=(ROOT/"lms/portal.html").read_text("utf-8")
 s08=(ROOT/"lms/session-08.html").read_text("utf-8")
 wall=(ROOT/"lms/teacher-wall.html").read_text("utf-8")
 client=(ROOT/"lms/assets/bigdata-lms.js").read_text("utf-8")
-sql=(ROOT/"infraestructura/lms/bigdata-lms-s08.sql").read_text("utf-8")\nedge=(ROOT/"infraestructura/lms/functions/bigdata-learning/index.ts").read_text("utf-8")
+sql=(ROOT/"infraestructura/lms/bigdata-lms-s08.sql").read_text("utf-8")
+edge=(ROOT/"infraestructura/lms/functions/bigdata-learning/index.ts").read_text("utf-8")
 index=(ROOT/"index.html").read_text("utf-8")
 course=json.loads((ROOT/"lms/data/course.json").read_text("utf-8"))
 
@@ -40,7 +41,11 @@ checks=[
  ("S08 no marca abrir como completar","Abrirlo <b>no</b> lo marca como completado" in s08),
  ("WALL declara desempate por inicio","demora de inicio" in wall),
  ("WALL usa endpoint BigData","teacher_wall" in wall),
- ("RLS habilitado",sql.count("enable row level security")>=7),\n ("inicio oficial course-scoped","bd_lms_session_windows" in sql and "teacher_open_session" in edge),\n ("inicio no nace de page_view",'["notebook_opened","activity_started","stage_opened"].includes(event)' in edge),\n ("pareja solo con hash","pair_hash:m.pair_hash" in edge and "pair_hash text" in sql and "pair_id text" not in sql),\n ("Edge Function versionada","VALIDATOR_VERSION" in edge and "submit_manifest" in edge),
+ ("RLS habilitado",sql.count("enable row level security")>=7),
+ ("inicio oficial course-scoped","bd_lms_session_windows" in sql and "teacher_open_session" in edge),
+ ("inicio no nace de page_view",'["notebook_opened","activity_started","stage_opened"].includes(event)' in edge),
+ ("pareja solo con hash","pair_hash:m.pair_hash" in edge and "pair_hash text" in sql and "pair_id text" not in sql),
+ ("Edge Function versionada","VALIDATOR_VERSION" in edge and "submit_manifest" in edge),
  ("tablas no expuestas a anon/authenticated","revoke all" in sql and "anon,authenticated" in sql),
  ("curso declarativo",course.get("course")=="bigdata" and course.get("current_tracked_session")==8),
  ("portada enlaza LMS",'lms/portal.html' in index),
