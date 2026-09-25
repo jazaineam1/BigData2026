@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
@@ -14,6 +14,18 @@
       "status": "tracked",
       "path": "session-08.html",
       "source": "../Cuadernos/Taller_Control_1.ipynb"
+    }
+  ],
+  "teacher_tools": [
+    {
+      "code": "wall",
+      "title": "WALL S08",
+      "path": "teacher-wall.html"
+    },
+    {
+      "code": "users",
+      "title": "Administrador de usuarios",
+      "path": "admin-users.html"
     }
   ]
 }
