@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153">
-<title>Big Data · LMS</title><link rel="stylesheet" href="assets/bigdata-lms.css?v=20260925-1"></head>
+<title>Big Data · LMS</title><link rel="stylesheet" href="assets/bigdata-lms.css?v=20260925-2"></head>
 <body><header class="appbar"><div class="inner"><a class="brand" href="../index.html">Universidad Central<small>Big Data 2026-2S · LMS</small></a><span class="spacer"></span><a class="navlink optional" href="../index.html">Sitio del curso</a><button class="hidden" id="logout" data-logout>Salir</button></div></header>
 <main class="wrap"><div class="ey">Maestría en Analítica de Datos</div><h1>Tu ruta de Big Data.</h1><p class="lead">Entra con tu cuenta LMS para conservar el seguimiento académico de las actividades habilitadas. La sesión 8 es la primera sesión integrada de extremo a extremo.</p>
 <div id="status" class="status hidden"></div>
@@ -22,7 +22,7 @@
 <div class="actions"><a id="teacher" class="btn accent hidden" href="teacher-wall.html">Abrir WALL docente</a><button class="btn alt" data-logout>Cerrar sesión</button></div>
 <div class="note" style="margin-top:14px">S07 conserva su sistema Live/Teacher Wall actual y no se integra ni modifica en este cambio.</div></section></div></section>
 <section id="noEnrollment" class="card hidden" style="max-width:680px"><h2>Tu sesión LMS está activa, pero no tienes matrícula Big Data</h2><p>La cuenta es válida. Solo falta que el docente habilite este curso para ti.</p><div class="actions"><a class="btn primary" href="access.html">Solicitar acceso</a><button class="btn alt" data-logout>Cerrar sesión</button></div></section>
-</main><script src="assets/bigdata-lms.js?v=20260925-1"></script><script>
+</main><script src="assets/bigdata-lms.js?v=20260925-2"></script><script>
 (async()=>{'use strict';const L=window.BIGDATA_LMS,status=L.$('status'),loginCard=L.$('loginCard'),home=L.$('home'),noEnroll=L.$('noEnrollment');
 L.wireLogout();
 function render(x){loginCard.classList.add('hidden');noEnroll.classList.add('hidden');home.classList.remove('hidden');document.querySelectorAll('[data-logout]').forEach(x=>x.classList.remove('hidden'));L.$('who').textContent=x.viewer.display_name||x.viewer.username;L.$('role').textContent=x.viewer.role==='student'?'Estudiante · Big Data 2026-2S':'Rol '+x.viewer.role+' · Big Data 2026-2S';if(['teacher','admin'].includes(x.viewer.role))L.$('teacher').classList.remove('hidden');const p=x.session_progress||{},aps=x.activity_progress||[],done=aps.filter(a=>a.status==='completed').length,total=(x.activities||[]).length||7,pct=Math.round(100*done/total);L.$('bar').style.width=pct+'%';L.$('progressText').textContent=done+' de '+total+' hitos validados · '+pct+' %';L.$('score').textContent=x.submission?x.submission.score+'/100':'—';L.$('active').textContent=L.fmtTime(p.active_seconds||0)}
