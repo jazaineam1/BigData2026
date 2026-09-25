@@ -98,6 +98,124 @@ async function openOfficial(ctx:any,run:any){
  const now=new Date().toISOString();const {data,error}=await db.from("bd_lms_session_windows").insert({course_run_id:run.id,session_number:SESSION,opened_at:now,opened_by:ctx.user.id}).select("opened_at,opened_by").single();
  if(!error&&data)return data;const retry=await sessionWindow(run.id);if(retry)return retry;throw error||new Error("No se pudo fijar el inicio oficial")
 }
+function requireTeacher(ctx:any){
+ if(!["teacher","admin"].includes(ctx.user.role))throw new Error("NO_AUTH")
+}
+function tempPassword(){
+ const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+ const bytes=crypto.getRandomValues(new Uint8Array(12));let s="Bd8-";
+ for(const b of bytes)s+=chars[b%chars.length];
+ return s
+}
+async function auditAdmin(actor:string,action:string,target:string,metadata:any={}){
+ await db.from("lms_audit_log").insert({
+  actor_user_id:actor,action,entity_type:"bigdata_user",entity_id:target,
+  metadata:{course_code:COURSE,run_code:RUN_CODE,...metadata}
+ }).then(()=>{}).catch(()=>{})
+}
+function sessionAlive(s:any){
+ if(s.revoked_at)return false;
+ if(s.persistent)return true;
+ return !!s.expires_at&&Date.parse(s.expires_at)>Date.now()
+}
+async function teacherAdminOverview(ctx:any,run:any){
+ requireTeacher(ctx);
+ const [{data:courseEnroll},{data:runEnroll},{data:progress},{data:subs},{data:requests},{data:auditRows}] = await Promise.all([
+  db.from("lms_enrollments").select("user_id,role,status,enrolled_at").eq("course_code",COURSE),
+  db.from("lms_run_enrollments").select("user_id,role,status,enrolled_at,completed_at").eq("course_run_id",run.id),
+  db.from("bd_lms_session_progress").select("*").eq("course_run_id",run.id).eq("session_number",SESSION),
+  db.from("bd_lms_s08_submissions").select("user_id,score,max_score,note_5,validated,submitted_at").eq("course_run_id",run.id),
+  db.from("lms_access_requests").select("id,full_name,email,status,created_at,reviewed_at,notes").eq("course_code",COURSE).order("created_at",{ascending:false}).limit(200),
+  db.from("lms_audit_log").select("id,actor_user_id,action,entity_id,metadata,created_at").contains("metadata",{course_code:COURSE}).order("created_at",{ascending:false}).limit(100)
+ ]);
+ const ce=courseEnroll||[],re=runEnroll||[],ids=[...new Set([...ce,...re].map((x:any)=>x.user_id))];
+ const [{data:users},{data:sessions}] = await Promise.all([
+  ids.length?db.from("lms_users").select("id,username,display_name,email,role,active,created_at,updated_at").in("id",ids):Promise.resolve({data:[]} as any),
+  ids.length?db.from("lms_auth_sessions").select("id,user_id,created_at,last_seen_at,expires_at,persistent,revoked_at").in("user_id",ids).order("last_seen_at",{ascending:false}):Promise.resolve({data:[]} as any)
+ ]);
+ const cem=new Map(ce.map((x:any)=>[x.user_id,x])),rem=new Map(re.map((x:any)=>[x.user_id,x]));
+ const pm=new Map((progress||[]).map((x:any)=>[x.user_id,x])),sm=new Map((subs||[]).map((x:any)=>[x.user_id,x]));
+ const reqByEmail=new Map<string,any>();for(const r of requests||[]){const k=String(r.email||"").toLowerCase();if(!reqByEmail.has(k))reqByEmail.set(k,r)}
+ const sessByUser=new Map<string,any[]>();for(const s of sessions||[]){if(!sessionAlive(s))continue;if(!sessByUser.has(s.user_id))sessByUser.set(s.user_id,[]);sessByUser.get(s.user_id)!.push(s)}
+ const rows=(users||[]).filter((u:any)=>(cem.get(u.id)?.role||rem.get(u.id)?.role||u.role)==="student").map((u:any)=>{
+  const a:any=cem.get(u.id)||{},b:any=rem.get(u.id)||{},p:any=pm.get(u.id)||{},s:any=sm.get(u.id)||{},ss=sessByUser.get(u.id)||[],rq=reqByEmail.get(String(u.email||u.username||"").toLowerCase());
+  return {user_id:u.id,display_name:u.display_name||u.username,email:u.email||u.username,global_active:!!u.active,
+   course_status:a.status||"none",run_status:b.status||"none",enrolled_at:b.enrolled_at||a.enrolled_at||null,
+   s08_status:p.status||"not_started",score:Number(s.score??p.score??0),note_5:s.note_5??null,
+   active_seconds:Number(p.active_seconds||0),started_at:p.started_at||null,last_activity_at:p.last_activity_at||null,
+   submitted_at:s.submitted_at||p.submitted_at||null,open_sessions:ss.length,last_seen_at:ss[0]?.last_seen_at||null,
+   request_id:rq?.id||null,request_status:rq?.status||null}
+ });
+ rows.sort((a:any,b:any)=>a.display_name.localeCompare(b.display_name,"es",{sensitivity:"base"}));
+ const stats={
+  total:rows.length,active:rows.filter((x:any)=>x.course_status==="active"&&x.run_status==="active").length,
+  suspended:rows.filter((x:any)=>x.course_status==="suspended"||x.run_status==="inactive").length,
+  started:rows.filter((x:any)=>x.started_at).length,completed:rows.filter((x:any)=>x.s08_status==="completed").length,
+  pending_requests:(requests||[]).filter((x:any)=>x.status==="pending").length,
+  open_sessions:rows.reduce((a:number,x:any)=>a+x.open_sessions,0)
+ };
+ return {viewer:ctx.user,run,stats,users:rows,access_requests:requests||[],audit:auditRows||[]}
+}
+async function teacherUserDetail(ctx:any,run:any,target:string){
+ requireTeacher(ctx);if(!target)throw new Error("Usuario requerido");
+ const {data:ce}=await db.from("lms_enrollments").select("user_id,role,status,enrolled_at").eq("user_id",target).eq("course_code",COURSE).maybeSingle();
+ if(!ce)throw new Error("El usuario no pertenece a Big Data");
+ const [{data:u},{data:re},{data:p},{data:a},{data:s},{data:sessions},{data:auditRows},{data:reqs}] = await Promise.all([
+  db.from("lms_users").select("id,username,display_name,email,role,active,created_at,updated_at").eq("id",target).maybeSingle(),
+  db.from("lms_run_enrollments").select("role,status,enrolled_at,completed_at").eq("user_id",target).eq("course_run_id",run.id).maybeSingle(),
+  db.from("bd_lms_session_progress").select("*").eq("user_id",target).eq("course_run_id",run.id).eq("session_number",SESSION).maybeSingle(),
+  db.from("bd_lms_activity_progress").select("*").eq("user_id",target).eq("course_run_id",run.id).order("activity_code"),
+  db.from("bd_lms_s08_submissions").select("score,max_score,note_5,validated,submitted_at,updated_at,sha256").eq("user_id",target).eq("course_run_id",run.id).maybeSingle(),
+  db.from("lms_auth_sessions").select("id,user_agent,created_at,last_seen_at,expires_at,persistent,revoked_at").eq("user_id",target).order("last_seen_at",{ascending:false}).limit(20),
+  db.from("lms_audit_log").select("id,actor_user_id,action,metadata,created_at").eq("entity_id",target).order("created_at",{ascending:false}).limit(30),
+  u?.email?db.from("lms_access_requests").select("id,status,created_at,reviewed_at,notes").eq("course_code",COURSE).ilike("email",u.email).order("created_at",{ascending:false}).limit(10):Promise.resolve({data:[]} as any)
+ ]);
+ return {user:u,course_enrollment:ce,run_enrollment:re,session_progress:p,activity_progress:a||[],submission:s,
+  sessions:(sessions||[]).filter(sessionAlive).map((x:any)=>({...x,revoked_at:undefined})),audit:auditRows||[],access_requests:reqs||[]}
+}
+async function teacherSetEnrollment(ctx:any,run:any,target:string,status:string){
+ requireTeacher(ctx);if(!target||!["active","suspended"].includes(status))throw new Error("Acción de matrícula inválida");
+ const {data:u}=await db.from("lms_users").select("id,role,active,display_name,username").eq("id",target).maybeSingle();
+ if(!u)throw new Error("Usuario no encontrado");if(u.role!=="student")throw new Error("Solo se administra matrícula de estudiantes desde este panel");
+ const {data:ce}=await db.from("lms_enrollments").select("role,status,enrolled_at").eq("user_id",target).eq("course_code",COURSE).maybeSingle();
+ if(!ce)throw new Error("El estudiante no está matriculado en Big Data");
+ const now=new Date().toISOString();
+ await db.from("lms_enrollments").update({status}).eq("user_id",target).eq("course_code",COURSE);
+ const {data:re}=await db.from("lms_run_enrollments").select("user_id,status").eq("user_id",target).eq("course_run_id",run.id).maybeSingle();
+ if(re)await db.from("lms_run_enrollments").update({status:status==="active"?"active":"inactive"}).eq("user_id",target).eq("course_run_id",run.id);
+ else if(status==="active")await db.from("lms_run_enrollments").insert({user_id:target,course_run_id:run.id,role:"student",status:"active",enrolled_at:now});
+ await auditAdmin(ctx.user.id,status==="active"?"bigdata.enrollment.reactivate":"bigdata.enrollment.suspend",target,{previous_status:ce.status,new_status:status});
+ return {ok:true,status}
+}
+async function teacherAddExisting(ctx:any,run:any,emailRaw:string){
+ requireTeacher(ctx);const email=String(emailRaw||"").trim().toLowerCase();if(!email||email.length>180||!email.includes("@"))throw new Error("Correo inválido");
+ let {data:u}=await db.from("lms_users").select("id,username,display_name,email,role,active").ilike("email",email).maybeSingle();
+ if(!u){const x=await db.from("lms_users").select("id,username,display_name,email,role,active").ilike("username",email).maybeSingle();u=x.data}
+ if(!u)throw new Error("No existe una cuenta LMS con ese correo. Usa Solicitar acceso para crear una nueva.");
+ if(!u.active)throw new Error("La cuenta global está inactiva");if(u.role!=="student")throw new Error("La cuenta encontrada no es de estudiante");
+ const now=new Date().toISOString();
+ await db.from("lms_enrollments").upsert({user_id:u.id,course_code:COURSE,role:"student",status:"active",enrolled_at:now},{onConflict:"user_id,course_code"});
+ await db.from("lms_run_enrollments").upsert({user_id:u.id,course_run_id:run.id,role:"student",status:"active",enrolled_at:now},{onConflict:"user_id,course_run_id"});
+ await auditAdmin(ctx.user.id,"bigdata.enrollment.add_existing",u.id,{email});
+ return {ok:true,user:{id:u.id,display_name:u.display_name||u.username,email:u.email||u.username}}
+}
+async function teacherResetPassword(ctx:any,run:any,target:string){
+ requireTeacher(ctx);const {data:ce}=await db.from("lms_enrollments").select("role,status").eq("user_id",target).eq("course_code",COURSE).maybeSingle();
+ if(!ce||ce.role!=="student")throw new Error("Estudiante Big Data no encontrado");
+ const {data:u}=await db.from("lms_users").select("id,username,display_name,email,active").eq("id",target).maybeSingle();if(!u||!u.active)throw new Error("La cuenta global no está activa");
+ const password=tempPassword(),{error}=await db.rpc("lms_set_password",{p_user_id:target,p_password:password});if(error)throw new Error("No se pudo restablecer la contraseña");
+ const now=new Date().toISOString();await db.from("lms_auth_sessions").update({revoked_at:now}).eq("user_id",target).is("revoked_at",null);
+ await auditAdmin(ctx.user.id,"bigdata.identity.password_reset",target,{global_session_revoke:true});
+ return {ok:true,username:u.username,password,display_name:u.display_name,email:u.email||u.username,warning:"La contraseña es global para el LMS y todas las sesiones anteriores quedaron cerradas."}
+}
+async function teacherRevokeSessions(ctx:any,target:string){
+ requireTeacher(ctx);const {data:ce}=await db.from("lms_enrollments").select("role").eq("user_id",target).eq("course_code",COURSE).maybeSingle();
+ if(!ce||ce.role!=="student")throw new Error("Estudiante Big Data no encontrado");
+ const now=new Date().toISOString();const {data,error}=await db.from("lms_auth_sessions").update({revoked_at:now}).eq("user_id",target).is("revoked_at",null).select("id");if(error)throw error;
+ await auditAdmin(ctx.user.id,"bigdata.identity.sessions_revoked",target,{count:(data||[]).length,global_scope:true});
+ return {ok:true,count:(data||[]).length}
+}
+
 async function teacherWall(ctx:any,run:any){
  if(!["teacher","admin"].includes(ctx.user.role))throw new Error("NO_AUTH");
  const [{data:enrollments},{data:progress},{data:activities},{data:subs},{data:requests},window]=await Promise.all([
@@ -126,6 +244,12 @@ Deno.serve(async(req:Request)=>{
   if(action==="submit_manifest"){const m=await verifyManifest(String(body.manifest_text||""));await persistManifest(ctx,run,m);const p=await ownProgress(ctx.user.id,run.id);return out(req,{ok:true,validated:true,score:m.score,note_5:m.note,sha256:m.sha,...p})}
   if(action==="teacher_open_session"){try{return out(req,{ok:true,session_window:await openOfficial(ctx,run)})}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
   if(action==="teacher_wall"){try{return out(req,await teacherWall(ctx,run))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
+  if(action==="teacher_admin_overview"){try{return out(req,await teacherAdminOverview(ctx,run))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
+  if(action==="teacher_user_detail"){try{return out(req,await teacherUserDetail(ctx,run,String(body.user_id||"")))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
+  if(action==="teacher_set_enrollment"){try{return out(req,await teacherSetEnrollment(ctx,run,String(body.user_id||""),String(body.status||"")))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
+  if(action==="teacher_add_existing"){try{return out(req,await teacherAddExisting(ctx,run,String(body.email||"")))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
+  if(action==="teacher_reset_password"){try{return out(req,await teacherResetPassword(ctx,run,String(body.user_id||"")))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
+  if(action==="teacher_revoke_sessions"){try{return out(req,await teacherRevokeSessions(ctx,String(body.user_id||"")))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
   return out(req,{error:"Acción desconocida"},400)
  }catch(e){return out(req,{error:String((e as any)?.message||e).slice(0,400)},400)}
 });
