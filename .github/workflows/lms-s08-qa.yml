@@ -10,6 +10,7 @@ on:
       - lms/**
       - infraestructura/lms/**
       - utils/validate_lms_s08.py
+      - utils/validate_lms_admin.py
       - Presentaciones/s07-del-vecindario-al-texto.html
       - .github/workflows/lms-s08-qa.yml
   pull_request:
@@ -18,6 +19,7 @@ on:
       - lms/**
       - infraestructura/lms/**
       - utils/validate_lms_s08.py
+      - utils/validate_lms_admin.py
       - Presentaciones/s07-del-vecindario-al-texto.html
       - .github/workflows/lms-s08-qa.yml
 
@@ -37,6 +39,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Comprobar sintaxis del validador
-        run: python -m py_compile utils/validate_lms_s08.py
+        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py
       - name: Validar LMS S08 y guardia S07
         run: python utils/validate_lms_s08.py
+      - name: Validar administrador docente
+        run: python utils/validate_lms_admin.py
