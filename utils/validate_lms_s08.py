@@ -11,7 +11,7 @@ def need(path):
     return p
 
 required=[
- "lms/index.html","lms/portal.html","lms/access.html","lms/session-08.html","lms/teacher-wall.html",
+ "lms/index.html","lms/portal.html","lms/access.html","lms/session-08.html","lms/teacher-wall.html","lms/admin-users.html",
  "lms/assets/bigdata-lms.css","lms/assets/bigdata-lms.js","lms/data/course.json",
  "infraestructura/lms/bigdata-lms-s08.sql","infraestructura/lms/functions/bigdata-learning/index.ts",".github/workflows/pages.yml",
 ]
@@ -28,6 +28,7 @@ if s07.exists():
 portal=(ROOT/"lms/portal.html").read_text("utf-8")
 s08=(ROOT/"lms/session-08.html").read_text("utf-8")
 wall=(ROOT/"lms/teacher-wall.html").read_text("utf-8")
+admin=(ROOT/"lms/admin-users.html").read_text("utf-8")
 client=(ROOT/"lms/assets/bigdata-lms.js").read_text("utf-8")
 sql=(ROOT/"infraestructura/lms/bigdata-lms-s08.sql").read_text("utf-8")
 edge=(ROOT/"infraestructura/lms/functions/bigdata-learning/index.ts").read_text("utf-8")
@@ -42,6 +43,10 @@ checks=[
  ("S08 no marca abrir como completar","Abrirlo <b>no</b> lo marca como completado" in s08),
  ("WALL declara desempate por inicio","demora de inicio" in wall),
  ("WALL usa modo docente BigData","requireBigData({teacher:true})" in wall and "teacher_wall" in edge),
+ ("administrador exige modo docente","requireBigData({teacher:true})" in admin),
+ ("administrador cubre cohorte e identidad",all(x in edge for x in ["teacher_admin_overview","teacher_user_detail","teacher_set_enrollment","teacher_add_existing","teacher_reset_password","teacher_revoke_sessions"])),
+ ("administrador advierte alcance global","identidad LMS compartida" in admin and "TODAS las sesiones LMS" in admin),
+ ("portal y WALL enlazan administrador","admin-users.html" in portal and "admin-users.html" in wall),
  ("RLS habilitado",sql.count("enable row level security")>=7),
  ("inicio oficial course-scoped","bd_lms_session_windows" in sql and "teacher_open_session" in edge),
  ("inicio no nace de page_view",'["notebook_opened","activity_started","stage_opened"].includes(event)' in edge),
@@ -52,6 +57,7 @@ checks=[
  ("portada enlaza LMS",'lms/portal.html' in index),
  ("portada S08 entra al LMS",'lms/session-08.html' in index),
  ("Pages publica carpeta LMS","cp -R lms _site/" in pages and "lms/**" in pages),
+ ("Pages verifica administrador docente","test -f _site/lms/admin-users.html" in pages),
  ("Pages publica recursos mínimos S08","Talleres/Taller_Control_1.md" in pages and "Cuadernos/Taller_Control_1.ipynb" in pages),
 ]
 for label,ok in checks:
@@ -69,4 +75,5 @@ print("LMS S08: OK")
 print(" - S07 intacta por Git blob SHA")
 print(" - Login LMS reutilizado")
 print(" - S08 + manifest + WALL presentes")
+print(" - Administrador docente + controles de seguridad presentes")
 print(" - RLS/revocación declarados")
