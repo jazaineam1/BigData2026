@@ -10,6 +10,9 @@ on:
       - js/**
       - assets/**
       - Presentaciones/**
+      - lms/**
+      - Talleres/Taller_Control_1.md
+      - Cuadernos/Taller_Control_1.ipynb
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -42,6 +45,13 @@ jobs:
           cp index.html _site/
           cp -R css js assets _site/
           cp -R Presentaciones _site/
+          cp -R lms _site/
+          mkdir -p _site/Talleres _site/Cuadernos
+          cp Talleres/Taller_Control_1.md _site/Talleres/
+          cp Cuadernos/Taller_Control_1.ipynb _site/Cuadernos/
+          test -f _site/lms/portal.html
+          test -f _site/lms/session-08.html
+          test -f _site/lms/teacher-wall.html
           touch _site/.nojekyll
 
       - name: Cargar artefacto

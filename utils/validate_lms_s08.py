@@ -13,7 +13,7 @@ def need(path):
 required=[
  "lms/index.html","lms/portal.html","lms/access.html","lms/session-08.html","lms/teacher-wall.html",
  "lms/assets/bigdata-lms.css","lms/assets/bigdata-lms.js","lms/data/course.json",
- "infraestructura/lms/bigdata-lms-s08.sql","infraestructura/lms/functions/bigdata-learning/index.ts",
+ "infraestructura/lms/bigdata-lms-s08.sql","infraestructura/lms/functions/bigdata-learning/index.ts",".github/workflows/pages.yml",
 ]
 for x in required: need(x)
 
@@ -32,6 +32,7 @@ client=(ROOT/"lms/assets/bigdata-lms.js").read_text("utf-8")
 sql=(ROOT/"infraestructura/lms/bigdata-lms-s08.sql").read_text("utf-8")
 edge=(ROOT/"infraestructura/lms/functions/bigdata-learning/index.ts").read_text("utf-8")
 index=(ROOT/"index.html").read_text("utf-8")
+pages=(ROOT/".github/workflows/pages.yml").read_text("utf-8")
 course=json.loads((ROOT/"lms/data/course.json").read_text("utf-8"))
 
 checks=[
@@ -50,6 +51,8 @@ checks=[
  ("curso declarativo",course.get("course")=="bigdata" and course.get("current_tracked_session")==8),
  ("portada enlaza LMS",'lms/portal.html' in index),
  ("portada S08 entra al LMS",'lms/session-08.html' in index),
+ ("Pages publica carpeta LMS","cp -R lms _site/" in pages and "lms/**" in pages),
+ ("Pages publica recursos mínimos S08","Talleres/Taller_Control_1.md" in pages and "Cuadernos/Taller_Control_1.ipynb" in pages),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
