@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#142153">
+<title>Big Data · Administrador docente</title>
+<link rel="stylesheet" href="assets/bigdata-lms.css?v=20260925-3">
+<style>
+.admin-head{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.admin-head .lead{margin-bottom:0}.toolbar{display:grid;grid-template-columns:minmax(240px,1fr) 190px 190px auto;gap:10px;align-items:end}
+.toolbar label,.mini-form label{display:block;font-size:.78rem;font-weight:900;color:var(--uc-navy);margin-bottom:5px}
+.select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:11px;background:#fff;padding:9px 11px;color:var(--ink)}
+.tablewrap table{min-width:980px}.clickrow{cursor:pointer}.clickrow:hover{background:#f5f8ff}.student-name{display:flex;gap:9px;align-items:center}
+.avatar{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#e9eefc;color:var(--uc-navy);font-weight:900;flex:0 0 auto}
+.pill.active,.pill.completed{background:#e4f3eb;color:#176b4a}.pill.suspended,.pill.inactive{background:#fde8e7;color:#8d1d1d}.pill.pending,.pill.in_progress{background:#fff2cf;color:#7b5500}.pill.not_started,.pill.none{background:#eef0f3;color:#5f6670}
+.admin-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(290px,.8fr);gap:15px}.stack{display:grid;gap:15px}
+.tabbar{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 14px}.tab{border:1px solid var(--line);background:#fff;color:var(--uc-navy);padding:9px 13px;border-radius:999px;font-weight:900;cursor:pointer}.tab.active{background:var(--uc-navy);color:#fff;border-color:var(--uc-navy)}
+.request{padding:13px 0;border-bottom:1px solid var(--line)}.request:last-child{border-bottom:0}.request .row,.audit-row{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+.audit-row{padding:10px 0;border-bottom:1px solid var(--line)}.audit-row:last-child{border-bottom:0}.audit-action{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.76rem;background:#f3f4f6;padding:2px 6px;border-radius:6px}
+dialog{width:min(850px,94vw);max-height:90vh;border:0;border-radius:20px;padding:0;box-shadow:0 25px 90px #0006}dialog::backdrop{background:#0d163b99}.dialog-head{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;padding:18px 20px}.dialog-body{padding:20px;overflow:auto}.dialog-close{border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px 11px;cursor:pointer;font-weight:900}.detailgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.detailmetric{border:1px solid var(--line);border-radius:13px;padding:12px;background:#fff}.detailmetric b{display:block;font-size:1.25rem;color:var(--uc-navy)}.detailmetric span{font-size:.78rem}
+.security-box{border:1px solid #efd0a4;background:#fff8e8;border-radius:14px;padding:13px}.credential{border:1px dashed var(--uc-cyan);background:#effafa;border-radius:13px;padding:13px;margin-top:12px}.credential code{font-size:1rem;word-break:break-all}
+.session-item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}.stagebar{height:8px;background:#eceff3;border-radius:99px;overflow:hidden;margin-top:5px}.stagebar i{display:block;height:100%;background:var(--uc-cyan)}
+.empty{padding:22px;text-align:center;color:var(--muted)}.danger-note{color:#8d1d1d;font-weight:800}
+@media(max-width:900px){.toolbar{grid-template-columns:1fr 1fr}.admin-grid{grid-template-columns:1fr}.detailgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.toolbar{grid-template-columns:1fr}.detailgrid{grid-template-columns:1fr}.optional{display:none!important}}
+</style>
+</head>
+<body>
+<header class="appbar"><div class="inner">
+<a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · Administrador docente</small></a>
+<span class="spacer"></span>
+<a class="navlink optional" href="teacher-wall.html">WALL S08</a>
+<a class="navlink optional" href="session-08.html">S08</a>
+<button data-logout>Salir</button>
+</div></header>
+
+<main class="wrap">
+<div class="admin-head">
+<div><div class="ey">Operación del curso</div><h1>Administrador docente.</h1>
+<p class="lead">Matrícula, identidad, seguridad de sesiones y seguimiento académico en un solo lugar. Las acciones sensibles quedan registradas en auditoría.</p></div>
+<button id="refresh" class="btn alt">Actualizar datos</button>
+</div>
+<div id="status" class="status hidden"></div>
+<div id="metrics" class="kpis" style="margin-top:20px"></div>
+
+<div class="tabbar" role="tablist" aria-label="Secciones del administrador">
+<button class="tab active" data-tab="cohort" role="tab">Cohorte</button>
+<button class="tab" data-tab="requests" role="tab">Solicitudes <span id="requestBadge"></span></button>
+<button class="tab" data-tab="audit" role="tab">Auditoría</button>
+</div>
+
+<section id="tab-cohort" class="tabpane">
+<div class="admin-grid">
+<section class="card">
+<div class="actions" style="justify-content:space-between;align-items:flex-start">
+<div><div class="ey">Cohorte activa</div><h2 style="margin-bottom:4px">Estudiantes de Big Data</h2><p class="muted" style="margin:0">Haz clic en un estudiante para abrir su ficha operativa.</p></div>
+<button id="exportCsv" class="btn alt">Exportar CSV</button>
+</div>
+<div class="toolbar" style="margin-top:14px">
+<div><label for="search">Buscar</label><input id="search" class="input" type="search" placeholder="Nombre o correo…"></div>
+<div><label for="enrollmentFilter">Matrícula</label><select id="enrollmentFilter" class="select"><option value="all">Todas</option><option value="active">Activas</option><option value="suspended">Suspendidas</option></select></div>
+<div><label for="progressFilter">Sesión 08</label><select id="progressFilter" class="select"><option value="all">Todos los estados</option><option value="not_started">No iniciada</option><option value="in_progress">En progreso</option><option value="completed">Completada</option></select></div>
+<div><button id="clearFilters" class="btn alt">Limpiar</button></div>
+</div>
+<div class="tablewrap" style="margin-top:12px"><table>
+<thead><tr><th>Estudiante</th><th>Matrícula</th><th>S08</th><th>Puntaje</th><th>Tiempo activo</th><th>Última actividad</th><th>Sesiones</th><th></th></tr></thead>
+<tbody id="usersBody"></tbody>
+</table></div>
+<p id="countLabel" class="muted"></p>
+</section>
+
+<div class="stack">
+<section class="card"><div class="ey">Matrícula directa</div><h2>Añadir cuenta LMS existente</h2>
+<p class="muted">Úsalo si el estudiante ya tiene una cuenta LMS compartida. No crea identidades duplicadas.</p>
+<form id="addExisting" class="mini-form">
+<label for="existingEmail">Correo de la cuenta</label>
+<input id="existingEmail" class="input" name="email" type="email" autocomplete="off" required placeholder="estudiante@correo.com">
+<button class="btn primary" style="margin-top:10px" type="submit">Matricular en Big Data</button>
+</form>
+<div class="note" style="margin-top:12px">Para una persona que todavía no tiene cuenta, usa <b>Solicitudes</b>: el flujo de aprobación crea o enlaza la identidad de forma controlada.</div>
+</section>
+
+<section class="card"><div class="ey">Alcance de seguridad</div><h2>Qué administra esta pantalla</h2>
+<p class="muted">Suspender acceso afecta <b>solo Big Data</b>. La cuenta puede seguir funcionando en otros cursos.</p>
+<div class="security-box"><b>Atención con dos acciones globales</b><p class="muted" style="margin-bottom:0">“Restablecer contraseña” y “Cerrar todas las sesiones” actúan sobre la identidad LMS compartida y, por seguridad, invalidan sesiones también en otros cursos.</p></div>
+</section>
+</div>
+</div>
+</section>
+
+<section id="tab-requests" class="tabpane hidden">
+<div class="cols">
+<section class="card"><div class="ey">Pendientes</div><h2>Solicitudes de acceso</h2><p class="muted">Aprobar matricula a la persona en Big Data y entrega una credencial temporal cuando corresponde.</p><div id="requestsPending"></div></section>
+<section class="card"><div class="ey">Historial</div><h2>Solicitudes recientes</h2><div id="requestsHistory"></div></section>
+</div>
+</section>
+
+<section id="tab-audit" class="tabpane hidden">
+<section class="card"><div class="actions" style="justify-content:space-between"><div><div class="ey">Trazabilidad</div><h2 style="margin-bottom:0">Auditoría administrativa</h2></div><span class="pill active">Solo lectura</span></div>
+<p class="muted">Registra acciones administrativas de Big Data: matrícula, suspensión, restablecimiento de contraseña y revocación de sesiones.</p>
+<div id="auditList"></div>
+</section>
+</section>
+</main>
+
+<dialog id="userDialog" aria-labelledby="dialogTitle">
+<div class="dialog-head"><div style="min-width:0"><div class="ey">Ficha operativa</div><h2 id="dialogTitle" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Estudiante</h2></div><span class="spacer"></span><button id="dialogClose" class="dialog-close" aria-label="Cerrar">Cerrar</button></div>
+<div id="dialogBody" class="dialog-body"></div>
+</dialog>
+
+<script src="assets/bigdata-lms.js?v=20260925-3"></script>
+<script>
+(async function(){
+'use strict';
+const L=window.BIGDATA_LMS;
+L.wireLogout();
+const status=L.$('status'), dialog=L.$('userDialog'), body=L.$('dialogBody');
+let model={users:[],access_requests:[],audit:[],stats:{}};
+let activeTab='cohort';
+
+const actionLabel={
+ 'bigdata.enrollment.add_existing':'Matrícula añadida',
+ 'bigdata.enrollment.reactivate':'Matrícula reactivada',
+ 'bigdata.enrollment.suspend':'Matrícula suspendida',
+ 'bigdata.identity.password_reset':'Contraseña restablecida',
+ 'bigdata.identity.sessions_revoked':'Sesiones cerradas'
+};
+const stageLabel={
+ 'bd-s08-e1':'E1 · Histórico y JSON','bd-s08-e2':'E2 · MongoDB Atlas','bd-s08-e3':'E3 · Bandeja histórica',
+ 'bd-s08-e4':'E4 · Cassandra','bd-s08-e5':'E5 · Neo4j','bd-s08-e6':'E6 · Informe','bd-s08-final':'Validación final'
+};
+function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')}
+function pill(v){const x=String(v||'none');const labels={active:'Activa',suspended:'Suspendida',inactive:'Inactiva',completed:'Completada',in_progress:'En progreso',not_started:'No iniciada',submitted:'Enviada',none:'Sin cohorte',pending:'Pendiente',approved:'Aprobada',rejected:'Rechazada'};return '<span class="pill '+L.esc(x)+'">'+L.esc(labels[x]||x)+'</span>'}
+function initials(name){const p=String(name||'?').trim().split(/\\s+/).slice(0,2);return p.map(function(x){return x.charAt(0).toUpperCase()}).join('')||'?'}
+function safeScore(u){return u.s08_status==='not_started'?'—':String(Number(u.score||0))+'/100'}
+function filters(){
+ const q=norm(L.$('search').value),en=L.$('enrollmentFilter').value,pr=L.$('progressFilter').value;
+ return model.users.filter(function(u){
+   const enrolled=u.global_active&&u.course_status==='active'&&u.run_status==='active';
+   const suspended=!u.global_active||u.course_status==='suspended'||u.run_status==='inactive';
+   return (!q||norm(u.display_name+' '+u.email).includes(q)) &&
+          (en==='all'||(en==='active'&&enrolled)||(en==='suspended'&&suspended)) &&
+          (pr==='all'||u.s08_status===pr);
+ });
+}
+function renderUsers(){
+ const rows=filters();
+ L.$('countLabel').textContent='Mostrando '+rows.length+' de '+model.users.length+' estudiantes.';
+ L.$('usersBody').innerHTML=rows.length?rows.map(function(u){
+   const enrollment=!u.global_active?'Cuenta global inactiva':(u.course_status==='active'&&u.run_status==='active'?'active':'suspended');
+   return '<tr class="clickrow" data-user="'+L.esc(u.user_id)+'">'+
+   '<td><div class="student-name"><span class="avatar">'+L.esc(initials(u.display_name))+'</span><span><b>'+L.esc(u.display_name)+'</b><br><span class="muted">'+L.esc(u.email)+'</span></span></div></td>'+
+   '<td>'+pill(enrollment)+'</td><td>'+pill(u.s08_status)+'</td><td><b>'+safeScore(u)+'</b>'+(u.note_5!=null?'<br><span class="muted">'+Number(u.note_5).toFixed(2)+'/5.0</span>':'')+'</td>'+
+   '<td>'+L.fmtTime(u.active_seconds)+'</td><td>'+L.fmtWhen(u.last_activity_at)+'</td><td><b>'+Number(u.open_sessions||0)+'</b><br><span class="muted">'+L.fmtWhen(u.last_seen_at)+'</span></td>'+
+   '<td><button class="btn alt" data-open="'+L.esc(u.user_id)+'">Ver ficha</button></td></tr>';
+ }).join(''):'<tr><td colspan="8" class="empty">No hay estudiantes que coincidan con los filtros.</td></tr>';
+ document.querySelectorAll('[data-open]').forEach(function(b){b.onclick=function(e){e.stopPropagation();openUser(b.dataset.open)}});
+ document.querySelectorAll('tr[data-user]').forEach(function(r){r.onclick=function(){openUser(r.dataset.user)}});
+}
+function renderMetrics(){
+ const s=model.stats||{};
+ L.$('metrics').innerHTML=
+ '<div class="kpi"><span class="muted">Estudiantes</span><b>'+Number(s.total||0)+'</b></div>'+
+ '<div class="kpi"><span class="muted">Matrículas activas</span><b>'+Number(s.active||0)+'</b></div>'+
+ '<div class="kpi"><span class="muted">Suspendidas</span><b>'+Number(s.suspended||0)+'</b></div>'+
+ '<div class="kpi"><span class="muted">S08 completada</span><b>'+Number(s.completed||0)+'</b></div>'+
+ '<div class="kpi"><span class="muted">Solicitudes pendientes</span><b>'+Number(s.pending_requests||0)+'</b></div>'+
+ '<div class="kpi"><span class="muted">Sesiones abiertas</span><b>'+Number(s.open_sessions||0)+'</b></div>';
+ L.$('requestBadge').textContent=Number(s.pending_requests||0)?'('+Number(s.pending_requests||0)+')':'';
+}
+function requestCard(r,allowActions){
+ let actions='';
+ if(allowActions&&r.status==='pending')actions='<div class="actions" style="margin-top:9px"><button class="btn accent" data-approve="'+L.esc(r.id)+'">Aprobar</button><button class="btn danger" data-reject="'+L.esc(r.id)+'">Rechazar</button></div><div id="cred-'+L.esc(r.id)+'"></div>';
+ return '<div class="request"><div class="row"><div><b>'+L.esc(r.full_name)+'</b><div class="muted">'+L.esc(r.email)+' · '+L.fmtWhen(r.created_at)+'</div></div>'+pill(r.status)+'</div>'+actions+'</div>';
+}
+function renderRequests(){
+ const all=model.access_requests||[], pending=all.filter(function(r){return r.status==='pending'});
+ L.$('requestsPending').innerHTML=pending.length?pending.map(function(r){return requestCard(r,true)}).join(''):'<div class="empty">No hay solicitudes pendientes.</div>';
+ L.$('requestsHistory').innerHTML=all.length?all.slice(0,30).map(function(r){return requestCard(r,false)}).join(''):'<div class="empty">No hay solicitudes registradas.</div>';
+ document.querySelectorAll('[data-approve]').forEach(function(b){b.onclick=function(){reviewRequest(b.dataset.approve,'approve',b)}});
+ document.querySelectorAll('[data-reject]').forEach(function(b){b.onclick=function(){reviewRequest(b.dataset.reject,'reject',b)}});
+}
+async function reviewRequest(id,action,button){
+ if(action==='reject'&&!confirm('¿Rechazar esta solicitud de acceso a Big Data?'))return;
+ if(action==='approve'&&!confirm('¿Aprobar la solicitud y matricular a la persona en Big Data?'))return;
+ button.disabled=true;
+ try{
+   const x=await L.reviewAccess({request_id:id,action:action});
+   if(action==='approve'&&x.password){
+     const box=L.$('cred-'+id);
+     if(box)box.innerHTML='<div class="credential"><b>Credencial temporal</b><div>Usuario: <code>'+L.esc(x.username||'')+'</code></div><div>Contraseña: <code>'+L.esc(x.password||'')+'</code></div><button class="btn alt" data-copy-cred style="margin-top:8px">Copiar credencial</button><div class="muted" style="margin-top:6px">Compártela de forma privada. No se guardará en esta pantalla después de recargar.</div></div>';
+     const cb=box&&box.querySelector('[data-copy-cred]');
+     if(cb)cb.onclick=async function(){await navigator.clipboard.writeText('Big Data LMS\\nUsuario: '+(x.username||'')+'\\nContraseña temporal: '+(x.password||'')+'\\nPortal: https://jazaineam1.github.io/BigData2026/lms/portal.html')};
+   }
+   L.msg(status,action==='approve'?'Solicitud aprobada.':'Solicitud rechazada.','ok');
+   setTimeout(load,900);
+ }catch(e){L.msg(status,e.message,'err')}finally{button.disabled=false}
+}
+function renderAudit(){
+ const rows=model.audit||[];
+ L.$('auditList').innerHTML=rows.length?rows.map(function(a){
+   return '<div class="audit-row"><div><b>'+L.esc(actionLabel[a.action]||a.action)+'</b><div class="muted">'+L.esc(a.actor_name||'Sistema')+' · '+L.fmtWhen(a.created_at)+'</div></div><span class="audit-action">'+L.esc(a.action)+'</span></div>';
+ }).join(''):'<div class="empty">Aún no hay acciones administrativas de Big Data registradas.</div>';
+}
+function renderAll(){renderMetrics();renderUsers();renderRequests();renderAudit()}
+function switchTab(name){
+ activeTab=name;
+ document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===name)});
+ document.querySelectorAll('.tabpane').forEach(function(p){p.classList.add('hidden')});
+ L.$('tab-'+name).classList.remove('hidden');
+}
+function renderUserDetail(d){
+ const u=d.user||{},p=d.session_progress||{},sub=d.submission||{},aps=d.activity_progress||[],ce=d.course_enrollment||{},re=d.run_enrollment||{};
+ const courseActive=u.active&&ce.status==='active'&&re.status==='active';
+ const stages=aps.length?aps.map(function(a){
+   const max=Number(a.max_score||0),score=Number(a.score||0),pct=max>0?Math.max(0,Math.min(100,100*score/max)):0;
+   return '<div class="stage" style="align-items:flex-start"><span class="stage-num">'+L.esc((stageLabel[a.activity_code]||a.activity_code).split(' · ')[0])+'</span><span style="flex:1"><b>'+L.esc(stageLabel[a.activity_code]||a.activity_code)+'</b><br><span class="muted">'+pill(a.status)+' · '+score+'/'+max+'</span><div class="stagebar"><i style="width:'+pct+'%"></i></div></span></div>';
+ }).join(''):'<div class="empty">Sin actividad S08 registrada.</div>';
+ const sessions=(d.sessions||[]).length?(d.sessions||[]).map(function(s){
+   return '<div class="session-item"><b>'+L.esc((s.user_agent||'Dispositivo').slice(0,160))+'</b><div class="muted">Último uso '+L.fmtWhen(s.last_seen_at||s.created_at)+' · '+(s.persistent?'persistente':'temporal')+'</div></div>';
+ }).join(''):'<div class="empty">No hay sesiones abiertas.</div>';
+ const audits=(d.audit||[]).length?(d.audit||[]).slice(0,8).map(function(a){return '<div class="audit-row"><div><b>'+L.esc(actionLabel[a.action]||a.action)+'</b><div class="muted">'+L.fmtWhen(a.created_at)+'</div></div></div>'}).join(''):'<div class="muted">Sin acciones administrativas recientes.</div>';
+ body.innerHTML=
+ '<div class="actions" style="justify-content:space-between;align-items:flex-start"><div><h2 style="margin-bottom:2px">'+L.esc(u.display_name||u.username)+'</h2><div class="muted">'+L.esc(u.email||u.username)+' · usuario '+L.esc(u.username)+'</div></div>'+pill(courseActive?'active':'suspended')+'</div>'+
+ '<div class="detailgrid" style="margin-top:14px">'+
+ '<div class="detailmetric"><b>'+L.esc(p.status||'not_started')+'</b><span>Estado S08</span></div>'+
+ '<div class="detailmetric"><b>'+(sub.score!=null?Number(sub.score)+'/100':'—')+'</b><span>Puntaje</span></div>'+
+ '<div class="detailmetric"><b>'+(sub.note_5!=null?Number(sub.note_5).toFixed(2):'—')+'</b><span>Nota / 5.0</span></div>'+
+ '<div class="detailmetric"><b>'+L.fmtTime(p.active_seconds||0)+'</b><span>Tiempo activo</span></div></div>'+
+ '<h3 style="margin-top:20px">Progreso de la sesión 08</h3>'+stages+
+ '<h3 style="margin-top:20px">Sesiones/dispositivos abiertos</h3>'+sessions+
+ '<h3 style="margin-top:20px">Acciones administrativas</h3>'+
+ '<div class="security-box"><b>Acciones con distinto alcance</b><p class="muted">Suspender matrícula afecta solo Big Data. Restablecer contraseña o cerrar sesiones afecta la identidad LMS compartida.</p>'+
+ '<div class="actions"><button class="btn '+(courseActive?'danger':'accent')+'" id="toggleEnrollment">'+(courseActive?'Suspender Big Data':'Reactivar Big Data')+'</button>'+
+ '<button class="btn alt" id="revokeSessions">Cerrar todas las sesiones LMS</button><button class="btn alt" id="resetPassword">Restablecer contraseña</button></div></div>'+
+ '<div id="passwordBox"></div>'+
+ '<h3 style="margin-top:20px">Auditoría reciente del estudiante</h3>'+audits;
+ L.$('dialogTitle').textContent=u.display_name||u.username||'Estudiante';
+ L.$('toggleEnrollment').onclick=function(){toggleEnrollment(u,courseActive)};
+ L.$('revokeSessions').onclick=function(){revokeSessions(u)};
+ L.$('resetPassword').onclick=function(){resetPassword(u)};
+}
+async function openUser(id){
+ L.$('dialogTitle').textContent='Cargando…';body.innerHTML='<div class="empty">Consultando ficha del estudiante…</div>';dialog.showModal();
+ try{const d=await L.bigdata('teacher_user_detail',{user_id:id});renderUserDetail(d)}catch(e){body.innerHTML='<div class="status err">'+L.esc(e.message)+'</div>'}
+}
+async function toggleEnrollment(u,isActive){
+ const next=isActive?'suspended':'active';
+ const msg=isActive?'¿Suspender el acceso de '+u.display_name+' a Big Data? Su cuenta LMS seguirá existiendo.':'¿Reactivar la matrícula de '+u.display_name+' en Big Data?';
+ if(!confirm(msg))return;
+ try{await L.bigdata('teacher_set_enrollment',{user_id:u.id,status:next});L.msg(status,next==='active'?'Matrícula reactivada.':'Matrícula suspendida.','ok');dialog.close();await load()}catch(e){alert(e.message)}
+}
+async function revokeSessions(u){
+ if(!confirm('Esta acción cerrará TODAS las sesiones LMS de '+u.display_name+', incluso las usadas en otros cursos. ¿Continuar?'))return;
+ try{const x=await L.bigdata('teacher_revoke_sessions',{user_id:u.id});L.msg(status,'Se cerraron '+Number(x.count||0)+' sesiones LMS.','ok');dialog.close();await load()}catch(e){alert(e.message)}
+}
+async function resetPassword(u){
+ if(!confirm('La contraseña es GLOBAL para el LMS. Se cambiará la contraseña de '+u.display_name+' y se cerrarán todas sus sesiones. ¿Continuar?'))return;
+ try{
+   const x=await L.bigdata('teacher_reset_password',{user_id:u.id});
+   const box=L.$('passwordBox');
+   box.innerHTML='<div class="credential"><b>Nueva credencial temporal</b><div>Usuario: <code>'+L.esc(x.username||'')+'</code></div><div>Contraseña: <code>'+L.esc(x.password||'')+'</code></div><p class="danger-note">Esta contraseña afecta toda la identidad LMS. Compártela de forma privada.</p><button class="btn alt" id="copyPassword">Copiar</button></div>';
+   L.$('copyPassword').onclick=async function(){await navigator.clipboard.writeText('LMS\\nUsuario: '+(x.username||'')+'\\nContraseña temporal: '+(x.password||''))};
+ }catch(e){alert(e.message)}
+}
+function csv(){
+ const rows=[['Estudiante','Correo','Matrícula curso','Cohorte','S08','Puntaje','Nota','Tiempo activo segundos','Última actividad','Sesiones abiertas']];
+ filters().forEach(function(u){rows.push([u.display_name,u.email,u.course_status,u.run_status,u.s08_status,u.score,u.note_5==null?'':u.note_5,u.active_seconds,u.last_activity_at||'',u.open_sessions])});
+ const text=rows.map(function(r){return r.map(function(v){return '"'+String(v==null?'':v).replaceAll('"','""')+'"'}).join(',')}).join('\\r\\n');
+ const blob=new Blob(['\\ufeff'+text],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BigData-2026-2-cohorte.csv';a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},0);
+}
+async function load(){
+ L.$('refresh').disabled=true;
+ try{
+   const guard=await L.requireBigData({teacher:true});if(!guard)return;
+   model=await L.bigdata('teacher_admin_overview');
+   renderAll();
+ }catch(e){L.msg(status,e.message,'err')}finally{L.$('refresh').disabled=false}
+}
+document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){switchTab(b.dataset.tab)}});
+['search','enrollmentFilter','progressFilter'].forEach(function(id){L.$(id).addEventListener(id==='search'?'input':'change',renderUsers)});
+L.$('clearFilters').onclick=function(){L.$('search').value='';L.$('enrollmentFilter').value='all';L.$('progressFilter').value='all';renderUsers()};
+L.$('refresh').onclick=load;
+L.$('exportCsv').onclick=csv;
+L.$('dialogClose').onclick=function(){dialog.close()};
+dialog.addEventListener('click',function(e){if(e.target===dialog)dialog.close()});
+L.$('addExisting').onsubmit=async function(e){
+ e.preventDefault();const f=e.currentTarget,b=f.querySelector('button'),email=f.email.value.trim();
+ if(!confirm('¿Matricular la cuenta '+email+' en Big Data 2026-2S?'))return;
+ b.disabled=true;
+ try{const x=await L.bigdata('teacher_add_existing',{email:email});L.msg(status,'Matrícula activada para '+(x.user&&x.user.display_name?x.user.display_name:email)+'.','ok');f.reset();await load()}catch(ex){L.msg(status,ex.message,'err')}finally{b.disabled=false}
+};
+await load();
+})();
+</script>
+</body>
+</html>
