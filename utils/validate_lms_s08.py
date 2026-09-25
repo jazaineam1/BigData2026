@@ -38,7 +38,7 @@ checks=[
  ("S08 abre Taller_Control_1","Cuadernos/Taller_Control_1.ipynb" in s08),
  ("S08 acepta manifest","manifest_tc1.json" in s08 and 'type="file"' in s08),
  ("S08 no marca abrir como completar","Abrirlo <b>no</b> lo marca como completado" in s08),
- ("WALL declara desempate por inicio","hora real de inicio" in wall),
+ ("WALL declara desempate por inicio","demora de inicio" in wall),
  ("WALL usa endpoint BigData","teacher_wall" in wall),
  ("RLS habilitado",sql.count("enable row level security")>=7),\n ("inicio oficial course-scoped","bd_lms_session_windows" in sql and "teacher_open_session" in edge),\n ("inicio no nace de page_view",'["notebook_opened","activity_started","stage_opened"].includes(event)' in edge),\n ("pareja solo con hash","pair_hash:m.pair_hash" in edge and "pair_hash text" in sql and "pair_id text" not in sql),\n ("Edge Function versionada","VALIDATOR_VERSION" in edge and "submit_manifest" in edge),
  ("tablas no expuestas a anon/authenticated","revoke all" in sql and "anon,authenticated" in sql),
