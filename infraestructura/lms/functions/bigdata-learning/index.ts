@@ -148,13 +148,17 @@ async function teacherAdminOverview(ctx:any,run:any){
  });
  rows.sort((a:any,b:any)=>a.display_name.localeCompare(b.display_name,"es",{sensitivity:"base"}));
  const stats={
-  total:rows.length,active:rows.filter((x:any)=>x.course_status==="active"&&x.run_status==="active").length,
-  suspended:rows.filter((x:any)=>x.course_status==="suspended"||x.run_status==="inactive").length,
+  total:rows.length,active:rows.filter((x:any)=>x.global_active&&x.course_status==="active"&&x.run_status==="active").length,
+  suspended:rows.filter((x:any)=>!x.global_active||x.course_status==="suspended"||x.run_status==="inactive").length,
   started:rows.filter((x:any)=>x.started_at).length,completed:rows.filter((x:any)=>x.s08_status==="completed").length,
   pending_requests:(requests||[]).filter((x:any)=>x.status==="pending").length,
   open_sessions:rows.reduce((a:number,x:any)=>a+x.open_sessions,0)
  };
- return {viewer:ctx.user,run,stats,users:rows,access_requests:requests||[],audit:auditRows||[]}
+ const actorIds=[...new Set((auditRows||[]).map((x:any)=>x.actor_user_id).filter(Boolean))];
+ const {data:actors}=actorIds.length?await db.from("lms_users").select("id,display_name,username").in("id",actorIds):({data:[]} as any);
+ const actorMap=new Map((actors||[]).map((x:any)=>[x.id,x.display_name||x.username]));
+ const audit=(auditRows||[]).map((x:any)=>({...x,actor_name:actorMap.get(x.actor_user_id)||"Sistema"}));
+ return {viewer:ctx.user,run,stats,users:rows,access_requests:requests||[],audit}
 }
 async function teacherUserDetail(ctx:any,run:any,target:string){
  requireTeacher(ctx);if(!target)throw new Error("Usuario requerido");
@@ -181,10 +185,11 @@ async function teacherSetEnrollment(ctx:any,run:any,target:string,status:string)
  const {data:ce}=await db.from("lms_enrollments").select("role,status,enrolled_at").eq("user_id",target).eq("course_code",COURSE).maybeSingle();
  if(!ce)throw new Error("El estudiante no está matriculado en Big Data");
  const now=new Date().toISOString();
- await db.from("lms_enrollments").update({status}).eq("user_id",target).eq("course_code",COURSE);
+ const {error:courseError}=await db.from("lms_enrollments").update({status}).eq("user_id",target).eq("course_code",COURSE);
+ if(courseError)throw new Error("No se pudo actualizar la matrícula del curso");
  const {data:re}=await db.from("lms_run_enrollments").select("user_id,status").eq("user_id",target).eq("course_run_id",run.id).maybeSingle();
- if(re)await db.from("lms_run_enrollments").update({status:status==="active"?"active":"inactive"}).eq("user_id",target).eq("course_run_id",run.id);
- else if(status==="active")await db.from("lms_run_enrollments").insert({user_id:target,course_run_id:run.id,role:"student",status:"active",enrolled_at:now});
+ if(re){const {error:e}=await db.from("lms_run_enrollments").update({status:status==="active"?"active":"inactive"}).eq("user_id",target).eq("course_run_id",run.id);if(e)throw new Error("No se pudo actualizar la cohorte")}
+ else if(status==="active"){const {error:e}=await db.from("lms_run_enrollments").insert({user_id:target,course_run_id:run.id,role:"student",status:"active",enrolled_at:now});if(e)throw new Error("No se pudo matricular en la cohorte")}
  await auditAdmin(ctx.user.id,status==="active"?"bigdata.enrollment.reactivate":"bigdata.enrollment.suspend",target,{previous_status:ce.status,new_status:status});
  return {ok:true,status}
 }
@@ -195,8 +200,12 @@ async function teacherAddExisting(ctx:any,run:any,emailRaw:string){
  if(!u)throw new Error("No existe una cuenta LMS con ese correo. Usa Solicitar acceso para crear una nueva.");
  if(!u.active)throw new Error("La cuenta global está inactiva");if(u.role!=="student")throw new Error("La cuenta encontrada no es de estudiante");
  const now=new Date().toISOString();
- await db.from("lms_enrollments").upsert({user_id:u.id,course_code:COURSE,role:"student",status:"active",enrolled_at:now},{onConflict:"user_id,course_code"});
- await db.from("lms_run_enrollments").upsert({user_id:u.id,course_run_id:run.id,role:"student",status:"active",enrolled_at:now},{onConflict:"user_id,course_run_id"});
+ const {data:ce}=await db.from("lms_enrollments").select("user_id").eq("user_id",u.id).eq("course_code",COURSE).maybeSingle();
+ if(ce){const {error:e}=await db.from("lms_enrollments").update({role:"student",status:"active"}).eq("user_id",u.id).eq("course_code",COURSE);if(e)throw new Error("No se pudo activar la matrícula")}
+ else{const {error:e}=await db.from("lms_enrollments").insert({user_id:u.id,course_code:COURSE,role:"student",status:"active",enrolled_at:now});if(e)throw new Error("No se pudo crear la matrícula")}
+ const {data:re}=await db.from("lms_run_enrollments").select("user_id").eq("user_id",u.id).eq("course_run_id",run.id).maybeSingle();
+ if(re){const {error:e}=await db.from("lms_run_enrollments").update({role:"student",status:"active"}).eq("user_id",u.id).eq("course_run_id",run.id);if(e)throw new Error("No se pudo activar la cohorte")}
+ else{const {error:e}=await db.from("lms_run_enrollments").insert({user_id:u.id,course_run_id:run.id,role:"student",status:"active",enrolled_at:now});if(e)throw new Error("No se pudo añadir a la cohorte")}
  await auditAdmin(ctx.user.id,"bigdata.enrollment.add_existing",u.id,{email});
  return {ok:true,user:{id:u.id,display_name:u.display_name||u.username,email:u.email||u.username}}
 }
