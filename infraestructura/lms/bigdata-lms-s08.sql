@@ -84,6 +84,7 @@ grant all on public.bd_lms_sessions,public.bd_lms_activities,public.bd_lms_event
 grant usage,select on sequence public.bd_lms_events_id_seq to service_role;
 
 -- Índices detectados por el advisor para las FK usadas por el WALL.
+create index if not exists bd_lms_activities_course_session_idx on public.bd_lms_activities(course_code,session_number);
 create index if not exists bd_lms_activity_progress_run_idx on public.bd_lms_activity_progress(course_run_id);
 create index if not exists bd_lms_activity_progress_activity_idx on public.bd_lms_activity_progress(activity_code);
 create index if not exists bd_lms_events_activity_idx on public.bd_lms_events(activity_code);
