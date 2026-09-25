@@ -40,7 +40,7 @@ checks=[
  ("S08 acepta manifest","manifest_tc1.json" in s08 and 'type="file"' in s08),
  ("S08 no marca abrir como completar","Abrirlo <b>no</b> lo marca como completado" in s08),
  ("WALL declara desempate por inicio","demora de inicio" in wall),
- ("WALL usa endpoint BigData","teacher_wall" in wall),
+ ("WALL usa modo docente BigData","requireBigData({teacher:true})" in wall and "teacher_wall" in edge),
  ("RLS habilitado",sql.count("enable row level security")>=7),
  ("inicio oficial course-scoped","bd_lms_session_windows" in sql and "teacher_open_session" in edge),
  ("inicio no nace de page_view",'["notebook_opened","activity_started","stage_opened"].includes(event)' in edge),
