@@ -71,6 +71,7 @@
     }
     .nav-links a:hover,.nav-links a:focus{background:var(--soft);color:var(--uc-navy)}
     .nav-cta{background:var(--uc-navy)!important;color:#fff!important}
+    .nav-lms{background:var(--uc-cyan)!important;color:#fff!important}
     .hero{
       min-height:690px;display:grid;place-items:center;
       background:
@@ -223,7 +224,7 @@
       .progress-card{width:100%}
     }
     @media(max-width:680px){
-      .nav{padding:10px 14px}.brand small{display:none}.nav-links a:not(.nav-cta){display:none}
+      .nav{padding:10px 14px}.brand small{display:none}.nav-links a:not(.nav-cta):not(.nav-lms){display:none}.nav-lms{display:inline-flex!important}
       .hero-grid,.shell{padding-left:14px;padding-right:14px}
       h1{font-size:50px}
       .section{padding:58px 0}
@@ -248,6 +249,7 @@
     <div class="nav-links">
       <a href="#ruta">Ruta</a>
       <a href="#metodo">Método</a>
+      <a class="nav-lms" href="lms/portal.html">Ingresar LMS</a>
       <a class="nav-cta" href="Presentaciones/s07-del-vecindario-al-texto.html?v=20260924-two-tools#s1">Continuar S07</a>
     </div>
   </nav>
@@ -409,7 +411,7 @@
             <p>Taller evaluativo determinista: histórico SECOP → MongoDB Atlas → bandeja → Cassandra → Neo4j → informe técnico.</p>
             <div class="skills"><span class="skill">Integración</span><span class="skill">Atlas</span><span class="skill">Cassandra</span><span class="skill">Neo4j</span></div>
             <div class="session-actions">
-              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb">Abrir taller</a>
+              <a class="action" href="lms/session-08.html">Abrir S08 en LMS</a>
             </div>
           </div>
         </article>
@@ -457,7 +459,7 @@
 
 <footer>
   <strong>Big Data 2026-2S · Universidad Central · Antonino Zainea</strong><br>
-  Plataforma académica del curso · progreso guardado únicamente en este navegador.
+  Plataforma académica del curso · marcas de revisión locales; seguimiento verificable de S08 en el LMS.
 </footer>
 
 <script>
