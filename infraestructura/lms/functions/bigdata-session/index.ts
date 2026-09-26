@@ -199,6 +199,92 @@ async function evidenceByCode(body:any){
   failIf(useError,"No se pudo actualizar el uso del código");
   return result;
 }
+
+async function wallPost(ctx:any,run:any,n:number,activityCode:string,rawBody:any,evidenceId:any=null){
+  const {data:activity,error:activityError}=await db.from("bd_lms_activities").select("code,kind")
+    .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",n).maybeSingle();
+  failIf(activityError,"No se pudo validar el LAB");
+  if(!activity||activity.kind!=="lab")throw new Error("El muro solo está disponible para laboratorios");
+  const body=trimText(rawBody,20,2000,"La publicación");
+  let linked:string|null=null;
+  if(evidenceId){
+    const {data:e,error}=await db.from("bd_evidence").select("id").eq("id",String(evidenceId))
+      .eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("activity_code",activityCode).maybeSingle();
+    failIf(error,"No se pudo validar la evidencia vinculada");linked=e?.id||null;
+  }
+  const {data:post,error}=await db.from("bd_wall_posts").insert({
+    course_run_id:run.id,session_number:n,activity_code:activityCode,user_id:ctx.user.id,
+    body,evidence_id:linked,status:"visible"
+  }).select("id,activity_code,body,status,created_at").single();
+  failIf(error,"No se pudo publicar en el muro");
+  const {error:eventError}=await db.from("bd_lms_events").insert({
+    user_id:ctx.user.id,course_run_id:run.id,event_type:"ui_action",session_number:n,
+    activity_code:activityCode,metadata:{source:"class-wall",action:"wall_posted"},created_at:new Date().toISOString()
+  });
+  failIf(eventError,"No se pudo auditar la publicación");
+  return {ok:true,post};
+}
+async function wallList(ctx:any,run:any,n:number,activityCode:string){
+  const isTeacher=["teacher","admin"].includes(ctx.user.role);
+  const {data:activity,error:activityError}=await db.from("bd_lms_activities").select("code,kind,title")
+    .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",n).maybeSingle();
+  failIf(activityError,"No se pudo validar el LAB");
+  if(!activity||activity.kind!=="lab")throw new Error("Actividad de muro inválida");
+  if(!isTeacher){
+    const {count,error}=await db.from("bd_wall_posts").select("id",{count:"exact",head:true})
+      .eq("course_run_id",run.id).eq("session_number",n).eq("activity_code",activityCode)
+      .eq("user_id",ctx.user.id).in("status",["visible","spotlight","pinned"]);
+    failIf(error,"No se pudo verificar tu publicación");
+    if(!(count||0))return {viewer:ctx.user,activity,can_view:false,posts:[],reason:"publish_first"};
+  }
+  const {data:posts,error}=await db.from("bd_wall_posts").select("id,user_id,parent_id,body,evidence_id,status,created_at")
+    .eq("course_run_id",run.id).eq("session_number",n).eq("activity_code",activityCode)
+    .neq("status","hidden").order("created_at",{ascending:true}).limit(300);
+  failIf(error,"No se pudo cargar el muro");
+  const postIds=(posts||[]).map((p:any)=>p.id);
+  const userIds=[...new Set((posts||[]).map((p:any)=>p.user_id))];
+  const [{data:reactions},{data:users}]=await Promise.all([
+    postIds.length?db.from("bd_wall_reactions").select("post_id,user_id,kind").in("post_id",postIds):Promise.resolve({data:[]} as any),
+    isTeacher&&userIds.length?db.from("lms_users").select("id,display_name,username").in("id",userIds):Promise.resolve({data:[]} as any)
+  ]);
+  const names=new Map((users||[]).map((u:any)=>[u.id,u.display_name||u.username]));
+  const rows=await Promise.all((posts||[]).map(async(p:any)=>{
+    const rs=(reactions||[]).filter((r:any)=>r.post_id===p.id);
+    let author="Compañero";
+    if(p.user_id===ctx.user.id)author="Tú";
+    else if(isTeacher)author=names.get(p.user_id)||"Estudiante";
+    else author="Compañero "+(await sha256(p.user_id+"|"+activityCode)).slice(0,4).toUpperCase();
+    return {...p,author,
+      reactions:{useful:rs.filter((r:any)=>r.kind==="useful").length,same_doubt:rs.filter((r:any)=>r.kind==="same_doubt").length},
+      my_reactions:rs.filter((r:any)=>r.user_id===ctx.user.id).map((r:any)=>r.kind)};
+  }));
+  return {viewer:ctx.user,activity,can_view:true,posts:rows};
+}
+async function wallReact(ctx:any,run:any,n:number,postId:string,kind:string){
+  if(!["useful","same_doubt"].includes(kind))throw new Error("Reacción inválida");
+  const {data:post,error}=await db.from("bd_wall_posts").select("id,course_run_id,session_number,status")
+    .eq("id",postId).eq("course_run_id",run.id).eq("session_number",n).neq("status","hidden").maybeSingle();
+  failIf(error,"No se pudo validar la publicación");if(!post)throw new Error("Publicación no disponible");
+  const {data:existing,error:existingError}=await db.from("bd_wall_reactions").select("post_id")
+    .eq("post_id",postId).eq("user_id",ctx.user.id).eq("kind",kind).maybeSingle();
+  failIf(existingError,"No se pudo leer la reacción");
+  if(existing){
+    const {error:delError}=await db.from("bd_wall_reactions").delete().eq("post_id",postId).eq("user_id",ctx.user.id).eq("kind",kind);
+    failIf(delError,"No se pudo retirar la reacción");return {ok:true,active:false};
+  }
+  const {error:insError}=await db.from("bd_wall_reactions").insert({post_id:postId,user_id:ctx.user.id,kind});
+  failIf(insError,"No se pudo guardar la reacción");return {ok:true,active:true};
+}
+async function wallModerate(ctx:any,run:any,n:number,postId:string,moderation:string){
+  requireTeacher(ctx);
+  const status=moderation==="hide"?"hidden":moderation==="spotlight"?"spotlight":moderation==="pin"?"pinned":moderation==="show"?"visible":null;
+  if(!status)throw new Error("Acción de moderación inválida");
+  const {data,error}=await db.from("bd_wall_posts").update({status,updated_at:new Date().toISOString()})
+    .eq("id",postId).eq("course_run_id",run.id).eq("session_number",n).select("id,status").maybeSingle();
+  failIf(error,"No se pudo moderar la publicación");if(!data)throw new Error("Publicación no encontrada");
+  await audit(ctx.user.id,"bigdata.wall.moderate","wall_post",postId,{session_number:n,status});
+  return {ok:true,post:data};
+}
 async function current(req:Request){
   const token=bearer(req);if(!token)return null;
   const {data:s}=await db.from("lms_auth_sessions").select("id,user_id,expires_at,revoked_at,persistent")
@@ -538,7 +624,7 @@ Deno.serve(async(req:Request)=>{
   }
   try{
     if(action==="course_progress")return out(req,await courseProgress(ctx,run));
-    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail"].includes(action);
+    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","wall_moderate"].includes(action);
     const def=await definition(run.id,n,teacher),codes=def.activities.map((a:any)=>a.code);
     if(action==="me"){
       const [p,cat,evidence]=await Promise.all([
@@ -577,6 +663,10 @@ Deno.serve(async(req:Request)=>{
       return out(req,await submitEvidence(ctx.user.id,run.id,n,activity,body.payload||{},String(body.source||"presentation")));
     }
     if(action==="lab_code")return out(req,{ok:true,...await issueLabCode(ctx,run,n)});
+    if(action==="wall_post")return out(req,await wallPost(ctx,run,n,String(body.activity_code||""),body.body,body.evidence_id||null));
+    if(action==="wall_list")return out(req,await wallList(ctx,run,n,String(body.activity_code||"")));
+    if(action==="wall_react")return out(req,await wallReact(ctx,run,n,String(body.post_id||""),String(body.kind||"")));
+    if(action==="wall_moderate")return out(req,await wallModerate(ctx,run,n,String(body.post_id||""),String(body.moderation||"")));
     if(action==="teacher_open_session")return out(req,{ok:true,session_window:await openOfficial(ctx,run,n)});
     if(action==="teacher_reset_session")return out(req,await resetSession(ctx,run,n,body));
     if(action==="teacher_student_detail")return out(req,await teacherStudentDetail(ctx,run,n,String(body.user_id||"")));
