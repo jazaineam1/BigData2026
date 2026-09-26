@@ -84,6 +84,7 @@ checks=[
     ("backend códigos aislados", "bd-s09-presentation" in backend and "bd-s09-c5" in backend),
     ("backend no califica TC1", "submit_manifest" not in backend and "note_5" not in backend),
     ("backend checkpoint self-report", "s09-self-checkpoint" in backend and "formative:true" in backend),
+    ("page_opened no inicia progreso", '["presentation_opened","notebook_opened","guide_opened","checkpoint_started"].includes(event)' in backend),
     ("seed S09", "'bigdata',9" in seed and "'bd-s09-c5'" in seed),
     ("seed tres recursos", seed.count("select id,9,")>=3 and "Presentación S09" in seed and "Cuaderno S09" in seed),
     ("index S09 actual", 'data-mark="9"' in index and "Cuando las palabras no coinciden" in index),
