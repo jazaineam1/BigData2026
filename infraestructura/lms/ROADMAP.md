@@ -21,36 +21,79 @@ El objetivo no es copiar Moodle, Brightspace, Blackboard o Classroom pantalla po
 
 ### Implementado
 
-- Login LMS compartido.
-- Matrícula por curso y por cohorte.
-- Solicitudes de acceso.
-- Sesión 08 integrada de extremo a extremo.
-- Validación server-side de `manifest_tc1.json`.
-- Progreso por actividad y sesión.
-- Tiempo activo con heartbeat controlado.
-- WALL docente S08.
-- Inicio oficial de sesión y desempate por inicio.
-- Administrador docente de usuarios:
-  - búsqueda y filtros;
-  - matrícula de cuentas LMS existentes;
-  - suspensión/reactivación de Big Data;
-  - detalle del estudiante;
-  - sesiones abiertas;
-  - revocación de sesiones;
-  - restablecimiento de contraseña;
+- **Fase 1 · Operación docente segura**
+  - identidad LMS compartida;
+  - matrícula por curso/cohorte;
   - solicitudes de acceso;
-  - exportación CSV;
-  - auditoría administrativa.
-- RLS y revocación de acceso directo para las tablas académicas Big Data.
-- QA con guardia explícita para no modificar S07.
+  - administrador docente de usuarios;
+  - suspensión/reactivación por curso;
+  - sesiones y revocación;
+  - recuperación/restablecimiento de credenciales;
+  - exportación de cohorte y auditoría.
+- **Fase 2 · Columna vertebral S01–S16**
+  - sesiones declarativas con borrador/visible/cerrado;
+  - recursos por sesión;
+  - calendario, anuncios y pendientes;
+  - portal “qué sigue”;
+  - gestor docente del curso.
+- **Fase 3 · Evaluación y Gradebook**
+  - texto, URL, evidencia automática y archivos privados mediante URLs firmadas;
+  - intentos, fechas límite, estados y accommodations;
+  - rúbricas reutilizables;
+  - retroalimentación e historial de cambios de nota;
+  - categorías y ponderaciones;
+  - banco versionado de preguntas;
+  - quizzes con aleatorización, límite de tiempo, autocalificación y revisión manual;
+  - sincronización quiz → Gradebook.
+- **Fase 4 · Competencias y dominio**
+  - marco de competencias;
+  - mapeo evidencia → competencia;
+  - reglas transparentes de dominio;
+  - vistas estudiante y cohorte.
+- **Fase 5 · Analítica e intervención**
+  - señales explicables;
+  - snapshots longitudinales;
+  - fricción por actividad;
+  - intervenciones privadas y seguimiento;
+  - analítica de cohorte.
+- **Fase 6 · Colaboración**
+  - equipos;
+  - entregas grupales con responsabilidad individual;
+  - discusiones por sesión;
+  - menciones y respuestas dirigidas;
+  - FAQ mediante respuestas destacadas;
+  - revisión por pares.
+- **S08 · TC1 V4**
+  - SECOP Data Pipeline;
+  - API + concurrencia;
+  - evidencia verificable;
+  - integración NoSQL;
+  - WALL y validación server-side.
+- RLS y revocación de acceso directo para tablas académicas.
+- QA acumulativo con guardia explícita para no modificar S07.
+- S07 mantiene su archivo fuente protegido por SHA.
 
-### Parcial
+### En curso / siguiente
 
-- El portal aún representa principalmente S08, no el curso completo.
-- El progreso histórico de S01–S06 no está normalizado en el expediente LMS.
-- La evaluación está especializada en el manifest de S08; todavía no existe un motor general de entregas y rúbricas.
-- Las comunicaciones y fechas viven fuera de un calendario LMS central.
-- La analítica docente es útil para S08, pero todavía no forma una vista longitudinal del semestre.
+- **Fase 7 · Integraciones y estándares.**
+  - API pública documentada para integraciones autorizadas;
+  - webhooks salientes;
+  - QTI 3 para banco de preguntas;
+  - exportación/importación de roster compatible con OneRoster cuando haya sistema institucional;
+  - calendario interoperable;
+  - xAPI/Caliper solo si existe consumidor;
+  - integración opcional con GitHub;
+  - políticas de retención de archivos.
+- **Fase 8 · Plataforma, accesibilidad y confianza.**
+  - permisos más granulares;
+  - SSO/OIDC y MFA cuando la institución provea identidad compatible;
+  - observabilidad y rate limiting;
+  - backup/restore;
+  - WCAG 2.2 AA y pruebas responsive formales.
+
+### Dependencias externas no simuladas
+
+LTI institucional, SSO/OIDC, sincronización OneRoster y envío xAPI/Caliper requieren endpoints, client IDs, secretos o consumidores externos. El LMS puede dejar adaptadores y contratos listos, pero esas integraciones solo se marcarán “activas” cuando exista una contraparte institucional real.
 
 ## Fase 1 · Operación docente segura
 
@@ -186,9 +229,10 @@ Esas capacidades deben ser el núcleo; calendario, notas, usuarios y comunicacio
 
 ## Próximos incrementos recomendados
 
-1. Generalizar el portal a S01–S16 y crear el modelo de sesión completo.
-2. Crear calendario + anuncios + pendientes.
-3. Implementar entregas/rúbricas/libro de calificaciones como motor general.
-4. Añadir competencias y mapa actividad → competencia.
-5. Construir analítica longitudinal + flujo de intervención.
-6. Añadir colaboración e integraciones solo después de estabilizar los cinco puntos anteriores.
+1. Cerrar fase 7 con **exportaciones estándar primero**: QTI, roster/gradebook, calendario y API documentada.
+2. Añadir **webhooks firmados** y registro de entregas/reintentos.
+3. Preparar adaptadores LTI 1.3, OneRoster y xAPI/Caliper sin declararlos activos hasta tener credenciales institucionales.
+4. Integrar GitHub opcionalmente para evidencias técnicas, usando permisos mínimos.
+5. Ejecutar fase 8: matriz de permisos, observabilidad, backup/restore, rate limiting y recuperación.
+6. Cerrar con una auditoría WCAG 2.2 AA + pruebas responsive en teléfono, tablet y escritorio.
+

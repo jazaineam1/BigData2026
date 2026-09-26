@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
@@ -103,6 +103,11 @@
       "path": "gradebook.html"
     },
     {
+      "code": "quizzes",
+      "title": "Banco y quizzes",
+      "path": "teacher-quizzes.html"
+    },
+    {
       "code": "competencies",
       "title": "Matriz de competencias",
       "path": "teacher-competencies.html"
@@ -133,6 +138,11 @@
       "code": "collaboration",
       "title": "Colaboración",
       "path": "collaboration.html"
+    },
+    {
+      "code": "quizzes",
+      "title": "Quizzes",
+      "path": "quizzes.html"
     }
   ]
 }
