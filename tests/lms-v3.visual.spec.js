@@ -129,3 +129,13 @@ for (const vp of [viewports[0],viewports[5]]) {
     await assertNoHorizontalOverflow(page,'wall '+vp.name);
   });
 }
+
+
+test('guía interna hereda identidad LMS', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await mockSessionApi(page,'student');
+  await page.goto('/assets/tutoriales/atlas-guia-conexion.html');
+  await expect(page.getByText('Sesión LMS activa')).toBeVisible();
+  await expect(page.getByText('Estudiante QA')).toBeVisible();
+  await assertNoHorizontalOverflow(page,'resource bridge Atlas');
+});
