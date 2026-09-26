@@ -83,3 +83,26 @@ set domain='Documental',
     updated_at=now()
 where course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1)
   and code='BD-E2';
+
+
+-- TC1 se entrega y califica por equipo.
+insert into public.lms_assignment_group_settings_v2(
+  assignment_id,enabled,peer_review_enabled,reviews_per_student,peer_rubric,anonymous_peer_review,updated_at
+)
+select id,true,false,1,'[]'::jsonb,false,now()
+from public.lms_assignments_v2
+where code='bd-s08-control'
+  and course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1)
+on conflict (assignment_id) do update
+set enabled=true,
+    peer_review_enabled=false,
+    reviews_per_student=1,
+    peer_rubric='[]'::jsonb,
+    anonymous_peer_review=false,
+    updated_at=now();
+
+update public.lms_assignments_v2
+set instructions='Entrega grupal. Un integrante carga el manifest_tc1.json validado; el LMS registra una sola calificación del equipo y la replica a todos sus integrantes. La microdefensa es una verificación grupal de comprensión y no añade una segunda escala de nota.',
+    updated_at=now()
+where code='bd-s08-control'
+  and course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1);
