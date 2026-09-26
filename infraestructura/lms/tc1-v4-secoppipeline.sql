@@ -1,13 +1,13 @@
 -- TC1 · SECOP Data Pipeline
--- Migración compatible con entregas V3 existentes.
--- Mantiene códigos de actividad y ponderaciones; actualiza títulos, checks y rúbrica.
+-- Migración del esquema actual del TC1.
+-- Mantiene códigos de actividad e historial del LMS; actualiza títulos, pesos, checks y rúbrica.
 
 update public.bd_lms_sessions
 set title='SECOP Data Pipeline · API, concurrencia y NoSQL',
     metadata=jsonb_build_object(
       'type','evaluation',
       'source','Cuadernos/Taller_Control_1.ipynb',
-      'guide','assets/tutoriales/s08-secoppipeline.html',
+      'reference','assets/tutoriales/s08-secoppipeline.html',
       'max_score',100,
       'validator_version','2026-09-26-secoppipeline'
     )
