@@ -112,3 +112,34 @@ on conflict(code) do update set
 
 comment on table public.bd_evidence is 'Evidencia formativa verificable de laboratorios Big Data. El payload no es progreso oficial por sí solo: el veredicto del backend determina completion.';
 comment on table public.bd_lab_codes is 'Códigos efímeros para enviar evidencia desde recursos externos como Colab sin exponer el token LMS.';
+
+
+create table if not exists public.bd_wall_posts(
+  id uuid primary key default gen_random_uuid(),
+  course_run_id uuid not null references public.lms_course_runs(id) on delete cascade,
+  session_number smallint not null check (session_number between 1 and 99),
+  activity_code text not null references public.bd_lms_activities(code) on delete cascade,
+  user_id uuid not null references public.lms_users(id) on delete cascade,
+  parent_id uuid references public.bd_wall_posts(id) on delete cascade,
+  body text not null check (char_length(body) between 20 and 2000),
+  evidence_id uuid references public.bd_evidence(id) on delete set null,
+  status text not null default 'visible' check (status in ('visible','hidden','spotlight','pinned')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists bd_wall_posts_activity_idx on public.bd_wall_posts(course_run_id,session_number,activity_code,created_at);
+
+create table if not exists public.bd_wall_reactions(
+  post_id uuid not null references public.bd_wall_posts(id) on delete cascade,
+  user_id uuid not null references public.lms_users(id) on delete cascade,
+  kind text not null check (kind in ('useful','same_doubt')),
+  created_at timestamptz not null default now(),
+  primary key(post_id,user_id,kind)
+);
+
+alter table public.bd_wall_posts enable row level security;
+alter table public.bd_wall_reactions enable row level security;
+revoke all on public.bd_wall_posts,public.bd_wall_reactions from anon,authenticated;
+grant select,insert,update,delete on public.bd_wall_posts,public.bd_wall_reactions to service_role;
+
+comment on table public.bd_wall_posts is 'Muro de clase por actividad. Estudiantes ven al grupo después de publicar; el backend anonimiza identidades entre pares.';
