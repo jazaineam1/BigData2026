@@ -54,7 +54,7 @@ if start<0 or end<0:
     errors.append("No se pudo localizar el array de diapositivas S09")
 else:
     raw=deck[start:end]
-    slides=[x for x in re.split(r"\n(?=\{t:')",raw) if "{t:'" in x]
+    slides=[x for x in re.split(r'\n(?=\{t:[\'"])',raw) if re.search(r'\{t:[\'"]',x)]
 
 resource_seed_start=seed.find("insert into public.lms_run_resources_v2")
 resource_seed=seed[resource_seed_start:] if resource_seed_start>=0 else ""
@@ -101,6 +101,14 @@ definition_markers={
     "prefijo de tarea":"<b>Prefijo de tarea</b>",
     "chunking":"<b>Chunking</b>",
     "chunk":"<b>Chunk</b>",
+    "tamaño de chunk":"<b>Tamaño de chunk</b>",
+    "solapamiento":"<b>Solapamiento · overlap</b>",
+    "colección":"<b>Colección</b>",
+    "documento mongodb":"<b>Documento MongoDB</b>",
+    "upsert":"<b>Upsert</b>",
+    "idempotencia":"<b>Idempotencia</b>",
+    "updateone":"<b>UpdateOne</b>",
+    "bulk_write":"<b>bulk_write</b>",
     "norma":"<b>Norma</b>",
     "normalización":"<b>Normalización</b>",
     "producto punto":"<b>Producto punto</b>",
@@ -117,12 +125,22 @@ definition_markers={
     "enn":"<b>ENN</b>",
     "ann":"<b>ANN</b>",
     "hnsw":"<b>HNSW</b>",
+    "punto de entrada":"<b>Punto de entrada</b>",
+    "capa":"<b>Capa</b>",
     "conjunto de candidatos":"<b>Conjunto de candidatos</b>",
     "recall@k":"<b>Recall@k</b>",
     "latencia":"<b>Latencia</b>",
     "numcandidates":"<b>numCandidates</b>",
     "atlas vector search":"<b>Atlas Vector Search</b>",
+    "search index":"<b>Search Index</b>",
+    "searchindexmodel":"<b>SearchIndexModel</b>",
+    "queryable":"<b>queryable</b>",
+    "pipeline de agregación":"<b>Pipeline de agregación</b>",
+    "etapa":"<b>Etapa · stage</b>",
     "$vectorsearch":"<b>$vectorSearch</b>",
+    "vectorsearchscore":"<b>vectorSearchScore</b>",
+    "fusión de rankings":"<b>Fusión de rankings</b>",
+    "normalización de score":"<b>Normalización de score</b>",
     "rrf":"<b>RRF · Reciprocal Rank Fusion</b>",
     "precision@k":"<b>Precision@k</b>",
     "evidencia reproducible":"<b>Evidencia reproducible</b>",
@@ -145,8 +163,8 @@ challenge_calls=re.findall(r"challengeChoice\('(bd-s09-c[1-5])'",deck)
 
 checks=[
     ("exactamente 35 diapositivas",len(slides)==35),
-    ("profundidad de definiciones",defs>=50),
-    ("ejemplos explícitos",examples>=20),
+    ("profundidad de definiciones",defs>=65),
+    ("ejemplos explícitos",examples>=24),
     ("gráficos/diagramas",svg_functions>=15),
     ("LAB 1–9 embebidos",set(range(1,10)).issubset(lab_numbers)),
     ("D1–D5 embebidos",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,6)}),
@@ -170,6 +188,11 @@ checks=[
     ("Elasticsearch no se confunde con lexical","Elasticsearch no es sinónimo de lexical" in deck and "Elasticsearch" in deck and "Búsqueda vectorial" in deck),
     ("ruta semántica completa",all(x in deck for x in ["Embedding","Similitud coseno","k-Nearest Neighbors","Base vectorial","HNSW","Atlas Vector Search","Reciprocal Rank Fusion"])),
     ("trade-off interactivo","tradeSvg" in deck and "Recall@k" in deck and "Latencia" in deck),
+    ("pipeline E5 interactivo","function embedPipeDemo" in deck and 'id="embedRole"' in deck and 'id="embedPipeOut"' in deck),
+    ("chunking interactivo","function chunkDemo" in deck and 'id="chunkSize"' in deck and 'id="chunkOverlap"' in deck),
+    ("operación MongoDB explicada",all(x in deck for x in ["<b>Colección</b>","<b>Upsert</b>","<b>Idempotencia</b>","<b>bulk_write</b>"])),
+    ("Atlas explicado antes del constructor",all(x in deck for x in ["<b>SearchIndexModel</b>","<b>queryable</b>","<b>Pipeline de agregación</b>","<b>vectorSearchScore</b>"])),
+    ("híbrida explica fusión y escalas","<b>Fusión de rankings</b>" in deck and "<b>Normalización de score</b>" in deck and "No sumes scores crudos" in deck),
     ("RRF calculable","function rrfDemo" in deck and "RRF(d) = Σ" in deck),
     ("constructor de evidencia","alternativa_descartada" in deck and "evidencia reproducible" in deck.lower()),
     ("notebook suficientemente completo",len(nb.get("cells",[]))>=20),
