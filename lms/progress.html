@@ -10,7 +10,7 @@
 .course-route{display:grid;gap:11px}.session-progress-card{border:1px solid var(--line);border-radius:16px;background:#fff;padding:15px;display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:13px;align-items:center}
 .session-progress-card.focus{border:2px solid var(--uc-cyan);box-shadow:0 8px 26px #0b86891b}.session-progress-card .snum{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:#eef1f5;color:var(--uc-navy);font-weight:950}
 .session-progress-card.done .snum{background:#dff4e8;color:#12633c}.dimensions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.dimension{border-radius:999px;padding:5px 8px;font-size:.72rem;font-weight:900;background:#eef1f5;color:#5f6877}.dimension.yes{background:#dff4e8;color:#12633c}.dimension.progress{background:#e2f3f4;color:#075f62}.dimension.grade{background:#eee6f8;color:#5b388a}
-.alert-v3{border:1px solid var(--line);border-left:4px solid var(--uc-cyan);border-radius:12px;padding:12px;background:#fff;margin:8px 0}.alert-v3 b{color:var(--uc-navy)}.snapshot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}.snapshot{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
+.evidence-list{display:grid;gap:9px}.evidence-item{border:1px solid var(--line);border-left:4px solid var(--uc-cyan);border-radius:12px;padding:12px;background:#fff}.evidence-item pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.78rem;margin:7px 0 0;background:#f7f9fc;border-radius:8px;padding:8px}.alert-v3{border:1px solid var(--line);border-left:4px solid var(--uc-cyan);border-radius:12px;padding:12px;background:#fff;margin:8px 0}.alert-v3 b{color:var(--uc-navy)}.snapshot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}.snapshot{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
 @media(max-width:850px){.progress-hero{grid-template-columns:1fr}.session-progress-card{grid-template-columns:50px minmax(0,1fr)}.session-progress-card .stage-action{grid-column:2}}
 @media(max-width:560px){.session-progress-card{padding:11px}.session-progress-card .stage-action{width:100%}}
 </style>
@@ -35,6 +35,11 @@
 <div id="courseRoute" class="course-route"></div>
 </section>
 
+<section id="evidenceCard" class="card hidden">
+<div class="actions" style="justify-content:space-between;align-items:flex-start"><div><div class="ey">Evidencia de la sesión</div><h2 id="evidenceTitle">Mi portafolio</h2><p class="muted">Resultado, decisión y límite quedan separados de simples visitas.</p></div><span id="evidenceCount" class="pill progress"></span></div>
+<div id="evidenceList" class="evidence-list"></div>
+</section>
+
 <div class="cols">
 <section class="card"><div class="ey">Señales explicables</div><h2>Qué merece atención</h2><div id="alerts"></div></section>
 <section class="card"><div class="ey">Cómo se calcula</div><h2>Reglas transparentes</h2><div id="rules"></div></section>
@@ -48,7 +53,7 @@
 <script>
 (async()=>{'use strict';
 const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status'),focus=Math.trunc(Number(new URLSearchParams(location.search).get('s')||0));
-let course=null,analytics=null;
+let course=null,analytics=null,focusData=null;
 function renderMetrics(){
   const sessions=course.sessions||[],started=sessions.filter(s=>s.session_progress).length,completed=sessions.filter(s=>s.session_progress?.status==='completed').length;
   const mastered=sessions.reduce((n,s)=>n+Number(s.summary_metrics?.checkpoint_mastered||0),0),checks=sessions.reduce((n,s)=>n+Number(s.summary_metrics?.checkpoint_total||0),0);
@@ -68,6 +73,17 @@ function renderRoute(){
     return '<article class="session-progress-card '+(done?'done ':'')+(focus===n?'focus':'')+'"><span class="snum">S'+String(n).padStart(2,'0')+'</span><div><h3 style="margin:0 0 4px">'+L.esc(s.title)+'</h3><p class="muted" style="margin:0">'+L.esc(s.summary||'')+'</p>'+dimensions(s)+'</div><a class="btn '+(focus===n?'primary':'alt')+' stage-action" href="session.html?s='+n+'">'+(p?'Continuar':'Abrir')+'</a></article>'
   }).join('')||'<p class="muted">No hay sesiones publicadas.</p>';
 }
+function renderEvidence(){
+  const card=L.$('evidenceCard');if(!focusData){card.classList.add('hidden');return}
+  card.classList.remove('hidden');
+  const evidence=focusData.evidence||[],activities=new Map((focusData.activities||[]).map(a=>[a.code,a]));
+  L.$('evidenceTitle').textContent='S'+String(focus).padStart(2,'0')+' · evidencia registrada';
+  L.$('evidenceCount').textContent=evidence.length+' registro'+(evidence.length===1?'':'s');
+  L.$('evidenceList').innerHTML=evidence.length?evidence.map(e=>{
+    const a=activities.get(e.activity_code),ok=['correct','accepted'].includes(e.verdict);
+    return '<article class="evidence-item"><div class="actions" style="justify-content:space-between"><b>'+L.esc(a?.title||e.activity_code)+'</b><span class="pill '+(ok?'done':'pending')+'">'+L.esc(e.verdict)+'</span></div><div class="muted">'+L.fmtWhen(e.created_at)+' · '+L.esc(e.source||'')+'</div><p>'+L.esc(e.feedback||'')+'</p><pre>'+L.esc(JSON.stringify(e.payload||{},null,2))+'</pre></article>'
+  }).join(''):'<div class="note"><b>Aún no hay evidencia registrada.</b> Explorar un recurso no completa un laboratorio; registra la evidencia desde la actividad.</div>';
+}
 function renderAnalytics(){
   const a=analytics?.alerts||[];L.$('alerts').innerHTML=a.length?a.map(x=>'<article class="alert-v3"><b>'+L.esc(x.title)+'</b><p>'+L.esc(x.evidence)+'</p><span class="pill pending">'+L.esc(x.rule)+'</span></article>').join(''):'<div class="note"><b>Sin señales activas.</b> Con las reglas actuales no hay condiciones que requieran atención.</div>';
   L.$('rules').innerHTML=(analytics?.rules||[]).map(r=>'<div class="item"><b>'+L.esc(r.title)+'</b><div class="muted">'+L.esc(r.description||'')+'</div><span class="pill pending">'+L.esc(r.rule_type)+'</span></div>').join('')||'<p class="muted">Sin reglas activas.</p>';
@@ -76,10 +92,14 @@ function renderAnalytics(){
 async function load(){
   try{
     const gate=await L.requireBigData();if(!gate)return;
-    const results=await Promise.all([L.session('course_progress'),L.core('analytics').catch(()=>null)]);
-    course=results[0];analytics=results[1];
+    const results=await Promise.all([
+      L.session('course_progress'),
+      L.core('analytics').catch(()=>null),
+      focus>0?L.session('me',{session_number:focus}).catch(()=>null):Promise.resolve(null)
+    ]);
+    course=results[0];analytics=results[1];focusData=results[2];
     if(['teacher','admin'].includes(course.viewer?.role))L.$('teacherLink').classList.remove('hidden');
-    renderMetrics();renderRoute();renderAnalytics();
+    renderMetrics();renderRoute();renderEvidence();renderAnalytics();
   }catch(e){L.msg(status,e.message,'err')}
 }
 await load();
