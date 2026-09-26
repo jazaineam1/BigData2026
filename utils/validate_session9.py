@@ -61,8 +61,11 @@ resource_seed=seed[resource_seed_start:] if resource_seed_start>=0 else ""
 resource_selects=len(re.findall(r"select\s+id,9,",resource_seed,re.I))
 
 def first_slide(term):
-    # Evita falsos positivos con términos cortos como k/ANN dentro de otras palabras.
-    pattern=(r"(?<![A-Za-z0-9])"+re.escape(term)+r"(?![A-Za-z0-9])") if len(term)<=3 else re.escape(term)
+    # Evita falsos positivos de la sintaxis JavaScript (por ejemplo, la propiedad k: del objeto slide).
+    if term=="k":
+        pattern=r"(?:<b>k</b>|\bk\s*=\s*\d+|parámetro\s+k)"
+    else:
+        pattern=(r"(?<![A-Za-z0-9])"+re.escape(term)+r"(?![A-Za-z0-9])") if len(term)<=3 else re.escape(term)
     for i,s in enumerate(slides,1):
         if re.search(pattern,s,re.I): return i
     return None
