@@ -1,14 +1,66 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153"><title>S08 · SECOP Data Pipeline · Big Data LMS</title><link rel="stylesheet" href="assets/bigdata-lms.css?v=20260925-2"></head>
-<body><header class="appbar"><div class="inner"><a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · S08</small></a><span class="spacer"></span><a class="navlink optional" href="portal.html">Mi curso</a><button data-logout>Salir</button></div></header>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153"><title>S08 · SECOP Data Pipeline · Big Data LMS</title><link rel="stylesheet" href="assets/bigdata-lms.css?v=20260926-s08-mobile2">
+<style>
+.s08-rubric-summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:12px 0}
+.s08-rubric-chip{border:1px solid var(--line);border-radius:12px;padding:10px;background:#f8fafc}
+.s08-rubric-chip b{display:block;color:var(--uc-navy);font-size:1.05rem}
+.s08-rubric-chip span{display:block;color:var(--muted);font-size:.76rem;line-height:1.25}
+.s08-rubric-details summary{cursor:pointer;font-weight:900;color:var(--uc-navy);padding:2px 0 10px}
+.s08-rubric-details .tablewrap{margin-top:8px}
+.s08-rubric-details table{min-width:680px}
+.s08-workflow{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:14px;align-items:start;margin-top:15px}
+.s08-workshop{grid-column:1}.s08-delivery{grid-column:2;grid-row:1 / span 2}.s08-stages{grid-column:1}.s08-home,.s08-complete{grid-column:2}
+.s08-page .drop{padding:15px}.s08-page .drop input{width:100%}
+.s08-page code{overflow-wrap:anywhere}
+@media(max-width:900px){
+  .s08-page .wrap{width:min(94vw,760px);padding-top:22px}
+  .s08-page h1{font-size:clamp(2rem,8vw,2.8rem);line-height:1.02}
+  .s08-page .lead{font-size:1rem}
+  .s08-page .kpis{grid-template-columns:1fr 1fr}
+  .s08-workflow{grid-template-columns:1fr}
+  .s08-workshop,.s08-delivery,.s08-stages,.s08-home,.s08-complete{grid-column:1;grid-row:auto}
+  .s08-workshop{order:1}.s08-delivery{order:2}.s08-stages{order:3}.s08-home{order:4}.s08-complete{order:5}
+  .s08-rubric-summary{grid-template-columns:repeat(3,1fr)}
+  .s08-page .stage{grid-template-columns:42px minmax(0,1fr)}
+  .s08-page .stage-action{grid-column:1/-1;display:flex;gap:8px;align-items:center}
+  .s08-page .stage-action .btn{flex:1}
+}
+@media(max-width:560px){
+  .s08-page .wrap{width:92vw;padding:18px 0 56px}
+  .s08-page h1{font-size:1.95rem}
+  .s08-page .kpis{grid-template-columns:1fr 1fr;gap:8px}
+  .s08-page .kpi{padding:11px}.s08-page .kpi b{font-size:1.2rem}
+  .s08-rubric-summary{grid-template-columns:1fr 1fr}
+  .s08-page .card{padding:14px;border-radius:14px}
+  .s08-page .actions{display:grid;grid-template-columns:1fr}
+  .s08-page .actions .btn{width:100%}
+  .s08-page .stage{padding:10px;gap:9px}
+  .s08-page .stage-num{width:38px;height:38px}
+  .s08-page .stage-title{font-size:.95rem}
+  .s08-page .muted{font-size:.82rem}
+  .s08-page .tablewrap{margin-inline:-4px}
+  .s08-rubric-details table{min-width:620px;font-size:.8rem}
+  .s08-page .appbar .inner{min-height:56px}
+  .s08-page .appbar .brand{font-size:.9rem}
+}
+</style></head>
+<body class="s08-page"><header class="appbar"><div class="inner"><a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · S08</small></a><span class="spacer"></span><a class="navlink optional" href="portal.html">Mi curso</a><button data-logout>Salir</button></div></header>
 <main class="wrap"><div class="ey">Sesión 08 · evaluación integradora</div><h1>SECOP Data Pipeline: de la API a evidencia multimodelo.</h1>
 <p class="lead">Reto grupal sobre SECOP II en un entorno real. Se inicia en clase y se completa en casa: la dedicación esperada es de <b>mínimo 6 horas por grupo</b>. Deben diseñar una adquisición reproducible, demostrar equivalencia entre ejecución secuencial y concurrente y reutilizar el mismo snapshot en modelos documental, operacional y relacional.</p>
 <div class="note" style="margin:12px 0"><b>Entrega obligatoria:</b> notebook ejecutado + paquete <code>TC1_&lt;pareja&gt;.zip</code> + <code>manifest_tc1.json</code>. Un solo integrante carga el manifest; la calificación se registra para todo el equipo.</div>
 <div id="status" class="status hidden"></div>
 <div id="groupBox" class="card" style="margin-top:14px"><div class="ey">Equipo de evaluación</div><h2 id="groupName">Sin equipo asignado</h2><p id="groupMembers" class="muted">El TC1 se califica por grupo. El docente debe asignarte a un equipo antes de registrar el manifest.</p></div>
-<section class="card">
+<section class="card s08-rubric">
 <div class="ey">Rúbrica oficial · 100 puntos</div><h2>Así se calcula la nota del grupo</h2>
 <p class="muted">La calificación automática proviene de evidencias verificables del notebook. Después de revisar la carpeta de evidencia, el docente puede mantener o ajustar la nota grupal con retroalimentación.</p>
-<div class="tablewrap"><table>
+<div class="s08-rubric-summary">
+  <div class="s08-rubric-chip"><b>E1 · 25</b><span>Adquisición SECOP</span></div>
+  <div class="s08-rubric-chip"><b>E2 · 25</b><span>MongoDB Atlas</span></div>
+  <div class="s08-rubric-chip"><b>E3 · 10</b><span>Producto analítico</span></div>
+  <div class="s08-rubric-chip"><b>E4 · 15</b><span>Cassandra</span></div>
+  <div class="s08-rubric-chip"><b>E5 · 15</b><span>Neo4j</span></div>
+  <div class="s08-rubric-chip"><b>E6 · 10</b><span>Decisiones y defensa</span></div>
+</div>
+<details class="s08-rubric-details"><summary>Ver detalle completo de la rúbrica</summary><div class="tablewrap"><table>
 <thead><tr><th>Etapa</th><th>Criterio</th><th>Puntos</th></tr></thead>
 <tbody>
 <tr><td rowspan="4"><b>E1</b><br>Adquisición</td><td>Contrato de datos y consulta SoQL</td><td>4</td></tr>
@@ -35,23 +87,24 @@
 <tr><td>Paquete reproducible completo</td><td>2</td></tr>
 </tbody>
 <tfoot><tr><th colspan="2">Total</th><th>100</th></tr></tfoot>
-</table></div>
+</table></div></details>
 <div class="note" style="margin-top:12px"><b>Conversión:</b> Nota = 1 + 4 × (puntaje / 100). Ejemplo: 75/100 = 4.00/5.0.</div>
 </section>
 <div class="kpis"><div class="kpi"><span class="muted">Estado</span><b id="state">—</b></div><div class="kpi"><span class="muted">Puntaje</span><b id="score">—</b></div><div class="kpi"><span class="muted">Tiempo activo</span><b id="active">—</b></div><div class="kpi"><span class="muted">Inicio</span><b id="started" style="font-size:1rem">—</b></div></div>
-<div class="cols" style="margin-top:15px"><section><div class="card"><h2>1 · Abre el taller desde aquí</h2><p>Este botón registra que abriste el notebook. Abrirlo <b>no</b> lo marca como completado.</p>
+<div class="s08-workflow">
+<div class="card s08-workshop"><h2>1 · Abre el taller desde aquí</h2><p>Este botón registra que abriste el notebook. Abrirlo <b>no</b> lo marca como completado.</p>
 <div class="actions"><button id="openNotebook" class="btn primary">Abrir taller en Colab ↗</button><a class="btn alt" href="../assets/tutoriales/s08-secoppipeline.html" target="_blank" rel="noopener">Referencia técnica</a></div></div>
-<div class="card"><div class="ey">Criterios de aceptación</div><h2>Tu progreso se deriva del resultado real</h2><p class="muted">Cada bloque representa una capacidad observable. Puedes consultar la referencia técnica, pero no existe una receta paralela al notebook.</p><div id="stages"></div></div></section>
-<aside><div class="card"><div class="ey">Entrega verificable</div><h2>2 · Carga <code>manifest_tc1.json</code></h2>
+<div class="card s08-delivery"><div class="ey">Entrega verificable</div><h2>2 · Entrega la evidencia del grupo</h2>
 <p>Ejecuta primero la celda final del validador en el notebook. Después registra la carpeta de evidencia del grupo y selecciona el manifest generado. No reformatees ni edites el manifest: el servidor verifica su SHA-256.</p>
 <div class="field"><label for="evidenceUrl"><b>Enlace a la evidencia del grupo</b></label><input id="evidenceUrl" class="input" type="url" placeholder="https://drive.google.com/... o enlace equivalente" autocomplete="off"><span class="muted">La carpeta debe contener el notebook ejecutado y <code>TC1_&lt;pareja&gt;.zip</code>, y debe ser accesible para el docente.</span></div>
 <div class="drop"><input id="manifest" type="file" accept=".json,application/json"><p id="fileName" class="muted">Ningún archivo seleccionado.</p></div>
 <button id="submitManifest" class="btn accent" style="width:100%;margin-top:10px" disabled>Validar y registrar evidencia</button>
 <div id="manifestStatus" class="status hidden"></div>
 <div class="note" style="margin-top:14px"><b>Privacidad:</b> el archivo contiene nombres/códigos de integrantes, pero el servidor no conserva esos campos. No conserva nombres, códigos ni el identificador de pareja en claro: guarda un hash de pareja, puntaje, controles y hash del manifest.</div></div>
-<div class="card"><div class="ey">Trabajo fuera de clase</div><h2>6–8 horas de proyecto</h2><p class="muted">La sesión sirve para arrancar, aclarar el reto y validar el entorno. La integración, reejecución, corrección de errores, microdefensa y preparación de evidencia pueden completarse en casa.</p></div>
-<div class="card"><h2>Qué cuenta como completado</h2><p class="muted">Un manifest válido confirma coherencia entre adquisición, hashes, artefactos y resultados. El validador comprueba equivalencia secuencial/concurrente, idempotencia y reproducibilidad, y devuelve feedback por criterio. La velocidad por sí sola no suma puntos.</p><div class="note" style="margin-top:12px"><b>Seguridad:</b> una entrega con credenciales o tokens debe corregirse antes de ser aceptada.</div></div></aside></div>
-</main><script src="assets/bigdata-lms.js?v=20260925-2"></script><script>
+<div class="card s08-stages"><div class="ey">Criterios de aceptación</div><h2>Tu progreso se deriva del resultado real</h2><p class="muted">Cada bloque representa una capacidad observable. Puedes consultar la referencia técnica, pero no existe una receta paralela al notebook.</p><div id="stages"></div></div>
+<div class="card s08-home"><div class="ey">Trabajo fuera de clase</div><h2>6–8 horas de proyecto</h2><p class="muted">La sesión sirve para arrancar, aclarar el reto y validar el entorno. La integración, reejecución, corrección de errores, microdefensa y preparación de evidencia pueden completarse en casa.</p></div>
+<div class="card s08-complete"><h2>Qué cuenta como completado</h2><p class="muted">Un manifest válido confirma coherencia entre adquisición, hashes, artefactos y resultados. El validador comprueba equivalencia secuencial/concurrente, idempotencia y reproducibilidad, y devuelve feedback por criterio. La velocidad por sí sola no suma puntos.</p><div class="note" style="margin-top:12px"><b>Seguridad:</b> una entrega con credenciales o tokens debe corregirse antes de ser aceptada.</div></div></div>
+</main><script src="assets/bigdata-lms.js?v=20260926-s08-mobile2"></script><script>
 (async()=>{'use strict';const L=window.BIGDATA_LMS;L.wireLogout();let data,groupReady=false,fileReady=false,evidenceReady=false;try{data=await L.requireBigData()}catch(e){L.msg(L.$('status'),e.message,'err');return}if(!data)return;
 await L.bigdata('track',{event_type:'page_opened',metadata:{source:'s08-lms'},client_at:new Date().toISOString()}).catch(()=>{});L.startHeartbeat();
 const notebook='https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb';
