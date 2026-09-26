@@ -245,7 +245,10 @@ Deno.serve(async(req:Request)=>{
         client_at:body.client_at?String(body.client_at):null,created_at:now
       });
       if(event==="heartbeat")await heartbeat(ctx.user.id,run.id,delta);
-      else if(event!=="page_closed"){await ensureSessionStarted(ctx.user.id,run.id);if(activity)await touchActivity(ctx.user.id,run.id,activity,event)}
+      else if(["presentation_opened","notebook_opened","guide_opened","checkpoint_started"].includes(event)){
+        await ensureSessionStarted(ctx.user.id,run.id);
+        if(activity)await touchActivity(ctx.user.id,run.id,activity,event);
+      }
       return out(req,{ok:true});
     }
     if(action==="complete_checkpoint")return out(req,await completeCheckpoint(ctx,run,String(body.activity_code||"")));
