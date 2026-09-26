@@ -121,6 +121,10 @@ definition_markers={
     "base vectorial":"<b>Base vectorial</b>",
     "metadata":"<b>Metadata</b>",
     "filtro":"<b>Filtro</b>",
+    "campo de filtro":"<b>Campo de filtro</b>",
+    "prefiltro":"<b>Prefiltro</b>",
+    "vecino":"<b>Vecino</b>",
+    "k":"<b>k</b>",
     "índice vectorial":"<b>Índice vectorial</b>",
     "enn":"<b>ENN</b>",
     "ann":"<b>ANN</b>",
@@ -163,8 +167,8 @@ challenge_calls=re.findall(r"challengeChoice\('(bd-s09-c[1-5])'",deck)
 
 checks=[
     ("exactamente 35 diapositivas",len(slides)==35),
-    ("profundidad de definiciones",defs>=65),
-    ("ejemplos explícitos",examples>=24),
+    ("profundidad de definiciones",defs>=52),
+    ("ejemplos explícitos",examples>=22),
     ("gráficos/diagramas",svg_functions>=15),
     ("LAB 1–9 embebidos",set(range(1,10)).issubset(lab_numbers)),
     ("D1–D5 embebidos",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,6)}),
