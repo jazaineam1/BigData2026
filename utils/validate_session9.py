@@ -100,6 +100,12 @@ definition_markers={
     "búsqueda híbrida":"<b>Búsqueda híbrida</b>",
     "motor de búsqueda":"<b>Motor de búsqueda</b>",
     "vector":"<b>Vector</b>",
+    "componente":"<b>Componente</b>",
+    "coordenada":"<b>Coordenada</b>",
+    "magnitud":"<b>Magnitud</b>",
+    "dirección":"<b>Dirección</b>",
+    "métrica de distancia":"<b>Métrica de distancia</b>",
+    "distancia euclídea":"<b>Distancia euclídea · L2</b>",
     "búsqueda vectorial":"<b>Búsqueda vectorial</b>",
     "embedding":"<b>Embedding</b>",
     "espacio vectorial":"<b>Espacio vectorial</b>",
@@ -193,12 +199,19 @@ for i,s in enumerate(slides,1):
         light_without_visual.append(i)
 
 checks=[
-    ("exactamente 35 diapositivas",len(slides)==35),
+    ("exactamente 40 diapositivas",len(slides)==40),
     ("profundidad de definiciones",defs>=70),
     ("ejemplos explícitos",examples>=30),
     ("gráficos/diagramas",svg_functions>=15 and len(graphic_refs)>=15),
     ("diapositivas ligeras compensadas visualmente",not light_without_visual),
     ("LAB 1–9 embebidos",set(range(1,10)).issubset(lab_numbers)),
+    ("ruta de laboratorio explícita","Laboratorio integrado" in deck and "El laboratorio no está aparte" in deck and "id=\"labBtn\"" in deck),
+    ("anatomía matemática del vector",all(x in deck for x in ["<b>Componente</b>","<b>Dimensión</b>","<b>Coordenada</b>","<b>Magnitud</b>","<b>Norma</b>","<b>Dirección</b>"])),
+    ("distancia y similitud separadas",all(x in deck for x in ["<b>Métrica de distancia</b>","<b>Distancia euclídea · L2</b>","<b>Similitud coseno</b>"])),
+    ("persistencia MongoDB separada",all(x in deck for x in ["Persistencia en MongoDB","<b>UpdateOne</b>","<b>Upsert</b>","<b>Idempotencia</b>","<b>bulk_write</b>"])),
+    ("Recall y Precision diferenciados","Recall vs Precision" in deck and "vecinos exactos recuperados / vecinos exactos de referencia" in deck and "resultados relevantes / k resultados inspeccionados" in deck),
+    ("kNN gráfico dinámico",'id="knnPlot"' in deck and "knnDocs" in deck and "distancia 2D conceptual" in deck),
+
     ("D1–D5 embebidos",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,6)}),
     ("S09 Live embebido",'id="liveDrawer"' in deck and "S09 LIVE" in deck and "renderStudentLive" in deck),
     ("Teacher Wall embebido",'id="teacherWall"' in deck and "S09 Teacher Wall" in deck and "wall')==='docente" in deck),
@@ -246,14 +259,18 @@ for label,ok in checks:
 nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
 for label,ok in [
     ("notebook E5","intfloat/multilingual-e5-small" in nb_text and "query: " in nb_text and "passage: " in nb_text),
+    ("notebook matemática vectorial","producto punto" in nb_text.lower() and "distancia euclídea" in nb_text.lower() and "np.linalg.norm" in nb_text),
     ("notebook baseline lexical","BM25Okapi" in nb_text and "buscar_lexical" in nb_text),
     ("notebook semántico local","buscar_semantico_local" in nb_text and "embeddings @ q" in nb_text),
     ("notebook Atlas","SearchIndexModel" in nb_text and "$vectorSearch" in nb_text),
+    ("notebook persistencia idempotente","idempotencia" in nb_text.lower() and "UpdateOne" in nb_text and "bulk_write" in nb_text and "upsert=True" in nb_text),
     ("notebook evidencia","s09_evidencia_semantica.json" in nb_text and "falso_positivo" in nb_text and "alternativa_descartada" in nb_text),
     ("notebook chunking","def chunk_palabras" in nb_text and "overlap" in nb_text and "ranking_chunks" in nb_text),
     ("notebook ANN y ENN","def buscar_atlas_modo" in nb_text and '"exact"] = True' in nb_text and '"numCandidates"]' in nb_text),
+    ("notebook Recall@k ANN vs ENN","Recall@5 ANN vs ENN" in nb_text and "ids_ann & ids_enn" in nb_text),
     ("notebook híbrida RRF","def rrf_fusion" in nb_text and "RRF_CONSTANT = 60" in nb_text and "top_hibrido" in nb_text),
     ("notebook Precision@k","Precision@5" in nb_text and "mis_juicios" in nb_text and "precision_mia" in nb_text),
+    ("notebook separa Recall y Precision","No confundas Recall@k con Precision@k" in nb_text),
     ("notebook sin laboratorio paralelo","Laboratorio guiado" not in nb_text and "Presentación interactiva + laboratorio" in nb_text),
 ]:
     if not ok: errors.append("Falla: "+label)
@@ -288,10 +305,10 @@ if errors:
     sys.exit(1)
 
 print("SESION 09 PROFUNDA: OK")
-print(" - 35 diapositivas")
+print(" - 40 diapositivas")
 print(f" - {defs} bloques de definición · {examples} ejemplos explícitos · {len(graphic_refs)} gráficos usados")
 print(" - ninguna diapositiva ligera queda sin gráfico, tabla, código o herramienta")
-print(" - LAB 1–9 + evaluación embebidos")
+print(" - LAB 1–9 + evaluación embebidos + ruta de laboratorio explícita")
 print(" - D1–D5 con primer intento/dominio server-side")
 print(" - exactamente dos recursos visibles")
 print(" - S09 Live + Teacher Wall dentro de la presentación")
