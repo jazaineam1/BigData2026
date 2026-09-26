@@ -18,7 +18,7 @@ session=read("lms/session.html")
 progress=read("lms/progress.html")
 wall=read("lms/wall.html")
 client=read("lms/assets/bigdata-lms.js")
-css=read("lms/assets/bigdata-lms.css")
+css=read("lms/assets/bigdata-lms.css")\nbridge=read("lms/assets/resource-bridge.js")\natlas_guide=read("assets/tutoriales/atlas-guia-conexion.html")\nastra_guide=read("assets/tutoriales/astra-cassandra-paso-a-paso-v3.html")\nneo4j_guide=read("assets/tutoriales/neo4j-aura-s06-paso-a-paso.html")
 backend=read("infraestructura/lms/functions/bigdata-session/index.ts")
 sql=read("infraestructura/lms/lms-session-engine-v3.sql")
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
@@ -63,7 +63,7 @@ checks=[
     ("S09 vuelve a módulo universal",'href="../lms/session.html?s=9"' in deck and 'href="../lms/progress.html?s=9"' in deck),
     ("S09 login vuelve a módulo universal","../lms/session.html?s=9&reason=login" in deck),
     ("SVG S09 contenidos","overflow:hidden" in re.search(r'\.svg\{[^}]*\}',deck).group(0) and "height:auto" in re.search(r'\.svg\{[^}]*\}',deck).group(0)),
-    ("estándar viz-frame",".viz-frame{" in css and ":focus-visible" in css),
+    ("estándar viz-frame",".viz-frame{" in css and ":focus-visible" in css),\n    ("bridge recursos internos","requireSession(n)" in bridge and "guide_opened" in bridge and all("resource-bridge.js" in x for x in [atlas_guide,astra_guide,neo4j_guide])),
     ("course policy V3",course.get("version",0)>=11 and "LMS V3" in course.get("tracking_policy","")),
     ("course wall universal",any(x.get("code")=="wall_s09" and x.get("path")=="wall.html?s=9" for x in course.get("teacher_tools",[]))),
     ("course progress universal",any(x.get("code")=="progress_s09" and x.get("path")=="progress.html?s=9" for x in course.get("student_tools",[]))),
