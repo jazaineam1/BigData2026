@@ -17,7 +17,7 @@ insert into public.bd_lms_activities
 values
 ('bd-s09-presentation','bigdata',9,'Recurso · Presentación S09','resource',0,1,true,'{"resource_type":"presentation","formative":true}'::jsonb),
 ('bd-s09-notebook','bigdata',9,'Recurso · Cuaderno Colab S09','resource',0,2,true,'{"resource_type":"notebook","formative":true}'::jsonb),
-('bd-s09-guide','bigdata',9,'Recurso · Laboratorio guiado S09','resource',0,3,false,'{"resource_type":"guide","formative":true}'::jsonb),
+('bd-s09-guide','bigdata',9,'Recurso · Guía de apoyo S09','resource',0,3,false,'{"resource_type":"guide","formative":true}'::jsonb),
 ('bd-s09-c1','bigdata',9,'C1 · Diferenciar lexical, semántica e híbrida','checkpoint',1,4,true,'{"formative":true,"evidence":"Explica qué recupera BM25 y qué recupera un embedding"}'::jsonb),
 ('bd-s09-c2','bigdata',9,'C2 · Embeddings y similitud coseno','checkpoint',1,5,true,'{"formative":true,"evidence":"Interpreta vector, dimensión y coseno sin llamarlo probabilidad"}'::jsonb),
 ('bd-s09-c3','bigdata',9,'C3 · Comparar Top-5 lexical vs semántico','checkpoint',1,6,true,'{"formative":true,"evidence":"Compara rankings sobre la misma consulta"}'::jsonb),
@@ -34,7 +34,7 @@ insert into public.lms_run_sessions_v2
 (course_run_id,session_number,title,summary,status,path,starts_at,position,metadata,published_at,updated_at)
 select id,9,
   'Cuando las palabras no coinciden: búsqueda semántica y bases vectoriales',
-  'Embeddings, similitud coseno, comparación BM25 vs semantic search, índices vectoriales y MongoDB Atlas Vector Search.',
+  'Presentación-laboratorio con definiciones, herramientas interactivas, comparación BM25 vs semantic search, índices vectoriales y MongoDB Atlas Vector Search.',
   'visible','session-09.html','2026-10-01 23:00:00+00',9,
   '{"pda":"Introducción a bases de datos vectoriales","product":"Ejercicio en Colab de búsquedas semánticas","graded":false,"tracked":true}'::jsonb,
   now(),now()
@@ -53,17 +53,17 @@ with run as (
 )
 insert into public.lms_run_resources_v2
 (course_run_id,session_number,resource_type,title,summary,url,position,visible,metadata)
-select id,9,'presentation','Presentación S09',
-  'Puente S07→S09: lexical, semántica e híbrida sin confundir la herramienta con el mecanismo.',
+select id,9,'presentation','Presentación S09 · laboratorio integrado',
+  'Recurso principal: definiciones, ejemplos, herramientas interactivas y laboratorio al estilo S07.',
   '../Presentaciones/s09-de-palabras-a-significado.html#s1',1,true,
   '{"tracked_activity":"bd-s09-presentation"}'::jsonb from run
 union all
 select id,9,'notebook','Cuaderno S09 · búsqueda semántica',
-  'Colab con BM25 local, embeddings E5, búsqueda exacta y ruta Atlas Vector Search.',
+  'Colab para ejecutar BM25 local, embeddings E5, búsqueda exacta, Atlas Vector Search y evidencia reproducible.',
   'https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb',2,true,
   '{"tracked_activity":"bd-s09-notebook"}'::jsonb from run
 union all
-select id,9,'guide','Laboratorio guiado S09',
-  'Referencia de conceptos, checkpoints, fallos frecuentes y ruta de contingencia.',
+select id,9,'guide','Guía de apoyo S09',
+  'Respaldo de conceptos y checklist; no sustituye el laboratorio principal de la presentación.',
   '../assets/tutoriales/s09-laboratorio-guiado.html',3,true,
   '{"tracked_activity":"bd-s09-guide"}'::jsonb from run;
