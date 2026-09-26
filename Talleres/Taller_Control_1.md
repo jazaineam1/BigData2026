@@ -1,896 +1,678 @@
-# Taller domiciliario de control 1 — S1 a S6
+# TC1 V4 — SECOP Data Pipeline
 
-## Construir un histórico SECOP y convertirlo en una solución NoSQL
+## De una API pública a un producto de datos multimodelo
 
-**Curso:** Big Data — Maestría en Analítica de Datos  
+**Curso:** Big Data · Maestría en Analítica de Datos  
 **Modalidad:** parejas  
 **Valor:** 100 puntos  
 **Git/GitHub:** opcional; no suma ni resta puntos  
-**Regla:** no hay preguntas de selección múltiple.
+**Sesión LMS:** S08
 
 ---
 
-# 1. ¿Qué van a hacer?
+## 1. Reto profesional
 
-En las clases ya practicaron con una muestra de 1.000 procesos y aprendieron a:
+Su equipo recibe el encargo de construir un pipeline reproducible con información pública de contratación estatal.
 
-- cargar archivos con Python;
-- trabajar con documentos;
-- conectarse a MongoDB Atlas;
-- usar `insert_many()`;
-- consultar con `count_documents()` y `find()`;
-- usar filtros, proyecciones, orden y límites;
-- construir pipelines de agregación;
-- pensar Cassandra desde la consulta;
-- modelar relaciones Entidad → Proceso → Proveedor en Neo4j.
+No recibe un CSV “limpio”. Debe:
 
-Este taller **no repite esos ejercicios**.
+1. consultar SECOP II mediante la API pública de Datos Abiertos Colombia;
+2. diseñar una consulta que reduzca transferencia innecesaria;
+3. comparar una adquisición secuencial con otra concurrente;
+4. demostrar que ambas producen el mismo snapshot;
+5. registrar trazabilidad y calidad;
+6. enriquecer procesos con contratos;
+7. construir un modelo documental e idempotente en MongoDB Atlas;
+8. generar un producto analítico;
+9. diseñar una tabla Cassandra desde una consulta;
+10. modelar contexto relacional con Neo4j;
+11. justificar decisiones de ingeniería;
+12. producir evidencia verificable por el LMS.
 
-Ahora recibirán **seis archivos SECOP distintos, cada uno de 1.000 filas**, y deberán construir una solución nueva:
+El resultado no es “un notebook que corre”: es un **producto de datos reproducible**.
+
+---
+
+## 2. Fuentes obligatorias
+
+| Fuente | ID Socrata | Rol |
+|---|---|---|
+| SECOP II · Procesos de Contratación | `p6dx-8zbt` | universo de procesos |
+| SECOP II · Contratos Electrónicos | `jbjy-vk9h` | enriquecimiento contractual |
+
+La relación principal es:
 
 ```text
-6 CSV
-  ↓
-histórico de 6.000 registros
-  ↓
-JSON documental
-  ↓
-MongoDB Atlas real
-  ↓
-consultas nuevas
-  ↓
-bandeja histórica
-  ↓
-Cassandra query-first
-  ↓
-Neo4j / contexto relacional
-  ↓
-informe técnico
+procesos.id_del_proceso
+        │
+        └── contratos.proceso_de_compra
 ```
 
-La pregunta central es:
+Fuentes opcionales para extensión —no exigidas en TC1 V4—:
 
-> ¿Pueden tomar varias fuentes crudas, convertirlas en una colección documental útil, cargarlas correctamente en Atlas y reutilizar los mismos datos para responder preguntas operacionales y relacionales diferentes?
+- Adiciones: `cb9c-h8sn`
+- Ejecución: `mfmm-jqmq`
+- DIVIPOLA: `gdxc-w37w`
 
----
+Referencias:
 
-# 2. ¿Qué deben entregar?
-
-El notebook debe generar la carpeta `entrega_tc1/` con estos archivos:
-
-| Archivo | Qué demuestra |
-|---|---|
-| `01_secop_historico_6000.json` | que integraron y transformaron los seis CSV |
-| `01_control_ingesta.json` | que verificaron la carga y la calidad básica |
-| `02_atlas_consultas.json` | que cargaron Atlas y resolvieron tres consultas |
-| `03_bandeja_historica.csv` | que construyeron una salida nueva desde Atlas |
-| `04_modelo_cassandra.cql` | que diseñaron una tabla desde otra consulta |
-| `05_neo4j_consultas.cypher` | que saben expresar carga y recorridos en Cypher |
-| `05_resultado_relacional.csv` | que calcularon proveedores compartidos |
-| `06_informe_tecnico.md` | que pueden explicar lo construido y sus límites |
-| `manifest_tc1.json` | resultado del validador |
-| `TC1_<pareja>.zip` | paquete final |
-
-Además deben entregar el `.ipynb` ejecutado y con las salidas visibles.
+- Procesos: https://www.datos.gov.co/Gastos-Gubernamentales/SECOP-II-Procesos-de-Contrataci-n/p6dx-8zbt
+- Contratos: https://www.datos.gov.co/Gastos-Gubernamentales/SECOP-II-Contratos-Electr-nicos/jbjy-vk9h
+- Socrata API: https://dev.socrata.com/
+- Application Tokens: https://dev.socrata.com/docs/app-tokens.html
 
 ---
 
-# ETAPA 1 — Construyan un histórico nuevo de SECOP
+## 3. Principios que se evaluarán
+
+### 3.1 Query pushdown
+
+No descargue 85 columnas para utilizar 10.
+
+Construya consultas con:
+
+- `$select`
+- `$where`
+- `$order`
+- `$limit`
+- `$offset`
+
+La consulta debe tener un orden explícito y estable antes de paginar.
+
+### 3.2 Concurrencia responsable
+
+`ThreadPoolExecutor` se utiliza porque las peticiones HTTP son un problema principalmente **I/O-bound**.
+
+Se permite entre **2 y 6 workers**.
+
+No se califica:
+
+> “Mi solución fue 4.2× más rápida”.
+
+Sí se califica:
+
+> “La adquisición secuencial y la concurrente produjeron exactamente el mismo snapshot y puedo justificar la configuración”.
+
+### 3.3 Robustez
+
+La API real puede responder:
+
+- `429`
+- `500`
+- `502`
+- `503`
+- `504`
+- timeout
+
+Su cliente debe contemplar retry y backoff.
+
+### 3.4 Reproducibilidad
+
+Debe quedar evidencia de:
+
+- endpoint;
+- consulta;
+- ventana temporal;
+- timestamp UTC;
+- filas;
+- peticiones;
+- workers;
+- hashes;
+- calidad;
+- versión del taller.
+
+### 3.5 Seguridad
+
+Nunca entregue:
+
+- App Token;
+- URI de MongoDB Atlas;
+- usuario;
+- contraseña;
+- secretos dentro de JSON/CSV/notebook.
+
+---
+
+# E1 — Adquisición SECOP verificable
 
 **20 puntos**
 
-## Objetivo
+## E1.1 Contrato de datos y consulta — 4 puntos
 
-Demostrar que pueden recibir varios archivos con el mismo esquema, integrarlos por código, limpiar sus tipos y convertirlos en documentos JSON listos para MongoDB.
-
-## Paso 1.1 — Cargar los seis archivos
-
-Los archivos asignados son:
+Complete:
 
 ```text
-prueba_chunk_0000000.csv
-prueba_chunk_0001000.csv
-prueba_chunk_0002000.csv
-prueba_chunk_0003000.csv
-prueba_chunk_0004000.csv
-prueba_chunk_0005000.csv
+PAREJA_ID
+INTEGRANTE_1
+CODIGO_1
+INTEGRANTE_2
+CODIGO_2
 ```
 
-Las URL ya están disponibles en el diccionario `URLS_SECOP` del notebook.
+El cuaderno asignará una ventana temporal de 2025 de forma determinística a partir de `PAREJA_ID`.
 
-Deben programar un ciclo que, para cada elemento de `URLS_SECOP`:
+Construya:
 
-1. lea el archivo con `pd.read_csv(..., low_memory=False)`;
-2. agregue una columna `archivo_origen` con el nombre del archivo;
-3. imprima el nombre, número de filas y número de columnas;
-4. agregue el DataFrame a una lista llamada `fragmentos`.
+- `data_contract`
+- `query_plan`
+- `WHERE_PROCESOS`
+- `WHERE_CONTRATOS`
 
-Después concatenen los seis DataFrames en:
+Antes de una descarga grande, pruebe ambos endpoints con 50 filas.
 
-```python
-secop_historico
-```
-
-No concatenen los archivos manualmente ni en Excel.
-
-### Evidencia que debe quedar visible
-
-Calculen por código e impriman:
-
-- número de archivos cargados;
-- número total de filas;
-- número de procesos únicos en `id_del_proceso`;
-- número de departamentos distintos.
-
-No escriban esos resultados manualmente.
+**Evidencia:** `00_dataset_contract.json`.
 
 ---
 
-## Paso 1.2 — Crear un esquema más pequeño y útil
+## E1.2 Descarga secuencial — 4 puntos
 
-El dataset original tiene muchas columnas. Para este taller deben construir un DataFrame llamado `historico` con **exactamente estos 16 campos y en este orden**:
-
-| Campo de `historico` | Campo original |
-|---|---|
-| `id_proceso` | `id_del_proceso` |
-| `entidad` | `entidad` |
-| `nit_entidad` | `nit_entidad` |
-| `departamento` | `departamento_entidad` |
-| `ciudad` | `ciudad_entidad` |
-| `fecha_publicacion` | `fecha_de_publicacion` |
-| `anio` | se deriva de `fecha_publicacion` |
-| `precio_base` | `precio_base` |
-| `modalidad` | `modalidad_de_contratacion` |
-| `respuestas` | `respuestas_al_procedimiento` |
-| `estado` | `estado_del_procedimiento` |
-| `adjudicado` | `adjudicado` |
-| `proveedor` | `nombre_del_proveedor` |
-| `nit_proveedor` | `nit_del_proveedor_adjudicado` |
-| `url` | `urlproceso` |
-| `archivo_origen` | creado en el paso anterior |
-
-### Conversión de tipos obligatoria
-
-Deben aplicar:
+Implemente:
 
 ```python
-pd.to_datetime(..., errors="coerce")
-pd.to_numeric(..., errors="coerce")
+descargar_secuencial(...)
 ```
 
-según corresponda.
+Debe:
 
-`adjudicado` debe terminar como booleano `True/False`, no como texto `"Si"/"No"`.
+1. consultar por páginas;
+2. usar `fetch_page()`;
+3. acumular metadata HTTP;
+4. detenerse al alcanzar el máximo o una página incompleta;
+5. devolver DataFrame + metadata.
 
-`anio` debe derivarse de `fecha_publicacion`, no copiarse manualmente.
+Objetivo orientativo:
 
-Al terminar muestren:
+- procesos: 6.000 filas;
+- contratos: 4.000 filas.
 
-```python
-historico.head()
-historico.dtypes
-```
+El volumen exacto puede ser menor si la ventana asignada no contiene suficientes registros. El validador exige un volumen mínimo, no un número mágico idéntico para todos.
 
 ---
 
-## Paso 1.3 — Convertir el histórico a documentos JSON
+## E1.3 Descarga concurrente — 6 puntos
 
-MongoDB trabaja naturalmente con documentos. Ahora transformen `historico` en una lista de diccionarios llamada:
-
-```python
-documentos
-```
-
-Una forma válida es:
+Implemente:
 
 ```python
-documentos = json.loads(
-    historico.to_json(
-        orient="records",
-        force_ascii=False,
-        date_format="iso"
-    )
-)
+descargar_concurrente(...)
 ```
 
-Esto además convierte los faltantes en `null` de JSON en lugar de dejar el texto `"nan"`.
+con:
 
-## ¿Cómo debe verse el JSON?
-
-El archivo debe ser **un arreglo de documentos**:
-
-```json
-[
-  {
-    "id_proceso": "CO1.REQ....",
-    "entidad": "...",
-    "nit_entidad": "...",
-    "departamento": "...",
-    "ciudad": "...",
-    "fecha_publicacion": "2025-07-23T00:00:00.000",
-    "anio": 2025,
-    "precio_base": 250000000.0,
-    "modalidad": "...",
-    "respuestas": 0,
-    "estado": "...",
-    "adjudicado": true,
-    "proveedor": "...",
-    "nit_proveedor": "...",
-    "url": "https://...",
-    "archivo_origen": "prueba_chunk_0000000.csv"
-  }
-]
+```python
+ThreadPoolExecutor
 ```
 
-Los valores anteriores son únicamente un ejemplo de estructura. **No son resultados del taller.**
+Pruebe una configuración entre 2 y 6 workers.
 
-Guarden:
+Debe construir:
+
+```python
+benchmark_threads
+```
+
+con:
+
+- filas secuenciales;
+- filas concurrentes;
+- tiempo secuencial;
+- tiempo concurrente;
+- hash secuencial;
+- hash concurrente;
+- `same_rows`;
+- `same_hash`.
+
+**Condición de aprendizaje:** los hashes deben coincidir.
+
+---
+
+## E1.4 Más información SECOP + calidad — 6 puntos
+
+Descargue contratos para la misma ventana.
+
+Calcule:
 
 ```text
-entrega_tc1/01_secop_historico_6000.json
+join_coverage =
+procesos que encuentran al menos un contrato
+/
+procesos totales
 ```
 
----
+Construya:
 
-## Paso 1.4 — Crear controles de ingesta
+- `quality_report`;
+- `acquisition_manifest`.
 
-Construyan este diccionario usando resultados calculados:
-
-```python
-control_ingesta = {
-    "archivos_cargados": ...,
-    "filas_integradas": ...,
-    "procesos_unicos": ...,
-    "departamentos": ...,
-    "anio_min": ...,
-    "anio_max": ...,
-    "documentos_json": ...
-}
-```
-
-Guárdenlo como:
+Guarde RAW como:
 
 ```text
-entrega_tc1/01_control_ingesta.json
+entrega_tc1/raw/procesos.parquet
+entrega_tc1/raw/contratos.parquet
 ```
 
-### Al terminar la etapa 1 deben tener
+Y:
 
-- `fragmentos`
-- `secop_historico`
-- `historico`
-- `documentos`
-- `control_ingesta`
-- dos archivos JSON en `entrega_tc1/`
+```text
+01_acquisition_manifest.json
+01_benchmark_threads.json
+01_quality_report.json
+```
 
 ---
 
-# ETAPA 2 — Carguen el histórico en MongoDB Atlas
+# E2 — Modelo documental + Atlas
 
 **30 puntos**
 
-## Objetivo
+## E2.1 Modelo documental — 6 puntos
 
-Demostrar que pueden pasar de un archivo construido por ustedes a una **colección real en MongoDB Atlas** y consultarla.
+Integre procesos y contratos.
 
-En esta etapa Atlas **sí es obligatorio**. No se acepta `mongomock` como sustituto.
-
----
-
-## Paso 2.1 — Conectarse a Atlas
-
-Usen la técnica practicada en clase:
+Construya:
 
 ```python
-from getpass import getpass
-from urllib.parse import quote_plus
-from pymongo import MongoClient
+historico
+documentos
 ```
 
-Obtengan de Atlas su plantilla de conexión SRV, por ejemplo:
+`historico` debe tener una fila por proceso.
 
-```text
-mongodb+srv://<db_username>:<db_password>@cluster....
-```
+Cada documento debe contener al menos:
 
-Pidan:
-
-- la plantilla SRV con `input()`;
-- el usuario con `input()`;
-- la contraseña con `getpass()`.
-
-Reemplacen `<db_username>` y `<db_password>` usando el usuario y la contraseña codificada con `quote_plus()`.
-
-**Nunca escriban la contraseña directamente en una celda.**
-
-Creen `client` y comprueben la conexión con:
-
-```python
-client.admin.command("ping")
-```
-
-Deben dejar:
-
-```python
-atlas_ping = True
-atlas_server_version = ...
-```
-
-La versión se puede obtener desde `client.server_info()`.
-
----
-
-## Paso 2.2 — Crear la colección de la pareja
-
-Usen exactamente:
-
-```text
-base de datos: tc1_bigdata
-colección: secop_historico_<PAREJA_ID>
-```
-
-En Python:
-
-```python
-db = client["tc1_bigdata"]
-NOMBRE_COLECCION = f"secop_historico_{PAREJA_ID}"
-coleccion = db[NOMBRE_COLECCION]
-```
-
-Antes de insertar, vacíen **solo su colección** para que el notebook pueda ejecutarse de nuevo sin duplicar documentos:
-
-```python
-coleccion.delete_many({})
-```
-
-Carguen una copia de sus documentos:
-
-```python
-coleccion.insert_many([dict(d) for d in documentos])
-```
-
-Después verifiquen la carga:
-
-```python
-documentos_atlas = coleccion.count_documents({})
-```
-
-Impriman:
-
-- base de datos;
-- nombre de colección;
-- número de documentos cargados.
-
----
-
-## Paso 2.3 — Consulta A: contar procesos recientes de contratación directa
-
-Construyan `filtro_a` para contar documentos que cumplan **todas** estas condiciones:
-
-- `anio >= 2024`;
-- `modalidad` contiene la palabra `directa` sin distinguir mayúsculas/minúsculas;
-- `respuestas == 0`;
-- `precio_base > 0`.
-
-Para expresar el texto en MongoDB utilicen `$regex` y `$options`:
-
-```python
-"modalidad": {
-    "$regex": "directa",
-    "$options": "i"
+```json
+{
+  "id_proceso": "...",
+  "entidad": {
+    "nit": "...",
+    "nombre": "...",
+    "departamento": "...",
+    "ciudad": "..."
+  },
+  "proceso": {
+    "fecha_publicacion": "...",
+    "precio_base": 0,
+    "modalidad": "...",
+    "estado": "...",
+    "adjudicado": false
+  },
+  "proveedor_adjudicado": {
+    "nit": "...",
+    "nombre": "..."
+  },
+  "contratos_resumen": {
+    "cantidad": 0,
+    "valor_total": 0,
+    "estados": []
+  },
+  "metadata_ingesta": {
+    "dataset": "p6dx-8zbt",
+    "pareja_id": "...",
+    "window_start": "...",
+    "window_end": "..."
+  }
 }
 ```
 
-No se entrega el filtro completo ni el resultado numérico.
+Guarde:
 
-Ejecuten:
-
-```python
-resultado_a = coleccion.count_documents(filtro_a)
-```
+- `02_secop_integrado.parquet`
+- `02_modelo_documental.json`
 
 ---
 
-## Paso 2.4 — Consulta B: buscar los procesos de mayor valor
+## E2.2 Atlas real e idempotencia — 8 puntos
 
-Construyan `filtro_b` para:
+Atlas es obligatorio.
 
-- `anio == 2025`;
-- `departamento == "Antioquia"`;
-- `precio_base > 0`.
+Use:
 
-Construyan `proyeccion_b` para mostrar únicamente:
+- `MongoClient`;
+- `ping`;
+- índice único;
+- `bulk_write`;
+- `UpdateOne(..., upsert=True)`.
 
-- `id_proceso`;
-- `entidad`;
-- `precio_base`;
-- `modalidad`;
+Base:
 
-Debe ocultarse `_id`.
+```text
+tc1_bigdata_v4
+```
 
-Ejecuten un `find()` que además:
+Colección:
 
-1. ordene `precio_base DESC`;
-2. en empate ordene `id_proceso ASC`;
-3. devuelva máximo 10 documentos.
+```text
+secop_pipeline_<PAREJA_ID>
+```
 
-Conviertan el cursor a lista y guárdenlo en:
+Ejecute la carga dos veces.
+
+Construya:
 
 ```python
-resultado_b
-```
-
----
-
-## Paso 2.5 — Consulta C: agregación por departamento
-
-Construyan `pipeline_c` con **exactamente cuatro etapas**.
-
-### `$match`
-
-```text
-anio >= 2024
-precio_base > 0
-```
-
-### `$group`
-
-Agrupen por `departamento` y calculen:
-
-```text
-procesos       = cantidad de documentos
-valor_total    = suma de precio_base
-valor_promedio = promedio de precio_base
-```
-
-### `$sort`
-
-```text
-procesos DESC
-_id ASC
-```
-
-### `$limit`
-
-```text
-8
-```
-
-Ejecuten:
-
-```python
-resultado_c = list(coleccion.aggregate(pipeline_c))
-```
-
----
-
-## Paso 2.6 — Guardar evidencia de las consultas
-
-Construyan:
-
-```python
-atlas_resultados = {
-    "carga": {
-        "base_datos": "tc1_bigdata",
-        "coleccion": NOMBRE_COLECCION,
-        "documentos": documentos_atlas,
-        "server_version": atlas_server_version
-    },
-    "consulta_a": {
-        "filtro": filtro_a,
-        "resultado": resultado_a
-    },
-    "consulta_b": {
-        "filtro": filtro_b,
-        "proyeccion": proyeccion_b,
-        "resultado": resultado_b
-    },
-    "consulta_c": {
-        "pipeline": pipeline_c,
-        "resultado": resultado_c
-    }
+atlas_idempotencia = {
+  "count_after_first": ...,
+  "count_after_second": ...,
+  "duplicates_after_second": ...
 }
 ```
 
-Guárdenlo como:
-
-```text
-entrega_tc1/02_atlas_consultas.json
-```
-
-No guarden URI, usuario ni contraseña.
+La segunda ejecución no debe crear documentos adicionales.
 
 ---
 
-# ETAPA 3 — Construyan una bandeja histórica desde Atlas
+## E2.3 Índices — 5 puntos
 
-**10 puntos**
+Cree:
 
-## Objetivo
+1. índice único por `id_proceso`;
+2. al menos un índice compuesto que tenga sentido para una consulta del taller.
 
-Usar Atlas para producir una salida diferente de las trabajadas en clase.
+Guarde los nombres/propiedades en:
 
-La nueva pregunta es:
-
-> ¿Cuáles son los procesos recientes, adjudicados, de mayor exposición económica y con baja participación dentro del histórico construido por la pareja?
-
-Construyan un pipeline llamado `pipeline_bandeja`.
-
-## `$match`
-
-Conserven documentos con:
-
-```text
-anio >= 2024
-adjudicado == true
-precio_base >= 50000000
-respuestas <= 1
+```python
+atlas_indexes
 ```
 
-## `$project`
+No cree índices sin explicar qué consulta soportan.
 
-Conserven:
+---
 
-```text
-id_proceso
-entidad
-nit_entidad
-departamento
-fecha_publicacion
-anio
-precio_base
-respuestas
-proveedor
-nit_proveedor
-url
-```
+## E2.4–E2.5 Consultas — 8 puntos
 
-Oculten `_id`.
+### Consulta A
 
-## `$sort`
+Conteo de procesos que:
+
+- tienen `precio_base > 0`;
+- tienen al menos un contrato relacionado.
+
+### Consulta B
+
+Top 10 por:
 
 ```text
-precio_base DESC
-fecha_publicacion DESC
+contratos_resumen.valor_total DESC
 id_proceso ASC
 ```
 
-## `$limit`
+El resultado debe conservar:
 
-```text
-100
-```
-
-Ejecuten el pipeline directamente en Atlas:
-
-```python
-bandeja_documentos = list(coleccion.aggregate(pipeline_bandeja))
-bandeja_historica = pd.DataFrame(bandeja_documentos)
-```
-
-Guarden:
-
-```text
-entrega_tc1/03_bandeja_historica.csv
-```
-
-La bandeja representa **prioridad de revisión**, no evidencia de fraude o irregularidad.
+- `id_proceso`;
+- `valor_contratos`.
 
 ---
 
-# ETAPA 4 — Diseñen Cassandra desde una consulta nueva
+## E2.6 Evidencia — 3 puntos
+
+Guarde:
+
+```text
+02_atlas_evidence.json
+```
+
+No incluya secretos.
+
+---
+
+# E3 — Producto analítico
+
+**10 puntos**
+
+Construya un pipeline Atlas llamado:
+
+```python
+pipeline_bandeja
+```
+
+Debe:
+
+- conservar procesos con precio positivo;
+- exigir al menos un contrato asociado;
+- calcular/exponer `valor_contratos`;
+- ordenar `valor_contratos DESC`;
+- desempatar `id_proceso ASC`;
+- limitar a 100.
+
+Genere:
+
+```python
+bandeja_documentos
+bandeja_historica
+```
+
+Guarde:
+
+```text
+03_bandeja_historica.csv
+```
+
+La bandeja representa prioridad de revisión. **No es evidencia de fraude.**
+
+---
+
+# E4 — Cassandra query-first
 
 **15 puntos**
 
-## Pregunta operacional
+Pregunta:
 
-> Para un `anio` y un `departamento`, mostrar hasta 10 procesos de la bandeja empezando por los más recientes. Si dos procesos tienen la misma fecha, mostrar primero el de mayor `precio_base`; si persiste el empate, ordenar por `id_proceso` ascendente.
+> Para un año y departamento, mostrar hasta 10 procesos priorizados, empezando por mayor valor contractual; en empate usar ID de proceso ascendente.
 
-Esta consulta **no es la de la sesión 5**.
-
-## Paso 4.1 — Preparar los datos
-
-Creen `bandeja_cassandra` desde `bandeja_historica` con:
-
-```text
-anio
-departamento
-fecha_publicacion
-precio_base
-id_proceso
-entidad
-respuestas
-proveedor
-url
-```
-
-Conviertan `fecha_publicacion` a `datetime`.
-
-## Paso 4.2 — Diseñar la tabla
-
-La tabla debe llamarse:
+Construya:
 
 ```text
 tc1.procesos_por_anio_departamento
 ```
 
-Creen el texto CQL en:
-
-```python
-cql_create
-```
-
-La clave primaria debe estar diseñada para responder la consulta con igualdad sobre `anio + departamento`, sin `ALLOW FILTERING`.
-
-Las columnas de clustering deben permitir obtener directamente el orden solicitado:
+El diseño esperado debe permitir:
 
 ```text
-fecha_publicacion DESC
-precio_base DESC
-id_proceso ASC
+WHERE anio = ?
+  AND departamento = ?
+ORDER BY valor_contratos DESC, id_proceso ASC
+LIMIT 10
 ```
 
-No se entrega el `PRIMARY KEY`: deben deducirlo a partir de la pregunta.
+sin `ALLOW FILTERING`.
 
-Guarden:
+Variables evaluadas:
+
+- `bandeja_cassandra`
+- `cql_create`
+- `consulta_cassandra_simulada`
+- `particion_prueba`
+- `top10_cassandra`
+
+Guarde:
 
 ```text
-entrega_tc1/04_modelo_cassandra.cql
-```
-
-## Paso 4.3 — Probar el patrón de acceso
-
-Implementen:
-
-```python
-def consulta_cassandra_simulada(df, anio, departamento, n=10):
-    ...
-```
-
-Debe:
-
-1. filtrar por `anio` y `departamento`;
-2. ordenar fecha DESC, precio DESC e ID ASC;
-3. retornar `n` filas.
-
-Para la prueba determinen por código la partición `(anio, departamento)` con mayor cantidad de filas.
-
-Si dos particiones tienen la misma cantidad de filas, desempaten por:
-
-1. `anio ASC`;
-2. `departamento ASC`.
-
-Guárdenla como:
-
-```python
-particion_prueba = (anio, departamento)
-```
-
-Ejecuten la función con `n=10` y guarden:
-
-```python
-top10_cassandra
+04_modelo_cassandra.cql
 ```
 
 ---
 
-# ETAPA 5 — Construyan contexto relacional con el histórico propio
+# E5 — Neo4j y contexto relacional
 
 **20 puntos**
 
-## Pregunta
+Pregunta:
 
-> ¿Qué proveedores conectan a la entidad con mayor número de procesos adjudicados con otras entidades dentro de los 6.000 registros?
+> ¿Qué proveedores conectan a la entidad con mayor número de procesos adjudicados con otras entidades dentro de su snapshot?
 
-No utilicen el NIT ancla usado en clase. El ancla de este taller debe salir de sus datos.
+Calcule el ancla desde sus propios datos.
 
-## Paso 5.1 — Construir el historial adjudicado
+Variables:
 
-Desde `historico`, creen `hist_adjudicado` conservando registros donde:
+- `hist_adjudicado`
+- `nit_ancla`
+- `entidad_ancla`
+- `resultado_relacional`
 
-- `adjudicado == True`;
-- `nit_entidad` no sea nulo ni vacío;
-- `nit_proveedor` no sea nulo ni vacío;
-- `nit_proveedor` no sea `"No Definido"`.
+Cypher:
 
-Conserven el orden original de las filas.
+- `cypher_carga`
+- `cypher_contexto`
+- `cypher_compartidos`
+- `cypher_ranking`
 
-## Paso 5.2 — Encontrar el ancla
-
-Agrupen `hist_adjudicado` por `nit_entidad` y calculen el número de `id_proceso` distintos.
-
-Ordenen:
-
-1. procesos DESC;
-2. `nit_entidad` ASC.
-
-La primera entidad define:
-
-```python
-nit_ancla
-entidad_ancla
-```
-
-Ambos valores deben calcularse por código.
-
-## Paso 5.3 — Medir proveedores compartidos
-
-Para cada proveedor utilizado por el ancla calculen:
+Modelo:
 
 ```text
-procesos_con_ancla  = procesos distintos del proveedor con el ancla
-entidades_conectadas = entidades distintas relacionadas con ese proveedor en todo hist_adjudicado
+Entidad --PUBLICA------> Proceso
+Proceso --ADJUDICADO_A-> Proveedor
 ```
 
-Construyan:
+Además cree un `nx.DiGraph()` equivalente para que el validador compruebe estructura.
 
-```python
-prov_ancla
-prov_global
-resultado_relacional
-```
+Guarde:
 
-Ordenen `resultado_relacional` por:
-
-```text
-entidades_conectadas DESC
-procesos_con_ancla DESC
-nit_proveedor ASC
-```
-
-Guarden:
-
-```text
-entrega_tc1/05_resultado_relacional.csv
-```
+- `05_neo4j_consultas.cypher`
+- `05_resultado_relacional.csv`
 
 ---
 
-## Paso 5.4 — Escribir las consultas Cypher
-
-Creen cuatro variables de texto.
-
-### `cypher_carga`
-
-Debe usar:
-
-```text
-UNWIND $rows
-MERGE (:Entidad ...)
-MERGE (:Proceso ...)
-MERGE (:Proveedor ...)
-PUBLICA
-ADJUDICADO_A
-```
-
-### `cypher_contexto`
-
-Debe partir de una `Entidad` filtrada por `$nit_ancla` y recorrer:
-
-```text
-Entidad → Proceso → Proveedor
-```
-
-### `cypher_compartidos`
-
-Debe encontrar `otra:Entidad` diferente del ancla que llegue al mismo proveedor.
-
-### `cypher_ranking`
-
-Debe utilizar `count(DISTINCT ...)` para ordenar proveedores por cantidad de entidades conectadas.
-
-Guarden las cuatro consultas en:
-
-```text
-entrega_tc1/05_neo4j_consultas.cypher
-```
-
----
-
-## Paso 5.5 — Verificar el subgrafo en Python
-
-Construyan un `nx.DiGraph()` para el ancla.
-
-IDs:
-
-```text
-E:<nit_entidad>
-P:<id_proceso>
-V:<nit_proveedor>
-```
-
-Aristas:
-
-```text
-Entidad  --PUBLICA------> Proceso
-Proceso  --ADJUDICADO_A-> Proveedor
-```
-
-Guarden:
-
-```python
-nodos_grafo = G.number_of_nodes()
-aristas_grafo = G.number_of_edges()
-```
-
-El dibujo es opcional. Lo evaluado es la estructura.
-
----
-
-# ETAPA 6 — Expliquen la solución
+# E6 — Decisiones + informe
 
 **5 puntos**
 
-Creen `informe_tecnico` y guárdenlo como:
+## Decision log
+
+Cree:
+
+```python
+decision_log
+```
+
+con mínimo 3 decisiones.
+
+Cada una debe incluir:
+
+```json
+{
+  "decision": "...",
+  "evidence": "...",
+  "alternative": "...",
+  "risk": "..."
+}
+```
+
+No escriba frases genéricas.
+
+Ejemplo de evidencia válida:
+
+> Con 4 workers obtuvimos el mismo hash que secuencial y no observamos 429; 6 workers no redujo de forma material el tiempo.
+
+Guarde:
 
 ```text
-entrega_tc1/06_informe_tecnico.md
+06_decision_log.json
 ```
 
-Debe contener exactamente:
+## Informe
+
+Debe contener exactamente estas secciones:
 
 ```markdown
-## 1. Cómo construimos el histórico
-## 2. Qué comprobamos en MongoDB Atlas
-## 3. Cómo funciona la bandeja histórica
-## 4. Por qué el modelo Cassandra responde la consulta
-## 5. Qué relaciones aporta Neo4j y qué no podemos concluir
+## 1. Adquisición y contrato de datos
+## 2. Concurrencia, robustez y calidad
+## 3. Modelo documental e idempotencia Atlas
+## 4. Producto analítico y Cassandra
+## 5. Neo4j, decisiones y límites
 ```
 
-El informe debe insertar mediante variables, no números copiados:
+Debe afirmar explícitamente que priorización y conexiones contractuales **no demuestran por sí solas fraude, favorecimiento o colusión**.
 
-- cantidad de archivos integrados;
-- cantidad de documentos cargados en Atlas;
-- resultado de la consulta A;
-- tamaño de `bandeja_historica`;
-- `nit_ancla`;
-- máximo de `entidades_conectadas`.
+Guarde:
 
-Debe afirmar explícitamente que una regla de priorización y una conexión contractual **no demuestran por sí solas fraude, favorecimiento ni colusión**.
+```text
+06_informe_tecnico.md
+```
 
 ---
 
-# Rúbrica
+# 4. Entrega final
 
-| Etapa | Evidencia | Puntos |
-|---|---|---:|
-| 1 | integración de 6 archivos, esquema, JSON y controles | 20 |
-| 2 | conexión Atlas, carga real, count, find y aggregation | 30 |
-| 3 | pipeline nuevo y bandeja histórica | 10 |
-| 4 | modelo Cassandra y prueba del patrón | 15 |
-| 5 | ancla nueva, métrica relacional, Cypher y subgrafo | 20 |
-| 6 | informe y paquete final | 5 |
-| **Total** |  | **100** |
+El validador debe producir:
+
+```text
+manifest_tc1.json
+TC1_<pareja>.zip
+```
+
+La carpeta debe contener:
+
+```text
+entrega_tc1/
+├── 00_dataset_contract.json
+├── 01_acquisition_manifest.json
+├── 01_benchmark_threads.json
+├── 01_quality_report.json
+├── raw/
+│   ├── procesos.parquet
+│   └── contratos.parquet
+├── 02_secop_integrado.parquet
+├── 02_modelo_documental.json
+├── 02_atlas_evidence.json
+├── 03_bandeja_historica.csv
+├── 04_modelo_cassandra.cql
+├── 05_neo4j_consultas.cypher
+├── 05_resultado_relacional.csv
+├── 06_decision_log.json
+├── 06_informe_tecnico.md
+└── manifest_tc1.json
+```
+
+Además entregue el notebook ejecutado.
 
 ---
 
-# Qué NO se acepta
+# 5. Qué NO se acepta
 
-- unir los seis CSV manualmente;
-- escribir los resultados esperados a mano;
-- usar `mongomock` en lugar de Atlas para la etapa 2;
-- dejar usuario o contraseña de Atlas dentro del notebook;
-- entregar capturas como reemplazo del código;
-- copiar la regla `1.000 → 163 → 77` de las clases;
-- usar el NIT ancla de la sesión de Neo4j;
-- copiar el modelo Cassandra de la sesión 5 sin adaptarlo a la nueva consulta;
-- afirmar que una señal de priorización o una conexión contractual prueba fraude.
+- sustituir la API por los seis CSV del taller antiguo;
+- descargar una exportación completa y fingir que se utilizó paginación;
+- usar más de 6 workers;
+- considerar una ejecución más rápida como evidencia suficiente;
+- reportar `same_hash=True` sin calcular hashes;
+- borrar la colección antes de cada carga para ocultar duplicados;
+- usar `insert_many()` como sustituto de idempotencia;
+- usar `mongomock` para E2;
+- guardar secretos;
+- escribir números manualmente en los artefactos;
+- usar `ALLOW FILTERING`;
+- afirmar que el producto analítico o una conexión en el grafo demuestra fraude.
 
 ---
 
-# Antes de entregar
+# 6. Modo contingencia
 
-Ejecuten el notebook de arriba abajo y comprueben que:
+Si Datos Abiertos Colombia presenta una indisponibilidad prolongada durante una sesión evaluativa, el docente puede habilitar un snapshot de contingencia.
 
-- los seis archivos se cargan;
-- se genera el JSON histórico;
-- Atlas responde `ping`;
-- la colección tiene todos los documentos;
-- las tres consultas se ejecutan;
-- la bandeja sale de Atlas;
-- Cassandra responde la consulta nueva;
-- el ancla de Neo4j se calcula desde el histórico;
-- el validador termina;
-- descargaron `TC1_<pareja>.zip` y el `.ipynb` ejecutado.
+Ese snapshot:
 
-**Git/GitHub sigue siendo opcional.**
+- no cambia la rúbrica;
+- no exime de implementar secuencial/concurrente;
+- debe conservar metadata y hashes;
+- se identifica explícitamente como contingencia en el manifest.
+
+La contingencia existe para proteger la evaluación de una falla externa, no para reemplazar la ruta principal.
+
+---
+
+# 7. Criterio de éxito
+
+El taller está terminado cuando el equipo puede responder, con evidencia:
+
+1. qué descargó;
+2. desde dónde;
+3. con qué consulta;
+4. cuándo;
+5. cuánto;
+6. qué errores o reintentos ocurrieron;
+7. por qué eligió su nivel de concurrencia;
+8. por qué secuencial y concurrente representan el mismo snapshot;
+9. cómo evitó duplicados en Atlas;
+10. qué pregunta responde cada modelo;
+11. qué limitaciones tiene el análisis.
+
+Ese conjunto de evidencias es lo que registra el LMS.
