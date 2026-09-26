@@ -50,6 +50,7 @@ jobs:
           cp Cuadernos/Taller_Control_1.ipynb _site/Cuadernos/
           cp Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb _site/Cuadernos/
           test -f _site/lms/portal.html
+          test -f _site/lms/account.html
           test -f _site/lms/session-08.html
           test -f _site/assets/tutoriales/s08-secoppipeline.html
           test -f _site/lms/teacher-wall.html
@@ -96,10 +97,12 @@ jobs:
           for i in {1..20}; do
             html="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}?v=${GITHUB_SHA}" || true)"
             module="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/session.html?s=9&v=${GITHUB_SHA}" || true)"
+            account="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/account.html?v=${GITHUB_SHA}" || true)"
             if grep -q 'assets/img/bg-masthead.jpg' <<<"$html" \
               && ! grep -q 'Aprender haciendo, con evidencia' <<<"$html" \
               && ! grep -q 'Marcar revisada' <<<"$html" \
-              && grep -q 'Recursos de la sesión' <<<"$module"; then
+              && grep -q 'Recursos de la sesión' <<<"$module" \
+              && grep -q 'Cambiar contraseña' <<<"$account"; then
               ok=1
               break
             fi
