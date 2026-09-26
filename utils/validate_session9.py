@@ -218,6 +218,7 @@ checks=[
     ("presentación obliga identidad","reason=login" in deck and "Vista previa · sin seguimiento" in deck and "moduleIdentity" in deck),
     ("presentación registra diapositiva","queueSlideTrack" in deck and "event_type:'slide_viewed'" in deck),
     ("WALL docente muestra posición","<th>Posición</th>" in deck and "r.last_slide" in deck),
+    ("WALL docente filtra estudiantes","id=\"teacherSearch\"" in deck and "id=\"teacherFilter\"" in deck and "filterTeacherRows" in deck),
     ("respuestas validadas por hash","CHALLENGE_HASHES" in backend and "sha256(code+\"|\"+answer)" in backend),
     ("respuesta correcta no mapeada en frontend","CHALLENGE_HASHES" not in deck and "referencia esperada" not in deck and "function c1Check" not in deck),
     ("sin bypass complete_checkpoint","complete_checkpoint" not in backend and "complete_checkpoint" not in session),
