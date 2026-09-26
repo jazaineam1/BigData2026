@@ -1,7 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,{auth:{persistSession:false}});
-const COURSE="bigdata",RUN_CODE="bigdata-2026-2",SESSION=8,CURRENT_VALIDATOR_VERSION="2026-09-26-v4-secoppipeline";\nconst VALIDATOR_VERSIONS=new Set(["2026-09-17-v3-historico-atlas",CURRENT_VALIDATOR_VERSION]);
+const COURSE="bigdata",RUN_CODE="bigdata-2026-2",SESSION=8,CURRENT_VALIDATOR_VERSION="2026-09-26-v4-secoppipeline";
+const VALIDATOR_VERSIONS=new Set(["2026-09-17-v3-historico-atlas",CURRENT_VALIDATOR_VERSION]);
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 const TRACK_EVENTS=new Set(["page_opened","page_closed","heartbeat","notebook_opened","activity_started","stage_opened","ui_action"]);
 const ACTIVITY_CODES=new Set(["bd-s08-e1","bd-s08-e2","bd-s08-e3","bd-s08-e4","bd-s08-e5","bd-s08-e6","bd-s08-final"]);
