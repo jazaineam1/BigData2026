@@ -101,7 +101,7 @@ jobs:
             if grep -q 'assets/img/bg-masthead.jpg' <<<"$html" \
               && ! grep -q 'Aprender haciendo, con evidencia' <<<"$html" \
               && ! grep -q 'Marcar revisada' <<<"$html" \
-              && grep -q 'Recursos de la sesión' <<<"$module" \
+              && grep -q 'Material de la sesión' <<<"$module" \
               && grep -q 'Cambiar contraseña' <<<"$account"; then
               ok=1
               break
