@@ -14,9 +14,11 @@ def read(path):
 
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
 guide=read("assets/tutoriales/s09-laboratorio-guiado.html")
-session=read("lms/session-09.html")
-student_progress=read("lms/progress-09.html")
+session_legacy=read("lms/session-09.html")
+progress_legacy=read("lms/progress-09.html")
 wall_redirect=read("lms/teacher-wall-09.html")
+session=read("lms/session.html")
+student_progress=read("lms/progress.html")
 client=read("lms/assets/bigdata-lms.js")
 backend=read("infraestructura/lms/functions/bigdata-session9/index.ts")
 seed=read("infraestructura/lms/s09-vector-search-seed.sql")
@@ -226,16 +228,18 @@ checks=[
     ("sin guía en backend","bd-s09-guide" not in backend and "guide_opened" not in backend),
     ("dos recursos visibles en seed",resource_selects==2 and "'guide'" not in resource_seed and "bd-s09-guide" not in resource_seed),
     ("guía histórica solo redirige","no hay un laboratorio separado" in guide and "location.replace" in guide),
-    ("módulo S09 autenticado","requireS09()" in session and "identityName" in session and "Sesión LMS activa" in session),
-    ("módulo muestra ruta y reanudación","learningPath" in session and "Continuar aprendizaje" in session and "CHALLENGE_SLIDES" in session and "data.resume" in session),
-    ("módulo separa recursos y dominio","7 hitos" in session and "dominio" in session and "recursos visitados" in session),
+    ("módulo universal autenticado","requireSession(sessionNumber)" in session and "Recursos de la sesión" in session and "Seguimiento integrado" in session),
+    ("módulo universal reanuda","primaryAction" in session and "data.resume" in session and "Continuar donde quedaste" in session),
+    ("módulo separa recursos y dominio","resource-grid-v4" in session and "Dominado" in session and "Evidencia" in session),
     ("módulo no infla tiempo activo","startHeartbeat" not in session),
     ("módulo no permite marcar dominio manual","Marcar completado" not in session and "completeCheckpoint" not in session),
-    ("Wall personal existe","Wall personal" in student_progress and "requireS09()" in student_progress and "primer intento" in student_progress.lower()),
-    ("Wall personal privado","data.ranking" not in student_progress and "teacher_wall" not in student_progress),
-    ("Wall personal reanuda","data.resume" in student_progress and "SLIDES" in student_progress),
-    ("Colab no recibe token LMS","token=" not in session.lower() and "token=" not in student_progress.lower() and "no envía tu token" in student_progress),
-    ("WALL legado redirige","s09-de-palabras-a-significado.html?wall=docente" in wall_redirect and "location.replace" in wall_redirect),
+    ("progreso universal existe","L.session('course_progress')" in student_progress and "Mi portafolio" in student_progress and "Visitado" in student_progress),
+    ("progreso universal privado","data.ranking" not in student_progress and "teacher_wall" not in student_progress),
+    ("progreso muestra evidencia","focusData" in student_progress and "evidenceCard" in student_progress and "class-wall.html" in student_progress),
+    ("Colab no recibe token LMS","token=" not in session.lower() and "token=" not in student_progress.lower()),
+    ("módulo S09 legado redirige","session.html?" in session_legacy and "p.set('s','9')" in session_legacy and "location.replace" in session_legacy),
+    ("progreso S09 legado redirige","progress.html?" in progress_legacy and "p.set('s','9')" in progress_legacy and "location.replace" in progress_legacy),
+    ("WALL legado redirige","wall.html?" in wall_redirect and "p.set('s','9')" in wall_redirect and "location.replace" in wall_redirect),
     ("tool docente apunta al WALL canónico",any(x.get("code")=="wall_s09" and x.get("path")=="wall.html?s=9" for x in course.get("teacher_tools",[]))),
     ("portal apunta al WALL universal",'href="wall.html?s=9"' in read("lms/portal.html") and 'id="teacherWall"' in read("lms/portal.html")),
     ("portal no prioriza S08 fijo","Number(x.session_number)===8" not in read("lms/portal.html")),
@@ -286,7 +290,7 @@ for i,cell in enumerate(nb.get("cells",[]),1):
     except SyntaxError as ex: errors.append(f"Notebook: sintaxis Python celda {i}: {ex}")
 
 # Sintaxis JavaScript de artefactos HTML.
-for name,html in [("presentación",deck),("session-09",session),("progress-09",student_progress),("wall-redirect",wall_redirect)]:
+for name,html in [("presentación",deck),("session",session),("progress",student_progress),("session-09-redirect",session_legacy),("progress-09-redirect",progress_legacy),("wall-redirect",wall_redirect)]:
     scripts=re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>",html,re.S|re.I)
     for i,script in enumerate(scripts,1):
         with tempfile.NamedTemporaryFile("w",suffix=".js",encoding="utf-8",delete=False) as fh:
@@ -296,7 +300,7 @@ for name,html in [("presentación",deck),("session-09",session),("progress-09",s
         if p.returncode:
             errors.append(f"{name} JS #{i}: {p.stderr.strip()[:700]}")
 
-front=deck+session+student_progress+wall_redirect+client
+front=deck+session+student_progress+session_legacy+progress_legacy+wall_redirect+client
 if re.search(r"(service[_-]?role|sb_secret_)[A-Za-z0-9_.-]{12,}",front,re.I):
     errors.append("Posible secreto privado expuesto en frontend")
 
