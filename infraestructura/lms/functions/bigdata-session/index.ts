@@ -416,8 +416,10 @@ async function teacherWall(ctx:any,run:any,n:number){
     const attempted=aps.length;
     const ev:any=lastEvent.get(u.id),slideEv:any=lastSlide.get(u.id),slideMeta=slideEv?.metadata||{};
     const lastAt=p.last_activity_at||ev?.created_at||null;
-    const age=lastAt?(Date.now()-Date.parse(lastAt))/60000:null;
-    const needsAttention=aps.some((a:any)=>a.attempts>0&&a.metadata?.mastery===false)||(p.started_at&&age!==null&&age>20&&p.status!=="completed");
+    const age=lastAt?(Date.now()-Date.parse(lastAt))/60000:null,currentDef=def.activities.find((a:any)=>a.code===ev?.activity_code);
+    const failedCheckpoint=aps.some((a:any)=>a.attempts>0&&a.metadata?.mastery===false);
+    const stalledLab=currentDef?.kind==="lab"&&age!==null&&age>5&&p.status!=="completed";
+    const needsAttention=failedCheckpoint||stalledLab;
     return {
       user_id:u.id,display_name:u.display_name||u.username,
       status:p.status||"not_started",started_at:p.started_at||null,
@@ -470,14 +472,18 @@ async function resetSession(ctx:any,run:any,n:number,body:any){
   const phrase="REINICIAR_S"+String(n).padStart(2,"0");
   if(String(body.confirmation||"")!==phrase)throw new Error("Confirmación de reinicio inválida");
   const def=await definition(run.id,n,true),codes=def.activities.map((a:any)=>a.code);
-  const [{data:progress},{data:activity},{data:events},{data:window}]=await Promise.all([
+  const [{data:progress},{data:activity},{data:events},{data:window},{data:evidence},{data:labCodes}]=await Promise.all([
     db.from("bd_lms_session_progress").select("user_id").eq("course_run_id",run.id).eq("session_number",n),
     codes.length?db.from("bd_lms_activity_progress").select("user_id,activity_code").eq("course_run_id",run.id).in("activity_code",codes):Promise.resolve({data:[]} as any),
     db.from("bd_lms_events").select("id").eq("course_run_id",run.id).eq("session_number",n),
-    db.from("bd_lms_session_windows").select("course_run_id").eq("course_run_id",run.id).eq("session_number",n)
+    db.from("bd_lms_session_windows").select("course_run_id").eq("course_run_id",run.id).eq("session_number",n),
+    db.from("bd_evidence").select("id").eq("course_run_id",run.id).eq("session_number",n),
+    db.from("bd_lab_codes").select("code_hash").eq("course_run_id",run.id).eq("session_number",n)
   ]);
-  const counts={session_progress:(progress||[]).length,activity_progress:(activity||[]).length,events:(events||[]).length,session_window:(window||[]).length};
+  const counts={session_progress:(progress||[]).length,activity_progress:(activity||[]).length,events:(events||[]).length,session_window:(window||[]).length,evidence:(evidence||[]).length,lab_codes:(labCodes||[]).length};
   const deletes:any[]=[
+    await db.from("bd_evidence").delete().eq("course_run_id",run.id).eq("session_number",n),
+    await db.from("bd_lab_codes").delete().eq("course_run_id",run.id).eq("session_number",n),
     await db.from("bd_lms_events").delete().eq("course_run_id",run.id).eq("session_number",n),
     await db.from("bd_lms_session_progress").delete().eq("course_run_id",run.id).eq("session_number",n),
     await db.from("bd_lms_session_windows").delete().eq("course_run_id",run.id).eq("session_number",n)
