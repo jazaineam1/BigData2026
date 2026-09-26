@@ -2,8 +2,32 @@ from pathlib import Path
 import json, re, hashlib, zipfile
 import pandas as pd
 
-VERSION = "2026-09-26-v4-secoppipeline"
-STAGE_MAX = {"E1": 20, "E2": 30, "E3": 10, "E4": 15, "E5": 20, "E6": 5}
+VERSION = "2026-09-26-secoppipeline"
+STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}
+FEEDBACK = {
+    "E1_contrato_y_query": "Revise el contrato de datos y el plan SoQL: fuente, campos, filtros y orden estable deben corresponder a la ventana asignada.",
+    "E1_descarga_secuencial": "La descarga secuencial debe producir un DataFrame real, registrar tiempo y conservar el esquema mínimo esperado.",
+    "E1_concurrencia_equivalente": "Compare resultados, no solo tiempos: secuencial y concurrente deben tener las mismas filas y el mismo hash canónico.",
+    "E1_trazabilidad_calidad": "Guarde RAW, metadata de adquisición, calidad y cobertura del cruce; no incluya secretos.",
+    "E2_modelo_documental": "Construya un documento coherente por proceso y conserve el snapshot integrado como evidencia.",
+    "E2_atlas_idempotente": "La colección debe ser real y la segunda ejecución no puede aumentar el número de documentos.",
+    "E2_indices": "Debe existir un índice único de identidad y al menos un índice adicional justificado por una consulta.",
+    "E2_consulta_A_count": "Recalcule la consulta A directamente en Atlas y contraste el conteo con el snapshot local.",
+    "E2_consulta_B_find": "El top 10 debe coincidir con el orden de referencia: valor contractual descendente e id_proceso ascendente.",
+    "E2_evidencia_atlas": "Registre carga, consultas e índices en 02_atlas_evidence.json sin credenciales.",
+    "E3_pipeline_bandeja": "La bandeja debe derivarse de Atlas y conservar exactamente la priorización especificada.",
+    "E3_artefacto_bandeja": "Exporte la bandeja con las columnas y límite requeridos.",
+    "E4_datos_cassandra": "Prepare el DataFrame operacional con año, departamento, valor e identificador.",
+    "E4_modelo_query_first": "Diseñe la PRIMARY KEY desde la consulta objetivo y evite ALLOW FILTERING.",
+    "E4_consulta_simulada": "La simulación debe devolver el mismo top 10 que el patrón query-first definido.",
+    "E5_historial_y_ancla": "Derive el conjunto adjudicado y la entidad ancla a partir de sus propios datos.",
+    "E5_metrica_relacional": "La métrica de proveedores compartidos debe coincidir con el cálculo tabular de referencia.",
+    "E5_cypher": "El Cypher debe cargar con MERGE/UNWIND y responder las consultas parametrizadas solicitadas.",
+    "E5_subgrafo": "El subgrafo NetworkX debe representar la misma estructura Entidad–Proceso–Proveedor.",
+    "E6_decisiones_informe": "Registre decisiones con evidencia, alternativa y riesgo, y comunique explícitamente los límites de interpretación.",
+    "E6_paquete_reproducible": "Complete todos los artefactos requeridos antes de generar la entrega final.",
+}
+
 PROCESS_FIELDS = {
     "id_del_proceso","entidad","nit_entidad","departamento_entidad","ciudad_entidad",
     "fecha_de_publicacion","precio_base","modalidad_de_contratacion",
@@ -42,8 +66,16 @@ def evaluar(ns):
 
     def check(k,ok,puntos,evidencia=""):
         ok=bool(ok)
-        checks[k]={"ok":ok,"puntos":puntos if ok else 0,"maximo":puntos,"evidencia":str(evidencia)[:500]}
+        checks[k]={
+            "ok":ok,
+            "puntos":puntos if ok else 0,
+            "maximo":puntos,
+            "evidencia":str(evidencia)[:500],
+            "feedback":"" if ok else FEEDBACK.get(k,"Revise la evidencia y vuelva a ejecutar el criterio.")
+        }
         print(("✅" if ok else "❌"),k,f"{checks[k]['puntos']}/{puntos}")
+        if not ok:
+            print("   ↳",checks[k]["feedback"])
 
     pareja=str(ns.get("PAREJA_ID","")).strip()
     procesos=ns.get("procesos_df"); contratos=ns.get("contratos_df")
@@ -54,7 +86,7 @@ def evaluar(ns):
     acq=ns.get("acquisition_manifest",{})
     quality=ns.get("quality_report",{})
 
-    # E1 · 20
+    # E1 · 25
     try:
         q1=query_plan.get("procesos",{}); q2=query_plan.get("contratos",{})
         e11=(
@@ -101,7 +133,7 @@ def evaluar(ns):
         )
     except Exception as e:
         print("E1.3",type(e).__name__,e); e13=False
-    check("E1_concurrencia_equivalente",e13,6)
+    check("E1_concurrencia_equivalente",e13,8)
 
     try:
         join_cov=quality.get("join_coverage")
@@ -124,9 +156,9 @@ def evaluar(ns):
         )
     except Exception as e:
         print("E1.4",type(e).__name__,e); e14=False
-    check("E1_trazabilidad_calidad",e14,6)
+    check("E1_trazabilidad_calidad",e14,9)
 
-    # E2 · 30
+    # E2 · 25
     historico=ns.get("historico"); documentos=ns.get("documentos")
     try:
         sample=documentos[:20] if isinstance(documentos,list) else []
@@ -143,7 +175,7 @@ def evaluar(ns):
         )
     except Exception as e:
         print("E2.1",type(e).__name__,e); e21=False
-    check("E2_modelo_documental",e21,6)
+    check("E2_modelo_documental",e21,5)
 
     coleccion=ns.get("coleccion")
     try:
@@ -163,7 +195,7 @@ def evaluar(ns):
         )
     except Exception as e:
         print("E2.2",type(e).__name__,e); e22=False
-    check("E2_atlas_idempotente",e22,8)
+    check("E2_atlas_idempotente",e22,7)
 
     try:
         info=coleccion.index_information() if coleccion is not None else {}
@@ -171,7 +203,7 @@ def evaluar(ns):
         useful_compound=any(len(v.get("key",[]))>=2 for name,v in info.items() if name!="_id_")
         e23=unique_id and useful_compound and isinstance(ns.get("atlas_indexes"),list)
     except Exception: e23=False
-    check("E2_indices",e23,5)
+    check("E2_indices",e23,4)
 
     try:
         ref_a=sum(
@@ -181,7 +213,7 @@ def evaluar(ns):
         )
         e24=isinstance(ns.get("filtro_a"),dict) and ns.get("resultado_a")==ref_a
     except Exception: e24=False
-    check("E2_consulta_A_count",e24,4,ns.get("resultado_a"))
+    check("E2_consulta_A_count",e24,3,ns.get("resultado_a"))
 
     try:
         ref_b=sorted(
@@ -199,7 +231,7 @@ def evaluar(ns):
         e25=got2==ref_b
     except Exception as e:
         print("E2.5",type(e).__name__,e); e25=False
-    check("E2_consulta_B_find",e25,4)
+    check("E2_consulta_B_find",e25,3)
 
     try:
         ar=ns.get("atlas_resultados",{})
@@ -272,7 +304,7 @@ def evaluar(ns):
         print("E4.3",type(e).__name__,e); e43=False
     check("E4_consulta_simulada",e43,4)
 
-    # E5 · 20
+    # E5 · 15
     try:
         h=historico.copy()
         mask=(
@@ -293,7 +325,7 @@ def evaluar(ns):
         e51=isinstance(hh,pd.DataFrame) and list(hh["id_proceso"])==list(ref_hist["id_proceso"]) and str(ns.get("nit_ancla"))==ref_nit and ns.get("entidad_ancla") is not None
     except Exception as e:
         print("E5.1",type(e).__name__,e); e51=False; ref_hist=pd.DataFrame(); ref_ancla=pd.DataFrame()
-    check("E5_historial_y_ancla",e51,5)
+    check("E5_historial_y_ancla",e51,4)
 
     try:
         a=ref_ancla.groupby("nit_proveedor")["id_proceso"].nunique().rename("procesos_con_ancla").reset_index()
@@ -302,7 +334,7 @@ def evaluar(ns):
         got=ns.get("resultado_relacional")
         e52=isinstance(got,pd.DataFrame) and list(got["nit_proveedor"].astype(str))==list(ref_rel["nit_proveedor"].astype(str)) and list(got["entidades_conectadas"])==list(ref_rel["entidades_conectadas"]) and (OUT/"05_resultado_relacional.csv").exists()
     except Exception:e52=False
-    check("E5_metrica_relacional",e52,6)
+    check("E5_metrica_relacional",e52,4)
 
     try:
         qc=re.sub(r"\s+"," ",str(ns.get("cypher_carga","")).casefold())
@@ -313,7 +345,7 @@ def evaluar(ns):
             and "count(distinct" in q3 and (OUT/"05_neo4j_consultas.cypher").exists()
         )
     except Exception:e53=False
-    check("E5_cypher",e53,6)
+    check("E5_cypher",e53,5)
 
     try:
         import networkx as nx
@@ -322,9 +354,9 @@ def evaluar(ns):
         edge_pp=ref_ancla[["id_proceso","nit_proveedor"]].drop_duplicates().shape[0]
         e54=isinstance(G,nx.DiGraph) and ns.get("nodos_grafo")==1+np_+nv_ and ns.get("aristas_grafo")==np_+edge_pp
     except Exception:e54=False
-    check("E5_subgrafo",e54,3)
+    check("E5_subgrafo",e54,2)
 
-    # E6 · 5
+    # E6 · 10
     decisions=ns.get("decision_log",[])
     informe=str(ns.get("informe_tecnico","")); inf=informe.casefold()
     try:
@@ -343,7 +375,7 @@ def evaluar(ns):
             and (OUT/"06_informe_tecnico.md").exists()
         )
     except Exception:e61=False
-    check("E6_decisiones_informe",e61,3)
+    check("E6_decisiones_informe",e61,6)
 
     files=[
         "00_dataset_contract.json","01_acquisition_manifest.json","01_benchmark_threads.json","01_quality_report.json",
@@ -352,13 +384,36 @@ def evaluar(ns):
         "05_resultado_relacional.csv","06_decision_log.json","06_informe_tecnico.md",
     ]
     e62=all((OUT/f).exists() and (OUT/f).stat().st_size>0 for f in files)
-    check("E6_paquete_reproducible",e62,2)
+    check("E6_paquete_reproducible",e62,4)
+
+    secret_patterns=[
+        re.compile(r"mongodb\+srv://[^\s:@/]+:[^\s@]+@",re.I),
+        re.compile(r"(?i)(x-app-token|app_token)\s*[:=]\s*['\"][A-Za-z0-9_-]{8,}"),
+        re.compile(r"(?i)(password|passwd|pwd)\s*[:=]\s*['\"][^'\"]{4,}"),
+    ]
+    secret_hits=[]
+    for p in OUT.rglob("*"):
+        if not p.is_file() or p.suffix.lower() not in {".json",".csv",".md",".cql",".cypher",".txt"}:
+            continue
+        try:
+            txt=p.read_text(encoding="utf-8",errors="ignore")
+        except Exception:
+            continue
+        if any(rx.search(txt) for rx in secret_patterns):
+            secret_hits.append(str(p.relative_to(OUT)))
+
+    gates={
+        "security_no_secrets":{
+            "ok":not secret_hits,
+            "message":"Sin secretos detectados." if not secret_hits else "Elimine credenciales o tokens de: "+", ".join(secret_hits)
+        }
+    }
 
     puntaje=sum(x["puntos"] for x in checks.values()); maximo=sum(x["maximo"] for x in checks.values())
     assert maximo==100, f"El validador debe sumar 100, suma {maximo}"
     nota=round(1+4*puntaje/maximo,2)
     manifest={
-        "taller":"TC1 V4 · SECOP Data Pipeline",
+        "taller":"TC1 · SECOP Data Pipeline",
         "version":VERSION,
         "pareja_id":pareja,
         "integrantes":[
@@ -366,7 +421,9 @@ def evaluar(ns):
             {"nombre":ns.get("INTEGRANTE_2",""),"codigo":ns.get("CODIGO_2","")},
         ],
         "puntaje":puntaje,"maximo":maximo,"nota_5":nota,
-        "controles":checks,"artefactos":files,
+        "controles":checks,"gates":gates,
+        "feedback_summary":[{"control":k,"feedback":v["feedback"]} for k,v in checks.items() if not v["ok"]],
+        "artefactos":files,
     }
     previo=json.dumps(manifest,ensure_ascii=False,indent=2)
     manifest["sha256"]=hashlib.sha256(previo.encode("utf-8")).hexdigest()
