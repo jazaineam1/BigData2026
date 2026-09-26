@@ -602,7 +602,12 @@ async function collaborationOverview(ctx:any,run:any){
     db.from("lms_discussion_threads_v2").select("*").eq("course_run_id",run.id).order("pinned",{ascending:false}).order("created_at",{ascending:false}).limit(60),
     db.from("lms_discussion_posts_v2").select("*").eq("hidden",false).order("created_at").limit(500)
   ]);
-  const visibleUserIds=[...new Set([...(members||[]).map((x:any)=>x.user_id),...(posts||[]).map((x:any)=>x.user_id)])];
+  const threadIds=new Set((threads||[]).map((t:any)=>t.id));
+  const postRows=(posts||[]).filter((p:any)=>threadIds.has(p.thread_id));
+  const postIds=postRows.map((p:any)=>p.id);
+  const {data:mentions}=postIds.length?await db.from("lms_discussion_mentions_v2").select("post_id,mentioned_user_id,created_at,read_at").eq("mentioned_user_id",ctx.user.id).in("post_id",postIds).order("created_at",{ascending:false}):({data:[]} as any);
+  if((mentions||[]).some((m:any)=>!m.read_at))await db.from("lms_discussion_mentions_v2").update({read_at:new Date().toISOString()}).eq("mentioned_user_id",ctx.user.id).is("read_at",null).in("post_id",postIds).then(()=>{}).catch(()=>{});
+  const visibleUserIds=[...new Set([...(members||[]).map((x:any)=>x.user_id),...postRows.map((x:any)=>x.user_id)])];
   const {data:users}=visibleUserIds.length?await db.from("lms_users").select("id,display_name,username").in("id",visibleUserIds):({data:[]} as any);
   const assignmentMap=new Map((assignments||[]).map((a:any)=>[a.id,a]));
   const settingRows=(settings||[]).filter((s:any)=>assignmentMap.has(s.assignment_id));
@@ -612,9 +617,13 @@ async function collaborationOverview(ctx:any,run:any){
     const {data:done}=await db.from("lms_peer_reviews_v2").select("reviewee_submission_id").eq("assignment_id",setting.assignment_id).eq("reviewer_user_id",ctx.user.id);
     const doneSet=new Set((done||[]).map((x:any)=>x.reviewee_submission_id));
     const eligible=(candidates||[]).filter((x:any)=>!ownGroupIds.includes(x.group_id)&&!doneSet.has(x.id));
-    for(const x of eligible.slice(0,Number(setting.reviews_per_student||1)))peerTargets.push({...x,assignment:assignmentMap.get(setting.assignment_id),peer_setting:setting});
+    for(const x of eligible.slice(0,Number(setting.reviews_per_student||1)))peerTargets.push({
+      id:x.id,assignment_id:x.assignment_id,attempt:x.attempt,artifact_type:x.artifact_type,artifact:x.artifact,status:x.status,submitted_at:x.submitted_at,
+      assignment:assignmentMap.get(setting.assignment_id),
+      peer_setting:{assignment_id:setting.assignment_id,peer_review_enabled:setting.peer_review_enabled,reviews_per_student:setting.reviews_per_student,peer_rubric:setting.peer_rubric,anonymous_peer_review:setting.anonymous_peer_review}
+    });
   }
-  return {viewer:ctx.user,run,groups:groups||[],members:members||[],member_users:users||[],users:users||[],settings:settingRows,assignments:assignments||[],group_submissions:groupSubs||[],threads:threads||[],posts:posts||[],peer_targets:peerTargets};
+  return {viewer:ctx.user,run,groups:groups||[],members:members||[],member_users:users||[],users:users||[],settings:settingRows,assignments:assignments||[],group_submissions:groupSubs||[],threads:threads||[],posts:postRows,mentions:mentions||[],peer_targets:peerTargets};
 }
 async function teacherCollaboration(ctx:any,run:any){
   requireTeacher(ctx);
@@ -631,6 +640,8 @@ async function teacherCollaboration(ctx:any,run:any){
     db.from("lms_group_contributions_v2").select("*").order("confirmed_at",{ascending:false}).limit(2000)
   ]);
   const groupIds=new Set((groups||[]).map((g:any)=>g.id));
+  const threadIds=new Set((threads||[]).map((t:any)=>t.id));
+  const postRows=(posts||[]).filter((p:any)=>threadIds.has(p.thread_id));
   const memberRows=(members||[]).filter((m:any)=>groupIds.has(m.group_id));
   const assignmentIds=new Set((assignments||[]).map((a:any)=>a.id));
   const settingRows=(settings||[]).filter((s:any)=>assignmentIds.has(s.assignment_id));
@@ -640,7 +651,7 @@ async function teacherCollaboration(ctx:any,run:any){
   const contributionRows=(contributions||[]).filter((x:any)=>subIds.has(x.group_submission_id));
   const ids=[...new Set([...(enrollments||[]).map((x:any)=>x.user_id),...memberRows.map((x:any)=>x.user_id)])];
   const {data:users}=ids.length?await db.from("lms_users").select("id,display_name,username,email,active").in("id",ids):({data:[]} as any);
-  return {viewer:ctx.user,run,groups:groups||[],members:memberRows,settings:settingRows,assignments:assignments||[],group_submissions:subRows,students:(users||[]).filter((u:any)=>(enrollments||[]).some((e:any)=>e.user_id===u.id&&e.role==="student")),users:users||[],threads:threads||[],posts:posts||[],peer_reviews:reviewRows,contributions:contributionRows};
+  return {viewer:ctx.user,run,groups:groups||[],members:memberRows,settings:settingRows,assignments:assignments||[],group_submissions:subRows,students:(users||[]).filter((u:any)=>(enrollments||[]).some((e:any)=>e.user_id===u.id&&e.role==="student")),users:users||[],threads:threads||[],posts:postRows,peer_reviews:reviewRows,contributions:contributionRows};
 }
 async function createGroup(ctx:any,run:any,body:any){
   requireTeacher(ctx);const name=clampText(body.name,120,true),description=clampText(body.description,1000);
@@ -726,13 +737,18 @@ async function createThread(ctx:any,run:any,body:any){
   const n=body.session_number===null||body.session_number===""?null:Math.trunc(Number(body.session_number));
   if(n!==null){const {data:s}=await db.from("lms_run_sessions_v2").select("session_number").eq("course_run_id",run.id).eq("session_number",n).maybeSingle();if(!s)throw new Error("Sesión inválida")}
   const assignmentId=clampText(body.assignment_id,80)||null;if(assignmentId){const {data:a}=await db.from("lms_assignments_v2").select("id").eq("id",assignmentId).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Tarea inválida")}
+  const initialBody=clampText(body.body,8000,true);
   const {data,error}=await db.from("lms_discussion_threads_v2").insert({course_run_id:run.id,session_number:n,assignment_id:assignmentId,title:clampText(body.title,180,true),pinned:isTeacher(ctx)&&!!body.pinned,locked:false,created_by:ctx.user.id}).select("*").single();if(error)throw error;
-  return {ok:true,thread:data};
+  const {data:first,error:postError}=await db.from("lms_discussion_posts_v2").insert({thread_id:data.id,user_id:ctx.user.id,body:initialBody}).select("*").single();if(postError)throw postError;
+  return {ok:true,thread:data,post:first};
 }
 async function postDiscussion(ctx:any,run:any,body:any){
   const threadId=clampText(body.thread_id,80,true),parentId=clampText(body.parent_id,80)||null;
   const {data:t}=await db.from("lms_discussion_threads_v2").select("*").eq("id",threadId).eq("course_run_id",run.id).maybeSingle();if(!t)throw new Error("Conversación no encontrada");if(t.locked&&!isTeacher(ctx))throw new Error("Esta conversación está cerrada");
+  let parent:any=null;
+  if(parentId){const x=await db.from("lms_discussion_posts_v2").select("id,thread_id,user_id").eq("id",parentId).maybeSingle();parent=x.data;if(!parent||parent.thread_id!==threadId)throw new Error("La respuesta citada no pertenece a esta conversación")}
   const {data,error}=await db.from("lms_discussion_posts_v2").insert({thread_id:threadId,user_id:ctx.user.id,parent_id:parentId,body:clampText(body.body,8000,true)}).select("*").single();if(error)throw error;
+  if(parent&&parent.user_id!==ctx.user.id)await db.from("lms_discussion_mentions_v2").upsert({post_id:data.id,mentioned_user_id:parent.user_id,created_at:new Date().toISOString()},{onConflict:"post_id,mentioned_user_id"}).then(()=>{}).catch(()=>{});
   return {ok:true,post:data};
 }
 async function moderateThread(ctx:any,run:any,body:any){
