@@ -17,7 +17,7 @@ backend=read("infraestructura/lms/functions/bigdata-session/index.ts")
 client=read("lms/assets/bigdata-lms.js")
 session=read("lms/session.html")
 progress=read("lms/progress.html")
-wall=read("lms/wall.html")
+wall=read("lms/wall.html")\nclass_wall=read("lms/class-wall.html")
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
 generator=read("utils/build_session9_notebook.py")
 notebook=read("Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb")
@@ -30,7 +30,7 @@ labs=[
 
 checks=[
  ("CHECK de eventos versionado", all(x in migration for x in ["slide_viewed","challenge_answered","lab_interaction","evidence_submitted","lab_code_issued"])),
- ("tablas de evidencia protegidas", all(x in migration for x in ["bd_activity_catalog","bd_evidence","bd_lab_codes","enable row level security","revoke all"])),
+ ("tablas de evidencia protegidas", all(x in migration for x in ["bd_activity_catalog","bd_evidence","bd_lab_codes","enable row level security","revoke all"])),\n ("muro de clase protegido", all(x in migration for x in ["bd_wall_posts","bd_wall_reactions"])),
  ("12 LAB declarados", all(x in migration for x in labs)),
  ("LAB3 seeded-numeric", "s09_topk_aero_count" in migration and "'bd-s09-lab3','seeded-numeric'" in migration),
  ("backend comprueba errores", 'failIf(eventError,"No se pudo registrar el evento")' in backend and "failIf(evidenceError" in backend),
@@ -43,7 +43,7 @@ checks=[
  ("módulo abre LAB en slide", "function openStage(a)" in session and "resource_type:'lab'" in session),
  ("módulo genera código Colab", "labCodeCard" in session and "L.session('lab_code'" in session),
  ("Mi progreso muestra evidencia", "evidenceCard" in progress and "renderEvidence()" in progress),
- ("WALL muestra LAB y evidencia", "LAB explorados" in wall and "detailEvidence" in wall and "evidence_count" in wall),
+ ("WALL muestra LAB y evidencia", "LAB explorados" in wall and "detailEvidence" in wall and "evidence_count" in wall),\n ("muro publicar-para-ver", "publish_first" in backend and all(x in backend for x in ['action==="wall_post"','action==="wall_list"','action==="wall_react"','action==="wall_moderate"']) and "Publica para ver" in class_wall),\n ("muro anonimiza pares", "Compañero " in backend and "Tus compañeros ven un alias" in class_wall),
  ("S09 instrumenta 12 LAB", "LAB_BY_SLIDE" in deck and all(x in deck for x in labs)),
  ("S09 envía lab_interaction", "lab_interaction" in deck and "queueLabInteraction" in deck),
  ("S09 LAB3 registra evidencia", "submitLab3Evidence" in deck and "bd-s09-lab3" in deck and "Resultado propio" in deck),
