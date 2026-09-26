@@ -70,7 +70,7 @@ checks=[
     ("SVG S09 contenidos","overflow:hidden" in re.search(r'\.svg\{[^}]*\}',deck).group(0) and "height:auto" in re.search(r'\.svg\{[^}]*\}',deck).group(0)),
     ("estándar viz-frame",".viz-frame{" in css and ":focus-visible" in css),
     ("bridge recursos internos","requireSession(n)" in bridge and "guide_opened" in bridge and all("resource-bridge.js" in x for x in [atlas_guide,astra_guide,neo4j_guide])),
-    ("course policy V3",course.get("version",0)>=11 and "LMS V3" in course.get("tracking_policy","")),
+    ("course policy V3+",course.get("version",0)>=11 and any(v in course.get("tracking_policy","") for v in ["LMS V3","LMS V4","LMS V5"])),
     ("course wall universal",any(x.get("code")=="wall_s09" and x.get("path")=="wall.html?s=9" for x in course.get("teacher_tools",[]))),
     ("course progress universal",any(x.get("code")=="progress_s09" and x.get("path")=="progress.html?s=9" for x in course.get("student_tools",[]))),
     ("Pages módulo universal","test -f _site/lms/session.html" in pages),
