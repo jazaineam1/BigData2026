@@ -96,6 +96,18 @@ jobs:
           PY
       - name: Validar recurso TC1
         run: python utils/validate_tc1_v4.py
+      - name: Verificar notebook S09 reproducible
+        run: |
+          cp Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb /tmp/S09.ipynb
+          python utils/build_session9_notebook.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          original=json.loads(Path("/tmp/S09.ipynb").read_text(encoding="utf-8"))
+          rebuilt=json.loads(Path("Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb").read_text(encoding="utf-8"))
+          assert original==rebuilt, "El notebook S09 generado no coincide semánticamente con el versionado"
+          print("Notebook S09 reproducible: OK")
+          PY
       - name: Validar administrador docente
         run: python utils/validate_lms_admin.py
       - name: Validar columna vertebral LMS
