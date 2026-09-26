@@ -12,6 +12,14 @@ values (
 on conflict (course_code,session_number) do update set
   title=excluded.title,path=excluded.path,position=excluded.position,required=excluded.required,metadata=excluded.metadata;
 
+-- S09 sigue el patrón S07: la guía separada deja de ser recurso/actividad.
+delete from public.bd_lms_activity_progress
+where activity_code='bd-s09-guide'
+  and course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' and course_code='bigdata' limit 1);
+
+delete from public.bd_lms_activities
+where code='bd-s09-guide' and course_code='bigdata' and session_number=9;
+
 insert into public.bd_lms_activities
 (code,course_code,session_number,title,kind,points,position,required,metadata)
 values
