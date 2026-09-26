@@ -64,6 +64,7 @@ checks=[
     ("reset limitado por sesión","REINICIAR_S" in backend and 'eq("session_number",n)' in backend),
     ("tabla claves protegida","bd_lms_activity_keys" in sql and "enable row level security" in sql and "revoke all on table public.bd_lms_activity_keys from anon, authenticated" in sql),
     ("recursos S01-S09 declarativos","bd-s01-r1" in sql and "bd-s07-r1" in sql and "bd-s08-module" in sql and "bd-s09-c5" in sql),
+    ("rutas canónicas SQL","set path = 'session.html?s=' || session_number::text" in sql and "canonical_module" in sql),
     ("S09 vuelve a módulo universal",'href="../lms/session.html?s=9"' in deck and 'href="../lms/progress.html?s=9"' in deck),
     ("S09 login vuelve a módulo universal","../lms/session.html?s=9&reason=login" in deck),
     ("SVG S09 contenidos","overflow:hidden" in re.search(r'\.svg\{[^}]*\}',deck).group(0) and "height:auto" in re.search(r'\.svg\{[^}]*\}',deck).group(0)),

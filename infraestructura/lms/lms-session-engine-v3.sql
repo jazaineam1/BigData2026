@@ -104,3 +104,18 @@ set metadata=metadata || case session_number
  when 9 then '{"module_kind":"learning","estimated_minutes":180,"outcomes":["Diferenciar búsqueda lexical, semántica e híbrida","Interpretar embeddings y similitud coseno","Diseñar búsqueda vectorial y evaluar Top-k"]}'::jsonb
  else '{}'::jsonb end
 where session_number between 1 and 9;
+
+
+-- LMS V3 canonical session route
+-- La sesión siempre abre primero el módulo LMS. Los recursos (presentación,
+-- cuaderno, guía o laboratorio) conservan sus URL propias en lms_run_resources_v2.
+update public.lms_run_sessions_v2
+set path = 'session.html?s=' || session_number::text
+where course_run_id = (select id from public.lms_course_runs where code='bigdata-2026-2' limit 1)
+  and session_number between 1 and 16;
+
+update public.bd_lms_sessions
+set path = 'session.html?s=' || session_number::text,
+    metadata = metadata || '{"canonical_module":true}'::jsonb
+where course_code='bigdata'
+  and session_number between 1 and 16;
