@@ -26,6 +26,7 @@ body.wall-mode .stage,body.wall-mode .nav,body.wall-mode .top,body.wall-mode>.dr
 <div class="stage" id="stage"></div>
 <nav class="nav"><button id="prev">←</button><span id="chap" class="chap">Inicio</span><button id="next">→</button></nav>
 <script src="../lms/assets/bigdata-lms.js?v=20260926-s09-live2"></script>
+<script src="../lms/assets/lms-kit.js?v=20260926-v5" data-session="9"></script>
 <script>
 const slides=[
 {t:'Inicio',k:'S09 · CASO CONDUCTOR',h:'Cuando las palabras no coinciden.',dark:1,b:`<div class="body cols bigleft"><div><p class="lead">Laura busca procesos SECOP. Su necesidad puede estar escrita con palabras distintas a las del contenido que realmente le sirve. Hoy compararemos formas de buscar, ordenar resultados y evaluar si son útiles.</p><div class="flow"><div class="node">necesidad</div><div class="arrow">→</div><div class="node">buscar</div><div class="arrow">→</div><div class="node">resultados</div><div class="arrow">→</div><div class="node">evaluar</div></div><div class="note warn"><b>Regla:</b> ningún resultado automático reemplaza la lectura humana de la necesidad y del contenido recuperado.</div></div>${svgHero()}</div>`},
@@ -98,7 +99,7 @@ function queueSlideTrack(){
   slideTrackTimer=setTimeout(()=>{
     if(slide===lastSlideTracked)return;
     lastSlideTracked=slide;
-    L.s09('track',{event_type:'slide_viewed',metadata:{source:'s09-presentation',slide,label,chapter,path:location.pathname},client_at:new Date().toISOString()}).catch(()=>{});
+    K.track('slide_viewed',{metadata:{source:'s09-presentation',slide,label,chapter,path:location.pathname},client_at:new Date().toISOString()}).catch(()=>{});
   },650);
 }
 function fromHash(){const m=location.hash.match(/^#s(\d+)$/);go(m?Number(m[1])-1:0,true)}
@@ -122,7 +123,7 @@ function rrfDemo(){if(!window.rrfOut)return;const ranks={D8:[2,1],D3:[1,2],D5:[4
 function initP(){if(!window.pBtns)return;pBtns.innerHTML=pState.map((v,i)=>`<button class="${v?'on':''}" onclick="pState[${i}]=1-pState[${i}];initP()">${v?'✓':'✗'}</button>`).join('');pOut.textContent='P@5 = '+(pState.reduce((a,b)=>a+b,0)/5).toFixed(2)}function resetP(){pState=[0,0,0,0,0];initP()}
 function evidence(){const o={consulta:evQ.value,resultado_defendible:evGood.value,falso_positivo:evBad.value,alternativa_descartada:evAlt.value,limite:evLim.value,nota:'Completar en Colab con Top-5 lexical, semántico e híbrido reales.'};evOut.textContent=JSON.stringify(o,null,2)}
 
-const L=window.BIGDATA_LMS;
+const L=window.BIGDATA_LMS,K=window.LMS;
 const LAB_BY_SLIDE={6:'bd-s09-lab1',12:'bd-s09-lab-e5',14:'bd-s09-lab-chunk',16:'bd-s09-lab2',17:'bd-s09-lab3',18:'bd-s09-lab4',24:'bd-s09-lab5',26:'bd-s09-lab6',29:'bd-s09-lab7',31:'bd-s09-lab8',32:'bd-s09-lab-eval',33:'bd-s09-lab9'};
 const labTimers=new Map(),labLastSent=new Map();
 let s09Model=null,studentTimer=null,teacherTimer=null;
@@ -140,7 +141,7 @@ function queueLabInteraction(code,el){
   labTimers.set(key,setTimeout(async()=>{
     const now=Date.now(),last=labLastSent.get(key)||0;if(now-last<5000)return;
     labLastSent.set(key,now);
-    await L.s09('track',{event_type:'lab_interaction',activity_code:code,metadata:{source:'s09-lab',control,value:labControlValue(el)},client_at:new Date().toISOString()}).catch(()=>{});
+    await K.track('lab_interaction',{activity_code:code,metadata:{source:'s09-lab',control,value:labControlValue(el)},client_at:new Date().toISOString()}).catch(()=>{});
   },1500));
 }
 function injectLab3Evidence(lab){
@@ -155,7 +156,8 @@ async function submitLab3Evidence(){
     alternative=document.getElementById('lab3Alternative').value,limit=document.getElementById('lab3Limit').value;
   btn.disabled=true;out.textContent='Validando evidencia…';
   try{
-    const x=await L.s09('evidence',{activity_code:'bd-s09-lab3',source:'presentation',payload:{result,decision,alternative,limit}});
+    const x=await K.evidence('bd-s09-lab3',{result,decision,alternative,limit},{source:'presentation'});
+    if(x.queued){out.textContent='⟳ '+x.feedback;return}
     out.textContent=x.completed?'✓ '+x.feedback:'Aún no · '+x.feedback;
     await refreshStudentProgress();
   }catch(e){out.textContent='No se pudo registrar: '+e.message}
@@ -181,7 +183,8 @@ async function submitGenericEvidence(code,box){
   const payload={};box.querySelectorAll('[data-step]').forEach(el=>{payload[el.dataset.step]=el.type==='number'?Number(el.value):el.value});
   btn.disabled=true;out.textContent='Registrando evidencia…';
   try{
-    const x=await L.s09('evidence',{activity_code:code,source:'presentation',payload});
+    const x=await K.evidence(code,payload,{source:'presentation'});
+    if(x.queued){out.textContent='⟳ '+x.feedback;return}
     out.textContent=x.completed?'✓ '+x.feedback:'Aún no · '+x.feedback;await refreshStudentProgress();
   }catch(e){out.textContent='No se pudo registrar: '+e.message}finally{btn.disabled=false}
 }
@@ -266,11 +269,11 @@ async function initStudentLms(){
     moduleIdentity.textContent=(s09Model.viewer?.display_name||s09Model.viewer?.username||'Usuario')+' · conectado';
     renderEvidencePanels();
     if(window.topk)topKDemo();
-    await L.s09('track',{event_type:'presentation_opened',activity_code:'bd-s09-presentation',metadata:{source:'s09-embedded-presentation',path:location.pathname},client_at:new Date().toISOString()});
+    await K.track('presentation_opened',{activity_code:'bd-s09-presentation',metadata:{source:'s09-embedded-presentation',path:location.pathname},client_at:new Date().toISOString()});
     s09Model=await L.s09('me');
     queueSlideTrack();
     renderStudentLive();
-    L.startHeartbeat('bd-s09-presentation',L.s09);
+    K.startHeartbeat('bd-s09-presentation');
     studentTimer=setInterval(()=>refreshStudentProgress().catch(()=>{}),15000);
   }catch(e){liveStatus.textContent='S09 Live no disponible: '+e.message;renderStudentLive()}
 }
