@@ -197,6 +197,7 @@ function wireLabs(){
   Object.entries(LAB_BY_SLIDE).forEach(([slide,code])=>{
     const section=document.getElementById('s'+slide),lab=section?.querySelector('.lab');if(!lab)return;
     lab.dataset.lab=code;
+    if(code==='bd-s09-lab3'){const b=lab.querySelector('#lab3Submit');if(b)b.onclick=submitLab3Evidence}
     ['input','change','click'].forEach(type=>lab.addEventListener(type,e=>{const el=e.target;if(el&&['INPUT','SELECT','TEXTAREA','BUTTON'].includes(el.tagName))queueLabInteraction(code,el)},true));
   });
 }
