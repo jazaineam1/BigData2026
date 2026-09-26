@@ -107,7 +107,7 @@ async function getHome(ctx:any,run:any,teacher=false){
     db.from("lms_run_resources_v2").select("*").eq("course_run_id",run.id).eq("visible",true).order("position"),
     db.from("lms_announcements").select("id,title,body,link,pinned,published_at,expires_at,created_at,updated_at")
       .eq("course_run_id",run.id).lte("published_at",now).order("pinned",{ascending:false}).order("published_at",{ascending:false}).limit(50),
-    db.from("lms_assignments").select("id,session_number,title,instructions,due_at,required,max_score,rubric,allowed_types,active,created_at,updated_at")
+    db.from("lms_assignments_v2").select("id,code,session_number,title,instructions,due_at,required,max_score,rubric,allowed_types,active,max_attempts,category,weight,created_at,updated_at")
       .eq("course_run_id",run.id).eq("active",true).order("due_at",{ascending:true})
   ]);
   const sessionRows=(sessions||[]).filter((s:any)=>teacher||s.status!=="draft");
@@ -117,7 +117,7 @@ async function getHome(ctx:any,run:any,teacher=false){
   let submissions:any[]=[];
   if((assignments||[]).length){
     const ids=(assignments||[]).map((a:any)=>a.id);
-    const {data}=await db.from("lms_submissions")
+    const {data}=await db.from("lms_submissions_v2")
       .select("id,assignment_id,attempt,artifact_type,status,submitted_at,score,feedback,reviewed_at")
       .eq("user_id",ctx.user.id).in("assignment_id",ids)
       .order("attempt",{ascending:false});
@@ -152,7 +152,7 @@ async function teacherOverview(ctx:any,run:any){
   const home=await getHome(ctx,run,true);
   const [{data:allAnnouncements},{data:allAssignments}] = await Promise.all([
     db.from("lms_announcements").select("*").eq("course_run_id",run.id).order("created_at",{ascending:false}).limit(100),
-    db.from("lms_assignments").select("*").eq("course_run_id",run.id).order("session_number").order("created_at",{ascending:false}).limit(200)
+    db.from("lms_assignments_v2").select("*").eq("course_run_id",run.id).order("session_number").order("created_at",{ascending:false}).limit(200)
   ]);
   return {...home,all_announcements:allAnnouncements||[],all_assignments:allAssignments||[]};
 }
@@ -254,6 +254,139 @@ async function deleteResource(ctx:any,run:any,body:any){
   return {ok:true};
 }
 
+
+async function assignmentsForUser(ctx:any,run:any){
+  const {data:assignments,error}=await db.from("lms_assignments_v2")
+    .select("*").eq("course_run_id",run.id).eq("active",true).order("session_number").order("due_at",{ascending:true});
+  if(error)throw error;
+  const ids=(assignments||[]).map((x:any)=>x.id);
+  if(!ids.length)return {viewer:ctx.user,run,assignments:[]};
+  const [{data:subs},{data:accs}]=await Promise.all([
+    db.from("lms_submissions_v2").select("*").eq("user_id",ctx.user.id).in("assignment_id",ids).order("attempt",{ascending:false}),
+    db.from("lms_assignment_accommodations_v2").select("*").eq("user_id",ctx.user.id).in("assignment_id",ids)
+  ]);
+  const by=new Map<string,any[]>();for(const s of subs||[]){if(!by.has(s.assignment_id))by.set(s.assignment_id,[]);by.get(s.assignment_id)!.push(s)}
+  const am=new Map((accs||[]).map((x:any)=>[x.assignment_id,x]));
+  const rows=(assignments||[]).map((a:any)=>{
+    const attempts=by.get(a.id)||[],latest=attempts[0]||null,acc:any=am.get(a.id)||{};
+    const effective_due=acc.due_at||a.due_at||null,effective_max_attempts=Number(acc.max_attempts||a.max_attempts||1);
+    const overdue=!!effective_due&&Date.parse(effective_due)<Date.now()&&!latest;
+    const can_submit=attempts.length<effective_max_attempts&&(!effective_due||Date.parse(effective_due)>=Date.now());
+    return {...a,effective_due,effective_max_attempts,attempts_used:attempts.length,latest_submission:latest,attempts,overdue,can_submit,accommodation:acc||null}
+  });
+  return {viewer:ctx.user,run,assignments:rows};
+}
+async function submitAssignment(ctx:any,run:any,body:any){
+  const id=clampText(body.assignment_id,80,true);
+  const {data:a}=await db.from("lms_assignments_v2").select("*").eq("id",id).eq("course_run_id",run.id).eq("active",true).maybeSingle();
+  if(!a)throw new Error("Tarea no encontrada o no disponible");
+  if(a.code==="bd-s08-control")throw new Error("S08 se entrega desde su validador de manifest, no desde este formulario");
+  const {data:acc}=await db.from("lms_assignment_accommodations_v2").select("*").eq("assignment_id",id).eq("user_id",ctx.user.id).maybeSingle();
+  const due=acc?.due_at||a.due_at||null,maxAttempts=Number(acc?.max_attempts||a.max_attempts||1);
+  if(due&&Date.parse(due)<Date.now())throw new Error("La fecha de entrega ya venció para tu cuenta");
+  const {data:prior}=await db.from("lms_submissions_v2").select("attempt").eq("assignment_id",id).eq("user_id",ctx.user.id).order("attempt",{ascending:false}).limit(1);
+  const attempt=Number(prior?.[0]?.attempt||0)+1;if(attempt>maxAttempts)throw new Error("Ya usaste el máximo de intentos");
+  const type=String(body.artifact_type||"text");
+  if(!Array.isArray(a.allowed_types)||!a.allowed_types.includes(type))throw new Error("Tipo de entrega no permitido");
+  let artifact:any={};
+  if(type==="text")artifact={text:clampText(body.text,20000,true)};
+  else if(type==="url"){const url=cleanUrl(body.url);if(!url)throw new Error("URL obligatoria");artifact={url}}
+  else if(type==="file")throw new Error("Carga de archivo aún no está habilitada; usa texto o URL en esta tarea");
+  else throw new Error("La evidencia automática solo puede generarla el sistema");
+  const {data,error}=await db.from("lms_submissions_v2").insert({
+    assignment_id:id,user_id:ctx.user.id,attempt,artifact_type:type,artifact,status:"submitted",submitted_at:new Date().toISOString()
+  }).select("*").single();
+  if(error)throw error;
+  await audit(ctx.user.id,"bigdata.assignment.submit","submission",data.id,{assignment_id:id,attempt});
+  return {ok:true,submission:data};
+}
+function cleanRubric(raw:any,maxScore:number){
+  if(!Array.isArray(raw))return [];
+  const out=[];let total=0;
+  for(const x of raw.slice(0,20)){
+    const title=clampText(x?.title,180,true),code=clampText(x?.code||title.toLowerCase().replace(/[^a-z0-9]+/g,"-"),80,true);
+    const max=Number(x?.max);if(!Number.isFinite(max)||max<=0)throw new Error("Máximo de rúbrica inválido");
+    total+=max;out.push({code,title,max});
+  }
+  if(out.length&&Math.abs(total-maxScore)>0.001)throw new Error("La suma de la rúbrica debe coincidir con el puntaje máximo");
+  return out;
+}
+async function saveAssignment(ctx:any,run:any,body:any){
+  requireTeacher(ctx);
+  const id=clampText(body.id,80),code=clampText(body.code,80,true).toLowerCase();
+  if(!/^[a-z0-9][a-z0-9_-]{2,79}$/.test(code))throw new Error("Código de tarea inválido");
+  const n=body.session_number===null||body.session_number===""?null:Math.trunc(Number(body.session_number));
+  if(n!==null){
+    const {data:s}=await db.from("lms_run_sessions_v2").select("session_number").eq("course_run_id",run.id).eq("session_number",n).maybeSingle();
+    if(!s)throw new Error("La sesión indicada no existe en esta cohorte");
+  }
+  const maxScore=Number(body.max_score||100);if(!Number.isFinite(maxScore)||maxScore<=0||maxScore>1000)throw new Error("Puntaje máximo inválido");
+  const allowed=(Array.isArray(body.allowed_types)?body.allowed_types:[]).filter((x:any)=>["text","url","file","evidence"].includes(String(x)));
+  if(!allowed.length)throw new Error("Selecciona al menos un tipo de entrega");
+  const maxAttempts=Math.trunc(Number(body.max_attempts||1));if(maxAttempts<1||maxAttempts>20)throw new Error("Intentos inválidos");
+  const row:any={course_run_id:run.id,code,session_number:n,title:clampText(body.title,180,true),instructions:clampText(body.instructions,8000),
+    due_at:toIsoOrNull(body.due_at),required:body.required!==false,max_score:maxScore,rubric:cleanRubric(body.rubric,maxScore),
+    allowed_types:allowed,active:body.active!==false,max_attempts:maxAttempts,category:clampText(body.category||"coursework",80,true),
+    weight:Math.max(0,Number(body.weight??1)),updated_at:new Date().toISOString()};
+  let saved:any,error:any;
+  if(id){
+    const x=await db.from("lms_assignments_v2").update(row).eq("id",id).eq("course_run_id",run.id).select("*").single();saved=x.data;error=x.error;
+  }else{
+    row.created_by=ctx.user.id;const x=await db.from("lms_assignments_v2").insert(row).select("*").single();saved=x.data;error=x.error;
+  }
+  if(error)throw error;await audit(ctx.user.id,id?"bigdata.assignment.update":"bigdata.assignment.create","assignment",saved.id,{code:saved.code});
+  return {ok:true,assignment:saved};
+}
+async function setAccommodation(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const assignmentId=clampText(body.assignment_id,80,true),userId=clampText(body.user_id,80,true);
+  const {data:a}=await db.from("lms_assignments_v2").select("id").eq("id",assignmentId).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Tarea no encontrada");
+  const {data:e}=await db.from("lms_run_enrollments").select("user_id").eq("course_run_id",run.id).eq("user_id",userId).maybeSingle();if(!e)throw new Error("Estudiante fuera de la cohorte");
+  const due=toIsoOrNull(body.due_at),max=body.max_attempts?Math.trunc(Number(body.max_attempts)):null;if(max!==null&&(max<1||max>20))throw new Error("Intentos inválidos");
+  const {data,error}=await db.from("lms_assignment_accommodations_v2").upsert({
+    assignment_id:assignmentId,user_id:userId,due_at:due,max_attempts:max,notes:clampText(body.notes,1000),updated_by:ctx.user.id,updated_at:new Date().toISOString()
+  },{onConflict:"assignment_id,user_id"}).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.assignment.accommodation","assignment_accommodation",assignmentId,{user_id:userId});
+  return {ok:true,accommodation:data};
+}
+async function gradebook(ctx:any,run:any){
+  requireTeacher(ctx);
+  const [{data:assignments},{data:enrollments}]=await Promise.all([
+    db.from("lms_assignments_v2").select("*").eq("course_run_id",run.id).order("session_number").order("created_at"),
+    db.from("lms_run_enrollments").select("user_id,role,status").eq("course_run_id",run.id)
+  ]);
+  const studentIds=(enrollments||[]).filter((x:any)=>x.role==="student").map((x:any)=>x.user_id);
+  const assignmentIds=(assignments||[]).map((x:any)=>x.id);
+  const [{data:users},{data:subs},{data:accs}]=await Promise.all([
+    studentIds.length?db.from("lms_users").select("id,display_name,username,email,active").in("id",studentIds):Promise.resolve({data:[]} as any),
+    assignmentIds.length?db.from("lms_submissions_v2").select("*").in("assignment_id",assignmentIds).order("attempt",{ascending:false}):Promise.resolve({data:[]} as any),
+    assignmentIds.length?db.from("lms_assignment_accommodations_v2").select("*").in("assignment_id",assignmentIds):Promise.resolve({data:[]} as any)
+  ]);
+  return {viewer:ctx.user,run,assignments:assignments||[],students:users||[],submissions:subs||[],accommodations:accs||[]};
+}
+async function gradeSubmission(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const id=clampText(body.submission_id,80,true);
+  const {data:s}=await db.from("lms_submissions_v2").select("*").eq("id",id).maybeSingle();if(!s)throw new Error("Entrega no encontrada");
+  const {data:a}=await db.from("lms_assignments_v2").select("*").eq("id",s.assignment_id).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Entrega fuera de Big Data");
+  const score=Number(body.score);if(!Number.isFinite(score)||score<0||score>Number(a.max_score))throw new Error("Nota fuera del rango permitido");
+  const feedback=clampText(body.feedback,10000),rubricScores=body.rubric_scores&&typeof body.rubric_scores==="object"?body.rubric_scores:{};
+  const now=new Date().toISOString();
+  const {error:hError}=await db.from("lms_grade_history_v2").insert({
+    submission_id:s.id,assignment_id:s.assignment_id,user_id:s.user_id,actor_user_id:ctx.user.id,
+    previous_score:s.score,new_score:score,previous_feedback:s.feedback,new_feedback:feedback,rubric_scores:rubricScores,created_at:now
+  });if(hError)throw hError;
+  const {data,error}=await db.from("lms_submissions_v2").update({score,feedback,rubric_scores:rubricScores,status:"reviewed",reviewed_by:ctx.user.id,reviewed_at:now})
+    .eq("id",s.id).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.submission.grade","submission",id,{assignment_id:s.assignment_id,user_id:s.user_id,score});
+  return {ok:true,submission:data};
+}
+async function gradeHistory(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const id=clampText(body.submission_id,80,true);
+  const {data:s}=await db.from("lms_submissions_v2").select("assignment_id").eq("id",id).maybeSingle();if(!s)throw new Error("Entrega no encontrada");
+  const {data:a}=await db.from("lms_assignments_v2").select("id").eq("id",s.assignment_id).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Entrega fuera de Big Data");
+  const {data}=await db.from("lms_grade_history_v2").select("*").eq("submission_id",id).order("created_at",{ascending:false});
+  return {history:data||[]};
+}
+
 Deno.serve(async(req:Request)=>{
   if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
   if(req.method==="OPTIONS")return new Response("ok",{headers:headers(req)});
@@ -276,6 +409,13 @@ Deno.serve(async(req:Request)=>{
     if(action==="teacher_save_session")return out(req,await saveSession(ctx,run,body));
     if(action==="teacher_save_resource")return out(req,await saveResource(ctx,run,body));
     if(action==="teacher_delete_resource")return out(req,await deleteResource(ctx,run,body));
+    if(action==="assignments")return out(req,await assignmentsForUser(ctx,run));
+    if(action==="submit_assignment")return out(req,await submitAssignment(ctx,run,body));
+    if(action==="teacher_save_assignment")return out(req,await saveAssignment(ctx,run,body));
+    if(action==="teacher_gradebook")return out(req,await gradebook(ctx,run));
+    if(action==="teacher_grade_submission")return out(req,await gradeSubmission(ctx,run,body));
+    if(action==="teacher_grade_history")return out(req,await gradeHistory(ctx,run,body));
+    if(action==="teacher_set_accommodation")return out(req,await setAccommodation(ctx,run,body));
     return out(req,{error:"Acción desconocida"},400);
   }catch(e){
     if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);
