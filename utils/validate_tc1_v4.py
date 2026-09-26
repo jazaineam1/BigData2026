@@ -21,6 +21,7 @@ edge=read("infraestructura/lms/functions/bigdata-learning/index.ts")
 sql=read("infraestructura/lms/tc1-v4-secoppipeline.sql")
 pages=read(".github/workflows/pages.yml")
 index=read("index.html")
+teacher_collab=read("lms/teacher-collaboration.html")
 
 try:
     nb=json.loads(nb_text)
@@ -65,6 +66,10 @@ checks=[
     ("LMS declara 6h", "mínimo 6 horas por grupo" in s08 and "'estimated_minutes',360" in sql),
     ("LMS grupal en SQL", "lms_assignment_group_settings_v2" in sql and "'group_assessment',true" in sql and "Proyecto grupal" in sql),
     ("manifest único por grupo", "Este manifest ya fue registrado por otro equipo" in edge),
+    ("rúbrica detallada visible", "Rúbrica oficial · 100 puntos" in s08 and "Concurrencia equivalente" in s08 and "Microdefensa grupal" in s08),
+    ("evidencia auditable requerida", "evidenceUrl" in s08 and "evidence_url" in edge and "carpeta de evidencia" in sql),
+    ("revisión docente abre evidencia", "Abrir evidencia del grupo" in teacher_collab and "Desglose automático" in teacher_collab),
+    ("notebook incluye rúbrica detallada", "Contrato de datos y consulta SoQL" in all_src and "Microdefensa grupal basada en resultados propios" in all_src),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
