@@ -54,16 +54,20 @@ if start<0 or end<0:
     errors.append("No se pudo localizar el array de diapositivas S09")
 else:
     raw=deck[start:end]
-    slides=[x for x in re.split(r"\n(?=\{t:')",raw) if "{t:'" in x]
+    slides=[x for x in re.split(r'\n(?=\{t:[\'"])',raw) if re.search(r'\{t:[\'"]',x)]
 
 resource_seed_start=seed.find("insert into public.lms_run_resources_v2")
 resource_seed=seed[resource_seed_start:] if resource_seed_start>=0 else ""
 resource_selects=len(re.findall(r"select\s+id,9,",resource_seed,re.I))
 
 def first_slide(term):
-    term=term.lower()
+    # Evita falsos positivos de la sintaxis JavaScript (por ejemplo, la propiedad k: del objeto slide).
+    if term=="k":
+        pattern=r"(?:<b>k</b>|\bk\s*=\s*\d+|parámetro\s+k)"
+    else:
+        pattern=(r"(?<![A-Za-z0-9])"+re.escape(term)+r"(?![A-Za-z0-9])") if len(term)<=3 else re.escape(term)
     for i,s in enumerate(slides,1):
-        if term in s.lower(): return i
+        if re.search(pattern,s,re.I): return i
     return None
 
 def def_slide(marker):
@@ -101,6 +105,14 @@ definition_markers={
     "prefijo de tarea":"<b>Prefijo de tarea</b>",
     "chunking":"<b>Chunking</b>",
     "chunk":"<b>Chunk</b>",
+    "tamaño de chunk":"<b>Tamaño de chunk</b>",
+    "solapamiento":"<b>Solapamiento · overlap</b>",
+    "colección":"<b>Colección</b>",
+    "documento mongodb":"<b>Documento MongoDB</b>",
+    "upsert":"<b>Upsert</b>",
+    "idempotencia":"<b>Idempotencia</b>",
+    "updateone":"<b>UpdateOne</b>",
+    "bulk_write":"<b>bulk_write</b>",
     "norma":"<b>Norma</b>",
     "normalización":"<b>Normalización</b>",
     "producto punto":"<b>Producto punto</b>",
@@ -113,16 +125,30 @@ definition_markers={
     "base vectorial":"<b>Base vectorial</b>",
     "metadata":"<b>Metadata</b>",
     "filtro":"<b>Filtro</b>",
+    "campo de filtro":"<b>Campo de filtro</b>",
+    "prefiltro":"<b>Prefiltro</b>",
+    "vecino":"<b>Vecino</b>",
+    "k":"<b>k</b>",
     "índice vectorial":"<b>Índice vectorial</b>",
     "enn":"<b>ENN</b>",
     "ann":"<b>ANN</b>",
     "hnsw":"<b>HNSW</b>",
+    "punto de entrada":"<b>Punto de entrada</b>",
+    "capa":"<b>Capa</b>",
     "conjunto de candidatos":"<b>Conjunto de candidatos</b>",
     "recall@k":"<b>Recall@k</b>",
     "latencia":"<b>Latencia</b>",
     "numcandidates":"<b>numCandidates</b>",
     "atlas vector search":"<b>Atlas Vector Search</b>",
+    "search index":"<b>Search Index</b>",
+    "searchindexmodel":"<b>SearchIndexModel</b>",
+    "queryable":"<b>queryable</b>",
+    "pipeline de agregación":"<b>Pipeline de agregación</b>",
+    "etapa":"<b>Etapa · stage</b>",
     "$vectorsearch":"<b>$vectorSearch</b>",
+    "vectorsearchscore":"<b>vectorSearchScore</b>",
+    "fusión de rankings":"<b>Fusión de rankings</b>",
+    "normalización de score":"<b>Normalización de score</b>",
     "rrf":"<b>RRF · Reciprocal Rank Fusion</b>",
     "precision@k":"<b>Precision@k</b>",
     "evidencia reproducible":"<b>Evidencia reproducible</b>",
@@ -137,17 +163,24 @@ for term,marker in definition_markers.items():
     elif first < defined:
         errors.append(f"Término usado antes de definirse: {term} (uso S{first}, definición S{defined})")
 
-defs=deck.count('class="card def"')
-examples=deck.count('class="card ex"')
+defs=len(re.findall(r'class=(?:\\?")card def(?:\\?")',deck))
+examples=len(re.findall(r'class=(?:\\?")card ex(?:\\?")',deck))
 svg_functions=len(re.findall(r"function\s+svg[A-Za-z0-9_]+\s*\(",deck))
 lab_numbers=set(int(x) for x in re.findall(r"LAB\s+(\d+)\s*·",deck))
 challenge_calls=re.findall(r"challengeChoice\('(bd-s09-c[1-5])'",deck)
+graphic_refs=set(re.findall(r'\b(svg[A-Za-z0-9_]+)\(\)',raw))
+light_without_visual=[]
+for i,s in enumerate(slides,1):
+    visual=bool(re.search(r'svg[A-Za-z0-9_]+\(\)|<svg|class=\\?"(?:lab|table|diagram|three|cols)|<table|<pre|<select|<input|<textarea|challengeChoice\(',s,re.I))
+    if len(s)<850 and not visual:
+        light_without_visual.append(i)
 
 checks=[
     ("exactamente 35 diapositivas",len(slides)==35),
-    ("profundidad de definiciones",defs>=50),
-    ("ejemplos explícitos",examples>=20),
-    ("gráficos/diagramas",svg_functions>=15),
+    ("profundidad de definiciones",defs>=70),
+    ("ejemplos explícitos",examples>=30),
+    ("gráficos/diagramas",svg_functions>=15 and len(graphic_refs)>=15),
+    ("diapositivas ligeras compensadas visualmente",not light_without_visual),
     ("LAB 1–9 embebidos",set(range(1,10)).issubset(lab_numbers)),
     ("D1–D5 embebidos",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,6)}),
     ("S09 Live embebido",'id="liveDrawer"' in deck and "S09 LIVE" in deck and "renderStudentLive" in deck),
@@ -170,6 +203,11 @@ checks=[
     ("Elasticsearch no se confunde con lexical","Elasticsearch no es sinónimo de lexical" in deck and "Elasticsearch" in deck and "Búsqueda vectorial" in deck),
     ("ruta semántica completa",all(x in deck for x in ["Embedding","Similitud coseno","k-Nearest Neighbors","Base vectorial","HNSW","Atlas Vector Search","Reciprocal Rank Fusion"])),
     ("trade-off interactivo","tradeSvg" in deck and "Recall@k" in deck and "Latencia" in deck),
+    ("pipeline E5 interactivo","function embedPipeDemo" in deck and "embedRole" in deck and "embedPipeOut" in deck),
+    ("chunking interactivo","function chunkDemo" in deck and "chunkSize" in deck and "chunkOverlap" in deck),
+    ("operación MongoDB explicada",all(x in deck for x in ["<b>Colección</b>","<b>Upsert</b>","<b>Idempotencia</b>","<b>bulk_write</b>"])),
+    ("Atlas explicado antes del constructor",all(x in deck for x in ["<b>SearchIndexModel</b>","<b>queryable</b>","<b>Pipeline de agregación</b>","<b>vectorSearchScore</b>"])),
+    ("híbrida explica fusión y escalas","<b>Fusión de rankings</b>" in deck and "<b>Normalización de score</b>" in deck and "No sumes scores crudos" in deck),
     ("RRF calculable","function rrfDemo" in deck and "RRF(d) = Σ" in deck),
     ("constructor de evidencia","alternativa_descartada" in deck and "evidencia reproducible" in deck.lower()),
     ("notebook suficientemente completo",len(nb.get("cells",[]))>=20),
@@ -218,7 +256,8 @@ if errors:
 
 print("SESION 09 PROFUNDA: OK")
 print(" - 35 diapositivas")
-print(f" - {defs} bloques de definición · {examples} ejemplos explícitos · {svg_functions} gráficos")
+print(f" - {defs} bloques de definición · {examples} ejemplos explícitos · {len(graphic_refs)} gráficos usados")
+print(" - ninguna diapositiva ligera queda sin gráfico, tabla, código o herramienta")
 print(" - LAB 1–9 + evaluación embebidos")
 print(" - D1–D5 con primer intento/dominio server-side")
 print(" - exactamente dos recursos visibles")

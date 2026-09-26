@@ -83,7 +83,10 @@ La ruta incluye, entre otros:
 - recuperación semántica, búsqueda híbrida, motor y mecanismo;
 - vector, búsqueda vectorial, embedding y espacio vectorial;
 - modelo de embeddings, tokenización del modelo, encoder y pooling;
-- dimensión, E5, prefijos query/passage y chunk;
+- dimensión, E5, prefijos query/passage, chunk, tamaño de chunk y overlap;
+- colección MongoDB, documento MongoDB, UpdateOne, bulk_write, upsert e idempotencia;
+- Search Index, SearchIndexModel y estado queryable;
+- pipeline de agregación, stage, $vectorSearch y vectorSearchScore;
 - norma, normalización, producto punto y similitud coseno;
 - kNN y Top-k;
 - falso positivo y falso negativo;
@@ -168,6 +171,8 @@ La presentación debe conservar, como mínimo:
 Herramientas mínimas:
 
 - simulador de coincidencia literal;
+- inspector conceptual del pipeline E5 (rol → unidades → encoder → pooling → vector);
+- simulador de chunking con tamaño y overlap;
 - LAB 1 lexical;
 - LAB 2 coseno;
 - LAB 3 Top-k;
