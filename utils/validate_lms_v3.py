@@ -48,7 +48,7 @@ checks=[
     ("módulo universal","requireSession(sessionNumber)" in session and "session.html?s=" not in session and "Visitado" in session and "Completado" in session and "Dominado" in session and "Calificado" in session),
     ("módulo no infla tiempo","startHeartbeat" not in session),
     ("progreso universal","L.session('course_progress')" in progress and all(x in progress for x in ["Visitado","Completado","Dominado","Calificado"])),
-    ("WALL universal","requireSession(sessionNumber,{teacher:true})" in wall and "teacher_student_detail" in wall and "No es un ranking de velocidad" in wall),
+    ("WALL universal","requireSession(sessionNumber,{teacher:true})" in wall and "teacher_student_detail" in wall and "no es un ranking de velocidad" in wall.lower()),
     ("WALL filtra ayuda","needs_attention" in wall and 'value="needs_attention"' in wall),
     ("WALL polling seguro","setInterval(load,15000)" in wall),
     ("cliente genérico","async function session(" in client and "bigdata-session" in client and "requireSession" in client),
