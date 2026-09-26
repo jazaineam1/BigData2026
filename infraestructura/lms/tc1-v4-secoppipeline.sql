@@ -61,3 +61,21 @@ set title='TC1 V4 · SECOP Data Pipeline',
     updated_at=now()
 where code='bd-s08-control'
   and course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1);
+
+
+-- Alinear competencias existentes sin cambiar sus códigos ni historial.
+update public.lms_competencies_v2
+set domain='Adquisición e integración',
+    title='Construye una adquisición SECOP reproducible y concurrente',
+    description='Diseña consultas SoQL, pagina una API real, compara adquisición secuencial y concurrente por equivalencia de datos y conserva trazabilidad/calidad.',
+    updated_at=now()
+where course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1)
+  and code='BD-E1';
+
+update public.lms_competencies_v2
+set domain='Documental',
+    title='Opera un modelo documental idempotente en MongoDB Atlas',
+    description='Transforma un snapshot trazable en documentos anidados, usa upsert e índices y demuestra que la reejecución no crea duplicados.',
+    updated_at=now()
+where course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1)
+  and code='BD-E2';
