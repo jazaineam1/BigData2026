@@ -86,6 +86,9 @@ async function mockSessionApi(page, role='student') {
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(model)});
     }
     if(req.method()==='GET') return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(sessionModel)});
+    const body=req.postDataJSON?.()||{};
+    if(body.action==='lab_code')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,code:'ABCD2345',expires_at:'2099-12-31T23:59:59Z'})});
+    if(body.action==='evidence')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,completed:true,verdict:'correct',feedback:'Resultado verificado.'})});
     return route.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});
   });
 }
