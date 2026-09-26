@@ -44,7 +44,7 @@ checks=[
     ("quiz intenta y guarda respuestas", "lms_quiz_attempts_v2" in schema and "lms_quiz_responses_v2" in schema),
     ("aleatorización", "shuffle_questions" in schema and "shuffle_options" in schema and "shuffled(" in assess),
     ("quiz vacío no se publica", 'Agrega al menos una pregunta antes de publicar' in assess),
-    ("answer_key no sale al estudiante", "function publicQuestion" in assess and "answer_key:q.answer_key" not in assess and "answer_key:q." not in assess),
+    ("answer_key no sale al estudiante", "function publicQuestion" in assess and "return {id:q.id,code:q.code,version:q.version,question_type:q.question_type,prompt:q.prompt,options}" in assess and "publicQuestion(x.question" in assess),
     ("autocalificación objetiva", "function autoScore" in assess and "equalSets" in assess),
     ("texto abierto requiere docente", "teacher_grade_response" in assess and "Revisión manual" in teacher),
     ("quiz sincroniza gradebook", 'source:"quiz"' in assess and "assignment_id:quiz.assignment_id" in assess),
