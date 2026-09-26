@@ -127,5 +127,12 @@
       "title": "Administrador de usuarios",
       "path": "admin-users.html"
     }
+  ],
+  "student_tools": [
+    {
+      "code": "collaboration",
+      "title": "Colaboración",
+      "path": "collaboration.html"
+    }
   ]
 }
