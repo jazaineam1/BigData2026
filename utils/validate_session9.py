@@ -237,6 +237,11 @@ for label,ok in [
     ("notebook semántico local","buscar_semantico_local" in nb_text and "embeddings @ q" in nb_text),
     ("notebook Atlas","SearchIndexModel" in nb_text and "$vectorSearch" in nb_text),
     ("notebook evidencia","s09_evidencia_semantica.json" in nb_text and "falso_positivo" in nb_text and "alternativa_descartada" in nb_text),
+    ("notebook chunking","def chunk_palabras" in nb_text and "overlap" in nb_text and "ranking_chunks" in nb_text),
+    ("notebook ANN y ENN","def buscar_atlas_modo" in nb_text and '"exact"] = True' in nb_text and '"numCandidates"]' in nb_text),
+    ("notebook híbrida RRF","def rrf_fusion" in nb_text and "RRF_CONSTANT = 60" in nb_text and "top_hibrido" in nb_text),
+    ("notebook Precision@k","Precision@5" in nb_text and "mis_juicios" in nb_text and "precision_mia" in nb_text),
+    ("notebook sin laboratorio paralelo","Laboratorio guiado" not in nb_text and "Presentación interactiva + laboratorio" in nb_text),
 ]:
     if not ok: errors.append("Falla: "+label)
 
