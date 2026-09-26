@@ -179,3 +179,28 @@ test('accesibilidad WALL docente', async ({ page }) => {
   await expect(page.getByText('no es un ranking de velocidad')).toBeVisible();
   await assertA11y(page,'teacher wall');
 });
+
+
+test('módulo genera código efímero para Colab', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await mockSessionApi(page,'student');
+  await page.goto('/lms/session.html?s=9');
+  await expect(page.getByText('Código de laboratorio')).toBeVisible();
+  await page.getByRole('button',{name:'Generar código'}).click();
+  await expect(page.getByText('ABCD2345')).toBeVisible();
+  await assertNoHorizontalOverflow(page,'lab code mobile');
+});
+
+test('LAB 3 registra evidencia sin desbordes', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await mockSessionApi(page,'student');
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s17');
+  await expect(page.getByText('Registrar evidencia · LAB 3')).toBeVisible();
+  await page.locator('#lab3Result').fill('4');
+  await page.locator('#lab3Decision').selectOption('mantener');
+  await page.locator('#lab3Alternative').fill('Descarto subir k porque aumentaría candidatos sin mejorar necesariamente la precisión.');
+  await page.locator('#lab3Limit').fill('Me faltan juicios de relevancia humanos para saber si los cinco candidatos realmente responden a la necesidad.');
+  await page.locator('#lab3Submit').click();
+  await expect(page.getByText(/Resultado verificado/)).toBeVisible();
+  await assertNoHorizontalOverflow(page,'LAB 3 evidence mobile');
+});
