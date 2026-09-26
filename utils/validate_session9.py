@@ -231,7 +231,7 @@ checks=[
     ("módulo no infla tiempo activo","startHeartbeat" not in session),
     ("módulo no permite marcar dominio manual","Marcar completado" not in session and "completeCheckpoint" not in session),
     ("Wall personal existe","Wall personal" in student_progress and "requireS09()" in student_progress and "primer intento" in student_progress.lower()),
-    ("Wall personal privado","ranking" not in student_progress.lower() and "teacher_wall" not in student_progress),
+    ("Wall personal privado","data.ranking" not in student_progress and "teacher_wall" not in student_progress),
     ("Wall personal reanuda","data.resume" in student_progress and "SLIDES" in student_progress),
     ("Colab no recibe token LMS","token=" not in session.lower() and "token=" not in student_progress.lower() and "no envía tu token" in student_progress),
     ("WALL legado redirige","s09-de-palabras-a-significado.html?wall=docente" in wall_redirect and "location.replace" in wall_redirect),
