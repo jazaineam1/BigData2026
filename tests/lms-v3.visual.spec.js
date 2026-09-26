@@ -117,7 +117,7 @@ for (const vp of [viewports[0],viewports[5],viewports[6]]) {
     await expect(page.getByText('Sesión LMS activa')).toBeVisible();
     await assertNoHorizontalOverflow(page,'module '+vp.name);
     const heights=await page.locator('.btn:visible').evaluateAll(xs=>xs.map(x=>x.getBoundingClientRect().height));
-    expect(heights.every(h=>h>=40)).toBeTruthy();
+    expect(heights.every(h=>h>=44)).toBeTruthy();
   });
 }
 
@@ -162,4 +162,13 @@ test('accesibilidad módulo universal autenticado', async ({ page }) => {
   await page.goto('/lms/session.html?s=9');
   await expect(page.getByText('Sesión LMS activa')).toBeVisible();
   await assertA11y(page,'module');
+});
+
+
+test('accesibilidad WALL docente', async ({ page }) => {
+  await page.setViewportSize({width:1280,height:720});
+  await mockSessionApi(page,'teacher');
+  await page.goto('/lms/wall.html?s=9');
+  await expect(page.getByText('no es un ranking de velocidad')).toBeVisible();
+  await assertA11y(page,'teacher wall');
 });
