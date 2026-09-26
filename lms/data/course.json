@@ -1,12 +1,12 @@
 {
-  "version": 8,
+  "version": 9,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
   "institution": "Universidad Central",
   "total_sessions": 16,
   "current_tracked_session": 9,
-  "tracking_policy": "S01–S09 visibles con recursos verificados; S08 conserva su evaluación integradora y S09 registra recursos/checkpoints formativos en un WALL independiente. S07 permanece protegida y sin modificaciones.",
+  "tracking_policy": "S01–S09 visibles con recursos verificados; S08 conserva su evaluación integradora. S09 sigue el patrón S07: exactamente dos recursos visibles, laboratorio y WALL embebidos en la presentación, desafíos con primer intento/dominio y cuaderno reproducible. S07 permanece protegida y sin modificaciones.",
   "sessions": [
     {
       "n": 1,
@@ -141,8 +141,8 @@
     },
     {
       "code": "wall_s09",
-      "title": "WALL S09",
-      "path": "teacher-wall-09.html"
+      "title": "WALL S09 · embebido",
+      "path": "../Presentaciones/s09-de-palabras-a-significado.html?wall=docente#s1"
     },
     {
       "code": "users",

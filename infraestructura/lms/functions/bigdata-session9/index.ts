@@ -10,12 +10,26 @@ const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
 const SESSION=9;
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
-const RESOURCE_CODES=new Set(["bd-s09-presentation","bd-s09-notebook","bd-s09-guide"]);
+const RESOURCE_CODES=new Set(["bd-s09-presentation","bd-s09-notebook"]);
 const CHECKPOINT_CODES=new Set(["bd-s09-c1","bd-s09-c2","bd-s09-c3","bd-s09-c4","bd-s09-c5"]);
+const CHALLENGE_HASHES:Record<string,string>={
+  "bd-s09-c1":"527bbe6e343018a39e6e78ba0fc39e8c8d67d88e9dbe2ab7d52f6215501e9892",
+  "bd-s09-c2":"6e65ee7bd666203cba62114ae0e43eb002dfe01315969773ced9608543eab77f",
+  "bd-s09-c3":"701c258052172c1ffcdede204b508111671a980c9101b561ea8d88b021a255ba",
+  "bd-s09-c4":"b31e961d21cdf1676df29fa87555cc14edbddfc3b2dcc2a8889dcec440e97956",
+  "bd-s09-c5":"e92de32e71f3f3ed64f76dca618fdaefc1bc78e9a349cd7c7731a9d224ef9929"
+};
+const CHALLENGE_HINTS:Record<string,string>={
+  "bd-s09-c1":"Piensa si la necesidad exige coincidencia exacta o puede tolerar paráfrasis.",
+  "bd-s09-c2":"El coseno describe cercanía geométrica; no es una probabilidad calibrada.",
+  "bd-s09-c3":"Dos rankings se comparan contra juicios de relevancia, no por quién produce el número mayor.",
+  "bd-s09-c4":"Separa quién transforma texto en vector de quién lo almacena e indexa.",
+  "bd-s09-c5":"RRF trabaja con posiciones de ranking para no asumir que BM25 y coseno comparten escala."
+};
 const ALL_CODES=new Set([...RESOURCE_CODES,...CHECKPOINT_CODES]);
 const TRACK_EVENTS=new Set([
   "page_opened","page_closed","heartbeat",
-  "presentation_opened","notebook_opened","guide_opened",
+  "presentation_opened","notebook_opened",
   "checkpoint_started","ui_action"
 ]);
 
@@ -163,23 +177,43 @@ async function recomputeSession(userId:string,runId:string){
   },{onConflict:"user_id,course_run_id,session_number"});
   return {completed,total:CHECKPOINT_CODES.size,done};
 }
-async function completeCheckpoint(ctx:any,run:any,code:string){
-  if(!CHECKPOINT_CODES.has(code))throw new Error("Checkpoint no válido");
+async function answerChallenge(ctx:any,run:any,code:string,rawAnswer:any){
+  if(!CHECKPOINT_CODES.has(code))throw new Error("Desafío no válido");
+  const answer=String(rawAnswer||"").trim().slice(0,100);
+  if(!answer)throw new Error("Respuesta vacía");
+  const expected=CHALLENGE_HASHES[code];
+  const actual=await sha256(code+"|"+answer);
+  const correct=actual===expected;
   await ensureSessionStarted(ctx.user.id,run.id);
   const now=new Date().toISOString();
   const {data:p}=await db.from("bd_lms_activity_progress").select("*")
     .eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("activity_code",code).maybeSingle();
+  const previousMeta=(p?.metadata&&typeof p.metadata==="object")?p.metadata:{};
+  const attempts=Number(p?.attempts||0)+1;
+  const firstAttempt=(typeof previousMeta.first_attempt_correct==="boolean")
+    ? previousMeta.first_attempt_correct
+    : correct;
+  const mastery=Boolean(previousMeta.mastery)||correct;
   await db.from("bd_lms_activity_progress").upsert({
-    user_id:ctx.user.id,course_run_id:run.id,activity_code:code,status:"completed",
-    started_at:p?.started_at||now,attempts:Number(p?.attempts||0),score:1,max_score:1,
-    completed_at:p?.completed_at||now,updated_at:now,metadata:{source:"s09-self-checkpoint",formative:true}
+    user_id:ctx.user.id,course_run_id:run.id,activity_code:code,
+    status:mastery?"completed":"in_progress",
+    started_at:p?.started_at||now,attempts,score:mastery?1:0,max_score:1,
+    completed_at:mastery?(p?.completed_at||now):null,updated_at:now,
+    metadata:{
+      source:"s09-live-challenge",formative:true,
+      first_attempt_correct:firstAttempt,mastery,last_attempt_correct:correct
+    }
   },{onConflict:"user_id,course_run_id,activity_code"});
   await db.from("bd_lms_events").insert({
-    user_id:ctx.user.id,course_run_id:run.id,event_type:"checkpoint_completed",
-    session_number:SESSION,activity_code:code,metadata:{formative:true},created_at:now
+    user_id:ctx.user.id,course_run_id:run.id,event_type:"challenge_answered",
+    session_number:SESSION,activity_code:code,
+    metadata:{correct,attempt:attempts,first_attempt_correct:firstAttempt,mastery},
+    created_at:now
   });
-  return {ok:true,...await recomputeSession(ctx.user.id,run.id)};
+  const summary=await recomputeSession(ctx.user.id,run.id);
+  return {ok:true,correct,attempts,first_attempt_correct:firstAttempt,mastery,hint:correct?null:CHALLENGE_HINTS[code],...summary};
 }
+
 async function openOfficial(ctx:any,run:any){
   requireTeacher(ctx);
   const existing=await sessionWindow(run.id);if(existing)return existing;
@@ -215,12 +249,23 @@ async function teacherWall(ctx:any,run:any){
       last_activity_at:p.last_activity_at||null,completed_checkpoints:completed,total_checkpoints:CHECKPOINT_CODES.size,
       presentation_opened:!!am.get("bd-s09-presentation"),
       notebook_opened:!!am.get("bd-s09-notebook"),
-      guide_opened:!!am.get("bd-s09-guide"),
-      checkpoints:[...CHECKPOINT_CODES].map(code=>({code,status:am.get(code)?.status||"not_started",started_at:am.get(code)?.started_at||null,completed_at:am.get(code)?.completed_at||null}))
+      checkpoints:[...CHECKPOINT_CODES].map(code=>{
+        const cp:any=am.get(code)||{},meta=(cp.metadata&&typeof cp.metadata==="object")?cp.metadata:{};
+        return {code,status:cp.status||"not_started",started_at:cp.started_at||null,completed_at:cp.completed_at||null,attempts:Number(cp.attempts||0),first_attempt_correct:typeof meta.first_attempt_correct==="boolean"?meta.first_attempt_correct:null,mastery:Boolean(meta.mastery)};
+      })
     };
   });
-  rows.sort((a:any,b:any)=>b.completed_checkpoints-a.completed_checkpoints||(a.display_name||"").localeCompare(b.display_name||"","es"));
-  return {viewer:ctx.user,run,session:def.session,activities:def.activities,resources:def.resources,session_window:window,ranking:rows};
+  rows.sort((a:any,b:any)=>(a.display_name||"").localeCompare(b.display_name||"","es"));
+  const challenge_stats=[...CHECKPOINT_CODES].map(code=>{
+    const cps=rows.map((r:any)=>r.checkpoints.find((x:any)=>x.code===code)).filter(Boolean);
+    return {
+      code,
+      attempted:cps.filter((x:any)=>x.attempts>0).length,
+      first_attempt_correct:cps.filter((x:any)=>x.first_attempt_correct===true).length,
+      mastered:cps.filter((x:any)=>x.mastery===true).length
+    };
+  });
+  return {viewer:ctx.user,run,session:def.session,activities:def.activities,resources:def.resources,session_window:window,ranking:rows,challenge_stats};
 }
 
 Deno.serve(async(req:Request)=>{
@@ -245,13 +290,13 @@ Deno.serve(async(req:Request)=>{
         client_at:body.client_at?String(body.client_at):null,created_at:now
       });
       if(event==="heartbeat")await heartbeat(ctx.user.id,run.id,delta);
-      else if(["presentation_opened","notebook_opened","guide_opened","checkpoint_started"].includes(event)){
+      else if(["presentation_opened","notebook_opened","checkpoint_started"].includes(event)){
         await ensureSessionStarted(ctx.user.id,run.id);
         if(activity)await touchActivity(ctx.user.id,run.id,activity,event);
       }
       return out(req,{ok:true});
     }
-    if(action==="complete_checkpoint")return out(req,await completeCheckpoint(ctx,run,String(body.activity_code||"")));
+    if(action==="answer_challenge")return out(req,await answerChallenge(ctx,run,String(body.activity_code||""),body.answer));
     if(action==="teacher_open_session")return out(req,{ok:true,session_window:await openOfficial(ctx,run)});
     if(action==="teacher_wall")return out(req,await teacherWall(ctx,run));
     return out(req,{error:"Acción desconocida"},400);

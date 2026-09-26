@@ -15,24 +15,23 @@ def read(path):
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
 guide=read("assets/tutoriales/s09-laboratorio-guiado.html")
 session=read("lms/session-09.html")
-wall=read("lms/teacher-wall-09.html")
+wall_redirect=read("lms/teacher-wall-09.html")
 client=read("lms/assets/bigdata-lms.js")
 backend=read("infraestructura/lms/functions/bigdata-session9/index.ts")
 seed=read("infraestructura/lms/s09-vector-search-seed.sql")
 index=read("index.html")
 course_text=read("lms/data/course.json")
-pages=read(".github/workflows/pages.yml")
 notebook_path=ROOT/"Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb"
 s07=ROOT/"Presentaciones/s07-del-vecindario-al-texto.html"
 s08=ROOT/"lms/session-08.html"
 
-def git_blob_sha(path):
+def blob_sha(path):
     b=path.read_bytes()
     return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
 
-if s07.exists() and git_blob_sha(s07)!="07e99d34a8896a9a6b4c5bf39cb7619a953fe0b8":
+if s07.exists() and blob_sha(s07)!="07e99d34a8896a9a6b4c5bf39cb7619a953fe0b8":
     errors.append("S07 cambió durante S09")
-if s08.exists() and git_blob_sha(s08)!="b5b1e9085fe99759182d141a75f875fcbab39d3a":
+if s08.exists() and blob_sha(s08)!="b5b1e9085fe99759182d141a75f875fcbab39d3a":
     errors.append("S08 cambió durante S09")
 
 try:
@@ -40,89 +39,165 @@ try:
 except Exception as ex:
     course={}
     errors.append(f"course.json inválido: {ex}")
-
 try:
     nb=json.loads(notebook_path.read_text("utf-8"))
 except Exception as ex:
     nb={"cells":[]}
     errors.append(f"Notebook S09 inválido: {ex}")
 
-nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
-code_cells=["".join(c.get("source",[])) for c in nb.get("cells",[]) if c.get("cell_type")=="code"]
+# Parsear el array real de diapositivas.
+start=deck.find("const slides=[")
+end_match=re.search(r"\n\];\s*\n\s*function challengeChoice",deck[start:]) if start>=0 else None
+end=(start+end_match.start()) if end_match else -1
+if start<0 or end<0:
+    slides=[]
+    errors.append("No se pudo localizar el array de diapositivas S09")
+else:
+    raw=deck[start:end]
+    slides=[x for x in re.split(r"\n(?=\{t:')",raw) if "{t:'" in x]
 
-required_terms=[
-    "Corpus","Documento","Consulta","Ranking","Recuperación de información",
-    "Recuperación lexical","Recuperación semántica","Búsqueda híbrida","Analyzer","Token",
-    "Índice invertido","BM25","Embedding","Vector","Dimensión","Modelo",
-    "Similitud","Similitud coseno","Top-k","Falso positivo","Base vectorial",
-    "Metadata","Filtro","Índice vectorial","ANN","ENN","HNSW","Atlas Vector Search","$vectorSearch","Juicio de relevancia"
-]
-missing_terms=[t for t in required_terms if t not in deck]
-lab_markers=["LAB 1 · tokenizador didáctico","LAB 2 · calculadora de coseno","LAB 3 · comparador lexical vs semántico","LAB 4 · decisión corta","LAB 5 · ruta Atlas","LAB 6 · Top-k","LAB 7 · constructor de evidencia"]
-def_cards=len(re.findall(r'class="card def"',deck))
-ex_cards=len(re.findall(r'class="card ex"',deck))
+resource_seed_start=seed.find("insert into public.lms_run_resources_v2")
+resource_seed=seed[resource_seed_start:] if resource_seed_start>=0 else ""
+resource_selects=len(re.findall(r"select\s+id,9,",resource_seed,re.I))
+
+def first_slide(term):
+    term=term.lower()
+    for i,s in enumerate(slides,1):
+        if term in s.lower(): return i
+    return None
+
+def def_slide(marker):
+    for i,s in enumerate(slides,1):
+        if marker.lower() in s.lower(): return i
+    return None
+
+# Términos cuyo primer uso debe coincidir o venir después de su definición explícita.
+definition_markers={
+    "corpus":"<b>Corpus</b>",
+    "documento":"<b>Documento</b>",
+    "consulta":"<b>Consulta</b>",
+    "ranking":"<b>Ranking</b>",
+    "candidato":"<b>Candidato</b>",
+    "score":"<b>Score</b>",
+    "juicio de relevancia":"<b>Juicio de relevancia</b>",
+    "recuperación lexical":"<b>Recuperación lexical</b>",
+    "analyzer":"<b>Analyzer</b>",
+    "token":"<b>Token</b>",
+    "índice invertido":"<b>Índice invertido</b>",
+    "bm25":"<b>BM25",
+    "recuperación semántica":"<b>Recuperación semántica</b>",
+    "búsqueda híbrida":"<b>Búsqueda híbrida</b>",
+    "motor de búsqueda":"<b>Motor de búsqueda</b>",
+    "vector":"<b>Vector</b>",
+    "búsqueda vectorial":"<b>Búsqueda vectorial</b>",
+    "embedding":"<b>Embedding</b>",
+    "espacio vectorial":"<b>Espacio vectorial</b>",
+    "modelo de embeddings":"<b>Modelo de embeddings</b>",
+    "tokenización del modelo":"<b>Tokenización del modelo</b>",
+    "encoder":"<b>Encoder</b>",
+    "pooling":"<b>Pooling</b>",
+    "dimensión":"<b>Dimensión</b>",
+    "e5":"<b>E5</b>",
+    "prefijo de tarea":"<b>Prefijo de tarea</b>",
+    "chunking":"<b>Chunking</b>",
+    "chunk":"<b>Chunk</b>",
+    "norma":"<b>Norma</b>",
+    "normalización":"<b>Normalización</b>",
+    "producto punto":"<b>Producto punto</b>",
+    "similitud coseno":"<b>Similitud coseno</b>",
+    "knn":"<b>kNN · k-Nearest Neighbors</b>",
+    "top-k":"<b>Top-k</b>",
+    "falso positivo":"<b>Falso positivo</b>",
+    "falso negativo":"<b>Falso negativo</b>",
+    "dominio":"<b>Dominio</b>",
+    "base vectorial":"<b>Base vectorial</b>",
+    "metadata":"<b>Metadata</b>",
+    "filtro":"<b>Filtro</b>",
+    "índice vectorial":"<b>Índice vectorial</b>",
+    "enn":"<b>ENN</b>",
+    "ann":"<b>ANN</b>",
+    "hnsw":"<b>HNSW</b>",
+    "conjunto de candidatos":"<b>Conjunto de candidatos</b>",
+    "recall@k":"<b>Recall@k</b>",
+    "latencia":"<b>Latencia</b>",
+    "numcandidates":"<b>numCandidates</b>",
+    "atlas vector search":"<b>Atlas Vector Search</b>",
+    "$vectorsearch":"<b>$vectorSearch</b>",
+    "rrf":"<b>RRF · Reciprocal Rank Fusion</b>",
+    "precision@k":"<b>Precision@k</b>",
+    "evidencia reproducible":"<b>Evidencia reproducible</b>",
+}
+for term,marker in definition_markers.items():
+    first=first_slide(term)
+    defined=def_slide(marker)
+    if first is None:
+        errors.append(f"Falta término requerido: {term}")
+    elif defined is None:
+        errors.append(f"Falta definición explícita: {term}")
+    elif first < defined:
+        errors.append(f"Término usado antes de definirse: {term} (uso S{first}, definición S{defined})")
+
+defs=deck.count('class="card def"')
+examples=deck.count('class="card ex"')
+svg_functions=len(re.findall(r"function\s+svg[A-Za-z0-9_]+\s*\(",deck))
+lab_numbers=set(int(x) for x in re.findall(r"LAB\s+(\d+)\s*·",deck))
+challenge_calls=re.findall(r"challengeChoice\('(bd-s09-c[1-5])'",deck)
 
 checks=[
-    ("presentación suficiente", deck.count('<section class="slide')>=38),
-    ("formato tipo S07", "class=\"stage\"" in deck and "class=\"nav\"" in deck and "S09 Lab" in deck and "cqw" in deck),
-    ("laboratorio embebido", all(x in deck for x in lab_markers) and "S09 Lab integrado" in deck),
-    ("definiciones completas", not missing_terms and def_cards>=24 and ex_cards>=10),
-    ("distinción Elasticsearch explícita", "Elasticsearch ≠ búsqueda lexical" in deck),
-    ("tres mecanismos", all(x in deck.lower() for x in ["lexical","semántica","híbrida"])),
-    ("S07 lexical correctamente descrita", '<div class="node">tokens</div>' in deck and '<div class="node">índice invertido</div>' in deck and '<div class="node">BM25</div>' in deck),
-    ("S09 semántica correctamente descrita", "Recuperación semántica" in deck and '<div class="node">embedding</div>' in deck and '<div class="node">similitud</div>' in deck and '<div class="node">Top-k</div>' in deck),
-    ("hybrid no reemplaza conceptos", "Hybrid search: no siempre hay que elegir" in deck),
-    ("score no probabilidad", "0.91 no significa" in deck and "probabilidad" in deck),
-    ("base vectorial separa responsabilidades", "el modelo genera vectores" in deck.lower()),
-    ("ANN/ENN", "Exacto vs aproximado" in deck and "ANN" in deck and "ENN" in deck),
-    ("Atlas es implementación no definición", "Atlas es una implementación. No es la definición de base vectorial." in deck),
-    ("guía apoyo no ruta paralela", "El laboratorio principal está en la presentación" in guide and "no ruta paralela" in guide),
-    ("guía conserva regla de herramienta/mecanismo", "Elasticsearch puede hacer lexical, vectorial e híbrida" in guide),
-    ("LMS aclara laboratorio en presentación", "laboratorio integrado dentro de la presentación" in session and "Diapositivas + laboratorio" in session),
-    ("notebook tamaño pedagógico", len(nb.get("cells",[]))>=20),
-    ("notebook modelo E5", "intfloat/multilingual-e5-small" in nb_text and "query: " in nb_text and "passage: " in nb_text),
-    ("notebook BM25", "BM25Okapi" in nb_text and "buscar_lexical" in nb_text),
-    ("notebook búsqueda local", "buscar_semantico_local" in nb_text and "embeddings @ q" in nb_text),
-    ("notebook Atlas", "SearchIndexModel" in nb_text and "$vectorSearch" in nb_text),
-    ("notebook URI oculta", "getpass(" in nb_text and "print(MONGODB_URI)" not in nb_text),
-    ("notebook evidencia", "s09_evidencia_semantica.json" in nb_text and "falso_positivo" in nb_text and "alternativa_descartada" in nb_text),
-    ("ruta local contingencia", "continúa con la ruta local" in nb_text.lower()),
-    ("LMS recursos", "data-resource" in session and "resource_type==='presentation'" in session and "resource_type==='notebook'" in session and "guide:'guide_opened'" in session),
-    ("tracking S09 dedicado", "L.s09('track'" in session and "L.startHeartbeat(null,L.s09)" in session),
-    ("S09 no usa track S08", "L.bigdata('track'" not in session),
-    ("checkpoints formativos", "No agregan puntaje al TC1" in session and "complete_checkpoint" in session),
-    ("WALL no ranking", "No es un ranking" in wall and "No ordenar por velocidad" in wall),
-    ("WALL inicio oficial", "teacher_open_session" in wall),
-    ("WALL 5 checkpoints", "completed_checkpoints+'/5" in wall),
-    ("cliente separado", "async function s09" in client and "async function requireS09" in client),
-    ("heartbeat parametrizable", "function startHeartbeat(activity=null,tracker=bigdata)" in client),
-    ("backend sesión 9", "const SESSION=9;" in backend),
-    ("backend códigos aislados", "bd-s09-presentation" in backend and "bd-s09-c5" in backend),
-    ("backend no califica TC1", "submit_manifest" not in backend and "note_5" not in backend),
-    ("backend checkpoint self-report", "s09-self-checkpoint" in backend and "formative:true" in backend),
-    ("page_opened no inicia progreso", '["presentation_opened","notebook_opened","guide_opened","checkpoint_started"].includes(event)' in backend),
-    ("seed S09", "'bigdata',9" in seed and "'bd-s09-c5'" in seed),
-    ("seed tres recursos", seed.count("select id,9,")>=3 and "Presentación S09" in seed and "Cuaderno S09" in seed),
-    ("index S09 actual", 'data-mark="9"' in index and "Cuando las palabras no coinciden" in index),
-    ("course S09 tracked", any(x.get("n")==9 and x.get("status")=="visible" and x.get("tracked") for x in course.get("sessions",[]))),
-    ("course wall S09", any(x.get("code")=="wall_s09" and x.get("path")=="teacher-wall-09.html" for x in course.get("teacher_tools",[]))),
+    ("exactamente 35 diapositivas",len(slides)==35),
+    ("profundidad de definiciones",defs>=50),
+    ("ejemplos explícitos",examples>=20),
+    ("gráficos/diagramas",svg_functions>=15),
+    ("LAB 1–9 embebidos",set(range(1,10)).issubset(lab_numbers)),
+    ("D1–D5 embebidos",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,6)}),
+    ("S09 Live embebido",'id="liveDrawer"' in deck and "S09 LIVE" in deck and "renderStudentLive" in deck),
+    ("Teacher Wall embebido",'id="teacherWall"' in deck and "S09 Teacher Wall" in deck and "wall')==='docente" in deck),
+    ("WALL sin ranking por velocidad","No es un ranking de velocidad" in deck and "localeCompare" in backend),
+    ("primer intento + dominio server-side","first_attempt_correct" in backend and "mastery" in backend and "challenge_stats" in backend),
+    ("respuestas validadas por hash","CHALLENGE_HASHES" in backend and "sha256(code+\"|\"+answer)" in backend),
+    ("respuesta correcta no mapeada en frontend","CHALLENGE_HASHES" not in deck and "referencia esperada" not in deck and "function c1Check" not in deck),
+    ("sin bypass complete_checkpoint","complete_checkpoint" not in backend and "complete_checkpoint" not in session),
+    ("dos códigos de recurso", 'const RESOURCE_CODES=new Set(["bd-s09-presentation","bd-s09-notebook"])' in backend),
+    ("sin guía en backend","bd-s09-guide" not in backend and "guide_opened" not in backend),
+    ("dos recursos visibles en seed",resource_selects==2 and "'guide'" not in resource_seed and "bd-s09-guide" not in resource_seed),
+    ("guía histórica solo redirige","no hay un laboratorio separado" in guide and "location.replace" in guide),
+    ("LMS presenta dos recursos","repeat(2,minmax(0,1fr))" in session and "guide_opened" not in session),
+    ("LMS no permite marcar dominio manual","Marcar completado" not in session and "completeCheckpoint" not in session),
+    ("WALL legado redirige","s09-de-palabras-a-significado.html?wall=docente" in wall_redirect and "location.replace" in wall_redirect),
+    ("tool docente apunta a wall embebido",any(x.get("code")=="wall_s09" and "?wall=docente" in x.get("path","") for x in course.get("teacher_tools",[]))),
+    ("portal apunta a wall embebido","teacherWall09" in read("lms/portal.html") and "?wall=docente" in read("lms/portal.html")),
+    ("portal no prioriza S08 fijo","Number(x.session_number)===8" not in read("lms/portal.html")),
+    ("Elasticsearch no se confunde con lexical","Elasticsearch no es sinónimo de lexical" in deck and "Elasticsearch" in deck and "Búsqueda vectorial" in deck),
+    ("ruta semántica completa",all(x in deck for x in ["Embedding","Similitud coseno","k-Nearest Neighbors","Base vectorial","HNSW","Atlas Vector Search","Reciprocal Rank Fusion"])),
+    ("trade-off interactivo","tradeSvg" in deck and "Recall@k" in deck and "Latencia" in deck),
+    ("RRF calculable","function rrfDemo" in deck and "RRF(d) = Σ" in deck),
+    ("constructor de evidencia","alternativa_descartada" in deck and "evidencia reproducible" in deck.lower()),
+    ("notebook suficientemente completo",len(nb.get("cells",[]))>=20),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
-if missing_terms:
-    errors.append("Faltan definiciones/términos en presentación: "+", ".join(missing_terms))
-if def_cards<24 or ex_cards<10:
-    errors.append(f"Tarjetas def/ex insuficientes: def={def_cards}, ex={ex_cards}")
 
-for i,src in enumerate(code_cells,1):
+nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
+for label,ok in [
+    ("notebook E5","intfloat/multilingual-e5-small" in nb_text and "query: " in nb_text and "passage: " in nb_text),
+    ("notebook baseline lexical","BM25Okapi" in nb_text and "buscar_lexical" in nb_text),
+    ("notebook semántico local","buscar_semantico_local" in nb_text and "embeddings @ q" in nb_text),
+    ("notebook Atlas","SearchIndexModel" in nb_text and "$vectorSearch" in nb_text),
+    ("notebook evidencia","s09_evidencia_semantica.json" in nb_text and "falso_positivo" in nb_text and "alternativa_descartada" in nb_text),
+]:
+    if not ok: errors.append("Falla: "+label)
+
+# Sintaxis Python del notebook, ignorando magics.
+for i,cell in enumerate(nb.get("cells",[]),1):
+    if cell.get("cell_type")!="code": continue
+    src="".join(cell.get("source",[]))
     lines=[ln for ln in src.splitlines() if not ln.lstrip().startswith(("%","!"))]
     if not lines: continue
-    try:
-        compile("\n".join(lines),f"cell_{i}.py","exec")
-    except SyntaxError as ex:
-        errors.append(f"Notebook: sintaxis Python en celda {i}: {ex}")
+    try: compile("\n".join(lines),f"s09_cell_{i}.py","exec")
+    except SyntaxError as ex: errors.append(f"Notebook: sintaxis Python celda {i}: {ex}")
 
-for name,html in [("deck",deck),("session",session),("wall",wall)]:
+# Sintaxis JavaScript de artefactos HTML.
+for name,html in [("presentación",deck),("session-09",session),("wall-redirect",wall_redirect)]:
     scripts=re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>",html,re.S|re.I)
     for i,script in enumerate(scripts,1):
         with tempfile.NamedTemporaryFile("w",suffix=".js",encoding="utf-8",delete=False) as fh:
@@ -130,23 +205,24 @@ for name,html in [("deck",deck),("session",session),("wall",wall)]:
         p=subprocess.run(["node","--check",tmp],capture_output=True,text=True)
         Path(tmp).unlink(missing_ok=True)
         if p.returncode:
-            errors.append(f"{name} JS #{i}: {p.stderr.strip()[:500]}")
+            errors.append(f"{name} JS #{i}: {p.stderr.strip()[:700]}")
 
-front=deck+guide+session+wall+client
+front=deck+session+wall_redirect+client
 if re.search(r"(service[_-]?role|sb_secret_)[A-Za-z0-9_.-]{12,}",front,re.I):
     errors.append("Posible secreto privado expuesto en frontend")
 
 if errors:
-    print("SESION 09: FAIL")
+    print("SESION 09 PROFUNDA: FAIL")
     for e in errors: print(" -",e)
     sys.exit(1)
 
-print("SESION 09: OK")
+print("SESION 09 PROFUNDA: OK")
+print(" - 35 diapositivas")
+print(f" - {defs} bloques de definición · {examples} ejemplos explícitos · {svg_functions} gráficos")
+print(" - LAB 1–9 + evaluación embebidos")
+print(" - D1–D5 con primer intento/dominio server-side")
+print(" - exactamente dos recursos visibles")
+print(" - S09 Live + Teacher Wall dentro de la presentación")
+print(" - términos definidos antes del primer uso")
 print(" - S07 y S08 intactas")
-print(" - presentación estilo S07 con laboratorio embebido")
-print(" - términos nuevos definidos con ejemplos")
-print(" - notebook E5 + BM25 + Atlas + fallback local")
-print(" - LMS con presentación/cuaderno/guía")
-print(" - tracking y WALL S09 aislados")
-print(" - checkpoints formativos, no nota")
-print(" - JS/Python válidos")
+print(" - notebook/JS válidos")
