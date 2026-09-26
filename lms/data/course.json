@@ -103,6 +103,11 @@
       "path": "gradebook.html"
     },
     {
+      "code": "competencies",
+      "title": "Matriz de competencias",
+      "path": "teacher-competencies.html"
+    },
+    {
       "code": "wall",
       "title": "WALL S08",
       "path": "teacher-wall.html"
