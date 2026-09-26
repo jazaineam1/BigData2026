@@ -7,6 +7,9 @@ const db=createClient(
 );
 const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
+const SUBMISSION_BUCKET="lms-submissions";
+const MAX_FILE_BYTES=2*1024*1024;
+const ALLOWED_FILE_MIME=new Set(["text/plain","text/csv","application/json","application/sql","application/octet-stream"]);
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 
 function origin(req:Request){
