@@ -393,20 +393,23 @@ async function teacherWall(ctx:any,run:any,n:number){
   const activityQuery=codes.length
     ?db.from("bd_lms_activity_progress").select("*").eq("course_run_id",run.id).in("activity_code",codes)
     :Promise.resolve({data:[]} as any);
-  const [{data:enrollments},{data:progress},{data:activityProgress},{data:events},window]=await Promise.all([
+  const [{data:enrollments},{data:progress},{data:activityProgress},{data:events},{data:evidence},window]=await Promise.all([
     db.from("lms_run_enrollments").select("user_id,role,status").eq("course_run_id",run.id).eq("status","active"),
     db.from("bd_lms_session_progress").select("*").eq("course_run_id",run.id).eq("session_number",n),
     activityQuery,
     db.from("bd_lms_events").select("user_id,event_type,activity_code,metadata,created_at").eq("course_run_id",run.id)
       .eq("session_number",n).order("created_at",{ascending:false}).limit(5000),
+    db.from("bd_evidence").select("user_id,activity_code,verdict,created_at").eq("course_run_id",run.id)
+      .eq("session_number",n).order("created_at",{ascending:false}).limit(5000),
     sessionWindow(run.id,n)
   ]);
   const ids=(enrollments||[]).filter((x:any)=>x.role==="student").map((x:any)=>x.user_id);
   const {data:users}=ids.length?await db.from("lms_users").select("id,display_name,username,active").in("id",ids):({data:[]} as any);
-  const pm=new Map((progress||[]).map((x:any)=>[x.user_id,x])),byUser=new Map<string,any[]>(),lastEvent=new Map<string,any>(),lastSlide=new Map<string,any>();
+  const pm=new Map((progress||[]).map((x:any)=>[x.user_id,x])),byUser=new Map<string,any[]>(),lastEvent=new Map<string,any>(),lastSlide=new Map<string,any>(),evByUser=new Map<string,any[]>();
   for(const a of activityProgress||[]){if(!byUser.has(a.user_id))byUser.set(a.user_id,[]);byUser.get(a.user_id)!.push(a)}
   for(const e of events||[]){if(!lastEvent.has(e.user_id))lastEvent.set(e.user_id,e);if(e.event_type==="slide_viewed"&&!lastSlide.has(e.user_id))lastSlide.set(e.user_id,e)}
-  const checkpoints=def.activities.filter((a:any)=>a.kind==="checkpoint");
+  for(const e of evidence||[]){if(!evByUser.has(e.user_id))evByUser.set(e.user_id,[]);evByUser.get(e.user_id)!.push(e)}
+  const checkpoints=def.activities.filter((a:any)=>a.kind==="checkpoint"),labs=def.activities.filter((a:any)=>a.kind==="lab");
   const rows=(users||[]).map((u:any)=>{
     const p:any=pm.get(u.id)||{},aps=byUser.get(u.id)||[],am=new Map(aps.map((x:any)=>[x.activity_code,x]));
     const mastered=checkpoints.filter((a:any)=>Boolean(am.get(a.code)?.metadata?.mastery)||am.get(a.code)?.status==="completed").length;
@@ -422,7 +425,10 @@ async function teacherWall(ctx:any,run:any,n:number){
       current_activity:ev?.activity_code||null,current_event:ev?.event_type||null,
       needs_attention:needsAttention,attempted_activities:attempted,
       completed_activities:aps.filter((a:any)=>a.status==="completed").length,
-      mastered_checkpoints:mastered,total_checkpoints:checkpoints.length,
+      mastered_checkpoints:mastered,total_checkpoints:checkpoints.length,completed_checkpoints:mastered,
+      presentation_opened:Boolean(am.get("bd-s09-presentation")),notebook_opened:Boolean(am.get("bd-s09-notebook")),
+      lab_explored:labs.filter((a:any)=>am.has(a.code)).length,evidence_count:(evByUser.get(u.id)||[]).length,
+      checkpoints:checkpoints.map((a:any)=>{const x:any=am.get(a.code)||{},m=x.metadata||{};return {code:a.code,attempts:Number(x.attempts||0),metadata:{first_attempt_correct:typeof m.first_attempt_correct==="boolean"?m.first_attempt_correct:null,mastery:Boolean(m.mastery)}}}),
       last_slide:Number(slideMeta.slide||0)>0?{slide:Number(slideMeta.slide),label:String(slideMeta.label||""),chapter:String(slideMeta.chapter||""),at:slideEv.created_at}:null,
       activities:def.activities.map((a:any)=>{
         const x:any=am.get(a.code)||{},m=x.metadata||{};
@@ -449,13 +455,14 @@ async function teacherStudentDetail(ctx:any,run:any,n:number,userId:string){
     .eq("course_run_id",run.id).eq("user_id",userId).eq("role","student").eq("status","active").maybeSingle();
   if(!enrollment)throw new Error("Estudiante no pertenece a esta cohorte");
   const def=await definition(run.id,n,true),codes=def.activities.map((a:any)=>a.code);
-  const [{data:user},{data:session_progress},{data:activity_progress},{data:events}]=await Promise.all([
+  const [{data:user},{data:session_progress},{data:activity_progress},{data:events},{data:evidence}]=await Promise.all([
     db.from("lms_users").select("id,display_name,username,active").eq("id",userId).maybeSingle(),
     db.from("bd_lms_session_progress").select("*").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).maybeSingle(),
     codes.length?db.from("bd_lms_activity_progress").select("*").eq("user_id",userId).eq("course_run_id",run.id).in("activity_code",codes).order("updated_at",{ascending:false}):Promise.resolve({data:[]} as any),
-    db.from("bd_lms_events").select("event_type,activity_code,metadata,client_at,created_at").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).order("created_at",{ascending:false}).limit(250)
+    db.from("bd_lms_events").select("event_type,activity_code,metadata,client_at,created_at").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).order("created_at",{ascending:false}).limit(250),
+    db.from("bd_evidence").select("id,activity_code,payload,source,verdict,feedback,created_at").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).order("created_at",{ascending:false}).limit(100)
   ]);
-  return {viewer:ctx.user,run,session:def.session,user,session_progress,activity_progress:activity_progress||[],events:events||[],activities:def.activities};
+  return {viewer:ctx.user,run,session:def.session,user,session_progress,activity_progress:activity_progress||[],events:events||[],evidence:evidence||[],activities:def.activities};
 }
 
 async function resetSession(ctx:any,run:any,n:number,body:any){
