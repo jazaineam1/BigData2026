@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153">
+<title>Big Data · Gestor del curso</title><link rel="stylesheet" href="assets/bigdata-lms.css?v=20260926-core1">
+<style>
+.editor-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.65fr);gap:16px}
+.session-editor{border:1px solid var(--line);border-radius:14px;padding:13px;margin:9px 0;background:#fff}
+.session-editor summary{cursor:pointer;font-weight:900;color:var(--uc-navy);display:flex;gap:8px;align-items:center}
+.session-editor[open] summary{margin-bottom:12px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.formgrid .wide{grid-column:1/-1}.resource-row{display:flex;gap:8px;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.resource-row:last-child{border-bottom:0}.announce-row{padding:12px;border:1px solid var(--line);border-radius:12px;margin:8px 0}
+@media(max-width:850px){.editor-grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.formgrid .wide{grid-column:auto}}
+</style></head>
+<body><header class="appbar"><div class="inner"><a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · Gestor docente</small></a><span class="spacer"></span><a class="navlink optional" href="admin-users.html">Usuarios</a><a class="navlink optional" href="teacher-wall.html">WALL S08</a><button data-logout>Salir</button></div></header>
+<main class="wrap"><div class="ey">Gestión académica</div><h1>Publica el curso sin editar código.</h1><p class="lead">Administra sesiones, recursos y anuncios. S07 aparece en el catálogo, pero esta pantalla no modifica su archivo fuente.</p>
+<div id="status" class="status hidden"></div>
+<div id="metrics" class="kpis"></div>
+<div class="editor-grid">
+<section class="card"><div class="actions" style="justify-content:space-between"><div><div class="ey">Sesiones</div><h2 style="margin-bottom:0">Ruta S01–S16</h2></div><button id="refresh" class="btn alt">Actualizar</button></div><div id="sessions"></div></section>
+<div>
+<section class="card"><div class="ey">Nuevo anuncio</div><h2>Comunicar al grupo</h2>
+<form id="announceForm" class="form">
+<div class="field"><label>Título</label><input class="input" name="title" maxlength="180" required></div>
+<div class="field"><label>Mensaje</label><textarea class="input" name="body" rows="5" maxlength="5000" required></textarea></div>
+<div class="field"><label>Enlace opcional</label><input class="input" name="link" placeholder="https://…"></div>
+<div class="formgrid"><div class="field"><label>Publicar desde</label><input class="input" name="published_at" type="datetime-local"></div><div class="field"><label>Vence</label><input class="input" name="expires_at" type="datetime-local"></div></div>
+<label class="check"><input name="pinned" type="checkbox"> Fijar arriba</label><button class="btn primary" type="submit">Publicar anuncio</button>
+</form></section>
+<section class="card"><div class="ey">Anuncios</div><h2>Historial</h2><div id="announcements"></div></section>
+</div></div></main>
+<script src="assets/bigdata-lms.js?v=20260926-core1"></script>
+<script>
+(async()=>{'use strict';const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status');let data=null;
+function isoLocal(v){if(!v)return'';const d=new Date(v),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes())}
+function sessionResources(n){return (data.resources||[]).filter(r=>Number(r.session_number)===Number(n))}
+function renderMetrics(){const s=data.sessions||[];L.$('metrics').innerHTML='<div class="kpi"><span class="muted">Publicadas</span><b>'+s.filter(x=>x.status==='visible').length+'</b></div><div class="kpi"><span class="muted">Borradores</span><b>'+s.filter(x=>x.status==='draft').length+'</b></div><div class="kpi"><span class="muted">Cerradas</span><b>'+s.filter(x=>x.status==='closed').length+'</b></div><div class="kpi"><span class="muted">Recursos</span><b>'+(data.resources||[]).length+'</b></div>'}
+function renderSessions(){
+ L.$('sessions').innerHTML=(data.sessions||[]).map(s=>{const rs=sessionResources(s.session_number);return '<details class="session-editor"><summary><span>S'+String(s.session_number).padStart(2,'0')+'</span><span>'+L.esc(s.title)+'</span><span class="pill '+(s.status==='visible'?'active':'pending')+'">'+L.esc(s.status)+'</span></summary>'+
+ '<form data-session-form="'+s.session_number+'" class="formgrid"><div class="field wide"><label>Título</label><input class="input" name="title" value="'+L.esc(s.title)+'" required></div><div class="field wide"><label>Resumen</label><textarea class="input" name="summary" rows="3">'+L.esc(s.summary||'')+'</textarea></div><div class="field"><label>Estado</label><select class="input" name="status"><option value="draft" '+(s.status==='draft'?'selected':'')+'>Borrador</option><option value="visible" '+(s.status==='visible'?'selected':'')+'>Publicada</option><option value="closed" '+(s.status==='closed'?'selected':'')+'>Cerrada</option></select></div><div class="field"><label>Fecha/hora</label><input class="input" type="datetime-local" name="starts_at" value="'+isoLocal(s.starts_at)+'"></div><div class="field wide"><label>Ruta principal opcional</label><input class="input" name="path" value="'+L.esc(s.path||'')+'"></div><div class="wide actions"><button class="btn primary" type="submit">Guardar sesión</button></div></form>'+
+ '<h3 style="margin-top:15px">Recursos</h3><div id="res-'+s.session_number+'">'+(rs.length?rs.map(r=>'<div class="resource-row"><div><b>'+L.esc(r.title)+'</b><div class="muted">'+L.esc(r.resource_type)+' · '+L.esc(r.url)+'</div></div><button class="btn danger" data-del-resource="'+r.id+'">Quitar</button></div>').join(''):'<p class="muted">Sin recursos.</p>')+'</div>'+
+ '<form data-resource-form="'+s.session_number+'" class="formgrid" style="margin-top:10px"><div class="field"><label>Tipo</label><select class="input" name="resource_type"><option>notebook</option><option>presentation</option><option>guide</option><option>reading</option><option>lab</option><option>link</option><option>evidence</option></select></div><div class="field"><label>Título</label><input class="input" name="title" required></div><div class="field wide"><label>URL/ruta</label><input class="input" name="url" required></div><div class="wide"><button class="btn alt" type="submit">Añadir recurso</button></div></form></details>'}).join('');
+ document.querySelectorAll('[data-session-form]').forEach(f=>f.onsubmit=saveSession);
+ document.querySelectorAll('[data-resource-form]').forEach(f=>f.onsubmit=saveResource);
+ document.querySelectorAll('[data-del-resource]').forEach(b=>b.onclick=()=>deleteResource(b.dataset.delResource));
+}
+function renderAnnouncements(){
+ const rows=data.all_announcements||[];
+ L.$('announcements').innerHTML=rows.length?rows.map(a=>'<div class="announce-row"><div class="actions" style="justify-content:space-between"><b>'+(a.pinned?'★ ':'')+L.esc(a.title)+'</b><button class="btn danger" data-del-ann="'+a.id+'">Eliminar</button></div><div class="muted">'+L.fmtWhen(a.published_at)+(a.expires_at?' → '+L.fmtWhen(a.expires_at):'')+'</div><p>'+L.esc(a.body).replace(/\n/g,'<br>')+'</p></div>').join(''):'<p class="muted">Sin anuncios.</p>';
+ document.querySelectorAll('[data-del-ann]').forEach(b=>b.onclick=()=>deleteAnnouncement(b.dataset.delAnn));
+}
+function render(){renderMetrics();renderSessions();renderAnnouncements()}
+async function saveSession(e){e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;try{await L.core('teacher_save_session',{session_number:Number(f.dataset.sessionForm),title:f.title.value,summary:f.summary.value,status:f.status.value,path:f.path.value,starts_at:f.starts_at.value||null});L.msg(status,'Sesión guardada.','ok');await load()}catch(ex){L.msg(status,ex.message,'err')}finally{b.disabled=false}}
+async function saveResource(e){e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;try{await L.core('teacher_save_resource',{session_number:Number(f.dataset.resourceForm),resource_type:f.resource_type.value,title:f.title.value,url:f.url.value,position:sessionResources(f.dataset.resourceForm).length+1});L.msg(status,'Recurso añadido.','ok');await load()}catch(ex){L.msg(status,ex.message,'err')}finally{b.disabled=false}}
+async function deleteResource(id){if(!confirm('¿Quitar este recurso de la sesión?'))return;try{await L.core('teacher_delete_resource',{id});await load()}catch(ex){L.msg(status,ex.message,'err')}}
+async function deleteAnnouncement(id){if(!confirm('¿Eliminar este anuncio?'))return;try{await L.core('teacher_delete_announcement',{id});await load()}catch(ex){L.msg(status,ex.message,'err')}}
+L.$('announceForm').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;try{await L.core('teacher_save_announcement',{title:f.title.value,body:f.body.value,link:f.link.value,pinned:f.pinned.checked,published_at:f.published_at.value||null,expires_at:f.expires_at.value||null});f.reset();L.msg(status,'Anuncio publicado.','ok');await load()}catch(ex){L.msg(status,ex.message,'err')}finally{b.disabled=false}};
+async function load(){try{const gate=await L.requireBigData({teacher:true});if(!gate)return;data=await L.core('teacher_overview');render()}catch(ex){L.msg(status,ex.message,'err')}}
+L.$('refresh').onclick=load;await load();
+})();
+</script></body></html>
