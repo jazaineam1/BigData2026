@@ -58,6 +58,8 @@ jobs:
           test -f _site/lms/gradebook.html
           test -f _site/lms/competencies.html
           test -f _site/lms/teacher-competencies.html
+          test -f _site/lms/progress.html
+          test -f _site/lms/teacher-analytics.html
           touch _site/.nojekyll
 
       - name: Cargar artefacto
