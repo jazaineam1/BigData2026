@@ -17,6 +17,6 @@ function render(){
  document.querySelectorAll('[data-submit]').forEach(f=>{const sel=f.artifact_type,text=f.querySelector('[data-text]'),url=f.querySelector('[data-url]');sel.onchange=()=>{text.classList.toggle('hidden',sel.value!=='text');url.classList.toggle('hidden',sel.value!=='url')};f.onsubmit=submit});
 }
 async function submit(e){e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');if(!confirm('¿Enviar este intento? Quedará registrado con fecha y hora.'))return;b.disabled=true;try{await L.core('submit_assignment',{assignment_id:f.dataset.submit,artifact_type:f.artifact_type.value,text:f.text?.value||'',url:f.url?.value||''});L.msg(status,'Entrega registrada.','ok');await load()}catch(ex){L.msg(status,ex.message,'err')}finally{b.disabled=false}}
-async function load(){try{const gate=await L.requireBigData();if(!gate)return;data=await L.core('assignments');if(['teacher','admin'].includes(data.viewer?.role))L.$('gradebookLink').classList.remove('hidden');render()}catch(ex){L.msg(status,ex.message,'err')}}await load();
+async function load(){try{const gate=await L.requireBigData();if(!gate)return;data=await L.core('assignments');L.core('track_learning_event',{event_type:'assignments_opened',client_at:new Date().toISOString()}).catch(()=>{});if(['teacher','admin'].includes(data.viewer?.role))L.$('gradebookLink').classList.remove('hidden');render()}catch(ex){L.msg(status,ex.message,'err')}}await load();
 })();
 </script></body></html>
