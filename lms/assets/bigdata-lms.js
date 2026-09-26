@@ -1,12 +1,31 @@
 (()=>{'use strict';
 const API='https://gnpouhsvsisqoxketlfr.supabase.co/functions/v1';
-const STORE='andesdb.lms.auth.v1';
+const STORE='lms.bigdata.v2';
+const LEGACY_STORE='andesdb.lms.auth.v1';
 const ROOT='/BigData2026/lms/';
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const auth=()=>{try{return JSON.parse(localStorage.getItem(STORE)||'null')}catch{return null}};
-const save=x=>{try{x?localStorage.setItem(STORE,JSON.stringify(x)):localStorage.removeItem(STORE)}catch{}};
-async function request(path,opt={}){const a=auth(),h={'Content-Type':'application/json',...(opt.headers||{})};if(a?.token)h.Authorization='Bearer '+a.token;const r=await fetch(API+'/'+path,{...opt,headers:h});const x=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(x.error||('HTTP '+r.status));e.status=r.status;e.data=x;throw e}return x}
+const parseStore=(storage,key)=>{try{return JSON.parse(storage.getItem(key)||'null')}catch{return null}};
+const auth=()=>{
+  const current=parseStore(sessionStorage,STORE)||parseStore(localStorage,STORE);
+  if(current)return current;
+  const legacy=parseStore(localStorage,LEGACY_STORE);
+  if(legacy){try{sessionStorage.setItem(STORE,JSON.stringify(legacy));localStorage.setItem(STORE,JSON.stringify(legacy))}catch{}}
+  return legacy;
+};
+const save=x=>{try{
+  if(x){
+    const raw=JSON.stringify(x);
+    sessionStorage.setItem(STORE,raw);
+    localStorage.setItem(STORE,raw);
+    localStorage.removeItem(LEGACY_STORE);
+  }else{
+    sessionStorage.removeItem(STORE);
+    localStorage.removeItem(STORE);
+    localStorage.removeItem(LEGACY_STORE);
+  }
+}catch{}};
+async function request(path,opt={}){const {auth:useAuth=true,...fetchOpt}=opt,a=useAuth?auth():null,h={'Content-Type':'application/json',...(fetchOpt.headers||{})};if(a?.token)h.Authorization='Bearer '+a.token;const r=await fetch(API+'/'+path,{...fetchOpt,headers:h});const x=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(x.error||('HTTP '+r.status));e.status=r.status;e.data=x;throw e}return x}
 async function login(username,password){const x=await request('learning-auth',{method:'POST',body:JSON.stringify({action:'login',username,password})});save({token:x.token,expires_at:x.expires_at,auth_session_id:x.auth_session_id,user:x.user});return x}
 async function authAction(action,payload={}){return request('learning-auth',{method:'POST',body:JSON.stringify({action,...payload})})}
 async function bigdata(action='me',payload={}){if(action==='me'||action==='teacher_wall')return request('bigdata-learning?action='+encodeURIComponent(action),{method:'GET'});return request('bigdata-learning',{method:'POST',body:JSON.stringify({action,...payload})})}
@@ -16,7 +35,7 @@ async function core(action='home',payload={}){if(action==='home'||action==='teac
 async function assess(action='quizzes',payload={}){if(action==='quizzes'||action==='teacher_overview')return request('bigdata-lms-assess?action='+encodeURIComponent(action),{method:'GET'});return request('bigdata-lms-assess',{method:'POST',body:JSON.stringify({action,...payload})})}
 async function interop(action='overview',payload={}){if(action==='overview')return request('bigdata-lms-interop?action='+encodeURIComponent(action),{method:'GET'});return request('bigdata-lms-interop',{method:'POST',body:JSON.stringify({action,...payload})})}
 async function ops(action='overview',payload={}){if(action==='overview')return request('bigdata-lms-ops?action='+encodeURIComponent(action),{method:'GET'});return request('bigdata-lms-ops',{method:'POST',body:JSON.stringify({action,...payload})})}
-async function requestAccess(payload){return request('learning-access-request',{method:'POST',body:JSON.stringify({...payload,course_code:'bigdata',website:''})})}
+async function requestAccess(payload){return request('learning-access-request',{auth:false,method:'POST',body:JSON.stringify({...payload,course_code:'bigdata',website:''})})}
 async function reviewAccess(payload){return request('learning-access-review',{method:'POST',body:JSON.stringify(payload)})}
 async function logout(){try{await authAction('logout')}catch{}save(null);location.href=ROOT+'portal.html'}
 function fmtTime(s){s=Math.max(0,Number(s||0));const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h?h+' h '+m+' min':m+' min'}
