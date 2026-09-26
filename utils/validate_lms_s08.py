@@ -65,6 +65,8 @@ checks=[
  ("manifiesto declara administrador",any(x.get("code")=="users" and x.get("path")=="admin-users.html" for x in course.get("teacher_tools",[]))),
  ("portada enlaza LMS",'lms/portal.html' in index),
  ("portada S08 entra al LMS",'lms/session-08.html' in index),
+ ("portada sin método redundante","Aprender = comprender, practicar, comprobar y transferir." not in index and "La evidencia importa más que completar una pantalla." not in index),
+ ("S08 trabajo en casa 6h","mínimo 6 horas por grupo" in s08),
  ("Pages publica carpeta LMS","cp -R lms _site/" in pages and "lms/**" in pages),
  ("Pages publica recursos mínimos S08","Talleres/Taller_Control_1.md" not in pages and "Cuadernos/Taller_Control_1.ipynb" in pages and "s08-secoppipeline.html" in pages),
 ]
