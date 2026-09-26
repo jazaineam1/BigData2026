@@ -14,7 +14,6 @@ def read(path):
 
 nb_text=read("Cuadernos/Taller_Control_1.ipynb")
 builder=read("utils/build_taller_control_1.py")
-guide=read("Talleres/Taller_Control_1.md")
 tutorial=read("assets/tutoriales/s08-secoppipeline.html")
 validator=read("utils/tc1_validator.py")
 s08=read("lms/session-08.html")
@@ -30,27 +29,30 @@ except Exception as e:
 
 all_src="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
 checks=[
-    ("notebook V4", "TC1 V4 · SECOP Data Pipeline" in all_src),
+    ("notebook sin versión visible", "# TC1 · SECOP Data Pipeline" in all_src and "TC1 V4" not in all_src),
     ("dos endpoints SECOP", "p6dx-8zbt" in all_src and "jbjy-vk9h" in all_src),
     ("ThreadPoolExecutor", "ThreadPoolExecutor" in all_src),
+    ("micro-lab antes del reto", "demo_dos_paginas" in all_src and "no suma puntos" in all_src),
     ("retry/backoff", "RETRY_STATUS" in all_src and "base_backoff" in all_src),
     ("orden estable", "$order" in all_src and "id_del_proceso ASC" in all_src),
     ("hash canónico", "canonical_hash" in all_src and "same_hash" in all_src),
     ("workers limitados", "MAX_WORKERS = 4" in all_src and "2–6 workers" in all_src),
-    ("RAW parquet", 'raw/procesos.parquet' in guide and 'raw/contratos.parquet' in guide),
+    ("RAW parquet", 'RAW = OUT / "raw"' in all_src and "to_parquet" in all_src),
     ("Atlas idempotente", "bulk_write" in all_src and "UpdateOne" in all_src and "upsert=True" in all_src),
     ("decision log", "decision_log" in all_src),
-    ("validador V4", 'VERSION = "2026-09-26-v4-secoppipeline"' in validator),
-    ("E1 nueva suma 20", all(x in validator for x in ["E1_contrato_y_query","E1_descarga_secuencial","E1_concurrencia_equivalente","E1_trazabilidad_calidad"])),
+    ("validador actual", 'VERSION = "2026-09-26-secoppipeline"' in validator),
+    ("E1 adquisición completa", all(x in validator for x in ["E1_contrato_y_query","E1_descarga_secuencial","E1_concurrencia_equivalente","E1_trazabilidad_calidad"])),
     ("E2 idempotencia", "E2_atlas_idempotente" in validator and "E2_indices" in validator),
     ("no speedup mínimo", "speedup >=" not in validator.lower()),
-    ("backend acepta V3+V4", "VALIDATOR_VERSIONS" in edge and "2026-09-17-v3-historico-atlas" in edge and "2026-09-26-v4-secoppipeline" in edge),
+    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-09-26-secoppipeline" in edge and "security_no_secrets" in edge),
+    ("gate de secretos", "secret_patterns" in validator and '"gates":gates' in validator),
     ("backend persiste versión real", "manifest_version:m.version" in edge and "validator_version:m.version" in edge),
     ("migración actividad", "E1 · API SECOP, concurrencia y trazabilidad" in sql),
-    ("rúbrica preserva 100", all(x in sql for x in ['"max":20','"max":30','"max":10','"max":15','"max":5'])),
-    ("S08 nueva", "SECOP Data Pipeline" in s08 and "s08-secoppipeline.html" in s08),
-    ("guía visual", "Calculadora de benchmark" in tutorial and "hash" in tutorial.lower()),
-    ("Pages guía", "test -f _site/assets/tutoriales/s08-secoppipeline.html" in pages),
+    ("rúbrica 25/25/10/15/15/10", 'STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}' in validator and sql.count('"max":25')>=2 and sql.count('"max":15')>=2 and sql.count('"max":10')>=2),
+    ("S08 nueva", "SECOP Data Pipeline" in s08 and "s08-secoppipeline.html" in s08 and "V4" not in s08),
+    ("sin guía Markdown redundante", not (ROOT/"Talleres/Taller_Control_1.md").exists()),
+    ("referencia no procedimental", "Pistas, no respuestas" in tutorial and "Paso a paso" not in tutorial and "hash" in tutorial.lower()),
+    ("Pages referencia", "test -f _site/assets/tutoriales/s08-secoppipeline.html" in pages and "Talleres/Taller_Control_1.md" not in pages),
     ("builder canónico", "Cuadernos" in builder and "Taller_Control_1.ipynb" in builder),
 ]
 for label,ok in checks:
@@ -84,20 +86,20 @@ if s07.exists():
         errors.append("S07 cambió: "+blob)
 
 # No secretos obvios
-public=nb_text+"\n"+guide+"\n"+tutorial
+public=nb_text+"\n"+tutorial
 if re.search(r"(mongodb\+srv://[^<\s]+:[^@\s]+@|sb_secret|service_role)",public,re.I):
     errors.append("Posible secreto en recurso público")
 
 if errors:
-    print("TC1 V4: FAIL")
+    print("TC1: FAIL")
     for e in errors: print(" -",e)
     sys.exit(1)
 
-print("TC1 V4: OK")
+print("TC1: OK")
 print(" - API SECOP Procesos + Contratos")
 print(" - secuencial + ThreadPoolExecutor + hash")
 print(" - trazabilidad + calidad + RAW")
 print(" - Atlas idempotente + índices")
 print(" - Cassandra + Neo4j + decision log")
-print(" - backend compatible V3/V4")
+print(" - backend y rúbrica actuales")
 print(" - S07 intacta")
