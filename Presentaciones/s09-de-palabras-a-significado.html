@@ -99,10 +99,10 @@ function svgAtlas(){return `<svg class="svg" viewBox="0 0 620 390"><rect x="45" 
 const stage=document.getElementById('stage'),bar=document.querySelector('.bar i'),n=document.getElementById('n'),tot=document.getElementById('tot'),chap=document.getElementById('chap');let idx=0,hstep=0,pState=[0,0,0,0,0];
 function render(){stage.innerHTML=slides.map((s,i)=>`<section class="slide ${s.dark?'dark':''}" id="s${i+1}" data-title="${s.t}"><div class="k">${s.k}</div><h1>${s.h}</h1>${s.b}</section>`).join('');tot.textContent=slides.length;document.getElementById('mapLinks').innerHTML=slides.map((s,i)=>`<a href="#s${i+1}">${String(i+1).padStart(2,'0')} · ${s.t}</a>`).join('')}
 function go(v,replace=false){idx=Math.max(0,Math.min(slides.length-1,v));document.querySelectorAll('.slide').forEach((s,i)=>s.classList.toggle('on',i===idx));n.textContent=idx+1;bar.style.width=((idx+1)/slides.length*100)+'%';chap.textContent=slides[idx].t;prev.disabled=idx===0;next.disabled=idx===slides.length-1;const h='#s'+(idx+1);if(location.hash!==h){replace?history.replaceState(null,'',h):history.pushState(null,'',h)}afterShow()}
-function afterShow(){if(document.getElementById('rankQ'))rankDemo();if(document.getElementById('topk'))topKDemo();if(document.getElementById('hnswSvg'))drawHnsw();if(document.getElementById('cand'))candDemo();if(document.getElementById('vsOut'))buildVS();if(document.getElementById('pBtns'))initP();if(document.getElementById('vecA'))cosDemo()}
+function afterShow(){if(document.getElementById('rankQ'))rankDemo();if(document.getElementById('topk'))topKDemo();if(document.getElementById('hnswSvg'))drawHnsw();if(document.getElementById('cand'))candDemo();if(document.getElementById('vsOut'))buildVS();if(document.getElementById('pBtns'))initP();if(document.getElementById('vecA'))cosDemo();if(document.getElementById('rrfOut'))rrfDemo();paintChallengeStates()}
 function fromHash(){const m=location.hash.match(/^#s(\d+)$/);go(m?Number(m[1])-1:0,true)}
 prev.onclick=()=>go(idx-1);next.onclick=()=>go(idx+1);addEventListener('hashchange',fromHash);addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(idx+1)}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(idx-1)}else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1)});
-mapBtn.onclick=()=>drawer.classList.toggle('on');closeDrawer.onclick=()=>drawer.classList.remove('on');fs.onclick=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()};resetBtn.onclick=()=>{localStorage.removeItem('s09p');hstep=0;pState=[0,0,0,0,0];document.querySelectorAll('input,textarea').forEach(x=>{if(x.defaultValue!==undefined)x.value=x.defaultValue});afterShow()};
+mapBtn.onclick=()=>drawer.classList.toggle('on');closeDrawer.onclick=()=>drawer.classList.remove('on');liveBtn.onclick=()=>liveDrawer.classList.toggle('on');closeLive.onclick=()=>liveDrawer.classList.remove('on');fs.onclick=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()};resetBtn.onclick=()=>{hstep=0;pState=[0,0,0,0,0];document.querySelectorAll('input,textarea').forEach(x=>{if(x.defaultValue!==undefined)x.value=x.defaultValue});document.querySelectorAll('select').forEach(x=>x.selectedIndex=0);afterShow();liveStatus.textContent='Práctica local reiniciada. El progreso LMS/primer intento no se borra.'};
 function literalSearch(){caseOut.textContent='Resultado literal: encuentra documentos con palabras compartidas, pero puede perder “mantenimiento programado de aeronaves KFIR”. Esa pérdida justifica búsqueda semántica.'}
 function toks(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9ñ ]/g,' ').split(/\s+/).filter(Boolean)}
 function lexicalDemo(){const docs=['mantenimiento programado de aeronaves KFIR','licencia Oracle Database','CO1.REQ.3714823 compra directa'];const q=lexQ.value;const qt=new Set(toks(q));lexOut.textContent=docs.map(d=>{const m=toks(d).filter(x=>qt.has(x));return d+'\n  tokens compartidos: '+(m.join(', ')||'ninguno fuerte')}).join('\n\n')}
@@ -117,7 +117,104 @@ function buildVS(){if(!window.vsOut)return;vsOut.textContent=JSON.stringify({$ve
 function rrfDemo(){if(!window.rrfOut)return;const ranks={D8:[2,1],D3:[1,2],D5:[4,3],D1:[3,null]},d=rrfDoc?.value||'D8',r=ranks[d]||[];const parts=r.filter(x=>x!=null).map(x=>1/(60+x)),score=parts.reduce((a,b)=>a+b,0);rrfOut.textContent=d+'\n'+r.map((x,i)=>x==null?'ranking '+(i+1)+': no aparece':'ranking '+(i+1)+': posición '+x+' → 1/(60+'+x+')').join('\n')+'\nRRF = '+score.toFixed(5)+'\nLectura: posiciones altas en varios rankings acumulan evidencia.'}
 function initP(){if(!window.pBtns)return;pBtns.innerHTML=pState.map((v,i)=>`<button class="${v?'on':''}" onclick="pState[${i}]=1-pState[${i}];initP()">${v?'✓':'✗'}</button>`).join('');pOut.textContent='P@5 = '+(pState.reduce((a,b)=>a+b,0)/5).toFixed(2)}function resetP(){pState=[0,0,0,0,0];initP()}
 function evidence(){const o={consulta:evQ.value,resultado_defendible:evGood.value,falso_positivo:evBad.value,alternativa_descartada:evAlt.value,limite:evLim.value,nota:'Completar en Colab con Top-5 lexical, semántico e híbrido reales.'};evOut.textContent=JSON.stringify(o,null,2)}
-render();fromHash();
+
+const L=window.BIGDATA_LMS;
+let s09Model=null,studentTimer=null,teacherTimer=null;
+const CHALLENGE_LABELS={"bd-s09-c1":"D1 · mecanismo","bd-s09-c2":"D2 · coseno","bd-s09-c3":"D3 · comparar rankings","bd-s09-c4":"D4 · arquitectura","bd-s09-c5":"D5 · RRF"};
+
+function fmtChallenge(cp){
+  const meta=cp?.metadata||{};
+  const first=meta.first_attempt_correct===true?'1.er intento ✓':meta.first_attempt_correct===false?'1.er intento ✗':'sin intento';
+  const mastery=meta.mastery===true?'dominio ✓':'dominio pendiente';
+  return {first,mastery,mastered:meta.mastery===true,attempted:Number(cp?.attempts||0)>0};
+}
+function progressMap(){return new Map((s09Model?.activity_progress||[]).map(x=>[x.activity_code,x]))}
+function paintChallengeStates(){
+  const map=progressMap();
+  Object.keys(CHALLENGE_LABELS).forEach(code=>{
+    const fb=document.getElementById('fb-'+code);if(!fb)return;
+    const x=fmtChallenge(map.get(code));
+    if(x.attempted)fb.textContent=x.first+' · '+x.mastery+(x.mastered?' · continúa con la transferencia':' · puedes reintentar después de leer la pista');
+  });
+}
+function renderStudentLive(){
+  const auth=L?.auth?.(),map=progressMap(),p=s09Model?.session_progress||{};
+  if(!auth||!s09Model){
+    liveIdentity.textContent='Sin sesión LMS activa. Entra primero por el LMS para registrar avances.';
+    liveStats.innerHTML='<div class="live-stat"><b>Modo local</b><span class="mini">Las herramientas funcionan, pero no se registra progreso.</span></div>';
+    liveChallenges.innerHTML='';
+    return;
+  }
+  liveIdentity.textContent=(s09Model.viewer?.display_name||s09Model.viewer?.username||'Estudiante')+' · progreso S09';
+  const mastered=Object.keys(CHALLENGE_LABELS).filter(code=>fmtChallenge(map.get(code)).mastered).length;
+  const attempted=Object.keys(CHALLENGE_LABELS).filter(code=>fmtChallenge(map.get(code)).attempted).length;
+  liveStats.innerHTML='<div class="live-stat"><span class="mini">Intentados</span><b>'+attempted+'/5</b></div><div class="live-stat"><span class="mini">Dominio</span><b>'+mastered+'/5</b></div><div class="live-stat"><span class="mini">Tiempo activo</span><b>'+L.fmtTime(p.active_seconds||0)+'</b></div><div class="live-stat"><span class="mini">Última actividad</span><b style="font-size:.85rem">'+L.fmtWhen(p.last_activity_at)+'</b></div>';
+  liveChallenges.innerHTML=Object.entries(CHALLENGE_LABELS).map(([code,label])=>{const x=fmtChallenge(map.get(code));return '<div class="live-row"><span class="live-dot '+(x.mastered?'done':x.attempted?'try':'')+'">'+(x.mastered?'✓':x.attempted?'•':'–')+'</span><span><b>'+label+'</b><br><span class="mini">'+x.first+' · '+x.mastery+'</span></span><a href="#s'+challengeSlide(code)+'" class="btn ghost" style="font-size:12px;padding:5px 7px">Ir</a></div>'}).join('');
+  paintChallengeStates();
+}
+function challengeSlide(code){return {"bd-s09-c1":9,"bd-s09-c2":16,"bd-s09-c3":18,"bd-s09-c4":21,"bd-s09-c5":31}[code]||1}
+async function refreshStudentProgress(){
+  if(!L?.auth?.()?.token)return;
+  try{s09Model=await L.s09('me');renderStudentLive()}catch(e){liveStatus.textContent='No se pudo actualizar S09 Live: '+e.message}
+}
+async function answerChallenge(code){
+  const sel=document.getElementById('ans-'+code),fb=document.getElementById('fb-'+code);
+  if(!sel||!fb)return;
+  if(!L?.auth?.()?.token){
+    fb.textContent='Abre la presentación desde el LMS para registrar primer intento y dominio.';
+    liveDrawer.classList.add('on');renderStudentLive();return;
+  }
+  const btn=sel.parentElement?.querySelector('button');if(btn)btn.disabled=true;
+  fb.textContent='Validando…';
+  try{
+    const x=await L.s09('answer_challenge',{activity_code:code,answer:sel.value});
+    fb.textContent=x.correct?'Correcto · dominio alcanzado.':'Todavía no · pista: '+(x.hint||'revisa la definición y vuelve a intentarlo.');
+    await refreshStudentProgress();
+  }catch(e){fb.textContent='No se pudo registrar: '+e.message}
+  finally{if(btn)btn.disabled=false}
+}
+async function initStudentLms(){
+  if(!L?.auth?.()?.token){renderStudentLive();return}
+  try{
+    s09Model=await L.s09('me');
+    await L.s09('track',{event_type:'presentation_opened',activity_code:'bd-s09-presentation',metadata:{source:'s09-embedded-presentation',path:location.pathname},client_at:new Date().toISOString()});
+    s09Model=await L.s09('me');
+    renderStudentLive();
+    L.startHeartbeat('bd-s09-presentation',L.s09);
+    studentTimer=setInterval(()=>refreshStudentProgress().catch(()=>{}),15000);
+  }catch(e){liveStatus.textContent='S09 Live no disponible: '+e.message;renderStudentLive()}
+}
+function cpCell(cp){
+  const x=fmtChallenge(cp);
+  return '<span class="mastery '+(x.mastered?'ok':x.attempted?'bad':'none')+'">'+(x.first.replace('1.er intento ','1º '))+'<br>'+x.mastery+'</span>';
+}
+function renderTeacherWall(data){
+  const rows=data.ranking||[],started=rows.filter(x=>x.started_at).length,pres=rows.filter(x=>x.presentation_opened).length,nb=rows.filter(x=>x.notebook_opened).length,mastered=rows.reduce((a,r)=>a+Number(r.completed_checkpoints||0),0);
+  teacherMetrics.innerHTML='<div class="teacher-card"><span class="mini">Estudiantes</span><b>'+rows.length+'</b></div><div class="teacher-card"><span class="mini">Iniciaron</span><b>'+started+'</b></div><div class="teacher-card"><span class="mini">Presentación</span><b>'+pres+'</b></div><div class="teacher-card"><span class="mini">Colab</span><b>'+nb+'</b></div><div class="teacher-card"><span class="mini">Dominio acumulado</span><b>'+mastered+'/'+(rows.length*5)+'</b></div>';
+  teacherChallengeStats.innerHTML=(data.challenge_stats||[]).map((s,i)=>'<div class="challenge-chip"><b>D'+(i+1)+'</b><div>Intentaron: '+s.attempted+'/'+rows.length+'</div><div>1.er intento: '+s.first_attempt_correct+'/'+Math.max(1,s.attempted)+'</div><div>Dominio: '+s.mastered+'/'+rows.length+'</div></div>').join('');
+  teacherRows.innerHTML=rows.length?rows.map(r=>'<tr><td><b>'+L.esc(r.display_name)+'</b></td><td>'+L.fmtWhen(r.started_at)+'</td><td>'+(r.presentation_opened?'✓':'—')+'</td><td>'+(r.notebook_opened?'✓':'—')+'</td>'+[0,1,2,3,4].map(i=>'<td>'+cpCell(r.checkpoints?.[i])+'</td>').join('')+'<td>'+L.fmtTime(r.active_seconds||0)+'</td><td>'+L.fmtWhen(r.last_activity_at)+'</td></tr>').join(''):'<tr><td colspan="11">No hay estudiantes activos.</td></tr>';
+  teacherOpen.disabled=!!data.session_window?.opened_at;
+  teacherOpen.textContent=data.session_window?.opened_at?'Inicio fijado · '+L.fmtWhen(data.session_window.opened_at):'Fijar inicio oficial';
+  teacherStatus.textContent='WALL actualizado · '+new Date().toLocaleTimeString('es-CO')+'. Usa las señales para acompañar, no para ordenar estudiantes por velocidad.';
+}
+async function loadTeacherWall(){
+  try{const data=await L.requireS09({teacher:true});if(!data)return;renderTeacherWall(data)}
+  catch(e){teacherStatus.textContent='WALL no disponible: '+e.message}
+}
+async function initTeacherWall(){
+  document.body.classList.add('wall-mode');teacherWall.classList.add('on');
+  teacherRefresh.onclick=()=>loadTeacherWall();
+  teacherOpen.onclick=async()=>{if(!confirm('¿Fijar ahora el inicio oficial de S09?'))return;teacherOpen.disabled=true;try{await L.s09('teacher_open_session');await loadTeacherWall()}catch(e){teacherStatus.textContent=e.message}finally{teacherOpen.disabled=false}};
+  await loadTeacherWall();teacherTimer=setInterval(()=>loadTeacherWall().catch(()=>{}),15000);
+}
+async function initLmsLayer(){
+  const wallMode=new URLSearchParams(location.search).get('wall')==='docente';
+  if(wallMode){await initTeacherWall();return}
+  await initStudentLms();
+}
+addEventListener('pagehide',()=>{if(studentTimer)clearInterval(studentTimer);if(teacherTimer)clearInterval(teacherTimer)});
+
+render();fromHash();initLmsLayer();
 </script>
 </body>
 </html>
