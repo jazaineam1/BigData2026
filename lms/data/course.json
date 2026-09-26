@@ -113,6 +113,11 @@
       "path": "teacher-analytics.html"
     },
     {
+      "code": "collaboration",
+      "title": "Colaboración",
+      "path": "teacher-collaboration.html"
+    },
+    {
       "code": "wall",
       "title": "WALL S08",
       "path": "teacher-wall.html"
