@@ -58,7 +58,8 @@ const sessionModel = {
   activities:[
     {code:'bd-s09-presentation',title:'Presentación S09',kind:'resource',required:true,points:0,metadata:{resource_type:'presentation',completion_rule:'visit'}},
     {code:'bd-s09-c1',title:'D1 · mecanismos de búsqueda',kind:'checkpoint',required:true,points:1,metadata:{completion_rule:'mastery',slide:9,evidence:'Distingue búsqueda lexical y semántica.'}},
-    {code:'bd-s09-notebook',title:'Cuaderno S09',kind:'resource',required:true,points:0,metadata:{resource_type:'notebook',completion_rule:'visit'}}
+    {code:'bd-s09-notebook',title:'Cuaderno S09',kind:'resource',required:true,points:0,metadata:{resource_type:'notebook',completion_rule:'visit'}},
+    {code:'bd-s09-lab3',title:'LAB 3 · Vecinos y Top-k',kind:'lab',required:true,points:0,metadata:{completion_rule:'evidence',slide:17,evidence:'Resultado propio + decisión + alternativa + límite.'}}
   ],
   resources:[
     {id:'r1',resource_type:'presentation',title:'Presentación S09',url:'../Presentaciones/s09-de-palabras-a-significado.html#s1',metadata:{tracked_activity:'bd-s09-presentation'}},
@@ -69,7 +70,10 @@ const sessionModel = {
     {activity_code:'bd-s09-presentation',status:'in_progress',attempts:1,metadata:{visited:true}}
   ],
   resume:{slide:7,label:'Embeddings',chapter:'SEMÁNTICA'},
-  summary:{total_activities:3,required_activities:3,attempted:1,completed:0,resource_visited:1,resource_total:2,checkpoint_mastered:0,checkpoint_total:1}
+  catalog:[{code:'bd-s09-lab3',evaluator:'seeded-numeric',seeded:true,version:1}],
+  seeds:{'bd-s09-lab3':'0000000000000001'},
+  evidence:[],
+  summary:{total_activities:4,required_activities:4,attempted:1,completed:0,resource_visited:1,resource_total:2,checkpoint_mastered:0,checkpoint_total:1}
 };
 
 async function mockSessionApi(page, role='student') {
