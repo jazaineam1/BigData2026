@@ -47,8 +47,8 @@
 <section class="card">
 <div class="ey">Cohorte</div><h2>Avance de estudiantes</h2>
 <div class="wall-filters">
-<input id="search" class="input" type="search" placeholder="Buscar estudiante…">
-<select id="filter" class="input"><option value="all">Todos</option><option value="not_started">Sin iniciar</option><option value="in_progress">En curso</option><option value="needs_attention">Requieren ayuda</option><option value="completed">Completaron</option></select>
+<label class="sr-only" for="search">Buscar estudiante</label><input id="search" class="input" type="search" placeholder="Buscar estudiante…" aria-label="Buscar estudiante">
+<label class="sr-only" for="filter">Filtrar estudiantes por estado</label><select id="filter" class="input" aria-label="Filtrar estudiantes por estado"><option value="all">Todos</option><option value="not_started">Sin iniciar</option><option value="in_progress">En curso</option><option value="needs_attention">Requieren ayuda</option><option value="completed">Completaron</option></select>
 <span id="visibleCount" class="pill active">0</span>
 </div>
 <div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>Estudiante</th><th>Estado</th><th>Ahora</th><th>Ruta</th><th>Dominio</th><th>Posición</th><th>Tiempo activo</th><th>Última actividad</th></tr></thead><tbody id="students"></tbody></table></div>
