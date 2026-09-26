@@ -63,7 +63,7 @@ El objetivo no es copiar Moodle, Brightspace, Blackboard o Classroom pantalla po
   - menciones y respuestas dirigidas;
   - FAQ mediante respuestas destacadas;
   - revisión por pares.
-- **S08 · TC1 V4**
+- **S08 · TC1**
   - SECOP Data Pipeline;
   - API + concurrencia;
   - evidencia verificable;
@@ -88,13 +88,20 @@ El objetivo no es copiar Moodle, Brightspace, Blackboard o Classroom pantalla po
   - pendiente: Edu-API institucional para educación superior si la universidad dispone de contraparte;
   - pendiente: xAPI/Caliper solo si existe consumidor;
   - pendiente: integración opcional con GitHub;
-  - pendiente: políticas de retención de archivos.
-- **Fase 8 · Plataforma, accesibilidad y confianza.**
-  - permisos más granulares;
-  - SSO/OIDC y MFA cuando la institución provea identidad compatible;
-  - observabilidad y rate limiting;
-  - backup/restore;
-  - WCAG 2.2 AA y pruebas responsive formales.
+  - implementado: política de retención segura para archivos pending/abandoned;
+  - pendiente: API pública documentada, webhooks firmados, importaciones y adaptadores institucionales.
+- **Fase 8 · Plataforma, accesibilidad y confianza · en curso.**
+  - implementado: rate limiting de login en identidad compartida;
+  - implementado: gestión/revocación de sesiones y recuperación de cuenta;
+  - implementado: auditoría administrativa;
+  - implementado: snapshot académico con SHA-256 y exclusión de secretos;
+  - implementado: runbook de recuperación y separación DB/Storage;
+  - implementado: limpieza de archivos huérfanos con rol admin y transición segura;
+  - pendiente: permisos más granulares;
+  - pendiente: SSO/OIDC y MFA cuando la institución provea identidad compatible;
+  - pendiente: observabilidad operacional centralizada;
+  - pendiente: estrategia formal de backups de plataforma/RPO/RTO con la institución;
+  - pendiente: WCAG 2.2 AA y pruebas responsive formales.
 
 ### Dependencias externas no simuladas
 
@@ -207,17 +214,16 @@ LTI institucional, SSO/OIDC, sincronización OneRoster y envío xAPI/Caliper req
 
 **Meta:** que el LMS pueda sostener más cursos sin degradar seguridad ni experiencia.
 
-- Roles y permisos granulares.
-- SSO institucional/OIDC cuando esté disponible.
-- MFA para roles docentes/administrativos.
-- Políticas de sesión y recuperación de cuenta.
-- Auditoría consultable y exportable.
-- Retención y borrado de datos documentados.
-- Backups y procedimiento de recuperación.
-- Observabilidad: errores frontend, Edge Functions y consultas críticas.
-- Límites/rate limiting para acciones sensibles.
-- WCAG 2.2 AA: teclado, foco, contraste, lectores de pantalla y movimiento reducido.
-- Pruebas responsive en teléfono, tablet y escritorio.
+- Roles y permisos granulares: pendiente.
+- SSO institucional/OIDC y MFA: pendientes de identidad institucional.
+- Políticas de sesión, revocación, recuperación y rate limiting de login: implementadas en la identidad compartida; falta política formal de expiración por rol.
+- Auditoría administrativa: implementada; falta observabilidad operacional centralizada.
+- Retención de archivos: implementada para huérfanos pending/abandoned con mínimo 24 h y limpieza admin-only.
+- Snapshot académico verificable con SHA-256: implementado.
+- Runbook de recuperación: implementado; restore destructivo se mantiene fuera del navegador.
+- Backup de plataforma, RPO/RTO y respaldo separado de Storage: requieren política operativa institucional.
+- WCAG 2.2 AA: pendiente auditoría formal de teclado, foco, contraste, lectores de pantalla y movimiento reducido.
+- Pruebas responsive en teléfono, tablet y escritorio: pendientes como suite formal.
 - PWA/offline solo para contenidos que realmente se beneficien de ello.
 
 **Criterio de salida:** existe una matriz de permisos, una prueba de restauración, un checklist de accesibilidad y un tablero de salud operacional.
