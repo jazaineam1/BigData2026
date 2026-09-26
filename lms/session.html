@@ -86,6 +86,14 @@
 <div><b>Calificado</b><span class="muted">Existe evaluación formal; no se infiere por tiempo.</span></div>
 </div>
 </section>
+
+<section id="labCodeCard" class="card hidden">
+<div class="ey">Puente con Colab</div>
+<h2 style="margin-bottom:5px">Código de laboratorio</h2>
+<p class="muted">Permite enviar evidencia desde el cuaderno sin compartir tu token LMS. Vence en 6 horas y puedes regenerarlo.</p>
+<div class="actions"><button id="labCodeBtn" class="btn alt">Generar código</button></div>
+<div id="labCodeBox" class="note hidden" style="margin-top:10px"><span class="muted">Código actual</span><div><code id="labCodeValue" style="font-size:1.35rem;font-weight:950;letter-spacing:.12em"></code></div><span id="labCodeExpiry" class="muted"></span></div>
+</section>
 </aside>
 </div>
 </main>
@@ -123,6 +131,15 @@ function openCheckpoint(a){
   if(r){openResource(r,(data.activities||[]).find(x=>x.code===r.metadata?.tracked_activity));return}
   location.href='progress.html?s='+sessionNumber;
 }
+function openStage(a){
+  const slide=Number(a?.metadata?.slide||0),r=presentationResource();
+  if(a?.kind==='lab'&&r&&slide>0){
+    const u=r.url.replace(/#.*$/,'')+'#s'+slide;
+    openResource({...r,url:u,resource_type:'lab'},a);return;
+  }
+  const lab=(data.resources||[]).find(r=>r.resource_type==='lab')||(data.resources||[])[0];
+  if(lab)openResource(lab,a);
+}
 function primaryAction(){
   const pm=progressMap(),resume=data.resume;
   if(resume&&presentationResource())return {title:'Continuar donde quedaste',text:'Última posición registrada: diapositiva '+resume.slide+(resume.label?' · '+resume.label:''),run:()=>openCheckpoint({metadata:{slide:resume.slide}})};
@@ -145,6 +162,8 @@ function render(){
   L.$('role').textContent=(viewer.role==='student'?'Estudiante':'Rol '+viewer.role)+' · Big Data 2026-2S';
   if(['teacher','admin'].includes(viewer.role)){L.$('wallLink').classList.remove('hidden');L.$('wallLink').href='wall.html?s='+sessionNumber}
   L.$('progressBtn').href='progress.html?s='+sessionNumber;
+  const hasNotebook=(data.resources||[]).some(r=>r.resource_type==='notebook');
+  L.$('labCodeCard').classList.toggle('hidden',!hasNotebook);
   const outcomes=Array.isArray(meta.outcomes)?meta.outcomes:[];
   L.$('outcomes').innerHTML=outcomes.length?outcomes.map(x=>'<li>'+L.esc(x)+'</li>').join(''):'<li>Revisa los recursos publicados y completa las evidencias definidas para la sesión.</li>';
   const achieved=Number(sum.resource_visited||0)+Number(sum.checkpoint_mastered||0)+(data.activities||[]).filter(a=>!['resource','checkpoint'].includes(a.kind)&&pm.get(a.code)?.status==='completed').length;
@@ -164,14 +183,23 @@ function render(){
   }).join('')||'<div class="empty">No hay actividades publicadas todavía.</div>';
   document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{const a=data.activities.find(x=>x.code===b.dataset.open);openResource(trackedResource(a),a)});
   document.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>openCheckpoint(data.activities.find(x=>x.code===b.dataset.check)));
-  document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{const a=data.activities.find(x=>x.code===b.dataset.stage),lab=(data.resources||[]).find(r=>r.resource_type==='lab')||(data.resources||[])[0];if(lab)openResource(lab,a)});
+  document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>openStage(data.activities.find(x=>x.code===b.dataset.stage)));
   const next=primaryAction();L.$('nextTitle').textContent=next.title;L.$('nextText').textContent=next.text;L.$('continueBtn').onclick=next.run;
 }
 async function refresh(){
   try{data=await L.requireSession(sessionNumber);if(!data)return;render()}catch(e){L.msg(status,e.message,'err')}
 }
 await refresh();
-L.session('track',{session_number:sessionNumber,event_type:'session_entered',metadata:{source:'module-v3',path:location.pathname},client_at:new Date().toISOString()}).catch(()=>{});
+L.$('labCodeBtn').onclick=async()=>{
+  const btn=L.$('labCodeBtn');btn.disabled=true;
+  try{
+    const x=await L.session('lab_code',{session_number:sessionNumber});
+    L.$('labCodeValue').textContent=x.code||'';
+    L.$('labCodeExpiry').textContent='Vence '+L.fmtWhen(x.expires_at)+'. Úsalo solo en el cuaderno de esta sesión.';
+    L.$('labCodeBox').classList.remove('hidden');
+  }catch(e){L.msg(status,e.message,'err')}finally{btn.disabled=false}
+};
+L.session('track',{session_number:sessionNumber,event_type:'session_entered',metadata:{source:'module-v4',path:location.pathname},client_at:new Date().toISOString()}).catch(()=>{});
 addEventListener('pageshow',()=>{if(document.visibilityState==='visible')refresh()});
 })();
 </script>
