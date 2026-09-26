@@ -50,8 +50,21 @@ except Exception as ex:
 nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
 code_cells=["".join(c.get("source",[])) for c in nb.get("cells",[]) if c.get("cell_type")=="code"]
 
+required_terms=[
+    "Corpus","Documento","Consulta","Ranking","Recuperación de información",
+    "Recuperación lexical","Recuperación semántica","Búsqueda híbrida","Analyzer","Token",
+    "Índice invertido","BM25","Embedding","Vector","Dimensión","Modelo",
+    "Similitud","Similitud coseno","Top-k","Falso positivo","Base vectorial",
+    "Metadata","Filtro","Índice vectorial","ANN","ENN","HNSW","Atlas Vector Search","$vectorSearch","Juicio de relevancia"
+]
+missing_terms=[t for t in required_terms if t not in deck]
+lab_markers=["LAB 1 · tokenizador didáctico","LAB 2 · calculadora de coseno","LAB 3 · comparador lexical vs semántico","LAB 4 · decisión corta","LAB 5 · ruta Atlas","LAB 6 · Top-k","LAB 7 · constructor de evidencia"]
+
 checks=[
     ("presentación suficiente", deck.count('<section class="slide')>=38),
+    ("formato tipo S07", "class=\"stage\"" in deck and "class=\"nav\"" in deck and "S09 Lab" in deck and "cqw" in deck),
+    ("laboratorio embebido", all(x in deck for x in lab_markers) and "S09 Lab integrado" in deck),
+    ("definiciones completas", not missing_terms and deck.count("Definición")>=24 and deck.count("Ejemplo")>=18),
     ("distinción Elasticsearch explícita", "Elasticsearch ≠ búsqueda lexical" in deck),
     ("tres mecanismos", all(x in deck.lower() for x in ["lexical","semántica","híbrida"])),
     ("S07 lexical correctamente descrita", '<div class="node">tokens</div>' in deck and '<div class="node">índice invertido</div>' in deck and '<div class="node">BM25</div>' in deck),
@@ -60,9 +73,10 @@ checks=[
     ("score no probabilidad", "0.91 no significa" in deck and "probabilidad" in deck),
     ("base vectorial separa responsabilidades", "el modelo genera vectores" in deck.lower()),
     ("ANN/ENN", "Exacto vs aproximado" in deck and "ANN" in deck and "ENN" in deck),
-    ("Atlas es implementación no definición", "No es la definición de base vectorial" in deck),
-    ("guía rescate no ruta paralela", "La ejecución principal sigue estando en el cuaderno S09" in guide),
-    ("guía distingue herramienta/mecanismo", "Elasticsearch no significa “búsqueda lexical”" in guide),
+    ("Atlas es implementación no definición", "Atlas es una implementación. No es la definición de base vectorial." in deck),
+    ("guía apoyo no ruta paralela", "El laboratorio principal está en la presentación" in guide and "no ruta paralela" in guide),
+    ("guía conserva regla de herramienta/mecanismo", "Elasticsearch puede hacer lexical, vectorial e híbrida" in guide),
+    ("LMS aclara laboratorio en presentación", "laboratorio integrado dentro de la presentación" in session and "Diapositivas + laboratorio" in session),
     ("notebook tamaño pedagógico", len(nb.get("cells",[]))>=20),
     ("notebook modelo E5", "intfloat/multilingual-e5-small" in nb_text and "query: " in nb_text and "passage: " in nb_text),
     ("notebook BM25", "BM25Okapi" in nb_text and "buscar_lexical" in nb_text),
@@ -93,8 +107,9 @@ checks=[
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
+if missing_terms:
+    errors.append("Faltan definiciones/términos en presentación: "+", ".join(missing_terms))
 
-# Compilar código Python de celdas normales; ignorar magics de Colab.
 for i,src in enumerate(code_cells,1):
     lines=[ln for ln in src.splitlines() if not ln.lstrip().startswith(("%","!"))]
     if not lines: continue
@@ -103,7 +118,6 @@ for i,src in enumerate(code_cells,1):
     except SyntaxError as ex:
         errors.append(f"Notebook: sintaxis Python en celda {i}: {ex}")
 
-# Sintaxis JavaScript inline.
 for name,html in [("deck",deck),("session",session),("wall",wall)]:
     scripts=re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>",html,re.S|re.I)
     for i,script in enumerate(scripts,1):
@@ -125,7 +139,8 @@ if errors:
 
 print("SESION 09: OK")
 print(" - S07 y S08 intactas")
-print(" - presentación lexical/semántica/híbrida")
+print(" - presentación estilo S07 con laboratorio embebido")
+print(" - términos nuevos definidos con ejemplos")
 print(" - notebook E5 + BM25 + Atlas + fallback local")
 print(" - LMS con presentación/cuaderno/guía")
 print(" - tracking y WALL S09 aislados")
