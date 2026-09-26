@@ -85,3 +85,30 @@ jobs:
       - name: Publicar en GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Smoke test del sitio publicado
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in {1..20}; do
+            html="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}?v=${GITHUB_SHA}" || true)"
+            module="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/session.html?s=9&v=${GITHUB_SHA}" || true)"
+            if grep -q 'assets/img/bg-masthead.jpg' <<<"$html" \
+              && ! grep -q 'Aprender haciendo, con evidencia' <<<"$html" \
+              && ! grep -q 'Marcar revisada' <<<"$html" \
+              && grep -q 'Recursos de la sesión' <<<"$module"; then
+              ok=1
+              break
+            fi
+            sleep 3
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "El sitio publicado no coincide con el artefacto esperado después del despliegue."
+            exit 1
+          fi
+          legacy="$(curl -fsS "${PAGE_URL}lms/session-09.html?v=${GITHUB_SHA}")"
+          grep -q "session.html?" <<<"$legacy"
+

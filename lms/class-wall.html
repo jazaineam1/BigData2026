@@ -47,9 +47,10 @@
 </main>
 
 <script src="assets/bigdata-lms.js?v=20260926-v4"></script>
+<script src="assets/lms-kit.js?v=20260926-v5"></script>
 <script>
 (async()=>{'use strict';
-const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status'),p=new URLSearchParams(location.search);
+const L=window.BIGDATA_LMS,K=window.LMS;L.wireLogout();const status=L.$('status'),p=new URLSearchParams(location.search);
 const sessionNumber=Math.trunc(Number(p.get('s')||0)),activityCode=String(p.get('a')||'');
 if(!Number.isInteger(sessionNumber)||sessionNumber<1||!activityCode){location.replace('portal.html');return}
 L.$('moduleLink').href='session.html?s='+sessionNumber;L.$('progressLink').href='progress.html?s='+sessionNumber;L.$('teacherLink').href='wall.html?s='+sessionNumber;
@@ -86,7 +87,7 @@ try{
 L.$('publish').onclick=async()=>{
   const btn=L.$('publish'),body=L.$('body').value.trim();if(body.length<20){L.msg(status,'Escribe al menos 20 caracteres antes de publicar.','warn');return}
   btn.disabled=true;
-  try{await L.session('wall_post',{session_number:sessionNumber,activity_code:activityCode,body});L.$('body').value='';await loadWall();L.msg(status,'Publicación registrada. Ya puedes ver el muro.','ok')}
+  try{const x=await K.wallPost(activityCode,body,{session_number:sessionNumber});L.$('body').value='';if(x.queued){L.msg(status,x.feedback,'warn');return}await loadWall();L.msg(status,'Publicación registrada. Ya puedes ver el muro.','ok')}
   catch(e){L.msg(status,e.message,'err')}finally{btn.disabled=false}
 };
 L.$('refresh').onclick=()=>loadWall().catch(e=>L.msg(status,e.message,'err'));

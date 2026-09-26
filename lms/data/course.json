@@ -1,12 +1,12 @@
 {
-  "version": 11,
+  "version": 12,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
   "institution": "Universidad Central",
   "total_sessions": 16,
   "current_tracked_session": 9,
-  "tracking_policy": "LMS V3: S01–S09 usan módulo canónico /lms/session.html?s=N, identidad única por curso, tracking server-side por sesión/actividad, progreso unificado y WALL genérico. S09 conserva primer intento vs dominio; S07 permanece protegida y sin cambios de fuente.",
+  "tracking_policy": "LMS V5: course.json define estructura/visibilidad del curso; Supabase define recursos, actividades, LAB, evaluadores y progreso. Las superficies canónicas son session.html?s=N, progress.html?s=N y wall.html?s=N. El runtime lms-kit.js aporta cola offline, retry e idempotencia sobre bigdata-lms.js. Máximo dos recursos visibles por sesión; la presentación integra explicación, ejemplos y laboratorio.",
   "sessions": [
     {
       "n": 1,
