@@ -24,7 +24,7 @@ select 'bigdata',s.session_number,s.title,
        s.metadata || jsonb_build_object('source','lms_run_sessions_v2')
 from public.lms_run_sessions_v2 s
 where s.course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1)
-  and s.session_number between 1 and 7
+  and s.session_number between 1 and 16
 on conflict(course_code,session_number) do update
 set title=excluded.title,path=excluded.path,position=excluded.position,required=excluded.required,
     metadata=public.bd_lms_sessions.metadata || excluded.metadata;
