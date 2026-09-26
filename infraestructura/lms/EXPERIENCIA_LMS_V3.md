@@ -567,3 +567,50 @@ La plataforma pasa QA si:
 - S07 conserva su SHA protegido;
 - navegación y tracking no dependen de localStorage;
 - CI/Pages están verdes.
+
+
+---
+
+## Estado de implementación · 26-sep-2026
+
+### Implementado
+
+- Gateway público sin progreso académico simulado en `localStorage`.
+- Portal autenticado centrado en la siguiente acción.
+- Módulo universal `/lms/session.html?s=N` para S01–S16.
+- S01–S16 declaradas en la capa de sesiones; S10–S16 permanecen borrador.
+- Motor Edge Function genérico `bigdata-session` por sesión y actividad.
+- Tracking server-side reutilizando `bd_lms_events`, `bd_lms_session_progress` y `bd_lms_activity_progress`.
+- Claves de checkpoints formativos en `bd_lms_activity_keys`, RLS habilitado y sin acceso anon/authenticated.
+- S09 migrada de forma compatible al motor genérico sin exponer las respuestas correctas.
+- Progreso unificado con cuatro dimensiones visibles: visitado, completado, dominado y calificado.
+- WALL universal `/lms/wall.html?s=N` con búsqueda, filtros, fricción, dominio, actividad actual y detalle individual.
+- Ficha docente de estudiante con línea de tiempo de eventos de la sesión.
+- Inicio oficial y reinicio protegido por sesión con auditoría.
+- Bridge de identidad/tracking para las guías HTML same-origin de S04–S06.
+- S08 accesible desde el módulo universal sin modificar su archivo evaluativo protegido.
+- S07 conserva su SHA protegido y no se modifica.
+- Contención SVG S09 y estándar compartido `.viz-frame`.
+- QA visual con Playwright en laptop, escritorio, tablet y móvil.
+- Recorrido automático de las 35 diapositivas S09 para detectar overflow.
+- Auditoría automatizada de accesibilidad con axe sobre landing y módulo.
+- Playwright y axe fijados a versiones concretas en `package.json`.
+
+### Decisiones deliberadas / límites reales
+
+- **Colab es cross-origin.** El LMS registra el lanzamiento y el retorno/evidencia; nunca envía el token LMS por query string ni intenta leer el almacenamiento de otro origen.
+- **S07 permanece protegida.** Su experiencia legacy no se reescribe como parte de V3; el módulo universal puede registrar el acceso sin alterar el archivo fuente.
+- **WALL en vivo:** con la identidad LMS actual basada en tokens propios, V3 usa polling de 15 s. Supabase Realtime/Broadcast queda preparado como evolución cuando exista un canal autenticado compatible; no se expone el token LMS en una suscripción insegura.
+- **Cookies HttpOnly:** GitHub Pages no puede emitir por sí mismo una cookie HttpOnly first-party para el dominio de la Edge Function. Migrarla correctamente requiere dominio/proxy de aplicación; V3 mantiene la sesión actual, revocable y corta, sin afirmar una protección que el hosting estático no puede ofrecer.
+- **SSO/OIDC institucional, MFA, LTI y Edu-API** siguen dependiendo de contraparte/credenciales institucionales y no se marcan como activas.
+
+### Definition of Done V3
+
+El incremento se considera publicable únicamente si:
+
+1. QA funcional acumulativo queda verde.
+2. QA visual/responsive queda verde.
+3. S07 y S08 conservan sus SHA protegidos.
+4. GitHub Pages publica `session.html`, `wall.html` y `progress.html`.
+5. Después del despliegue, las rutas S01–S09 en la base apuntan al módulo canónico.
+6. La verificación web final confirma landing, módulo y S09 sin overflow.
