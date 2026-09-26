@@ -12,6 +12,7 @@ def read(path):
         return ""
     return p.read_text("utf-8")
 
+index=read("index.html")
 migration=read("infraestructura/lms/lms-evidence-v4.sql")
 backend=read("infraestructura/lms/functions/bigdata-session/index.ts")
 client=read("lms/assets/bigdata-lms.js")
@@ -30,6 +31,10 @@ labs=[
 ]
 
 checks=[
+ ("portada recupera fondo UC", 'assets/img/bg-masthead.jpg' in index and 'class="hero"' in index),
+ ("portada sin copy rechazado", "Aprender haciendo, con evidencia." not in index and "Una ruta integrada para comprender arquitecturas" not in index),
+ ("módulo máximo dos recursos", "slice(0,2)" in session and "Máximo 2 por sesión" in session),
+ ("migración limita recursos", "row_number() over(partition by course_run_id,session_number" in migration and "x.rn>2" in migration),
  ("CHECK de eventos versionado", all(x in migration for x in ["slide_viewed","challenge_answered","lab_interaction","evidence_submitted","lab_code_issued"])),
  ("tablas de evidencia protegidas", all(x in migration for x in ["bd_activity_catalog","bd_evidence","bd_lab_codes","enable row level security","revoke all"])),
  ("muro de clase protegido", all(x in migration for x in ["bd_wall_posts","bd_wall_reactions"])),
