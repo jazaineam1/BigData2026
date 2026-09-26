@@ -226,6 +226,43 @@ function cleanQuestion(body:any){
   }
   return {type,prompt,options,answer,explanation,points,tags};
 }
+
+async function teacherRubrics(ctx:any,run:any){
+  requireTeacher(ctx);
+  const {data,error}=await db.from("lms_rubric_templates_v2").select("*").eq("course_run_id",run.id).order("active",{ascending:false}).order("code");
+  if(error)throw error;
+  return {viewer:ctx.user,run,rubrics:data||[]};
+}
+function cleanRubricCriteria(raw:any,maxScore:number){
+  if(!Array.isArray(raw)||!raw.length)throw new Error("La plantilla necesita al menos un criterio");
+  const out:any[]=[];let total=0;
+  for(const [i,x] of raw.slice(0,30).entries()){
+    const title=text(x?.title,180,true),code=text(x?.code||("c"+(i+1)),80,true).toLowerCase();
+    if(!/^[a-z0-9][a-z0-9_-]{0,79}$/.test(code))throw new Error("Código de criterio inválido");
+    const max=Number(x?.max);if(!Number.isFinite(max)||max<=0||max>1000)throw new Error("Puntaje de criterio inválido");
+    total+=max;out.push({code,title,max});
+  }
+  if(Math.abs(total-maxScore)>0.001)throw new Error("La suma de criterios debe coincidir con el máximo de la plantilla");
+  return out;
+}
+async function saveRubricTemplate(ctx:any,run:any,body:any){
+  requireTeacher(ctx);
+  const id=text(body.id,80),code=safeCode(body.code),maxScore=Number(body.max_score);
+  if(!Number.isFinite(maxScore)||maxScore<=0||maxScore>1000)throw new Error("Máximo de plantilla inválido");
+  const criteria=cleanRubricCriteria(body.criteria,maxScore);
+  const row:any={course_run_id:run.id,code,title:text(body.title,180,true),description:text(body.description,2000),max_score:maxScore,criteria,active:body.active!==false,updated_at:new Date().toISOString()};
+  let saved:any,error:any;
+  if(id){
+    const x=await db.from("lms_rubric_templates_v2").update(row).eq("id",id).eq("course_run_id",run.id).select("*").single();saved=x.data;error=x.error;
+  }else{
+    row.created_by=ctx.user.id;
+    const x=await db.from("lms_rubric_templates_v2").insert(row).select("*").single();saved=x.data;error=x.error;
+  }
+  if(error)throw error;
+  await audit(ctx.user.id,id?"bigdata.rubric_template.update":"bigdata.rubric_template.create","rubric_template",saved.id,{code:saved.code,max_score:saved.max_score});
+  return {ok:true,rubric:saved};
+}
+
 async function teacherQuestions(ctx:any,run:any){
   requireTeacher(ctx);
   const {data,error}=await db.from("lms_questions_v2").select("*").eq("course_run_id",run.id).order("code").order("version",{ascending:false});
@@ -499,6 +536,8 @@ Deno.serve(async(req:Request)=>{
     if(action==="submit_file_assignment")return out(req,await submitFileAssignment(ctx,run,body));
     if(action==="file_download_url")return out(req,await fileDownloadUrl(ctx,run,body));
     if(action==="teacher_overview")return out(req,await teacherOverview(ctx,run));
+    if(action==="teacher_rubrics")return out(req,await teacherRubrics(ctx,run));
+    if(action==="teacher_save_rubric")return out(req,await saveRubricTemplate(ctx,run,body));
     if(action==="teacher_save_question")return out(req,await saveQuestion(ctx,run,body));
     if(action==="teacher_save_quiz")return out(req,await saveQuiz(ctx,run,body));
     if(action==="teacher_set_quiz_items")return out(req,await setQuizItems(ctx,run,body));
