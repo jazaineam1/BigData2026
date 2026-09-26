@@ -1,12 +1,12 @@
 {
-  "version": 7,
+  "version": 8,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
   "institution": "Universidad Central",
   "total_sessions": 16,
-  "current_tracked_session": 8,
-  "tracking_policy": "S01–S08 visibles con recursos verificados; S09–S16 permanecen en borrador hasta publicación docente. S07 conserva su implementación existente sin modificaciones.",
+  "current_tracked_session": 9,
+  "tracking_policy": "S01–S09 visibles con recursos verificados; S08 conserva su evaluación integradora y S09 registra recursos/checkpoints formativos en un WALL independiente. S07 permanece protegida y sin modificaciones.",
   "sessions": [
     {
       "n": 1,
@@ -52,8 +52,10 @@
     },
     {
       "n": 9,
-      "title": "Sesión 09 · por publicar",
-      "status": "draft"
+      "title": "Cuando las palabras no coinciden: búsqueda semántica y bases vectoriales",
+      "status": "visible",
+      "tracked": true,
+      "formative": true
     },
     {
       "n": 10,
@@ -136,6 +138,11 @@
       "code": "wall",
       "title": "WALL S08",
       "path": "teacher-wall.html"
+    },
+    {
+      "code": "wall_s09",
+      "title": "WALL S09",
+      "path": "teacher-wall-09.html"
     },
     {
       "code": "users",

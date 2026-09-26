@@ -12,6 +12,7 @@ on:
       - Presentaciones/**
       - lms/**
       - Cuadernos/Taller_Control_1.ipynb
+      - Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -47,6 +48,7 @@ jobs:
           cp -R lms _site/
           mkdir -p _site/Cuadernos
           cp Cuadernos/Taller_Control_1.ipynb _site/Cuadernos/
+          cp Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb _site/Cuadernos/
           test -f _site/lms/portal.html
           test -f _site/lms/session-08.html
           test -f _site/assets/tutoriales/s08-secoppipeline.html
@@ -65,6 +67,11 @@ jobs:
           test -f _site/lms/teacher-quizzes.html
           test -f _site/lms/teacher-interoperability.html
           test -f _site/lms/admin-operations.html
+          test -f _site/lms/session-09.html
+          test -f _site/lms/teacher-wall-09.html
+          test -f _site/Presentaciones/s09-de-palabras-a-significado.html
+          test -f _site/assets/tutoriales/s09-laboratorio-guiado.html
+          test -f _site/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb
           touch _site/.nojekyll
 
       - name: Cargar artefacto

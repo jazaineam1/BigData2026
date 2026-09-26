@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153">
+<title>WALL S09 · Big Data</title>
+<link rel="stylesheet" href="assets/bigdata-lms.css?v=20260926-s09-wall1">
+<style>
+.wall-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}
+.wall-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.wall-table{min-width:1120px}.wall-table th{position:sticky;top:0;background:#f5f7fb;z-index:1}.wall-table td{vertical-align:middle}
+.dot{display:inline-grid;place-items:center;width:25px;height:25px;border-radius:50%;font-size:.75rem;font-weight:900}.dot.done{background:#dff4e8;color:#12633c}.dot.progress{background:#e2f3f4;color:#075f62}.dot.pending{background:#edf0f4;color:#737b86}
+.res{font-size:.78rem;font-weight:800}.res.yes{color:#12633c}.res.no{color:#8b929b}
+.delay{font-variant-numeric:tabular-nums}.student-state{font-size:.72rem;font-weight:900;border-radius:999px;padding:4px 7px;display:inline-block}.student-state.completed{background:#dff4e8;color:#12633c}.student-state.in_progress{background:#e2f3f4;color:#075f62}.student-state.not_started{background:#edf0f4;color:#68717d}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+@media(max-width:800px){.wall-head{grid-template-columns:1fr}.wall-grid{grid-template-columns:1fr 1fr}.wall-head .actions{display:grid;grid-template-columns:1fr 1fr}.wall-head .actions .btn{width:100%}}
+</style>
+</head>
+<body>
+<header class="appbar"><div class="inner">
+<a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · WALL S09</small></a>
+<span class="spacer"></span><a class="navlink optional" href="session-09.html">Vista estudiante</a><a class="navlink optional" href="teacher-course.html">Gestor</a><button data-logout>Salir</button>
+</div></header>
+<main class="wrap">
+<div class="wall-head">
+<div><div class="ey">Monitoreo formativo · S09</div><h1>WALL · búsqueda semántica</h1><p class="lead">Acompaña el ritmo de la clase sin convertir tiempo o clics en nota. Recursos y checkpoints son señales de navegación/autorreporte.</p></div>
+<div class="actions"><button id="openSession" class="btn primary">Fijar inicio oficial</button><button id="refresh" class="btn alt">Actualizar</button></div>
+</div>
+<div id="status" class="status hidden"></div>
+<div id="metrics" class="wall-grid"></div>
+
+<section class="card">
+<div class="actions" style="justify-content:space-between"><div><div class="ey">Inicio oficial</div><h2 id="officialStart" style="margin:3px 0">No fijado</h2></div><div class="legend"><span><span class="dot done">✓</span> completo</span><span><span class="dot progress">•</span> en curso</span><span><span class="dot pending">–</span> pendiente</span></div></div>
+<p class="muted">El retraso se calcula desde el inicio oficial hasta el primer avance real del estudiante. Antes de fijarlo no se muestra retraso.</p>
+</section>
+
+<section class="card">
+<div class="ey">Cohorte</div><h2>Avance por estudiante</h2>
+<div class="tablewrap"><table class="wall-table">
+<thead><tr><th>Estudiante</th><th>Estado</th><th>Inicio</th><th>Retraso</th><th>Diap.</th><th>Colab</th><th>Guía</th><th>C1</th><th>C2</th><th>C3</th><th>C4</th><th>C5</th><th>Activo</th><th>Última actividad</th></tr></thead>
+<tbody id="rows"></tbody>
+</table></div>
+</section>
+
+<section class="card">
+<div class="ey">Cómo leer el WALL</div><h2>No es un ranking</h2>
+<div class="note"><b>No ordenar por velocidad.</b> Un estudiante con menos minutos puede haber trabajado fuera del LMS; uno con más minutos no necesariamente aprendió más. Usa el WALL para detectar quién todavía no accedió, dónde se concentra la clase y quién puede necesitar ayuda.</div>
+</section>
+</main>
+
+<script src="assets/bigdata-lms.js?v=20260926-s09-wall1"></script>
+<script>
+(async()=>{'use strict';
+const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status');let data=null,timer=null;
+function fmtDelay(v){return v==null?'—':L.fmtDelay(v)}
+function cp(row,i){const x=row.checkpoints?.[i],st=x?.status||'not_started';return '<span class="dot '+(st==='completed'?'done':st==='in_progress'?'progress':'pending')+'">'+(st==='completed'?'✓':st==='in_progress'?'•':'–')+'</span>'}
+function render(){
+ const rows=data.ranking||[],started=rows.filter(x=>x.started_at).length,done=rows.filter(x=>x.status==='completed').length;
+ const slides=rows.filter(x=>x.presentation_opened).length,colab=rows.filter(x=>x.notebook_opened).length;
+ const avg=rows.length?rows.reduce((z,x)=>z+Number(x.completed_checkpoints||0),0)/rows.length:0;
+ L.$('metrics').innerHTML='<div class="kpi"><span class="muted">Estudiantes</span><b>'+rows.length+'</b></div><div class="kpi"><span class="muted">Iniciaron</span><b>'+started+'</b></div><div class="kpi"><span class="muted">Abrieron diapositivas</span><b>'+slides+'</b></div><div class="kpi"><span class="muted">Abrieron Colab</span><b>'+colab+'</b></div><div class="kpi"><span class="muted">Checkpoints promedio</span><b>'+avg.toFixed(1)+'/5</b></div>';
+ L.$('officialStart').textContent=data.session_window?.opened_at?L.fmtWhen(data.session_window.opened_at):'No fijado';
+ L.$('openSession').disabled=!!data.session_window?.opened_at;
+ L.$('openSession').textContent=data.session_window?.opened_at?'Inicio fijado':'Fijar inicio oficial';
+ L.$('rows').innerHTML=rows.length?rows.map(r=>'<tr><td><b>'+L.esc(r.display_name)+'</b><br><span class="muted">'+r.completed_checkpoints+'/5 checkpoints</span></td><td><span class="student-state '+r.status+'">'+(r.status==='completed'?'completa':r.status==='in_progress'?'en curso':'sin iniciar')+'</span></td><td>'+L.fmtWhen(r.started_at)+'</td><td class="delay">'+fmtDelay(r.start_delay_seconds)+'</td><td><span class="res '+(r.presentation_opened?'yes':'no')+'">'+(r.presentation_opened?'✓':'—')+'</span></td><td><span class="res '+(r.notebook_opened?'yes':'no')+'">'+(r.notebook_opened?'✓':'—')+'</span></td><td><span class="res '+(r.guide_opened?'yes':'no')+'">'+(r.guide_opened?'✓':'—')+'</span></td>'+[0,1,2,3,4].map(i=>'<td>'+cp(r,i)+'</td>').join('')+'<td>'+L.fmtTime(r.active_seconds||0)+'</td><td>'+L.fmtWhen(r.last_activity_at)+'</td></tr>').join(''):'<tr><td colspan="14" class="muted">No hay estudiantes activos en la cohorte.</td></tr>';
+}
+async function load(){try{data=await L.requireS09({teacher:true});if(!data)return;render()}catch(e){L.msg(status,e.message,'err')}}
+L.$('refresh').onclick=load;
+L.$('openSession').onclick=async()=>{if(!confirm('¿Fijar ahora el inicio oficial de S09? El WALL usará esta hora para calcular retrasos.'))return;const b=L.$('openSession');b.disabled=true;try{await L.s09('teacher_open_session');L.msg(status,'Inicio oficial de S09 fijado.','ok');await load()}catch(e){L.msg(status,e.message,'err')}finally{b.disabled=false}};
+await load();timer=setInterval(()=>load().catch(()=>{}),15000);addEventListener('pagehide',()=>clearInterval(timer));
+})();
+</script>
+</body></html>

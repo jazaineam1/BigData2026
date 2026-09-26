@@ -63,7 +63,7 @@ checks=[
  ("pareja solo con hash","pair_hash:m.pair_hash" in edge and "pair_hash text" in sql and "pair_id text" not in sql),
  ("Edge Function versionada","VALIDATOR_VERSIONS" in edge and "2026-09-26-secoppipeline" in edge and "submit_manifest" in edge),
  ("tablas no expuestas a anon/authenticated","revoke all" in sql and "anon,authenticated" in sql),
- ("curso declarativo",course.get("course")=="bigdata" and course.get("current_tracked_session")==8),
+ ("curso declarativo",course.get("course")=="bigdata" and int(course.get("current_tracked_session") or 0)>=8 and any(x.get("n")==8 and x.get("tracked") for x in course.get("sessions",[]))),
  ("manifiesto declara administrador",any(x.get("code")=="users" and x.get("path")=="admin-users.html" for x in course.get("teacher_tools",[]))),
  ("portada enlaza LMS",'lms/portal.html' in index),
  ("portada S08 entra al LMS",'lms/session-08.html' in index),
