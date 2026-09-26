@@ -1,501 +1,72 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Plataforma de aprendizaje de Big Data 2026-2S de la Maestría en Analítica de Datos de la Universidad Central.">
-  <meta name="author" content="Antonino Zainea">
-  <meta name="theme-color" content="#142153">
-  <title>Big Data 2026-2S · Universidad Central</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Titillium+Web:wght@600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --uc-navy:#142153;
-      --uc-cyan:#0B8689;
-      --uc-gray:#E5E5E3;
-      --uc-green:#ACAA00;
-      --uc-blue:#00519E;
-      --uc-cyan-soft:#6EADAD;
-      --uc-beige:#FFF9F1;
-      --uc-green-dark:#636F07;
-      --uc-purple:#634998;
-      --uc-aqua:#2CAFA8;
-      --paper:#FFF9F1;
-      --surface:#FFFFFF;
-      --ink:#142153;
-      --body:#34363A;
-      --muted:#62676F;
-      --line:#E5E5E3;
-      --soft:#F5F6F6;
-      --shadow:0 18px 48px rgba(20,33,83,.10);
-      --radius:22px;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      background:var(--paper);
-      color:var(--body);
-      font-family:Roboto,"Segoe UI",Arial,sans-serif;
-      line-height:1.55;
-    }
-    a{color:inherit}
-    button,input{font:inherit}
-    .skip{
-      position:absolute;left:-999px;top:0;background:#fff;color:var(--uc-navy);
-      padding:10px 14px;z-index:1000;border-radius:0 0 10px 10px
-    }
-    .skip:focus{left:16px}
-    .topbar{
-      position:sticky;top:0;z-index:50;
-      background:rgba(255,252,247,.92);
-      backdrop-filter:blur(18px);
-      border-bottom:1px solid rgba(20,33,83,.12);
-    }
-    .nav{
-      max-width:1200px;margin:auto;padding:12px 22px;display:flex;align-items:center;gap:18px;
-    }
-    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:max-content}
-    .brand-mark{
-      width:38px;height:38px;border-radius:12px;
-      display:grid;place-items:center;background:var(--uc-navy);color:#fff;font-weight:900;
-      box-shadow:0 8px 18px rgba(20,33,83,.18)
-    }
-    .brand strong{font-family:"Titillium Web",sans-serif;font-size:18px;line-height:1}
-    .brand small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
-    .nav-links{display:flex;gap:6px;margin-left:auto;align-items:center}
-    .nav-links a{
-      text-decoration:none;color:#4D474E;font-weight:700;font-size:14px;padding:9px 11px;border-radius:10px
-    }
-    .nav-links a:hover,.nav-links a:focus{background:var(--soft);color:var(--uc-navy)}
-    .nav-cta{background:var(--uc-navy)!important;color:#fff!important}
-    .nav-lms{background:var(--uc-cyan)!important;color:#fff!important}
-    .hero{
-      min-height:690px;display:grid;place-items:center;
-      background:
-        linear-gradient(115deg,rgba(20,33,83,.95) 0%,rgba(20,33,83,.86) 54%,rgba(11,134,137,.72) 100%),
-        url("assets/img/bg-masthead.jpg") center/cover no-repeat;
-      color:#fff;
-      position:relative;
-      overflow:hidden;
-    }
-    .hero:after{
-      content:"";position:absolute;inset:auto -12vw -230px auto;width:640px;height:640px;border-radius:50%;
-      border:110px solid rgba(255,249,241,.09);pointer-events:none
-    }
-    .hero-grid{
-      width:min(1200px,100%);padding:96px 22px 70px;
-      display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.65fr);gap:44px;align-items:center;position:relative;z-index:1
-    }
-    .eyebrow{
-      display:inline-flex;align-items:center;gap:8px;
-      background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.20);
-      padding:7px 11px;border-radius:999px;font-weight:800;font-size:13px
-    }
-    .eyebrow i{width:8px;height:8px;background:var(--uc-green);border-radius:50%;box-shadow:0 0 0 6px rgba(172,170,0,.16)}
-    h1,h2,h3{font-family:"Titillium Web",Roboto,sans-serif;color:var(--uc-navy)}
-    h1{font-size:clamp(48px,7vw,86px);line-height:.96;margin:20px 0 18px;max-width:10ch;letter-spacing:-.035em}
-    .hero h1{color:#fff}.hero-lead{font-size:clamp(18px,2vw,23px);color:rgba(255,255,255,.86);max-width:720px;margin:0 0 26px}
-    .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      border:0;border-radius:13px;padding:13px 17px;font-weight:900;text-decoration:none;cursor:pointer;
-      transition:transform .18s ease,box-shadow .18s ease,background .18s ease
-    }
-    .btn:hover{transform:translateY(-2px)}
-    .btn-primary{background:var(--uc-navy);color:#fff;box-shadow:0 12px 30px rgba(20,33,83,.24)}
-    .btn-light{background:#fff;color:var(--uc-navy)}
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.38);color:#fff}
-    .today{
-      background:rgba(255,255,255,.96);color:var(--ink);border-radius:26px;padding:24px;
-      box-shadow:0 28px 70px rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.5)
-    }
-    .today-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
-    .kicker{text-transform:uppercase;letter-spacing:.1em;font-size:11px;font-weight:900;color:var(--uc-navy)}
-    .today h2{font-size:29px;line-height:1.05;margin:6px 0 8px;color:var(--uc-navy)}
-    .status{
-      display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:999px;
-      background:#E7F4F4;color:#086C70;font-weight:800;font-size:12px;white-space:nowrap
-    }
-    .status:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--uc-cyan)}
-    .today ul{margin:16px 0 18px;padding:0;list-style:none;display:grid;gap:9px}
-    .today li{display:flex;gap:10px;color:#4F4950;font-size:14px}
-    .today li:before{content:"✓";color:var(--uc-cyan);font-weight:900}
-    .today .btn{width:100%}
-    .shell{max-width:1200px;margin:auto;padding:0 22px}
-    .section{padding:78px 0}
-    .section.alt{background:#F5F6F6;border-top:1px solid var(--uc-gray);border-bottom:1px solid var(--uc-gray)}
-    .section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px}
-    .section-head h2{font-size:clamp(34px,4vw,52px);line-height:1;margin:0;color:var(--uc-navy)}
-    .section-head p{max-width:680px;margin:8px 0 0;color:var(--muted)}
-    .progress-card{
-      min-width:270px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 15px
-    }
-    .progress-card strong{font-size:13px}
-    .meter{height:9px;background:#EDE7DE;border-radius:999px;margin:9px 0 5px;overflow:hidden}
-    .meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--uc-navy),var(--uc-cyan));transition:width .25s ease}
-    .progress-card small{color:var(--muted)}
-    .route-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
-    .search{
-      flex:1;min-width:260px;border:1px solid var(--line);border-radius:13px;background:#fff;
-      padding:12px 14px;color:var(--ink);outline:none
-    }
-    .search:focus{border-color:var(--uc-navy);box-shadow:0 0 0 4px rgba(177,31,22,.08)}
-    .filter{
-      border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 13px;font-weight:800;color:#4F4950;cursor:pointer
-    }
-    .filter.active{background:var(--uc-navy);border-color:var(--uc-navy);color:#fff}
-    .route{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .session{
-      background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;
-      display:grid;grid-template-columns:64px 1fr;gap:18px;box-shadow:0 8px 28px rgba(20,33,83,.05);
-      transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease
-    }
-    .session:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#D6CDC1}
-    .session.current{border:2px solid var(--uc-cyan);box-shadow:0 18px 44px rgba(11,134,137,.10)}
-    .session.evaluation{border-left:6px solid var(--uc-purple)}
-    .session-num{
-      width:56px;height:56px;border-radius:18px;background:var(--uc-navy);color:#fff;
-      display:grid;place-items:center;font:900 22px "Titillium Web",sans-serif
-    }
-    .current .session-num{background:var(--uc-cyan)}
-    .evaluation .session-num{background:var(--uc-purple)}
-    .session-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:5px}
-    .pill{font-size:11px;font-weight:900;border-radius:999px;padding:5px 8px;background:#F1F3F4;color:#56606A}
-    .pill.live{background:#FCE6E5;color:var(--uc-navy)}
-    .pill.eval{background:#EEE9F6;color:var(--uc-purple)}
-    .session h3{font-size:24px;line-height:1.08;margin:6px 0 8px}
-    .session p{margin:0;color:var(--muted);font-size:14px}
-    .skills{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
-    .skill{font-size:11px;background:#F5F6F6;border:1px solid var(--uc-gray);border-radius:8px;padding:4px 7px;color:#5A5359}
-    .session-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-    .action{
-      display:inline-flex;align-items:center;justify-content:center;text-decoration:none;
-      border-radius:10px;padding:9px 11px;font-weight:800;font-size:13px;background:var(--uc-navy);color:#fff
-    }
-    .action.secondary{background:#F3EFE8;color:var(--uc-navy);border:1px solid #E6DED2}
-    .action.accent{background:var(--uc-cyan)}
-    .mark{
-      margin-left:auto;border:0;background:transparent;color:var(--uc-cyan);font-weight:900;font-size:12px;cursor:pointer;padding:8px
-    }
-    .mark.done{background:#E7F4F4;border-radius:9px}
-    .session.hidden{display:none}
-    .principles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-    .principle{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px}
-    .principle b{display:block;font-family:"Titillium Web",sans-serif;font-size:22px;margin-bottom:7px}
-    .principle p{margin:0;color:var(--muted);font-size:14px}
-    .principle .icon{font-size:26px;margin-bottom:12px}
-    .support-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
-    .support-main,.library{background:#fff;border:1px solid var(--line);border-radius:24px;padding:24px}
-    .support-main h3,.library h3{font-size:28px;margin:0 0 8px}
-    .support-main p,.library p{color:var(--muted);margin-top:0}
-    .support-list{display:grid;gap:10px;margin-top:18px}
-    .support-link{
-      display:flex;justify-content:space-between;gap:14px;align-items:center;text-decoration:none;
-      padding:13px 14px;background:#F8F4ED;border-radius:13px;border:1px solid #ECE4D9;font-weight:800
-    }
-    .support-link span{font-size:13px;color:var(--muted);font-weight:500}
-    .support-link:hover{border-color:var(--uc-navy)}
-    .library-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
-    .library-grid a{
-      text-decoration:none;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;font-weight:800;font-size:13px
-    }
-    .library-grid a:hover{background:#F8F4ED}
-    .manifesto{
-      border-radius:28px;padding:32px;color:#fff;
-      background:linear-gradient(120deg,var(--uc-navy),var(--uc-blue) 62%,var(--uc-cyan));
-      display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center
-    }
-    .manifesto h2{font-size:clamp(32px,4vw,48px);margin:0 0 10px}
-    .manifesto p{color:rgba(255,255,255,.78);margin:0}
-    .manifesto ol{margin:0;padding-left:20px;display:grid;gap:8px;color:#fff}
-    footer{padding:34px 22px 46px;color:#746D73;text-align:center;font-size:13px}
-    footer strong{color:var(--uc-navy)}
-    @media(max-width:900px){
-      .hero-grid{grid-template-columns:1fr;padding-top:82px}
-      .hero{min-height:auto}
-      .today{max-width:620px}
-      .route{grid-template-columns:1fr}
-      .principles{grid-template-columns:1fr 1fr}
-      .support-grid,.manifesto{grid-template-columns:1fr}
-      .section-head{align-items:flex-start;flex-direction:column}
-      .progress-card{width:100%}
-    }
-    @media(max-width:680px){
-      .nav{padding:10px 14px}.brand small{display:none}.nav-links a:not(.nav-cta):not(.nav-lms){display:none}.nav-lms{display:inline-flex!important}
-      .hero-grid,.shell{padding-left:14px;padding-right:14px}
-      h1{font-size:50px}
-      .section{padding:58px 0}
-      .session{grid-template-columns:48px 1fr;padding:17px;gap:13px}
-      .session-num{width:44px;height:44px;border-radius:13px;font-size:18px}
-      .session h3{font-size:21px}
-      .principles{grid-template-columns:1fr}
-      .library-grid{grid-template-columns:1fr}
-      .mark{margin-left:0}
-    }
-    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Aula Big Data 2026-2S · Universidad Central">
+<meta name="theme-color" content="#142153">
+<title>Big Data 2026-2S · Universidad Central</title>
+<link rel="stylesheet" href="lms/assets/bigdata-lms.css?v=20260926-v3">
+<style>
+.public-shell{min-height:100vh;background:
+radial-gradient(circle at 88% 10%,rgba(11,134,137,.18),transparent 30%),
+radial-gradient(circle at 8% 88%,rgba(99,73,152,.12),transparent 32%),
+var(--paper)}
+.public-nav{width:min(1180px,94vw);margin:auto;padding:18px 0;display:flex;align-items:center;gap:12px}.public-nav .brand{color:var(--uc-navy)}.public-nav .brand small{color:var(--muted)}
+.hero-public{width:min(1180px,94vw);margin:auto;padding:60px 0 34px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:28px;align-items:center}
+.hero-public h1{font-size:clamp(2.7rem,7vw,5.8rem);max-width:11ch}.hero-public .lead{font-size:1.15rem;max-width:680px}
+.hero-card{background:#fff;border:1px solid var(--line);border-radius:26px;padding:24px;box-shadow:var(--shadow)}
+.current-public{border-left:6px solid var(--uc-cyan)}.current-public h2{font-size:1.55rem}.public-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.public-actions .btn{min-width:170px}.course-strip{width:min(1180px,94vw);margin:20px auto 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.course-strip article{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px}.course-strip b{display:block;color:var(--uc-navy);font-size:1.05rem}.course-strip span{color:var(--muted);font-size:.83rem}
+.public-sections{width:min(1180px,94vw);margin:28px auto 0;padding-bottom:70px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.learning-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.learning-flow div{border:1px solid var(--line);border-radius:13px;padding:12px;background:#f8fafc}.learning-flow b{display:block;color:var(--uc-navy)}
+.public-footer{border-top:1px solid var(--line);padding:22px 3vw;text-align:center;color:var(--muted);background:#fff}
+@media(max-width:900px){.hero-public{grid-template-columns:1fr;padding-top:36px}.course-strip{grid-template-columns:1fr 1fr}.public-sections{grid-template-columns:1fr}.learning-flow{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.hero-public h1{font-size:clamp(2.5rem,14vw,4rem)}.course-strip,.learning-flow{grid-template-columns:1fr}.public-actions .btn{width:100%}.public-nav{padding:12px 0}}
+</style>
 </head>
-<body>
-<a class="skip" href="#contenido">Saltar al contenido</a>
+<body class="public-shell">
+<nav class="public-nav">
+<a class="brand" href="./">Universidad Central<small>Maestría en Analítica de Datos · Big Data 2026-2S</small></a>
+<span class="spacer"></span>
+<a id="navEntry" class="btn alt" href="lms/portal.html">Entrar al aula</a>
+</nav>
 
-<header class="topbar">
-  <nav class="nav" aria-label="Navegación principal">
-    <a class="brand" href="#inicio">
-      <span><strong>Universidad Central</strong><small>Maestría en Analítica de Datos · Big Data 2026-2S</small></span>
-    </a>
-    <div class="nav-links">
-      <a href="#ruta">Ruta</a>
-      
-      <a class="nav-lms" href="lms/portal.html">Ingresar LMS</a>
-      <a class="nav-cta" href="Presentaciones/s07-del-vecindario-al-texto.html?v=20260924-two-tools#s1">Continuar S07</a>
-    </div>
-  </nav>
+<header class="hero-public">
+<section>
+<div class="ey">BIG DATA · 2026-2S · GRUPO 2</div>
+<h1>Aprender haciendo, con evidencia.</h1>
+<p class="lead">Una ruta integrada para comprender arquitecturas, NoSQL, grafos, búsqueda y sistemas de datos. Identifícate una sola vez y conserva tu progreso al pasar entre módulos, laboratorios, recursos y evidencias.</p>
+<div class="public-actions"><a id="mainEntry" class="btn primary" href="lms/portal.html">Entrar al aula</a><a class="btn alt" href="lms/access.html">Solicitar acceso</a></div>
+</section>
+<aside class="hero-card current-public">
+<div class="ey">Sesión actual</div><h2>S09 · Cuando las palabras no coinciden</h2>
+<p>Búsqueda semántica, embeddings, similitud coseno, bases vectoriales y recuperación híbrida.</p>
+<div class="note"><b>Empieza desde el módulo LMS.</b> La presentación, los checkpoints y el cuaderno se abren desde una identidad única.</div>
+<a class="btn accent" style="margin-top:14px" href="lms/session.html?s=9">Abrir módulo S09</a>
+</aside>
 </header>
 
-<main id="contenido">
-  <section class="hero" id="inicio">
-    <div class="hero-grid">
-      <div>
-        <span class="eyebrow"><i></i> Universidad Central · 2026-2S</span>
-        <h1>Big Data · ruta de aprendizaje aplicada.</h1>
-        <p class="hero-lead">Avanza por una ruta guiada de conceptos, práctica y evidencia: datos documentales, grafos, búsqueda, procesamiento distribuido y plataformas modernas.</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="Presentaciones/s07-del-vecindario-al-texto.html?v=20260924-two-tools#s1">▶ Continuar sesión 7</a>
-          <a class="btn btn-light" href="#ruta">Ver ruta completa</a>
-        </div>
-      </div>
+<section class="course-strip" aria-label="Resumen del curso">
+<article><b>16 sesiones</b><span>Ruta completa del semestre.</span></article>
+<article><b>9 publicadas</b><span>S01–S09 disponibles.</span></article>
+<article><b>Laboratorios</b><span>Práctica guiada y evidencia técnica.</span></article>
+<article><b>Progreso explicable</b><span>Visitado ≠ completado ≠ dominado ≠ calificado.</span></article>
+</section>
 
-      <aside class="today" aria-label="Sesión actual">
-        <div class="today-top">
-          <div><span class="kicker">Ahora</span><h2>Sesión 7 · Elasticsearch y BM25</h2></div>
-          <span class="status">Activa</span>
-        </div>
-        <p>Construye un buscador real sobre el caso Compras Claras y aprende qué hace cada pieza antes de usarla.</p>
-        <ul>
-          <li>Analyzer → índice invertido → ranking BM25.</li>
-          <li>Elasticsearch Serverless real, mapping e ingesta bulk.</li>
-          <li>Consultas por capas: match, multi_match, boost, filter y highlight.</li>
-          <li>Evaluación con Precision@5 y reto de transferencia.</li>
-        </ul>
-        <a class="btn btn-primary" href="Presentaciones/s07-del-vecindario-al-texto.html?v=20260924-two-tools#s1">Comenzar con la presentación →</a>
-      </aside>
-    </div>
-  </section>
-
-  <section class="section" id="ruta">
-    <div class="shell">
-      <div class="section-head">
-        <div>
-          <span class="kicker">Ruta del semestre</span>
-        </div>
-        <div class="progress-card" aria-live="polite">
-          <strong>Progreso personal en este navegador</strong>
-          <div class="meter"><span id="progressBar"></span></div>
-          <small><b id="progressCount">0</b> de 8 sesiones marcadas como revisadas.</small>
-        </div>
-      </div>
-
-      <div class="route-toolbar">
-        <input id="sessionSearch" class="search" type="search" placeholder="Buscar sesión, herramienta o competencia…" aria-label="Buscar en la ruta">
-        <button class="filter active" data-filter="all">Todas</button>
-        <button class="filter" data-filter="current">Actual</button>
-        <button class="filter" data-filter="evaluation">Evaluación</button>
-      </div>
-
-      <div class="route" id="routeGrid">
-        <article class="session" data-kind="published" data-search="sesion 1 fundamentos big data ingesta csv json xml secop">
-          <div class="session-num">01</div>
-          <div>
-            <div class="session-meta"><span class="pill">Fundamentos</span><button class="mark" data-mark="1">○ Marcar revisada</button></div>
-            <h3>Introducción a Big Data e ingesta</h3>
-            <p>De las 5 V a la lectura reproducible de fuentes estructuradas y semiestructuradas usando Python y SECOP.</p>
-            <div class="skills"><span class="skill">5 V</span><span class="skill">CSV / JSON / XML</span><span class="skill">API</span></div>
-            <div class="session-actions">
-              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/sesion1_introducci_n.ipynb">Abrir cuaderno</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="session" data-kind="published" data-search="sesion 2 negocio procesos arquitectura git github ciclo analitico">
-          <div class="session-num">02</div>
-          <div>
-            <div class="session-meta"><span class="pill">Arquitectura</span><button class="mark" data-mark="2">○ Marcar revisada</button></div>
-            <h3>Del problema de negocio a una arquitectura</h3>
-            <p>Conecta proceso, decisión, caso de uso, arquitectura y trazabilidad del trabajo con GitHub.</p>
-            <div class="skills"><span class="skill">BPM</span><span class="skill">Arquitectura</span><span class="skill">Git</span></div>
-            <div class="session-actions">
-              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb">Abrir cuaderno</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="session" data-kind="published" data-search="sesion 3 mongodb documental mql agregacion noticias secop nosql">
-          <div class="session-num">03</div>
-          <div>
-            <div class="session-meta"><span class="pill">NoSQL documental</span><button class="mark" data-mark="3">○ Marcar revisada</button></div>
-            <h3>Cuando una fila ya no representa el dato</h3>
-            <p>Modelo documental, MQL, agregaciones y decisiones de diseño sobre noticias reales relacionadas con contratación.</p>
-            <div class="skills"><span class="skill">MongoDB</span><span class="skill">MQL</span><span class="skill">Aggregation</span></div>
-            <div class="session-actions">
-              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/3_MongoDB_Documental.ipynb">Abrir cuaderno</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="session" data-kind="published" data-search="sesion 4 mongodb atlas cassandra nube priorizacion query first">
-          <div class="session-num">04</div>
-          <div>
-            <div class="session-meta"><span class="pill">Cloud + NoSQL</span><button class="mark" data-mark="4">○ Marcar revisada</button></div>
-            <h3>Atlas y Cassandra: dos preguntas, dos modelos</h3>
-            <p>Pasa de la exploración documental a una priorización reproducible y diseña Cassandra desde la consulta que debe servir.</p>
-            <div class="skills"><span class="skill">Atlas</span><span class="skill">Cassandra</span><span class="skill">Query-first</span></div>
-            <div class="session-actions">
-              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/4_Atlas_Cassandra_Laura.ipynb">Abrir cuaderno</a>
-              <a class="action secondary" href="assets/tutoriales/atlas-guia-conexion.html">Guía Atlas</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="session" data-kind="published" data-search="sesion 5 cassandra astra query first atlas vistas pipeline">
-          <div class="session-num">05</div>
-          <div>
-            <div class="session-meta"><span class="pill">Operacionalización</span><button class="mark" data-mark="5">○ Marcar revisada</button></div>
-            <h3>De evidencia a bandeja operacional</h3>
-            <p>Transforma evidencia de Atlas en una vista reutilizable y diseña una tabla wide-column desde un patrón de acceso explícito.</p>
-            <div class="skills"><span class="skill">Views</span><span class="skill">Astra</span><span class="skill">CQL</span></div>
-            <div class="session-actions">
-              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/5_Atlas_Cassandra_Query_First.ipynb">Abrir cuaderno</a>
-              <a class="action secondary" href="assets/tutoriales/astra-cassandra-paso-a-paso-v3.html">Guía Astra</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="session" data-kind="published" data-search="sesion 6 neo4j cypher grafos aura contexto relacional entidades proveedores">
-          <div class="session-num">06</div>
-          <div>
-            <div class="session-meta"><span class="pill">Grafos</span><button class="mark" data-mark="6">○ Marcar revisada</button></div>
-            <h3>De la fila priorizada al contexto relacional</h3>
-            <p>Modela Entidad → Proceso → Proveedor, ejecuta Cypher en Aura y contrasta resultados con una referencia tabular.</p>
-            <div class="skills"><span class="skill">Neo4j Aura</span><span class="skill">Cypher</span><span class="skill">Graph thinking</span></div>
-            <div class="session-actions">
-              <a class="action" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/6_Neo4j_Contexto_Relacional.ipynb">Abrir cuaderno</a>
-              <a class="action secondary" href="assets/tutoriales/neo4j-aura-s06-paso-a-paso.html">Guía Aura</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="session" data-kind="published" data-search="sesion 7 elasticsearch bm25 busqueda analyzer indice invertido ranking relevancia precision">
-          <div class="session-num">07</div>
-          <div>
-            <div class="session-meta"><span class="pill">Publicado</span><button class="mark" data-mark="7">○ Marcar revisada</button></div>
-            <h3>Construye un buscador: del corpus al ranking</h3>
-            <p>Presentación interactiva + cuaderno Python: conceptos, S07 Live, desafíos D1–D8, tokenización, Console, Elasticsearch real y evaluación.</p>
-            <div class="skills"><span class="skill">Elasticsearch</span><span class="skill">BM25</span><span class="skill">Precision@5</span></div>
-            <div class="session-actions">
-              <a class="action accent" href="Presentaciones/s07-del-vecindario-al-texto.html?v=20260924-two-tools#s1">Presentación · empezar aquí</a>
-              <a class="action secondary" target="bigdata-workspace" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb">Cuaderno</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="session evaluation" data-kind="evaluation" data-search="sesion 8 taller control secop api socrata concurrencia threadpoolexecutor trazabilidad mongodb atlas cassandra neo4j">
-          <div class="session-num">08</div>
-          <div>
-            <div class="session-meta"><span class="pill eval">Taller de control</span><button class="mark" data-mark="8">○ Marcar revisada</button></div>
-            <h3>SECOP Data Pipeline: de la API a evidencia multimodelo</h3>
-            <p>Consulta SECOP II mediante API real, compara descarga secuencial y concurrente, conserva trazabilidad y construye evidencia en MongoDB Atlas, Cassandra y Neo4j.</p>
-            <div class="skills"><span class="skill">SECOP API</span><span class="skill">Threads</span><span class="skill">Atlas</span><span class="skill">Cassandra</span><span class="skill">Neo4j</span></div>
-            <div class="session-actions">
-              <a class="action accent" href="lms/session-08.html">Abrir S08 en LMS</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="session current" data-kind="current" data-search="sesion 9 embeddings vectorial vector search busqueda semantica cosine coseno bm25 hybrid mongo atlas">
-          <div class="session-num">09</div>
-          <div>
-            <div class="session-meta"><span class="pill live">Sesión actual</span><button class="mark" data-mark="9">○ Marcar revisada</button></div>
-            <h3>Cuando las palabras no coinciden: búsqueda semántica y bases vectoriales</h3>
-            <p>Conecta S07 con embeddings: compara BM25 y semantic search sobre el mismo corpus, interpreta similitud coseno, distingue búsqueda lexical/semántica/híbrida y lleva vectores a MongoDB Atlas.</p>
-            <div class="skills"><span class="skill">Embeddings</span><span class="skill">Cosine</span><span class="skill">Vector Search</span><span class="skill">Hybrid Search</span><span class="skill">MongoDB Atlas</span></div>
-            <div class="session-actions">
-              <a class="action accent" href="lms/session-09.html">Abrir S09 en LMS</a>
-            </div>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
+<main class="public-sections">
+<section class="card"><div class="ey">Cómo se aprende</div><h2>Una sola ruta, no una colección de enlaces.</h2>
+<div class="learning-flow"><div><b>1 · Comprender</b><span>Conceptos, definiciones y ejemplos.</span></div><div><b>2 · Ejecutar</b><span>Laboratorios y cuadernos reales.</span></div><div><b>3 · Verificar</b><span>Checkpoints y evidencia reproducible.</span></div><div><b>4 · Transferir</b><span>Aplicar el mecanismo a otra situación.</span></div></div>
+</section>
+<section class="card"><div class="ey">Experiencia LMS</div><h2>Tu identidad acompaña el aprendizaje.</h2>
+<p>Después de iniciar sesión, el aula reconoce quién eres al abrir módulos y recursos internos. El progreso oficial vive en el backend: esta página pública no usa marcas locales ni simula avance académico.</p>
+<div class="actions"><a class="btn primary" href="lms/portal.html">Ir a mi curso</a><a class="btn alt" href="lms/progress.html">Mi progreso</a></div>
+</section>
 </main>
 
-<footer>
-  <strong>Big Data 2026-2S · Universidad Central · Antonino Zainea</strong><br>
-  Plataforma académica del curso · marcas de revisión locales; seguimiento de S08 y progreso formativo de S09 en el LMS.
-</footer>
-
+<footer class="public-footer">Big Data 2026-2S · Universidad Central · Plataforma académica del curso</footer>
+<script src="lms/assets/bigdata-lms.js?v=20260926-v3"></script>
 <script>
-(function(){
-  var key="bigdata2026:index:v2";
-  var saved={};
-  try{saved=JSON.parse(localStorage.getItem(key)||"{}")}catch(e){saved={}}
-
-  var marks=[].slice.call(document.querySelectorAll("[data-mark]"));
-  var bar=document.getElementById("progressBar");
-  var count=document.getElementById("progressCount");
-
-  function renderProgress(){
-    var n=0;
-    marks.forEach(function(btn){
-      var id=btn.getAttribute("data-mark");
-      var done=!!saved[id];
-      if(done)n++;
-      btn.classList.toggle("done",done);
-      btn.textContent=done?"✓ Revisada":"○ Marcar revisada";
-      btn.setAttribute("aria-pressed",done?"true":"false");
-    });
-    count.textContent=n;
-    bar.style.width=((n/marks.length)*100)+"%";
-  }
-
-  marks.forEach(function(btn){
-    btn.addEventListener("click",function(){
-      var id=btn.getAttribute("data-mark");
-      saved[id]=!saved[id];
-      localStorage.setItem(key,JSON.stringify(saved));
-      renderProgress();
-    });
-  });
-  renderProgress();
-
-  var search=document.getElementById("sessionSearch");
-  var filters=[].slice.call(document.querySelectorAll(".filter"));
-  var sessions=[].slice.call(document.querySelectorAll(".session"));
-  var activeFilter="all";
-
-  function applyFilters(){
-    var q=(search.value||"").trim().toLowerCase();
-    sessions.forEach(function(card){
-      var kind=card.getAttribute("data-kind");
-      var hay=(card.getAttribute("data-search")+" "+card.textContent).toLowerCase();
-      var filterOK=activeFilter==="all" || kind===activeFilter;
-      var searchOK=!q || hay.indexOf(q)>=0;
-      card.classList.toggle("hidden",!(filterOK&&searchOK));
-    });
-  }
-
-  search.addEventListener("input",applyFilters);
-  filters.forEach(function(btn){
-    btn.addEventListener("click",function(){
-      activeFilter=btn.getAttribute("data-filter");
-      filters.forEach(function(x){x.classList.toggle("active",x===btn)});
-      applyFilters();
-    });
-  });
-})();
+(()=>{'use strict';const L=window.BIGDATA_LMS;if(!L)return;const active=!!L.auth()?.token;for(const id of ['mainEntry','navEntry']){const el=document.getElementById(id);if(el)el.textContent=active?'Continuar mi curso':'Entrar al aula'}})();
 </script>
-</body>
-</html>
+</body></html>
