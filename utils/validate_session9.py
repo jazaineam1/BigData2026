@@ -164,12 +164,19 @@ examples=len(re.findall(r'class=(?:\\?")card ex(?:\\?")',deck))
 svg_functions=len(re.findall(r"function\s+svg[A-Za-z0-9_]+\s*\(",deck))
 lab_numbers=set(int(x) for x in re.findall(r"LAB\s+(\d+)\s*·",deck))
 challenge_calls=re.findall(r"challengeChoice\('(bd-s09-c[1-5])'",deck)
+graphic_refs=set(re.findall(r'\b(svg[A-Za-z0-9_]+)\(\)',raw))
+light_without_visual=[]
+for i,s in enumerate(slides,1):
+    visual=bool(re.search(r'svg[A-Za-z0-9_]+\(\)|<svg|class=\\?"(?:lab|table|diagram|three|cols)|<table|<pre|<select|<input|<textarea|challengeChoice\(',s,re.I))
+    if len(s)<850 and not visual:
+        light_without_visual.append(i)
 
 checks=[
     ("exactamente 35 diapositivas",len(slides)==35),
     ("profundidad de definiciones",defs>=70),
     ("ejemplos explícitos",examples>=30),
-    ("gráficos/diagramas",svg_functions>=15),
+    ("gráficos/diagramas",svg_functions>=15 and len(graphic_refs)>=15),
+    ("diapositivas ligeras compensadas visualmente",not light_without_visual),
     ("LAB 1–9 embebidos",set(range(1,10)).issubset(lab_numbers)),
     ("D1–D5 embebidos",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,6)}),
     ("S09 Live embebido",'id="liveDrawer"' in deck and "S09 LIVE" in deck and "renderStudentLive" in deck),
@@ -245,7 +252,8 @@ if errors:
 
 print("SESION 09 PROFUNDA: OK")
 print(" - 35 diapositivas")
-print(f" - {defs} bloques de definición · {examples} ejemplos explícitos · {svg_functions} gráficos")
+print(f" - {defs} bloques de definición · {examples} ejemplos explícitos · {len(graphic_refs)} gráficos usados")
+print(" - ninguna diapositiva ligera queda sin gráfico, tabla, código o herramienta")
 print(" - LAB 1–9 + evaluación embebidos")
 print(" - D1–D5 con primer intento/dominio server-side")
 print(" - exactamente dos recursos visibles")
