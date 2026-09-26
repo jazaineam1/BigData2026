@@ -82,6 +82,39 @@ async function verifyManifest(rawInput:string){
  const {clean,stageScores,stageMax}=summarizeControls(m.controles);const sum=Object.values(stageScores).reduce((a:number,b:any)=>a+Number(b),0);if(sum!==score)throw new Error("El detalle por etapas no suma el puntaje total");
  return {pair_hash:await digestHex(pair),score,note,sha:supplied,controls:clean,stageScores,stageMax}
 }
+async function syncManifestGradebook(ctx:any,run:any,m:any){
+ const {data:a}=await db.from("lms_assignments_v2").select("id,max_attempts,max_score").eq("course_run_id",run.id).eq("code","bd-s08-control").eq("active",true).maybeSingle();
+ if(!a)return;
+ const {data:latest}=await db.from("lms_submissions_v2").select("*").eq("assignment_id",a.id).eq("user_id",ctx.user.id).order("attempt",{ascending:false}).limit(1).maybeSingle();
+ const maxAttempts=Number(a.max_attempts||20),now=new Date().toISOString();
+ let target:any=null,previousScore:any=null,previousFeedback:any=null;
+ if(!latest||Number(latest.attempt)<maxAttempts){
+  const attempt=Number(latest?.attempt||0)+1;
+  const {data,error}=await db.from("lms_submissions_v2").insert({
+   assignment_id:a.id,user_id:ctx.user.id,attempt,artifact_type:"evidence",
+   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:VALIDATOR_VERSION,stage_scores:m.stageScores},
+   status:"reviewed",submitted_at:now,score:m.score,
+   feedback:"Calificación automática desde manifest_tc1.json validado en S08.",
+   rubric_scores:m.stageScores,reviewed_at:now
+  }).select("*").single();
+  if(error)return;target=data;
+ }else{
+  previousScore=latest.score;previousFeedback=latest.feedback;
+  const {data,error}=await db.from("lms_submissions_v2").update({
+   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:VALIDATOR_VERSION,stage_scores:m.stageScores},
+   status:"reviewed",submitted_at:now,score:m.score,
+   feedback:"Calificación automática actualizada desde la validación más reciente de S08.",
+   rubric_scores:m.stageScores,reviewed_at:now
+  }).eq("id",latest.id).select("*").single();
+  if(error)return;target=data;
+ }
+ if(target)await db.from("lms_grade_history_v2").insert({
+  submission_id:target.id,assignment_id:a.id,user_id:ctx.user.id,actor_user_id:null,
+  previous_score:previousScore,new_score:m.score,previous_feedback:previousFeedback,new_feedback:target.feedback,
+  rubric_scores:m.stageScores,created_at:now
+ }).then(()=>{}).catch(()=>{});
+}
+
 async function persistManifest(ctx:any,run:any,m:any){
  const now=new Date().toISOString();await ensureSessionStarted(ctx.user.id,run.id);
  const {error}=await db.from("bd_lms_s08_submissions").upsert({user_id:ctx.user.id,course_run_id:run.id,pair_hash:m.pair_hash,manifest_version:VALIDATOR_VERSION,score:m.score,max_score:100,note_5:m.note,sha256:m.sha,controls:m.controls,validated:true,submitted_at:now,updated_at:now},{onConflict:"user_id,course_run_id"});if(error)throw error;
@@ -90,7 +123,8 @@ async function persistManifest(ctx:any,run:any,m:any){
  await db.from("bd_lms_activity_progress").upsert({user_id:ctx.user.id,course_run_id:run.id,activity_code:"bd-s08-final",status:"completed",started_at:pf?.started_at||now,attempts:Number(pf?.attempts||0)+1,score:m.score,max_score:100,completed_at:now,updated_at:now,metadata:{source:"manifest_tc1",validated:true,sha256:m.sha}},{onConflict:"user_id,course_run_id,activity_code"});
  const {data:sp}=await db.from("bd_lms_session_progress").select("*").eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("session_number",SESSION).maybeSingle();
  await db.from("bd_lms_session_progress").upsert({user_id:ctx.user.id,course_run_id:run.id,session_number:SESSION,status:"completed",started_at:sp?.started_at||now,active_seconds:Number(sp?.active_seconds||0),last_activity_at:now,submitted_at:now,completed_at:now,score:m.score,max_score:100,updated_at:now},{onConflict:"user_id,course_run_id,session_number"});
- await db.from("bd_lms_events").insert({user_id:ctx.user.id,course_run_id:run.id,event_type:"manifest_submitted",session_number:SESSION,activity_code:"bd-s08-final",metadata:{score:m.score,validated:true},created_at:now})
+ await db.from("bd_lms_events").insert({user_id:ctx.user.id,course_run_id:run.id,event_type:"manifest_submitted",session_number:SESSION,activity_code:"bd-s08-final",metadata:{score:m.score,validated:true},created_at:now});
+ await syncManifestGradebook(ctx,run,m)
 }
 async function openOfficial(ctx:any,run:any){
  if(!["teacher","admin"].includes(ctx.user.role))throw new Error("NO_AUTH");
