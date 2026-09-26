@@ -17,7 +17,8 @@ backend=read("infraestructura/lms/functions/bigdata-session/index.ts")
 client=read("lms/assets/bigdata-lms.js")
 session=read("lms/session.html")
 progress=read("lms/progress.html")
-wall=read("lms/wall.html")\nclass_wall=read("lms/class-wall.html")
+wall=read("lms/wall.html")
+class_wall=read("lms/class-wall.html")
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
 generator=read("utils/build_session9_notebook.py")
 notebook=read("Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb")
@@ -30,7 +31,8 @@ labs=[
 
 checks=[
  ("CHECK de eventos versionado", all(x in migration for x in ["slide_viewed","challenge_answered","lab_interaction","evidence_submitted","lab_code_issued"])),
- ("tablas de evidencia protegidas", all(x in migration for x in ["bd_activity_catalog","bd_evidence","bd_lab_codes","enable row level security","revoke all"])),\n ("muro de clase protegido", all(x in migration for x in ["bd_wall_posts","bd_wall_reactions"])),
+ ("tablas de evidencia protegidas", all(x in migration for x in ["bd_activity_catalog","bd_evidence","bd_lab_codes","enable row level security","revoke all"])),
+ ("muro de clase protegido", all(x in migration for x in ["bd_wall_posts","bd_wall_reactions"])),
  ("12 LAB declarados", all(x in migration for x in labs)),
  ("LAB3 seeded-numeric", "s09_topk_aero_count" in migration and "'bd-s09-lab3','seeded-numeric'" in migration),
  ("backend comprueba errores", 'failIf(eventError,"No se pudo registrar el evento")' in backend and "failIf(evidenceError" in backend),
