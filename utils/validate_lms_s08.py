@@ -38,7 +38,8 @@ course=json.loads((ROOT/"lms/data/course.json").read_text("utf-8"))
 
 checks=[
  ("portal reutiliza sesión LMS","andesdb.lms.auth.v1" in client),
- ("S08 abre Taller_Control_1","Cuadernos/Taller_Control_1.ipynb" in s08),\n ("S08 enlaza guía V4","s08-secoppipeline.html" in s08),
+ ("S08 abre Taller_Control_1","Cuadernos/Taller_Control_1.ipynb" in s08),
+ ("S08 enlaza guía V4","s08-secoppipeline.html" in s08),
  ("S08 acepta manifest","manifest_tc1.json" in s08 and 'type="file"' in s08),
  ("S08 no marca abrir como completar","Abrirlo <b>no</b> lo marca como completado" in s08),
  ("WALL declara desempate por inicio","demora de inicio" in wall),
