@@ -476,6 +476,158 @@ async function unmapCompetency(ctx:any,run:any,body:any){
   return {ok:true};
 }
 
+
+const LEARNING_EVENTS=new Set(["portal_opened","assignments_opened","competencies_opened","progress_opened","session_resource_opened","assignment_submitted","feedback_viewed"]);
+function cleanEventMeta(v:any){
+  if(!v||typeof v!=="object"||Array.isArray(v))return {};
+  const o:any={};let n=0;
+  for(const [k,val] of Object.entries(v)){
+    if(n>=12)break;
+    if(!/^[a-zA-Z0-9_.-]{1,50}$/.test(k))continue;
+    if(["string","number","boolean"].includes(typeof val)){o[k]=typeof val==="string"?String(val).slice(0,300):val;n++}
+  }
+  return o;
+}
+async function trackLearningEvent(ctx:any,run:any,body:any){
+  const event=String(body.event_type||"");
+  if(!LEARNING_EVENTS.has(event))throw new Error("Evento académico no permitido");
+  const sessionNumber=body.session_number==null?null:Math.trunc(Number(body.session_number));
+  if(sessionNumber!==null&&(!Number.isInteger(sessionNumber)||sessionNumber<1||sessionNumber>99))throw new Error("Sesión inválida");
+  const row={
+    course_run_id:run.id,user_id:ctx.user.id,event_type:event,session_number:sessionNumber,
+    entity_type:body.entity_type?clampText(body.entity_type,60):null,
+    entity_id:body.entity_id?clampText(body.entity_id,120):null,
+    active_seconds_delta:Math.max(0,Math.min(300,Math.trunc(Number(body.active_seconds_delta||0)))),
+    metadata:cleanEventMeta(body.metadata),client_at:toIsoOrNull(body.client_at)
+  };
+  const {error}=await db.from("lms_learning_events_v2").insert(row);if(error)throw error;
+  return {ok:true};
+}
+function latestDate(values:any[]){
+  let best:number|null=null,raw:string|null=null;
+  for(const v of values){if(!v)continue;const t=Date.parse(String(v));if(Number.isFinite(t)&&(best===null||t>best)){best=t;raw=String(v)}}
+  return raw;
+}
+async function analyticsContext(run:any){
+  const [{data:rules},{data:assignments},{data:enrollments},{data:interventions},{data:events},{data:s08}] = await Promise.all([
+    db.from("lms_analytics_rules_v2").select("*").eq("course_run_id",run.id).order("position"),
+    db.from("lms_assignments_v2").select("*").eq("course_run_id",run.id).eq("active",true).order("session_number"),
+    db.from("lms_run_enrollments").select("user_id,role,status,enrolled_at").eq("course_run_id",run.id),
+    db.from("lms_interventions_v2").select("*").eq("course_run_id",run.id).order("created_at",{ascending:false}).limit(500),
+    db.from("lms_learning_events_v2").select("id,user_id,event_type,session_number,entity_type,entity_id,metadata,client_at,created_at").eq("course_run_id",run.id).order("created_at",{ascending:false}).limit(5000),
+    db.from("bd_lms_session_progress").select("user_id,status,active_seconds,started_at,last_activity_at,completed_at,score").eq("course_run_id",run.id).eq("session_number",8)
+  ]);
+  const studentEnroll=(enrollments||[]).filter((x:any)=>x.role==="student");
+  const userIds=studentEnroll.map((x:any)=>x.user_id);
+  const assignmentIds=(assignments||[]).map((x:any)=>x.id);
+  const [{data:users},{data:subs},{data:accommodations}]=await Promise.all([
+    userIds.length?db.from("lms_users").select("id,display_name,username,email,active").in("id",userIds):Promise.resolve({data:[]} as any),
+    assignmentIds.length?db.from("lms_submissions_v2").select("*").in("assignment_id",assignmentIds):Promise.resolve({data:[]} as any),
+    assignmentIds.length?db.from("lms_assignment_accommodations_v2").select("*").in("assignment_id",assignmentIds):Promise.resolve({data:[]} as any)
+  ]);
+  const comp=await competencyContext(run);
+  return {rules:rules||[],assignments:assignments||[],enrollments:studentEnroll,interventions:interventions||[],events:events||[],s08:s08||[],users:users||[],subs:subs||[],accommodations:accommodations||[],comp};
+}
+function buildAnalyticsRows(ctx:any){
+  const now=Date.now(),assignmentMap=new Map(ctx.assignments.map((a:any)=>[a.id,a]));
+  const enrollmentMap=new Map(ctx.enrollments.map((e:any)=>[e.user_id,e]));
+  const s08Map=new Map(ctx.s08.map((p:any)=>[p.user_id,p]));
+  const eventsByUser=new Map<string,any[]>(),subsByUser=new Map<string,any[]>(),intByUser=new Map<string,any[]>();
+  for(const e of ctx.events){if(!eventsByUser.has(e.user_id))eventsByUser.set(e.user_id,[]);eventsByUser.get(e.user_id)!.push(e)}
+  for(const s of ctx.subs){if(!subsByUser.has(s.user_id))subsByUser.set(s.user_id,[]);subsByUser.get(s.user_id)!.push(s)}
+  for(const i of ctx.interventions){if(!intByUser.has(i.user_id))intByUser.set(i.user_id,[]);intByUser.get(i.user_id)!.push(i)}
+  const accommodationMap=new Map(ctx.accommodations.map((x:any)=>[x.assignment_id+":"+x.user_id,x]));
+  const ruleMap=new Map(ctx.rules.filter((r:any)=>r.enabled).map((r:any)=>[r.code,r]));
+  return ctx.users.map((u:any)=>{
+    const userSubs=(subsByUser.get(u.id)||[]).slice().sort((a:any,b:any)=>Number(b.attempt)-Number(a.attempt));
+    const latest=new Map<string,any>();for(const s of userSubs)if(!latest.has(s.assignment_id))latest.set(s.assignment_id,s);
+    let pending=0,overdue=0,maxAttempt=0,weighted=0,weights=0;
+    for(const a of ctx.assignments){
+      const s:any=latest.get(a.id),ac:any=accommodationMap.get(a.id+":"+u.id);
+      const due=ac?.due_at||a.due_at;
+      if(!s){pending++;if(due&&Date.parse(due)<now)overdue++}
+      if(s){maxAttempt=Math.max(maxAttempt,Number(s.attempt||0));if(s.score!==null&&s.score!==undefined&&Number(a.max_score)>0){const w=Math.max(0,Number(a.weight||1));weighted+=(100*Number(s.score)/Number(a.max_score))*w;weights+=w}}
+    }
+    const ev=eventsByUser.get(u.id)||[],p:any=s08Map.get(u.id)||{},ints=intByUser.get(u.id)||[];
+    const lastAcademicAt=latestDate([p.last_activity_at,p.completed_at,...ev.map((x:any)=>x.client_at||x.created_at),...userSubs.map((x:any)=>x.submitted_at||x.reviewed_at)]);
+    const comps=computeCompetencyRows(ctx.comp,userSubs);
+    const signals:any[]=[];
+    const overdueRule:any=ruleMap.get("overdue_assignment");if(overdueRule&&overdue>0)signals.push({code:overdueRule.code,title:overdueRule.title,severity:overdueRule.severity,reason:overdue+" entrega(s) requerida(s) vencida(s) sin envío."});
+    const inactiveRule:any=ruleMap.get("inactive_days");
+    if(inactiveRule){
+      const days=Math.max(1,Number(inactiveRule.config?.days||7)),enrolled=(enrollmentMap.get(u.id) as any)?.enrolled_at;
+      const basis=lastAcademicAt||enrolled;const age=basis?Math.floor((now-Date.parse(basis))/86400000):0;
+      if(basis&&age>=days)signals.push({code:inactiveRule.code,title:inactiveRule.title,severity:inactiveRule.severity,reason:(lastAcademicAt?"Última actividad académica":"Matrícula sin actividad académica")+" hace "+age+" día(s)."});
+    }
+    const attemptRule:any=ruleMap.get("repeated_attempts");if(attemptRule&&maxAttempt>=Math.max(2,Number(attemptRule.config?.attempts||3)))signals.push({code:attemptRule.code,title:attemptRule.title,severity:attemptRule.severity,reason:"Máximo de "+maxAttempt+" intento(s) en una tarea. Revisar si fue iteración deliberada o fricción."});
+    const compRule:any=ruleMap.get("competency_developing"),developing=comps.filter((x:any)=>x.status==="developing");
+    if(compRule&&developing.length)signals.push({code:compRule.code,title:compRule.title,severity:compRule.severity,reason:developing.length+" competencia(s) con evidencia evaluada todavía bajo su umbral."});
+    return {
+      user_id:u.id,display_name:u.display_name||u.username,email:u.email||u.username,global_active:!!u.active,
+      run_status:(enrollmentMap.get(u.id) as any)?.status||"none",enrolled_at:(enrollmentMap.get(u.id) as any)?.enrolled_at||null,
+      last_academic_at:lastAcademicAt,pending_assignments:pending,overdue_assignments:overdue,
+      grade_pct:weights?Math.round(weighted/weights*10)/10:null,max_attempt:maxAttempt,
+      s08_status:p.status||"not_started",s08_active_seconds:Number(p.active_seconds||0),
+      competencies:comps,mastered_competencies:comps.filter((x:any)=>x.status==="mastered").length,
+      developing_competencies:developing.length,signals,
+      interventions:ints,open_interventions:ints.filter((x:any)=>x.status!=="closed").length,
+      event_count:ev.length
+    };
+  }).sort((a:any,b:any)=>b.signals.length-a.signals.length||a.display_name.localeCompare(b.display_name,"es",{sensitivity:"base"}));
+}
+async function teacherAnalytics(ctx:any,run:any){
+  requireTeacher(ctx);const context=await analyticsContext(run),students=buildAnalyticsRows(context);
+  const assignmentStats=context.assignments.map((a:any)=>{
+    const rows=context.subs.filter((s:any)=>s.assignment_id===a.id),users=new Set(rows.map((x:any)=>x.user_id));
+    const reviewed=rows.filter((x:any)=>x.score!==null&&x.score!==undefined),avg=reviewed.length?reviewed.reduce((z:number,x:any)=>z+100*Number(x.score)/Number(a.max_score),0)/reviewed.length:null;
+    return {assignment_id:a.id,code:a.code,title:a.title,session_number:a.session_number,submitted_students:users.size,total_submissions:rows.length,average_pct:avg===null?null:Math.round(avg*10)/10,average_attempts:users.size?Math.round(rows.length/users.size*10)/10:0};
+  });
+  const compCodes=(context.comp.competencies||[]).filter((x:any)=>x.active).map((x:any)=>x.code);
+  const competencyStats=compCodes.map((code:string)=>{
+    const states=students.map((s:any)=>s.competencies.find((c:any)=>c.code===code)?.status||"pending");
+    const comp=context.comp.competencies.find((c:any)=>c.code===code);
+    return {code,title:comp?.title||code,mastered:states.filter((x:string)=>x==="mastered").length,developing:states.filter((x:string)=>x==="developing").length,pending:states.filter((x:string)=>x==="pending").length};
+  });
+  return {viewer:ctx.user,run,rules:context.rules,students,assignment_stats:assignmentStats,competency_stats:competencyStats,summary:{
+    students:students.length,students_with_signals:students.filter((s:any)=>s.signals.length).length,
+    overdue_total:students.reduce((z:number,s:any)=>z+s.overdue_assignments,0),
+    open_interventions:students.reduce((z:number,s:any)=>z+s.open_interventions,0)
+  }};
+}
+async function myAnalytics(ctx:any,run:any){
+  const context=await analyticsContext(run),student=buildAnalyticsRows(context).find((x:any)=>x.user_id===ctx.user.id);
+  if(!student)throw new Error("No se encontró tu matrícula");
+  const ev=(context.events||[]).filter((x:any)=>x.user_id===ctx.user.id);
+  const now=Date.now(),week=7*86400000;
+  const current=ev.filter((x:any)=>{const t=Date.parse(x.client_at||x.created_at);return t>=now-week}).length;
+  const previous=ev.filter((x:any)=>{const t=Date.parse(x.client_at||x.created_at);return t<now-week&&t>=now-2*week}).length;
+  return {viewer:ctx.user,run,student:{...student,interventions:undefined,signals:undefined},self_compare:{events_last_7_days:current,events_previous_7_days:previous},recent_events:ev.slice(0,30).map((x:any)=>({event_type:x.event_type,session_number:x.session_number,created_at:x.created_at,entity_type:x.entity_type,entity_id:x.entity_id}))};
+}
+async function saveIntervention(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const id=clampText(body.id,80),userId=clampText(body.user_id,80,true);
+  const {data:e}=await db.from("lms_run_enrollments").select("user_id,role").eq("course_run_id",run.id).eq("user_id",userId).maybeSingle();
+  if(!e||e.role!=="student")throw new Error("Estudiante fuera de esta cohorte");
+  const status=String(body.status||"open");if(!["open","follow_up","closed"].includes(status))throw new Error("Estado de intervención inválido");
+  const row:any={course_run_id:run.id,user_id:userId,signal_code:body.signal_code?clampText(body.signal_code,80):null,note:clampText(body.note,5000,true),action_text:clampText(body.action_text,3000),status,follow_up_at:toIsoOrNull(body.follow_up_at),updated_by:ctx.user.id,updated_at:new Date().toISOString()};
+  let saved:any,error:any;
+  if(id){const x=await db.from("lms_interventions_v2").update(row).eq("id",id).eq("course_run_id",run.id).select("*").single();saved=x.data;error=x.error}
+  else{row.created_by=ctx.user.id;const x=await db.from("lms_interventions_v2").insert(row).select("*").single();saved=x.data;error=x.error}
+  if(error)throw error;
+  await audit(ctx.user.id,id?"bigdata.intervention.update":"bigdata.intervention.create","intervention",saved.id,{user_id:userId,status,signal_code:row.signal_code});
+  return {ok:true,intervention:saved};
+}
+async function saveAnalyticsRule(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const code=clampText(body.code,80,true);
+  const {data:prior}=await db.from("lms_analytics_rules_v2").select("*").eq("course_run_id",run.id).eq("code",code).maybeSingle();if(!prior)throw new Error("Regla no encontrada");
+  const severity=String(body.severity||prior.severity);if(!["info","medium","high"].includes(severity))throw new Error("Severidad inválida");
+  const config=body.config&&typeof body.config==="object"&&!Array.isArray(body.config)?body.config:prior.config;
+  if(code==="inactive_days"){const days=Number(config.days);if(!Number.isFinite(days)||days<1||days>90)throw new Error("Días de inactividad fuera de rango")}
+  if(code==="repeated_attempts"){const attempts=Number(config.attempts);if(!Number.isFinite(attempts)||attempts<2||attempts>20)throw new Error("Intentos fuera de rango")}
+  const {data,error}=await db.from("lms_analytics_rules_v2").update({enabled:body.enabled!==false,severity,config,updated_by:ctx.user.id,updated_at:new Date().toISOString()}).eq("course_run_id",run.id).eq("code",code).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.analytics_rule.update","analytics_rule",code,{enabled:data.enabled,severity:data.severity,config:data.config});
+  return {ok:true,rule:data};
+}
+
 Deno.serve(async(req:Request)=>{
   if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
   if(req.method==="OPTIONS")return new Response("ok",{headers:headers(req)});
@@ -510,6 +662,11 @@ Deno.serve(async(req:Request)=>{
     if(action==="teacher_save_competency")return out(req,await saveCompetency(ctx,run,body));
     if(action==="teacher_map_competency")return out(req,await mapCompetency(ctx,run,body));
     if(action==="teacher_unmap_competency")return out(req,await unmapCompetency(ctx,run,body));
+    if(action==="track_learning_event")return out(req,await trackLearningEvent(ctx,run,body));
+    if(action==="my_analytics")return out(req,await myAnalytics(ctx,run));
+    if(action==="teacher_analytics")return out(req,await teacherAnalytics(ctx,run));
+    if(action==="teacher_save_intervention")return out(req,await saveIntervention(ctx,run,body));
+    if(action==="teacher_save_analytics_rule")return out(req,await saveAnalyticsRule(ctx,run,body));
     return out(req,{error:"Acción desconocida"},400);
   }catch(e){
     if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);
