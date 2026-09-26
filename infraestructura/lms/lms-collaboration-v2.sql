@@ -88,6 +88,17 @@ create table if not exists public.lms_discussion_posts_v2 (
 );
 create index if not exists lms_discussion_posts_v2_thread_idx on public.lms_discussion_posts_v2(thread_id,created_at);
 
+
+create table if not exists public.lms_discussion_mentions_v2 (
+  post_id uuid not null references public.lms_discussion_posts_v2(id) on delete cascade,
+  mentioned_user_id uuid not null references public.lms_users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  read_at timestamptz,
+  primary key(post_id,mentioned_user_id)
+);
+create index if not exists lms_discussion_mentions_v2_user_idx
+  on public.lms_discussion_mentions_v2(mentioned_user_id,read_at,created_at desc);
+
 create table if not exists public.lms_peer_reviews_v2 (
   id uuid primary key default extensions.gen_random_uuid(),
   assignment_id uuid not null references public.lms_assignments_v2(id) on delete cascade,
@@ -109,13 +120,14 @@ alter table public.lms_group_contributions_v2 enable row level security;
 alter table public.lms_discussion_threads_v2 enable row level security;
 alter table public.lms_discussion_posts_v2 enable row level security;
 alter table public.lms_peer_reviews_v2 enable row level security;
+alter table public.lms_discussion_mentions_v2 enable row level security;
 
 revoke all on public.lms_groups_v2, public.lms_group_members_v2, public.lms_assignment_group_settings_v2,
   public.lms_group_submissions_v2, public.lms_group_contributions_v2,
-  public.lms_discussion_threads_v2, public.lms_discussion_posts_v2, public.lms_peer_reviews_v2
+  public.lms_discussion_threads_v2, public.lms_discussion_posts_v2, public.lms_discussion_mentions_v2, public.lms_peer_reviews_v2
   from anon, authenticated;
 
 grant all on public.lms_groups_v2, public.lms_group_members_v2, public.lms_assignment_group_settings_v2,
   public.lms_group_submissions_v2, public.lms_group_contributions_v2,
-  public.lms_discussion_threads_v2, public.lms_discussion_posts_v2, public.lms_peer_reviews_v2
+  public.lms_discussion_threads_v2, public.lms_discussion_posts_v2, public.lms_discussion_mentions_v2, public.lms_peer_reviews_v2
   to service_role;
