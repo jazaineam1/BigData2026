@@ -330,20 +330,60 @@ async function teacherRevokeSessions(ctx:any,target:string){
 
 async function teacherWall(ctx:any,run:any){
  if(!["teacher","admin"].includes(ctx.user.role))throw new Error("NO_AUTH");
- const [{data:enrollments},{data:progress},{data:activities},{data:subs},{data:requests},window]=await Promise.all([
+ const [{data:enrollments},{data:progress},{data:activities},{data:subs},{data:requests},window,{data:assignment}]=await Promise.all([
   db.from("lms_run_enrollments").select("user_id,role,status,enrolled_at").eq("course_run_id",run.id).eq("status","active"),
   db.from("bd_lms_session_progress").select("*").eq("course_run_id",run.id).eq("session_number",SESSION),
   db.from("bd_lms_activity_progress").select("*").eq("course_run_id",run.id),
   db.from("bd_lms_s08_submissions").select("user_id,score,max_score,note_5,validated,submitted_at,sha256").eq("course_run_id",run.id),
   db.from("lms_access_requests").select("id,full_name,email,course_code,status,created_at,reviewed_at").eq("course_code",COURSE).order("created_at",{ascending:false}).limit(100),
-  sessionWindow(run.id)
+  sessionWindow(run.id),
+  db.from("lms_assignments_v2").select("id").eq("course_run_id",run.id).eq("code","bd-s08-control").maybeSingle()
  ]);
- const ids=(enrollments||[]).filter((x:any)=>x.role==="student").map((x:any)=>x.user_id),{data:users}=ids.length?await db.from("lms_users").select("id,display_name,username,active").in("id",ids):({data:[]} as any);
+ const ids=(enrollments||[]).filter((x:any)=>x.role==="student").map((x:any)=>x.user_id);
+ const {data:users}=ids.length?await db.from("lms_users").select("id,display_name,username,active").in("id",ids):({data:[]} as any);
  const pm=new Map((progress||[]).map((x:any)=>[x.user_id,x])),sm=new Map((subs||[]).map((x:any)=>[x.user_id,x])),byUser=new Map<string,any[]>();
  for(const a of activities||[]){if(!byUser.has(a.user_id))byUser.set(a.user_id,[]);byUser.get(a.user_id)!.push(a)}
- const rows=(users||[]).map((u:any)=>{const p:any=pm.get(u.id)||{},s:any=sm.get(u.id)||{},st=(byUser.get(u.id)||[]).map((a:any)=>({activity_code:a.activity_code,status:a.status,score:Number(a.score||0),max_score:Number(a.max_score||0),started_at:a.started_at,completed_at:a.completed_at}));let delay:null|number=null;if(window?.opened_at&&p.started_at)delay=Math.max(0,Math.round((Date.parse(p.started_at)-Date.parse(window.opened_at))/1000));return {user_id:u.id,display_name:u.display_name||u.username,status:p.status||"not_started",score:Number(s.score??p.score??0),max_score:Number(s.max_score??p.max_score??100),note_5:s.note_5??null,started_at:p.started_at||null,start_delay_seconds:delay,active_seconds:Number(p.active_seconds||0),last_activity_at:p.last_activity_at||null,submitted_at:s.submitted_at||p.submitted_at||null,validated:!!s.validated,sha256:s.sha256||null,stages:st}});
- rows.sort((a:any,b:any)=>{if(b.score!==a.score)return b.score-a.score;if(window?.opened_at){const da=a.start_delay_seconds??Number.MAX_SAFE_INTEGER,dbb=b.start_delay_seconds??Number.MAX_SAFE_INTEGER;if(da!==dbb)return da-dbb}else{const ta=a.started_at?Date.parse(a.started_at):Number.MAX_SAFE_INTEGER,tb=b.started_at?Date.parse(b.started_at):Number.MAX_SAFE_INTEGER;if(ta!==tb)return ta-tb}const sa=a.submitted_at?Date.parse(a.submitted_at):Number.MAX_SAFE_INTEGER,sb=b.submitted_at?Date.parse(b.submitted_at):Number.MAX_SAFE_INTEGER;return sa-sb});
- return {viewer:ctx.user,run,session_window:window,ranking:rows,access_requests:requests||[]}
+ const rows=(users||[]).map((u:any)=>{
+  const p:any=pm.get(u.id)||{},s:any=sm.get(u.id)||{},st=(byUser.get(u.id)||[]).map((a:any)=>({activity_code:a.activity_code,status:a.status,score:Number(a.score||0),max_score:Number(a.max_score||0),started_at:a.started_at,completed_at:a.completed_at}));
+  let delay:null|number=null;if(window?.opened_at&&p.started_at)delay=Math.max(0,Math.round((Date.parse(p.started_at)-Date.parse(window.opened_at))/1000));
+  return {user_id:u.id,display_name:u.display_name||u.username,status:p.status||"not_started",score:Number(s.score??p.score??0),max_score:Number(s.max_score??p.max_score??100),note_5:s.note_5??null,started_at:p.started_at||null,start_delay_seconds:delay,active_seconds:Number(p.active_seconds||0),last_activity_at:p.last_activity_at||null,submitted_at:s.submitted_at||p.submitted_at||null,validated:!!s.validated,sha256:s.sha256||null,stages:st}
+ });
+ rows.sort((a:any,b:any)=>b.score-a.score);
+
+ const [{data:groups},{data:members},{data:groupSubs}]=await Promise.all([
+  db.from("lms_groups_v2").select("id,name,description,active").eq("course_run_id",run.id).eq("active",true).order("name"),
+  db.from("lms_group_members_v2").select("group_id,user_id,role"),
+  assignment?.id?db.from("lms_group_submissions_v2").select("*").eq("assignment_id",assignment.id).order("attempt",{ascending:false}):Promise.resolve({data:[]} as any)
+ ]);
+ const userMap=new Map((users||[]).map((u:any)=>[u.id,u]));
+ const rowMap=new Map(rows.map((r:any)=>[r.user_id,r]));
+ const latestGroupSub=new Map<string,any>();
+ for(const s of groupSubs||[])if(!latestGroupSub.has(s.group_id))latestGroupSub.set(s.group_id,s);
+ const groupRows=(groups||[]).map((g:any)=>{
+  const gm=(members||[]).filter((m:any)=>m.group_id===g.id&&ids.includes(m.user_id));
+  const sub:any=latestGroupSub.get(g.id)||null;
+  const names=gm.map((m:any)=>(userMap.get(m.user_id) as any)?.display_name||(userMap.get(m.user_id) as any)?.username||"Participante");
+  const memberRows=gm.map((m:any)=>rowMap.get(m.user_id)).filter(Boolean);
+  const active_seconds=memberRows.reduce((z:number,r:any)=>z+Number(r.active_seconds||0),0);
+  const starts=memberRows.map((r:any)=>r.started_at).filter(Boolean).sort();
+  const stages:any={};
+  for(const code of Object.values(STAGE_ACTIVITY))stages[code]={score:0,max_score:0,status:"not_started"};
+  for(const r of memberRows)for(const st of r.stages||[]){
+   if(!stages[st.activity_code])continue;
+   if(Number(st.score||0)>Number(stages[st.activity_code].score||0))stages[st.activity_code]={score:Number(st.score||0),max_score:Number(st.max_score||0),status:st.status}
+  }
+  return {
+   group_id:g.id,group_name:g.name,members:names,member_count:gm.length,
+   score:sub?.score!=null?Number(sub.score):0,max_score:100,
+   note_5:sub?.score!=null?Math.round((1+4*Number(sub.score)/100)*100)/100:null,
+   status:sub?.status||"not_submitted",attempt:sub?.attempt||0,submitted_at:sub?.submitted_at||null,
+   active_seconds,started_at:starts[0]||null,stages
+  }
+ });
+ groupRows.sort((a:any,b:any)=>b.score-a.score||(a.submitted_at?Date.parse(a.submitted_at):Number.MAX_SAFE_INTEGER)-(b.submitted_at?Date.parse(b.submitted_at):Number.MAX_SAFE_INTEGER));
+ const assigned=new Set((members||[]).map((m:any)=>m.user_id));
+ const unassigned=(users||[]).filter((u:any)=>!assigned.has(u.id)).map((u:any)=>({user_id:u.id,display_name:u.display_name||u.username}));
+ return {viewer:ctx.user,run,session_window:window,ranking:rows,group_ranking:groupRows,unassigned_students:unassigned,access_requests:requests||[]}
 }
 
 Deno.serve(async(req:Request)=>{
