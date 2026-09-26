@@ -247,14 +247,15 @@ async function cleanupRetention(ctx:any,run:any,body:any){
   const assignmentIds=await runAssignmentIds(run);if(!assignmentIds.length)return {ok:true,deleted:0};
   const cutoff=new Date(Date.now()-24*3600_000).toISOString();
   const {data,error}=await db.from("lms_submission_files_v2")
-    .select("id,assignment_id,bucket,object_path,status,created_at")
+    .update({status:"abandoned"})
     .in("id",fileIds).in("assignment_id",assignmentIds)
     .in("status",["pending","abandoned"])
-    .lt("created_at",cutoff);
+    .lt("created_at",cutoff)
+    .select("id,assignment_id,bucket,object_path,status,created_at");
   if(error)throw error;
   const rows=data||[];
   if(rows.length!==fileIds.length)throw new Error("Uno o más archivos ya no son candidatos seguros para limpieza");
-  if(rows.some((x:any)=>x.status==="attached"))throw new Error("Nunca se eliminan archivos attached");
+  if(rows.some((x:any)=>x.status!=="abandoned"))throw new Error("La limpieza solo puede reclamar archivos abandoned");
 
   const byBucket=new Map<string,string[]>();
   for(const r of rows){const a=byBucket.get(r.bucket)||[];a.push(r.object_path);byBucket.set(r.bucket,a)}
