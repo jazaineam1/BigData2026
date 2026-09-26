@@ -50,9 +50,9 @@ function compactQueue(q){
     .slice(0,removeCount);
   const remove=new Set(candidates.map(x=>x.i));
   let out=arr.filter((_,i)=>!remove.has(i));
-  // Evidencia y publicaciones nunca se eliminan para hacer espacio a telemetría.
-  if(out.length>MAX_QUEUE&&out.every(x=>priority(x)>=100))return out;
-  return out.slice(Math.max(0,out.length-MAX_QUEUE));
+  // Evidencia/publicaciones se eliminan únicamente como último recurso si ellas solas superan el límite.
+  if(out.length>MAX_QUEUE)out=out.slice(out.length-MAX_QUEUE);
+  return out;
 }
 function saveQueue(q){
   const compacted=compactQueue(q);
@@ -67,6 +67,10 @@ function clearRetry(){
 function retryable(error){
   const status=Number(error?.status||0);
   return navigator.onLine===false||!status||status===408||status===425||status===429||status>=500;
+}
+function authBlocked(error){
+  const status=Number(error?.status||0);
+  return status===401||status===403;
 }
 function enqueue(kind,payload,id=null){
   const q=loadQueue(),entry={
@@ -108,6 +112,11 @@ async function flush(){
         q.shift();saveQueue(q);sent++;
         emit('sent',{entry,result});
       }catch(error){
+        if(authBlocked(error)&&priority(entry)>=100){
+          q[0]=entry;saveQueue(q);
+          emit('auth_required',{entry,error});
+          return {ok:false,auth_required:true,size:q.length,sent};
+        }
         if(retryable(error)){
           entry.attempts=Number(entry.attempts||0)+1;
           q[0]=entry;saveQueue(q);
@@ -134,6 +143,10 @@ async function send(kind,payload){
     flush().catch(()=>{});
     return {...result,client_id:id};
   }catch(error){
+    if(authBlocked(error)&&priority(entry)>=100){
+      enqueue(kind,payload,id);
+      return {ok:true,queued:true,pending:true,auth_required:true,client_id:id,feedback:'Tu trabajo quedó guardado. Vuelve a iniciar sesión para sincronizarlo.'};
+    }
     if(!retryable(error))throw error;
     enqueue(kind,payload,id);
     return {ok:true,queued:true,pending:true,client_id:id,feedback:'Tu trabajo quedó guardado temporalmente y se sincronizará cuando vuelva la conexión.'};
