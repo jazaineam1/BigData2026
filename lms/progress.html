@@ -81,7 +81,8 @@ function renderEvidence(){
   L.$('evidenceCount').textContent=evidence.length+' registro'+(evidence.length===1?'':'s');
   L.$('evidenceList').innerHTML=evidence.length?evidence.map(e=>{
     const a=activities.get(e.activity_code),ok=['correct','accepted'].includes(e.verdict);
-    return '<article class="evidence-item"><div class="actions" style="justify-content:space-between"><b>'+L.esc(a?.title||e.activity_code)+'</b><span class="pill '+(ok?'done':'pending')+'">'+L.esc(e.verdict)+'</span></div><div class="muted">'+L.fmtWhen(e.created_at)+' · '+L.esc(e.source||'')+'</div><p>'+L.esc(e.feedback||'')+'</p><pre>'+L.esc(JSON.stringify(e.payload||{},null,2))+'</pre></article>'
+    const wall=a?.kind==='lab'?'<a class="btn ghost" href="class-wall.html?s='+focus+'&a='+encodeURIComponent(e.activity_code)+'">Abrir muro del LAB</a>':'';
+    return '<article class="evidence-item"><div class="actions" style="justify-content:space-between"><b>'+L.esc(a?.title||e.activity_code)+'</b><span class="pill '+(ok?'done':'pending')+'">'+L.esc(e.verdict)+'</span></div><div class="muted">'+L.fmtWhen(e.created_at)+' · '+L.esc(e.source||'')+'</div><p>'+L.esc(e.feedback||'')+'</p><pre>'+L.esc(JSON.stringify(e.payload||{},null,2))+'</pre><div class="actions">'+wall+'</div></article>'
   }).join(''):'<div class="note"><b>Aún no hay evidencia registrada.</b> Explorar un recurso no completa un laboratorio; registra la evidencia desde la actividad.</div>';
 }
 function renderAnalytics(){
