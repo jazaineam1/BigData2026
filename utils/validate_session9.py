@@ -47,13 +47,18 @@ except Exception as ex:
 
 # Parsear el array real de diapositivas.
 start=deck.find("const slides=[")
-end=deck.find("];\nfunction challengeChoice",start)
+end_match=re.search(r"\n\];\s*\n\s*function challengeChoice",deck[start:]) if start>=0 else None
+end=(start+end_match.start()) if end_match else -1
 if start<0 or end<0:
     slides=[]
     errors.append("No se pudo localizar el array de diapositivas S09")
 else:
     raw=deck[start:end]
     slides=[x for x in re.split(r"\n(?=\{t:')",raw) if "{t:'" in x]
+
+resource_seed_start=seed.find("insert into public.lms_run_resources_v2")
+resource_seed=seed[resource_seed_start:] if resource_seed_start>=0 else ""
+resource_selects=len(re.findall(r"select\s+id,9,",resource_seed,re.I))
 
 def first_slide(term):
     term=term.lower()
@@ -154,7 +159,7 @@ checks=[
     ("sin bypass complete_checkpoint","complete_checkpoint" not in backend and "complete_checkpoint" not in session),
     ("dos códigos de recurso", 'const RESOURCE_CODES=new Set(["bd-s09-presentation","bd-s09-notebook"])' in backend),
     ("sin guía en backend","bd-s09-guide" not in backend and "guide_opened" not in backend),
-    ("dos recursos visibles en seed",seed.count("select id,9,")==2 and "'guide'" not in seed and "bd-s09-guide" not in seed),
+    ("dos recursos visibles en seed",resource_selects==2 and "'guide'" not in resource_seed and "bd-s09-guide" not in resource_seed),
     ("guía histórica solo redirige","no hay un laboratorio separado" in guide and "location.replace" in guide),
     ("LMS presenta dos recursos","repeat(2,minmax(0,1fr))" in session and "guide_opened" not in session),
     ("LMS no permite marcar dominio manual","Marcar completado" not in session and "completeCheckpoint" not in session),
