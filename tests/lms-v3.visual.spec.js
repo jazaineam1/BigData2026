@@ -223,3 +223,70 @@ test('muro de clase exige publicar antes de ver', async ({ page }) => {
   await assertNoHorizontalOverflow(page,'class wall mobile');
   await assertA11y(page,'class wall');
 });
+
+
+test('solicitud pública no envía Authorization aunque exista sesión LMS', async ({ page }) => {
+  let authHeader = null;
+  await page.addInitScript(() => {
+    localStorage.setItem('lms.bigdata.v2', JSON.stringify({
+      token:'token-admin-prueba',
+      expires_at:'2099-12-31T23:59:59Z',
+      auth_session_id:'qa-admin',
+      user:{id:'admin',username:'admin',display_name:'Admin QA',role:'admin'}
+    }));
+  });
+  await page.route('**/functions/v1/learning-access-request', async route => {
+    authHeader = route.request().headers()['authorization'] || null;
+    await route.fulfill({
+      status:200,
+      contentType:'application/json',
+      body:JSON.stringify({ok:true,message:'Solicitud registrada.'})
+    });
+  });
+  await page.goto('/lms/access.html');
+  await page.locator('#name').fill('Estudiante QA');
+  await page.locator('#email').fill('estudiante.qa@ucentral.edu.co');
+  await page.getByRole('button',{name:'Enviar solicitud'}).click();
+  await expect(page.getByText('Solicitud registrada.')).toBeVisible();
+  expect(authHeader).toBeNull();
+});
+
+test('sesión de pestaña prevalece sobre otra sesión guardada y sobrevive reload', async ({ page }) => {
+  await page.addInitScript(() => {
+    const tab = {
+      token:'token-pestana',
+      expires_at:'2099-12-31T23:59:59Z',
+      auth_session_id:'tab',
+      user:{id:'admin',username:'admin',display_name:'Admin pestaña',role:'admin'}
+    };
+    const global = {
+      token:'token-otra-pestana',
+      expires_at:'2099-12-31T23:59:59Z',
+      auth_session_id:'global',
+      user:{id:'student',username:'student',display_name:'Otra cuenta',role:'student'}
+    };
+    sessionStorage.setItem('lms.bigdata.v2',JSON.stringify(tab));
+    localStorage.setItem('lms.bigdata.v2',JSON.stringify(global));
+  });
+  const seen=[];
+  await page.route('**/functions/v1/bigdata-lms-core**', async route => {
+    seen.push(route.request().headers()['authorization']);
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      viewer:{id:'admin',username:'admin',display_name:'Admin pestaña',role:'admin'},
+      assignments:[],sessions:[],announcements:[]
+    })});
+  });
+  await page.route('**/functions/v1/bigdata-session**', async route => {
+    seen.push(route.request().headers()['authorization']);
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      viewer:{id:'admin',username:'admin',display_name:'Admin pestaña',role:'admin'},
+      sessions:[]
+    })});
+  });
+  await page.goto('/lms/portal.html');
+  await expect(page.locator('#home')).toBeVisible();
+  await page.reload();
+  await expect(page.locator('#home')).toBeVisible();
+  expect(seen.length).toBeGreaterThanOrEqual(4);
+  expect(seen.every(x=>x==='Bearer token-pestana')).toBeTruthy();
+});
