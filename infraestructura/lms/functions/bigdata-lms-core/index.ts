@@ -584,6 +584,182 @@ async function resolveIntervention(ctx:any,run:any,body:any){
   await audit(ctx.user.id,"bigdata.intervention.resolve","intervention",id,{user_id:data.user_id});return {ok:true,intervention:data};
 }
 
+
+async function groupIdsForUser(runId:string,userId:string){
+  const {data:members}=await db.from("lms_group_members_v2").select("group_id").eq("user_id",userId);
+  const ids=(members||[]).map((x:any)=>x.group_id);if(!ids.length)return [];
+  const {data:groups}=await db.from("lms_groups_v2").select("id").eq("course_run_id",runId).eq("active",true).in("id",ids);
+  return (groups||[]).map((x:any)=>x.id);
+}
+async function collaborationOverview(ctx:any,run:any){
+  const ownGroupIds=await groupIdsForUser(run.id,ctx.user.id);
+  const [{data:groups},{data:members},{data:settings},{data:assignments},{data:groupSubs},{data:threads},{data:posts}] = await Promise.all([
+    ownGroupIds.length?db.from("lms_groups_v2").select("*").eq("course_run_id",run.id).in("id",ownGroupIds):Promise.resolve({data:[]} as any),
+    ownGroupIds.length?db.from("lms_group_members_v2").select("*").in("group_id",ownGroupIds):Promise.resolve({data:[]} as any),
+    db.from("lms_assignment_group_settings_v2").select("*").eq("enabled",true),
+    db.from("lms_assignments_v2").select("id,code,title,session_number,due_at,max_score,max_attempts,rubric,allowed_types,active").eq("course_run_id",run.id).eq("active",true),
+    ownGroupIds.length?db.from("lms_group_submissions_v2").select("*").in("group_id",ownGroupIds).order("submitted_at",{ascending:false}):Promise.resolve({data:[]} as any),
+    db.from("lms_discussion_threads_v2").select("*").eq("course_run_id",run.id).order("pinned",{ascending:false}).order("created_at",{ascending:false}).limit(60),
+    db.from("lms_discussion_posts_v2").select("*").eq("hidden",false).order("created_at").limit(500)
+  ]);
+  const memberIds=[...new Set((members||[]).map((x:any)=>x.user_id))];
+  const {data:users}=memberIds.length?await db.from("lms_users").select("id,display_name,username").in("id",memberIds):({data:[]} as any);
+  const assignmentMap=new Map((assignments||[]).map((a:any)=>[a.id,a]));
+  const settingRows=(settings||[]).filter((s:any)=>assignmentMap.has(s.assignment_id));
+  const peerTargets:any[]=[];
+  for(const setting of settingRows.filter((x:any)=>x.peer_review_enabled)){
+    const {data:candidates}=await db.from("lms_group_submissions_v2").select("*").eq("assignment_id",setting.assignment_id).in("status",["submitted","reviewed"]).order("submitted_at",{ascending:false});
+    const {data:done}=await db.from("lms_peer_reviews_v2").select("reviewee_submission_id").eq("assignment_id",setting.assignment_id).eq("reviewer_user_id",ctx.user.id);
+    const doneSet=new Set((done||[]).map((x:any)=>x.reviewee_submission_id));
+    const eligible=(candidates||[]).filter((x:any)=>!ownGroupIds.includes(x.group_id)&&!doneSet.has(x.id));
+    for(const x of eligible.slice(0,Number(setting.reviews_per_student||1)))peerTargets.push({...x,assignment:assignmentMap.get(setting.assignment_id),peer_setting:setting});
+  }
+  return {viewer:ctx.user,run,groups:groups||[],members:members||[],member_users:users||[],settings:settingRows,assignments:assignments||[],group_submissions:groupSubs||[],threads:threads||[],posts:posts||[],peer_targets:peerTargets};
+}
+async function teacherCollaboration(ctx:any,run:any){
+  requireTeacher(ctx);
+  const [{data:groups},{data:members},{data:settings},{data:assignments},{data:subs},{data:enrollments},{data:threads},{data:posts},{data:reviews}] = await Promise.all([
+    db.from("lms_groups_v2").select("*").eq("course_run_id",run.id).order("name"),
+    db.from("lms_group_members_v2").select("*"),
+    db.from("lms_assignment_group_settings_v2").select("*"),
+    db.from("lms_assignments_v2").select("*").eq("course_run_id",run.id).order("session_number"),
+    db.from("lms_group_submissions_v2").select("*").order("submitted_at",{ascending:false}).limit(500),
+    db.from("lms_run_enrollments").select("user_id,role,status").eq("course_run_id",run.id),
+    db.from("lms_discussion_threads_v2").select("*").eq("course_run_id",run.id).order("pinned",{ascending:false}).order("created_at",{ascending:false}),
+    db.from("lms_discussion_posts_v2").select("*").order("created_at").limit(1000),
+    db.from("lms_peer_reviews_v2").select("*").order("submitted_at",{ascending:false}).limit(1000)
+  ]);
+  const groupIds=new Set((groups||[]).map((g:any)=>g.id));
+  const memberRows=(members||[]).filter((m:any)=>groupIds.has(m.group_id));
+  const assignmentIds=new Set((assignments||[]).map((a:any)=>a.id));
+  const settingRows=(settings||[]).filter((s:any)=>assignmentIds.has(s.assignment_id));
+  const subRows=(subs||[]).filter((s:any)=>assignmentIds.has(s.assignment_id)&&groupIds.has(s.group_id));
+  const reviewRows=(reviews||[]).filter((r:any)=>assignmentIds.has(r.assignment_id));
+  const ids=[...new Set([...(enrollments||[]).map((x:any)=>x.user_id),...memberRows.map((x:any)=>x.user_id)])];
+  const {data:users}=ids.length?await db.from("lms_users").select("id,display_name,username,email,active").in("id",ids):({data:[]} as any);
+  return {viewer:ctx.user,run,groups:groups||[],members:memberRows,settings:settingRows,assignments:assignments||[],group_submissions:subRows,students:(users||[]).filter((u:any)=>(enrollments||[]).some((e:any)=>e.user_id===u.id&&e.role==="student")),users:users||[],threads:threads||[],posts:posts||[],peer_reviews:reviewRows};
+}
+async function createGroup(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const name=clampText(body.name,120,true),description=clampText(body.description,1000);
+  const {data,error}=await db.from("lms_groups_v2").insert({course_run_id:run.id,name,description,created_by:ctx.user.id}).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.group.create","group",data.id,{name});return {ok:true,group:data};
+}
+async function addGroupMember(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const groupId=clampText(body.group_id,80,true),userId=clampText(body.user_id,80,true),role=String(body.role||"member");
+  if(!["member","lead"].includes(role))throw new Error("Rol de equipo inválido");
+  const [{data:g},{data:e}]=await Promise.all([
+    db.from("lms_groups_v2").select("id").eq("id",groupId).eq("course_run_id",run.id).eq("active",true).maybeSingle(),
+    db.from("lms_run_enrollments").select("user_id").eq("course_run_id",run.id).eq("user_id",userId).eq("status","active").maybeSingle()
+  ]);if(!g||!e)throw new Error("Equipo o estudiante fuera de la cohorte");
+  const {data,error}=await db.from("lms_group_members_v2").upsert({group_id:groupId,user_id:userId,role},{onConflict:"group_id,user_id"}).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.group.member.add","group_member",groupId,{user_id:userId,role});return {ok:true,member:data};
+}
+async function removeGroupMember(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const groupId=clampText(body.group_id,80,true),userId=clampText(body.user_id,80,true);
+  const {data:g}=await db.from("lms_groups_v2").select("id").eq("id",groupId).eq("course_run_id",run.id).maybeSingle();if(!g)throw new Error("Equipo fuera de la cohorte");
+  const {error}=await db.from("lms_group_members_v2").delete().eq("group_id",groupId).eq("user_id",userId);if(error)throw error;
+  await audit(ctx.user.id,"bigdata.group.member.remove","group_member",groupId,{user_id:userId});return {ok:true};
+}
+async function saveGroupSetting(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const assignmentId=clampText(body.assignment_id,80,true);
+  const {data:a}=await db.from("lms_assignments_v2").select("id").eq("id",assignmentId).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Tarea fuera de la cohorte");
+  const n=Math.max(1,Math.min(5,Math.trunc(Number(body.reviews_per_student||1))));
+  const rubric=Array.isArray(body.peer_rubric)?body.peer_rubric.slice(0,20).map((x:any,i:number)=>({code:clampText(x.code||"p"+(i+1),80,true),title:clampText(x.title,180,true),max:Number(x.max||0)})).filter((x:any)=>x.max>0):[];
+  const {data,error}=await db.from("lms_assignment_group_settings_v2").upsert({assignment_id:assignmentId,enabled:body.enabled!==false,peer_review_enabled:!!body.peer_review_enabled,reviews_per_student:n,peer_rubric:rubric,anonymous_peer_review:!!body.anonymous_peer_review,updated_by:ctx.user.id,updated_at:new Date().toISOString()},{onConflict:"assignment_id"}).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.group.setting.save","group_assignment",assignmentId,{peer_review_enabled:data.peer_review_enabled});return {ok:true,setting:data};
+}
+async function groupSubmit(ctx:any,run:any,body:any){
+  const assignmentId=clampText(body.assignment_id,80,true),groupId=clampText(body.group_id,80,true);
+  const [{data:a},{data:setting},{data:g},{data:membership}]=await Promise.all([
+    db.from("lms_assignments_v2").select("*").eq("id",assignmentId).eq("course_run_id",run.id).eq("active",true).maybeSingle(),
+    db.from("lms_assignment_group_settings_v2").select("*").eq("assignment_id",assignmentId).eq("enabled",true).maybeSingle(),
+    db.from("lms_groups_v2").select("*").eq("id",groupId).eq("course_run_id",run.id).eq("active",true).maybeSingle(),
+    db.from("lms_group_members_v2").select("*").eq("group_id",groupId).eq("user_id",ctx.user.id).maybeSingle()
+  ]);if(!a||!setting||!g||!membership)throw new Error("Entrega grupal no disponible para tu equipo");
+  if(a.due_at&&Date.parse(a.due_at)<Date.now())throw new Error("La fecha de entrega grupal ya venció");
+  const {data:prior}=await db.from("lms_group_submissions_v2").select("attempt").eq("assignment_id",assignmentId).eq("group_id",groupId).order("attempt",{ascending:false}).limit(1);
+  const attempt=Number(prior?.[0]?.attempt||0)+1;if(attempt>Number(a.max_attempts||1))throw new Error("El equipo ya usó el máximo de intentos");
+  const type=String(body.artifact_type||"text");if(!["text","url"].includes(type))throw new Error("Tipo de entrega grupal no permitido");
+  let artifact:any={};if(type==="text")artifact={text:clampText(body.text,20000,true)};else{const url=cleanUrl(body.url);if(!url)throw new Error("URL obligatoria");artifact={url}};
+  const {data:gs,error}=await db.from("lms_group_submissions_v2").insert({assignment_id:assignmentId,group_id:groupId,attempt,artifact_type:type,artifact,status:"submitted",submitted_by:ctx.user.id,submitted_at:new Date().toISOString()}).select("*").single();if(error)throw error;
+  const {data:members}=await db.from("lms_group_members_v2").select("user_id").eq("group_id",groupId);
+  for(const m of members||[]){
+    const {data:last}=await db.from("lms_submissions_v2").select("attempt").eq("assignment_id",assignmentId).eq("user_id",m.user_id).order("attempt",{ascending:false}).limit(1);
+    const indAttempt=Number(last?.[0]?.attempt||0)+1;if(indAttempt>Number(a.max_attempts||1))continue;
+    await db.from("lms_submissions_v2").insert({assignment_id:assignmentId,user_id:m.user_id,attempt:indAttempt,artifact_type:"evidence",artifact:{source:"group_submission",group_submission_id:gs.id,group_id:groupId},status:"submitted",submitted_at:gs.submitted_at}).then(()=>{}).catch(()=>{});
+  }
+  const contribution=clampText(body.contribution_text,2000);
+  if(contribution)await db.from("lms_group_contributions_v2").upsert({group_submission_id:gs.id,user_id:ctx.user.id,contribution_text:contribution,confirmed_at:new Date().toISOString()},{onConflict:"group_submission_id,user_id"});
+  await audit(ctx.user.id,"bigdata.group.submit","group_submission",gs.id,{assignment_id:assignmentId,group_id:groupId,attempt});return {ok:true,submission:gs};
+}
+async function confirmContribution(ctx:any,run:any,body:any){
+  const submissionId=clampText(body.group_submission_id,80,true),text=clampText(body.contribution_text,2000,true);
+  const {data:s}=await db.from("lms_group_submissions_v2").select("id,group_id,assignment_id").eq("id",submissionId).maybeSingle();if(!s)throw new Error("Entrega grupal no encontrada");
+  const [{data:g},{data:m},{data:a}]=await Promise.all([
+    db.from("lms_groups_v2").select("id").eq("id",s.group_id).eq("course_run_id",run.id).maybeSingle(),
+    db.from("lms_group_members_v2").select("user_id").eq("group_id",s.group_id).eq("user_id",ctx.user.id).maybeSingle(),
+    db.from("lms_assignments_v2").select("id").eq("id",s.assignment_id).eq("course_run_id",run.id).maybeSingle()
+  ]);if(!g||!m||!a)throw new Error("No perteneces al equipo de esta entrega");
+  const {data,error}=await db.from("lms_group_contributions_v2").upsert({group_submission_id:submissionId,user_id:ctx.user.id,contribution_text:text,confirmed_at:new Date().toISOString()},{onConflict:"group_submission_id,user_id"}).select("*").single();if(error)throw error;
+  return {ok:true,contribution:data};
+}
+async function gradeGroupSubmission(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const id=clampText(body.group_submission_id,80,true);
+  const {data:s}=await db.from("lms_group_submissions_v2").select("*").eq("id",id).maybeSingle();if(!s)throw new Error("Entrega grupal no encontrada");
+  const {data:a}=await db.from("lms_assignments_v2").select("*").eq("id",s.assignment_id).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Entrega fuera de la cohorte");
+  const score=Number(body.score);if(!Number.isFinite(score)||score<0||score>Number(a.max_score))throw new Error("Puntaje fuera de rango");
+  const feedback=clampText(body.feedback,10000),rubricScores=body.rubric_scores&&typeof body.rubric_scores==="object"?body.rubric_scores:{},now=new Date().toISOString();
+  const {data:updated,error}=await db.from("lms_group_submissions_v2").update({score,feedback,rubric_scores:rubricScores,status:"reviewed",reviewed_by:ctx.user.id,reviewed_at:now}).eq("id",id).select("*").single();if(error)throw error;
+  const {data:members}=await db.from("lms_group_members_v2").select("user_id").eq("group_id",s.group_id);
+  for(const m of members||[]){
+    const {data:inds}=await db.from("lms_submissions_v2").select("*").eq("assignment_id",s.assignment_id).eq("user_id",m.user_id).order("attempt",{ascending:false});
+    const ind=(inds||[]).find((x:any)=>x.artifact?.source==="group_submission"&&x.artifact?.group_submission_id===id);if(!ind)continue;
+    await db.from("lms_grade_history_v2").insert({submission_id:ind.id,assignment_id:s.assignment_id,user_id:m.user_id,actor_user_id:ctx.user.id,previous_score:ind.score,new_score:score,previous_feedback:ind.feedback,new_feedback:feedback,rubric_scores:rubricScores,created_at:now}).then(()=>{}).catch(()=>{});
+    await db.from("lms_submissions_v2").update({score,feedback,rubric_scores:rubricScores,status:"reviewed",reviewed_by:ctx.user.id,reviewed_at:now}).eq("id",ind.id);
+  }
+  await audit(ctx.user.id,"bigdata.group.grade","group_submission",id,{assignment_id:s.assignment_id,group_id:s.group_id,score});return {ok:true,submission:updated};
+}
+async function createThread(ctx:any,run:any,body:any){
+  const n=body.session_number===null||body.session_number===""?null:Math.trunc(Number(body.session_number));
+  if(n!==null){const {data:s}=await db.from("lms_run_sessions_v2").select("session_number").eq("course_run_id",run.id).eq("session_number",n).maybeSingle();if(!s)throw new Error("Sesión inválida")}
+  const assignmentId=clampText(body.assignment_id,80)||null;if(assignmentId){const {data:a}=await db.from("lms_assignments_v2").select("id").eq("id",assignmentId).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Tarea inválida")}
+  const {data,error}=await db.from("lms_discussion_threads_v2").insert({course_run_id:run.id,session_number:n,assignment_id:assignmentId,title:clampText(body.title,180,true),pinned:isTeacher(ctx)&&!!body.pinned,locked:false,created_by:ctx.user.id}).select("*").single();if(error)throw error;
+  return {ok:true,thread:data};
+}
+async function postDiscussion(ctx:any,run:any,body:any){
+  const threadId=clampText(body.thread_id,80,true),parentId=clampText(body.parent_id,80)||null;
+  const {data:t}=await db.from("lms_discussion_threads_v2").select("*").eq("id",threadId).eq("course_run_id",run.id).maybeSingle();if(!t)throw new Error("Conversación no encontrada");if(t.locked&&!isTeacher(ctx))throw new Error("Esta conversación está cerrada");
+  const {data,error}=await db.from("lms_discussion_posts_v2").insert({thread_id:threadId,user_id:ctx.user.id,parent_id:parentId,body:clampText(body.body,8000,true)}).select("*").single();if(error)throw error;
+  return {ok:true,post:data};
+}
+async function moderateThread(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const threadId=clampText(body.thread_id,80,true);
+  const {data,error}=await db.from("lms_discussion_threads_v2").update({pinned:!!body.pinned,locked:!!body.locked}).eq("id",threadId).eq("course_run_id",run.id).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.discussion.moderate","discussion_thread",threadId,{pinned:data.pinned,locked:data.locked});return {ok:true,thread:data};
+}
+async function pinAnswer(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const postId=clampText(body.post_id,80,true);
+  const {data:p}=await db.from("lms_discussion_posts_v2").select("id,thread_id").eq("id",postId).maybeSingle();if(!p)throw new Error("Respuesta no encontrada");
+  const {data:t}=await db.from("lms_discussion_threads_v2").select("id").eq("id",p.thread_id).eq("course_run_id",run.id).maybeSingle();if(!t)throw new Error("Respuesta fuera de la cohorte");
+  const {data,error}=await db.from("lms_discussion_posts_v2").update({pinned_answer:!!body.pinned_answer}).eq("id",postId).select("*").single();if(error)throw error;
+  return {ok:true,post:data};
+}
+async function submitPeerReview(ctx:any,run:any,body:any){
+  const submissionId=clampText(body.reviewee_submission_id,80,true);
+  const {data:s}=await db.from("lms_group_submissions_v2").select("*").eq("id",submissionId).maybeSingle();if(!s)throw new Error("Entrega a revisar no encontrada");
+  const [{data:a},{data:setting},{data:g}]=await Promise.all([
+    db.from("lms_assignments_v2").select("id").eq("id",s.assignment_id).eq("course_run_id",run.id).maybeSingle(),
+    db.from("lms_assignment_group_settings_v2").select("*").eq("assignment_id",s.assignment_id).eq("peer_review_enabled",true).maybeSingle(),
+    db.from("lms_groups_v2").select("id").eq("id",s.group_id).eq("course_run_id",run.id).maybeSingle()
+  ]);if(!a||!setting||!g)throw new Error("Revisión por pares no habilitada");
+  const own=await groupIdsForUser(run.id,ctx.user.id);if(own.includes(s.group_id))throw new Error("No puedes revisar la entrega de tu propio equipo");
+  const scores=body.rubric_scores&&typeof body.rubric_scores==="object"?body.rubric_scores:{};
+  for(const criterion of Array.isArray(setting.peer_rubric)?setting.peer_rubric:[]){const v=Number(scores[criterion.code]);if(!Number.isFinite(v)||v<0||v>Number(criterion.max))throw new Error("Puntaje de revisión fuera de rango: "+criterion.title)}
+  const feedback=clampText(body.feedback,5000,true);
+  const {data,error}=await db.from("lms_peer_reviews_v2").upsert({assignment_id:s.assignment_id,reviewee_submission_id:s.id,reviewer_user_id:ctx.user.id,rubric_scores:scores,feedback,status:"submitted",submitted_at:new Date().toISOString()},{onConflict:"reviewee_submission_id,reviewer_user_id"}).select("*").single();if(error)throw error;
+  return {ok:true,review:data};
+}
+
 Deno.serve(async(req:Request)=>{
   if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
   if(req.method==="OPTIONS")return new Response("ok",{headers:headers(req)});
@@ -623,6 +799,20 @@ Deno.serve(async(req:Request)=>{
     if(action==="teacher_save_alert_rule")return out(req,await saveAlertRule(ctx,run,body));
     if(action==="teacher_create_intervention")return out(req,await createIntervention(ctx,run,body));
     if(action==="teacher_resolve_intervention")return out(req,await resolveIntervention(ctx,run,body));
+    if(action==="collaboration")return out(req,await collaborationOverview(ctx,run));
+    if(action==="teacher_collaboration")return out(req,await teacherCollaboration(ctx,run));
+    if(action==="teacher_create_group")return out(req,await createGroup(ctx,run,body));
+    if(action==="teacher_add_group_member")return out(req,await addGroupMember(ctx,run,body));
+    if(action==="teacher_remove_group_member")return out(req,await removeGroupMember(ctx,run,body));
+    if(action==="teacher_save_group_setting")return out(req,await saveGroupSetting(ctx,run,body));
+    if(action==="group_submit")return out(req,await groupSubmit(ctx,run,body));
+    if(action==="confirm_contribution")return out(req,await confirmContribution(ctx,run,body));
+    if(action==="teacher_grade_group_submission")return out(req,await gradeGroupSubmission(ctx,run,body));
+    if(action==="create_thread")return out(req,await createThread(ctx,run,body));
+    if(action==="post_discussion")return out(req,await postDiscussion(ctx,run,body));
+    if(action==="teacher_moderate_thread")return out(req,await moderateThread(ctx,run,body));
+    if(action==="teacher_pin_answer")return out(req,await pinAnswer(ctx,run,body));
+    if(action==="submit_peer_review")return out(req,await submitPeerReview(ctx,run,body));
     return out(req,{error:"Acción desconocida"},400);
   }catch(e){
     if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);
