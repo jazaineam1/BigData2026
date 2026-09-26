@@ -29,7 +29,7 @@ const CHALLENGE_HINTS:Record<string,string>={
 const ALL_CODES=new Set([...RESOURCE_CODES,...CHECKPOINT_CODES]);
 const TRACK_EVENTS=new Set([
   "page_opened","page_closed","heartbeat",
-  "presentation_opened","notebook_opened",
+  "presentation_opened","notebook_opened","slide_viewed",
   "checkpoint_started","ui_action"
 ]);
 
@@ -61,7 +61,7 @@ async function sha256(text:string){
 }
 function cleanMeta(raw:any){
   const x=raw&&typeof raw==="object"?raw:{},z:Record<string,string|number|boolean|null>={};
-  for(const k of ["source","action","label","path","resource_type"]){
+  for(const k of ["source","action","label","path","resource_type","slide","chapter"]){
     const v=x[k];
     if(typeof v==="string")z[k]=v.slice(0,180);
     else if(typeof v==="number"||typeof v==="boolean"||v===null)z[k]=v;
@@ -118,12 +118,17 @@ async function sessionWindow(runId:string){
   return data||null;
 }
 async function ownProgress(userId:string,runId:string){
-  const [{data:session_progress},{data:activity_progress},window]=await Promise.all([
+  const [{data:session_progress},{data:activity_progress},{data:lastSlide},window]=await Promise.all([
     db.from("bd_lms_session_progress").select("*").eq("user_id",userId).eq("course_run_id",runId).eq("session_number",SESSION).maybeSingle(),
     db.from("bd_lms_activity_progress").select("*").eq("user_id",userId).eq("course_run_id",runId).in("activity_code",[...ALL_CODES]).order("activity_code"),
+    db.from("bd_lms_events").select("metadata,created_at").eq("user_id",userId).eq("course_run_id",runId)
+      .eq("session_number",SESSION).eq("event_type","slide_viewed").order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sessionWindow(runId)
   ]);
-  return {session_progress,activity_progress:activity_progress||[],session_window:window};
+  const meta=(lastSlide?.metadata&&typeof lastSlide.metadata==="object")?lastSlide.metadata:{};
+  const slide=Number(meta.slide||0);
+  const resume=slide>0?{slide,label:String(meta.label||""),chapter:String(meta.chapter||""),at:lastSlide?.created_at||null}:null;
+  return {session_progress,activity_progress:activity_progress||[],session_window:window,resume};
 }
 async function ensureSessionStarted(userId:string,runId:string){
   const now=new Date().toISOString();
@@ -233,17 +238,20 @@ async function openOfficial(ctx:any,run:any){
 }
 async function teacherWall(ctx:any,run:any){
   requireTeacher(ctx);
-  const [{data:enrollments},{data:progress},{data:activities},window,def]=await Promise.all([
+  const [{data:enrollments},{data:progress},{data:activities},{data:slideEvents},window,def]=await Promise.all([
     db.from("lms_run_enrollments").select("user_id,role,status").eq("course_run_id",run.id).eq("status","active"),
     db.from("bd_lms_session_progress").select("*").eq("course_run_id",run.id).eq("session_number",SESSION),
     db.from("bd_lms_activity_progress").select("*").eq("course_run_id",run.id).in("activity_code",[...ALL_CODES]),
+    db.from("bd_lms_events").select("user_id,metadata,created_at").eq("course_run_id",run.id)
+      .eq("session_number",SESSION).eq("event_type","slide_viewed").order("created_at",{ascending:false}),
     sessionWindow(run.id),
     definition(run.id)
   ]);
   const ids=(enrollments||[]).filter((x:any)=>x.role==="student").map((x:any)=>x.user_id);
   const {data:users}=ids.length?await db.from("lms_users").select("id,display_name,username,active").in("id",ids):({data:[]} as any);
-  const pm=new Map((progress||[]).map((x:any)=>[x.user_id,x])),byUser=new Map<string,any[]>();
+  const pm=new Map((progress||[]).map((x:any)=>[x.user_id,x])),byUser=new Map<string,any[]>(),lastSlideByUser=new Map<string,any>();
   for(const a of activities||[]){if(!byUser.has(a.user_id))byUser.set(a.user_id,[]);byUser.get(a.user_id)!.push(a)}
+  for(const e of slideEvents||[]){if(!lastSlideByUser.has(e.user_id))lastSlideByUser.set(e.user_id,e)}
   const rows=(users||[]).map((u:any)=>{
     const p:any=pm.get(u.id)||{},a=byUser.get(u.id)||[],am=new Map(a.map((x:any)=>[x.activity_code,x]));
     const completed=[...CHECKPOINT_CODES].filter(code=>am.get(code)?.status==="completed").length;
@@ -255,6 +263,7 @@ async function teacherWall(ctx:any,run:any){
       last_activity_at:p.last_activity_at||null,completed_checkpoints:completed,total_checkpoints:CHECKPOINT_CODES.size,
       presentation_opened:!!am.get("bd-s09-presentation"),
       notebook_opened:!!am.get("bd-s09-notebook"),
+      last_slide:(()=>{const e:any=lastSlideByUser.get(u.id),m=(e?.metadata&&typeof e.metadata==="object")?e.metadata:{};return Number(m.slide||0)>0?{slide:Number(m.slide),label:String(m.label||""),chapter:String(m.chapter||""),at:e.created_at||null}:null})(),
       checkpoints:[...CHECKPOINT_CODES].map(code=>{
         const cp:any=am.get(code)||{},meta=(cp.metadata&&typeof cp.metadata==="object")?cp.metadata:{};
         return {code,status:cp.status||"not_started",started_at:cp.started_at||null,completed_at:cp.completed_at||null,attempts:Number(cp.attempts||0),first_attempt_correct:typeof meta.first_attempt_correct==="boolean"?meta.first_attempt_correct:null,mastery:Boolean(meta.mastery)};

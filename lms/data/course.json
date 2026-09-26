@@ -1,12 +1,12 @@
 {
-  "version": 9,
+  "version": 10,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
   "institution": "Universidad Central",
   "total_sessions": 16,
   "current_tracked_session": 9,
-  "tracking_policy": "S01–S09 visibles con recursos verificados; S08 conserva su evaluación integradora. S09 sigue el patrón S07: exactamente dos recursos visibles, laboratorio y WALL embebidos en la presentación, desafíos con primer intento/dominio y cuaderno reproducible. S07 permanece protegida y sin modificaciones.",
+  "tracking_policy": "S01–S09 visibles con recursos verificados. S08 conserva su evaluación integradora. S09 usa entrada única autenticada: módulo → presentación/labs → Colab → Wall personal; identidad persistente en el mismo origen, primer intento/dominio separados, reanudación por última diapositiva y Teacher Wall. S07 permanece protegida y sin modificaciones.",
   "sessions": [
     {
       "n": 1,
@@ -160,6 +160,11 @@
       "code": "quizzes",
       "title": "Quizzes",
       "path": "quizzes.html"
+    },
+    {
+      "code": "progress_s09",
+      "title": "Mi progreso S09",
+      "path": "progress-09.html"
     }
   ]
 }

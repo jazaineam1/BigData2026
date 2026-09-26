@@ -68,6 +68,7 @@ jobs:
           test -f _site/lms/teacher-interoperability.html
           test -f _site/lms/admin-operations.html
           test -f _site/lms/session-09.html
+          test -f _site/lms/progress-09.html
           test -f _site/lms/teacher-wall-09.html
           test -f _site/Presentaciones/s09-de-palabras-a-significado.html
           test -f _site/assets/tutoriales/s09-laboratorio-guiado.html

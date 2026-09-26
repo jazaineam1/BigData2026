@@ -15,6 +15,7 @@ def read(path):
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
 guide=read("assets/tutoriales/s09-laboratorio-guiado.html")
 session=read("lms/session-09.html")
+student_progress=read("lms/progress-09.html")
 wall_redirect=read("lms/teacher-wall-09.html")
 client=read("lms/assets/bigdata-lms.js")
 backend=read("infraestructura/lms/functions/bigdata-session9/index.ts")
@@ -186,6 +187,8 @@ svg_functions=len(re.findall(r"function\s+svg[A-Za-z0-9_]+\s*\(",deck))
 lab_numbers=set(int(x) for x in re.findall(r"LAB\s+(\d+)\s*·",deck))
 challenge_calls=re.findall(r"challengeChoice\('(bd-s09-c[1-5])'",deck)
 graphic_refs=set(re.findall(r'\b(svg[A-Za-z0-9_]+)\(\)',raw))
+svg_tags=re.findall(r'<svg\b[^>]*>',deck,re.I)
+svg_without_viewbox=[x for x in svg_tags if 'viewBox=' not in x]
 light_without_visual=[]
 for i,s in enumerate(slides,1):
     visual=bool(re.search(r'svg[A-Za-z0-9_]+\(\)|<svg|class=\\?"(?:lab|table|diagram|three|cols)|<table|<pre|<select|<input|<textarea|challengeChoice\(',s,re.I))
@@ -197,6 +200,9 @@ checks=[
     ("profundidad de definiciones",defs>=70),
     ("ejemplos explícitos",examples>=30),
     ("gráficos/diagramas",svg_functions>=15 and len(graphic_refs)>=15),
+    ("todos los SVG tienen viewBox",len(svg_without_viewbox)==0),
+    ("SVG contenidos sin height 100","height:100%" not in re.search(r'\.svg\{[^}]*\}',deck).group(0) and "height:auto" in re.search(r'\.svg\{[^}]*\}',deck).group(0) and "max-height:" in re.search(r'\.svg\{[^}]*\}',deck).group(0)),
+    ("grids no fuerzan overflow","grid-template-columns:minmax(0,1fr) minmax(0,1fr)" in deck and "repeat(3,minmax(0,1fr))" in deck and ".body>*{min-width:0;min-height:0}" in deck),
     ("diapositivas ligeras compensadas visualmente",not light_without_visual),
     ("LAB 1–9 embebidos",set(range(1,10)).issubset(lab_numbers)),
     ("D1–D5 embebidos",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,6)}),
@@ -208,6 +214,11 @@ checks=[
     ("reinicio auditado", "bigdata.s09.reset" in backend and "lms_audit_log" in backend),
     ("WALL sin ranking por velocidad","No es un ranking de velocidad" in deck and "localeCompare" in backend),
     ("primer intento + dominio server-side","first_attempt_correct" in backend and "mastery" in backend and "challenge_stats" in backend),
+    ("posición de lectura server-side","slide_viewed" in backend and "resume" in backend and "last_slide" in backend),
+    ("presentación obliga identidad","reason=login" in deck and "Vista previa · sin seguimiento" in deck and "moduleIdentity" in deck),
+    ("presentación registra diapositiva","queueSlideTrack" in deck and "event_type:'slide_viewed'" in deck),
+    ("WALL docente muestra posición","<th>Posición</th>" in deck and "r.last_slide" in deck),
+    ("WALL docente filtra estudiantes","id=\"teacherSearch\"" in deck and "id=\"teacherFilter\"" in deck and "filterTeacherRows" in deck),
     ("respuestas validadas por hash","CHALLENGE_HASHES" in backend and "sha256(code+\"|\"+answer)" in backend),
     ("respuesta correcta no mapeada en frontend","CHALLENGE_HASHES" not in deck and "referencia esperada" not in deck and "function c1Check" not in deck),
     ("sin bypass complete_checkpoint","complete_checkpoint" not in backend and "complete_checkpoint" not in session),
@@ -215,8 +226,15 @@ checks=[
     ("sin guía en backend","bd-s09-guide" not in backend and "guide_opened" not in backend),
     ("dos recursos visibles en seed",resource_selects==2 and "'guide'" not in resource_seed and "bd-s09-guide" not in resource_seed),
     ("guía histórica solo redirige","no hay un laboratorio separado" in guide and "location.replace" in guide),
-    ("LMS presenta dos recursos","repeat(2,minmax(0,1fr))" in session and "guide_opened" not in session),
-    ("LMS no permite marcar dominio manual","Marcar completado" not in session and "completeCheckpoint" not in session),
+    ("módulo S09 autenticado","requireS09()" in session and "identityName" in session and "Sesión LMS activa" in session),
+    ("módulo muestra ruta y reanudación","learningPath" in session and "Continuar aprendizaje" in session and "CHALLENGE_SLIDES" in session and "data.resume" in session),
+    ("módulo separa recursos y dominio","7 hitos" in session and "dominio" in session and "recursos visitados" in session),
+    ("módulo no infla tiempo activo","startHeartbeat" not in session),
+    ("módulo no permite marcar dominio manual","Marcar completado" not in session and "completeCheckpoint" not in session),
+    ("Wall personal existe","Wall personal" in student_progress and "requireS09()" in student_progress and "primer intento" in student_progress.lower()),
+    ("Wall personal privado","data.ranking" not in student_progress and "teacher_wall" not in student_progress),
+    ("Wall personal reanuda","data.resume" in student_progress and "SLIDES" in student_progress),
+    ("Colab no recibe token LMS","token=" not in session.lower() and "token=" not in student_progress.lower() and "no envía tu token" in student_progress),
     ("WALL legado redirige","s09-de-palabras-a-significado.html?wall=docente" in wall_redirect and "location.replace" in wall_redirect),
     ("tool docente apunta a wall embebido",any(x.get("code")=="wall_s09" and "?wall=docente" in x.get("path","") for x in course.get("teacher_tools",[]))),
     ("portal apunta a wall embebido","teacherWall09" in read("lms/portal.html") and "?wall=docente" in read("lms/portal.html")),
@@ -268,7 +286,7 @@ for i,cell in enumerate(nb.get("cells",[]),1):
     except SyntaxError as ex: errors.append(f"Notebook: sintaxis Python celda {i}: {ex}")
 
 # Sintaxis JavaScript de artefactos HTML.
-for name,html in [("presentación",deck),("session-09",session),("wall-redirect",wall_redirect)]:
+for name,html in [("presentación",deck),("session-09",session),("progress-09",student_progress),("wall-redirect",wall_redirect)]:
     scripts=re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>",html,re.S|re.I)
     for i,script in enumerate(scripts,1):
         with tempfile.NamedTemporaryFile("w",suffix=".js",encoding="utf-8",delete=False) as fh:
@@ -278,7 +296,7 @@ for name,html in [("presentación",deck),("session-09",session),("wall-redirect"
         if p.returncode:
             errors.append(f"{name} JS #{i}: {p.stderr.strip()[:700]}")
 
-front=deck+session+wall_redirect+client
+front=deck+session+student_progress+wall_redirect+client
 if re.search(r"(service[_-]?role|sb_secret_)[A-Za-z0-9_.-]{12,}",front,re.I):
     errors.append("Posible secreto privado expuesto en frontend")
 
@@ -294,7 +312,9 @@ print(" - ninguna diapositiva ligera queda sin gráfico, tabla, código o herram
 print(" - LAB 1–9 + evaluación embebidos")
 print(" - D1–D5 con primer intento/dominio server-side")
 print(" - exactamente dos recursos visibles")
-print(" - S09 Live + Teacher Wall dentro de la presentación")
+print(" - módulo autenticado + reanudación por diapositiva")
+print(" - Wall personal privado + Teacher Wall")
+print(" - SVG/grids contenidos por QA")
 print(" - reset docente protegido/auditado")
 print(" - comparador con procesos SECOP reales y orden didáctico explícito")
 print(" - términos definidos antes del primer uso")
