@@ -43,6 +43,8 @@ checks=[
     ("peer review no expone autor", "peerTargets.push({" in core and "submitted_by:x.submitted_by" not in core and "group_id:x.group_id" not in core),
     ("foros aislados por cohorte", "const threadIds=new Set((threads||[]).map((t:any)=>t.id))" in core and "const postRows=(posts||[]).filter((p:any)=>threadIds.has(p.thread_id))" in core),
     ("menciones por respuesta", "lms_discussion_mentions_v2" in sql and "mentioned_user_id:parent.user_id" in core and "parent_id:f.parent_id.value" in student),
+    ("mención guarda trazabilidad", "thread_id:threadId" in core and "created_by:ctx.user.id" in core),
+    ("mención se lee al abrir discusión", "mark_mentions_read" in core and "mark_mentions_read" in student),
     ("conversación inicia con mensaje", "initialBody=clampText(body.body,8000,true)" in core and 'name="body"' in student),
     ("FAQ con respuesta destacada", "teacher_pin_answer" in teacher and "pinned_answer" in student),
     ("tablas por cohorte", "course_run_id uuid not null references public.lms_course_runs" in sql),
