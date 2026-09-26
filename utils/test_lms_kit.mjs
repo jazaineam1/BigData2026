@@ -102,3 +102,22 @@ test('wallPost usa idempotency key propia',async()=>{
   assert.equal(h.sent[0].action,'wall_post');
   assert.match(h.sent[0].payload.client_post_id,/^post-/);
 });
+
+
+test('un 401 conserva evidencia para sincronizar tras nuevo login',async()=>{
+  const h=harness({online:true,handler:async()=>{
+    const e=new Error('sesión vencida');e.status=401;throw e;
+  }});
+  const x=await h.LMS.evidence('bd-s09-lab3',{result:4,decision:'mantener'});
+  assert.equal(x.queued,true);
+  assert.equal(x.auth_required,true);
+  assert.equal(h.LMS.queueSize(),1);
+  const q=JSON.parse(h.store.get(h.LMS.QUEUE_KEY));
+  assert.equal(q[0].kind,'evidence');
+});
+
+test('la cola respeta el máximo de 500 incluso si todas las entradas son durables',async()=>{
+  const h=harness({online:false});
+  for(let i=0;i<505;i++) await h.LMS.evidence('bd-s09-lab3',{result:i,decision:'mantener'});
+  assert.equal(h.LMS.queueSize(),h.LMS.MAX_QUEUE);
+});
