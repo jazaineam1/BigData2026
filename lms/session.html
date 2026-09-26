@@ -9,14 +9,14 @@
 .module-v3{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:18px;align-items:start}
 .identity-v3{display:flex;gap:12px;align-items:center}.avatar-v3{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--uc-navy);color:#fff;font-weight:950;flex:0 0 auto}
 .resume-v3{border:1px solid #a9d7d9;border-left:5px solid var(--uc-cyan);background:#f1fbfb;border-radius:16px;padding:16px;margin:16px 0}
-.route-v3{display:grid;gap:10px}.activity-v3{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:15px;padding:14px}
+.resource-grid-v4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.resource-v4{border:1px solid var(--line);border-radius:15px;background:#fff;padding:15px;display:grid;gap:10px}.resource-v4 h3{margin:0;color:var(--uc-navy)}.resource-v4 p{margin:0;color:var(--muted);font-size:.84rem}.route-v3{display:grid;gap:10px}.activity-v3{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:15px;padding:14px}
 .activity-v3 .num{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#edf1f6;color:var(--uc-navy);font-weight:950}
 .activity-v3.visited .num{background:#e2f3f4;color:#075f62}.activity-v3.mastered .num,.activity-v3.completed .num{background:#dff4e8;color:#12633c}
 .activity-v3 h3{margin:0 0 3px;font-size:1rem}.activity-v3 p{margin:0;color:var(--muted);font-size:.84rem}.activity-v3 .meta{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}
 .legend-v3{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.legend-v3>div{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}.legend-v3 b{display:block;color:var(--uc-navy)}
 .outcomes-v3{display:grid;gap:8px;margin:0;padding:0;list-style:none}.outcomes-v3 li{border-left:4px solid var(--uc-cyan);background:#f7fbfb;border-radius:8px;padding:9px 11px}
 .side-v3{position:sticky;top:78px}.mini-progress{height:12px;border-radius:999px;background:#e8edf2;overflow:hidden}.mini-progress i{display:block;height:100%;background:linear-gradient(90deg,var(--uc-cyan),var(--uc-navy))}
-@media(max-width:900px){.module-v3{grid-template-columns:1fr}.side-v3{position:static}.legend-v3{grid-template-columns:1fr 1fr}.activity-v3{grid-template-columns:44px minmax(0,1fr)}.activity-v3 .stage-action{grid-column:2}}
+@media(max-width:900px){.module-v3{grid-template-columns:1fr}.resource-grid-v4{grid-template-columns:1fr}.side-v3{position:static}.legend-v3{grid-template-columns:1fr 1fr}.activity-v3{grid-template-columns:44px minmax(0,1fr)}.activity-v3 .stage-action{grid-column:2}}
 @media(max-width:560px){.legend-v3{grid-template-columns:1fr}.activity-v3{padding:11px}.activity-v3 .stage-action{width:100%}}
 </style>
 </head>
@@ -53,7 +53,15 @@
 
 <section class="card">
 <div class="actions" style="justify-content:space-between;align-items:flex-start">
-<div><div class="ey">Ruta de aprendizaje</div><h2 style="margin-bottom:4px">Actividades y recursos</h2><p class="muted" style="margin:0">Visitar, completar, dominar y calificar son estados diferentes.</p></div>
+<div><div class="ey">Recursos principales</div><h2 style="margin-bottom:4px">Máximo 2 por sesión</h2><p class="muted" style="margin:0">Cuando existe presentación, integra explicación, ejemplos y laboratorio; el cuaderno es el segundo recurso de trabajo.</p></div>
+<span id="resourceBadge" class="pill progress">0 recursos</span>
+</div>
+<div id="resources" class="resource-grid-v4" style="margin-top:12px"></div>
+</section>
+
+<section class="card">
+<div class="actions" style="justify-content:space-between;align-items:flex-start">
+<div><div class="ey">Seguimiento integrado</div><h2 style="margin-bottom:4px">Checkpoints y evidencias requeridas</h2><p class="muted" style="margin:0">Estas actividades viven dentro de los recursos anteriores; no son accesos adicionales.</p></div>
 <span id="routeBadge" class="pill progress">0 actividades</span>
 </div>
 <div id="route" class="route-v3" style="margin-top:12px"></div>
@@ -148,7 +156,7 @@ function primaryAction(){
     const p=pm.get(a.code),state=activityState(a,p);
     if(a.kind==='resource'&&!p){const r=trackedResource(a);if(r)return {title:'Abrir '+a.title,text:'Este es el siguiente recurso requerido de la sesión.',run:()=>openResource(r,a)}}
     if(a.kind==='checkpoint'&&state.label!=='Dominado')return {title:'Continuar con '+a.title,text:'Este checkpoint todavía no está dominado.',run:()=>openCheckpoint(a)}
-    if(!['resource','checkpoint'].includes(a.kind)&&p?.status!=='completed'){const lab=(data.resources||[]).find(r=>r.resource_type==='lab')||data.resources?.[0];if(lab)return {title:'Continuar '+a.title,text:'Trabaja la siguiente etapa desde el recurso principal.',run:()=>openResource(lab,a)}}
+    if(!['resource','checkpoint'].includes(a.kind)&&p?.status!=='completed')return {title:'Continuar '+a.title,text:'Trabaja esta evidencia dentro del recurso principal.',run:()=>openStage(a)}
   }
   const first=(data.resources||[])[0];if(first)return {title:'Revisar el módulo',text:'Ya no hay checkpoints pendientes en esta ruta. Puedes revisar recursos o tu progreso.',run:()=>openResource(first,(data.activities||[]).find(a=>a.code===first.metadata?.tracked_activity))};
   return {title:'Ver mi progreso',text:'No hay recursos publicados adicionales para esta sesión.',run:()=>location.assign('progress.html?s='+sessionNumber)}
@@ -173,8 +181,17 @@ function render(){
   L.$('masteryMetric').textContent=Number(sum.checkpoint_mastered||0)+'/'+Number(sum.checkpoint_total||0);
   L.$('timeMetric').textContent=L.fmtTime(data.session_progress?.active_seconds||0);
   L.$('statusMetric').textContent=data.session_progress?.status==='completed'?'Completada':data.session_progress?'En curso':'Sin iniciar';
-  L.$('routeBadge').textContent=(data.activities||[]).length+' actividades';
-  L.$('route').innerHTML=(data.activities||[]).map((a,i)=>{
+  const visibleResources=(data.resources||[]).filter(r=>r.visible!==false).slice(0,2);
+  L.$('resourceBadge').textContent=visibleResources.length+' recurso'+(visibleResources.length===1?'':'s');
+  L.$('resources').innerHTML=visibleResources.map((r,i)=>{
+    const a=(data.activities||[]).find(x=>x.code===r.metadata?.tracked_activity),p=a?pm.get(a.code):null;
+    const label=r.resource_type==='presentation'?'Presentación + laboratorio':r.resource_type==='notebook'?'Cuaderno':r.resource_type==='lab'?'Taller integrado':'Recurso';
+    return '<article class="resource-v4"><div><span class="pill">'+L.esc(label)+'</span><h3>'+L.esc(r.title)+'</h3><p>'+L.esc(r.resource_type==='presentation'?'Explicaciones, ejemplos, actividades y evidencias dentro de una sola experiencia.':r.resource_type==='notebook'?'Trabajo reproducible y práctica en Python.':'Recurso principal de la sesión.')+'</p></div><button class="btn '+(p?'alt':'primary')+'" data-resource-id="'+L.esc(r.id)+'">'+(p?'Volver a abrir':'Abrir')+'</button></article>'
+  }).join('')||'<div class="empty">No hay recursos publicados.</div>';
+  document.querySelectorAll('[data-resource-id]').forEach(b=>b.onclick=()=>{const r=visibleResources.find(x=>String(x.id)===b.dataset.resourceId),a=(data.activities||[]).find(x=>x.code===r?.metadata?.tracked_activity);if(r)openResource(r,a)});
+  const integrated=(data.activities||[]).filter(a=>a.kind!=='resource'&&a.required);
+  L.$('routeBadge').textContent=integrated.length+' actividad'+(integrated.length===1?'':'es');
+  L.$('route').innerHTML=integrated.map((a,i)=>{
     const p=pm.get(a.code),st=activityState(a,p),r=trackedResource(a),kind=a.kind==='resource'?(a.metadata?.resource_type||'recurso'):a.kind==='checkpoint'?'checkpoint':a.kind;
     const first=typeof p?.metadata?.first_attempt_correct==='boolean'?(p.metadata.first_attempt_correct?' · 1.er intento ✓':' · 1.er intento ✗'):'';
     const rule=a.metadata?.completion_rule==='mastery'?'dominio':a.metadata?.completion_rule==='visit'?'visita':a.required?'requerida':'opcional';
