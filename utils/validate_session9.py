@@ -71,7 +71,7 @@ checks=[
     ("notebook URI oculta", "getpass(" in nb_text and "print(MONGODB_URI)" not in nb_text),
     ("notebook evidencia", "s09_evidencia_semantica.json" in nb_text and "falso_positivo" in nb_text and "alternativa_descartada" in nb_text),
     ("ruta local contingencia", "continúa con la ruta local" in nb_text.lower()),
-    ("LMS recursos", "data-resource" in session and "resource_type==='presentation'" in session and "resource_type==='notebook'" in session and "resource_type==='guide'" in session),
+    ("LMS recursos", "data-resource" in session and "resource_type==='presentation'" in session and "resource_type==='notebook'" in session and "guide:'guide_opened'" in session),
     ("tracking S09 dedicado", "L.s09('track'" in session and "L.startHeartbeat(null,L.s09)" in session),
     ("S09 no usa track S08", "L.bigdata('track'" not in session),
     ("checkpoints formativos", "No agregan puntaje al TC1" in session and "complete_checkpoint" in session),
