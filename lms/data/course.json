@@ -116,6 +116,18 @@
       "code": "users",
       "title": "Administrador de usuarios",
       "path": "admin-users.html"
+    },
+    {
+      "code": "analytics",
+      "title": "Analítica e intervenciones",
+      "path": "teacher-analytics.html"
+    }
+  ],
+  "student_tools": [
+    {
+      "code": "progress",
+      "title": "Mi progreso",
+      "path": "progress.html"
     }
   ]
 }
