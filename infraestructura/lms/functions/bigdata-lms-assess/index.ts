@@ -305,9 +305,15 @@ async function saveQuiz(ctx:any,run:any,body:any){
   if(session!==null){const {data:s}=await db.from("lms_run_sessions_v2").select("session_number").eq("course_run_id",run.id).eq("session_number",session).maybeSingle();if(!s)throw new Error("Sesión inválida")}
   const maxAttempts=Math.trunc(Number(body.max_attempts||1));if(maxAttempts<1||maxAttempts>20)throw new Error("Intentos inválidos");
   const tl=body.time_limit_minutes==null||body.time_limit_minutes===""?null:Math.trunc(Number(body.time_limit_minutes));if(tl!==null&&(tl<1||tl>480))throw new Error("Tiempo límite inválido");
+  const wantsPublished=!!body.published;
+  if(wantsPublished&&!id)throw new Error("Crea primero el quiz como borrador, agrega preguntas y luego publícalo");
+  if(wantsPublished&&id){
+    const {count}=await db.from("lms_quiz_items_v2").select("*",{count:"exact",head:true}).eq("quiz_id",id);
+    if(!count)throw new Error("Agrega al menos una pregunta antes de publicar");
+  }
   const row:any={course_run_id:run.id,code,session_number:session,title:text(body.title,180,true),instructions:text(body.instructions,8000),
     release_at:iso(body.release_at),due_at:iso(body.due_at),max_attempts:maxAttempts,time_limit_minutes:tl,
-    shuffle_questions:!!body.shuffle_questions,shuffle_options:!!body.shuffle_options,published:!!body.published,active:body.active!==false,updated_at:new Date().toISOString()};
+    shuffle_questions:!!body.shuffle_questions,shuffle_options:!!body.shuffle_options,published:wantsPublished,active:body.active!==false,updated_at:new Date().toISOString()};
   let quiz:any,error:any;
   if(id){const x=await db.from("lms_quizzes_v2").update(row).eq("id",id).eq("course_run_id",run.id).select("*").single();quiz=x.data;error=x.error}
   else{row.created_by=ctx.user.id;const x=await db.from("lms_quizzes_v2").insert(row).select("*").single();quiz=x.data;error=x.error}
