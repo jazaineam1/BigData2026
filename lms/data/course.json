@@ -1,12 +1,12 @@
 {
-  "version": 10,
+  "version": 11,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
   "institution": "Universidad Central",
   "total_sessions": 16,
   "current_tracked_session": 9,
-  "tracking_policy": "S01–S09 visibles con recursos verificados. S08 conserva su evaluación integradora. S09 usa entrada única autenticada: módulo → presentación/labs → Colab → Wall personal; identidad persistente en el mismo origen, primer intento/dominio separados, reanudación por última diapositiva y Teacher Wall. S07 permanece protegida y sin modificaciones.",
+  "tracking_policy": "LMS V3: S01–S09 usan módulo canónico /lms/session.html?s=N, identidad única por curso, tracking server-side por sesión/actividad, progreso unificado y WALL genérico. S09 conserva primer intento vs dominio; S07 permanece protegida y sin cambios de fuente.",
   "sessions": [
     {
       "n": 1,
@@ -136,13 +136,13 @@
     },
     {
       "code": "wall",
-      "title": "WALL S08",
+      "title": "WALL S08 · legado",
       "path": "teacher-wall.html"
     },
     {
       "code": "wall_s09",
-      "title": "WALL S09 · embebido",
-      "path": "../Presentaciones/s09-de-palabras-a-significado.html?wall=docente#s1"
+      "title": "WALL S09 · universal",
+      "path": "wall.html?s=9"
     },
     {
       "code": "users",
@@ -151,6 +151,11 @@
     }
   ],
   "student_tools": [
+    {
+      "code": "modules",
+      "title": "Módulos",
+      "path": "portal.html"
+    },
     {
       "code": "collaboration",
       "title": "Colaboración",
@@ -163,8 +168,8 @@
     },
     {
       "code": "progress_s09",
-      "title": "Mi progreso S09",
-      "path": "progress-09.html"
+      "title": "Mi progreso",
+      "path": "progress.html?s=9"
     }
   ]
 }

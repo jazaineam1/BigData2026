@@ -1,0 +1,63 @@
+name: QA visual LMS
+
+on:
+  push:
+    branches:
+      - main
+      - feat/lms-v3-unified
+    paths:
+      - index.html
+      - lms/**
+      - Presentaciones/s09-de-palabras-a-significado.html
+      - tests/**
+      - package.json
+      - playwright.config.js
+      - .github/workflows/lms-visual-qa.yml
+  pull_request:
+    paths:
+      - index.html
+      - lms/**
+      - Presentaciones/s09-de-palabras-a-significado.html
+      - tests/**
+      - package.json
+      - playwright.config.js
+      - .github/workflows/lms-visual-qa.yml
+
+permissions:
+  contents: read
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v6
+      - name: Preparar Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Instalar Playwright fijado
+        run: npm install --no-audit --no-fund
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Servir sitio
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/lms-http.log 2>&1 &
+          echo $! > /tmp/lms-http.pid
+          for i in {1..20}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/lms-http.log
+          exit 1
+      - name: Ejecutar QA visual
+        run: npm run test:visual
+      - name: Subir evidencia si falla
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-lms-evidence
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
