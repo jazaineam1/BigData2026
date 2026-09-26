@@ -439,6 +439,8 @@ async function finalizeAttempt(ctx:any,run:any,attemptId:string,expired=false){
   for(const item of items){
     const r:any=rm.get(item.question_id),pts=Number(item.points);
     if(item.question.question_type==="short_text"){
+      const answered=!!String(r?.response?.text||"").trim();
+      if(!answered){manual+=0;continue}
       if(r?.manual_score===null||r?.manual_score===undefined)pendingManual++;else manual+=Number(r.manual_score||0);
       continue;
     }
@@ -466,7 +468,7 @@ async function gradeResponse(ctx:any,run:any,body:any){
   const {error}=await db.from("lms_quiz_responses_v2").update({manual_score:score,feedback:text(body.feedback,5000),graded_by:ctx.user.id,graded_at:new Date().toISOString()}).eq("attempt_id",attemptId).eq("question_id",questionId);if(error)throw error;
   const items=await quizItems(a.quiz_id),{data:rs}=await db.from("lms_quiz_responses_v2").select("*").eq("attempt_id",attemptId);
   const rm=new Map((rs||[]).map((r:any)=>[r.question_id,r]));let auto=0,manual=0,pending=0;
-  for(const x of items){const r:any=rm.get(x.question_id);auto+=Number(r?.auto_score||0);if(x.question.question_type==="short_text"){if(r?.manual_score===null||r?.manual_score===undefined)pending++;else manual+=Number(r.manual_score)}}
+  for(const x of items){const r:any=rm.get(x.question_id);auto+=Number(r?.auto_score||0);if(x.question.question_type==="short_text"){const answered=!!String(r?.response?.text||"").trim();if(!answered)continue;if(r?.manual_score===null||r?.manual_score===undefined)pending++;else manual+=Number(r.manual_score)}}
   const status=pending?"submitted":"reviewed",total=auto+manual;
   const {data:updated}=await db.from("lms_quiz_attempts_v2").update({manual_score:manual,auto_score:auto,score:total,status}).eq("id",attemptId).select("*").single();
   await syncQuizGrade(run,updated);await audit(ctx.user.id,"bigdata.quiz.response.grade","quiz_attempt",attemptId,{question_id:questionId,score});
