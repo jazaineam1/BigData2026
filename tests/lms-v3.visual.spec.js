@@ -290,3 +290,46 @@ test('sesión de pestaña prevalece sobre otra sesión guardada y sobrevive relo
   expect(seen.length).toBeGreaterThanOrEqual(4);
   expect(seen.every(x=>x==='Bearer token-pestana')).toBeTruthy();
 });
+
+
+test('estudiante puede cambiar contraseña desde Mi cuenta', async ({ page }) => {
+  await page.addInitScript(() => {
+    const auth={
+      token:'token-estudiante',
+      expires_at:'2099-12-31T23:59:59Z',
+      auth_session_id:'student-session',
+      user:{id:'student',username:'student',display_name:'Estudiante QA',role:'student',email:'student@ucentral.edu.co'}
+    };
+    sessionStorage.setItem('lms.bigdata.v2',JSON.stringify(auth));
+    localStorage.setItem('lms.bigdata.v2',JSON.stringify(auth));
+  });
+  const actions=[];
+  await page.route('**/functions/v1/learning-auth', async route => {
+    const body=route.request().postDataJSON?.()||{};
+    actions.push(body);
+    let result={ok:true};
+    if(body.action==='me') result={
+      user:{id:'student',username:'student',display_name:'Estudiante QA',role:'student',email:'student@ucentral.edu.co'},
+      expires_at:'2099-12-31T23:59:59Z',auth_session_id:'student-session',persistent:true
+    };
+    if(body.action==='list_sessions') result={sessions:[
+      {id:'student-session',current:true,device_label:'Android · Chrome',created_at:'2099-01-01T10:00:00Z',last_seen_at:'2099-01-01T11:00:00Z'},
+      {id:'other',current:false,device_label:'Windows · Chrome',created_at:'2099-01-01T09:00:00Z',last_seen_at:'2099-01-01T10:30:00Z'}
+    ]};
+    if(body.action==='change_password') result={ok:true,message:'Contraseña actualizada; las demás sesiones quedaron cerradas'};
+    if(body.action==='logout_others') result={ok:true};
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(result)});
+  });
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/lms/account.html');
+  await expect(page.getByText('Cambiar contraseña')).toBeVisible();
+  await page.locator('#password').fill('NuevaClave123!');
+  await page.locator('#confirm').fill('NuevaClave123!');
+  await page.getByRole('button',{name:'Actualizar contraseña'}).click();
+  await expect(page.getByText(/Contraseña actualizada/)).toBeVisible();
+  expect(actions.some(x=>x.action==='change_password'&&x.password==='NuevaClave123!')).toBeTruthy();
+  await expect(page.getByText('Android · Chrome')).toBeVisible();
+  await expect(page.getByText('Windows · Chrome')).toBeVisible();
+  await assertNoHorizontalOverflow(page,'account mobile');
+  await assertA11y(page,'account');
+});
