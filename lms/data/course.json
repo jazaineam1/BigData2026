@@ -108,6 +108,11 @@
       "path": "teacher-competencies.html"
     },
     {
+      "code": "analytics",
+      "title": "Analítica e intervenciones",
+      "path": "teacher-analytics.html"
+    },
+    {
       "code": "wall",
       "title": "WALL S08",
       "path": "teacher-wall.html"

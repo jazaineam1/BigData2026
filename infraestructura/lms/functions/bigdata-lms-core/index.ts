@@ -476,6 +476,114 @@ async function unmapCompetency(ctx:any,run:any,body:any){
   return {ok:true};
 }
 
+
+function maxIso(values:any[]){
+  const xs=values.filter(Boolean).map(v=>Date.parse(String(v))).filter(Number.isFinite);
+  return xs.length?new Date(Math.max(...xs)).toISOString():null;
+}
+async function analyticsContext(run:any,userIds:string[]){
+  const comp=await competencyContext(run);
+  const [{data:assignments},{data:subs},{data:s08},{data:rules}]=await Promise.all([
+    db.from("lms_assignments_v2").select("*").eq("course_run_id",run.id).eq("active",true),
+    userIds.length?db.from("lms_submissions_v2").select("*").in("user_id",userIds).in("assignment_id",(comp.assignments||[]).map((a:any)=>a.id)):Promise.resolve({data:[]} as any),
+    userIds.length?db.from("bd_lms_session_progress").select("*").eq("course_run_id",run.id).eq("session_number",8).in("user_id",userIds):Promise.resolve({data:[]} as any),
+    db.from("lms_alert_rules_v2").select("*").eq("course_run_id",run.id).eq("active",true).order("position")
+  ]);
+  return {comp,assignments:assignments||[],subs:subs||[],s08:s08||[],rules:rules||[]};
+}
+function evaluateAlerts(metrics:any,rules:any[],studentView=false){
+  const alerts:any[]=[];
+  for(const r of rules||[]){
+    const p=r.params||{};
+    if(r.rule_type==="inactivity_days"){
+      const days=Math.max(1,Number(p.days||7));
+      const age=metrics.last_activity_at?(Date.now()-Date.parse(metrics.last_activity_at))/86400000:null;
+      if(age===null||age>=days)alerts.push({code:r.code,title:r.title,kind:"student",evidence:age===null?"Sin actividad académica registrada":Math.floor(age)+" días desde la última actividad registrada",rule:"≥ "+days+" días"});
+    }else if(r.rule_type==="overdue_assignments"){
+      const n=Math.max(1,Number(p.count||1));if(metrics.overdue_count>=n)alerts.push({code:r.code,title:r.title,kind:"student",evidence:metrics.overdue_count+" entrega(s) vencida(s) sin entrega",rule:"≥ "+n});
+    }else if(r.rule_type==="mastery_below"){
+      const pct=Number(p.pct??60),min=Number(p.min_evidence??1);
+      if(metrics.competency_evidence_count>=min&&metrics.mastery_avg!==null&&metrics.mastery_avg<pct)alerts.push({code:r.code,title:r.title,kind:"student",evidence:"Promedio de dominio "+Number(metrics.mastery_avg).toFixed(1)+"% con "+metrics.competency_evidence_count+" evidencia(s)",rule:"< "+pct+"%"});
+    }else if(r.rule_type==="unreviewed_submissions"){
+      const n=Math.max(1,Number(p.count||1));if(metrics.unreviewed_count>=n)alerts.push({code:r.code,title:r.title,kind:"teacher",evidence:metrics.unreviewed_count+" entrega(s) esperando revisión docente",rule:"≥ "+n});
+    }
+  }
+  return studentView?alerts.filter(x=>x.kind!=="teacher"):alerts;
+}
+function metricsForUser(userId:string,context:any){
+  const userSubs=(context.subs||[]).filter((s:any)=>s.user_id===userId).sort((a:any,b:any)=>Number(b.attempt)-Number(a.attempt));
+  const latest=new Map<string,any>();for(const s of userSubs)if(!latest.has(s.assignment_id))latest.set(s.assignment_id,s);
+  let pending=0,overdue=0,reviewed=0,unreviewed=0;
+  const now=Date.now();
+  for(const a of context.assignments||[]){
+    const s=latest.get(a.id);
+    if(!s){pending++;if(a.due_at&&Date.parse(a.due_at)<now)overdue++}
+    else if(s.status==="reviewed")reviewed++;else if(["submitted","returned"].includes(s.status))unreviewed++;
+  }
+  const s08=(context.s08||[]).find((x:any)=>x.user_id===userId)||{};
+  const comps=computeCompetencyRows(context.comp,userSubs);
+  const withEvidence=comps.filter((x:any)=>x.mastery_pct!==null);
+  const mastery=withEvidence.length?withEvidence.reduce((z:number,x:any)=>z+Number(x.mastery_pct),0)/withEvidence.length:null;
+  const last=maxIso([s08.last_activity_at,...userSubs.map((s:any)=>s.submitted_at),...userSubs.map((s:any)=>s.reviewed_at)]);
+  return {
+    user_id:userId,last_activity_at:last,pending_count:pending,overdue_count:overdue,reviewed_count:reviewed,unreviewed_count:unreviewed,
+    mastery_avg:mastery===null?null:Math.round(mastery*10)/10,mastered_count:comps.filter((x:any)=>x.status==="mastered").length,
+    competency_evidence_count:comps.reduce((z:number,x:any)=>z+Number(x.evidence_count||0),0),competencies:comps,
+    active_seconds_s08:Number(s08.active_seconds||0)
+  };
+}
+async function saveSnapshot(run:any,m:any){
+  const date=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Bogota",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+  await db.from("lms_student_snapshots_v2").upsert({
+    course_run_id:run.id,user_id:m.user_id,snapshot_date:date,last_activity_at:m.last_activity_at,
+    pending_count:m.pending_count,overdue_count:m.overdue_count,reviewed_count:m.reviewed_count,
+    mastery_avg:m.mastery_avg,mastered_count:m.mastered_count,active_seconds_s08:m.active_seconds_s08,created_at:new Date().toISOString()
+  },{onConflict:"course_run_id,user_id,snapshot_date"}).then(()=>{}).catch(()=>{});
+}
+async function analyticsForUser(ctx:any,run:any){
+  const context=await analyticsContext(run,[ctx.user.id]),m=metricsForUser(ctx.user.id,context);await saveSnapshot(run,m);
+  const {data:history}=await db.from("lms_student_snapshots_v2").select("*").eq("course_run_id",run.id).eq("user_id",ctx.user.id).order("snapshot_date",{ascending:false}).limit(30);
+  return {viewer:ctx.user,run,metrics:m,alerts:evaluateAlerts(m,context.rules,true),history:(history||[]).reverse(),rules:context.rules.filter((r:any)=>r.rule_type!=="unreviewed_submissions")};
+}
+async function teacherAnalytics(ctx:any,run:any){
+  requireTeacher(ctx);
+  const {data:enrollments}=await db.from("lms_run_enrollments").select("user_id,role,status").eq("course_run_id",run.id);
+  const ids=(enrollments||[]).filter((x:any)=>x.role==="student").map((x:any)=>x.user_id);
+  const context=await analyticsContext(run,ids);
+  const [{data:users},{data:interventions},{data:activityRows}]=await Promise.all([
+    ids.length?db.from("lms_users").select("id,display_name,username,email,active").in("id",ids):Promise.resolve({data:[]} as any),
+    db.from("lms_interventions_v2").select("*").eq("course_run_id",run.id).order("created_at",{ascending:false}).limit(500),
+    db.from("bd_lms_activity_progress").select("user_id,activity_code,status,score,max_score,started_at,completed_at").eq("course_run_id",run.id)
+  ]);
+  const students=[];
+  for(const u of users||[]){const m=metricsForUser(u.id,context);await saveSnapshot(run,m);students.push({...u,...m,alerts:evaluateAlerts(m,context.rules,false),open_interventions:(interventions||[]).filter((x:any)=>x.user_id===u.id&&x.status==="open")})}
+  const frictionMap=new Map<string,any>();
+  for(const a of activityRows||[]){if(!frictionMap.has(a.activity_code))frictionMap.set(a.activity_code,{activity_code:a.activity_code,started:0,evaluated:0,completed:0,score_sum:0,score_n:0});const z=frictionMap.get(a.activity_code);if(a.started_at)z.started++;if(["submitted","completed"].includes(a.status))z.evaluated++;if(a.status==="completed")z.completed++;if(a.max_score>0){z.score_sum+=100*Number(a.score||0)/Number(a.max_score);z.score_n++}}
+  const friction=[...frictionMap.values()].map(z=>({...z,avg_pct:z.score_n?Math.round(10*z.score_sum/z.score_n)/10:null}));
+  return {viewer:ctx.user,run,students,rules:context.rules,interventions:interventions||[],friction,
+    summary:{students:students.length,students_with_student_alerts:students.filter((s:any)=>s.alerts.some((a:any)=>a.kind==="student")).length,unreviewed:students.reduce((z:number,s:any)=>z+s.unreviewed_count,0),open_interventions:(interventions||[]).filter((x:any)=>x.status==="open").length}};
+}
+async function saveAlertRule(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const code=clampText(body.code,80,true).toLowerCase(),type=String(body.rule_type||"");
+  if(!/^[a-z0-9][a-z0-9_-]{2,79}$/.test(code))throw new Error("Código de regla inválido");
+  if(!["inactivity_days","overdue_assignments","mastery_below","unreviewed_submissions"].includes(type))throw new Error("Tipo de regla inválido");
+  const params=body.params&&typeof body.params==="object"?body.params:{};
+  const row={course_run_id:run.id,code,title:clampText(body.title,180,true),description:clampText(body.description,1200),rule_type:type,params,active:body.active!==false,position:Math.max(0,Math.trunc(Number(body.position||0))),updated_by:ctx.user.id,updated_at:new Date().toISOString()};
+  const {data,error}=await db.from("lms_alert_rules_v2").upsert(row,{onConflict:"course_run_id,code"}).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.alert_rule.save","alert_rule",code,{rule_type:type,params});return {ok:true,rule:data};
+}
+async function createIntervention(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const userId=clampText(body.user_id,80,true),note=clampText(body.note,4000,true);
+  const {data:e}=await db.from("lms_run_enrollments").select("user_id").eq("course_run_id",run.id).eq("user_id",userId).maybeSingle();if(!e)throw new Error("Estudiante fuera de la cohorte");
+  const {data,error}=await db.from("lms_interventions_v2").insert({course_run_id:run.id,user_id:userId,created_by:ctx.user.id,kind:clampText(body.kind||"follow_up",80,true),note,status:"open",follow_up_at:toIsoOrNull(body.follow_up_at)}).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.intervention.create","intervention",data.id,{user_id:userId,kind:data.kind});return {ok:true,intervention:data};
+}
+async function resolveIntervention(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const id=clampText(body.id,80,true),now=new Date().toISOString();
+  const {data,error}=await db.from("lms_interventions_v2").update({status:"resolved",resolved_at:now,resolved_by:ctx.user.id}).eq("id",id).eq("course_run_id",run.id).select("*").maybeSingle();if(error)throw error;if(!data)throw new Error("Intervención no encontrada");
+  await audit(ctx.user.id,"bigdata.intervention.resolve","intervention",id,{user_id:data.user_id});return {ok:true,intervention:data};
+}
+
 Deno.serve(async(req:Request)=>{
   if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
   if(req.method==="OPTIONS")return new Response("ok",{headers:headers(req)});
@@ -510,6 +618,11 @@ Deno.serve(async(req:Request)=>{
     if(action==="teacher_save_competency")return out(req,await saveCompetency(ctx,run,body));
     if(action==="teacher_map_competency")return out(req,await mapCompetency(ctx,run,body));
     if(action==="teacher_unmap_competency")return out(req,await unmapCompetency(ctx,run,body));
+    if(action==="analytics")return out(req,await analyticsForUser(ctx,run));
+    if(action==="teacher_analytics")return out(req,await teacherAnalytics(ctx,run));
+    if(action==="teacher_save_alert_rule")return out(req,await saveAlertRule(ctx,run,body));
+    if(action==="teacher_create_intervention")return out(req,await createIntervention(ctx,run,body));
+    if(action==="teacher_resolve_intervention")return out(req,await resolveIntervention(ctx,run,body));
     return out(req,{error:"Acción desconocida"},400);
   }catch(e){
     if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);
