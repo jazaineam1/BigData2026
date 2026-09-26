@@ -96,6 +96,12 @@ async function activeRun(ctx:any){
 function requireTeacher(ctx:any){
   if(!["teacher","admin"].includes(ctx.user.role))throw new Error("NO_AUTH");
 }
+async function audit(actor:string,action:string,entity:string,id:string|null,metadata:any={}){
+  await db.from("lms_audit_log").insert({
+    actor_user_id:actor,action,entity_type:entity,entity_id:id,
+    metadata:{course_code:COURSE,run_code:RUN_CODE,session_number:SESSION,...metadata}
+  }).then(()=>{}).catch(()=>{});
+}
 async function definition(runId:string){
   const [{data:session},{data:activities},{data:resources}]=await Promise.all([
     db.from("bd_lms_sessions").select("*").eq("course_code",COURSE).eq("session_number",SESSION).maybeSingle(),
@@ -267,6 +273,32 @@ async function teacherWall(ctx:any,run:any){
   });
   return {viewer:ctx.user,run,session:def.session,activities:def.activities,resources:def.resources,session_window:window,ranking:rows,challenge_stats};
 }
+async function resetSession(ctx:any,run:any,body:any){
+  requireTeacher(ctx);
+  if(String(body.confirmation||"")!=="REINICIAR_S09")throw new Error("Confirmación de reinicio inválida");
+  const [{data:progress},{data:activity},{data:events},{data:window}]=await Promise.all([
+    db.from("bd_lms_session_progress").select("user_id").eq("course_run_id",run.id).eq("session_number",SESSION),
+    db.from("bd_lms_activity_progress").select("user_id,activity_code").eq("course_run_id",run.id).in("activity_code",[...ALL_CODES]),
+    db.from("bd_lms_events").select("id").eq("course_run_id",run.id).eq("session_number",SESSION),
+    db.from("bd_lms_session_windows").select("course_run_id").eq("course_run_id",run.id).eq("session_number",SESSION)
+  ]);
+  const counts={
+    session_progress:(progress||[]).length,
+    activity_progress:(activity||[]).length,
+    events:(events||[]).length,
+    session_window:(window||[]).length
+  };
+  const deletes=[
+    await db.from("bd_lms_events").delete().eq("course_run_id",run.id).eq("session_number",SESSION),
+    await db.from("bd_lms_activity_progress").delete().eq("course_run_id",run.id).in("activity_code",[...ALL_CODES]),
+    await db.from("bd_lms_session_progress").delete().eq("course_run_id",run.id).eq("session_number",SESSION),
+    await db.from("bd_lms_session_windows").delete().eq("course_run_id",run.id).eq("session_number",SESSION)
+  ];
+  const failed=deletes.find((x:any)=>x.error);
+  if(failed?.error)throw failed.error;
+  await audit(ctx.user.id,"bigdata.s09.reset","course_run",run.id,{counts});
+  return {ok:true,counts};
+}
 
 Deno.serve(async(req:Request)=>{
   if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
@@ -298,6 +330,7 @@ Deno.serve(async(req:Request)=>{
     }
     if(action==="answer_challenge")return out(req,await answerChallenge(ctx,run,String(body.activity_code||""),body.answer));
     if(action==="teacher_open_session")return out(req,{ok:true,session_window:await openOfficial(ctx,run)});
+    if(action==="teacher_reset_session")return out(req,await resetSession(ctx,run,body));
     if(action==="teacher_wall")return out(req,await teacherWall(ctx,run));
     return out(req,{error:"Acción desconocida"},400);
   }catch(e){
