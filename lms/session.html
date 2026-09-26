@@ -159,11 +159,12 @@ function render(){
     const p=pm.get(a.code),st=activityState(a,p),r=trackedResource(a),kind=a.kind==='resource'?(a.metadata?.resource_type||'recurso'):a.kind==='checkpoint'?'checkpoint':a.kind;
     const first=typeof p?.metadata?.first_attempt_correct==='boolean'?(p.metadata.first_attempt_correct?' · 1.er intento ✓':' · 1.er intento ✗'):'';
     const rule=a.metadata?.completion_rule==='mastery'?'dominio':a.metadata?.completion_rule==='visit'?'visita':a.required?'requerida':'opcional';
-    const action=r?'<button class="btn '+(p?'alt':'primary')+' stage-action" data-open="'+L.esc(a.code)+'">'+(p?'Volver a abrir':'Abrir')+'</button>':a.kind==='checkpoint'?'<button class="btn alt stage-action" data-check="'+L.esc(a.code)+'">Ir al checkpoint</button>':'';
+    const action=r?'<button class="btn '+(p?'alt':'primary')+' stage-action" data-open="'+L.esc(a.code)+'">'+(p?'Volver a abrir':'Abrir')+'</button>':a.kind==='checkpoint'?'<button class="btn alt stage-action" data-check="'+L.esc(a.code)+'">Ir al checkpoint</button>':'<button class="btn alt stage-action" data-stage="'+L.esc(a.code)+'">'+(p?'Continuar etapa':'Trabajar etapa')+'</button>';
     return '<article class="activity-v3 '+st.cls+'"><span class="num">'+st.icon+'</span><div><h3>'+L.esc(a.title)+'</h3><p>'+L.esc(a.metadata?.evidence||'Actividad de la ruta de aprendizaje.')+'</p><div class="meta"><span class="pill">'+L.esc(kind)+'</span><span class="pill '+(st.cls==='mastered'||st.cls==='completed'?'done':st.cls==='visited'?'progress':'pending')+'">'+st.label+first+'</span><span class="pill pending">Regla: '+L.esc(rule)+'</span>'+(a.required?'':'<span class="pill pending">Opcional</span>')+'</div></div>'+action+'</article>'
   }).join('')||'<div class="empty">No hay actividades publicadas todavía.</div>';
   document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{const a=data.activities.find(x=>x.code===b.dataset.open);openResource(trackedResource(a),a)});
   document.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>openCheckpoint(data.activities.find(x=>x.code===b.dataset.check)));
+  document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{const a=data.activities.find(x=>x.code===b.dataset.stage),lab=(data.resources||[]).find(r=>r.resource_type==='lab')||(data.resources||[])[0];if(lab)openResource(lab,a)});
   const next=primaryAction();L.$('nextTitle').textContent=next.title;L.$('nextText').textContent=next.text;L.$('continueBtn').onclick=next.run;
 }
 async function refresh(){
