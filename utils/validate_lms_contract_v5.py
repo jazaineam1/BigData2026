@@ -47,6 +47,7 @@ labs=set(re.findall(r"bd-s09-lab(?:-e5|-chunk|-eval|\d+)",deck))
 
 checks=[
     ("16 sesiones declaradas",course.get("total_sessions")==16 and nums==list(range(1,17))),
+    ("course.json declara contrato V5",course.get("version",0)>=12 and "LMS V5" in course.get("tracking_policy","")),
     ("módulo universal", "requireSession(sessionNumber)" in session and "session.html?s=" not in session),
     ("progreso universal", "L.session('course_progress')" in progress and "session.html?s=" in progress),
     ("WALL universal", "requireSession(sessionNumber,{teacher:true})" in wall),
@@ -65,6 +66,7 @@ checks=[
     ("S09 usa runtime V5", "lms-kit.js?v=20260926-v5" in deck and "K.track('lab_interaction'" in deck and "K.evidence(" in deck),
     ("módulo usa runtime V5", "lms-kit.js?v=20260926-v5" in session and "K.track(" in session),
     ("muro usa runtime V5", "lms-kit.js?v=20260926-v5" in class_wall and "K.wallPost(" in class_wall),
+    ("bridge de recursos usa runtime V5", "loadKit" in read("lms/assets/resource-bridge.js") and "K.track('guide_opened'" in read("lms/assets/resource-bridge.js")),
     ("12 LAB S09 declarados en presentación", len(labs)==12),
     ("legacy módulo redirige", "session.html?" in legacy_session and "p.set('s','9')" in legacy_session),
     ("legacy progreso redirige", "progress.html?" in legacy_progress and "p.set('s','9')" in legacy_progress),
