@@ -45,7 +45,7 @@ checks=[
     ("QTI tolerancia numérica", 'tolerance-mode="absolute"' in interop and 'qti-extended-text-interaction' in interop),
     ("no falsa certificación QTI", 'certified:false' in interop and "No equivale a certificación" in interop),
     ("OneRoster 1.2.1", 'format:"OneRoster 1.2.1 CSV bulk package"' in interop and '["oneroster.version","1.2"]' in interop),
-    ("manifest OneRoster", '["manifest.version","1.0"]' in interop and 'file.academicSessions' in interop),
+    ("manifest OneRoster", '["manifest.version","1.0"]' in interop and '"academicSessions"' in interop and '"file."+n' in interop),
     ("Bulk deja metadatos delta vacíos", '[term,"","","Big Data 2026-2S"' in interop and 'catId(c),"","",c' in interop),
     ("OneRoster exige fechas", 'if(!run.starts_on||!run.ends_on)throw new Error' in interop),
     ("OneRoster no exporta hashes", "password_hash" not in interop and '.select("id,username,display_name,email,active,updated_at")' in interop),
