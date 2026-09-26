@@ -748,7 +748,7 @@ async function postDiscussion(ctx:any,run:any,body:any){
   let parent:any=null;
   if(parentId){const x=await db.from("lms_discussion_posts_v2").select("id,thread_id,user_id").eq("id",parentId).maybeSingle();parent=x.data;if(!parent||parent.thread_id!==threadId)throw new Error("La respuesta citada no pertenece a esta conversación")}
   const {data,error}=await db.from("lms_discussion_posts_v2").insert({thread_id:threadId,user_id:ctx.user.id,parent_id:parentId,body:clampText(body.body,8000,true)}).select("*").single();if(error)throw error;
-  if(parent&&parent.user_id!==ctx.user.id)await db.from("lms_discussion_mentions_v2").upsert({post_id:data.id,mentioned_user_id:parent.user_id,created_at:new Date().toISOString()},{onConflict:"post_id,mentioned_user_id"}).then(()=>{}).catch(()=>{});
+  if(parent&&parent.user_id!==ctx.user.id)await db.from("lms_discussion_mentions_v2").upsert({thread_id:threadId,post_id:data.id,mentioned_user_id:parent.user_id,created_by:ctx.user.id,created_at:new Date().toISOString()},{onConflict:"post_id,mentioned_user_id"}).then(()=>{}).catch(()=>{});
   return {ok:true,post:data};
 }
 async function moderateThread(ctx:any,run:any,body:any){
