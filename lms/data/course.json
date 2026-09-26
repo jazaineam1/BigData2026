@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
@@ -111,6 +111,11 @@
       "code": "interoperability",
       "title": "Interoperabilidad",
       "path": "teacher-interoperability.html"
+    },
+    {
+      "code": "operations",
+      "title": "Operaciones y resiliencia",
+      "path": "admin-operations.html"
     },
     {
       "code": "competencies",
