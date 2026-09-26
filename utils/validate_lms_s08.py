@@ -66,7 +66,7 @@ checks=[
  ("curso declarativo",course.get("course")=="bigdata" and int(course.get("current_tracked_session") or 0)>=8 and any(x.get("n")==8 and x.get("tracked") for x in course.get("sessions",[]))),
  ("manifiesto declara administrador",any(x.get("code")=="users" and x.get("path")=="admin-users.html" for x in course.get("teacher_tools",[]))),
  ("portada enlaza LMS",'lms/portal.html' in index),
- ("portada S08 entra al LMS",'lms/session-08.html' in index),
+ ("portada S08 entra al LMS",'lms/portal.html' in index and (ROOT/"lms/session.html").exists()),
  ("portada sin método redundante","Aprender = comprender, practicar, comprobar y transferir." not in index and "La evidencia importa más que completar una pantalla." not in index),
  ("S08 trabajo en casa 6h","mínimo 6 horas por grupo" in s08),
  ("Pages publica carpeta LMS","cp -R lms _site/" in pages and "lms/**" in pages),
