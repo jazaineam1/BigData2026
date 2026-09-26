@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153">
+<title>Big Data · Interoperabilidad</title>
+<link rel="stylesheet" href="assets/bigdata-lms.css?v=20260926-interop1">
+<style>
+.cap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cap{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}
+.cap h3{margin:4px 0 6px}.cap .row{align-items:flex-start}
+.state{font-size:.72rem;font-weight:900;border-radius:999px;padding:5px 8px;white-space:nowrap}
+.state.available{background:#e8f6ef;color:#12633c}.state.needs_config{background:#fff4dc;color:#8a5b00}
+.state.planned,.state.not_configured{background:#f0f2f5;color:#555e6a}
+.export-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+.warning{border:1px solid #efcf87;background:#fff8e8;border-radius:10px;padding:9px 11px;margin:8px 0}
+.standard-note{background:#f6f8fc;border:1px solid #d7deeb;border-radius:12px;padding:12px}
+.files-preview{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.78rem;background:#f6f7f8;border-radius:9px;padding:9px;margin-top:8px}
+@media(max-width:820px){.cap-grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header class="appbar"><div class="inner">
+<a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · Interoperabilidad</small></a>
+<span class="spacer"></span>
+<a class="navlink optional" href="teacher-course.html">Gestor</a>
+<a class="navlink optional" href="gradebook.html">Gradebook</a>
+<a class="navlink optional" href="teacher-quizzes.html">Quizzes</a>
+<button data-logout>Salir</button>
+</div></header>
+
+<main class="wrap">
+<div class="ey">Fase 7 · Integraciones y estándares</div>
+<h1>Saca tus datos sin encerrar el curso.</h1>
+<p class="lead">Exporta lo que ya puede interoperar hoy. Las integraciones que requieren una plataforma institucional externa permanecen explícitamente como “no configuradas”.</p>
+<div id="status" class="status hidden"></div>
+<div id="metrics" class="kpis"></div>
+
+<div class="cols" style="margin-top:15px">
+<section class="card">
+  <div class="ey">Período académico</div><h2>Fechas oficiales para intercambio</h2>
+  <p class="muted">OneRoster necesita un período con inicio y fin. Estas fechas no se inventan: guárdalas solo cuando correspondan al calendario oficial.</p>
+  <form id="periodForm" class="form">
+    <div class="formgrid">
+      <div class="field"><label>Inicio</label><input class="input" name="starts_on" type="date" required></div>
+      <div class="field"><label>Fin</label><input class="input" name="ends_on" type="date" required></div>
+    </div>
+    <button class="btn primary" type="submit">Guardar período</button>
+  </form>
+</section>
+<section class="card">
+  <div class="ey">Lectura correcta</div><h2>Exportación ≠ certificación</h2>
+  <div class="standard-note">
+    <b>QTI 3 y OneRoster:</b> los paquetes siguen perfiles de intercambio implementados por el LMS, pero esta pantalla no afirma certificación 1EdTech.
+    <br><br><b>Educación superior:</b> OneRoster se ofrece como perfil de compatibilidad. Para una integración institucional de datos académicos en educación superior, Edu-API es la referencia que debe evaluarse con la universidad.
+  </div>
+</section>
+</div>
+
+<section class="card">
+  <div class="ey">Capacidades</div><h2>Qué está listo y qué depende de terceros</h2>
+  <div id="capabilities" class="cap-grid"></div>
+</section>
+
+<div class="cols">
+<section class="card">
+  <div class="ey">Paquetes estándar</div><h2>Exportar</h2>
+  <div class="export-card">
+    <div class="row"><div><b>QTI 3.0</b><div class="muted">Banco activo de preguntas + manifest de paquete.</div></div><button class="btn primary" data-export="export_qti">Descargar ZIP</button></div>
+  </div>
+  <div class="export-card">
+    <div class="row"><div><b>OneRoster 1.2.1 CSV</b><div class="muted">Roster + curso + clase + Gradebook cuando existan datos.</div></div><button class="btn primary" data-export="export_oneroster">Descargar ZIP</button></div>
+  </div>
+  <div class="export-card">
+    <div class="row"><div><b>iCalendar</b><div class="muted">Solo sesiones y tareas con fecha realmente registrada.</div></div><button class="btn alt" data-export="export_ics">Descargar .ics</button></div>
+  </div>
+  <div class="export-card">
+    <div class="row"><div><b>Gradebook CSV</b><div class="muted">Matriz docente simple para análisis o respaldo.</div></div><button class="btn alt" data-export="export_gradebook">Descargar CSV</button></div>
+  </div>
+</section>
+<section class="card">
+  <div class="ey">Última exportación</div><h2>Contenido generado</h2>
+  <div id="exportInfo"><p class="muted">Todavía no has generado un paquete en esta sesión.</p></div>
+</section>
+</div>
+</main>
+
+<script src="assets/bigdata-lms.js?v=20260926-interop1"></script>
+<script>
+(async()=>{'use strict';
+const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status');let data=null,zipLib=null;
+const labels={available:'Disponible',needs_config:'Requiere configuración',planned:'Planeado',not_configured:'No configurado'};
+function render(){
+  const c=data.counts||{},r=data.run||{};
+  L.$('metrics').innerHTML='<div class="kpi"><span class="muted">Estudiantes</span><b>'+Number(c.students||0)+'</b></div><div class="kpi"><span class="muted">Tareas</span><b>'+Number(c.assignments||0)+'</b></div><div class="kpi"><span class="muted">Preguntas activas</span><b>'+Number(c.questions||0)+'</b></div><div class="kpi"><span class="muted">Período</span><b style="font-size:1rem">'+(r.starts_on&&r.ends_on?L.esc(r.starts_on)+' → '+L.esc(r.ends_on):'Sin configurar')+'</b></div>';
+  const f=L.$('periodForm');f.starts_on.value=r.starts_on||'';f.ends_on.value=r.ends_on||'';
+  L.$('capabilities').innerHTML=(data.capabilities||[]).map(x=>'<article class="cap"><div class="row"><div><div class="ey">'+L.esc(x.code.toUpperCase())+'</div><h3>'+L.esc(x.title)+'</h3></div><span class="state '+L.esc(x.status)+'">'+L.esc(labels[x.status]||x.status)+'</span></div><p class="muted">'+L.esc(x.detail||'')+'</p></article>').join('');
+  const or=(data.capabilities||[]).find(x=>x.code==='oneroster');document.querySelector('[data-export="export_oneroster"]').disabled=or?.status!=='available';
+}
+async function getZip(){if(!zipLib)zipLib=await import('https://esm.sh/fflate@0.8.2');return zipLib}
+function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+function renderExport(x){const files=x.files||[],warnings=x.warnings||[];L.$('exportInfo').innerHTML='<div class="item"><b>'+L.esc(x.format||'Exportación')+'</b><div class="muted">'+files.length+' archivo(s)</div><div class="files-preview">'+files.map(f=>L.esc(f.name)).join('<br>')+'</div></div>'+warnings.map(w=>'<div class="warning">'+L.esc(w)+'</div>').join('')}
+async function doExport(action,button){if(action==='export_oneroster'&&!confirm('El paquete OneRoster contiene nombres y correos de la cohorte. ¿Generarlo y descargarlo en este dispositivo?'))return;const old=button.textContent;button.disabled=true;button.textContent='Generando…';try{const x=await L.interop(action);renderExport(x);const files=x.files||[];if(!files.length)throw new Error('La exportación no produjo archivos');if(files.length===1){downloadBlob(new Blob([files[0].content],{type:files[0].mime||'application/octet-stream'}),files[0].name)}else{const {zipSync,strToU8}=await getZip();const entries={};for(const f of files)entries[f.name]=strToU8(f.content);const bytes=zipSync(entries,{level:6});const name=action==='export_qti'?'bigdata-qti3.zip':action==='export_oneroster'?'bigdata-oneroster-1.2.1.zip':'bigdata-export.zip';downloadBlob(new Blob([bytes],{type:'application/zip'}),name)}L.msg(status,'Exportación generada. Revisa también las advertencias del paquete.','ok')}catch(e){L.msg(status,e.message,'err')}finally{button.disabled=false;button.textContent=old}}
+async function savePeriod(e){e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;try{await L.interop('save_run_dates',{starts_on:f.starts_on.value,ends_on:f.ends_on.value});L.msg(status,'Período oficial guardado.','ok');await load()}catch(ex){L.msg(status,ex.message,'err')}finally{b.disabled=false}}
+async function load(){try{const gate=await L.requireBigData({teacher:true});if(!gate)return;data=await L.interop('overview');render()}catch(e){L.msg(status,e.message,'err')}}
+L.$('periodForm').onsubmit=savePeriod;document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>doExport(b.dataset.export,b));await load();
+})();
+</script></body></html>
