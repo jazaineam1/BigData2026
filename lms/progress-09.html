@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153">
+<title>S09 · Mi progreso · Big Data LMS</title>
+<link rel="stylesheet" href="assets/bigdata-lms.css?v=20260926-s09-progress1">
+<style>
+.progress-hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);gap:16px}.identity{display:flex;gap:12px;align-items:center}.avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--uc-navy);color:#fff;font-weight:900}.barx{height:13px;border-radius:999px;background:#e8ecf3;overflow:hidden;margin:9px 0}.barx i{display:block;height:100%;background:linear-gradient(90deg,#15999d,#142153);width:0;transition:width .3s}
+.signal-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.signal{border:1px solid var(--line);border-radius:13px;padding:11px;background:#f8fafc}.signal b{display:block;color:var(--uc-navy);font-size:1.25rem}.signal span{font-size:.78rem;color:var(--muted)}
+.challenge-list{display:grid;gap:10px}.challenge{display:grid;grid-template-columns:48px minmax(0,1fr) repeat(3,minmax(105px,.35fr)) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}.challenge.mastered{border-color:#93d6b3;background:#f3fbf6}.dnum{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#eef1f7;color:var(--uc-navy);font-weight:900}.challenge.mastered .dnum{background:#dff4e8;color:#12633c}.cell span{display:block;font-size:.73rem;color:var(--muted)}.cell b{font-size:.88rem;color:var(--uc-navy)}.resource-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:11px;align-items:center;border-bottom:1px solid var(--line);padding:11px 0}.resource-row:last-child{border-bottom:0}.resource-icon{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:#eef1f7;font-weight:900;color:var(--uc-navy)}.resource-row.done .resource-icon{background:#dff4e8;color:#12633c}.interpret{border-left:5px solid #15999d;background:#f3fbfb;border-radius:13px;padding:13px}.warning{border-left-color:#d28a18;background:#fff8e8}
+@media(max-width:960px){.progress-hero{grid-template-columns:1fr}.signal-grid{grid-template-columns:1fr 1fr}.challenge{grid-template-columns:42px minmax(0,1fr)}.challenge>.cell,.challenge>.btn{grid-column:2}.resource-row{grid-template-columns:42px minmax(0,1fr)}.resource-row .btn{grid-column:2;justify-self:start}}
+</style>
+</head>
+<body>
+<header class="appbar"><div class="inner">
+<a class="brand" href="session-09.html">Universidad Central<small>S09 · Mi progreso</small></a>
+<span class="spacer"></span>
+<a class="navlink optional" href="session-09.html">Módulo S09</a>
+<a class="navlink optional" href="../Presentaciones/s09-de-palabras-a-significado.html">Presentación</a>
+<button data-logout>Salir</button>
+</div></header>
+
+<main class="wrap">
+<div id="status" class="status hidden"></div>
+
+<div class="progress-hero">
+<section class="card">
+<div class="ey">Wall personal · privado</div>
+<div class="identity"><div id="avatar" class="avatar">—</div><div><h1 id="name" style="margin:.05em 0">Mi progreso S09</h1><p id="identity" class="muted" style="margin:0">Cargando identidad…</p></div></div>
+<p class="lead">Este panel separa <b>visita de contenido</b>, <b>primer intento</b> y <b>dominio</b>. No compara tu velocidad con la de otros estudiantes.</p>
+<div class="barx"><i id="progressBar"></i></div>
+<div class="row"><b id="progressText">0/7 hitos</b><span id="progressPct" class="muted">0%</span></div>
+</section>
+
+<aside class="card">
+<div class="ey">Reanudar</div>
+<h2 id="resumeTitle">Buscando tu posición…</h2>
+<p id="resumeText" class="muted">—</p>
+<div class="actions"><button id="resumeBtn" class="btn primary">Continuar</button><a class="btn alt" href="session-09.html">Volver al módulo</a></div>
+</aside>
+</div>
+
+<section class="card">
+<div class="ey">Señales personales</div><h2>Qué ha registrado S09</h2>
+<div class="signal-grid">
+<div class="signal"><b id="mastery">0/5</b><span>desafíos dominados</span></div>
+<div class="signal"><b id="resources">0/2</b><span>recursos visitados</span></div>
+<div class="signal"><b id="active">0 min</b><span>tiempo activo aprox.</span></div>
+<div class="signal"><b id="last">—</b><span>última diapositiva</span></div>
+</div>
+</section>
+
+<section class="card">
+<div class="ey">Laboratorios D1–D5</div><h2>Diagnóstico inicial y dominio final</h2>
+<p class="muted">El primer intento queda fijo. El dominio puede mejorar después de revisar una definición, ejemplo o pista.</p>
+<div id="challenges" class="challenge-list"></div>
+</section>
+
+<section class="card">
+<div class="ey">Recursos</div><h2>Contenido visitado</h2>
+<div id="resourceList"></div>
+</section>
+
+<section class="card">
+<div class="ey">Interpretación responsable</div><h2>Estas señales no son una nota</h2>
+<div class="interpret"><b>Úsalas para orientarte.</b> “Presentación visitada” significa acceso; “dominio” significa respuesta correcta a un desafío formativo; “tiempo activo” es aproximado. Ninguna de esas señales sustituye el análisis de tu evidencia en Colab.</div>
+<div class="interpret warning" style="margin-top:10px"><b>Colab es externo.</b> Por seguridad, el LMS no envía tu token de autenticación a Google. Registra que abriste el recurso, pero no inspecciona tu actividad dentro de Colab.</div>
+</section>
+</main>
+
+<script src="assets/bigdata-lms.js?v=20260926-s09-progress1"></script>
+<script>
+(async()=>{'use strict';
+const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status');let data=null;
+const CODES=['bd-s09-c1','bd-s09-c2','bd-s09-c3','bd-s09-c4','bd-s09-c5'];
+const SLIDES={'bd-s09-c1':9,'bd-s09-c2':16,'bd-s09-c3':18,'bd-s09-c4':21,'bd-s09-c5':31};
+const LABELS={'bd-s09-c1':'D1 · mecanismo','bd-s09-c2':'D2 · coseno','bd-s09-c3':'D3 · rankings','bd-s09-c4':'D4 · arquitectura','bd-s09-c5':'D5 · RRF'};
+function initials(x){return String(x||'?').split(/\s+/).filter(Boolean).slice(0,2).map(y=>y[0]?.toUpperCase()).join('')||'?'}
+function amap(){return new Map((data.activity_progress||[]).map(x=>[x.activity_code,x]))}
+function mastery(code){return amap().get(code)?.metadata?.mastery===true}
+function resource(type){return (data.resources||[]).find(x=>x.resource_type===type)}
+function openPresentation(slide=1){const r=resource('presentation');if(!r)return;L.s09('track',{event_type:'presentation_opened',activity_code:'bd-s09-presentation',metadata:{source:'s09-personal-wall',resource_type:'presentation',label:r.title,path:r.url},client_at:new Date().toISOString()}).catch(()=>{});location.href='../Presentaciones/s09-de-palabras-a-significado.html#s'+slide}
+function openNotebook(){const r=resource('notebook');if(!r)return;L.s09('track',{event_type:'notebook_opened',activity_code:'bd-s09-notebook',metadata:{source:'s09-personal-wall',resource_type:'notebook',label:r.title,path:r.url},client_at:new Date().toISOString()}).catch(()=>{});window.open(r.url,'_blank','noopener')}
+function next(){
+ const m=amap();if(!m.has('bd-s09-presentation'))return {kind:'presentation',slide:1,title:'Empieza la presentación',text:'Tu primer recurso todavía no ha sido visitado.'};
+ const pending=CODES.find(c=>!mastery(c));if(pending)return {kind:'presentation',slide:Number(data.resume?.slide||SLIDES[pending]),title:'Continúa con '+LABELS[pending],text:data.resume?'Última posición registrada: diapositiva '+data.resume.slide+'.':'Siguiente laboratorio: diapositiva '+SLIDES[pending]+'.'};
+ if(!m.has('bd-s09-notebook'))return {kind:'notebook',title:'Abre el cuaderno Colab',text:'Ya dominaste D1–D5; ahora reproduce el pipeline completo.'};
+ return {kind:'presentation',slide:Number(data.resume?.slide||1),title:'Ruta formativa completa',text:'Puedes repasar la presentación o volver al módulo.'};
+}
+function render(){
+ const m=amap(),viewer=data.viewer||{},name=viewer.display_name||viewer.username||'Usuario',mastered=CODES.filter(mastery).length,res=['bd-s09-presentation','bd-s09-notebook'].filter(x=>m.has(x)).length,total=mastered+res,pct=Math.round(total/7*100);
+ L.$('avatar').textContent=initials(name);L.$('name').textContent=name;L.$('identity').textContent=(viewer.role==='student'?'Estudiante':viewer.role||'Usuario')+' · Big Data 2026-2S';
+ L.$('progressBar').style.width=pct+'%';L.$('progressText').textContent=total+'/7 hitos';L.$('progressPct').textContent=pct+'%';
+ L.$('mastery').textContent=mastered+'/5';L.$('resources').textContent=res+'/2';L.$('active').textContent=L.fmtTime(data.session_progress?.active_seconds||0);L.$('last').textContent=data.resume?'S'+data.resume.slide:'—';
+ const nx=next();L.$('resumeTitle').textContent=nx.title;L.$('resumeText').textContent=nx.text;L.$('resumeBtn').onclick=()=>nx.kind==='notebook'?openNotebook():openPresentation(nx.slide||1);
+
+ L.$('challenges').innerHTML=CODES.map((code,i)=>{const p=m.get(code)||{},meta=p.metadata||{},done=meta.mastery===true,first=meta.first_attempt_correct===true?'Correcto':meta.first_attempt_correct===false?'Incorrecto':'Sin intento';return '<article class="challenge '+(done?'mastered':'')+'"><span class="dnum">D'+(i+1)+'</span><div><b>'+LABELS[code]+'</b><div class="muted">'+L.esc((data.activities||[]).find(x=>x.code===code)?.metadata?.evidence||'Desafío formativo')+'</div></div><div class="cell"><span>Primer intento</span><b>'+first+'</b></div><div class="cell"><span>Intentos</span><b>'+Number(p.attempts||0)+'</b></div><div class="cell"><span>Dominio</span><b>'+(done?'Alcanzado':'Pendiente')+'</b></div><button class="btn '+(done?'alt':'primary')+'" data-slide="'+SLIDES[code]+'">'+(done?'Repasar':'Continuar')+'</button></article>'}).join('');
+ document.querySelectorAll('[data-slide]').forEach(b=>b.onclick=()=>openPresentation(Number(b.dataset.slide)));
+
+ const pres=m.has('bd-s09-presentation'),nb=m.has('bd-s09-notebook');
+ L.$('resourceList').innerHTML='<div class="resource-row '+(pres?'done':'')+'"><span class="resource-icon">'+(pres?'✓':'1')+'</span><div><b>Presentación + laboratorios</b><div class="muted">'+(pres?'Visitada':'Pendiente')+(data.resume?' · última posición S'+data.resume.slide:'')+'</div></div><button class="btn alt" id="presBtn">'+(pres?'Continuar':'Abrir')+'</button></div><div class="resource-row '+(nb?'done':'')+'"><span class="resource-icon">'+(nb?'✓':'2')+'</span><div><b>Cuaderno Colab</b><div class="muted">'+(nb?'Visitado':'Pendiente')+' · recurso externo, sin compartir token LMS</div></div><button class="btn alt" id="nbBtn">Abrir ↗</button></div>';
+ L.$('presBtn').onclick=()=>openPresentation(Number(data.resume?.slide||1));L.$('nbBtn').onclick=openNotebook;
+}
+try{data=await L.requireS09();if(!data)return;render()}catch(e){L.msg(status,e.message,'err')}
+})();
+</script>
+</body></html>
