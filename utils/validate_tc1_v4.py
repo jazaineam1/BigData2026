@@ -63,7 +63,7 @@ checks=[
     ("builder canónico", "Cuadernos" in builder and "Taller_Control_1.ipynb" in builder),
     ("portada sin bloque redundante", "Aprender = comprender, practicar, comprobar y transferir." not in index and "La evidencia importa más que completar una pantalla." not in index and 'id="metodo"' not in index),
     ("LMS declara 6h", "mínimo 6 horas por grupo" in s08 and "'estimated_minutes',360" in sql),
-    ("LMS grupal en SQL", "lms_assignment_group_settings_v2" in sql and "Entrega grupal" in sql),
+    ("LMS grupal en SQL", "lms_assignment_group_settings_v2" in sql and "'group_assessment',true" in sql and "Proyecto grupal" in sql),
     ("manifest único por grupo", "Este manifest ya fue registrado por otro equipo" in edge),
 ]
 for label,ok in checks:
