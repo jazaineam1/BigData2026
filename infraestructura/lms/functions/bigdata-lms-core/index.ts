@@ -298,6 +298,7 @@ async function submitAssignment(ctx:any,run:any,body:any){
   }).select("*").single();
   if(error)throw error;
   await audit(ctx.user.id,"bigdata.assignment.submit","submission",data.id,{assignment_id:id,attempt});
+  await db.from("lms_learning_events_v2").insert({course_run_id:run.id,user_id:ctx.user.id,event_type:"assignment_submitted",session_number:a.session_number,entity_type:"assignment",entity_id:id,metadata:{attempt},client_at:new Date().toISOString()}).then(()=>{}).catch(()=>{});
   return {ok:true,submission:data};
 }
 function cleanRubric(raw:any,maxScore:number){
