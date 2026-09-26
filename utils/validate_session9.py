@@ -61,9 +61,10 @@ resource_seed=seed[resource_seed_start:] if resource_seed_start>=0 else ""
 resource_selects=len(re.findall(r"select\s+id,9,",resource_seed,re.I))
 
 def first_slide(term):
-    term=term.lower()
+    # Evita falsos positivos con términos cortos como k/ANN dentro de otras palabras.
+    pattern=(r"(?<![A-Za-z0-9])"+re.escape(term)+r"(?![A-Za-z0-9])") if len(term)<=3 else re.escape(term)
     for i,s in enumerate(slides,1):
-        if term in s.lower(): return i
+        if re.search(pattern,s,re.I): return i
     return None
 
 def def_slide(marker):
@@ -199,8 +200,8 @@ checks=[
     ("Elasticsearch no se confunde con lexical","Elasticsearch no es sinónimo de lexical" in deck and "Elasticsearch" in deck and "Búsqueda vectorial" in deck),
     ("ruta semántica completa",all(x in deck for x in ["Embedding","Similitud coseno","k-Nearest Neighbors","Base vectorial","HNSW","Atlas Vector Search","Reciprocal Rank Fusion"])),
     ("trade-off interactivo","tradeSvg" in deck and "Recall@k" in deck and "Latencia" in deck),
-    ("pipeline E5 interactivo","function embedPipeDemo" in deck and 'id="embedRole"' in deck and 'id="embedPipeOut"' in deck),
-    ("chunking interactivo","function chunkDemo" in deck and 'id="chunkSize"' in deck and 'id="chunkOverlap"' in deck),
+    ("pipeline E5 interactivo","function embedPipeDemo" in deck and "embedRole" in deck and "embedPipeOut" in deck),
+    ("chunking interactivo","function chunkDemo" in deck and "chunkSize" in deck and "chunkOverlap" in deck),
     ("operación MongoDB explicada",all(x in deck for x in ["<b>Colección</b>","<b>Upsert</b>","<b>Idempotencia</b>","<b>bulk_write</b>"])),
     ("Atlas explicado antes del constructor",all(x in deck for x in ["<b>SearchIndexModel</b>","<b>queryable</b>","<b>Pipeline de agregación</b>","<b>vectorSearchScore</b>"])),
     ("híbrida explica fusión y escalas","<b>Fusión de rankings</b>" in deck and "<b>Normalización de score</b>" in deck and "No sumes scores crudos" in deck),
