@@ -42,6 +42,8 @@ checks=[
  ("S08 enlaza referencia técnica","s08-secoppipeline.html" in s08 and "Talleres/Taller_Control_1.md" not in s08),
  ("S08 no expone versión interna","V4" not in s08 and "v4" not in s08),
  ("S08 acepta manifest","manifest_tc1.json" in s08 and 'type="file"' in s08),
+ ("S08 muestra rúbrica completa","Rúbrica oficial · 100 puntos" in s08 and "Concurrencia equivalente" in s08 and "Paquete reproducible completo" in s08),
+ ("S08 exige enlace de evidencia","evidenceUrl" in s08 and "evidence_url" in edge),
  ("S08 no marca abrir como completar","Abrirlo <b>no</b> lo marca como completado" in s08),
  ("WALL declara desempate por inicio","demora de inicio" in wall),
  ("WALL usa modo docente BigData","requireBigData({teacher:true})" in wall and "teacher_wall" in edge),
