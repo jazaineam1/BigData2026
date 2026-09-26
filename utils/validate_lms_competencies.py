@@ -28,7 +28,7 @@ if s07.exists():
         errors.append("S07 cambió durante competencias")
 
 checks=[
-    ("portal enlaza competencias", 'href="competencies.html"' in portal),
+    ("competencias no saturan portal estudiante", 'href="competencies.html"' not in portal),
     ("gradebook enlaza matriz", 'href="teacher-competencies.html"' in grade),
     ("vista estudiante usa evidencia", "L.core('competencies')" in student and "Por qué aparece así" in student),
     ("matriz docente usa backend", "teacher_competencies" in teacher and "teacherCompetencies" in core),
