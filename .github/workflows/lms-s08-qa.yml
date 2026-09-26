@@ -59,6 +59,11 @@ on:
       - Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb
       - utils/build_session9_notebook.py
       - utils/validate_session9.py
+      - utils/validate_lms_v3.py
+      - utils/validate_lms_ops.py
+      - assets/tutoriales/atlas-guia-conexion.html
+      - assets/tutoriales/astra-cassandra-paso-a-paso-v3.html
+      - assets/tutoriales/neo4j-aura-s06-paso-a-paso.html
       - .github/workflows/lms-s08-qa.yml
 
 permissions:
