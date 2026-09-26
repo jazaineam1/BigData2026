@@ -61,11 +61,18 @@ resource_seed=seed[resource_seed_start:] if resource_seed_start>=0 else ""
 resource_selects=len(re.findall(r"select\s+id,9,",resource_seed,re.I))
 
 def first_slide(term):
-    # Evita falsos positivos de la sintaxis JavaScript (por ejemplo, la propiedad k: del objeto slide).
-    if term=="k":
-        pattern=r"(?:<b>k</b>|\bk\s*=\s*\d+|parámetro\s+k)"
-    else:
-        pattern=(r"(?<![A-Za-z0-9])"+re.escape(term)+r"(?![A-Za-z0-9])") if len(term)<=3 else re.escape(term)
+    # Busca usos pedagógicos reales y evita substrings/markup:
+    # capa != capacidad, exact != exacta y path != <path> de SVG.
+    special={
+        "k":r"(?:<b>k</b>|\bk\s*=\s*\d+|parámetro\s+k)",
+        "path":r"""(?:<b>path</b>|<code>path</code>|["']path["']\s*:)""",
+        "exact":r"""(?:<b>exact</b>|<code>exact(?:=|</code>)|["']exact["']\s*:)""",
+        "limit":r"""(?:<b>limit</b>|<code>limit(?:=|</code>)|["']limit["']\s*:)""",
+        "queryvector":r"""(?:<b>queryVector</b>|<code>queryVector</code>|["']queryVector["']\s*:)""",
+    }
+    pattern=special.get(term)
+    if not pattern:
+        pattern=r"(?<!\w)"+re.escape(term)+r"(?!\w)"
     for i,s in enumerate(slides,1):
         if re.search(pattern,s,re.I): return i
     return None
@@ -229,7 +236,7 @@ checks=[
     ("Atlas explicado antes del constructor",all(x in deck for x in ["<b>SearchIndexModel</b>","<b>queryable</b>","<b>Pipeline de agregación</b>","<b>vectorSearchScore</b>"])),
     ("híbrida explica fusión y escalas","<b>Fusión de rankings</b>" in deck and "<b>Normalización de score</b>" in deck and "No sumes scores crudos" in deck),
     ("RRF calculable","function rrfDemo" in deck and "RRF(d) = Σ" in deck),
-    ("RRF explica rank_constant","<b>rank_constant</b>" in deck and "id=\\\"rrfK\\\"" in deck and "Elasticsearch el valor predeterminado es 60" in deck),
+    ("RRF explica rank_constant","<b>rank_constant</b>" in deck and 'id="rrfK"' in deck and "Elasticsearch el valor predeterminado es 60" in deck),
     ("constructor de evidencia","alternativa_descartada" in deck and "evidencia reproducible" in deck.lower()),
     ("notebook suficientemente completo",len(nb.get("cells",[]))>=20),
 ]
