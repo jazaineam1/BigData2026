@@ -37,7 +37,7 @@ checks=[
     ("16 sesiones declaradas", len(course.get("sessions",[]))==16 and [x.get("n") for x in course.get("sessions",[])]==list(range(1,17))),
     ("S09 visible y S10-S16 siguen borrador", any(x.get("n")==9 and x.get("status")=="visible" for x in course.get("sessions",[])) and all(x.get("status")=="draft" for x in course.get("sessions",[]) if x.get("n",0)>=10)),
     ("S07 marcada protegida", any(x.get("n")==7 and x.get("protected") for x in course.get("sessions",[]))),
-    ("portal usa API core", "L.core('home')" in portal and "sessions" in portal and "announcements" in portal and "pending" in portal),
+    ("portal usa API core", "L.core('home')" in portal and "sessions" in portal and "nextActions" in portal and "model.assignments" in portal),
     ("cliente conecta bigdata-lms-core", "bigdata-lms-core" in client and "async function core" in client),
     ("gestor docente exige rol", "requireBigData({teacher:true})" in teacher),
     ("gestor publica/cierra sesiones", "teacher_save_session" in teacher and "teacher_save_session" in edge),
