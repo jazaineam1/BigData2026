@@ -1,8 +1,9 @@
 (()=>{'use strict';
 const tag=document.currentScript,n=Math.trunc(Number(tag?.dataset?.session||0)),activity=String(tag?.dataset?.activity||''),label=String(tag?.dataset?.label||document.title||'Recurso');
 if(!n)return;
-const clientUrl=new URL('bigdata-lms.js',tag.src).href;
+const clientUrl=new URL('bigdata-lms.js',tag.src).href,kitUrl=new URL('lms-kit.js',tag.src).href;
 function loadClient(){return new Promise((resolve,reject)=>{if(window.BIGDATA_LMS)return resolve(window.BIGDATA_LMS);const s=document.createElement('script');s.src=clientUrl;s.onload=()=>resolve(window.BIGDATA_LMS);s.onerror=reject;document.head.appendChild(s)})}
+function loadKit(){return new Promise((resolve,reject)=>{if(window.LMS)return resolve(window.LMS);const s=document.createElement('script');s.src=kitUrl;s.onload=()=>resolve(window.LMS);s.onerror=reject;document.head.appendChild(s)})}
 function identity(model,L){
  const el=document.createElement('aside');el.className='lms-resource-identity';
  const who=model.viewer?.display_name||model.viewer?.username||'Estudiante';
@@ -13,8 +14,9 @@ function identity(model,L){
  const L=await loadClient();
  if(!L?.auth?.()?.token){location.replace(L.ROOT+'session.html?s='+n);return}
  const model=await L.requireSession(n);if(!model)return;
+ const K=await loadKit();K.configure({session_number:n});
  identity(model,L);
- await L.session('track',{session_number:n,event_type:'guide_opened',activity_code:activity||null,metadata:{source:'resource-bridge',resource_type:'guide',label,path:location.pathname},client_at:new Date().toISOString()}).catch(()=>{});
- L.startHeartbeat(activity||null,(action,payload)=>L.session(action,{...payload,session_number:n}));
+ await K.track('guide_opened',{session_number:n,activity_code:activity||null,metadata:{source:'resource-bridge-v5',resource_type:'guide',label,path:location.pathname},client_at:new Date().toISOString()}).catch(()=>{});
+ K.startHeartbeat(activity||null,{session_number:n});
 }catch(e){console.error('LMS resource bridge',e)}})();
 })();
