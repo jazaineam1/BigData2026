@@ -159,16 +159,16 @@ for term,marker in definition_markers.items():
     elif first < defined:
         errors.append(f"Término usado antes de definirse: {term} (uso S{first}, definición S{defined})")
 
-defs=deck.count('class="card def"')
-examples=deck.count('class="card ex"')
+defs=len(re.findall(r'class=(?:\\?")card def(?:\\?")',deck))
+examples=len(re.findall(r'class=(?:\\?")card ex(?:\\?")',deck))
 svg_functions=len(re.findall(r"function\s+svg[A-Za-z0-9_]+\s*\(",deck))
 lab_numbers=set(int(x) for x in re.findall(r"LAB\s+(\d+)\s*·",deck))
 challenge_calls=re.findall(r"challengeChoice\('(bd-s09-c[1-5])'",deck)
 
 checks=[
     ("exactamente 35 diapositivas",len(slides)==35),
-    ("profundidad de definiciones",defs>=52),
-    ("ejemplos explícitos",examples>=22),
+    ("profundidad de definiciones",defs>=70),
+    ("ejemplos explícitos",examples>=30),
     ("gráficos/diagramas",svg_functions>=15),
     ("LAB 1–9 embebidos",set(range(1,10)).issubset(lab_numbers)),
     ("D1–D5 embebidos",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,6)}),
