@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const AxeBuilder = require('@axe-core/playwright').default;
 
 const viewports = [
   { name: 'laptop-1280', width: 1280, height: 720 },
@@ -138,4 +139,27 @@ test('guía interna hereda identidad LMS', async ({ page }) => {
   await expect(page.getByText('Sesión LMS activa')).toBeVisible();
   await expect(page.getByText('Estudiante QA')).toBeVisible();
   await assertNoHorizontalOverflow(page,'resource bridge Atlas');
+});
+
+
+async function assertA11y(page, label) {
+  const result = await new AxeBuilder({ page })
+    .withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa'])
+    .analyze();
+  const severe = result.violations.filter(v => ['serious','critical'].includes(v.impact));
+  expect(severe, label + ' violaciones WCAG serias/críticas').toEqual([]);
+}
+
+test('accesibilidad landing pública', async ({ page }) => {
+  await page.setViewportSize({width:1280,height:720});
+  await page.goto('/');
+  await assertA11y(page,'landing');
+});
+
+test('accesibilidad módulo universal autenticado', async ({ page }) => {
+  await page.setViewportSize({width:1280,height:720});
+  await mockSessionApi(page,'student');
+  await page.goto('/lms/session.html?s=9');
+  await expect(page.getByText('Sesión LMS activa')).toBeVisible();
+  await assertA11y(page,'module');
 });
