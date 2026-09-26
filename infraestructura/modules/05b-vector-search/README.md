@@ -90,11 +90,12 @@ La ruta incluye, entre otros:
 - norma, normalización, producto punto y similitud coseno;
 - kNN y Top-k;
 - falso positivo y falso negativo;
-- base vectorial, metadata, filtro e índice vectorial;
-- ENN, ANN y HNSW;
+- base vectorial especializada vs sistema general con búsqueda vectorial; metadata, filtro e índice vectorial;
+- PyMongo, colección, documento MongoDB, Upsert, UpdateOne, bulk_write e idempotencia;
+- ENN, ANN y HNSW; grafo, nodo, arista, punto de entrada y capa;
 - conjunto de candidatos, Recall@k, latencia y numCandidates;
-- Atlas Vector Search y $vectorSearch;
-- RRF;
+- Atlas Vector Search y $vectorSearch; index, path, queryVector, exact, numCandidates, limit y filter;
+- RRF y rank_constant;
 - Precision@k;
 - evidencia reproducible.
 
