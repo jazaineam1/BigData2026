@@ -161,12 +161,43 @@ async function submitLab3Evidence(){
   }catch(e){out.textContent='No se pudo registrar: '+e.message}
   finally{btn.disabled=false}
 }
+const STEP_LABELS={result:'Resultado',decision:'Decisión',alternative:'Alternativa descartada',limit:'Límite concreto',interpretation:'Interpretación'};
+function genericEvidencePanel(code,lab,catalog){
+  if(lab.querySelector('.evidence-box'))return;
+  const steps=Array.isArray(catalog?.steps)?catalog.steps:[],box=document.createElement('div');box.className='evidence-box';box.dataset.evidenceFor=code;
+  const fields=steps.map(step=>{
+    const id=String(step.id||''),label=STEP_LABELS[id]||id,attrs=' data-step="'+esc(id)+'"';
+    if(step.type==='number')return '<label>'+esc(label)+'<input type="number"'+attrs+' inputmode="decimal"></label>';
+    if(step.type==='choice')return '<label>'+esc(label)+'<select'+attrs+'><option value="">Elige…</option>'+((step.options||[]).map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join(''))+'</select></label>';
+    return '<label>'+esc(label)+'<textarea'+attrs+' placeholder="'+esc(id==='limit'?'Explica qué dato, juicio o condición todavía limita tu conclusión.':id==='alternative'?'¿Qué otra opción consideraste y por qué no la elegiste?':'Escribe una respuesta concreta basada en lo que observaste.')+'"></textarea></label>';
+  }).join('');
+  box.innerHTML='<h4>Registrar evidencia · '+esc(catalog?.code||code)+'</h4><p class="mini">'+esc(catalog?.wall_prompt||'Registra una decisión defendible y un límite concreto.')+'</p><div class="mini-grid">'+fields+'</div><div class="actions"><button class="btn alt" type="button" data-submit-evidence="'+esc(code)+'">Registrar evidencia</button><a class="btn ghost" href="../lms/class-wall.html?s=9&a='+encodeURIComponent(code)+'">Muro del LAB</a></div><div class="feedback" data-evidence-status="'+esc(code)+'">Explora primero; luego registra tu evidencia.</div>';
+  lab.appendChild(box);
+  box.querySelector('[data-submit-evidence]').onclick=()=>submitGenericEvidence(code,box);
+}
+async function submitGenericEvidence(code,box){
+  const btn=box.querySelector('[data-submit-evidence]'),out=box.querySelector('[data-evidence-status]');
+  if(!L?.auth?.()?.token){out.textContent='Entra por el LMS para registrar evidencia.';return}
+  const payload={};box.querySelectorAll('[data-step]').forEach(el=>{payload[el.dataset.step]=el.type==='number'?Number(el.value):el.value});
+  btn.disabled=true;out.textContent='Registrando evidencia…';
+  try{
+    const x=await L.s09('evidence',{activity_code:code,source:'presentation',payload});
+    out.textContent=x.completed?'✓ '+x.feedback:'Aún no · '+x.feedback;await refreshStudentProgress();
+  }catch(e){out.textContent='No se pudo registrar: '+e.message}finally{btn.disabled=false}
+}
+function renderEvidencePanels(){
+  if(!s09Model)return;
+  const cats=new Map((s09Model.catalog||[]).map(x=>[x.code,x]));
+  Object.entries(LAB_BY_SLIDE).forEach(([slide,code])=>{
+    const lab=document.getElementById('s'+slide)?.querySelector('.lab');if(!lab)return;
+    if(code==='bd-s09-lab3')injectLab3Evidence(lab);else if(cats.has(code))genericEvidencePanel(code,lab,cats.get(code));
+  });
+}
 function wireLabs(){
   Object.entries(LAB_BY_SLIDE).forEach(([slide,code])=>{
     const section=document.getElementById('s'+slide),lab=section?.querySelector('.lab');if(!lab)return;
     lab.dataset.lab=code;
     ['input','change','click'].forEach(type=>lab.addEventListener(type,e=>{const el=e.target;if(el&&['INPUT','SELECT','TEXTAREA','BUTTON'].includes(el.tagName))queueLabInteraction(code,el)},true));
-    if(code==='bd-s09-lab3')injectLab3Evidence(lab);
   });
 }
 const CHALLENGE_LABELS={"bd-s09-c1":"D1 · mecanismo","bd-s09-c2":"D2 · coseno","bd-s09-c3":"D3 · comparar rankings","bd-s09-c4":"D4 · arquitectura","bd-s09-c5":"D5 · RRF"};
@@ -232,6 +263,7 @@ async function initStudentLms(){
   try{
     s09Model=await L.s09('me');
     moduleIdentity.textContent=(s09Model.viewer?.display_name||s09Model.viewer?.username||'Usuario')+' · conectado';
+    renderEvidencePanels();
     if(window.topk)topKDemo();
     await L.s09('track',{event_type:'presentation_opened',activity_code:'bd-s09-presentation',metadata:{source:'s09-embedded-presentation',path:location.pathname},client_at:new Date().toISOString()});
     s09Model=await L.s09('me');
