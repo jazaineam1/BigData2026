@@ -12,7 +12,7 @@
 <div class="drop"><input id="manifest" type="file" accept=".json,application/json"><p id="fileName" class="muted">Ningún archivo seleccionado.</p></div>
 <button id="submitManifest" class="btn accent" style="width:100%;margin-top:10px" disabled>Validar y registrar evidencia</button>
 <div id="manifestStatus" class="status hidden"></div>
-<div class="note" style="margin-top:14px"><b>Privacidad:</b> el archivo contiene nombres/códigos de integrantes, pero el servidor no conserva esos campos. No conserva nombres, códigos ni el identificador de pareja en claro: guarda un hash de pareja, puntaje, controles, versión y hash del manifest.</div></div>
+<div class="note" style="margin-top:14px"><b>Privacidad:</b> el archivo contiene nombres/códigos de integrantes, pero el servidor no conserva esos campos. No conserva nombres, códigos ni el identificador de pareja en claro: guarda un hash de pareja, puntaje, controles y hash del manifest.</div></div>
 <div class="card"><h2>Qué cuenta como completado</h2><p class="muted">Un manifest válido confirma coherencia entre adquisición, hashes, artefactos y resultados. El validador comprueba equivalencia secuencial/concurrente, idempotencia y reproducibilidad, y devuelve feedback por criterio. La velocidad por sí sola no suma puntos.</p><div class="note" style="margin-top:12px"><b>Seguridad:</b> una entrega con credenciales o tokens debe corregirse antes de ser aceptada.</div></div></aside></div>
 </main><script src="assets/bigdata-lms.js?v=20260925-2"></script><script>
 (async()=>{'use strict';const L=window.BIGDATA_LMS;L.wireLogout();let data;try{data=await L.requireBigData()}catch(e){L.msg(L.$('status'),e.message,'err');return}if(!data)return;
