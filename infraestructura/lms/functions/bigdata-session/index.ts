@@ -59,6 +59,13 @@ function cleanMeta(raw:any){
 function failIf(error:any,label:string){
   if(error)throw new Error(label+": "+String(error?.message||error).slice(0,320));
 }
+function clientId(v:any,label:string){
+  const s=String(v??"").trim();
+  if(!s)return null;
+  if(!/^[A-Za-z0-9._:-]{8,120}$/.test(s))throw new Error(label+" inválido");
+  return s;
+}
+function isDuplicate(error:any){return String(error?.code||"")==="23505"}
 function trimText(v:any,min:number,max:number,label:string){
   const s=String(v??"").trim();
   if(s.length<min)throw new Error(label+" debe tener al menos "+min+" caracteres");
@@ -100,8 +107,20 @@ async function ownEvidence(userId:string,runId:string,n:number){
   failIf(error,"No se pudo cargar la evidencia");
   return data||[];
 }
-async function submitEvidence(userId:string,runId:string,n:number,activity:any,payload:any,source:string){
+async function submitEvidence(userId:string,runId:string,n:number,activity:any,payload:any,source:string,rawClientId:any=null){
   if(!activity||activity.kind!=="lab")throw new Error("La actividad no es un laboratorio");
+  const evidenceClientId=clientId(rawClientId,"client_evidence_id");
+  if(evidenceClientId){
+    const {data:existing,error:existingError}=await db.from("bd_evidence")
+      .select("id,activity_code,verdict,feedback,created_at,payload")
+      .eq("user_id",userId).eq("course_run_id",runId).eq("client_evidence_id",evidenceClientId).maybeSingle();
+    failIf(existingError,"No se pudo comprobar la idempotencia de la evidencia");
+    if(existing){
+      if(existing.activity_code!==activity.code)throw new Error("client_evidence_id ya fue usado en otra actividad");
+      return {ok:true,duplicate:true,completed:["correct","accepted"].includes(existing.verdict),
+        verdict:existing.verdict,feedback:existing.feedback,evidence:existing};
+    }
+  }
   const {data:catalog,error:catalogError}=await db.from("bd_activity_catalog").select("*")
     .eq("code",activity.code).maybeSingle();
   failIf(catalogError,"No se pudo cargar el evaluador");
@@ -134,7 +153,7 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
   const now=new Date().toISOString();
   const {data:evidence,error:evidenceError}=await db.from("bd_evidence").insert({
     user_id:userId,course_run_id:runId,session_number:n,activity_code:activity.code,
-    step_id:"submission",payload:normalized,seed,source,
+    step_id:"submission",payload:normalized,seed,source,client_evidence_id:evidenceClientId,
     verdict,feedback,catalog_version:Number(catalog.version||1),created_at:now
   }).select("id,activity_code,verdict,feedback,created_at,payload").single();
   failIf(evidenceError,"No se pudo guardar la evidencia");
@@ -194,18 +213,28 @@ async function evidenceByCode(body:any){
     .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",row.session_number).maybeSingle();
   failIf(activityError,"No se pudo validar la actividad");
   if(!activity)throw new Error("Actividad no válida para este código");
-  const result=await submitEvidence(row.user_id,row.course_run_id,row.session_number,activity,body.payload||{},"notebook");
+  const result=await submitEvidence(row.user_id,row.course_run_id,row.session_number,activity,body.payload||{},"notebook",body.client_evidence_id);
   const {error:useError}=await db.from("bd_lab_codes").update({uses:Number(row.uses||0)+1}).eq("code_hash",hash);
   failIf(useError,"No se pudo actualizar el uso del código");
   return result;
 }
 
-async function wallPost(ctx:any,run:any,n:number,activityCode:string,rawBody:any,evidenceId:any=null){
+async function wallPost(ctx:any,run:any,n:number,activityCode:string,rawBody:any,evidenceId:any=null,rawClientId:any=null){
   const {data:activity,error:activityError}=await db.from("bd_lms_activities").select("code,kind")
     .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",n).maybeSingle();
   failIf(activityError,"No se pudo validar el LAB");
   if(!activity||activity.kind!=="lab")throw new Error("El muro solo está disponible para laboratorios");
-  const body=trimText(rawBody,20,2000,"La publicación");
+  const body=trimText(rawBody,20,2000,"La publicación"),postClientId=clientId(rawClientId,"client_post_id");
+  if(postClientId){
+    const {data:existing,error:existingError}=await db.from("bd_wall_posts")
+      .select("id,activity_code,body,status,created_at").eq("user_id",ctx.user.id)
+      .eq("course_run_id",run.id).eq("client_post_id",postClientId).maybeSingle();
+    failIf(existingError,"No se pudo comprobar la idempotencia de la publicación");
+    if(existing){
+      if(existing.activity_code!==activityCode)throw new Error("client_post_id ya fue usado en otra actividad");
+      return {ok:true,duplicate:true,post:existing};
+    }
+  }
   let linked:string|null=null;
   if(evidenceId){
     const {data:e,error}=await db.from("bd_evidence").select("id").eq("id",String(evidenceId))
@@ -214,7 +243,7 @@ async function wallPost(ctx:any,run:any,n:number,activityCode:string,rawBody:any
   }
   const {data:post,error}=await db.from("bd_wall_posts").insert({
     course_run_id:run.id,session_number:n,activity_code:activityCode,user_id:ctx.user.id,
-    body,evidence_id:linked,status:"visible"
+    body,evidence_id:linked,status:"visible",client_post_id:postClientId
   }).select("id,activity_code,body,status,created_at").single();
   failIf(error,"No se pudo publicar en el muro");
   const {error:eventError}=await db.from("bd_lms_events").insert({
@@ -640,12 +669,13 @@ Deno.serve(async(req:Request)=>{
       const activity=activityCode?def.activities.find((a:any)=>a.code===activityCode):null;
       if(activityCode&&!activity)throw new Error("Actividad no válida para esta sesión");
       const delta=event==="heartbeat"?Math.max(0,Math.min(30,Math.round(Number(body.active_seconds_delta||0)))):0;
-      const now=new Date().toISOString();
+      const now=new Date().toISOString(),eventClientId=clientId(body.client_event_id,"client_event_id");
       const {error:eventError}=await db.from("bd_lms_events").insert({
         user_id:ctx.user.id,course_run_id:run.id,event_type:event,session_number:n,
         activity_code:activityCode,active_seconds_delta:delta,metadata:cleanMeta(body.metadata),
-        client_at:body.client_at?String(body.client_at):null,created_at:now
+        client_at:body.client_at?String(body.client_at):null,client_event_id:eventClientId,created_at:now
       });
+      if(isDuplicate(eventError))return out(req,{ok:true,duplicate:true});
       failIf(eventError,"No se pudo registrar el evento");
       if(event==="heartbeat")await heartbeat(ctx.user.id,run.id,n,delta);
       else{
@@ -660,10 +690,10 @@ Deno.serve(async(req:Request)=>{
     if(action==="answer_challenge")return out(req,await answerChallenge(ctx,run,n,String(body.activity_code||""),body.answer,def.activities));
     if(action==="evidence"){
       const activity=def.activities.find((a:any)=>a.code===String(body.activity_code||""));
-      return out(req,await submitEvidence(ctx.user.id,run.id,n,activity,body.payload||{},String(body.source||"presentation")));
+      return out(req,await submitEvidence(ctx.user.id,run.id,n,activity,body.payload||{},String(body.source||"presentation"),body.client_evidence_id));
     }
     if(action==="lab_code")return out(req,{ok:true,...await issueLabCode(ctx,run,n)});
-    if(action==="wall_post")return out(req,await wallPost(ctx,run,n,String(body.activity_code||""),body.body,body.evidence_id||null));
+    if(action==="wall_post")return out(req,await wallPost(ctx,run,n,String(body.activity_code||""),body.body,body.evidence_id||null,body.client_post_id));
     if(action==="wall_list")return out(req,await wallList(ctx,run,n,String(body.activity_code||"")));
     if(action==="wall_react")return out(req,await wallReact(ctx,run,n,String(body.post_id||""),String(body.kind||"")));
     if(action==="wall_moderate")return out(req,await wallModerate(ctx,run,n,String(body.post_id||""),String(body.moderation||"")));
