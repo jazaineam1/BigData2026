@@ -98,6 +98,11 @@
       "path": "teacher-course.html"
     },
     {
+      "code": "gradebook",
+      "title": "Gradebook",
+      "path": "gradebook.html"
+    },
+    {
       "code": "wall",
       "title": "WALL S08",
       "path": "teacher-wall.html"
