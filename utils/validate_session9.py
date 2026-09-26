@@ -59,12 +59,14 @@ required_terms=[
 ]
 missing_terms=[t for t in required_terms if t not in deck]
 lab_markers=["LAB 1 · tokenizador didáctico","LAB 2 · calculadora de coseno","LAB 3 · comparador lexical vs semántico","LAB 4 · decisión corta","LAB 5 · ruta Atlas","LAB 6 · Top-k","LAB 7 · constructor de evidencia"]
+def_cards=len(re.findall(r'class="card def"',deck))
+ex_cards=len(re.findall(r'class="card ex"',deck))
 
 checks=[
     ("presentación suficiente", deck.count('<section class="slide')>=38),
     ("formato tipo S07", "class=\"stage\"" in deck and "class=\"nav\"" in deck and "S09 Lab" in deck and "cqw" in deck),
     ("laboratorio embebido", all(x in deck for x in lab_markers) and "S09 Lab integrado" in deck),
-    ("definiciones completas", not missing_terms and deck.count("Definición")>=24 and deck.count("Ejemplo")>=18),
+    ("definiciones completas", not missing_terms and def_cards>=24 and ex_cards>=10),
     ("distinción Elasticsearch explícita", "Elasticsearch ≠ búsqueda lexical" in deck),
     ("tres mecanismos", all(x in deck.lower() for x in ["lexical","semántica","híbrida"])),
     ("S07 lexical correctamente descrita", '<div class="node">tokens</div>' in deck and '<div class="node">índice invertido</div>' in deck and '<div class="node">BM25</div>' in deck),
@@ -109,6 +111,8 @@ for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
 if missing_terms:
     errors.append("Faltan definiciones/términos en presentación: "+", ".join(missing_terms))
+if def_cards<24 or ex_cards<10:
+    errors.append(f"Tarjetas def/ex insuficientes: def={def_cards}, ex={ex_cards}")
 
 for i,src in enumerate(code_cells,1):
     lines=[ln for ln in src.splitlines() if not ln.lstrip().startswith(("%","!"))]
