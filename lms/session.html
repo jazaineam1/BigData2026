@@ -107,9 +107,10 @@
 </main>
 
 <script src="assets/bigdata-lms.js?v=20260926-v3"></script>
+<script src="assets/lms-kit.js?v=20260926-v5"></script>
 <script>
 (async()=>{'use strict';
-const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status');
+const L=window.BIGDATA_LMS,K=window.LMS;L.wireLogout();const status=L.$('status');
 const params=new URLSearchParams(location.search),sessionNumber=Math.trunc(Number(params.get('s')||0));
 if(!Number.isInteger(sessionNumber)||sessionNumber<1){location.replace('portal.html');return}
 let data=null;
@@ -129,7 +130,7 @@ function presentationResource(){return (data.resources||[]).find(r=>r.resource_t
 function eventForResource(r){return r.resource_type==='presentation'?'presentation_opened':r.resource_type==='notebook'?'notebook_opened':r.resource_type==='guide'?'guide_opened':r.resource_type==='lab'?'lab_started':'resource_opened'}
 async function openResource(r,a){
   if(!r)return;
-  try{await L.session('track',{session_number:sessionNumber,event_type:eventForResource(r),activity_code:a?.code||r.metadata?.tracked_activity||null,metadata:{source:'module-v3',resource_type:r.resource_type,resource_id:r.id,label:r.title,path:r.url},client_at:new Date().toISOString()})}catch{}
+  try{await K.track(eventForResource(r),{session_number:sessionNumber,activity_code:a?.code||r.metadata?.tracked_activity||null,metadata:{source:'module-v5',resource_type:r.resource_type,resource_id:r.id,label:r.title,path:r.url},client_at:new Date().toISOString()})}catch{}
   if(/^https?:/i.test(r.url)){window.open(r.url,'_blank','noopener');setTimeout(refresh,500)}
   else location.href=r.url;
 }
@@ -216,7 +217,7 @@ L.$('labCodeBtn').onclick=async()=>{
     L.$('labCodeBox').classList.remove('hidden');
   }catch(e){L.msg(status,e.message,'err')}finally{btn.disabled=false}
 };
-L.session('track',{session_number:sessionNumber,event_type:'session_entered',metadata:{source:'module-v4',path:location.pathname},client_at:new Date().toISOString()}).catch(()=>{});
+K.track('session_entered',{session_number:sessionNumber,metadata:{source:'module-v5',path:location.pathname},client_at:new Date().toISOString()}).catch(()=>{});
 addEventListener('pageshow',()=>{if(document.visibilityState==='visible')refresh()});
 })();
 </script>
