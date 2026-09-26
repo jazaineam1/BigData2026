@@ -75,15 +75,20 @@ El objetivo no es copiar Moodle, Brightspace, Blackboard o Classroom pantalla po
 
 ### En curso / siguiente
 
-- **Fase 7 · Integraciones y estándares.**
-  - API pública documentada para integraciones autorizadas;
-  - webhooks salientes;
-  - QTI 3 para banco de preguntas;
-  - exportación/importación de roster compatible con OneRoster cuando haya sistema institucional;
-  - calendario interoperable;
-  - xAPI/Caliper solo si existe consumidor;
-  - integración opcional con GitHub;
-  - políticas de retención de archivos.
+- **Fase 7 · Integraciones y estándares · en curso.**
+  - implementado: centro docente de interoperabilidad;
+  - implementado: exportación QTI 3 del banco activo de preguntas;
+  - implementado: perfil de compatibilidad OneRoster 1.2.1 CSV en modo Bulk;
+  - implementado: iCalendar para fechas realmente registradas;
+  - implementado: exportación simple del Gradebook;
+  - implementado: documentación de versiones, PII y límites de certificación;
+  - pendiente: API pública documentada para integraciones autorizadas;
+  - pendiente: webhooks salientes firmados y reintentos;
+  - pendiente: importación QTI/roster con validación previa;
+  - pendiente: Edu-API institucional para educación superior si la universidad dispone de contraparte;
+  - pendiente: xAPI/Caliper solo si existe consumidor;
+  - pendiente: integración opcional con GitHub;
+  - pendiente: políticas de retención de archivos.
 - **Fase 8 · Plataforma, accesibilidad y confianza.**
   - permisos más granulares;
   - SSO/OIDC y MFA cuando la institución provea identidad compatible;
@@ -186,14 +191,15 @@ LTI institucional, SSO/OIDC, sincronización OneRoster y envío xAPI/Caliper req
 
 **Meta:** evitar encerrar el curso en una plataforma aislada.
 
-- API documentada y webhooks.
-- LTI 1.3 para herramientas externas cuando sea necesario.
-- Importación/exportación QTI para bancos de preguntas.
-- OneRoster o equivalente para sincronización de matrículas si la universidad lo habilita.
-- xAPI o Caliper para eventos de aprendizaje si existe un consumidor institucional.
+- Centro docente que distingue exportaciones disponibles, configuración pendiente e integraciones externas no configuradas.
+- Exportación QTI 3 del banco de preguntas; importación pendiente.
+- OneRoster 1.2.1 CSV como perfil de compatibilidad; para educación superior se prioriza evaluar Edu-API con la institución.
+- iCalendar y Gradebook CSV.
+- API documentada y webhooks firmados pendientes.
+- LTI 1.3 para herramientas externas solo cuando exista plataforma y credenciales reales.
+- xAPI o Caliper solo si existe un consumidor institucional.
 - Integración opcional con repositorios GitHub para evidencias técnicas.
-- Integración de calendario.
-- Almacenamiento de archivos con URLs firmadas y políticas de retención.
+- Almacenamiento de archivos con URLs firmadas ya implementado; política de retención pendiente.
 
 **Criterio de salida:** datos académicos esenciales se pueden exportar y las integraciones no dependen de copiar secretos al navegador.
 
