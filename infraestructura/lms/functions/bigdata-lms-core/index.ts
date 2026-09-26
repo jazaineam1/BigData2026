@@ -606,7 +606,6 @@ async function collaborationOverview(ctx:any,run:any){
   const postRows=(posts||[]).filter((p:any)=>threadIds.has(p.thread_id));
   const postIds=postRows.map((p:any)=>p.id);
   const {data:mentions}=postIds.length?await db.from("lms_discussion_mentions_v2").select("post_id,mentioned_user_id,created_at,read_at").eq("mentioned_user_id",ctx.user.id).in("post_id",postIds).order("created_at",{ascending:false}):({data:[]} as any);
-  if((mentions||[]).some((m:any)=>!m.read_at))await db.from("lms_discussion_mentions_v2").update({read_at:new Date().toISOString()}).eq("mentioned_user_id",ctx.user.id).is("read_at",null).in("post_id",postIds).then(()=>{}).catch(()=>{});
   const visibleUserIds=[...new Set([...(members||[]).map((x:any)=>x.user_id),...postRows.map((x:any)=>x.user_id)])];
   const {data:users}=visibleUserIds.length?await db.from("lms_users").select("id,display_name,username").in("id",visibleUserIds):({data:[]} as any);
   const assignmentMap=new Map((assignments||[]).map((a:any)=>[a.id,a]));
@@ -625,6 +624,14 @@ async function collaborationOverview(ctx:any,run:any){
   }
   return {viewer:ctx.user,run,groups:groups||[],members:members||[],member_users:users||[],users:users||[],settings:settingRows,assignments:assignments||[],group_submissions:groupSubs||[],threads:threads||[],posts:postRows,mentions:mentions||[],peer_targets:peerTargets};
 }
+async function markMentionsRead(ctx:any,run:any){
+  const {data:threads}=await db.from("lms_discussion_threads_v2").select("id").eq("course_run_id",run.id);
+  const ids=(threads||[]).map((x:any)=>x.id);if(!ids.length)return {ok:true,count:0};
+  const now=new Date().toISOString();
+  const {data,error}=await db.from("lms_discussion_mentions_v2").update({read_at:now}).eq("mentioned_user_id",ctx.user.id).is("read_at",null).in("thread_id",ids).select("id");
+  if(error)throw error;return {ok:true,count:(data||[]).length,read_at:now};
+}
+
 async function teacherCollaboration(ctx:any,run:any){
   requireTeacher(ctx);
   const [{data:groups},{data:members},{data:settings},{data:assignments},{data:subs},{data:enrollments},{data:threads},{data:posts},{data:reviews},{data:contributions}] = await Promise.all([
@@ -819,6 +826,7 @@ Deno.serve(async(req:Request)=>{
     if(action==="teacher_create_intervention")return out(req,await createIntervention(ctx,run,body));
     if(action==="teacher_resolve_intervention")return out(req,await resolveIntervention(ctx,run,body));
     if(action==="collaboration")return out(req,await collaborationOverview(ctx,run));
+    if(action==="mark_mentions_read")return out(req,await markMentionsRead(ctx,run));
     if(action==="teacher_collaboration")return out(req,await teacherCollaboration(ctx,run));
     if(action==="teacher_create_group")return out(req,await createGroup(ctx,run,body));
     if(action==="teacher_add_group_member")return out(req,await addGroupMember(ctx,run,body));
