@@ -28,7 +28,7 @@ if s07.exists():
 
 checks=[
     ("portal enlaza progreso", 'href="progress.html"' in portal),
-    ("vista estudiante usa analytics", "L.core('analytics')" in student and "Reglas transparentes" in student),
+    ("analítica no satura vista estudiante", "L.core('analytics')" not in student and "Reglas transparentes" not in student and "Snapshots académicos" not in student),
     ("vista docente exige rol", "requireBigData({teacher:true})" in teacher),
     ("backend analytics estudiante", "analyticsForUser" in core and 'action==="analytics"' in core),
     ("backend analytics docente", "teacherAnalytics" in core and 'action==="teacher_analytics"' in core),
@@ -69,7 +69,7 @@ if errors:
 
 print("ANALITICA: OK")
 print(" - reglas explicables")
-print(" - señales estudiante/docente separadas")
+print(" - analítica completa en backend/docente; vista estudiante simplificada")
 print(" - intervenciones + snapshots")
 print(" - S07 intacta")
 print(" - JS válido")

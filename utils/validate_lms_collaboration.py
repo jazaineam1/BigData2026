@@ -27,7 +27,7 @@ if s07.exists():
         errors.append("S07 cambió durante colaboración")
 
 checks=[
-    ("portal enlaza colaboración", 'href="collaboration.html"' in portal),
+    ("colaboración no satura portal estudiante", 'href="collaboration.html"' not in portal),
     ("vista estudiante usa backend", "L.core('collaboration')" in student),
     ("vista docente exige rol", "requireBigData({teacher:true})" in teacher),
     ("gestión de equipos", "teacher_create_group" in teacher and "createGroup" in core),

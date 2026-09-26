@@ -58,7 +58,7 @@ checks=[
     ("rúbricas reutilizables", "lms_rubric_templates_v2" in rubrics and "teacher_save_rubric" in assess and "Plantilla reutilizable" in gradebook),
     ("RLS evaluación", schema.count("enable row level security")>=6 and "from anon,authenticated" in schema and "to service_role" in schema),
     ("RLS rúbricas", "enable row level security" in rubrics and "from anon, authenticated" in rubrics and "to service_role" in rubrics),
-    ("portal enlaza quizzes", 'href="quizzes.html"' in portal),
+    ("quizzes no saturan portal estudiante", 'href="quizzes.html"' not in portal),
     ("vista estudiante", "L.assess('quizzes')" in student and "start_quiz" in student and "save_response" in student),
     ("vista docente protegida", "requireBigData({teacher:true})" in teacher and "teacher_save_question" in teacher),
     ("Pages estudiante", "test -f _site/lms/quizzes.html" in pages),
