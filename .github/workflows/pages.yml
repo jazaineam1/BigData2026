@@ -67,6 +67,8 @@ jobs:
           test -f _site/lms/teacher-quizzes.html
           test -f _site/lms/teacher-interoperability.html
           test -f _site/lms/admin-operations.html
+          test -f _site/lms/session.html
+          test -f _site/lms/wall.html
           test -f _site/lms/session-09.html
           test -f _site/lms/progress-09.html
           test -f _site/lms/teacher-wall-09.html
