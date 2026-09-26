@@ -39,7 +39,7 @@ course=json.loads((ROOT/"lms/data/course.json").read_text("utf-8"))
 checks=[
  ("portal reutiliza sesión LMS","andesdb.lms.auth.v1" in client),
  ("S08 abre Taller_Control_1","Cuadernos/Taller_Control_1.ipynb" in s08),
- ("S08 enlaza guía V4","s08-secoppipeline.html" in s08),
+ ("S08 enlaza referencia técnica","s08-secoppipeline.html" in s08 and "Talleres/Taller_Control_1.md" not in s08),
  ("S08 acepta manifest","manifest_tc1.json" in s08 and 'type="file"' in s08),
  ("S08 no marca abrir como completar","Abrirlo <b>no</b> lo marca como completado" in s08),
  ("WALL declara desempate por inicio","demora de inicio" in wall),
@@ -55,14 +55,14 @@ checks=[
  ("inicio oficial course-scoped","bd_lms_session_windows" in sql and "teacher_open_session" in edge),
  ("inicio no nace de page_view",'["notebook_opened","activity_started","stage_opened"].includes(event)' in edge),
  ("pareja solo con hash","pair_hash:m.pair_hash" in edge and "pair_hash text" in sql and "pair_id text" not in sql),
- ("Edge Function versionada","VALIDATOR_VERSIONS" in edge and "2026-09-26-v4-secoppipeline" in edge and "submit_manifest" in edge),
+ ("Edge Function versionada","VALIDATOR_VERSIONS" in edge and "2026-09-26-secoppipeline" in edge and "submit_manifest" in edge),
  ("tablas no expuestas a anon/authenticated","revoke all" in sql and "anon,authenticated" in sql),
  ("curso declarativo",course.get("course")=="bigdata" and course.get("current_tracked_session")==8),
  ("manifiesto declara administrador",any(x.get("code")=="users" and x.get("path")=="admin-users.html" for x in course.get("teacher_tools",[]))),
  ("portada enlaza LMS",'lms/portal.html' in index),
  ("portada S08 entra al LMS",'lms/session-08.html' in index),
  ("Pages publica carpeta LMS","cp -R lms _site/" in pages and "lms/**" in pages),
- ("Pages publica recursos mínimos S08","Talleres/Taller_Control_1.md" in pages and "Cuadernos/Taller_Control_1.ipynb" in pages),
+ ("Pages publica recursos mínimos S08","Talleres/Taller_Control_1.md" not in pages and "Cuadernos/Taller_Control_1.ipynb" in pages and "s08-secoppipeline.html" in pages),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
