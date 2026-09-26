@@ -25,6 +25,7 @@ FEEDBACK = {
     "E5_cypher": "El Cypher debe cargar con MERGE/UNWIND y responder las consultas parametrizadas solicitadas.",
     "E5_subgrafo": "El subgrafo NetworkX debe representar la misma estructura Entidad–Proceso–Proveedor.",
     "E6_decisiones_informe": "Registre decisiones con evidencia, alternativa y riesgo, y comunique explícitamente los límites de interpretación.",
+    "E6_microdefensa_grupal": "Responda como grupo las dos preguntas de transferencia usando resultados propios de concurrencia y calidad.",
     "E6_paquete_reproducible": "Complete todos los artefactos requeridos antes de generar la entrega final.",
 }
 
@@ -375,16 +376,33 @@ def evaluar(ns):
             and (OUT/"06_informe_tecnico.md").exists()
         )
     except Exception:e61=False
-    check("E6_decisiones_informe",e61,6)
+    check("E6_decisiones_informe",e61,5)
+
+    defensa=ns.get("defensa_grupal",{})
+    try:
+        r1=str(defensa.get("respuesta_concurrencia","")).strip()
+        r2=str(defensa.get("respuesta_calidad","")).strip()
+        r1l=r1.casefold();r2l=r2.casefold()
+        e62=(
+            isinstance(defensa,dict)
+            and len(r1)>=120 and len(r2)>=120
+            and any(x in r1l for x in ["429","worker","backoff","retry"])
+            and "hash" in r1l
+            and any(x in r2l for x in ["join","cobertura","coverage"])
+            and any(x in r2l for x in ["falt","contrato","invent"])
+            and (OUT/"06_microdefensa_grupal.json").exists()
+        )
+    except Exception:e62=False
+    check("E6_microdefensa_grupal",e62,3)
 
     files=[
         "00_dataset_contract.json","01_acquisition_manifest.json","01_benchmark_threads.json","01_quality_report.json",
         "02_secop_integrado.parquet","02_modelo_documental.json","02_atlas_evidence.json",
         "03_bandeja_historica.csv","04_modelo_cassandra.cql","05_neo4j_consultas.cypher",
-        "05_resultado_relacional.csv","06_decision_log.json","06_informe_tecnico.md",
+        "05_resultado_relacional.csv","06_decision_log.json","06_informe_tecnico.md","06_microdefensa_grupal.json",
     ]
-    e62=all((OUT/f).exists() and (OUT/f).stat().st_size>0 for f in files)
-    check("E6_paquete_reproducible",e62,4)
+    e63=all((OUT/f).exists() and (OUT/f).stat().st_size>0 for f in files)
+    check("E6_paquete_reproducible",e63,2)
 
     secret_patterns=[
         re.compile(r"mongodb\+srv://[^\s:@/]+:[^\s@]+@",re.I),

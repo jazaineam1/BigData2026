@@ -45,6 +45,9 @@ checks=[
  ("S08 no marca abrir como completar","Abrirlo <b>no</b> lo marca como completado" in s08),
  ("WALL declara desempate por inicio","demora de inicio" in wall),
  ("WALL usa modo docente BigData","requireBigData({teacher:true})" in wall and "teacher_wall" in edge),
+ ("WALL califica por equipos","groupRanking" in wall and "Exportar calificaciones CSV" in wall and "group_ranking" in edge),
+ ("TC1 exige equipo","tc1GroupContext" in edge and "TC1 se califica por grupo" in edge),
+ ("nota grupal replica integrantes","syncManifestGroupGradebook" in edge and "lms_group_submissions_v2" in edge and "Calificación grupal TC1" in edge),
  ("administrador docente publicado","admin-users.html" in portal and "admin-users.html" in wall and "teacher_admin_overview" in admin),
  ("administrador exige rol docente","requireBigData({teacher:true})" in admin),
  ("acciones course-scoped","teacher_set_enrollment" in edge and 'eq("course_code",COURSE)' in edge and 'status==="active"?"active":"inactive"' in edge),
@@ -62,6 +65,8 @@ checks=[
  ("manifiesto declara administrador",any(x.get("code")=="users" and x.get("path")=="admin-users.html" for x in course.get("teacher_tools",[]))),
  ("portada enlaza LMS",'lms/portal.html' in index),
  ("portada S08 entra al LMS",'lms/session-08.html' in index),
+ ("portada sin método redundante","Aprender = comprender, practicar, comprobar y transferir." not in index and "La evidencia importa más que completar una pantalla." not in index),
+ ("S08 trabajo en casa 6h","mínimo 6 horas por grupo" in s08),
  ("Pages publica carpeta LMS","cp -R lms _site/" in pages and "lms/**" in pages),
  ("Pages publica recursos mínimos S08","Talleres/Taller_Control_1.md" not in pages and "Cuadernos/Taller_Control_1.ipynb" in pages and "s08-secoppipeline.html" in pages),
 ]

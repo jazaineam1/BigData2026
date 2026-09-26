@@ -38,14 +38,29 @@ async function sessionDefinition(){
  return {session,activities:activities||[]}
 }
 async function sessionWindow(runId:string){const {data}=await db.from("bd_lms_session_windows").select("opened_at,opened_by").eq("course_run_id",runId).eq("session_number",SESSION).maybeSingle();return data||null}
+async function tc1GroupContext(userId:string,runId:string){
+ const {data:memberships}=await db.from("lms_group_members_v2").select("group_id,role").eq("user_id",userId);
+ const ids=(memberships||[]).map((x:any)=>x.group_id);
+ if(!ids.length)return null;
+ const {data:groups}=await db.from("lms_groups_v2").select("id,name,description,active").eq("course_run_id",runId).eq("active",true).in("id",ids);
+ if(!(groups||[]).length)return null;
+ if((groups||[]).length!==1)throw new Error("Tu cuenta pertenece a más de un equipo activo. El docente debe corregir la configuración antes de entregar TC1.");
+ const group:any=(groups||[])[0];
+ const {data:members}=await db.from("lms_group_members_v2").select("user_id,role").eq("group_id",group.id);
+ const userIds=(members||[]).map((x:any)=>x.user_id);
+ const {data:users}=userIds.length?await db.from("lms_users").select("id,display_name,username").in("id",userIds):({data:[]} as any);
+ const um=new Map((users||[]).map((u:any)=>[u.id,u]));
+ return {group,members:(members||[]).map((m:any)=>({user_id:m.user_id,role:m.role,display_name:(um.get(m.user_id) as any)?.display_name||(um.get(m.user_id) as any)?.username||"Participante"}))}
+}
 async function ownProgress(userId:string,runId:string){
- const [{data:session_progress},{data:activity_progress},{data:submission},window]=await Promise.all([
+ const [{data:session_progress},{data:activity_progress},{data:submission},window,group_context]=await Promise.all([
   db.from("bd_lms_session_progress").select("*").eq("user_id",userId).eq("course_run_id",runId).eq("session_number",SESSION).maybeSingle(),
   db.from("bd_lms_activity_progress").select("*").eq("user_id",userId).eq("course_run_id",runId),
   db.from("bd_lms_s08_submissions").select("manifest_version,score,max_score,note_5,sha256,validated,submitted_at,updated_at").eq("user_id",userId).eq("course_run_id",runId).maybeSingle(),
-  sessionWindow(runId)
+  sessionWindow(runId),
+  tc1GroupContext(userId,runId)
  ]);
- return {session_progress,activity_progress:activity_progress||[],submission,session_window:window}
+ return {session_progress,activity_progress:activity_progress||[],submission,session_window:window,group_context}
 }
 async function ensureSessionStarted(userId:string,runId:string){
  const now=new Date().toISOString(),{data:p}=await db.from("bd_lms_session_progress").select("*").eq("user_id",userId).eq("course_run_id",runId).eq("session_number",SESSION).maybeSingle();
@@ -84,49 +99,102 @@ async function verifyManifest(rawInput:string){
  const {clean,stageScores,stageMax}=summarizeControls(m.controles);const sum=Object.values(stageScores).reduce((a:number,b:any)=>a+Number(b),0);if(sum!==score)throw new Error("El detalle por etapas no suma el puntaje total");
  return {pair_hash:await digestHex(pair),score,note,sha:supplied,controls:clean,stageScores,stageMax,version}
 }
-async function syncManifestGradebook(ctx:any,run:any,m:any){
+async function syncManifestGroupGradebook(ctx:any,run:any,m:any,groupCtx:any){
  const {data:a}=await db.from("lms_assignments_v2").select("id,max_attempts,max_score").eq("course_run_id",run.id).eq("code","bd-s08-control").eq("active",true).maybeSingle();
- if(!a)return;
- const {data:latest}=await db.from("lms_submissions_v2").select("*").eq("assignment_id",a.id).eq("user_id",ctx.user.id).order("attempt",{ascending:false}).limit(1).maybeSingle();
- const maxAttempts=Number(a.max_attempts||20),now=new Date().toISOString();
- let target:any=null,previousScore:any=null,previousFeedback:any=null;
- if(!latest||Number(latest.attempt)<maxAttempts){
-  const attempt=Number(latest?.attempt||0)+1;
-  const {data,error}=await db.from("lms_submissions_v2").insert({
-   assignment_id:a.id,user_id:ctx.user.id,attempt,artifact_type:"evidence",
-   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:m.version,stage_scores:m.stageScores},
-   status:"reviewed",submitted_at:now,score:m.score,
-   feedback:"Calificación automática desde manifest_tc1.json validado en S08.",
+ if(!a)throw new Error("No existe la tarea TC1 activa en el Gradebook.");
+ const {data:setting}=await db.from("lms_assignment_group_settings_v2").select("enabled").eq("assignment_id",a.id).eq("enabled",true).maybeSingle();
+ if(!setting)throw new Error("TC1 no está habilitado como entrega grupal.");
+ const now=new Date().toISOString(),maxAttempts=Number(a.max_attempts||20);
+ const {data:sameEvidence}=await db.from("lms_group_submissions_v2").select("id,group_id").eq("assignment_id",a.id).contains("artifact",{pair_hash:m.pair_hash});
+ if((sameEvidence||[]).some((x:any)=>x.group_id!==groupCtx.group.id))throw new Error("Este manifest ya fue registrado por otro equipo. Cada grupo debe entregar su propia evidencia.");
+ const {data:prior}=await db.from("lms_group_submissions_v2").select("*").eq("assignment_id",a.id).eq("group_id",groupCtx.group.id).order("attempt",{ascending:false}).limit(1).maybeSingle();
+ let gs:any=null;
+ if(!prior||Number(prior.attempt)<maxAttempts){
+  const attempt=Number(prior?.attempt||0)+1;
+  const {data,error}=await db.from("lms_group_submissions_v2").insert({
+   assignment_id:a.id,group_id:groupCtx.group.id,attempt,artifact_type:"evidence",
+   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:m.version,pair_hash:m.pair_hash,stage_scores:m.stageScores},
+   status:"reviewed",submitted_by:ctx.user.id,submitted_at:now,score:m.score,
+   feedback:"Calificación automática grupal desde manifest_tc1.json validado en S08.",
    rubric_scores:m.stageScores,reviewed_at:now
-  }).select("*").single();
-  if(error)return;target=data;
+  }).select("*").single();if(error)throw error;gs=data;
  }else{
-  previousScore=latest.score;previousFeedback=latest.feedback;
-  const {data,error}=await db.from("lms_submissions_v2").update({
-   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:m.version,stage_scores:m.stageScores},
-   status:"reviewed",submitted_at:now,score:m.score,
-   feedback:"Calificación automática actualizada desde la validación más reciente de S08.",
+  const {data,error}=await db.from("lms_group_submissions_v2").update({
+   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:m.version,pair_hash:m.pair_hash,stage_scores:m.stageScores},
+   status:"reviewed",submitted_by:ctx.user.id,submitted_at:now,score:m.score,
+   feedback:"Calificación automática grupal actualizada desde la validación más reciente de S08.",
    rubric_scores:m.stageScores,reviewed_at:now
-  }).eq("id",latest.id).select("*").single();
-  if(error)return;target=data;
+  }).eq("id",prior.id).select("*").single();if(error)throw error;gs=data;
  }
- if(target)await db.from("lms_grade_history_v2").insert({
-  submission_id:target.id,assignment_id:a.id,user_id:ctx.user.id,actor_user_id:null,
-  previous_score:previousScore,new_score:m.score,previous_feedback:previousFeedback,new_feedback:target.feedback,
-  rubric_scores:m.stageScores,created_at:now
- }).then(()=>{}).catch(()=>{});
+ for(const member of groupCtx.members||[]){
+  const {data:latest}=await db.from("lms_submissions_v2").select("*").eq("assignment_id",a.id).eq("user_id",member.user_id).order("attempt",{ascending:false}).limit(1).maybeSingle();
+  let ind:any=null,previousScore:any=latest?.score??null,previousFeedback:any=latest?.feedback??null;
+  if(!latest||Number(latest.attempt)<maxAttempts){
+   const attempt=Number(latest?.attempt||0)+1;
+   const {data,error}=await db.from("lms_submissions_v2").insert({
+    assignment_id:a.id,user_id:member.user_id,attempt,artifact_type:"evidence",
+    artifact:{source:"group_submission",group_submission_id:gs.id,group_id:groupCtx.group.id,sha256:m.sha,validator_version:m.version},
+    status:"reviewed",submitted_at:now,score:m.score,
+    feedback:"Calificación grupal TC1 · "+groupCtx.group.name+".",
+    rubric_scores:m.stageScores,reviewed_at:now
+   }).select("*").single();if(error)throw error;ind=data;
+  }else{
+   const {data,error}=await db.from("lms_submissions_v2").update({
+    artifact:{source:"group_submission",group_submission_id:gs.id,group_id:groupCtx.group.id,sha256:m.sha,validator_version:m.version},
+    status:"reviewed",submitted_at:now,score:m.score,
+    feedback:"Calificación grupal TC1 · "+groupCtx.group.name+".",
+    rubric_scores:m.stageScores,reviewed_at:now
+   }).eq("id",latest.id).select("*").single();if(error)throw error;ind=data;
+  }
+  if(ind)await db.from("lms_grade_history_v2").insert({
+   submission_id:ind.id,assignment_id:a.id,user_id:member.user_id,actor_user_id:null,
+   previous_score:previousScore,new_score:m.score,previous_feedback:previousFeedback,new_feedback:ind.feedback,
+   rubric_scores:m.stageScores,created_at:now
+  }).then(()=>{}).catch(()=>{});
+ }
+ return gs
 }
 
 async function persistManifest(ctx:any,run:any,m:any){
- const now=new Date().toISOString();await ensureSessionStarted(ctx.user.id,run.id);
- const {error}=await db.from("bd_lms_s08_submissions").upsert({user_id:ctx.user.id,course_run_id:run.id,pair_hash:m.pair_hash,manifest_version:m.version,score:m.score,max_score:100,note_5:m.note,sha256:m.sha,controls:m.controls,validated:true,submitted_at:now,updated_at:now},{onConflict:"user_id,course_run_id"});if(error)throw error;
- for(const p of Object.keys(STAGE_ACTIVITY)){const code=STAGE_ACTIVITY[p],score=m.stageScores[p],max=m.stageMax[p],done=score===max,{data:prior}=await db.from("bd_lms_activity_progress").select("started_at,attempts").eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("activity_code",code).maybeSingle();await db.from("bd_lms_activity_progress").upsert({user_id:ctx.user.id,course_run_id:run.id,activity_code:code,status:done?"completed":"submitted",started_at:prior?.started_at||now,attempts:Number(prior?.attempts||0),score,max_score:max,completed_at:done?now:null,updated_at:now,metadata:{source:"manifest_tc1",validated:true}},{onConflict:"user_id,course_run_id,activity_code"})}
- const {data:pf}=await db.from("bd_lms_activity_progress").select("started_at,attempts").eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("activity_code","bd-s08-final").maybeSingle();
- await db.from("bd_lms_activity_progress").upsert({user_id:ctx.user.id,course_run_id:run.id,activity_code:"bd-s08-final",status:"completed",started_at:pf?.started_at||now,attempts:Number(pf?.attempts||0)+1,score:m.score,max_score:100,completed_at:now,updated_at:now,metadata:{source:"manifest_tc1",validated:true,sha256:m.sha}},{onConflict:"user_id,course_run_id,activity_code"});
- const {data:sp}=await db.from("bd_lms_session_progress").select("*").eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("session_number",SESSION).maybeSingle();
- await db.from("bd_lms_session_progress").upsert({user_id:ctx.user.id,course_run_id:run.id,session_number:SESSION,status:"completed",started_at:sp?.started_at||now,active_seconds:Number(sp?.active_seconds||0),last_activity_at:now,submitted_at:now,completed_at:now,score:m.score,max_score:100,updated_at:now},{onConflict:"user_id,course_run_id,session_number"});
- await db.from("bd_lms_events").insert({user_id:ctx.user.id,course_run_id:run.id,event_type:"manifest_submitted",session_number:SESSION,activity_code:"bd-s08-final",metadata:{score:m.score,validated:true},created_at:now});
- await syncManifestGradebook(ctx,run,m)
+ const groupCtx=await tc1GroupContext(ctx.user.id,run.id);
+ if(!groupCtx)throw new Error("TC1 se califica por grupo. El docente debe asignarte a un equipo activo antes de registrar la entrega.");
+ const now=new Date().toISOString();
+ const groupSubmission=await syncManifestGroupGradebook(ctx,run,m,groupCtx);
+ for(const member of groupCtx.members||[]){
+  await ensureSessionStarted(member.user_id,run.id);
+  const {error}=await db.from("bd_lms_s08_submissions").upsert({
+   user_id:member.user_id,course_run_id:run.id,pair_hash:m.pair_hash,manifest_version:m.version,
+   score:m.score,max_score:100,note_5:m.note,sha256:m.sha,controls:m.controls,validated:true,
+   submitted_at:now,updated_at:now
+  },{onConflict:"user_id,course_run_id"});if(error)throw error;
+  for(const p of Object.keys(STAGE_ACTIVITY)){
+   const code=STAGE_ACTIVITY[p],score=m.stageScores[p],max=m.stageMax[p],done=score===max;
+   const {data:prior}=await db.from("bd_lms_activity_progress").select("started_at,attempts").eq("user_id",member.user_id).eq("course_run_id",run.id).eq("activity_code",code).maybeSingle();
+   await db.from("bd_lms_activity_progress").upsert({
+    user_id:member.user_id,course_run_id:run.id,activity_code:code,status:done?"completed":"submitted",
+    started_at:prior?.started_at||now,attempts:Number(prior?.attempts||0),score,max_score:max,
+    completed_at:done?now:null,updated_at:now,
+    metadata:{source:"group_manifest_tc1",validated:true,group_id:groupCtx.group.id}
+   },{onConflict:"user_id,course_run_id,activity_code"});
+  }
+  const {data:pf}=await db.from("bd_lms_activity_progress").select("started_at,attempts").eq("user_id",member.user_id).eq("course_run_id",run.id).eq("activity_code","bd-s08-final").maybeSingle();
+  await db.from("bd_lms_activity_progress").upsert({
+   user_id:member.user_id,course_run_id:run.id,activity_code:"bd-s08-final",status:"completed",
+   started_at:pf?.started_at||now,attempts:Number(pf?.attempts||0)+1,score:m.score,max_score:100,
+   completed_at:now,updated_at:now,metadata:{source:"group_manifest_tc1",validated:true,sha256:m.sha,group_id:groupCtx.group.id}
+  },{onConflict:"user_id,course_run_id,activity_code"});
+  const {data:sp}=await db.from("bd_lms_session_progress").select("*").eq("user_id",member.user_id).eq("course_run_id",run.id).eq("session_number",SESSION).maybeSingle();
+  await db.from("bd_lms_session_progress").upsert({
+   user_id:member.user_id,course_run_id:run.id,session_number:SESSION,status:"completed",
+   started_at:sp?.started_at||now,active_seconds:Number(sp?.active_seconds||0),last_activity_at:now,
+   submitted_at:now,completed_at:now,score:m.score,max_score:100,updated_at:now
+  },{onConflict:"user_id,course_run_id,session_number"});
+ }
+ await db.from("bd_lms_events").insert({
+  user_id:ctx.user.id,course_run_id:run.id,event_type:"manifest_submitted",session_number:SESSION,
+  activity_code:"bd-s08-final",metadata:{score:m.score,validated:true,group_id:groupCtx.group.id,group_submission_id:groupSubmission.id},created_at:now
+ });
+ return {group_context:groupCtx,group_submission:groupSubmission}
 }
 async function openOfficial(ctx:any,run:any){
  if(!["teacher","admin"].includes(ctx.user.role))throw new Error("NO_AUTH");
@@ -264,20 +332,60 @@ async function teacherRevokeSessions(ctx:any,target:string){
 
 async function teacherWall(ctx:any,run:any){
  if(!["teacher","admin"].includes(ctx.user.role))throw new Error("NO_AUTH");
- const [{data:enrollments},{data:progress},{data:activities},{data:subs},{data:requests},window]=await Promise.all([
+ const [{data:enrollments},{data:progress},{data:activities},{data:subs},{data:requests},window,{data:assignment}]=await Promise.all([
   db.from("lms_run_enrollments").select("user_id,role,status,enrolled_at").eq("course_run_id",run.id).eq("status","active"),
   db.from("bd_lms_session_progress").select("*").eq("course_run_id",run.id).eq("session_number",SESSION),
   db.from("bd_lms_activity_progress").select("*").eq("course_run_id",run.id),
   db.from("bd_lms_s08_submissions").select("user_id,score,max_score,note_5,validated,submitted_at,sha256").eq("course_run_id",run.id),
   db.from("lms_access_requests").select("id,full_name,email,course_code,status,created_at,reviewed_at").eq("course_code",COURSE).order("created_at",{ascending:false}).limit(100),
-  sessionWindow(run.id)
+  sessionWindow(run.id),
+  db.from("lms_assignments_v2").select("id").eq("course_run_id",run.id).eq("code","bd-s08-control").maybeSingle()
  ]);
- const ids=(enrollments||[]).filter((x:any)=>x.role==="student").map((x:any)=>x.user_id),{data:users}=ids.length?await db.from("lms_users").select("id,display_name,username,active").in("id",ids):({data:[]} as any);
+ const ids=(enrollments||[]).filter((x:any)=>x.role==="student").map((x:any)=>x.user_id);
+ const {data:users}=ids.length?await db.from("lms_users").select("id,display_name,username,active").in("id",ids):({data:[]} as any);
  const pm=new Map((progress||[]).map((x:any)=>[x.user_id,x])),sm=new Map((subs||[]).map((x:any)=>[x.user_id,x])),byUser=new Map<string,any[]>();
  for(const a of activities||[]){if(!byUser.has(a.user_id))byUser.set(a.user_id,[]);byUser.get(a.user_id)!.push(a)}
- const rows=(users||[]).map((u:any)=>{const p:any=pm.get(u.id)||{},s:any=sm.get(u.id)||{},st=(byUser.get(u.id)||[]).map((a:any)=>({activity_code:a.activity_code,status:a.status,score:Number(a.score||0),max_score:Number(a.max_score||0),started_at:a.started_at,completed_at:a.completed_at}));let delay:null|number=null;if(window?.opened_at&&p.started_at)delay=Math.max(0,Math.round((Date.parse(p.started_at)-Date.parse(window.opened_at))/1000));return {user_id:u.id,display_name:u.display_name||u.username,status:p.status||"not_started",score:Number(s.score??p.score??0),max_score:Number(s.max_score??p.max_score??100),note_5:s.note_5??null,started_at:p.started_at||null,start_delay_seconds:delay,active_seconds:Number(p.active_seconds||0),last_activity_at:p.last_activity_at||null,submitted_at:s.submitted_at||p.submitted_at||null,validated:!!s.validated,sha256:s.sha256||null,stages:st}});
- rows.sort((a:any,b:any)=>{if(b.score!==a.score)return b.score-a.score;if(window?.opened_at){const da=a.start_delay_seconds??Number.MAX_SAFE_INTEGER,dbb=b.start_delay_seconds??Number.MAX_SAFE_INTEGER;if(da!==dbb)return da-dbb}else{const ta=a.started_at?Date.parse(a.started_at):Number.MAX_SAFE_INTEGER,tb=b.started_at?Date.parse(b.started_at):Number.MAX_SAFE_INTEGER;if(ta!==tb)return ta-tb}const sa=a.submitted_at?Date.parse(a.submitted_at):Number.MAX_SAFE_INTEGER,sb=b.submitted_at?Date.parse(b.submitted_at):Number.MAX_SAFE_INTEGER;return sa-sb});
- return {viewer:ctx.user,run,session_window:window,ranking:rows,access_requests:requests||[]}
+ const rows=(users||[]).map((u:any)=>{
+  const p:any=pm.get(u.id)||{},s:any=sm.get(u.id)||{},st=(byUser.get(u.id)||[]).map((a:any)=>({activity_code:a.activity_code,status:a.status,score:Number(a.score||0),max_score:Number(a.max_score||0),started_at:a.started_at,completed_at:a.completed_at}));
+  let delay:null|number=null;if(window?.opened_at&&p.started_at)delay=Math.max(0,Math.round((Date.parse(p.started_at)-Date.parse(window.opened_at))/1000));
+  return {user_id:u.id,display_name:u.display_name||u.username,status:p.status||"not_started",score:Number(s.score??p.score??0),max_score:Number(s.max_score??p.max_score??100),note_5:s.note_5??null,started_at:p.started_at||null,start_delay_seconds:delay,active_seconds:Number(p.active_seconds||0),last_activity_at:p.last_activity_at||null,submitted_at:s.submitted_at||p.submitted_at||null,validated:!!s.validated,sha256:s.sha256||null,stages:st}
+ });
+ rows.sort((a:any,b:any)=>b.score-a.score);
+
+ const [{data:groups},{data:members},{data:groupSubs}]=await Promise.all([
+  db.from("lms_groups_v2").select("id,name,description,active").eq("course_run_id",run.id).eq("active",true).order("name"),
+  db.from("lms_group_members_v2").select("group_id,user_id,role"),
+  assignment?.id?db.from("lms_group_submissions_v2").select("*").eq("assignment_id",assignment.id).order("attempt",{ascending:false}):Promise.resolve({data:[]} as any)
+ ]);
+ const userMap=new Map((users||[]).map((u:any)=>[u.id,u]));
+ const rowMap=new Map(rows.map((r:any)=>[r.user_id,r]));
+ const latestGroupSub=new Map<string,any>();
+ for(const s of groupSubs||[])if(!latestGroupSub.has(s.group_id))latestGroupSub.set(s.group_id,s);
+ const groupRows=(groups||[]).map((g:any)=>{
+  const gm=(members||[]).filter((m:any)=>m.group_id===g.id&&ids.includes(m.user_id));
+  const sub:any=latestGroupSub.get(g.id)||null;
+  const names=gm.map((m:any)=>(userMap.get(m.user_id) as any)?.display_name||(userMap.get(m.user_id) as any)?.username||"Participante");
+  const memberRows=gm.map((m:any)=>rowMap.get(m.user_id)).filter(Boolean);
+  const active_seconds=memberRows.reduce((z:number,r:any)=>z+Number(r.active_seconds||0),0);
+  const starts=memberRows.map((r:any)=>r.started_at).filter(Boolean).sort();
+  const stages:any={};
+  for(const code of Object.values(STAGE_ACTIVITY))stages[code]={score:0,max_score:0,status:"not_started"};
+  for(const r of memberRows)for(const st of r.stages||[]){
+   if(!stages[st.activity_code])continue;
+   if(Number(st.score||0)>Number(stages[st.activity_code].score||0))stages[st.activity_code]={score:Number(st.score||0),max_score:Number(st.max_score||0),status:st.status}
+  }
+  return {
+   group_id:g.id,group_name:g.name,members:names,member_count:gm.length,
+   score:sub?.score!=null?Number(sub.score):0,max_score:100,
+   note_5:sub?.score!=null?Math.round((1+4*Number(sub.score)/100)*100)/100:null,
+   status:sub?.status||"not_submitted",attempt:sub?.attempt||0,submitted_at:sub?.submitted_at||null,
+   active_seconds,started_at:starts[0]||null,stages
+  }
+ });
+ groupRows.sort((a:any,b:any)=>b.score-a.score||(a.submitted_at?Date.parse(a.submitted_at):Number.MAX_SAFE_INTEGER)-(b.submitted_at?Date.parse(b.submitted_at):Number.MAX_SAFE_INTEGER));
+ const assigned=new Set((members||[]).map((m:any)=>m.user_id));
+ const unassigned=(users||[]).filter((u:any)=>!assigned.has(u.id)).map((u:any)=>({user_id:u.id,display_name:u.display_name||u.username}));
+ return {viewer:ctx.user,run,session_window:window,ranking:rows,group_ranking:groupRows,unassigned_students:unassigned,access_requests:requests||[]}
 }
 
 Deno.serve(async(req:Request)=>{
@@ -287,7 +395,7 @@ Deno.serve(async(req:Request)=>{
  try{
   if(action==="me"){const def=await sessionDefinition(),progress=await ownProgress(ctx.user.id,run.id);return out(req,{viewer:ctx.user,run,...def,...progress})}
   if(action==="track"){const event=String(body.event_type||"");if(!TRACK_EVENTS.has(event))return out(req,{error:"Evento no permitido"},400);const activity=body.activity_code?String(body.activity_code):null;if(activity&&!ACTIVITY_CODES.has(activity))return out(req,{error:"Actividad no válida"},400);const delta=event==="heartbeat"?Math.max(0,Math.min(30,Math.round(Number(body.active_seconds_delta||0)))):0,now=new Date().toISOString();await db.from("bd_lms_events").insert({user_id:ctx.user.id,course_run_id:run.id,event_type:event,session_number:SESSION,activity_code:activity,active_seconds_delta:delta,metadata:cleanMeta(body.metadata),client_at:body.client_at?String(body.client_at):null,created_at:now});if(["notebook_opened","activity_started","stage_opened"].includes(event))await ensureSessionStarted(ctx.user.id,run.id);else if(event==="heartbeat")await heartbeat(ctx.user.id,run.id,delta);if(activity&&["activity_started","stage_opened"].includes(event))await touchActivity(ctx.user.id,run.id,activity);return out(req,{ok:true})}
-  if(action==="submit_manifest"){const m=await verifyManifest(String(body.manifest_text||""));await persistManifest(ctx,run,m);const p=await ownProgress(ctx.user.id,run.id);return out(req,{ok:true,validated:true,score:m.score,note_5:m.note,sha256:m.sha,...p})}
+  if(action==="submit_manifest"){const m=await verifyManifest(String(body.manifest_text||""));const g=await persistManifest(ctx,run,m);const p=await ownProgress(ctx.user.id,run.id);return out(req,{ok:true,validated:true,score:m.score,note_5:m.note,sha256:m.sha,group_submission_id:g.group_submission.id,...p})}
   if(action==="teacher_open_session"){try{return out(req,{ok:true,session_window:await openOfficial(ctx,run)})}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
   if(action==="teacher_wall"){try{return out(req,await teacherWall(ctx,run))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
   if(action==="teacher_admin_overview"){try{return out(req,await teacherAdminOverview(ctx,run))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}

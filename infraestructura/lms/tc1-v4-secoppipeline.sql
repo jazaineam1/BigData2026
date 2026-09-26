@@ -9,6 +9,9 @@ set title='SECOP Data Pipeline · API, concurrencia y NoSQL',
       'source','Cuadernos/Taller_Control_1.ipynb',
       'reference','assets/tutoriales/s08-secoppipeline.html',
       'max_score',100,
+      'estimated_minutes',360,
+      'work_mode','class_and_home',
+      'group_assessment',true,
       'validator_version','2026-09-26-secoppipeline'
     )
 where course_code='bigdata' and session_number=8;
@@ -44,7 +47,7 @@ where code='bd-s08-e5';
 update public.bd_lms_activities
 set title='E6 · Decisiones, informe y paquete',
     points=10,
-    metadata='{"checks":["E6_decisiones_informe","E6_paquete_reproducible"]}'::jsonb
+    metadata='{"checks":["E6_decisiones_informe","E6_microdefensa_grupal","E6_paquete_reproducible"]}'::jsonb
 where code='bd-s08-e6';
 
 update public.bd_lms_activities
@@ -83,3 +86,26 @@ set domain='Documental',
     updated_at=now()
 where course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1)
   and code='BD-E2';
+
+
+-- TC1 se entrega y califica por equipo.
+insert into public.lms_assignment_group_settings_v2(
+  assignment_id,enabled,peer_review_enabled,reviews_per_student,peer_rubric,anonymous_peer_review,updated_at
+)
+select id,true,false,1,'[]'::jsonb,false,now()
+from public.lms_assignments_v2
+where code='bd-s08-control'
+  and course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1)
+on conflict (assignment_id) do update
+set enabled=true,
+    peer_review_enabled=false,
+    reviews_per_student=1,
+    peer_rubric='[]'::jsonb,
+    anonymous_peer_review=false,
+    updated_at=now();
+
+update public.lms_assignments_v2
+set instructions='Proyecto grupal de trabajo en clase y en casa. Dedicación mínima esperada: 6 horas por grupo. Entregables: notebook ejecutado, TC1_<pareja>.zip y manifest_tc1.json. Un integrante carga el manifest validado; el LMS registra una sola calificación del equipo y la replica a todos sus integrantes. La microdefensa escrita forma parte de la evidencia E6 y no crea una segunda nota.',
+    updated_at=now()
+where code='bd-s08-control'
+  and course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1);

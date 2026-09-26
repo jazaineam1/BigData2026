@@ -33,7 +33,7 @@ checks=[
     ("gestor enlaza gradebook", 'href="gradebook.html"' in teacher),
     ("estudiante lista tareas", "L.core('assignments')" in assign),
     ("estudiante entrega intento", "submit_assignment" in assign and "submitAssignment" in core),
-    ("S08 usa evidencia automática", "bd-s08-control" in assign and "syncManifestGradebook" in s08edge),
+    ("S08 usa evidencia automática", "bd-s08-control" in assign and "syncManifestGroupGradebook" in s08edge and "lms_group_submissions_v2" in s08edge),
     ("docente abre gradebook", "teacher_gradebook" in grade and "gradebook(ctx" in core),
     ("docente crea tarea", "teacher_save_assignment" in grade and "saveAssignment" in core),
     ("rúbrica validada", "cleanRubric" in core and "La suma de la rúbrica" in core),

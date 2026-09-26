@@ -20,6 +20,7 @@ s08=read("lms/session-08.html")
 edge=read("infraestructura/lms/functions/bigdata-learning/index.ts")
 sql=read("infraestructura/lms/tc1-v4-secoppipeline.sql")
 pages=read(".github/workflows/pages.yml")
+index=read("index.html")
 
 try:
     nb=json.loads(nb_text)
@@ -40,6 +41,8 @@ checks=[
     ("RAW parquet", 'RAW = OUT / "raw"' in all_src and "to_parquet" in all_src),
     ("Atlas idempotente", "bulk_write" in all_src and "UpdateOne" in all_src and "upsert=True" in all_src),
     ("decision log", "decision_log" in all_src),
+    ("carga mínima 6h", "6–8 horas por grupo" in all_src and "Dedicación mínima prevista por grupo: 6 horas" in all_src),
+    ("microdefensa grupal", "defensa_grupal" in all_src and "06_microdefensa_grupal.json" in all_src and "E6_microdefensa_grupal" in validator),
     ("validador actual", 'VERSION = "2026-09-26-secoppipeline"' in validator),
     ("E1 adquisición completa", all(x in validator for x in ["E1_contrato_y_query","E1_descarga_secuencial","E1_concurrencia_equivalente","E1_trazabilidad_calidad"])),
     ("E2 idempotencia", "E2_atlas_idempotente" in validator and "E2_indices" in validator),
@@ -47,13 +50,21 @@ checks=[
     ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-09-26-secoppipeline" in edge and "security_no_secrets" in edge),
     ("gate de secretos", "secret_patterns" in validator and '"gates":gates' in validator),
     ("backend persiste versión real", "manifest_version:m.version" in edge and "validator_version:m.version" in edge),
+    ("calificación grupal", "tc1GroupContext" in edge and "syncManifestGroupGradebook" in edge and "lms_group_submissions_v2" in edge and "Calificación grupal TC1" in edge),
+
     ("migración actividad", "E1 · API SECOP, concurrencia y trazabilidad" in sql),
     ("rúbrica 25/25/10/15/15/10", 'STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}' in validator and sql.count('"max":25')>=2 and sql.count('"max":15')>=2 and sql.count('"max":10')>=2),
     ("S08 nueva", "SECOP Data Pipeline" in s08 and "s08-secoppipeline.html" in s08 and "V4" not in s08),
+    ("S08 entrega por equipo", "group_context" in edge and "Sin equipo asignado" in s08 and "misma calificación" in s08),
+
     ("sin guía Markdown redundante", not (ROOT/"Talleres/Taller_Control_1.md").exists()),
     ("referencia no procedimental", "Pistas, no respuestas" in tutorial and "Paso a paso" not in tutorial and "hash" in tutorial.lower()),
     ("Pages referencia", "test -f _site/assets/tutoriales/s08-secoppipeline.html" in pages and "Talleres/Taller_Control_1.md" not in pages),
     ("builder canónico", "Cuadernos" in builder and "Taller_Control_1.ipynb" in builder),
+    ("portada sin bloque redundante", "Aprender = comprender, practicar, comprobar y transferir." not in index and "La evidencia importa más que completar una pantalla." not in index and 'id="metodo"' not in index),
+    ("LMS declara 6h", "mínimo 6 horas por grupo" in s08 and "'estimated_minutes',360" in sql),
+    ("LMS grupal en SQL", "lms_assignment_group_settings_v2" in sql and "'group_assessment',true" in sql and "Proyecto grupal" in sql),
+    ("manifest único por grupo", "Este manifest ya fue registrado por otro equipo" in edge),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
