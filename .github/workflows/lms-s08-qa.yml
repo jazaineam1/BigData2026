@@ -74,6 +74,13 @@ jobs:
         run: |
           cp Cuadernos/Taller_Control_1.ipynb /tmp/Taller_Control_1.ipynb
           python utils/build_taller_control_1.py
-          diff -u /tmp/Taller_Control_1.ipynb Cuadernos/Taller_Control_1.ipynb
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          original=json.loads(Path("/tmp/Taller_Control_1.ipynb").read_text(encoding="utf-8"))
+          rebuilt=json.loads(Path("Cuadernos/Taller_Control_1.ipynb").read_text(encoding="utf-8"))
+          assert original==rebuilt, "El notebook generado no coincide semánticamente con el versionado"
+          print("Notebook reproducible: OK")
+          PY
       - name: Validar TC1 V4
         run: python utils/validate_tc1_v4.py
