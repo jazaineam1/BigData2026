@@ -177,24 +177,6 @@ async function recomputeSession(userId:string,runId:string){
   },{onConflict:"user_id,course_run_id,session_number"});
   return {completed,total:CHECKPOINT_CODES.size,done};
 }
-async function completeCheckpoint(ctx:any,run:any,code:string){
-  if(!CHECKPOINT_CODES.has(code))throw new Error("Checkpoint no válido");
-  await ensureSessionStarted(ctx.user.id,run.id);
-  const now=new Date().toISOString();
-  const {data:p}=await db.from("bd_lms_activity_progress").select("*")
-    .eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("activity_code",code).maybeSingle();
-  await db.from("bd_lms_activity_progress").upsert({
-    user_id:ctx.user.id,course_run_id:run.id,activity_code:code,status:"completed",
-    started_at:p?.started_at||now,attempts:Number(p?.attempts||0),score:1,max_score:1,
-    completed_at:p?.completed_at||now,updated_at:now,metadata:{source:"s09-self-checkpoint",formative:true}
-  },{onConflict:"user_id,course_run_id,activity_code"});
-  await db.from("bd_lms_events").insert({
-    user_id:ctx.user.id,course_run_id:run.id,event_type:"checkpoint_completed",
-    session_number:SESSION,activity_code:code,metadata:{formative:true},created_at:now
-  });
-  return {ok:true,...await recomputeSession(ctx.user.id,run.id)};
-}
-
 async function answerChallenge(ctx:any,run:any,code:string,rawAnswer:any){
   if(!CHECKPOINT_CODES.has(code))throw new Error("Desafío no válido");
   const answer=String(rawAnswer||"").trim().slice(0,100);
@@ -315,7 +297,6 @@ Deno.serve(async(req:Request)=>{
       return out(req,{ok:true});
     }
     if(action==="answer_challenge")return out(req,await answerChallenge(ctx,run,String(body.activity_code||""),body.answer));
-    if(action==="complete_checkpoint")return out(req,await completeCheckpoint(ctx,run,String(body.activity_code||"")));
     if(action==="teacher_open_session")return out(req,{ok:true,session_window:await openOfficial(ctx,run)});
     if(action==="teacher_wall")return out(req,await teacherWall(ctx,run));
     return out(req,{error:"Acción desconocida"},400);
