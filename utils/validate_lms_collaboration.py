@@ -40,8 +40,13 @@ checks=[
     ("moderación docente", "teacher_moderate_thread" in teacher and "teacher_pin_answer" in teacher),
     ("revisión pares", "submit_peer_review" in student and "submitPeerReview" in core),
     ("no revisión propio equipo", "No puedes revisar la entrega de tu propio equipo" in core),
+    ("peer review no expone autor", "peerTargets.push({" in core and "submitted_by:x.submitted_by" not in core and "group_id:x.group_id" not in core),
+    ("foros aislados por cohorte", "const threadIds=new Set((threads||[]).map((t:any)=>t.id))" in core and "const postRows=(posts||[]).filter((p:any)=>threadIds.has(p.thread_id))" in core),
+    ("menciones por respuesta", "lms_discussion_mentions_v2" in sql and "mentioned_user_id:parent.user_id" in core and "parent_id:f.parent_id.value" in student),
+    ("conversación inicia con mensaje", "initialBody=clampText(body.body,8000,true)" in core and 'name="body"' in student),
+    ("FAQ con respuesta destacada", "teacher_pin_answer" in teacher and "pinned_answer" in student),
     ("tablas por cohorte", "course_run_id uuid not null references public.lms_course_runs" in sql),
-    ("RLS colaboración", sql.count("enable row level security")>=8),
+    ("RLS colaboración", sql.count("enable row level security")>=9),
     ("sin acceso público directo", "from anon, authenticated" in sql and "to service_role" in sql),
     ("Pages estudiante", "test -f _site/lms/collaboration.html" in pages),
     ("Pages docente", "test -f _site/lms/teacher-collaboration.html" in pages),
@@ -74,6 +79,7 @@ print("COLABORACION: OK")
 print(" - equipos + contribución individual")
 print(" - entregas grupales sincronizadas")
 print(" - discusión + moderación")
-print(" - revisión por pares")
+print(" - revisión por pares + anonimato")
+print(" - foros aislados + menciones")
 print(" - S07 intacta")
 print(" - JS válido")
