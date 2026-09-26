@@ -70,5 +70,10 @@ jobs:
         run: python utils/validate_lms_analytics.py
       - name: Validar colaboración
         run: python utils/validate_lms_collaboration.py
+      - name: Verificar notebook reproducible
+        run: |
+          cp Cuadernos/Taller_Control_1.ipynb /tmp/Taller_Control_1.ipynb
+          python utils/build_taller_control_1.py
+          diff -u /tmp/Taller_Control_1.ipynb Cuadernos/Taller_Control_1.ipynb
       - name: Validar TC1 V4
         run: python utils/validate_tc1_v4.py
