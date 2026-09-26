@@ -16,6 +16,12 @@ on:
       - utils/validate_lms_competencies.py
       - utils/validate_lms_analytics.py
       - utils/validate_lms_collaboration.py
+      - utils/validate_tc1_v4.py
+      - utils/tc1_validator.py
+      - utils/build_taller_control_1.py
+      - Cuadernos/Taller_Control_1.ipynb
+      - Talleres/Taller_Control_1.md
+      - assets/tutoriales/s08-secoppipeline.html
       - Presentaciones/s07-del-vecindario-al-texto.html
       - .github/workflows/lms-s08-qa.yml
   pull_request:
@@ -49,7 +55,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Comprobar sintaxis de validadores
-        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py utils/validate_lms_core.py utils/validate_lms_gradebook.py utils/validate_lms_competencies.py utils/validate_lms_analytics.py utils/validate_lms_collaboration.py
+        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py utils/validate_lms_core.py utils/validate_lms_gradebook.py utils/validate_lms_competencies.py utils/validate_lms_analytics.py utils/validate_lms_collaboration.py utils/validate_tc1_v4.py utils/tc1_validator.py utils/build_taller_control_1.py
       - name: Validar LMS S08 y guardia S07
         run: python utils/validate_lms_s08.py
       - name: Validar administrador docente
@@ -64,3 +70,5 @@ jobs:
         run: python utils/validate_lms_analytics.py
       - name: Validar colaboración
         run: python utils/validate_lms_collaboration.py
+      - name: Validar TC1 V4
+        run: python utils/validate_tc1_v4.py
