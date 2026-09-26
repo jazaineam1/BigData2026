@@ -33,7 +33,7 @@ labs=[
 checks=[
  ("portada recupera fondo UC", 'assets/img/bg-masthead.jpg' in index and 'class="hero"' in index),
  ("portada sin copy rechazado", "Aprender haciendo, con evidencia." not in index and "Una ruta integrada para comprender arquitecturas" not in index),
- ("módulo máximo dos recursos", "slice(0,2)" in session and "Máximo 2 por sesión" in session),
+ ("módulo máximo dos recursos", "slice(0,2)" in session and "Recursos de la sesión" in session),
  ("migración limita recursos", "row_number() over(partition by course_run_id,session_number" in migration and "x.rn>2" in migration),
  ("CHECK de eventos versionado", all(x in migration for x in ["slide_viewed","challenge_answered","lab_interaction","evidence_submitted","lab_code_issued"])),
  ("tablas de evidencia protegidas", all(x in migration for x in ["bd_activity_catalog","bd_evidence","bd_lab_codes","enable row level security","revoke all"])),
