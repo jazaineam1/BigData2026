@@ -1,22 +1,102 @@
 {
-  "version": 2,
+  "version": 3,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
   "institution": "Universidad Central",
   "total_sessions": 16,
   "current_tracked_session": 8,
-  "tracking_policy": "S08 es el primer vertical slice LMS. S07 conserva su implementación existente sin modificaciones.",
+  "tracking_policy": "S01–S08 visibles con recursos verificados; S09–S16 permanecen en borrador hasta publicación docente. S07 conserva su implementación existente sin modificaciones.",
   "sessions": [
+    {
+      "n": 1,
+      "title": "Introducción a Big Data e ingesta",
+      "status": "visible"
+    },
+    {
+      "n": 2,
+      "title": "Del problema de negocio a una arquitectura",
+      "status": "visible"
+    },
+    {
+      "n": 3,
+      "title": "Cuando una fila ya no representa el dato",
+      "status": "visible"
+    },
+    {
+      "n": 4,
+      "title": "Atlas y Cassandra: dos preguntas, dos modelos",
+      "status": "visible"
+    },
+    {
+      "n": 5,
+      "title": "De evidencia a bandeja operacional",
+      "status": "visible"
+    },
+    {
+      "n": 6,
+      "title": "De la fila priorizada al contexto relacional",
+      "status": "visible"
+    },
+    {
+      "n": 7,
+      "title": "Construye un buscador: del corpus al ranking",
+      "status": "visible",
+      "protected": true
+    },
     {
       "n": 8,
       "title": "Integra 6 CSV y construye una solución NoSQL",
-      "status": "tracked",
-      "path": "session-08.html",
-      "source": "../Cuadernos/Taller_Control_1.ipynb"
+      "status": "visible",
+      "tracked": true
+    },
+    {
+      "n": 9,
+      "title": "Sesión 09 · por publicar",
+      "status": "draft"
+    },
+    {
+      "n": 10,
+      "title": "Sesión 10 · por publicar",
+      "status": "draft"
+    },
+    {
+      "n": 11,
+      "title": "Sesión 11 · por publicar",
+      "status": "draft"
+    },
+    {
+      "n": 12,
+      "title": "Sesión 12 · por publicar",
+      "status": "draft"
+    },
+    {
+      "n": 13,
+      "title": "Sesión 13 · por publicar",
+      "status": "draft"
+    },
+    {
+      "n": 14,
+      "title": "Sesión 14 · por publicar",
+      "status": "draft"
+    },
+    {
+      "n": 15,
+      "title": "Sesión 15 · por publicar",
+      "status": "draft"
+    },
+    {
+      "n": 16,
+      "title": "Sesión 16 · por publicar",
+      "status": "draft"
     }
   ],
   "teacher_tools": [
+    {
+      "code": "course",
+      "title": "Gestor del curso",
+      "path": "teacher-course.html"
+    },
     {
       "code": "wall",
       "title": "WALL S08",
