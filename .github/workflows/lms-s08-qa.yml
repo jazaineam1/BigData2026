@@ -14,6 +14,7 @@ on:
       - utils/validate_lms_core.py
       - utils/validate_lms_gradebook.py
       - utils/validate_lms_competencies.py
+      - utils/validate_lms_analytics.py
       - Presentaciones/s07-del-vecindario-al-texto.html
       - .github/workflows/lms-s08-qa.yml
   pull_request:
