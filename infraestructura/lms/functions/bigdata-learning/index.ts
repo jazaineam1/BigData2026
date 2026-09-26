@@ -99,7 +99,7 @@ async function verifyManifest(rawInput:string){
  const {clean,stageScores,stageMax}=summarizeControls(m.controles);const sum=Object.values(stageScores).reduce((a:number,b:any)=>a+Number(b),0);if(sum!==score)throw new Error("El detalle por etapas no suma el puntaje total");
  return {pair_hash:await digestHex(pair),score,note,sha:supplied,controls:clean,stageScores,stageMax,version}
 }
-async function syncManifestGroupGradebook(ctx:any,run:any,m:any,groupCtx:any){
+async function syncManifestGroupGradebook(ctx:any,run:any,m:any,groupCtx:any,evidenceUrl:string){
  const {data:a}=await db.from("lms_assignments_v2").select("id,max_attempts,max_score").eq("course_run_id",run.id).eq("code","bd-s08-control").eq("active",true).maybeSingle();
  if(!a)throw new Error("No existe la tarea TC1 activa en el Gradebook.");
  const {data:setting}=await db.from("lms_assignment_group_settings_v2").select("enabled").eq("assignment_id",a.id).eq("enabled",true).maybeSingle();
@@ -113,14 +113,14 @@ async function syncManifestGroupGradebook(ctx:any,run:any,m:any,groupCtx:any){
   const attempt=Number(prior?.attempt||0)+1;
   const {data,error}=await db.from("lms_group_submissions_v2").insert({
    assignment_id:a.id,group_id:groupCtx.group.id,attempt,artifact_type:"evidence",
-   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:m.version,pair_hash:m.pair_hash,stage_scores:m.stageScores},
+   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:m.version,pair_hash:m.pair_hash,stage_scores:m.stageScores,evidence_url:evidenceUrl},
    status:"reviewed",submitted_by:ctx.user.id,submitted_at:now,score:m.score,
    feedback:"Calificación automática grupal desde manifest_tc1.json validado en S08.",
    rubric_scores:m.stageScores,reviewed_at:now
   }).select("*").single();if(error)throw error;gs=data;
  }else{
   const {data,error}=await db.from("lms_group_submissions_v2").update({
-   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:m.version,pair_hash:m.pair_hash,stage_scores:m.stageScores},
+   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:m.version,pair_hash:m.pair_hash,stage_scores:m.stageScores,evidence_url:evidenceUrl},
    status:"reviewed",submitted_by:ctx.user.id,submitted_at:now,score:m.score,
    feedback:"Calificación automática grupal actualizada desde la validación más reciente de S08.",
    rubric_scores:m.stageScores,reviewed_at:now
@@ -133,14 +133,14 @@ async function syncManifestGroupGradebook(ctx:any,run:any,m:any,groupCtx:any){
    const attempt=Number(latest?.attempt||0)+1;
    const {data,error}=await db.from("lms_submissions_v2").insert({
     assignment_id:a.id,user_id:member.user_id,attempt,artifact_type:"evidence",
-    artifact:{source:"group_submission",group_submission_id:gs.id,group_id:groupCtx.group.id,sha256:m.sha,validator_version:m.version},
+    artifact:{source:"group_submission",group_submission_id:gs.id,group_id:groupCtx.group.id,sha256:m.sha,validator_version:m.version,evidence_url:evidenceUrl},
     status:"reviewed",submitted_at:now,score:m.score,
     feedback:"Calificación grupal TC1 · "+groupCtx.group.name+".",
     rubric_scores:m.stageScores,reviewed_at:now
    }).select("*").single();if(error)throw error;ind=data;
   }else{
    const {data,error}=await db.from("lms_submissions_v2").update({
-    artifact:{source:"group_submission",group_submission_id:gs.id,group_id:groupCtx.group.id,sha256:m.sha,validator_version:m.version},
+    artifact:{source:"group_submission",group_submission_id:gs.id,group_id:groupCtx.group.id,sha256:m.sha,validator_version:m.version,evidence_url:evidenceUrl},
     status:"reviewed",submitted_at:now,score:m.score,
     feedback:"Calificación grupal TC1 · "+groupCtx.group.name+".",
     rubric_scores:m.stageScores,reviewed_at:now
@@ -155,11 +155,11 @@ async function syncManifestGroupGradebook(ctx:any,run:any,m:any,groupCtx:any){
  return gs
 }
 
-async function persistManifest(ctx:any,run:any,m:any){
+async function persistManifest(ctx:any,run:any,m:any,evidenceUrl:string){
  const groupCtx=await tc1GroupContext(ctx.user.id,run.id);
  if(!groupCtx)throw new Error("TC1 se califica por grupo. El docente debe asignarte a un equipo activo antes de registrar la entrega.");
  const now=new Date().toISOString();
- const groupSubmission=await syncManifestGroupGradebook(ctx,run,m,groupCtx);
+ const groupSubmission=await syncManifestGroupGradebook(ctx,run,m,groupCtx,evidenceUrl);
  for(const member of groupCtx.members||[]){
   await ensureSessionStarted(member.user_id,run.id);
   const {error}=await db.from("bd_lms_s08_submissions").upsert({
@@ -395,7 +395,7 @@ Deno.serve(async(req:Request)=>{
  try{
   if(action==="me"){const def=await sessionDefinition(),progress=await ownProgress(ctx.user.id,run.id);return out(req,{viewer:ctx.user,run,...def,...progress})}
   if(action==="track"){const event=String(body.event_type||"");if(!TRACK_EVENTS.has(event))return out(req,{error:"Evento no permitido"},400);const activity=body.activity_code?String(body.activity_code):null;if(activity&&!ACTIVITY_CODES.has(activity))return out(req,{error:"Actividad no válida"},400);const delta=event==="heartbeat"?Math.max(0,Math.min(30,Math.round(Number(body.active_seconds_delta||0)))):0,now=new Date().toISOString();await db.from("bd_lms_events").insert({user_id:ctx.user.id,course_run_id:run.id,event_type:event,session_number:SESSION,activity_code:activity,active_seconds_delta:delta,metadata:cleanMeta(body.metadata),client_at:body.client_at?String(body.client_at):null,created_at:now});if(["notebook_opened","activity_started","stage_opened"].includes(event))await ensureSessionStarted(ctx.user.id,run.id);else if(event==="heartbeat")await heartbeat(ctx.user.id,run.id,delta);if(activity&&["activity_started","stage_opened"].includes(event))await touchActivity(ctx.user.id,run.id,activity);return out(req,{ok:true})}
-  if(action==="submit_manifest"){const m=await verifyManifest(String(body.manifest_text||""));const g=await persistManifest(ctx,run,m);const p=await ownProgress(ctx.user.id,run.id);return out(req,{ok:true,validated:true,score:m.score,note_5:m.note,sha256:m.sha,group_submission_id:g.group_submission.id,...p})}
+  if(action==="submit_manifest"){const evidenceUrl=String(body.evidence_url||"").trim();let parsedUrl:URL;try{parsedUrl=new URL(evidenceUrl)}catch{throw new Error("Registra un enlace válido a la carpeta de evidencia del grupo.")}if(!["https:","http:"].includes(parsedUrl.protocol))throw new Error("El enlace de evidencia debe usar http o https.");const m=await verifyManifest(String(body.manifest_text||""));const g=await persistManifest(ctx,run,m,evidenceUrl);const p=await ownProgress(ctx.user.id,run.id);return out(req,{ok:true,validated:true,score:m.score,note_5:m.note,sha256:m.sha,group_submission_id:g.group_submission.id,...p})}
   if(action==="teacher_open_session"){try{return out(req,{ok:true,session_window:await openOfficial(ctx,run)})}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
   if(action==="teacher_wall"){try{return out(req,await teacherWall(ctx,run))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
   if(action==="teacher_admin_overview"){try{return out(req,await teacherAdminOverview(ctx,run))}catch(e){if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);throw e}}
