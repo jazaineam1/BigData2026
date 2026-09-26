@@ -31,7 +31,7 @@
 <main class="wrap">
 <div id="status" class="status hidden"></div>
 <section style="max-width:980px;margin:0 auto">
-<div id="ey" class="ey">Sesión</div>
+<div class="actions" style="justify-content:space-between;align-items:center"><div id="ey" class="ey">Sesión</div><span class="pill active">Sesión LMS activa</span></div>
 <h1 id="title">Cargando sesión…</h1>
 <p id="summary" class="lead"></p>
 
@@ -52,12 +52,12 @@
 <ul id="outcomes" class="outcomes-v3" style="margin-top:12px"></ul>
 </details>
 
-<details id="labCodeCard" class="card hidden">
-<summary><b>Conectar el cuaderno con el LMS</b></summary>
-<p class="muted">Si el cuaderno te pide un código, genéralo aquí. Vence en 6 horas.</p>
+<section id="labCodeCard" class="card hidden">
+<div class="ey">Cuaderno</div><h2>Código de laboratorio</h2>
+<p class="muted">Úsalo solo si el cuaderno te lo solicita. Vence en 6 horas.</p>
 <div class="actions"><button id="labCodeBtn" class="btn alt">Generar código</button></div>
 <div id="labCodeBox" class="note hidden" style="margin-top:10px"><span class="muted">Código actual</span><div><code id="labCodeValue" style="font-size:1.35rem;font-weight:950;letter-spacing:.12em"></code></div><span id="labCodeExpiry" class="muted"></span></div>
-</details>
+</section>
 </section>
 </main>
 
