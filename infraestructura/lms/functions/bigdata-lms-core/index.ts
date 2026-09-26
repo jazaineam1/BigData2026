@@ -387,6 +387,95 @@ async function gradeHistory(ctx:any,run:any,body:any){
   return {history:data||[]};
 }
 
+
+async function competencyContext(run:any){
+  const [{data:competencies},{data:mappings},{data:assignments}] = await Promise.all([
+    db.from("lms_competencies_v2").select("*").eq("course_run_id",run.id).order("position"),
+    db.from("lms_assignment_competencies_v2").select("*").eq("course_run_id",run.id),
+    db.from("lms_assignments_v2").select("id,code,title,max_score,rubric,active").eq("course_run_id",run.id)
+  ]);
+  return {competencies:competencies||[],mappings:mappings||[],assignments:assignments||[]};
+}
+function computeCompetencyRows(context:any,submissions:any[]){
+  const assignmentMap=new Map((context.assignments||[]).map((a:any)=>[a.id,a]));
+  const latest=new Map<string,any>();
+  for(const s of (submissions||[]).sort((a:any,b:any)=>Number(b.attempt)-Number(a.attempt))){
+    if(s.score==null)continue;
+    if(!latest.has(s.assignment_id))latest.set(s.assignment_id,s);
+  }
+  return (context.competencies||[]).filter((c:any)=>c.active).map((comp:any)=>{
+    const maps=(context.mappings||[]).filter((m:any)=>m.competency_code===comp.code);
+    const evidence:any[]=[];
+    for(const m of maps){
+      const a:any=assignmentMap.get(m.assignment_id),s:any=latest.get(m.assignment_id);
+      if(!a||!s)continue;
+      let score:number|null=null,max:number|null=null,label="Puntaje total";
+      if(m.rubric_code&&m.rubric_code!=="__overall__"){
+        const criterion=(Array.isArray(a.rubric)?a.rubric:[]).find((x:any)=>String(x.code)===String(m.rubric_code));
+        const raw=s.rubric_scores?.[m.rubric_code];
+        if(criterion&&raw!==undefined&&raw!==null){score=Number(raw);max=Number(criterion.max);label=criterion.title||m.rubric_code}
+      }else if(s.score!==null&&s.score!==undefined){score=Number(s.score);max=Number(a.max_score)}
+      if(score===null||max===null||!Number.isFinite(score)||!Number.isFinite(max)||max<=0)continue;
+      evidence.push({assignment_id:a.id,assignment_code:a.code,assignment_title:a.title,rubric_code:m.rubric_code,label,score,max,pct:Math.max(0,Math.min(100,100*score/max)),weight:Number(m.weight||1),attempt:s.attempt,reviewed_at:s.reviewed_at,submitted_at:s.submitted_at});
+    }
+    const totalWeight=evidence.reduce((z:number,e:any)=>z+e.weight,0);
+    const mastery_pct=totalWeight?evidence.reduce((z:number,e:any)=>z+e.pct*e.weight,0)/totalWeight:null;
+    const enough=evidence.length>=Number(comp.min_evidence_count||1);
+    const status=!evidence.length?"pending":(enough&&Number(mastery_pct)>=Number(comp.mastery_threshold)?"mastered":"developing");
+    return {...comp,mastery_pct:mastery_pct===null?null:Math.round(mastery_pct*10)/10,evidence_count:evidence.length,status,evidence};
+  });
+}
+async function competenciesForUser(ctx:any,run:any){
+  const context=await competencyContext(run);
+  const assignmentIds=(context.assignments||[]).map((a:any)=>a.id);
+  const {data:subs}=assignmentIds.length?await db.from("lms_submissions_v2").select("*").eq("user_id",ctx.user.id).in("assignment_id",assignmentIds):({data:[]} as any);
+  return {viewer:ctx.user,run,competencies:computeCompetencyRows(context,subs||[])};
+}
+async function teacherCompetencies(ctx:any,run:any){
+  requireTeacher(ctx);const context=await competencyContext(run);
+  const {data:enrollments}=await db.from("lms_run_enrollments").select("user_id,role,status").eq("course_run_id",run.id);
+  const studentIds=(enrollments||[]).filter((x:any)=>x.role==="student").map((x:any)=>x.user_id);
+  const assignmentIds=(context.assignments||[]).map((a:any)=>a.id);
+  const [{data:users},{data:subs}]=await Promise.all([
+    studentIds.length?db.from("lms_users").select("id,display_name,username,email,active").in("id",studentIds):Promise.resolve({data:[]} as any),
+    assignmentIds.length?db.from("lms_submissions_v2").select("*").in("assignment_id",assignmentIds):Promise.resolve({data:[]} as any)
+  ]);
+  const byUser=new Map<string,any[]>();for(const s of subs||[]){if(!byUser.has(s.user_id))byUser.set(s.user_id,[]);byUser.get(s.user_id)!.push(s)}
+  const students=(users||[]).map((u:any)=>({...u,competencies:computeCompetencyRows(context,byUser.get(u.id)||[])}));
+  return {viewer:ctx.user,run,...context,students};
+}
+async function saveCompetency(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const code=clampText(body.code,80,true).toUpperCase();
+  if(!/^[A-Z0-9][A-Z0-9_-]{2,79}$/.test(code))throw new Error("Código de competencia inválido");
+  const threshold=Number(body.mastery_threshold??80),minCount=Math.trunc(Number(body.min_evidence_count??1));
+  if(!Number.isFinite(threshold)||threshold<0||threshold>100)throw new Error("Umbral inválido");
+  if(minCount<1||minCount>20)throw new Error("Número mínimo de evidencias inválido");
+  const row={course_run_id:run.id,code,domain:clampText(body.domain,120,true),title:clampText(body.title,220,true),description:clampText(body.description,2000),position:Math.max(0,Math.trunc(Number(body.position||0))),mastery_threshold:threshold,min_evidence_count:minCount,active:body.active!==false,updated_at:new Date().toISOString()};
+  const {data,error}=await db.from("lms_competencies_v2").upsert(row,{onConflict:"course_run_id,code"}).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.competency.save","competency",code,{threshold,min_evidence_count:minCount});
+  return {ok:true,competency:data};
+}
+async function mapCompetency(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const assignmentId=clampText(body.assignment_id,80,true),code=clampText(body.competency_code,80,true).toUpperCase();
+  const rubricCode=clampText(body.rubric_code||"__overall__",80,true),weight=Number(body.weight||1);
+  if(!Number.isFinite(weight)||weight<=0)throw new Error("Peso inválido");
+  const [{data:a},{data:comp}]=await Promise.all([
+    db.from("lms_assignments_v2").select("id,rubric").eq("id",assignmentId).eq("course_run_id",run.id).maybeSingle(),
+    db.from("lms_competencies_v2").select("code").eq("course_run_id",run.id).eq("code",code).maybeSingle()
+  ]);
+  if(!a||!comp)throw new Error("Tarea o competencia no pertenece a esta cohorte");
+  if(rubricCode!=="__overall__"&&!(Array.isArray(a.rubric)&&a.rubric.some((x:any)=>String(x.code)===rubricCode)))throw new Error("El criterio de rúbrica no existe");
+  const {data,error}=await db.from("lms_assignment_competencies_v2").upsert({assignment_id:assignmentId,course_run_id:run.id,competency_code:code,rubric_code:rubricCode,weight},{onConflict:"assignment_id,competency_code,rubric_code"}).select("*").single();if(error)throw error;
+  await audit(ctx.user.id,"bigdata.competency.map","competency_mapping",code,{assignment_id:assignmentId,rubric_code:rubricCode});
+  return {ok:true,mapping:data};
+}
+async function unmapCompetency(ctx:any,run:any,body:any){
+  requireTeacher(ctx);const assignmentId=clampText(body.assignment_id,80,true),code=clampText(body.competency_code,80,true).toUpperCase(),rubricCode=clampText(body.rubric_code||"__overall__",80,true);
+  const {error}=await db.from("lms_assignment_competencies_v2").delete().eq("assignment_id",assignmentId).eq("course_run_id",run.id).eq("competency_code",code).eq("rubric_code",rubricCode);if(error)throw error;
+  await audit(ctx.user.id,"bigdata.competency.unmap","competency_mapping",code,{assignment_id:assignmentId,rubric_code:rubricCode});
+  return {ok:true};
+}
+
 Deno.serve(async(req:Request)=>{
   if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
   if(req.method==="OPTIONS")return new Response("ok",{headers:headers(req)});
@@ -416,6 +505,11 @@ Deno.serve(async(req:Request)=>{
     if(action==="teacher_grade_submission")return out(req,await gradeSubmission(ctx,run,body));
     if(action==="teacher_grade_history")return out(req,await gradeHistory(ctx,run,body));
     if(action==="teacher_set_accommodation")return out(req,await setAccommodation(ctx,run,body));
+    if(action==="competencies")return out(req,await competenciesForUser(ctx,run));
+    if(action==="teacher_competencies")return out(req,await teacherCompetencies(ctx,run));
+    if(action==="teacher_save_competency")return out(req,await saveCompetency(ctx,run,body));
+    if(action==="teacher_map_competency")return out(req,await mapCompetency(ctx,run,body));
+    if(action==="teacher_unmap_competency")return out(req,await unmapCompetency(ctx,run,body));
     return out(req,{error:"Acción desconocida"},400);
   }catch(e){
     if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);
