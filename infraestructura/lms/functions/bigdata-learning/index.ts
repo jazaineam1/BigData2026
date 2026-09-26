@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,{auth:{persistSession:false}});
-const COURSE="bigdata",RUN_CODE="bigdata-2026-2",SESSION=8,VALIDATOR_VERSION="2026-09-17-v3-historico-atlas";
+const COURSE="bigdata",RUN_CODE="bigdata-2026-2",SESSION=8,CURRENT_VALIDATOR_VERSION="2026-09-26-v4-secoppipeline";\nconst VALIDATOR_VERSIONS=new Set(["2026-09-17-v3-historico-atlas",CURRENT_VALIDATOR_VERSION]);
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 const TRACK_EVENTS=new Set(["page_opened","page_closed","heartbeat","notebook_opened","activity_started","stage_opened","ui_action"]);
 const ACTIVITY_CODES=new Set(["bd-s08-e1","bd-s08-e2","bd-s08-e3","bd-s08-e4","bd-s08-e5","bd-s08-e6","bd-s08-final"]);
@@ -75,12 +75,12 @@ async function verifyManifest(rawInput:string){
  const supplied=String(m.sha256||"").toLowerCase();if(!/^[0-9a-f]{64}$/.test(supplied))throw new Error("SHA-256 ausente o inválido");
  const pattern=/,\n  "sha256": "[0-9a-fA-F]{64}"\n}$/;const prior=raw.replace(pattern,"\n}");if(prior===raw)throw new Error("El archivo fue reformateado. Carga directamente manifest_tc1.json generado por el validador.");
  if(await digestHex(prior)!==supplied)throw new Error("SHA-256 no coincide: el manifest fue modificado después del validador");
- if(String(m.version||"")!==VALIDATOR_VERSION)throw new Error("Versión del validador no reconocida");
+ const version=String(m.version||"");if(!VALIDATOR_VERSIONS.has(version))throw new Error("Versión del validador no reconocida");
  const score=Number(m.puntaje),max=Number(m.maximo),note=Number(m.nota_5);if(!Number.isInteger(score)||score<0||score>100||max!==100)throw new Error("Puntaje del manifest inválido");
  const expected=Math.round((1+4*score/100)*100)/100;if(!Number.isFinite(note)||Math.abs(note-expected)>.001)throw new Error("Nota del manifest no corresponde al puntaje");
  const pair=String(m.pareja_id||"").trim();if(pair.length<3||pair.length>160)throw new Error("Identificador de pareja inválido");
  const {clean,stageScores,stageMax}=summarizeControls(m.controles);const sum=Object.values(stageScores).reduce((a:number,b:any)=>a+Number(b),0);if(sum!==score)throw new Error("El detalle por etapas no suma el puntaje total");
- return {pair_hash:await digestHex(pair),score,note,sha:supplied,controls:clean,stageScores,stageMax}
+ return {pair_hash:await digestHex(pair),score,note,sha:supplied,controls:clean,stageScores,stageMax,version}
 }
 async function syncManifestGradebook(ctx:any,run:any,m:any){
  const {data:a}=await db.from("lms_assignments_v2").select("id,max_attempts,max_score").eq("course_run_id",run.id).eq("code","bd-s08-control").eq("active",true).maybeSingle();
@@ -92,7 +92,7 @@ async function syncManifestGradebook(ctx:any,run:any,m:any){
   const attempt=Number(latest?.attempt||0)+1;
   const {data,error}=await db.from("lms_submissions_v2").insert({
    assignment_id:a.id,user_id:ctx.user.id,attempt,artifact_type:"evidence",
-   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:VALIDATOR_VERSION,stage_scores:m.stageScores},
+   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:m.version,stage_scores:m.stageScores},
    status:"reviewed",submitted_at:now,score:m.score,
    feedback:"Calificación automática desde manifest_tc1.json validado en S08.",
    rubric_scores:m.stageScores,reviewed_at:now
@@ -101,7 +101,7 @@ async function syncManifestGradebook(ctx:any,run:any,m:any){
  }else{
   previousScore=latest.score;previousFeedback=latest.feedback;
   const {data,error}=await db.from("lms_submissions_v2").update({
-   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:VALIDATOR_VERSION,stage_scores:m.stageScores},
+   artifact:{source:"manifest_tc1",sha256:m.sha,validator_version:m.version,stage_scores:m.stageScores},
    status:"reviewed",submitted_at:now,score:m.score,
    feedback:"Calificación automática actualizada desde la validación más reciente de S08.",
    rubric_scores:m.stageScores,reviewed_at:now
@@ -117,7 +117,7 @@ async function syncManifestGradebook(ctx:any,run:any,m:any){
 
 async function persistManifest(ctx:any,run:any,m:any){
  const now=new Date().toISOString();await ensureSessionStarted(ctx.user.id,run.id);
- const {error}=await db.from("bd_lms_s08_submissions").upsert({user_id:ctx.user.id,course_run_id:run.id,pair_hash:m.pair_hash,manifest_version:VALIDATOR_VERSION,score:m.score,max_score:100,note_5:m.note,sha256:m.sha,controls:m.controls,validated:true,submitted_at:now,updated_at:now},{onConflict:"user_id,course_run_id"});if(error)throw error;
+ const {error}=await db.from("bd_lms_s08_submissions").upsert({user_id:ctx.user.id,course_run_id:run.id,pair_hash:m.pair_hash,manifest_version:m.version,score:m.score,max_score:100,note_5:m.note,sha256:m.sha,controls:m.controls,validated:true,submitted_at:now,updated_at:now},{onConflict:"user_id,course_run_id"});if(error)throw error;
  for(const p of Object.keys(STAGE_ACTIVITY)){const code=STAGE_ACTIVITY[p],score=m.stageScores[p],max=m.stageMax[p],done=score===max,{data:prior}=await db.from("bd_lms_activity_progress").select("started_at,attempts").eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("activity_code",code).maybeSingle();await db.from("bd_lms_activity_progress").upsert({user_id:ctx.user.id,course_run_id:run.id,activity_code:code,status:done?"completed":"submitted",started_at:prior?.started_at||now,attempts:Number(prior?.attempts||0),score,max_score:max,completed_at:done?now:null,updated_at:now,metadata:{source:"manifest_tc1",validated:true}},{onConflict:"user_id,course_run_id,activity_code"})}
  const {data:pf}=await db.from("bd_lms_activity_progress").select("started_at,attempts").eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("activity_code","bd-s08-final").maybeSingle();
  await db.from("bd_lms_activity_progress").upsert({user_id:ctx.user.id,course_run_id:run.id,activity_code:"bd-s08-final",status:"completed",started_at:pf?.started_at||now,attempts:Number(pf?.attempts||0)+1,score:m.score,max_score:100,completed_at:now,updated_at:now,metadata:{source:"manifest_tc1",validated:true,sha256:m.sha}},{onConflict:"user_id,course_run_id,activity_code"});
