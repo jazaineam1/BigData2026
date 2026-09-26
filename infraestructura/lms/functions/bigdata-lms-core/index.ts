@@ -618,7 +618,7 @@ async function collaborationOverview(ctx:any,run:any){
 }
 async function teacherCollaboration(ctx:any,run:any){
   requireTeacher(ctx);
-  const [{data:groups},{data:members},{data:settings},{data:assignments},{data:subs},{data:enrollments},{data:threads},{data:posts},{data:reviews}] = await Promise.all([
+  const [{data:groups},{data:members},{data:settings},{data:assignments},{data:subs},{data:enrollments},{data:threads},{data:posts},{data:reviews},{data:contributions}] = await Promise.all([
     db.from("lms_groups_v2").select("*").eq("course_run_id",run.id).order("name"),
     db.from("lms_group_members_v2").select("*"),
     db.from("lms_assignment_group_settings_v2").select("*"),
@@ -627,7 +627,8 @@ async function teacherCollaboration(ctx:any,run:any){
     db.from("lms_run_enrollments").select("user_id,role,status").eq("course_run_id",run.id),
     db.from("lms_discussion_threads_v2").select("*").eq("course_run_id",run.id).order("pinned",{ascending:false}).order("created_at",{ascending:false}),
     db.from("lms_discussion_posts_v2").select("*").order("created_at").limit(1000),
-    db.from("lms_peer_reviews_v2").select("*").order("submitted_at",{ascending:false}).limit(1000)
+    db.from("lms_peer_reviews_v2").select("*").order("submitted_at",{ascending:false}).limit(1000),
+    db.from("lms_group_contributions_v2").select("*").order("confirmed_at",{ascending:false}).limit(2000)
   ]);
   const groupIds=new Set((groups||[]).map((g:any)=>g.id));
   const memberRows=(members||[]).filter((m:any)=>groupIds.has(m.group_id));
@@ -635,9 +636,11 @@ async function teacherCollaboration(ctx:any,run:any){
   const settingRows=(settings||[]).filter((s:any)=>assignmentIds.has(s.assignment_id));
   const subRows=(subs||[]).filter((s:any)=>assignmentIds.has(s.assignment_id)&&groupIds.has(s.group_id));
   const reviewRows=(reviews||[]).filter((r:any)=>assignmentIds.has(r.assignment_id));
+  const subIds=new Set(subRows.map((s:any)=>s.id));
+  const contributionRows=(contributions||[]).filter((x:any)=>subIds.has(x.group_submission_id));
   const ids=[...new Set([...(enrollments||[]).map((x:any)=>x.user_id),...memberRows.map((x:any)=>x.user_id)])];
   const {data:users}=ids.length?await db.from("lms_users").select("id,display_name,username,email,active").in("id",ids):({data:[]} as any);
-  return {viewer:ctx.user,run,groups:groups||[],members:memberRows,settings:settingRows,assignments:assignments||[],group_submissions:subRows,students:(users||[]).filter((u:any)=>(enrollments||[]).some((e:any)=>e.user_id===u.id&&e.role==="student")),users:users||[],threads:threads||[],posts:posts||[],peer_reviews:reviewRows};
+  return {viewer:ctx.user,run,groups:groups||[],members:memberRows,settings:settingRows,assignments:assignments||[],group_submissions:subRows,students:(users||[]).filter((u:any)=>(enrollments||[]).some((e:any)=>e.user_id===u.id&&e.role==="student")),users:users||[],threads:threads||[],posts:posts||[],peer_reviews:reviewRows,contributions:contributionRows};
 }
 async function createGroup(ctx:any,run:any,body:any){
   requireTeacher(ctx);const name=clampText(body.name,120,true),description=clampText(body.description,1000);
