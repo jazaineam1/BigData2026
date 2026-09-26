@@ -64,6 +64,7 @@ jobs:
           test -f _site/lms/quizzes.html
           test -f _site/lms/teacher-quizzes.html
           test -f _site/lms/teacher-interoperability.html
+          test -f _site/lms/admin-operations.html
           touch _site/.nojekyll
 
       - name: Cargar artefacto

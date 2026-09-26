@@ -18,6 +18,7 @@ on:
       - utils/validate_lms_collaboration.py
       - utils/validate_lms_assessment.py
       - utils/validate_lms_interop.py
+      - utils/validate_lms_ops.py
       - utils/validate_tc1_v4.py
       - utils/test_tc1_v4_synthetic.py
       - utils/tc1_validator.py
@@ -64,7 +65,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Comprobar sintaxis de validadores
-        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py utils/validate_lms_core.py utils/validate_lms_gradebook.py utils/validate_lms_competencies.py utils/validate_lms_analytics.py utils/validate_lms_collaboration.py utils/validate_lms_assessment.py utils/validate_lms_interop.py utils/validate_tc1_v4.py utils/test_tc1_v4_synthetic.py utils/tc1_validator.py utils/build_taller_control_1.py
+        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py utils/validate_lms_core.py utils/validate_lms_gradebook.py utils/validate_lms_competencies.py utils/validate_lms_analytics.py utils/validate_lms_collaboration.py utils/validate_lms_assessment.py utils/validate_lms_interop.py utils/validate_lms_ops.py utils/validate_tc1_v4.py utils/test_tc1_v4_synthetic.py utils/tc1_validator.py utils/build_taller_control_1.py
       - name: Validar LMS S08 y guardia S07
         run: python utils/validate_lms_s08.py
       - name: Instalar dependencias QA TC1
@@ -101,3 +102,5 @@ jobs:
         run: python utils/validate_lms_assessment.py
       - name: Validar interoperabilidad
         run: python utils/validate_lms_interop.py
+      - name: Validar operaciones y resiliencia
+        run: python utils/validate_lms_ops.py

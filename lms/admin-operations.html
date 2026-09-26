@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153">
+<title>Big Data · Operaciones LMS</title>
+<link rel="stylesheet" href="assets/bigdata-lms.css?v=20260926-ops1">
+<style>
+.ops-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.policy{border:1px solid var(--line);border-radius:13px;padding:12px;background:#fff;margin:8px 0}
+.file-row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;border-bottom:1px solid var(--line);padding:10px 0}.file-row:last-child{border-bottom:0}
+.hash{font:12px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-all;background:#f6f7f9;border-radius:9px;padding:8px}
+.warnbox{border-left:4px solid #cf8610;background:#fff8e8;border-radius:9px;padding:10px 12px;margin:10px 0}
+.okbox{border-left:4px solid #18824b;background:#edf9f2;border-radius:9px;padding:10px 12px;margin:10px 0}
+.runbook{counter-reset:step}.runbook li{margin:9px 0;padding-left:4px}.role-admin{display:none}
+@media(max-width:850px){.ops-grid{grid-template-columns:1fr}.file-row{grid-template-columns:28px 1fr}.file-row .size{grid-column:2}}
+</style></head>
+<body>
+<header class="appbar"><div class="inner">
+<a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · Operaciones</small></a>
+<span class="spacer"></span>
+<a class="navlink optional" href="teacher-course.html">Gestor</a>
+<a class="navlink optional" href="teacher-interoperability.html">Interoperabilidad</a>
+<a class="navlink optional" href="admin-users.html">Usuarios</a>
+<button data-logout>Salir</button>
+</div></header>
+
+<main class="wrap">
+<div class="ey">Fase 8 · resiliencia operacional</div>
+<h1>Respalda antes de intervenir.</h1>
+<p class="lead">Snapshot académico verificable, retención de archivos huérfanos y un procedimiento de recuperación que evita restauraciones destructivas desde el navegador.</p>
+<div id="status" class="status hidden"></div>
+<div id="metrics" class="kpis"></div>
+
+<div class="ops-grid" style="margin-top:15px">
+<section class="card">
+  <div class="ey">Backup académico</div><h2>Snapshot JSON con SHA-256</h2>
+  <p>Incluye cohorte, sesiones, tareas, entregas, notas, quizzes, competencias, analítica, colaboración y metadatos de archivos.</p>
+  <div class="warnbox"><b>No incluye</b> contraseñas, hashes de contraseña, secretos de Edge Functions ni los binarios de Storage.</div>
+  <div class="actions"><button id="backupBtn" class="btn primary">Generar y verificar snapshot</button></div>
+  <div id="backupOut"></div>
+</section>
+
+<section class="card">
+  <div class="ey">Políticas activas</div><h2>Controles operativos</h2>
+  <div id="policies"></div>
+</section>
+</div>
+
+<section class="card">
+  <div class="actions" style="justify-content:space-between;align-items:flex-start">
+    <div><div class="ey">Retención</div><h2 style="margin-bottom:3px">Archivos pendientes o abandonados</h2><p class="muted" style="margin:0">Nunca se consideran archivos <code>attached</code>.</p></div>
+    <div class="actions"><label class="muted">Antigüedad <select id="hours" class="input" style="width:auto"><option value="24">24 h</option><option value="72">3 días</option><option value="168">7 días</option><option value="720">30 días</option></select></label><button id="previewBtn" class="btn alt">Previsualizar</button></div>
+  </div>
+  <div id="retention"></div>
+  <div class="actions role-admin" id="cleanupActions"><button id="cleanupBtn" class="btn danger" disabled>Eliminar seleccionados de forma irreversible</button></div>
+  <p id="teacherRetentionNote" class="muted">Los docentes pueden auditar candidatos. Solo un administrador puede ejecutar la eliminación.</p>
+</section>
+
+<section class="card">
+  <div class="ey">Runbook de recuperación</div><h2>Restaurar sin improvisar</h2>
+  <ol class="runbook">
+    <li><b>Detener escrituras académicas.</b> No calificar, cambiar matrículas ni ejecutar limpiezas durante la recuperación.</li>
+    <li><b>Conservar el incidente.</b> Registrar qué falló, hora, alcance y último snapshot conocido antes de modificar datos.</li>
+    <li><b>Restaurar infraestructura primero.</b> Si el problema es de proyecto completo, usar el mecanismo de restore de Supabase antes de insertar snapshots manuales.</li>
+    <li><b>Validar identidad y cohorte.</b> Confirmar curso, run y usuarios existentes. El snapshot académico no restaura credenciales.</li>
+    <li><b>Restaurar por dependencias.</b> Configuración → matrículas → sesiones/recursos → tareas → evaluaciones → entregas/notas → competencias → colaboración → eventos.</li>
+    <li><b>Restaurar Storage por separado.</b> Los metadatos del snapshot deben coincidir con objetos privados antes de habilitar descargas.</li>
+    <li><b>Reejecutar QA.</b> Validar S07, TC1, Gradebook, competencias y permisos antes de reabrir el LMS.</li>
+  </ol>
+  <div class="warnbox"><b>No hay botón “Restaurar”.</b> Es deliberado: una restauración cambia datos académicos masivamente y debe ejecutarse con revisión, backup previo y ventana controlada.</div>
+</section>
+</main>
+
+<script src="assets/bigdata-lms.js?v=20260926-ops1"></script>
+<script>
+(async()=>{'use strict';
+const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status');let model=null,candidates=[];
+function fmtBytes(n){n=Number(n||0);if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFixed(1)+' KB';return (n/1024/1024).toFixed(1)+' MB'}
+async function hashText(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function downloadJson(obj,name){const blob=new Blob([JSON.stringify(obj,null,2)+'\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();const u=a.href;a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500)}
+function render(){
+ const f=model.files||{},p=model.policies||{},admin=model.viewer?.role==='admin';
+ L.$('metrics').innerHTML='<div class="kpi"><span class="muted">Archivos registrados</span><b>'+Number(f.total||0)+'</b></div><div class="kpi"><span class="muted">Tamaño registrado</span><b>'+fmtBytes(f.total_bytes||0)+'</b></div><div class="kpi"><span class="muted">Attached</span><b>'+Number(f.by_status?.attached||0)+'</b></div><div class="kpi"><span class="muted">Pendientes/abandonados</span><b>'+Number((f.by_status?.pending||0)+(f.by_status?.abandoned||0))+'</b></div>';
+ L.$('policies').innerHTML='<div class="policy"><b>Login</b><div class="muted">'+L.esc(p.login_rate_limit||'—')+'</div></div><div class="policy"><b>Retención</b><div class="muted">Previsualización desde '+Number(p.retention_preview_min_hours||24)+' h.</div></div><div class="policy"><b>Limpieza</b><div class="muted">Rol requerido: '+L.esc(p.cleanup_role||'admin')+'. Attached eliminable: '+(p.attached_files_deletable?'sí':'no')+'.</div></div>';
+ document.querySelectorAll('.role-admin').forEach(x=>x.style.display=admin?'flex':'none');L.$('teacherRetentionNote').style.display=admin?'none':'block';
+}
+async function backup(){
+ const b=L.$('backupBtn');b.disabled=true;b.textContent='Construyendo snapshot…';L.$('backupOut').innerHTML='';
+ try{
+  const x=await L.ops('export_backup'),calc=await hashText(JSON.stringify(x.data||{})),ok=calc===x.manifest?.sha256;
+  if(!ok)throw new Error('La verificación local SHA-256 no coincide; el archivo no se descargó.');
+  const name='bigdata-2026-2-snapshot-'+new Date().toISOString().slice(0,10)+'.json';
+  downloadJson(x,name);
+  L.$('backupOut').innerHTML='<div class="okbox"><b>Snapshot verificado y descargado</b><div>'+Object.keys(x.data||{}).length+' conjuntos · '+Number(x.manifest?.storage_files||0)+' metadatos de archivo</div></div><div class="muted">SHA-256 de data</div><div class="hash">'+L.esc(calc)+'</div>'+(x.warnings||[]).map(w=>'<div class="warnbox">'+L.esc(w)+'</div>').join('');
+  L.msg(status,'Backup académico generado y verificado localmente.','ok');
+ }catch(e){L.msg(status,e.message,'err')}finally{b.disabled=false;b.textContent='Generar y verificar snapshot'}
+}
+function renderRetention(x){
+ candidates=x.candidates||[];const admin=model.viewer?.role==='admin';
+ L.$('retention').innerHTML=candidates.length?'<div class="muted" style="margin:12px 0">'+candidates.length+' candidato(s) · '+fmtBytes(x.total_bytes||0)+'</div>'+candidates.map(r=>'<label class="file-row"><input type="checkbox" data-file="'+L.esc(r.id)+'" '+(admin?'':'disabled')+'><span><b>'+L.esc(r.file_name)+'</b><div class="muted">'+L.esc(r.status)+' · creado '+L.fmtWhen(r.created_at)+'<br><span class="mono">'+L.esc(r.object_path)+'</span></div></span><span class="size muted">'+fmtBytes(r.size_bytes)+'</span></label>').join(''):'<p class="muted">No hay archivos huérfanos con esa antigüedad.</p>';
+ document.querySelectorAll('[data-file]').forEach(x=>x.onchange=()=>{L.$('cleanupBtn').disabled=!document.querySelector('[data-file]:checked')});
+ L.$('cleanupBtn').disabled=true;
+}
+async function preview(){
+ const b=L.$('previewBtn');b.disabled=true;try{const x=await L.ops('retention_preview',{older_than_hours:Number(L.$('hours').value)});renderRetention(x);L.msg(status,'Previsualización actualizada. No se eliminó nada.','ok')}catch(e){L.msg(status,e.message,'err')}finally{b.disabled=false}
+}
+async function cleanup(){
+ const ids=[...document.querySelectorAll('[data-file]:checked')].map(x=>x.dataset.file);if(!ids.length)return;
+ const phrase=prompt('Esta acción elimina objetos privados y metadatos huérfanos. Escribe ELIMINAR_HUERFANOS para continuar:');if(phrase!=='ELIMINAR_HUERFANOS')return L.msg(status,'Limpieza cancelada: confirmación incorrecta.','warn');
+ const b=L.$('cleanupBtn');b.disabled=true;try{const x=await L.ops('retention_cleanup',{file_ids:ids,confirmation:phrase});L.msg(status,'Limpieza completada: '+Number(x.deleted||0)+' archivo(s).','ok');await load();await preview()}catch(e){L.msg(status,e.message,'err')}finally{b.disabled=false}
+}
+async function load(){try{const gate=await L.requireBigData({teacher:true});if(!gate)return;model=await L.ops('overview');render()}catch(e){L.msg(status,e.message,'err')}}
+L.$('backupBtn').onclick=backup;L.$('previewBtn').onclick=preview;L.$('cleanupBtn').onclick=cleanup;await load();
+})();
+</script></body></html>

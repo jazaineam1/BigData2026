@@ -174,7 +174,13 @@ async function submitFileAssignment(ctx:any,run:any,body:any){
     status:"submitted",submitted_at:new Date().toISOString()
   }).select("*").single();
   if(error)throw error;
-  await db.from("lms_submission_files_v2").update({submission_id:sub.id,status:"attached",attached_at:new Date().toISOString()}).eq("id",file.id);
+  const {data:attached,error:attachError}=await db.from("lms_submission_files_v2")
+    .update({submission_id:sub.id,status:"attached",attached_at:new Date().toISOString()})
+    .eq("id",file.id).eq("status","pending").select("id").maybeSingle();
+  if(attachError||!attached){
+    await db.from("lms_submissions_v2").delete().eq("id",sub.id).eq("user_id",ctx.user.id);
+    throw new Error("La carga dejó de estar disponible antes de adjuntarse. Vuelve a cargar el archivo.");
+  }
   await audit(ctx.user.id,"bigdata.assignment.submit_file","submission",sub.id,{assignment_id:file.assignment_id,attempt,file_id:file.id});
   return {ok:true,submission:sub};
 }
