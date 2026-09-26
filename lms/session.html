@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153">
+<title>Módulo · Big Data LMS</title>
+<link rel="stylesheet" href="assets/bigdata-lms.css?v=20260926-v3">
+<style>
+.module-v3{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:18px;align-items:start}
+.identity-v3{display:flex;gap:12px;align-items:center}.avatar-v3{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--uc-navy);color:#fff;font-weight:950;flex:0 0 auto}
+.resume-v3{border:1px solid #a9d7d9;border-left:5px solid var(--uc-cyan);background:#f1fbfb;border-radius:16px;padding:16px;margin:16px 0}
+.route-v3{display:grid;gap:10px}.activity-v3{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:15px;padding:14px}
+.activity-v3 .num{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#edf1f6;color:var(--uc-navy);font-weight:950}
+.activity-v3.visited .num{background:#e2f3f4;color:#075f62}.activity-v3.mastered .num,.activity-v3.completed .num{background:#dff4e8;color:#12633c}
+.activity-v3 h3{margin:0 0 3px;font-size:1rem}.activity-v3 p{margin:0;color:var(--muted);font-size:.84rem}.activity-v3 .meta{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}
+.legend-v3{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.legend-v3>div{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}.legend-v3 b{display:block;color:var(--uc-navy)}
+.outcomes-v3{display:grid;gap:8px;margin:0;padding:0;list-style:none}.outcomes-v3 li{border-left:4px solid var(--uc-cyan);background:#f7fbfb;border-radius:8px;padding:9px 11px}
+.side-v3{position:sticky;top:78px}.mini-progress{height:12px;border-radius:999px;background:#e8edf2;overflow:hidden}.mini-progress i{display:block;height:100%;background:linear-gradient(90deg,var(--uc-cyan),var(--uc-navy))}
+@media(max-width:900px){.module-v3{grid-template-columns:1fr}.side-v3{position:static}.legend-v3{grid-template-columns:1fr 1fr}.activity-v3{grid-template-columns:44px minmax(0,1fr)}.activity-v3 .stage-action{grid-column:2}}
+@media(max-width:560px){.legend-v3{grid-template-columns:1fr}.activity-v3{padding:11px}.activity-v3 .stage-action{width:100%}}
+</style>
+</head>
+<body>
+<header class="appbar"><div class="inner">
+<a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · Módulo</small></a>
+<span class="spacer"></span>
+<a class="navlink optional" href="portal.html">Inicio</a>
+<a class="navlink optional" href="progress.html">Mi progreso</a>
+<a class="navlink optional" href="collaboration.html">Comunidad</a>
+<a id="wallLink" class="navlink hidden" href="#">WALL docente</a>
+<button data-logout>Salir</button>
+</div></header>
+
+<main class="wrap">
+<div id="status" class="status hidden"></div>
+<div class="module-v3">
+<section>
+<div id="ey" class="ey">Módulo</div>
+<h1 id="title">Cargando sesión…</h1>
+<p id="summary" class="lead"></p>
+
+<div class="resume-v3">
+<div class="ey">Siguiente acción</div>
+<h2 id="nextTitle">Calculando tu ruta…</h2>
+<p id="nextText" class="muted"></p>
+<div class="actions"><button id="continueBtn" class="btn primary">Continuar</button><a id="progressBtn" class="btn alt" href="progress.html">Ver progreso</a></div>
+</div>
+
+<section class="card">
+<div class="ey">Resultados de aprendizaje</div><h2>Qué debes poder hacer</h2>
+<ul id="outcomes" class="outcomes-v3"></ul>
+</section>
+
+<section class="card">
+<div class="actions" style="justify-content:space-between;align-items:flex-start">
+<div><div class="ey">Ruta de aprendizaje</div><h2 style="margin-bottom:4px">Actividades y recursos</h2><p class="muted" style="margin:0">Visitar, completar, dominar y calificar son estados diferentes.</p></div>
+<span id="routeBadge" class="pill progress">0 actividades</span>
+</div>
+<div id="route" class="route-v3" style="margin-top:12px"></div>
+</section>
+</section>
+
+<aside class="side-v3">
+<section class="card">
+<div class="identity-v3"><div id="avatar" class="avatar-v3">—</div><div><span class="muted">Sesión LMS activa</span><h2 id="who" style="margin:1px 0 0">Identificando…</h2><div id="role" class="muted"></div></div></div>
+</section>
+
+<section class="card">
+<div class="ey">Avance de la ruta</div>
+<div class="row"><b id="fraction">0/0</b><span id="percent" class="muted">0%</span></div>
+<div class="mini-progress" style="margin:9px 0 14px"><i id="progressBar" style="width:0"></i></div>
+<div class="detailgrid">
+<div class="detailmetric"><span class="muted">Recursos visitados</span><b id="visitedMetric">0/0</b></div>
+<div class="detailmetric"><span class="muted">Dominio</span><b id="masteryMetric">0/0</b></div>
+<div class="detailmetric"><span class="muted">Tiempo activo</span><b id="timeMetric">0 min</b></div>
+<div class="detailmetric"><span class="muted">Estado</span><b id="statusMetric">—</b></div>
+</div>
+</section>
+
+<section class="card">
+<div class="ey">Cómo leer el progreso</div>
+<div class="legend-v3">
+<div><b>Visitado</b><span class="muted">Entraste al recurso.</span></div>
+<div><b>Completado</b><span class="muted">Cumpliste su regla de finalización.</span></div>
+<div><b>Dominado</b><span class="muted">Demostraste comprensión en un checkpoint.</span></div>
+<div><b>Calificado</b><span class="muted">Existe evaluación formal; no se infiere por tiempo.</span></div>
+</div>
+</section>
+</aside>
+</div>
+</main>
+
+<script src="assets/bigdata-lms.js?v=20260926-v3"></script>
+<script>
+(async()=>{'use strict';
+const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status');
+const params=new URLSearchParams(location.search),sessionNumber=Math.trunc(Number(params.get('s')||0));
+if(!Number.isInteger(sessionNumber)||sessionNumber<1){location.replace('portal.html');return}
+let data=null;
+const progressMap=()=>new Map((data?.activity_progress||[]).map(x=>[x.activity_code,x]));
+const initials=s=>String(s||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();
+const activityState=(a,p)=>{
+  const m=p?.metadata||{};
+  if(a.kind==='checkpoint'&&(m.mastery===true||p?.status==='completed'))return {cls:'mastered',label:'Dominado',icon:'✓'};
+  if(p?.status==='completed')return {cls:'completed',label:'Completado',icon:'✓'};
+  if(p)return {cls:'visited',label:a.kind==='resource'?'Visitado':'En curso',icon:'•'};
+  return {cls:'',label:'Pendiente',icon:'○'};
+};
+function trackedResource(a){
+  return (data.resources||[]).find(r=>String(r.metadata?.tracked_activity||'')===a.code)||null;
+}
+function presentationResource(){return (data.resources||[]).find(r=>r.resource_type==='presentation')||null}
+function eventForResource(r){return r.resource_type==='presentation'?'presentation_opened':r.resource_type==='notebook'?'notebook_opened':r.resource_type==='guide'?'guide_opened':r.resource_type==='lab'?'lab_started':'resource_opened'}
+async function openResource(r,a){
+  if(!r)return;
+  try{await L.session('track',{session_number:sessionNumber,event_type:eventForResource(r),activity_code:a?.code||r.metadata?.tracked_activity||null,metadata:{source:'module-v3',resource_type:r.resource_type,resource_id:r.id,label:r.title,path:r.url},client_at:new Date().toISOString()})}catch{}
+  if(/^https?:/i.test(r.url)){window.open(r.url,'_blank','noopener');setTimeout(refresh,500)}
+  else location.href=r.url;
+}
+function openCheckpoint(a){
+  const slide=Number(a.metadata?.slide||0),r=presentationResource();
+  if(r&&slide>0){const u=r.url.replace(/#.*$/,'')+'#s'+slide;openResource({...r,url:u},(data.activities||[]).find(x=>x.code===r.metadata?.tracked_activity));return}
+  if(r){openResource(r,(data.activities||[]).find(x=>x.code===r.metadata?.tracked_activity));return}
+  location.href='progress.html?s='+sessionNumber;
+}
+function primaryAction(){
+  const pm=progressMap(),resume=data.resume;
+  if(resume&&presentationResource())return {title:'Continuar donde quedaste',text:'Última posición registrada: diapositiva '+resume.slide+(resume.label?' · '+resume.label:''),run:()=>openCheckpoint({metadata:{slide:resume.slide}})};
+  const required=(data.activities||[]).filter(a=>a.required);
+  for(const a of required){
+    const p=pm.get(a.code),state=activityState(a,p);
+    if(a.kind==='resource'&&!p){const r=trackedResource(a);if(r)return {title:'Abrir '+a.title,text:'Este es el siguiente recurso requerido de la sesión.',run:()=>openResource(r,a)}}
+    if(a.kind==='checkpoint'&&state.label!=='Dominado')return {title:'Continuar con '+a.title,text:'Este checkpoint todavía no está dominado.',run:()=>openCheckpoint(a)}
+    if(!['resource','checkpoint'].includes(a.kind)&&p?.status!=='completed'){const lab=(data.resources||[]).find(r=>r.resource_type==='lab')||data.resources?.[0];if(lab)return {title:'Continuar '+a.title,text:'Trabaja la siguiente etapa desde el recurso principal.',run:()=>openResource(lab,a)}}
+  }
+  const first=(data.resources||[])[0];if(first)return {title:'Revisar el módulo',text:'Ya no hay checkpoints pendientes en esta ruta. Puedes revisar recursos o tu progreso.',run:()=>openResource(first,(data.activities||[]).find(a=>a.code===first.metadata?.tracked_activity))};
+  return {title:'Ver mi progreso',text:'No hay recursos publicados adicionales para esta sesión.',run:()=>location.assign('progress.html?s='+sessionNumber)}
+}
+function render(){
+  const s=data.session||{},meta=s.metadata||{},viewer=data.viewer||{},sum=data.summary||{},pm=progressMap();
+  document.title='S'+String(sessionNumber).padStart(2,'0')+' · '+s.title+' · Big Data LMS';
+  L.$('ey').textContent='Módulo S'+String(sessionNumber).padStart(2,'0')+(meta.estimated_minutes?' · '+meta.estimated_minutes+' min':'');
+  L.$('title').textContent=s.title||('Sesión '+sessionNumber);L.$('summary').textContent=s.summary||'';
+  L.$('who').textContent=viewer.display_name||viewer.username||'Estudiante';L.$('avatar').textContent=initials(viewer.display_name||viewer.username);
+  L.$('role').textContent=(viewer.role==='student'?'Estudiante':'Rol '+viewer.role)+' · Big Data 2026-2S';
+  if(['teacher','admin'].includes(viewer.role)){L.$('wallLink').classList.remove('hidden');L.$('wallLink').href='wall.html?s='+sessionNumber}
+  L.$('progressBtn').href='progress.html?s='+sessionNumber;
+  const outcomes=Array.isArray(meta.outcomes)?meta.outcomes:[];
+  L.$('outcomes').innerHTML=outcomes.length?outcomes.map(x=>'<li>'+L.esc(x)+'</li>').join(''):'<li>Revisa los recursos publicados y completa las evidencias definidas para la sesión.</li>';
+  const achieved=Number(sum.resource_visited||0)+Number(sum.checkpoint_mastered||0)+(data.activities||[]).filter(a=>!['resource','checkpoint'].includes(a.kind)&&pm.get(a.code)?.status==='completed').length;
+  const total=(data.activities||[]).length||1,pct=Math.round(Math.min(1,achieved/total)*100);
+  L.$('fraction').textContent=achieved+'/'+(data.activities||[]).length;L.$('percent').textContent=pct+'%';L.$('progressBar').style.width=pct+'%';
+  L.$('visitedMetric').textContent=Number(sum.resource_visited||0)+'/'+Number(sum.resource_total||0);
+  L.$('masteryMetric').textContent=Number(sum.checkpoint_mastered||0)+'/'+Number(sum.checkpoint_total||0);
+  L.$('timeMetric').textContent=L.fmtTime(data.session_progress?.active_seconds||0);
+  L.$('statusMetric').textContent=data.session_progress?.status==='completed'?'Completada':data.session_progress?'En curso':'Sin iniciar';
+  L.$('routeBadge').textContent=(data.activities||[]).length+' actividades';
+  L.$('route').innerHTML=(data.activities||[]).map((a,i)=>{
+    const p=pm.get(a.code),st=activityState(a,p),r=trackedResource(a),kind=a.kind==='resource'?(a.metadata?.resource_type||'recurso'):a.kind==='checkpoint'?'checkpoint':a.kind;
+    const first=typeof p?.metadata?.first_attempt_correct==='boolean'?(p.metadata.first_attempt_correct?' · 1.er intento ✓':' · 1.er intento ✗'):'';
+    const rule=a.metadata?.completion_rule==='mastery'?'dominio':a.metadata?.completion_rule==='visit'?'visita':a.required?'requerida':'opcional';
+    const action=r?'<button class="btn '+(p?'alt':'primary')+' stage-action" data-open="'+L.esc(a.code)+'">'+(p?'Volver a abrir':'Abrir')+'</button>':a.kind==='checkpoint'?'<button class="btn alt stage-action" data-check="'+L.esc(a.code)+'">Ir al checkpoint</button>':'';
+    return '<article class="activity-v3 '+st.cls+'"><span class="num">'+st.icon+'</span><div><h3>'+L.esc(a.title)+'</h3><p>'+L.esc(a.metadata?.evidence||'Actividad de la ruta de aprendizaje.')+'</p><div class="meta"><span class="pill">'+L.esc(kind)+'</span><span class="pill '+(st.cls==='mastered'||st.cls==='completed'?'done':st.cls==='visited'?'progress':'pending')+'">'+st.label+first+'</span><span class="pill pending">Regla: '+L.esc(rule)+'</span>'+(a.required?'':'<span class="pill pending">Opcional</span>')+'</div></div>'+action+'</article>'
+  }).join('')||'<div class="empty">No hay actividades publicadas todavía.</div>';
+  document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{const a=data.activities.find(x=>x.code===b.dataset.open);openResource(trackedResource(a),a)});
+  document.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>openCheckpoint(data.activities.find(x=>x.code===b.dataset.check)));
+  const next=primaryAction();L.$('nextTitle').textContent=next.title;L.$('nextText').textContent=next.text;L.$('continueBtn').onclick=next.run;
+}
+async function refresh(){
+  try{data=await L.requireSession(sessionNumber);if(!data)return;render()}catch(e){L.msg(status,e.message,'err')}
+}
+await refresh();
+L.session('track',{session_number:sessionNumber,event_type:'session_entered',metadata:{source:'module-v3',path:location.pathname},client_at:new Date().toISOString()}).catch(()=>{});
+addEventListener('pageshow',()=>{if(document.visibilityState==='visible')refresh()});
+})();
+</script>
+</body></html>
