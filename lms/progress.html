@@ -1,18 +1,88 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153"><title>Big Data · Mi progreso</title><link rel="stylesheet" href="assets/bigdata-lms.css?v=20260926-analytics1">
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#142153">
+<title>Mi progreso · Big Data LMS</title>
+<link rel="stylesheet" href="assets/bigdata-lms.css?v=20260926-v3">
 <style>
-.alert{border:1px solid var(--line);border-left:5px solid var(--warn);border-radius:13px;padding:13px;margin:9px 0;background:#fffaf0}.rule{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.76rem;background:#f1f3f5;padding:3px 6px;border-radius:6px}.trend{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:7px}.snap{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff}.snap b{display:block;color:var(--uc-navy)}.explain{background:#f7fafc;border:1px solid var(--line);border-radius:13px;padding:13px}.emptyok{border:1px solid #b9dfcc;background:#f0faf5;border-radius:13px;padding:13px;color:var(--ok)}</style></head>
-<body><header class="appbar"><div class="inner"><a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · Mi progreso</small></a><span class="spacer"></span><a class="navlink optional" href="assignments.html">Entregas</a><a class="navlink optional" href="competencies.html">Competencias</a><a id="teacherLink" class="navlink hidden" href="teacher-analytics.html">Analítica docente</a><button data-logout>Salir</button></div></header>
-<main class="wrap"><div class="ey">Analítica personal</div><h1>Tu progreso, con reglas visibles.</h1><p class="lead">Estas señales sirven para orientar acciones. No son una predicción de éxito ni una calificación adicional.</p><div id="status" class="status hidden"></div><div id="metrics" class="kpis"></div>
-<div class="cols" style="margin-top:15px"><section class="card"><div class="ey">Señales</div><h2>Qué merece atención</h2><div id="alerts"></div></section><section class="card"><div class="ey">Cómo se calcula</div><h2>Reglas transparentes</h2><div id="rules"></div></section></div>
-<section class="card"><div class="ey">Evolución</div><h2>Snapshots diarios</h2><p class="muted">Un snapshot resume el estado académico del día. No mide tiempo de pantalla como sinónimo de aprendizaje.</p><div id="trend" class="trend"></div></section>
-<section class="card"><div class="ey">Lectura responsable</div><div class="explain"><b>Qué sí significa:</b> hay una condición concreta que merece revisar. <b>Qué no significa:</b> que la plataforma haya predicho tu desempeño, capacidad o resultado final. El dato sirve para decidir qué revisar a continuación.</div></section>
-</main><script src="assets/bigdata-lms.js?v=20260926-analytics1"></script><script>
-(async()=>{'use strict';const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status');let data=null;
-function renderMetrics(){const m=data.metrics||{};L.$('metrics').innerHTML='<div class="kpi"><span class="muted">Pendientes</span><b>'+Number(m.pending_count||0)+'</b></div><div class="kpi"><span class="muted">Vencidas</span><b>'+Number(m.overdue_count||0)+'</b></div><div class="kpi"><span class="muted">Competencias dominadas</span><b>'+Number(m.mastered_count||0)+'</b></div><div class="kpi"><span class="muted">Promedio de dominio</span><b>'+(m.mastery_avg==null?'—':Number(m.mastery_avg).toFixed(1)+'%')+'</b></div>'}
-function renderAlerts(){const a=data.alerts||[];L.$('alerts').innerHTML=a.length?a.map(x=>'<article class="alert"><b>'+L.esc(x.title)+'</b><p>'+L.esc(x.evidence)+'</p><span class="rule">'+L.esc(x.rule)+'</span></article>').join(''):'<div class="emptyok"><b>Sin señales activas.</b><div>Con las reglas actuales no aparece ninguna condición que requiera atención.</div></div>'}
-function renderRules(){L.$('rules').innerHTML=(data.rules||[]).map(r=>'<div class="item"><b>'+L.esc(r.title)+'</b><div class="muted">'+L.esc(r.description||'')+'</div><div style="margin-top:6px"><span class="rule">'+L.esc(r.rule_type)+'</span></div></div>').join('')||'<p class="muted">Sin reglas activas.</p>'}
-function renderTrend(){const h=data.history||[];L.$('trend').innerHTML=h.length?h.map(x=>'<div class="snap"><span class="muted">'+L.esc(x.snapshot_date)+'</span><b>'+(x.mastery_avg==null?'—':Number(x.mastery_avg).toFixed(1)+'% dominio')+'</b><div class="muted">'+Number(x.pending_count||0)+' pendientes · '+Number(x.overdue_count||0)+' vencidas</div></div>').join(''):'<p class="muted">El historial comenzará a construirse a partir de tus visitas y actividad académica.</p>'}
-function render(){renderMetrics();renderAlerts();renderRules();renderTrend()}
-async function load(){try{const gate=await L.requireBigData();if(!gate)return;data=await L.core('analytics');if(['teacher','admin'].includes(data.viewer?.role))L.$('teacherLink').classList.remove('hidden');render()}catch(ex){L.msg(status,ex.message,'err')}}await load();
+.progress-hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:16px;align-items:start}
+.course-route{display:grid;gap:11px}.session-progress-card{border:1px solid var(--line);border-radius:16px;background:#fff;padding:15px;display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:13px;align-items:center}
+.session-progress-card.focus{border:2px solid var(--uc-cyan);box-shadow:0 8px 26px #0b86891b}.session-progress-card .snum{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:#eef1f5;color:var(--uc-navy);font-weight:950}
+.session-progress-card.done .snum{background:#dff4e8;color:#12633c}.dimensions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.dimension{border-radius:999px;padding:5px 8px;font-size:.72rem;font-weight:900;background:#eef1f5;color:#5f6877}.dimension.yes{background:#dff4e8;color:#12633c}.dimension.progress{background:#e2f3f4;color:#075f62}.dimension.grade{background:#eee6f8;color:#5b388a}
+.alert-v3{border:1px solid var(--line);border-left:4px solid var(--uc-cyan);border-radius:12px;padding:12px;background:#fff;margin:8px 0}.alert-v3 b{color:var(--uc-navy)}.snapshot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}.snapshot{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
+@media(max-width:850px){.progress-hero{grid-template-columns:1fr}.session-progress-card{grid-template-columns:50px minmax(0,1fr)}.session-progress-card .stage-action{grid-column:2}}
+@media(max-width:560px){.session-progress-card{padding:11px}.session-progress-card .stage-action{width:100%}}
+</style>
+</head>
+<body>
+<header class="appbar"><div class="inner">
+<a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · Mi progreso</small></a>
+<span class="spacer"></span>
+<a class="navlink optional" href="portal.html">Inicio</a><a class="navlink optional" href="assignments.html">Entregas</a><a class="navlink optional" href="competencies.html">Competencias</a><a class="navlink optional" href="collaboration.html">Comunidad</a>
+<a id="teacherLink" class="navlink hidden" href="teacher-analytics.html">Analítica docente</a><button data-logout>Salir</button>
+</div></header>
+
+<main class="wrap">
+<div id="status" class="status hidden"></div>
+<div class="progress-hero">
+<section><div class="ey">Progreso personal</div><h1>Qué visitaste, qué completaste y qué dominas.</h1><p class="lead">El LMS separa navegación, finalización, dominio y calificación. El tiempo activo es una señal de contexto, no una nota ni una medida de capacidad.</p></section>
+<section class="card"><div class="ey">Resumen del curso</div><div id="metrics" class="detailgrid"></div></section>
+</div>
+
+<section class="card">
+<div class="actions" style="justify-content:space-between;align-items:flex-start"><div><div class="ey">Ruta del curso</div><h2>Sesiones publicadas</h2><p class="muted">Abre cualquier módulo para continuar desde su ruta de aprendizaje.</p></div><span id="routeCount" class="pill active"></span></div>
+<div id="courseRoute" class="course-route"></div>
+</section>
+
+<div class="cols">
+<section class="card"><div class="ey">Señales explicables</div><h2>Qué merece atención</h2><div id="alerts"></div></section>
+<section class="card"><div class="ey">Reglas</div><h2>Cómo se calcula</h2><div id="rules"></div></section>
+</div>
+
+<section class="card"><div class="ey">Evolución</div><h2>Snapshots académicos</h2><p class="muted">Los snapshots resumen pendientes, entregas y competencias; no convierten tiempo de pantalla en rendimiento.</p><div id="trend" class="snapshot-grid"></div></section>
+<section class="card"><div class="note"><b>Lectura responsable.</b> Una señal indica una condición concreta que conviene revisar. No es una predicción automática de éxito, capacidad o resultado final.</div></section>
+</main>
+
+<script src="assets/bigdata-lms.js?v=20260926-v3"></script>
+<script>
+(async()=>{'use strict';
+const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status'),focus=Math.trunc(Number(new URLSearchParams(location.search).get('s')||0));
+let course=null,analytics=null;
+function renderMetrics(){
+  const sessions=course.sessions||[],started=sessions.filter(s=>s.session_progress).length,completed=sessions.filter(s=>s.session_progress?.status==='completed').length;
+  const mastered=sessions.reduce((n,s)=>n+Number(s.summary_metrics?.checkpoint_mastered||0),0),checks=sessions.reduce((n,s)=>n+Number(s.summary_metrics?.checkpoint_total||0),0);
+  const pending=Number(analytics?.metrics?.pending_count||0);
+  L.$('metrics').innerHTML='<div class="detailmetric"><span class="muted">Sesiones iniciadas</span><b>'+started+'/'+sessions.length+'</b></div><div class="detailmetric"><span class="muted">Sesiones completadas</span><b>'+completed+'</b></div><div class="detailmetric"><span class="muted">Checkpoints dominados</span><b>'+mastered+'/'+checks+'</b></div><div class="detailmetric"><span class="muted">Entregas pendientes</span><b>'+pending+'</b></div>';
+}
+function dimensions(s){
+  const p=s.session_progress,m=s.summary_metrics||{},kind=s.metadata?.module_kind||'learning';
+  const visited=!!p,completed=p?.status==='completed',mastery=Number(m.checkpoint_total||0)?Number(m.checkpoint_mastered||0)+'/'+Number(m.checkpoint_total||0):'—';
+  const graded=kind==='assessment'?(Number(p?.max_score||0)>0?Number(p?.score||0)+'/'+Number(p?.max_score||0):'Evaluativo'):'No evaluativo';
+  return '<div class="dimensions"><span class="dimension '+(visited?'yes':'')+'">Visitado '+(visited?'✓':'○')+'</span><span class="dimension '+(completed?'yes':'')+'">Completado '+(completed?'✓':'○')+'</span><span class="dimension '+(Number(m.checkpoint_mastered||0)>0?'progress':'')+'">Dominado '+mastery+'</span><span class="dimension '+(kind==='assessment'?'grade':'')+'">Calificado '+L.esc(graded)+'</span></div>';
+}
+function renderRoute(){
+  const rows=course.sessions||[];L.$('routeCount').textContent=rows.length+' sesiones visibles';
+  L.$('courseRoute').innerHTML=rows.map(s=>{
+    const n=Number(s.session_number),p=s.session_progress,done=p?.status==='completed';
+    return '<article class="session-progress-card '+(done?'done ':'')+(focus===n?'focus':'')+'"><span class="snum">S'+String(n).padStart(2,'0')+'</span><div><h3 style="margin:0 0 4px">'+L.esc(s.title)+'</h3><p class="muted" style="margin:0">'+L.esc(s.summary||'')+'</p>'+dimensions(s)+'</div><a class="btn '+(focus===n?'primary':'alt')+' stage-action" href="session.html?s='+n+'">'+(p?'Continuar':'Abrir')+'</a></article>'
+  }).join('')||'<p class="muted">No hay sesiones publicadas.</p>';
+}
+function renderAnalytics(){
+  const a=analytics?.alerts||[];L.$('alerts').innerHTML=a.length?a.map(x=>'<article class="alert-v3"><b>'+L.esc(x.title)+'</b><p>'+L.esc(x.evidence)+'</p><span class="pill pending">'+L.esc(x.rule)+'</span></article>').join(''):'<div class="note"><b>Sin señales activas.</b> Con las reglas actuales no hay condiciones que requieran atención.</div>';
+  L.$('rules').innerHTML=(analytics?.rules||[]).map(r=>'<div class="item"><b>'+L.esc(r.title)+'</b><div class="muted">'+L.esc(r.description||'')+'</div><span class="pill pending">'+L.esc(r.rule_type)+'</span></div>').join('')||'<p class="muted">Sin reglas activas.</p>';
+  const h=analytics?.history||[];L.$('trend').innerHTML=h.length?h.map(x=>'<div class="snapshot"><span class="muted">'+L.esc(x.snapshot_date)+'</span><b style="display:block;color:var(--uc-navy)">'+(x.mastery_avg==null?'—':Number(x.mastery_avg).toFixed(1)+'% dominio')+'</b><div class="muted">'+Number(x.pending_count||0)+' pendientes · '+Number(x.overdue_count||0)+' vencidas</div></div>').join(''):'<p class="muted">El historial aparecerá a medida que se registren snapshots académicos.</p>';
+}
+async function load(){
+  try{
+    const gate=await L.requireBigData();if(!gate)return;
+    const results=await Promise.all([L.session('course_progress'),L.core('analytics').catch(()=>null)]);
+    course=results[0];analytics=results[1];
+    if(['teacher','admin'].includes(course.viewer?.role))L.$('teacherLink').classList.remove('hidden');
+    renderMetrics();renderRoute();renderAnalytics();
+  }catch(e){L.msg(status,e.message,'err')}
+}
+await load();
 })();
-</script></body></html>
+</script>
+</body></html>
