@@ -143,3 +143,27 @@ revoke all on public.bd_wall_posts,public.bd_wall_reactions from anon,authentica
 grant select,insert,update,delete on public.bd_wall_posts,public.bd_wall_reactions to service_role;
 
 comment on table public.bd_wall_posts is 'Muro de clase por actividad. Estudiantes ven al grupo después de publicar; el backend anonimiza identidades entre pares.';
+
+
+-- Regla editorial: máximo dos recursos visibles por sesión.
+-- Los apoyos adicionales permanecen disponibles dentro del recurso principal,
+-- pero no compiten como una tercera entrada del módulo.
+with ranked as (
+  select id, row_number() over(partition by course_run_id,session_number order by position,id) as rn
+  from public.lms_run_resources_v2
+  where course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1)
+    and session_number between 1 and 16
+    and visible=true
+)
+update public.lms_run_resources_v2 r
+set visible=false,
+    metadata=coalesce(r.metadata,'{}'::jsonb)||'{"integrated_support":true}'::jsonb
+from ranked x
+where r.id=x.id and x.rn>2;
+
+-- S08: la guía de entrega queda integrada al taller protegido y deja de contar
+-- como un tercer recurso académico visible.
+update public.bd_lms_activities
+set kind='support',
+    metadata=metadata||'{"integrated_support":true,"integrated_into":"bd-s08-module"}'::jsonb
+where code='bd-s08-guide';
