@@ -1,12 +1,12 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,{auth:{persistSession:false}});
-const COURSE="bigdata",RUN_CODE="bigdata-2026-2",SESSION=8,CURRENT_VALIDATOR_VERSION="2026-09-26-v4-secoppipeline";
-const VALIDATOR_VERSIONS=new Set(["2026-09-17-v3-historico-atlas",CURRENT_VALIDATOR_VERSION]);
+const COURSE="bigdata",RUN_CODE="bigdata-2026-2",SESSION=8,CURRENT_VALIDATOR_VERSION="2026-09-26-secoppipeline";
+const VALIDATOR_VERSIONS=new Set([CURRENT_VALIDATOR_VERSION]);
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 const TRACK_EVENTS=new Set(["page_opened","page_closed","heartbeat","notebook_opened","activity_started","stage_opened","ui_action"]);
 const ACTIVITY_CODES=new Set(["bd-s08-e1","bd-s08-e2","bd-s08-e3","bd-s08-e4","bd-s08-e5","bd-s08-e6","bd-s08-final"]);
-const STAGE_MAX:Record<string,number>={E1:20,E2:30,E3:10,E4:15,E5:20,E6:5};
+const STAGE_MAX:Record<string,number>={E1:25,E2:25,E3:10,E4:15,E5:15,E6:10};
 const STAGE_ACTIVITY:Record<string,string>={E1:"bd-s08-e1",E2:"bd-s08-e2",E3:"bd-s08-e3",E4:"bd-s08-e4",E5:"bd-s08-e5",E6:"bd-s08-e6"};
 
 function origin(req:Request){const o=req.headers.get("origin");if(!o)return "";if(ALLOWED.has(o)||/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o))return o;return null}
@@ -77,6 +77,7 @@ async function verifyManifest(rawInput:string){
  const pattern=/,\n  "sha256": "[0-9a-fA-F]{64}"\n}$/;const prior=raw.replace(pattern,"\n}");if(prior===raw)throw new Error("El archivo fue reformateado. Carga directamente manifest_tc1.json generado por el validador.");
  if(await digestHex(prior)!==supplied)throw new Error("SHA-256 no coincide: el manifest fue modificado después del validador");
  const version=String(m.version||"");if(!VALIDATOR_VERSIONS.has(version))throw new Error("Versión del validador no reconocida");
+ const securityGate=m?.gates?.security_no_secrets;if(!securityGate||securityGate.ok!==true)throw new Error("La entrega contiene o no ha verificado secretos. Corrige los artefactos y genera nuevamente el manifest.");
  const score=Number(m.puntaje),max=Number(m.maximo),note=Number(m.nota_5);if(!Number.isInteger(score)||score<0||score>100||max!==100)throw new Error("Puntaje del manifest inválido");
  const expected=Math.round((1+4*score/100)*100)/100;if(!Number.isFinite(note)||Math.abs(note-expected)>.001)throw new Error("Nota del manifest no corresponde al puntaje");
  const pair=String(m.pareja_id||"").trim();if(pair.length<3||pair.length>160)throw new Error("Identificador de pareja inválido");
