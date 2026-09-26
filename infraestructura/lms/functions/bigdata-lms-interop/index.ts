@@ -97,10 +97,12 @@ function qtiItem(q:any){
     body='<qti-item-body><p>'+prompt+'</p><qti-text-entry-interaction response-identifier="RESPONSE" expected-length="16"/></qti-item-body>';
     const cond=tol>0?'<qti-equal tolerance-mode="absolute" tolerance="'+tol+'"><qti-variable identifier="RESPONSE"/><qti-correct identifier="RESPONSE"/></qti-equal>':'<qti-match><qti-variable identifier="RESPONSE"/><qti-correct identifier="RESPONSE"/></qti-match>';
     processing=qtiSetScore(max,cond);
-  }else{
+  }else if(q.question_type==="short_text"){
     decl='<qti-response-declaration identifier="RESPONSE" cardinality="single" base-type="string"/>';
     body='<qti-item-body><p>'+prompt+'</p><qti-extended-text-interaction response-identifier="RESPONSE" expected-lines="5"/></qti-item-body>';
     processing="";
+  }else{
+    throw new Error("Tipo de pregunta no soportado por el exportador QTI: "+String(q.question_type||""));
   }
   return '<?xml version="1.0" encoding="UTF-8"?>\n<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd" identifier="'+id+'" title="'+xml(q.code)+'" adaptive="false" time-dependent="false">'+decl+qtiOutcome(max)+body+processing+'</qti-assessment-item>';
 }
