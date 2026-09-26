@@ -105,6 +105,8 @@ async function syncManifestGroupGradebook(ctx:any,run:any,m:any,groupCtx:any){
  const {data:setting}=await db.from("lms_assignment_group_settings_v2").select("enabled").eq("assignment_id",a.id).eq("enabled",true).maybeSingle();
  if(!setting)throw new Error("TC1 no está habilitado como entrega grupal.");
  const now=new Date().toISOString(),maxAttempts=Number(a.max_attempts||20);
+ const {data:sameEvidence}=await db.from("lms_group_submissions_v2").select("id,group_id").eq("assignment_id",a.id).contains("artifact",{pair_hash:m.pair_hash});
+ if((sameEvidence||[]).some((x:any)=>x.group_id!==groupCtx.group.id))throw new Error("Este manifest ya fue registrado por otro equipo. Cada grupo debe entregar su propia evidencia.");
  const {data:prior}=await db.from("lms_group_submissions_v2").select("*").eq("assignment_id",a.id).eq("group_id",groupCtx.group.id).order("attempt",{ascending:false}).limit(1).maybeSingle();
  let gs:any=null;
  if(!prior||Number(prior.attempt)<maxAttempts){
