@@ -185,6 +185,10 @@ checks=[
     ("D1–D5 embebidos",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,6)}),
     ("S09 Live embebido",'id="liveDrawer"' in deck and "S09 LIVE" in deck and "renderStudentLive" in deck),
     ("Teacher Wall embebido",'id="teacherWall"' in deck and "S09 Teacher Wall" in deck and "wall')==='docente" in deck),
+    ("reinicio docente visible", "id=\"teacherReset\"" in deck and "REINICIAR_S09" in deck and "teacher_reset_session" in deck),
+    ("reinicio docente backend", "async function resetSession" in backend and "teacher_reset_session" in backend and "REINICIAR_S09" in backend),
+    ("reinicio limitado a S09", 'eq("session_number",SESSION)' in backend and 'in("activity_code",[...ALL_CODES])' in backend and "lms_run_enrollments" not in backend[backend.find("async function resetSession"):backend.find("Deno.serve")]),
+    ("reinicio auditado", "bigdata.s09.reset" in backend and "lms_audit_log" in backend),
     ("WALL sin ranking por velocidad","No es un ranking de velocidad" in deck and "localeCompare" in backend),
     ("primer intento + dominio server-side","first_attempt_correct" in backend and "mastery" in backend and "challenge_stats" in backend),
     ("respuestas validadas por hash","CHALLENGE_HASHES" in backend and "sha256(code+\"|\"+answer)" in backend),
@@ -203,6 +207,8 @@ checks=[
     ("Elasticsearch no se confunde con lexical","Elasticsearch no es sinónimo de lexical" in deck and "Elasticsearch" in deck and "Búsqueda vectorial" in deck),
     ("ruta semántica completa",all(x in deck for x in ["Embedding","Similitud coseno","k-Nearest Neighbors","Base vectorial","HNSW","Atlas Vector Search","Reciprocal Rank Fusion"])),
     ("trade-off interactivo","tradeSvg" in deck and "Recall@k" in deck and "Latencia" in deck),
+    ("casos SECOP reales en comparador", all(x in deck for x in ["CO1.REQ.3755377","CO1.REQ.3714823","CO1.REQ.8018431","CO1.REQ.3730074","CO1.REQ.9229871"])),
+    ("comparador distingue dato real de ranking didáctico", "el orden aquí es didáctico" in deck and "ranking calculado se ejecuta en el cuaderno" in deck),
     ("pipeline E5 interactivo","function embedPipeDemo" in deck and "embedRole" in deck and "embedPipeOut" in deck),
     ("chunking interactivo","function chunkDemo" in deck and "chunkSize" in deck and "chunkOverlap" in deck),
     ("operación MongoDB explicada",all(x in deck for x in ["<b>Colección</b>","<b>Upsert</b>","<b>Idempotencia</b>","<b>bulk_write</b>"])),
@@ -262,6 +268,8 @@ print(" - LAB 1–9 + evaluación embebidos")
 print(" - D1–D5 con primer intento/dominio server-side")
 print(" - exactamente dos recursos visibles")
 print(" - S09 Live + Teacher Wall dentro de la presentación")
+print(" - reset docente protegido/auditado")
+print(" - comparador con procesos SECOP reales y orden didáctico explícito")
 print(" - términos definidos antes del primer uso")
 print(" - S07 y S08 intactas")
 print(" - notebook/JS válidos")
