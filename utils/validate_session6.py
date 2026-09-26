@@ -15,6 +15,7 @@ GRAPH = ROOT / "assets" / "tutoriales" / "neo4j-graph-lab-s06.html"
 CHECKLIST = ROOT / "assets" / "tutoriales" / "s06-laboratorio-guiado.html"
 GEN = ROOT / "utils" / "build_session6_notebook.py"
 DATA_GEN = ROOT / "utils" / "build_session6_graph_data.py"
+ADV = ROOT / "utils" / "session6_advanced_ecosystem.py"
 
 
 def src(c):
