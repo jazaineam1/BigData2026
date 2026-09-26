@@ -17,6 +17,12 @@ on:
       - utils/validate_lms_analytics.py
       - utils/validate_lms_collaboration.py
       - utils/validate_lms_assessment.py
+      - utils/validate_tc1_v4.py
+      - utils/test_tc1_v4_synthetic.py
+      - utils/tc1_validator.py
+      - utils/build_taller_control_1.py
+      - Cuadernos/Taller_Control_1.ipynb
+      - assets/tutoriales/s08-secoppipeline.html
       - Presentaciones/s07-del-vecindario-al-texto.html
       - .github/workflows/lms-s08-qa.yml
   pull_request:
@@ -32,6 +38,12 @@ on:
       - utils/validate_lms_analytics.py
       - utils/validate_lms_collaboration.py
       - utils/validate_lms_assessment.py
+      - utils/validate_tc1_v4.py
+      - utils/test_tc1_v4_synthetic.py
+      - utils/tc1_validator.py
+      - utils/build_taller_control_1.py
+      - Cuadernos/Taller_Control_1.ipynb
+      - assets/tutoriales/s08-secoppipeline.html
       - Presentaciones/s07-del-vecindario-al-texto.html
       - .github/workflows/lms-s08-qa.yml
 
@@ -51,9 +63,27 @@ jobs:
         with:
           python-version: '3.12'
       - name: Comprobar sintaxis de validadores
-        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py utils/validate_lms_core.py utils/validate_lms_gradebook.py utils/validate_lms_competencies.py utils/validate_lms_analytics.py utils/validate_lms_collaboration.py utils/validate_lms_assessment.py
+        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py utils/validate_lms_core.py utils/validate_lms_gradebook.py utils/validate_lms_competencies.py utils/validate_lms_analytics.py utils/validate_lms_collaboration.py utils/validate_lms_assessment.py utils/validate_tc1_v4.py utils/test_tc1_v4_synthetic.py utils/tc1_validator.py utils/build_taller_control_1.py
       - name: Validar LMS S08 y guardia S07
         run: python utils/validate_lms_s08.py
+      - name: Instalar dependencias QA TC1
+        run: pip install -q pandas networkx
+      - name: Probar TC1 con caso sintético 100/100
+        run: python utils/test_tc1_v4_synthetic.py
+      - name: Verificar notebook reproducible
+        run: |
+          cp Cuadernos/Taller_Control_1.ipynb /tmp/Taller_Control_1.ipynb
+          python utils/build_taller_control_1.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          original=json.loads(Path("/tmp/Taller_Control_1.ipynb").read_text(encoding="utf-8"))
+          rebuilt=json.loads(Path("Cuadernos/Taller_Control_1.ipynb").read_text(encoding="utf-8"))
+          assert original==rebuilt, "El notebook generado no coincide semánticamente con el versionado"
+          print("Notebook reproducible: OK")
+          PY
+      - name: Validar recurso TC1
+        run: python utils/validate_tc1_v4.py
       - name: Validar administrador docente
         run: python utils/validate_lms_admin.py
       - name: Validar columna vertebral LMS
