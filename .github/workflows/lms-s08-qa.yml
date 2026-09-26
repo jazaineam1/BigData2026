@@ -11,6 +11,7 @@ on:
       - infraestructura/lms/**
       - utils/validate_lms_s08.py
       - utils/validate_lms_admin.py
+      - utils/validate_lms_core.py
       - Presentaciones/s07-del-vecindario-al-texto.html
       - .github/workflows/lms-s08-qa.yml
   pull_request:
