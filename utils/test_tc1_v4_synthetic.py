@@ -144,6 +144,13 @@ ok
 La priorización y las conexiones no demuestran fraude.
 """
     touch(out/"06_informe_tecnico.md",report)
+    defensa={
+      "pregunta_concurrencia":"Con 4 workers, ¿qué cambiaríamos ante HTTP 429 sin alterar el snapshot?",
+      "respuesta_concurrencia":"Si aparece HTTP 429 reduciríamos los workers y respetaríamos Retry-After/backoff. Luego volveríamos a ejecutar la descarga y comprobaríamos que el hash canónico sigue siendo exactamente el mismo que en la referencia secuencial, además del mismo número de filas.",
+      "pregunta_calidad":"Con join_coverage=0.5, ¿qué significa la cobertura y por qué no rellenamos contratos faltantes?",
+      "respuesta_calidad":"La cobertura del join indica qué proporción de procesos encontró contrato relacionado dentro de la ventana y muestra el alcance del snapshot. No debemos inventar ni rellenar contratos faltantes porque convertiríamos ausencia de evidencia en datos fabricados y alteraríamos la interpretación."
+    }
+    touch(out/"06_microdefensa_grupal.json",json.dumps(defensa))
 
     ns={
       "OUT":out,"PAREJA_ID":"TEST-V4","INTEGRANTE_1":"A","CODIGO_1":"1","INTEGRANTE_2":"B","CODIGO_2":"2",
@@ -157,13 +164,13 @@ La priorización y las conexiones no demuestran fraude.
       "cypher_carga":cy_load,"cypher_contexto":cy_ctx,"cypher_compartidos":cy_share,"cypher_ranking":cy_rank,
       "G":nx.DiGraph(),"nodos_grafo":1+ref_ancla.id_proceso.nunique()+ref_ancla.nit_proveedor.nunique(),
       "aristas_grafo":ref_ancla.id_proceso.nunique()+ref_ancla[["id_proceso","nit_proveedor"]].drop_duplicates().shape[0],
-      "decision_log":decisions,"informe_tecnico":report,
+      "decision_log":decisions,"informe_tecnico":report,"defensa_grupal":defensa,
     }
     manifest=V.evaluar(ns)
     assert manifest["puntaje"]==100, manifest
     assert manifest["maximo"]==100
     assert manifest["version"]==V.VERSION
-    print("TC1 V4 synthetic 100/100: OK")
+    print("TC1 synthetic 100/100: OK")
 
 if __name__=="__main__":
   main()
