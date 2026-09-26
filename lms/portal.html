@@ -96,7 +96,7 @@ function renderCalendar(){
 function render(){
  loginCard.classList.add('hidden');noEnroll.classList.add('hidden');home.classList.remove('hidden');document.querySelectorAll('[data-logout]').forEach(x=>x.classList.remove('hidden'));
  const v=model.viewer||{};L.$('who').textContent=v.display_name||v.username;L.$('role').textContent=(v.role==='student'?'Estudiante':'Rol '+v.role)+' · Big Data 2026-2S';
- if(['teacher','admin'].includes(v.role)){['teacherCourse','teacherWall','adminUsers','teacherCourseTop'].forEach(id=>L.$(id)?.classList.remove('hidden'))}
+ if(['teacher','admin'].includes(v.role)){['teacherCourse','teacherAnalytics','teacherWall','adminUsers','teacherCourseTop'].forEach(id=>L.$(id)?.classList.remove('hidden'))}
  renderNext();renderMetrics();renderAnnouncements();renderPending();renderSessions();renderCalendar();
 }
 async function loadHome(){const [m,p]=await Promise.all([L.core('home'),L.bigdata('me')]);model=m;progress=p;render()}
