@@ -99,7 +99,7 @@ function render(){
  if(['teacher','admin'].includes(v.role)){['teacherCourse','teacherAnalytics','teacherWall','adminUsers','teacherCourseTop'].forEach(id=>L.$(id)?.classList.remove('hidden'))}
  renderNext();renderMetrics();renderAnnouncements();renderPending();renderSessions();renderCalendar();
 }
-async function loadHome(){const [m,p]=await Promise.all([L.core('home'),L.bigdata('me')]);model=m;progress=p;render()}
+async function loadHome(){const [m,p]=await Promise.all([L.core('home'),L.bigdata('me')]);model=m;progress=p;render();L.core('track_learning_event',{event_type:'portal_opened',client_at:new Date().toISOString()}).catch(()=>{})}
 async function resume(){
  if(!L.auth()?.token)return;
  try{await loadHome();if(new URLSearchParams(location.search).get('next'))location.replace(L.safeNext())}
