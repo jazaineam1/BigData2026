@@ -602,8 +602,8 @@ async function collaborationOverview(ctx:any,run:any){
     db.from("lms_discussion_threads_v2").select("*").eq("course_run_id",run.id).order("pinned",{ascending:false}).order("created_at",{ascending:false}).limit(60),
     db.from("lms_discussion_posts_v2").select("*").eq("hidden",false).order("created_at").limit(500)
   ]);
-  const memberIds=[...new Set((members||[]).map((x:any)=>x.user_id))];
-  const {data:users}=memberIds.length?await db.from("lms_users").select("id,display_name,username").in("id",memberIds):({data:[]} as any);
+  const visibleUserIds=[...new Set([...(members||[]).map((x:any)=>x.user_id),...(posts||[]).map((x:any)=>x.user_id)])];
+  const {data:users}=visibleUserIds.length?await db.from("lms_users").select("id,display_name,username").in("id",visibleUserIds):({data:[]} as any);
   const assignmentMap=new Map((assignments||[]).map((a:any)=>[a.id,a]));
   const settingRows=(settings||[]).filter((s:any)=>assignmentMap.has(s.assignment_id));
   const peerTargets:any[]=[];
@@ -614,7 +614,7 @@ async function collaborationOverview(ctx:any,run:any){
     const eligible=(candidates||[]).filter((x:any)=>!ownGroupIds.includes(x.group_id)&&!doneSet.has(x.id));
     for(const x of eligible.slice(0,Number(setting.reviews_per_student||1)))peerTargets.push({...x,assignment:assignmentMap.get(setting.assignment_id),peer_setting:setting});
   }
-  return {viewer:ctx.user,run,groups:groups||[],members:members||[],member_users:users||[],settings:settingRows,assignments:assignments||[],group_submissions:groupSubs||[],threads:threads||[],posts:posts||[],peer_targets:peerTargets};
+  return {viewer:ctx.user,run,groups:groups||[],members:members||[],member_users:users||[],users:users||[],settings:settingRows,assignments:assignments||[],group_submissions:groupSubs||[],threads:threads||[],posts:posts||[],peer_targets:peerTargets};
 }
 async function teacherCollaboration(ctx:any,run:any){
   requireTeacher(ctx);
