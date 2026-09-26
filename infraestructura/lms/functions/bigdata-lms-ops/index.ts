@@ -224,7 +224,8 @@ async function exportBackup(ctx:any,run:any){
 async function runAssignmentIds(run:any){return ids(await eqRows("lms_assignments_v2","course_run_id",run.id))}
 async function retentionPreview(ctx:any,run:any,body:any={}){
   requireTeacher(ctx);
-  const hours=Math.max(24,Math.min(24*90,Number(body.older_than_hours||24)));
+  const requested=Number(body.older_than_hours??24);
+  const hours=Number.isFinite(requested)?Math.max(24,Math.min(24*90,requested)):24;
   const assignmentIds=await runAssignmentIds(run);
   if(!assignmentIds.length)return {viewer:ctx.user,older_than_hours:hours,candidates:[],total_bytes:0};
   const cutoff=new Date(Date.now()-hours*3600_000).toISOString();
