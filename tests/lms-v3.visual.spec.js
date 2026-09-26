@@ -58,7 +58,8 @@ const sessionModel = {
   activities:[
     {code:'bd-s09-presentation',title:'Presentación S09',kind:'resource',required:true,points:0,metadata:{resource_type:'presentation',completion_rule:'visit'}},
     {code:'bd-s09-c1',title:'D1 · mecanismos de búsqueda',kind:'checkpoint',required:true,points:1,metadata:{completion_rule:'mastery',slide:9,evidence:'Distingue búsqueda lexical y semántica.'}},
-    {code:'bd-s09-notebook',title:'Cuaderno S09',kind:'resource',required:true,points:0,metadata:{resource_type:'notebook',completion_rule:'visit'}}
+    {code:'bd-s09-notebook',title:'Cuaderno S09',kind:'resource',required:true,points:0,metadata:{resource_type:'notebook',completion_rule:'visit'}},
+    {code:'bd-s09-lab3',title:'LAB 3 · Vecinos y Top-k',kind:'lab',required:true,points:0,metadata:{completion_rule:'evidence',slide:17,evidence:'Resultado propio + decisión + alternativa + límite.'}}
   ],
   resources:[
     {id:'r1',resource_type:'presentation',title:'Presentación S09',url:'../Presentaciones/s09-de-palabras-a-significado.html#s1',metadata:{tracked_activity:'bd-s09-presentation'}},
@@ -69,11 +70,15 @@ const sessionModel = {
     {activity_code:'bd-s09-presentation',status:'in_progress',attempts:1,metadata:{visited:true}}
   ],
   resume:{slide:7,label:'Embeddings',chapter:'SEMÁNTICA'},
-  summary:{total_activities:3,required_activities:3,attempted:1,completed:0,resource_visited:1,resource_total:2,checkpoint_mastered:0,checkpoint_total:1}
+  catalog:[{code:'bd-s09-lab3',evaluator:'seeded-numeric',seeded:true,version:1}],
+  seeds:{'bd-s09-lab3':'0000000000000001'},
+  evidence:[],
+  summary:{total_activities:4,required_activities:4,attempted:1,completed:0,resource_visited:1,resource_total:2,checkpoint_mastered:0,checkpoint_total:1}
 };
 
 async function mockSessionApi(page, role='student') {
   await mockAuth(page,role);
+  let wallPublished=false;
   await page.route('**/functions/v1/bigdata-session**', async route => {
     const req=route.request(),url=new URL(req.url());
     const action=url.searchParams.get('action');
@@ -82,6 +87,14 @@ async function mockSessionApi(page, role='student') {
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(model)});
     }
     if(req.method()==='GET') return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(sessionModel)});
+    const body=req.postDataJSON?.()||{};
+    if(body.action==='lab_code')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,code:'ABCD2345',expires_at:'2099-12-31T23:59:59Z'})});
+    if(body.action==='evidence')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,completed:true,verdict:'correct',feedback:'Resultado verificado.'})});
+    if(body.action==='wall_post'){wallPublished=true;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,post:{id:'p1'}})})}
+    if(body.action==='wall_list'){
+      const result=wallPublished?{viewer:sessionModel.viewer,activity:sessionModel.activities.find(a=>a.code==='bd-s09-lab3'),can_view:true,posts:[{id:'p1',author:'Tú',body:'Mantendría k=5 porque el Top-5 ya concentra candidatos aeronáuticos; todavía necesito juicios humanos.',status:'visible',created_at:'2099-01-01T00:00:00Z',reactions:{useful:0,same_doubt:0},my_reactions:[]}]}:{viewer:sessionModel.viewer,activity:sessionModel.activities.find(a=>a.code==='bd-s09-lab3'),can_view:false,posts:[],reason:'publish_first'};
+      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(result)})
+    }
     return route.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});
   });
 }
@@ -171,4 +184,42 @@ test('accesibilidad WALL docente', async ({ page }) => {
   await page.goto('/lms/wall.html?s=9');
   await expect(page.getByText('no es un ranking de velocidad')).toBeVisible();
   await assertA11y(page,'teacher wall');
+});
+
+
+test('módulo genera código efímero para Colab', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await mockSessionApi(page,'student');
+  await page.goto('/lms/session.html?s=9');
+  await expect(page.getByText('Código de laboratorio')).toBeVisible();
+  await page.getByRole('button',{name:'Generar código'}).click();
+  await expect(page.getByText('ABCD2345')).toBeVisible();
+  await assertNoHorizontalOverflow(page,'lab code mobile');
+});
+
+test('LAB 3 registra evidencia sin desbordes', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await mockSessionApi(page,'student');
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s17');
+  await expect(page.getByText('Registrar evidencia · LAB 3')).toBeVisible();
+  await page.locator('#lab3Result').fill('4');
+  await page.locator('#lab3Decision').selectOption('mantener');
+  await page.locator('#lab3Alternative').fill('Descarto subir k porque aumentaría candidatos sin mejorar necesariamente la precisión.');
+  await page.locator('#lab3Limit').fill('Me faltan juicios de relevancia humanos para saber si los cinco candidatos realmente responden a la necesidad.');
+  await page.locator('#lab3Submit').click();
+  await expect(page.getByText(/Resultado verificado/)).toBeVisible();
+  await assertNoHorizontalOverflow(page,'LAB 3 evidence mobile');
+});
+
+
+test('muro de clase exige publicar antes de ver', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await mockSessionApi(page,'student');
+  await page.goto('/lms/class-wall.html?s=9&a=bd-s09-lab3');
+  await expect(page.getByText('Publica tu aporte para abrir el muro.')).toBeVisible();
+  await page.locator('#body').fill('Mantendría k=5 porque el Top-5 ya concentra candidatos aeronáuticos; todavía necesito juicios humanos.');
+  await page.getByRole('button',{name:'Publicar'}).click();
+  await expect(page.getByText('Mantendría k=5 porque el Top-5 ya concentra candidatos aeronáuticos; todavía necesito juicios humanos.')).toBeVisible();
+  await assertNoHorizontalOverflow(page,'class wall mobile');
+  await assertA11y(page,'class wall');
 });
