@@ -20,6 +20,7 @@ s08=read("lms/session-08.html")
 edge=read("infraestructura/lms/functions/bigdata-learning/index.ts")
 sql=read("infraestructura/lms/tc1-v4-secoppipeline.sql")
 pages=read(".github/workflows/pages.yml")
+index=read("index.html")
 
 try:
     nb=json.loads(nb_text)
@@ -60,6 +61,10 @@ checks=[
     ("referencia no procedimental", "Pistas, no respuestas" in tutorial and "Paso a paso" not in tutorial and "hash" in tutorial.lower()),
     ("Pages referencia", "test -f _site/assets/tutoriales/s08-secoppipeline.html" in pages and "Talleres/Taller_Control_1.md" not in pages),
     ("builder canónico", "Cuadernos" in builder and "Taller_Control_1.ipynb" in builder),
+    ("portada sin bloque redundante", "Aprender = comprender, practicar, comprobar y transferir." not in index and "La evidencia importa más que completar una pantalla." not in index and 'id="metodo"' not in index),
+    ("LMS declara 6h", "mínimo 6 horas por grupo" in s08 and "'estimated_minutes',360" in sql),
+    ("LMS grupal en SQL", "lms_assignment_group_settings_v2" in sql and "Entrega grupal" in sql),
+    ("manifest único por grupo", "Este manifest ya fue registrado por otro equipo" in edge),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
