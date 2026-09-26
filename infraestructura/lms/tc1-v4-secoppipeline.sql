@@ -105,7 +105,7 @@ set enabled=true,
     updated_at=now();
 
 update public.lms_assignments_v2
-set instructions='Proyecto grupal de trabajo en clase y en casa. Dedicación mínima esperada: 6 horas por grupo. Entregables: notebook ejecutado, TC1_<pareja>.zip y manifest_tc1.json. Un integrante carga el manifest validado; el LMS registra una sola calificación del equipo y la replica a todos sus integrantes. La microdefensa escrita forma parte de la evidencia E6 y no crea una segunda nota.',
+set instructions='Proyecto grupal de trabajo en clase y en casa. Dedicación mínima esperada: 6 horas por grupo. Entregables: notebook ejecutado, TC1_<pareja>.zip y manifest_tc1.json. El notebook y el ZIP deben quedar en una carpeta de evidencia accesible al docente. Un integrante registra el enlace de esa carpeta y carga el manifest validado; el LMS registra una sola calificación del equipo y la replica a todos sus integrantes. La microdefensa escrita forma parte de la evidencia E6 y no crea una segunda nota.',
     updated_at=now()
 where code='bd-s08-control'
   and course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1);
