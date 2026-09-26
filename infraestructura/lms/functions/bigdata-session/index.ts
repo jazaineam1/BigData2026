@@ -298,6 +298,22 @@ async function teacherWall(ctx:any,run:any,n:number){
   });
   return {viewer:ctx.user,run,...def,session_window:window,students:rows,ranking:rows,activity_stats,challenge_stats:activity_stats.filter((x:any)=>x.kind==="checkpoint"),refreshed_at:new Date().toISOString()};
 }
+async function teacherStudentDetail(ctx:any,run:any,n:number,userId:string){
+  requireTeacher(ctx);
+  if(!/^[0-9a-f-]{36}$/i.test(userId))throw new Error("Estudiante inválido");
+  const {data:enrollment}=await db.from("lms_run_enrollments").select("user_id,role,status")
+    .eq("course_run_id",run.id).eq("user_id",userId).eq("role","student").eq("status","active").maybeSingle();
+  if(!enrollment)throw new Error("Estudiante no pertenece a esta cohorte");
+  const def=await definition(run.id,n,true),codes=def.activities.map((a:any)=>a.code);
+  const [{data:user},{data:session_progress},{data:activity_progress},{data:events}]=await Promise.all([
+    db.from("lms_users").select("id,display_name,username,active").eq("id",userId).maybeSingle(),
+    db.from("bd_lms_session_progress").select("*").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).maybeSingle(),
+    codes.length?db.from("bd_lms_activity_progress").select("*").eq("user_id",userId).eq("course_run_id",run.id).in("activity_code",codes).order("updated_at",{ascending:false}):Promise.resolve({data:[]} as any),
+    db.from("bd_lms_events").select("event_type,activity_code,metadata,client_at,created_at").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).order("created_at",{ascending:false}).limit(250)
+  ]);
+  return {viewer:ctx.user,run,session:def.session,user,session_progress,activity_progress:activity_progress||[],events:events||[],activities:def.activities};
+}
+
 async function resetSession(ctx:any,run:any,n:number,body:any){
   requireTeacher(ctx);
   const phrase="REINICIAR_S"+String(n).padStart(2,"0");
@@ -388,6 +404,7 @@ Deno.serve(async(req:Request)=>{
     if(action==="answer_challenge")return out(req,await answerChallenge(ctx,run,n,String(body.activity_code||""),body.answer,def.activities));
     if(action==="teacher_open_session")return out(req,{ok:true,session_window:await openOfficial(ctx,run,n)});
     if(action==="teacher_reset_session")return out(req,await resetSession(ctx,run,n,body));
+    if(action==="teacher_student_detail")return out(req,await teacherStudentDetail(ctx,run,n,String(body.user_id||"")));
     if(action==="teacher_wall")return out(req,await teacherWall(ctx,run,n));
     return out(req,{error:"Acción desconocida"},400);
   }catch(e){
