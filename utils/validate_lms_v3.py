@@ -48,10 +48,10 @@ for path,sha in [
 
 checks=[
     ("index es gateway sin progreso local","lms/portal.html" in index and "Continuar mi curso" in index and "data-mark" not in index and "bigdata2026:index:v2" not in index),
-    ("portal usa progreso backend","L.session('course_progress')" in portal and "session.html?s=" in portal and "Continuar aprendizaje" in portal),
-    ("módulo universal","requireSession(sessionNumber)" in session and "session.html?s=" not in session and "Visitado" in session and "Completado" in session and "Dominado" in session and "Calificado" in session),
+    ("portal usa progreso backend","L.session('course_progress')" in portal and "session.html?s=" in portal and "Qué hacer ahora" in portal),
+    ("módulo universal","requireSession(sessionNumber)" in session and "session.html?s=" not in session and "Material de la sesión" in session and "Qué hacer ahora" in session and "Seguimiento integrado" not in session),
     ("módulo no infla tiempo","startHeartbeat" not in session),
-    ("progreso universal","L.session('course_progress')" in progress and all(x in progress for x in ["Visitado","Completado","Dominado","Calificado"])),
+    ("progreso universal","L.session('course_progress')" in progress and all(x in progress for x in ["Sin empezar","En curso","Lista"]) and "Snapshots académicos" not in progress),
     ("WALL universal","requireSession(sessionNumber,{teacher:true})" in wall and "teacher_student_detail" in wall and "no es un ranking de velocidad" in wall.lower()),
     ("WALL filtra ayuda","needs_attention" in wall and 'value="needs_attention"' in wall),
     ("WALL polling seguro","setInterval(load,15000)" in wall),
@@ -103,7 +103,7 @@ print(" - gateway público sin progreso ficticio")
 print(" - identidad única y módulo S01-S16")
 print(" - tracking server-side genérico")
 print(" - primer intento y dominio separados")
-print(" - progreso universal en cuatro dimensiones")
+print(" - progreso universal con estados simples para estudiante")
 print(" - WALL universal + detalle individual")
 print(" - contención visual + foco")
 print(" - S07/S08 protegidas")
