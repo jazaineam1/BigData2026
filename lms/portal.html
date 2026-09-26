@@ -18,7 +18,7 @@
 @media(max-width:850px){.hero-lms,.session-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.calendar-item{grid-template-columns:1fr}}
 </style></head>
-<body><header class="appbar"><div class="inner"><a class="brand" href="../index.html">Universidad Central<small>Big Data 2026-2S · LMS</small></a><span class="spacer"></span><a class="navlink optional" href="../index.html">Sitio público</a><a class="navlink" href="assignments.html">Entregas</a><a class="navlink" href="competencies.html">Competencias</a><a class="navlink" href="progress.html">Mi progreso</a><a class="navlink" href="collaboration.html">Colaboración</a><a id="teacherCourseTop" class="navlink hidden" href="teacher-course.html">Gestor docente</a><button class="hidden" id="logout" data-logout>Salir</button></div></header>
+<body><header class="appbar"><div class="inner"><a class="brand" href="../index.html">Universidad Central<small>Big Data 2026-2S · LMS</small></a><span class="spacer"></span><a class="navlink optional" href="../index.html">Sitio público</a><a class="navlink" href="assignments.html">Entregas</a><a class="navlink" href="quizzes.html">Quizzes</a><a class="navlink" href="competencies.html">Competencias</a><a class="navlink" href="progress.html">Mi progreso</a><a class="navlink" href="collaboration.html">Colaboración</a><a id="teacherCourseTop" class="navlink hidden" href="teacher-course.html">Gestor docente</a><button class="hidden" id="logout" data-logout>Salir</button></div></header>
 <main class="wrap">
 <div class="ey">Maestría en Analítica de Datos</div><h1>Tu semestre, en un solo lugar.</h1><p class="lead">Qué sigue, qué está publicado, qué tienes pendiente y qué evidencia ya quedó registrada.</p>
 <div id="status" class="status hidden"></div>
@@ -31,7 +31,7 @@
 <section id="home" class="hidden">
 <div class="hero-lms">
 <section class="card"><div class="ey">Siguiente acción</div><h2 id="nextTitle">Cargando…</h2><p id="nextText" class="muted"></p><div id="nextActions" class="actions"></div></section>
-<section class="card"><div class="ey">Cuenta</div><h2 id="who">Estudiante</h2><p class="muted" id="role"></p><div class="actions"><a id="teacherCourse" class="btn primary hidden" href="teacher-course.html">Gestor del curso</a><a id="teacherCollaboration" class="btn alt hidden" href="teacher-collaboration.html">Gestionar colaboración</a><a id="teacherWall" class="btn accent hidden" href="teacher-wall.html">WALL S08</a><a id="adminUsers" class="btn alt hidden" href="admin-users.html">Usuarios</a><button class="btn alt" data-logout>Cerrar sesión</button></div></section>
+<section class="card"><div class="ey">Cuenta</div><h2 id="who">Estudiante</h2><p class="muted" id="role"></p><div class="actions"><a id="teacherCourse" class="btn primary hidden" href="teacher-course.html">Gestor del curso</a><a id="teacherQuizzes" class="btn alt hidden" href="teacher-quizzes.html">Banco y quizzes</a><a id="teacherCollaboration" class="btn alt hidden" href="teacher-collaboration.html">Gestionar colaboración</a><a id="teacherWall" class="btn accent hidden" href="teacher-wall.html">WALL S08</a><a id="adminUsers" class="btn alt hidden" href="admin-users.html">Usuarios</a><button class="btn alt" data-logout>Cerrar sesión</button></div></section>
 </div>
 
 <div id="metrics" class="kpis"></div>
@@ -96,7 +96,7 @@ function renderCalendar(){
 function render(){
  loginCard.classList.add('hidden');noEnroll.classList.add('hidden');home.classList.remove('hidden');document.querySelectorAll('[data-logout]').forEach(x=>x.classList.remove('hidden'));
  const v=model.viewer||{};L.$('who').textContent=v.display_name||v.username;L.$('role').textContent=(v.role==='student'?'Estudiante':'Rol '+v.role)+' · Big Data 2026-2S';
- if(['teacher','admin'].includes(v.role)){['teacherCourse','teacherCollaboration','teacherWall','adminUsers','teacherCourseTop'].forEach(id=>L.$(id)?.classList.remove('hidden'))}
+ if(['teacher','admin'].includes(v.role)){['teacherCourse','teacherQuizzes','teacherCollaboration','teacherWall','adminUsers','teacherCourseTop'].forEach(id=>L.$(id)?.classList.remove('hidden'))}
  renderNext();renderMetrics();renderAnnouncements();renderPending();renderSessions();renderCalendar();
 }
 async function loadHome(){const [m,p]=await Promise.all([L.core('home'),L.bigdata('me')]);model=m;progress=p;render()}
