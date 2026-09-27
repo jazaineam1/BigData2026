@@ -224,7 +224,7 @@ async function startRealtime(){
   if(!window.LMSRealtime)return;
   stopRealtime=await window.LMSRealtime.subscribe({
     session_number:sessionNumber,
-    scopes:['controls','progress','teacher_wall','wall'],
+    scopes:['controls','progress','teacher_wall'],
     onSignal:scheduleRealtimeReload,
     onStatus:(st)=>{
       realtimeReady=st==='SUBSCRIBED';
@@ -238,7 +238,6 @@ function restartPolling(){
   if(timer)clearInterval(timer);
   timer=setInterval(()=>load().catch(()=>{}),realtimeReady?60000:15000);
 }
-L.$('controlLab').onchange=updateProjectionLink;
 L.$('openLab').onclick=()=>{const code=L.$('controlLab').value;if(!code)return L.msg(status,'Selecciona un LAB.','warn');return setControl({control_type:'open_lab',activity_code:code})};
 L.$('closeLab').onclick=()=>{const code=L.$('controlLab').value;if(!code)return L.msg(status,'Selecciona un LAB.','warn');return setControl({control_type:'close_lab',activity_code:code})};
 L.$('gotoSlide').onclick=()=>setControl({control_type:'goto_slide',slide:Number(L.$('controlSlide').value)});
