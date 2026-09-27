@@ -97,7 +97,8 @@ function renderSessions(){
   L.$('sessions').innerHTML=rows.map(s=>{
     const n=Number(s.session_number),state=sessionState(s),isCurrent=current&&Number(current.session_number)===n;
     const stateText=state==='completed'?'Lista':state==='started'?'En curso':'Sin empezar';
-    return '<article class="session-card-v3 '+(isCurrent?'current':'')+'"><div class="row"><span class="pill '+(state==='completed'?'done':state==='started'?'progress':'pending')+'">S'+String(n).padStart(2,'0')+' · '+stateText+'</span>'+(isCurrent?'<span class="pill active">Sesión actual</span>':'')+'</div><h3>'+L.esc(s.title)+'</h3><p class="muted">'+L.esc(s.summary||'')+'</p><div class="actions"><a class="btn '+(isCurrent?'primary':'alt')+'" href="session.html?s='+n+'">'+(state==='pending'?'Abrir':'Continuar')+'</a></div></article>'
+    const currentLabel=s.metadata?.class_kind==='assessment_workshop'?'Taller actual':'Sesión actual';
+    return '<article class="session-card-v3 '+(isCurrent?'current':'')+'"><div class="row"><span class="pill '+(state==='completed'?'done':state==='started'?'progress':'pending')+'">S'+String(n).padStart(2,'0')+' · '+stateText+'</span>'+(isCurrent?'<span class="pill active">'+currentLabel+'</span>':'')+'</div><h3>'+L.esc(s.title)+'</h3><p class="muted">'+L.esc(s.summary||'')+'</p><div class="actions"><a class="btn '+(isCurrent?'primary':'alt')+'" href="session.html?s='+n+'">'+(state==='pending'?'Abrir':'Continuar')+'</a></div></article>'
   }).join('')||'<p class="muted">No hay sesiones publicadas.</p>';
 }
 function render(){
