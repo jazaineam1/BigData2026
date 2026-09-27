@@ -9,11 +9,10 @@ const db=createClient(
 const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
-const TRACK_EVENTS=new Set([
+const PUBLIC_TRACK_EVENTS=new Set([
   "session_entered","page_opened","page_closed","heartbeat",
-  "resource_opened","resource_completed","presentation_opened","notebook_opened","guide_opened",
-  "lab_started","checkpoint_started","slide_viewed","challenge_answered","lab_interaction","ui_action",
-  "evidence_submitted","evidence_verified","lab_code_issued","session_completed"
+  "resource_opened","presentation_opened","notebook_opened","guide_opened",
+  "lab_started","checkpoint_started","slide_viewed","lab_interaction","ui_action"
 ]);
 
 function origin(req:Request){
@@ -283,9 +282,12 @@ async function wallList(ctx:any,run:any,n:number,activityCode:string){
     if(p.user_id===ctx.user.id)author="Tú";
     else if(isTeacher)author=names.get(p.user_id)||"Estudiante";
     else author="Compañero "+(await sha256(p.user_id+"|"+activityCode)).slice(0,4).toUpperCase();
-    return {...p,author,
+    const publicPost={
+      id:p.id,parent_id:p.parent_id,body:p.body,evidence_id:p.evidence_id,status:p.status,created_at:p.created_at,author,
       reactions:{useful:rs.filter((r:any)=>r.kind==="useful").length,same_doubt:rs.filter((r:any)=>r.kind==="same_doubt").length},
-      my_reactions:rs.filter((r:any)=>r.user_id===ctx.user.id).map((r:any)=>r.kind)};
+      my_reactions:rs.filter((r:any)=>r.user_id===ctx.user.id).map((r:any)=>r.kind)
+    };
+    return isTeacher?{...publicPost,user_id:p.user_id}:publicPost;
   }));
   return {viewer:ctx.user,activity,can_view:true,posts:rows};
 }
@@ -664,7 +666,7 @@ Deno.serve(async(req:Request)=>{
       return out(req,{viewer:ctx.user,run,...def,...p,...cat,evidence,summary:activitySummary(def.activities,p.activity_progress)});
     }
     if(action==="track"){
-      const event=String(body.event_type||"");if(!TRACK_EVENTS.has(event))throw new Error("Evento no permitido");
+      const event=String(body.event_type||"");if(!PUBLIC_TRACK_EVENTS.has(event))throw new Error("Evento no permitido para tracking cliente");
       const activityCode=body.activity_code?String(body.activity_code):null;
       const activity=activityCode?def.activities.find((a:any)=>a.code===activityCode):null;
       if(activityCode&&!activity)throw new Error("Actividad no válida para esta sesión");
@@ -681,8 +683,7 @@ Deno.serve(async(req:Request)=>{
       else{
         await ensureSessionStarted(ctx.user.id,run.id,n,def.activities.filter((a:any)=>a.kind==="checkpoint"&&a.required).length);
         if(activity){
-          const complete=event==="resource_completed"||event==="evidence_verified"||event==="session_completed";
-          await touchActivity(ctx.user.id,run.id,activity,event,complete,event!=="lab_interaction");
+          await touchActivity(ctx.user.id,run.id,activity,event,false,event!=="lab_interaction");
         }
       }
       return out(req,{ok:true});
