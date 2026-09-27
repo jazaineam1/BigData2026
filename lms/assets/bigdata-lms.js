@@ -13,14 +13,15 @@ const save=x=>{try{
   if(x){
     const raw=JSON.stringify(x);
     sessionStorage.setItem(STORE,raw);
-    localStorage.setItem(STORE,raw);
+    if(x.persistent===false)localStorage.removeItem(STORE);
+    else localStorage.setItem(STORE,raw);
   }else{
     sessionStorage.removeItem(STORE);
     localStorage.removeItem(STORE);
   }
 }catch{}};
 async function request(path,opt={}){const {auth:useAuth=true,...fetchOpt}=opt,a=useAuth?auth():null,h={'Content-Type':'application/json',...(fetchOpt.headers||{})};if(a?.token)h.Authorization='Bearer '+a.token;const r=await fetch(API+'/'+path,{...fetchOpt,headers:h});const x=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(x.error||('HTTP '+r.status));e.status=r.status;e.data=x;throw e}return x}
-async function login(username,password){const x=await request(AUTH_ENDPOINT,{method:'POST',body:JSON.stringify({action:'login',username,password})});save({token:x.token,expires_at:x.expires_at,auth_session_id:x.auth_session_id,user:x.user});return x}
+async function login(username,password){const x=await request(AUTH_ENDPOINT,{method:'POST',body:JSON.stringify({action:'login',username,password})});save({token:x.token,expires_at:x.expires_at,auth_session_id:x.auth_session_id,persistent:x.persistent!==false,user:x.user});return x}
 async function authAction(action,payload={}){return request(AUTH_ENDPOINT,{method:'POST',body:JSON.stringify({action,...payload})})}
 async function bigdata(action='me',payload={}){if(action==='me'||action==='teacher_wall')return request('bigdata-learning?action='+encodeURIComponent(action),{method:'GET'});return request('bigdata-learning',{method:'POST',body:JSON.stringify({action,...payload})})}
 async function session(action='me',payload={}){const n=Math.trunc(Number(payload.session_number||0));if(action==='course_progress')return request('bigdata-session?action=course_progress',{method:'GET'});if(!Number.isInteger(n)||n<1)throw new Error('Número de sesión inválido');if(action==='me'||action==='teacher_wall')return request('bigdata-session?action='+encodeURIComponent(action)+'&session_number='+encodeURIComponent(String(n)),{method:'GET'});return request('bigdata-session',{method:'POST',body:JSON.stringify({action,...payload,session_number:n})})}
@@ -36,11 +37,26 @@ function fmtTime(s){s=Math.max(0,Number(s||0));const h=Math.floor(s/3600),m=Math
 function fmtWhen(v){if(!v)return'—';try{return new Intl.DateTimeFormat('es-CO',{dateStyle:'short',timeStyle:'short',timeZone:'America/Bogota'}).format(new Date(v))}catch{return'—'}}
 function fmtDelay(s){if(s==null||!Number.isFinite(Number(s)))return'—';s=Math.max(0,Math.round(Number(s)));const m=Math.floor(s/60),r=s%60;return'+'+String(m).padStart(2,'0')+':'+String(r).padStart(2,'0')}
 function safeNext(){const p=new URLSearchParams(location.search),n=p.get('next');if(!n)return ROOT+'portal.html';try{const u=new URL(n,location.origin),allowed=[ROOT,'/BigData2026/Presentaciones/','/BigData2026/assets/tutoriales/'];return u.origin===location.origin&&allowed.some(x=>u.pathname.startsWith(x))?u.pathname+u.search+u.hash:ROOT+'portal.html'}catch{return ROOT+'portal.html'}}
-function msg(el,text,type='ok'){if(!el)return;el.className='status '+type;el.textContent=text;el.hidden=false}
+function msg(el,text,type='ok'){if(!el)return;el.className='status '+type;el.textContent=text;el.setAttribute('role',type==='err'?'alert':'status');el.setAttribute('aria-live',type==='err'?'assertive':'polite');el.hidden=false}
+function ensureA11yShell(){
+  const main=document.querySelector('main');
+  if(main){
+    if(!main.id)main.id='main-content';
+    if(!main.hasAttribute('tabindex'))main.setAttribute('tabindex','-1');
+    if(!document.querySelector('.skip-link')){
+      const a=document.createElement('a');a.className='skip-link';a.href='#'+main.id;a.textContent='Saltar al contenido principal';document.body.prepend(a);
+    }
+  }
+  document.querySelectorAll('.status').forEach(el=>{
+    if(!el.hasAttribute('role'))el.setAttribute('role','status');
+    if(!el.hasAttribute('aria-live'))el.setAttribute('aria-live','polite');
+  });
+}
 async function requireBigData({teacher=false}={}){if(!auth()?.token){location.replace(ROOT+'portal.html?next='+encodeURIComponent(location.pathname+location.search));return null}try{const x=await bigdata(teacher?'teacher_wall':'me');if(teacher&&!['teacher','admin'].includes(x.viewer?.role)){location.replace(ROOT+'portal.html');return null}return x}catch(e){if(e.status===401){save(null);location.replace(ROOT+'portal.html?next='+encodeURIComponent(location.pathname+location.search));return null}throw e}}
 async function requireSession(sessionNumber,{teacher=false}={}){if(!auth()?.token){location.replace(ROOT+'portal.html?next='+encodeURIComponent(location.pathname+location.search+location.hash));return null}try{const x=await session(teacher?'teacher_wall':'me',{session_number:sessionNumber});if(teacher&&!['teacher','admin'].includes(x.viewer?.role)){location.replace(ROOT+'portal.html');return null}return x}catch(e){if(e.status===401){save(null);location.replace(ROOT+'portal.html?next='+encodeURIComponent(location.pathname+location.search+location.hash));return null}throw e}}
 async function requireS09({teacher=false}={}){return requireSession(9,{teacher})}
 function wireLogout(){document.querySelectorAll('[data-logout]').forEach(b=>b.addEventListener('click',logout))}
 function startHeartbeat(activity=null,tracker=bigdata){let last=Date.now(),beat=Date.now();const touch=()=>last=Date.now();['pointerdown','keydown','scroll','touchstart'].forEach(ev=>addEventListener(ev,touch,{passive:true}));const send=async()=>{const now=Date.now(),visible=document.visibilityState==='visible',active=now-last<90000,elapsed=Math.min(30,Math.max(0,Math.round((now-beat)/1000)));beat=now;if(visible&&active&&elapsed>0){try{await tracker('track',{event_type:'heartbeat',activity_code:activity,active_seconds_delta:elapsed,client_at:new Date().toISOString()})}catch{}}};const id=setInterval(send,30000);addEventListener('pagehide',()=>{clearInterval(id);tracker('track',{event_type:'page_closed',activity_code:activity,client_at:new Date().toISOString()}).catch(()=>{})})}
-window.BIGDATA_LMS={API,STORE,ROOT,$,esc,auth,save,login,authAction,bigdata,session,s09,core,assess,interop,ops,requestAccess,reviewAccess,logout,fmtTime,fmtWhen,fmtDelay,safeNext,msg,requireBigData,requireSession,requireS09,wireLogout,startHeartbeat};
+ensureA11yShell();
+window.BIGDATA_LMS={API,STORE,ROOT,$,esc,auth,save,login,authAction,bigdata,session,s09,core,assess,interop,ops,requestAccess,reviewAccess,logout,fmtTime,fmtWhen,fmtDelay,safeNext,msg,requireBigData,requireSession,requireS09,wireLogout,startHeartbeat,ensureA11yShell};
 })();

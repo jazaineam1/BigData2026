@@ -7,6 +7,12 @@ function headers(req:Request){const o=origin(req);return {"Access-Control-Allow-
 function out(req:Request,body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers:{...headers(req),"Content-Type":"application/json"}})}
 function bearer(req:Request){const h=req.headers.get("authorization")||"";return h.toLowerCase().startsWith("bearer ")?h.slice(7).trim():""}
 async function sha256(s:string){const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("")}
+const SESSION_POLICY:Record<string,{ttl_hours:number,persistent:boolean,label:string}>={
+  student:{ttl_hours:30*24,persistent:true,label:"30 días"},
+  teacher:{ttl_hours:12,persistent:false,label:"12 horas"},
+  admin:{ttl_hours:4,persistent:false,label:"4 horas"}
+};
+function sessionPolicy(role:any){return SESSION_POLICY[String(role||"").toLowerCase()]||{ttl_hours:8,persistent:false,label:"8 horas"}}
 function randomToken(){const bytes=crypto.getRandomValues(new Uint8Array(32));return btoa(String.fromCharCode(...bytes)).replaceAll("+","-").replaceAll("/","_").replaceAll("=","")}
 function deviceLabel(ua:string){const s=ua||"";const os=/Android/i.test(s)?"Android":/iPhone|iPad|iPod/i.test(s)?"iOS/iPadOS":/Windows/i.test(s)?"Windows":/Mac OS X|Macintosh/i.test(s)?"macOS":/Linux/i.test(s)?"Linux":"Dispositivo";const browser=/Edg\//i.test(s)?"Edge":/OPR\//i.test(s)?"Opera":/Chrome\//i.test(s)?"Chrome":/Safari\//i.test(s)?"Safari":/Firefox\//i.test(s)?"Firefox":"navegador";return `${os} · ${browser}`}
 async function current(req:Request){const token=bearer(req);if(!token)return null;const token_hash=await sha256(token);const {data:s}=await supabase.from("lms_auth_sessions").select("id,user_id,expires_at,revoked_at,persistent,user_agent,created_at,last_seen_at").eq("token_hash",token_hash).is("revoked_at",null).maybeSingle();if(!s)return null;const deadline=s.expires_at?new Date(s.expires_at).getTime():(new Date(s.created_at).getTime()+(s.persistent?30:1)*24*3600_000);if(!Number.isFinite(deadline)||deadline<=Date.now())return null;const {data:u}=await supabase.from("lms_users").select("id,username,display_name,role,active,email,auth_user_id").eq("id",s.user_id).eq("active",true).maybeSingle();return u?{token,session:s,user:u}:null}
@@ -16,7 +22,7 @@ async function currentRun(userId:string){
  const {data:re}=await supabase.from("lms_run_enrollments").select("role,status,enrolled_at").eq("user_id",userId).eq("course_run_id",r.id).eq("status","active").maybeSingle();
  return re?{...r,enrollment_role:re.role}:null
 }
-async function issueSession(req:Request,user:any,includeRun=true){const token=randomToken(),token_hash=await sha256(token),student=user.role==="student",persistent=student,ttlHours=student?30*24:24,expires_at=new Date(Date.now()+ttlHours*3600_000).toISOString();const {data:created,error}=await supabase.from("lms_auth_sessions").insert({user_id:user.id,token_hash,user_agent:(req.headers.get("user-agent")||"").slice(0,500),expires_at,persistent}).select("id").single();if(error)throw error;return {token,expires_at,auth_session_id:created.id,persistent,user:{id:user.id,username:user.username,display_name:user.display_name,role:user.role,email:user.email||null},course_run:includeRun?await currentRun(user.id):null}}
+async function issueSession(req:Request,user:any,includeRun=true){const token=randomToken(),token_hash=await sha256(token),policy=sessionPolicy(user.role),persistent=policy.persistent,ttlHours=policy.ttl_hours,expires_at=new Date(Date.now()+ttlHours*3600_000).toISOString();const {data:created,error}=await supabase.from("lms_auth_sessions").insert({user_id:user.id,token_hash,user_agent:(req.headers.get("user-agent")||"").slice(0,500),expires_at,persistent}).select("id").single();if(error)throw error;return {token,expires_at,auth_session_id:created.id,persistent,session_policy:{role:user.role,ttl_hours:ttlHours,label:policy.label,persistent},user:{id:user.id,username:user.username,display_name:user.display_name,role:user.role,email:user.email||null},course_run:includeRun?await currentRun(user.id):null}}
 async function accessContext(raw:string){
  if(raw.length<30)return {error:"Enlace de acceso incompleto",status:400} as any;
  const token_hash=await sha256(raw);
@@ -104,7 +110,7 @@ Deno.serve(async req=>{
  }
  if(action==="me"){
    await supabase.from("lms_auth_sessions").update({last_seen_at:new Date().toISOString()}).eq("id",ctx.session.id);
-   return out(req,{user:ctx.user,expires_at:ctx.session.expires_at,auth_session_id:ctx.session.id,persistent:!!ctx.session.persistent,course_run:await currentRun(ctx.user.id)});
+   const policy=sessionPolicy(ctx.user.role);return out(req,{user:ctx.user,expires_at:ctx.session.expires_at,auth_session_id:ctx.session.id,persistent:!!ctx.session.persistent,session_policy:{role:ctx.user.role,ttl_hours:policy.ttl_hours,label:policy.label,persistent:policy.persistent},course_run:await currentRun(ctx.user.id)});
  }
  return out(req,{error:"Acción desconocida"},400);
 });
