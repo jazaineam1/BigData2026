@@ -231,7 +231,7 @@ function queueLabInteraction(code,el){
 }
 function injectLab3Evidence(lab){
   const existing=lab.querySelector('[data-evidence-kind="self-check"]');if(existing){const b=existing.querySelector('#lab3Submit');if(b)b.onclick=submitLab3Evidence;return;}
-  const box=document.createElement('div');box.className='evidence-box';box.dataset.evidenceKind='self-check';box.dataset.evidenceFor='bd-s09-lab3';box.innerHTML='<h4>Comprueba tu aprendizaje · LAB 3</h4><p class="mini">Cuenta cuántos de tus primeros 5 candidatos son claramente aeronáuticos. Regla del ejercicio: si son 4–5, mantén k=5; si son 0–3, amplía k. El servidor conoce tu ranking personalizado y verificará ambas respuestas.</p><div class="mini-grid"><label>¿Cuántos son claramente aeronáuticos?<input id="lab3Result" type="number" min="0" max="5" inputmode="numeric" placeholder="0–5"></label><label>Con ese resultado, ¿qué harías con k?<select id="lab3Decision"><option value="">Elige…</option><option value="mantener">Mantener k=5</option><option value="subir">Subir k para revisar más vecinos</option></select></label></div><button id="lab3Submit" class="btn alt" type="button">Comprobar</button><a class="btn ghost" href="../lms/class-wall.html?s=9&a=bd-s09-lab3">Muro del LAB 3</a><div id="lab3EvidenceStatus" class="feedback">Explora primero tu ranking y luego comprueba tu respuesta.</div>';
+  const box=document.createElement('div');box.className='evidence-box';box.dataset.evidenceKind='self-check';box.dataset.evidenceFor='bd-s09-lab3';box.innerHTML='<h4>Comprueba tu aprendizaje · LAB 3</h4><p class="mini">Cuenta cuántos de tus primeros 5 candidatos son claramente aeronáuticos. Regla del ejercicio: si son 4–5, mantén k=5; si son 0–3, amplía k. El servidor conoce tu ranking personalizado y verificará ambas respuestas.</p><div class="mini-grid"><label>¿Cuántos son claramente aeronáuticos?<input id="lab3Result" type="number" min="0" max="5" inputmode="numeric" placeholder="0–5"></label><label>Con ese resultado, ¿qué harías con k?<select id="lab3Decision"><option value="">Elige…</option><option value="mantener">Mantener k=5</option><option value="subir">Subir k para revisar más vecinos</option></select></label></div><button id="lab3Submit" class="btn alt" type="button">Comprobar</button><div id="lab3EvidenceStatus" class="feedback">Explora primero tu ranking y luego comprueba tu respuesta.</div>';
   lab.appendChild(box);box.querySelector('#lab3Submit').onclick=submitLab3Evidence;
 }
 async function submitLab3Evidence(){
@@ -266,51 +266,6 @@ function shuffleChallengeOptions(){
 }
 function stepOptionValue(opt){return typeof opt==='object'?String(opt.value??''):String(opt)}
 function stepOptionLabel(opt){return typeof opt==='object'?String(opt.label??opt.value??''):String(opt)}
-const TRANSFER_CODES=new Set(['bd-s09-lab3','bd-s09-lab4','bd-s09-lab8']);
-const TRANSFER_LABELS={
-  'bd-s09-lab3':'LAB 3 · Top-k',
-  'bd-s09-lab4':'LAB 4 · BM25 vs semántica',
-  'bd-s09-lab8':'LAB 8 · RRF'
-};
-function transferState(code){
-  return (s09Model?.evidence||[]).find(e=>e.activity_code===code&&e.step_id==='transfer')||null;
-}
-function transferEvidencePanel(code,lab){
-  if(!TRANSFER_CODES.has(code)||lab.querySelector('[data-transfer-for="'+code+'"]'))return;
-  const evidence=transferState(code),payload=evidence?.payload||{},box=document.createElement('details');
-  box.className='evidence-box transfer-box';box.dataset.transferFor=code;
-  const state=evidence?.verdict==='accepted'?'✓ Aceptada':evidence?.verdict==='rejected'?'↺ Requiere ajuste':evidence?.verdict==='pending_review'?'⏳ Pendiente de revisión':'Pendiente de enviar';
-  const locked=['accepted','pending_review'].includes(evidence?.verdict);
-  const field=(id,label)=>'<label>'+esc(label)+'<textarea rows="2" data-transfer-field="'+id+'" placeholder="Escribe una evidencia concreta…">'+esc(payload[id]||'')+'</textarea></label>';
-  box.innerHTML='<summary>Transferencia breve · '+esc(state)+'</summary><div class="transfer-body"><p class="mini">Solo al terminar el LAB: registra qué observaste y qué decisión puedes defender. Esto sí es evidencia revisable; la autocomprobación anterior no lo es.</p><div class="mini-grid">'+
-    field('result','Resultado que observaste')+
-    field('decision','Decisión que defenderías')+
-    field('rejected_alternative','Alternativa descartada y por qué')+
-    field('interpretation','Cómo interpretas el resultado')+
-    field('limit','Límite concreto de tu conclusión')+
-    '</div><div class="actions"><button class="btn accent" type="button" data-submit-transfer="'+esc(code)+'" '+(locked?'disabled':'')+'>'+(evidence?.verdict==='rejected'?'Reenviar transferencia':'Enviar transferencia')+'</button></div><div class="feedback" data-transfer-status="'+esc(code)+'">'+esc(evidence?.feedback||'Completa primero la autocomprobación del LAB y luego envía esta transferencia.')+'</div></div>';
-  lab.appendChild(box);
-  const btn=box.querySelector('[data-submit-transfer]');
-  if(btn)btn.onclick=()=>submitTransferEvidence(code,box);
-}
-async function submitTransferEvidence(code,box){
-  const btn=box.querySelector('[data-submit-transfer]'),out=box.querySelector('[data-transfer-status]');
-  if(!L?.auth?.()?.token){out.textContent='Entra por el LMS para enviar la transferencia.';return}
-  const payload={};
-  for(const el of box.querySelectorAll('[data-transfer-field]')){
-    const value=String(el.value||'').trim();
-    if(value.length<12){out.textContent='Completa cada campo con una respuesta concreta de al menos 12 caracteres.';el.focus();return}
-    payload[el.dataset.transferField]=value;
-  }
-  btn.disabled=true;out.textContent='Guardando evidencia…';
-  try{
-    const x=await K.evidence(code,payload,{source:'presentation-transfer'});
-    if(x.queued){out.textContent='⟳ '+x.feedback;return}
-    out.textContent='⏳ '+x.feedback;
-    await refreshStudentProgress();
-  }catch(e){out.textContent='No se pudo enviar: '+e.message;btn.disabled=false}
-}
-
 function lab9EvidencePanel(lab){
   if(lab.querySelector('[data-evidence-for="bd-s09-lab9"]'))return;
   const box=document.createElement('div');box.className='evidence-box';box.dataset.evidenceFor='bd-s09-lab9';box.dataset.evidenceKind='authentic';
@@ -328,7 +283,7 @@ function genericEvidencePanel(code,lab,catalog){
     if(step.type==='number')return '<label>'+esc(label)+'<input type="number"'+attrs+' inputmode="decimal"></label>';
     return '';
   }).join('');
-  box.innerHTML='<h4>Autocomprobación</h4><p class="mini">Comprueba tu aprendizaje con lo que acabas de explorar. Puedes reintentar: no es nota ni evidencia de competencia.</p><div class="mini-grid">'+fields+'</div><div class="actions"><button class="btn alt" type="button" data-submit-evidence="'+esc(code)+'">Comprobar</button><a class="btn ghost" href="../lms/class-wall.html?s=9&a='+encodeURIComponent(code)+'">Muro del LAB</a></div><div class="feedback" data-evidence-status="'+esc(code)+'">Explora el LAB y luego comprueba tus respuestas.</div>';
+  box.innerHTML='<h4>Autocomprobación</h4><p class="mini">Comprueba tu aprendizaje con lo que acabas de explorar. Puedes reintentar: no es nota ni evidencia de competencia.</p><div class="mini-grid">'+fields+'</div><div class="actions"><button class="btn alt" type="button" data-submit-evidence="'+esc(code)+'">Comprobar</button></div><div class="feedback" data-evidence-status="'+esc(code)+'">Explora el LAB y luego comprueba tus respuestas.</div>';
   lab.appendChild(box);
   box.querySelector('[data-submit-evidence]').onclick=()=>submitGenericEvidence(code,box);
 }
@@ -341,8 +296,7 @@ async function submitGenericEvidence(code,box){
     const x=await K.evidence(code,payload,{source:'presentation'});
     if(x.queued){out.textContent='⟳ '+x.feedback;return}
     const ok=['correct','accepted'].includes(x.verdict);
-    out.textContent=ok?'✓ '+x.feedback+(x.completed?'':' Continúa con la transferencia breve.'):'✗ '+x.feedback;
-    if(ok&&!x.completed&&TRANSFER_CODES.has(code)){const transfer=document.querySelector('[data-transfer-for="'+code+'"]');if(transfer)transfer.open=true}
+    out.textContent=ok?'✓ '+x.feedback:'✗ '+x.feedback;
     await refreshStudentProgress();
   }catch(e){out.textContent='No se pudo comprobar: '+e.message}finally{btn.disabled=false}
 }
@@ -354,7 +308,6 @@ function renderEvidencePanels(){
     if(code==='bd-s09-lab3')injectLab3Evidence(lab);
     else if(code==='bd-s09-lab9'&&cats.get(code)?.evaluator==='authentic-review')lab9EvidencePanel(lab);
     else if(cats.has(code))genericEvidencePanel(code,lab,cats.get(code));
-    if(TRANSFER_CODES.has(code))transferEvidencePanel(code,lab);
   });
 }
 function wireLabs(){
