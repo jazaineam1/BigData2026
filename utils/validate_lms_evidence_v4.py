@@ -21,7 +21,6 @@ client=read("lms/assets/bigdata-lms.js")
 session=read("lms/session.html")
 progress=read("lms/progress.html")
 wall=read("lms/wall.html")
-class_wall=read("lms/class-wall.html")
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
 generator=read("utils/build_session9_notebook.py")
 notebook=read("Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb")
@@ -100,8 +99,8 @@ checks=[
  ("módulo genera código Colab", "labCodeCard" in session and "L.session('lab_code'" in session),
  ("Mi progreso muestra evidencia", "evidenceCard" in progress and "renderEvidence()" in progress),
  ("WALL muestra LAB y evidencia", "LAB explorados" in wall and "detailEvidence" in wall and "evidence_count" in wall),
- ("muro histórico reservado al docente", "publish_first" in backend and all(x in backend for x in ['action==="wall_post"','action==="wall_list"','action==="wall_react"','action==="wall_moderate"']) and "Publica para ver" not in class_wall and '<textarea id="body"' not in class_wall and "if(!teacher){location.replace('session.html?s='+sessionNumber)" in class_wall),
- ("muro conserva anonimización histórica", "Compañero " in backend and "Esta vista queda reservada al docente" in class_wall),
+ ("muro abierto retirado", not (ROOT/"lms/class-wall.html").exists() and all(x not in backend for x in ['action==="wall_post"','action==="wall_list"','action==="wall_react"','action==="wall_moderate"'])),
+ ("S09 sin enlaces a muro abierto", "class-wall.html" not in deck and "class-wall.html" not in progress),
  ("S09 instrumenta 12 LAB", "LAB_BY_SLIDE" in deck and all(x in deck for x in labs)),
  ("S09 envía lab_interaction", "lab_interaction" in deck and "queueLabInteraction" in deck),
  ("S09 LAB3 registra evidencia", "submitLab3Evidence" in deck and "bd-s09-lab3" in deck and "¿Cuántos son claramente aeronáuticos?" in deck),
@@ -145,5 +144,5 @@ print(" - autocomprobación determinística separada de evidencia auténtica LAB
 print(" - LAB3 seeded sin campos abiertos")
 print(" - hashes de respuesta validados contra opciones publicadas")
 print(" - código Colab efímero sin bearer")
-print(" - Mi progreso y WALL consumen evidencia")
+print(" - Mi progreso y WALL docente consumen evidencia; muro abierto retirado")
 print(" - reset y señal de atasco consistentes")
