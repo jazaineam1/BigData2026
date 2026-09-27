@@ -46,7 +46,7 @@ async function routeSession(page,{role='student',seen=[],controls=[],wallPosts=[
       viewer:model.viewer,activity:model.activities.find(a=>a.code===body.activity_code),can_view:true,posts:wallPosts
     })});
     if(body.action==='answer_challenge')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
-      ok:true,correct:true,attempts:1,first_attempt_correct:true,mastery:true,confidence:body.confidence,hint:null
+      ok:true,correct:true,attempts:1,first_attempt_correct:true,mastery:true,hint:null
     })});
     if(body.action==='teacher_set_control'||body.action==='teacher_clear_control')
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,controls:[]})});
@@ -54,19 +54,19 @@ async function routeSession(page,{role='student',seen=[],controls=[],wallPosts=[
   });
 }
 
-test('S09 exige confianza y la envía al backend', async ({page})=>{
+test('S09 responde sin preguntas de confianza', async ({page})=>{
   const seen=[];await auth(page,'student');await routeSession(page,{role:'student',seen});
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s9');
-  const answer=page.locator('#ans-bd-s09-c1'),confidence=page.locator('#conf-bd-s09-c1');
-  await expect(answer).toBeVisible();await expect(confidence).toBeVisible();
+  const answer=page.locator('#ans-bd-s09-c1');
+  await expect(answer).toBeVisible();
+  await expect(page.getByText('¿Qué tan seguro estás?',{exact:true})).toHaveCount(0);
+  await expect(page.locator('[id^="conf-"]')).toHaveCount(0);
   await page.evaluate(()=>answerChallenge('bd-s09-c1'));
   await expect(page.locator('#fb-bd-s09-c1')).toContainText('Elige una opción');
   await answer.selectOption('lexical');
   await page.evaluate(()=>answerChallenge('bd-s09-c1'));
-  await expect(page.locator('#fb-bd-s09-c1')).toContainText('indica tu nivel de confianza');
-  await confidence.selectOption('high');
-  await page.evaluate(()=>answerChallenge('bd-s09-c1'));
-  await expect.poll(()=>seen.some(x=>x.action==='answer_challenge'&&x.confidence==='high')).toBeTruthy();
+  await expect.poll(()=>seen.some(x=>x.action==='answer_challenge'&&x.answer==='lexical')).toBeTruthy();
+  expect(seen.find(x=>x.action==='answer_challenge')).not.toHaveProperty('confidence');
 });
 
 test('S09 muestra pista docente sin cambiar de diapositiva', async ({page})=>{
