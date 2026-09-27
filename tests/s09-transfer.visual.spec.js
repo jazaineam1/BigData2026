@@ -52,15 +52,16 @@ async function route(page){
     const req=route.request();
     if(req.method()==='OPTIONS')return route.fulfill({status:200,body:'ok'});
     let body={};try{body=req.postDataJSON()||{}}catch{}
-    if(body.action==='me')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(state)});
-    if(body.action==='evidence'&&body.source==='presentation-transfer'){
+    const url=new URL(req.url()),action=body.action||url.searchParams.get('action')||'';
+    if(action==='me')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(state)});
+    if(action==='evidence'&&body.source==='presentation-transfer'){
       const ev={id:'22222222-2222-2222-2222-222222222222',activity_code:body.activity_code,step_id:'transfer',
         source:'presentation-transfer',verdict:'pending_review',feedback:'Transferencia recibida. Está pendiente de revisión docente con rúbrica.',
         payload:body.payload,created_at:new Date().toISOString()};
       state={...state,evidence:[ev,...state.evidence]};
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,completed:false,verdict:'pending_review',feedback:ev.feedback,evidence:ev})});
     }
-    if(body.action==='track'||body.action==='session_controls')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,controls:[]})});
+    if(action==='track'||action==='session_controls')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,controls:[]})});
     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true})});
   });
 }
