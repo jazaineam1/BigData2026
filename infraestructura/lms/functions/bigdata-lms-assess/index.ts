@@ -447,8 +447,7 @@ function cleanResponse(q:any,raw:any){
   }
   if(q.question_type==="true_false"){if(typeof raw?.value!=="boolean")throw new Error("Selecciona verdadero o falso");return {value:raw.value}}
   if(q.question_type==="numeric"){const n=Number(raw?.value);if(!Number.isFinite(n))throw new Error("Respuesta numérica inválida");return {value:n}}
-  if(q.question_type==="short_text")return {text:text(raw?.text,5000,true)};
-  throw new Error("Tipo de pregunta desconocido");
+  throw new Error("Tipo de pregunta no habilitado");
 }
 async function saveResponse(ctx:any,run:any,body:any){
   const attemptId=text(body.attempt_id,80,true),questionId=text(body.question_id,80,true);
@@ -484,22 +483,16 @@ async function finalizeAttempt(ctx:any,run:any,attemptId:string,expired=false){
   const {data:quiz}=await db.from("lms_quizzes_v2").select("*").eq("id",a.quiz_id).eq("course_run_id",run.id).maybeSingle();if(!quiz)throw new Error("Quiz fuera de esta cohorte");
   if(a.status!=="in_progress")return a;
   const items=await quizItems(a.quiz_id),{data:responses}=await db.from("lms_quiz_responses_v2").select("*").eq("attempt_id",a.id);
-  const rm=new Map((responses||[]).map((r:any)=>[r.question_id,r]));let auto=0,manual=0,pendingManual=0;
+  const rm=new Map((responses||[]).map((r:any)=>[r.question_id,r]));let auto=0;
   for(const item of items){
     const r:any=rm.get(item.question_id),pts=Number(item.points);
-    if(item.question.question_type==="short_text"){
-      const answered=!!String(r?.response?.text||"").trim();
-      if(!answered){manual+=0;continue}
-      if(r?.manual_score===null||r?.manual_score===undefined)pendingManual++;else manual+=Number(r.manual_score||0);
-      continue;
-    }
     const score=autoScore(item.question,r?.response||{},pts);auto+=Number(score||0);
     if(r)await db.from("lms_quiz_responses_v2").update({auto_score:score,saved_at:new Date().toISOString()}).eq("attempt_id",a.id).eq("question_id",item.question_id);
     else await db.from("lms_quiz_responses_v2").insert({attempt_id:a.id,question_id:item.question_id,response:{},auto_score:0});
   }
-  const status=pendingManual?"submitted":"reviewed",submittedAt=expired&&a.expires_at?a.expires_at:new Date().toISOString(),score=auto+manual;
-  const {data:updated,error}=await db.from("lms_quiz_attempts_v2").update({status,submitted_at:submittedAt,auto_score:auto,manual_score:manual,score}).eq("id",a.id).select("*").single();if(error)throw error;
-  await syncQuizGrade(run,updated);await audit(ctx.user.id,"bigdata.quiz.attempt.submit","quiz_attempt",a.id,{quiz_id:a.quiz_id,attempt:a.attempt,expired,pending_manual:pendingManual});
+  const status="reviewed",submittedAt=expired&&a.expires_at?a.expires_at:new Date().toISOString(),score=auto;
+  const {data:updated,error}=await db.from("lms_quiz_attempts_v2").update({status,submitted_at:submittedAt,auto_score:auto,manual_score:0,score}).eq("id",a.id).select("*").single();if(error)throw error;
+  await syncQuizGrade(run,updated);await audit(ctx.user.id,"bigdata.quiz.attempt.submit","quiz_attempt",a.id,{quiz_id:a.quiz_id,attempt:a.attempt,expired});
   return updated;
 }
 async function submitQuiz(ctx:any,run:any,body:any){
@@ -507,23 +500,6 @@ async function submitQuiz(ctx:any,run:any,body:any){
   const updated=await finalizeAttempt(ctx,run,attemptId,false);
   return {ok:true,attempt:updated};
 }
-async function gradeResponse(ctx:any,run:any,body:any){
-  requireTeacher(ctx);const attemptId=text(body.attempt_id,80,true),questionId=text(body.question_id,80,true);
-  const {data:a}=await db.from("lms_quiz_attempts_v2").select("*").eq("id",attemptId).maybeSingle();if(!a)throw new Error("Intento no encontrado");
-  const {data:qz}=await db.from("lms_quizzes_v2").select("*").eq("id",a.quiz_id).eq("course_run_id",run.id).maybeSingle();if(!qz)throw new Error("Quiz fuera de la cohorte");
-  const {data:item}=await db.from("lms_quiz_items_v2").select("*").eq("quiz_id",a.quiz_id).eq("question_id",questionId).maybeSingle();if(!item)throw new Error("Pregunta fuera del quiz");
-  const {data:q}=await db.from("lms_questions_v2").select("question_type").eq("id",questionId).maybeSingle();if(q?.question_type!=="short_text")throw new Error("Solo las respuestas de texto requieren calificación manual");
-  const score=Number(body.score);if(!Number.isFinite(score)||score<0||score>Number(item.points))throw new Error("Puntaje fuera de rango");
-  const {error}=await db.from("lms_quiz_responses_v2").update({manual_score:score,feedback:text(body.feedback,5000),graded_by:ctx.user.id,graded_at:new Date().toISOString()}).eq("attempt_id",attemptId).eq("question_id",questionId);if(error)throw error;
-  const items=await quizItems(a.quiz_id),{data:rs}=await db.from("lms_quiz_responses_v2").select("*").eq("attempt_id",attemptId);
-  const rm=new Map((rs||[]).map((r:any)=>[r.question_id,r]));let auto=0,manual=0,pending=0;
-  for(const x of items){const r:any=rm.get(x.question_id);auto+=Number(r?.auto_score||0);if(x.question.question_type==="short_text"){const answered=!!String(r?.response?.text||"").trim();if(!answered)continue;if(r?.manual_score===null||r?.manual_score===undefined)pending++;else manual+=Number(r.manual_score)}}
-  const status=pending?"submitted":"reviewed",total=auto+manual;
-  const {data:updated}=await db.from("lms_quiz_attempts_v2").update({manual_score:manual,auto_score:auto,score:total,status}).eq("id",attemptId).select("*").single();
-  await syncQuizGrade(run,updated);await audit(ctx.user.id,"bigdata.quiz.response.grade","quiz_attempt",attemptId,{question_id:questionId,score});
-  return {ok:true,attempt:updated};
-}
-
 Deno.serve(async(req:Request)=>{
   if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
   if(req.method==="OPTIONS")return new Response("ok",{headers:headers(req)});
@@ -547,7 +523,6 @@ Deno.serve(async(req:Request)=>{
     if(action==="teacher_save_question")return out(req,await saveQuestion(ctx,run,body));
     if(action==="teacher_save_quiz")return out(req,await saveQuiz(ctx,run,body));
     if(action==="teacher_set_quiz_items")return out(req,await setQuizItems(ctx,run,body));
-    if(action==="teacher_grade_response")return out(req,await gradeResponse(ctx,run,body));
     return out(req,{error:"Acción desconocida"},400);
   }catch(e){
     if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);
