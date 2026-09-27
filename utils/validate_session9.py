@@ -235,7 +235,7 @@ checks=[
     ("módulo no permite marcar dominio manual","Marcar completado" not in session and "completeCheckpoint" not in session),
     ("progreso universal simple","L.session('course_progress')" in student_progress and "Tus trabajos" in student_progress and "Sin empezar" in student_progress and "Snapshots académicos" not in student_progress),
     ("progreso universal privado","data.ranking" not in student_progress and "teacher_wall" not in student_progress and "<pre>" not in student_progress),
-    ("progreso muestra evidencia","focusData" in student_progress and "evidenceCard" in student_progress and "class-wall.html" in student_progress),
+    ("progreso muestra evidencia sin muro estudiantil","focusData" in student_progress and "evidenceCard" in student_progress and "class-wall.html" not in student_progress),
     ("Colab no recibe token LMS","token=" not in session.lower() and "token=" not in student_progress.lower()),
     ("módulo S09 legado redirige","session.html?" in session_legacy and "p.set('s','9')" in session_legacy and "location.replace" in session_legacy),
     ("progreso S09 legado redirige","progress.html?" in progress_legacy and "p.set('s','9')" in progress_legacy and "location.replace" in progress_legacy),
