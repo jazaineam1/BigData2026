@@ -59,7 +59,7 @@ if(!L.auth()?.token){location.replace('portal.html?next='+encodeURIComponent(loc
 let me=null;
 function renderSessions(rows){
   const box=L.$('sessions');
-  box.innerHTML=(rows||[]).length?(rows||[]).map(s=>'<article class="session-item '+(s.current?'current':'')+'"><div class="actions" style="justify-content:space-between"><b>'+L.esc(s.device_label||'Dispositivo')+'</b><span class="pill '+(s.current?'active':'pending')+'">'+(s.current?'Este dispositivo':'Otra sesión')+'</span></div><div class="muted">Inicio: '+L.fmtWhen(s.created_at)+'</div><div class="muted">Última actividad: '+L.fmtWhen(s.last_seen_at)+'</div></article>').join(''):'<p class="muted">No hay sesiones registradas.</p>';
+  box.innerHTML=(rows||[]).length?(rows||[]).map(s=>'<article class="session-item '+(s.current?'current':'')+'"><div class="actions" style="justify-content:space-between"><b>'+L.esc(s.device_label||'Dispositivo')+'</b><span class="pill '+(s.current?'active':'pending')+'">'+(s.current?'Este dispositivo':'Otra sesión')+'</span></div><div class="muted">Inicio: '+L.fmtWhen(s.created_at)+'</div><div class="muted">Última actividad: '+L.fmtWhen(s.last_seen_at)+'</div><div class="muted">Vence: '+L.fmtWhen(s.expires_at)+'</div></article>').join(''):'<p class="muted">No hay sesiones registradas.</p>';
 }
 async function load(){
   try{
