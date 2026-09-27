@@ -31,7 +31,7 @@ function baseModel(role='student'){
   };
 }
 
-async function routeSession(page,{role='student',seen=[],controls=[],wallPosts=[]}={}){
+async function routeSession(page,{role='student',seen=[],controls=[]}={}){
   const model=baseModel(role);model.controls=controls;
   await page.route('**/functions/v1/bigdata-session**',async route=>{
     const req=route.request(),url=new URL(req.url()),action=url.searchParams.get('action');
@@ -42,9 +42,6 @@ async function routeSession(page,{role='student',seen=[],controls=[],wallPosts=[
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(model)});
     }
     const body=req.postDataJSON?.()||{};seen.push(body);
-    if(body.action==='wall_list')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
-      viewer:model.viewer,activity:model.activities.find(a=>a.code===body.activity_code),can_view:true,posts:wallPosts
-    })});
     if(body.action==='answer_challenge')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
       ok:true,correct:true,attempts:1,first_attempt_correct:true,mastery:true,hint:null
     })});
@@ -86,19 +83,11 @@ test('WALL docente expone controles de ritmo', async ({page})=>{
   await expect(page.locator('#pinHint')).toBeVisible();
 });
 
-test('modo proyección anonimiza y oculta administración', async ({page})=>{
-  const posts=[
-    {id:'p1',user_id:'u1',author:'Nombre real 1',body:'La búsqueda semántica recupera paráfrasis, pero aún debo validar relevancia.',status:'visible',created_at:new Date().toISOString(),reactions:{useful:2,same_doubt:0},my_reactions:[]},
-    {id:'p2',user_id:'u2',author:'Nombre real 2',body:'BM25 sigue siendo útil cuando necesito coincidencia lexical precisa.',status:'spotlight',created_at:new Date().toISOString(),reactions:{useful:1,same_doubt:1},my_reactions:[]}
-  ];
-  await auth(page,'teacher');await routeSession(page,{role:'teacher',wallPosts:posts});
-  await page.goto('/lms/class-wall.html?s=9&a=bd-s09-lab1&mode=projection');
-  await expect(page.locator('body')).toHaveClass(/projection/);
-  await expect(page.getByText('Respuesta 1')).toBeVisible();
-  await expect(page.getByText('Respuesta 2')).toBeVisible();
-  await expect(page.getByText('Nombre real 1')).toHaveCount(0);
-  await expect(page.locator('[data-mod]')).toHaveCount(0);
-  await expect(page.locator('[data-react]')).toHaveCount(0);
+test('WALL docente no proyecta respuestas abiertas', async ({page})=>{
+  await auth(page,'teacher');await routeSession(page,{role:'teacher'});
+  await page.goto('/lms/wall.html?s=9');
+  await expect(page.locator('#projectionLink')).toHaveCount(0);
+  await expect(page.locator('a[href*="class-wall.html"]')).toHaveCount(0);
 });
 
 test('dos estudiantes y docente conservan sesiones aisladas en el flujo de aula', async ({browser})=>{
