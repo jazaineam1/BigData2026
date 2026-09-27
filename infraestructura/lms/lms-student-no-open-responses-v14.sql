@@ -2,17 +2,17 @@
 -- Regla de producto: el estudiante responde solo con selección, verdadero/falso,
 -- numérico, URL/archivo o evidencia estructurada generada por el recurso.
 
--- El antiguo muro de respuestas abiertas queda vacío e inaccesible.
-delete from public.bd_wall_reactions;
-delete from public.bd_wall_posts;
+-- El antiguo muro de respuestas abiertas se elimina por completo.
+drop table if exists public.bd_wall_reactions;
+drop table if exists public.bd_wall_posts;
 
-revoke all on table public.bd_wall_posts from anon, authenticated;
-revoke all on table public.bd_wall_reactions from anon, authenticated;
-
-comment on table public.bd_wall_posts is
-  'LEGACY V14: muro abierto de estudiantes deshabilitado. No se usa en el runtime.';
-comment on table public.bd_wall_reactions is
-  'LEGACY V14: reacciones del muro abierto deshabilitadas. No se usa en el runtime.';
+-- El scope Realtime "wall" pertenecía exclusivamente a ese muro.
+delete from public.bd_realtime_signals where scope='wall';
+alter table public.bd_realtime_signals
+  drop constraint if exists bd_realtime_signals_scope_check;
+alter table public.bd_realtime_signals
+  add constraint bd_realtime_signals_scope_check
+  check (scope = any(array['controls'::text,'progress'::text,'teacher_wall'::text]));
 
 -- Eliminar telemetría histórica de confianza de las autocomprobaciones.
 update public.bd_lms_activity_progress
