@@ -70,7 +70,7 @@ checks=[
     ("LMS sin duración estimada", "mínimo 6 horas" not in s08 and "6–8 horas" not in s08 and "estimated_minutes" not in sql),
     ("LMS grupal en SQL", "lms_assignment_group_settings_v2" in sql and "'group_assessment',true" in sql and "Proyecto grupal" in sql),
     ("manifest único por grupo", "Este manifest ya fue registrado por otro equipo" in edge),
-    ("rúbrica detallada visible", "Rúbrica oficial · 100 puntos" in s08 and "Concurrencia equivalente" in s08 and "Microdefensa grupal" in s08),
+    ("rúbrica detallada visible", "Rúbrica oficial · 100 puntos" in s08 and "Concurrencia equivalente" in s08 and "Respuestas a las tres preguntas del caso" in s08),
     ("evidencia auditable requerida", "evidenceUrl" in s08 and "evidence_url" in edge and "carpeta de evidencia" in sql),
     ("revisión docente abre evidencia", "Abrir evidencia del grupo" in teacher_collab and "Desglose automático" in teacher_collab),
     ("notebook incluye rúbrica detallada", "Contrato de datos y consulta SoQL" in all_src and "Respuestas a las preguntas del caso" in all_src),
