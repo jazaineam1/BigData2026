@@ -16,9 +16,12 @@ tests=read("tests/lms-v6-regression.spec.js")
 checks=[
     ("tabla controles server-side", "create table if not exists public.bd_session_controls" in migration and "revoke all on table public.bd_session_controls from anon, authenticated" in migration),
     ("señal Realtime sin PII", "create table if not exists public.bd_realtime_signals" in migration and "course_code" in migration and "scope" in migration and "user_id" not in migration.split("create table if not exists public.bd_realtime_signals",1)[1].split(");",1)[0]),
+    ("mínimo privilegio Realtime", "revoke all on table public.bd_realtime_signals from anon, authenticated" in migration and "grant select on table public.bd_realtime_signals to anon, authenticated" in migration),
+    ("controles sin acceso directo", "bd_session_controls_no_direct_access" in migration and "using (false)" in migration and "with check (false)" in migration),
     ("publicación Realtime", "alter publication supabase_realtime add table public.bd_realtime_signals" in migration),
     ("cliente Realtime fijado", "@supabase/supabase-js@2.117.1" in realtime and "postgres_changes" in realtime and "bd_realtime_signals" in realtime),
     ("fallback polling docente", "realtimeReady?60000:15000" in teacher and "setInterval" in teacher),
+    ("observabilidad docente", all(x in teacher for x in ["En línea","En pausa","Sin señal","No conectado"])),
     ("fallback polling muro", "realtimeReady?60000:15000" in wall and "setInterval" in wall),
     ("controles docentes autorizados", "teacher_set_control" in backend and "teacher_clear_control" in backend and "requireTeacher(ctx)" in backend),
     ("acciones controladas", all(x in backend for x in ['"open_lab"','"close_lab"','"goto_slide"','"pin_hint"'])),
