@@ -57,8 +57,8 @@ jobs:
           cp -R Presentaciones _site/
           cp -R lms _site/
           mkdir -p _site/lms/assets/vendor
-          cp /tmp/supabase-sdk/package/dist/umd/supabase.min.js _site/lms/assets/vendor/supabase.min.js
-          test -s _site/lms/assets/vendor/supabase.min.js
+          cp /tmp/supabase-sdk/package/dist/umd/supabase.js _site/lms/assets/vendor/supabase.js
+          test -s _site/lms/assets/vendor/supabase.js
           mkdir -p _site/Cuadernos
           cp Cuadernos/Taller_Control_1.ipynb _site/Cuadernos/
           cp Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb _site/Cuadernos/
@@ -112,7 +112,7 @@ jobs:
             module="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/session.html?s=9&v=${GITHUB_SHA}" || true)"
             account="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/account.html?v=${GITHUB_SHA}" || true)"
             client="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/assets/bigdata-lms.js?v=${GITHUB_SHA}" || true)"
-            realtime_sdk="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/assets/vendor/supabase.min.js?v=${GITHUB_SHA}" || true)"
+            realtime_sdk="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/assets/vendor/supabase.js?v=${GITHUB_SHA}" || true)"
             if grep -q 'assets/img/bg-masthead.jpg' <<<"$html" \
               && ! grep -q 'Aprender haciendo, con evidencia' <<<"$html" \
               && ! grep -q 'Marcar revisada' <<<"$html" \
