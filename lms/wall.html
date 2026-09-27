@@ -40,6 +40,13 @@
 
 <div id="metrics" class="wall-grid"></div>
 
+<section class="card" style="margin-top:15px">
+  <div class="actions" style="justify-content:space-between;align-items:center">
+    <div><div class="ey">Competencias del grupo</div><h2>Compara evidencias verificadas de la cohorte</h2><p class="muted">La matriz reúne a todos los estudiantes y muestra qué competencias tienen evidencia suficiente.</p></div>
+    <a class="btn accent" href="teacher-competencies.html">Ver competencias del grupo</a>
+  </div>
+</section>
+
 <section class="card" id="paceControls" style="margin-top:15px">
 <div class="actions" style="justify-content:space-between;align-items:flex-start"><div><div class="ey">Ritmo de clase</div><h2>Controles docentes</h2><p class="muted">Los controles orientan la sesión. “Ir a diapositiva” es una sugerencia: nunca mueve al estudiante sin su acción.</p></div><span id="liveState" class="live-dot-v6 fallback">Polling de respaldo</span></div>
 <div class="control-grid">
@@ -154,7 +161,7 @@ async function load(){
 }
 const RUBRIC_FIELDS=[
   ['reproducible_result','Resultado reproducible'],
-  ['supported_decision','Decisión sustentada'],
+  ['supported_decision','Decisión coherente con el resultado'],
   ['rejected_alternative','Alternativa descartada'],
   ['ranking_interpretation','Interpretación del resultado / ranking'],
   ['concrete_limit','Límite concreto']
