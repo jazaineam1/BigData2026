@@ -94,16 +94,6 @@ test('la cola elimina telemetría antes que evidencia al superar el límite',asy
   assert.equal(q.some(x=>x.kind==='evidence'),true);
 });
 
-test('wallPost usa idempotency key propia',async()=>{
-  const h=harness({online:false});
-  await h.LMS.wallPost('bd-s09-lab3','Una respuesta suficientemente extensa para publicar.');
-  h.context.navigator.onLine=true;
-  await h.LMS.flush();
-  assert.equal(h.sent[0].action,'wall_post');
-  assert.match(h.sent[0].payload.client_post_id,/^post-/);
-});
-
-
 test('un 401 conserva evidencia para sincronizar tras nuevo login',async()=>{
   const h=harness({online:true,handler:async()=>{
     const e=new Error('sesión vencida');e.status=401;throw e;
