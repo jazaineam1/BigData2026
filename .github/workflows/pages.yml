@@ -35,17 +35,30 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v6
 
+      - name: Preparar Node para SDK fijado
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v6
 
       - name: Preparar sitio estático
         shell: bash
         run: |
+          set -euo pipefail
+          rm -rf /tmp/supabase-sdk
+          mkdir -p /tmp/supabase-sdk
+          npm pack @supabase/supabase-js@2.117.1 --pack-destination /tmp/supabase-sdk >/tmp/supabase-pack-name.txt
+          tar -xzf "$(find /tmp/supabase-sdk -maxdepth 1 -name '*.tgz' -print -quit)" -C /tmp/supabase-sdk
           mkdir -p _site
           cp index.html _site/
           cp -R css js assets _site/
           cp -R Presentaciones _site/
           cp -R lms _site/
+          mkdir -p _site/lms/assets/vendor
+          cp /tmp/supabase-sdk/package/dist/umd/supabase.js _site/lms/assets/vendor/supabase.js
+          test -s _site/lms/assets/vendor/supabase.js
           mkdir -p _site/Cuadernos
           cp Cuadernos/Taller_Control_1.ipynb _site/Cuadernos/
           cp Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb _site/Cuadernos/
@@ -99,6 +112,7 @@ jobs:
             module="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/session.html?s=9&v=${GITHUB_SHA}" || true)"
             account="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/account.html?v=${GITHUB_SHA}" || true)"
             client="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/assets/bigdata-lms.js?v=${GITHUB_SHA}" || true)"
+            realtime_sdk="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/assets/vendor/supabase.js?v=${GITHUB_SHA}" || true)"
             if grep -q 'assets/img/bg-masthead.jpg' <<<"$html" \
               && ! grep -q 'Aprender haciendo, con evidencia' <<<"$html" \
               && ! grep -q 'Marcar revisada' <<<"$html" \
@@ -107,7 +121,8 @@ jobs:
               && grep -q "bigdata-auth" <<<"$client" \
               && grep -q "bigdata-access-request" <<<"$client" \
               && grep -q "bigdata-access-review" <<<"$client" \
-              && ! grep -q "learning-auth" <<<"$client"; then
+              && ! grep -q "learning-auth" <<<"$client" \
+              && [ -n "$realtime_sdk" ]; then
               ok=1
               break
             fi

@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const PROJECT_URL='https://gnpouhsvsisqoxketlfr.supabase.co';
 const PUBLISHABLE_KEY='sb_publishable_9l_od2Dg78hu1mPrmxAabA_erL2Tlge';
-const CLIENT_MODULE='https://esm.sh/@supabase/supabase-js@2.117.1';
+const CLIENT_VERSION='2.117.1';
 let clientPromise=null;
 
 function validSession(v){
@@ -11,10 +11,14 @@ function validSession(v){
 }
 async function client(){
   if(!clientPromise){
-    clientPromise=import(CLIENT_MODULE).then(({createClient})=>createClient(PROJECT_URL,PUBLISHABLE_KEY,{
-      auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},
-      realtime:{params:{eventsPerSecond:4}}
-    }));
+    clientPromise=Promise.resolve().then(()=>{
+      const createClient=window.supabase?.createClient;
+      if(typeof createClient!=='function')throw new Error('SDK Realtime local no disponible');
+      return createClient(PROJECT_URL,PUBLISHABLE_KEY,{
+        auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},
+        realtime:{params:{eventsPerSecond:4}}
+      });
+    });
   }
   return clientPromise;
 }
@@ -42,5 +46,5 @@ async function subscribe({session_number,scopes=[],onSignal=()=>{},onStatus=()=>
     try{if(sb&&channel)await sb.removeChannel(channel)}catch{}
   };
 }
-window.LMSRealtime={version:'1.0.0',subscribe};
+window.LMSRealtime={version:'1.1.0',sdk_version:CLIENT_VERSION,subscribe};
 })();
