@@ -1,11 +1,23 @@
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 
+const runtimeErrors = new WeakMap();
+test.beforeEach(async ({ page }) => {
+  const errors=[];
+  runtimeErrors.set(page,errors);
+  page.on('pageerror', err => errors.push('pageerror: '+err.message));
+});
+test.afterEach(async ({ page }, testInfo) => {
+  const errors=runtimeErrors.get(page)||[];
+  expect(errors, testInfo.title+' errores JavaScript').toEqual([]);
+});
+
 const viewports = [
   { name: 'laptop-1280', width: 1280, height: 720 },
   { name: 'laptop-1366', width: 1366, height: 768 },
   { name: 'desktop-1536', width: 1536, height: 864 },
   { name: 'desktop-1920', width: 1920, height: 1080 },
+  { name: 'desktop-1920x937', width: 1920, height: 937 },
   { name: 'tablet', width: 768, height: 1024 },
   { name: 'phone-390', width: 390, height: 844 },
   { name: 'phone-412', width: 412, height: 915 },
@@ -33,13 +45,34 @@ async function assertVisibleSvgContained(page, label) {
       const host=svg.closest('.diagram,.card,.panel,.lab,.slide')||svg.parentElement;
       if(!host) continue;
       const a=svg.getBoundingClientRect(),b=host.getBoundingClientRect(),tol=3;
-      if(a.left < b.left-tol || a.right > b.right+tol) {
-        out.push({id:svg.id||null,svg:{left:a.left,right:a.right,width:a.width},host:{class:host.className,left:b.left,right:b.right,width:b.width}});
+      if(a.left < b.left-tol || a.right > b.right+tol || a.top < b.top-tol || a.bottom > b.bottom+tol) {
+        out.push({id:svg.id||null,svg:{left:a.left,right:a.right,top:a.top,bottom:a.bottom,width:a.width,height:a.height},host:{class:host.className,left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width,height:b.height}});
       }
     }
     return out;
   });
   expect(failures, label + ' SVG fuera de contenedor').toEqual([]);
+}
+
+async function assertActiveSlideContained(page, label) {
+  const failures = await page.evaluate(() => {
+    const slide=document.querySelector('.slide.active,.slide:target');
+    const stage=document.querySelector('.stage');
+    if(!slide||!stage)return [];
+    const out=[],host=stage.getBoundingClientRect(),tol=4;
+    const visible=el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'&&r.width>1&&r.height>1};
+    const nodes=[slide,...slide.querySelectorAll('.body,.diagram,.lab,.card,svg,foreignObject,text')];
+    for(const el of nodes){
+      if(!visible(el))continue;
+      const r=el.getBoundingClientRect();
+      if(r.left<host.left-tol||r.right>host.right+tol||r.top<host.top-tol||r.bottom>host.bottom+tol){
+        out.push({tag:el.tagName,id:el.id||null,class:String(el.className?.baseVal||el.className||'').slice(0,120),
+          rect:{left:r.left,right:r.right,top:r.top,bottom:r.bottom},stage:{left:host.left,right:host.right,top:host.top,bottom:host.bottom}});
+      }
+    }
+    return out.slice(0,50);
+  });
+  expect(failures,label+' contenido fuera del stage').toEqual([]);
 }
 
 async function mockAuth(page, role='student') {
@@ -118,6 +151,7 @@ for (const vp of viewports) {
       await page.waitForTimeout(20);
       await assertNoHorizontalOverflow(page,'S09 '+vp.name+' slide '+i);
       await assertVisibleSvgContained(page,'S09 '+vp.name+' slide '+i);
+      await assertActiveSlideContained(page,'S09 '+vp.name+' slide '+i);
     }
   });
 }
