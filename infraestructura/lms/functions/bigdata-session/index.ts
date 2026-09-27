@@ -552,7 +552,7 @@ async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:an
     status:mastery?"completed":"in_progress",started_at:p?.started_at||now,
     attempts,score:mastery?Number(activity.points||1):0,max_score:Number(activity.points||1),
     completed_at:mastery?(p?.completed_at||now):null,updated_at:now,
-    metadata:{...Object.fromEntries(Object.entries(previousMeta).filter(([k])=>!["last_confidence","first_confidence"].includes(k))),source:"lms-formative-challenge",formative:true,first_attempt_correct:firstAttempt,mastery,last_attempt_correct:correct}
+    metadata:{...previousMeta,source:"lms-formative-challenge",formative:true,first_attempt_correct:firstAttempt,mastery,last_attempt_correct:correct}
   },{onConflict:"user_id,course_run_id,activity_code"});
   const {error:eventError}=await db.from("bd_lms_events").insert({
     user_id:ctx.user.id,course_run_id:run.id,event_type:"challenge_answered",
