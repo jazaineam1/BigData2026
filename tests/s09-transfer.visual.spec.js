@@ -56,7 +56,7 @@ async function route(page){
     if(action==='me')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(state)});
     if(action==='evidence'&&body.source==='presentation-transfer'){
       const ev={id:'22222222-2222-2222-2222-222222222222',activity_code:body.activity_code,step_id:'transfer',
-        source:'presentation-transfer',verdict:'pending_review',feedback:'Transferencia recibida. Está pendiente de revisión docente con rúbrica.',
+        source:'presentation-transfer',verdict:'pending_review',feedback:'Evidencia estructurada recibida. Está pendiente de revisión docente.',
         payload:body.payload,created_at:new Date().toISOString()};
       state={...state,evidence:[ev,...state.evidence]};
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,completed:false,verdict:'pending_review',feedback:ev.feedback,evidence:ev})});
@@ -87,13 +87,13 @@ test('S09 transferencia usa evidence existente y queda pendiente de revisión',a
   const transfer=page.locator('[data-transfer-for="bd-s09-lab3"]');
   await transfer.locator('summary').click();
   const values={
-    result:'Observé cuatro de cinco candidatos aeronáuticos en mi Top-5.',
-    decision:'Mantendría k igual a cinco para esta consulta concreta.',
-    rejected_alternative:'Descarto subir k porque agregaría candidatos menos pertinentes.',
-    interpretation:'El resultado muestra buena concentración de vecinos útiles en el Top-5.',
-    limit:'La conclusión depende de una sola consulta y de juicios manuales de relevancia.'
+    result:'El Top-5 concentra suficientes candidatos relevantes',
+    decision:'Mantendría k=5 para esta necesidad',
+    rejected_alternative:'Descarto aumentar k porque añade revisión innecesaria',
+    interpretation:'El valor de k controla cuántos vecinos se revisan, no la relevancia por sí sola',
+    limit:'La conclusión depende de los juicios de relevancia del Top-5'
   };
-  for(const [id,value] of Object.entries(values))await transfer.locator('[data-transfer-field="'+id+'"]').fill(value);
+  for(const [id,value] of Object.entries(values))await transfer.locator('[data-transfer-field="'+id+'"]').selectOption(value);
   await transfer.locator('[data-submit-transfer]').click();
   await expect(transfer.locator('[data-transfer-status]')).toContainText('pendiente de revisión docente');
 });
