@@ -43,7 +43,7 @@
 .slide[data-slide="31"] .body>.stack>.eq{align-self:start}
 .slide[data-slide="21"]{padding:2.45% 3.8% 4%}
 .slide[data-slide="22"]{padding:2.05% 4% 3.25%}
-.slide[data-slide="28"]{padding:2.75% 4.1% 4.35%}
+.slide[data-slide="28"]{padding:2.75% 4.1% 7.4%}
 .slide[data-slide="22"] h1{font-size:2.72cqw;margin-bottom:.3cqw}
 .slide[data-slide="22"] .stack{gap:.34cqw}
 .slide[data-slide="22"] .table{font-size:.92cqw}
@@ -272,7 +272,7 @@ function genericEvidencePanel(code,lab,catalog){
     if(step.type==='number')return '<label>'+esc(label)+'<input type="number"'+attrs+' inputmode="decimal"></label>';
     return '';
   }).join('');
-  box.innerHTML='<h4>Autocomprobación</h4><p class="mini">Comprueba lo que entendiste. Puedes reintentar: no es nota ni evidencia de competencia.</p><div class="mini-grid">'+fields+'</div><div class="actions"><button class="btn alt" type="button" data-submit-evidence="'+esc(code)+'">Comprobar</button><a class="btn ghost" href="../lms/class-wall.html?s=9&a='+encodeURIComponent(code)+'">Muro del LAB</a></div><div class="feedback" data-evidence-status="'+esc(code)+'">Explora el LAB y luego comprueba tus respuestas.</div>';
+  box.innerHTML='<h4>Autocomprobación</h4><p class="mini">Comprueba tu aprendizaje con lo que acabas de explorar. Puedes reintentar: no es nota ni evidencia de competencia.</p><div class="mini-grid">'+fields+'</div><div class="actions"><button class="btn alt" type="button" data-submit-evidence="'+esc(code)+'">Comprobar</button><a class="btn ghost" href="../lms/class-wall.html?s=9&a='+encodeURIComponent(code)+'">Muro del LAB</a></div><div class="feedback" data-evidence-status="'+esc(code)+'">Explora el LAB y luego comprueba tus respuestas.</div>';
   lab.appendChild(box);
   box.querySelector('[data-submit-evidence]').onclick=()=>submitGenericEvidence(code,box);
 }
