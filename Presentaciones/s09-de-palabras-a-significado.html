@@ -69,18 +69,24 @@
 .teacher-wall{position:fixed;z-index:100;inset:0;background:#f3f5f9;color:var(--ink);display:none;overflow:auto;padding:28px}.teacher-wall.on{display:block}.teacher-shell{max-width:1500px;margin:auto}.teacher-head{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;margin-bottom:14px}.teacher-title{font-size:clamp(2rem,4vw,3.6rem);color:var(--navy);margin:.15em 0}.teacher-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0}.teacher-card,.teacher-panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px;box-shadow:0 6px 22px rgba(18,34,83,.06)}.teacher-card b{display:block;font-size:1.45rem;color:var(--navy)}.teacher-table{width:100%;border-collapse:collapse;min-width:1050px}.teacher-table th,.teacher-table td{padding:8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}.teacher-table th{background:#eef1f7;color:var(--navy);position:sticky;top:0}.teacher-table-wrap{overflow:auto;max-height:62vh}.confirmbox{margin:12px 0;background:#fff4ef;border:1px solid #efb6a3;border-left:5px solid var(--red);border-radius:12px;padding:12px}.confirmbox.hidden{display:none}.confirmbox input{width:100%;max-width:420px;border:1px solid #cfd5e2;border-radius:8px;padding:8px;margin-top:6px}.mastery{font-weight:900}.mastery.ok{color:#12633c}.mastery.bad{color:#a0441b}.mastery.none{color:#7a8290}.challenge-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.challenge-chip{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}.challenge-chip b{display:block;color:var(--navy)}.teacher-filterbar{display:grid;grid-template-columns:minmax(220px,1fr) minmax(180px,.35fr);gap:8px;margin:10px 0}.teacher-filterbar input,.teacher-filterbar select{width:100%;border:1px solid #cfd5e2;border-radius:9px;padding:8px;background:#fff;color:var(--ink)}@media(max-width:760px){.teacher-filterbar{grid-template-columns:1fr}}
 body.wall-mode .stage,body.wall-mode .nav,body.wall-mode .top,body.wall-mode>.drawer,body.wall-mode>.live-drawer{display:none!important}
 @media(max-width:900px){html,body{overflow:auto;background:var(--cream)}.slide[data-slide="21"],.slide[data-slide="22"],.slide[data-slide="28"]{padding:76px 18px 94px}.slide[data-slide="21"] h1{font-size:34px;margin:0 0 14px}.slide[data-slide="21"] .body>.stack,.slide[data-slide="22"] .body>.stack,.slide[data-slide="23"] .body>.stack,.slide[data-slide="31"] .body>.stack{grid-template-columns:1fr}.slide[data-slide="21"] .body>.stack>*,.slide[data-slide="22"] .body>.stack>*,.slide[data-slide="23"] .body>.stack>*,.slide[data-slide="31"] .body>.stack>*{grid-column:1!important}.lab[style*="grid-template-columns"]{grid-template-columns:1fr!important}.stage{position:fixed;inset:0;width:100vw;height:100dvh;transform:none;left:0;top:0;background:var(--cream)}.slide{padding:76px 18px 94px;min-height:100dvh;overflow:auto}.slide.on{display:block}.slide-content{transform:none!important;width:100%!important}.k{font-size:12px;margin-bottom:6px}h1{font-size:34px;line-height:1.02;max-width:none;margin:0 0 14px}h2{font-size:25px}.lead{font-size:17px}.body,.cols,.bigleft,.bigright,.three,.four{display:grid;grid-template-columns:1fr;gap:12px}.card,.panel,.lab,.note,.diagram,.table{font-size:15px;border-radius:14px;padding:13px}.card b,.panel b{font-size:17px}.node{font-size:15px}.flow{display:grid}.arrow{transform:rotate(90deg);text-align:center}.top{max-width:calc(100vw - 14px);overflow:auto}.top a.opt{display:none}.nav button{width:48px;height:48px}.svg{width:100%;height:auto;max-width:100%;max-height:42dvh;min-height:0;overflow:hidden}.precisionBtns button{width:44px;height:44px;font-size:18px}.candidateGrid{grid-template-columns:repeat(10,1fr)}.bigphrase{font-size:26px}.mini{font-size:12px}pre{font-size:12px}.table{font-size:13px}.rel{font-size:13px}.eq{font-size:24px}.item{font-size:14px}.slide.dark{background:linear-gradient(135deg,#0a1437,#122253 55%,#0b3f72)}}
-</style>
+.session-control-banner{position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:76;width:min(920px,calc(100vw - 28px));display:none;gap:10px;align-items:center;padding:10px 14px;border-radius:14px;background:#fff;border:1px solid #d8dfeb;box-shadow:0 10px 30px #12225322;color:#122253}.session-control-banner.on{display:flex}.session-control-banner .grow{flex:1}.session-control-banner .hint{font-size:.86rem;color:#4b5573}.session-control-banner .btn{flex:0 0 auto}</style>
 </head>
 <body>
 <div class="bar"><i id="bar"></i></div>
 <div class="top"><span id="moduleIdentity" class="identity-pill">Identificando…</span><button id="liveBtn">Mi progreso</button><button id="mapBtn">Mapa</button><a class="opt" href="../lms/session.html?s=9">Módulo S09</a><a class="opt" href="../lms/progress.html?s=9">Mi progreso</a><a class="opt" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb" target="_blank" rel="noopener">Cuaderno</a><button id="resetBtn">Reiniciar práctica</button><button id="fs">⛶</button><span class="count"><b id="n">1</b>/<span id="tot"></span></span></div>
+<div id="sessionControlBanner" class="session-control-banner" role="status" aria-live="polite">
+  <div class="grow"><b id="sessionControlTitle">Ritmo de clase</b><div id="sessionControlText" class="hint"></div></div>
+  <button id="sessionControlGo" class="btn alt" type="button">Ir</button>
+  <button id="sessionControlDismiss" class="btn ghost" type="button">Ocultar</button>
+</div>
 <aside class="drawer" id="drawer"><button class="btn ghost" id="closeDrawer">Cerrar</button><h2>Mapa S09</h2><p class="mini">Versión móvil-first: menos pantallas, más ejemplos y ocupación visual alta.</p><div id="mapLinks"></div></aside>
 <aside class="live-drawer" id="liveDrawer"><div style="display:flex;gap:10px;align-items:center"><div><div class="k">S09 LIVE</div><h2>Tu progreso conceptual</h2></div><button class="btn ghost" id="closeLive" style="margin-left:auto">Cerrar</button></div><p id="liveIdentity" class="mini">Conéctate desde el LMS para registrar avances.</p><div id="liveStats" class="live-grid"></div><div id="liveChallenges" class="live-challenges"></div><div id="liveStatus" class="feedback">Los desafíos registran primer intento y dominio; no son nota.</div></aside>
 <section id="teacherWall" class="teacher-wall"><div class="teacher-shell"><div class="teacher-head"><div><div class="k">SOLO DOCENTE · MISMA PRESENTACIÓN</div><h1 class="teacher-title">S09 Teacher Wall</h1><p>Primer intento, dominio, recursos abiertos y tiempo activo. No es un ranking de velocidad.</p></div><div><a class="btn ghost" href="./s09-de-palabras-a-significado.html#s1">Volver a presentación</a><button id="teacherOpen" class="btn alt">Fijar inicio oficial</button><button id="teacherRefresh" class="btn ghost">Actualizar</button><button id="teacherReset" class="btn">Reiniciar S09</button></div></div><div id="teacherResetConfirm" class="confirmbox hidden"><b>Reinicio protegido de S09</b><p class="mini">Borra únicamente progreso, intentos D1–D5, eventos y hora de inicio de S09 para esta cohorte. No toca matrículas, S07, S08 ni TC1. Escribe <code>REINICIAR_S09</code>.</p><input id="teacherResetPhrase" autocomplete="off" placeholder="REINICIAR_S09"><div><button id="teacherResetCancel" class="btn ghost">Cancelar</button><button id="teacherResetDo" class="btn">Confirmar reinicio</button></div></div><div id="teacherStatus" class="feedback">Cargando…</div><div id="teacherMetrics" class="teacher-grid"></div><div class="teacher-panel"><h3>Dominio por desafío</h3><div id="teacherChallengeStats" class="challenge-stats"></div></div><div class="teacher-panel"><h3>Avance de la cohorte</h3><div class="teacher-filterbar"><input id="teacherSearch" type="search" placeholder="Buscar estudiante…"><select id="teacherFilter"><option value="all">Todos los estados</option><option value="not_started">Sin iniciar</option><option value="in_progress">En curso</option><option value="completed">Dominio completo</option></select></div><div class="teacher-table-wrap"><table class="teacher-table"><thead><tr><th>Estudiante</th><th>Inicio</th><th>Diap.</th><th>Colab</th><th>D1</th><th>D2</th><th>D3</th><th>D4</th><th>D5</th><th>Posición</th><th>Activo</th><th>Última actividad</th></tr></thead><tbody id="teacherRows"></tbody></table></div></div></div></section>
 <div class="stage" id="stage"></div>
 <nav class="nav"><button id="prev">←</button><span id="chap" class="chap">Inicio</span><button id="next">→</button></nav>
 <script src="../lms/assets/bigdata-lms.js?v=20260926-s09-live2"></script>
-<script src="../lms/assets/lms-kit.js?v=20260926-v5" data-session="9"></script>
+<script src="../lms/assets/lms-realtime.js?v=20260927-v6"></script>
+<script src="../lms/assets/lms-kit.js?v=20260927-v6" data-session="9"></script>
 <script>
 const DENSE_SLIDES=new Set([12,14,15,21,22,23,26,27,28,29,30,31]);
 const slides=[
@@ -124,7 +130,7 @@ scores = embeddings @ q</pre></div>${svgNorm()}</div>`},
 {t:"Cierre",k:"EXIT TICKET · PASAPORTE S09",h:"Un documento obtuvo score coseno 0.91.",dark:1,b:"<div class=\"body cols bigleft\"><div class=\"stack\"><div class=\"card\"><b>Sí puedes afirmar</b><p>Está cerca de la consulta bajo <b>ese modelo</b>, <b>esa representación</b> y <b>esa función de similitud</b>.</p></div><div class=\"card danger\"><b>No puedes afirmar</b><p>Que tiene 91 % de probabilidad de ser relevante ni que sea automáticamente la respuesta correcta.</p></div><table class=\"table\"><tr><th>Si la necesidad es…</th><th>Piensa primero en…</th></tr><tr><td>ID, código o término exacto</td><td>Lexical</td></tr><tr><td>Paráfrasis / vocabulario distinto</td><td>Semántica</td></tr><tr><td>Exactitud + intención</td><td>Híbrida</td></tr></table></div><div class=\"stack\"><div class=\"card\"><b>Representar</b>texto → embedding.</div><div class=\"card\"><b>Recuperar</b>kNN / ANN → Top-k.</div><div class=\"card\"><b>Operar</b>colección + metadata + índice + pipeline.</div><div class=\"card\"><b>Evaluar</b>juicios de relevancia + Precision@k + falsos positivos.</div><div class=\"note warn\"><b>Puente a S10:</b> ya sabemos representar y recuperar texto; ahora necesitamos tuberías que lo extraigan, transformen y muevan con trazabilidad.</div></div></div>"},
 ];
 
-function challengeChoice(code,title,options){return '<div class="challenge" data-code="'+code+'"><b>'+title+'</b><select id="ans-'+code+'">'+options.map(o=>'<option value="'+o[0]+'">'+o[1]+'</option>').join('')+'</select><button class="btn alt" onclick="answerChallenge(\''+code+'\')">Responder</button><div id="fb-'+code+'" class="feedback">Primer intento aún no registrado.</div></div>'}
+function challengeChoice(code,title,options){return '<div class="challenge" data-code="'+code+'"><b>'+title+'</b><select id="ans-'+code+'">'+options.map(o=>'<option value="'+o[0]+'">'+o[1]+'</option>').join('')+'</select><label class="mini" style="display:grid;gap:5px;margin-top:8px">¿Qué tan seguro estás?<select id="conf-'+code+'"><option value="">Elige…</option><option value="low">Baja</option><option value="medium">Media</option><option value="high">Alta</option></select></label><button class="btn alt" onclick="answerChallenge(\''+code+'\')">Responder</button><div id="fb-'+code+'" class="feedback">Primer intento aún no registrado.</div></div>'}
 function svgSignalMap(){return '<svg class="svg" viewBox="0 0 660 410"><defs><marker id="sigA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#E95D0F"/></marker></defs><rect x="35" y="42" width="190" height="72" rx="16" fill="#fff" stroke="#dfe3ee"/><text x="76" y="84" font-size="21" font-weight="900" fill="#122253">consulta</text><path d="M235 78 L325 78" stroke="#E95D0F" stroke-width="7" marker-end="url(#sigA)"/><rect x="338" y="30" width="210" height="98" rx="18" fill="#eaf6f6" stroke="#0B8689"/><text x="378" y="70" font-size="19" font-weight="900" fill="#075f62">señal de ranking</text><text x="388" y="102" font-size="17" fill="#075f62">BM25 / coseno / fusión</text><path d="M550 78 L610 78" stroke="#E95D0F" stroke-width="7"/><rect x="390" y="185" width="215" height="58" rx="14" fill="#fff3e8"/><text x="420" y="221" font-size="20" font-weight="900" fill="#8a4200">score ≠ probabilidad</text><rect x="80" y="285" width="480" height="72" rx="18" fill="#fff" stroke="#dfe3ee"/><text x="112" y="320" font-size="20" font-weight="900" fill="#122253">ranking → candidatos → juicio de relevancia</text><text x="112" y="347" font-size="16" fill="#4b5573">el sistema ordena; la evaluación decide si sirve</text></svg>'}
 function svgLexicalPipeline(){return '<svg class="svg" viewBox="0 0 720 150"><g fill="#fff" stroke="#dfe3ee"><rect x="20" y="18" width="115" height="46" rx="12"/><rect x="165" y="18" width="115" height="46" rx="12"/><rect x="310" y="18" width="115" height="46" rx="12"/><rect x="455" y="18" width="120" height="46" rx="12"/><rect x="605" y="18" width="95" height="46" rx="12"/></g><g font-size="16" font-weight="900" fill="#122253" text-anchor="middle"><text x="78" y="47">texto</text><text x="223" y="47">analyzer</text><text x="368" y="47">tokens</text><text x="515" y="39">índice</text><text x="515" y="57">invertido</text><text x="653" y="47">BM25</text></g><g stroke="#E95D0F" stroke-width="5"><line x1="135" y1="41" x2="165" y2="41"/><line x1="280" y1="41" x2="310" y2="41"/><line x1="425" y1="41" x2="455" y2="41"/><line x1="575" y1="41" x2="605" y2="41"/></g><text x="360" y="101" font-size="15" fill="#4b5573" text-anchor="middle"><tspan x="360" dy="0">La señal nace de términos analizados;</tspan><tspan x="360" dy="19">no de una representación vectorial del significado.</tspan></text></svg>'}
 function svgVectorSpace(){return '<svg class="svg" viewBox="0 0 600 430"><line x1="70" y1="360" x2="560" y2="360" stroke="#cfd5e2" stroke-width="2"/><line x1="70" y1="360" x2="70" y2="50" stroke="#cfd5e2" stroke-width="2"/><g fill="#0B8689"><circle cx="390" cy="125" r="16"/><circle cx="430" cy="145" r="13"/><circle cx="365" cy="165" r="12"/></g><g fill="#E95D0F"><circle cx="185" cy="285" r="15"/><circle cx="220" cy="310" r="12"/></g><circle cx="405" cy="185" r="18" fill="#634998"/><text x="428" y="190" font-size="18" font-weight="900" fill="#634998">query</text><text x="330" y="92" font-size="17" font-weight="900" fill="#075f62">aeronáutica</text><text x="145" y="340" font-size="17" font-weight="900" fill="#8a4200">software</text><path d="M405 185 C405 160 395 145 390 125" stroke="#634998" stroke-width="4" fill="none" stroke-dasharray="8 6"/><text x="90" y="82" font-size="18" fill="#122253">Puntos cercanos → representaciones parecidas bajo el modelo</text></svg>'}
@@ -311,8 +317,9 @@ async function refreshStudentProgress(){
   try{s09Model=await L.s09('me');renderStudentLive()}catch(e){liveStatus.textContent='No se pudo actualizar S09 Live: '+e.message}
 }
 async function answerChallenge(code){
-  const sel=document.getElementById('ans-'+code),fb=document.getElementById('fb-'+code);
+  const sel=document.getElementById('ans-'+code),conf=document.getElementById('conf-'+code),fb=document.getElementById('fb-'+code);
   if(!sel||!fb)return;
+  if(conf&&!conf.value){fb.textContent='Antes de responder, indica tu nivel de confianza: Baja, Media o Alta.';return;}
   if(!L?.auth?.()?.token){
     fb.textContent='Abre la presentación desde el LMS para registrar primer intento y dominio.';
     liveDrawer.classList.add('on');renderStudentLive();return;
@@ -320,12 +327,55 @@ async function answerChallenge(code){
   const btn=sel.parentElement?.querySelector('button');if(btn)btn.disabled=true;
   fb.textContent='Validando…';
   try{
-    const x=await L.s09('answer_challenge',{activity_code:code,answer:sel.value});
+    const x=await L.s09('answer_challenge',{activity_code:code,answer:sel.value,confidence:conf?.value||null});
     fb.textContent=x.correct?'Correcto · dominio alcanzado.':'Todavía no · pista: '+(x.hint||'revisa la definición y vuelve a intentarlo.');
     await refreshStudentProgress();
   }catch(e){fb.textContent='No se pudo registrar: '+e.message}
   finally{if(btn)btn.disabled=false}
 }
+let stopS09Realtime=null,controlDismissedKey='';
+function activeControl(key){
+  return (s09Model?.controls||[]).find(c=>c.control_key===key)||null;
+}
+function renderSessionControls(){
+  const banner=document.getElementById('sessionControlBanner'),title=document.getElementById('sessionControlTitle'),text=document.getElementById('sessionControlText'),go=document.getElementById('sessionControlGo');
+  if(!banner||!s09Model)return;
+  const hint=activeControl('hint'),slide=activeControl('slide');
+  const closed=(s09Model.controls||[]).filter(c=>c.control_type==='close_lab').map(c=>String(c.payload?.activity_code||''));
+  document.querySelectorAll('[data-evidence-for]').forEach(box=>{
+    const code=box.dataset.evidenceFor,isClosed=closed.includes(code),btn=box.querySelector('[data-submit-evidence]');
+    if(btn)btn.disabled=isClosed;
+    box.classList.toggle('lab-closed-by-teacher',isClosed);
+    let msg=box.querySelector('[data-teacher-lab-state]');
+    if(isClosed&&!msg){msg=document.createElement('div');msg.dataset.teacherLabState='1';msg.className='feedback';box.prepend(msg)}
+    if(msg){msg.textContent=isClosed?'LAB cerrado temporalmente por el docente. Puedes revisar el contenido, pero no enviar un nuevo intento.':'';msg.hidden=!isClosed}
+  });
+  const lab3=closed.includes('bd-s09-lab3'),lab3Btn=document.getElementById('lab3Submit');
+  if(lab3Btn)lab3Btn.disabled=lab3;
+  const currentKey=hint?('hint:'+hint.id):slide?('slide:'+slide.id):'';
+  if(!currentKey||currentKey===controlDismissedKey){banner.classList.remove('on');return}
+  banner.classList.add('on');
+  if(hint){title.textContent='Pista del docente';text.textContent=String(hint.payload?.text||'');go.hidden=true}
+  else{const target=Math.trunc(Number(slide.payload?.slide||0));title.textContent='El docente está trabajando otra diapositiva';text.textContent='Sugerencia: ir a la diapositiva '+target+'. Tú decides cuándo cambiar.';go.hidden=false;go.onclick=()=>{if(target>0)location.hash='s'+target}}
+}
+async function refreshControls(){
+  if(!L?.auth?.()?.token)return;
+  try{s09Model=await L.s09('me');renderStudentLive();renderSessionControls()}catch{}
+}
+async function startS09Realtime(){
+  if(!window.LMSRealtime)return;
+  stopS09Realtime=await window.LMSRealtime.subscribe({
+    session_number:9,scopes:['controls','progress'],
+    onSignal:()=>refreshControls(),
+    onStatus:()=>{}
+  });
+}
+document.getElementById('sessionControlDismiss').onclick=()=>{
+  const hint=activeControl('hint'),slide=activeControl('slide');
+  controlDismissedKey=hint?('hint:'+hint.id):slide?('slide:'+slide.id):'';
+  document.getElementById('sessionControlBanner').classList.remove('on');
+};
+
 async function initStudentLms(){
   const preview=new URLSearchParams(location.search).get('preview')==='1';
   if(!L?.auth?.()?.token){
@@ -336,14 +386,15 @@ async function initStudentLms(){
   try{
     s09Model=await L.s09('me');
     moduleIdentity.textContent=(s09Model.viewer?.display_name||s09Model.viewer?.username||'Usuario')+' · conectado';
-    renderEvidencePanels();
+    renderEvidencePanels();renderSessionControls();
     if(window.topk)topKDemo();
     await K.track('presentation_opened',{activity_code:'bd-s09-presentation',metadata:{source:'s09-embedded-presentation',path:location.pathname},client_at:new Date().toISOString()});
     s09Model=await L.s09('me');
     queueSlideTrack();
     renderStudentLive();
     K.startHeartbeat('bd-s09-presentation');
-    studentTimer=setInterval(()=>refreshStudentProgress().catch(()=>{}),15000);
+    studentTimer=setInterval(()=>refreshStudentProgress().then(renderSessionControls).catch(()=>{}),15000);
+    startS09Realtime().catch(()=>{});
   }catch(e){liveStatus.textContent='S09 Live no disponible: '+e.message;renderStudentLive()}
 }
 function cpCell(cp){
@@ -403,6 +454,7 @@ async function initLmsLayer(){
 addEventListener('pagehide',()=>{if(studentTimer)clearInterval(studentTimer);if(teacherTimer)clearInterval(teacherTimer)});
 
 render();wireLabs();fromHash();initLmsLayer();
+addEventListener('pagehide',()=>{if(stopS09Realtime)stopS09Realtime()});
 </script>
 </body>
 </html>
