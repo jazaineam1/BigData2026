@@ -12,6 +12,8 @@
 .session-progress-card.done .snum{background:#dff4e8;color:#12633c}
 .evidence-list{display:grid;gap:9px}.evidence-item{border:1px solid var(--line);border-left:4px solid var(--uc-cyan);border-radius:12px;padding:12px;background:#fff}.evidence-item .feedback-text{margin:7px 0 0}
 .competency-list{display:grid;gap:9px}.competency-simple{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.competency-simple p{margin:4px 0 0}.competency-simple .state{font-weight:900}.competency-simple.mastered{border-left:4px solid #16835f}.competency-simple.developing{border-left:4px solid #c38813}.competency-simple.pending{border-left:4px solid #aab1bf}@media(max-width:620px){.competency-simple{grid-template-columns:1fr}}
+.competition-list{display:grid;gap:7px;margin-top:12px}.competition-row{display:grid;grid-template-columns:46px minmax(120px,.75fr) minmax(160px,1fr) 90px;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff}.competition-row.me{border:2px solid var(--uc-cyan);background:#f1fbfb}.competition-rank{font-size:1.15rem;font-weight:950;color:var(--uc-navy);text-align:center}.competition-alias{font-weight:900;color:var(--uc-navy)}.competition-track{height:9px;background:#e8edf1;border-radius:999px;overflow:hidden}.competition-track i{display:block;height:100%;background:var(--uc-cyan)}.competition-score{text-align:right;font-weight:900}.competition-note{margin:8px 0 0}
+@media(max-width:620px){.competition-row{grid-template-columns:38px minmax(0,1fr) 62px}.competition-progress{grid-column:2 / span 2}.competition-score{grid-column:3;grid-row:1}}
 @media(max-width:850px){.progress-hero{grid-template-columns:1fr}.session-progress-card{grid-template-columns:50px minmax(0,1fr)}.session-progress-card .stage-action{grid-column:2}}
 @media(max-width:560px){.session-progress-card{padding:11px}.session-progress-card .stage-action{width:100%}}
 </style>
@@ -36,6 +38,12 @@
 <div id="courseRoute" class="course-route"></div>
 </section>
 
+<section id="competitionWall" class="card hidden">
+<div class="actions" style="justify-content:space-between;align-items:flex-start"><div><div class="ey">Wall de competencia</div><h2 id="competitionTitle">Avance del grupo</h2><p class="muted competition-note">Comparación por actividades requeridas completadas. Los empates comparten posición; no se premia la velocidad y tus compañeros aparecen con alias.</p></div><button id="refreshCompetition" class="btn alt" type="button">Actualizar</button></div>
+<div id="competitionSummary" class="detailgrid"></div>
+<div id="competitionList" class="competition-list"></div>
+</section>
+
 <section id="competencyCard" class="card hidden">
 <div class="actions" style="justify-content:space-between;align-items:flex-start"><div><div class="ey">Evidencia de aprendizaje</div><h2>Competencias</h2><p class="muted">Solo mostramos si ya existe evidencia suficiente; no añadimos otro tablero de porcentajes.</p></div><a class="btn ghost" href="competencies.html">Ver detalle</a></div>
 <div id="competencyList" class="competency-list"></div>
@@ -50,8 +58,8 @@
 <script src="assets/bigdata-lms.js?v=20260926-v3"></script>
 <script>
 (async()=>{'use strict';
-const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status'),focus=Math.trunc(Number(new URLSearchParams(location.search).get('s')||0));
-let course=null,focusData=null,competencyData=null;
+const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status');let focus=Math.trunc(Number(new URLSearchParams(location.search).get('s')||0));
+let course=null,focusData=null,competencyData=null,competitionData=null,competitionTimer=null;
 function renderMetrics(){
   const sessions=course.sessions||[],completed=sessions.filter(s=>s.session_progress?.status==='completed').length,
     started=sessions.filter(s=>s.session_progress&&s.session_progress.status!=='completed').length;
@@ -65,6 +73,38 @@ function renderRoute(){
       state=done?'Lista':p?'En curso':'Sin empezar';
     return '<article class="session-progress-card '+(done?'done ':'')+(focus===n?'focus':'')+'"><span class="snum">S'+String(n).padStart(2,'0')+'</span><div><h3 style="margin:0 0 4px">'+L.esc(s.title)+'</h3><span class="pill '+(done?'done':p?'progress':'pending')+'">'+state+'</span></div><a class="btn '+(focus===n?'primary':'alt')+' stage-action" href="session.html?s='+n+'">'+(p?'Continuar':'Abrir')+'</a></article>'
   }).join('')||'<p class="muted">No hay sesiones publicadas.</p>';
+}
+function defaultFocus(){
+  const rows=(course?.sessions||[]).filter(x=>x.status==='visible'),now=Date.now();
+  const timed=rows.map(x=>({...x,_t:Date.parse(String(x.starts_at||''))})).filter(x=>Number.isFinite(x._t)).sort((a,b)=>a._t-b._t);
+  const past=timed.filter(x=>x._t<=now);if(past.length)return Number(past.at(-1).session_number);
+  if(timed.length)return Number(timed[0].session_number);
+  return Number(rows.at(-1)?.session_number||0);
+}
+function competitionState(row){
+  if(row.status==='completed')return 'Completado';
+  if(row.status==='in_progress')return 'En curso';
+  return 'Sin iniciar';
+}
+function renderCompetition(){
+  const card=L.$('competitionWall'),d=competitionData;
+  if(!d||!Array.isArray(d.ranking)){card.classList.add('hidden');return}
+  card.classList.remove('hidden');
+  L.$('competitionTitle').textContent='S'+String(d.session?.session_number||focus).padStart(2,'0')+' · '+(d.session?.title||'Avance del grupo');
+  const mine=d.ranking.find(x=>x.is_me);
+  L.$('competitionSummary').innerHTML=
+    '<div class="detailmetric"><span class="muted">Participantes</span><b>'+Number(d.participants||0)+'</b></div>'+
+    '<div class="detailmetric"><span class="muted">Tu posición</span><b>'+(mine?('#'+mine.position):'—')+'</b></div>'+
+    '<div class="detailmetric"><span class="muted">Tu avance</span><b>'+(mine?Number(mine.progress_pct||0)+'%':'—')+'</b></div>';
+  L.$('competitionList').innerHTML=d.ranking.length?d.ranking.map(row=>{
+    const medal=row.position===1?'🥇 ':row.position===2?'🥈 ':row.position===3?'🥉 ':'';
+    return '<article class="competition-row '+(row.is_me?'me':'')+'"><div class="competition-rank">#'+Number(row.position)+'</div><div><div class="competition-alias">'+medal+L.esc(row.alias)+(row.is_me?' · Tú':'')+'</div><div class="muted">'+competitionState(row)+'</div></div><div class="competition-progress"><div class="competition-track"><i style="width:'+Math.max(0,Math.min(100,Number(row.progress_pct||0)))+'%"></i></div><div class="muted">'+Number(row.completed_required||0)+'/'+Number(row.required_total||0)+' actividades requeridas</div></div><div class="competition-score">'+Number(row.progress_pct||0)+'%</div></article>';
+  }).join(''):'<div class="note"><b>Aún no hay participantes con matrícula activa.</b></div>';
+}
+async function refreshCompetition(){
+  if(!focus)return;
+  try{competitionData=await L.session('competition_wall',{session_number:focus});renderCompetition()}
+  catch(e){L.msg(status,'No se pudo actualizar el wall de competencia: '+e.message,'warn')}
 }
 function competencyLabel(c){
   if(c.status==='mastered')return 'Evidencia suficiente ✓';
@@ -93,17 +133,22 @@ function renderEvidence(){
 async function load(){
   try{
     const gate=await L.requireBigData();if(!gate)return;
+    course=await L.session('course_progress');
+    if(!focus)focus=defaultFocus();
     const results=await Promise.all([
-      L.session('course_progress'),
       focus>0?L.session('me',{session_number:focus}).catch(()=>null):Promise.resolve(null),
-      L.core('competencies').catch(()=>({competencies:[]}))
+      L.core('competencies').catch(()=>({competencies:[]})),
+      focus>0?L.session('competition_wall',{session_number:focus}).catch(()=>null):Promise.resolve(null)
     ]);
-    course=results[0];focusData=results[1];competencyData=results[2];
+    focusData=results[0];competencyData=results[1];competitionData=results[2];
     if(['teacher','admin'].includes(course.viewer?.role))L.$('teacherLink').classList.remove('hidden');
-    renderMetrics();renderRoute();renderCompetencies();renderEvidence();
+    renderMetrics();renderRoute();renderCompetition();renderCompetencies();renderEvidence();
   }catch(e){L.msg(status,e.message,'err')}
 }
+L.$('refreshCompetition').onclick=refreshCompetition;
 await load();
+competitionTimer=setInterval(()=>{if(!document.hidden)refreshCompetition()},20000);
+addEventListener('pagehide',()=>{if(competitionTimer)clearInterval(competitionTimer)});
 })();
 </script>
 </body></html>
