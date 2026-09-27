@@ -45,7 +45,7 @@ checks=[
  ("backend código Colab", 'action==="lab_code"' in backend and 'action==="evidence_by_code"' in backend and "bd_lab_codes" in backend),
  ("evidence_by_code antes de bearer", backend.index('if(action==="evidence_by_code")') < backend.index("const ctx=await current(req)")),
  ("reset incluye evidencia", 'db.from("bd_evidence").delete()' in backend and 'db.from("bd_lab_codes").delete()' in backend),
- ("atascado LAB 5 min", 'currentDef?.kind==="lab"' in backend and "age>5" in backend),
+ ("atascado LAB 5–30 min con presencia", 'currentDef?.kind==="lab"' in backend and "meaningfulAge>5&&meaningfulAge<=30" in backend and "present&&" in backend),
  ("safeNext recursos internos", "/BigData2026/Presentaciones/" in client and "/BigData2026/assets/tutoriales/" in client),
  ("módulo abre LAB en slide", "function openStage(a)" in session and "resource_type:'lab'" in session),
  ("módulo genera código Colab", "labCodeCard" in session and "L.session('lab_code'" in session),
