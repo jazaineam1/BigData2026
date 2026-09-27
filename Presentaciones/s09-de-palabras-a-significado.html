@@ -251,6 +251,7 @@ function stableSeed(text){let h=2166136261>>>0;for(const ch of String(text)){h^=
 function stableShuffle(items,key){
   const out=[...items];let x=stableSeed((L?.auth?.()?.user?.id||'preview')+'|'+key);
   for(let i=out.length-1;i>0;i--){x^=x<<13;x^=x>>>17;x^=x<<5;x>>>=0;const j=x%(i+1);[out[i],out[j]]=[out[j],out[i]]}
+  if(out.length>1&&out[0]===items[0])out.push(out.shift());
   return out;
 }
 function shuffleChallengeOptions(){
