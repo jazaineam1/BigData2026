@@ -16,8 +16,9 @@ backend=read("infraestructura/lms/functions/bigdata-session/index.ts")
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
 kit=read("lms/assets/lms-kit.js")
 tests=read("tests/lms-v3.visual.spec.js")
-auth=read("infraestructura/lms/functions/learning-auth/index.ts")
-access=read("infraestructura/lms/functions/learning-access-request/index.ts")
+auth=read("infraestructura/lms/functions/bigdata-auth/index.ts")
+access=read("infraestructura/lms/functions/bigdata-access-request/index.ts")
+review=read("infraestructura/lms/functions/bigdata-access-review/index.ts")
 client=read("lms/assets/bigdata-lms.js")
 portal=read("lms/portal.html")
 wall=read("lms/wall.html")
@@ -52,7 +53,9 @@ checks=[
  ("Supabase enlaza email exacto", '.eq("email",normalizedEmail)' in auth and '.ilike("email"' not in auth),
  ("solicitud pública no reabre aprobados", 'existing?.status==="pending"||existing?.status==="approved"' in access and "reopened" not in access),
  ("solicitud pública no enumera matrícula", "Si corresponde, tu solicitud será revisada" in access and "Tu matrícula ya estaba aprobada" not in access),
- ("Big Data no borra storage ANDESDB", "localStorage.removeItem(LEGACY_STORE)" not in client and "return legacy" not in client),
+ ("Big Data usa endpoints propios", all(x in client for x in ["bigdata-auth","bigdata-access-request","bigdata-access-review"]) and "learning-auth" not in client and "learning-access-request" not in client and "learning-access-review" not in client),
+ ("Big Data usa solo storage propio", "andesdb.lms.auth" not in client and "LEGACY_STORE" not in client),
+ ("review de matrícula es exclusivo BigData", 'const COURSE_CODE = "bigdata"' in review and "BigData2026/lms/access.html" in review and 'source: "bigdata"' in review),
  ("portal evita flash de login", "Cargando tu aula…" in portal and "data-lms-auth" in portal and "setAuthState('stored')" in portal),
  ("WALL excluye heartbeat", '.neq("event_type","heartbeat")' in backend),
  ("atasco se limita a 5-30 min", "meaningfulAge>5&&meaningfulAge<=30" in backend and "present&&" in backend),
@@ -71,7 +74,8 @@ print(" - tracking cliente sin eventos académicos")
 print(" - muro estudiante sin user_id")
 print(" - cola aislada por usuario y rechazados persistentes")
 print(" - QA detecta pageerror, errores JS y overflow vertical")
-print(" - autenticación: expiración, single-use, rate limit por cuenta y email confirmado")
+print(" - autenticación BigData aislada: expiración, single-use, rate limit por cuenta y email confirmado")
+print(" - solicitud/revisión de matrícula usan endpoints y URLs propias de BigData")
 print(" - acceso público no enumera ni reabre matrículas aprobadas")
 print(" - portal restaura sesión sin flash de login")
 print(" - WALL excluye heartbeats y acota atasco 5–30 min")
