@@ -107,6 +107,29 @@ async function ownEvidence(userId:string,runId:string,n:number){
   return data||[];
 }
 const TRANSFER_REVIEW_CODES=new Set(["bd-s09-lab3","bd-s09-lab4","bd-s09-lab8"]);
+const TRANSFER_ALLOWED:Record<string,Record<string,string[]>>={
+  "bd-s09-lab3":{
+    result:["El Top-5 concentra suficientes candidatos relevantes","El Top-5 deja demasiados candidatos relevantes fuera"],
+    decision:["Mantendría k=5 para esta necesidad","Aumentaría k para revisar más vecinos"],
+    rejected_alternative:["Descarto aumentar k porque añade revisión innecesaria","Descarto mantener k=5 porque limita demasiado el recall"],
+    interpretation:["El valor de k controla cuántos vecinos se revisan, no la relevancia por sí sola","Más vecinos no significa automáticamente mejores resultados"],
+    limit:["La conclusión depende de los juicios de relevancia del Top-5","El resultado puede cambiar con otra consulta o embedding"]
+  },
+  "bd-s09-lab4":{
+    result:["BM25 recuperó mejor la coincidencia exacta del caso","La búsqueda semántica recuperó mejor la intención del caso","Los dos mecanismos aportaron señales complementarias"],
+    decision:["Priorizaría recuperación lexical","Priorizaría recuperación semántica","Usaría una estrategia híbrida"],
+    rejected_alternative:["Descarto solo lexical porque pierde paráfrasis","Descarto solo semántica porque puede perder identificadores exactos","Descarto usar un único mecanismo porque las señales son complementarias"],
+    interpretation:["Lexical prioriza coincidencia de términos y semántica cercanía de representación","Los scores de ambos mecanismos no son probabilidades comparables directamente"],
+    limit:["El ranking depende de la consulta y del corpus usado","La evaluación requiere juicios de relevancia y no solo mirar el score"]
+  },
+  "bd-s09-lab8":{
+    result:["RRF cambió el orden al combinar posiciones de ambos rankings","RRF mantuvo en cabeza documentos apoyados por ambos rankings"],
+    decision:["Usaría RRF para combinar los rankings","Mantendría los rankings separados para este caso"],
+    rejected_alternative:["Descarto sumar scores crudos porque sus escalas no son equivalentes","Descarto elegir un único ranking porque perdería señal complementaria"],
+    interpretation:["RRF fusiona posiciones y no necesita comparar scores crudos","Un documento respaldado por varios rankings puede subir de posición"],
+    limit:["El parámetro de fusión puede cambiar el orden final","La fusión no reemplaza la evaluación de relevancia"]
+  }
+};
 async function submitEvidence(userId:string,runId:string,n:number,activity:any,payload:any,source:string,rawClientId:any=null){
   if(!activity||activity.kind!=="lab")throw new Error("La actividad no es un laboratorio");
   const evidenceClientId=clientId(rawClientId,"client_evidence_id");
@@ -137,13 +160,15 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     const selfVerified=selfProgress?.metadata?.self_check_verified===true||
       selfProgress?.metadata?.evidence_verdict==="correct"||selfProgress?.status==="completed";
     if(!selfVerified)throw new Error("Completa primero la autocomprobación del LAB antes de enviar la transferencia.");
-    normalized.result=trimText(payload?.result,12,900,"El resultado observado");
-    normalized.decision=trimText(payload?.decision,12,700,"La decisión");
-    normalized.rejected_alternative=trimText(payload?.rejected_alternative,12,700,"La alternativa descartada");
-    normalized.interpretation=trimText(payload?.interpretation,12,900,"La interpretación");
-    normalized.limit=trimText(payload?.limit,12,700,"El límite");
+    const allowed=TRANSFER_ALLOWED[activity.code];
+    if(!allowed)throw new Error("Evidencia estructurada no configurada");
+    for(const key of ["result","decision","rejected_alternative","interpretation","limit"]){
+      const value=String(payload?.[key]||"");
+      if(!allowed[key]?.includes(value))throw new Error("Selecciona una opción válida en "+key);
+      normalized[key]=value;
+    }
     verdict="pending_review";
-    feedback="Transferencia recibida. Está pendiente de revisión docente con rúbrica.";
+    feedback="Evidencia estructurada recibida. Está pendiente de revisión docente.";
   }else if(catalog.evaluator==="seeded-numeric"&&catalog.config?.generator==="s09_topk_aero_count"){
     const k=Number(catalog.config?.k||5),expected=s09TopKProfile(seed,k).count,result=Number(payload?.result);
     if(!Number.isFinite(result))throw new Error("Registra el resultado numérico obtenido");
@@ -288,104 +313,6 @@ async function evidenceByCode(body:any){
   return result;
 }
 
-async function wallPost(ctx:any,run:any,n:number,activityCode:string,rawBody:any,evidenceId:any=null,rawClientId:any=null){
-  const {data:activity,error:activityError}=await db.from("bd_lms_activities").select("code,kind")
-    .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",n).maybeSingle();
-  failIf(activityError,"No se pudo validar el LAB");
-  if(!activity||activity.kind!=="lab")throw new Error("El muro solo está disponible para laboratorios");
-  const body=trimText(rawBody,20,2000,"La publicación"),postClientId=clientId(rawClientId,"client_post_id");
-  if(postClientId){
-    const {data:existing,error:existingError}=await db.from("bd_wall_posts")
-      .select("id,activity_code,body,status,created_at").eq("user_id",ctx.user.id)
-      .eq("course_run_id",run.id).eq("client_post_id",postClientId).maybeSingle();
-    failIf(existingError,"No se pudo comprobar la idempotencia de la publicación");
-    if(existing){
-      if(existing.activity_code!==activityCode)throw new Error("client_post_id ya fue usado en otra actividad");
-      return {ok:true,duplicate:true,post:existing};
-    }
-  }
-  let linked:string|null=null;
-  if(evidenceId){
-    const {data:e,error}=await db.from("bd_evidence").select("id").eq("id",String(evidenceId))
-      .eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("activity_code",activityCode).maybeSingle();
-    failIf(error,"No se pudo validar la evidencia vinculada");linked=e?.id||null;
-  }
-  const {data:post,error}=await db.from("bd_wall_posts").insert({
-    course_run_id:run.id,session_number:n,activity_code:activityCode,user_id:ctx.user.id,
-    body,evidence_id:linked,status:"visible",client_post_id:postClientId
-  }).select("id,activity_code,body,status,created_at").single();
-  failIf(error,"No se pudo publicar en el muro");
-  const {error:eventError}=await db.from("bd_lms_events").insert({
-    user_id:ctx.user.id,course_run_id:run.id,event_type:"ui_action",session_number:n,
-    activity_code:activityCode,metadata:{source:"class-wall",action:"wall_posted"},created_at:new Date().toISOString()
-  });
-  failIf(eventError,"No se pudo auditar la publicación");
-  return {ok:true,post};
-}
-async function wallList(ctx:any,run:any,n:number,activityCode:string){
-  const isTeacher=["teacher","admin"].includes(ctx.user.role);
-  const {data:activity,error:activityError}=await db.from("bd_lms_activities").select("code,kind,title")
-    .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",n).maybeSingle();
-  failIf(activityError,"No se pudo validar el LAB");
-  if(!activity||activity.kind!=="lab")throw new Error("Actividad de muro inválida");
-  if(!isTeacher){
-    const {count,error}=await db.from("bd_wall_posts").select("id",{count:"exact",head:true})
-      .eq("course_run_id",run.id).eq("session_number",n).eq("activity_code",activityCode)
-      .eq("user_id",ctx.user.id).in("status",["visible","spotlight","pinned"]);
-    failIf(error,"No se pudo verificar tu publicación");
-    if(!(count||0))return {viewer:ctx.user,activity,can_view:false,posts:[],reason:"publish_first"};
-  }
-  const {data:posts,error}=await db.from("bd_wall_posts").select("id,user_id,parent_id,body,evidence_id,status,created_at")
-    .eq("course_run_id",run.id).eq("session_number",n).eq("activity_code",activityCode)
-    .neq("status","hidden").order("created_at",{ascending:true}).limit(300);
-  failIf(error,"No se pudo cargar el muro");
-  const postIds=(posts||[]).map((p:any)=>p.id);
-  const userIds=[...new Set((posts||[]).map((p:any)=>p.user_id))];
-  const [{data:reactions},{data:users}]=await Promise.all([
-    postIds.length?db.from("bd_wall_reactions").select("post_id,user_id,kind").in("post_id",postIds):Promise.resolve({data:[]} as any),
-    isTeacher&&userIds.length?db.from("lms_users").select("id,display_name,username").in("id",userIds):Promise.resolve({data:[]} as any)
-  ]);
-  const names=new Map((users||[]).map((u:any)=>[u.id,u.display_name||u.username]));
-  const rows=await Promise.all((posts||[]).map(async(p:any)=>{
-    const rs=(reactions||[]).filter((r:any)=>r.post_id===p.id);
-    let author="Compañero";
-    if(p.user_id===ctx.user.id)author="Tú";
-    else if(isTeacher)author=names.get(p.user_id)||"Estudiante";
-    else author="Compañero "+(await sha256(p.user_id+"|"+activityCode)).slice(0,4).toUpperCase();
-    const publicPost={
-      id:p.id,parent_id:p.parent_id,body:p.body,evidence_id:p.evidence_id,status:p.status,created_at:p.created_at,author,
-      reactions:{useful:rs.filter((r:any)=>r.kind==="useful").length,same_doubt:rs.filter((r:any)=>r.kind==="same_doubt").length},
-      my_reactions:rs.filter((r:any)=>r.user_id===ctx.user.id).map((r:any)=>r.kind)
-    };
-    return isTeacher?{...publicPost,user_id:p.user_id}:publicPost;
-  }));
-  return {viewer:ctx.user,activity,can_view:true,posts:rows};
-}
-async function wallReact(ctx:any,run:any,n:number,postId:string,kind:string){
-  if(!["useful","same_doubt"].includes(kind))throw new Error("Reacción inválida");
-  const {data:post,error}=await db.from("bd_wall_posts").select("id,course_run_id,session_number,status")
-    .eq("id",postId).eq("course_run_id",run.id).eq("session_number",n).neq("status","hidden").maybeSingle();
-  failIf(error,"No se pudo validar la publicación");if(!post)throw new Error("Publicación no disponible");
-  const {data:existing,error:existingError}=await db.from("bd_wall_reactions").select("post_id")
-    .eq("post_id",postId).eq("user_id",ctx.user.id).eq("kind",kind).maybeSingle();
-  failIf(existingError,"No se pudo leer la reacción");
-  if(existing){
-    const {error:delError}=await db.from("bd_wall_reactions").delete().eq("post_id",postId).eq("user_id",ctx.user.id).eq("kind",kind);
-    failIf(delError,"No se pudo retirar la reacción");return {ok:true,active:false};
-  }
-  const {error:insError}=await db.from("bd_wall_reactions").insert({post_id:postId,user_id:ctx.user.id,kind});
-  failIf(insError,"No se pudo guardar la reacción");return {ok:true,active:true};
-}
-async function wallModerate(ctx:any,run:any,n:number,postId:string,moderation:string){
-  requireTeacher(ctx);
-  const status=moderation==="hide"?"hidden":moderation==="spotlight"?"spotlight":moderation==="pin"?"pinned":moderation==="show"?"visible":null;
-  if(!status)throw new Error("Acción de moderación inválida");
-  const {data,error}=await db.from("bd_wall_posts").update({status,updated_at:new Date().toISOString()})
-    .eq("id",postId).eq("course_run_id",run.id).eq("session_number",n).select("id,status").maybeSingle();
-  failIf(error,"No se pudo moderar la publicación");if(!data)throw new Error("Publicación no encontrada");
-  await audit(ctx.user.id,"bigdata.wall.moderate","wall_post",postId,{session_number:n,status});
-  return {ok:true,post:data};
-}
 async function current(req:Request){
   const token=bearer(req);if(!token)return null;
   const {data:s}=await db.from("lms_auth_sessions").select("id,user_id,expires_at,revoked_at,persistent,created_at")
@@ -902,10 +829,6 @@ Deno.serve(async(req:Request)=>{
       await realtimeSignal(n,"progress");return out(req,result);
     }
     if(action==="lab_code")return out(req,{ok:true,...await issueLabCode(ctx,run,n)});
-    if(action==="wall_post"){const result=await wallPost(ctx,run,n,String(body.activity_code||""),body.body,body.evidence_id||null,body.client_post_id);await realtimeSignal(n,"wall");return out(req,result)}
-    if(action==="wall_list")return out(req,await wallList(ctx,run,n,String(body.activity_code||"")));
-    if(action==="wall_react"){const result=await wallReact(ctx,run,n,String(body.post_id||""),String(body.kind||""));await realtimeSignal(n,"wall");return out(req,result)}
-    if(action==="wall_moderate"){const result=await wallModerate(ctx,run,n,String(body.post_id||""),String(body.moderation||""));await realtimeSignal(n,"wall");return out(req,result)}
     if(action==="session_controls")return out(req,{ok:true,controls:await sessionControls(run.id,n)});
     if(action==="teacher_review_evidence")return out(req,await teacherReviewEvidence(ctx,run,n,body,def.activities));
     if(action==="teacher_set_control")return out(req,await teacherSetControl(ctx,run,n,body,def.activities));
