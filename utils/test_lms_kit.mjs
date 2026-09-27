@@ -173,5 +173,24 @@ test('entradas legacy sin propietario no se envían y quedan rechazadas',async()
   await h.LMS.flush();
   assert.equal(h.sent.length,0);
   assert.equal(h.LMS.queueSize(),0);
-  assert.equal(h.LMS.rejected()[0].reject_reason,'unscoped_legacy');
+  assert.equal(h.LMS.rejected().length,0);
+  const quarantined=JSON.parse(h.store.get(h.LMS.REJECTED_KEY));
+  assert.equal(quarantined[0].reject_reason,'unscoped_legacy');
+  assert.equal(quarantined[0].owner_id,undefined);
+});
+
+
+test('rechazos de Ana no son visibles para Carlos en un equipo compartido',async()=>{
+  const h=harness({online:false,user:{id:'user-a',username:'a',display_name:'Ana'}});
+  await h.LMS.evidence('bd-s09-lab3',{result:4,decision:'mantener',limit:'corto'});
+  h.context.navigator.onLine=true;
+  h.context.window.BIGDATA_LMS.session=async()=>{const e=new Error('Evidencia inválida');e.status=400;throw e};
+  await h.LMS.flush();
+  assert.equal(h.LMS.rejected().length,1);
+
+  h.setUser({id:'user-b',username:'b',display_name:'Carlos'});
+  assert.equal(h.LMS.rejected().length,0);
+
+  h.setUser({id:'user-a',username:'a',display_name:'Ana'});
+  assert.equal(h.LMS.rejected().length,1);
 });
