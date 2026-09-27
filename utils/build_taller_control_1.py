@@ -10,7 +10,7 @@ def build():
         if c["cell_type"]=="code":
             cell.update({"execution_count":None,"outputs":[]})
         cells.append(cell)
-    nb={"cells":cells,"metadata":{"kernelspec":{"display_name":"Python 3","language":"python","name":"python3"},"language_info":{"name":"Python","version":"3.11"},"colab":{"name":"Taller_Control_1.ipynb","provenance":[]}},"nbformat":4,"nbformat_minor":5}
+    nb={"cells":cells,"metadata":{"kernelspec":{"display_name":"Python 3","language":"python","name":"python3"},"language_info":{"name":"python","version":"3.11"},"colab":{"name":"Taller_Control_1.ipynb","provenance":[]}},"nbformat":4,"nbformat_minor":5}
     out=Path(__file__).resolve().parents[1]/"Cuadernos"/"Taller_Control_1.ipynb"
     out.write_text(json.dumps(nb,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(out)
