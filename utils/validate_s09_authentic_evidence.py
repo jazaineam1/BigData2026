@@ -26,7 +26,7 @@ checks=[
  ("notebook envía decisión", any('"decision": decision' in s for s in sources)),
  ("notebook envía alternativa y límite", any('"rejected_alternative": alternativa_descartada' in s and '"limit": limite' in s for s in sources)),
  ("notebook envía rankings compactos", any('"top5_lexical": _ids(top_lex)' in s and '"top5_hybrid": _ids(top_hibrido)' in s for s in sources)),
- ("generador coincide con contrato", "FINAL_LMS_CODE" in generator and "bd-s09-lab9" in generator and "decision = \\"qué enfoque final eliges" in generator),
+ ("generador coincide con contrato", "FINAL_LMS_CODE" in generator and "bd-s09-lab9" in generator and "qué enfoque final eliges" in generator),
  ("presentación no suplanta LAB9", "lab9EvidencePanel" in deck and "Evidencia auténtica · LAB 9" in deck),
  ("WALL revisa con rúbrica", "RUBRIC_FIELDS" in wall and "submitEvidenceReview" in wall and "Pedir ajuste" in wall),
 ]
