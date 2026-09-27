@@ -14,13 +14,16 @@
 .account-tools{display:flex;gap:7px;flex-wrap:wrap}
 @media(max-width:900px){.hero-v3{grid-template-columns:1fr}.session-grid-v3{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.session-grid-v3{grid-template-columns:1fr}}
+#bootCard,#loginCard{display:none}
+html[data-lms-auth="stored"] #bootCard{display:block}
+html[data-lms-auth="none"] #loginCard{display:block}
 </style>
 </head>
 <body>
 <header class="appbar"><div class="inner">
 <a class="brand" href="portal.html">Universidad Central<small>Big Data 2026-2S · Aula</small></a>
 <span class="spacer"></span>
-<a class="navlink optional" href="progress.html">Mi progreso</a><a class="navlink optional" href="account.html">Mi cuenta</a>
+<a id="progressTop" class="navlink optional hidden" href="progress.html">Mi progreso</a><a id="accountTop" class="navlink optional hidden" href="account.html">Mi cuenta</a>
 <a id="teacherCourseTop" class="navlink optional hidden" href="teacher-course.html">Gestión</a><button id="logout" class="hidden" data-logout>Salir</button>
 </div></header>
 
@@ -28,6 +31,7 @@
 <div class="ey">Maestría en Analítica de Datos</div><h1>Tu curso.</h1><p class="lead">Continúa donde quedaste o abre una sesión.</p>
 <div id="status" class="status hidden"></div>
 
+<section id="bootCard" class="card" style="max-width:560px"><div class="ey">Sesión LMS</div><h2>Cargando tu aula…</h2><p class="muted">Estamos comprobando tu sesión en este dispositivo.</p></section>
 <section id="loginCard" class="card" style="max-width:560px"><h2>Ingresar al LMS</h2><p class="muted">Usa tu cuenta LMS. Si ya tienes una sesión válida en este navegador, se reutiliza automáticamente.</p>
 <form id="login" class="form"><div class="field"><label for="username">Usuario o correo</label><input class="input" id="username" name="username" autocomplete="username" required></div>
 <div class="field"><label for="password">Contraseña</label><input class="input" id="password" name="password" type="password" autocomplete="current-password" required></div>
@@ -54,7 +58,10 @@
 <script src="assets/bigdata-lms.js?v=20260926-v3"></script>
 <script>
 (async()=>{'use strict';
-const L=window.BIGDATA_LMS,status=L.$('status'),loginCard=L.$('loginCard'),home=L.$('home'),noEnroll=L.$('noEnrollment');L.wireLogout();
+const L=window.BIGDATA_LMS,status=L.$('status'),bootCard=L.$('bootCard'),loginCard=L.$('loginCard'),home=L.$('home'),noEnroll=L.$('noEnrollment');L.wireLogout();
+const setAuthState=state=>{document.documentElement.dataset.lmsAuth=state;bootCard.style.display=state==='stored'?'block':'none';loginCard.style.display=state==='none'?'block':'none'};
+const showAuthNav=({progress=true}={})=>{L.$('accountTop')?.classList.remove('hidden');if(progress)L.$('progressTop')?.classList.remove('hidden');document.querySelectorAll('[data-logout]').forEach(x=>x.classList.remove('hidden'))};
+const hideAuthNav=()=>{L.$('accountTop')?.classList.add('hidden');L.$('progressTop')?.classList.add('hidden');document.querySelectorAll('[data-logout]').forEach(x=>x.classList.add('hidden'))};
 let model=null,progress=null;
 const pmap=()=>new Map((progress?.sessions||[]).map(s=>[Number(s.session_number),s]));
 function currentSession(){
@@ -83,18 +90,23 @@ function renderSessions(){
   }).join('')||'<p class="muted">No hay sesiones publicadas.</p>';
 }
 function render(){
-  loginCard.classList.add('hidden');noEnroll.classList.add('hidden');home.classList.remove('hidden');document.querySelectorAll('[data-logout]').forEach(x=>x.classList.remove('hidden'));
+  setAuthState('verified');bootCard.style.display='none';loginCard.style.display='none';noEnroll.classList.add('hidden');home.classList.remove('hidden');showAuthNav({progress:true});
   const v=model.viewer||{};L.$('who').textContent=v.display_name||v.username;L.$('role').textContent=(v.role==='student'?'Estudiante':'Rol '+v.role)+' · Big Data 2026-2S';
   if(['teacher','admin'].includes(v.role)){['teacherCourse','teacherAnalytics','teacherQuizzes','teacherInterop','teacherOps','teacherCollaboration','teacherWall','adminUsers','teacherCourseTop'].forEach(id=>L.$(id)?.classList.remove('hidden'));const cs=currentSession();if(cs)L.$('teacherWall').href='wall.html?s='+cs.session_number}
   renderNext();renderSessions();
 }
 async function loadHome(){const result=await Promise.all([L.core('home'),L.session('course_progress')]);model=result[0];progress=result[1];render()}
 async function resume(){
-  if(!L.auth()?.token)return;
+  if(!L.auth()?.token){setAuthState('none');hideAuthNav();return}
+  setAuthState('stored');hideAuthNav();
   try{await loadHome();if(new URLSearchParams(location.search).get('next'))location.replace(L.safeNext())}
-  catch(e){if(e.status===403){loginCard.classList.add('hidden');noEnroll.classList.remove('hidden')}else if(e.status===401){L.save(null)}else L.msg(status,e.message,'err')}
+  catch(e){
+    if(e.status===403){bootCard.style.display='none';loginCard.style.display='none';home.classList.add('hidden');noEnroll.classList.remove('hidden');showAuthNav({progress:false})}
+    else if(e.status===401){L.save(null);home.classList.add('hidden');noEnroll.classList.add('hidden');setAuthState('none');hideAuthNav()}
+    else{L.msg(status,e.message,'err')}
+  }
 }
-L.$('login').addEventListener('submit',async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button'),fd=new FormData(e.currentTarget);b.disabled=true;b.textContent='Ingresando…';try{await L.login(fd.get('username'),fd.get('password'));await loadHome();location.replace(L.safeNext())}catch(ex){if(ex.status===403){loginCard.classList.add('hidden');noEnroll.classList.remove('hidden');L.msg(status,'Ingreso correcto. Tu cuenta aún no está matriculada en Big Data.','warn')}else L.msg(status,ex.message,'err')}finally{b.disabled=false;b.textContent='Entrar al aula'}});
+L.$('login').addEventListener('submit',async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button'),fd=new FormData(e.currentTarget);b.disabled=true;b.textContent='Ingresando…';try{await L.login(fd.get('username'),fd.get('password'));await loadHome();location.replace(L.safeNext())}catch(ex){if(ex.status===403){setAuthState('verified');bootCard.style.display='none';loginCard.style.display='none';noEnroll.classList.remove('hidden');showAuthNav({progress:false});L.msg(status,'Ingreso correcto. Tu cuenta aún no está matriculada en Big Data.','warn')}else L.msg(status,ex.message,'err')}finally{b.disabled=false;b.textContent='Entrar al aula'}});
 await resume();
 })();
 </script>
