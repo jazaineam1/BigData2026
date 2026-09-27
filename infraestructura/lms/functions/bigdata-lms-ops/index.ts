@@ -340,7 +340,7 @@ async function healthSnapshot(ctx:any,run:any){
   const assignmentIds=await runAssignmentIds(run);
   const [
     explicitSessionsQ,legacyPersistentQ,legacyTemporaryQ,
-    loginTotalQ,loginFailedQ,snapshotQ,eventQ,realtimeQ,orphanQ
+    loginTotalQ,loginFailedQ,snapshotQ,eventQ,orphanQ
   ]=await Promise.all([
     db.from("lms_auth_sessions").select("id",{count:"exact",head:true}).is("revoked_at",null).gt("expires_at",nowIso),
     db.from("lms_auth_sessions").select("id",{count:"exact",head:true}).is("revoked_at",null).is("expires_at",null).eq("persistent",true).gte("created_at",legacyPersistentCutoff),
@@ -350,7 +350,6 @@ async function healthSnapshot(ctx:any,run:any){
     db.from("lms_audit_log").select("created_at,action,metadata").in("action",["bigdata.ops.snapshot.auto","bigdata.ops.snapshot.export","bigdata.ops.backup.export"])
       .eq("entity_id",run.id).order("created_at",{ascending:false}).limit(1),
     db.from("bd_lms_events").select("created_at",{count:"exact"}).eq("course_run_id",run.id).gte("created_at",since24).order("created_at",{ascending:false}).limit(1),
-    db.from("bd_realtime_signals").select("created_at,scope",{count:"exact"}).eq("course_code",COURSE).gte("created_at",since24).order("created_at",{ascending:false}).limit(1),
     assignmentIds.length
       ?db.from("lms_submission_files_v2").select("id",{count:"exact",head:true}).in("assignment_id",assignmentIds).in("status",["pending","abandoned"]).lt("created_at",orphanCutoff)
       :Promise.resolve({count:0,error:null} as any)
@@ -358,7 +357,7 @@ async function healthSnapshot(ctx:any,run:any){
   for(const [label,q] of [
     ["sesiones con vencimiento",explicitSessionsQ],["sesiones legacy persistentes",legacyPersistentQ],
     ["sesiones legacy temporales",legacyTemporaryQ],["intentos login",loginTotalQ],["fallos login",loginFailedQ],
-    ["snapshot académico",snapshotQ],["eventos",eventQ],["Realtime",realtimeQ],["retención",orphanQ]
+    ["snapshot académico",snapshotQ],["eventos",eventQ],["retención",orphanQ]
   ] as any[]){
     if(q?.error)throw new Error("No se pudo consultar "+label+": "+String(q.error.message||q.error));
   }
@@ -368,14 +367,14 @@ async function healthSnapshot(ctx:any,run:any){
     snapshotAge=lastSnapshot?Math.max(0,(now-Date.parse(lastSnapshot))/3600_000):null,
     snapshotRecent=snapshotAge!==null&&snapshotAge<=RPO_HOURS,
     snapshotMode=lastSnapshotRow?.action==="bigdata.ops.snapshot.auto"?"automatic":"manual";
-  const lastAcademic=eventQ.data?.[0]?.created_at||null,lastRealtime=realtimeQ.data?.[0]?.created_at||null;
+  const lastAcademic=eventQ.data?.[0]?.created_at||null;
   return {
     generated_at:new Date(now).toISOString(),
     overall:snapshotRecent?"ok":"attention",
     database:{status:"ok",note:"La Edge Function respondió y pudo consultar PostgreSQL."},
     auth:{active_sessions:activeSessions,login_attempts_24h:total,failed_logins_24h:failed,failure_rate_pct:total?Math.round(failed/total*1000)/10:0},
     academic:{events_24h:Number(eventQ.count||0),last_event_at:lastAcademic},
-    realtime:{signals_24h:Number(realtimeQ.count||0),last_signal_at:lastRealtime},
+    realtime:{mode:"broadcast",transport:"ephemeral",persistent_rows:false,polling_fallback:true},
     retention:{orphan_candidates_24h:Number(orphanQ.count||0)},
     recovery:{
       rpo_hours:RPO_HOURS,rto_hours:RTO_HOURS,
