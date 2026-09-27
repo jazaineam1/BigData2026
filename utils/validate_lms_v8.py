@@ -26,13 +26,14 @@ checks=[
     ("mensajes accesibles", "aria-live" in client and "type==='err'?'alert':'status'" in client),
     ("foco y forced colors", ".skip-link" in css and "@media(forced-colors:active)" in css and ":focus-visible" in css),
     ("observabilidad server-side", "async function healthSnapshot" in ops and "lms_login_attempts" in ops and "bd_realtime_signals" in ops),
+    ("conteos server-side", 'select("id",{count:"exact",head:true})' in ops and "const activeSessions=Number(explicitSessionsQ.count||0)" in ops),
     ("observabilidad sin hashes login", '.select("id,ok,created_at")' in ops and 'select("id,key_hash' not in ops),
-    ("RPO RTO", "const RPO_HOURS=24" in ops and "const RTO_HOURS=4" in ops and "rpo_met" in ops),
+    ("RPO RTO", "const RPO_HOURS=24" in ops and "const RTO_HOURS=4" in ops and 'platform_backup_status:"not_observed_by_lms"' in ops),
     ("capacidades por rol", "roleCapabilities" in ops and '"retention.cleanup"' in ops),
-    ("panel de salud", 'id="health"' in ops_ui and "Backup / RPO" in ops_ui and "Capacidades efectivas" in ops_ui),
+    ("panel de salud", 'id="health"' in ops_ui and "Snapshot académico" in ops_ui and "No equivale al backup administrado" in ops_ui and "Capacidades efectivas" in ops_ui),
     ("cuenta muestra policy", 'id="sessionPolicy"' in account and "Política de esta cuenta" in account),
     ("revocación individual", "revoke_session" in account and "Cerrar esta sesión" in account),
-    ("runbook documentado", "RPO objetivo: 24 horas" in runbook and "RTO objetivo: 4 horas" in runbook),
+    ("runbook documentado", "RPO objetivo de plataforma: 24 horas" in runbook and "RTO objetivo: 4 horas" in runbook and "no sustituye el backup de plataforma" in runbook),
     ("regresiones V8", "WCAG" in tests and "no persistente" in tests and "observabilidad" in tests),
 ]
 
