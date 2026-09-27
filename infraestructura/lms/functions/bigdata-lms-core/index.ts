@@ -389,34 +389,72 @@ async function gradeHistory(ctx:any,run:any,body:any){
 
 
 async function competencyContext(run:any){
-  const [{data:competencies},{data:mappings},{data:assignments}] = await Promise.all([
+  const [{data:competencies},{data:mappings},{data:assignments},{data:activityMappings}] = await Promise.all([
     db.from("lms_competencies_v2").select("*").eq("course_run_id",run.id).order("position"),
     db.from("lms_assignment_competencies_v2").select("*").eq("course_run_id",run.id),
-    db.from("lms_assignments_v2").select("id,code,title,max_score,rubric,active").eq("course_run_id",run.id)
+    db.from("lms_assignments_v2").select("id,code,title,max_score,rubric,active").eq("course_run_id",run.id),
+    db.from("lms_activity_competencies_v2").select("course_run_id,activity_code,competency_code,weight").eq("course_run_id",run.id)
   ]);
-  return {competencies:competencies||[],mappings:mappings||[],assignments:assignments||[]};
+  const activityCodes=[...new Set((activityMappings||[]).map((x:any)=>String(x.activity_code||"")).filter(Boolean))];
+  const {data:activities}=activityCodes.length
+    ?await db.from("bd_lms_activities").select("code,title,session_number,kind").in("code",activityCodes)
+    :({data:[]} as any);
+  return {
+    competencies:competencies||[],
+    mappings:mappings||[],
+    assignments:assignments||[],
+    activity_mappings:activityMappings||[],
+    activities:activities||[]
+  };
 }
-function computeCompetencyRows(context:any,submissions:any[]){
+function computeCompetencyRows(context:any,submissions:any[],activityEvidence:any[]=[]){
   const assignmentMap=new Map((context.assignments||[]).map((a:any)=>[a.id,a]));
+  const activityMap=new Map((context.activities||[]).map((a:any)=>[a.code,a]));
   const latest=new Map<string,any>();
-  for(const s of (submissions||[]).sort((a:any,b:any)=>Number(b.attempt)-Number(a.attempt))){
+  for(const s of [...(submissions||[])].sort((a:any,b:any)=>Number(b.attempt)-Number(a.attempt))){
     if(s.score==null)continue;
     if(!latest.has(s.assignment_id))latest.set(s.assignment_id,s);
   }
+  const latestActivity=new Map<string,any>();
+  for(const e of [...(activityEvidence||[])].sort((a:any,b:any)=>{
+    const ta=Date.parse(String(a.reviewed_at||a.created_at||0)),tb=Date.parse(String(b.reviewed_at||b.created_at||0));
+    return tb-ta;
+  })){
+    if(e.verdict!=="accepted"||!e.rubric)continue;
+    if(!latestActivity.has(e.activity_code))latestActivity.set(e.activity_code,e);
+  }
   return (context.competencies||[]).filter((c:any)=>c.active).map((comp:any)=>{
     const maps=(context.mappings||[]).filter((m:any)=>m.competency_code===comp.code);
+    const activityMaps=(context.activity_mappings||[]).filter((m:any)=>m.competency_code===comp.code);
     const evidence:any[]=[];
     for(const m of maps){
-      const a:any=assignmentMap.get(m.assignment_id),s:any=latest.get(m.assignment_id);
-      if(!a||!s)continue;
+      const a:any=assignmentMap.get(m.assignment_id),sub:any=latest.get(m.assignment_id);
+      if(!a||!sub)continue;
       let score:number|null=null,max:number|null=null,label="Puntaje total";
       if(m.rubric_code&&m.rubric_code!=="__overall__"){
         const criterion=(Array.isArray(a.rubric)?a.rubric:[]).find((x:any)=>String(x.code)===String(m.rubric_code));
-        const raw=s.rubric_scores?.[m.rubric_code];
+        const raw=sub.rubric_scores?.[m.rubric_code];
         if(criterion&&raw!==undefined&&raw!==null){score=Number(raw);max=Number(criterion.max);label=criterion.title||m.rubric_code}
-      }else if(s.score!==null&&s.score!==undefined){score=Number(s.score);max=Number(a.max_score)}
+      }else if(sub.score!==null&&sub.score!==undefined){score=Number(sub.score);max=Number(a.max_score)}
       if(score===null||max===null||!Number.isFinite(score)||!Number.isFinite(max)||max<=0)continue;
-      evidence.push({assignment_id:a.id,assignment_code:a.code,assignment_title:a.title,rubric_code:m.rubric_code,label,score,max,pct:Math.max(0,Math.min(100,100*score/max)),weight:Number(m.weight||1),attempt:s.attempt,reviewed_at:s.reviewed_at,submitted_at:s.submitted_at});
+      evidence.push({
+        source_type:"assignment",assignment_id:a.id,assignment_code:a.code,assignment_title:a.title,
+        source_title:a.title,rubric_code:m.rubric_code,label,score,max,
+        pct:Math.max(0,Math.min(100,100*score/max)),weight:Number(m.weight||1),
+        attempt:sub.attempt,reviewed_at:sub.reviewed_at,submitted_at:sub.submitted_at
+      });
+    }
+    for(const m of activityMaps){
+      const ev:any=latestActivity.get(m.activity_code),activity:any=activityMap.get(m.activity_code);
+      const score=Number(ev?.rubric?.total),max=Number(ev?.rubric?.max);
+      if(!ev||ev.verdict!=="accepted"||!Number.isFinite(score)||!Number.isFinite(max)||max<=0)continue;
+      evidence.push({
+        source_type:"lab",activity_code:m.activity_code,activity_title:activity?.title||m.activity_code,
+        source_title:activity?.title||m.activity_code,session_number:activity?.session_number||null,
+        label:"Evidencia auténtica revisada",score,max,pct:Math.max(0,Math.min(100,100*score/max)),
+        weight:Number(m.weight||1),attempt:null,reviewed_at:ev.reviewed_at,submitted_at:ev.created_at,
+        evidence_id:ev.id
+      });
     }
     const totalWeight=evidence.reduce((z:number,e:any)=>z+e.weight,0);
     const mastery_pct=totalWeight?evidence.reduce((z:number,e:any)=>z+e.pct*e.weight,0)/totalWeight:null;
@@ -428,20 +466,27 @@ function computeCompetencyRows(context:any,submissions:any[]){
 async function competenciesForUser(ctx:any,run:any){
   const context=await competencyContext(run);
   const assignmentIds=(context.assignments||[]).map((a:any)=>a.id);
-  const {data:subs}=assignmentIds.length?await db.from("lms_submissions_v2").select("*").eq("user_id",ctx.user.id).in("assignment_id",assignmentIds):({data:[]} as any);
-  return {viewer:ctx.user,run,competencies:computeCompetencyRows(context,subs||[])};
+  const activityCodes=(context.activity_mappings||[]).map((m:any)=>m.activity_code);
+  const [{data:subs},{data:activityEvidence}]=await Promise.all([
+    assignmentIds.length?db.from("lms_submissions_v2").select("*").eq("user_id",ctx.user.id).in("assignment_id",assignmentIds):Promise.resolve({data:[]} as any),
+    activityCodes.length?db.from("bd_evidence").select("id,user_id,activity_code,verdict,rubric,created_at,reviewed_at").eq("course_run_id",run.id).eq("user_id",ctx.user.id).eq("verdict","accepted").in("activity_code",activityCodes):Promise.resolve({data:[]} as any)
+  ]);
+  return {viewer:ctx.user,run,competencies:computeCompetencyRows(context,subs||[],activityEvidence||[])};
 }
 async function teacherCompetencies(ctx:any,run:any){
   requireTeacher(ctx);const context=await competencyContext(run);
   const {data:enrollments}=await db.from("lms_run_enrollments").select("user_id,role,status").eq("course_run_id",run.id);
   const studentIds=(enrollments||[]).filter((x:any)=>x.role==="student").map((x:any)=>x.user_id);
   const assignmentIds=(context.assignments||[]).map((a:any)=>a.id);
-  const [{data:users},{data:subs}]=await Promise.all([
+  const activityCodes=(context.activity_mappings||[]).map((m:any)=>m.activity_code);
+  const [{data:users},{data:subs},{data:activityEvidence}]=await Promise.all([
     studentIds.length?db.from("lms_users").select("id,display_name,username,email,active").in("id",studentIds):Promise.resolve({data:[]} as any),
-    assignmentIds.length?db.from("lms_submissions_v2").select("*").in("assignment_id",assignmentIds):Promise.resolve({data:[]} as any)
+    assignmentIds.length?db.from("lms_submissions_v2").select("*").in("assignment_id",assignmentIds).in("user_id",studentIds):Promise.resolve({data:[]} as any),
+    studentIds.length&&activityCodes.length?db.from("bd_evidence").select("id,user_id,activity_code,verdict,rubric,created_at,reviewed_at").eq("course_run_id",run.id).eq("verdict","accepted").in("activity_code",activityCodes).in("user_id",studentIds):Promise.resolve({data:[]} as any)
   ]);
-  const byUser=new Map<string,any[]>();for(const s of subs||[]){if(!byUser.has(s.user_id))byUser.set(s.user_id,[]);byUser.get(s.user_id)!.push(s)}
-  const students=(users||[]).map((u:any)=>({...u,competencies:computeCompetencyRows(context,byUser.get(u.id)||[])}));
+  const byUser=new Map<string,any[]>();for(const sub of subs||[]){if(!byUser.has(sub.user_id))byUser.set(sub.user_id,[]);byUser.get(sub.user_id)!.push(sub)}
+  const evidenceByUser=new Map<string,any[]>();for(const ev of activityEvidence||[]){if(!evidenceByUser.has(ev.user_id))evidenceByUser.set(ev.user_id,[]);evidenceByUser.get(ev.user_id)!.push(ev)}
+  const students=(users||[]).map((u:any)=>({...u,competencies:computeCompetencyRows(context,byUser.get(u.id)||[],evidenceByUser.get(u.id)||[])}));
   return {viewer:ctx.user,run,...context,students};
 }
 async function saveCompetency(ctx:any,run:any,body:any){
@@ -482,14 +527,15 @@ function maxIso(values:any[]){
   return xs.length?new Date(Math.max(...xs)).toISOString():null;
 }
 async function analyticsContext(run:any,userIds:string[]){
-  const comp=await competencyContext(run);
-  const [{data:assignments},{data:subs},{data:s08},{data:rules}]=await Promise.all([
+  const comp=await competencyContext(run),activityCodes=(comp.activity_mappings||[]).map((m:any)=>m.activity_code);
+  const [{data:assignments},{data:subs},{data:s08},{data:rules},{data:activityEvidence}]=await Promise.all([
     db.from("lms_assignments_v2").select("*").eq("course_run_id",run.id).eq("active",true),
     userIds.length?db.from("lms_submissions_v2").select("*").in("user_id",userIds).in("assignment_id",(comp.assignments||[]).map((a:any)=>a.id)):Promise.resolve({data:[]} as any),
     userIds.length?db.from("bd_lms_session_progress").select("*").eq("course_run_id",run.id).eq("session_number",8).in("user_id",userIds):Promise.resolve({data:[]} as any),
-    db.from("lms_alert_rules_v2").select("*").eq("course_run_id",run.id).eq("active",true).order("position")
+    db.from("lms_alert_rules_v2").select("*").eq("course_run_id",run.id).eq("active",true).order("position"),
+    userIds.length&&activityCodes.length?db.from("bd_evidence").select("id,user_id,activity_code,verdict,rubric,created_at,reviewed_at").eq("course_run_id",run.id).eq("verdict","accepted").in("activity_code",activityCodes).in("user_id",userIds):Promise.resolve({data:[]} as any)
   ]);
-  return {comp,assignments:assignments||[],subs:subs||[],s08:s08||[],rules:rules||[]};
+  return {comp,assignments:assignments||[],subs:subs||[],s08:s08||[],rules:rules||[],activityEvidence:activityEvidence||[]};
 }
 function evaluateAlerts(metrics:any,rules:any[],studentView=false){
   const alerts:any[]=[];
@@ -521,10 +567,11 @@ function metricsForUser(userId:string,context:any){
     else if(s.status==="reviewed")reviewed++;else if(["submitted","returned"].includes(s.status))unreviewed++;
   }
   const s08=(context.s08||[]).find((x:any)=>x.user_id===userId)||{};
-  const comps=computeCompetencyRows(context.comp,userSubs);
+  const userActivityEvidence=(context.activityEvidence||[]).filter((e:any)=>e.user_id===userId);
+  const comps=computeCompetencyRows(context.comp,userSubs,userActivityEvidence);
   const withEvidence=comps.filter((x:any)=>x.mastery_pct!==null);
   const mastery=withEvidence.length?withEvidence.reduce((z:number,x:any)=>z+Number(x.mastery_pct),0)/withEvidence.length:null;
-  const last=maxIso([s08.last_activity_at,...userSubs.map((s:any)=>s.submitted_at),...userSubs.map((s:any)=>s.reviewed_at)]);
+  const last=maxIso([s08.last_activity_at,...userSubs.map((s:any)=>s.submitted_at),...userSubs.map((s:any)=>s.reviewed_at),...userActivityEvidence.map((e:any)=>e.reviewed_at||e.created_at)]);
   return {
     user_id:userId,last_activity_at:last,pending_count:pending,overdue_count:overdue,reviewed_count:reviewed,unreviewed_count:unreviewed,
     mastery_avg:mastery===null?null:Math.round(mastery*10)/10,mastered_count:comps.filter((x:any)=>x.status==="mastered").length,
