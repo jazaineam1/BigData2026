@@ -16,8 +16,9 @@ Toda Edge Function autenticada valida `expires_at`. Las sesiones legacy sin fech
 
 ## Objetivos de continuidad
 
-- **RPO objetivo: 24 horas.** Debe existir un snapshot académico verificado por SHA-256 al menos una vez cada 24 horas durante operación activa.
+- **RPO objetivo de plataforma: 24 horas.** Es un objetivo de continuidad; el LMS no certifica desde su propio panel el estado de los backups administrados por Supabase.
 - **RTO objetivo: 4 horas.** Ante incidente severo, el objetivo es restaurar servicio académico verificado dentro de cuatro horas.
+- **Snapshot académico objetivo: 24 horas.** Es una capa adicional de portabilidad verificable por SHA-256; no sustituye el backup de plataforma.
 - El snapshot académico no contiene contraseñas, tokens, secretos de Edge Functions ni binarios de Storage.
 - Storage se recupera por separado y debe reconciliarse con los metadatos del snapshot.
 
@@ -30,7 +31,8 @@ El panel `lms/admin-operations.html` expone agregados operativos, no datos sensi
 - actividad académica de las últimas 24 h;
 - señales Realtime de las últimas 24 h;
 - archivos pending/abandoned con más de 24 h;
-- último snapshot y cumplimiento del RPO.
+- último snapshot académico exportado y su antigüedad;
+- el objetivo RPO/RTO declarado, dejando explícito que el estado real del backup administrado de plataforma no se observa desde el LMS.
 
 No se muestran IP, hashes de login, tokens ni respuestas académicas.
 
