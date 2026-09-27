@@ -42,7 +42,7 @@ html[data-lms-auth="none"] #loginCard{display:block}
 <section class="card continue-card"><div class="ey">Qué hacer ahora</div><h2 id="nextTitle">Buscando tu siguiente paso…</h2><p id="nextText" class="muted"></p><div id="nextActions" class="actions"></div></section>
 <section class="card"><div class="ey">Hola</div><h2 id="who">Estudiante</h2><p id="role" class="muted"></p><div class="account-tools">
 <a class="btn alt" href="account.html">Mi cuenta</a>
-<a id="teacherCourse" class="btn primary hidden" href="teacher-course.html">Gestor del curso</a><a id="teacherAnalytics" class="btn alt hidden" href="teacher-analytics.html">Analítica</a><a id="teacherQuizzes" class="btn alt hidden" href="teacher-quizzes.html">Quizzes</a><a id="teacherInterop" class="btn alt hidden" href="teacher-interoperability.html">Interoperabilidad</a><a id="teacherOps" class="btn alt hidden" href="admin-operations.html">Operaciones</a><a id="teacherCollaboration" class="btn alt hidden" href="teacher-collaboration.html">Colaboración</a><a id="adminUsers" class="btn alt hidden" href="admin-users.html">Usuarios</a><a id="teacherWall" class="btn accent hidden" href="wall.html?s=9">WALL actual</a>
+<a id="teacherCourse" class="btn primary hidden" href="teacher-course.html">Gestor del curso</a><a id="teacherAnalytics" class="btn alt hidden" href="teacher-analytics.html">Analítica</a><a id="teacherCompetencies" class="btn alt hidden" href="teacher-competencies.html">Competencias</a><a id="teacherQuizzes" class="btn alt hidden" href="teacher-quizzes.html">Quizzes</a><a id="teacherInterop" class="btn alt hidden" href="teacher-interoperability.html">Interoperabilidad</a><a id="teacherOps" class="btn alt hidden" href="admin-operations.html">Operaciones</a><a id="teacherCollaboration" class="btn alt hidden" href="teacher-collaboration.html">Colaboración</a><a id="adminUsers" class="btn alt hidden" href="admin-users.html">Usuarios</a><a id="teacherWall" class="btn accent hidden" href="wall.html?s=9">Panel actual</a>
 </div></section>
 </div>
 
@@ -104,7 +104,7 @@ function renderSessions(){
 function render(){
   setAuthState('verified');bootCard.style.display='none';loginCard.style.display='none';noEnroll.classList.add('hidden');home.classList.remove('hidden');showAuthNav({progress:true});
   const v=model.viewer||{};L.$('who').textContent=v.display_name||v.username;L.$('role').textContent=(v.role==='student'?'Estudiante':'Rol '+v.role)+' · Big Data 2026-2S';
-  if(['teacher','admin'].includes(v.role)){['teacherCourse','teacherAnalytics','teacherQuizzes','teacherInterop','teacherOps','teacherCollaboration','teacherWall','adminUsers','teacherCourseTop'].forEach(id=>L.$(id)?.classList.remove('hidden'));const cs=currentSession();if(cs)L.$('teacherWall').href='wall.html?s='+cs.session_number}
+  if(['teacher','admin'].includes(v.role)){['teacherCourse','teacherAnalytics','teacherCompetencies','teacherQuizzes','teacherInterop','teacherOps','teacherCollaboration','teacherWall','adminUsers','teacherCourseTop'].forEach(id=>L.$(id)?.classList.remove('hidden'));const cs=currentSession();if(cs)L.$('teacherWall').href='wall.html?s='+cs.session_number}
   renderNext();renderSessions();
 }
 async function loadHome(){const result=await Promise.all([L.core('home'),L.session('course_progress')]);model=result[0];progress=result[1];render()}
