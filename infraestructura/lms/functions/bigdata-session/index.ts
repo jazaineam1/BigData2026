@@ -786,8 +786,8 @@ async function courseProgress(ctx:any,run:any){
   return {viewer:ctx.user,run,sessions:rows,generated_at:new Date().toISOString()};
 }
 
-async function competitionAlias(runId:string,userId:string){
-  const h=await sha256(runId+"|competition|"+userId);
+async function competitionAlias(runId:string,sessionNumber:number,userId:string){
+  const h=await sha256(runId+"|competition|"+sessionNumber+"|"+userId);
   return "Jugador "+h.slice(0,4).toUpperCase();
 }
 async function competitionWall(ctx:any,run:any,n:number){
@@ -816,7 +816,7 @@ async function competitionWall(ctx:any,run:any,n:number){
     const total=required.length;
     const progressPct=total?Math.round((completed/total)*100):((p?.status==="completed")?100:0);
     return {
-      alias:await competitionAlias(run.id,userId),
+      alias:await competitionAlias(run.id,n,userId),
       is_me:userId===ctx.user.id,
       status:p?.status||"not_started",
       completed_required:completed,
