@@ -235,7 +235,7 @@ checks=[
     ("módulo no permite marcar dominio manual","Marcar completado" not in session and "completeCheckpoint" not in session),
     ("progreso universal simple","L.session('course_progress')" in student_progress and "Tus trabajos" in student_progress and "Sin empezar" in student_progress and "Snapshots académicos" not in student_progress),
     ("progreso universal privado","data.ranking" not in student_progress and "teacher_wall" not in student_progress and "<pre>" not in student_progress),
-    ("progreso muestra evidencia","focusData" in student_progress and "evidenceCard" in student_progress and "class-wall.html" in student_progress),
+    ("progreso muestra evidencia sin muro abierto","focusData" in student_progress and "evidenceCard" in student_progress and "class-wall.html" not in student_progress),
     ("Colab no recibe token LMS","token=" not in session.lower() and "token=" not in student_progress.lower()),
     ("módulo S09 legado redirige","session.html?" in session_legacy and "p.set('s','9')" in session_legacy and "location.replace" in session_legacy),
     ("progreso S09 legado redirige","progress.html?" in progress_legacy and "p.set('s','9')" in progress_legacy and "location.replace" in progress_legacy),
@@ -260,6 +260,7 @@ checks=[
     ("RRF calculable","function rrfDemo" in deck and "RRF(d) = Σ" in deck),
     ("RRF explica rank_constant","<b>rank_constant</b>" in deck and 'id="rrfK"' in deck and "Elasticsearch el valor predeterminado es 60" in deck),
     ("constructor de evidencia","alternativa_descartada" in deck and "evidencia reproducible" in deck.lower()),
+    ("S09 sin respuestas abiertas","<textarea" not in deck and "¿Qué tan seguro estás?" not in deck and "class-wall.html" not in deck),
     ("notebook suficientemente completo",len(nb.get("cells",[]))>=20),
 ]
 for label,ok in checks:
@@ -272,6 +273,7 @@ for label,ok in [
     ("notebook semántico local","buscar_semantico_local" in nb_text and "embeddings @ q" in nb_text),
     ("notebook Atlas","SearchIndexModel" in nb_text and "$vectorSearch" in nb_text),
     ("notebook evidencia","s09_evidencia_semantica.json" in nb_text and "falso_positivo" in nb_text and "alternativa_descartada" in nb_text),
+    ("notebook evidencia estructurada","RAZONES =" in nb_text and "DECISIONES =" in nb_text and "ALTERNATIVAS =" in nb_text and "LIMITES =" in nb_text and "explica qué relación semántica observaste" not in nb_text),
     ("notebook chunking","def chunk_palabras" in nb_text and "overlap" in nb_text and "ranking_chunks" in nb_text),
     ("notebook ANN y ENN","def buscar_atlas_modo" in nb_text and '"exact"] = True' in nb_text and '"numCandidates"]' in nb_text),
     ("notebook híbrida RRF","def rrf_fusion" in nb_text and "RRF_CONSTANT = 60" in nb_text and "top_hibrido" in nb_text),
@@ -317,7 +319,7 @@ print(" - LAB 1–9 + evaluación embebidos")
 print(" - D1–D5 con primer intento/dominio server-side")
 print(" - exactamente dos recursos visibles")
 print(" - módulo autenticado + reanudación por diapositiva")
-print(" - Wall personal privado + Teacher Wall")
+print(" - Teacher Wall operativo; muro abierto estudiante retirado")
 print(" - SVG/grids contenidos por QA")
 print(" - reset docente protegido/auditado")
 print(" - comparador con procesos SECOP reales y orden didáctico explícito")
