@@ -788,6 +788,7 @@ async function gradeGroupSubmission(ctx:any,run:any,body:any){
   await audit(ctx.user.id,"bigdata.group.grade","group_submission",id,{assignment_id:s.assignment_id,group_id:s.group_id,score});return {ok:true,submission:updated};
 }
 async function createThread(ctx:any,run:any,body:any){
+  requireTeacher(ctx);
   const n=body.session_number===null||body.session_number===""?null:Math.trunc(Number(body.session_number));
   if(n!==null){const {data:s}=await db.from("lms_run_sessions_v2").select("session_number").eq("course_run_id",run.id).eq("session_number",n).maybeSingle();if(!s)throw new Error("Sesión inválida")}
   const assignmentId=clampText(body.assignment_id,80)||null;if(assignmentId){const {data:a}=await db.from("lms_assignments_v2").select("id").eq("id",assignmentId).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Tarea inválida")}
@@ -797,6 +798,7 @@ async function createThread(ctx:any,run:any,body:any){
   return {ok:true,thread:data,post:first};
 }
 async function postDiscussion(ctx:any,run:any,body:any){
+  requireTeacher(ctx);
   const threadId=clampText(body.thread_id,80,true),parentId=clampText(body.parent_id,80)||null;
   const {data:t}=await db.from("lms_discussion_threads_v2").select("*").eq("id",threadId).eq("course_run_id",run.id).maybeSingle();if(!t)throw new Error("Conversación no encontrada");if(t.locked&&!isTeacher(ctx))throw new Error("Esta conversación está cerrada");
   let parent:any=null;
@@ -879,14 +881,11 @@ Deno.serve(async(req:Request)=>{
     if(action==="teacher_add_group_member")return out(req,await addGroupMember(ctx,run,body));
     if(action==="teacher_remove_group_member")return out(req,await removeGroupMember(ctx,run,body));
     if(action==="teacher_save_group_setting")return out(req,await saveGroupSetting(ctx,run,body));
-    if(action==="group_submit")return out(req,await groupSubmit(ctx,run,body));
-    if(action==="confirm_contribution")return out(req,await confirmContribution(ctx,run,body));
     if(action==="teacher_grade_group_submission")return out(req,await gradeGroupSubmission(ctx,run,body));
     if(action==="create_thread")return out(req,await createThread(ctx,run,body));
     if(action==="post_discussion")return out(req,await postDiscussion(ctx,run,body));
     if(action==="teacher_moderate_thread")return out(req,await moderateThread(ctx,run,body));
     if(action==="teacher_pin_answer")return out(req,await pinAnswer(ctx,run,body));
-    if(action==="submit_peer_review")return out(req,await submitPeerReview(ctx,run,body));
     return out(req,{error:"Acción desconocida"},400);
   }catch(e){
     if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);
