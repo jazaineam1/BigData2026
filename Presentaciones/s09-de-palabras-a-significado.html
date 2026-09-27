@@ -263,6 +263,14 @@ function shuffleChallengeOptions(){
 }
 function stepOptionValue(opt){return typeof opt==='object'?String(opt.value??''):String(opt)}
 function stepOptionLabel(opt){return typeof opt==='object'?String(opt.label??opt.value??''):String(opt)}
+function lab9EvidencePanel(lab){
+  if(lab.querySelector('[data-evidence-for="bd-s09-lab9"]'))return;
+  const box=document.createElement('div');box.className='evidence-box';box.dataset.evidenceFor='bd-s09-lab9';
+  const evidence=(s09Model?.evidence||[]).find(e=>e.activity_code==='bd-s09-lab9');
+  const state=evidence?.verdict==='accepted'?'✓ Evidencia aceptada por el docente':evidence?.verdict==='rejected'?'↺ Requiere ajustes: '+String(evidence.feedback||'Revisa el feedback docente.'):evidence?.verdict==='pending_review'?'⏳ Evidencia enviada · pendiente de revisión docente':'Aún no has sincronizado la evidencia final desde Colab.';
+  box.innerHTML='<h4>Evidencia auténtica · LAB 9</h4><p class="mini">La autocomprobación de la presentación no completa esta evidencia. Ejecuta el cuaderno, construye tu consulta y rankings, argumenta tu decisión, alternativa y límite, y envíala con el código del módulo.</p><div class="actions"><a class="btn alt" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb">Abrir cuaderno</a><a class="btn ghost" href="../lms/session.html?s=9">Generar código</a></div><div class="feedback">'+esc(state)+'</div>';
+  lab.appendChild(box);
+}
 function genericEvidencePanel(code,lab,catalog){
   if(lab.querySelector('.evidence-box'))return;
   const steps=Array.isArray(catalog?.steps)?catalog.steps:[],box=document.createElement('div');box.className='evidence-box';box.dataset.evidenceFor=code;
@@ -292,7 +300,9 @@ function renderEvidencePanels(){
   const cats=new Map((s09Model.catalog||[]).map(x=>[x.code,x]));
   Object.entries(LAB_BY_SLIDE).forEach(([slide,code])=>{
     const lab=document.getElementById('s'+slide)?.querySelector('.lab');if(!lab)return;
-    if(code==='bd-s09-lab3')injectLab3Evidence(lab);else if(cats.has(code))genericEvidencePanel(code,lab,cats.get(code));
+    if(code==='bd-s09-lab3')injectLab3Evidence(lab);
+    else if(code==='bd-s09-lab9'&&cats.get(code)?.evaluator==='authentic-review')lab9EvidencePanel(lab);
+    else if(cats.has(code))genericEvidencePanel(code,lab,cats.get(code));
   });
 }
 function wireLabs(){
