@@ -22,7 +22,6 @@ index=read("index.html")
 session=read("lms/session.html")
 progress=read("lms/progress.html")
 wall=read("lms/wall.html")
-class_wall=read("lms/class-wall.html")
 client=read("lms/assets/bigdata-lms.js")
 kit=read("lms/assets/lms-kit.js")
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
@@ -50,22 +49,21 @@ checks=[
     ("course.json declara contrato V5",course.get("version",0)>=12 and "LMS V5" in course.get("tracking_policy","")),
     ("módulo universal", "requireSession(sessionNumber)" in session and "session.html?s=" not in session),
     ("progreso universal", "L.session('course_progress')" in progress and "session.html?s=" in progress),
-    ("WALL universal", "requireSession(sessionNumber,{teacher:true})" in wall),
+    ("panel docente universal", "requireSession(sessionNumber,{teacher:true})" in wall and "Panel docente" in wall),
     ("máximo dos recursos en módulo", "slice(0,2)" in session),
     ("regla SQL máximo dos recursos", "x.rn>2" in evidence_sql and "integrated_support" in evidence_sql),
     ("portada sin recursos externos directos", "colab.research.google.com" not in index and "Marcar revisada" not in index),
     ("runtime único V5", "window.LMS=api" in kit and "lms.bigdata.queue.v1" in kit),
     ("cola limitada", "MAX_QUEUE=500" in kit and "compactQueue" in kit),
-    ("prioriza evidencia", "entry.kind==='evidence'||entry.kind==='wall_post'" in kit),
+    ("prioriza evidencia", "entry.kind==='evidence'" in kit and "wall_post" not in kit),
     ("retry escalonado", "RETRY_MS=[1000,2000,4000,8000,30000]" in kit),
     ("pagehide autenticado usa keepalive", "keepalive:true" in kit and "'Authorization':'Bearer '+auth.token" in kit),
     ("safeNext allowlist", "/BigData2026/Presentaciones/" in client and "/BigData2026/assets/tutoriales/" in client),
     ("idempotencia eventos", "client_event_id" in migration and "bd_lms_events_client_event_uidx" in migration and "client_event_id:eventClientId" in backend),
     ("idempotencia evidencia", "client_evidence_id" in migration and "bd_evidence_client_evidence_uidx" in migration and "client_evidence_id:evidenceClientId" in backend),
-    ("idempotencia muro", "client_post_id" in migration and "bd_wall_posts_client_post_uidx" in migration and "client_post_id:postClientId" in backend),
     ("S09 usa runtime V5", "lms-kit.js?v=20260926-v5" in deck and "K.track('lab_interaction'" in deck and "K.evidence(" in deck),
     ("módulo usa runtime V5", "lms-kit.js?v=20260926-v5" in session and "K.track(" in session),
-    ("muro usa runtime V5", "lms-kit.js?v=20260926-v5" in class_wall and "K.wallPost(" in class_wall),
+    ("muro abierto retirado", not (ROOT/"lms/class-wall.html").exists() and "class-wall.html" not in deck and "class-wall.html" not in progress and "wall_post" not in backend),
     ("bridge de recursos usa runtime V5", "loadKit" in read("lms/assets/resource-bridge.js") and "K.track('guide_opened'" in read("lms/assets/resource-bridge.js")),
     ("12 LAB S09 declarados en presentación", len(labs)==12),
     ("legacy módulo redirige", "session.html?" in legacy_session and "p.set('s','9')" in legacy_session),
@@ -106,7 +104,7 @@ if errors:
 
 print("LMS CONTRACT V5: OK")
 print(f" - {len(visible)} sesiones visibles · {len(sessions)} declaradas")
-print(" - módulo/progreso/WALL universales")
+print(" - módulo/progreso/panel docente universales")
 print(" - máximo dos recursos")
 print(" - runtime offline con retry e idempotencia")
 print(" - rutas S09 legacy son redirects")
