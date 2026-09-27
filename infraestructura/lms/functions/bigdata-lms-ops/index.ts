@@ -358,7 +358,7 @@ async function healthSnapshot(ctx:any,run:any){
   for(const [label,q] of [
     ["sesiones con vencimiento",explicitSessionsQ],["sesiones legacy persistentes",legacyPersistentQ],
     ["sesiones legacy temporales",legacyTemporaryQ],["intentos login",loginTotalQ],["fallos login",loginFailedQ],
-    ["snapshot académico",snapshotQ],["eventos",eventQ],["Realtime",realtimeQ],["retención",orphanQ]
+    ["snapshot académico",snapshotQ],["eventos",eventQ],["Realtime legacy",realtimeQ],["retención",orphanQ]
   ] as any[]){
     if(q?.error)throw new Error("No se pudo consultar "+label+": "+String(q.error.message||q.error));
   }
@@ -375,7 +375,7 @@ async function healthSnapshot(ctx:any,run:any){
     database:{status:"ok",note:"La Edge Function respondió y pudo consultar PostgreSQL."},
     auth:{active_sessions:activeSessions,login_attempts_24h:total,failed_logins_24h:failed,failure_rate_pct:total?Math.round(failed/total*1000)/10:0},
     academic:{events_24h:Number(eventQ.count||0),last_event_at:lastAcademic},
-    realtime:{signals_24h:Number(realtimeQ.count||0),last_signal_at:lastRealtime},
+    realtime:{transport:"broadcast",legacy_signal_rows_24h:Number(realtimeQ.count||0),last_legacy_signal_at:lastRealtime},
     retention:{orphan_candidates_24h:Number(orphanQ.count||0)},
     recovery:{
       rpo_hours:RPO_HOURS,rto_hours:RTO_HOURS,
