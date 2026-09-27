@@ -37,7 +37,7 @@ else:
 checks=[
  ("track no deriva completitud", 'event==="resource_completed"' not in backend and 'event==="evidence_verified"' not in backend and 'event==="session_completed"' not in backend),
  ("answer_challenge usa endpoint dedicado", 'if(action==="answer_challenge")' in backend and '"challenge_answered"' not in (m.group(1) if m else "")),
- ("muro estudiante no expone user_id", "return isTeacher?{...publicPost,user_id:p.user_id}:publicPost" in backend),
+ ("muro estudiante eliminado", not (ROOT/"lms/class-wall.html").exists() and all(x not in backend for x in ['action==="wall_post"','action==="wall_list"','action==="wall_react"','action==="wall_moderate"'])),
  ("S09 define esc local", "const esc=value=>L?.esc" in deck),
  ("S09 activa heartbeat después de autenticar", "K.startHeartbeat('bd-s09-presentation')" in deck),
  ("cola guarda propietario", "owner_id:ownerId" in kit and "entry.owner_id!==owner" in kit),
@@ -74,7 +74,7 @@ if errors:
 
 print("LMS SECURITY V5.1: OK")
 print(" - tracking cliente sin eventos académicos")
-print(" - muro estudiante sin user_id")
+print(" - muro estudiante eliminado; sin endpoints abiertos")
 print(" - cola aislada por usuario y rechazados persistentes")
 print(" - QA detecta pageerror, errores JS y overflow vertical")
 print(" - autenticación BigData aislada: expiración, single-use, rate limit por cuenta y email confirmado")
