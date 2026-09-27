@@ -268,18 +268,21 @@ test('módulo genera código efímero para Colab', async ({ page }) => {
   await assertNoHorizontalOverflow(page,'lab code mobile');
 });
 
-test('LAB 3 registra evidencia sin desbordes', async ({ page }) => {
+test('LAB 3 se autocorrige sin campos abiertos ni desbordes', async ({ page }) => {
+  const seen=[];
   await page.setViewportSize({width:390,height:844});
-  await mockSessionApi(page,'student');
+  await mockSessionApi(page,'student',seen);
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s17');
-  await expect(page.getByText('Registrar evidencia · LAB 3')).toBeVisible();
+  await expect(page.getByText('Comprueba tu aprendizaje · LAB 3')).toBeVisible();
+  await expect(page.locator('#lab3Alternative')).toHaveCount(0);
+  await expect(page.locator('#lab3Limit')).toHaveCount(0);
   await page.locator('#lab3Result').fill('4');
   await page.locator('#lab3Decision').selectOption('mantener');
-  await page.locator('#lab3Alternative').fill('Descarto subir k porque aumentaría candidatos sin mejorar necesariamente la precisión.');
-  await page.locator('#lab3Limit').fill('Me faltan juicios de relevancia humanos para saber si los cinco candidatos realmente responden a la necesidad.');
   await page.locator('#lab3Submit').click();
   await expect(page.getByText(/Resultado verificado/)).toBeVisible();
-  await assertNoHorizontalOverflow(page,'LAB 3 evidence mobile');
+  const evidence=seen.find(x=>x.action==='evidence'&&x.activity_code==='bd-s09-lab3');
+  expect(evidence?.payload).toEqual({result:4,decision:'mantener'});
+  await assertNoHorizontalOverflow(page,'LAB 3 deterministic mobile');
 });
 
 
