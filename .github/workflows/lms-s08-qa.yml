@@ -177,7 +177,7 @@ jobs:
         run: python utils/validate_s09_authentic_evidence.py
       - name: Validar competencias desde evidencia S09
         run: python utils/validate_s09_competency_evidence.py
-      - name: Validar transferencia auténtica S09
+      - name: Validar S09 sin respuestas abiertas
         run: python utils/validate_s09_transfer_evidence.py
       - name: Validar LMS V3
         run: python utils/validate_lms_v3.py
