@@ -39,7 +39,7 @@ El panel `lms/admin-operations.html` expone agregados operativos, no datos sensi
 - sesiones activas;
 - intentos de login y fallos de las últimas 24 h;
 - actividad académica de las últimas 24 h;
-- señales Realtime de las últimas 24 h;
+- transporte Realtime activo (**Broadcast**); la tabla `bd_realtime_signals` queda solo como legado de transición y su cron elimina filas con más de 24 h;
 - archivos pending/abandoned con más de 24 h;
 - último snapshot académico exportado y su antigüedad;
 - el objetivo RPO/RTO declarado, dejando explícito que el estado real del backup administrado de plataforma no se observa desde el LMS.
