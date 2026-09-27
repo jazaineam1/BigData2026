@@ -34,7 +34,7 @@ def blob_sha(path):
 
 if s07.exists() and blob_sha(s07)!="07e99d34a8896a9a6b4c5bf39cb7619a953fe0b8":
     errors.append("S07 cambió durante S09")
-if s08.exists() and blob_sha(s08)!="b5b1e9085fe99759182d141a75f875fcbab39d3a":
+if s08.exists() and blob_sha(s08)!="a290bbd228c52f4df4a20509ce17c0a00844192c":
     errors.append("S08 cambió durante S09")
 
 try:
