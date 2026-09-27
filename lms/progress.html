@@ -11,6 +11,7 @@
 .session-progress-card.focus{border:2px solid var(--uc-cyan);box-shadow:0 8px 26px #0b86891b}.session-progress-card .snum{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:#eef1f5;color:var(--uc-navy);font-weight:950}
 .session-progress-card.done .snum{background:#dff4e8;color:#12633c}
 .evidence-list{display:grid;gap:9px}.evidence-item{border:1px solid var(--line);border-left:4px solid var(--uc-cyan);border-radius:12px;padding:12px;background:#fff}.evidence-item .feedback-text{margin:7px 0 0}
+.competency-list{display:grid;gap:9px}.competency-simple{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.competency-simple p{margin:4px 0 0}.competency-simple .state{font-weight:900}.competency-simple.mastered{border-left:4px solid #16835f}.competency-simple.developing{border-left:4px solid #c38813}.competency-simple.pending{border-left:4px solid #aab1bf}@media(max-width:620px){.competency-simple{grid-template-columns:1fr}}
 @media(max-width:850px){.progress-hero{grid-template-columns:1fr}.session-progress-card{grid-template-columns:50px minmax(0,1fr)}.session-progress-card .stage-action{grid-column:2}}
 @media(max-width:560px){.session-progress-card{padding:11px}.session-progress-card .stage-action{width:100%}}
 </style>
@@ -26,13 +27,18 @@
 <main class="wrap">
 <div id="status" class="status hidden"></div>
 <div class="progress-hero">
-<section><div class="ey">Mi progreso</div><h1>Qué terminaste y qué te falta.</h1><p class="lead">Aquí ves tus sesiones. Abre cualquiera para continuar.</p></section>
+<section><div class="ey">Mi progreso</div><h1>Qué terminaste y qué te falta.</h1><p class="lead">Aquí ves tus sesiones. Abre cualquiera para continuar.</p><div class="actions"><a class="btn alt" href="portfolio.html">Exportar mi portafolio</a></div></section>
 <section class="card"><div class="ey">Resumen</div><div id="metrics" class="detailgrid"></div></section>
 </div>
 
 <section class="card">
 <div class="actions" style="justify-content:space-between;align-items:flex-start"><div><div class="ey">Sesiones</div><h2>Tu recorrido</h2></div><span id="routeCount" class="pill active"></span></div>
 <div id="courseRoute" class="course-route"></div>
+</section>
+
+<section id="competencyCard" class="card hidden">
+<div class="actions" style="justify-content:space-between;align-items:flex-start"><div><div class="ey">Evidencia de aprendizaje</div><h2>Competencias</h2><p class="muted">Solo mostramos si ya existe evidencia suficiente; no añadimos otro tablero de porcentajes.</p></div><a class="btn ghost" href="competencies.html">Ver detalle</a></div>
+<div id="competencyList" class="competency-list"></div>
 </section>
 
 <section id="evidenceCard" class="card hidden">
@@ -45,7 +51,7 @@
 <script>
 (async()=>{'use strict';
 const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status'),focus=Math.trunc(Number(new URLSearchParams(location.search).get('s')||0));
-let course=null,focusData=null;
+let course=null,focusData=null,competencyData=null;
 function renderMetrics(){
   const sessions=course.sessions||[],completed=sessions.filter(s=>s.session_progress?.status==='completed').length,
     started=sessions.filter(s=>s.session_progress&&s.session_progress.status!=='completed').length;
@@ -60,6 +66,18 @@ function renderRoute(){
     return '<article class="session-progress-card '+(done?'done ':'')+(focus===n?'focus':'')+'"><span class="snum">S'+String(n).padStart(2,'0')+'</span><div><h3 style="margin:0 0 4px">'+L.esc(s.title)+'</h3><span class="pill '+(done?'done':p?'progress':'pending')+'">'+state+'</span></div><a class="btn '+(focus===n?'primary':'alt')+' stage-action" href="session.html?s='+n+'">'+(p?'Continuar':'Abrir')+'</a></article>'
   }).join('')||'<p class="muted">No hay sesiones publicadas.</p>';
 }
+function competencyLabel(c){
+  if(c.status==='mastered')return 'Evidencia suficiente ✓';
+  if(c.status==='developing')return 'En progreso';
+  return 'Aún sin evidencia suficiente';
+}
+function renderCompetencies(){
+  const card=L.$('competencyCard'),rows=competencyData?.competencies||[];
+  if(!rows.length){card.classList.add('hidden');return}
+  card.classList.remove('hidden');
+  L.$('competencyList').innerHTML=rows.map(c=>'<article class="competency-simple '+L.esc(c.status||'pending')+'"><div><b>'+L.esc(c.title)+'</b><p class="muted">'+L.esc(c.domain||'Competencia')+' · '+Number(c.evidence_count||0)+' evidencia'+(Number(c.evidence_count||0)===1?'':'s')+'</p></div><span class="state">'+competencyLabel(c)+'</span></article>').join('');
+}
+
 function renderEvidence(){
   const card=L.$('evidenceCard');if(!focusData){card.classList.add('hidden');return}
   card.classList.remove('hidden');
@@ -78,11 +96,12 @@ async function load(){
     const gate=await L.requireBigData();if(!gate)return;
     const results=await Promise.all([
       L.session('course_progress'),
-      focus>0?L.session('me',{session_number:focus}).catch(()=>null):Promise.resolve(null)
+      focus>0?L.session('me',{session_number:focus}).catch(()=>null):Promise.resolve(null),
+      L.core('competencies').catch(()=>({competencies:[]}))
     ]);
-    course=results[0];focusData=results[1];
+    course=results[0];focusData=results[1];competencyData=results[2];
     if(['teacher','admin'].includes(course.viewer?.role))L.$('teacherLink').classList.remove('hidden');
-    renderMetrics();renderRoute();renderEvidence();
+    renderMetrics();renderRoute();renderCompetencies();renderEvidence();
   }catch(e){L.msg(status,e.message,'err')}
 }
 await load();
