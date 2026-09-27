@@ -882,7 +882,7 @@ Deno.serve(async(req:Request)=>{
           await touchActivity(ctx.user.id,run.id,activity,event,false,event!=="lab_interaction");
         }
       }
-      if(["slide_viewed","presentation_opened","notebook_opened","page_closed","lab_interaction"].includes(event))await realtimeSignal(n,"teacher_wall");
+      if(["presentation_opened","notebook_opened","page_closed"].includes(event))await realtimeSignal(n,"teacher_wall");
       return out(req,{ok:true});
     }
     if(action==="answer_challenge"){const result=await answerChallenge(ctx,run,n,String(body.activity_code||""),body.answer,def.activities,body.confidence);await realtimeSignal(n,"progress");return out(req,result)}
