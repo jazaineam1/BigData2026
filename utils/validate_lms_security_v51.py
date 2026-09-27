@@ -55,7 +55,7 @@ checks=[
  ("solicitud pública no enumera matrícula", "Si corresponde, tu solicitud será revisada" in access and "Tu matrícula ya estaba aprobada" not in access),
  ("Big Data usa endpoints propios", all(x in client for x in ["bigdata-auth","bigdata-access-request","bigdata-access-review"]) and "learning-auth" not in client and "learning-access-request" not in client and "learning-access-review" not in client),
  ("Big Data usa solo storage propio", "andesdb.lms.auth" not in client and "LEGACY_STORE" not in client),
- ("review de matrícula es exclusivo BigData", 'const COURSE_CODE = "bigdata"' in review and "BigData2026/lms/access.html" in review and 'source: "bigdata"' in review),
+ ("review de matrícula es exclusivo BigData", 'const COURSE_CODE = "bigdata"' in review and 'source: "bigdata"' in review and '"generate_link"' not in review and "ANDESDB" not in review),
  ("portal evita flash de login", "Cargando tu aula…" in portal and "data-lms-auth" in portal and "setAuthState('stored')" in portal),
  ("WALL excluye heartbeat", '.neq("event_type","heartbeat")' in backend),
  ("atasco se limita a 5-30 min", "meaningfulAge>5&&meaningfulAge<=30" in backend and "present&&" in backend),
@@ -75,7 +75,7 @@ print(" - muro estudiante sin user_id")
 print(" - cola aislada por usuario y rechazados persistentes")
 print(" - QA detecta pageerror, errores JS y overflow vertical")
 print(" - autenticación BigData aislada: expiración, single-use, rate limit por cuenta y email confirmado")
-print(" - solicitud/revisión de matrícula usan endpoints y URLs propias de BigData")
+print(" - solicitud/revisión de matrícula usan endpoints propios de BigData y no emiten enlaces mágicos")
 print(" - acceso público no enumera ni reabre matrículas aprobadas")
 print(" - portal restaura sesión sin flash de login")
 print(" - WALL excluye heartbeats y acota atasco 5–30 min")
