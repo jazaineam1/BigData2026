@@ -5,8 +5,8 @@ import vm from 'node:vm';
 
 const source=fs.readFileSync(new URL('../lms/assets/lms-kit.js',import.meta.url),'utf8');
 
-function harness({online=false,handler}={}){
-  const store=new Map(),sent=[];
+function harness({online=false,handler,user={id:'user-a',username:'user-a',display_name:'QA'}}={}){
+  const store=new Map(),sent=[];let activeUser={...user};
   const localStorage={
     getItem:k=>store.has(k)?store.get(k):null,
     setItem:(k,v)=>store.set(k,String(v)),
@@ -14,7 +14,7 @@ function harness({online=false,handler}={}){
   };
   const base={
     API:'https://example.test/functions/v1',
-    auth:()=>({token:'token-test',user:{display_name:'QA'}}),
+    auth:()=>({token:'token-test-'+activeUser.id,user:activeUser}),
     requireSession:async n=>({viewer:{display_name:'QA'},session:{session_number:n}}),
     session:async(action,payload)=>{
       sent.push({action,payload});
@@ -43,7 +43,7 @@ function harness({online=false,handler}={}){
   };
   context.globalThis=context;context.window.window=context.window;context.window.LMS=undefined;
   vm.createContext(context);vm.runInContext(source,context);
-  return {LMS:context.window.LMS,context,store,sent,listeners};
+  return {LMS:context.window.LMS,context,store,sent,listeners,setUser:u=>{activeUser={...u}}};
 }
 
 test('track offline queda en cola y luego se sincroniza con client_event_id',async()=>{
@@ -120,4 +120,58 @@ test('la cola respeta el máximo de 500 incluso si todas las entradas son durabl
   const h=harness({online:false});
   for(let i=0;i<505;i++) await h.LMS.evidence('bd-s09-lab3',{result:i,decision:'mantener'});
   assert.equal(h.LMS.queueSize(),h.LMS.MAX_QUEUE);
+});
+
+
+test('la cola no cruza evidencia entre usuarios del mismo navegador',async()=>{
+  const h=harness({online:false,user:{id:'user-a',username:'a',display_name:'Ana'}});
+  await h.LMS.evidence('bd-s09-lab3',{result:4,decision:'mantener'});
+  const queued=JSON.parse(h.store.get(h.LMS.QUEUE_KEY));
+  assert.equal(queued[0].owner_id,'user-a');
+
+  h.setUser({id:'user-b',username:'b',display_name:'Carlos'});
+  h.context.navigator.onLine=true;
+  const result=await h.LMS.flush();
+  assert.equal(result.sent,0);
+  assert.equal(h.sent.length,0);
+  assert.equal(h.LMS.queueSize(),1);
+
+  h.setUser({id:'user-a',username:'a',display_name:'Ana'});
+  const flushed=await h.LMS.flush();
+  assert.equal(flushed.sent,1);
+  assert.equal(h.LMS.queueSize(),0);
+  assert.equal(h.sent[0].action,'evidence');
+});
+
+test('una evidencia rechazada queda disponible en LMS.rejected()',async()=>{
+  const h=harness({online:true,handler:async()=>{
+    const e=new Error('El límite debe tener al menos 40 caracteres');e.status=400;throw e;
+  }});
+  await assert.rejects(
+    h.LMS.evidence('bd-s09-lab3',{result:4,decision:'mantener',limit:'corto'}),
+    /40 caracteres/
+  );
+
+  h.context.navigator.onLine=false;
+  await h.LMS.evidence('bd-s09-lab3',{result:4,decision:'mantener',limit:'corto'});
+  h.context.navigator.onLine=true;
+  await h.LMS.flush();
+  const rejected=h.LMS.rejected();
+  assert.equal(rejected.length,1);
+  assert.equal(rejected[0].kind,'evidence');
+  assert.match(rejected[0].error_message,/40 caracteres/);
+  assert.equal(h.LMS.queueSize(),0);
+});
+
+test('entradas legacy sin propietario no se envían y quedan rechazadas',async()=>{
+  const h=harness({online:false});
+  h.store.set(h.LMS.QUEUE_KEY,JSON.stringify([{
+    id:'legacy-0001',kind:'evidence',payload:{session_number:9,activity_code:'bd-s09-lab3',payload:{result:4}},
+    attempts:0,created_at_ms:1
+  }]));
+  h.context.navigator.onLine=true;
+  await h.LMS.flush();
+  assert.equal(h.sent.length,0);
+  assert.equal(h.LMS.queueSize(),0);
+  assert.equal(h.LMS.rejected()[0].reject_reason,'unscoped_legacy');
 });
