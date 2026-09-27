@@ -107,6 +107,51 @@ async function ownEvidence(userId:string,runId:string,n:number){
   return data||[];
 }
 const TRANSFER_REVIEW_CODES=new Set(["bd-s09-lab3","bd-s09-lab4","bd-s09-lab8"]);
+const LAB9_STRUCTURED={
+  reason:[
+    "Las señales lexical y semántica aportan información complementaria.",
+    "La coincidencia exacta de términos fue decisiva en este caso.",
+    "La cercanía semántica recuperó mejor la intención aunque cambió el vocabulario."
+  ],
+  decision:[
+    "Priorizar recuperación lexical.",
+    "Priorizar recuperación semántica.",
+    "Usar recuperación híbrida mediante fusión de rankings."
+  ],
+  rejected_alternative:[
+    "Descarto usar solo lexical porque puede perder paráfrasis.",
+    "Descarto usar solo semántica porque puede perder coincidencias exactas.",
+    "Descarto sumar scores crudos porque no comparten una escala comparable."
+  ],
+  limit:[
+    "La evaluación depende de juicios de relevancia sobre solo cinco resultados.",
+    "El resultado puede cambiar con otra consulta o con otro corpus.",
+    "El resultado depende del modelo de embeddings utilizado."
+  ]
+};
+const TRANSFER_ALLOWED:Record<string,Record<string,string[]>>={
+  "bd-s09-lab3":{
+    result:["El Top-5 concentra suficientes candidatos relevantes","El Top-5 deja demasiados candidatos relevantes fuera"],
+    decision:["Mantendría k=5 para esta necesidad","Aumentaría k para revisar más vecinos"],
+    rejected_alternative:["Descarto aumentar k porque añade revisión innecesaria","Descarto mantener k=5 porque limita demasiado el recall"],
+    interpretation:["El valor de k controla cuántos vecinos se revisan, no la relevancia por sí sola","Más vecinos no significa automáticamente mejores resultados"],
+    limit:["La conclusión depende de los juicios de relevancia del Top-5","El resultado puede cambiar con otra consulta o embedding"]
+  },
+  "bd-s09-lab4":{
+    result:["BM25 recuperó mejor la coincidencia exacta del caso","La búsqueda semántica recuperó mejor la intención del caso","Los dos mecanismos aportaron señales complementarias"],
+    decision:["Priorizaría recuperación lexical","Priorizaría recuperación semántica","Usaría una estrategia híbrida"],
+    rejected_alternative:["Descarto solo lexical porque pierde paráfrasis","Descarto solo semántica porque puede perder identificadores exactos","Descarto usar un único mecanismo porque las señales son complementarias"],
+    interpretation:["Lexical prioriza coincidencia de términos y semántica cercanía de representación","Los scores de ambos mecanismos no son probabilidades comparables directamente"],
+    limit:["El ranking depende de la consulta y del corpus usado","La evaluación requiere juicios de relevancia y no solo mirar el score"]
+  },
+  "bd-s09-lab8":{
+    result:["RRF cambió el orden al combinar posiciones de ambos rankings","RRF mantuvo en cabeza documentos apoyados por ambos rankings"],
+    decision:["Usaría RRF para combinar los rankings","Mantendría los rankings separados para este caso"],
+    rejected_alternative:["Descarto sumar scores crudos porque sus escalas no son equivalentes","Descarto elegir un único ranking porque perdería señal complementaria"],
+    interpretation:["RRF fusiona posiciones y no necesita comparar scores crudos","Un documento respaldado por varios rankings puede subir de posición"],
+    limit:["El parámetro de fusión puede cambiar el orden final","La fusión no reemplaza la evaluación de relevancia"]
+  }
+};
 async function submitEvidence(userId:string,runId:string,n:number,activity:any,payload:any,source:string,rawClientId:any=null){
   if(!activity||activity.kind!=="lab")throw new Error("La actividad no es un laboratorio");
   const evidenceClientId=clientId(rawClientId,"client_evidence_id");
@@ -137,13 +182,15 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     const selfVerified=selfProgress?.metadata?.self_check_verified===true||
       selfProgress?.metadata?.evidence_verdict==="correct"||selfProgress?.status==="completed";
     if(!selfVerified)throw new Error("Completa primero la autocomprobación del LAB antes de enviar la transferencia.");
-    normalized.result=trimText(payload?.result,12,900,"El resultado observado");
-    normalized.decision=trimText(payload?.decision,12,700,"La decisión");
-    normalized.rejected_alternative=trimText(payload?.rejected_alternative,12,700,"La alternativa descartada");
-    normalized.interpretation=trimText(payload?.interpretation,12,900,"La interpretación");
-    normalized.limit=trimText(payload?.limit,12,700,"El límite");
+    const allowed=TRANSFER_ALLOWED[activity.code];
+    if(!allowed)throw new Error("Evidencia estructurada no configurada");
+    for(const key of ["result","decision","rejected_alternative","interpretation","limit"]){
+      const value=String(payload?.[key]||"");
+      if(!allowed[key]?.includes(value))throw new Error("Selecciona una opción válida en "+key);
+      normalized[key]=value;
+    }
     verdict="pending_review";
-    feedback="Transferencia recibida. Está pendiente de revisión docente con rúbrica.";
+    feedback="Evidencia estructurada recibida. Está pendiente de revisión docente.";
   }else if(catalog.evaluator==="seeded-numeric"&&catalog.config?.generator==="s09_topk_aero_count"){
     const k=Number(catalog.config?.k||5),expected=s09TopKProfile(seed,k).count,result=Number(payload?.result);
     if(!Number.isFinite(result))throw new Error("Registra el resultado numérico obtenido");
@@ -174,10 +221,12 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     const defensible=Array.isArray(payload?.defensible_results)?payload.defensible_results.map((x:any)=>String(x||"").trim()).filter(Boolean):[];
     if(defensible.length!==2||defensible.some((x:string)=>x.length<3||x.length>220))throw new Error("Registra exactamente dos resultados defendibles");
     const falsePositive=trimText(payload?.false_positive,3,220,"El falso positivo");
-    const reason=trimText(payload?.reason,12,900,"La razón");
-    const decision=trimText(payload?.decision,12,600,"La decisión");
-    const rejected=trimText(payload?.rejected_alternative,12,600,"La alternativa descartada");
-    const limit=trimText(payload?.limit,12,600,"El límite");
+    const reason=String(payload?.reason||""),decision=String(payload?.decision||""),
+      rejected=String(payload?.rejected_alternative||""),limit=String(payload?.limit||"");
+    if(!LAB9_STRUCTURED.reason.includes(reason))throw new Error("Selecciona una razón válida");
+    if(!LAB9_STRUCTURED.decision.includes(decision))throw new Error("Selecciona una decisión válida");
+    if(!LAB9_STRUCTURED.rejected_alternative.includes(rejected))throw new Error("Selecciona una alternativa válida");
+    if(!LAB9_STRUCTURED.limit.includes(limit))throw new Error("Selecciona un límite válido");
     const ids=(value:any,label:string)=>{
       const xs=Array.isArray(value)?value.map((x:any)=>String(x||"").trim()).filter(Boolean):[];
       if(!xs.length||xs.length>5||xs.some((x:string)=>x.length>120))throw new Error("Revisa "+label);
@@ -465,7 +514,7 @@ async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:an
   const summary=await recomputeSession(ctx.user.id,run.id,n,activities);
   return {ok:true,correct,attempts,first_attempt_correct:firstAttempt,mastery,hint:correct?null:key.hint,...summary};
 }
-async function realtimeSignal(n:number,scope:"controls"|"progress"|"teacher_wall"){
+async function realtimeSignal(n:number,scope:"controls"|"wall"|"progress"|"teacher_wall"){
   try{
     const base=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if(!base||!key)return false;
@@ -750,7 +799,7 @@ async function competitionWall(ctx:any,run:any,n:number){
   failIf(enrollmentError,"No se pudo cargar la cohorte");
   const ids=(enrollments||[]).map((x:any)=>String(x.user_id));
   const [{data:sessionRows,error:sessionError},{data:activityRows,error:activityError}]=await Promise.all([
-    ids.length?db.from("bd_lms_session_progress").select("user_id,status").eq("course_run_id",run.id).eq("session_number",n).in("user_id",ids):Promise.resolve({data:[],error:null} as any),
+    ids.length?db.from("bd_lms_session_progress").select("user_id,status,score,max_score").eq("course_run_id",run.id).eq("session_number",n).in("user_id",ids):Promise.resolve({data:[],error:null} as any),
     ids.length&&requiredCodes.length?db.from("bd_lms_activity_progress").select("user_id,activity_code,status").eq("course_run_id",run.id).in("user_id",ids).in("activity_code",requiredCodes):Promise.resolve({data:[],error:null} as any)
   ]);
   failIf(sessionError,"No se pudo cargar el progreso del grupo");
@@ -762,7 +811,9 @@ async function competitionWall(ctx:any,run:any,n:number){
   }
   const rows=await Promise.all(ids.map(async(userId)=>{
     const aps=byUser.get(userId)||[],p:any=spm.get(userId)||null;
-    const completed=aps.filter((x:any)=>x.status==="completed").length,total=required.length;
+    const completed=aps.filter((x:any)=>x.status==="completed").length;
+    const attempted=aps.length;
+    const total=required.length;
     const progressPct=total?Math.round((completed/total)*100):((p?.status==="completed")?100:0);
     return {
       alias:await competitionAlias(run.id,n,userId),
@@ -770,7 +821,7 @@ async function competitionWall(ctx:any,run:any,n:number){
       status:p?.status||"not_started",
       completed_required:completed,
       required_total:total,
-      attempted_required:aps.length,
+      attempted_required:attempted,
       progress_pct:progressPct
     };
   }));
@@ -789,7 +840,7 @@ async function competitionWall(ctx:any,run:any,n:number){
     ranking:rows,
     viewer_rank:viewer?.position||null,
     generated_at:new Date().toISOString(),
-    privacy:{identity:"session_alias",open_responses:false,speed_tiebreak:false}
+    privacy:{identity:"alias",open_responses:false,speed_tiebreak:false}
   };
 }
 
@@ -819,7 +870,7 @@ Deno.serve(async(req:Request)=>{
   try{
     if(action==="course_progress")return out(req,await courseProgress(ctx,run));
     if(action==="competition_wall"){const u=req.method==="GET"?new URL(req.url):null;const cn=req.method==="GET"?sessionNumber(u!.searchParams.get("session_number")||u!.searchParams.get("s")):sessionNumber(body.session_number);return out(req,await competitionWall(ctx,run,cn));}
-    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","teacher_set_control","teacher_clear_control","teacher_review_evidence"].includes(action);
+    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","wall_moderate","teacher_set_control","teacher_clear_control","teacher_review_evidence"].includes(action);
     const def=await definition(run.id,n,teacher),codes=def.activities.map((a:any)=>a.code);
     if(action==="me"){
       const [p,cat,evidence]=await Promise.all([
