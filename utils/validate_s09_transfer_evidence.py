@@ -11,6 +11,7 @@ checks=[
  ("LAB3/4/8 conservan autocomprobación", "set evaluator=" not in migration.lower() and all(x in migration for x in ["bd-s09-lab3","bd-s09-lab4","bd-s09-lab8"])),
  ("config exige transferencia", "'requires_transfer', true" in migration and "transfer_requires_review" in migration),
  ("progreso previo se conserva como self-check", "self_check_verified" in migration and "completion_semantics" in migration and "accepted_transfer" in migration),
+ ("sesión se reconcilia", "update public.bd_lms_session_progress" in migration and "p.activity_code='bd-s09-lab3'" in migration and "completed_at=null" in migration),
  ("transferencia no borra historial", "delete from public.bd_lms_activity_progress" not in migration.lower()),
  ("backend separa transfer", 'source==="presentation-transfer"' in backend and "TRANSFER_REVIEW_CODES" in backend),
  ("transfer usa step_id propio", 'step_id:transferMode?"transfer":"submission"' in backend),
