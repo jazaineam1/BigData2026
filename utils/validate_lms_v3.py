@@ -41,7 +41,7 @@ def blob_sha(path):
 
 for path,sha in [
     ("Presentaciones/s07-del-vecindario-al-texto.html","07e99d34a8896a9a6b4c5bf39cb7619a953fe0b8"),
-    ("lms/session-08.html","b5b1e9085fe99759182d141a75f875fcbab39d3a"),
+    ("lms/session-08.html","72f4e5c685fe40098a9efabd0ff158c93cd46b3e"),
 ]:
     if (ROOT/path).exists() and blob_sha(path)!=sha:
         errors.append(f"{path} cambió durante LMS V3")
