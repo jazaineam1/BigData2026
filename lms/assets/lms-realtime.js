@@ -28,13 +28,13 @@ async function subscribe({session_number,scopes=[],onSignal=()=>{},onStatus=()=>
   try{
     sb=await client();
     if(closed)return()=>{};
-    const name='bigdata-'+n+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
-    channel=sb.channel(name)
-      .on('postgres_changes',{
-        event:'INSERT',schema:'public',table:'bd_realtime_signals',
-        filter:'session_number=eq.'+n
-      },payload=>{
-        const scope=String(payload?.new?.scope||'');
+    const topic='bigdata:session:'+n;
+    channel=sb.channel(topic,{config:{private:false}})
+      .on('broadcast',{event:'invalidate'},message=>{
+        const payload=message?.payload||{};
+        if(String(payload.course_code||'')!=='bigdata')return;
+        if(Math.trunc(Number(payload.session_number))!==n)return;
+        const scope=String(payload.scope||'');
         if(!wanted.size||wanted.has(scope))onSignal({scope,payload});
       })
       .subscribe(status=>onStatus(status));
@@ -46,5 +46,5 @@ async function subscribe({session_number,scopes=[],onSignal=()=>{},onStatus=()=>
     try{if(sb&&channel)await sb.removeChannel(channel)}catch{}
   };
 }
-window.LMSRealtime={version:'1.1.0',sdk_version:CLIENT_VERSION,subscribe};
+window.LMSRealtime={version:'2.0.0',transport:'broadcast',sdk_version:CLIENT_VERSION,subscribe};
 })();
