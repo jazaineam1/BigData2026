@@ -42,7 +42,7 @@ insert into public.lms_run_sessions_v2
 select id,9,
   'Cuando las palabras no coinciden: búsqueda semántica y bases vectoriales',
   'Presentación-laboratorio al estilo S07: definiciones antes de uso, gráficos, desafíos con primer intento/dominio, comparación BM25 vs semantic search, índices vectoriales y MongoDB Atlas Vector Search.',
-  'visible','session-09.html','2026-10-01 23:00:00+00',9,
+  'visible','session-09.html','2026-10-08 23:00:00+00',9,
   '{"pda":"Introducción a bases de datos vectoriales","product":"Ejercicio en Colab de búsquedas semánticas","graded":false,"tracked":true}'::jsonb,
   now(),now()
 from run
