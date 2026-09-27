@@ -6,6 +6,9 @@ test.beforeEach(async ({ page }) => {
   const errors=[];
   runtimeErrors.set(page,errors);
   page.on('pageerror', err => errors.push('pageerror: '+err.message));
+  page.on('console', msg => {
+    if(msg.type()==='error' && /ReferenceError|TypeError|SyntaxError|Uncaught/i.test(msg.text())) errors.push('console: '+msg.text());
+  });
 });
 test.afterEach(async ({ page }, testInfo) => {
   const errors=runtimeErrors.get(page)||[];
@@ -91,7 +94,7 @@ async function assertActiveSlideContained(page, label) {
 
 async function mockAuth(page, role='student') {
   await page.addInitScript(({role}) => {
-    localStorage.setItem('andesdb.lms.auth.v1',JSON.stringify({
+    localStorage.setItem('lms.bigdata.v2',JSON.stringify({
       token:'qa-token',expires_at:'2099-12-31T23:59:59Z',auth_session_id:'qa',
       user:{id:'00000000-0000-0000-0000-000000000001',username:'qa',display_name:'Estudiante QA',role}
     }));
@@ -386,4 +389,45 @@ test('estudiante puede cambiar contraseña desde Mi cuenta', async ({ page }) =>
   await expect(page.getByText('Windows · Chrome')).toBeVisible();
   await assertNoHorizontalOverflow(page,'account mobile');
   await assertA11y(page,'account');
+});
+
+
+test('portal no muestra login mientras restaura una sesión válida', async ({ page }) => {
+  await page.addInitScript(() => {
+    const auth={token:'token-stored',expires_at:'2099-12-31T23:59:59Z',auth_session_id:'stored',
+      user:{id:'00000000-0000-0000-0000-000000000001',username:'qa',display_name:'Estudiante QA',role:'student'}};
+    localStorage.setItem('lms.bigdata.v2',JSON.stringify(auth));
+    localStorage.setItem('andesdb.lms.auth.v1',JSON.stringify({token:'andesdb-token',user:{id:'andes-user'}}));
+  });
+  const delay=ms=>new Promise(r=>setTimeout(r,ms));
+  await page.route('**/functions/v1/bigdata-lms-core**', async route => {
+    await delay(600);
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      viewer:{id:'00000000-0000-0000-0000-000000000001',username:'qa',display_name:'Estudiante QA',role:'student'},
+      assignments:[],sessions:[],announcements:[]
+    })});
+  });
+  await page.route('**/functions/v1/bigdata-session**', async route => {
+    await delay(600);
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      viewer:{id:'00000000-0000-0000-0000-000000000001',username:'qa',display_name:'Estudiante QA',role:'student'},
+      sessions:[{session_number:9,title:'Búsqueda semántica',summary:'Sesión 9',status:'visible',session_progress:{status:'in_progress'}}]
+    })});
+  });
+  await page.goto('/lms/portal.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#loginCard')).toBeHidden();
+  await expect(page.locator('#bootCard')).toBeVisible();
+  await expect(page.getByText('Cargando tu aula…')).toBeVisible();
+  await expect(page.locator('#home')).toBeVisible({timeout:3000});
+  await expect(page.locator('#bootCard')).toBeHidden();
+  const andes=await page.evaluate(()=>localStorage.getItem('andesdb.lms.auth.v1'));
+  expect(andes).toContain('andesdb-token');
+});
+
+test('portal sin sesión muestra login directamente y no navegación autenticada', async ({ page }) => {
+  await page.goto('/lms/portal.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#loginCard')).toBeVisible();
+  await expect(page.locator('#bootCard')).toBeHidden();
+  await expect(page.locator('#progressTop')).toBeHidden();
+  await expect(page.locator('#accountTop')).toBeHidden();
 });
