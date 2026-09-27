@@ -167,9 +167,9 @@
       "path": "quizzes.html"
     },
     {
-      "code": "progress_s09",
+      "code": "progress_current",
       "title": "Mi progreso",
-      "path": "progress.html?s=9"
+      "path": "progress.html?s=8"
     }
   ]
 }
