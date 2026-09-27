@@ -271,7 +271,7 @@ for label,ok in [
     ("notebook baseline lexical","BM25Okapi" in nb_text and "buscar_lexical" in nb_text),
     ("notebook semántico local","buscar_semantico_local" in nb_text and "embeddings @ q" in nb_text),
     ("notebook Atlas","SearchIndexModel" in nb_text and "$vectorSearch" in nb_text),
-    ("notebook evidencia","s09_evidencia_semantica.json" in nb_text and "falso_positivo" in nb_text and "alternativa_descartada" in nb_text),
+    ("notebook evidencia estructurada","s09_evidencia_semantica.json" in nb_text and "QUERY_ID" in nb_text and "ALTERNATIVA_DESCARTADA" in nb_text and "LIMIT_CODE" in nb_text and "resultado_defendible_1" not in nb_text),
     ("notebook chunking","def chunk_palabras" in nb_text and "overlap" in nb_text and "ranking_chunks" in nb_text),
     ("notebook ANN y ENN","def buscar_atlas_modo" in nb_text and '"exact"] = True' in nb_text and '"numCandidates"]' in nb_text),
     ("notebook híbrida RRF","def rrf_fusion" in nb_text and "RRF_CONSTANT = 60" in nb_text and "top_hibrido" in nb_text),
