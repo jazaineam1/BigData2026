@@ -87,6 +87,18 @@ La rúbrica va **en el cuaderno**, con niveles observables y no adjetivos. Nunca
 
 **Cómo sabes que se logró:** dos personas calificando el mismo trabajo con esa rúbrica llegarían a la misma nota.
 
+### No usar respuestas abiertas del estudiante en la interfaz
+
+En este curso, **la interfaz del estudiante no pide texto libre como respuesta**. No crees muros de publicación, foros evaluables, cajas de reflexión, textareas de “explica por qué”, justificaciones abiertas ni pasos de confianza/metacognición. Si el estudiante debe tomar una decisión, exprésala con controles estructurados —opciones, booleanos, selección de estrategia, resultados calculados, archivos o trazas verificables— y deriva lo que pueda derivarse de la ejecución.
+
+- Una autocomprobación usa opciones cerradas y feedback inmediato.
+- Una evidencia evaluable se apoya en resultados, artefactos, manifest, rankings, métricas, elecciones estructuradas o trazas.
+- El **feedback del docente sí puede ser texto libre**: esta regla aplica a las respuestas solicitadas al estudiante.
+- No añadas una página nueva solo para recoger una respuesta que ya puede derivarse del cuaderno o del artefacto.
+- Si una futura actividad realmente requiere redacción del estudiante, solo se incorpora cuando el usuario lo pida explícitamente.
+
+**Cómo sabes que se logró:** el estudiante puede completar el flujo académico sin encontrar un textarea de respuesta, un “publica tu aporte” ni una justificación abierta adicional.
+
 ### Preguntas de autoevaluación
 
 No hay número obligatorio. La regla es de **cobertura**: cada bloque que el estudiante deba poder defender tiene al menos una pregunta, y ninguna se agrega para llegar a una cifra.
