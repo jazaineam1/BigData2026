@@ -3,7 +3,7 @@ import json
 
 ROOT=Path(__file__).resolve().parents[1]
 course=json.loads((ROOT/"lms/data/course.json").read_text(encoding="utf-8"))
-portal=(ROOT/"lms/portal.html").read_text(encoding="utf-8")
+portal=(ROOT/"lms/portal.html").read_text(encoding="utf-8")\nmodule=(ROOT/"lms/session.html").read_text(encoding="utf-8")
 sql=(ROOT/"infraestructura/lms/lms-calendar-october-2026.sql").read_text(encoding="utf-8")
 
 sessions={int(x["n"]):x for x in course["sessions"]}
@@ -15,6 +15,7 @@ checks=[
  ("portal elige próxima si aún no inicia", "if(scheduled.length)return scheduled[0]" in portal),
  ("portal muestra horario de clase", "function classTime(s)" in portal and "America/Bogota" in portal),
  ("entrega de misma sesión no desplaza taller", "Number(x.session_number)!==Number(s?.session_number)" in portal),
+ ("módulo identifica taller sin tarjeta extra", "meta.class_kind==='assessment_workshop'" in module and " · Taller" in module and "meta.class_date" in module),
  ("migración S08 1 oct 18h Bogotá", "2026-10-01T23:00:00Z" in sql and "session_number=8" in sql),
  ("migración S09 8 oct 18h Bogotá", "2026-10-08T23:00:00Z" in sql and "session_number=9" in sql),
  ("migración documenta timezone", "America/Bogota" in sql),
