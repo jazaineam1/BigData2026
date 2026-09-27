@@ -751,7 +751,7 @@ async function teacherStudentDetail(ctx:any,run:any,n:number,userId:string){
     db.from("bd_lms_session_progress").select("*").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).maybeSingle(),
     codes.length?db.from("bd_lms_activity_progress").select("*").eq("user_id",userId).eq("course_run_id",run.id).in("activity_code",codes).order("updated_at",{ascending:false}):Promise.resolve({data:[]} as any),
     db.from("bd_lms_events").select("event_type,activity_code,metadata,client_at,created_at").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).neq("event_type","heartbeat").order("created_at",{ascending:false}).limit(250),
-    db.from("bd_evidence").select("id,activity_code,payload,source,verdict,feedback,created_at").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).order("created_at",{ascending:false}).limit(100)
+    db.from("bd_evidence").select("id,activity_code,payload,source,verdict,feedback,created_at,reviewed_by,reviewed_at,rubric").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).order("created_at",{ascending:false}).limit(100)
   ]);
   return {viewer:ctx.user,run,session:def.session,user,session_progress,activity_progress:activity_progress||[],events:events||[],evidence:evidence||[],activities:def.activities};
 }
