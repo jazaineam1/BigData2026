@@ -98,7 +98,7 @@ if errors:
 print("EVALUACION AVANZADA: OK")
 print(" - archivo privado firmado")
 print(" - banco versionado + quizzes")
-print(" - autocalificación + revisión manual")
+print(" - autocalificación objetiva sin respuestas abiertas")
 print(" - rúbricas reutilizables")
 print(" - Gradebook sincronizado")
 print(" - S07 intacta y TC1 V4 preservado")
