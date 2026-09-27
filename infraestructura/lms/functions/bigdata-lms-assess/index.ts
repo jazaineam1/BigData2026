@@ -49,10 +49,10 @@ async function current(req:Request){
   const token=bearer(req);if(!token)return null;
   const tokenHash=await sha256(token);
   const {data:s}=await db.from("lms_auth_sessions")
-    .select("id,user_id,expires_at,revoked_at,persistent")
+    .select("id,user_id,expires_at,revoked_at,persistent,created_at")
     .eq("token_hash",tokenHash).is("revoked_at",null).maybeSingle();
   if(!s)return null;
-  if(!s.persistent&&(!s.expires_at||Date.parse(s.expires_at)<=Date.now()))return null;
+  const deadline=s.expires_at?Date.parse(s.expires_at):(Date.parse(s.created_at)+(s.persistent?30:1)*24*3600_000);if(!Number.isFinite(deadline)||deadline<=Date.now())return null;
   const {data:u}=await db.from("lms_users")
     .select("id,username,display_name,role,active,email")
     .eq("id",s.user_id).eq("active",true).maybeSingle();
