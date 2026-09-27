@@ -160,13 +160,19 @@ for (const vp of viewports) {
     await page.setViewportSize({width:vp.width,height:vp.height});
     await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?preview=1#s1');
     await page.waitForLoadState('domcontentloaded');
+    const issues=[];
     for(let i=1;i<=35;i++){
       await page.evaluate(n=>{location.hash='#s'+n},i);
       await page.waitForTimeout(60);
-      await assertNoHorizontalOverflow(page,'S09 '+vp.name+' slide '+i);
-      await assertVisibleSvgContained(page,'S09 '+vp.name+' slide '+i);
-      await assertActiveSlideContained(page,'S09 '+vp.name+' slide '+i);
+      for(const check of [
+        ()=>assertNoHorizontalOverflow(page,'S09 '+vp.name+' slide '+i),
+        ()=>assertVisibleSvgContained(page,'S09 '+vp.name+' slide '+i),
+        ()=>assertActiveSlideContained(page,'S09 '+vp.name+' slide '+i)
+      ]){
+        try{await check()}catch(e){issues.push('S'+String(i).padStart(2,'0')+' · '+String(e.message||e).split('\n')[0])}
+      }
     }
+    expect(issues,'S09 '+vp.name+' problemas de contención/fit').toEqual([]);
   });
 }
 
