@@ -163,11 +163,6 @@
       "path": "portal.html"
     },
     {
-      "code": "collaboration",
-      "title": "Colaboración",
-      "path": "collaboration.html"
-    },
-    {
       "code": "quizzes",
       "title": "Quizzes",
       "path": "quizzes.html"
