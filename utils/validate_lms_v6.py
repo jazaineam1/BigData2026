@@ -7,6 +7,7 @@ def read(path):
 
 backend=read("infraestructura/lms/functions/bigdata-session/index.ts")
 migration=read("infraestructura/lms/lms-v6-live-controls.sql")
+broadcast_migration=read("infraestructura/lms/lms-realtime-broadcast-v10.sql")
 realtime=read("lms/assets/lms-realtime.js")
 teacher=read("lms/wall.html")
 wall=read("lms/class-wall.html")
@@ -20,8 +21,8 @@ checks=[
     ("señal Realtime sin PII", "create table if not exists public.bd_realtime_signals" in migration and "course_code" in migration and "scope" in migration and "user_id" not in migration.split("create table if not exists public.bd_realtime_signals",1)[1].split(");",1)[0]),
     ("mínimo privilegio Realtime", "revoke all on table public.bd_realtime_signals from anon, authenticated" in migration and "grant select on table public.bd_realtime_signals to anon, authenticated" in migration),
     ("controles sin acceso directo", "bd_session_controls_no_direct_access" in migration and "using (false)" in migration and "with check (false)" in migration),
-    ("publicación Realtime", "alter publication supabase_realtime add table public.bd_realtime_signals" in migration),
-    ("cliente Realtime fijado", "CLIENT_VERSION='2.117.1'" in realtime and "window.supabase?.createClient" in realtime and "postgres_changes" in realtime and "bd_realtime_signals" in realtime),
+    ("transporte Realtime V10", "alter publication supabase_realtime add table public.bd_realtime_signals" in migration and "alter publication supabase_realtime drop table public.bd_realtime_signals" in broadcast_migration.lower()),
+    ("cliente Realtime fijado", "CLIENT_VERSION='2.117.1'" in realtime and "window.supabase?.createClient" in realtime and ".on('broadcast',{event:'signal'}" in realtime and "postgres_changes" not in realtime),
     ("sin código remoto Realtime en runtime", "esm.sh" not in realtime and "cdn.jsdelivr" not in realtime and "unpkg.com" not in realtime),
     ("SDK local cargado en superficies Realtime", "assets/vendor/supabase.js?v=2.117.1" in teacher and "assets/vendor/supabase.js?v=2.117.1" in wall and "../lms/assets/vendor/supabase.js?v=2.117.1" in deck),
     ("build fija SDK 2.117.1", all("@supabase/supabase-js@2.117.1" in x and "supabase.js" in x for x in [pages,visual])),
