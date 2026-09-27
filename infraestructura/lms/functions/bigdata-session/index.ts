@@ -567,10 +567,22 @@ async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:an
 }
 async function realtimeSignal(n:number,scope:"controls"|"wall"|"progress"|"teacher_wall"){
   try{
-    const {error}=await db.from("bd_realtime_signals").insert({
-      course_code:COURSE,session_number:n,scope,created_at:new Date().toISOString()
+    const base=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if(!base||!key)return false;
+    const response=await fetch(base+"/realtime/v1/api/broadcast",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "apikey":key,
+        "Authorization":"Bearer "+key
+      },
+      body:JSON.stringify({messages:[{
+        topic:"bigdata:session:"+n,
+        event:"invalidate",
+        payload:{course_code:COURSE,session_number:n,scope}
+      }]})
     });
-    return !error;
+    return response.ok;
   }catch{return false}
 }
 async function sessionControls(runId:string,n:number){
