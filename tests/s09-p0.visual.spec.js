@@ -22,7 +22,16 @@ async function inspectSlide(page,n){
       stage:sr?{left:sr.left,right:sr.right,top:sr.top,bottom:sr.bottom}:null,
       h1:hr?{left:hr.left,right:hr.right,top:hr.top,bottom:hr.bottom}:null,
       brokenFlow:[...document.querySelectorAll('.slide.on .node')].filter(el=>el.scrollWidth>el.getBoundingClientRect().width+2).map(el=>el.textContent),
-      labels:[...document.querySelectorAll('.slide.on svg text')].map(el=>({text:(el.textContent||'').trim(),r:rect(el),svg:rect(el.closest('svg'))})).filter(x=>x.r&&x.svg).filter(x=>x.r.left<x.svg.left-3||x.r.right>x.svg.right+3||x.r.top<x.svg.top-3||x.r.bottom>x.svg.bottom+3).map(x=>x.text)
+      labels:[...document.querySelectorAll('.slide.on svg text')].map(el=>({text:(el.textContent||'').trim(),r:rect(el),svg:rect(el.closest('svg'))})).filter(x=>x.r&&x.svg).filter(x=>x.r.left<x.svg.left-3||x.r.right>x.svg.right+3||x.r.top<x.svg.top-3||x.r.bottom>x.svg.bottom+3).map(x=>x.text),
+      boxedLabels:[...document.querySelectorAll('.slide.on svg text')].flatMap(el=>{
+        const tr=rect(el),svg=el.closest('svg');if(!tr||!svg||!tr.width||!tr.height)return [];
+        const cx=(tr.left+tr.right)/2,cy=(tr.top+tr.bottom)/2;
+        const boxes=[...svg.querySelectorAll('rect')].map(r=>({el:r,r:rect(r)})).filter(x=>x.r&&cx>=x.r.left&&cx<=x.r.right&&cy>=x.r.top&&cy<=x.r.bottom)
+          .sort((a,b)=>(a.r.width*a.r.height)-(b.r.width*b.r.height));
+        if(!boxes.length)return [];
+        const br=boxes[0].r,t=3,bad=tr.left<br.left-t||tr.right>br.right+t||tr.top<br.top-t||tr.bottom>br.bottom+t;
+        return bad?[{text:(el.textContent||'').trim(),textRect:{left:tr.left,right:tr.right,top:tr.top,bottom:tr.bottom},boxRect:{left:br.left,right:br.right,top:br.top,bottom:br.bottom}}]:[];
+      })
     };
   });
 }
@@ -38,6 +47,7 @@ for(const vp of viewports){
       if(x.topOverlap)failures.push('S'+n+' toolbar solapa título');
       if(x.bottomOverlap)failures.push('S'+n+' navegación solapa body');
       if(x.labels.length)failures.push('S'+n+' labels fuera SVG: '+x.labels.join(' | '));
+      if(x.boxedLabels.length)failures.push('S'+n+' labels fuera de su caja: '+x.boxedLabels.map(z=>z.text).join(' | '));
       if(n===21&&x.brokenFlow.length)failures.push('S21 nodos partidos: '+x.brokenFlow.join(' | '));
     }
     expect(failures).toEqual([]);

@@ -106,6 +106,7 @@ async function ownEvidence(userId:string,runId:string,n:number){
   failIf(error,"No se pudo cargar la evidencia");
   return data||[];
 }
+const TRANSFER_REVIEW_CODES=new Set(["bd-s09-lab3","bd-s09-lab4","bd-s09-lab8"]);
 async function submitEvidence(userId:string,runId:string,n:number,activity:any,payload:any,source:string,rawClientId:any=null){
   if(!activity||activity.kind!=="lab")throw new Error("La actividad no es un laboratorio");
   const evidenceClientId=clientId(rawClientId,"client_evidence_id");
@@ -126,8 +127,24 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
   if(!catalog)throw new Error("El laboratorio no tiene evaluador configurado");
   if(n===9&&catalog.evaluator==="self-report")throw new Error("Este LAB S09 requiere autocorrección. Recarga la presentación e inténtalo de nuevo.");
   const seed=await seedFor(userId,runId,activity.code),normalized:any={};
+  const transferMode=n===9&&source==="presentation-transfer"&&TRANSFER_REVIEW_CODES.has(activity.code);
   let verdict="accepted",feedback="Evidencia registrada.";
-  if(catalog.evaluator==="seeded-numeric"&&catalog.config?.generator==="s09_topk_aero_count"){
+  if(transferMode){
+    const {data:selfProgress,error:selfError}=await db.from("bd_lms_activity_progress")
+      .select("status,metadata").eq("user_id",userId).eq("course_run_id",runId)
+      .eq("activity_code",activity.code).maybeSingle();
+    failIf(selfError,"No se pudo comprobar la autocomprobación previa");
+    const selfVerified=selfProgress?.metadata?.self_check_verified===true||
+      selfProgress?.metadata?.evidence_verdict==="correct"||selfProgress?.status==="completed";
+    if(!selfVerified)throw new Error("Completa primero la autocomprobación del LAB antes de enviar la transferencia.");
+    normalized.result=trimText(payload?.result,12,900,"El resultado observado");
+    normalized.decision=trimText(payload?.decision,12,700,"La decisión");
+    normalized.rejected_alternative=trimText(payload?.rejected_alternative,12,700,"La alternativa descartada");
+    normalized.interpretation=trimText(payload?.interpretation,12,900,"La interpretación");
+    normalized.limit=trimText(payload?.limit,12,700,"El límite");
+    verdict="pending_review";
+    feedback="Transferencia recibida. Está pendiente de revisión docente con rúbrica.";
+  }else if(catalog.evaluator==="seeded-numeric"&&catalog.config?.generator==="s09_topk_aero_count"){
     const k=Number(catalog.config?.k||5),expected=s09TopKProfile(seed,k).count,result=Number(payload?.result);
     if(!Number.isFinite(result))throw new Error("Registra el resultado numérico obtenido");
     const decision=String(payload?.decision||"");
@@ -200,20 +217,25 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
   const now=new Date().toISOString();
   const {data:evidence,error:evidenceError}=await db.from("bd_evidence").insert({
     user_id:userId,course_run_id:runId,session_number:n,activity_code:activity.code,
-    step_id:"submission",payload:normalized,seed,source,client_evidence_id:evidenceClientId,
+    step_id:transferMode?"transfer":"submission",payload:normalized,seed,source,client_evidence_id:evidenceClientId,
     verdict,feedback,catalog_version:Number(catalog.version||1),created_at:now
   }).select("id,activity_code,verdict,feedback,created_at,payload").single();
   failIf(evidenceError,"No se pudo guardar la evidencia");
   const {data:p,error:progressError}=await db.from("bd_lms_activity_progress").select("*")
     .eq("user_id",userId).eq("course_run_id",runId).eq("activity_code",activity.code).maybeSingle();
   failIf(progressError,"No se pudo leer el progreso del laboratorio");
-  const completed=["correct","accepted"].includes(verdict),attempts=Number(p?.attempts||0)+1;
+  const verifiedNow=["correct","accepted"].includes(verdict),
+    requiresTransfer=Boolean(catalog.config?.requires_transfer)&&TRANSFER_REVIEW_CODES.has(activity.code),
+    completed=verifiedNow&&!transferMode&&!requiresTransfer,
+    selfCheckVerified=p?.metadata?.self_check_verified===true||(!transferMode&&verifiedNow),
+    attempts=Number(p?.attempts||0)+1;
   const {error:upsertError}=await db.from("bd_lms_activity_progress").upsert({
     user_id:userId,course_run_id:runId,activity_code:activity.code,
     status:completed?"completed":"in_progress",started_at:p?.started_at||now,attempts,
     score:0,max_score:0,completed_at:completed?(p?.completed_at||now):null,updated_at:now,
-    metadata:{...(p?.metadata||{}),source:"evidence",evidence_id:evidence?.id||null,evidence_verdict:verdict,
-      evidence_verified:completed,last_evidence_at:now}
+    metadata:{...(p?.metadata||{}),source:transferMode?"transfer-evidence":"evidence",evidence_id:evidence?.id||null,evidence_verdict:verdict,
+      evidence_verified:completed,self_check_verified:selfCheckVerified,transfer_required:requiresTransfer||transferMode,
+      transfer_pending:transferMode&&verdict==="pending_review",last_evidence_at:now}
   },{onConflict:"user_id,course_run_id,activity_code"});
   failIf(upsertError,"No se pudo actualizar el progreso del laboratorio");
   const {error:eventError}=await db.from("bd_lms_events").insert({
@@ -580,7 +602,7 @@ async function teacherReviewEvidence(ctx:any,run:any,n:number,body:any,activitie
     scores[id]=v;total+=v;
   }
   const {data:evidence,error}=await db.from("bd_evidence")
-    .select("id,user_id,activity_code,verdict,payload")
+    .select("id,user_id,activity_code,step_id,source,verdict,payload")
     .eq("id",evidenceId).eq("course_run_id",run.id).eq("session_number",n).maybeSingle();
   failIf(error,"No se pudo cargar la evidencia");
   if(!evidence)throw new Error("Evidencia no encontrada");
@@ -588,7 +610,8 @@ async function teacherReviewEvidence(ctx:any,run:any,n:number,body:any,activitie
   if(!activity)throw new Error("Actividad de evidencia inválida");
   const {data:catalog,error:catalogError}=await db.from("bd_activity_catalog").select("evaluator").eq("code",activity.code).maybeSingle();
   failIf(catalogError,"No se pudo validar el evaluador");
-  if(catalog?.evaluator!=="authentic-review")throw new Error("Esta evidencia no usa revisión auténtica");
+  const transferEvidence=evidence.step_id==="transfer"&&TRANSFER_REVIEW_CODES.has(evidence.activity_code);
+  if(catalog?.evaluator!=="authentic-review"&&!transferEvidence)throw new Error("Esta evidencia no usa revisión auténtica");
   if(!["pending_review","rejected"].includes(String(evidence.verdict)))throw new Error("La evidencia ya fue cerrada");
   const now=new Date().toISOString(),rubric={scores,total,max:10};
   const {data:updated,error:updateError}=await db.from("bd_evidence").update({
@@ -604,7 +627,8 @@ async function teacherReviewEvidence(ctx:any,run:any,n:number,body:any,activitie
     status:accepted?"completed":"in_progress",started_at:p?.started_at||now,attempts:Number(p?.attempts||1),
     score:total,max_score:10,completed_at:accepted?(p?.completed_at||now):null,updated_at:now,
     metadata:{...(p?.metadata||{}),source:"evidence-review",evidence_id:evidenceId,evidence_verdict:decision,
-      evidence_verified:accepted,last_evidence_review_at:now,rubric_total:total}
+      evidence_verified:accepted,transfer_verified:transferEvidence?accepted:(p?.metadata?.transfer_verified===true),
+      transfer_pending:false,last_evidence_review_at:now,rubric_total:total}
   },{onConflict:"user_id,course_run_id,activity_code"});
   failIf(progressError,"No se pudo actualizar el progreso");
   if(accepted){

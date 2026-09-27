@@ -162,7 +162,7 @@ const RUBRIC_FIELDS=[
   ['reproducible_result','Resultado reproducible'],
   ['supported_decision','Decisión sustentada'],
   ['rejected_alternative','Alternativa descartada'],
-  ['ranking_interpretation','Interpretación del ranking'],
+  ['ranking_interpretation','Interpretación del resultado / ranking'],
   ['concrete_limit','Límite concreto']
 ];
 function rubricSelect(evidenceId,id,label,current){
@@ -172,7 +172,7 @@ function rubricSelect(evidenceId,id,label,current){
 function reviewBox(e){
   if(!['pending_review','rejected'].includes(e.verdict))return '';
   const scores=e.rubric?.scores||{};
-  return '<div class="control-block" style="margin-top:10px"><b>Rúbrica LAB 9 · 10 puntos</b><div class="control-grid" style="margin-top:8px">'+RUBRIC_FIELDS.map(([id,label])=>rubricSelect(e.id,id,label,scores[id])).join('')+'</div><label class="field" style="margin-top:8px"><span>Feedback docente</span><textarea class="input" data-review-feedback="'+e.id+'" rows="3" placeholder="Indica qué está bien y qué debe ajustar.">'+L.esc(e.feedback&&e.verdict==='rejected'?e.feedback:'')+'</textarea></label><div class="actions" style="margin-top:8px"><button class="btn accent" data-review="'+e.id+'" data-decision="accepted">Aceptar evidencia</button><button class="btn danger" data-review="'+e.id+'" data-decision="rejected">Pedir ajuste</button></div></div>';
+  return '<div class="control-block" style="margin-top:10px"><b>Rúbrica de evidencia · 10 puntos</b><div class="control-grid" style="margin-top:8px">'+RUBRIC_FIELDS.map(([id,label])=>rubricSelect(e.id,id,label,scores[id])).join('')+'</div><label class="field" style="margin-top:8px"><span>Feedback docente</span><textarea class="input" data-review-feedback="'+e.id+'" rows="3" placeholder="Indica qué está bien y qué debe ajustar.">'+L.esc(e.feedback&&e.verdict==='rejected'?e.feedback:'')+'</textarea></label><div class="actions" style="margin-top:8px"><button class="btn accent" data-review="'+e.id+'" data-decision="accepted">Aceptar evidencia</button><button class="btn danger" data-review="'+e.id+'" data-decision="rejected">Pedir ajuste</button></div></div>';
 }
 async function submitEvidenceReview(button){
   const evidenceId=button.dataset.review,decision=button.dataset.decision;
