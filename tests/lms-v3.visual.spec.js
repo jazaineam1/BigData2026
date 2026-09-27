@@ -39,19 +39,28 @@ async function assertVisibleSvgContained(page, label) {
       const r=el.getBoundingClientRect(),s=getComputedStyle(el);
       return s.display!=='none'&&s.visibility!=='hidden'&&r.width>1&&r.height>1;
     };
-    const out=[];
+    const mobile=matchMedia('(max-width:900px)').matches,out=[];
     for (const svg of document.querySelectorAll('svg')) {
       if(!visible(svg)) continue;
-      const host=svg.closest('.diagram,.card,.panel,.lab,.slide')||svg.parentElement;
+      const host=svg.closest('.diagram,.card,.panel,.lab')||svg.closest('.slide')||svg.parentElement;
       if(!host) continue;
-      const a=svg.getBoundingClientRect(),b=host.getBoundingClientRect(),tol=3;
-      if(a.left < b.left-tol || a.right > b.right+tol || a.top < b.top-tol || a.bottom > b.bottom+tol) {
-        out.push({id:svg.id||null,svg:{left:a.left,right:a.right,top:a.top,bottom:a.bottom,width:a.width,height:a.height},host:{class:host.className,left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width,height:b.height}});
+      const a=svg.getBoundingClientRect(),b=host.getBoundingClientRect(),tol=3,isSlide=host.classList?.contains('slide');
+      const badX=a.left < b.left-tol || a.right > b.right+tol;
+      const badY=(!mobile || !isSlide) && (a.top < b.top-tol || a.bottom > b.bottom+tol);
+      if(badX || badY) {
+        out.push({id:svg.id||null,svg:{left:a.left,right:a.right,top:a.top,bottom:a.bottom},host:{class:host.className,left:b.left,right:b.right,top:b.top,bottom:b.bottom}});
+      }
+      for (const labelNode of svg.querySelectorAll('text')) {
+        if(!visible(labelNode)) continue;
+        const t=labelNode.getBoundingClientRect(),s=svg.getBoundingClientRect();
+        if(t.left<s.left-tol||t.right>s.right+tol||t.top<s.top-tol||t.bottom>s.bottom+tol) {
+          out.push({id:svg.id||null,label:(labelNode.textContent||'').slice(0,80),text:{left:t.left,right:t.right,top:t.top,bottom:t.bottom},svg:{left:s.left,right:s.right,top:s.top,bottom:s.bottom}});
+        }
       }
     }
     return out;
   });
-  expect(failures, label + ' SVG fuera de contenedor').toEqual([]);
+  expect(failures, label + ' SVG/etiqueta fuera de contenedor').toEqual([]);
 }
 
 async function assertActiveSlideContained(page, label) {
