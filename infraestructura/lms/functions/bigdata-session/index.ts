@@ -288,104 +288,6 @@ async function evidenceByCode(body:any){
   return result;
 }
 
-async function wallPost(ctx:any,run:any,n:number,activityCode:string,rawBody:any,evidenceId:any=null,rawClientId:any=null){
-  const {data:activity,error:activityError}=await db.from("bd_lms_activities").select("code,kind")
-    .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",n).maybeSingle();
-  failIf(activityError,"No se pudo validar el LAB");
-  if(!activity||activity.kind!=="lab")throw new Error("El muro solo está disponible para laboratorios");
-  const body=trimText(rawBody,20,2000,"La publicación"),postClientId=clientId(rawClientId,"client_post_id");
-  if(postClientId){
-    const {data:existing,error:existingError}=await db.from("bd_wall_posts")
-      .select("id,activity_code,body,status,created_at").eq("user_id",ctx.user.id)
-      .eq("course_run_id",run.id).eq("client_post_id",postClientId).maybeSingle();
-    failIf(existingError,"No se pudo comprobar la idempotencia de la publicación");
-    if(existing){
-      if(existing.activity_code!==activityCode)throw new Error("client_post_id ya fue usado en otra actividad");
-      return {ok:true,duplicate:true,post:existing};
-    }
-  }
-  let linked:string|null=null;
-  if(evidenceId){
-    const {data:e,error}=await db.from("bd_evidence").select("id").eq("id",String(evidenceId))
-      .eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("activity_code",activityCode).maybeSingle();
-    failIf(error,"No se pudo validar la evidencia vinculada");linked=e?.id||null;
-  }
-  const {data:post,error}=await db.from("bd_wall_posts").insert({
-    course_run_id:run.id,session_number:n,activity_code:activityCode,user_id:ctx.user.id,
-    body,evidence_id:linked,status:"visible",client_post_id:postClientId
-  }).select("id,activity_code,body,status,created_at").single();
-  failIf(error,"No se pudo publicar en el muro");
-  const {error:eventError}=await db.from("bd_lms_events").insert({
-    user_id:ctx.user.id,course_run_id:run.id,event_type:"ui_action",session_number:n,
-    activity_code:activityCode,metadata:{source:"class-wall",action:"wall_posted"},created_at:new Date().toISOString()
-  });
-  failIf(eventError,"No se pudo auditar la publicación");
-  return {ok:true,post};
-}
-async function wallList(ctx:any,run:any,n:number,activityCode:string){
-  const isTeacher=["teacher","admin"].includes(ctx.user.role);
-  const {data:activity,error:activityError}=await db.from("bd_lms_activities").select("code,kind,title")
-    .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",n).maybeSingle();
-  failIf(activityError,"No se pudo validar el LAB");
-  if(!activity||activity.kind!=="lab")throw new Error("Actividad de muro inválida");
-  if(!isTeacher){
-    const {count,error}=await db.from("bd_wall_posts").select("id",{count:"exact",head:true})
-      .eq("course_run_id",run.id).eq("session_number",n).eq("activity_code",activityCode)
-      .eq("user_id",ctx.user.id).in("status",["visible","spotlight","pinned"]);
-    failIf(error,"No se pudo verificar tu publicación");
-    if(!(count||0))return {viewer:ctx.user,activity,can_view:false,posts:[],reason:"publish_first"};
-  }
-  const {data:posts,error}=await db.from("bd_wall_posts").select("id,user_id,parent_id,body,evidence_id,status,created_at")
-    .eq("course_run_id",run.id).eq("session_number",n).eq("activity_code",activityCode)
-    .neq("status","hidden").order("created_at",{ascending:true}).limit(300);
-  failIf(error,"No se pudo cargar el muro");
-  const postIds=(posts||[]).map((p:any)=>p.id);
-  const userIds=[...new Set((posts||[]).map((p:any)=>p.user_id))];
-  const [{data:reactions},{data:users}]=await Promise.all([
-    postIds.length?db.from("bd_wall_reactions").select("post_id,user_id,kind").in("post_id",postIds):Promise.resolve({data:[]} as any),
-    isTeacher&&userIds.length?db.from("lms_users").select("id,display_name,username").in("id",userIds):Promise.resolve({data:[]} as any)
-  ]);
-  const names=new Map((users||[]).map((u:any)=>[u.id,u.display_name||u.username]));
-  const rows=await Promise.all((posts||[]).map(async(p:any)=>{
-    const rs=(reactions||[]).filter((r:any)=>r.post_id===p.id);
-    let author="Compañero";
-    if(p.user_id===ctx.user.id)author="Tú";
-    else if(isTeacher)author=names.get(p.user_id)||"Estudiante";
-    else author="Compañero "+(await sha256(p.user_id+"|"+activityCode)).slice(0,4).toUpperCase();
-    const publicPost={
-      id:p.id,parent_id:p.parent_id,body:p.body,evidence_id:p.evidence_id,status:p.status,created_at:p.created_at,author,
-      reactions:{useful:rs.filter((r:any)=>r.kind==="useful").length,same_doubt:rs.filter((r:any)=>r.kind==="same_doubt").length},
-      my_reactions:rs.filter((r:any)=>r.user_id===ctx.user.id).map((r:any)=>r.kind)
-    };
-    return isTeacher?{...publicPost,user_id:p.user_id}:publicPost;
-  }));
-  return {viewer:ctx.user,activity,can_view:true,posts:rows};
-}
-async function wallReact(ctx:any,run:any,n:number,postId:string,kind:string){
-  if(!["useful","same_doubt"].includes(kind))throw new Error("Reacción inválida");
-  const {data:post,error}=await db.from("bd_wall_posts").select("id,course_run_id,session_number,status")
-    .eq("id",postId).eq("course_run_id",run.id).eq("session_number",n).neq("status","hidden").maybeSingle();
-  failIf(error,"No se pudo validar la publicación");if(!post)throw new Error("Publicación no disponible");
-  const {data:existing,error:existingError}=await db.from("bd_wall_reactions").select("post_id")
-    .eq("post_id",postId).eq("user_id",ctx.user.id).eq("kind",kind).maybeSingle();
-  failIf(existingError,"No se pudo leer la reacción");
-  if(existing){
-    const {error:delError}=await db.from("bd_wall_reactions").delete().eq("post_id",postId).eq("user_id",ctx.user.id).eq("kind",kind);
-    failIf(delError,"No se pudo retirar la reacción");return {ok:true,active:false};
-  }
-  const {error:insError}=await db.from("bd_wall_reactions").insert({post_id:postId,user_id:ctx.user.id,kind});
-  failIf(insError,"No se pudo guardar la reacción");return {ok:true,active:true};
-}
-async function wallModerate(ctx:any,run:any,n:number,postId:string,moderation:string){
-  requireTeacher(ctx);
-  const status=moderation==="hide"?"hidden":moderation==="spotlight"?"spotlight":moderation==="pin"?"pinned":moderation==="show"?"visible":null;
-  if(!status)throw new Error("Acción de moderación inválida");
-  const {data,error}=await db.from("bd_wall_posts").update({status,updated_at:new Date().toISOString()})
-    .eq("id",postId).eq("course_run_id",run.id).eq("session_number",n).select("id,status").maybeSingle();
-  failIf(error,"No se pudo moderar la publicación");if(!data)throw new Error("Publicación no encontrada");
-  await audit(ctx.user.id,"bigdata.wall.moderate","wall_post",postId,{session_number:n,status});
-  return {ok:true,post:data};
-}
 async function current(req:Request){
   const token=bearer(req);if(!token)return null;
   const {data:s}=await db.from("lms_auth_sessions").select("id,user_id,expires_at,revoked_at,persistent,created_at")
@@ -563,7 +465,7 @@ async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:an
   const summary=await recomputeSession(ctx.user.id,run.id,n,activities);
   return {ok:true,correct,attempts,first_attempt_correct:firstAttempt,mastery,hint:correct?null:key.hint,...summary};
 }
-async function realtimeSignal(n:number,scope:"controls"|"wall"|"progress"|"teacher_wall"){
+async function realtimeSignal(n:number,scope:"controls"|"progress"|"teacher_wall"){
   try{
     const base=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if(!base||!key)return false;
@@ -835,6 +737,62 @@ async function courseProgress(ctx:any,run:any){
   return {viewer:ctx.user,run,sessions:rows,generated_at:new Date().toISOString()};
 }
 
+async function competitionAlias(runId:string,sessionNumber:number,userId:string){
+  const h=await sha256(runId+"|competition|"+sessionNumber+"|"+userId);
+  return "Jugador "+h.slice(0,4).toUpperCase();
+}
+async function competitionWall(ctx:any,run:any,n:number){
+  const def=await definition(run.id,n,false);
+  const required=(def.activities||[]).filter((a:any)=>a.required);
+  const requiredCodes=required.map((a:any)=>a.code);
+  const {data:enrollments,error:enrollmentError}=await db.from("lms_run_enrollments")
+    .select("user_id,role,status").eq("course_run_id",run.id).eq("status","active").eq("role","student");
+  failIf(enrollmentError,"No se pudo cargar la cohorte");
+  const ids=(enrollments||[]).map((x:any)=>String(x.user_id));
+  const [{data:sessionRows,error:sessionError},{data:activityRows,error:activityError}]=await Promise.all([
+    ids.length?db.from("bd_lms_session_progress").select("user_id,status").eq("course_run_id",run.id).eq("session_number",n).in("user_id",ids):Promise.resolve({data:[],error:null} as any),
+    ids.length&&requiredCodes.length?db.from("bd_lms_activity_progress").select("user_id,activity_code,status").eq("course_run_id",run.id).in("user_id",ids).in("activity_code",requiredCodes):Promise.resolve({data:[],error:null} as any)
+  ]);
+  failIf(sessionError,"No se pudo cargar el progreso del grupo");
+  failIf(activityError,"No se pudo cargar el avance de actividades");
+  const spm=new Map((sessionRows||[]).map((x:any)=>[String(x.user_id),x]));
+  const byUser=new Map<string,any[]>();
+  for(const row of activityRows||[]){
+    const id=String(row.user_id);if(!byUser.has(id))byUser.set(id,[]);byUser.get(id)!.push(row);
+  }
+  const rows=await Promise.all(ids.map(async(userId)=>{
+    const aps=byUser.get(userId)||[],p:any=spm.get(userId)||null;
+    const completed=aps.filter((x:any)=>x.status==="completed").length,total=required.length;
+    const progressPct=total?Math.round((completed/total)*100):((p?.status==="completed")?100:0);
+    return {
+      alias:await competitionAlias(run.id,n,userId),
+      is_me:userId===ctx.user.id,
+      status:p?.status||"not_started",
+      completed_required:completed,
+      required_total:total,
+      attempted_required:aps.length,
+      progress_pct:progressPct
+    };
+  }));
+  rows.sort((a:any,b:any)=>b.progress_pct-a.progress_pct||b.completed_required-a.completed_required||a.alias.localeCompare(b.alias,"es"));
+  let rank=0,lastKey="";
+  rows.forEach((row:any,index:number)=>{
+    const key=row.progress_pct+"|"+row.completed_required;
+    if(key!==lastKey){rank=index+1;lastKey=key}
+    row.position=rank;
+  });
+  const viewer=rows.find((x:any)=>x.is_me)||null;
+  return {
+    session:{session_number:n,title:def.session?.title||("Sesión "+n)},
+    participants:rows.length,
+    required_total:required.length,
+    ranking:rows,
+    viewer_rank:viewer?.position||null,
+    generated_at:new Date().toISOString(),
+    privacy:{identity:"session_alias",open_responses:false,speed_tiebreak:false}
+  };
+}
+
 Deno.serve(async(req:Request)=>{
   if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
   if(req.method==="OPTIONS")return new Response("ok",{headers:headers(req)});
@@ -860,7 +818,8 @@ Deno.serve(async(req:Request)=>{
   }
   try{
     if(action==="course_progress")return out(req,await courseProgress(ctx,run));
-    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","wall_moderate","teacher_set_control","teacher_clear_control","teacher_review_evidence"].includes(action);
+    if(action==="competition_wall"){const u=req.method==="GET"?new URL(req.url):null;const cn=req.method==="GET"?sessionNumber(u!.searchParams.get("session_number")||u!.searchParams.get("s")):sessionNumber(body.session_number);return out(req,await competitionWall(ctx,run,cn));}
+    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","teacher_set_control","teacher_clear_control","teacher_review_evidence"].includes(action);
     const def=await definition(run.id,n,teacher),codes=def.activities.map((a:any)=>a.code);
     if(action==="me"){
       const [p,cat,evidence]=await Promise.all([
@@ -902,10 +861,6 @@ Deno.serve(async(req:Request)=>{
       await realtimeSignal(n,"progress");return out(req,result);
     }
     if(action==="lab_code")return out(req,{ok:true,...await issueLabCode(ctx,run,n)});
-    if(action==="wall_post"){const result=await wallPost(ctx,run,n,String(body.activity_code||""),body.body,body.evidence_id||null,body.client_post_id);await realtimeSignal(n,"wall");return out(req,result)}
-    if(action==="wall_list")return out(req,await wallList(ctx,run,n,String(body.activity_code||"")));
-    if(action==="wall_react"){const result=await wallReact(ctx,run,n,String(body.post_id||""),String(body.kind||""));await realtimeSignal(n,"wall");return out(req,result)}
-    if(action==="wall_moderate"){const result=await wallModerate(ctx,run,n,String(body.post_id||""),String(body.moderation||""));await realtimeSignal(n,"wall");return out(req,result)}
     if(action==="session_controls")return out(req,{ok:true,controls:await sessionControls(run.id,n)});
     if(action==="teacher_review_evidence")return out(req,await teacherReviewEvidence(ctx,run,n,body,def.activities));
     if(action==="teacher_set_control")return out(req,await teacherSetControl(ctx,run,n,body,def.activities));
