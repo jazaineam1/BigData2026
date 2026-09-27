@@ -38,7 +38,8 @@ Deno.serve(async req=>{
  }
  if(action==="inspect_access"){
    const raw=String(body.token||"").trim(),ctx:any=await accessContext(raw);if(ctx.error)return out(req,{error:ctx.error,expired:!!ctx.expired},ctx.status||401);
-   return out(req,{ok:true,display_name:ctx.user.display_name||ctx.user.username,email:ctx.user.email||null,courses:(ctx.enrollments||[]).map((x:any)=>x.course_code),already_used:ctx.alreadyUsed});
+   if(ctx.alreadyUsed)return out(req,{ok:true,already_used:true});
+   return out(req,{ok:true,display_name:ctx.user.display_name||ctx.user.username,email:ctx.user.email||null,courses:(ctx.enrollments||[]).map((x:any)=>x.course_code),already_used:false});
  }
  if(action==="claim_access"){
    const raw=String(body.token||"").trim(),ctx:any=await accessContext(raw);if(ctx.error)return out(req,{error:ctx.error,expired:!!ctx.expired},ctx.status||401);
