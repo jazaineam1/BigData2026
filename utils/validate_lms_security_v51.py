@@ -23,6 +23,7 @@ client=read("lms/assets/bigdata-lms.js")
 portal=read("lms/portal.html")
 wall=read("lms/wall.html")
 auth_migration=read("infraestructura/lms/lms-auth-v51.sql")
+gitignore=read(".gitignore")
 
 dangerous={"resource_completed","challenge_answered","evidence_submitted","evidence_verified","lab_code_issued","session_completed"}
 m=re.search(r"const PUBLIC_TRACK_EVENTS=new Set\(\[(.*?)\]\);",backend,re.S)
@@ -38,6 +39,7 @@ checks=[
  ("answer_challenge usa endpoint dedicado", 'if(action==="answer_challenge")' in backend and '"challenge_answered"' not in (m.group(1) if m else "")),
  ("muro estudiante no expone user_id", "return isTeacher?{...publicPost,user_id:p.user_id}:publicPost" in backend),
  ("S09 define esc local", "const esc=value=>L?.esc" in deck),
+ ("S09 activa heartbeat después de autenticar", "K.startHeartbeat('bd-s09-presentation')" in deck),
  ("cola guarda propietario", "owner_id:ownerId" in kit and "entry.owner_id!==owner" in kit),
  ("cola tiene rechazados", "REJECTED_KEY='lms.bigdata.rejected.v1'" in kit and "function rejected()" in kit and "retryRejected" in kit),
  ("QA escucha pageerror", "page.on('pageerror'" in tests),
@@ -60,6 +62,7 @@ checks=[
  ("WALL excluye heartbeat", '.neq("event_type","heartbeat")' in backend),
  ("atasco se limita a 5-30 min", "meaningfulAge>5&&meaningfulAge<=30" in backend and "present&&" in backend),
  ("WALL usa presencia backend", "r.present===true" in wall),
+ ("artefactos QA locales ignorados", all(x in gitignore for x in ["node_modules/","test-results/","playwright-report/","package-lock.json"])),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)

@@ -24,3 +24,11 @@ Cassandra/*.zip
 # Ruido de ejecucion
 Cuadernos/dask-worker-space/
 .ipynb_checkpoints/
+
+
+# QA local Node / Playwright
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+package-lock.json
