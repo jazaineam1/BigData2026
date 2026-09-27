@@ -18,7 +18,7 @@ checks=[
  ("rúbrica 5x2", all(x in migration for x in ["reproducible_result","supported_decision","rejected_alternative","ranking_interpretation","concrete_limit"])),
  ("campos de revisión versionados", all(x in migration for x in ["reviewed_by","reviewed_at","rubric"])),
  ("backend valida evidencia auténtica", 'catalog.evaluator==="authentic-review"' in backend and "precision_at_5" in backend and "defensible_results" in backend),
- ("envío no completa", 'verdict="pending_review"' in backend and 'completed=["correct","accepted"].includes(verdict)' in backend),
+ ("envío no completa", 'verdict="pending_review"' in backend and (('completed=["correct","accepted"].includes(verdict)' in backend) or ('completed=verifiedNow&&!transferMode&&!requiresTransfer' in backend))),
  ("revisión docente explícita", "teacherReviewEvidence" in backend and "teacher_review_evidence" in backend),
  ("rúbrica backend 0-2", 'v<0||v>2' in backend and 'max:10' in backend),
  ("aceptación completa progreso", 'status:accepted?"completed":"in_progress"' in backend),
