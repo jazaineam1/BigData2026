@@ -46,6 +46,7 @@ checks=[
  ("sesiones estudiante tienen caducidad", "ttlHours=student?30*24:24" in auth and "deadline=s.expires_at?" in auth),
  ("sesiones legacy se backfillean", "update public.lms_auth_sessions" in auth_migration and "s.expires_at is null" in auth_migration and "interval '30 days'" in auth_migration),
  ("claim_access es single-use", 'ctx.tokenRow.used_at)return out(req,{error:"Este enlace ya fue utilizado' in auth and '.is("used_at",null).select("id").maybeSingle()' in auth),
+ ("inspect_access usado no expone identidad", "if(ctx.alreadyUsed)return out(req,{ok:true,already_used:true})" in auth),
  ("login limita también por cuenta", "account_hash" in auth and "accountCount" in auth),
  ("Supabase exige correo confirmado", "email_confirmed_at" in auth),
  ("Supabase enlaza email exacto", '.eq("email",normalizedEmail)' in auth and '.ilike("email"' not in auth),
