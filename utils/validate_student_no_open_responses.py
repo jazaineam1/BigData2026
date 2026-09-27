@@ -39,6 +39,7 @@ student_surfaces={
 checks=[
     ("class-wall eliminado", not (ROOT/"lms/class-wall.html").exists()),
     ("sin enlaces class-wall", all("class-wall.html" not in x for x in [deck,progress,teacher_wall])),
+    ("Teacher WALL sin scope abierto", "'teacher_wall','wall'" not in teacher_wall and "updateProjectionLink" not in teacher_wall),
     ("sin textareas de respuesta estudiante", all("<textarea" not in html for html in student_surfaces.values())),
     ("sin confianza S09", all(x not in deck for x in ["¿Qué tan seguro estás?","id=\"conf-","confidence:conf"])),
     ("sin wall API runtime", all(x not in kit for x in ["wallPost","wall_post"]) and all(x not in session_backend for x in ['action===\"wall_post\"','action===\"wall_list\"','action===\"wall_react\"','action===\"wall_moderate\"'])),
@@ -51,7 +52,7 @@ checks=[
     ("colaboración estudiante solo lectura", "<form" not in collab and all(x not in collab for x in ["post_discussion","create_thread","submit_peer_review","group_submit","confirm_contribution"])),
     ("backend no expone mutaciones abiertas colaboración", all(x not in core for x in ['if(action===\"group_submit\")','if(action===\"confirm_contribution\")','if(action===\"submit_peer_review\")'])),
     ("peer review abierto no configurable", 'name=\"peer_review_enabled\"' not in teacher_collab and "peer_review_enabled:false" in core),
-    ("migración limpia muro", all(x in migration for x in ["delete from public.bd_wall_posts","delete from public.bd_wall_reactions","revoke all on table public.bd_wall_posts"])),
+    ("migración elimina muro", all(x in migration for x in ["drop table if exists public.bd_wall_posts","drop table if exists public.bd_wall_reactions","delete from public.bd_realtime_signals where scope='wall'"])),
     ("migración elimina text de tareas", "array_remove(allowed_types,'text')" in migration),
     ("migración restringe question_type", "short_text" not in migration.split("add constraint lms_questions_v2_question_type_check",1)[1].split(";",1)[0]),
 ]
