@@ -45,6 +45,7 @@
 <div class="ey">Dispositivos</div>
 <h2>Sesiones abiertas</h2>
 <p id="identity" class="muted">Cargando cuenta…</p>
+<p id="sessionPolicy" class="muted"></p>
 <div id="sessions"></div>
 <div class="actions"><button id="logoutOthers" class="btn alt">Cerrar otras sesiones</button></div>
 </section>
@@ -59,12 +60,14 @@ if(!L.auth()?.token){location.replace('portal.html?next='+encodeURIComponent(loc
 let me=null;
 function renderSessions(rows){
   const box=L.$('sessions');
-  box.innerHTML=(rows||[]).length?(rows||[]).map(s=>'<article class="session-item '+(s.current?'current':'')+'"><div class="actions" style="justify-content:space-between"><b>'+L.esc(s.device_label||'Dispositivo')+'</b><span class="pill '+(s.current?'active':'pending')+'">'+(s.current?'Este dispositivo':'Otra sesión')+'</span></div><div class="muted">Inicio: '+L.fmtWhen(s.created_at)+'</div><div class="muted">Última actividad: '+L.fmtWhen(s.last_seen_at)+'</div><div class="muted">Vence: '+L.fmtWhen(s.expires_at)+'</div></article>').join(''):'<p class="muted">No hay sesiones registradas.</p>';
+  box.innerHTML=(rows||[]).length?(rows||[]).map(s=>'<article class="session-item '+(s.current?'current':'')+'"><div class="actions" style="justify-content:space-between"><b>'+L.esc(s.device_label||'Dispositivo')+'</b><span class="pill '+(s.current?'active':'pending')+'">'+(s.current?'Este dispositivo':'Otra sesión')+'</span></div><div class="muted">Inicio: '+L.fmtWhen(s.created_at)+'</div><div class="muted">Última actividad: '+L.fmtWhen(s.last_seen_at)+'</div><div class="muted">Vence: '+L.fmtWhen(s.expires_at)+'</div>'+(s.current?'':'<div class="actions" style="margin-top:8px"><button class="btn danger" data-revoke-session="'+L.esc(s.id)+'">Cerrar esta sesión</button></div>')+'</article>').join(''):'<p class="muted">No hay sesiones registradas.</p>';
+  document.querySelectorAll('[data-revoke-session]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await L.authAction('revoke_session',{session_id:b.dataset.revokeSession});L.msg(status,'Sesión cerrada.','ok');await load()}catch(e){L.msg(status,e.message,'err')}finally{b.disabled=false}});
 }
 async function load(){
   try{
     me=await L.authAction('me');
     L.$('identity').textContent=(me.user?.display_name||me.user?.username||'Usuario')+' · '+(me.user?.email||me.user?.username||'');
+    const policy=me.session_policy||{};L.$('sessionPolicy').textContent=policy.label?('Política de esta cuenta: sesión por '+policy.label+(policy.persistent?' con persistencia en este navegador.':' solo en esta pestaña.')):'';
     const x=await L.authAction('list_sessions');
     renderSessions(x.sessions||[]);
   }catch(e){
