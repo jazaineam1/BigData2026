@@ -286,7 +286,7 @@ async function overview(ctx:any,run:any){
     backup:{format:"bigdata-lms-academic-snapshot",version:BACKUP_VERSION,includes_binary_files:false},
     files:{total:files.length,total_bytes:files.reduce((a:number,x:any)=>a+Number(x.size_bytes||0),0),by_status:byStatus},
     policies:{
-      login_rate_limit:"8 fallos / 15 min en learning-auth compartido",
+      login_rate_limit:"8 fallos por IP/cuenta en 15 min mediante bigdata-auth",
       retention_preview_min_hours:24,
       cleanup_role:"admin",
       attached_files_deletable:false
