@@ -83,7 +83,7 @@ function renderNext(){
   const s=currentSession();
   const a=(model.assignments||[]).find(x=>!x.submission&&!x.overdue&&Number(x.session_number)!==Number(s?.session_number));
   if(a){L.$('nextTitle').textContent='Tienes una entrega pendiente';L.$('nextText').textContent=a.title+(a.due_at?' · vence '+L.fmtWhen(a.due_at):'');L.$('nextActions').innerHTML='<a class="btn primary" href="assignments.html">Revisar entrega</a>';return}
-  if(s){const p=s.session_progress,when=classTime(s);L.$('nextTitle').textContent=(p?'Continuar ':'Abrir ')+'S'+String(s.session_number).padStart(2,'0')+' · '+s.title;L.$('nextText').textContent=(when?('Clase: '+when+'. '):'')+(p?'Retoma donde quedaste.':(s.summary||''));L.$('nextActions').innerHTML='<a class="btn primary" href="session.html?s='+s.session_number+'">'+(p?'Continuar':'Abrir sesión')+'</a>';return}
+  if(s){const p=s.session_progress,when=classTime(s);L.$('nextTitle').textContent=(p?'Continuar ':'Abrir ')+'S'+String(s.session_number).padStart(2,'0')+' · '+s.title;L.$('nextText').textContent=(when?('Clase: '+when+'. '):'')+(p?'Retoma donde quedaste.':(s.summary||''));L.$('nextActions').innerHTML='<a class="btn primary" href="session.html?s='+s.session_number+'">'+(p?'Continuar':'Abrir sesión')+'</a><a class="btn alt" href="progress.html?s='+s.session_number+'#competitionWall">Wall de competencia</a>';return}
   L.$('nextTitle').textContent='No hay una siguiente actividad publicada';L.$('nextText').textContent='Cuando se publique una sesión aparecerá aquí.';L.$('nextActions').innerHTML='';
 }
 
