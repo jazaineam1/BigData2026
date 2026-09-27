@@ -151,39 +151,50 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     else{verdict="correct";feedback=String(catalog.config?.success_feedback||"Correcto. Las respuestas coinciden con el concepto trabajado en el LAB.")}
   }else if(catalog.evaluator==="authentic-review"){
     if(activity.code!=="bd-s09-lab9")throw new Error("Evaluador auténtico no habilitado para esta actividad");
-    const query=trimText(payload?.query,12,500,"La consulta");
+    const queryChoices:any={
+      aircraft_repair:"reparación de aviones militares",
+      aircraft_maintenance:"mantenimiento de aeronaves militares",
+      air_force_maintenance:"mantenimiento de aeronaves de la fuerza aérea"
+    };
+    const queryId=String(payload?.query_id||"");
+    if(!queryChoices[queryId])throw new Error("Selecciona una consulta válida");
+    const query=String(queryChoices[queryId]);
     const precision=Number(payload?.precision_at_5);
     if(!Number.isFinite(precision)||precision<0||precision>1)throw new Error("Precision@5 debe estar entre 0 y 1");
-    const defensible=Array.isArray(payload?.defensible_results)?payload.defensible_results.map((x:any)=>String(x||"").trim()).filter(Boolean):[];
-    if(defensible.length!==2||defensible.some((x:string)=>x.length<3||x.length>220))throw new Error("Registra exactamente dos resultados defendibles");
-    const falsePositive=trimText(payload?.false_positive,3,220,"El falso positivo");
-    const reason=trimText(payload?.reason,12,900,"La razón");
-    const decision=trimText(payload?.decision,12,600,"La decisión");
-    const rejected=trimText(payload?.rejected_alternative,12,600,"La alternativa descartada");
-    const limit=trimText(payload?.limit,12,600,"El límite");
+    const judgments=Array.isArray(payload?.judgments)?payload.judgments:[];
+    if(judgments.length!==5||!judgments.every((x:any)=>typeof x==="boolean"))throw new Error("Registra cinco juicios de relevancia True/False");
+    const expectedPrecision=judgments.filter(Boolean).length/5;
+    if(Math.abs(precision-expectedPrecision)>0.001)throw new Error("Precision@5 no coincide con los cinco juicios");
+    const decision=String(payload?.decision||"");
+    const rejected=String(payload?.rejected_alternative||"");
+    const strategies=["lexical","semantic","hybrid"];
+    if(!strategies.includes(decision))throw new Error("Selecciona una estrategia final válida");
+    if(!strategies.includes(rejected)||rejected===decision)throw new Error("Selecciona una alternativa descartada distinta");
+    const limitCode=String(payload?.limit_code||"");
+    const limitCodes=["sample_five","manual_labels","model_dependence","latency_not_measured"];
+    if(!limitCodes.includes(limitCode))throw new Error("Selecciona un límite válido");
     const ids=(value:any,label:string)=>{
       const xs=Array.isArray(value)?value.map((x:any)=>String(x||"").trim()).filter(Boolean):[];
-      if(!xs.length||xs.length>5||xs.some((x:string)=>x.length>120))throw new Error("Revisa "+label);
+      if(xs.length!==5||xs.some((x:string)=>x.length>120))throw new Error("Revisa "+label);
       return xs;
     };
     const trace=payload?.trace&&typeof payload.trace==="object"?payload.trace:{};
     const model=trimText(trace.model,3,160,"El modelo");
     const dimensions=Math.trunc(Number(trace.dimensions));
     if(!Number.isInteger(dimensions)||dimensions<2||dimensions>100000)throw new Error("Dimensiones inválidas");
+    normalized.query_id=queryId;
     normalized.query=query;
     normalized.precision_at_5=Math.round(precision*10000)/10000;
-    normalized.defensible_results=defensible;
-    normalized.false_positive=falsePositive;
-    normalized.reason=reason;
+    normalized.judgments=judgments;
     normalized.decision=decision;
     normalized.rejected_alternative=rejected;
-    normalized.limit=limit;
+    normalized.limit_code=limitCode;
     normalized.top5_lexical=ids(payload?.top5_lexical,"Top-5 lexical");
     normalized.top5_semantic=ids(payload?.top5_semantic,"Top-5 semántico");
     normalized.top5_hybrid=ids(payload?.top5_hybrid,"Top-5 híbrido");
     normalized.trace={source:"colab",model,dimensions};
     verdict="pending_review";
-    feedback="Evidencia auténtica recibida. Está pendiente de revisión docente con rúbrica.";
+    feedback="Evidencia estructurada recibida. Está pendiente de revisión docente con rúbrica.";
   }else{
     for(const step of Array.isArray(catalog.steps)?catalog.steps:[]){
       const id=String(step.id||"");if(!id)continue;
@@ -215,7 +226,7 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     user_id:userId,course_run_id:runId,activity_code:activity.code,
     status:completed?"completed":"in_progress",started_at:p?.started_at||now,attempts,
     score:0,max_score:0,completed_at:completed?(p?.completed_at||now):null,updated_at:now,
-    metadata:{...(p?.metadata||{}),source:transferMode?"transfer-evidence":"evidence",evidence_id:evidence?.id||null,evidence_verdict:verdict,
+    metadata:{...(p?.metadata||{}),source:"evidence",evidence_id:evidence?.id||null,evidence_verdict:verdict,
       evidence_verified:completed,self_check_verified:selfCheckVerified,last_evidence_at:now}
   },{onConflict:"user_id,course_run_id,activity_code"});
   failIf(upsertError,"No se pudo actualizar el progreso del laboratorio");
