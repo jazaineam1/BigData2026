@@ -150,15 +150,28 @@ async function mockSessionApi(page, role='student', seen=null, modelOverride=nul
   });
 }
 
-test('S09 autenticada inicializa tracking y evidencia genérica', async ({ page }) => {
+test('S09 autenticada inicializa tracking y LAB genérico determinístico', async ({ page }) => {
   const seen=[];
   const model=JSON.parse(JSON.stringify(sessionModel));
   model.activities.push({code:'bd-s09-lab1',title:'LAB 1 · Recuperación lexical',kind:'lab',required:true,points:0,metadata:{completion_rule:'evidence',slide:6}});
-  model.catalog.push({code:'bd-s09-lab1',evaluator:'self-report',seeded:false,version:1,wall_prompt:'Explica una decisión y un límite.',steps:[{id:'decision',type:'text'},{id:'limit',type:'text'}]});
+  model.catalog.push({code:'bd-s09-lab1',evaluator:'choice-hash',seeded:false,version:2,steps:[
+    {id:'mechanism',type:'choice',label:'¿Qué señal favorece una búsqueda lexical?',options:[
+      {value:'exact_terms',label:'Coincidencia de términos'},
+      {value:'semantic_meaning',label:'Parecido de significado'}
+    ],hint:'Revisa los términos observables.'},
+    {id:'limitation',type:'choice',label:'¿Cuál es su límite?',options:[
+      {value:'paraphrase_gap',label:'Puede perder paráfrasis'},
+      {value:'no_ranking',label:'No puede ordenar'}
+    ],hint:'Compara vocabulario distinto.'}
+  ]});
   await mockSessionApi(page,'student',seen,model);
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s6');
   await expect(page.locator('#moduleIdentity')).toContainText('Estudiante QA · conectado');
-  await expect(page.locator('[data-evidence-for="bd-s09-lab1"]')).toHaveCount(1);
+  const panel=page.locator('[data-evidence-for="bd-s09-lab1"]');
+  await expect(panel).toHaveCount(1);
+  await expect(panel.getByText('Comprueba tu aprendizaje')).toBeVisible();
+  await expect(panel.locator('select')).toHaveCount(2);
+  await expect(panel.locator('textarea')).toHaveCount(0);
   await expect.poll(()=>seen.some(x=>x.action==='track'&&x.event_type==='presentation_opened')).toBeTruthy();
   await expect.poll(()=>seen.some(x=>x.action==='track'&&x.event_type==='slide_viewed')).toBeTruthy();
 });
@@ -268,18 +281,21 @@ test('módulo genera código efímero para Colab', async ({ page }) => {
   await assertNoHorizontalOverflow(page,'lab code mobile');
 });
 
-test('LAB 3 registra evidencia sin desbordes', async ({ page }) => {
+test('LAB 3 se autocorrige sin campos abiertos ni desbordes', async ({ page }) => {
+  const seen=[];
   await page.setViewportSize({width:390,height:844});
-  await mockSessionApi(page,'student');
+  await mockSessionApi(page,'student',seen);
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s17');
-  await expect(page.getByText('Registrar evidencia · LAB 3')).toBeVisible();
+  await expect(page.getByText('Comprueba tu aprendizaje · LAB 3')).toBeVisible();
+  await expect(page.locator('#lab3Alternative')).toHaveCount(0);
+  await expect(page.locator('#lab3Limit')).toHaveCount(0);
   await page.locator('#lab3Result').fill('4');
   await page.locator('#lab3Decision').selectOption('mantener');
-  await page.locator('#lab3Alternative').fill('Descarto subir k porque aumentaría candidatos sin mejorar necesariamente la precisión.');
-  await page.locator('#lab3Limit').fill('Me faltan juicios de relevancia humanos para saber si los cinco candidatos realmente responden a la necesidad.');
   await page.locator('#lab3Submit').click();
   await expect(page.getByText(/Resultado verificado/)).toBeVisible();
-  await assertNoHorizontalOverflow(page,'LAB 3 evidence mobile');
+  const evidence=seen.find(x=>x.action==='evidence'&&x.activity_code==='bd-s09-lab3');
+  expect(evidence?.payload).toEqual({result:4,decision:'mantener'});
+  await assertNoHorizontalOverflow(page,'LAB 3 deterministic mobile');
 });
 
 

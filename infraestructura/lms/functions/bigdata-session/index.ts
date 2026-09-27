@@ -124,18 +124,31 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     .eq("code",activity.code).maybeSingle();
   failIf(catalogError,"No se pudo cargar el evaluador");
   if(!catalog)throw new Error("El laboratorio no tiene evaluador configurado");
+  if(n===9&&catalog.evaluator==="self-report")throw new Error("Este LAB S09 requiere autocorrección. Recarga la presentación e inténtalo de nuevo.");
   const seed=await seedFor(userId,runId,activity.code),normalized:any={};
   let verdict="accepted",feedback="Evidencia registrada.";
   if(catalog.evaluator==="seeded-numeric"&&catalog.config?.generator==="s09_topk_aero_count"){
     const k=Number(catalog.config?.k||5),expected=s09TopKProfile(seed,k).count,result=Number(payload?.result);
     if(!Number.isFinite(result))throw new Error("Registra el resultado numérico obtenido");
     const decision=String(payload?.decision||"");
-    if(!["mantener","subir"].includes(decision))throw new Error("Elige si mantendrías k o lo subirías");
+    if(!["mantener","subir"].includes(decision))throw new Error("Elige qué harías con k");
+    const expectedDecision=expected>=4?"mantener":"subir";
     normalized.k=k;normalized.result=result;normalized.decision=decision;
-    normalized.alternative=trimText(payload?.alternative,10,500,"La alternativa descartada");
-    normalized.limit=trimText(payload?.limit,40,1200,"El límite");
-    if(result!==expected){verdict="incorrect";feedback="El conteo no coincide con tu ranking asignado. Revisa los cinco candidatos antes de reenviar."}
-    else{verdict="correct";feedback="Resultado verificado. La decisión, alternativa y límite quedaron registrados."}
+    if(result!==expected){verdict="incorrect";feedback="El conteo no coincide con tu ranking. Revisa los cinco candidatos y vuelve a comprobar."}
+    else if(decision!==expectedDecision){verdict="incorrect";feedback=expected>=4?"Tu conteo es correcto. Con al menos 4 de 5 candidatos claramente aeronáuticos, k=5 ya cubre bien esta necesidad.":"Tu conteo es correcto. Con menos de 4 candidatos claramente aeronáuticos, conviene ampliar k y revisar más vecinos."}
+    else{verdict="correct";feedback="Correcto. El conteo y la decisión sobre k coinciden con tu ranking personalizado."}
+  }else if(catalog.evaluator==="choice-hash"){
+    const expected=catalog.config?.answers||{},wrong:string[]=[];
+    for(const step of Array.isArray(catalog.steps)?catalog.steps:[]){
+      const id=String(step.id||"");if(!id)continue;
+      const v=String(payload?.[id]||"");
+      if(step.type!=="choice"||!Array.isArray(step.options)||!step.options.some((o:any)=>String(o?.value??o)===v))throw new Error("Selecciona una opción válida en "+id);
+      normalized[id]=v;
+      const actual=await sha256(v),target=String(expected[id]||"");
+      if(!target||actual!==target)wrong.push(id);
+    }
+    if(wrong.length){verdict="incorrect";const first=(catalog.steps||[]).find((s:any)=>String(s.id)===wrong[0]);feedback="Todavía no. "+String(first?.hint||"Revisa el ejemplo del LAB y vuelve a comprobar.")}
+    else{verdict="correct";feedback=String(catalog.config?.success_feedback||"Correcto. Las respuestas coinciden con el concepto trabajado en el LAB.")}
   }else{
     for(const step of Array.isArray(catalog.steps)?catalog.steps:[]){
       const id=String(step.id||"");if(!id)continue;
