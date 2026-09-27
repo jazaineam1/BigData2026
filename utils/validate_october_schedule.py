@@ -3,7 +3,8 @@ import json
 
 ROOT=Path(__file__).resolve().parents[1]
 course=json.loads((ROOT/"lms/data/course.json").read_text(encoding="utf-8"))
-portal=(ROOT/"lms/portal.html").read_text(encoding="utf-8")\nmodule=(ROOT/"lms/session.html").read_text(encoding="utf-8")
+portal=(ROOT/"lms/portal.html").read_text(encoding="utf-8")
+module=(ROOT/"lms/session.html").read_text(encoding="utf-8")
 sql=(ROOT/"infraestructura/lms/lms-calendar-october-2026.sql").read_text(encoding="utf-8")
 
 sessions={int(x["n"]):x for x in course["sessions"]}
