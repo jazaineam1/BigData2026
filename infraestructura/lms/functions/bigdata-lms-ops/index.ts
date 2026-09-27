@@ -11,6 +11,8 @@ const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 const BACKUP_VERSION=1;
 const RPO_HOURS=24;
 const RTO_HOURS=4;
+const SNAPSHOT_BUCKET="bigdata-lms-snapshots";
+const SNAPSHOT_RETENTION_DAYS=30;
 const SESSION_TTL_HOURS={student:30*24,teacher:12,admin:4};
 function roleCapabilities(role:string){
   if(role==="admin")return ["ops.view","backup.export","retention.preview","retention.cleanup","users.manage","course.manage"];
@@ -59,7 +61,7 @@ async function activeRun(ctx:any){
 }
 function requireTeacher(ctx:any){if(!["teacher","admin"].includes(ctx.user.role))throw new Error("NO_AUTH")}
 function requireAdmin(ctx:any){if(ctx.user.role!=="admin")throw new Error("ADMIN_ONLY")}
-async function audit(actor:string,action:string,entity:string,id:string|null,metadata:any={}){
+async function audit(actor:string|null,action:string,entity:string,id:string|null,metadata:any={}){
   await db.from("lms_audit_log").insert({actor_user_id:actor,action,entity_type:entity,entity_id:id,metadata:{course_code:COURSE,run_code:RUN_CODE,...metadata}}).then(()=>{}).catch(()=>{});
 }
 async function eqRows(table:string,column:string,value:any,select="*"){
@@ -147,6 +149,7 @@ async function backupData(run:any){
     ...groupMembers.map((x:any)=>x.user_id)
   ].filter(Boolean))];
   const users=await inRows("lms_users","id",userIds,"id,username,display_name,role,active,email,created_at,updated_at");
+  const activityCompetencyMappings=await eqRows("lms_activity_competencies_v2","course_run_id",run.id);
 
   const data:Record<string,any[]>={
     lms_courses:course,
@@ -161,6 +164,7 @@ async function backupData(run:any){
     lms_rubric_templates_v2:rubrics,
     lms_assignment_accommodations_v2:accommodations,
     lms_assignment_competencies_v2:assignmentCompetencies,
+    lms_activity_competencies_v2:activityCompetencyMappings,
     lms_assignment_group_settings_v2:assignmentGroupSettings,
     lms_submissions_v2:submissions,
     lms_submission_files_v2:submissionFiles,
@@ -201,11 +205,8 @@ async function backupData(run:any){
   return data;
 }
 
-async function exportBackup(ctx:any,run:any){
-  requireTeacher(ctx);
-  const data=await backupData(run);
-  const dataJson=JSON.stringify(data);
-  const fileRows=data.lms_submission_files_v2||[];
+async function snapshotEnvelope(run:any,generatedBy:string|null,mode:"manual"|"automatic"){
+  const data=await backupData(run),dataJson=JSON.stringify(data),fileRows=data.lms_submission_files_v2||[];
   const manifest={
     format:"bigdata-lms-academic-snapshot",
     version:BACKUP_VERSION,
@@ -213,20 +214,71 @@ async function exportBackup(ctx:any,run:any){
     run_code:RUN_CODE,
     course_run_id:run.id,
     generated_at:new Date().toISOString(),
-    generated_by:ctx.user.id,
+    generated_by:generatedBy,
+    generation_mode:mode,
     sha256:await sha256(dataJson),
     table_counts:counts(data),
     storage_files:fileRows.length,
     storage_bytes:fileRows.reduce((a:number,x:any)=>a+Number(x.size_bytes||0),0),
     includes_binary_files:false,
+    platform_backup_equivalent:false,
     excludes:["password_hash","Supabase Auth secrets","Edge Function secrets","binary Storage objects"]
   };
-  await audit(ctx.user.id,"bigdata.ops.backup.export","course_run",run.id,{tables:Object.keys(data).length,storage_files:manifest.storage_files});
-  return {ok:true,manifest,data,warnings:[
-    "Este snapshot respalda datos académicos y metadatos de archivos; no incluye binarios de Storage.",
+  return {manifest,data,warnings:[
+    "Este snapshot sirve para portabilidad y recuperación académica; no sustituye el backup administrado de la plataforma.",
     "No contiene password_hash ni secretos de autenticación.",
     "La restauración debe seguir el runbook y realizarse en una ventana controlada."
   ]};
+}
+async function snapshotCronAuthorized(req:Request){
+  const secret=String(req.headers.get("x-lms-snapshot-secret")||"");
+  if(secret.length<32)return false;
+  const {data,error}=await db.rpc("bigdata_validate_snapshot_cron_secret",{p_secret:secret});
+  return !error&&data===true;
+}
+async function pruneAutomaticSnapshots(){
+  const cutoff=Date.now()-SNAPSHOT_RETENTION_DAYS*24*3600_000;
+  const {data,error}=await db.storage.from(SNAPSHOT_BUCKET).list(RUN_CODE,{
+    limit:100,offset:0,sortBy:{column:"created_at",order:"asc"}
+  });
+  if(error)return {removed:0,warning:error.message};
+  const expired=(data||[]).filter((x:any)=>x.name&&x.created_at&&Date.parse(x.created_at)<cutoff)
+    .map((x:any)=>RUN_CODE+"/"+x.name);
+  if(!expired.length)return {removed:0};
+  const {error:removeError}=await db.storage.from(SNAPSHOT_BUCKET).remove(expired);
+  return removeError?{removed:0,warning:removeError.message}:{removed:expired.length};
+}
+async function scheduledSnapshot(){
+  const {data:run,error}=await db.from("lms_course_runs").select("*")
+    .eq("code",RUN_CODE).eq("course_code",COURSE).eq("active",true).maybeSingle();
+  if(error||!run)throw new Error("No se encontró la cohorte activa para snapshot");
+  const envelope=await snapshotEnvelope(run,null,"automatic");
+  const stamp=envelope.manifest.generated_at.replace(/[:.]/g,"-");
+  const path=RUN_CODE+"/snapshot-"+stamp+".json";
+  const payload=JSON.stringify({ok:true,...envelope})+"\n";
+  const {error:uploadError}=await db.storage.from(SNAPSHOT_BUCKET).upload(
+    path,new Blob([payload],{type:"application/json"}),
+    {contentType:"application/json",upsert:false,cacheControl:"3600"}
+  );
+  if(uploadError)throw new Error("No se pudo guardar el snapshot automático: "+uploadError.message);
+  const retention=await pruneAutomaticSnapshots();
+  await audit(null,"bigdata.ops.snapshot.auto","course_run",run.id,{
+    path,sha256:envelope.manifest.sha256,tables:Object.keys(envelope.data).length,
+    storage_files:envelope.manifest.storage_files,retention_removed:retention.removed||0,
+    retention_warning:retention.warning||null
+  });
+  return {ok:true,manifest:envelope.manifest,path,retention};
+}
+
+async function exportBackup(ctx:any,run:any){
+  requireTeacher(ctx);
+  const envelope=await snapshotEnvelope(run,ctx.user.id,"manual");
+  await audit(ctx.user.id,"bigdata.ops.snapshot.export","course_run",run.id,{
+    tables:Object.keys(envelope.data).length,
+    storage_files:envelope.manifest.storage_files,
+    sha256:envelope.manifest.sha256
+  });
+  return {ok:true,...envelope};
 }
 
 async function runAssignmentIds(run:any){return ids(await eqRows("lms_assignments_v2","course_run_id",run.id))}
@@ -281,38 +333,61 @@ async function cleanupRetention(ctx:any,run:any,body:any){
 
 async function healthSnapshot(ctx:any,run:any){
   requireTeacher(ctx);
-  const now=Date.now(),since24=new Date(now-24*3600_000).toISOString(),orphanCutoff=new Date(now-24*3600_000).toISOString();
+  const now=Date.now(),nowIso=new Date(now).toISOString(),since24=new Date(now-24*3600_000).toISOString(),
+    legacyPersistentCutoff=new Date(now-30*24*3600_000).toISOString(),
+    legacyTemporaryCutoff=new Date(now-24*3600_000).toISOString(),
+    orphanCutoff=new Date(now-24*3600_000).toISOString();
   const assignmentIds=await runAssignmentIds(run);
-  const [sessionsQ,loginQ,backupQ,eventQ,realtimeQ,orphanQ]=await Promise.all([
-    db.from("lms_auth_sessions").select("id,user_id,created_at,last_seen_at,expires_at,revoked_at,persistent").is("revoked_at",null),
-    db.from("lms_login_attempts").select("id,ok,created_at").gte("created_at",since24),
-    db.from("lms_audit_log").select("created_at").eq("action","bigdata.ops.backup.export").eq("entity_id",run.id).order("created_at",{ascending:false}).limit(1),
+  const [
+    explicitSessionsQ,legacyPersistentQ,legacyTemporaryQ,
+    loginTotalQ,loginFailedQ,snapshotQ,eventQ,realtimeQ,orphanQ
+  ]=await Promise.all([
+    db.from("lms_auth_sessions").select("id",{count:"exact",head:true}).is("revoked_at",null).gt("expires_at",nowIso),
+    db.from("lms_auth_sessions").select("id",{count:"exact",head:true}).is("revoked_at",null).is("expires_at",null).eq("persistent",true).gte("created_at",legacyPersistentCutoff),
+    db.from("lms_auth_sessions").select("id",{count:"exact",head:true}).is("revoked_at",null).is("expires_at",null).eq("persistent",false).gte("created_at",legacyTemporaryCutoff),
+    db.from("lms_login_attempts").select("id",{count:"exact",head:true}).gte("created_at",since24),
+    db.from("lms_login_attempts").select("id",{count:"exact",head:true}).gte("created_at",since24).eq("ok",false),
+    db.from("lms_audit_log").select("created_at,action,metadata").in("action",["bigdata.ops.snapshot.auto","bigdata.ops.snapshot.export","bigdata.ops.backup.export"])
+      .eq("entity_id",run.id).order("created_at",{ascending:false}).limit(1),
     db.from("bd_lms_events").select("created_at",{count:"exact"}).eq("course_run_id",run.id).gte("created_at",since24).order("created_at",{ascending:false}).limit(1),
     db.from("bd_realtime_signals").select("created_at,scope",{count:"exact"}).eq("course_code",COURSE).gte("created_at",since24).order("created_at",{ascending:false}).limit(1),
     assignmentIds.length
       ?db.from("lms_submission_files_v2").select("id",{count:"exact",head:true}).in("assignment_id",assignmentIds).in("status",["pending","abandoned"]).lt("created_at",orphanCutoff)
       :Promise.resolve({count:0,error:null} as any)
   ]);
-  for(const [label,q] of [["sesiones",sessionsQ],["intentos login",loginQ],["backup",backupQ],["eventos",eventQ],["Realtime",realtimeQ],["retención",orphanQ]] as any[]){
+  for(const [label,q] of [
+    ["sesiones con vencimiento",explicitSessionsQ],["sesiones legacy persistentes",legacyPersistentQ],
+    ["sesiones legacy temporales",legacyTemporaryQ],["intentos login",loginTotalQ],["fallos login",loginFailedQ],
+    ["snapshot académico",snapshotQ],["eventos",eventQ],["Realtime",realtimeQ],["retención",orphanQ]
+  ] as any[]){
     if(q?.error)throw new Error("No se pudo consultar "+label+": "+String(q.error.message||q.error));
   }
-  const sessions=(sessionsQ.data||[]),activeSessions=sessions.filter((x:any)=>{
-    const deadline=x.expires_at?Date.parse(x.expires_at):(Date.parse(x.created_at)+(x.persistent?30:1)*24*3600_000);
-    return Number.isFinite(deadline)&&deadline>now;
-  });
-  const logins=loginQ.data||[],failed=logins.filter((x:any)=>x.ok===false).length,total=logins.length;
-  const lastBackup=backupQ.data?.[0]?.created_at||null,backupAge=lastBackup?Math.max(0,(now-Date.parse(lastBackup))/3600_000):null;
-  const rpoMet=backupAge!==null&&backupAge<=RPO_HOURS;
+  const activeSessions=Number(explicitSessionsQ.count||0)+Number(legacyPersistentQ.count||0)+Number(legacyTemporaryQ.count||0);
+  const total=Number(loginTotalQ.count||0),failed=Number(loginFailedQ.count||0);
+  const lastSnapshotRow=snapshotQ.data?.[0]||null,lastSnapshot=lastSnapshotRow?.created_at||null,
+    snapshotAge=lastSnapshot?Math.max(0,(now-Date.parse(lastSnapshot))/3600_000):null,
+    snapshotRecent=snapshotAge!==null&&snapshotAge<=RPO_HOURS,
+    snapshotMode=lastSnapshotRow?.action==="bigdata.ops.snapshot.auto"?"automatic":"manual";
   const lastAcademic=eventQ.data?.[0]?.created_at||null,lastRealtime=realtimeQ.data?.[0]?.created_at||null;
   return {
     generated_at:new Date(now).toISOString(),
-    overall:rpoMet?"ok":"attention",
+    overall:snapshotRecent?"ok":"attention",
     database:{status:"ok",note:"La Edge Function respondió y pudo consultar PostgreSQL."},
-    auth:{active_sessions:activeSessions.length,login_attempts_24h:total,failed_logins_24h:failed,failure_rate_pct:total?Math.round(failed/total*1000)/10:0},
+    auth:{active_sessions:activeSessions,login_attempts_24h:total,failed_logins_24h:failed,failure_rate_pct:total?Math.round(failed/total*1000)/10:0},
     academic:{events_24h:Number(eventQ.count||0),last_event_at:lastAcademic},
     realtime:{signals_24h:Number(realtimeQ.count||0),last_signal_at:lastRealtime},
     retention:{orphan_candidates_24h:Number(orphanQ.count||0)},
-    recovery:{rpo_hours:RPO_HOURS,rto_hours:RTO_HOURS,last_backup_at:lastBackup,backup_age_hours:backupAge===null?null:Math.round(backupAge*10)/10,rpo_met:rpoMet}
+    recovery:{
+      rpo_hours:RPO_HOURS,rto_hours:RTO_HOURS,
+      platform_backup_status:"not_observed_by_lms",
+      last_academic_snapshot_at:lastSnapshot,
+      academic_snapshot_age_hours:snapshotAge===null?null:Math.round(snapshotAge*10)/10,
+      academic_snapshot_recent:snapshotRecent,
+      academic_snapshot_target_hours:RPO_HOURS,
+      academic_snapshot_mode:lastSnapshot?snapshotMode:null,
+      academic_snapshot_path:lastSnapshotRow?.metadata?.path||null,
+      automatic_snapshot_retention_days:SNAPSHOT_RETENTION_DAYS
+    }
   };
 }
 
@@ -328,7 +403,7 @@ async function overview(ctx:any,run:any){
   return {
     viewer:ctx.user,
     run:{id:run.id,code:run.code,title:run.title},
-    backup:{format:"bigdata-lms-academic-snapshot",version:BACKUP_VERSION,includes_binary_files:false},
+    academic_snapshot:{format:"bigdata-lms-academic-snapshot",version:BACKUP_VERSION,includes_binary_files:false,platform_backup_equivalent:false},
     files:{total:files.length,total_bytes:files.reduce((a:number,x:any)=>a+Number(x.size_bytes||0),0),by_status:byStatus},
     health:await healthSnapshot(ctx,run),
     capabilities:roleCapabilities(ctx.user.role),
@@ -339,7 +414,9 @@ async function overview(ctx:any,run:any){
       attached_files_deletable:false,
       session_ttl_hours:SESSION_TTL_HOURS,
       rpo_hours:RPO_HOURS,
-      rto_hours:RTO_HOURS
+      rto_hours:RTO_HOURS,
+      academic_snapshot_target_hours:RPO_HOURS,
+      platform_backup_status:"not_observed_by_lms"
     }
   };
 }
@@ -348,11 +425,23 @@ Deno.serve(async(req:Request)=>{
   if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
   if(req.method==="OPTIONS")return new Response("ok",{headers:headers(req)});
   if(!["GET","POST"].includes(req.method))return out(req,{error:"Método no permitido"},405);
-  const ctx=await current(req);if(!ctx)return out(req,{error:"Sesión LMS no válida o vencida"},401);
-  const run=await activeRun(ctx);if(!run)return out(req,{error:"Tu cuenta no está matriculada en Big Data 2026-2S"},403);
+
   let action="overview",body:any={};
   if(req.method==="GET")action=new URL(req.url).searchParams.get("action")||"overview";
-  else{try{body=await req.json()}catch{return out(req,{error:"JSON inválido"},400)}action=String(body.action||"overview")}
+  else{
+    try{body=await req.json()}catch{return out(req,{error:"JSON inválido"},400)}
+    action=String(body.action||"overview");
+  }
+
+  if(action==="scheduled_snapshot"){
+    if(req.method!=="POST")return out(req,{error:"Método no permitido"},405);
+    if(!(await snapshotCronAuthorized(req)))return out(req,{error:"Scheduler no autorizado"},403);
+    try{return out(req,await scheduledSnapshot())}
+    catch(e){return out(req,{error:String((e as any)?.message||e).slice(0,500)},500)}
+  }
+
+  const ctx=await current(req);if(!ctx)return out(req,{error:"Sesión LMS no válida o vencida"},401);
+  const run=await activeRun(ctx);if(!run)return out(req,{error:"Tu cuenta no está matriculada en Big Data 2026-2S"},403);
   try{
     if(action==="overview")return out(req,await overview(ctx,run));
     if(action==="health")return out(req,{viewer:ctx.user,health:await healthSnapshot(ctx,run),capabilities:roleCapabilities(ctx.user.role)});
