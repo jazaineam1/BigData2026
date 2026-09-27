@@ -221,9 +221,9 @@ async function exportBackup(ctx:any,run:any){
     includes_binary_files:false,
     excludes:["password_hash","Supabase Auth secrets","Edge Function secrets","binary Storage objects"]
   };
-  await audit(ctx.user.id,"bigdata.ops.backup.export","course_run",run.id,{tables:Object.keys(data).length,storage_files:manifest.storage_files});
+  await audit(ctx.user.id,"bigdata.ops.snapshot.export","course_run",run.id,{tables:Object.keys(data).length,storage_files:manifest.storage_files});
   return {ok:true,manifest,data,warnings:[
-    "Este snapshot respalda datos académicos y metadatos de archivos; no incluye binarios de Storage.",
+    "Este snapshot sirve para portabilidad y recuperación académica; no sustituye el backup administrado de la plataforma.",
     "No contiene password_hash ni secretos de autenticación.",
     "La restauración debe seguir el runbook y realizarse en una ventana controlada."
   ]};
@@ -281,38 +281,57 @@ async function cleanupRetention(ctx:any,run:any,body:any){
 
 async function healthSnapshot(ctx:any,run:any){
   requireTeacher(ctx);
-  const now=Date.now(),since24=new Date(now-24*3600_000).toISOString(),orphanCutoff=new Date(now-24*3600_000).toISOString();
+  const now=Date.now(),nowIso=new Date(now).toISOString(),since24=new Date(now-24*3600_000).toISOString(),
+    legacyPersistentCutoff=new Date(now-30*24*3600_000).toISOString(),
+    legacyTemporaryCutoff=new Date(now-24*3600_000).toISOString(),
+    orphanCutoff=new Date(now-24*3600_000).toISOString();
   const assignmentIds=await runAssignmentIds(run);
-  const [sessionsQ,loginQ,backupQ,eventQ,realtimeQ,orphanQ]=await Promise.all([
-    db.from("lms_auth_sessions").select("id,user_id,created_at,last_seen_at,expires_at,revoked_at,persistent").is("revoked_at",null),
-    db.from("lms_login_attempts").select("id,ok,created_at").gte("created_at",since24),
-    db.from("lms_audit_log").select("created_at").eq("action","bigdata.ops.backup.export").eq("entity_id",run.id).order("created_at",{ascending:false}).limit(1),
+  const [
+    explicitSessionsQ,legacyPersistentQ,legacyTemporaryQ,
+    loginTotalQ,loginFailedQ,snapshotQ,eventQ,realtimeQ,orphanQ
+  ]=await Promise.all([
+    db.from("lms_auth_sessions").select("id",{count:"exact",head:true}).is("revoked_at",null).gt("expires_at",nowIso),
+    db.from("lms_auth_sessions").select("id",{count:"exact",head:true}).is("revoked_at",null).is("expires_at",null).eq("persistent",true).gte("created_at",legacyPersistentCutoff),
+    db.from("lms_auth_sessions").select("id",{count:"exact",head:true}).is("revoked_at",null).is("expires_at",null).eq("persistent",false).gte("created_at",legacyTemporaryCutoff),
+    db.from("lms_login_attempts").select("id",{count:"exact",head:true}).gte("created_at",since24),
+    db.from("lms_login_attempts").select("id",{count:"exact",head:true}).gte("created_at",since24).eq("ok",false),
+    db.from("lms_audit_log").select("created_at,action").in("action",["bigdata.ops.snapshot.export","bigdata.ops.backup.export"])
+      .eq("entity_id",run.id).order("created_at",{ascending:false}).limit(1),
     db.from("bd_lms_events").select("created_at",{count:"exact"}).eq("course_run_id",run.id).gte("created_at",since24).order("created_at",{ascending:false}).limit(1),
     db.from("bd_realtime_signals").select("created_at,scope",{count:"exact"}).eq("course_code",COURSE).gte("created_at",since24).order("created_at",{ascending:false}).limit(1),
     assignmentIds.length
       ?db.from("lms_submission_files_v2").select("id",{count:"exact",head:true}).in("assignment_id",assignmentIds).in("status",["pending","abandoned"]).lt("created_at",orphanCutoff)
       :Promise.resolve({count:0,error:null} as any)
   ]);
-  for(const [label,q] of [["sesiones",sessionsQ],["intentos login",loginQ],["backup",backupQ],["eventos",eventQ],["Realtime",realtimeQ],["retención",orphanQ]] as any[]){
+  for(const [label,q] of [
+    ["sesiones con vencimiento",explicitSessionsQ],["sesiones legacy persistentes",legacyPersistentQ],
+    ["sesiones legacy temporales",legacyTemporaryQ],["intentos login",loginTotalQ],["fallos login",loginFailedQ],
+    ["snapshot académico",snapshotQ],["eventos",eventQ],["Realtime",realtimeQ],["retención",orphanQ]
+  ] as any[]){
     if(q?.error)throw new Error("No se pudo consultar "+label+": "+String(q.error.message||q.error));
   }
-  const sessions=(sessionsQ.data||[]),activeSessions=sessions.filter((x:any)=>{
-    const deadline=x.expires_at?Date.parse(x.expires_at):(Date.parse(x.created_at)+(x.persistent?30:1)*24*3600_000);
-    return Number.isFinite(deadline)&&deadline>now;
-  });
-  const logins=loginQ.data||[],failed=logins.filter((x:any)=>x.ok===false).length,total=logins.length;
-  const lastBackup=backupQ.data?.[0]?.created_at||null,backupAge=lastBackup?Math.max(0,(now-Date.parse(lastBackup))/3600_000):null;
-  const rpoMet=backupAge!==null&&backupAge<=RPO_HOURS;
+  const activeSessions=Number(explicitSessionsQ.count||0)+Number(legacyPersistentQ.count||0)+Number(legacyTemporaryQ.count||0);
+  const total=Number(loginTotalQ.count||0),failed=Number(loginFailedQ.count||0);
+  const lastSnapshot=snapshotQ.data?.[0]?.created_at||null,
+    snapshotAge=lastSnapshot?Math.max(0,(now-Date.parse(lastSnapshot))/3600_000):null,
+    snapshotRecent=snapshotAge!==null&&snapshotAge<=RPO_HOURS;
   const lastAcademic=eventQ.data?.[0]?.created_at||null,lastRealtime=realtimeQ.data?.[0]?.created_at||null;
   return {
     generated_at:new Date(now).toISOString(),
-    overall:rpoMet?"ok":"attention",
+    overall:snapshotRecent?"ok":"attention",
     database:{status:"ok",note:"La Edge Function respondió y pudo consultar PostgreSQL."},
-    auth:{active_sessions:activeSessions.length,login_attempts_24h:total,failed_logins_24h:failed,failure_rate_pct:total?Math.round(failed/total*1000)/10:0},
+    auth:{active_sessions:activeSessions,login_attempts_24h:total,failed_logins_24h:failed,failure_rate_pct:total?Math.round(failed/total*1000)/10:0},
     academic:{events_24h:Number(eventQ.count||0),last_event_at:lastAcademic},
     realtime:{signals_24h:Number(realtimeQ.count||0),last_signal_at:lastRealtime},
     retention:{orphan_candidates_24h:Number(orphanQ.count||0)},
-    recovery:{rpo_hours:RPO_HOURS,rto_hours:RTO_HOURS,last_backup_at:lastBackup,backup_age_hours:backupAge===null?null:Math.round(backupAge*10)/10,rpo_met:rpoMet}
+    recovery:{
+      rpo_hours:RPO_HOURS,rto_hours:RTO_HOURS,
+      platform_backup_status:"not_observed_by_lms",
+      last_academic_snapshot_at:lastSnapshot,
+      academic_snapshot_age_hours:snapshotAge===null?null:Math.round(snapshotAge*10)/10,
+      academic_snapshot_recent:snapshotRecent,
+      academic_snapshot_target_hours:RPO_HOURS
+    }
   };
 }
 
@@ -328,7 +347,7 @@ async function overview(ctx:any,run:any){
   return {
     viewer:ctx.user,
     run:{id:run.id,code:run.code,title:run.title},
-    backup:{format:"bigdata-lms-academic-snapshot",version:BACKUP_VERSION,includes_binary_files:false},
+    academic_snapshot:{format:"bigdata-lms-academic-snapshot",version:BACKUP_VERSION,includes_binary_files:false,platform_backup_equivalent:false},
     files:{total:files.length,total_bytes:files.reduce((a:number,x:any)=>a+Number(x.size_bytes||0),0),by_status:byStatus},
     health:await healthSnapshot(ctx,run),
     capabilities:roleCapabilities(ctx.user.role),
@@ -339,7 +358,9 @@ async function overview(ctx:any,run:any){
       attached_files_deletable:false,
       session_ttl_hours:SESSION_TTL_HOURS,
       rpo_hours:RPO_HOURS,
-      rto_hours:RTO_HOURS
+      rto_hours:RTO_HOURS,
+      academic_snapshot_target_hours:RPO_HOURS,
+      platform_backup_status:"not_observed_by_lms"
     }
   };
 }
