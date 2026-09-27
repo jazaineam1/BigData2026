@@ -57,7 +57,7 @@ checks=[
     ("rúbrica 25/25/10/15/15/10", 'STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}' in validator and sql.count('"max":25')>=2 and sql.count('"max":15')>=2 and sql.count('"max":10')>=2),
     ("S08 nueva", "SECOP Data Pipeline" in s08 and "s08-secoppipeline.html" not in s08 and "V4" not in s08),
     ("S08 entrega por equipo", "group_context" in edge and "Sin equipo asignado" in s08 and "misma calificación" in s08),
-    ("S08 sin acciones redundantes", "Solo tienes dos acciones" in s08 and "Trabajar etapa" not in s08 and "Qué cuenta como completado" not in s08),
+    ("S08 sin acciones redundantes", "Ruta simple" not in s08 and "Trabajar etapa" not in s08 and "Qué cuenta como completado" not in s08),
     ("S08 progreso plegable", "Ver avance por etapa" in s08 and "stageSummary" in s08),
 
     ("sin guía Markdown redundante", not (ROOT/"Talleres/Taller_Control_1.md").exists()),
