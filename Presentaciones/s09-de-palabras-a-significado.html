@@ -136,7 +136,7 @@ scores = embeddings @ q</pre></div>${svgNorm()}</div>`},
 {t:"Híbrida",k:"DOS SEÑALES, UN RANKING",h:"Lexical y semántica fallan de formas distintas; la fusión decide cómo cooperan.",b:"<div class=\"body cols bigleft\"><div class=\"stack\"><div class=\"card def\"><b>Búsqueda híbrida</b>Estrategia que combina resultados de dos o más mecanismos de recuperación para producir una lista final.</div><div class=\"card def\"><b>Fusión de rankings</b>Regla que transforma dos listas ordenadas en una sola lista final.</div><div class=\"cols\"><div class=\"card ex\"><b>Lexical aporta</b>ID exacto, marca, entidad, término legal y evidencia textual.</div><div class=\"card ex\"><b>Semántica aporta</b>Paráfrasis, sinónimos, vocabulario técnico e intención.</div></div><div class=\"card def\"><b>Normalización de score</b>Transformación usada cuando deseas comparar o combinar scores de escalas distintas. Debe justificarse; no asumimos que BM25 y coseno ya sean comparables.</div><div class=\"note warn\"><b>No sumes scores crudos a ciegas:</b> 12.8 de BM25 y 0.91 de coseno no representan la misma escala ni el mismo significado.</div></div><div class=\"stack\">"+svgHybrid()+"<div class=\"card ex\"><b>Ejemplo</b>Un ID exacto puede entrar alto por lexical mientras una paráfrasis puede entrar alto por semántica. La siguiente diapositiva presentará una técnica de fusión que usa <b>posiciones</b> en lugar de sumar scores.</div></div></div>"},
 {t:'RRF',k:'LAB 8 · RECIPROCAL RANK FUSION',h:'RRF fusiona posiciones sin exigir scores comparables.',b:`<div class="body three"><div class="stack"><div class="card def"><b>RRF · Reciprocal Rank Fusion</b>Método que premia documentos ubicados alto en varios rankings usando posiciones, no scores brutos.</div><div class="card def"><b>rank_constant</b>Constante positiva que suaviza cuánto pesa la posición. En Elasticsearch el valor predeterminado es 60.</div><div class="eq">RRF(d) = Σ 1 / (c + posiciónᵢ(d))</div><div class="card ex"><b>Ejemplo</b>Si D8 aparece #2 lexical y #1 semántico, recibe contribución de ambos rankings.</div></div><div class="stack"><div class="lab"><label>Documento a inspeccionar<select id="rrfDoc" onchange="rrfDemo()"><option>D8</option><option>D3</option><option>D5</option><option>D1</option></select></label><label>rank_constant<input id="rrfK" type="range" min="1" max="100" value="60" oninput="rrfDemo()"></label><button class="btn" onclick="rrfDemo()">Calcular contribución</button><div id="rrfOut" class="feedback"></div></div>${challengeChoice('bd-s09-c5','D5 · ¿Por qué RRF es útil aquí?',[['rank_fusion','Fusiona posiciones sin asumir que BM25 y coseno tienen la misma escala'],['sum_raw_scores','Suma directamente BM25 y coseno porque representan lo mismo'],['vector_only','Descarta siempre el ranking lexical']])}</div><div class="stack"><table class="table"><tr><th>#</th><th>Lexical</th><th>Semántico</th><th>Fusión</th></tr><tr><td>1</td><td>D3</td><td>D8</td><td>D8</td></tr><tr><td>2</td><td>D8</td><td>D3</td><td>D3</td></tr><tr><td>3</td><td>D1</td><td>D5</td><td>D5</td></tr><tr><td>4</td><td>D5</td><td>D9</td><td>D1</td></tr></table>${svgRrf()}</div></div>`},
 {t:'Evaluación',k:'LAB · RELEVANCIA Y PRECISION@K',h:'Mejor buscador no significa score más alto.',b:`<div class="body cols"><div class="stack"><div class="card def"><b>Juicio de relevancia</b>Etiqueta humana o de referencia que indica si un documento responde a la necesidad definida.</div><div class="card def"><b>Precision@k</b>Fracción de los k primeros resultados que fueron juzgados relevantes.</div><div class="eq">Precision@k = relevantes en Top-k / k</div><div class="card ex"><b>Ejemplo</b>Si 4 de los primeros 5 documentos son relevantes, Precision@5 = 0.80.</div><table class="table"><tr><th>Top-5</th><th>Juicio</th></tr><tr><td>D1</td><td>✓ relevante</td></tr><tr><td>D2</td><td>✓ relevante</td></tr><tr><td>D3</td><td>✗ falso positivo</td></tr></table></div><div class="lab"><p>Marca resultados relevantes:</p><div class="precisionBtns" id="pBtns"></div><div id="pOut" class="meter">P@5 = 0.00</div><button class="btn ghost" onclick="resetP()">Restablecer</button><div class="note warn"><b>Límite:</b> Precision@k solo es tan buena como los juicios de relevancia usados como referencia.</div></div></div>`},
-{t:'Evidencia final',k:'LAB 9 · CONSTRUCTOR DE EVIDENCIA',h:'Construye evidencia antes de defender.',b:`<div class="body cols"><div class="lab"><label>Consulta propia</label><input id="evQ" value="mantenimiento de aeronaves militares"><label>Resultado defendible</label><input id="evGood" value="mantenimiento programado de aeronaves KFIR"><label>Falso positivo</label><input id="evBad" value="mantenimiento de infraestructura militar"><label>Alternativa descartada</label><input id="evAlt" value="usar solo coincidencia literal"><label>Límite</label><input id="evLim" value="el score no prueba relevancia sin lectura humana"><button class="btn" onclick="evidence()">Generar JSON</button><a class="btn alt" target="_blank" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb">Continuar en Colab ↗</a></div><div class="stack"><pre id="evOut">{}</pre><div class="card def"><b>Evidencia reproducible</b>Salida que permite reconstruir qué consulta, configuración, resultados y decisión produjeron tu conclusión.</div><div class="note">La presentación ayuda a pensar. El cuaderno ejecuta el pipeline completo y produce el archivo final.</div></div></div>`},
+{t:'Evidencia final',k:'LAB 9 · EVIDENCIA DESDE EL CUADERNO',h:'La evidencia se genera a partir de la ejecución; no escribes respuestas abiertas aquí.',b:`<div class="body cols"><div class="stack"><div class="card def"><b>Qué se conserva</b>Consulta ejecutada, Top-5 lexical, Top-5 semántico, Top-5 híbrido, Precision@5, configuración y trazabilidad.</div><div class="card def"><b>Qué haces</b>Ejecuta el cuaderno y completa únicamente controles estructurados del experimento. El LMS recibe el resultado verificable.</div><div class="note warn"><b>Sin respuesta abierta:</b> esta diapositiva no pide texto libre ni una publicación en muro.</div></div><div class="lab"><a class="btn alt" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb">Abrir cuaderno ↗</a><a class="btn ghost" href="../lms/session.html?s=9">Volver al módulo</a><div class="feedback">El estado de la evidencia aparece en el LMS cuando el cuaderno la sincroniza.</div></div></div>`},
 {t:"Taller autónomo",k:"DESPUÉS DE CLASE · ≥ 6 HORAS",h:"El trabajo autónomo debe reconstruir el flujo, no repetir capturas.",b:"<div class=\"body cols bigleft\"><table class=\"table\"><tr><th>Tiempo</th><th>Trabajo</th><th>Evidencia verificable</th></tr><tr><td>0:00–1:00</td><td>Preparar corpus y 3 consultas propias: exacta, paráfrasis y mixta.</td><td><code>consultas.csv</code> + justificación</td></tr><tr><td>1:00–2:10</td><td>Baseline BM25 sobre las mismas consultas.</td><td>Top-5 lexical + lectura de errores</td></tr><tr><td>2:10–3:30</td><td>Embeddings y búsqueda semántica.</td><td>Top-5 semántico + falsos positivos</td></tr><tr><td>3:30–4:30</td><td>Variar chunking, k o numCandidates; Atlas o ruta local.</td><td>tabla de experimento</td></tr><tr><td>4:30–5:20</td><td>Híbrida + juicios de relevancia.</td><td>ranking fusionado + Precision@5</td></tr><tr><td>5:20–6:00+</td><td>Informe, límites y reproducción desde cero.</td><td><code>evidencia.json</code> + notebook ejecutado</td></tr></table><div class=\"stack\"><div class=\"card def\"><b>Criterio de aceptación</b>Otra persona debe poder reconstruir consulta, modelo, parámetros, Top-k y decisión con tus archivos.</div><div class=\"card ex\"><b>Debe incluir</b>dos resultados defendibles, al menos un falso positivo, una alternativa descartada y un límite.</div><div class=\"card ex\"><b>Comprobación</b>conteos, nombres de modelo/índice, parámetros usados y resultados guardados; no solo pantallazos.</div><div class=\"note warn\"><b>No vale:</b> una captura del Top-5 sin código/configuración ni explicación de relevancia.</div></div></div>"},
 {t:"Cierre",k:"EXIT TICKET · PASAPORTE S09",h:"Un documento obtuvo score coseno 0.91.",dark:1,b:"<div class=\"body cols bigleft\"><div class=\"stack\"><div class=\"card\"><b>Sí puedes afirmar</b><p>Está cerca de la consulta bajo <b>ese modelo</b>, <b>esa representación</b> y <b>esa función de similitud</b>.</p></div><div class=\"card danger\"><b>No puedes afirmar</b><p>Que tiene 91 % de probabilidad de ser relevante ni que sea automáticamente la respuesta correcta.</p></div><table class=\"table\"><tr><th>Si la necesidad es…</th><th>Piensa primero en…</th></tr><tr><td>ID, código o término exacto</td><td>Lexical</td></tr><tr><td>Paráfrasis / vocabulario distinto</td><td>Semántica</td></tr><tr><td>Exactitud + intención</td><td>Híbrida</td></tr></table></div><div class=\"stack\"><div class=\"card\"><b>Representar</b>texto → embedding.</div><div class=\"card\"><b>Recuperar</b>kNN / ANN → Top-k.</div><div class=\"card\"><b>Operar</b>colección + metadata + índice + pipeline.</div><div class=\"card\"><b>Evaluar</b>juicios de relevancia + Precision@k + falsos positivos.</div><div class=\"note warn\"><b>Puente a S10:</b> ya sabemos representar y recuperar texto; ahora necesitamos tuberías que lo extraigan, transformen y muevan con trazabilidad.</div></div></div>"},
 ];
@@ -205,7 +205,6 @@ function candDemo(){if(!window.cand)return;const v=Number(cand.value),cells=Math
 function buildVS(){if(!window.vsOut)return;const mode=vsMode?.value||'ann',limit=Number(lim?.value||5),candidates=Number(numc?.value||100);const q={$vectorSearch:{index:idxName?.value||'s09_vector_index',path:pathv?.value||'embedding',queryVector:'q',limit,filter:{entidad:'opcional'}}};if(mode==='enn'){q.$vectorSearch.exact=true}else{q.$vectorSearch.exact=false;q.$vectorSearch.numCandidates=candidates}vsOut.textContent=JSON.stringify(q,null,2);if(window.vsHint){vsHint.textContent=mode==='enn'?'ENN: exact=true; numCandidates no participa porque no aproximas la búsqueda.':('ANN: exploras '+candidates+' candidatos para devolver '+limit+' resultados'+(candidates<limit?' · ERROR: numCandidates debe ser ≥ limit.':'.'))}}
 function rrfDemo(){if(!window.rrfOut)return;const ranks={D8:[2,1],D3:[1,2],D5:[4,3],D1:[3,null]},d=rrfDoc?.value||'D8',r=ranks[d]||[],k=Math.max(1,Number(rrfK?.value||60));const parts=r.filter(x=>x!=null).map(x=>1/(k+x)),score=parts.reduce((a,b)=>a+b,0);rrfOut.textContent=d+'\nrank_constant = '+k+'\n'+r.map((x,i)=>x==null?'ranking '+(i+1)+': no aparece':'ranking '+(i+1)+': posición '+x+' → 1/('+k+'+'+x+')').join('\n')+'\nRRF = '+score.toFixed(5)+'\nLectura: al subir la constante, posiciones más bajas pierden menos influencia relativa.'}
 function initP(){if(!window.pBtns)return;pBtns.innerHTML=pState.map((v,i)=>`<button class="${v?'on':''}" onclick="pState[${i}]=1-pState[${i}];initP()">${v?'✓':'✗'}</button>`).join('');pOut.textContent='P@5 = '+(pState.reduce((a,b)=>a+b,0)/5).toFixed(2)}function resetP(){pState=[0,0,0,0,0];initP()}
-function evidence(){const o={consulta:evQ.value,resultado_defendible:evGood.value,falso_positivo:evBad.value,alternativa_descartada:evAlt.value,limite:evLim.value,nota:'Completar en Colab con Top-5 lexical, semántico e híbrido reales.'};evOut.textContent=JSON.stringify(o,null,2)}
 
 const L=window.BIGDATA_LMS,K=window.LMS;
 const esc=value=>L?.esc?L.esc(value):String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
@@ -231,7 +230,7 @@ function queueLabInteraction(code,el){
 }
 function injectLab3Evidence(lab){
   const existing=lab.querySelector('[data-evidence-kind="self-check"]');if(existing){const b=existing.querySelector('#lab3Submit');if(b)b.onclick=submitLab3Evidence;return;}
-  const box=document.createElement('div');box.className='evidence-box';box.dataset.evidenceKind='self-check';box.dataset.evidenceFor='bd-s09-lab3';box.innerHTML='<h4>Comprueba tu aprendizaje · LAB 3</h4><p class="mini">Cuenta cuántos de tus primeros 5 candidatos son claramente aeronáuticos. Regla del ejercicio: si son 4–5, mantén k=5; si son 0–3, amplía k. El servidor conoce tu ranking personalizado y verificará ambas respuestas.</p><div class="mini-grid"><label>¿Cuántos son claramente aeronáuticos?<input id="lab3Result" type="number" min="0" max="5" inputmode="numeric" placeholder="0–5"></label><label>Con ese resultado, ¿qué harías con k?<select id="lab3Decision"><option value="">Elige…</option><option value="mantener">Mantener k=5</option><option value="subir">Subir k para revisar más vecinos</option></select></label></div><button id="lab3Submit" class="btn alt" type="button">Comprobar</button><a class="btn ghost" href="../lms/class-wall.html?s=9&a=bd-s09-lab3">Muro del LAB 3</a><div id="lab3EvidenceStatus" class="feedback">Explora primero tu ranking y luego comprueba tu respuesta.</div>';
+  const box=document.createElement('div');box.className='evidence-box';box.dataset.evidenceKind='self-check';box.dataset.evidenceFor='bd-s09-lab3';box.innerHTML='<h4>Comprueba tu aprendizaje · LAB 3</h4><p class="mini">Cuenta cuántos de tus primeros 5 candidatos son claramente aeronáuticos. Regla del ejercicio: si son 4–5, mantén k=5; si son 0–3, amplía k. El servidor conoce tu ranking personalizado y verificará ambas respuestas.</p><div class="mini-grid"><label>¿Cuántos son claramente aeronáuticos?<input id="lab3Result" type="number" min="0" max="5" inputmode="numeric" placeholder="0–5"></label><label>Con ese resultado, ¿qué harías con k?<select id="lab3Decision"><option value="">Elige…</option><option value="mantener">Mantener k=5</option><option value="subir">Subir k para revisar más vecinos</option></select></label></div><button id="lab3Submit" class="btn alt" type="button">Comprobar</button><div id="lab3EvidenceStatus" class="feedback">Explora primero tu ranking y luego comprueba tu respuesta.</div>';
   lab.appendChild(box);box.querySelector('#lab3Submit').onclick=submitLab3Evidence;
 }
 async function submitLab3Evidence(){
@@ -243,9 +242,8 @@ async function submitLab3Evidence(){
     const x=await K.evidence('bd-s09-lab3',{result,decision},{source:'presentation'});
     if(x.queued){out.textContent='⟳ '+x.feedback;return}
     const ok=['correct','accepted'].includes(x.verdict);
-    out.textContent=ok?'✓ '+x.feedback+(x.completed?'':' Continúa con la transferencia breve.'):'✗ '+x.feedback;
-    if(ok&&!x.completed){const transfer=document.querySelector('[data-transfer-for="bd-s09-lab3"]');if(transfer)transfer.open=true}
-    await refreshStudentProgress();
+    out.textContent=ok?'✓ '+x.feedback:'✗ '+x.feedback;
+        await refreshStudentProgress();
   }catch(e){out.textContent='No se pudo comprobar: '+e.message}
   finally{btn.disabled=false}
 }
@@ -266,57 +264,12 @@ function shuffleChallengeOptions(){
 }
 function stepOptionValue(opt){return typeof opt==='object'?String(opt.value??''):String(opt)}
 function stepOptionLabel(opt){return typeof opt==='object'?String(opt.label??opt.value??''):String(opt)}
-const TRANSFER_CODES=new Set(['bd-s09-lab3','bd-s09-lab4','bd-s09-lab8']);
-const TRANSFER_LABELS={
-  'bd-s09-lab3':'LAB 3 · Top-k',
-  'bd-s09-lab4':'LAB 4 · BM25 vs semántica',
-  'bd-s09-lab8':'LAB 8 · RRF'
-};
-function transferState(code){
-  return (s09Model?.evidence||[]).find(e=>e.activity_code===code&&e.step_id==='transfer')||null;
-}
-function transferEvidencePanel(code,lab){
-  if(!TRANSFER_CODES.has(code)||lab.querySelector('[data-transfer-for="'+code+'"]'))return;
-  const evidence=transferState(code),payload=evidence?.payload||{},box=document.createElement('details');
-  box.className='evidence-box transfer-box';box.dataset.transferFor=code;
-  const state=evidence?.verdict==='accepted'?'✓ Aceptada':evidence?.verdict==='rejected'?'↺ Requiere ajuste':evidence?.verdict==='pending_review'?'⏳ Pendiente de revisión':'Pendiente de enviar';
-  const locked=['accepted','pending_review'].includes(evidence?.verdict);
-  const field=(id,label)=>'<label>'+esc(label)+'<textarea rows="2" data-transfer-field="'+id+'" placeholder="Escribe una evidencia concreta…">'+esc(payload[id]||'')+'</textarea></label>';
-  box.innerHTML='<summary>Transferencia breve · '+esc(state)+'</summary><div class="transfer-body"><p class="mini">Solo al terminar el LAB: registra qué observaste y qué decisión puedes defender. Esto sí es evidencia revisable; la autocomprobación anterior no lo es.</p><div class="mini-grid">'+
-    field('result','Resultado que observaste')+
-    field('decision','Decisión que defenderías')+
-    field('rejected_alternative','Alternativa descartada y por qué')+
-    field('interpretation','Cómo interpretas el resultado')+
-    field('limit','Límite concreto de tu conclusión')+
-    '</div><div class="actions"><button class="btn accent" type="button" data-submit-transfer="'+esc(code)+'" '+(locked?'disabled':'')+'>'+(evidence?.verdict==='rejected'?'Reenviar transferencia':'Enviar transferencia')+'</button></div><div class="feedback" data-transfer-status="'+esc(code)+'">'+esc(evidence?.feedback||'Completa primero la autocomprobación del LAB y luego envía esta transferencia.')+'</div></div>';
-  lab.appendChild(box);
-  const btn=box.querySelector('[data-submit-transfer]');
-  if(btn)btn.onclick=()=>submitTransferEvidence(code,box);
-}
-async function submitTransferEvidence(code,box){
-  const btn=box.querySelector('[data-submit-transfer]'),out=box.querySelector('[data-transfer-status]');
-  if(!L?.auth?.()?.token){out.textContent='Entra por el LMS para enviar la transferencia.';return}
-  const payload={};
-  for(const el of box.querySelectorAll('[data-transfer-field]')){
-    const value=String(el.value||'').trim();
-    if(value.length<12){out.textContent='Completa cada campo con una respuesta concreta de al menos 12 caracteres.';el.focus();return}
-    payload[el.dataset.transferField]=value;
-  }
-  btn.disabled=true;out.textContent='Guardando evidencia…';
-  try{
-    const x=await K.evidence(code,payload,{source:'presentation-transfer'});
-    if(x.queued){out.textContent='⟳ '+x.feedback;return}
-    out.textContent='⏳ '+x.feedback;
-    await refreshStudentProgress();
-  }catch(e){out.textContent='No se pudo enviar: '+e.message;btn.disabled=false}
-}
-
 function lab9EvidencePanel(lab){
   if(lab.querySelector('[data-evidence-for="bd-s09-lab9"]'))return;
   const box=document.createElement('div');box.className='evidence-box';box.dataset.evidenceFor='bd-s09-lab9';box.dataset.evidenceKind='authentic';
   const evidence=(s09Model?.evidence||[]).find(e=>e.activity_code==='bd-s09-lab9');
   const state=evidence?.verdict==='accepted'?'✓ Evidencia aceptada por el docente':evidence?.verdict==='rejected'?'↺ Requiere ajustes: '+String(evidence.feedback||'Revisa el feedback docente.'):evidence?.verdict==='pending_review'?'⏳ Evidencia enviada · pendiente de revisión docente':'Aún no has sincronizado la evidencia final desde Colab.';
-  box.innerHTML='<h4>Evidencia auténtica · LAB 9</h4><p class="mini">La autocomprobación de la presentación no completa esta evidencia. Ejecuta el cuaderno, construye tu consulta y rankings, argumenta tu decisión, alternativa y límite, y envíala con el código del módulo.</p><div class="actions"><a class="btn alt" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb">Abrir cuaderno</a><a class="btn ghost" href="../lms/session.html?s=9">Generar código</a></div><div class="feedback">'+esc(state)+'</div>';
+  box.innerHTML='<h4>Evidencia auténtica · LAB 9</h4><p class="mini">La autocomprobación de la presentación no completa esta evidencia. Ejecuta el cuaderno: la evidencia se construye desde los resultados y controles estructurados del experimento y se envía con el código del módulo.</p><div class="actions"><a class="btn alt" target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb">Abrir cuaderno</a><a class="btn ghost" href="../lms/session.html?s=9">Generar código</a></div><div class="feedback">'+esc(state)+'</div>';
   lab.appendChild(box);
 }
 function genericEvidencePanel(code,lab,catalog){
@@ -328,7 +281,7 @@ function genericEvidencePanel(code,lab,catalog){
     if(step.type==='number')return '<label>'+esc(label)+'<input type="number"'+attrs+' inputmode="decimal"></label>';
     return '';
   }).join('');
-  box.innerHTML='<h4>Autocomprobación</h4><p class="mini">Comprueba tu aprendizaje con lo que acabas de explorar. Puedes reintentar: no es nota ni evidencia de competencia.</p><div class="mini-grid">'+fields+'</div><div class="actions"><button class="btn alt" type="button" data-submit-evidence="'+esc(code)+'">Comprobar</button><a class="btn ghost" href="../lms/class-wall.html?s=9&a='+encodeURIComponent(code)+'">Muro del LAB</a></div><div class="feedback" data-evidence-status="'+esc(code)+'">Explora el LAB y luego comprueba tus respuestas.</div>';
+  box.innerHTML='<h4>Autocomprobación</h4><p class="mini">Comprueba tu aprendizaje con lo que acabas de explorar. Puedes reintentar: no es nota ni evidencia de competencia.</p><div class="mini-grid">'+fields+'</div><div class="actions"><button class="btn alt" type="button" data-submit-evidence="'+esc(code)+'">Comprobar</button></div><div class="feedback" data-evidence-status="'+esc(code)+'">Explora el LAB y luego comprueba tus respuestas.</div>';
   lab.appendChild(box);
   box.querySelector('[data-submit-evidence]').onclick=()=>submitGenericEvidence(code,box);
 }
@@ -341,8 +294,7 @@ async function submitGenericEvidence(code,box){
     const x=await K.evidence(code,payload,{source:'presentation'});
     if(x.queued){out.textContent='⟳ '+x.feedback;return}
     const ok=['correct','accepted'].includes(x.verdict);
-    out.textContent=ok?'✓ '+x.feedback+(x.completed?'':' Continúa con la transferencia breve.'):'✗ '+x.feedback;
-    if(ok&&!x.completed&&TRANSFER_CODES.has(code)){const transfer=document.querySelector('[data-transfer-for="'+code+'"]');if(transfer)transfer.open=true}
+    out.textContent=ok?'✓ '+x.feedback:'✗ '+x.feedback;
     await refreshStudentProgress();
   }catch(e){out.textContent='No se pudo comprobar: '+e.message}finally{btn.disabled=false}
 }
@@ -354,7 +306,6 @@ function renderEvidencePanels(){
     if(code==='bd-s09-lab3')injectLab3Evidence(lab);
     else if(code==='bd-s09-lab9'&&cats.get(code)?.evaluator==='authentic-review')lab9EvidencePanel(lab);
     else if(cats.has(code))genericEvidencePanel(code,lab,cats.get(code));
-    if(TRANSFER_CODES.has(code))transferEvidencePanel(code,lab);
   });
 }
 function wireLabs(){
@@ -428,8 +379,8 @@ function renderSessionControls(){
   if(!banner||!s09Model)return;
   const hint=activeControl('hint'),slide=activeControl('slide');
   const closed=(s09Model.controls||[]).filter(c=>c.control_type==='close_lab').map(c=>String(c.payload?.activity_code||''));
-  document.querySelectorAll('[data-evidence-for],[data-transfer-for]').forEach(box=>{
-    const code=box.dataset.evidenceFor||box.dataset.transferFor,isClosed=closed.includes(code),btn=box.querySelector('[data-submit-evidence],[data-submit-transfer]');
+  document.querySelectorAll('[data-evidence-for]').forEach(box=>{
+    const code=box.dataset.evidenceFor,isClosed=closed.includes(code),btn=box.querySelector('[data-submit-evidence]');
     if(btn)btn.disabled=isClosed;
     box.classList.toggle('lab-closed-by-teacher',isClosed);
     let msg=box.querySelector('[data-teacher-lab-state]');
