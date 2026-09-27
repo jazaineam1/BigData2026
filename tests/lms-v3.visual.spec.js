@@ -128,7 +128,6 @@ const sessionModel = {
 
 async function mockSessionApi(page, role='student', seen=null, modelOverride=null) {
   await mockAuth(page,role);
-  let wallPublished=false;
   await page.route('**/functions/v1/bigdata-session**', async route => {
     const req=route.request(),url=new URL(req.url());
     const action=url.searchParams.get('action');
@@ -141,11 +140,6 @@ async function mockSessionApi(page, role='student', seen=null, modelOverride=nul
     const body=req.postDataJSON?.()||{};if(seen)seen.push(body);
     if(body.action==='lab_code')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,code:'ABCD2345',expires_at:'2099-12-31T23:59:59Z'})});
     if(body.action==='evidence')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,completed:true,verdict:'correct',feedback:'Resultado verificado.'})});
-    if(body.action==='wall_post'){wallPublished=true;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,post:{id:'p1'}})})}
-    if(body.action==='wall_list'){
-      const result=wallPublished?{viewer:sessionModel.viewer,activity:sessionModel.activities.find(a=>a.code==='bd-s09-lab3'),can_view:true,posts:[{id:'p1',author:'Tú',body:'Mantendría k=5 porque el Top-5 ya concentra candidatos aeronáuticos; todavía necesito juicios humanos.',status:'visible',created_at:'2099-01-01T00:00:00Z',reactions:{useful:0,same_doubt:0},my_reactions:[]}]}:{viewer:sessionModel.viewer,activity:sessionModel.activities.find(a=>a.code==='bd-s09-lab3'),can_view:false,posts:[],reason:'publish_first'};
-      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(result)})
-    }
     return route.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});
   });
 }
@@ -299,18 +293,16 @@ test('LAB 3 se autocorrige sin campos abiertos ni desbordes', async ({ page }) =
 });
 
 
-test('muro de clase exige publicar antes de ver', async ({ page }) => {
+test('S09 sin muro abierto ni respuestas evaluables libres', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
   await mockSessionApi(page,'student');
-  await page.goto('/lms/class-wall.html?s=9&a=bd-s09-lab3');
-  await expect(page.getByText('Publica tu aporte para abrir el muro.')).toBeVisible();
-  await page.locator('#body').fill('Mantendría k=5 porque el Top-5 ya concentra candidatos aeronáuticos; todavía necesito juicios humanos.');
-  await page.getByRole('button',{name:'Publicar'}).click();
-  await expect(page.getByText('Mantendría k=5 porque el Top-5 ya concentra candidatos aeronáuticos; todavía necesito juicios humanos.')).toBeVisible();
-  await assertNoHorizontalOverflow(page,'class wall mobile');
-  await assertA11y(page,'class wall');
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s17');
+  await expect(page.locator('a[href*="class-wall.html"]')).toHaveCount(0);
+  await expect(page.locator('[data-transfer-for]')).toHaveCount(0);
+  await expect(page.locator('[data-transfer-field]')).toHaveCount(0);
+  await expect(page.locator('.slide.on [data-evidence-for] textarea')).toHaveCount(0);
+  await assertNoHorizontalOverflow(page,'S09 sin muro mobile');
 });
-
 
 test('solicitud pública no envía Authorization aunque exista sesión LMS', async ({ page }) => {
   let authHeader = null;
