@@ -5,6 +5,7 @@ wall=(ROOT/"lms/wall.html").read_text(encoding="utf-8")
 backend=(ROOT/"infraestructura/lms/functions/bigdata-session/index.ts").read_text(encoding="utf-8")
 client=(ROOT/"lms/assets/lms-realtime.js").read_text(encoding="utf-8")
 migration=(ROOT/"infraestructura/lms/lms-realtime-broadcast-v12.sql").read_text(encoding="utf-8")
+cleanup=(ROOT/"infraestructura/lms/lms-realtime-legacy-cleanup-v13.sql").read_text(encoding="utf-8")
 checks=[
  ("estudiante solo escucha controles", "scopes:['controls']" in deck and "scopes:['controls','progress']" not in deck),
  ("poll estudiante espaciado", "30000" in deck and "studentTimer=setInterval" in deck),
@@ -18,6 +19,8 @@ checks=[
  ("payload Realtime sin PII", "payload:{course_code:COURSE,session_number:n,scope}" in backend and "user_id" not in backend[backend.index('async function realtimeSignal'):backend.index('async function sessionControls')]),
  ("tabla legacy sale de publicación", "alter publication supabase_realtime drop table public.bd_realtime_signals" in migration),
  ("cron legacy se retira", "cron.unschedule('bigdata-prune-realtime-signals')" in migration),
+ ("filas legacy se vacían", "delete from public.bd_realtime_signals" in cleanup.lower()),
+ ("lectura cliente legacy revocada", "drop policy if exists bd_realtime_signals_public_read" in cleanup.lower() and "revoke select on table public.bd_realtime_signals" in cleanup.lower()),
 ]
 failed=[n for n,ok in checks if not ok]
 for n,ok in checks: print(("OK   " if ok else "FAIL ")+n)
