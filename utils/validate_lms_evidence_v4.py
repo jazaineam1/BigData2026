@@ -14,6 +14,7 @@ def read(path):
 
 index=read("index.html")
 migration=read("infraestructura/lms/lms-evidence-v4.sql")
+deterministic=read("infraestructura/lms/lms-s09-deterministic-v51.sql")
 backend=read("infraestructura/lms/functions/bigdata-session/index.ts")
 client=read("lms/assets/bigdata-lms.js")
 session=read("lms/session.html")
@@ -39,7 +40,11 @@ checks=[
  ("tablas de evidencia protegidas", all(x in migration for x in ["bd_activity_catalog","bd_evidence","bd_lab_codes","enable row level security","revoke all"])),
  ("muro de clase protegido", all(x in migration for x in ["bd_wall_posts","bd_wall_reactions"])),
  ("12 LAB declarados", all(x in migration for x in labs)),
- ("LAB3 seeded-numeric", "s09_topk_aero_count" in migration and "'bd-s09-lab3','seeded-numeric'" in migration),
+ ("LAB3 seeded-numeric", "s09_topk_aero_count" in deterministic and "evaluator='seeded-numeric'" in deterministic and "code='bd-s09-lab3'" in deterministic),
+ ("LAB S09 autocorregidos", deterministic.count("evaluator='choice-hash'")>=11 and "version=2" in deterministic),
+ ("backend choice-hash", 'catalog.evaluator==="choice-hash"' in backend and "await sha256(v)" in backend),
+ ("LAB3 sin texto libre", "lab3Alternative" not in deck and "lab3Limit" not in deck and "Comprueba tu aprendizaje · LAB 3" in deck),
+ ("paneles determinísticos", "La corrección es automática e inmediata." in deck and "stepOptionValue" in deck),
  ("backend comprueba errores", 'failIf(eventError,"No se pudo registrar el evento")' in backend and "failIf(evidenceError" in backend),
  ("backend evidencia", 'action==="evidence"' in backend and "submitEvidence" in backend and "bd_evidence" in backend),
  ("backend código Colab", 'action==="lab_code"' in backend and 'action==="evidence_by_code"' in backend and "bd_lab_codes" in backend),
@@ -55,7 +60,7 @@ checks=[
  ("muro anonimiza pares", "Compañero " in backend and "Tus compañeros ven un alias" in class_wall),
  ("S09 instrumenta 12 LAB", "LAB_BY_SLIDE" in deck and all(x in deck for x in labs)),
  ("S09 envía lab_interaction", "lab_interaction" in deck and "queueLabInteraction" in deck),
- ("S09 LAB3 registra evidencia", "submitLab3Evidence" in deck and "bd-s09-lab3" in deck and "Resultado propio" in deck),
+ ("S09 LAB3 registra evidencia", "submitLab3Evidence" in deck and "bd-s09-lab3" in deck and "¿Cuántos son claramente aeronáuticos?" in deck),
  ("Colab no recibe bearer", "Authorization" not in generator and "Authorization" not in notebook),
  ("Colab usa código efímero", "LMSBridge" in generator and "evidence_by_code" in generator and "LMSBridge" in notebook),
  ("link de notebook vuelve a módulo universal", "lms/session.html?s=9" in generator and "lms/session.html?s=9" in notebook),
@@ -67,7 +72,8 @@ try:
     nb=json.loads(notebook)
     sources=["".join(c.get("source",[])) for c in nb.get("cells",[])]
     if not any("class LMSBridge" in s for s in sources): errors.append("Falla: notebook generado sin LMSBridge")
-    if not any('lms.registrar("bd-s09-lab9"' in s for s in sources): errors.append("Falla: notebook sin envío formativo final")
+    if any('lms.registrar("bd-s09-lab9"' in s for s in sources): errors.append("Falla: notebook todavía completa LAB9 con texto libre")
+    if not any("Los LAB que completan progreso se comprueban automáticamente" in s for s in sources): errors.append("Falla: notebook sin cierre alineado a autocorrección")
 except Exception as ex:
     errors.append("Notebook inválido: "+str(ex))
 
@@ -89,7 +95,8 @@ if errors:
 print("LMS EVIDENCE V4: OK")
 print(" - constraint de eventos versionada")
 print(" - 12 LAB declarados e instrumentados")
-print(" - LAB3 evidencia seeded end-to-end")
+print(" - 12 LAB S09 con autocorrección determinística")
+print(" - LAB3 seeded sin campos abiertos")
 print(" - código Colab efímero sin bearer")
 print(" - Mi progreso y WALL consumen evidencia")
 print(" - reset y señal de atasco consistentes")
