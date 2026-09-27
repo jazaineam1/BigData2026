@@ -65,15 +65,16 @@ const hideAuthNav=()=>{L.$('accountTop')?.classList.add('hidden');L.$('progressT
 let model=null,progress=null;
 const pmap=()=>new Map((progress?.sessions||[]).map(s=>[Number(s.session_number),s]));
 function currentSession(){
-  const rows=progress?.sessions||[],started=rows.filter(s=>s.session_progress&&s.session_progress.status!=='completed');
-  if(started.length)return started.at(-1);
+  const rows=progress?.sessions||[],now=Date.now(),visible=rows.filter(s=>s.status==='visible');
+  const scheduled=visible.filter(s=>s.starts_at&&Number.isFinite(Date.parse(s.starts_at))).sort((a,b)=>Date.parse(a.starts_at)-Date.parse(b.starts_at));
+  const active=scheduled.find(s=>{const start=Date.parse(s.starts_at),minutes=Math.max(180,Number(s.metadata?.estimated_minutes||180));return start<=now&&now<start+minutes*60000});
+  if(active)return active;
+  const upcoming=scheduled.filter(s=>Date.parse(s.starts_at)>now);
+  if(upcoming.length)return upcoming[0];
   const nextN=Number(model?.next_session?.session_number||0);
   if(nextN){const next=rows.find(s=>Number(s.session_number)===nextN);if(next)return next}
-  const now=Date.now(),visible=rows.filter(s=>s.status==='visible');
-  const upcoming=visible.filter(s=>s.starts_at&&Date.parse(s.starts_at)>=now).sort((a,b)=>Date.parse(a.starts_at)-Date.parse(b.starts_at));
-  if(upcoming.length)return upcoming[0];
-  const past=visible.filter(s=>!s.starts_at||Date.parse(s.starts_at)<=now);
-  return past.at(-1)||visible[0]||rows.at(-1)||null;
+  const started=visible.filter(s=>s.session_progress&&s.session_progress.status!=='completed');
+  return started.at(-1)||visible.at(-1)||rows.at(-1)||null;
 }
 function renderNext(){
   const a=(model.assignments||[]).find(x=>!x.submission&&!x.overdue),s=currentSession();
