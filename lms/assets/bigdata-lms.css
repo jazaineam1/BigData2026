@@ -46,6 +46,8 @@ svg{max-width:100%}
 .viz-frame{width:100%;max-width:100%;min-width:0;min-height:0;overflow:hidden;contain:layout paint;display:grid;place-items:center}
 .viz-frame>svg,.viz-frame>canvas,.viz-frame>img{display:block;max-width:100%;max-height:100%;width:100%;height:auto;overflow:hidden}
 :focus-visible{outline:3px solid rgba(11,134,137,.45);outline-offset:3px}
+.skip-link{position:fixed;left:12px;top:10px;z-index:9999;transform:translateY(-160%);background:#fff;color:var(--uc-navy);border:2px solid var(--uc-navy);border-radius:9px;padding:10px 13px;font-weight:900;text-decoration:none;box-shadow:0 8px 24px #14215324}.skip-link:focus{transform:translateY(0)}
+@media(forced-colors:active){.btn,.input,.card,.navlink,.skip-link{border:1px solid ButtonText}.progress i{background:Highlight}.pill{border:1px solid CanvasText}}
 .appbar .inner{overflow-x:auto;scrollbar-width:thin}
 @media(max-width:560px){.appbar .inner{gap:6px}.navlink,.appbar button{min-height:44px}.tablewrap{max-width:100%}}
 
