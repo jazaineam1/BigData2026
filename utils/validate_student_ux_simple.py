@@ -15,6 +15,7 @@ def read(path):
 portal=read("lms/portal.html")
 session=read("lms/session.html")
 progress=read("lms/progress.html")
+s08=read("lms/session-08.html")
 
 def between(src,a,b):
     i=src.find(a); j=src.find(b,i+len(a))
@@ -42,12 +43,15 @@ checks=[
     ("Mi progreso sin analítica estudiante", "L.core('analytics')" not in progress and "renderAnalytics" not in progress),
     ("Navegación Progreso mínima", all(x not in progress_header for x in ['href="assignments.html"','href="competencies.html"','href="collaboration.html"']) and 'href="account.html"' in progress_header),
     ("Tracking permanece fuera de la UI", "K.track('session_entered'" in session and "activity_progress" in session),
+    ("S08 estudiante una sola ruta", all(x in s08 for x in ["Tu equipo","Abre el taller en Colab","Registra la evidencia del grupo","Progreso del equipo"])),
+    ("S08 no duplica contenido del notebook", all(x not in s08 for x in ["Rúbrica oficial · 100 puntos","Trabajo fuera de clase","6–8 horas","Qué cuenta como completado","s08-secoppipeline.html"])),
+    ("S08 no expone telemetría ni acciones repetidas", all(x not in s08 for x in ["Tiempo activo","Trabajar etapa"]) and "<details><summary>Ver avance por etapa</summary>" in s08),
 ]
 
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
 
-for name,html in [("portal",portal),("session",session),("progress",progress)]:
+for name,html in [("portal",portal),("session",session),("progress",progress),("s08",s08)]:
     scripts=re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>",html,re.S|re.I)
     for i,script in enumerate(scripts,1):
         with tempfile.NamedTemporaryFile("w",suffix=".js",encoding="utf-8",delete=False) as fh:
@@ -67,3 +71,4 @@ print(" - Aula: qué hacer ahora + sesiones")
 print(" - Sesión: siguiente acción + máximo dos recursos")
 print(" - Progreso: Sin empezar / En curso / Lista")
 print(" - Analítica y telemetría permanecen en backend, no en la vista estudiante")
+print(" - S08: equipo → notebook → entrega → estado, sin duplicar el cuaderno")
