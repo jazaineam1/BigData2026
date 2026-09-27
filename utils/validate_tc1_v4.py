@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import hashlib, json, re, subprocess, sys, tempfile
+import ast, hashlib, json, re, subprocess, sys, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 errors=[]
@@ -33,22 +33,26 @@ all_src="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
 checks=[
     ("notebook sin versión visible", "# TC1 · SECOP Data Pipeline" in all_src and "TC1 V4" not in all_src),
     ("dos endpoints SECOP", "p6dx-8zbt" in all_src and "jbjy-vk9h" in all_src),
+    ("campo fecha procesos correcto", "fecha_de_publicacion_del" in all_src and '"fecha_de_publicacion"' not in all_src),
+    ("corte dinámico 2025-2026", "FECHA_INI = \"2025-01-01T00:00:00.000\"" in all_src and "latest_available" in all_src and "LATEST_PROCESOS" in all_src and "LATEST_CONTRATOS" in all_src),
+    ("snapshot completo", "max_rows=TOTAL_PROCESOS" in all_src and "max_rows=TOTAL_CONTRATOS" in all_src and "TOTAL_PROCESOS = count_rows" in all_src),
+    ("OUT robusto", 'OUT = Path(globals().get("OUT", "entrega_tc1"))' in all_src),
     ("ThreadPoolExecutor", "ThreadPoolExecutor" in all_src),
     ("micro-lab antes del reto", "demo_dos_paginas" in all_src and "no suma puntos" in all_src),
     ("retry/backoff", "RETRY_STATUS" in all_src and "base_backoff" in all_src),
     ("orden estable", "$order" in all_src and "id_del_proceso ASC" in all_src),
     ("hash canónico", "canonical_hash" in all_src and "same_hash" in all_src),
-    ("workers limitados", "MAX_WORKERS = 4" in all_src and "2–6 workers" in all_src),
+    ("workers limitados", "MAX_WORKERS = 4" in all_src and "2 y 6" in all_src),
     ("RAW parquet", 'RAW = OUT / "raw"' in all_src and "to_parquet" in all_src),
     ("Atlas idempotente", "bulk_write" in all_src and "UpdateOne" in all_src and "upsert=True" in all_src),
     ("decision log", "decision_log" in all_src),
-    ("carga mínima 6h", "6–8 horas por grupo" in all_src and "Dedicación mínima prevista por grupo: 6 horas" in all_src),
-    ("microdefensa grupal", "defensa_grupal" in all_src and "06_microdefensa_grupal.json" in all_src and "E6_microdefensa_grupal" in validator),
-    ("validador actual", 'VERSION = "2026-09-26-secoppipeline"' in validator),
+    ("sin estimaciones de duración", not re.search(r"6\s*[–-]\s*8\s*horas|mínimo\s+6\s+horas|180\s+minutos|estimated_minutes", all_src+"\n"+tutorial+"\n"+s08+"\n"+sql, re.I)),
+    ("preguntas del caso", all(x in all_src for x in ["Cobertura contractual","Concentración y revisión","Conectividad de proveedores"]) and "respuestas_caso" in all_src and "06_respuestas_caso.json" in all_src),
+    ("validador actual", 'VERSION = "2026-09-27-secoppipeline"' in validator),
     ("E1 adquisición completa", all(x in validator for x in ["E1_contrato_y_query","E1_descarga_secuencial","E1_concurrencia_equivalente","E1_trazabilidad_calidad"])),
     ("E2 idempotencia", "E2_atlas_idempotente" in validator and "E2_indices" in validator),
     ("no speedup mínimo", "speedup >=" not in validator.lower()),
-    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-09-26-secoppipeline" in edge and "security_no_secrets" in edge),
+    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-09-27-secoppipeline" in edge and "security_no_secrets" in edge),
     ("gate de secretos", "secret_patterns" in validator and '"gates":gates' in validator),
     ("backend persiste versión real", "manifest_version:m.version" in edge and "validator_version:m.version" in edge),
     ("calificación grupal", "tc1GroupContext" in edge and "syncManifestGroupGradebook" in edge and "lms_group_submissions_v2" in edge and "Calificación grupal TC1" in edge),
@@ -63,13 +67,13 @@ checks=[
     ("Pages referencia", "test -f _site/assets/tutoriales/s08-secoppipeline.html" in pages and "Talleres/Taller_Control_1.md" not in pages),
     ("builder canónico", "Cuadernos" in builder and "Taller_Control_1.ipynb" in builder),
     ("portada sin bloque redundante", "Aprender = comprender, practicar, comprobar y transferir." not in index and "La evidencia importa más que completar una pantalla." not in index and 'id="metodo"' not in index),
-    ("LMS declara 6h", "mínimo 6 horas por grupo" in s08 and "'estimated_minutes',360" in sql),
+    ("LMS sin duración estimada", "mínimo 6 horas" not in s08 and "6–8 horas" not in s08 and "estimated_minutes" not in sql),
     ("LMS grupal en SQL", "lms_assignment_group_settings_v2" in sql and "'group_assessment',true" in sql and "Proyecto grupal" in sql),
     ("manifest único por grupo", "Este manifest ya fue registrado por otro equipo" in edge),
     ("rúbrica detallada visible", "Rúbrica oficial · 100 puntos" in s08 and "Concurrencia equivalente" in s08 and "Microdefensa grupal" in s08),
     ("evidencia auditable requerida", "evidenceUrl" in s08 and "evidence_url" in edge and "carpeta de evidencia" in sql),
     ("revisión docente abre evidencia", "Abrir evidencia del grupo" in teacher_collab and "Desglose automático" in teacher_collab),
-    ("notebook incluye rúbrica detallada", "Contrato de datos y consulta SoQL" in all_src and "Microdefensa grupal basada en resultados propios" in all_src),
+    ("notebook incluye rúbrica detallada", "Contrato de datos y consulta SoQL" in all_src and "Respuestas a las preguntas del caso" in all_src),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
@@ -82,6 +86,17 @@ if sum(pts)!=100:
 # Notebook sin salidas/soluciones incrustadas
 if any(c.get("cell_type")=="code" and c.get("outputs") for c in nb.get("cells",[])):
     errors.append("Notebook de estudiante contiene outputs preejecutados")
+
+# Sintaxis Python de las celdas (ignorando comandos de shell de Colab)
+for i,cell in enumerate(nb.get("cells",[])):
+    if cell.get("cell_type")!="code":
+        continue
+    src="".join(cell.get("source",[]))
+    py="\n".join(line for line in src.splitlines() if not line.lstrip().startswith("!"))
+    try:
+        ast.parse(py)
+    except SyntaxError as e:
+        errors.append(f"Notebook Python inválido en celda {i}: {e}")
 
 # JavaScript del tutorial
 scripts=re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>",tutorial,re.S|re.I)
