@@ -42,7 +42,7 @@ html[data-lms-auth="none"] #loginCard{display:block}
 <section class="card continue-card"><div class="ey">Qué hacer ahora</div><h2 id="nextTitle">Buscando tu siguiente paso…</h2><p id="nextText" class="muted"></p><div id="nextActions" class="actions"></div></section>
 <section class="card"><div class="ey">Hola</div><h2 id="who">Estudiante</h2><p id="role" class="muted"></p><div class="account-tools">
 <a class="btn alt" href="account.html">Mi cuenta</a>
-<a id="teacherCourse" class="btn primary hidden" href="teacher-course.html">Gestor del curso</a><a id="teacherAnalytics" class="btn alt hidden" href="teacher-analytics.html">Analítica</a><a id="teacherQuizzes" class="btn alt hidden" href="teacher-quizzes.html">Quizzes</a><a id="teacherInterop" class="btn alt hidden" href="teacher-interoperability.html">Interoperabilidad</a><a id="teacherOps" class="btn alt hidden" href="admin-operations.html">Operaciones</a><a id="teacherCollaboration" class="btn alt hidden" href="teacher-collaboration.html">Colaboración</a><a id="adminUsers" class="btn alt hidden" href="admin-users.html">Usuarios</a><a id="teacherWall" class="btn accent hidden" href="wall.html?s=9">WALL actual</a>
+<a id="teacherCourse" class="btn primary hidden" href="teacher-course.html">Gestor del curso</a><a id="teacherAnalytics" class="btn alt hidden" href="teacher-analytics.html">Analítica</a><a id="teacherQuizzes" class="btn alt hidden" href="teacher-quizzes.html">Quizzes</a><a id="teacherInterop" class="btn alt hidden" href="teacher-interoperability.html">Interoperabilidad</a><a id="teacherOps" class="btn alt hidden" href="admin-operations.html">Operaciones</a><a id="teacherCollaboration" class="btn alt hidden" href="teacher-collaboration.html">Colaboración</a><a id="adminUsers" class="btn alt hidden" href="admin-users.html">Usuarios</a><a id="teacherWall" class="btn accent hidden" href="teacher-wall.html">WALL S08</a>
 </div></section>
 </div>
 
@@ -66,13 +66,25 @@ let model=null,progress=null;
 const pmap=()=>new Map((progress?.sessions||[]).map(s=>[Number(s.session_number),s]));
 function currentSession(){
   const rows=progress?.sessions||[],started=rows.filter(s=>s.session_progress&&s.session_progress.status!=='completed');
-  return started.at(-1)||rows.filter(s=>s.status==='visible').at(-1)||rows.at(-1)||null;
+  if(started.length)return started.at(-1);
+  const nextN=Number(model?.next_session?.session_number||0);
+  if(nextN){const next=rows.find(s=>Number(s.session_number)===nextN);if(next)return next}
+  const now=Date.now(),visible=rows.filter(s=>s.status==='visible');
+  const upcoming=visible.filter(s=>s.starts_at&&Date.parse(s.starts_at)>=now).sort((a,b)=>Date.parse(a.starts_at)-Date.parse(b.starts_at));
+  if(upcoming.length)return upcoming[0];
+  const past=visible.filter(s=>!s.starts_at||Date.parse(s.starts_at)<=now);
+  return past.at(-1)||visible[0]||rows.at(-1)||null;
 }
 function renderNext(){
-  const a=(model.assignments||[]).find(x=>!x.submission&&!x.overdue);
-  const s=currentSession();
+  const a=(model.assignments||[]).find(x=>!x.submission&&!x.overdue),s=currentSession();
+  if(s&&a&&Number(a.session_number)===Number(s.session_number)){
+    const when=s.starts_at?' · '+L.fmtWhen(s.starts_at):'';
+    L.$('nextTitle').textContent='S'+String(s.session_number).padStart(2,'0')+' · '+s.title;
+    L.$('nextText').textContent='Esta es la próxima sesión'+when+'. La entrega se gestiona dentro de este módulo.';
+    L.$('nextActions').innerHTML='<a class="btn primary" href="session.html?s='+s.session_number+'">Abrir sesión</a>';return;
+  }
   if(a){L.$('nextTitle').textContent='Tienes una entrega pendiente';L.$('nextText').textContent=a.title+(a.due_at?' · vence '+L.fmtWhen(a.due_at):'');L.$('nextActions').innerHTML='<a class="btn primary" href="assignments.html">Revisar entrega</a>';return}
-  if(s){const p=s.session_progress;L.$('nextTitle').textContent=(p?'Continuar ':'Abrir ')+'S'+String(s.session_number).padStart(2,'0')+' · '+s.title;L.$('nextText').textContent=p?'Retoma exactamente donde quedaste.':(s.summary||'');L.$('nextActions').innerHTML='<a class="btn primary" href="session.html?s='+s.session_number+'">'+(p?'Continuar':'Abrir sesión')+'</a>';return}
+  if(s){const p=s.session_progress,when=s.starts_at?' · '+L.fmtWhen(s.starts_at):'';L.$('nextTitle').textContent=(p?'Continuar ':'Abrir ')+'S'+String(s.session_number).padStart(2,'0')+' · '+s.title;L.$('nextText').textContent=p?'Retoma exactamente donde quedaste.':((s.summary||'')+when);L.$('nextActions').innerHTML='<a class="btn primary" href="session.html?s='+s.session_number+'">'+(p?'Continuar':'Abrir sesión')+'</a>';return}
   L.$('nextTitle').textContent='No hay una siguiente actividad publicada';L.$('nextText').textContent='Cuando se publique una sesión aparecerá aquí.';L.$('nextActions').innerHTML='';
 }
 
@@ -92,7 +104,7 @@ function renderSessions(){
 function render(){
   setAuthState('verified');bootCard.style.display='none';loginCard.style.display='none';noEnroll.classList.add('hidden');home.classList.remove('hidden');showAuthNav({progress:true});
   const v=model.viewer||{};L.$('who').textContent=v.display_name||v.username;L.$('role').textContent=(v.role==='student'?'Estudiante':'Rol '+v.role)+' · Big Data 2026-2S';
-  if(['teacher','admin'].includes(v.role)){['teacherCourse','teacherAnalytics','teacherQuizzes','teacherInterop','teacherOps','teacherCollaboration','teacherWall','adminUsers','teacherCourseTop'].forEach(id=>L.$(id)?.classList.remove('hidden'));const cs=currentSession();if(cs)L.$('teacherWall').href='wall.html?s='+cs.session_number}
+  if(['teacher','admin'].includes(v.role)){['teacherCourse','teacherAnalytics','teacherQuizzes','teacherInterop','teacherOps','teacherCollaboration','teacherWall','adminUsers','teacherCourseTop'].forEach(id=>L.$(id)?.classList.remove('hidden'));const cs=currentSession();if(cs){L.$('teacherWall').href=Number(cs.session_number)===8?'teacher-wall.html':'wall.html?s='+cs.session_number;L.$('teacherWall').textContent='WALL S'+String(cs.session_number).padStart(2,'0')}}
   renderNext();renderSessions();
 }
 async function loadHome(){const result=await Promise.all([L.core('home'),L.session('course_progress')]);model=result[0];progress=result[1];render()}
