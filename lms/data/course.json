@@ -1,11 +1,11 @@
 {
-  "version": 12,
+  "version": 13,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
   "institution": "Universidad Central",
   "total_sessions": 16,
-  "current_tracked_session": 9,
+  "current_tracked_session": 8,
   "tracking_policy": "LMS V5: course.json define estructura/visibilidad del curso; Supabase define recursos, actividades, LAB, evaluadores y progreso. Las superficies canónicas son session.html?s=N, progress.html?s=N y wall.html?s=N. El runtime lms-kit.js aporta cola offline, retry e idempotencia sobre bigdata-lms.js. Máximo dos recursos visibles por sesión; la presentación integra explicación, ejemplos y laboratorio.",
   "sessions": [
     {
@@ -48,14 +48,20 @@
       "n": 8,
       "title": "SECOP Data Pipeline · API, concurrencia y NoSQL",
       "status": "visible",
-      "tracked": true
+      "tracked": true,
+      "starts_at": "2026-10-01T18:00:00-05:00",
+      "class_date": "2026-10-01",
+      "class_kind": "assessment_workshop"
     },
     {
       "n": 9,
       "title": "Cuando las palabras no coinciden: búsqueda semántica y bases vectoriales",
       "status": "visible",
       "tracked": true,
-      "formative": true
+      "formative": true,
+      "starts_at": "2026-10-08T18:00:00-05:00",
+      "class_date": "2026-10-08",
+      "class_kind": "learning"
     },
     {
       "n": 10,

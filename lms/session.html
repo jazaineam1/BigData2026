@@ -119,7 +119,8 @@ function primaryAction(){
 function render(){
   const s=data.session||{},meta=s.metadata||{},viewer=data.viewer||{},pm=progressMap();
   document.title='S'+String(sessionNumber).padStart(2,'0')+' · '+s.title+' · Big Data LMS';
-  L.$('ey').textContent='Sesión '+String(sessionNumber).padStart(2,'0');
+  const classDate=meta.class_date?new Intl.DateTimeFormat('es-CO',{day:'numeric',month:'short'}).format(new Date(meta.class_date+'T12:00:00')):'';
+  L.$('ey').textContent='Sesión '+String(sessionNumber).padStart(2,'0')+(meta.class_kind==='assessment_workshop'?' · Taller'+(classDate?' · '+classDate:''):'');
   L.$('title').textContent=s.title||('Sesión '+sessionNumber);
   L.$('summary').textContent=s.summary||'';
   if(['teacher','admin'].includes(viewer.role)){L.$('wallLink').classList.remove('hidden');L.$('wallLink').href='wall.html?s='+sessionNumber}
