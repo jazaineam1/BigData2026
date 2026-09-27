@@ -22,6 +22,16 @@ Toda Edge Function autenticada valida `expires_at`. Las sesiones legacy sin fech
 - El snapshot académico no contiene contraseñas, tokens, secretos de Edge Functions ni binarios de Storage.
 - Storage se recupera por separado y debe reconciliarse con los metadatos del snapshot.
 
+### Snapshot académico automático
+
+- `pg_cron` ejecuta el snapshot diariamente a las **08:20 UTC (03:20 Bogotá)**.
+- `pg_net` invoca `bigdata-lms-ops` con un secreto generado y conservado en **Supabase Vault**.
+- La Edge Function valida el secreto mediante un RPC accesible únicamente a `service_role`.
+- El JSON se escribe en el bucket privado `bigdata-lms-snapshots` con SHA-256 en el manifiesto.
+- La retención automática es de **30 días**.
+- El bucket está en el mismo proyecto Supabase: protege frente a errores lógicos y mejora portabilidad, pero **no reemplaza una copia externa ni el backup administrado de plataforma**.
+- Los exports manuales continúan disponibles para conservar una copia fuera del proyecto.
+
 ## Señales de observabilidad
 
 El panel `lms/admin-operations.html` expone agregados operativos, no datos sensibles:
