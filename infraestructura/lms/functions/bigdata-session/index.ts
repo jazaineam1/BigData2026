@@ -567,10 +567,15 @@ async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:an
 }
 async function realtimeSignal(n:number,scope:"controls"|"wall"|"progress"|"teacher_wall"){
   try{
-    const {error}=await db.from("bd_realtime_signals").insert({
-      course_code:COURSE,session_number:n,scope,created_at:new Date().toISOString()
+    // Broadcast es efímero: evita convertir cada interacción en una fila PostgreSQL.
+    // Enviar antes de subscribe() usa HTTP según el contrato de Supabase Realtime.
+    const channel=db.channel("bigdata-s"+n);
+    const result=await channel.send({
+      type:"broadcast",
+      event:"signal",
+      payload:{course_code:COURSE,session_number:n,scope}
     });
-    return !error;
+    return result==="ok";
   }catch{return false}
 }
 async function sessionControls(runId:string,n:number){
