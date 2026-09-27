@@ -91,7 +91,7 @@ const L=window.BIGDATA_LMS;L.wireLogout();const status=L.$('status');
 const sessionNumber=Math.trunc(Number(new URLSearchParams(location.search).get('s')||0));
 if(!Number.isInteger(sessionNumber)||sessionNumber<1){location.replace('portal.html');return}
 L.$('moduleLink').href='session.html?s='+sessionNumber;
-let data=null,timer=null,stopRealtime=null,realtimeReady=false,reloadTimer=null;
+let data=null,timer=null,stopRealtime=null,realtimeReady=false,reloadTimer=null,lastRealtimeLoad=0;
 const labelMap=()=>new Map((data?.activities||[]).map(a=>[a.code,a.title]));
 function stateLabel(r){return r.status==='completed'?'Completada':r.needs_attention?'Requiere ayuda':r.status==='in_progress'?'En curso':'Sin iniciar'}
 function isRecent(v,min=5){return !!v&&(Date.now()-Date.parse(v))<=min*60000}
@@ -213,7 +213,17 @@ async function clearControl(control_key){
   catch(e){L.msg(status,e.message,'err')}
 }
 function scheduleRealtimeReload(){
-  clearTimeout(reloadTimer);reloadTimer=setTimeout(()=>load().catch(()=>{}),180);
+  const windowMs=3000,now=Date.now(),elapsed=now-lastRealtimeLoad;
+  if(elapsed>=windowMs){
+    lastRealtimeLoad=now;
+    if(reloadTimer){clearTimeout(reloadTimer);reloadTimer=null}
+    load().catch(()=>{});
+    return;
+  }
+  if(reloadTimer)return;
+  reloadTimer=setTimeout(()=>{
+    reloadTimer=null;lastRealtimeLoad=Date.now();load().catch(()=>{});
+  },Math.max(0,windowMs-elapsed));
 }
 async function startRealtime(){
   if(!window.LMSRealtime)return;
