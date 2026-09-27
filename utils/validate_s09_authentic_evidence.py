@@ -14,6 +14,7 @@ sources=["".join(c.get("source",[])) for c in nb.get("cells",[])]
 
 checks=[
  ("LAB9 authentic-review", "evaluator='authentic-review'" in migration and "requires_review" in migration),
+ ("constraint permite authentic-review", "bd_activity_catalog_evaluator_check" in migration and "'authentic-review'::text" in migration),
  ("rúbrica 5x2", all(x in migration for x in ["reproducible_result","supported_decision","rejected_alternative","ranking_interpretation","concrete_limit"])),
  ("campos de revisión versionados", all(x in migration for x in ["reviewed_by","reviewed_at","rubric"])),
  ("backend valida evidencia auténtica", 'catalog.evaluator==="authentic-review"' in backend and "precision_at_5" in backend and "defensible_results" in backend),
