@@ -91,7 +91,7 @@ body.wall-mode .stage,body.wall-mode .nav,body.wall-mode .top,body.wall-mode>.dr
 </div>
 <aside class="drawer" id="drawer"><button class="btn ghost" id="closeDrawer">Cerrar</button><h2>Mapa S09</h2><p class="mini">Versión móvil-first: menos pantallas, más ejemplos y ocupación visual alta.</p><div id="mapLinks"></div></aside>
 <aside class="live-drawer" id="liveDrawer"><div style="display:flex;gap:10px;align-items:center"><div><div class="k">S09 LIVE</div><h2>Tu progreso conceptual</h2></div><button class="btn ghost" id="closeLive" style="margin-left:auto">Cerrar</button></div><p id="liveIdentity" class="mini">Conéctate desde el LMS para registrar avances.</p><div id="liveStats" class="live-grid"></div><div id="liveChallenges" class="live-challenges"></div><div id="liveStatus" class="feedback">Los desafíos registran primer intento y autocomprobación; no son nota ni evidencia de competencia.</div></aside>
-<section id="teacherWall" class="teacher-wall"><div class="teacher-shell"><div class="teacher-head"><div><div class="k">SOLO DOCENTE · MISMA PRESENTACIÓN</div><h1 class="teacher-title">S09 Teacher Wall</h1><p>Primer intento, dominio, recursos abiertos y tiempo activo. No es un ranking de velocidad.</p></div><div><a class="btn ghost" href="./s09-de-palabras-a-significado.html#s1">Volver a presentación</a><button id="teacherOpen" class="btn alt">Fijar inicio oficial</button><button id="teacherRefresh" class="btn ghost">Actualizar</button><button id="teacherReset" class="btn">Reiniciar S09</button></div></div><div id="teacherResetConfirm" class="confirmbox hidden"><b>Reinicio protegido de S09</b><p class="mini">Borra únicamente progreso, intentos D1–D5, eventos y hora de inicio de S09 para esta cohorte. No toca matrículas, S07, S08 ni TC1. Escribe <code>REINICIAR_S09</code>.</p><input id="teacherResetPhrase" autocomplete="off" placeholder="REINICIAR_S09"><div><button id="teacherResetCancel" class="btn ghost">Cancelar</button><button id="teacherResetDo" class="btn">Confirmar reinicio</button></div></div><div id="teacherStatus" class="feedback">Cargando…</div><div id="teacherMetrics" class="teacher-grid"></div><div class="teacher-panel"><h3>Dominio por desafío</h3><div id="teacherChallengeStats" class="challenge-stats"></div></div><div class="teacher-panel"><h3>Avance de la cohorte</h3><div class="teacher-filterbar"><input id="teacherSearch" type="search" placeholder="Buscar estudiante…"><select id="teacherFilter"><option value="all">Todos los estados</option><option value="not_started">Sin iniciar</option><option value="in_progress">En curso</option><option value="completed">Dominio completo</option></select></div><div class="teacher-table-wrap"><table class="teacher-table"><thead><tr><th>Estudiante</th><th>Inicio</th><th>Diap.</th><th>Colab</th><th>D1</th><th>D2</th><th>D3</th><th>D4</th><th>D5</th><th>Posición</th><th>Activo</th><th>Última actividad</th></tr></thead><tbody id="teacherRows"></tbody></table></div></div></div></section>
+<section id="teacherWall" class="teacher-wall"><div class="teacher-shell"><div class="teacher-head"><div><div class="k">SOLO DOCENTE · MISMA PRESENTACIÓN</div><h1 class="teacher-title">S09 Teacher Wall</h1><p>Primer intento, dominio, recursos abiertos y tiempo activo. No es un ranking de velocidad.</p></div><div><a class="btn ghost" href="./s09-de-palabras-a-significado.html#s1">Volver a presentación</a><button id="teacherOpen" class="btn alt">Fijar inicio oficial</button><button id="teacherRefresh" class="btn ghost">Actualizar</button><button id="teacherReset" class="btn">Reiniciar S09</button></div></div><div id="teacherResetConfirm" class="confirmbox hidden"><b>Reinicio protegido de S09</b><p class="mini">Borra únicamente progreso, intentos D1–D5, eventos y hora de inicio de S09 para esta cohorte. No toca matrículas, S07, S08 ni TC1. Escribe <code>REINICIAR_S09</code>.</p><input id="teacherResetPhrase" autocomplete="off" placeholder="REINICIAR_S09"><div><button id="teacherResetCancel" class="btn ghost">Cancelar</button><button id="teacherResetDo" class="btn">Confirmar reinicio</button></div></div><div id="teacherStatus" class="feedback">Cargando…</div><div id="teacherMetrics" class="teacher-grid"></div><div class="teacher-panel"><h3>Autocomprobación por desafío</h3><div id="teacherChallengeStats" class="challenge-stats"></div></div><div class="teacher-panel"><h3>Avance de la cohorte</h3><div class="teacher-filterbar"><input id="teacherSearch" type="search" placeholder="Buscar estudiante…"><select id="teacherFilter"><option value="all">Todos los estados</option><option value="not_started">Sin iniciar</option><option value="in_progress">En curso</option><option value="completed">Autocomprobaciones completas</option></select></div><div class="teacher-table-wrap"><table class="teacher-table"><thead><tr><th>Estudiante</th><th>Inicio</th><th>Diap.</th><th>Colab</th><th>D1</th><th>D2</th><th>D3</th><th>D4</th><th>D5</th><th>Posición</th><th>Activo</th><th>Última actividad</th></tr></thead><tbody id="teacherRows"></tbody></table></div></div></div></section>
 <div class="stage" id="stage"></div>
 <nav class="nav"><button id="prev">←</button><span id="chap" class="chap">Inicio</span><button id="next">→</button></nav>
 <script src="../lms/assets/bigdata-lms.js?v=20260926-s09-live2"></script>
@@ -247,6 +247,19 @@ async function submitLab3Evidence(){
   finally{btn.disabled=false}
 }
 const STEP_LABELS={result:'Resultado',decision:'Decisión'};
+function stableSeed(text){let h=2166136261>>>0;for(const ch of String(text)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}return h||1}
+function stableShuffle(items,key){
+  const out=[...items];let x=stableSeed((L?.auth?.()?.user?.id||'preview')+'|'+key);
+  for(let i=out.length-1;i>0;i--){x^=x<<13;x^=x>>>17;x^=x<<5;x>>>=0;const j=x%(i+1);[out[i],out[j]]=[out[j],out[i]]}
+  return out;
+}
+function shuffleChallengeOptions(){
+  document.querySelectorAll('select[data-challenge-code]').forEach(sel=>{
+    const placeholder=[...sel.options].find(o=>!o.value),choices=[...sel.options].filter(o=>o.value);
+    const ordered=stableShuffle(choices,sel.dataset.challengeCode||sel.id);
+    sel.innerHTML='';if(placeholder)sel.appendChild(placeholder);ordered.forEach(o=>sel.appendChild(o));sel.value='';
+  });
+}
 function stepOptionValue(opt){return typeof opt==='object'?String(opt.value??''):String(opt)}
 function stepOptionLabel(opt){return typeof opt==='object'?String(opt.label??opt.value??''):String(opt)}
 function genericEvidencePanel(code,lab,catalog){
@@ -254,11 +267,11 @@ function genericEvidencePanel(code,lab,catalog){
   const steps=Array.isArray(catalog?.steps)?catalog.steps:[],box=document.createElement('div');box.className='evidence-box';box.dataset.evidenceFor=code;
   const fields=steps.map(step=>{
     const id=String(step.id||''),label=String(step.label||STEP_LABELS[id]||id),attrs=' data-step="'+esc(id)+'"';
-    if(step.type==='choice')return '<label>'+esc(label)+'<select'+attrs+'><option value="">Elige…</option>'+((step.options||[]).map(opt=>'<option value="'+esc(stepOptionValue(opt))+'">'+esc(stepOptionLabel(opt))+'</option>').join(''))+'</select></label>';
+    if(step.type==='choice'){const opts=stableShuffle(step.options||[],code+'|'+id);return '<label>'+esc(label)+'<select'+attrs+'><option value="">Elige una opción…</option>'+opts.map(opt=>'<option value="'+esc(stepOptionValue(opt))+'">'+esc(stepOptionLabel(opt))+'</option>').join('')+'</select></label>'};
     if(step.type==='number')return '<label>'+esc(label)+'<input type="number"'+attrs+' inputmode="decimal"></label>';
     return '';
   }).join('');
-  box.innerHTML='<h4>Comprueba tu aprendizaje</h4><p class="mini">Responde con base en lo que acabas de explorar. La corrección es automática e inmediata.</p><div class="mini-grid">'+fields+'</div><div class="actions"><button class="btn alt" type="button" data-submit-evidence="'+esc(code)+'">Comprobar</button><a class="btn ghost" href="../lms/class-wall.html?s=9&a='+encodeURIComponent(code)+'">Muro del LAB</a></div><div class="feedback" data-evidence-status="'+esc(code)+'">Explora el LAB y luego comprueba tus respuestas.</div>';
+  box.innerHTML='<h4>Autocomprobación</h4><p class="mini">Comprueba lo que entendiste. Puedes reintentar: no es nota ni evidencia de competencia.</p><div class="mini-grid">'+fields+'</div><div class="actions"><button class="btn alt" type="button" data-submit-evidence="'+esc(code)+'">Comprobar</button><a class="btn ghost" href="../lms/class-wall.html?s=9&a='+encodeURIComponent(code)+'">Muro del LAB</a></div><div class="feedback" data-evidence-status="'+esc(code)+'">Explora el LAB y luego comprueba tus respuestas.</div>';
   lab.appendChild(box);
   box.querySelector('[data-submit-evidence]').onclick=()=>submitGenericEvidence(code,box);
 }
@@ -294,7 +307,7 @@ const CHALLENGE_LABELS={"bd-s09-c1":"D1 · mecanismo","bd-s09-c2":"D2 · coseno"
 function fmtChallenge(cp){
   const meta=cp?.metadata||{};
   const first=meta.first_attempt_correct===true?'1.er intento ✓':meta.first_attempt_correct===false?'1.er intento ✗':'sin intento';
-  const mastery=meta.mastery===true?'dominio ✓':'dominio pendiente';
+  const mastery=meta.mastery===true?'autocomprobación ✓':'autocomprobación pendiente';
   return {first,mastery,mastered:meta.mastery===true,attempted:Number(cp?.attempts||0)>0};
 }
 function progressMap(){return new Map((s09Model?.activity_progress||[]).map(x=>[x.activity_code,x]))}
@@ -317,7 +330,7 @@ function renderStudentLive(){
   liveIdentity.textContent=(s09Model.viewer?.display_name||s09Model.viewer?.username||'Estudiante')+' · progreso S09';
   const mastered=Object.keys(CHALLENGE_LABELS).filter(code=>fmtChallenge(map.get(code)).mastered).length;
   const attempted=Object.keys(CHALLENGE_LABELS).filter(code=>fmtChallenge(map.get(code)).attempted).length;
-  liveStats.innerHTML='<div class="live-stat"><span class="mini">Intentados</span><b>'+attempted+'/5</b></div><div class="live-stat"><span class="mini">Dominio</span><b>'+mastered+'/5</b></div><div class="live-stat"><span class="mini">Tiempo activo</span><b>'+L.fmtTime(p.active_seconds||0)+'</b></div><div class="live-stat"><span class="mini">Última actividad</span><b style="font-size:.85rem">'+L.fmtWhen(p.last_activity_at)+'</b></div>';
+  liveStats.innerHTML='<div class="live-stat"><span class="mini">Intentados</span><b>'+attempted+'/5</b></div><div class="live-stat"><span class="mini">Autocomprobadas</span><b>'+mastered+'/5</b></div><div class="live-stat"><span class="mini">Tiempo activo</span><b>'+L.fmtTime(p.active_seconds||0)+'</b></div><div class="live-stat"><span class="mini">Última actividad</span><b style="font-size:.85rem">'+L.fmtWhen(p.last_activity_at)+'</b></div>';
   liveChallenges.innerHTML=Object.entries(CHALLENGE_LABELS).map(([code,label])=>{const x=fmtChallenge(map.get(code));return '<div class="live-row"><span class="live-dot '+(x.mastered?'done':x.attempted?'try':'')+'">'+(x.mastered?'✓':x.attempted?'•':'–')+'</span><span><b>'+label+'</b><br><span class="mini">'+x.first+' · '+x.mastery+'</span></span><a href="#s'+challengeSlide(code)+'" class="btn ghost" style="font-size:12px;padding:5px 7px">Ir</a></div>'}).join('');
   paintChallengeStates();
 }
@@ -329,6 +342,7 @@ async function refreshStudentProgress(){
 async function answerChallenge(code){
   const sel=document.getElementById('ans-'+code),conf=document.getElementById('conf-'+code),fb=document.getElementById('fb-'+code);
   if(!sel||!fb)return;
+  if(!sel.value){fb.textContent='Elige una opción antes de responder.';return;}
   if(conf&&!conf.value){fb.textContent='Antes de responder, indica tu nivel de confianza: Baja, Media o Alta.';return;}
   if(!L?.auth?.()?.token){
     fb.textContent='Abre la presentación desde el LMS para registrar primer intento y dominio.';
@@ -338,7 +352,7 @@ async function answerChallenge(code){
   fb.textContent='Validando…';
   try{
     const x=await L.s09('answer_challenge',{activity_code:code,answer:sel.value,confidence:conf?.value||null});
-    fb.textContent=x.correct?'Correcto · dominio alcanzado.':'Todavía no · pista: '+(x.hint||'revisa la definición y vuelve a intentarlo.');
+    fb.textContent=x.correct?'Correcto · autocomprobación superada.':'Todavía no · pista: '+(x.hint||'revisa la definición y vuelve a intentarlo.');
     await refreshStudentProgress();
   }catch(e){fb.textContent='No se pudo registrar: '+e.message}
   finally{if(btn)btn.disabled=false}
@@ -396,7 +410,7 @@ async function initStudentLms(){
   try{
     s09Model=await L.s09('me');
     moduleIdentity.textContent=(s09Model.viewer?.display_name||s09Model.viewer?.username||'Usuario')+' · conectado';
-    renderEvidencePanels();renderSessionControls();
+    shuffleChallengeOptions();renderEvidencePanels();renderSessionControls();
     if(window.topk)topKDemo();
     await K.track('presentation_opened',{activity_code:'bd-s09-presentation',metadata:{source:'s09-embedded-presentation',path:location.pathname},client_at:new Date().toISOString()});
     s09Model=await L.s09('me');
@@ -424,7 +438,7 @@ function filterTeacherRows(rows){
 function renderTeacherWall(data){
   teacherWallData=data;
   const allRows=data.ranking||[],rows=filterTeacherRows(allRows),started=allRows.filter(x=>x.started_at).length,pres=allRows.filter(x=>x.presentation_opened).length,nb=allRows.filter(x=>x.notebook_opened).length,mastered=allRows.reduce((a,r)=>a+Number(r.completed_checkpoints||0),0);
-  teacherMetrics.innerHTML='<div class="teacher-card"><span class="mini">Estudiantes</span><b>'+allRows.length+'</b></div><div class="teacher-card"><span class="mini">Iniciaron</span><b>'+started+'</b></div><div class="teacher-card"><span class="mini">Presentación</span><b>'+pres+'</b></div><div class="teacher-card"><span class="mini">Colab</span><b>'+nb+'</b></div><div class="teacher-card"><span class="mini">Dominio acumulado</span><b>'+mastered+'/'+(allRows.length*5)+'</b></div>';
+  teacherMetrics.innerHTML='<div class="teacher-card"><span class="mini">Estudiantes</span><b>'+allRows.length+'</b></div><div class="teacher-card"><span class="mini">Iniciaron</span><b>'+started+'</b></div><div class="teacher-card"><span class="mini">Presentación</span><b>'+pres+'</b></div><div class="teacher-card"><span class="mini">Colab</span><b>'+nb+'</b></div><div class="teacher-card"><span class="mini">Autocomprobaciones</span><b>'+mastered+'/'+(allRows.length*5)+'</b></div>';
   teacherChallengeStats.innerHTML=(data.challenge_stats||[]).map((s,i)=>'<div class="challenge-chip"><b>D'+(i+1)+'</b><div>Intentaron: '+s.attempted+'/'+allRows.length+'</div><div>1.er intento: '+s.first_attempt_correct+'/'+Math.max(1,s.attempted)+'</div><div>Dominio: '+s.mastered+'/'+allRows.length+'</div></div>').join('');
   teacherRows.innerHTML=rows.length?rows.map(r=>'<tr><td><b>'+L.esc(r.display_name)+'</b></td><td>'+L.fmtWhen(r.started_at)+'</td><td>'+(r.presentation_opened?'✓':'—')+'</td><td>'+(r.notebook_opened?'✓':'—')+'</td>'+[0,1,2,3,4].map(i=>'<td>'+cpCell(r.checkpoints?.[i])+'</td>').join('')+'<td>'+(r.last_slide?('S'+r.last_slide.slide+' · '+L.esc(r.last_slide.label||'')):'—')+'</td><td>'+L.fmtTime(r.active_seconds||0)+'</td><td>'+L.fmtWhen(r.last_activity_at)+'</td></tr>').join(''):'<tr><td colspan="12">No hay estudiantes con este filtro.</td></tr>';
   teacherOpen.disabled=!!data.session_window?.opened_at;
@@ -463,7 +477,7 @@ async function initLmsLayer(){
 }
 addEventListener('pagehide',()=>{if(studentTimer)clearInterval(studentTimer);if(teacherTimer)clearInterval(teacherTimer)});
 
-render();wireLabs();fromHash();initLmsLayer();
+render();shuffleChallengeOptions();wireLabs();fromHash();initLmsLayer();
 addEventListener('pagehide',()=>{if(stopS09Realtime)stopS09Realtime()});
 </script>
 </body>
