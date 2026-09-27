@@ -8,7 +8,6 @@ const supabase = createClient(
 
 const ALLOWED = new Set(["https://jazaineam1.github.io"]);
 const COURSE_CODE = "bigdata";
-const ACCESS_PAGE = "https://jazaineam1.github.io/BigData2026/lms/access.html";
 
 function origin(req: Request) {
   const o = req.headers.get("origin");
@@ -79,23 +78,6 @@ async function current(req: Request) {
     .eq("active", true)
     .maybeSingle();
   return u ? { session: s, user: u } : null;
-}
-
-async function makeAccess(userId: string, requestId: string, createdBy: string) {
-  const token = randomToken();
-  const hash = await sha256(token);
-  const now = new Date().toISOString();
-  const expires_at = new Date(Date.now() + 7 * 24 * 3600_000).toISOString();
-  await supabase.from("lms_access_tokens").update({ expires_at: now }).eq("request_id", requestId).gt("expires_at", now);
-  const { error } = await supabase.from("lms_access_tokens").insert({
-    token_hash: hash,
-    user_id: userId,
-    request_id: requestId,
-    created_by: createdBy,
-    expires_at,
-  });
-  if (error) throw error;
-  return `${ACCESS_PAGE}#token=${encodeURIComponent(token)}`;
 }
 
 async function setTemporaryPassword(userId: string) {
@@ -211,7 +193,7 @@ Deno.serve(async (req) => {
   const requestId = String(b.request_id || "").trim();
   const action = String(b.action || "").trim();
   const notes = String(b.notes || "").trim().slice(0, 500);
-  if (!requestId || !["approve", "reject", "reset_password", "generate_link"].includes(action)) {
+  if (!requestId || !["approve", "reject", "reset_password"].includes(action)) {
     return out(req, { error: "Solicitud o acción inválida" }, 400);
   }
 
@@ -247,21 +229,6 @@ Deno.serve(async (req) => {
       .eq("username", String(r.email||"").trim().toLowerCase())
       .maybeSingle();
     lms = byUser.data;
-  }
-
-  if (action === "generate_link") {
-    if (r.status !== "approved") return out(req, { error: "Primero debes aprobar la solicitud" }, 409);
-    if (!lms) return out(req, { error: "No se encontró el perfil matriculado" }, 404);
-    const link = await makeAccess(lms.id, r.id, ctx.user.id);
-    await audit(ctx.user.id, "access.compat_link", "user", lms.id, { request_id: r.id });
-    return out(req, {
-      ok: true,
-      status: "approved",
-      manual_link: link,
-      recipient_email: r.email,
-      recipient_name: r.full_name,
-      warning: "Enlace de compatibilidad generado. El acceso recomendado es usuario y contraseña.",
-    });
   }
 
   if (action === "reset_password") {
