@@ -509,10 +509,12 @@ async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:an
   return {ok:true,correct,attempts,first_attempt_correct:firstAttempt,mastery,confidence,hint:correct?null:key.hint,...summary};
 }
 async function realtimeSignal(n:number,scope:"controls"|"wall"|"progress"|"teacher_wall"){
-  const {error}=await db.from("bd_realtime_signals").insert({
-    course_code:COURSE,session_number:n,scope,created_at:new Date().toISOString()
-  });
-  failIf(error,"No se pudo emitir la señal Realtime");
+  try{
+    const {error}=await db.from("bd_realtime_signals").insert({
+      course_code:COURSE,session_number:n,scope,created_at:new Date().toISOString()
+    });
+    return !error;
+  }catch{return false}
 }
 async function sessionControls(runId:string,n:number){
   const now=Date.now();
