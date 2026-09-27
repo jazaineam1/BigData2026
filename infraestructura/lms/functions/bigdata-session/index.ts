@@ -100,7 +100,7 @@ async function publicCatalog(codes:string[],userId:string,runId:string){
 }
 async function ownEvidence(userId:string,runId:string,n:number){
   const {data,error}=await db.from("bd_evidence")
-    .select("id,activity_code,step_id,payload,source,verdict,feedback,catalog_version,created_at")
+    .select("id,activity_code,step_id,payload,source,verdict,feedback,catalog_version,created_at,reviewed_by,reviewed_at,rubric")
     .eq("user_id",userId).eq("course_run_id",runId).eq("session_number",n)
     .order("created_at",{ascending:false}).limit(100);
   failIf(error,"No se pudo cargar la evidencia");
@@ -149,6 +149,41 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     }
     if(wrong.length){verdict="incorrect";const first=(catalog.steps||[]).find((s:any)=>String(s.id)===wrong[0]);feedback="Todavía no. "+String(first?.hint||"Revisa el ejemplo del LAB y vuelve a comprobar.")}
     else{verdict="correct";feedback=String(catalog.config?.success_feedback||"Correcto. Las respuestas coinciden con el concepto trabajado en el LAB.")}
+  }else if(catalog.evaluator==="authentic-review"){
+    if(activity.code!=="bd-s09-lab9")throw new Error("Evaluador auténtico no habilitado para esta actividad");
+    const query=trimText(payload?.query,12,500,"La consulta");
+    const precision=Number(payload?.precision_at_5);
+    if(!Number.isFinite(precision)||precision<0||precision>1)throw new Error("Precision@5 debe estar entre 0 y 1");
+    const defensible=Array.isArray(payload?.defensible_results)?payload.defensible_results.map((x:any)=>String(x||"").trim()).filter(Boolean):[];
+    if(defensible.length!==2||defensible.some((x:string)=>x.length<3||x.length>220))throw new Error("Registra exactamente dos resultados defendibles");
+    const falsePositive=trimText(payload?.false_positive,3,220,"El falso positivo");
+    const reason=trimText(payload?.reason,12,900,"La razón");
+    const decision=trimText(payload?.decision,12,600,"La decisión");
+    const rejected=trimText(payload?.rejected_alternative,12,600,"La alternativa descartada");
+    const limit=trimText(payload?.limit,12,600,"El límite");
+    const ids=(value:any,label:string)=>{
+      const xs=Array.isArray(value)?value.map((x:any)=>String(x||"").trim()).filter(Boolean):[];
+      if(!xs.length||xs.length>5||xs.some((x:string)=>x.length>120))throw new Error("Revisa "+label);
+      return xs;
+    };
+    const trace=payload?.trace&&typeof payload.trace==="object"?payload.trace:{};
+    const model=trimText(trace.model,3,160,"El modelo");
+    const dimensions=Math.trunc(Number(trace.dimensions));
+    if(!Number.isInteger(dimensions)||dimensions<2||dimensions>100000)throw new Error("Dimensiones inválidas");
+    normalized.query=query;
+    normalized.precision_at_5=Math.round(precision*10000)/10000;
+    normalized.defensible_results=defensible;
+    normalized.false_positive=falsePositive;
+    normalized.reason=reason;
+    normalized.decision=decision;
+    normalized.rejected_alternative=rejected;
+    normalized.limit=limit;
+    normalized.top5_lexical=ids(payload?.top5_lexical,"Top-5 lexical");
+    normalized.top5_semantic=ids(payload?.top5_semantic,"Top-5 semántico");
+    normalized.top5_hybrid=ids(payload?.top5_hybrid,"Top-5 híbrido");
+    normalized.trace={source:"colab",model,dimensions};
+    verdict="pending_review";
+    feedback="Evidencia auténtica recibida. Está pendiente de revisión docente con rúbrica.";
   }else{
     for(const step of Array.isArray(catalog.steps)?catalog.steps:[]){
       const id=String(step.id||"");if(!id)continue;
@@ -530,6 +565,60 @@ async function isLabClosed(runId:string,n:number,activityCode:string){
   const c=controls.find((x:any)=>x.control_key==="lab:"+activityCode);
   return c?.control_type==="close_lab";
 }
+async function teacherReviewEvidence(ctx:any,run:any,n:number,body:any,activities:any[]){
+  requireTeacher(ctx);
+  const evidenceId=String(body.evidence_id||"").trim();
+  if(!/^[0-9a-fA-F-]{36}$/.test(evidenceId))throw new Error("Evidencia inválida");
+  const decision=String(body.decision||"");
+  if(!["accepted","rejected"].includes(decision))throw new Error("Decisión de revisión inválida");
+  const feedback=trimText(body.feedback,8,800,"El feedback");
+  const criteria=["reproducible_result","supported_decision","rejected_alternative","ranking_interpretation","concrete_limit"];
+  const scores:any={};let total=0;
+  for(const id of criteria){
+    const v=Math.trunc(Number(body.rubric?.[id]));
+    if(!Number.isInteger(v)||v<0||v>2)throw new Error("Rúbrica incompleta: "+id);
+    scores[id]=v;total+=v;
+  }
+  const {data:evidence,error}=await db.from("bd_evidence")
+    .select("id,user_id,activity_code,verdict,payload")
+    .eq("id",evidenceId).eq("course_run_id",run.id).eq("session_number",n).maybeSingle();
+  failIf(error,"No se pudo cargar la evidencia");
+  if(!evidence)throw new Error("Evidencia no encontrada");
+  const activity=activities.find((a:any)=>a.code===evidence.activity_code&&a.kind==="lab");
+  if(!activity)throw new Error("Actividad de evidencia inválida");
+  const {data:catalog,error:catalogError}=await db.from("bd_activity_catalog").select("evaluator").eq("code",activity.code).maybeSingle();
+  failIf(catalogError,"No se pudo validar el evaluador");
+  if(catalog?.evaluator!=="authentic-review")throw new Error("Esta evidencia no usa revisión auténtica");
+  if(!["pending_review","rejected"].includes(String(evidence.verdict)))throw new Error("La evidencia ya fue cerrada");
+  const now=new Date().toISOString(),rubric={scores,total,max:10};
+  const {data:updated,error:updateError}=await db.from("bd_evidence").update({
+    verdict:decision,feedback,rubric,reviewed_by:ctx.user.id,reviewed_at:now
+  }).eq("id",evidenceId).select("id,user_id,activity_code,verdict,feedback,rubric,reviewed_at").single();
+  failIf(updateError,"No se pudo revisar la evidencia");
+  const {data:p,error:pError}=await db.from("bd_lms_activity_progress").select("*")
+    .eq("user_id",evidence.user_id).eq("course_run_id",run.id).eq("activity_code",activity.code).maybeSingle();
+  failIf(pError,"No se pudo leer el progreso");
+  const accepted=decision==="accepted";
+  const {error:progressError}=await db.from("bd_lms_activity_progress").upsert({
+    user_id:evidence.user_id,course_run_id:run.id,activity_code:activity.code,
+    status:accepted?"completed":"in_progress",started_at:p?.started_at||now,attempts:Number(p?.attempts||1),
+    score:total,max_score:10,completed_at:accepted?(p?.completed_at||now):null,updated_at:now,
+    metadata:{...(p?.metadata||{}),source:"evidence-review",evidence_id:evidenceId,evidence_verdict:decision,
+      evidence_verified:accepted,last_evidence_review_at:now,rubric_total:total}
+  },{onConflict:"user_id,course_run_id,activity_code"});
+  failIf(progressError,"No se pudo actualizar el progreso");
+  if(accepted){
+    const {error:eventError}=await db.from("bd_lms_events").insert({
+      user_id:evidence.user_id,course_run_id:run.id,event_type:"evidence_verified",session_number:n,
+      activity_code:activity.code,metadata:{source:"teacher-review",outcome:decision,rubric_total:total},created_at:now
+    });
+    failIf(eventError,"No se pudo registrar la verificación");
+  }
+  await audit(ctx.user.id,"bigdata.evidence.review","evidence",evidenceId,{session_number:n,activity_code:activity.code,decision,total});
+  await realtimeSignal(n,"progress");
+  return {ok:true,evidence:updated,completed:accepted,score:total,max_score:10};
+}
+
 async function teacherSetControl(ctx:any,run:any,n:number,body:any,activities:any[]){
   requireTeacher(ctx);
   const type=String(body.control_type||"");
@@ -738,7 +827,7 @@ Deno.serve(async(req:Request)=>{
   }
   try{
     if(action==="course_progress")return out(req,await courseProgress(ctx,run));
-    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","wall_moderate","teacher_set_control","teacher_clear_control"].includes(action);
+    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","wall_moderate","teacher_set_control","teacher_clear_control","teacher_review_evidence"].includes(action);
     const def=await definition(run.id,n,teacher),codes=def.activities.map((a:any)=>a.code);
     if(action==="me"){
       const [p,cat,evidence]=await Promise.all([
@@ -785,6 +874,7 @@ Deno.serve(async(req:Request)=>{
     if(action==="wall_react"){const result=await wallReact(ctx,run,n,String(body.post_id||""),String(body.kind||""));await realtimeSignal(n,"wall");return out(req,result)}
     if(action==="wall_moderate"){const result=await wallModerate(ctx,run,n,String(body.post_id||""),String(body.moderation||""));await realtimeSignal(n,"wall");return out(req,result)}
     if(action==="session_controls")return out(req,{ok:true,controls:await sessionControls(run.id,n)});
+    if(action==="teacher_review_evidence")return out(req,await teacherReviewEvidence(ctx,run,n,body,def.activities));
     if(action==="teacher_set_control")return out(req,await teacherSetControl(ctx,run,n,body,def.activities));
     if(action==="teacher_clear_control")return out(req,await teacherClearControl(ctx,run,n,body));
     if(action==="teacher_open_session")return out(req,{ok:true,session_window:await openOfficial(ctx,run,n)});
