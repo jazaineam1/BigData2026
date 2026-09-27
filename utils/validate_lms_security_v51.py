@@ -21,6 +21,7 @@ access=read("infraestructura/lms/functions/learning-access-request/index.ts")
 client=read("lms/assets/bigdata-lms.js")
 portal=read("lms/portal.html")
 wall=read("lms/wall.html")
+auth_migration=read("infraestructura/lms/lms-auth-v51.sql")
 
 dangerous={"resource_completed","challenge_answered","evidence_submitted","evidence_verified","lab_code_issued","session_completed"}
 m=re.search(r"const PUBLIC_TRACK_EVENTS=new Set\(\[(.*?)\]\);",backend,re.S)
@@ -43,6 +44,7 @@ checks=[
  ("QA incluye 1920x937", "desktop-1920x937" in tests),
  ("QA vigila errores JS", "page.on('pageerror'" in tests and "ReferenceError|TypeError|SyntaxError|Uncaught" in tests),
  ("sesiones estudiante tienen caducidad", "ttlHours=student?30*24:24" in auth and "deadline=s.expires_at?" in auth),
+ ("sesiones legacy se backfillean", "update public.lms_auth_sessions" in auth_migration and "s.expires_at is null" in auth_migration and "interval '30 days'" in auth_migration),
  ("claim_access es single-use", 'ctx.tokenRow.used_at)return out(req,{error:"Este enlace ya fue utilizado' in auth and '.is("used_at",null).select("id").maybeSingle()' in auth),
  ("login limita también por cuenta", "account_hash" in auth and "accountCount" in auth),
  ("Supabase exige correo confirmado", "email_confirmed_at" in auth),
