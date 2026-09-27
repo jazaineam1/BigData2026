@@ -79,8 +79,8 @@ const labelMap=()=>new Map((data?.activities||[]).map(a=>[a.code,a.title]));
 function stateLabel(r){return r.status==='completed'?'Completada':r.needs_attention?'Requiere ayuda':r.status==='in_progress'?'En curso':'Sin iniciar'}
 function isRecent(v,min=5){return !!v&&(Date.now()-Date.parse(v))<=min*60000}
 function renderMetrics(){
-  const rows=data.students||[],started=rows.filter(r=>r.started_at).length,completed=rows.filter(r=>r.status==='completed').length,active=rows.filter(r=>isRecent(r.last_activity_at)).length,needs=rows.filter(r=>r.needs_attention).length;
-  L.$('metrics').innerHTML='<div class="kpi"><span class="muted">Estudiantes</span><b>'+rows.length+'</b></div><div class="kpi"><span class="muted">Iniciaron</span><b>'+started+'</b></div><div class="kpi"><span class="muted">Activos ~5 min</span><b>'+active+'</b></div><div class="kpi"><span class="muted">Completaron</span><b>'+completed+'</b></div><div class="kpi"><span class="muted">Requieren ayuda</span><b>'+needs+'</b></div>';
+  const rows=data.students||[],started=rows.filter(r=>r.started_at).length,completed=rows.filter(r=>r.status==='completed').length,active=rows.filter(r=>r.present===true).length,needs=rows.filter(r=>r.needs_attention).length;
+  L.$('metrics').innerHTML='<div class="kpi"><span class="muted">Estudiantes</span><b>'+rows.length+'</b></div><div class="kpi"><span class="muted">Iniciaron</span><b>'+started+'</b></div><div class="kpi"><span class="muted">Activos ahora</span><b>'+active+'</b></div><div class="kpi"><span class="muted">Completaron</span><b>'+completed+'</b></div><div class="kpi"><span class="muted">Requieren ayuda</span><b>'+needs+'</b></div>';
 }
 function renderStats(){
   const total=(data.students||[]).length||1;
