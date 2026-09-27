@@ -1,4 +1,19 @@
 -- S09 · evidencia auténtica y revisión docente
+
+alter table public.bd_activity_catalog
+  drop constraint if exists bd_activity_catalog_evaluator_check;
+alter table public.bd_activity_catalog
+  add constraint bd_activity_catalog_evaluator_check
+  check (evaluator = any (array[
+    'choice-hash'::text,
+    'seeded-numeric'::text,
+    'rubric'::text,
+    'self-report'::text,
+    'url-trace'::text,
+    'authentic-review'::text,
+    'none'::text
+  ]));
+
 alter table public.bd_evidence
   add column if not exists reviewed_by uuid null references public.lms_users(id),
   add column if not exists reviewed_at timestamptz null,
