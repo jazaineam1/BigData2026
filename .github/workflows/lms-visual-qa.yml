@@ -40,6 +40,17 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Instalar Chromium
         run: npx playwright install --with-deps chromium
+      - name: Preparar SDK Realtime local
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/supabase-sdk
+          mkdir -p /tmp/supabase-sdk lms/assets/vendor
+          npm pack @supabase/supabase-js@2.117.1 --pack-destination /tmp/supabase-sdk >/tmp/supabase-pack-name.txt
+          tar -xzf "$(find /tmp/supabase-sdk -maxdepth 1 -name '*.tgz' -print -quit)" -C /tmp/supabase-sdk
+          cp /tmp/supabase-sdk/package/dist/umd/supabase.min.js lms/assets/vendor/supabase.min.js
+          test -s lms/assets/vendor/supabase.min.js
+          ! grep -q "esm.sh" lms/assets/lms-realtime.js
       - name: Servir sitio
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/lms-http.log 2>&1 &
