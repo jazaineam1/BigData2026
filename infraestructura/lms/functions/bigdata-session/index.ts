@@ -515,7 +515,7 @@ async function teacherWall(ctx:any,run:any,n:number){
     db.from("bd_lms_session_progress").select("*").eq("course_run_id",run.id).eq("session_number",n),
     activityQuery,
     db.from("bd_lms_events").select("user_id,event_type,activity_code,metadata,created_at").eq("course_run_id",run.id)
-      .eq("session_number",n).order("created_at",{ascending:false}).limit(5000),
+      .eq("session_number",n).neq("event_type","heartbeat").order("created_at",{ascending:false}).limit(2500),
     db.from("bd_evidence").select("user_id,activity_code,verdict,created_at").eq("course_run_id",run.id)
       .eq("session_number",n).order("created_at",{ascending:false}).limit(5000),
     sessionWindow(run.id,n)
@@ -532,15 +532,16 @@ async function teacherWall(ctx:any,run:any,n:number){
     const mastered=checkpoints.filter((a:any)=>Boolean(am.get(a.code)?.metadata?.mastery)||am.get(a.code)?.status==="completed").length;
     const attempted=aps.length;
     const ev:any=lastEvent.get(u.id),slideEv:any=lastSlide.get(u.id),slideMeta=slideEv?.metadata||{};
-    const lastAt=p.last_activity_at||ev?.created_at||null;
-    const age=lastAt?(Date.now()-Date.parse(lastAt))/60000:null,currentDef=def.activities.find((a:any)=>a.code===ev?.activity_code);
+    const lastAt=p.last_activity_at||ev?.created_at||null,meaningfulAt=ev?.created_at||null;
+    const activeAge=lastAt?(Date.now()-Date.parse(lastAt))/60000:null,meaningfulAge=meaningfulAt?(Date.now()-Date.parse(meaningfulAt))/60000:null,
+      currentDef=def.activities.find((a:any)=>a.code===ev?.activity_code),present=ev?.event_type!=="page_closed"&&activeAge!==null&&activeAge<=5;
     const failedCheckpoint=aps.some((a:any)=>a.attempts>0&&a.metadata?.mastery===false);
-    const stalledLab=currentDef?.kind==="lab"&&age!==null&&age>5&&p.status!=="completed";
+    const stalledLab=currentDef?.kind==="lab"&&present&&meaningfulAge!==null&&meaningfulAge>5&&meaningfulAge<=30&&p.status!=="completed";
     const needsAttention=failedCheckpoint||stalledLab;
     return {
       user_id:u.id,display_name:u.display_name||u.username,
       status:p.status||"not_started",started_at:p.started_at||null,
-      active_seconds:Number(p.active_seconds||0),last_activity_at:lastAt,
+      active_seconds:Number(p.active_seconds||0),last_activity_at:lastAt,present,
       current_activity:ev?.activity_code||null,current_event:ev?.event_type||null,
       needs_attention:needsAttention,attempted_activities:attempted,
       completed_activities:aps.filter((a:any)=>a.status==="completed").length,
@@ -578,7 +579,7 @@ async function teacherStudentDetail(ctx:any,run:any,n:number,userId:string){
     db.from("lms_users").select("id,display_name,username,active").eq("id",userId).maybeSingle(),
     db.from("bd_lms_session_progress").select("*").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).maybeSingle(),
     codes.length?db.from("bd_lms_activity_progress").select("*").eq("user_id",userId).eq("course_run_id",run.id).in("activity_code",codes).order("updated_at",{ascending:false}):Promise.resolve({data:[]} as any),
-    db.from("bd_lms_events").select("event_type,activity_code,metadata,client_at,created_at").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).order("created_at",{ascending:false}).limit(250),
+    db.from("bd_lms_events").select("event_type,activity_code,metadata,client_at,created_at").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).neq("event_type","heartbeat").order("created_at",{ascending:false}).limit(250),
     db.from("bd_evidence").select("id,activity_code,payload,source,verdict,feedback,created_at").eq("user_id",userId).eq("course_run_id",run.id).eq("session_number",n).order("created_at",{ascending:false}).limit(100)
   ]);
   return {viewer:ctx.user,run,session:def.session,user,session_progress,activity_progress:activity_progress||[],events:events||[],evidence:evidence||[],activities:def.activities};
