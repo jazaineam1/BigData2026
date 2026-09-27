@@ -28,7 +28,7 @@ checks=[
     ("telemetría separada", 'event==="heartbeat"' in backend and 'realtimeSignal(n,"teacher_wall")' in backend),
     ("modo proyección anonimizado", "body.projection" in wall and "Respuesta '+(index+1)" in wall and "projection&&teacher" in wall),
     ("proyección sin moderación", "if(projection||!['teacher','admin'].includes" in wall),
-    ("confianza S09", 'id="conf-'+code' in deck and "confidence:conf?.value||null" in deck),
+    ("confianza S09", "id=\"conf-'+code+'\"" in deck and "confidence:conf?.value||null" in deck),
     ("confianza backend", "last_confidence" in backend and "high_confidence_wrong" in backend),
     ("goto slide no forzado", "Tú decides cuándo cambiar." in deck and "location.hash='s'+target" in deck),
     ("QA V6", "dos estudiantes y docente" in tests and "modo proyección anonimiza" in tests and "exige confianza" in tests),
