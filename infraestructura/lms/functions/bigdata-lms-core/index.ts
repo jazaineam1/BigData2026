@@ -286,12 +286,12 @@ async function submitAssignment(ctx:any,run:any,body:any){
   if(due&&Date.parse(due)<Date.now())throw new Error("La fecha de entrega ya venció para tu cuenta");
   const {data:prior}=await db.from("lms_submissions_v2").select("attempt").eq("assignment_id",id).eq("user_id",ctx.user.id).order("attempt",{ascending:false}).limit(1);
   const attempt=Number(prior?.[0]?.attempt||0)+1;if(attempt>maxAttempts)throw new Error("Ya usaste el máximo de intentos");
-  const type=String(body.artifact_type||"text");
+  const type=String(body.artifact_type||"url");
   if(!Array.isArray(a.allowed_types)||!a.allowed_types.includes(type))throw new Error("Tipo de entrega no permitido");
   let artifact:any={};
-  if(type==="text")artifact={text:clampText(body.text,20000,true)};
-  else if(type==="url"){const url=cleanUrl(body.url);if(!url)throw new Error("URL obligatoria");artifact={url}}
-  else if(type==="file")throw new Error("Carga de archivo aún no está habilitada; usa texto o URL en esta tarea");
+  if(type==="url"){const url=cleanUrl(body.url);if(!url)throw new Error("URL obligatoria");artifact={url}}
+  else if(type==="file")throw new Error("Los archivos se cargan mediante el flujo privado de Storage");
+  else if(type==="text")throw new Error("Las respuestas abiertas están deshabilitadas para estudiantes");
   else throw new Error("La evidencia automática solo puede generarla el sistema");
   const {data,error}=await db.from("lms_submissions_v2").insert({
     assignment_id:id,user_id:ctx.user.id,attempt,artifact_type:type,artifact,status:"submitted",submitted_at:new Date().toISOString()
@@ -321,7 +321,7 @@ async function saveAssignment(ctx:any,run:any,body:any){
     if(!s)throw new Error("La sesión indicada no existe en esta cohorte");
   }
   const maxScore=Number(body.max_score||100);if(!Number.isFinite(maxScore)||maxScore<=0||maxScore>1000)throw new Error("Puntaje máximo inválido");
-  const allowed=(Array.isArray(body.allowed_types)?body.allowed_types:[]).filter((x:any)=>["text","url","file","evidence"].includes(String(x)));
+  const allowed=(Array.isArray(body.allowed_types)?body.allowed_types:[]).filter((x:any)=>["url","file","evidence"].includes(String(x)));
   if(!allowed.length)throw new Error("Selecciona al menos un tipo de entrega");
   const maxAttempts=Math.trunc(Number(body.max_attempts||1));if(maxAttempts<1||maxAttempts>20)throw new Error("Intentos inválidos");
   const row:any={course_run_id:run.id,code,session_number:n,title:clampText(body.title,180,true),instructions:clampText(body.instructions,8000),
@@ -640,36 +640,18 @@ async function groupIdsForUser(runId:string,userId:string){
 }
 async function collaborationOverview(ctx:any,run:any){
   const ownGroupIds=await groupIdsForUser(run.id,ctx.user.id);
-  const [{data:groups},{data:members},{data:settings},{data:assignments},{data:groupSubs},{data:threads},{data:posts}] = await Promise.all([
+  const [{data:groups},{data:members},{data:settings},{data:assignments},{data:groupSubs}] = await Promise.all([
     ownGroupIds.length?db.from("lms_groups_v2").select("*").eq("course_run_id",run.id).in("id",ownGroupIds):Promise.resolve({data:[]} as any),
     ownGroupIds.length?db.from("lms_group_members_v2").select("*").in("group_id",ownGroupIds):Promise.resolve({data:[]} as any),
     db.from("lms_assignment_group_settings_v2").select("*").eq("enabled",true),
     db.from("lms_assignments_v2").select("id,code,title,session_number,due_at,max_score,max_attempts,rubric,allowed_types,active").eq("course_run_id",run.id).eq("active",true),
-    ownGroupIds.length?db.from("lms_group_submissions_v2").select("*").in("group_id",ownGroupIds).order("submitted_at",{ascending:false}):Promise.resolve({data:[]} as any),
-    db.from("lms_discussion_threads_v2").select("*").eq("course_run_id",run.id).order("pinned",{ascending:false}).order("created_at",{ascending:false}).limit(60),
-    db.from("lms_discussion_posts_v2").select("*").eq("hidden",false).order("created_at").limit(500)
+    ownGroupIds.length?db.from("lms_group_submissions_v2").select("id,assignment_id,group_id,attempt,status,submitted_at,score").in("group_id",ownGroupIds).order("submitted_at",{ascending:false}):Promise.resolve({data:[]} as any)
   ]);
-  const threadIds=new Set((threads||[]).map((t:any)=>t.id));
-  const postRows=(posts||[]).filter((p:any)=>threadIds.has(p.thread_id));
-  const postIds=postRows.map((p:any)=>p.id);
-  const {data:mentions}=postIds.length?await db.from("lms_discussion_mentions_v2").select("post_id,mentioned_user_id,created_at,read_at").eq("mentioned_user_id",ctx.user.id).in("post_id",postIds).order("created_at",{ascending:false}):({data:[]} as any);
-  const visibleUserIds=[...new Set([...(members||[]).map((x:any)=>x.user_id),...postRows.map((x:any)=>x.user_id)])];
+  const visibleUserIds=[...new Set((members||[]).map((x:any)=>x.user_id))];
   const {data:users}=visibleUserIds.length?await db.from("lms_users").select("id,display_name,username").in("id",visibleUserIds):({data:[]} as any);
   const assignmentMap=new Map((assignments||[]).map((a:any)=>[a.id,a]));
-  const settingRows=(settings||[]).filter((s:any)=>assignmentMap.has(s.assignment_id));
-  const peerTargets:any[]=[];
-  for(const setting of settingRows.filter((x:any)=>x.peer_review_enabled)){
-    const {data:candidates}=await db.from("lms_group_submissions_v2").select("*").eq("assignment_id",setting.assignment_id).in("status",["submitted","reviewed"]).order("submitted_at",{ascending:false});
-    const {data:done}=await db.from("lms_peer_reviews_v2").select("reviewee_submission_id").eq("assignment_id",setting.assignment_id).eq("reviewer_user_id",ctx.user.id);
-    const doneSet=new Set((done||[]).map((x:any)=>x.reviewee_submission_id));
-    const eligible=(candidates||[]).filter((x:any)=>!ownGroupIds.includes(x.group_id)&&!doneSet.has(x.id));
-    for(const x of eligible.slice(0,Number(setting.reviews_per_student||1)))peerTargets.push({
-      id:x.id,assignment_id:x.assignment_id,attempt:x.attempt,artifact_type:x.artifact_type,artifact:x.artifact,status:x.status,submitted_at:x.submitted_at,
-      assignment:assignmentMap.get(setting.assignment_id),
-      peer_setting:{assignment_id:setting.assignment_id,peer_review_enabled:setting.peer_review_enabled,reviews_per_student:setting.reviews_per_student,peer_rubric:setting.peer_rubric,anonymous_peer_review:setting.anonymous_peer_review}
-    });
-  }
-  return {viewer:ctx.user,run,groups:groups||[],members:members||[],member_users:users||[],users:users||[],settings:settingRows,assignments:assignments||[],group_submissions:groupSubs||[],threads:threads||[],posts:postRows,mentions:mentions||[],peer_targets:peerTargets};
+  const settingRows=(settings||[]).filter((x:any)=>assignmentMap.has(x.assignment_id)).map((x:any)=>({...x,peer_review_enabled:false,peer_rubric:[]}));
+  return {viewer:ctx.user,run,groups:groups||[],members:members||[],member_users:users||[],users:users||[],settings:settingRows,assignments:assignments||[],group_submissions:groupSubs||[]};
 }
 async function markMentionsRead(ctx:any,run:any){
   const {data:threads}=await db.from("lms_discussion_threads_v2").select("id").eq("course_run_id",run.id);
@@ -733,7 +715,7 @@ async function saveGroupSetting(ctx:any,run:any,body:any){
   const {data:a}=await db.from("lms_assignments_v2").select("id").eq("id",assignmentId).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Tarea fuera de la cohorte");
   const n=Math.max(1,Math.min(5,Math.trunc(Number(body.reviews_per_student||1))));
   const rubric=Array.isArray(body.peer_rubric)?body.peer_rubric.slice(0,20).map((x:any,i:number)=>({code:clampText(x.code||"p"+(i+1),80,true),title:clampText(x.title,180,true),max:Number(x.max||0)})).filter((x:any)=>x.max>0):[];
-  const {data,error}=await db.from("lms_assignment_group_settings_v2").upsert({assignment_id:assignmentId,enabled:body.enabled!==false,peer_review_enabled:!!body.peer_review_enabled,reviews_per_student:n,peer_rubric:rubric,anonymous_peer_review:!!body.anonymous_peer_review,updated_by:ctx.user.id,updated_at:new Date().toISOString()},{onConflict:"assignment_id"}).select("*").single();if(error)throw error;
+  const {data,error}=await db.from("lms_assignment_group_settings_v2").upsert({assignment_id:assignmentId,enabled:body.enabled!==false,peer_review_enabled:false,reviews_per_student:n,peer_rubric:[],anonymous_peer_review:false,updated_by:ctx.user.id,updated_at:new Date().toISOString()},{onConflict:"assignment_id"}).select("*").single();if(error)throw error;
   await audit(ctx.user.id,"bigdata.group.setting.save","group_assignment",assignmentId,{peer_review_enabled:data.peer_review_enabled});return {ok:true,setting:data};
 }
 async function groupSubmit(ctx:any,run:any,body:any){
@@ -788,6 +770,7 @@ async function gradeGroupSubmission(ctx:any,run:any,body:any){
   await audit(ctx.user.id,"bigdata.group.grade","group_submission",id,{assignment_id:s.assignment_id,group_id:s.group_id,score});return {ok:true,submission:updated};
 }
 async function createThread(ctx:any,run:any,body:any){
+  requireTeacher(ctx);
   const n=body.session_number===null||body.session_number===""?null:Math.trunc(Number(body.session_number));
   if(n!==null){const {data:s}=await db.from("lms_run_sessions_v2").select("session_number").eq("course_run_id",run.id).eq("session_number",n).maybeSingle();if(!s)throw new Error("Sesión inválida")}
   const assignmentId=clampText(body.assignment_id,80)||null;if(assignmentId){const {data:a}=await db.from("lms_assignments_v2").select("id").eq("id",assignmentId).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Tarea inválida")}
@@ -797,6 +780,7 @@ async function createThread(ctx:any,run:any,body:any){
   return {ok:true,thread:data,post:first};
 }
 async function postDiscussion(ctx:any,run:any,body:any){
+  requireTeacher(ctx);
   const threadId=clampText(body.thread_id,80,true),parentId=clampText(body.parent_id,80)||null;
   const {data:t}=await db.from("lms_discussion_threads_v2").select("*").eq("id",threadId).eq("course_run_id",run.id).maybeSingle();if(!t)throw new Error("Conversación no encontrada");if(t.locked&&!isTeacher(ctx))throw new Error("Esta conversación está cerrada");
   let parent:any=null;
@@ -873,20 +857,16 @@ Deno.serve(async(req:Request)=>{
     if(action==="teacher_create_intervention")return out(req,await createIntervention(ctx,run,body));
     if(action==="teacher_resolve_intervention")return out(req,await resolveIntervention(ctx,run,body));
     if(action==="collaboration")return out(req,await collaborationOverview(ctx,run));
-    if(action==="mark_mentions_read")return out(req,await markMentionsRead(ctx,run));
     if(action==="teacher_collaboration")return out(req,await teacherCollaboration(ctx,run));
     if(action==="teacher_create_group")return out(req,await createGroup(ctx,run,body));
     if(action==="teacher_add_group_member")return out(req,await addGroupMember(ctx,run,body));
     if(action==="teacher_remove_group_member")return out(req,await removeGroupMember(ctx,run,body));
     if(action==="teacher_save_group_setting")return out(req,await saveGroupSetting(ctx,run,body));
-    if(action==="group_submit")return out(req,await groupSubmit(ctx,run,body));
-    if(action==="confirm_contribution")return out(req,await confirmContribution(ctx,run,body));
     if(action==="teacher_grade_group_submission")return out(req,await gradeGroupSubmission(ctx,run,body));
     if(action==="create_thread")return out(req,await createThread(ctx,run,body));
     if(action==="post_discussion")return out(req,await postDiscussion(ctx,run,body));
     if(action==="teacher_moderate_thread")return out(req,await moderateThread(ctx,run,body));
     if(action==="teacher_pin_answer")return out(req,await pinAnswer(ctx,run,body));
-    if(action==="submit_peer_review")return out(req,await submitPeerReview(ctx,run,body));
     return out(req,{error:"Acción desconocida"},400);
   }catch(e){
     if(String((e as any)?.message)==="NO_AUTH")return out(req,{error:"No autorizado"},403);
