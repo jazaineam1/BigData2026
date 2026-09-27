@@ -157,8 +157,41 @@ function render(){
 async function load(){
   try{data=await L.requireSession(sessionNumber,{teacher:true});if(!data)return;render()}catch(e){L.msg(status,e.message,'err')}
 }
-async function openDetail(userId){
-  const dlg=L.$('detailDialog');dlg.showModal();L.$('detailName').textContent='Cargando…';L.$('timeline').innerHTML='<p class="muted">Cargando eventos…</p>';
+const RUBRIC_FIELDS=[
+  ['reproducible_result','Resultado reproducible'],
+  ['supported_decision','Decisión sustentada'],
+  ['rejected_alternative','Alternativa descartada'],
+  ['ranking_interpretation','Interpretación del ranking'],
+  ['concrete_limit','Límite concreto']
+];
+function rubricSelect(evidenceId,id,label,current){
+  const value=Number(current??-1);
+  return '<label class="field"><span>'+L.esc(label)+'</span><select class="input" data-rubric-evidence="'+evidenceId+'" data-rubric-id="'+id+'"><option value="">—</option>'+[0,1,2].map(v=>'<option value="'+v+'" '+(value===v?'selected':'')+'>'+v+' / 2</option>').join('')+'</select></label>';
+}
+function reviewBox(e){
+  if(!['pending_review','rejected'].includes(e.verdict))return '';
+  const scores=e.rubric?.scores||{};
+  return '<div class="control-block" style="margin-top:10px"><b>Rúbrica LAB 9 · 10 puntos</b><div class="control-grid" style="margin-top:8px">'+RUBRIC_FIELDS.map(([id,label])=>rubricSelect(e.id,id,label,scores[id])).join('')+'</div><label class="field" style="margin-top:8px"><span>Feedback docente</span><textarea class="input" data-review-feedback="'+e.id+'" rows="3" placeholder="Indica qué está bien y qué debe ajustar.">'+L.esc(e.feedback&&e.verdict==='rejected'?e.feedback:'')+'</textarea></label><div class="actions" style="margin-top:8px"><button class="btn accent" data-review="'+e.id+'" data-decision="accepted">Aceptar evidencia</button><button class="btn danger" data-review="'+e.id+'" data-decision="rejected">Pedir ajuste</button></div></div>';
+}
+async function submitEvidenceReview(button){
+  const evidenceId=button.dataset.review,decision=button.dataset.decision;
+  const rubric={},selects=[...document.querySelectorAll('[data-rubric-evidence="'+evidenceId+'"]')];
+  for(const sel of selects){if(sel.value===''){L.msg(L.$('detailStatus'),'Completa los cinco criterios de la rúbrica.','warn');return}rubric[sel.dataset.rubricId]=Number(sel.value)}
+  const feedback=document.querySelector('[data-review-feedback="'+evidenceId+'"]')?.value||'';
+  if(feedback.trim().length<8){L.msg(L.$('detailStatus'),'Escribe feedback concreto para el estudiante.','warn');return}
+  button.disabled=true;
+  try{
+    await L.session('teacher_review_evidence',{session_number:sessionNumber,evidence_id:evidenceId,decision,rubric,feedback});
+    L.msg(L.$('detailStatus'),decision==='accepted'?'Evidencia aceptada.':'Evidencia devuelta para ajuste.','ok');
+    if(detailUserId)await openDetail(detailUserId,true);
+    await load();
+  }catch(e){L.msg(L.$('detailStatus'),e.message,'err')}
+  finally{button.disabled=false}
+}
+let detailUserId=null;
+
+async function openDetail(userId,keepOpen=false){
+  detailUserId=userId;const dlg=L.$('detailDialog');if(!keepOpen&&!dlg.open)dlg.showModal();L.$('detailName').textContent='Cargando…';L.$('timeline').innerHTML='<p class="muted">Cargando eventos…</p>';
   try{
     const x=await L.session('teacher_student_detail',{session_number:sessionNumber,user_id:userId});
     L.$('detailName').textContent=x.user?.display_name||x.user?.username||'Estudiante';
@@ -166,7 +199,8 @@ async function openDetail(userId){
     const mastered=aps.filter(a=>a.metadata?.mastery===true).length,labs=aps.filter(a=>defs.get(a.activity_code)?.kind==='lab').length;
     L.$('detailMetrics').innerHTML='<div class="detailmetric"><span class="muted">Estado</span><b>'+(p.status||'not_started')+'</b></div><div class="detailmetric"><span class="muted">Tiempo activo</span><b>'+L.fmtTime(p.active_seconds||0)+'</b></div><div class="detailmetric"><span class="muted">LAB explorados</span><b>'+labs+'</b></div><div class="detailmetric"><span class="muted">Evidencias</span><b>'+evidence.length+'</b></div><div class="detailmetric"><span class="muted">Dominio</span><b>'+mastered+'</b></div>';
     L.$('detailActivities').innerHTML=(x.activities||[]).map(a=>{const p=aps.find(z=>z.activity_code===a.code),m=p?.metadata||{},state=m.mastery===true?'Dominado':p?.status==='completed'?'Completado':p?'En curso':'Pendiente';return '<div class="item"><b>'+L.esc(a.title)+'</b><div class="muted">'+L.esc(a.kind)+' · '+state+' · intentos '+Number(p?.attempts||0)+'</div>'+(typeof m.first_attempt_correct==='boolean'?'<div class="muted">1.er intento '+(m.first_attempt_correct?'✓':'✗')+'</div>':'')+'</div>'}).join('');
-    L.$('detailEvidence').innerHTML=evidence.length?evidence.map(e=>{const def=defs.get(e.activity_code);return '<div class="event"><time>'+L.fmtWhen(e.created_at)+'</time><div><b>'+L.esc(def?.title||e.activity_code)+'</b><div><span class="pill '+(['correct','accepted'].includes(e.verdict)?'done':'pending')+'">'+L.esc(e.verdict)+'</span></div><div class="muted">'+L.esc(e.feedback||'')+'</div><div class="current-code">'+L.esc(JSON.stringify(e.payload||{}))+'</div></div></div>'}).join(''):'<p class="muted">No hay evidencia enviada en esta sesión.</p>';
+    L.$('detailEvidence').innerHTML=evidence.length?evidence.map(e=>{const def=defs.get(e.activity_code),label=e.verdict==='pending_review'?'Pendiente de revisión':e.verdict==='rejected'?'Requiere ajustes':e.verdict==='accepted'?'Aceptada':e.verdict==='correct'?'Correcta':e.verdict;return '<div class="event"><time>'+L.fmtWhen(e.created_at)+'</time><div style="min-width:0"><b>'+L.esc(def?.title||e.activity_code)+'</b><div><span class="pill '+(['correct','accepted'].includes(e.verdict)?'done':e.verdict==='rejected'?'high':'pending')+'">'+L.esc(label)+'</span>'+(e.rubric?.total!=null?'<span class="pill active">'+Number(e.rubric.total)+'/10</span>':'')+'</div><div class="muted">'+L.esc(e.feedback||'')+'</div><div class="current-code" style="white-space:pre-wrap">'+L.esc(JSON.stringify(e.payload||{},null,2))+'</div>'+reviewBox(e)+'</div></div>'}).join(''):'<p class="muted">No hay evidencia enviada en esta sesión.</p>';
+    document.querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>submitEvidenceReview(b));
     L.$('timeline').innerHTML=(x.events||[]).length?x.events.map(e=>{const def=defs.get(e.activity_code);return '<div class="event"><time>'+L.fmtWhen(e.created_at)+'</time><div><b>'+L.esc(e.event_type)+'</b><div class="muted">'+L.esc(def?.title||e.activity_code||e.metadata?.label||'Sesión')+'</div></div></div>'}).join(''):'<p class="muted">No hay eventos registrados para esta sesión.</p>';
   }catch(e){L.msg(L.$('detailStatus'),e.message,'err')}
 }
