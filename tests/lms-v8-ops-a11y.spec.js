@@ -82,14 +82,15 @@ test('observabilidad docente muestra RPO RTO sin datos sensibles', async ({page}
         academic:{events_24h:42,last_event_at:new Date().toISOString()},
         realtime:{signals_24h:12,last_signal_at:new Date().toISOString()},
         retention:{orphan_candidates_24h:0},
-        recovery:{rpo_hours:24,rto_hours:4,last_backup_at:new Date().toISOString(),backup_age_hours:1.2,rpo_met:true}},
+        recovery:{rpo_hours:24,rto_hours:4,platform_backup_status:'not_observed_by_lms',last_academic_snapshot_at:new Date().toISOString(),academic_snapshot_age_hours:1.2,academic_snapshot_recent:true,academic_snapshot_target_hours:24}},
       capabilities:['ops.view','backup.export','retention.preview'],
-      policies:{login_rate_limit:'8 fallos por IP/cuenta en 15 min mediante bigdata-auth',retention_preview_min_hours:24,cleanup_role:'admin',attached_files_deletable:false,session_ttl_hours:{student:720,teacher:12,admin:4},rpo_hours:24,rto_hours:4}
+      policies:{login_rate_limit:'8 fallos por IP/cuenta en 15 min mediante bigdata-auth',retention_preview_min_hours:24,cleanup_role:'admin',attached_files_deletable:false,session_ttl_hours:{student:720,teacher:12,admin:4},rpo_hours:24,rto_hours:4,academic_snapshot_target_hours:24,platform_backup_status:'not_observed_by_lms'}
     })
   }));
   await page.goto('/lms/admin-operations.html');
   await expect(page.getByRole('heading',{name:'Estado operativo'})).toBeVisible();
-  await expect(page.getByText('En objetivo')).toBeVisible();
+  await expect(page.getByText('Reciente')).toBeVisible();
+  await expect(page.getByText(/No equivale al backup administrado de Supabase/)).toBeVisible();
   await expect(page.getByText(/RPO objetivo 24 h · RTO objetivo 4 h/)).toBeVisible();
   await expect(page.getByText('ops.view')).toBeVisible();
   const body=await page.locator('body').innerText();
