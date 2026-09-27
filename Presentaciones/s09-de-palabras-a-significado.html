@@ -124,6 +124,7 @@ function initP(){if(!window.pBtns)return;pBtns.innerHTML=pState.map((v,i)=>`<but
 function evidence(){const o={consulta:evQ.value,resultado_defendible:evGood.value,falso_positivo:evBad.value,alternativa_descartada:evAlt.value,limite:evLim.value,nota:'Completar en Colab con Top-5 lexical, semántico e híbrido reales.'};evOut.textContent=JSON.stringify(o,null,2)}
 
 const L=window.BIGDATA_LMS,K=window.LMS;
+const esc=value=>L?.esc?L.esc(value):String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
 const LAB_BY_SLIDE={6:'bd-s09-lab1',12:'bd-s09-lab-e5',14:'bd-s09-lab-chunk',16:'bd-s09-lab2',17:'bd-s09-lab3',18:'bd-s09-lab4',24:'bd-s09-lab5',26:'bd-s09-lab6',29:'bd-s09-lab7',31:'bd-s09-lab8',32:'bd-s09-lab-eval',33:'bd-s09-lab9'};
 const labTimers=new Map(),labLastSent=new Map();
 let s09Model=null,studentTimer=null,teacherTimer=null;
