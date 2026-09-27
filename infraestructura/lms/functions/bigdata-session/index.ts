@@ -474,10 +474,12 @@ async function recomputeSession(userId:string,runId:string,n:number,activities:a
   },{onConflict:"user_id,course_run_id,session_number"});
   return {completed:mastered,total:checkpoints.length,done};
 }
-async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:any,activities:any[]){
+async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:any,activities:any[],rawConfidence:any=null){
   const activity=activities.find((a:any)=>a.code===code&&a.kind==="checkpoint");
   if(!activity)throw new Error("Desafío no válido");
   const answer=String(rawAnswer||"").trim().slice(0,160);if(!answer)throw new Error("Respuesta vacía");
+  const confidenceRaw=String(rawConfidence||"").trim().toLowerCase();
+  const confidence=["low","medium","high"].includes(confidenceRaw)?confidenceRaw:null;
   const {data:key}=await db.from("bd_lms_activity_keys").select("answer_hash,hint,session_number")
     .eq("activity_code",code).eq("session_number",n).maybeSingle();
   if(!key)throw new Error("Este checkpoint no tiene validación automática configurada");
@@ -495,17 +497,81 @@ async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:an
     status:mastery?"completed":"in_progress",started_at:p?.started_at||now,
     attempts,score:mastery?Number(activity.points||1):0,max_score:Number(activity.points||1),
     completed_at:mastery?(p?.completed_at||now):null,updated_at:now,
-    metadata:{...previousMeta,source:"lms-formative-challenge",formative:true,first_attempt_correct:firstAttempt,mastery,last_attempt_correct:correct}
+    metadata:{...previousMeta,source:"lms-formative-challenge",formative:true,first_attempt_correct:firstAttempt,mastery,last_attempt_correct:correct,last_confidence:confidence,first_confidence:previousMeta.first_confidence||confidence}
   },{onConflict:"user_id,course_run_id,activity_code"});
   const {error:eventError}=await db.from("bd_lms_events").insert({
     user_id:ctx.user.id,course_run_id:run.id,event_type:"challenge_answered",
     session_number:n,activity_code:code,
-    metadata:{correct,attempt:attempts,first_attempt_correct:firstAttempt,mastery},created_at:now
+    metadata:{correct,attempt:attempts,first_attempt_correct:firstAttempt,mastery,confidence},created_at:now
   });
   failIf(eventError,"No se pudo registrar el intento");
   const summary=await recomputeSession(ctx.user.id,run.id,n,activities);
-  return {ok:true,correct,attempts,first_attempt_correct:firstAttempt,mastery,hint:correct?null:key.hint,...summary};
+  return {ok:true,correct,attempts,first_attempt_correct:firstAttempt,mastery,confidence,hint:correct?null:key.hint,...summary};
 }
+async function realtimeSignal(n:number,scope:"controls"|"wall"|"progress"|"teacher_wall"){
+  const {error}=await db.from("bd_realtime_signals").insert({
+    course_code:COURSE,session_number:n,scope,created_at:new Date().toISOString()
+  });
+  failIf(error,"No se pudo emitir la señal Realtime");
+}
+async function sessionControls(runId:string,n:number){
+  const now=Date.now();
+  const {data,error}=await db.from("bd_session_controls")
+    .select("id,control_key,control_type,payload,created_at,expires_at")
+    .eq("course_run_id",runId).eq("session_number",n).eq("active",true)
+    .order("created_at",{ascending:true});
+  failIf(error,"No se pudieron cargar los controles de sesión");
+  return (data||[]).filter((x:any)=>!x.expires_at||Date.parse(x.expires_at)>now);
+}
+async function isLabClosed(runId:string,n:number,activityCode:string){
+  const controls=await sessionControls(runId,n);
+  const c=controls.find((x:any)=>x.control_key==="lab:"+activityCode);
+  return c?.control_type==="close_lab";
+}
+async function teacherSetControl(ctx:any,run:any,n:number,body:any,activities:any[]){
+  requireTeacher(ctx);
+  const type=String(body.control_type||"");
+  if(!["open_lab","close_lab","goto_slide","pin_hint"].includes(type))throw new Error("Control docente inválido");
+  let key="",payload:any={};
+  if(type==="open_lab"||type==="close_lab"){
+    const code=String(body.activity_code||"");
+    const activity=activities.find((a:any)=>a.code===code&&a.kind==="lab");
+    if(!activity)throw new Error("Selecciona un LAB válido de esta sesión");
+    key="lab:"+code;payload={activity_code:code,title:String(activity.title||code)};
+  }else if(type==="goto_slide"){
+    const slide=Math.trunc(Number(body.slide));
+    if(!Number.isInteger(slide)||slide<1||slide>250)throw new Error("Diapositiva inválida");
+    key="slide";payload={slide,label:String(body.label||"").slice(0,120)};
+  }else{
+    const text=trimText(body.text,3,500,"La pista");
+    key="hint";payload={text};
+  }
+  const now=new Date().toISOString();
+  const {error:oldError}=await db.from("bd_session_controls").update({active:false,superseded_at:now})
+    .eq("course_run_id",run.id).eq("session_number",n).eq("control_key",key).eq("active",true);
+  failIf(oldError,"No se pudo reemplazar el control anterior");
+  const {data,error}=await db.from("bd_session_controls").insert({
+    course_run_id:run.id,session_number:n,control_key:key,control_type:type,payload,
+    active:true,created_by:ctx.user.id,created_at:now
+  }).select("id,control_key,control_type,payload,created_at,expires_at").single();
+  failIf(error,"No se pudo guardar el control docente");
+  await realtimeSignal(n,"controls");
+  await audit(ctx.user.id,"bigdata.session.control.set","course_run",run.id,{session_number:n,control_key:key,control_type:type});
+  return {ok:true,control:data,controls:await sessionControls(run.id,n)};
+}
+async function teacherClearControl(ctx:any,run:any,n:number,body:any){
+  requireTeacher(ctx);
+  const key=String(body.control_key||"");
+  if(!(key==="hint"||key==="slide"||/^lab:[A-Za-z0-9._:-]{3,120}$/.test(key)))throw new Error("Control a limpiar inválido");
+  const now=new Date().toISOString();
+  const {error}=await db.from("bd_session_controls").update({active:false,superseded_at:now})
+    .eq("course_run_id",run.id).eq("session_number",n).eq("control_key",key).eq("active",true);
+  failIf(error,"No se pudo limpiar el control");
+  await realtimeSignal(n,"controls");
+  await audit(ctx.user.id,"bigdata.session.control.clear","course_run",run.id,{session_number:n,control_key:key});
+  return {ok:true,controls:await sessionControls(run.id,n)};
+}
+
 async function openOfficial(ctx:any,run:any,n:number){
   requireTeacher(ctx);
   const existing=await sessionWindow(run.id,n);if(existing)return existing;
@@ -561,12 +627,12 @@ async function teacherWall(ctx:any,run:any,n:number){
       mastered_checkpoints:mastered,total_checkpoints:checkpoints.length,completed_checkpoints:mastered,
       presentation_opened:Boolean(am.get("bd-s09-presentation")),notebook_opened:Boolean(am.get("bd-s09-notebook")),
       lab_explored:labs.filter((a:any)=>am.has(a.code)).length,evidence_count:(evByUser.get(u.id)||[]).length,
-      checkpoints:checkpoints.map((a:any)=>{const x:any=am.get(a.code)||{},m=x.metadata||{};return {code:a.code,attempts:Number(x.attempts||0),metadata:{first_attempt_correct:typeof m.first_attempt_correct==="boolean"?m.first_attempt_correct:null,mastery:Boolean(m.mastery)}}}),
+      checkpoints:checkpoints.map((a:any)=>{const x:any=am.get(a.code)||{},m=x.metadata||{};return {code:a.code,attempts:Number(x.attempts||0),metadata:{first_attempt_correct:typeof m.first_attempt_correct==="boolean"?m.first_attempt_correct:null,mastery:Boolean(m.mastery),confidence:String(m.last_confidence||"")}}}),
       last_slide:Number(slideMeta.slide||0)>0?{slide:Number(slideMeta.slide),label:String(slideMeta.label||""),chapter:String(slideMeta.chapter||""),at:slideEv.created_at}:null,
       activities:def.activities.map((a:any)=>{
         const x:any=am.get(a.code)||{},m=x.metadata||{};
         return {code:a.code,title:a.title,kind:a.kind,status:x.status||"not_started",attempts:Number(x.attempts||0),
-          first_attempt_correct:typeof m.first_attempt_correct==="boolean"?m.first_attempt_correct:null,mastery:Boolean(m.mastery),
+          first_attempt_correct:typeof m.first_attempt_correct==="boolean"?m.first_attempt_correct:null,mastery:Boolean(m.mastery),confidence:String(m.last_confidence||""),
           started_at:x.started_at||null,completed_at:x.completed_at||null};
       })
     };
@@ -577,9 +643,10 @@ async function teacherWall(ctx:any,run:any,n:number){
       completed:xs.filter((x:any)=>x.status==="completed").length,
       attempted:xs.filter((x:any)=>x.attempts>0).length,
       first_attempt_correct:xs.filter((x:any)=>x.first_attempt_correct===true).length,
-      mastered:xs.filter((x:any)=>x.mastery===true).length};
+      mastered:xs.filter((x:any)=>x.mastery===true).length,
+      high_confidence_wrong:xs.filter((x:any)=>x.attempts>0&&x.mastery!==true&&x.confidence==="high").length};
   });
-  return {viewer:ctx.user,run,...def,session_window:window,students:rows,ranking:rows,activity_stats,challenge_stats:activity_stats.filter((x:any)=>x.kind==="checkpoint"),refreshed_at:new Date().toISOString()};
+  return {viewer:ctx.user,run,...def,session_window:window,controls:await sessionControls(run.id,n),students:rows,ranking:rows,activity_stats,challenge_stats:activity_stats.filter((x:any)=>x.kind==="checkpoint"),refreshed_at:new Date().toISOString()};
 }
 async function teacherStudentDetail(ctx:any,run:any,n:number,userId:string){
   requireTeacher(ctx);
@@ -669,7 +736,7 @@ Deno.serve(async(req:Request)=>{
   }
   try{
     if(action==="course_progress")return out(req,await courseProgress(ctx,run));
-    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","wall_moderate"].includes(action);
+    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","wall_moderate","teacher_set_control","teacher_clear_control"].includes(action);
     const def=await definition(run.id,n,teacher),codes=def.activities.map((a:any)=>a.code);
     if(action==="me"){
       const [p,cat,evidence]=await Promise.all([
@@ -677,7 +744,7 @@ Deno.serve(async(req:Request)=>{
         publicCatalog(codes,ctx.user.id,run.id),
         ownEvidence(ctx.user.id,run.id,n)
       ]);
-      return out(req,{viewer:ctx.user,run,...def,...p,...cat,evidence,summary:activitySummary(def.activities,p.activity_progress)});
+      return out(req,{viewer:ctx.user,run,...def,...p,...cat,evidence,controls:await sessionControls(run.id,n),summary:activitySummary(def.activities,p.activity_progress)});
     }
     if(action==="track"){
       const event=String(body.event_type||"");if(!PUBLIC_TRACK_EVENTS.has(event))throw new Error("Evento no permitido para tracking cliente");
@@ -700,18 +767,24 @@ Deno.serve(async(req:Request)=>{
           await touchActivity(ctx.user.id,run.id,activity,event,false,event!=="lab_interaction");
         }
       }
+      if(["slide_viewed","presentation_opened","notebook_opened","page_closed","lab_interaction"].includes(event))await realtimeSignal(n,"teacher_wall");
       return out(req,{ok:true});
     }
-    if(action==="answer_challenge")return out(req,await answerChallenge(ctx,run,n,String(body.activity_code||""),body.answer,def.activities));
+    if(action==="answer_challenge"){const result=await answerChallenge(ctx,run,n,String(body.activity_code||""),body.answer,def.activities,body.confidence);await realtimeSignal(n,"progress");return out(req,result)}
     if(action==="evidence"){
       const activity=def.activities.find((a:any)=>a.code===String(body.activity_code||""));
-      return out(req,await submitEvidence(ctx.user.id,run.id,n,activity,body.payload||{},String(body.source||"presentation"),body.client_evidence_id));
+      if(activity&&await isLabClosed(run.id,n,activity.code))throw new Error("Este LAB está cerrado temporalmente por el docente");
+      const result=await submitEvidence(ctx.user.id,run.id,n,activity,body.payload||{},String(body.source||"presentation"),body.client_evidence_id);
+      await realtimeSignal(n,"progress");return out(req,result);
     }
     if(action==="lab_code")return out(req,{ok:true,...await issueLabCode(ctx,run,n)});
-    if(action==="wall_post")return out(req,await wallPost(ctx,run,n,String(body.activity_code||""),body.body,body.evidence_id||null,body.client_post_id));
+    if(action==="wall_post"){const result=await wallPost(ctx,run,n,String(body.activity_code||""),body.body,body.evidence_id||null,body.client_post_id);await realtimeSignal(n,"wall");return out(req,result)}
     if(action==="wall_list")return out(req,await wallList(ctx,run,n,String(body.activity_code||"")));
-    if(action==="wall_react")return out(req,await wallReact(ctx,run,n,String(body.post_id||""),String(body.kind||"")));
-    if(action==="wall_moderate")return out(req,await wallModerate(ctx,run,n,String(body.post_id||""),String(body.moderation||"")));
+    if(action==="wall_react"){const result=await wallReact(ctx,run,n,String(body.post_id||""),String(body.kind||""));await realtimeSignal(n,"wall");return out(req,result)}
+    if(action==="wall_moderate"){const result=await wallModerate(ctx,run,n,String(body.post_id||""),String(body.moderation||""));await realtimeSignal(n,"wall");return out(req,result)}
+    if(action==="session_controls")return out(req,{ok:true,controls:await sessionControls(run.id,n)});
+    if(action==="teacher_set_control")return out(req,await teacherSetControl(ctx,run,n,body,def.activities));
+    if(action==="teacher_clear_control")return out(req,await teacherClearControl(ctx,run,n,body));
     if(action==="teacher_open_session")return out(req,{ok:true,session_window:await openOfficial(ctx,run,n)});
     if(action==="teacher_reset_session")return out(req,await resetSession(ctx,run,n,body));
     if(action==="teacher_student_detail")return out(req,await teacherStudentDetail(ctx,run,n,String(body.user_id||"")));
