@@ -80,7 +80,7 @@ test('observabilidad docente muestra RPO RTO sin datos sensibles', async ({page}
       health:{generated_at:new Date().toISOString(),overall:'ok',
         auth:{active_sessions:4,login_attempts_24h:10,failed_logins_24h:1,failure_rate_pct:10},
         academic:{events_24h:42,last_event_at:new Date().toISOString()},
-        realtime:{signals_24h:12,last_signal_at:new Date().toISOString()},
+        realtime:{transport:'broadcast',legacy_signal_rows_24h:0,last_legacy_signal_at:null},
         retention:{orphan_candidates_24h:0},
         recovery:{rpo_hours:24,rto_hours:4,platform_backup_status:'not_observed_by_lms',last_academic_snapshot_at:new Date().toISOString(),academic_snapshot_age_hours:1.2,academic_snapshot_recent:true,academic_snapshot_target_hours:24}},
       capabilities:['ops.view','backup.export','retention.preview'],
@@ -93,6 +93,8 @@ test('observabilidad docente muestra RPO RTO sin datos sensibles', async ({page}
   await expect(page.getByText(/No equivale al backup administrado de Supabase/)).toBeVisible();
   await expect(page.getByText(/RPO objetivo 24 h · RTO objetivo 4 h/)).toBeVisible();
   await expect(page.getByText('ops.view')).toBeVisible();
+  await expect(page.getByText('Realtime Broadcast')).toBeVisible();
+  await expect(page.getByText('broadcast',{exact:true})).toBeVisible();
   const body=await page.locator('body').innerText();
   expect(body).not.toContain('key_hash');
   expect(body).not.toContain('token_hash');
