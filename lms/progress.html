@@ -86,9 +86,8 @@ function renderEvidence(){
   L.$('evidenceCount').textContent=evidence.length+' registro'+(evidence.length===1?'':'s');
   L.$('evidenceList').innerHTML=evidence.length?evidence.map(e=>{
     const a=activities.get(e.activity_code),ok=['correct','accepted'].includes(e.verdict),
-      label=ok?'Registrado':e.verdict==='pending_review'?'En revisión':'Revisar',
-      wall=a?.kind==='lab'?'<a class="btn ghost" href="class-wall.html?s='+focus+'&a='+encodeURIComponent(e.activity_code)+'">Ver muro del LAB</a>':'';
-    return '<article class="evidence-item"><div class="actions" style="justify-content:space-between"><b>'+L.esc(a?.title||e.activity_code)+'</b><span class="pill '+(ok?'done':'pending')+'">'+label+'</span></div>'+(e.feedback?'<p class="feedback-text">'+L.esc(e.feedback)+'</p>':'')+'<div class="actions">'+wall+'</div></article>'
+      label=ok?'Registrado':e.verdict==='pending_review'?'En revisión':'Revisar';
+    return '<article class="evidence-item"><div class="actions" style="justify-content:space-between"><b>'+L.esc(a?.title||e.activity_code)+'</b><span class="pill '+(ok?'done':'pending')+'">'+label+'</span></div>'+(e.feedback?'<p class="feedback-text">'+L.esc(e.feedback)+'</p>':'')+'</article>'
   }).join(''):'<div class="note"><b>Aún no tienes trabajos registrados en esta sesión.</b></div>';
 }
 async function load(){
