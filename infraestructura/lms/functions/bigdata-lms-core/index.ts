@@ -286,12 +286,12 @@ async function submitAssignment(ctx:any,run:any,body:any){
   if(due&&Date.parse(due)<Date.now())throw new Error("La fecha de entrega ya venció para tu cuenta");
   const {data:prior}=await db.from("lms_submissions_v2").select("attempt").eq("assignment_id",id).eq("user_id",ctx.user.id).order("attempt",{ascending:false}).limit(1);
   const attempt=Number(prior?.[0]?.attempt||0)+1;if(attempt>maxAttempts)throw new Error("Ya usaste el máximo de intentos");
-  const type=String(body.artifact_type||"text");
+  const type=String(body.artifact_type||"url");
   if(!Array.isArray(a.allowed_types)||!a.allowed_types.includes(type))throw new Error("Tipo de entrega no permitido");
   let artifact:any={};
-  if(type==="text")artifact={text:clampText(body.text,20000,true)};
-  else if(type==="url"){const url=cleanUrl(body.url);if(!url)throw new Error("URL obligatoria");artifact={url}}
-  else if(type==="file")throw new Error("Carga de archivo aún no está habilitada; usa texto o URL en esta tarea");
+  if(type==="url"){const url=cleanUrl(body.url);if(!url)throw new Error("URL obligatoria");artifact={url}}
+  else if(type==="file")throw new Error("Los archivos se cargan mediante el flujo privado de Storage");
+  else if(type==="text")throw new Error("Las respuestas abiertas están deshabilitadas para estudiantes");
   else throw new Error("La evidencia automática solo puede generarla el sistema");
   const {data,error}=await db.from("lms_submissions_v2").insert({
     assignment_id:id,user_id:ctx.user.id,attempt,artifact_type:type,artifact,status:"submitted",submitted_at:new Date().toISOString()
@@ -321,7 +321,7 @@ async function saveAssignment(ctx:any,run:any,body:any){
     if(!s)throw new Error("La sesión indicada no existe en esta cohorte");
   }
   const maxScore=Number(body.max_score||100);if(!Number.isFinite(maxScore)||maxScore<=0||maxScore>1000)throw new Error("Puntaje máximo inválido");
-  const allowed=(Array.isArray(body.allowed_types)?body.allowed_types:[]).filter((x:any)=>["text","url","file","evidence"].includes(String(x)));
+  const allowed=(Array.isArray(body.allowed_types)?body.allowed_types:[]).filter((x:any)=>["url","file","evidence"].includes(String(x)));
   if(!allowed.length)throw new Error("Selecciona al menos un tipo de entrega");
   const maxAttempts=Math.trunc(Number(body.max_attempts||1));if(maxAttempts<1||maxAttempts>20)throw new Error("Intentos inválidos");
   const row:any={course_run_id:run.id,code,session_number:n,title:clampText(body.title,180,true),instructions:clampText(body.instructions,8000),
