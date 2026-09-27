@@ -488,7 +488,7 @@ Diferenciador Big Data:
 - convertir index en gateway;
 - retirar progreso local como progreso “oficial”;
 - portal como home autenticado;
-- sesión actual coherente (S09);
+- sesión actual coherente con el calendario real del curso;
 - login único y retorno seguro.
 
 ### Incremento C · módulo genérico
