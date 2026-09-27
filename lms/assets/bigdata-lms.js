@@ -42,6 +42,7 @@ function ensureA11yShell(){
   const main=document.querySelector('main');
   if(main){
     if(!main.id)main.id='main-content';
+    if(!main.hasAttribute('tabindex'))main.setAttribute('tabindex','-1');
     if(!document.querySelector('.skip-link')){
       const a=document.createElement('a');a.className='skip-link';a.href='#'+main.id;a.textContent='Saltar al contenido principal';document.body.prepend(a);
     }
