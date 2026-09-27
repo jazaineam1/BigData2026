@@ -72,8 +72,9 @@ test('S09 P0 desafíos empiezan vacíos y la respuesta fuente no queda primera',
   }
 });
 
-test('S09 P0 no duplica el nombre Mi progreso',async({page})=>{
+test('S09 P0 mantiene una sola opción de progreso en la presentación',async({page})=>{
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?preview=1#s1');
   await expect(page.getByRole('button',{name:'Progreso S09'})).toBeVisible();
-  await expect(page.locator('a[href="../lms/progress.html?s=9"]')).toHaveCount(1);
+  await expect(page.locator('a[href="../lms/progress.html?s=9"]')).toHaveCount(0);
+  await expect(page.getByText('Mi progreso',{exact:true})).toHaveCount(0);
 });
