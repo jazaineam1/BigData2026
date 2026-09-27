@@ -1,11 +1,26 @@
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 
+const runtimeErrors = new WeakMap();
+test.beforeEach(async ({ page }) => {
+  const errors=[];
+  runtimeErrors.set(page,errors);
+  page.on('pageerror', err => errors.push('pageerror: '+err.message));
+  page.on('console', msg => {
+    if(msg.type()==='error' && /ReferenceError|TypeError|SyntaxError|Uncaught/i.test(msg.text())) errors.push('console: '+msg.text());
+  });
+});
+test.afterEach(async ({ page }, testInfo) => {
+  const errors=runtimeErrors.get(page)||[];
+  expect(errors, testInfo.title+' errores JavaScript').toEqual([]);
+});
+
 const viewports = [
   { name: 'laptop-1280', width: 1280, height: 720 },
   { name: 'laptop-1366', width: 1366, height: 768 },
   { name: 'desktop-1536', width: 1536, height: 864 },
   { name: 'desktop-1920', width: 1920, height: 1080 },
+  { name: 'desktop-1920x937', width: 1920, height: 937 },
   { name: 'tablet', width: 768, height: 1024 },
   { name: 'phone-390', width: 390, height: 844 },
   { name: 'phone-412', width: 412, height: 915 },
@@ -27,24 +42,59 @@ async function assertVisibleSvgContained(page, label) {
       const r=el.getBoundingClientRect(),s=getComputedStyle(el);
       return s.display!=='none'&&s.visibility!=='hidden'&&r.width>1&&r.height>1;
     };
-    const out=[];
+    const mobile=matchMedia('(max-width:900px)').matches,out=[];
     for (const svg of document.querySelectorAll('svg')) {
       if(!visible(svg)) continue;
-      const host=svg.closest('.diagram,.card,.panel,.lab,.slide')||svg.parentElement;
+      const host=svg.closest('.diagram,.card,.panel,.lab')||svg.closest('.slide')||svg.parentElement;
       if(!host) continue;
-      const a=svg.getBoundingClientRect(),b=host.getBoundingClientRect(),tol=3;
-      if(a.left < b.left-tol || a.right > b.right+tol) {
-        out.push({id:svg.id||null,svg:{left:a.left,right:a.right,width:a.width},host:{class:host.className,left:b.left,right:b.right,width:b.width}});
+      const a=svg.getBoundingClientRect(),b=host.getBoundingClientRect(),tol=3,isSlide=host.classList?.contains('slide');
+      const badX=a.left < b.left-tol || a.right > b.right+tol;
+      const badY=(!mobile || !isSlide) && (a.top < b.top-tol || a.bottom > b.bottom+tol);
+      if(badX || badY) {
+        out.push({id:svg.id||null,svg:{left:a.left,right:a.right,top:a.top,bottom:a.bottom},host:{class:host.className,left:b.left,right:b.right,top:b.top,bottom:b.bottom}});
+      }
+      for (const labelNode of svg.querySelectorAll('text')) {
+        if(!visible(labelNode)) continue;
+        const t=labelNode.getBoundingClientRect(),s=svg.getBoundingClientRect();
+        if(t.left<s.left-tol||t.right>s.right+tol||t.top<s.top-tol||t.bottom>s.bottom+tol) {
+          out.push({id:svg.id||null,label:(labelNode.textContent||'').slice(0,80),text:{left:t.left,right:t.right,top:t.top,bottom:t.bottom},svg:{left:s.left,right:s.right,top:s.top,bottom:s.bottom}});
+        }
       }
     }
     return out;
   });
-  expect(failures, label + ' SVG fuera de contenedor').toEqual([]);
+  expect(failures, label + ' SVG/etiqueta fuera de contenedor').toEqual([]);
+}
+
+async function assertActiveSlideContained(page, label) {
+  const result = await page.evaluate(() => {
+    const slide=document.querySelector('.slide.on'),stage=document.querySelector('.stage');
+    if(!slide||!stage)return {failures:[],fit:1,mobile:false};
+    const mobile=matchMedia('(max-width:900px)').matches,out=[],host=stage.getBoundingClientRect(),tol=4;
+    const visible=el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'&&r.width>1&&r.height>1};
+    if(!mobile){
+      const nodes=[slide,...slide.querySelectorAll('.slide-content,.body,.diagram,.lab,.card,svg')];
+      for(const el of nodes){
+        if(!visible(el))continue;
+        const r=el.getBoundingClientRect();
+        if(r.left<host.left-tol||r.right>host.right+tol||r.top<host.top-tol||r.bottom>host.bottom+tol){
+          out.push({tag:el.tagName,id:el.id||null,class:String(el.className?.baseVal||el.className||'').slice(0,120),
+            rect:{left:r.left,right:r.right,top:r.top,bottom:r.bottom},stage:{left:host.left,right:host.right,top:host.top,bottom:host.bottom}});
+        }
+      }
+    }else{
+      const r=slide.getBoundingClientRect();
+      if(r.left<host.left-tol||r.right>host.right+tol)out.push({tag:'SLIDE',rect:{left:r.left,right:r.right},stage:{left:host.left,right:host.right}});
+    }
+    return {failures:out.slice(0,50),fit:Number(slide.dataset.fit||1),mobile};
+  });
+  expect(result.failures,label+' contenido fuera del stage').toEqual([]);
+  if(!result.mobile)expect(result.fit,label+' auto-fit demasiado pequeño').toBeGreaterThanOrEqual(0.79);
 }
 
 async function mockAuth(page, role='student') {
   await page.addInitScript(({role}) => {
-    localStorage.setItem('andesdb.lms.auth.v1',JSON.stringify({
+    localStorage.setItem('lms.bigdata.v2',JSON.stringify({
       token:'qa-token',expires_at:'2099-12-31T23:59:59Z',auth_session_id:'qa',
       user:{id:'00000000-0000-0000-0000-000000000001',username:'qa',display_name:'Estudiante QA',role}
     }));
@@ -76,7 +126,7 @@ const sessionModel = {
   summary:{total_activities:4,required_activities:4,attempted:1,completed:0,resource_visited:1,resource_total:2,checkpoint_mastered:0,checkpoint_total:1}
 };
 
-async function mockSessionApi(page, role='student') {
+async function mockSessionApi(page, role='student', seen=null, modelOverride=null) {
   await mockAuth(page,role);
   let wallPublished=false;
   await page.route('**/functions/v1/bigdata-session**', async route => {
@@ -86,8 +136,9 @@ async function mockSessionApi(page, role='student') {
       const model={...sessionModel,viewer:{...sessionModel.viewer,role:'teacher',display_name:'Docente QA'},students:[],ranking:[],activity_stats:[],challenge_stats:[],session_window:null,refreshed_at:new Date().toISOString()};
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(model)});
     }
-    if(req.method()==='GET') return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(sessionModel)});
-    const body=req.postDataJSON?.()||{};
+    const activeModel=modelOverride||sessionModel;
+    if(req.method()==='GET') return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(activeModel)});
+    const body=req.postDataJSON?.()||{};if(seen)seen.push(body);
     if(body.action==='lab_code')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,code:'ABCD2345',expires_at:'2099-12-31T23:59:59Z'})});
     if(body.action==='evidence')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,completed:true,verdict:'correct',feedback:'Resultado verificado.'})});
     if(body.action==='wall_post'){wallPublished=true;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,post:{id:'p1'}})})}
@@ -98,6 +149,19 @@ async function mockSessionApi(page, role='student') {
     return route.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});
   });
 }
+
+test('S09 autenticada inicializa tracking y evidencia genérica', async ({ page }) => {
+  const seen=[];
+  const model=JSON.parse(JSON.stringify(sessionModel));
+  model.activities.push({code:'bd-s09-lab1',title:'LAB 1 · Recuperación lexical',kind:'lab',required:true,points:0,metadata:{completion_rule:'evidence',slide:6}});
+  model.catalog.push({code:'bd-s09-lab1',evaluator:'self-report',seeded:false,version:1,wall_prompt:'Explica una decisión y un límite.',steps:[{id:'decision',type:'text'},{id:'limit',type:'text'}]});
+  await mockSessionApi(page,'student',seen,model);
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s6');
+  await expect(page.locator('#moduleIdentity')).toContainText('Estudiante QA · conectado');
+  await expect(page.locator('[data-evidence-for="bd-s09-lab1"]')).toHaveCount(1);
+  await expect.poll(()=>seen.some(x=>x.action==='track'&&x.event_type==='presentation_opened')).toBeTruthy();
+  await expect.poll(()=>seen.some(x=>x.action==='track'&&x.event_type==='slide_viewed')).toBeTruthy();
+});
 
 test('landing pública no desborda', async ({ page }) => {
   for (const vp of [viewports[0],viewports[5],viewports[6]]) {
@@ -113,12 +177,19 @@ for (const vp of viewports) {
     await page.setViewportSize({width:vp.width,height:vp.height});
     await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?preview=1#s1');
     await page.waitForLoadState('domcontentloaded');
+    const issues=[];
     for(let i=1;i<=35;i++){
       await page.evaluate(n=>{location.hash='#s'+n},i);
-      await page.waitForTimeout(20);
-      await assertNoHorizontalOverflow(page,'S09 '+vp.name+' slide '+i);
-      await assertVisibleSvgContained(page,'S09 '+vp.name+' slide '+i);
+      await page.waitForTimeout(60);
+      for(const check of [
+        ()=>assertNoHorizontalOverflow(page,'S09 '+vp.name+' slide '+i),
+        ()=>assertVisibleSvgContained(page,'S09 '+vp.name+' slide '+i),
+        ()=>assertActiveSlideContained(page,'S09 '+vp.name+' slide '+i)
+      ]){
+        try{await check()}catch(e){issues.push('S'+String(i).padStart(2,'0')+' · '+String(e.message||e).split('\n')[0])}
+      }
     }
+    expect(issues,'S09 '+vp.name+' problemas de contención/fit').toEqual([]);
   });
 }
 
@@ -332,4 +403,45 @@ test('estudiante puede cambiar contraseña desde Mi cuenta', async ({ page }) =>
   await expect(page.getByText('Windows · Chrome')).toBeVisible();
   await assertNoHorizontalOverflow(page,'account mobile');
   await assertA11y(page,'account');
+});
+
+
+test('portal no muestra login mientras restaura una sesión válida', async ({ page }) => {
+  await page.addInitScript(() => {
+    const auth={token:'token-stored',expires_at:'2099-12-31T23:59:59Z',auth_session_id:'stored',
+      user:{id:'00000000-0000-0000-0000-000000000001',username:'qa',display_name:'Estudiante QA',role:'student'}};
+    localStorage.setItem('lms.bigdata.v2',JSON.stringify(auth));
+    localStorage.setItem('andesdb.lms.auth.v1',JSON.stringify({token:'andesdb-token',user:{id:'andes-user'}}));
+  });
+  const delay=ms=>new Promise(r=>setTimeout(r,ms));
+  await page.route('**/functions/v1/bigdata-lms-core**', async route => {
+    await delay(600);
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      viewer:{id:'00000000-0000-0000-0000-000000000001',username:'qa',display_name:'Estudiante QA',role:'student'},
+      assignments:[],sessions:[],announcements:[]
+    })});
+  });
+  await page.route('**/functions/v1/bigdata-session**', async route => {
+    await delay(600);
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      viewer:{id:'00000000-0000-0000-0000-000000000001',username:'qa',display_name:'Estudiante QA',role:'student'},
+      sessions:[{session_number:9,title:'Búsqueda semántica',summary:'Sesión 9',status:'visible',session_progress:{status:'in_progress'}}]
+    })});
+  });
+  await page.goto('/lms/portal.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#loginCard')).toBeHidden();
+  await expect(page.locator('#bootCard')).toBeVisible();
+  await expect(page.getByText('Cargando tu aula…')).toBeVisible();
+  await expect(page.locator('#home')).toBeVisible({timeout:3000});
+  await expect(page.locator('#bootCard')).toBeHidden();
+  const andes=await page.evaluate(()=>localStorage.getItem('andesdb.lms.auth.v1'));
+  expect(andes).toContain('andesdb-token');
+});
+
+test('portal sin sesión muestra login directamente y no navegación autenticada', async ({ page }) => {
+  await page.goto('/lms/portal.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#loginCard')).toBeVisible();
+  await expect(page.locator('#bootCard')).toBeHidden();
+  await expect(page.locator('#progressTop')).toBeHidden();
+  await expect(page.locator('#accountTop')).toBeHidden();
 });
