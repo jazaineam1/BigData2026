@@ -126,7 +126,7 @@ const sessionModel = {
   summary:{total_activities:4,required_activities:4,attempted:1,completed:0,resource_visited:1,resource_total:2,checkpoint_mastered:0,checkpoint_total:1}
 };
 
-async function mockSessionApi(page, role='student') {
+async function mockSessionApi(page, role='student', seen=null, modelOverride=null) {
   await mockAuth(page,role);
   let wallPublished=false;
   await page.route('**/functions/v1/bigdata-session**', async route => {
@@ -136,8 +136,9 @@ async function mockSessionApi(page, role='student') {
       const model={...sessionModel,viewer:{...sessionModel.viewer,role:'teacher',display_name:'Docente QA'},students:[],ranking:[],activity_stats:[],challenge_stats:[],session_window:null,refreshed_at:new Date().toISOString()};
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(model)});
     }
-    if(req.method()==='GET') return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(sessionModel)});
-    const body=req.postDataJSON?.()||{};
+    const activeModel=modelOverride||sessionModel;
+    if(req.method()==='GET') return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(activeModel)});
+    const body=req.postDataJSON?.()||{};if(seen)seen.push(body);
     if(body.action==='lab_code')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,code:'ABCD2345',expires_at:'2099-12-31T23:59:59Z'})});
     if(body.action==='evidence')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,completed:true,verdict:'correct',feedback:'Resultado verificado.'})});
     if(body.action==='wall_post'){wallPublished=true;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,post:{id:'p1'}})})}
@@ -148,6 +149,19 @@ async function mockSessionApi(page, role='student') {
     return route.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});
   });
 }
+
+test('S09 autenticada inicializa tracking y evidencia genérica', async ({ page }) => {
+  const seen=[];
+  const model=JSON.parse(JSON.stringify(sessionModel));
+  model.activities.push({code:'bd-s09-lab1',title:'LAB 1 · Recuperación lexical',kind:'lab',required:true,points:0,metadata:{completion_rule:'evidence',slide:6}});
+  model.catalog.push({code:'bd-s09-lab1',evaluator:'self-report',seeded:false,version:1,wall_prompt:'Explica una decisión y un límite.',steps:[{id:'decision',type:'text'},{id:'limit',type:'text'}]});
+  await mockSessionApi(page,'student',seen,model);
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s6');
+  await expect(page.locator('#moduleIdentity')).toContainText('Estudiante QA · conectado');
+  await expect(page.locator('[data-evidence-for="bd-s09-lab1"]')).toHaveCount(1);
+  await expect.poll(()=>seen.some(x=>x.action==='track'&&x.event_type==='presentation_opened')).toBeTruthy();
+  await expect.poll(()=>seen.some(x=>x.action==='track'&&x.event_type==='slide_viewed')).toBeTruthy();
+});
 
 test('landing pública no desborda', async ({ page }) => {
   for (const vp of [viewports[0],viewports[5],viewports[6]]) {
