@@ -26,6 +26,14 @@ create unique index if not exists bd_session_controls_one_active_key_uidx
 alter table public.bd_session_controls enable row level security;
 revoke all on table public.bd_session_controls from anon, authenticated;
 
+drop policy if exists "bd_session_controls_no_direct_access" on public.bd_session_controls;
+create policy "bd_session_controls_no_direct_access"
+  on public.bd_session_controls
+  for all
+  to anon, authenticated
+  using (false)
+  with check (false);
+
 create table if not exists public.bd_realtime_signals (
   id bigint generated always as identity primary key,
   course_code text not null default 'bigdata',
