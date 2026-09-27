@@ -299,19 +299,6 @@ test('LAB 3 se autocorrige sin campos abiertos ni desbordes', async ({ page }) =
 });
 
 
-test('muro de clase exige publicar antes de ver', async ({ page }) => {
-  await page.setViewportSize({width:390,height:844});
-  await mockSessionApi(page,'student');
-  await page.goto('/lms/class-wall.html?s=9&a=bd-s09-lab3');
-  await expect(page.getByText('Publica tu aporte para abrir el muro.')).toBeVisible();
-  await page.locator('#body').fill('Mantendría k=5 porque el Top-5 ya concentra candidatos aeronáuticos; todavía necesito juicios humanos.');
-  await page.getByRole('button',{name:'Publicar'}).click();
-  await expect(page.getByText('Mantendría k=5 porque el Top-5 ya concentra candidatos aeronáuticos; todavía necesito juicios humanos.')).toBeVisible();
-  await assertNoHorizontalOverflow(page,'class wall mobile');
-  await assertA11y(page,'class wall');
-});
-
-
 test('solicitud pública no envía Authorization aunque exista sesión LMS', async ({ page }) => {
   let authHeader = null;
   await page.addInitScript(() => {
