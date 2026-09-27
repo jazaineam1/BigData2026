@@ -12,6 +12,8 @@ teacher=read("lms/wall.html")
 wall=read("lms/class-wall.html")
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
 tests=read("tests/lms-v6-regression.spec.js")
+pages=read(".github/workflows/pages.yml")
+visual=read(".github/workflows/lms-visual-qa.yml")
 
 checks=[
     ("tabla controles server-side", "create table if not exists public.bd_session_controls" in migration and "revoke all on table public.bd_session_controls from anon, authenticated" in migration),
@@ -19,7 +21,10 @@ checks=[
     ("mínimo privilegio Realtime", "revoke all on table public.bd_realtime_signals from anon, authenticated" in migration and "grant select on table public.bd_realtime_signals to anon, authenticated" in migration),
     ("controles sin acceso directo", "bd_session_controls_no_direct_access" in migration and "using (false)" in migration and "with check (false)" in migration),
     ("publicación Realtime", "alter publication supabase_realtime add table public.bd_realtime_signals" in migration),
-    ("cliente Realtime fijado", "@supabase/supabase-js@2.117.1" in realtime and "postgres_changes" in realtime and "bd_realtime_signals" in realtime),
+    ("cliente Realtime fijado", "CLIENT_VERSION='2.117.1'" in realtime and "window.supabase?.createClient" in realtime and "postgres_changes" in realtime and "bd_realtime_signals" in realtime),
+    ("sin código remoto Realtime en runtime", "esm.sh" not in realtime and "cdn.jsdelivr" not in realtime and "unpkg.com" not in realtime),
+    ("SDK local cargado en superficies Realtime", "assets/vendor/supabase.min.js?v=2.117.1" in teacher and "assets/vendor/supabase.min.js?v=2.117.1" in wall and "../lms/assets/vendor/supabase.min.js?v=2.117.1" in deck),
+    ("build fija SDK 2.117.1", all("@supabase/supabase-js@2.117.1" in x and "supabase.min.js" in x for x in [pages,visual])),
     ("fallback polling docente", "realtimeReady?60000:15000" in teacher and "setInterval" in teacher),
     ("observabilidad docente", all(x in teacher for x in ["En línea","En pausa","Sin señal","No conectado"])),
     ("fallback polling muro", "realtimeReady?60000:15000" in wall and "setInterval" in wall),
