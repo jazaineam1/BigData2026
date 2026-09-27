@@ -6,23 +6,15 @@ const ROOT='/BigData2026/lms/';
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const parseStore=(storage,key)=>{try{return JSON.parse(storage.getItem(key)||'null')}catch{return null}};
-const auth=()=>{
-  const current=parseStore(sessionStorage,STORE)||parseStore(localStorage,STORE);
-  if(current)return current;
-  const legacy=parseStore(localStorage,LEGACY_STORE);
-  if(legacy){try{sessionStorage.setItem(STORE,JSON.stringify(legacy));localStorage.setItem(STORE,JSON.stringify(legacy))}catch{}}
-  return legacy;
-};
+const auth=()=>parseStore(sessionStorage,STORE)||parseStore(localStorage,STORE);
 const save=x=>{try{
   if(x){
     const raw=JSON.stringify(x);
     sessionStorage.setItem(STORE,raw);
     localStorage.setItem(STORE,raw);
-    localStorage.removeItem(LEGACY_STORE);
   }else{
     sessionStorage.removeItem(STORE);
     localStorage.removeItem(STORE);
-    localStorage.removeItem(LEGACY_STORE);
   }
 }catch{}};
 async function request(path,opt={}){const {auth:useAuth=true,...fetchOpt}=opt,a=useAuth?auth():null,h={'Content-Type':'application/json',...(fetchOpt.headers||{})};if(a?.token)h.Authorization='Bearer '+a.token;const r=await fetch(API+'/'+path,{...fetchOpt,headers:h});const x=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(x.error||('HTTP '+r.status));e.status=r.status;e.data=x;throw e}return x}
