@@ -39,6 +39,7 @@ on:
       - utils/validate_lms_auth_expiry.py
       - utils/validate_lms_v6.py
       - utils/validate_lms_v7.py
+      - utils/validate_lms_v8.py
       - utils/validate_student_ux_simple.py
       - utils/test_lms_kit.mjs
       - .github/workflows/lms-s08-qa.yml
@@ -74,6 +75,7 @@ on:
       - utils/validate_lms_auth_expiry.py
       - utils/validate_lms_v6.py
       - utils/validate_lms_v7.py
+      - utils/validate_lms_v8.py
       - utils/validate_student_ux_simple.py
       - utils/test_lms_kit.mjs
       - utils/validate_lms_ops.py
@@ -102,7 +104,7 @@ jobs:
         with:
           node-version: '24'
       - name: Comprobar sintaxis de validadores
-        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py utils/validate_lms_core.py utils/validate_lms_gradebook.py utils/validate_lms_competencies.py utils/validate_lms_analytics.py utils/validate_lms_collaboration.py utils/validate_lms_assessment.py utils/validate_lms_interop.py utils/validate_lms_ops.py utils/validate_tc1_v4.py utils/test_tc1_v4_synthetic.py utils/tc1_validator.py utils/build_taller_control_1.py utils/build_session9_notebook.py utils/validate_session9.py utils/validate_lms_v3.py utils/validate_lms_evidence_v4.py utils/validate_lms_contract_v5.py utils/validate_lms_security_v51.py utils/validate_lms_auth_expiry.py utils/validate_lms_v6.py utils/validate_lms_v7.py utils/validate_student_ux_simple.py
+        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py utils/validate_lms_core.py utils/validate_lms_gradebook.py utils/validate_lms_competencies.py utils/validate_lms_analytics.py utils/validate_lms_collaboration.py utils/validate_lms_assessment.py utils/validate_lms_interop.py utils/validate_lms_ops.py utils/validate_tc1_v4.py utils/test_tc1_v4_synthetic.py utils/tc1_validator.py utils/build_taller_control_1.py utils/build_session9_notebook.py utils/validate_session9.py utils/validate_lms_v3.py utils/validate_lms_evidence_v4.py utils/validate_lms_contract_v5.py utils/validate_lms_security_v51.py utils/validate_lms_auth_expiry.py utils/validate_lms_v6.py utils/validate_lms_v7.py utils/validate_lms_v8.py utils/validate_student_ux_simple.py
       - name: Validar LMS S08 y guardia S07
         run: python utils/validate_lms_s08.py
       - name: Instalar dependencias QA TC1
@@ -169,6 +171,8 @@ jobs:
         run: python utils/validate_lms_v6.py
       - name: Validar LMS V7 portafolio
         run: python utils/validate_lms_v7.py
+      - name: Validar LMS V8 operaciones y accesibilidad
+        run: python utils/validate_lms_v8.py
       - name: Validar UX estudiante simple
         run: python utils/validate_student_ux_simple.py
       - name: Probar runtime LMS V5
