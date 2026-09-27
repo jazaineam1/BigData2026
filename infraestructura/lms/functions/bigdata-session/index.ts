@@ -106,7 +106,6 @@ async function ownEvidence(userId:string,runId:string,n:number){
   failIf(error,"No se pudo cargar la evidencia");
   return data||[];
 }
-const TRANSFER_REVIEW_CODES=new Set(["bd-s09-lab3","bd-s09-lab4","bd-s09-lab8"]);
 async function submitEvidence(userId:string,runId:string,n:number,activity:any,payload:any,source:string,rawClientId:any=null){
   if(!activity||activity.kind!=="lab")throw new Error("La actividad no es un laboratorio");
   const evidenceClientId=clientId(rawClientId,"client_evidence_id");
@@ -127,24 +126,8 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
   if(!catalog)throw new Error("El laboratorio no tiene evaluador configurado");
   if(n===9&&catalog.evaluator==="self-report")throw new Error("Este LAB S09 requiere autocorrección. Recarga la presentación e inténtalo de nuevo.");
   const seed=await seedFor(userId,runId,activity.code),normalized:any={};
-  const transferMode=n===9&&source==="presentation-transfer"&&TRANSFER_REVIEW_CODES.has(activity.code);
   let verdict="accepted",feedback="Evidencia registrada.";
-  if(transferMode){
-    const {data:selfProgress,error:selfError}=await db.from("bd_lms_activity_progress")
-      .select("status,metadata").eq("user_id",userId).eq("course_run_id",runId)
-      .eq("activity_code",activity.code).maybeSingle();
-    failIf(selfError,"No se pudo comprobar la autocomprobación previa");
-    const selfVerified=selfProgress?.metadata?.self_check_verified===true||
-      selfProgress?.metadata?.evidence_verdict==="correct"||selfProgress?.status==="completed";
-    if(!selfVerified)throw new Error("Completa primero la autocomprobación del LAB antes de enviar la transferencia.");
-    normalized.result=trimText(payload?.result,12,900,"El resultado observado");
-    normalized.decision=trimText(payload?.decision,12,700,"La decisión");
-    normalized.rejected_alternative=trimText(payload?.rejected_alternative,12,700,"La alternativa descartada");
-    normalized.interpretation=trimText(payload?.interpretation,12,900,"La interpretación");
-    normalized.limit=trimText(payload?.limit,12,700,"El límite");
-    verdict="pending_review";
-    feedback="Transferencia recibida. Está pendiente de revisión docente con rúbrica.";
-  }else if(catalog.evaluator==="seeded-numeric"&&catalog.config?.generator==="s09_topk_aero_count"){
+  if(catalog.evaluator==="seeded-numeric"&&catalog.config?.generator==="s09_topk_aero_count"){
     const k=Number(catalog.config?.k||5),expected=s09TopKProfile(seed,k).count,result=Number(payload?.result);
     if(!Number.isFinite(result))throw new Error("Registra el resultado numérico obtenido");
     const decision=String(payload?.decision||"");
@@ -217,7 +200,7 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
   const now=new Date().toISOString();
   const {data:evidence,error:evidenceError}=await db.from("bd_evidence").insert({
     user_id:userId,course_run_id:runId,session_number:n,activity_code:activity.code,
-    step_id:transferMode?"transfer":"submission",payload:normalized,seed,source,client_evidence_id:evidenceClientId,
+    step_id:"submission",payload:normalized,seed,source,client_evidence_id:evidenceClientId,
     verdict,feedback,catalog_version:Number(catalog.version||1),created_at:now
   }).select("id,activity_code,verdict,feedback,created_at,payload").single();
   failIf(evidenceError,"No se pudo guardar la evidencia");
@@ -225,17 +208,15 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     .eq("user_id",userId).eq("course_run_id",runId).eq("activity_code",activity.code).maybeSingle();
   failIf(progressError,"No se pudo leer el progreso del laboratorio");
   const verifiedNow=["correct","accepted"].includes(verdict),
-    requiresTransfer=Boolean(catalog.config?.requires_transfer)&&TRANSFER_REVIEW_CODES.has(activity.code),
-    completed=verifiedNow&&!transferMode&&!requiresTransfer,
-    selfCheckVerified=p?.metadata?.self_check_verified===true||(!transferMode&&verifiedNow),
+    completed=verifiedNow,
+    selfCheckVerified=p?.metadata?.self_check_verified===true||verifiedNow,
     attempts=Number(p?.attempts||0)+1;
   const {error:upsertError}=await db.from("bd_lms_activity_progress").upsert({
     user_id:userId,course_run_id:runId,activity_code:activity.code,
     status:completed?"completed":"in_progress",started_at:p?.started_at||now,attempts,
     score:0,max_score:0,completed_at:completed?(p?.completed_at||now):null,updated_at:now,
     metadata:{...(p?.metadata||{}),source:transferMode?"transfer-evidence":"evidence",evidence_id:evidence?.id||null,evidence_verdict:verdict,
-      evidence_verified:completed,self_check_verified:selfCheckVerified,transfer_required:requiresTransfer||transferMode,
-      transfer_pending:transferMode&&verdict==="pending_review",last_evidence_at:now}
+      evidence_verified:completed,self_check_verified:selfCheckVerified,last_evidence_at:now}
   },{onConflict:"user_id,course_run_id,activity_code"});
   failIf(upsertError,"No se pudo actualizar el progreso del laboratorio");
   const {error:eventError}=await db.from("bd_lms_events").insert({
@@ -288,104 +269,6 @@ async function evidenceByCode(body:any){
   return result;
 }
 
-async function wallPost(ctx:any,run:any,n:number,activityCode:string,rawBody:any,evidenceId:any=null,rawClientId:any=null){
-  const {data:activity,error:activityError}=await db.from("bd_lms_activities").select("code,kind")
-    .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",n).maybeSingle();
-  failIf(activityError,"No se pudo validar el LAB");
-  if(!activity||activity.kind!=="lab")throw new Error("El muro solo está disponible para laboratorios");
-  const body=trimText(rawBody,20,2000,"La publicación"),postClientId=clientId(rawClientId,"client_post_id");
-  if(postClientId){
-    const {data:existing,error:existingError}=await db.from("bd_wall_posts")
-      .select("id,activity_code,body,status,created_at").eq("user_id",ctx.user.id)
-      .eq("course_run_id",run.id).eq("client_post_id",postClientId).maybeSingle();
-    failIf(existingError,"No se pudo comprobar la idempotencia de la publicación");
-    if(existing){
-      if(existing.activity_code!==activityCode)throw new Error("client_post_id ya fue usado en otra actividad");
-      return {ok:true,duplicate:true,post:existing};
-    }
-  }
-  let linked:string|null=null;
-  if(evidenceId){
-    const {data:e,error}=await db.from("bd_evidence").select("id").eq("id",String(evidenceId))
-      .eq("user_id",ctx.user.id).eq("course_run_id",run.id).eq("activity_code",activityCode).maybeSingle();
-    failIf(error,"No se pudo validar la evidencia vinculada");linked=e?.id||null;
-  }
-  const {data:post,error}=await db.from("bd_wall_posts").insert({
-    course_run_id:run.id,session_number:n,activity_code:activityCode,user_id:ctx.user.id,
-    body,evidence_id:linked,status:"visible",client_post_id:postClientId
-  }).select("id,activity_code,body,status,created_at").single();
-  failIf(error,"No se pudo publicar en el muro");
-  const {error:eventError}=await db.from("bd_lms_events").insert({
-    user_id:ctx.user.id,course_run_id:run.id,event_type:"ui_action",session_number:n,
-    activity_code:activityCode,metadata:{source:"class-wall",action:"wall_posted"},created_at:new Date().toISOString()
-  });
-  failIf(eventError,"No se pudo auditar la publicación");
-  return {ok:true,post};
-}
-async function wallList(ctx:any,run:any,n:number,activityCode:string){
-  const isTeacher=["teacher","admin"].includes(ctx.user.role);
-  const {data:activity,error:activityError}=await db.from("bd_lms_activities").select("code,kind,title")
-    .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",n).maybeSingle();
-  failIf(activityError,"No se pudo validar el LAB");
-  if(!activity||activity.kind!=="lab")throw new Error("Actividad de muro inválida");
-  if(!isTeacher){
-    const {count,error}=await db.from("bd_wall_posts").select("id",{count:"exact",head:true})
-      .eq("course_run_id",run.id).eq("session_number",n).eq("activity_code",activityCode)
-      .eq("user_id",ctx.user.id).in("status",["visible","spotlight","pinned"]);
-    failIf(error,"No se pudo verificar tu publicación");
-    if(!(count||0))return {viewer:ctx.user,activity,can_view:false,posts:[],reason:"publish_first"};
-  }
-  const {data:posts,error}=await db.from("bd_wall_posts").select("id,user_id,parent_id,body,evidence_id,status,created_at")
-    .eq("course_run_id",run.id).eq("session_number",n).eq("activity_code",activityCode)
-    .neq("status","hidden").order("created_at",{ascending:true}).limit(300);
-  failIf(error,"No se pudo cargar el muro");
-  const postIds=(posts||[]).map((p:any)=>p.id);
-  const userIds=[...new Set((posts||[]).map((p:any)=>p.user_id))];
-  const [{data:reactions},{data:users}]=await Promise.all([
-    postIds.length?db.from("bd_wall_reactions").select("post_id,user_id,kind").in("post_id",postIds):Promise.resolve({data:[]} as any),
-    isTeacher&&userIds.length?db.from("lms_users").select("id,display_name,username").in("id",userIds):Promise.resolve({data:[]} as any)
-  ]);
-  const names=new Map((users||[]).map((u:any)=>[u.id,u.display_name||u.username]));
-  const rows=await Promise.all((posts||[]).map(async(p:any)=>{
-    const rs=(reactions||[]).filter((r:any)=>r.post_id===p.id);
-    let author="Compañero";
-    if(p.user_id===ctx.user.id)author="Tú";
-    else if(isTeacher)author=names.get(p.user_id)||"Estudiante";
-    else author="Compañero "+(await sha256(p.user_id+"|"+activityCode)).slice(0,4).toUpperCase();
-    const publicPost={
-      id:p.id,parent_id:p.parent_id,body:p.body,evidence_id:p.evidence_id,status:p.status,created_at:p.created_at,author,
-      reactions:{useful:rs.filter((r:any)=>r.kind==="useful").length,same_doubt:rs.filter((r:any)=>r.kind==="same_doubt").length},
-      my_reactions:rs.filter((r:any)=>r.user_id===ctx.user.id).map((r:any)=>r.kind)
-    };
-    return isTeacher?{...publicPost,user_id:p.user_id}:publicPost;
-  }));
-  return {viewer:ctx.user,activity,can_view:true,posts:rows};
-}
-async function wallReact(ctx:any,run:any,n:number,postId:string,kind:string){
-  if(!["useful","same_doubt"].includes(kind))throw new Error("Reacción inválida");
-  const {data:post,error}=await db.from("bd_wall_posts").select("id,course_run_id,session_number,status")
-    .eq("id",postId).eq("course_run_id",run.id).eq("session_number",n).neq("status","hidden").maybeSingle();
-  failIf(error,"No se pudo validar la publicación");if(!post)throw new Error("Publicación no disponible");
-  const {data:existing,error:existingError}=await db.from("bd_wall_reactions").select("post_id")
-    .eq("post_id",postId).eq("user_id",ctx.user.id).eq("kind",kind).maybeSingle();
-  failIf(existingError,"No se pudo leer la reacción");
-  if(existing){
-    const {error:delError}=await db.from("bd_wall_reactions").delete().eq("post_id",postId).eq("user_id",ctx.user.id).eq("kind",kind);
-    failIf(delError,"No se pudo retirar la reacción");return {ok:true,active:false};
-  }
-  const {error:insError}=await db.from("bd_wall_reactions").insert({post_id:postId,user_id:ctx.user.id,kind});
-  failIf(insError,"No se pudo guardar la reacción");return {ok:true,active:true};
-}
-async function wallModerate(ctx:any,run:any,n:number,postId:string,moderation:string){
-  requireTeacher(ctx);
-  const status=moderation==="hide"?"hidden":moderation==="spotlight"?"spotlight":moderation==="pin"?"pinned":moderation==="show"?"visible":null;
-  if(!status)throw new Error("Acción de moderación inválida");
-  const {data,error}=await db.from("bd_wall_posts").update({status,updated_at:new Date().toISOString()})
-    .eq("id",postId).eq("course_run_id",run.id).eq("session_number",n).select("id,status").maybeSingle();
-  failIf(error,"No se pudo moderar la publicación");if(!data)throw new Error("Publicación no encontrada");
-  await audit(ctx.user.id,"bigdata.wall.moderate","wall_post",postId,{session_number:n,status});
-  return {ok:true,post:data};
-}
 async function current(req:Request){
   const token=bearer(req);if(!token)return null;
   const {data:s}=await db.from("lms_auth_sessions").select("id,user_id,expires_at,revoked_at,persistent,created_at")
@@ -563,7 +446,7 @@ async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:an
   const summary=await recomputeSession(ctx.user.id,run.id,n,activities);
   return {ok:true,correct,attempts,first_attempt_correct:firstAttempt,mastery,hint:correct?null:key.hint,...summary};
 }
-async function realtimeSignal(n:number,scope:"controls"|"wall"|"progress"|"teacher_wall"){
+async function realtimeSignal(n:number,scope:"controls"|"progress"|"teacher_wall"){
   try{
     const base=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if(!base||!key)return false;
@@ -620,8 +503,7 @@ async function teacherReviewEvidence(ctx:any,run:any,n:number,body:any,activitie
   if(!activity)throw new Error("Actividad de evidencia inválida");
   const {data:catalog,error:catalogError}=await db.from("bd_activity_catalog").select("evaluator").eq("code",activity.code).maybeSingle();
   failIf(catalogError,"No se pudo validar el evaluador");
-  const transferEvidence=evidence.step_id==="transfer"&&TRANSFER_REVIEW_CODES.has(evidence.activity_code);
-  if(catalog?.evaluator!=="authentic-review"&&!transferEvidence)throw new Error("Esta evidencia no usa revisión auténtica");
+  if(catalog?.evaluator!=="authentic-review")throw new Error("Esta evidencia no usa revisión auténtica");
   if(!["pending_review","rejected"].includes(String(evidence.verdict)))throw new Error("La evidencia ya fue cerrada");
   const now=new Date().toISOString(),rubric={scores,total,max:10};
   const {data:updated,error:updateError}=await db.from("bd_evidence").update({
@@ -637,8 +519,7 @@ async function teacherReviewEvidence(ctx:any,run:any,n:number,body:any,activitie
     status:accepted?"completed":"in_progress",started_at:p?.started_at||now,attempts:Number(p?.attempts||1),
     score:total,max_score:10,completed_at:accepted?(p?.completed_at||now):null,updated_at:now,
     metadata:{...(p?.metadata||{}),source:"evidence-review",evidence_id:evidenceId,evidence_verdict:decision,
-      evidence_verified:accepted,transfer_verified:transferEvidence?accepted:(p?.metadata?.transfer_verified===true),
-      transfer_pending:false,last_evidence_review_at:now,rubric_total:total}
+      evidence_verified:accepted,last_evidence_review_at:now,rubric_total:total}
   },{onConflict:"user_id,course_run_id,activity_code"});
   failIf(progressError,"No se pudo actualizar el progreso");
   if(accepted){
@@ -860,7 +741,7 @@ Deno.serve(async(req:Request)=>{
   }
   try{
     if(action==="course_progress")return out(req,await courseProgress(ctx,run));
-    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","wall_moderate","teacher_set_control","teacher_clear_control","teacher_review_evidence"].includes(action);
+    const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","teacher_set_control","teacher_clear_control","teacher_review_evidence"].includes(action);
     const def=await definition(run.id,n,teacher),codes=def.activities.map((a:any)=>a.code);
     if(action==="me"){
       const [p,cat,evidence]=await Promise.all([
@@ -902,10 +783,6 @@ Deno.serve(async(req:Request)=>{
       await realtimeSignal(n,"progress");return out(req,result);
     }
     if(action==="lab_code")return out(req,{ok:true,...await issueLabCode(ctx,run,n)});
-    if(action==="wall_post"){const result=await wallPost(ctx,run,n,String(body.activity_code||""),body.body,body.evidence_id||null,body.client_post_id);await realtimeSignal(n,"wall");return out(req,result)}
-    if(action==="wall_list")return out(req,await wallList(ctx,run,n,String(body.activity_code||"")));
-    if(action==="wall_react"){const result=await wallReact(ctx,run,n,String(body.post_id||""),String(body.kind||""));await realtimeSignal(n,"wall");return out(req,result)}
-    if(action==="wall_moderate"){const result=await wallModerate(ctx,run,n,String(body.post_id||""),String(body.moderation||""));await realtimeSignal(n,"wall");return out(req,result)}
     if(action==="session_controls")return out(req,{ok:true,controls:await sessionControls(run.id,n)});
     if(action==="teacher_review_evidence")return out(req,await teacherReviewEvidence(ctx,run,n,body,def.activities));
     if(action==="teacher_set_control")return out(req,await teacherSetControl(ctx,run,n,body,def.activities));
