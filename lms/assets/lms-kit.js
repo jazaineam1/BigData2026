@@ -72,7 +72,7 @@ function retryRejected(id){
   return enqueue(entry.kind,entry.payload,null,owner);
 }
 function priority(entry){
-  if(entry.kind==='evidence'||entry.kind==='wall_post')return 100;
+  if(entry.kind==='evidence')return 100;
   const t=entry.payload?.event_type;
   if(t==='heartbeat')return 0;
   if(t==='slide_viewed')return 10;
@@ -88,7 +88,7 @@ function compactQueue(q){
     .slice(0,removeCount);
   const remove=new Set(candidates.map(x=>x.i));
   let out=arr.filter((_,i)=>!remove.has(i));
-  // Evidencia/publicaciones se eliminan únicamente como último recurso si ellas solas superan el límite.
+  // Evidencia se elimina únicamente como último recurso si ella sola supera el límite.
   if(out.length>MAX_QUEUE)out=out.slice(out.length-MAX_QUEUE);
   return out;
 }
@@ -113,7 +113,7 @@ function authBlocked(error){
 function enqueue(kind,payload,id=null,ownerId=currentOwner()){
   if(!ownerId)return null;
   const q=loadQueue(),entry={
-    id:id||uid(kind==='evidence'?'ev':kind==='wall_post'?'post':'evt'),
+    id:id||uid(kind==='evidence'?'ev':'evt'),
     owner_id:ownerId,kind,payload,attempts:0,created_at_ms:Date.now()
   };
   q.push(entry);saveQueue(q);scheduleFlush(RETRY_MS[0]);
@@ -131,10 +131,6 @@ async function deliver(entry){
   if(entry.kind==='evidence'){
     p.client_evidence_id=entry.id;
     return B.session('evidence',p);
-  }
-  if(entry.kind==='wall_post'){
-    p.client_post_id=entry.id;
-    return B.session('wall_post',p);
   }
   throw new Error('Tipo de cola desconocido');
 }
@@ -182,7 +178,7 @@ async function flush(){
   }finally{flushing=false}
 }
 async function send(kind,payload){
-  const id=uid(kind==='evidence'?'ev':kind==='wall_post'?'post':'evt'),owner_id=currentOwner();
+  const id=uid(kind==='evidence'?'ev':'evt'),owner_id=currentOwner();
   if(!owner_id)throw new Error('Inicia sesión antes de registrar esta operación');
   const entry={id,owner_id,kind,payload,attempts:0,created_at_ms:Date.now()};
   if(navigator.onLine===false){
@@ -208,9 +204,6 @@ function track(event_type,{session_number=configuredSession,activity_code=null,m
 }
 function evidence(activity_code,payload,{session_number=configuredSession,source='presentation'}={}){
   return send('evidence',{session_number:sessionNumber(session_number),activity_code,payload,source});
-}
-function wallPost(activity_code,body,{session_number=configuredSession,evidence_id=null}={}){
-  return send('wall_post',{session_number:sessionNumber(session_number),activity_code,body,evidence_id});
 }
 function configure({session_number}={}){
   if(session_number!=null)configuredSession=sessionNumber(session_number);
@@ -267,7 +260,7 @@ function moduleMenu(el,{session_number=configuredSession}={}){
   el.innerHTML='<a href="../lms/session.html?s='+n+'">Módulo</a> · <a href="../lms/progress.html?s='+n+'">Mi progreso</a>';
 }
 const api={
-  version:'5.1.0',QUEUE_KEY,REJECTED_KEY,MAX_QUEUE,configure,on,flush,queueSize,rejected,dismissRejected,retryRejected,track,evidence,wallPost,
+  version:'5.2.0',QUEUE_KEY,REJECTED_KEY,MAX_QUEUE,configure,on,flush,queueSize,rejected,dismissRejected,retryRejected,track,evidence,
   startHeartbeat,stopHeartbeat,keepaliveTrack,identityPill,moduleMenu,
   session:(action,payload={})=>B.session(action,{...payload,session_number:payload.session_number||configuredSession}),
   get ready(){return B.requireSession(sessionNumber())}
