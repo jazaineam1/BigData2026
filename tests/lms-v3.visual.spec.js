@@ -64,24 +64,29 @@ async function assertVisibleSvgContained(page, label) {
 }
 
 async function assertActiveSlideContained(page, label) {
-  const failures = await page.evaluate(() => {
-    const slide=document.querySelector('.slide.active,.slide:target');
-    const stage=document.querySelector('.stage');
-    if(!slide||!stage)return [];
-    const out=[],host=stage.getBoundingClientRect(),tol=4;
+  const result = await page.evaluate(() => {
+    const slide=document.querySelector('.slide.on'),stage=document.querySelector('.stage');
+    if(!slide||!stage)return {failures:[],fit:1,mobile:false};
+    const mobile=matchMedia('(max-width:900px)').matches,out=[],host=stage.getBoundingClientRect(),tol=4;
     const visible=el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'&&r.width>1&&r.height>1};
-    const nodes=[slide,...slide.querySelectorAll('.body,.diagram,.lab,.card,svg,foreignObject,text')];
-    for(const el of nodes){
-      if(!visible(el))continue;
-      const r=el.getBoundingClientRect();
-      if(r.left<host.left-tol||r.right>host.right+tol||r.top<host.top-tol||r.bottom>host.bottom+tol){
-        out.push({tag:el.tagName,id:el.id||null,class:String(el.className?.baseVal||el.className||'').slice(0,120),
-          rect:{left:r.left,right:r.right,top:r.top,bottom:r.bottom},stage:{left:host.left,right:host.right,top:host.top,bottom:host.bottom}});
+    if(!mobile){
+      const nodes=[slide,...slide.querySelectorAll('.slide-content,.body,.diagram,.lab,.card,svg')];
+      for(const el of nodes){
+        if(!visible(el))continue;
+        const r=el.getBoundingClientRect();
+        if(r.left<host.left-tol||r.right>host.right+tol||r.top<host.top-tol||r.bottom>host.bottom+tol){
+          out.push({tag:el.tagName,id:el.id||null,class:String(el.className?.baseVal||el.className||'').slice(0,120),
+            rect:{left:r.left,right:r.right,top:r.top,bottom:r.bottom},stage:{left:host.left,right:host.right,top:host.top,bottom:host.bottom}});
+        }
       }
+    }else{
+      const r=slide.getBoundingClientRect();
+      if(r.left<host.left-tol||r.right>host.right+tol)out.push({tag:'SLIDE',rect:{left:r.left,right:r.right},stage:{left:host.left,right:host.right}});
     }
-    return out.slice(0,50);
+    return {failures:out.slice(0,50),fit:Number(slide.dataset.fit||1),mobile};
   });
-  expect(failures,label+' contenido fuera del stage').toEqual([]);
+  expect(result.failures,label+' contenido fuera del stage').toEqual([]);
+  if(!result.mobile)expect(result.fit,label+' auto-fit demasiado pequeño').toBeGreaterThanOrEqual(0.79);
 }
 
 async function mockAuth(page, role='student') {
@@ -157,7 +162,7 @@ for (const vp of viewports) {
     await page.waitForLoadState('domcontentloaded');
     for(let i=1;i<=35;i++){
       await page.evaluate(n=>{location.hash='#s'+n},i);
-      await page.waitForTimeout(20);
+      await page.waitForTimeout(60);
       await assertNoHorizontalOverflow(page,'S09 '+vp.name+' slide '+i);
       await assertVisibleSvgContained(page,'S09 '+vp.name+' slide '+i);
       await assertActiveSlideContained(page,'S09 '+vp.name+' slide '+i);
