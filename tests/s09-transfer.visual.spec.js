@@ -48,7 +48,7 @@ function model(){
 
 async function route(page){
   let state=model();
-  await page.route('**/functions/v1/bigdata-session',async route=>{
+  await page.route('**/functions/v1/bigdata-session**',async route=>{
     const req=route.request();
     if(req.method()==='OPTIONS')return route.fulfill({status:200,body:'ok'});
     let body={};try{body=req.postDataJSON()||{}}catch{}
