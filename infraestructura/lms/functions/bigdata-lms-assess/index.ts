@@ -210,7 +210,7 @@ function cleanOptions(raw:any){
 }
 function cleanQuestion(body:any){
   const type=String(body.question_type||"");
-  if(!["single_choice","multiple_choice","true_false","numeric","short_text"].includes(type))throw new Error("Tipo de pregunta inválido");
+  if(!["single_choice","multiple_choice","true_false","numeric"].includes(type))throw new Error("Solo se permiten preguntas objetivas; las respuestas abiertas están deshabilitadas");
   const prompt=text(body.prompt,8000,true),explanation=text(body.explanation,8000),points=Number(body.default_points||1);
   if(!Number.isFinite(points)||points<=0||points>1000)throw new Error("Puntaje inválido");
   const tags=(Array.isArray(body.tags)?body.tags:[]).slice(0,20).map((x:any)=>text(x,60)).filter(Boolean);
