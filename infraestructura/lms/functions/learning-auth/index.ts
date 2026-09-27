@@ -69,7 +69,8 @@ Deno.serve(async req=>{
  if(action==="logout_others"){await supabase.from("lms_auth_sessions").update({revoked_at:new Date().toISOString()}).eq("user_id",ctx.user.id).is("revoked_at",null).neq("id",ctx.session.id);return out(req,{ok:true})}
  if(action==="list_sessions"){
    const {data}=await supabase.from("lms_auth_sessions").select("id,user_agent,created_at,last_seen_at,expires_at,persistent").eq("user_id",ctx.user.id).is("revoked_at",null).order("last_seen_at",{ascending:false});
-   return out(req,{sessions:(data||[]).map((s:any)=>({...s,current:s.id===ctx.session.id,device_label:deviceLabel(s.user_agent||"")}))});
+   const now=Date.now(),sessions=(data||[]).filter((s:any)=>{const deadline=s.expires_at?Date.parse(s.expires_at):(Date.parse(s.created_at)+(s.persistent?30:1)*24*3600_000);return Number.isFinite(deadline)&&deadline>now}).map((s:any)=>({...s,current:s.id===ctx.session.id,device_label:deviceLabel(s.user_agent||"")}));
+   return out(req,{sessions});
  }
  if(action==="revoke_session"){
    const id=String(body.session_id||"");if(!id)return out(req,{error:"Sesión requerida"},400);if(id===ctx.session.id)return out(req,{error:"Usa Cerrar sesión para terminar el dispositivo actual"},409);
