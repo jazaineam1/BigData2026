@@ -32,3 +32,6 @@ test-results/
 playwright-report/
 blob-report/
 package-lock.json
+
+# SDK Realtime generado por QA/Pages desde npm fijado
+lms/assets/vendor/supabase.min.js
