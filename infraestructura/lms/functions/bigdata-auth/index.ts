@@ -53,7 +53,12 @@ Deno.serve(async req=>{
      supabase.from("lms_login_attempts").select("id",{count:"exact",head:true}).eq("key_hash",key_hash).eq("ok",false).gte("created_at",since),
      supabase.from("lms_login_attempts").select("id",{count:"exact",head:true}).eq("key_hash",account_hash).eq("ok",false).gte("created_at",since)
    ]);
-   if((count||0)>=8||(accountCount||0)>=12)return out(req,{error:"Demasiados intentos. Espera 15 minutos antes de volver a intentar."},429);
+   if((count||0)>=8)return out(req,{error:"Demasiados intentos desde este origen. Espera unos minutos antes de volver a intentar."},429);
+   const globalFailures=Number(accountCount||0);
+   if(globalFailures>=6){
+     const delayMs=Math.min(2000,250*(globalFailures-5));
+     await new Promise(resolve=>setTimeout(resolve,delayMs));
+   }
    const {data,error}=await supabase.rpc("lms_verify_password",{p_username:username,p_password:password});
    if(error)return out(req,{error:"No se pudo validar el acceso"},500);const row=Array.isArray(data)?data[0]:null;
    if(!row){await supabase.from("lms_login_attempts").insert([{key_hash,ok:false},{key_hash:account_hash,ok:false}]);return out(req,{error:"Usuario o contraseña incorrectos"},401)}

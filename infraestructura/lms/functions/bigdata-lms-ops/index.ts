@@ -333,7 +333,7 @@ async function overview(ctx:any,run:any){
     health:await healthSnapshot(ctx,run),
     capabilities:roleCapabilities(ctx.user.role),
     policies:{
-      login_rate_limit:"8 fallos por IP/cuenta en 15 min mediante bigdata-auth",
+      login_rate_limit:"8 fallos por combinación IP+cuenta en 15 min; desde 6 fallos globales de cuenta se aplica retardo progresivo sin bloqueo global.",
       retention_preview_min_hours:24,
       cleanup_role:"admin",
       attached_files_deletable:false,
