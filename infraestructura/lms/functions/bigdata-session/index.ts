@@ -124,6 +124,7 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     .eq("code",activity.code).maybeSingle();
   failIf(catalogError,"No se pudo cargar el evaluador");
   if(!catalog)throw new Error("El laboratorio no tiene evaluador configurado");
+  if(n===9&&catalog.evaluator==="self-report")throw new Error("Este LAB S09 requiere autocorrección. Recarga la presentación e inténtalo de nuevo.");
   const seed=await seedFor(userId,runId,activity.code),normalized:any={};
   let verdict="accepted",feedback="Evidencia registrada.";
   if(catalog.evaluator==="seeded-numeric"&&catalog.config?.generator==="s09_topk_aero_count"){
