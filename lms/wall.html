@@ -45,7 +45,7 @@
 <div class="control-grid">
   <div class="control-block"><label>LAB
     <select id="controlLab" class="input"><option value="">Selecciona un LAB…</option></select>
-  </label><div class="actions" style="margin-top:8px"><button id="openLab" class="btn accent">Abrir LAB</button><button id="closeLab" class="btn danger">Cerrar LAB</button><a id="projectionLink" class="btn alt hidden" target="_blank" rel="noopener">Proyectar muro</a></div><div id="labState" class="control-state"></div></div>
+  </label><div class="actions" style="margin-top:8px"><button id="openLab" class="btn accent">Abrir LAB</button><button id="closeLab" class="btn danger">Cerrar LAB</button></div><div id="labState" class="control-state"></div></div>
   <div class="control-block"><label>Diapositiva sugerida
     <input id="controlSlide" class="input" type="number" min="1" max="250" inputmode="numeric" placeholder="Ej. 18">
   </label><div class="actions" style="margin-top:8px"><button id="gotoSlide" class="btn alt">Sugerir diapositiva</button><button id="clearSlide" class="btn ghost">Quitar sugerencia</button></div><div id="slideState" class="control-state"></div></div>
@@ -141,12 +141,6 @@ function renderControls(){
   L.$('labState').innerHTML=labs.map(a=>{const c=byKey.get('lab:'+a.code);return '<span class="pill '+(c?.control_type==='close_lab'?'high':'done')+'">'+L.esc(a.title)+': '+(c?.control_type==='close_lab'?'cerrado':'abierto')+'</span>'}).join('')||'<span class="muted">No hay LAB declarados.</span>';
   const slide=byKey.get('slide');L.$('slideState').innerHTML=slide?'<span class="pill active">Sugerida: '+Number(slide.payload?.slide||0)+'</span>':'<span class="muted">Sin diapositiva sugerida.</span>';
   const hint=byKey.get('hint');L.$('hintState').innerHTML=hint?'<span class="pill active">'+L.esc(hint.payload?.text||'')+'</span>':'<span class="muted">Sin pista fijada.</span>';
-  updateProjectionLink();
-}
-function updateProjectionLink(){
-  const code=L.$('controlLab').value,link=L.$('projectionLink');
-  link.classList.toggle('hidden',!code);
-  if(code)link.href='class-wall.html?s='+sessionNumber+'&a='+encodeURIComponent(code)+'&mode=projection';
 }
 function render(){
   const s=data.session||{};document.title='WALL S'+String(sessionNumber).padStart(2,'0')+' · Big Data LMS';L.$('ey').textContent='WALL docente · S'+String(sessionNumber).padStart(2,'0');L.$('title').textContent=s.title||('Sesión '+sessionNumber);
