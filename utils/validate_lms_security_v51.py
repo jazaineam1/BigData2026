@@ -16,6 +16,11 @@ backend=read("infraestructura/lms/functions/bigdata-session/index.ts")
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
 kit=read("lms/assets/lms-kit.js")
 tests=read("tests/lms-v3.visual.spec.js")
+auth=read("infraestructura/lms/functions/learning-auth/index.ts")
+access=read("infraestructura/lms/functions/learning-access-request/index.ts")
+client=read("lms/assets/bigdata-lms.js")
+portal=read("lms/portal.html")
+wall=read("lms/wall.html")
 
 dangerous={"resource_completed","challenge_answered","evidence_submitted","evidence_verified","lab_code_issued","session_completed"}
 m=re.search(r"const PUBLIC_TRACK_EVENTS=new Set\(\[(.*?)\]\);",backend,re.S)
@@ -36,6 +41,19 @@ checks=[
  ("QA escucha pageerror", "page.on('pageerror'" in tests),
  ("QA valida vertical", "a.top < b.top-tol" in tests and "a.bottom > b.bottom+tol" in tests),
  ("QA incluye 1920x937", "desktop-1920x937" in tests),
+ ("QA vigila errores JS", "page.on('pageerror'" in tests and "ReferenceError|TypeError|SyntaxError|Uncaught" in tests),
+ ("sesiones estudiante tienen caducidad", "ttlHours=student?30*24:24" in auth and "deadline=s.expires_at?" in auth),
+ ("claim_access es single-use", 'ctx.tokenRow.used_at)return out(req,{error:"Este enlace ya fue utilizado' in auth and '.is("used_at",null).select("id").maybeSingle()' in auth),
+ ("login limita también por cuenta", "account_hash" in auth and "accountCount" in auth),
+ ("Supabase exige correo confirmado", "email_confirmed_at" in auth),
+ ("Supabase enlaza email exacto", '.eq("email",normalizedEmail)' in auth and '.ilike("email"' not in auth),
+ ("solicitud pública no reabre aprobados", 'existing?.status==="pending"||existing?.status==="approved"' in access and "reopened" not in access),
+ ("solicitud pública no enumera matrícula", "Si corresponde, tu solicitud será revisada" in access and "Tu matrícula ya estaba aprobada" not in access),
+ ("Big Data no borra storage ANDESDB", "localStorage.removeItem(LEGACY_STORE)" not in client and "return legacy" not in client),
+ ("portal evita flash de login", "Cargando tu aula…" in portal and "data-lms-auth" in portal and "setAuthState('stored')" in portal),
+ ("WALL excluye heartbeat", '.neq("event_type","heartbeat")' in backend),
+ ("atasco se limita a 5-30 min", "meaningfulAge>5&&meaningfulAge<=30" in backend and "present&&" in backend),
+ ("WALL usa presencia backend", "r.present===true" in wall),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
@@ -49,4 +67,8 @@ print("LMS SECURITY V5.1: OK")
 print(" - tracking cliente sin eventos académicos")
 print(" - muro estudiante sin user_id")
 print(" - cola aislada por usuario y rechazados persistentes")
-print(" - QA detecta pageerror y overflow vertical")
+print(" - QA detecta pageerror, errores JS y overflow vertical")
+print(" - autenticación: expiración, single-use, rate limit por cuenta y email confirmado")
+print(" - acceso público no enumera ni reabre matrículas aprobadas")
+print(" - portal restaura sesión sin flash de login")
+print(" - WALL excluye heartbeats y acota atasco 5–30 min")
