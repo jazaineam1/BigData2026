@@ -37,7 +37,7 @@ pages=(ROOT/".github/workflows/pages.yml").read_text("utf-8")
 course=json.loads((ROOT/"lms/data/course.json").read_text("utf-8"))
 
 checks=[
- ("portal reutiliza sesión LMS","andesdb.lms.auth.v1" in client),
+ ("portal usa sesión propia BigData","lms.bigdata.v2" in client and "andesdb.lms.auth" not in client),
  ("S08 abre Taller_Control_1","Cuadernos/Taller_Control_1.ipynb" in s08),
  ("S08 enlaza referencia técnica","s08-secoppipeline.html" in s08 and "Talleres/Taller_Control_1.md" not in s08),
  ("S08 no expone versión interna","V4" not in s08 and "v4" not in s08),

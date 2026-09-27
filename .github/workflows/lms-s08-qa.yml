@@ -161,3 +161,20 @@ jobs:
         run: python utils/validate_student_ux_simple.py
       - name: Probar runtime LMS V5
         run: node --test utils/test_lms_kit.mjs
+      - name: Smoke endpoints BigData
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://gnpouhsvsisqoxketlfr.supabase.co/functions/v1"
+          ORIGIN="https://jazaineam1.github.io"
+          for fn in bigdata-auth bigdata-access-request bigdata-access-review; do
+            code="$(curl -sS -o /tmp/${fn}-options.txt -w '%{http_code}' -X OPTIONS "${BASE}/${fn}" -H "Origin: ${ORIGIN}" -H 'Access-Control-Request-Method: POST')"
+            test "$code" = "200"
+          done
+          code="$(curl -sS -o /tmp/bigdata-auth.json -w '%{http_code}' -X POST "${BASE}/bigdata-auth" -H "Origin: ${ORIGIN}" -H 'Content-Type: application/json' --data '{"action":"me"}')"
+          test "$code" = "401"
+          code="$(curl -sS -o /tmp/bigdata-request.json -w '%{http_code}' -X POST "${BASE}/bigdata-access-request" -H "Origin: ${ORIGIN}" -H 'Content-Type: application/json' --data '{"full_name":"A","email":"bad","website":""}')"
+          test "$code" = "400"
+          code="$(curl -sS -o /tmp/bigdata-review.json -w '%{http_code}' -X POST "${BASE}/bigdata-access-review" -H "Origin: ${ORIGIN}" -H 'Content-Type: application/json' --data '{"action":"approve","request_id":"00000000-0000-0000-0000-000000000000"}')"
+          test "$code" = "401"
+

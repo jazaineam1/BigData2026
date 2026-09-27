@@ -1,5 +1,5 @@
 -- LMS V5.1 · backfill de expiración de sesiones legacy
--- Las nuevas sesiones ya reciben expires_at desde learning-auth.
+-- Las nuevas sesiones de BigData reciben expires_at desde bigdata-auth.
 -- Este backfill elimina sesiones activas históricas sin fecha explícita.
 
 update public.lms_auth_sessions s
