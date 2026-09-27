@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
   const requestId = String(b.request_id || "").trim();
   const action = String(b.action || "").trim();
   const notes = String(b.notes || "").trim().slice(0, 500);
-  if (!requestId || !["approve", "reject", "reset_password"].includes(action)) {
+  if (!requestId || !["approve", "reject", "reset_password", "inspect"].includes(action)) {
     return out(req, { error: "Solicitud o acción inválida" }, 400);
   }
 
@@ -231,6 +231,22 @@ Deno.serve(async (req) => {
     lms = byUser.data;
   }
 
+  if (action === "inspect") {
+    if (r.status !== "pending") return out(req, { error: "Solo se inspeccionan solicitudes pendientes" }, 409);
+    return out(req, {
+      ok: true,
+      existing_account: !!lms,
+      account: lms ? {
+        id: lms.id,
+        username: lms.username,
+        display_name: lms.display_name,
+        role: lms.role,
+        active: !!lms.active,
+        email: lms.email,
+      } : null,
+    });
+  }
+
   if (action === "reset_password") {
     if (r.status !== "approved") return out(req, { error: "Primero debes aprobar la solicitud" }, 409);
     if (!lms) return out(req, { error: "No se encontró el perfil matriculado" }, 404);
@@ -266,15 +282,20 @@ Deno.serve(async (req) => {
     .maybeSingle();
   if (!course) return out(req, { error: "El curso ya no está disponible" }, 409);
 
-  if (lms) {
-    const { data: upd, error } = await supabase
-      .from("lms_users")
-      .update({ email: r.email, username: r.email, display_name: r.full_name, active: true, updated_at: new Date().toISOString() })
-      .eq("id", lms.id)
-      .select("id,username,display_name,role,active,email,auth_user_id")
-      .single();
-    if (error) return out(req, { error: "No se pudo actualizar el estudiante" }, 500);
-    lms = upd;
+  const existingAccount = !!lms;
+  if (existingAccount) {
+    if (!lms.active) {
+      return out(req, {
+        error: "La solicitud coincide con una cuenta LMS inactiva. Reactívala explícitamente desde la administración antes de matricularla.",
+        code: "existing_account_inactive",
+      }, 409);
+    }
+    if (b.confirm_existing_account !== true) {
+      return out(req, {
+        error: "La solicitud coincide con una cuenta existente. Confirma explícitamente la matrícula sin cambiar identidad ni contraseña.",
+        code: "existing_account_confirmation_required",
+      }, 409);
+    }
   } else {
     const { data: ins, error } = await supabase
       .from("lms_users")
@@ -285,12 +306,13 @@ Deno.serve(async (req) => {
     lms = ins;
   }
 
+  const enrollmentRole = existingAccount ? String(lms.role || "student") : "student";
   const { error: enrollError } = await supabase.from("lms_enrollments").upsert(
-    { user_id: lms.id, course_code: COURSE_CODE, role: "student", status: "active", enrolled_at: new Date().toISOString() },
+    { user_id: lms.id, course_code: COURSE_CODE, role: enrollmentRole, status: "active", enrolled_at: new Date().toISOString() },
     { onConflict: "user_id,course_code" },
   );
-  if (enrollError) return out(req, { error: "No se pudo matricular al estudiante" }, 500);
-  await ensureRunEnrollment(lms.id, COURSE_CODE, "student");
+  if (enrollError) return out(req, { error: "No se pudo matricular la cuenta en el curso" }, 500);
+  await ensureRunEnrollment(lms.id, COURSE_CODE, enrollmentRole);
 
   const now = new Date().toISOString();
   const { error: updateError } = await supabase
@@ -298,8 +320,22 @@ Deno.serve(async (req) => {
     .update({ status: "approved", reviewed_at: now, reviewed_by: ctx.user.id, notes: notes || null })
     .eq("id", r.id)
     .eq("status", "pending");
-  if (updateError) return out(req, { error: "La cuenta se creó, pero no se pudo cerrar la solicitud" }, 500);
-  await audit(ctx.user.id, "access.approve", "user", lms.id, { request_id: r.id, course_code: COURSE_CODE });
+  if (updateError) return out(req, { error: "La matrícula quedó lista, pero no se pudo cerrar la solicitud" }, 500);
+  await audit(ctx.user.id, existingAccount ? "access.approve_existing" : "access.approve", "user", lms.id, {
+    request_id: r.id, course_code: COURSE_CODE, existing_account: existingAccount, preserved_role: lms.role
+  });
+
+  if (existingAccount) {
+    return out(req, {
+      ok: true,
+      status: "approved",
+      existing_account: true,
+      user_id: lms.id,
+      username: lms.username,
+      role: lms.role,
+      warning: "Cuenta existente matriculada sin cambiar nombre, usuario, contraseña, estado global ni sesiones.",
+    });
+  }
 
   try {
     const password = await setTemporaryPassword(lms.id);
