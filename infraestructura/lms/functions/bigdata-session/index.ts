@@ -786,6 +786,64 @@ async function courseProgress(ctx:any,run:any){
   return {viewer:ctx.user,run,sessions:rows,generated_at:new Date().toISOString()};
 }
 
+async function competitionAlias(runId:string,userId:string){
+  const h=await sha256(runId+"|competition|"+userId);
+  return "Jugador "+h.slice(0,4).toUpperCase();
+}
+async function competitionWall(ctx:any,run:any,n:number){
+  const def=await definition(run.id,n,false);
+  const required=(def.activities||[]).filter((a:any)=>a.required);
+  const requiredCodes=required.map((a:any)=>a.code);
+  const {data:enrollments,error:enrollmentError}=await db.from("lms_run_enrollments")
+    .select("user_id,role,status").eq("course_run_id",run.id).eq("status","active").eq("role","student");
+  failIf(enrollmentError,"No se pudo cargar la cohorte");
+  const ids=(enrollments||[]).map((x:any)=>String(x.user_id));
+  const [{data:sessionRows,error:sessionError},{data:activityRows,error:activityError}]=await Promise.all([
+    ids.length?db.from("bd_lms_session_progress").select("user_id,status,score,max_score").eq("course_run_id",run.id).eq("session_number",n).in("user_id",ids):Promise.resolve({data:[],error:null} as any),
+    ids.length&&requiredCodes.length?db.from("bd_lms_activity_progress").select("user_id,activity_code,status").eq("course_run_id",run.id).in("user_id",ids).in("activity_code",requiredCodes):Promise.resolve({data:[],error:null} as any)
+  ]);
+  failIf(sessionError,"No se pudo cargar el progreso del grupo");
+  failIf(activityError,"No se pudo cargar el avance de actividades");
+  const spm=new Map((sessionRows||[]).map((x:any)=>[String(x.user_id),x]));
+  const byUser=new Map<string,any[]>();
+  for(const row of activityRows||[]){
+    const id=String(row.user_id);if(!byUser.has(id))byUser.set(id,[]);byUser.get(id)!.push(row);
+  }
+  const rows=await Promise.all(ids.map(async(userId)=>{
+    const aps=byUser.get(userId)||[],p:any=spm.get(userId)||null;
+    const completed=aps.filter((x:any)=>x.status==="completed").length;
+    const attempted=aps.length;
+    const total=required.length;
+    const progressPct=total?Math.round((completed/total)*100):((p?.status==="completed")?100:0);
+    return {
+      alias:await competitionAlias(run.id,userId),
+      is_me:userId===ctx.user.id,
+      status:p?.status||"not_started",
+      completed_required:completed,
+      required_total:total,
+      attempted_required:attempted,
+      progress_pct:progressPct
+    };
+  }));
+  rows.sort((a:any,b:any)=>b.progress_pct-a.progress_pct||b.completed_required-a.completed_required||a.alias.localeCompare(b.alias,"es"));
+  let rank=0,lastKey="";
+  rows.forEach((row:any,index:number)=>{
+    const key=row.progress_pct+"|"+row.completed_required;
+    if(key!==lastKey){rank=index+1;lastKey=key}
+    row.position=rank;
+  });
+  const viewer=rows.find((x:any)=>x.is_me)||null;
+  return {
+    session:{session_number:n,title:def.session?.title||("Sesión "+n)},
+    participants:rows.length,
+    required_total:required.length,
+    ranking:rows,
+    viewer_rank:viewer?.position||null,
+    generated_at:new Date().toISOString(),
+    privacy:{identity:"alias",open_responses:false,speed_tiebreak:false}
+  };
+}
+
 Deno.serve(async(req:Request)=>{
   if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
   if(req.method==="OPTIONS")return new Response("ok",{headers:headers(req)});
@@ -811,6 +869,7 @@ Deno.serve(async(req:Request)=>{
   }
   try{
     if(action==="course_progress")return out(req,await courseProgress(ctx,run));
+    if(action==="competition_wall"){const u=req.method==="GET"?new URL(req.url):null;const cn=req.method==="GET"?sessionNumber(u!.searchParams.get("session_number")||u!.searchParams.get("s")):sessionNumber(body.session_number);return out(req,await competitionWall(ctx,run,cn));}
     const teacher=["teacher_wall","teacher_open_session","teacher_reset_session","teacher_student_detail","wall_moderate","teacher_set_control","teacher_clear_control","teacher_review_evidence"].includes(action);
     const def=await definition(run.id,n,teacher),codes=def.activities.map((a:any)=>a.code);
     if(action==="me"){
