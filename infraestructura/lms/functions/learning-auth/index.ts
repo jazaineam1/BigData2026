@@ -8,9 +8,9 @@ function bearer(req:Request){const h=req.headers.get("authorization")||"";return
 async function sha256(s:string){const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("")}
 function randomToken(){const bytes=crypto.getRandomValues(new Uint8Array(32));return btoa(String.fromCharCode(...bytes)).replaceAll("+","-").replaceAll("/","_").replaceAll("=","")}
 function deviceLabel(ua:string){const s=ua||"";const os=/Android/i.test(s)?"Android":/iPhone|iPad|iPod/i.test(s)?"iOS/iPadOS":/Windows/i.test(s)?"Windows":/Mac OS X|Macintosh/i.test(s)?"macOS":/Linux/i.test(s)?"Linux":"Dispositivo";const browser=/Edg\//i.test(s)?"Edge":/OPR\//i.test(s)?"Opera":/Chrome\//i.test(s)?"Chrome":/Safari\//i.test(s)?"Safari":/Firefox\//i.test(s)?"Firefox":"navegador";return `${os} · ${browser}`}
-async function current(req:Request){const token=bearer(req);if(!token)return null;const token_hash=await sha256(token);const {data:s}=await supabase.from("lms_auth_sessions").select("id,user_id,expires_at,revoked_at,persistent,user_agent,created_at,last_seen_at").eq("token_hash",token_hash).is("revoked_at",null).maybeSingle();if(!s)return null;if(!s.persistent&&(!s.expires_at||new Date(s.expires_at).getTime()<=Date.now()))return null;const {data:u}=await supabase.from("lms_users").select("id,username,display_name,role,active,email,auth_user_id").eq("id",s.user_id).eq("active",true).maybeSingle();return u?{token,session:s,user:u}:null}
+async function current(req:Request){const token=bearer(req);if(!token)return null;const token_hash=await sha256(token);const {data:s}=await supabase.from("lms_auth_sessions").select("id,user_id,expires_at,revoked_at,persistent,user_agent,created_at,last_seen_at").eq("token_hash",token_hash).is("revoked_at",null).maybeSingle();if(!s)return null;const deadline=s.expires_at?new Date(s.expires_at).getTime():(new Date(s.created_at).getTime()+(s.persistent?30:1)*24*3600_000);if(!Number.isFinite(deadline)||deadline<=Date.now())return null;const {data:u}=await supabase.from("lms_users").select("id,username,display_name,role,active,email,auth_user_id").eq("id",s.user_id).eq("active",true).maybeSingle();return u?{token,session:s,user:u}:null}
 async function currentRun(userId:string){const {data:re}=await supabase.from("lms_run_enrollments").select("course_run_id,role,status,enrolled_at").eq("user_id",userId).eq("status","active").order("enrolled_at",{ascending:false}).limit(1).maybeSingle();if(!re)return null;const {data:r}=await supabase.from("lms_course_runs").select("id,course_code,code,title,timezone,starts_on,ends_on,active").eq("id",re.course_run_id).maybeSingle();return r?{...r,enrollment_role:re.role}:null}
-async function issueSession(req:Request,user:any,includeRun=true){const token=randomToken(),token_hash=await sha256(token),student=user.role==="student",expires_at=student?null:new Date(Date.now()+24*3600_000).toISOString();const {data:created,error}=await supabase.from("lms_auth_sessions").insert({user_id:user.id,token_hash,user_agent:(req.headers.get("user-agent")||"").slice(0,500),expires_at,persistent:student}).select("id").single();if(error)throw error;return {token,expires_at,auth_session_id:created.id,persistent:student,user:{id:user.id,username:user.username,display_name:user.display_name,role:user.role,email:user.email||null},course_run:includeRun?await currentRun(user.id):null}}
+async function issueSession(req:Request,user:any,includeRun=true){const token=randomToken(),token_hash=await sha256(token),student=user.role==="student",persistent=student,ttlHours=student?30*24:24,expires_at=new Date(Date.now()+ttlHours*3600_000).toISOString();const {data:created,error}=await supabase.from("lms_auth_sessions").insert({user_id:user.id,token_hash,user_agent:(req.headers.get("user-agent")||"").slice(0,500),expires_at,persistent}).select("id").single();if(error)throw error;return {token,expires_at,auth_session_id:created.id,persistent,user:{id:user.id,username:user.username,display_name:user.display_name,role:user.role,email:user.email||null},course_run:includeRun?await currentRun(user.id):null}}
 async function accessContext(raw:string){if(raw.length<30)return {error:"Enlace de acceso incompleto",status:400} as any;const token_hash=await sha256(raw);const {data:t,error}=await supabase.from("lms_access_tokens").select("id,user_id,request_id,used_at,expires_at").eq("token_hash",token_hash).maybeSingle();if(error||!t)return {error:"Este enlace no es válido",status:401} as any;if(!t.expires_at||new Date(t.expires_at).getTime()<=Date.now())return {error:"Este enlace venció",status:401,expired:true} as any;const {data:user}=await supabase.from("lms_users").select("id,username,display_name,role,active,email,auth_user_id").eq("id",t.user_id).eq("active",true).maybeSingle();if(!user)return {error:"La cuenta ya no está activa",status:403} as any;const {data:enrollments}=await supabase.from("lms_enrollments").select("course_code,status").eq("user_id",user.id).eq("status","active");if(!(enrollments||[]).length)return {error:"La cuenta no tiene matrícula activa",status:403} as any;return {token_hash,tokenRow:t,user,enrollments,alreadyUsed:!!t.used_at}}
 Deno.serve(async req=>{
  if(origin(req)===null)return out(req,{error:"Origen no permitido"},403);
@@ -22,14 +22,17 @@ Deno.serve(async req=>{
    const username=String(body.username||"").trim(),password=String(body.password||"");
    if(!username||!password)return out(req,{error:"Usuario y contraseña son obligatorios"},400);
    if(username.length>180||password.length>200)return out(req,{error:"Credenciales inválidas"},400);
-   const ip=(req.headers.get("x-forwarded-for")||req.headers.get("cf-connecting-ip")||"unknown").split(",")[0].trim();
-   const key_hash=await sha256(username.toLowerCase()+"|"+ip+"|andesdb-login-v5"),since=new Date(Date.now()-15*60_000).toISOString();
-   const {count}=await supabase.from("lms_login_attempts").select("id",{count:"exact",head:true}).eq("key_hash",key_hash).eq("ok",false).gte("created_at",since);
-   if((count||0)>=8)return out(req,{error:"Demasiados intentos. Espera 15 minutos antes de volver a intentar."},429);
+   const normalizedUser=username.toLowerCase(),ip=(req.headers.get("cf-connecting-ip")||req.headers.get("x-real-ip")||req.headers.get("x-forwarded-for")||"unknown").split(",")[0].trim();
+   const key_hash=await sha256(normalizedUser+"|"+ip+"|lms-login-v51"),account_hash=await sha256(normalizedUser+"|account|lms-login-v51"),since=new Date(Date.now()-15*60_000).toISOString();
+   const [{count},{count:accountCount}]=await Promise.all([
+     supabase.from("lms_login_attempts").select("id",{count:"exact",head:true}).eq("key_hash",key_hash).eq("ok",false).gte("created_at",since),
+     supabase.from("lms_login_attempts").select("id",{count:"exact",head:true}).eq("key_hash",account_hash).eq("ok",false).gte("created_at",since)
+   ]);
+   if((count||0)>=8||(accountCount||0)>=12)return out(req,{error:"Demasiados intentos. Espera 15 minutos antes de volver a intentar."},429);
    const {data,error}=await supabase.rpc("lms_verify_password",{p_username:username,p_password:password});
    if(error)return out(req,{error:"No se pudo validar el acceso"},500);const row=Array.isArray(data)?data[0]:null;
-   if(!row){await supabase.from("lms_login_attempts").insert({key_hash,ok:false});return out(req,{error:"Usuario o contraseña incorrectos"},401)}
-   await supabase.from("lms_login_attempts").insert({key_hash,ok:true});
+   if(!row){await supabase.from("lms_login_attempts").insert([{key_hash,ok:false},{key_hash:account_hash,ok:false}]);return out(req,{error:"Usuario o contraseña incorrectos"},401)}
+   await supabase.from("lms_login_attempts").insert([{key_hash,ok:true},{key_hash:account_hash,ok:true}]);
    const user={id:row.user_id,username:row.username,display_name:row.display_name,role:row.role,email:null};
    try{return out(req,await issueSession(req,user,false))}catch{return out(req,{error:"No se pudo crear la sesión"},500)}
  }
@@ -39,14 +42,24 @@ Deno.serve(async req=>{
  }
  if(action==="claim_access"){
    const raw=String(body.token||"").trim(),ctx:any=await accessContext(raw);if(ctx.error)return out(req,{error:ctx.error,expired:!!ctx.expired},ctx.status||401);
-   if(!ctx.tokenRow.used_at){const now=new Date().toISOString();await supabase.from("lms_access_tokens").update({used_at:now}).eq("id",ctx.tokenRow.id).is("used_at",null)}
-   try{return out(req,{...(await issueSession(req,ctx.user,false)),recovered:ctx.alreadyUsed})}catch{return out(req,{error:"No se pudo crear la sesión. Intenta nuevamente."},500)}
+   if(ctx.tokenRow.used_at)return out(req,{error:"Este enlace ya fue utilizado. Ingresa con tu cuenta o solicita ayuda al docente."},410);
+   const now=new Date().toISOString();
+   const {data:claimed,error:claimError}=await supabase.from("lms_access_tokens").update({used_at:now}).eq("id",ctx.tokenRow.id).is("used_at",null).select("id").maybeSingle();
+   if(claimError)return out(req,{error:"No se pudo validar el enlace de acceso"},500);
+   if(!claimed)return out(req,{error:"Este enlace ya fue utilizado. Ingresa con tu cuenta o solicita ayuda al docente."},410);
+   try{return out(req,{...(await issueSession(req,ctx.user,false)),recovered:false})}
+   catch{
+     await supabase.from("lms_access_tokens").update({used_at:null}).eq("id",ctx.tokenRow.id).eq("used_at",now);
+     return out(req,{error:"No se pudo crear la sesión. Intenta nuevamente."},500)
+   }
  }
  if(action==="exchange_supabase"){
    const access=String(body.access_token||"").trim();if(!access)return out(req,{error:"Enlace de acceso incompleto"},400);
    const {data:authData,error:authError}=await supabase.auth.getUser(access);const au=authData?.user;if(authError||!au?.id||!au.email)return out(req,{error:"El enlace de acceso es inválido o venció"},401);
+   if(!au.email_confirmed_at)return out(req,{error:"Confirma tu correo antes de continuar"},403);
+   const normalizedEmail=au.email.trim().toLowerCase();
    let {data:user}=await supabase.from("lms_users").select("id,username,display_name,role,active,email,auth_user_id").eq("auth_user_id",au.id).maybeSingle();
-   if(!user){const byEmail=await supabase.from("lms_users").select("id,username,display_name,role,active,email,auth_user_id").ilike("email",au.email).maybeSingle();user=byEmail.data;if(user&&!user.auth_user_id)await supabase.from("lms_users").update({auth_user_id:au.id,updated_at:new Date().toISOString()}).eq("id",user.id)}
+   if(!user){const byEmail=await supabase.from("lms_users").select("id,username,display_name,role,active,email,auth_user_id").eq("email",normalizedEmail).maybeSingle();user=byEmail.data;if(user&&!user.auth_user_id)await supabase.from("lms_users").update({auth_user_id:au.id,updated_at:new Date().toISOString()}).eq("id",user.id)}
    if(!user||!user.active)return out(req,{error:"Tu cuenta no tiene acceso activo a la plataforma"},403);const {count}=await supabase.from("lms_enrollments").select("course_code",{count:"exact",head:true}).eq("user_id",user.id).eq("status","active");if(!(count||0))return out(req,{error:"Tu cuenta aún no está matriculada en un curso"},403);
    try{return out(req,await issueSession(req,user,false))}catch{return out(req,{error:"No se pudo crear la sesión"},500)}
  }
