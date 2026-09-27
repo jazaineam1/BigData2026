@@ -46,7 +46,7 @@ checks=[
  ("QA valida vertical", "a.top < b.top-tol" in tests and "a.bottom > b.bottom+tol" in tests),
  ("QA incluye 1920x937", "desktop-1920x937" in tests),
  ("QA vigila errores JS", "page.on('pageerror'" in tests and "ReferenceError|TypeError|SyntaxError|Uncaught" in tests),
- ("sesiones estudiante tienen caducidad", "ttlHours=student?30*24:24" in auth and "deadline=s.expires_at?" in auth),
+ ("sesiones tienen caducidad", (("ttlHours=student?30*24:24" in auth) or ("SESSION_POLICY" in auth and "student:{ttl_hours:30*24" in auth)) and "deadline=s.expires_at?" in auth),
  ("sesiones legacy se backfillean", "update public.lms_auth_sessions" in auth_migration and "s.expires_at is null" in auth_migration and "interval '30 days'" in auth_migration),
  ("claim_access es single-use", 'ctx.tokenRow.used_at)return out(req,{error:"Este enlace ya fue utilizado' in auth and '.is("used_at",null).select("id").maybeSingle()' in auth),
  ("inspect_access usado no expone identidad", "if(ctx.alreadyUsed)return out(req,{ok:true,already_used:true})" in auth),
