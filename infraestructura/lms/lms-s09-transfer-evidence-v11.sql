@@ -48,6 +48,23 @@ where p.activity_code in ('bd-s09-lab3','bd-s09-lab4','bd-s09-lab8')
       and e.verdict='accepted'
   );
 
+-- Reconciliación: si LAB3 requerido vuelve a en curso, S09 no puede conservar
+-- un estado completed heredado de la semántica anterior.
+update public.bd_lms_session_progress s
+set status='in_progress',
+    completed_at=null,
+    updated_at=now()
+where s.session_number=9
+  and s.status='completed'
+  and exists (
+    select 1
+    from public.bd_lms_activity_progress p
+    where p.user_id=s.user_id
+      and p.course_run_id=s.course_run_id
+      and p.activity_code='bd-s09-lab3'
+      and p.status<>'completed'
+  );
+
 -- La competencia global de recuperación se sustenta en más de una evidencia.
 update public.lms_competencies_v2 c
 set min_evidence_count=2,
