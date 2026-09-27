@@ -531,12 +531,10 @@ async function recomputeSession(userId:string,runId:string,n:number,activities:a
   },{onConflict:"user_id,course_run_id,session_number"});
   return {completed:mastered,total:checkpoints.length,done};
 }
-async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:any,activities:any[],rawConfidence:any=null){
+async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:any,activities:any[]){
   const activity=activities.find((a:any)=>a.code===code&&a.kind==="checkpoint");
   if(!activity)throw new Error("Desafío no válido");
   const answer=String(rawAnswer||"").trim().slice(0,160);if(!answer)throw new Error("Respuesta vacía");
-  const confidenceRaw=String(rawConfidence||"").trim().toLowerCase();
-  const confidence=["low","medium","high"].includes(confidenceRaw)?confidenceRaw:null;
   const {data:key}=await db.from("bd_lms_activity_keys").select("answer_hash,hint,session_number")
     .eq("activity_code",code).eq("session_number",n).maybeSingle();
   if(!key)throw new Error("Este checkpoint no tiene validación automática configurada");
@@ -554,16 +552,16 @@ async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:an
     status:mastery?"completed":"in_progress",started_at:p?.started_at||now,
     attempts,score:mastery?Number(activity.points||1):0,max_score:Number(activity.points||1),
     completed_at:mastery?(p?.completed_at||now):null,updated_at:now,
-    metadata:{...previousMeta,source:"lms-formative-challenge",formative:true,first_attempt_correct:firstAttempt,mastery,last_attempt_correct:correct,last_confidence:confidence,first_confidence:previousMeta.first_confidence||confidence}
+    metadata:{...previousMeta,source:"lms-formative-challenge",formative:true,first_attempt_correct:firstAttempt,mastery,last_attempt_correct:correct}
   },{onConflict:"user_id,course_run_id,activity_code"});
   const {error:eventError}=await db.from("bd_lms_events").insert({
     user_id:ctx.user.id,course_run_id:run.id,event_type:"challenge_answered",
     session_number:n,activity_code:code,
-    metadata:{correct,attempt:attempts,first_attempt_correct:firstAttempt,mastery,confidence},created_at:now
+    metadata:{correct,attempt:attempts,first_attempt_correct:firstAttempt,mastery},created_at:now
   });
   failIf(eventError,"No se pudo registrar el intento");
   const summary=await recomputeSession(ctx.user.id,run.id,n,activities);
-  return {ok:true,correct,attempts,first_attempt_correct:firstAttempt,mastery,confidence,hint:correct?null:key.hint,...summary};
+  return {ok:true,correct,attempts,first_attempt_correct:firstAttempt,mastery,hint:correct?null:key.hint,...summary};
 }
 async function realtimeSignal(n:number,scope:"controls"|"wall"|"progress"|"teacher_wall"){
   try{
@@ -754,12 +752,12 @@ async function teacherWall(ctx:any,run:any,n:number){
       mastered_checkpoints:mastered,total_checkpoints:checkpoints.length,completed_checkpoints:mastered,
       presentation_opened:Boolean(am.get("bd-s09-presentation")),notebook_opened:Boolean(am.get("bd-s09-notebook")),
       lab_explored:labs.filter((a:any)=>am.has(a.code)).length,evidence_count:(evByUser.get(u.id)||[]).length,
-      checkpoints:checkpoints.map((a:any)=>{const x:any=am.get(a.code)||{},m=x.metadata||{};return {code:a.code,attempts:Number(x.attempts||0),metadata:{first_attempt_correct:typeof m.first_attempt_correct==="boolean"?m.first_attempt_correct:null,mastery:Boolean(m.mastery),confidence:String(m.last_confidence||"")}}}),
+      checkpoints:checkpoints.map((a:any)=>{const x:any=am.get(a.code)||{},m=x.metadata||{};return {code:a.code,attempts:Number(x.attempts||0),metadata:{first_attempt_correct:typeof m.first_attempt_correct==="boolean"?m.first_attempt_correct:null,mastery:Boolean(m.mastery)}}}),
       last_slide:Number(slideMeta.slide||0)>0?{slide:Number(slideMeta.slide),label:String(slideMeta.label||""),chapter:String(slideMeta.chapter||""),at:slideEv.created_at}:null,
       activities:def.activities.map((a:any)=>{
         const x:any=am.get(a.code)||{},m=x.metadata||{};
         return {code:a.code,title:a.title,kind:a.kind,status:x.status||"not_started",attempts:Number(x.attempts||0),
-          first_attempt_correct:typeof m.first_attempt_correct==="boolean"?m.first_attempt_correct:null,mastery:Boolean(m.mastery),confidence:String(m.last_confidence||""),
+          first_attempt_correct:typeof m.first_attempt_correct==="boolean"?m.first_attempt_correct:null,mastery:Boolean(m.mastery),
           started_at:x.started_at||null,completed_at:x.completed_at||null};
       })
     };
@@ -770,8 +768,7 @@ async function teacherWall(ctx:any,run:any,n:number){
       completed:xs.filter((x:any)=>x.status==="completed").length,
       attempted:xs.filter((x:any)=>x.attempts>0).length,
       first_attempt_correct:xs.filter((x:any)=>x.first_attempt_correct===true).length,
-      mastered:xs.filter((x:any)=>x.mastery===true).length,
-      high_confidence_wrong:xs.filter((x:any)=>x.attempts>0&&x.mastery!==true&&x.confidence==="high").length};
+      mastered:xs.filter((x:any)=>x.mastery===true).length};
   });
   return {viewer:ctx.user,run,...def,session_window:window,controls:await sessionControls(run.id,n),students:rows,ranking:rows,activity_stats,challenge_stats:activity_stats.filter((x:any)=>x.kind==="checkpoint"),refreshed_at:new Date().toISOString()};
 }
@@ -897,7 +894,7 @@ Deno.serve(async(req:Request)=>{
       if(["slide_viewed","presentation_opened","notebook_opened","page_closed","lab_interaction"].includes(event))await realtimeSignal(n,"teacher_wall");
       return out(req,{ok:true});
     }
-    if(action==="answer_challenge"){const result=await answerChallenge(ctx,run,n,String(body.activity_code||""),body.answer,def.activities,body.confidence);await realtimeSignal(n,"progress");return out(req,result)}
+    if(action==="answer_challenge"){const result=await answerChallenge(ctx,run,n,String(body.activity_code||""),body.answer,def.activities);await realtimeSignal(n,"progress");return out(req,result)}
     if(action==="evidence"){
       const activity=def.activities.find((a:any)=>a.code===String(body.activity_code||""));
       if(activity&&await isLabClosed(run.id,n,activity.code))throw new Error("Este LAB está cerrado temporalmente por el docente");
