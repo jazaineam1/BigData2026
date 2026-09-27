@@ -25,7 +25,7 @@ checks=[
     ("skip link automático", "ensureA11yShell" in client and "Saltar al contenido principal" in client),
     ("mensajes accesibles", "aria-live" in client and "type==='err'?'alert':'status'" in client),
     ("foco y forced colors", ".skip-link" in css and "@media(forced-colors:active)" in css and ":focus-visible" in css),
-    ("observabilidad server-side", "async function healthSnapshot" in ops and "lms_login_attempts" in ops and "bd_realtime_signals" in ops),
+    ("observabilidad server-side", "async function healthSnapshot" in ops and "lms_login_attempts" in ops and "bd_realtime_signals" in ops and 'transport:"broadcast"' in ops),
     ("conteos server-side", 'select("id",{count:"exact",head:true})' in ops and "const activeSessions=Number(explicitSessionsQ.count||0)" in ops),
     ("observabilidad sin hashes login", '.from("lms_login_attempts").select("id",{count:"exact",head:true})' in ops and 'select("id,key_hash' not in ops and '"key_hash"' not in ops),
     ("RPO RTO", "const RPO_HOURS=24" in ops and "const RTO_HOURS=4" in ops and 'platform_backup_status:"not_observed_by_lms"' in ops),
