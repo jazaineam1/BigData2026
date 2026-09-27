@@ -400,7 +400,7 @@ async function refreshControls(){
 async function startS09Realtime(){
   if(!window.LMSRealtime)return;
   stopS09Realtime=await window.LMSRealtime.subscribe({
-    session_number:9,scopes:['controls','progress'],
+    session_number:9,scopes:['controls'],
     onSignal:()=>refreshControls(),
     onStatus:()=>{}
   });
@@ -428,7 +428,7 @@ async function initStudentLms(){
     queueSlideTrack();
     renderStudentLive();
     K.startHeartbeat('bd-s09-presentation');
-    studentTimer=setInterval(()=>refreshStudentProgress().then(renderSessionControls).catch(()=>{}),15000);
+    studentTimer=setInterval(()=>refreshStudentProgress().then(renderSessionControls).catch(()=>{}),30000);
     startS09Realtime().catch(()=>{});
   }catch(e){liveStatus.textContent='S09 Live no disponible: '+e.message;renderStudentLive()}
 }
