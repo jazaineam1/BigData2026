@@ -37,11 +37,11 @@ footer{padding:30px 20px 42px;text-align:center;color:var(--muted);font-size:13p
 <p class="hero-lead">Maestría en Analítica de Datos · Universidad Central.</p>
 <div class="hero-actions"><a class="btn btn-primary" href="lms/portal.html">Continuar mi curso</a><a class="btn btn-light" href="#ruta">Ver sesiones</a></div>
 </div>
-<aside class="today" aria-label="Sesión actual">
-<div class="today-top"><div><span class="kicker">Sesión actual</span><h2>S09 · Búsqueda semántica y bases vectoriales</h2></div><span class="status">Publicada</span></div>
-<p>De palabras a significado: embeddings, similitud, recuperación vectorial e híbrida.</p>
-<ul><li>Diferenciar búsqueda lexical, semántica e híbrida.</li><li>Interpretar embeddings y similitud coseno.</li><li>Diseñar una búsqueda vectorial y evaluar Top-k.</li></ul>
-<a class="btn btn-primary" href="lms/session.html?s=9">Entrar a la sesión 9 →</a>
+<aside class="today" aria-label="Próxima sesión">
+<div class="today-top"><div><span class="kicker">Próxima sesión · jueves 1 de octubre</span><h2>S08 · SECOP Data Pipeline</h2></div><span class="status">6:00–9:00 p. m.</span></div>
+<p>Taller evaluativo grupal sobre adquisición SECOP, concurrencia y evidencia multimodelo.</p>
+<ul><li>Trabajar el reto directamente en el notebook.</li><li>Validar el paquete y generar <b>manifest_tc1.json</b>.</li><li>Registrar una sola evidencia final por equipo en el LMS.</li></ul>
+<a class="btn btn-primary" href="lms/session.html?s=8">Entrar al taller S08 →</a>
 </aside>
 </div></section>
 
@@ -63,17 +63,17 @@ footer{padding:30px 20px 42px;text-align:center;color:var(--muted);font-size:13p
 <div class="session-num">06</div><div><div class="session-meta"><span class="pill ">Grafos</span></div><h3>De la fila priorizada al contexto relacional</h3><p>Relaciones como grafo, Cypher en Aura y contraste con referencia tabular.</p><div class="skills"><span class="skill">Neo4j Aura</span><span class="skill">Cypher</span><span class="skill">Grafos</span></div><div class="session-actions"><a class="action" href="lms/session.html?s=6">Abrir módulo</a></div></div></article>
 <article class="session " data-kind="published" data-search="sesion 7 Búsqueda Construye un buscador: del corpus al ranking Elasticsearch|BM25|Precision@5">
 <div class="session-num">07</div><div><div class="session-meta"><span class="pill ">Búsqueda</span></div><h3>Construye un buscador: del corpus al ranking</h3><p>Análisis de texto, índice invertido, BM25 y evaluación de ranking.</p><div class="skills"><span class="skill">Elasticsearch</span><span class="skill">BM25</span><span class="skill">Precision@5</span></div><div class="session-actions"><a class="action" href="lms/session.html?s=7">Abrir módulo</a></div></div></article>
-<article class="session evaluation" data-kind="evaluation" data-search="sesion 8 Evaluación Integra 6 CSV y construye una solución NoSQL SECOP|Pipeline|NoSQL">
-<div class="session-num">08</div><div><div class="session-meta"><span class="pill eval">Evaluación</span></div><h3>Integra 6 CSV y construye una solución NoSQL</h3><p>Taller de control con pipeline SECOP y evidencia multimodelo.</p><div class="skills"><span class="skill">SECOP</span><span class="skill">Pipeline</span><span class="skill">NoSQL</span></div><div class="session-actions"><a class="action" href="lms/session.html?s=8">Abrir módulo</a></div></div></article>
-<article class="session current" data-kind="current" data-search="sesion 9 Actual Cuando las palabras no coinciden: búsqueda semántica y bases vectoriales Embeddings|Vector Search|RRF">
-<div class="session-num">09</div><div><div class="session-meta"><span class="pill live">Actual</span></div><h3>Cuando las palabras no coinciden: búsqueda semántica y bases vectoriales</h3><p>Embeddings, similitud coseno, recuperación vectorial e híbrida.</p><div class="skills"><span class="skill">Embeddings</span><span class="skill">Vector Search</span><span class="skill">RRF</span></div><div class="session-actions"><a class="action" href="lms/session.html?s=9">Abrir módulo</a></div></div></article>
+<article class="session evaluation current" data-kind="evaluation" data-current="true" data-search="sesion 8 actual evaluación taller SECOP Data Pipeline API concurrencia NoSQL">
+<div class="session-num">08</div><div><div class="session-meta"><span class="pill eval">Evaluación</span><span class="pill live">1 oct · actual</span></div><h3>SECOP Data Pipeline · API, concurrencia y NoSQL</h3><p>Taller de control con pipeline SECOP y evidencia multimodelo.</p><div class="skills"><span class="skill">SECOP</span><span class="skill">Pipeline</span><span class="skill">NoSQL</span></div><div class="session-actions"><a class="action" href="lms/session.html?s=8">Abrir taller</a></div></div></article>
+<article class="session" data-kind="published" data-current="false" data-search="sesion 9 próxima 8 octubre Cuando las palabras no coinciden búsqueda semántica bases vectoriales Embeddings Vector Search RRF">
+<div class="session-num">09</div><div><div class="session-meta"><span class="pill">Próxima · 8 oct</span></div><h3>Cuando las palabras no coinciden: búsqueda semántica y bases vectoriales</h3><p>Embeddings, similitud coseno, recuperación vectorial e híbrida.</p><div class="skills"><span class="skill">Embeddings</span><span class="skill">Vector Search</span><span class="skill">RRF</span></div><div class="session-actions"><a class="action" href="lms/session.html?s=9">Abrir módulo</a></div></div></article>
 </div>
 </div></section>
 </main>
 <footer><strong>Universidad Central</strong> · Maestría en Analítica de Datos · Big Data 2026-2S</footer>
 <script>
 (()=>{const q=document.getElementById('sessionSearch'),buttons=[...document.querySelectorAll('[data-filter]')],cards=[...document.querySelectorAll('.session')];let filter='all';
-function apply(){const term=(q.value||'').trim().toLowerCase();cards.forEach(c=>{const match=!term||(c.dataset.search||'').toLowerCase().includes(term),kind=filter==='all'||c.dataset.kind===filter;c.classList.toggle('hidden',!(match&&kind))})}
+function apply(){const term=(q.value||'').trim().toLowerCase();cards.forEach(c=>{const match=!term||(c.dataset.search||'').toLowerCase().includes(term),kind=filter==='all'||(filter==='current'?c.dataset.current==='true':c.dataset.kind===filter);c.classList.toggle('hidden',!(match&&kind))})}
 q.addEventListener('input',apply);buttons.forEach(b=>b.onclick=()=>{filter=b.dataset.filter;buttons.forEach(x=>x.classList.toggle('active',x===b));apply()})})();
 </script>
 </body></html>
