@@ -43,7 +43,7 @@ checks=[
     ("schema histórico de tipos", all(x in schema for x in ["single_choice","multiple_choice","true_false","numeric"])),
     ("backend no crea short_text", '["single_choice","multiple_choice","true_false","numeric"]' in assess and '["single_choice","multiple_choice","true_false","numeric","short_text"]' not in assess),
     ("editor no ofrece texto abierto", 'value="short_text"' not in teacher),
-    ("estudiante sin textarea de respuesta", 'data-q-input="'+q.id+'">'+L.esc(r.text' not in student and '<textarea class="input" rows="4" data-q-input' not in student),
+    ("estudiante sin textarea de respuesta", '<textarea class="input" rows="4" data-q-input' not in student and "Este tipo de pregunta no está habilitado para estudiantes." in student),
     ("quiz intenta y guarda respuestas", "lms_quiz_attempts_v2" in schema and "lms_quiz_responses_v2" in schema),
     ("aleatorización", "shuffle_questions" in schema and "shuffle_options" in schema and "shuffled(" in assess),
     ("quiz vacío no se publica", 'Agrega al menos una pregunta antes de publicar' in assess),
