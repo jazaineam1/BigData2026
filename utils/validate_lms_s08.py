@@ -42,7 +42,7 @@ checks=[
  ("S08 sin referencia paralela","s08-secoppipeline.html" not in s08 and "Talleres/Taller_Control_1.md" not in s08),
  ("S08 no expone versión interna","V4" not in s08 and "v4" not in s08),
  ("S08 acepta manifest","manifest_tc1.json" in s08 and 'type="file"' in s08),
- ("S08 ruta cognitiva simple",all(x in s08 for x in ["Solo tienes dos acciones","Abre el taller en Colab","Registra la evidencia del grupo","Progreso del equipo"])),
+ ("S08 ruta cognitiva simple",all(x in s08 for x in ["Abre el taller en Colab","Registra la evidencia del grupo","Progreso del equipo"]) and "Ruta simple" not in s08),
  ("S08 oculta telemetría al estudiante",all(x not in s08 for x in ["Tiempo activo","Inicio</span>","Qué cuenta como completado","Trabajar etapa"])),
  ("S08 detalle de etapas plegable","<details><summary>Ver avance por etapa</summary>" in s08),
  ("S08 no duplica rúbrica","Rúbrica oficial · 100 puntos" not in s08 and "Concurrencia equivalente" not in s08 and "Paquete reproducible completo" not in s08),
