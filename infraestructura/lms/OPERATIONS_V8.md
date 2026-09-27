@@ -39,12 +39,16 @@ El panel `lms/admin-operations.html` expone agregados operativos, no datos sensi
 - sesiones activas;
 - intentos de login y fallos de las últimas 24 h;
 - actividad académica de las últimas 24 h;
-- señales Realtime de las últimas 24 h;
+- transporte Realtime activo: **Broadcast efímero**, sin filas persistentes, con polling de respaldo;
 - archivos pending/abandoned con más de 24 h;
 - último snapshot académico exportado y su antigüedad;
 - el objetivo RPO/RTO declarado, dejando explícito que el estado real del backup administrado de plataforma no se observa desde el LMS.
 
 No se muestran IP, hashes de login, tokens ni respuestas académicas.
+
+### Realtime
+
+Desde V12, las invalidaciones de UI usan **Supabase Realtime Broadcast** sobre un topic por sesión (`bigdata:session:N`). El payload solo contiene curso, sesión y scope; no transporta identidad, respuestas ni progreso individual. Si Broadcast falla o se desconecta, las superficies conservan polling autenticado como respaldo. `bd_realtime_signals` queda únicamente como tabla legacy y ya no recibe nuevas escrituras.
 
 ## Runbook de incidente
 
