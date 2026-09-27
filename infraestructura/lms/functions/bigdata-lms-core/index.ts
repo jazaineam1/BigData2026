@@ -640,36 +640,18 @@ async function groupIdsForUser(runId:string,userId:string){
 }
 async function collaborationOverview(ctx:any,run:any){
   const ownGroupIds=await groupIdsForUser(run.id,ctx.user.id);
-  const [{data:groups},{data:members},{data:settings},{data:assignments},{data:groupSubs},{data:threads},{data:posts}] = await Promise.all([
+  const [{data:groups},{data:members},{data:settings},{data:assignments},{data:groupSubs}] = await Promise.all([
     ownGroupIds.length?db.from("lms_groups_v2").select("*").eq("course_run_id",run.id).in("id",ownGroupIds):Promise.resolve({data:[]} as any),
     ownGroupIds.length?db.from("lms_group_members_v2").select("*").in("group_id",ownGroupIds):Promise.resolve({data:[]} as any),
     db.from("lms_assignment_group_settings_v2").select("*").eq("enabled",true),
     db.from("lms_assignments_v2").select("id,code,title,session_number,due_at,max_score,max_attempts,rubric,allowed_types,active").eq("course_run_id",run.id).eq("active",true),
-    ownGroupIds.length?db.from("lms_group_submissions_v2").select("*").in("group_id",ownGroupIds).order("submitted_at",{ascending:false}):Promise.resolve({data:[]} as any),
-    db.from("lms_discussion_threads_v2").select("*").eq("course_run_id",run.id).order("pinned",{ascending:false}).order("created_at",{ascending:false}).limit(60),
-    db.from("lms_discussion_posts_v2").select("*").eq("hidden",false).order("created_at").limit(500)
+    ownGroupIds.length?db.from("lms_group_submissions_v2").select("id,assignment_id,group_id,attempt,status,submitted_at,score").in("group_id",ownGroupIds).order("submitted_at",{ascending:false}):Promise.resolve({data:[]} as any)
   ]);
-  const threadIds=new Set((threads||[]).map((t:any)=>t.id));
-  const postRows=(posts||[]).filter((p:any)=>threadIds.has(p.thread_id));
-  const postIds=postRows.map((p:any)=>p.id);
-  const {data:mentions}=postIds.length?await db.from("lms_discussion_mentions_v2").select("post_id,mentioned_user_id,created_at,read_at").eq("mentioned_user_id",ctx.user.id).in("post_id",postIds).order("created_at",{ascending:false}):({data:[]} as any);
-  const visibleUserIds=[...new Set([...(members||[]).map((x:any)=>x.user_id),...postRows.map((x:any)=>x.user_id)])];
+  const visibleUserIds=[...new Set((members||[]).map((x:any)=>x.user_id))];
   const {data:users}=visibleUserIds.length?await db.from("lms_users").select("id,display_name,username").in("id",visibleUserIds):({data:[]} as any);
   const assignmentMap=new Map((assignments||[]).map((a:any)=>[a.id,a]));
-  const settingRows=(settings||[]).filter((s:any)=>assignmentMap.has(s.assignment_id));
-  const peerTargets:any[]=[];
-  for(const setting of settingRows.filter((x:any)=>x.peer_review_enabled)){
-    const {data:candidates}=await db.from("lms_group_submissions_v2").select("*").eq("assignment_id",setting.assignment_id).in("status",["submitted","reviewed"]).order("submitted_at",{ascending:false});
-    const {data:done}=await db.from("lms_peer_reviews_v2").select("reviewee_submission_id").eq("assignment_id",setting.assignment_id).eq("reviewer_user_id",ctx.user.id);
-    const doneSet=new Set((done||[]).map((x:any)=>x.reviewee_submission_id));
-    const eligible=(candidates||[]).filter((x:any)=>!ownGroupIds.includes(x.group_id)&&!doneSet.has(x.id));
-    for(const x of eligible.slice(0,Number(setting.reviews_per_student||1)))peerTargets.push({
-      id:x.id,assignment_id:x.assignment_id,attempt:x.attempt,artifact_type:x.artifact_type,artifact:x.artifact,status:x.status,submitted_at:x.submitted_at,
-      assignment:assignmentMap.get(setting.assignment_id),
-      peer_setting:{assignment_id:setting.assignment_id,peer_review_enabled:setting.peer_review_enabled,reviews_per_student:setting.reviews_per_student,peer_rubric:setting.peer_rubric,anonymous_peer_review:setting.anonymous_peer_review}
-    });
-  }
-  return {viewer:ctx.user,run,groups:groups||[],members:members||[],member_users:users||[],users:users||[],settings:settingRows,assignments:assignments||[],group_submissions:groupSubs||[],threads:threads||[],posts:postRows,mentions:mentions||[],peer_targets:peerTargets};
+  const settingRows=(settings||[]).filter((x:any)=>assignmentMap.has(x.assignment_id)).map((x:any)=>({...x,peer_review_enabled:false,peer_rubric:[]}));
+  return {viewer:ctx.user,run,groups:groups||[],members:members||[],member_users:users||[],users:users||[],settings:settingRows,assignments:assignments||[],group_submissions:groupSubs||[]};
 }
 async function markMentionsRead(ctx:any,run:any){
   const {data:threads}=await db.from("lms_discussion_threads_v2").select("id").eq("course_run_id",run.id);
@@ -733,7 +715,7 @@ async function saveGroupSetting(ctx:any,run:any,body:any){
   const {data:a}=await db.from("lms_assignments_v2").select("id").eq("id",assignmentId).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Tarea fuera de la cohorte");
   const n=Math.max(1,Math.min(5,Math.trunc(Number(body.reviews_per_student||1))));
   const rubric=Array.isArray(body.peer_rubric)?body.peer_rubric.slice(0,20).map((x:any,i:number)=>({code:clampText(x.code||"p"+(i+1),80,true),title:clampText(x.title,180,true),max:Number(x.max||0)})).filter((x:any)=>x.max>0):[];
-  const {data,error}=await db.from("lms_assignment_group_settings_v2").upsert({assignment_id:assignmentId,enabled:body.enabled!==false,peer_review_enabled:!!body.peer_review_enabled,reviews_per_student:n,peer_rubric:rubric,anonymous_peer_review:!!body.anonymous_peer_review,updated_by:ctx.user.id,updated_at:new Date().toISOString()},{onConflict:"assignment_id"}).select("*").single();if(error)throw error;
+  const {data,error}=await db.from("lms_assignment_group_settings_v2").upsert({assignment_id:assignmentId,enabled:body.enabled!==false,peer_review_enabled:false,reviews_per_student:n,peer_rubric:[],anonymous_peer_review:false,updated_by:ctx.user.id,updated_at:new Date().toISOString()},{onConflict:"assignment_id"}).select("*").single();if(error)throw error;
   await audit(ctx.user.id,"bigdata.group.setting.save","group_assignment",assignmentId,{peer_review_enabled:data.peer_review_enabled});return {ok:true,setting:data};
 }
 async function groupSubmit(ctx:any,run:any,body:any){
@@ -875,7 +857,6 @@ Deno.serve(async(req:Request)=>{
     if(action==="teacher_create_intervention")return out(req,await createIntervention(ctx,run,body));
     if(action==="teacher_resolve_intervention")return out(req,await resolveIntervention(ctx,run,body));
     if(action==="collaboration")return out(req,await collaborationOverview(ctx,run));
-    if(action==="mark_mentions_read")return out(req,await markMentionsRead(ctx,run));
     if(action==="teacher_collaboration")return out(req,await teacherCollaboration(ctx,run));
     if(action==="teacher_create_group")return out(req,await createGroup(ctx,run,body));
     if(action==="teacher_add_group_member")return out(req,await addGroupMember(ctx,run,body));
