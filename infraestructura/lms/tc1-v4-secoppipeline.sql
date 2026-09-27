@@ -9,10 +9,9 @@ set title='SECOP Data Pipeline · API, concurrencia y NoSQL',
       'source','Cuadernos/Taller_Control_1.ipynb',
       'reference','assets/tutoriales/s08-secoppipeline.html',
       'max_score',100,
-      'estimated_minutes',360,
       'work_mode','class_and_home',
       'group_assessment',true,
-      'validator_version','2026-09-26-secoppipeline'
+      'validator_version','2026-09-27-secoppipeline'
     )
 where course_code='bigdata' and session_number=8;
 
@@ -45,25 +44,25 @@ set title='E5 · Neo4j y contexto relacional',
 where code='bd-s08-e5';
 
 update public.bd_lms_activities
-set title='E6 · Decisiones, informe y paquete',
+set title='E6 · Respuestas del caso, decisiones y límites',
     points=10,
-    metadata='{"checks":["E6_decisiones_informe","E6_microdefensa_grupal","E6_paquete_reproducible"]}'::jsonb
+    metadata='{"checks":["E6_decisiones_informe","E6_respuestas_caso","E6_paquete_reproducible"]}'::jsonb
 where code='bd-s08-e6';
 
 update public.bd_lms_activities
-set metadata='{"validator_versions":["2026-09-26-secoppipeline"],"current":"2026-09-26-secoppipeline"}'::jsonb
+set metadata='{"validator_versions":["2026-09-27-secoppipeline"],"current":"2026-09-27-secoppipeline"}'::jsonb
 where code='bd-s08-final';
 
 update public.lms_assignments_v2
 set title='TC1 · SECOP Data Pipeline',
-    instructions='Construya una adquisición reproducible de SECOP II, compare secuencial vs ThreadPoolExecutor, documente calidad/trazabilidad, cargue Atlas de forma idempotente y produzca evidencia Cassandra/Neo4j. La entrega se registra al validar manifest_tc1.json.',
+    instructions='Trabaje con SECOP II desde 2025 hasta el último registro disponible de 2026. Construya un snapshot reproducible, valide equivalencia secuencial/concurrente, modele en Atlas/Cassandra/Neo4j y responda las preguntas del caso con evidencia propia. La entrega se registra al validar manifest_tc1.json.',
     rubric='[
       {"code":"E1","title":"API SECOP + concurrencia + trazabilidad","max":25},
       {"code":"E2","title":"Modelo documental + Atlas idempotente","max":25},
       {"code":"E3","title":"Producto analítico","max":10},
       {"code":"E4","title":"Cassandra query-first","max":15},
       {"code":"E5","title":"Neo4j y contexto relacional","max":15},
-      {"code":"E6","title":"Decisiones + informe reproducible","max":10}
+      {"code":"E6","title":"Respuestas del caso + decisiones + límites","max":10}
     ]'::jsonb,
     updated_at=now()
 where code='bd-s08-control'
