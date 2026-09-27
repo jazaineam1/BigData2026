@@ -14,6 +14,15 @@ comment on table public.bd_wall_posts is
 comment on table public.bd_wall_reactions is
   'LEGACY V14: reacciones del muro abierto deshabilitadas. No se usa en el runtime.';
 
+-- Eliminar telemetría histórica de confianza de las autocomprobaciones.
+update public.bd_lms_activity_progress
+set metadata=(metadata - 'last_confidence' - 'first_confidence')
+where metadata ? 'last_confidence' or metadata ? 'first_confidence';
+
+update public.bd_lms_events
+set metadata=(metadata - 'confidence')
+where event_type='challenge_answered' and metadata ? 'confidence';
+
 -- Ninguna tarea existente debe conservar el tipo texto como entrega de estudiante.
 update public.lms_assignments_v2
 set allowed_types=array_remove(allowed_types,'text'),
