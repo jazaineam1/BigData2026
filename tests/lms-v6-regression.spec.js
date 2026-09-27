@@ -60,6 +60,9 @@ test('S09 exige confianza y la envía al backend', async ({page})=>{
   const answer=page.locator('#ans-bd-s09-c1'),confidence=page.locator('#conf-bd-s09-c1');
   await expect(answer).toBeVisible();await expect(confidence).toBeVisible();
   await page.evaluate(()=>answerChallenge('bd-s09-c1'));
+  await expect(page.locator('#fb-bd-s09-c1')).toContainText('Elige una opción');
+  await answer.selectOption('lexical');
+  await page.evaluate(()=>answerChallenge('bd-s09-c1'));
   await expect(page.locator('#fb-bd-s09-c1')).toContainText('indica tu nivel de confianza');
   await confidence.selectOption('high');
   await page.evaluate(()=>answerChallenge('bd-s09-c1'));
