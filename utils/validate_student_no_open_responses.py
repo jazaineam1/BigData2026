@@ -17,6 +17,7 @@ assignments=read("lms/assignments.html")
 quizzes=read("lms/quizzes.html")
 collab=read("lms/collaboration.html")
 progress=read("lms/progress.html")
+portal=read("lms/portal.html")
 teacher_wall=read("lms/wall.html")
 teacher_quizzes=read("lms/teacher-quizzes.html")
 gradebook=read("lms/gradebook.html")
@@ -43,6 +44,11 @@ checks=[
     ("sin textareas de respuesta estudiante", all("<textarea" not in html for html in student_surfaces.values())),
     ("sin confianza S09", all(x not in deck for x in ["¿Qué tan seguro estás?","id=\"conf-","confidence:conf"])),
     ("sin wall API runtime", all(x not in kit for x in ["wallPost","wall_post"]) and all(x not in session_backend for x in ['action===\"wall_post\"','action===\"wall_list\"','action===\"wall_react\"','action===\"wall_moderate\"'])),
+    ("wall competitivo embebido", "Wall de competencia" in progress and "competition_wall" in progress and "competitionWall" in progress),
+    ("wall competitivo visible desde portal", "Wall de competencia" in portal and "#competitionWall" in portal),
+    ("wall competitivo sin texto libre", "<textarea" not in progress and "open_responses:false" in session_backend),
+    ("wall competitivo usa alias", "competitionAlias" in session_backend and "Jugador " in session_backend),
+    ("wall competitivo no premia velocidad", "speed_tiebreak:false" in session_backend),
     ("transferencia S09 estructurada", "TRANSFER_OPTIONS" in deck and "No hay respuestas abiertas" in deck and "TRANSFER_ALLOWED" in session_backend),
     ("LAB9 estructurado", "LAB9_STRUCTURED" in session_backend and all(x in generator for x in ["RAZONES =","DECISIONES =","ALTERNATIVAS =","LIMITES ="])),
     ("notebook sin prompts abiertos", all(x not in notebook for x in ["explica qué relación semántica observaste","qué enfoque final eliges para esta necesidad y por qué","qué otra estrategia consideraste y por qué no la elegiste","qué dato o juicio falta para afirmar que el ranking es bueno"])),
@@ -81,3 +87,4 @@ print(" - sin textarea de respuesta")
 print(" - quizzes/tareas sin texto abierto")
 print(" - colaboración estudiante de solo lectura")
 print(" - S09/Colab usan evidencia estructurada")
+print(" - wall competitivo embebido usa alias y métricas estructuradas")
