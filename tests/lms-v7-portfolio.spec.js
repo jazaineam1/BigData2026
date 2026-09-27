@@ -68,8 +68,8 @@ test('portafolio contiene solo sesiones, evidencias y competencias propias',asyn
   await expect(page.getByText('LAB Dask')).toBeVisible();
   await expect(page.getByText('Evidencia verificada.')).toBeVisible();
   await expect(page.getByText('Búsqueda vectorial')).toBeVisible();
-  await expect(page.getByText('heartbeats')).toHaveCount(0);
-  await expect(page.getByText('u-self')).toHaveCount(0);
+  await expect(page.locator('#sessionPortfolio')).not.toContainText('heartbeat');
+  await expect(page.locator('#sessionPortfolio')).not.toContainText('u-self');
   await expect(page.getByRole('button',{name:'Guardar como PDF'})).toBeVisible();
 });
 
