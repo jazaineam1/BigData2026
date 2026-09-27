@@ -37,12 +37,12 @@ pages=(ROOT/".github/workflows/pages.yml").read_text("utf-8")
 course=json.loads((ROOT/"lms/data/course.json").read_text("utf-8"))
 
 checks=[
- ("portal reutiliza sesión LMS","andesdb.lms.auth.v1" in client),
+ ("portal reutiliza sesión LMS","lms.bigdata.v2" in client),
  ("S08 abre Taller_Control_1","Cuadernos/Taller_Control_1.ipynb" in s08),
  ("S08 enlaza referencia técnica","s08-secoppipeline.html" in s08 and "Talleres/Taller_Control_1.md" not in s08),
  ("S08 no expone versión interna","V4" not in s08 and "v4" not in s08),
  ("S08 acepta manifest","manifest_tc1.json" in s08 and 'type="file"' in s08),
- ("S08 muestra rúbrica completa","Rúbrica oficial · 100 puntos" in s08 and "Concurrencia equivalente" in s08 and "Paquete reproducible completo" in s08),
+ ("S08 muestra rúbrica completa","Rúbrica oficial · 100 puntos" in s08 and "Concurrencia equivalente" in s08 and "Respuestas a las tres preguntas del caso" in s08 and "Paquete reproducible completo" in s08),
  ("S08 exige enlace de evidencia","evidenceUrl" in s08 and "evidence_url" in edge),
  ("S08 no marca abrir como completar","Abrirlo <b>no</b> lo marca como completado" in s08),
  ("WALL declara desempate por inicio","demora de inicio" in wall),
@@ -61,14 +61,14 @@ checks=[
  ("inicio oficial course-scoped","bd_lms_session_windows" in sql and "teacher_open_session" in edge),
  ("inicio no nace de page_view",'["notebook_opened","activity_started","stage_opened"].includes(event)' in edge),
  ("pareja solo con hash","pair_hash:m.pair_hash" in edge and "pair_hash text" in sql and "pair_id text" not in sql),
- ("Edge Function versionada","VALIDATOR_VERSIONS" in edge and "2026-09-26-secoppipeline" in edge and "submit_manifest" in edge),
+ ("Edge Function versionada","VALIDATOR_VERSIONS" in edge and "2026-09-27-secoppipeline" in edge and "submit_manifest" in edge),
  ("tablas no expuestas a anon/authenticated","revoke all" in sql and "anon,authenticated" in sql),
  ("curso declarativo",course.get("course")=="bigdata" and int(course.get("current_tracked_session") or 0)>=8 and any(x.get("n")==8 and x.get("tracked") for x in course.get("sessions",[]))),
  ("manifiesto declara administrador",any(x.get("code")=="users" and x.get("path")=="admin-users.html" for x in course.get("teacher_tools",[]))),
  ("portada enlaza LMS",'lms/portal.html' in index),
  ("portada S08 entra al LMS",'lms/portal.html' in index and (ROOT/"lms/session.html").exists()),
  ("portada sin método redundante","Aprender = comprender, practicar, comprobar y transferir." not in index and "La evidencia importa más que completar una pantalla." not in index),
- ("S08 trabajo en casa 6h","mínimo 6 horas por grupo" in s08),
+ ("S08 sin estimaciones de duración","mínimo 6 horas" not in s08 and "6–8 horas" not in s08),
  ("Pages publica carpeta LMS","cp -R lms _site/" in pages and "lms/**" in pages),
  ("Pages publica recursos mínimos S08","Talleres/Taller_Control_1.md" not in pages and "Cuadernos/Taller_Control_1.ipynb" in pages and "s08-secoppipeline.html" in pages),
 ]
