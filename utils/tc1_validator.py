@@ -2,7 +2,7 @@ from pathlib import Path
 import json, re, hashlib, zipfile
 import pandas as pd
 
-VERSION = "2026-09-26-secoppipeline"
+VERSION = "2026-09-27-secoppipeline"
 STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}
 FEEDBACK = {
     "E1_contrato_y_query": "Revise el contrato de datos y el plan SoQL: fuente, campos, filtros y orden estable deben corresponder a la ventana asignada.",
@@ -25,13 +25,13 @@ FEEDBACK = {
     "E5_cypher": "El Cypher debe cargar con MERGE/UNWIND y responder las consultas parametrizadas solicitadas.",
     "E5_subgrafo": "El subgrafo NetworkX debe representar la misma estructura Entidad–Proceso–Proveedor.",
     "E6_decisiones_informe": "Registre decisiones con evidencia, alternativa y riesgo, y comunique explícitamente los límites de interpretación.",
-    "E6_microdefensa_grupal": "Responda como grupo las dos preguntas de transferencia usando resultados propios de concurrencia y calidad.",
+    "E6_respuestas_caso": "Responda las tres preguntas del caso usando resultados propios y explicando límites de interpretación.",
     "E6_paquete_reproducible": "Complete todos los artefactos requeridos antes de generar la entrega final.",
 }
 
 PROCESS_FIELDS = {
     "id_del_proceso","entidad","nit_entidad","departamento_entidad","ciudad_entidad",
-    "fecha_de_publicacion","precio_base","modalidad_de_contratacion",
+    "fecha_de_publicacion_del","precio_base","modalidad_de_contratacion",
     "respuestas_al_procedimiento","estado_del_procedimiento","adjudicado",
     "nombre_del_proveedor_adjudicado","nit_del_proveedor_adjudicado","urlproceso",
 }
@@ -80,7 +80,7 @@ def evaluar(ns):
 
     pareja=str(ns.get("PAREJA_ID","")).strip()
     procesos=ns.get("procesos_df"); contratos=ns.get("contratos_df")
-    procesos_seq=ns.get("procesos_seq")
+    procesos_seq=ns.get("procesos_seq"); procesos_thr=ns.get("procesos_threads_benchmark")
     data_contract=ns.get("data_contract",{})
     query_plan=ns.get("query_plan",{})
     bench=ns.get("benchmark_threads",{})
@@ -90,16 +90,22 @@ def evaluar(ns):
     # E1 · 25
     try:
         q1=query_plan.get("procesos",{}); q2=query_plan.get("contratos",{})
+        cov=data_contract.get("coverage",{}); exp=data_contract.get("expected_rows",{})
         e11=(
             len(pareja)>=3
             and data_contract.get("procesos",{}).get("id")=="p6dx-8zbt"
             and data_contract.get("contratos",{}).get("id")=="jbjy-vk9h"
             and PROCESS_FIELDS.issubset(set(data_contract.get("procesos",{}).get("fields",[])))
             and CONTRACT_FIELDS.issubset(set(data_contract.get("contratos",{}).get("fields",[])))
-            and isinstance(q1.get("where"),str) and "fecha_de_publicacion" in q1["where"]
-            and isinstance(q2.get("where"),str) and "fecha_de_firma" in q2["where"]
-            and "order" in q1 and "id_del_proceso" in q1["order"]
-            and "order" in q2 and "id_contrato" in q2["order"]
+            and cov.get("start")=="2025-01-01T00:00:00.000"
+            and str(cov.get("latest_procesos","")).startswith("2026-")
+            and str(cov.get("latest_contratos","")).startswith("2026-")
+            and isinstance(exp.get("procesos"),int) and exp.get("procesos",0)>0
+            and isinstance(exp.get("contratos"),int) and exp.get("contratos",0)>0
+            and isinstance(q1.get("where"),str) and "fecha_de_publicacion_del" in q1["where"] and "2025-01-01" in q1["where"]
+            and isinstance(q2.get("where"),str) and "fecha_de_firma" in q2["where"] and "2025-01-01" in q2["where"]
+            and "id_del_proceso" in q1.get("order","")
+            and "id_contrato" in q2.get("order","")
             and (OUT/"00_dataset_contract.json").exists()
         )
     except Exception: e11=False
@@ -110,6 +116,7 @@ def evaluar(ns):
             isinstance(procesos_seq,pd.DataFrame) and len(procesos_seq)>=1000
             and PROCESS_FIELDS.issubset(set(procesos_seq.columns))
             and bench.get("rows_sequential")==len(procesos_seq)
+            and bench.get("benchmark_rows")==len(procesos_seq)
             and isinstance(bench.get("seconds_sequential"),(int,float))
             and bench.get("seconds_sequential")>0
         )
@@ -118,14 +125,14 @@ def evaluar(ns):
 
     try:
         h_seq=_canon_df(procesos_seq,"id_del_proceso")
-        h_thr=_canon_df(procesos,"id_del_proceso")
+        h_thr=_canon_df(procesos_thr,"id_del_proceso")
         workers=int(bench.get("workers",0))
         e13=(
-            isinstance(procesos,pd.DataFrame) and len(procesos)>=1000
-            and PROCESS_FIELDS.issubset(set(procesos.columns))
+            isinstance(procesos_thr,pd.DataFrame) and len(procesos_thr)>=1000
+            and PROCESS_FIELDS.issubset(set(procesos_thr.columns))
             and 2<=workers<=6
-            and bench.get("rows_threaded")==len(procesos)
-            and len(procesos)==len(procesos_seq)
+            and bench.get("rows_threaded")==len(procesos_thr)
+            and len(procesos_thr)==len(procesos_seq)
             and h_seq is not None and h_seq==h_thr
             and bench.get("same_rows") is True and bench.get("same_hash") is True
             and bench.get("hash_sequential")==h_seq and bench.get("hash_threaded")==h_thr
@@ -138,22 +145,26 @@ def evaluar(ns):
 
     try:
         join_cov=quality.get("join_coverage")
-        raw_proc=(OUT/"raw"/"procesos.parquet")
-        raw_cont=(OUT/"raw"/"contratos.parquet")
+        raw_proc=(OUT/"raw"/"procesos.parquet"); raw_cont=(OUT/"raw"/"contratos.parquet")
         secret_blob=json.dumps(acq,ensure_ascii=False).lower()
+        years=quality.get("years",{})
+        ds=acq.get("datasets",{})
         e14=(
-            isinstance(contratos,pd.DataFrame) and len(contratos)>=100
+            isinstance(procesos,pd.DataFrame) and isinstance(contratos,pd.DataFrame)
+            and len(procesos)==int(ds.get("procesos",{}).get("expected_rows",-1))==int(ds.get("procesos",{}).get("rows",-2))
+            and len(contratos)==int(ds.get("contratos",{}).get("expected_rows",-1))==int(ds.get("contratos",{}).get("rows",-2))
+            and PROCESS_FIELDS.issubset(set(procesos.columns))
             and CONTRACT_FIELDS.issubset(set(contratos.columns))
+            and {2025,2026}.issubset(set(years.get("procesos",[])))
+            and {2025,2026}.issubset(set(years.get("contratos",[])))
             and isinstance(join_cov,(int,float)) and 0<=float(join_cov)<=1
-            and isinstance(acq,dict) and acq.get("datasets",{}).get("procesos",{}).get("id")=="p6dx-8zbt"
-            and acq.get("datasets",{}).get("contratos",{}).get("id")=="jbjy-vk9h"
-            and int(acq.get("workers",0))==int(bench.get("workers",0))
-            and "queried_at_utc" in acq
+            and str(acq.get("coverage",{}).get("latest_procesos","")).startswith("2026-")
+            and str(acq.get("coverage",{}).get("latest_contratos","")).startswith("2026-")
             and "password" not in secret_blob and "mongodb+srv" not in secret_blob and "app_token" not in secret_blob
-            and isinstance(quality.get("procesos"),dict) and isinstance(quality.get("contratos"),dict)
             and raw_proc.exists() and raw_cont.exists()
             and (OUT/"01_acquisition_manifest.json").exists()
             and (OUT/"01_quality_report.json").exists()
+            and (OUT/"01_cobertura_departamento.csv").exists()
         )
     except Exception as e:
         print("E1.4",type(e).__name__,e); e14=False
@@ -166,11 +177,12 @@ def evaluar(ns):
         required_top={"id_proceso","entidad","proceso","proveedor_adjudicado","contratos_resumen","metadata_ingesta"}
         nested_ok=bool(sample) and all(required_top.issubset(d.keys()) for d in sample)
         cr_ok=all(isinstance(d.get("contratos_resumen"),dict) and {"cantidad","valor_total","estados"}.issubset(d["contratos_resumen"].keys()) for d in sample)
+        case_ok=all("departamento" in d.get("entidad",{}) and "anio" in d.get("proceso",{}) and "diferencia_valor" in d.get("proceso",{}) for d in sample)
         e21=(
             isinstance(historico,pd.DataFrame) and len(historico)==len(procesos)
             and historico["id_proceso"].nunique()==len(historico)
             and isinstance(documentos,list) and len(documentos)==len(historico)
-            and nested_ok and cr_ok
+            and nested_ok and cr_ok and case_ok
             and (OUT/"02_secop_integrado.parquet").exists()
             and (OUT/"02_modelo_documental.json").exists()
         )
@@ -249,29 +261,33 @@ def evaluar(ns):
     # E3 · 10
     bandeja=ns.get("bandeja_historica")
     try:
-        ref=sorted(
-            [
-                {
-                    "id_proceso":d.get("id_proceso"),
-                    "valor_contratos":float(d.get("contratos_resumen",{}).get("valor_total") or 0),
-                }
-                for d in documentos
-                if (_safe_float(d.get("proceso",{}).get("precio_base")) or 0)>0
-                and int(d.get("contratos_resumen",{}).get("cantidad") or 0)>0
-            ],
-            key=lambda x:(-x["valor_contratos"],str(x["id_proceso"]))
-        )[:100]
+        ref=[]
+        for d in documentos:
+            base=_safe_float(d.get("proceso",{}).get("precio_base")) or 0
+            valor=_safe_float(d.get("contratos_resumen",{}).get("valor_total")) or 0
+            cantidad=int(d.get("contratos_resumen",{}).get("cantidad") or 0)
+            if base>0 and cantidad>0:
+                diff=valor-base
+                ref.append({"id_proceso":d.get("id_proceso"),"diferencia_abs":abs(diff)})
+        ref=sorted(ref,key=lambda x:(-x["diferencia_abs"],str(x["id_proceso"])))[:100]
         ids_ref=[x["id_proceso"] for x in ref]
         e31=(
             isinstance(ns.get("pipeline_bandeja"),list) and len(ns.get("pipeline_bandeja"))>=3
             and isinstance(bandeja,pd.DataFrame)
+            and {"id_proceso","precio_base","valor_contratos","diferencia_valor","diferencia_abs"}.issubset(bandeja.columns)
             and list(bandeja["id_proceso"])==ids_ref
         )
     except Exception as e:
         print("E3.1",type(e).__name__,e); e31=False
     check("E3_pipeline_bandeja",e31,7)
     try:
-        e32=(OUT/"03_bandeja_historica.csv").exists() and len(bandeja)<=100 and {"id_proceso","valor_contratos"}.issubset(bandeja.columns)
+        conc=ns.get("concentracion_departamento")
+        e32=(
+            (OUT/"03_bandeja_historica.csv").exists()
+            and (OUT/"03_concentracion_departamento.csv").exists()
+            and len(bandeja)<=100
+            and isinstance(conc,pd.DataFrame) and len(conc)>0
+        )
     except Exception:e32=False
     check("E3_artefacto_bandeja",e32,3)
 
@@ -280,15 +296,15 @@ def evaluar(ns):
     try:
         e41=(
             isinstance(bc,pd.DataFrame) and len(bc)==len(bandeja)
-            and {"anio","departamento","valor_contratos","id_proceso"}.issubset(bc.columns)
+            and {"anio","departamento","diferencia_abs","id_proceso"}.issubset(bc.columns)
         )
     except Exception:e41=False
     check("E4_datos_cassandra",e41,5)
 
     try:
         cql=re.sub(r"\s+"," ",str(ns.get("cql_create","")).casefold())
-        pk=re.search(r"primary\s+key\s*\(\s*\(\s*anio\s*,\s*departamento\s*\)\s*,\s*valor_contratos\s*,\s*id_proceso\s*\)",cql)
-        order=re.search(r"clustering\s+order\s+by\s*\(\s*valor_contratos\s+desc\s*,\s*id_proceso\s+asc\s*\)",cql)
+        pk=re.search(r"primary\s+key\s*\(\s*\(\s*anio\s*,\s*departamento\s*\)\s*,\s*diferencia_abs\s*,\s*id_proceso\s*\)",cql)
+        order=re.search(r"clustering\s+order\s+by\s*\(\s*diferencia_abs\s+desc\s*,\s*id_proceso\s+asc\s*\)",cql)
         e42="tc1.procesos_por_anio_departamento" in cql and pk is not None and order is not None and "allow filtering" not in cql and (OUT/"04_modelo_cassandra.cql").exists()
     except Exception:e42=False
     check("E4_modelo_query_first",e42,6)
@@ -298,7 +314,7 @@ def evaluar(ns):
                 .sort_values(["n","anio","departamento"],ascending=[False,True,True],kind="mergesort").reset_index(drop=True))
         rr=counts.iloc[0]; ref_part=(int(rr["anio"]),rr["departamento"])
         ref_top=(bc[(bc["anio"]==ref_part[0])&(bc["departamento"]==ref_part[1])]
-                 .sort_values(["valor_contratos","id_proceso"],ascending=[False,True],kind="mergesort").head(10))
+                 .sort_values(["diferencia_abs","id_proceso"],ascending=[False,True],kind="mergesort").head(10))
         top=ns.get("top10_cassandra")
         e43=tuple(ns.get("particion_prueba"))==ref_part and isinstance(top,pd.DataFrame) and list(top["id_proceso"])==list(ref_top["id_proceso"])
     except Exception as e:
@@ -367,39 +383,37 @@ def evaluar(ns):
             and (OUT/"06_decision_log.json").exists()
             and all(x in inf for x in [
                 "## 1. adquisición y contrato de datos",
-                "## 2. concurrencia, robustez y calidad",
-                "## 3. modelo documental e idempotencia atlas",
-                "## 4. producto analítico y cassandra",
-                "## 5. neo4j, decisiones y límites",
+                "## 2. cobertura proceso → contrato",
+                "## 3. concentración y bandeja de revisión",
+                "## 4. modelo documental y cassandra",
+                "## 5. red de proveedores, decisiones y límites",
             ])
-            and re.search(r"no\s+(demuestra|prueba)",inf) is not None
             and (OUT/"06_informe_tecnico.md").exists()
         )
     except Exception:e61=False
     check("E6_decisiones_informe",e61,5)
 
-    defensa=ns.get("defensa_grupal",{})
+    respuestas=ns.get("respuestas_caso",{})
     try:
-        r1=str(defensa.get("respuesta_concurrencia","")).strip()
-        r2=str(defensa.get("respuesta_calidad","")).strip()
-        r1l=r1.casefold();r2l=r2.casefold()
+        vals=[str(respuestas.get(k,"")).strip() for k in ["pregunta_1_cobertura","pregunta_2_concentracion","pregunta_3_red"]]
         e62=(
-            isinstance(defensa,dict)
-            and len(r1)>=120 and len(r2)>=120
-            and any(x in r1l for x in ["429","worker","backoff","retry"])
-            and "hash" in r1l
-            and any(x in r2l for x in ["join","cobertura","coverage"])
-            and any(x in r2l for x in ["falt","contrato","invent"])
-            and (OUT/"06_microdefensa_grupal.json").exists()
+            isinstance(respuestas,dict)
+            and all(len(x)>=160 for x in vals)
+            and all(re.search(r"\d",x) for x in vals)
+            and any(w in vals[0].casefold() for w in ["cobertura","contrato","departamento"])
+            and any(w in vals[1].casefold() for w in ["valor","diferencia","departamento","entidad"])
+            and any(w in vals[2].casefold() for w in ["proveedor","entidad","conecta","red"])
+            and (OUT/"06_respuestas_caso.json").exists()
         )
     except Exception:e62=False
-    check("E6_microdefensa_grupal",e62,3)
+    check("E6_respuestas_caso",e62,3)
 
     files=[
         "00_dataset_contract.json","01_acquisition_manifest.json","01_benchmark_threads.json","01_quality_report.json",
+        "01_cobertura_departamento.csv",
         "02_secop_integrado.parquet","02_modelo_documental.json","02_atlas_evidence.json",
-        "03_bandeja_historica.csv","04_modelo_cassandra.cql","05_neo4j_consultas.cypher",
-        "05_resultado_relacional.csv","06_decision_log.json","06_informe_tecnico.md","06_microdefensa_grupal.json",
+        "03_bandeja_historica.csv","03_concentracion_departamento.csv","04_modelo_cassandra.cql","05_neo4j_consultas.cypher",
+        "05_resultado_relacional.csv","06_decision_log.json","06_informe_tecnico.md","06_respuestas_caso.json",
     ]
     e63=all((OUT/f).exists() and (OUT/f).stat().st_size>0 for f in files)
     check("E6_paquete_reproducible",e63,2)
