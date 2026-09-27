@@ -16,6 +16,8 @@ portal=read("lms/portal.html")
 session=read("lms/session.html")
 progress=read("lms/progress.html")
 s08=read("lms/session-08.html")
+deck=read("Presentaciones/s09-de-palabras-a-significado.html")
+backend=read("infraestructura/lms/functions/bigdata-session/index.ts")
 
 def between(src,a,b):
     i=src.find(a); j=src.find(b,i+len(a))
@@ -46,6 +48,9 @@ checks=[
     ("S08 estudiante una sola ruta", all(x in s08 for x in ["Tu equipo","Abre el taller en Colab","Registra la evidencia del grupo","Progreso del equipo"])),
     ("S08 no duplica contenido del notebook", all(x not in s08 for x in ["Rúbrica oficial · 100 puntos","Trabajo fuera de clase","6–8 horas","Qué cuenta como completado","s08-secoppipeline.html"])),
     ("S08 no expone telemetría ni acciones repetidas", all(x not in s08 for x in ["Tiempo activo","Trabajar etapa"]) and "<details><summary>Ver avance por etapa</summary>" in s08),
+    ("Muro abierto retirado del estudiante", not (ROOT/"lms/class-wall.html").exists() and "class-wall.html" not in progress and "class-wall.html" not in deck),
+    ("S09 sin respuestas abiertas evaluables", all(x not in deck for x in ["data-transfer-field","data-transfer-for","presentation-transfer","Muro del LAB"])),
+    ("Backend sin acciones de muro", all(x not in backend for x in ['action==="wall_post"','action==="wall_list"','action==="wall_react"','action==="wall_moderate"'])),
 ]
 
 for label,ok in checks:
@@ -72,3 +77,4 @@ print(" - Sesión: siguiente acción + máximo dos recursos")
 print(" - Progreso: Sin empezar / En curso / Lista")
 print(" - Analítica y telemetría permanecen en backend, no en la vista estudiante")
 print(" - S08: equipo → notebook → entrega → estado, sin duplicar el cuaderno")
+print(" - S09: autocomprobación cerrada; sin muro ni transferencia textual")
