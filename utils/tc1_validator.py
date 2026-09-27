@@ -33,7 +33,7 @@ PROCESS_FIELDS = {
     "id_del_proceso","entidad","nit_entidad","departamento_entidad","ciudad_entidad",
     "fecha_de_publicacion_del","precio_base","modalidad_de_contratacion",
     "respuestas_al_procedimiento","estado_del_procedimiento","adjudicado",
-    "nombre_del_proveedor_adjudicado","nit_del_proveedor_adjudicado","urlproceso",
+    "valor_total_adjudicacion",
 }
 CONTRACT_FIELDS = {
     "proceso_de_compra","id_contrato","estado_contrato","tipo_de_contrato",
