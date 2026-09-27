@@ -2,6 +2,7 @@
 const B=window.BIGDATA_LMS;
 if(!B)throw new Error('LMS Kit requiere bigdata-lms.js');
 const QUEUE_KEY='lms.bigdata.queue.v1';
+const REJECTED_KEY='lms.bigdata.rejected.v1';
 const MAX_QUEUE=500;
 const RETRY_MS=[1000,2000,4000,8000,30000];
 const script=document.currentScript;
@@ -27,11 +28,44 @@ function sessionNumber(n=configuredSession){
   if(!Number.isInteger(x)||x<1)throw new Error('Número de sesión inválido');
   return x;
 }
+function currentOwner(){
+  const a=B.auth?.();
+  return String(a?.user?.id||a?.user?.username||'').trim()||null;
+}
 function loadQueue(){
   try{
     const q=JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]');
     return Array.isArray(q)?q.filter(x=>x&&typeof x==='object'&&x.id&&x.kind&&x.payload):[];
   }catch{return[]}
+}
+function loadRejected(){
+  try{
+    const q=JSON.parse(localStorage.getItem(REJECTED_KEY)||'[]');
+    return Array.isArray(q)?q.filter(x=>x&&typeof x==='object'&&x.id&&x.kind&&x.payload):[];
+  }catch{return[]}
+}
+function saveRejected(rows){
+  const out=Array.isArray(rows)?rows.slice(-500):[];
+  try{localStorage.setItem(REJECTED_KEY,JSON.stringify(out))}catch{}
+  emit('rejected',{size:out.length,items:out});
+  return out;
+}
+function rejection(entry,error,reason='server_rejected'){
+  const rows=loadRejected(),now=new Date().toISOString();
+  rows.push({...entry,rejected_at:now,reject_reason:reason,error_status:Number(error?.status||0)||null,error_message:String(error?.message||error||reason).slice(0,500)});
+  saveRejected(rows);
+}
+function rejected(){return loadRejected()}
+function dismissRejected(id){
+  const rows=loadRejected().filter(x=>x.id!==id);saveRejected(rows);return rows;
+}
+function retryRejected(id){
+  const rows=loadRejected(),entry=rows.find(x=>x.id===id);
+  if(!entry)throw new Error('Evidencia rechazada no encontrada');
+  const owner=currentOwner();
+  if(!owner||entry.owner_id!==owner)throw new Error('La evidencia pertenece a otra cuenta');
+  dismissRejected(id);
+  return enqueue(entry.kind,entry.payload,null,owner);
 }
 function priority(entry){
   if(entry.kind==='evidence'||entry.kind==='wall_post')return 100;
@@ -72,15 +106,19 @@ function authBlocked(error){
   const status=Number(error?.status||0);
   return status===401||status===403;
 }
-function enqueue(kind,payload,id=null){
+function enqueue(kind,payload,id=null,ownerId=currentOwner()){
+  if(!ownerId)return null;
   const q=loadQueue(),entry={
     id:id||uid(kind==='evidence'?'ev':kind==='wall_post'?'post':'evt'),
-    kind,payload,attempts:0,created_at_ms:Date.now()
+    owner_id:ownerId,kind,payload,attempts:0,created_at_ms:Date.now()
   };
   q.push(entry);saveQueue(q);scheduleFlush(RETRY_MS[0]);
   return entry;
 }
 async function deliver(entry){
+  const owner=currentOwner();
+  if(!entry.owner_id)throw Object.assign(new Error('Entrada antigua sin propietario'),{status:422,queue_reason:'unscoped'});
+  if(!owner||entry.owner_id!==owner)throw Object.assign(new Error('La operación pendiente pertenece a otra cuenta'),{status:409,queue_reason:'owner_mismatch'});
   const p={...entry.payload};
   if(entry.kind==='track'){
     p.client_event_id=entry.id;
@@ -104,27 +142,35 @@ async function flush(){
   if(flushing||navigator.onLine===false)return {ok:false,offline:navigator.onLine===false,size:queueSize()};
   flushing=true;clearRetry();
   try{
-    let q=loadQueue(),sent=0;
-    while(q.length){
-      const entry=q[0];
+    let q=loadQueue(),sent=0,index=0;
+    while(index<q.length){
+      const entry=q[index],owner=currentOwner();
+      if(entry.owner_id&&owner&&entry.owner_id!==owner){index++;continue}
       try{
         const result=await deliver(entry);
-        q.shift();saveQueue(q);sent++;
+        q.splice(index,1);saveQueue(q);sent++;
         emit('sent',{entry,result});
       }catch(error){
+        const reason=String(error?.queue_reason||'');
+        if(reason==='owner_mismatch'){index++;continue}
+        if(reason==='unscoped'){
+          rejection(entry,error,'unscoped_legacy');
+          q.splice(index,1);saveQueue(q);continue;
+        }
         if(authBlocked(error)&&priority(entry)>=100){
-          q[0]=entry;saveQueue(q);
+          q[index]=entry;saveQueue(q);
           emit('auth_required',{entry,error});
           return {ok:false,auth_required:true,size:q.length,sent};
         }
         if(retryable(error)){
           entry.attempts=Number(entry.attempts||0)+1;
-          q[0]=entry;saveQueue(q);
+          q[index]=entry;saveQueue(q);
           const delay=RETRY_MS[Math.min(entry.attempts-1,RETRY_MS.length-1)];
           emit('retry',{entry,error,delay});scheduleFlush(delay);
           return {ok:false,retry:true,size:q.length,sent};
         }
-        q.shift();saveQueue(q);
+        rejection(entry,error,'server_rejected');
+        q.splice(index,1);saveQueue(q);
         emit('discard',{entry,error});
       }
     }
@@ -132,10 +178,11 @@ async function flush(){
   }finally{flushing=false}
 }
 async function send(kind,payload){
-  const id=uid(kind==='evidence'?'ev':kind==='wall_post'?'post':'evt');
-  const entry={id,kind,payload,attempts:0,created_at_ms:Date.now()};
+  const id=uid(kind==='evidence'?'ev':kind==='wall_post'?'post':'evt'),owner_id=currentOwner();
+  if(!owner_id)throw new Error('Inicia sesión antes de registrar esta operación');
+  const entry={id,owner_id,kind,payload,attempts:0,created_at_ms:Date.now()};
   if(navigator.onLine===false){
-    enqueue(kind,payload,id);
+    enqueue(kind,payload,id,owner_id);
     return {ok:true,queued:true,pending:true,client_id:id,feedback:'Tu trabajo quedó guardado temporalmente y se sincronizará cuando vuelva la conexión.'};
   }
   try{
@@ -144,11 +191,11 @@ async function send(kind,payload){
     return {...result,client_id:id};
   }catch(error){
     if(authBlocked(error)&&priority(entry)>=100){
-      enqueue(kind,payload,id);
+      enqueue(kind,payload,id,owner_id);
       return {ok:true,queued:true,pending:true,auth_required:true,client_id:id,feedback:'Tu trabajo quedó guardado. Vuelve a iniciar sesión para sincronizarlo.'};
     }
     if(!retryable(error))throw error;
-    enqueue(kind,payload,id);
+    enqueue(kind,payload,id,owner_id);
     return {ok:true,queued:true,pending:true,client_id:id,feedback:'Tu trabajo quedó guardado temporalmente y se sincronizará cuando vuelva la conexión.'};
   }
 }
@@ -168,16 +215,16 @@ function configure({session_number}={}){
 function keepaliveTrack(event_type,{session_number=configuredSession,activity_code=null,metadata={},active_seconds_delta=0,client_at=new Date().toISOString()}={}){
   const n=sessionNumber(session_number),id=uid('evt'),auth=B.auth?.();
   const payload={action:'track',session_number:n,event_type,activity_code,metadata,active_seconds_delta,client_at,client_event_id:id};
-  if(!auth?.token){enqueue('track',{session_number:n,event_type,activity_code,metadata,active_seconds_delta,client_at},id);return false}
+  if(!auth?.token)return false
   try{
     fetch(B.API+'/bigdata-session',{
       method:'POST',keepalive:true,
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+auth.token},
       body:JSON.stringify(payload)
-    }).catch(()=>enqueue('track',{session_number:n,event_type,activity_code,metadata,active_seconds_delta,client_at},id));
+    }).catch(()=>enqueue('track',{session_number:n,event_type,activity_code,metadata,active_seconds_delta,client_at},id,currentOwner()));
     return true;
   }catch{
-    enqueue('track',{session_number:n,event_type,activity_code,metadata,active_seconds_delta,client_at},id);return false;
+    enqueue('track',{session_number:n,event_type,activity_code,metadata,active_seconds_delta,client_at},id,currentOwner());return false;
   }
 }
 function startHeartbeat(activity_code=null,{session_number=configuredSession}={}){
@@ -216,7 +263,7 @@ function moduleMenu(el,{session_number=configuredSession}={}){
   el.innerHTML='<a href="../lms/session.html?s='+n+'">Módulo</a> · <a href="../lms/progress.html?s='+n+'">Mi progreso</a>';
 }
 const api={
-  version:'5.0.0',QUEUE_KEY,MAX_QUEUE,configure,on,flush,queueSize,track,evidence,wallPost,
+  version:'5.1.0',QUEUE_KEY,REJECTED_KEY,MAX_QUEUE,configure,on,flush,queueSize,rejected,dismissRejected,retryRejected,track,evidence,wallPost,
   startHeartbeat,stopHeartbeat,keepaliveTrack,identityPill,moduleMenu,
   session:(action,payload={})=>B.session(action,{...payload,session_number:payload.session_number||configuredSession}),
   get ready(){return B.requireSession(sessionNumber())}
