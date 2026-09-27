@@ -322,7 +322,7 @@ test('solicitud pública no envía Authorization aunque exista sesión LMS', asy
       user:{id:'admin',username:'admin',display_name:'Admin QA',role:'admin'}
     }));
   });
-  await page.route('**/functions/v1/learning-access-request', async route => {
+  await page.route('**/functions/v1/bigdata-access-request', async route => {
     authHeader = route.request().headers()['authorization'] || null;
     await route.fulfill({
       status:200,
@@ -391,7 +391,7 @@ test('estudiante puede cambiar contraseña desde Mi cuenta', async ({ page }) =>
     localStorage.setItem('lms.bigdata.v2',JSON.stringify(auth));
   });
   const actions=[];
-  await page.route('**/functions/v1/learning-auth', async route => {
+  await page.route('**/functions/v1/bigdata-auth', async route => {
     const body=route.request().postDataJSON?.()||{};
     actions.push(body);
     let result={ok:true};
@@ -427,7 +427,7 @@ test('portal no muestra login mientras restaura una sesión válida', async ({ p
     const auth={token:'token-stored',expires_at:'2099-12-31T23:59:59Z',auth_session_id:'stored',
       user:{id:'00000000-0000-0000-0000-000000000001',username:'qa',display_name:'Estudiante QA',role:'student'}};
     localStorage.setItem('lms.bigdata.v2',JSON.stringify(auth));
-    localStorage.setItem('andesdb.lms.auth.v1',JSON.stringify({token:'andesdb-token',user:{id:'andes-user'}}));
+    localStorage.setItem('other.app.session','sentinel');
   });
   const delay=ms=>new Promise(r=>setTimeout(r,ms));
   await page.route('**/functions/v1/bigdata-lms-core**', async route => {
@@ -450,8 +450,8 @@ test('portal no muestra login mientras restaura una sesión válida', async ({ p
   await expect(page.getByText('Cargando tu aula…')).toBeVisible();
   await expect(page.locator('#home')).toBeVisible({timeout:3000});
   await expect(page.locator('#bootCard')).toBeHidden();
-  const andes=await page.evaluate(()=>localStorage.getItem('andesdb.lms.auth.v1'));
-  expect(andes).toContain('andesdb-token');
+  const sentinel=await page.evaluate(()=>localStorage.getItem('other.app.session'));
+  expect(sentinel).toBe('sentinel');
 });
 
 test('portal sin sesión muestra login directamente y no navegación autenticada', async ({ page }) => {
