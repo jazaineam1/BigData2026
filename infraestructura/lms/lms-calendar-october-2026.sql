@@ -3,8 +3,7 @@
 -- S09 se desplaza al jueves siguiente, 8 de octubre.
 
 update public.lms_run_sessions_v2
-set title='Taller S08 · SECOP Data Pipeline',
-    summary='Taller evaluativo: histórico SECOP, Atlas, Cassandra, Neo4j e informe técnico.',
+set summary='Taller evaluativo: histórico SECOP, Atlas, Cassandra, Neo4j e informe técnico.',
     starts_at='2026-10-01T23:00:00Z'::timestamptz,
     metadata=coalesce(metadata,'{}'::jsonb) || jsonb_build_object(
       'class_date','2026-10-01',
