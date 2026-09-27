@@ -95,6 +95,12 @@ let data=null,timer=null,stopRealtime=null,realtimeReady=false,reloadTimer=null;
 const labelMap=()=>new Map((data?.activities||[]).map(a=>[a.code,a.title]));
 function stateLabel(r){return r.status==='completed'?'Completada':r.needs_attention?'Requiere ayuda':r.status==='in_progress'?'En curso':'Sin iniciar'}
 function isRecent(v,min=5){return !!v&&(Date.now()-Date.parse(v))<=min*60000}
+function connectionState(r){
+  if(r.present===true)return {label:'En línea',cls:'done'};
+  if(isRecent(r.last_activity_at,15))return {label:'En pausa',cls:'pending'};
+  if(r.started_at)return {label:'Sin señal',cls:'high'};
+  return {label:'No conectado',cls:'pending'};
+}
 function renderMetrics(){
   const rows=data.students||[],started=rows.filter(r=>r.started_at).length,completed=rows.filter(r=>r.status==='completed').length,active=rows.filter(r=>r.present===true).length,needs=rows.filter(r=>r.needs_attention).length;
   L.$('metrics').innerHTML='<div class="kpi"><span class="muted">Estudiantes</span><b>'+rows.length+'</b></div><div class="kpi"><span class="muted">Iniciaron</span><b>'+started+'</b></div><div class="kpi"><span class="muted">Activos ahora</span><b>'+active+'</b></div><div class="kpi"><span class="muted">Completaron</span><b>'+completed+'</b></div><div class="kpi"><span class="muted">Requieren ayuda</span><b>'+needs+'</b></div>';
@@ -121,8 +127,8 @@ function renderRows(){
     const route=(r.attempted_activities||0)+'/'+(data.activities||[]).length;
     const mastery=Number(r.mastered_checkpoints||0)+'/'+Number(r.total_checkpoints||0);
     const pos=r.last_slide?('S'+r.last_slide.slide+' · '+L.esc(r.last_slide.label||'')):'—';
-    const now=r.current_activity?L.esc(labels.get(r.current_activity)||r.current_activity):'—';
-    return '<tr class="student-row '+(r.needs_attention?'needs':'')+'" data-user="'+r.user_id+'"><td><b>'+L.esc(r.display_name)+'</b></td><td><span class="pill '+(r.status==='completed'?'done':r.needs_attention?'high':r.status==='in_progress'?'progress':'pending')+'">'+stateLabel(r)+'</span></td><td>'+now+'<div class="current-code">'+L.esc(r.current_event||'')+'</div></td><td>'+route+'</td><td>'+Number(r.lab_explored||0)+'</td><td>'+Number(r.evidence_count||0)+'</td><td>'+mastery+'</td><td>'+pos+'</td><td>'+L.fmtTime(r.active_seconds||0)+'</td><td>'+L.fmtWhen(r.last_activity_at)+'</td></tr>'
+    const now=r.current_activity?L.esc(labels.get(r.current_activity)||r.current_activity):'—',conn=connectionState(r);
+    return '<tr class="student-row '+(r.needs_attention?'needs':'')+'" data-user="'+r.user_id+'"><td><b>'+L.esc(r.display_name)+'</b></td><td><span class="pill '+(r.status==='completed'?'done':r.needs_attention?'high':r.status==='in_progress'?'progress':'pending')+'">'+stateLabel(r)+'</span><div style="margin-top:5px"><span class="pill '+conn.cls+'">'+conn.label+'</span></div></td><td>'+now+'<div class="current-code">'+L.esc(r.current_event||'')+'</div></td><td>'+route+'</td><td>'+Number(r.lab_explored||0)+'</td><td>'+Number(r.evidence_count||0)+'</td><td>'+mastery+'</td><td>'+pos+'</td><td>'+L.fmtTime(r.active_seconds||0)+'</td><td>'+L.fmtWhen(r.last_activity_at)+'</td></tr>'
   }).join(''):'<tr><td colspan="10">No hay estudiantes en este filtro.</td></tr>';
   document.querySelectorAll('[data-user]').forEach(tr=>tr.onclick=()=>openDetail(tr.dataset.user));
 }
