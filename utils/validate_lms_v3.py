@@ -54,7 +54,7 @@ checks=[
     ("progreso universal","L.session('course_progress')" in progress and all(x in progress for x in ["Sin empezar","En curso","Lista"]) and "Snapshots académicos" not in progress),
     ("WALL universal","requireSession(sessionNumber,{teacher:true})" in wall and "teacher_student_detail" in wall and "no es un ranking de velocidad" in wall.lower()),
     ("WALL filtra ayuda","needs_attention" in wall and 'value="needs_attention"' in wall),
-    ("WALL polling seguro","setInterval(load,15000)" in wall),
+    ("WALL polling seguro",("setInterval(load,15000)" in wall) or ("realtimeReady?60000:15000" in wall and "setInterval" in wall)),
     ("cliente genérico","async function session(" in client and "bigdata-session" in client and "requireSession" in client),
     ("S09 usa compatibilidad genérica","return session(action,{...payload,session_number:9})" in client),
     ("backend sesión dinámica","sessionNumber" in backend and "course_progress" in backend and "teacherStudentDetail" in backend),
