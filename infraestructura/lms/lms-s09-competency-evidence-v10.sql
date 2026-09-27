@@ -15,6 +15,15 @@ create table if not exists public.lms_activity_competencies_v2 (
 alter table public.lms_activity_competencies_v2 enable row level security;
 revoke all on table public.lms_activity_competencies_v2 from anon, authenticated;
 
+drop policy if exists lms_activity_competencies_v2_no_direct_access
+  on public.lms_activity_competencies_v2;
+create policy lms_activity_competencies_v2_no_direct_access
+  on public.lms_activity_competencies_v2
+  for all
+  to anon, authenticated
+  using (false)
+  with check (false);
+
 comment on table public.lms_activity_competencies_v2 is
   'Mapeo explícito entre evidencias auténticas de actividades LMS y competencias V2. La lectura/escritura ocurre solo desde Edge Functions con control de rol.';
 
