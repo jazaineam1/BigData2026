@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import json, re, subprocess, sys, tempfile
+import hashlib, json, re, subprocess, sys, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 errors=[]
@@ -30,6 +30,48 @@ labs=[
  "bd-s09-lab3","bd-s09-lab4","bd-s09-lab5","bd-s09-lab6",
  "bd-s09-lab7","bd-s09-lab8","bd-s09-lab-eval","bd-s09-lab9"
 ]
+
+# Verifica que cada answer hash privado corresponda a exactamente una opción publicada.
+det_blocks=re.findall(r"update public\.bd_activity_catalog set(.*?)where code='([^']+)';",deterministic,re.S|re.I)
+det_by_code={}
+for block,code in det_blocks:
+    ev=re.search(r"evaluator='([^']+)'",block)
+    st=re.search(r"steps='(.*?)'::jsonb",block,re.S)
+    cfg=re.search(r"config='(.*?)'::jsonb",block,re.S)
+    if not (ev and st and cfg):
+        errors.append(f"Falla: contrato determinístico incompleto para {code}")
+        continue
+    try:
+        steps=json.loads(st.group(1))
+        config=json.loads(cfg.group(1))
+    except Exception as ex:
+        errors.append(f"Falla: JSON determinístico inválido en {code}: {ex}")
+        continue
+    det_by_code[code]={"evaluator":ev.group(1),"steps":steps,"config":config}
+
+if set(det_by_code)!=set(labs):
+    errors.append("Falla: la migración determinística no cubre exactamente los 12 LAB S09")
+
+for code,x in det_by_code.items():
+    if x["evaluator"]=="self-report":
+        errors.append(f"Falla: {code} todavía usa self-report")
+    if x["evaluator"]=="choice-hash":
+        answers=x["config"].get("answers",{})
+        for step in x["steps"]:
+            if step.get("type")!="choice":
+                errors.append(f"Falla: {code}/{step.get('id')} no es choice en un evaluador choice-hash")
+                continue
+            sid=str(step.get("id",""))
+            target=str(answers.get(sid,""))
+            vals=[str(o.get("value","")) if isinstance(o,dict) else str(o) for o in step.get("options",[])]
+            matches=[v for v in vals if hashlib.sha256(v.encode()).hexdigest()==target]
+            if len(matches)!=1:
+                errors.append(f"Falla: hash de respuesta inválido/ambiguo en {code}/{sid}")
+    elif code=="bd-s09-lab3":
+        if x["evaluator"]!="seeded-numeric" or x["config"].get("generator")!="s09_topk_aero_count":
+            errors.append("Falla: LAB3 perdió su evaluador seeded-numeric")
+    else:
+        errors.append(f"Falla: evaluador inesperado en {code}: {x['evaluator']}")
 
 checks=[
  ("portada recupera fondo UC", 'assets/img/bg-masthead.jpg' in index and 'class="hero"' in index),
@@ -97,6 +139,7 @@ print(" - constraint de eventos versionada")
 print(" - 12 LAB declarados e instrumentados")
 print(" - 12 LAB S09 con autocorrección determinística")
 print(" - LAB3 seeded sin campos abiertos")
+print(" - hashes de respuesta validados contra opciones publicadas")
 print(" - código Colab efímero sin bearer")
 print(" - Mi progreso y WALL consumen evidencia")
 print(" - reset y señal de atasco consistentes")
