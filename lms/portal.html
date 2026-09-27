@@ -65,14 +65,25 @@ const hideAuthNav=()=>{L.$('accountTop')?.classList.add('hidden');L.$('progressT
 let model=null,progress=null;
 const pmap=()=>new Map((progress?.sessions||[]).map(s=>[Number(s.session_number),s]));
 function currentSession(){
-  const rows=progress?.sessions||[],started=rows.filter(s=>s.session_progress&&s.session_progress.status!=='completed');
-  return started.at(-1)||rows.filter(s=>s.status==='visible').at(-1)||rows.at(-1)||null;
+  const rows=(progress?.sessions||[]).filter(s=>s.status==='visible'),now=Date.now();
+  const scheduled=rows.map(s=>({...s,_starts:Date.parse(String(s.starts_at||''))}))
+    .filter(s=>Number.isFinite(s._starts)).sort((a,b)=>a._starts-b._starts);
+  const past=scheduled.filter(s=>s._starts<=now);
+  if(past.length)return past.at(-1);
+  if(scheduled.length)return scheduled[0];
+  const started=rows.filter(s=>s.session_progress&&s.session_progress.status!=='completed');
+  return started.at(-1)||rows.at(-1)||null;
+}
+function classTime(s){
+  const t=Date.parse(String(s?.starts_at||''));if(!Number.isFinite(t))return '';
+  try{return new Intl.DateTimeFormat('es-CO',{timeZone:progress?.run?.timezone||'America/Bogota',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).format(new Date(t))}
+  catch{return ''}
 }
 function renderNext(){
   const a=(model.assignments||[]).find(x=>!x.submission&&!x.overdue);
   const s=currentSession();
   if(a){L.$('nextTitle').textContent='Tienes una entrega pendiente';L.$('nextText').textContent=a.title+(a.due_at?' · vence '+L.fmtWhen(a.due_at):'');L.$('nextActions').innerHTML='<a class="btn primary" href="assignments.html">Revisar entrega</a>';return}
-  if(s){const p=s.session_progress;L.$('nextTitle').textContent=(p?'Continuar ':'Abrir ')+'S'+String(s.session_number).padStart(2,'0')+' · '+s.title;L.$('nextText').textContent=p?'Retoma exactamente donde quedaste.':(s.summary||'');L.$('nextActions').innerHTML='<a class="btn primary" href="session.html?s='+s.session_number+'">'+(p?'Continuar':'Abrir sesión')+'</a>';return}
+  if(s){const p=s.session_progress,when=classTime(s);L.$('nextTitle').textContent=(p?'Continuar ':'Abrir ')+'S'+String(s.session_number).padStart(2,'0')+' · '+s.title;L.$('nextText').textContent=(when?('Clase: '+when+'. '):'')+(p?'Retoma donde quedaste.':(s.summary||''));L.$('nextActions').innerHTML='<a class="btn primary" href="session.html?s='+s.session_number+'">'+(p?'Continuar':'Abrir sesión')+'</a>';return}
   L.$('nextTitle').textContent='No hay una siguiente actividad publicada';L.$('nextText').textContent='Cuando se publique una sesión aparecerá aquí.';L.$('nextActions').innerHTML='';
 }
 
@@ -86,7 +97,7 @@ function renderSessions(){
   L.$('sessions').innerHTML=rows.map(s=>{
     const n=Number(s.session_number),state=sessionState(s),isCurrent=current&&Number(current.session_number)===n;
     const stateText=state==='completed'?'Lista':state==='started'?'En curso':'Sin empezar';
-    return '<article class="session-card-v3 '+(isCurrent?'current':'')+'"><div class="row"><span class="pill '+(state==='completed'?'done':state==='started'?'progress':'pending')+'">S'+String(n).padStart(2,'0')+' · '+stateText+'</span>'+(isCurrent?'<span class="pill active">Continuar aquí</span>':'')+'</div><h3>'+L.esc(s.title)+'</h3><p class="muted">'+L.esc(s.summary||'')+'</p><div class="actions"><a class="btn '+(isCurrent?'primary':'alt')+'" href="session.html?s='+n+'">'+(state==='pending'?'Abrir':'Continuar')+'</a></div></article>'
+    return '<article class="session-card-v3 '+(isCurrent?'current':'')+'"><div class="row"><span class="pill '+(state==='completed'?'done':state==='started'?'progress':'pending')+'">S'+String(n).padStart(2,'0')+' · '+stateText+'</span>'+(isCurrent?'<span class="pill active">Sesión actual</span>':'')+'</div><h3>'+L.esc(s.title)+'</h3><p class="muted">'+L.esc(s.summary||'')+'</p><div class="actions"><a class="btn '+(isCurrent?'primary':'alt')+'" href="session.html?s='+n+'">'+(state==='pending'?'Abrir':'Continuar')+'</a></div></article>'
   }).join('')||'<p class="muted">No hay sesiones publicadas.</p>';
 }
 function render(){
