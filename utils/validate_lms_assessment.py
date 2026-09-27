@@ -40,13 +40,16 @@ except Exception as ex:
 checks=[
     ("API evaluación separada", "bigdata-lms-assess" in client and "async function assess" in client),
     ("banco versionado", "lms_questions_v2" in schema and "version integer not null" in schema and "question.version.create" in assess),
-    ("tipos objetivos disponibles", all(x in schema for x in ["single_choice","multiple_choice","true_false","numeric"]) and '["single_choice","multiple_choice","true_false","numeric"].includes(type)' in assess),
+    ("schema histórico de tipos", all(x in schema for x in ["single_choice","multiple_choice","true_false","numeric"])),
+    ("backend no crea short_text", '["single_choice","multiple_choice","true_false","numeric"]' in assess and '["single_choice","multiple_choice","true_false","numeric","short_text"]' not in assess),
+    ("editor no ofrece texto abierto", 'value="short_text"' not in teacher),
+    ("estudiante sin textarea de respuesta", '<textarea class="input" rows="4" data-q-input' not in student and "Este tipo de pregunta no está habilitado para estudiantes." in student),
     ("quiz intenta y guarda respuestas", "lms_quiz_attempts_v2" in schema and "lms_quiz_responses_v2" in schema),
     ("aleatorización", "shuffle_questions" in schema and "shuffle_options" in schema and "shuffled(" in assess),
     ("quiz vacío no se publica", 'Agrega al menos una pregunta antes de publicar' in assess),
     ("answer_key no sale al estudiante", "function publicQuestion" in assess and "return {id:q.id,code:q.code,version:q.version,question_type:q.question_type,prompt:q.prompt,options}" in assess and "publicQuestion(x.question" in assess),
     ("autocalificación objetiva", "function autoScore" in assess and "equalSets" in assess),
-    ("sin respuestas abiertas en quizzes", "Texto abierto" not in teacher and "Revisión manual" not in teacher and "<textarea" not in student and "Solo se permiten preguntas objetivas" in assess),
+    ("sin respuesta abierta estudiante", "short_text" not in teacher and "return null" in student),
     ("quiz sincroniza gradebook", 'source:"quiz"' in assess and "assignment_id:quiz.assignment_id" in assess),
     ("archivos privados", 'const BUCKET="bigdata-lms-private"' in assess and "public:false" in assess),
     ("límite archivos 20MB", "const MAX_FILE=20*1024*1024" in assess),
@@ -98,7 +101,7 @@ if errors:
 print("EVALUACION AVANZADA: OK")
 print(" - archivo privado firmado")
 print(" - banco versionado + quizzes")
-print(" - autocalificación + revisión manual")
+print(" - autocalificación objetiva sin respuestas abiertas")
 print(" - rúbricas reutilizables")
 print(" - Gradebook sincronizado")
 print(" - S07 intacta y TC1 V4 preservado")
