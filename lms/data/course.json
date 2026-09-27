@@ -1,11 +1,11 @@
 {
-  "version": 12,
+  "version": 13,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
   "institution": "Universidad Central",
   "total_sessions": 16,
-  "current_tracked_session": 9,
+  "current_tracked_session": 8,
   "tracking_policy": "LMS V5: course.json define estructura/visibilidad del curso; Supabase define recursos, actividades, LAB, evaluadores y progreso. Las superficies canónicas son session.html?s=N, progress.html?s=N y wall.html?s=N. El runtime lms-kit.js aporta cola offline, retry e idempotencia sobre bigdata-lms.js. Máximo dos recursos visibles por sesión; la presentación integra explicación, ejemplos y laboratorio.",
   "sessions": [
     {
