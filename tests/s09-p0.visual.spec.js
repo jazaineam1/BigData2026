@@ -72,6 +72,15 @@ test('S09 P0 desafíos empiezan vacíos y la respuesta fuente no queda primera',
   }
 });
 
+test('S09 P0 no pregunta nivel de confianza en D1-D5',async({page})=>{
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?preview=1#s9');
+  await expect(page.locator('[id^="conf-"]')).toHaveCount(0);
+  await expect(page.getByText('¿Qué tan seguro estás?',{exact:true})).toHaveCount(0);
+  for(const code of ['bd-s09-c1','bd-s09-c2','bd-s09-c3','bd-s09-c4','bd-s09-c5']){
+    await expect(page.locator('#ans-'+code)).toBeAttached();
+  }
+});
+
 test('S09 P0 mantiene una barra simple sin Mi progreso global',async({page})=>{
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?preview=1#s1');
   await expect(page.getByRole('button',{name:'Progreso S09'})).toBeVisible();
