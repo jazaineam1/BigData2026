@@ -55,9 +55,13 @@ function rejection(entry,error,reason='server_rejected'){
   rows.push({...entry,rejected_at:now,reject_reason:reason,error_status:Number(error?.status||0)||null,error_message:String(error?.message||error||reason).slice(0,500)});
   saveRejected(rows);
 }
-function rejected(){return loadRejected()}
+function rejected(){
+  const owner=currentOwner();if(!owner)return [];
+  return loadRejected().filter(x=>x.owner_id===owner);
+}
 function dismissRejected(id){
-  const rows=loadRejected().filter(x=>x.id!==id);saveRejected(rows);return rows;
+  const owner=currentOwner();if(!owner)return [];
+  const rows=loadRejected().filter(x=>!(x.id===id&&x.owner_id===owner));saveRejected(rows);return rows.filter(x=>x.owner_id===owner);
 }
 function retryRejected(id){
   const rows=loadRejected(),entry=rows.find(x=>x.id===id);
