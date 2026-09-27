@@ -43,6 +43,7 @@ create table if not exists public.bd_realtime_signals (
 );
 
 alter table public.bd_realtime_signals enable row level security;
+revoke all on table public.bd_realtime_signals from anon, authenticated;
 grant select on table public.bd_realtime_signals to anon, authenticated;
 
 drop policy if exists "bd_realtime_signals_public_read" on public.bd_realtime_signals;
