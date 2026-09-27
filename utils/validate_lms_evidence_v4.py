@@ -85,6 +85,7 @@ checks=[
  ("LAB3 seeded-numeric", "s09_topk_aero_count" in deterministic and "evaluator='seeded-numeric'" in deterministic and "code='bd-s09-lab3'" in deterministic),
  ("LAB S09 autocorregidos", deterministic.count("evaluator='choice-hash'")>=11 and "version=2" in deterministic),
  ("backend choice-hash", 'catalog.evaluator==="choice-hash"' in backend and "await sha256(v)" in backend),
+ ("backend bloquea self-report S09", 'n===9&&catalog.evaluator==="self-report"' in backend),
  ("LAB3 sin texto libre", "lab3Alternative" not in deck and "lab3Limit" not in deck and "Comprueba tu aprendizaje · LAB 3" in deck),
  ("paneles determinísticos", "La corrección es automática e inmediata." in deck and "stepOptionValue" in deck),
  ("backend comprueba errores", 'failIf(eventError,"No se pudo registrar el evento")' in backend and "failIf(evidenceError" in backend),
