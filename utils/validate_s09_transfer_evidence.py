@@ -18,7 +18,7 @@ checks=[
  ("self-check no completa LAB con transferencia", "requiresTransfer" in backend and "completed=verifiedNow&&!transferMode&&!requiresTransfer" in backend),
  ("transfer queda pendiente de revisión", 'verdict="pending_review"' in backend and "Transferencia recibida" in backend),
  ("revisión docente acepta transfer", 'evidence.step_id==="transfer"' in backend and "transferEvidence" in backend),
- ("deck mantiene autocomprobación", "Autocomprobación" in deck and "data-evidence-kind='self-check'" not in deck), # markup is generated with double quotes inside strings
+ ("deck mantiene autocomprobación", "Autocomprobación" in deck and "box.dataset.evidenceKind='self-check'" in deck),
  ("deck transferencia plegable", "Transferencia breve" in deck and "data-transfer-for" in deck and "document.createElement('details')" in deck),
  ("deck usa cola offline existente", "K.evidence(code,payload,{source:'presentation-transfer'})" in deck),
  ("deck cinco dimensiones", all(x in deck for x in ["Resultado que observaste","Decisión que defenderías","Alternativa descartada y por qué","Cómo interpretas el resultado","Límite concreto de tu conclusión"])),
