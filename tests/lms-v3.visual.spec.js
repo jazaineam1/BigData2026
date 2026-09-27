@@ -169,7 +169,7 @@ test('S09 autenticada inicializa tracking y LAB genérico determinístico', asyn
   await expect(page.locator('#moduleIdentity')).toContainText('Estudiante QA · conectado');
   const panel=page.locator('[data-evidence-for="bd-s09-lab1"]');
   await expect(panel).toHaveCount(1);
-  await expect(panel.getByText('Comprueba tu aprendizaje')).toBeVisible();
+  await expect(panel.getByText('Autocomprobación')).toBeVisible();
   await expect(panel.locator('select')).toHaveCount(2);
   await expect(panel.locator('textarea')).toHaveCount(0);
   await expect.poll(()=>seen.some(x=>x.action==='track'&&x.event_type==='presentation_opened')).toBeTruthy();
