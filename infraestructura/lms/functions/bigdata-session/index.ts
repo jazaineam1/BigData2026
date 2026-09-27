@@ -107,6 +107,28 @@ async function ownEvidence(userId:string,runId:string,n:number){
   return data||[];
 }
 const TRANSFER_REVIEW_CODES=new Set(["bd-s09-lab3","bd-s09-lab4","bd-s09-lab8"]);
+const LAB9_STRUCTURED={
+  reason:[
+    "Las señales lexical y semántica aportan información complementaria.",
+    "La coincidencia exacta de términos fue decisiva en este caso.",
+    "La cercanía semántica recuperó mejor la intención aunque cambió el vocabulario."
+  ],
+  decision:[
+    "Priorizar recuperación lexical.",
+    "Priorizar recuperación semántica.",
+    "Usar recuperación híbrida mediante fusión de rankings."
+  ],
+  rejected_alternative:[
+    "Descarto usar solo lexical porque puede perder paráfrasis.",
+    "Descarto usar solo semántica porque puede perder coincidencias exactas.",
+    "Descarto sumar scores crudos porque no comparten una escala comparable."
+  ],
+  limit:[
+    "La evaluación depende de juicios de relevancia sobre solo cinco resultados.",
+    "El resultado puede cambiar con otra consulta o con otro corpus.",
+    "El resultado depende del modelo de embeddings utilizado."
+  ]
+};
 const TRANSFER_ALLOWED:Record<string,Record<string,string[]>>={
   "bd-s09-lab3":{
     result:["El Top-5 concentra suficientes candidatos relevantes","El Top-5 deja demasiados candidatos relevantes fuera"],
@@ -199,10 +221,12 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     const defensible=Array.isArray(payload?.defensible_results)?payload.defensible_results.map((x:any)=>String(x||"").trim()).filter(Boolean):[];
     if(defensible.length!==2||defensible.some((x:string)=>x.length<3||x.length>220))throw new Error("Registra exactamente dos resultados defendibles");
     const falsePositive=trimText(payload?.false_positive,3,220,"El falso positivo");
-    const reason=trimText(payload?.reason,12,900,"La razón");
-    const decision=trimText(payload?.decision,12,600,"La decisión");
-    const rejected=trimText(payload?.rejected_alternative,12,600,"La alternativa descartada");
-    const limit=trimText(payload?.limit,12,600,"El límite");
+    const reason=String(payload?.reason||""),decision=String(payload?.decision||""),
+      rejected=String(payload?.rejected_alternative||""),limit=String(payload?.limit||"");
+    if(!LAB9_STRUCTURED.reason.includes(reason))throw new Error("Selecciona una razón válida");
+    if(!LAB9_STRUCTURED.decision.includes(decision))throw new Error("Selecciona una decisión válida");
+    if(!LAB9_STRUCTURED.rejected_alternative.includes(rejected))throw new Error("Selecciona una alternativa válida");
+    if(!LAB9_STRUCTURED.limit.includes(limit))throw new Error("Selecciona un límite válido");
     const ids=(value:any,label:string)=>{
       const xs=Array.isArray(value)?value.map((x:any)=>String(x||"").trim()).filter(Boolean):[];
       if(!xs.length||xs.length>5||xs.some((x:string)=>x.length>120))throw new Error("Revisa "+label);
