@@ -1,4 +1,4 @@
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
 const db=createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -8,12 +8,37 @@ const db=createClient(
 
 const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
+const RELEASE="2026-09-28-v56";
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 const PUBLIC_TRACK_EVENTS=new Set([
   "session_entered","page_opened","page_closed","heartbeat",
   "resource_opened","presentation_opened","notebook_opened","guide_opened",
   "lab_started","checkpoint_started","slide_viewed","lab_interaction","ui_action"
 ]);
+
+const S09_AUTHENTIC_REASONS=new Set([
+  "El embedding recuperó documentos con sinónimos o términos relacionados que la búsqueda lexical no encontró.",
+  "El embedding trajo documentos del mismo tema general aunque no compartan el objeto contractual concreto.",
+  "Lexical y semántico coinciden casi por completo: el embedding no aportó documentos nuevos.",
+  "El ranking semántico mezcla documentos relevantes con otros que solo comparten vocabulario frecuente."
+]);
+const S09_AUTHENTIC_APPROACHES=new Set([
+  "Búsqueda híbrida: lexical y semántica fusionadas con RRF.",
+  "Solo búsqueda semántica (embeddings).",
+  "Solo búsqueda lexical (BM25).",
+  "Búsqueda semántica y revisión manual de los primeros resultados."
+]);
+const S09_AUTHENTIC_LIMITS=new Set([
+  "Precision@5 mide una sola consulta y solo 5 resultados: faltan más consultas y medir recall.",
+  "Faltan juicios de relevancia de una persona experta que no haya visto el ranking antes de juzgarlo.",
+  "El modelo de embeddings no se validó con el vocabulario contractual colombiano.",
+  "Falta un ranking de referencia construido antes de ver los resultados de cada método."
+]);
+function closedAcademicChoice(value:any,allowed:Set<string>,label:string){
+  const valueText=String(value??"").trim();
+  if(!allowed.has(valueText))throw new Error("Selecciona una opción válida para "+label+"; no se admite texto libre");
+  return valueText;
+}
 
 function origin(req:Request){
   const o=req.headers.get("origin");if(!o)return "";
@@ -27,6 +52,7 @@ function headers(req:Request){
     "Access-Control-Allow-Headers":"authorization, content-type",
     "Access-Control-Allow-Methods":"GET, POST, OPTIONS",
     "Vary":"Origin","Cache-Control":"no-store","X-Content-Type-Options":"nosniff",
+    "X-BigData-Release":RELEASE,
     "Referrer-Policy":"strict-origin-when-cross-origin"
   };
 }
@@ -174,10 +200,11 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     const defensible=Array.isArray(payload?.defensible_results)?payload.defensible_results.map((x:any)=>String(x||"").trim()).filter(Boolean):[];
     if(defensible.length!==2||defensible.some((x:string)=>x.length<3||x.length>220))throw new Error("Registra exactamente dos resultados defendibles");
     const falsePositive=trimText(payload?.false_positive,3,220,"El falso positivo");
-    const reason=trimText(payload?.reason,12,900,"La razón");
-    const decision=trimText(payload?.decision,12,600,"La decisión");
-    const rejected=trimText(payload?.rejected_alternative,12,600,"La alternativa descartada");
-    const limit=trimText(payload?.limit,12,600,"El límite");
+    const reason=closedAcademicChoice(payload?.reason,S09_AUTHENTIC_REASONS,"la razón");
+    const decision=closedAcademicChoice(payload?.decision,S09_AUTHENTIC_APPROACHES,"la decisión");
+    const rejected=closedAcademicChoice(payload?.rejected_alternative,S09_AUTHENTIC_APPROACHES,"la alternativa descartada");
+    const limit=closedAcademicChoice(payload?.limit,S09_AUTHENTIC_LIMITS,"el límite");
+    if(decision===rejected)throw new Error("La alternativa descartada debe ser distinta de la decisión");
     const ids=(value:any,label:string)=>{
       const xs=Array.isArray(value)?value.map((x:any)=>String(x||"").trim()).filter(Boolean):[];
       if(!xs.length||xs.length>5||xs.some((x:string)=>x.length>120))throw new Error("Revisa "+label);
@@ -187,6 +214,12 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     const model=trimText(trace.model,3,160,"El modelo");
     const dimensions=Math.trunc(Number(trace.dimensions));
     if(!Number.isInteger(dimensions)||dimensions<2||dimensions>100000)throw new Error("Dimensiones inválidas");
+    const topLexical=ids(payload?.top5_lexical,"Top-5 lexical");
+    const topSemantic=ids(payload?.top5_semantic,"Top-5 semántico");
+    const topHybrid=ids(payload?.top5_hybrid,"Top-5 híbrido");
+    const selected=[...defensible,falsePositive];
+    if(new Set(selected).size!==3)throw new Error("Los dos resultados defendibles y el falso positivo deben ser distintos");
+    if(selected.some((x:string)=>!topHybrid.includes(x)))throw new Error("La evidencia elegida debe pertenecer a tu Top-5 híbrido");
     normalized.query=query;
     normalized.precision_at_5=Math.round(precision*10000)/10000;
     normalized.defensible_results=defensible;
@@ -195,9 +228,9 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     normalized.decision=decision;
     normalized.rejected_alternative=rejected;
     normalized.limit=limit;
-    normalized.top5_lexical=ids(payload?.top5_lexical,"Top-5 lexical");
-    normalized.top5_semantic=ids(payload?.top5_semantic,"Top-5 semántico");
-    normalized.top5_hybrid=ids(payload?.top5_hybrid,"Top-5 híbrido");
+    normalized.top5_lexical=topLexical;
+    normalized.top5_semantic=topSemantic;
+    normalized.top5_hybrid=topHybrid;
     normalized.trace={source:"colab",model,dimensions};
     verdict="pending_review";
     feedback="Evidencia auténtica recibida. Está pendiente de revisión docente con rúbrica.";
@@ -847,6 +880,12 @@ Deno.serve(async(req:Request)=>{
   }else{
     try{body=await req.json()}catch{return out(req,{error:"JSON inválido"},400)}
     action=String(body.action||"me");
+  }
+  if(action==="deployment_status"){
+    if(req.method!=="GET")return out(req,{error:"Método no permitido"},405);
+    const {data,error}=await db.from("bd_deployment_state").select("release").eq("component","schema").maybeSingle();
+    if(error)return out(req,{ok:false,release:RELEASE,schema_release:null},503);
+    return out(req,{ok:true,release:RELEASE,schema_release:data?.release||null});
   }
   if(action==="evidence_by_code"){
     try{return out(req,await evidenceByCode(body))}
