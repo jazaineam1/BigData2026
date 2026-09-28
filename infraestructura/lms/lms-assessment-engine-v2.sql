@@ -18,6 +18,8 @@ create table if not exists public.lms_submission_files_v2 (
 create index if not exists lms_submission_files_v2_user_assignment_idx
   on public.lms_submission_files_v2(user_id,assignment_id,created_at desc);
 
+-- V54-B: el CHECK de question_type de esta tabla (que aún acepta el tipo abierto retirado) lo sustituye
+-- lms-v54b-question-types.sql, que debe aplicarse después. Esta migración ya está aplicada: no se reescribe.
 create table if not exists public.lms_questions_v2 (
   id uuid primary key default extensions.gen_random_uuid(),
   course_run_id uuid not null references public.lms_course_runs(id) on delete cascade,

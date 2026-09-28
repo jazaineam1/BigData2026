@@ -37,7 +37,20 @@ y un paquete con manifest:
 - `multiple_choice` → `qti-choice-interaction`, cardinalidad múltiple.
 - `true_false` → selección única con identificadores `TRUE` / `FALSE`.
 - `numeric` → entrada de texto con `base-type="float"`; soporta tolerancia absoluta.
-- `short_text` → `qti-extended-text-interaction`, sin clave de respuesta automática.
+Tipos de pregunta definitivos: `single_choice`, `multiple_choice`, `true_false` y `numeric`. Los cuatro se
+autocalifican y son los únicos que el LMS crea, agrega a un quiz o exporta.
+
+### Tipo retirado: `short_text` (respuesta abierta)
+
+`short_text` (`qti-extended-text-interaction`) ya no es un tipo de pregunta: el estudiante no escribe respuestas
+abiertas (AGENTS.md §4). Se prohíbe en todas las capas y solo sobrevive como historia legible:
+
+- **BD:** el CHECK de `lms_questions_v2.question_type` (`lms-v54b-question-types.sql`) acepta solo los 4 tipos y es
+  `NOT VALID`: rechaza filas nuevas y no revisa las históricas. Un UPDATE sobre una fila histórica también falla.
+- **API:** no se crea, no se versiona, no se agrega a un quiz y no se responde. Solo se lee y califica lo ya guardado.
+- **Exportación QTI:** las preguntas activas de este tipo se **omiten** del paquete y la respuesta lo avisa con
+  sus códigos. Se descartó exportarlas como ítem sin calificación: propagaría a otro LMS un tipo que el curso retiró.
+- **Importación QTI:** no existe hoy. Cuando exista, debe rechazar `qti-extended-text-interaction` con un mensaje claro.
 
 La exportación conserva la versión de cada pregunta activa. No se declara certificación QTI.
 
