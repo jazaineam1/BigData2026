@@ -1,0 +1,12 @@
+{
+  "release": "2026-09-28-v56",
+  "schema_release": "2026-09-28-v56",
+  "project_ref": "gnpouhsvsisqoxketlfr",
+  "critical_functions": [
+    "bigdata-session",
+    "bigdata-session9",
+    "bigdata-lms-core",
+    "bigdata-lms-assess",
+    "bigdata-lms-interop"
+  ]
+}
