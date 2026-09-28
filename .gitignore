@@ -12,8 +12,10 @@ Encuesta*.xlsx
 __pycache__/
 *.py[cod]
 
-# Entornos y credenciales
+# Entornos y credenciales (las plantillas *.example sí se versionan)
 .env
+.env.*
+!.env.example
 databricks.env
 *.secret
 secure-connect-*.zip
@@ -25,13 +27,16 @@ Cassandra/*.zip
 Cuadernos/dask-worker-space/
 .ipynb_checkpoints/
 
+# Salidas que Airflow genera al correr (logs del scheduler y sus WAL)
+Airflow/logs/
+*.duckdb.wal
 
 # QA local Node / Playwright
+# package-lock.json SÍ se versiona: `npm ci` en CI fija también las dependencias transitivas.
 node_modules/
 test-results/
 playwright-report/
 blob-report/
-package-lock.json
 
 # SDK Realtime generado por QA/Pages desde npm fijado
 lms/assets/vendor/supabase.js

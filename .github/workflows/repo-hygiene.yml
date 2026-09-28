@@ -1,0 +1,29 @@
+name: Higiene y secretos
+
+# Segunda barrera tras .gitignore. El repositorio es público: un secreto o el correo de un
+# estudiante que entra a Git queda copiado aunque se borre después (AGENTS.md §13).
+# Sin filtro de rutas a propósito: es rápido y debe correr en TODO cambio.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  higiene:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v6
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Sin artefactos generados ni archivos enormes
+        run: python utils/check_repo_hygiene.py
+      - name: Sin secretos ni datos personales
+        run: python utils/scan_secrets_pii.py

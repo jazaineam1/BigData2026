@@ -16,6 +16,9 @@ El objetivo no es copiar Moodle, Brightspace, Blackboard o Classroom pantalla po
 6. **Privacidad por diseño.** Las páginas públicas no contienen roster, notas, correos ni credenciales.
 7. **Mobile y accesibilidad son requisitos, no mejoras posteriores.**
 8. **La plataforma debe degradar con elegancia.** Si una integración externa falla, el estudiante conserva una ruta clara para continuar.
+9. **El estudiante no escribe respuestas abiertas** (decisión V54). Sus decisiones, alternativas y límites se capturan con opciones estructuradas, números, código ejecutado, archivos, URLs o evidencia verificable. Se retiraron las entregas de texto, la discusión abierta, el comentario libre en la revisión por pares y el muro abierto. El docente sí conserva campos de texto (retroalimentación, comunicados). Ver `AGENTS.md` §4.
+
+> **Cómo leer las fases de abajo.** Describen lo que se construyó en cada momento. Donde una fase menciona capacidades que la decisión 9 retiró, la línea lo dice explícitamente; el estado vigente manda sobre la historia.
 
 ## Estado actual
 
@@ -37,13 +40,13 @@ El objetivo no es copiar Moodle, Brightspace, Blackboard o Classroom pantalla po
   - portal “qué sigue”;
   - gestor docente del curso.
 - **Fase 3 · Evaluación y Gradebook**
-  - texto, URL, evidencia automática y archivos privados mediante URLs firmadas;
+  - URL, evidencia automática y archivos privados mediante URLs firmadas (las entregas de texto se retiraron en V54);
   - intentos, fechas límite, estados y accommodations;
   - rúbricas reutilizables;
   - retroalimentación e historial de cambios de nota;
   - categorías y ponderaciones;
   - banco versionado de preguntas;
-  - quizzes con aleatorización, límite de tiempo, autocalificación y revisión manual;
+  - quizzes con aleatorización, límite de tiempo y autocalificación de preguntas objetivas (la respuesta abierta con revisión manual se retira en V54-B);
   - sincronización quiz → Gradebook.
 - **Fase 4 · Competencias y dominio**
   - marco de competencias;
@@ -59,10 +62,11 @@ El objetivo no es copiar Moodle, Brightspace, Blackboard o Classroom pantalla po
 - **Fase 6 · Colaboración**
   - equipos;
   - entregas grupales con responsabilidad individual;
-  - discusiones por sesión;
+  - comunicados y respuestas del docente por sesión (el estudiante solo lee);
   - menciones y respuestas dirigidas;
   - FAQ mediante respuestas destacadas;
-  - revisión por pares.
+  - revisión por pares con rúbrica y criterio a fortalecer, sin comentario libre;
+  - rol de contribución individual elegido de una lista cerrada.
 - **S08 · TC1**
   - SECOP Data Pipeline;
   - API + concurrencia;
@@ -140,7 +144,7 @@ LTI institucional, SSO/OIDC, sincronización OneRoster y envío xAPI/Caliper req
 
 **Meta:** convertir las evaluaciones en un subsistema general, no en lógica específica por sesión.
 
-- Entregas de texto, URL, archivo y evidencia validada automáticamente.
+- Entregas por URL, archivo y evidencia validada automáticamente (sin texto libre del estudiante).
 - Intentos, fechas límite y estados de entrega.
 - Rúbricas reutilizables con criterios observables.
 - Retroalimentación individual.
@@ -187,8 +191,8 @@ LTI institucional, SSO/OIDC, sincronización OneRoster y envío xAPI/Caliper req
 
 - Grupos/equipos con vigencia por actividad.
 - Entregas grupales y responsabilidad individual.
-- Discusiones ligadas a sesiones.
-- Revisión por pares con rúbrica.
+- Comunicados del docente ligados a sesiones (solo lectura para el estudiante).
+- Revisión por pares con rúbrica y criterio a fortalecer, sin comentario libre.
 - Comentarios y menciones.
 - Espacios de preguntas frecuentes con respuestas docentes fijadas.
 
