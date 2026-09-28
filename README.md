@@ -66,7 +66,7 @@ Las pruebas de navegador esperan el sitio en `http://127.0.0.1:4173`; el CI lo s
 
 ## Reglas que no se negocian
 
-- **El estudiante no escribe respuestas abiertas.** Las decisiones, alternativas y límites se capturan con opciones estructuradas, números, código, archivos, URLs o evidencia verificable. Lo comprueba `utils/validate_no_open_student.py` y `AGENTS.md` §4 explica el porqué.
+- **El estudiante no escribe respuestas abiertas, en ningún laboratorio** (cuaderno, presentación o LMS): decide eligiendo de una lista cerrada, una posición de su propio resultado, un número o código que ejecuta. Las decisiones, alternativas y límites se capturan con opciones estructuradas, números, código, archivos, URLs o evidencia verificable. Lo comprueba `utils/validate_no_open_student.py` y `AGENTS.md` §4 explica el porqué.
 - **Un cuaderno es una clase, no un contenedor de código.** Cada salida se acompaña de cómo se lee, qué dice, qué **no** permite concluir y el error común (`AGENTS.md` §3).
 - **Los tiempos viven en el libreto docente, no en el cuaderno del estudiante.**
 - **Si hay un generador en `utils/`, se modifica el generador y se regenera**; no se editan cuadernos a mano.
@@ -89,4 +89,4 @@ Algunos conjuntos de datos (SECOP, benchmarks, una base DuckDB de ejemplo) super
 2. Abre un pull request; se usa **squash merge** para que `main` conserve una línea por cambio.
 3. El PR debe pasar esos workflows y completar la lista de la plantilla.
 
-Tareas pendientes y decisiones abiertas: [`docs/PENDIENTES.md`](docs/PENDIENTES.md). Documentación técnica del LMS: [`infraestructura/lms/ROADMAP.md`](infraestructura/lms/ROADMAP.md) y [`infraestructura/lms/STANDARDS.md`](infraestructura/lms/STANDARDS.md).
+Guía del curso (PDA): [`docs/PDA_guia.md`](docs/PDA_guia.md). Tareas pendientes y decisiones abiertas: [`docs/PENDIENTES.md`](docs/PENDIENTES.md). Documentación técnica del LMS: [`infraestructura/lms/ROADMAP.md`](infraestructura/lms/ROADMAP.md) y [`infraestructura/lms/STANDARDS.md`](infraestructura/lms/STANDARDS.md).
