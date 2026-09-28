@@ -6,6 +6,7 @@ def read(p): return (ROOT/p).read_text(encoding="utf-8")
 
 backend=read("infraestructura/lms/functions/bigdata-session/index.ts")
 migration=read("infraestructura/lms/lms-s09-authentic-evidence-v9.sql")
+closed_v56=read("infraestructura/lms/lms-s09-authentic-closed-v56.sql")
 deck=read("Presentaciones/s09-de-palabras-a-significado.html")
 generator=read("utils/build_session9_notebook.py")
 nb=json.loads(read("Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb"))
@@ -43,6 +44,9 @@ checks=[
  ("LAB9: ningún campo de respuesta queda como texto de instrucciones para escribir", bool(_cc) and not re.search(r'^(razon|decision|alternativa_descartada|limite|resultado_defendible_\d|falso_positivo)\s*=\s*"(?!Elige)[^"]*(explica|qué |por qué|ID o nombre)',_cc[0],re.M|re.I)),
  ("LAB9: los resultados se eligen por posición en el Top-5 propio", bool(_cc) and "posicion_defendible_1" in _cc[0] and "top5_evidencia" in _cc[0]),
  ("LAB9 authentic-review", "evaluator='authentic-review'" in migration and "requires_review" in migration),
+ ("LAB9 catálogo V56 distingue herramienta y respuestas estructuradas", '"type":"tool_text"' in closed_v56 and '"type":"rank_position"' in closed_v56 and closed_v56.count('"type":"choice"')>=4),
+ ("LAB9 backend usa catálogos cerrados", all(x in backend for x in ["S09_AUTHENTIC_REASONS","S09_AUTHENTIC_APPROACHES","S09_AUTHENTIC_LIMITS","closedAcademicChoice"])),
+ ("LAB9 backend exige evidencia del Top-5 propio", "selected.some((x:string)=>!topHybrid.includes(x))" in backend and "new Set(selected).size!==3" in backend),
  ("constraint permite authentic-review", "bd_activity_catalog_evaluator_check" in migration and "'authentic-review'::text" in migration),
  ("rúbrica 5x2", all(x in migration for x in ["reproducible_result","supported_decision","rejected_alternative","ranking_interpretation","concrete_limit"])),
  ("campos de revisión versionados", all(x in migration for x in ["reviewed_by","reviewed_at","rubric"])),
