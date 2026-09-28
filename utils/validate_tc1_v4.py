@@ -35,7 +35,7 @@ checks=[
     ("recap S01-S07 antes de la rúbrica", "## Antes de empezar · reconstruye el andamiaje S01–S07" in all_src and all_src.index("## Antes de empezar · reconstruye el andamiaje S01–S07") < all_src.index("## Rúbrica oficial · 100 puntos")),
     ("recap cubre las siete sesiones previas", all(("S0"+str(i)) in all_src for i in range(1,8))),
     ("recap solo usa elecciones cerradas", "#@title Autocomprobación de arranque · S01–S07" in all_src and all_src.count('#@param ["— selecciona —"') >= 7 and "input(" not in all_src[all_src.index("#@title Autocomprobación de arranque · S01–S07"):all_src.index("### Del repaso al TC1")]),
-    ("recap enlaza decisiones con E1-E6", all(x in all_src for x in ["E1 · ¿puedo adquirir exactamente el mismo snapshot","E2 · ¿cómo represento ese proceso como documento","E4 · ¿qué patrón de acceso operacional","E5 · ¿qué relación necesito recorrer","E6 · ¿qué decisiones tomé"]))),
+    ("recap enlaza decisiones con E1-E6", all(x in all_src for x in ["E1 · ¿puedo adquirir exactamente el mismo snapshot","E2 · ¿cómo represento ese proceso como documento","E4 · ¿qué patrón de acceso operacional","E5 · ¿qué relación necesito recorrer","E6 · ¿qué decisiones tomé"])),
     ("dos endpoints SECOP", "p6dx-8zbt" in all_src and "jbjy-vk9h" in all_src),
     ("ThreadPoolExecutor", "ThreadPoolExecutor" in all_src),
     ("micro-lab antes del reto", "demo_dos_paginas" in all_src and "no suma puntos" in all_src),
