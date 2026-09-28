@@ -1,7 +1,9 @@
 import unittest
 from unittest.mock import patch
 
-from utils.harness.providers import _extract_json, _safe_env
+from pathlib import Path
+
+from utils.harness.providers import _extract_json, _safe_env, run_provider
 
 
 class ProviderTests(unittest.TestCase):
@@ -13,6 +15,15 @@ class ProviderTests(unittest.TestCase):
 
     def test_returns_none_without_object(self):
         self.assertIsNone(_extract_json("plain text"))
+
+    def test_dry_run_reports_role_name(self):
+        result = run_provider(
+            {"kind": "dry_run"},
+            {"task": {"id": "qa1"}, "role": {"name": "qa"}},
+            Path("."),
+            1,
+        )
+        self.assertEqual(result.payload["summary"], "Dry-run: qa1 would run as qa")
 
     def test_provider_environment_is_allowlisted(self):
         provider = {"pass_env": ["OPENAI_API_KEY"]}

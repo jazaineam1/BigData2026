@@ -84,7 +84,7 @@ def run_provider(provider: dict[str, Any], envelope: dict[str, Any], cwd: Path, 
         return ProviderResult(
             payload={
                 "status": "pass",
-                "summary": f"Dry-run: {envelope['task']['id']} would run as {envelope['task'].get('role')}",
+                "summary": f"Dry-run: {envelope['task']['id']} would run as {envelope['role']['name']}",
                 "findings": [],
                 "requested_actions": [],
             }
