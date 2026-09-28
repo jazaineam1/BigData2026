@@ -26,7 +26,7 @@ EXPECTED_CODES = {
     "bd-s09-lab1", "bd-s09-lab2", "bd-s09-lab-e5", "bd-s09-lab-chunk", "bd-s09-lab4",
     "bd-s09-lab5", "bd-s09-lab6", "bd-s09-lab7", "bd-s09-lab8",
 }
-EXPECTED_ROWS = 20
+EXPECTED_ROWS = 22
 
 # Cadenas caricaturescas que no deben volver a aparecer (frases específicas).
 BANNED = [
@@ -40,14 +40,9 @@ BANNED = [
     "Porque ninguno produce números",
     "No puede buscar sobre documentos",
     "No necesita índice",
+    "Vectores concatenados",
+    "Ninguna búsqueda",
 ]
-
-# Decisión docente pendiente: se conservan con su etiqueta de V51 y NO están en la
-# migración. Al decidir, mover la fila a la migración y quitarla de aquí.
-PENDING = {
-    ("bd-s09-lab8", 0, 2): ("embeddings", "Vectores concatenados"),
-    ("bd-s09-lab4", 1, 2): ("none", "Ninguna búsqueda"),
-}
 
 ROW_RE = re.compile(
     r"\(\s*'(bd-s09-[a-z0-9-]+)'\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*'([^']*)'\s*,\s*'([^']*)'\s*,\s*'([^']*)'\s*\)"
@@ -110,9 +105,8 @@ def main():
         if option(c, s, o):
             final[c][s]["options"][o]["label"] = new
     old_labels = {old for *_, old, _ in rows}
-    pend_labels = {label for _, label in PENDING.values()}
     stale = [(c, i) for c in EXPECTED_CODES for i, st in enumerate(final.get(c, []))
-             for op in st.get("options", []) if op["label"] in old_labels - pend_labels]
+             for op in st.get("options", []) if op["label"] in old_labels]
     dup = [(c, i) for c in EXPECTED_CODES for i, st in enumerate(final.get(c, []))
            if len({op["label"] for op in st.get("options", [])}) != len(st.get("options", []))]
     add("estado final sin etiquetas antiguas reemplazadas", not stale)
@@ -120,11 +114,6 @@ def main():
     add("value y estructura de pasos intactos tras aplicar la migración",
         all([[op["value"] for op in st.get("options", [])] for st in final[c]]
             == [[op["value"] for op in st.get("options", [])] for st in base[c]] for c in EXPECTED_CODES))
-
-    # Decisión docente pendiente: sin tocar y con su etiqueta de V51.
-    add("los 2 distractores pendientes conservan su etiqueta de V51 y no están en la migración",
-        all(k not in keys and option(*k) and option(*k)["value"] == vl[0] and option(*k)["label"] == vl[1]
-            for k, vl in PENDING.items()))
 
     # Solo etiquetas: la migración no menciona hashes, config, evaluator ni hints.
     add("la migración solo escribe steps, version y updated_at",
@@ -150,6 +139,11 @@ def main():
         "['always_relevant','Un 0.91 es comparable directamente con 0.91 de cualquier otro modelo de embeddings']" in deck)
     add("D5 conserva value y usa error plausible",
         "['vector_only','Conserva únicamente el ranking cuyo score máximo sea numéricamente mayor']" in deck)
+    migrated = {(c, s, o): new for c, s, o, _, _, new in rows}
+    add("LAB4 identificador usa distractor plausible",
+        migrated.get(("bd-s09-lab4", 1, 2)) == "Semántica con un embedding de más dimensiones, porque el vector preserva exactamente el identificador")
+    add("LAB8 RRF usa distractor plausible",
+        migrated.get(("bd-s09-lab8", 0, 2)) == "Solo los documentos que aparecen en ambos rankings (intersección)")
 
     # Ninguna cadena caricaturesca reaparece fuera de V51 (histórico) y de las
     # etiquetas antiguas de V55.
