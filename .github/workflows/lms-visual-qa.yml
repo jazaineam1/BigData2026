@@ -11,6 +11,7 @@ on:
       - Presentaciones/s09-de-palabras-a-significado.html
       - tests/**
       - package.json
+      - package-lock.json
       - playwright.config.js
       - .github/workflows/lms-visual-qa.yml
   pull_request:
@@ -20,6 +21,7 @@ on:
       - Presentaciones/s09-de-palabras-a-significado.html
       - tests/**
       - package.json
+      - package-lock.json
       - playwright.config.js
       - .github/workflows/lms-visual-qa.yml
 
@@ -37,7 +39,7 @@ jobs:
         with:
           node-version: '24'
       - name: Instalar Playwright fijado
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Instalar Chromium
         run: npx playwright install --with-deps chromium
       - name: Preparar SDK Realtime local
