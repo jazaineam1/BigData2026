@@ -89,4 +89,4 @@ Algunos conjuntos de datos (SECOP, benchmarks, una base DuckDB de ejemplo) super
 2. Abre un pull request; se usa **squash merge** para que `main` conserve una línea por cambio.
 3. El PR debe pasar esos workflows y completar la lista de la plantilla.
 
-Documentación técnica del LMS: [`infraestructura/lms/ROADMAP.md`](infraestructura/lms/ROADMAP.md) y [`infraestructura/lms/STANDARDS.md`](infraestructura/lms/STANDARDS.md).
+Tareas pendientes y decisiones abiertas: [`docs/PENDIENTES.md`](docs/PENDIENTES.md). Documentación técnica del LMS: [`infraestructura/lms/ROADMAP.md`](infraestructura/lms/ROADMAP.md) y [`infraestructura/lms/STANDARDS.md`](infraestructura/lms/STANDARDS.md).
