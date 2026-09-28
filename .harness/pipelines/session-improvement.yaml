@@ -1,0 +1,17 @@
+{
+  "id": "session-improvement",
+  "description": "Two isolated change lanes, deterministic integration, independent review, optional repair and final gates.",
+  "base_ref": "HEAD",
+  "tasks": [
+    {"id": "requirements", "type": "agent", "role": "requirements", "mode": "read", "objective": "Extract current intent, durable rules, course-state constraints and acceptance criteria."},
+    {"id": "research", "type": "agent", "role": "researcher", "mode": "read", "objective": "Verify only external facts that are material to the requested session change using current official documentation."},
+    {"id": "pedagogy", "type": "agent", "role": "pedagogy", "mode": "write", "depends_on": ["requirements", "research"], "locks": ["course-material"], "scope": ["Cuadernos/**", "Presentaciones/**", "utils/build_session*.py", "utils/validate_session*.py"], "objective": "Implement the pedagogical/content portion of the requested improvement without touching LMS/backend code.", "gates": ["no_open_student"], "commit": true},
+    {"id": "frontend", "type": "agent", "role": "frontend", "mode": "write", "depends_on": ["requirements"], "locks": ["lms-frontend"], "scope": ["lms/**", "css/**", "tests/**", "utils/validate_*.py", "index.html"], "objective": "Implement only the LMS/frontend portion required by the user goal; preserve source-of-truth and accessibility rules.", "gates": ["no_open_student", "index_calendar"], "commit": true},
+    {"id": "integrate", "type": "integrate", "depends_on": ["pedagogy", "frontend"], "locks": ["integration"], "objective": "Deterministically merge the candidate branches. Stop on conflicts; never resolve them by guessing."},
+    {"id": "qa-review", "type": "agent", "role": "qa", "mode": "read", "workspace_from": "integrate", "depends_on": ["integrate"], "objective": "Review the integrated diff for regressions, generator drift, missing tests and contradictions with acceptance criteria."},
+    {"id": "a11y-review", "type": "agent", "role": "accessibility", "mode": "read", "workspace_from": "integrate", "depends_on": ["integrate"], "objective": "Review the integrated student-facing changes for keyboard, contrast, focus, responsive and semantic accessibility risks."},
+    {"id": "security-review", "type": "agent", "role": "security", "mode": "read", "workspace_from": "integrate", "depends_on": ["integrate"], "objective": "Review the integrated diff for secrets, PII, auth/trust-boundary regressions and unsafe production assumptions."},
+    {"id": "repair", "type": "agent", "role": "worker", "mode": "write", "workspace_from": "integrate", "depends_on": ["qa-review", "a11y-review", "security-review"], "locks": ["integration"], "scope": ["Cuadernos/**", "Presentaciones/**", "lms/**", "css/**", "tests/**", "utils/**", "index.html"], "objective": "Apply only concrete reviewer fixes. If reviewers found no actionable defect, make no changes.", "gates": ["no_open_student", "index_calendar", "secrets"], "commit": true},
+    {"id": "final-gates", "type": "command", "workspace_from": "integrate", "depends_on": ["repair"], "gates": ["harness_validate", "repo_hygiene", "secrets", "no_open_student", "index_calendar", "static_links"]}
+  ]
+}

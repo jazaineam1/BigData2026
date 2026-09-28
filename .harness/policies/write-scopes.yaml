@@ -1,0 +1,24 @@
+{
+  "roles": {
+    "orchestrator": [],
+    "requirements": [],
+    "researcher": [],
+    "pedagogy": ["Cuadernos/**", "Presentaciones/**", "assets/**", "utils/build_session*.py", "utils/validate_session*.py", "utils/make_notebook.py"],
+    "frontend": ["lms/**", "css/**", "tests/**", "assets/**", "utils/validate_*.py", "index.html"],
+    "backend": ["infraestructura/lms/**", "tests/**", "utils/validate_lms_*.py"],
+    "qa": ["tests/**", "utils/validate_*.py"],
+    "accessibility": [],
+    "security": [],
+    "integrator": [],
+    "worker": ["Cuadernos/**", "Presentaciones/**", "assets/**", "lms/**", "css/**", "tests/**", "utils/**", "infraestructura/lms/**", "index.html", "docs/**"]
+  },
+  "protected": [
+    {"pattern": "AGENTS.md", "requires": "L2"},
+    {"pattern": ".harness/**", "requires": "L2"},
+    {"pattern": ".github/workflows/**", "requires": "L2"},
+    {"pattern": ".gitignore", "requires": "L2"},
+    {"pattern": "lms/data/course.json", "requires": "L2"},
+    {"pattern": "docs/PDA*", "requires": "L2"},
+    {"pattern": ".local-docente/**", "requires": "L3"}
+  ]
+}
