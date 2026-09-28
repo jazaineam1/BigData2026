@@ -58,6 +58,7 @@ checks=[
  ("notebook envía rankings compactos", any('"top5_lexical": _ids(top_lex)' in s and '"top5_hybrid": _ids(top_hibrido)' in s for s in sources)),
  ("generador coincide con contrato", "FINAL_LMS_CODE" in generator and "bd-s09-lab9" in generator and "ENFOQUES" in generator),
  ("presentación no suplanta LAB9", "lab9EvidencePanel" in deck and "Evidencia auténtica · LAB 9" in deck),
+ ("presentación LAB9 sin campos abiertos", all(f'<select id="{x}"' in deck for x in ["evQ","evGood","evBad","evAlt","evLim"]) and not any(f'<input id="{x}"' in deck for x in ["evQ","evGood","evBad","evAlt","evLim"])),
  ("WALL revisa con rúbrica", "RUBRIC_FIELDS" in wall and "submitEvidenceReview" in wall and "Pedir ajuste" in wall),
 ]
 failed=[n for n,ok in checks if not ok]
