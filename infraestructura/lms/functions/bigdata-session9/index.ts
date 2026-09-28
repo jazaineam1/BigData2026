@@ -1,4 +1,4 @@
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
 const db=createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -8,6 +8,7 @@ const db=createClient(
 
 const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
+const RELEASE="2026-09-28-v56";
 const SESSION=9;
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 const RESOURCE_CODES=new Set(["bd-s09-presentation","bd-s09-notebook"]);
@@ -45,6 +46,7 @@ function headers(req:Request){
     "Access-Control-Allow-Headers":"authorization, content-type",
     "Access-Control-Allow-Methods":"GET, POST, OPTIONS",
     "Vary":"Origin","Cache-Control":"no-store","X-Content-Type-Options":"nosniff",
+    "X-BigData-Release":RELEASE,
     "Referrer-Policy":"strict-origin-when-cross-origin"
   };
 }
