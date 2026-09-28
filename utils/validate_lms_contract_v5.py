@@ -65,7 +65,7 @@ checks=[
     ("idempotencia muro", "client_post_id" in migration and "bd_wall_posts_client_post_uidx" in migration and "client_post_id:postClientId" in backend),
     ("S09 usa runtime V5", "lms-kit.js?v=20260926-v5" in deck and "K.track('lab_interaction'" in deck and "K.evidence(" in deck),
     ("módulo usa runtime V5", "lms-kit.js?v=20260926-v5" in session and "K.track(" in session),
-    ("muro usa runtime V5", "lms-kit.js?v=20260926-v5" in class_wall and "K.wallPost(" in class_wall),
+    ("muro estudiantil sin publicación abierta", "K.wallPost(" not in class_wall),
     ("bridge de recursos usa runtime V5", "loadKit" in read("lms/assets/resource-bridge.js") and "K.track('guide_opened'" in read("lms/assets/resource-bridge.js")),
     ("12 LAB S09 declarados en presentación", len(labs)==12),
     ("legacy módulo redirige", "session.html?" in legacy_session and "p.set('s','9')" in legacy_session),

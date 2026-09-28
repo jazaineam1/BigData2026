@@ -66,7 +66,7 @@ async function route(page){
   });
 }
 
-test('S09 LAB3/4/8 conservan autocomprobación y esconden transferencia hasta abrirla',async({page})=>{
+test('S09 LAB3/4/8 conservan autocomprobación sin transferencia abierta',async({page})=>{
   await auth(page);await route(page);
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s17');
   for(const [slide,code] of [[17,'bd-s09-lab3'],[18,'bd-s09-lab4'],[31,'bd-s09-lab8']]){
@@ -75,25 +75,6 @@ test('S09 LAB3/4/8 conservan autocomprobación y esconden transferencia hasta ab
     const selfCheck=page.locator('.slide.on [data-evidence-kind="self-check"]');
     const transfer=page.locator('.slide.on [data-transfer-for="'+code+'"]');
     await expect(selfCheck).toHaveCount(1);
-    await expect(transfer).toHaveCount(1);
-    await expect(transfer).not.toHaveAttribute('open','');
-    await expect(transfer.locator('[data-transfer-field]')).toHaveCount(5);
+    await expect(transfer).toHaveCount(0);
   }
-});
-
-test('S09 transferencia usa evidence existente y queda pendiente de revisión',async({page})=>{
-  await auth(page);await route(page);
-  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s17');
-  const transfer=page.locator('[data-transfer-for="bd-s09-lab3"]');
-  await transfer.locator('summary').click();
-  const values={
-    result:'Observé cuatro de cinco candidatos aeronáuticos en mi Top-5.',
-    decision:'Mantendría k igual a cinco para esta consulta concreta.',
-    rejected_alternative:'Descarto subir k porque agregaría candidatos menos pertinentes.',
-    interpretation:'El resultado muestra buena concentración de vecinos útiles en el Top-5.',
-    limit:'La conclusión depende de una sola consulta y de juicios manuales de relevancia.'
-  };
-  for(const [id,value] of Object.entries(values))await transfer.locator('[data-transfer-field="'+id+'"]').fill(value);
-  await transfer.locator('[data-submit-transfer]').click();
-  await expect(transfer.locator('[data-transfer-status]')).toContainText('pendiente de revisión docente');
 });
