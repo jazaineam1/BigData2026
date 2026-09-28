@@ -42,3 +42,12 @@ jobs:
         run: python -m unittest discover -s tests/harness -p 'test_*.py' -v
       - name: Simular plan multiagente
         run: python -m utils.harness.cli plan session-improvement.yaml --goal "CI smoke test"
+      - name: Ejecutar pipeline E2E sin modelos
+        run: |
+          python -m utils.harness.cli run session-improvement.yaml \
+            --goal "Prueba E2E del harness: validar orquestación sin cambios reales" \
+            --provider dry_run \
+            --approval L2 \
+            --run-id ci-e2e \
+            --cleanup
+          cat .agent-runs/ci-e2e/final.json
