@@ -26,6 +26,10 @@ if s07.exists():
     if blob!="07e99d34a8896a9a6b4c5bf39cb7619a953fe0b8":
         errors.append("S07 cambió durante colaboración")
 
+def teacher_first(src,fn):
+    """La función exige rol docente como primera sentencia."""
+    return "requireTeacher(ctx)" in src.split("async function "+fn,1)[1][:120]
+
 checks=[
     ("colaboración no satura portal estudiante", 'href="collaboration.html"' not in portal),
     ("vista estudiante usa backend", "L.core('collaboration')" in student),
@@ -36,16 +40,19 @@ checks=[
     ("entrega grupal", "group_submit" in student and "groupSubmit" in core),
     ("contribución individual", "confirm_contribution" in student and "lms_group_contributions_v2" in core),
     ("nota grupal sincroniza gradebook", "teacher_grade_group_submission" in teacher and "lms_grade_history_v2" in core),
-    ("discusión", "create_thread" in student and "post_discussion" in student and "postDiscussion" in core),
+    ("discusión: el estudiante solo lee, publica el docente", "create_thread" not in student and "post_discussion" not in student and "postDiscussion" in core and teacher_first(core,"postDiscussion")),
     ("moderación docente", "teacher_moderate_thread" in teacher and "teacher_pin_answer" in teacher),
     ("revisión pares", "submit_peer_review" in student and "submitPeerReview" in core),
     ("no revisión propio equipo", "No puedes revisar la entrega de tu propio equipo" in core),
     ("peer review no expone autor", "peerTargets.push({" in core and "submitted_by:x.submitted_by" not in core and "group_id:x.group_id" not in core),
     ("foros aislados por cohorte", "const threadIds=new Set((threads||[]).map((t:any)=>t.id))" in core and "const postRows=(posts||[]).filter((p:any)=>threadIds.has(p.thread_id))" in core),
-    ("menciones por respuesta", "lms_discussion_mentions_v2" in sql and "mentioned_user_id:parent.user_id" in core and "parent_id:f.parent_id.value" in student),
+    ("menciones por respuesta", "lms_discussion_mentions_v2" in sql and "mentioned_user_id:parent.user_id" in core),
     ("mención guarda trazabilidad", "thread_id:threadId" in core and "created_by:ctx.user.id" in core),
     ("mención se lee al abrir discusión", "mark_mentions_read" in core and "mark_mentions_read" in student),
-    ("conversación inicia con mensaje", "initialBody=clampText(body.body,8000,true)" in core and 'name="body"' in student),
+    ("conversación inicia con mensaje del docente", "initialBody=clampText(body.body,8000,true)" in core and teacher_first(core,"createThread")),
+    ("el docente publica comunicados y responde", "create_thread" in teacher and "post_discussion" in teacher),
+    ("contribución por rol de lista cerrada", "function contributionRole(" in core and "contribution_role" in student and "contribution_text" not in student),
+    ("peer review con rúbrica y criterio, sin comentario libre", "weakest_criterion" in student and "weakest_criterion" in core),
     ("FAQ con respuesta destacada", "teacher_pin_answer" in teacher and "pinned_answer" in student),
     ("tablas por cohorte", "course_run_id uuid not null references public.lms_course_runs" in sql),
     ("RLS colaboración", sql.count("enable row level security")>=9),

@@ -72,6 +72,10 @@ async function activeRun(ctx:any){
 }
 function isTeacher(ctx:any){return ["teacher","admin"].includes(ctx.user.role)}
 function requireTeacher(ctx:any){if(!isTeacher(ctx))throw new Error("NO_AUTH")}
+// V54: el estudiante no envía texto libre. Las contribuciones se eligen de una lista cerrada.
+const CONTRIBUTION_ROLES:Record<string,string>={data:"Datos y consultas",code:"Código y ejecución",validation:"Validación de resultados",docs:"Documentación y evidencia",coord:"Coordinación del equipo"};
+function contributionRole(v:any){const label=CONTRIBUTION_ROLES[String(v||"")];if(!label)throw new Error("Elige un rol de contribución de la lista");return label}
+const STUDENT_ARTIFACT_TYPES=["url","file","evidence"];
 function clampText(v:any,max:number,required=false){
   const s=String(v??"").trim();
   if(required&&!s)throw new Error("Campo obligatorio");
@@ -286,12 +290,12 @@ async function submitAssignment(ctx:any,run:any,body:any){
   if(due&&Date.parse(due)<Date.now())throw new Error("La fecha de entrega ya venció para tu cuenta");
   const {data:prior}=await db.from("lms_submissions_v2").select("attempt").eq("assignment_id",id).eq("user_id",ctx.user.id).order("attempt",{ascending:false}).limit(1);
   const attempt=Number(prior?.[0]?.attempt||0)+1;if(attempt>maxAttempts)throw new Error("Ya usaste el máximo de intentos");
-  const type=String(body.artifact_type||"text");
+  const type=String(body.artifact_type||"url");
   if(!Array.isArray(a.allowed_types)||!a.allowed_types.includes(type))throw new Error("Tipo de entrega no permitido");
   let artifact:any={};
-  if(type==="text")artifact={text:clampText(body.text,20000,true)};
+  if(type==="text")throw new Error("Las entregas de texto libre ya no están habilitadas; usa URL o archivo");
   else if(type==="url"){const url=cleanUrl(body.url);if(!url)throw new Error("URL obligatoria");artifact={url}}
-  else if(type==="file")throw new Error("Carga de archivo aún no está habilitada; usa texto o URL en esta tarea");
+  else if(type==="file")throw new Error("Los archivos se cargan con el flujo de archivo privado, no por esta acción");
   else throw new Error("La evidencia automática solo puede generarla el sistema");
   const {data,error}=await db.from("lms_submissions_v2").insert({
     assignment_id:id,user_id:ctx.user.id,attempt,artifact_type:type,artifact,status:"submitted",submitted_at:new Date().toISOString()
@@ -321,7 +325,7 @@ async function saveAssignment(ctx:any,run:any,body:any){
     if(!s)throw new Error("La sesión indicada no existe en esta cohorte");
   }
   const maxScore=Number(body.max_score||100);if(!Number.isFinite(maxScore)||maxScore<=0||maxScore>1000)throw new Error("Puntaje máximo inválido");
-  const allowed=(Array.isArray(body.allowed_types)?body.allowed_types:[]).filter((x:any)=>["text","url","file","evidence"].includes(String(x)));
+  const allowed=(Array.isArray(body.allowed_types)?body.allowed_types:[]).filter((x:any)=>STUDENT_ARTIFACT_TYPES.includes(String(x)));
   if(!allowed.length)throw new Error("Selecciona al menos un tipo de entrega");
   const maxAttempts=Math.trunc(Number(body.max_attempts||1));if(maxAttempts<1||maxAttempts>20)throw new Error("Intentos inválidos");
   const row:any={course_run_id:run.id,code,session_number:n,title:clampText(body.title,180,true),instructions:clampText(body.instructions,8000),
@@ -747,8 +751,10 @@ async function groupSubmit(ctx:any,run:any,body:any){
   if(a.due_at&&Date.parse(a.due_at)<Date.now())throw new Error("La fecha de entrega grupal ya venció");
   const {data:prior}=await db.from("lms_group_submissions_v2").select("attempt").eq("assignment_id",assignmentId).eq("group_id",groupId).order("attempt",{ascending:false}).limit(1);
   const attempt=Number(prior?.[0]?.attempt||0)+1;if(attempt>Number(a.max_attempts||1))throw new Error("El equipo ya usó el máximo de intentos");
-  const type=String(body.artifact_type||"text");if(!["text","url"].includes(type))throw new Error("Tipo de entrega grupal no permitido");
-  let artifact:any={};if(type==="text")artifact={text:clampText(body.text,20000,true)};else{const url=cleanUrl(body.url);if(!url)throw new Error("URL obligatoria");artifact={url}};
+  if(a.code==="bd-s08-control")throw new Error("S08 se entrega desde su validador de manifest, no desde este formulario");
+  const type=String(body.artifact_type||"url");if(type!=="url")throw new Error("La entrega grupal admite solo URL de evidencia");
+  const contribution=contributionRole(body.contribution_role);
+  let artifact:any={};{const url=cleanUrl(body.url);if(!url)throw new Error("URL obligatoria");artifact={url}};
   const {data:gs,error}=await db.from("lms_group_submissions_v2").insert({assignment_id:assignmentId,group_id:groupId,attempt,artifact_type:type,artifact,status:"submitted",submitted_by:ctx.user.id,submitted_at:new Date().toISOString()}).select("*").single();if(error)throw error;
   const {data:members}=await db.from("lms_group_members_v2").select("user_id").eq("group_id",groupId);
   for(const m of members||[]){
@@ -756,12 +762,11 @@ async function groupSubmit(ctx:any,run:any,body:any){
     const indAttempt=Number(last?.[0]?.attempt||0)+1;if(indAttempt>Number(a.max_attempts||1))continue;
     await db.from("lms_submissions_v2").insert({assignment_id:assignmentId,user_id:m.user_id,attempt:indAttempt,artifact_type:"evidence",artifact:{source:"group_submission",group_submission_id:gs.id,group_id:groupId},status:"submitted",submitted_at:gs.submitted_at}).then(()=>{}).catch(()=>{});
   }
-  const contribution=clampText(body.contribution_text,2000);
-  if(contribution)await db.from("lms_group_contributions_v2").upsert({group_submission_id:gs.id,user_id:ctx.user.id,contribution_text:contribution,confirmed_at:new Date().toISOString()},{onConflict:"group_submission_id,user_id"});
+  await db.from("lms_group_contributions_v2").upsert({group_submission_id:gs.id,user_id:ctx.user.id,contribution_text:contribution,confirmed_at:new Date().toISOString()},{onConflict:"group_submission_id,user_id"});
   await audit(ctx.user.id,"bigdata.group.submit","group_submission",gs.id,{assignment_id:assignmentId,group_id:groupId,attempt});return {ok:true,submission:gs};
 }
 async function confirmContribution(ctx:any,run:any,body:any){
-  const submissionId=clampText(body.group_submission_id,80,true),text=clampText(body.contribution_text,2000,true);
+  const submissionId=clampText(body.group_submission_id,80,true),text=contributionRole(body.contribution_role);
   const {data:s}=await db.from("lms_group_submissions_v2").select("id,group_id,assignment_id").eq("id",submissionId).maybeSingle();if(!s)throw new Error("Entrega grupal no encontrada");
   const [{data:g},{data:m},{data:a}]=await Promise.all([
     db.from("lms_groups_v2").select("id").eq("id",s.group_id).eq("course_run_id",run.id).maybeSingle(),
@@ -788,15 +793,17 @@ async function gradeGroupSubmission(ctx:any,run:any,body:any){
   await audit(ctx.user.id,"bigdata.group.grade","group_submission",id,{assignment_id:s.assignment_id,group_id:s.group_id,score});return {ok:true,submission:updated};
 }
 async function createThread(ctx:any,run:any,body:any){
+  requireTeacher(ctx);
   const n=body.session_number===null||body.session_number===""?null:Math.trunc(Number(body.session_number));
   if(n!==null){const {data:s}=await db.from("lms_run_sessions_v2").select("session_number").eq("course_run_id",run.id).eq("session_number",n).maybeSingle();if(!s)throw new Error("Sesión inválida")}
   const assignmentId=clampText(body.assignment_id,80)||null;if(assignmentId){const {data:a}=await db.from("lms_assignments_v2").select("id").eq("id",assignmentId).eq("course_run_id",run.id).maybeSingle();if(!a)throw new Error("Tarea inválida")}
   const initialBody=clampText(body.body,8000,true);
-  const {data,error}=await db.from("lms_discussion_threads_v2").insert({course_run_id:run.id,session_number:n,assignment_id:assignmentId,title:clampText(body.title,180,true),pinned:isTeacher(ctx)&&!!body.pinned,locked:false,created_by:ctx.user.id}).select("*").single();if(error)throw error;
+  const {data,error}=await db.from("lms_discussion_threads_v2").insert({course_run_id:run.id,session_number:n,assignment_id:assignmentId,title:clampText(body.title,180,true),pinned:!!body.pinned,locked:false,created_by:ctx.user.id}).select("*").single();if(error)throw error;
   const {data:first,error:postError}=await db.from("lms_discussion_posts_v2").insert({thread_id:data.id,user_id:ctx.user.id,body:initialBody}).select("*").single();if(postError)throw postError;
   return {ok:true,thread:data,post:first};
 }
 async function postDiscussion(ctx:any,run:any,body:any){
+  requireTeacher(ctx);
   const threadId=clampText(body.thread_id,80,true),parentId=clampText(body.parent_id,80)||null;
   const {data:t}=await db.from("lms_discussion_threads_v2").select("*").eq("id",threadId).eq("course_run_id",run.id).maybeSingle();if(!t)throw new Error("Conversación no encontrada");if(t.locked&&!isTeacher(ctx))throw new Error("Esta conversación está cerrada");
   let parent:any=null;
@@ -828,7 +835,10 @@ async function submitPeerReview(ctx:any,run:any,body:any){
   const own=await groupIdsForUser(run.id,ctx.user.id);if(own.includes(s.group_id))throw new Error("No puedes revisar la entrega de tu propio equipo");
   const scores=body.rubric_scores&&typeof body.rubric_scores==="object"?body.rubric_scores:{};
   for(const criterion of Array.isArray(setting.peer_rubric)?setting.peer_rubric:[]){const v=Number(scores[criterion.code]);if(!Number.isFinite(v)||v<0||v>Number(criterion.max))throw new Error("Puntaje de revisión fuera de rango: "+criterion.title)}
-  const feedback=clampText(body.feedback,5000,true);
+  const rubricList=Array.isArray(setting.peer_rubric)?setting.peer_rubric:[];
+  const weakest=rubricList.find((c:any)=>c.code===String(body.weakest_criterion||""));
+  if(rubricList.length&&!weakest)throw new Error("Elige el criterio que más debe fortalecer el equipo");
+  const feedback=weakest?"Criterio a fortalecer: "+weakest.title:"Revisión por rúbrica";
   const {data,error}=await db.from("lms_peer_reviews_v2").upsert({assignment_id:s.assignment_id,reviewee_submission_id:s.id,reviewer_user_id:ctx.user.id,rubric_scores:scores,feedback,status:"submitted",submitted_at:new Date().toISOString()},{onConflict:"reviewee_submission_id,reviewer_user_id"}).select("*").single();if(error)throw error;
   return {ok:true,review:data};
 }
