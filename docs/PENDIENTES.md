@@ -2,7 +2,7 @@
 
 Lista viva de lo que **quedó sin hacer** después de los cambios V54-A, V54-B y V56-A, en orden de urgencia. Se actualiza al cerrar cada punto (bórralo al terminarlo, no lo tachues). Lo que cambia cada semana del curso vive en `.local-docente/`, fuera de Git.
 
-Lo ya hecho (PR #104, #105, #106): portada alineada con `course.json`; sin texto libre del estudiante en entregas y colaboración; tipos de pregunta unificados; higiene, `npm ci` y escáner de secretos. Las guardias son `utils/validate_no_open_student.py`, `utils/check_repo_hygiene.py` y `utils/scan_secrets_pii.py`.
+Lo ya hecho (PR #104–#109, todos fusionados y cerrados): portada alineada con `course.json`; sin texto libre del estudiante en LMS, LAB9 S09 ni Quiz Neo4j; tipos de pregunta unificados; distractores S09 22/22; higiene, `npm ci` y escáner de secretos. Las guardias son `utils/validate_no_open_student.py`, `utils/validate_s09_distractors.py`, `utils/check_repo_hygiene.py` y `utils/scan_secrets_pii.py`.
 
 ## 1. Antes de la clase del 1 de octubre (bloqueantes)
 
@@ -20,10 +20,9 @@ El merge publica solo el **frontend** (Pages). Nada de lo siguiente se despliega
 
 ## 2. Antes de la clase del 8 de octubre (S09)
 
-- [ ] **Cobertura de laboratorios sin texto libre:** LAB 9 de S09, el quiz Neo4j y el constructor de evidencia de la presentación ya usan opciones estructuradas y la guardia recorre los cuadernos sin excepciones legacy. Mantener la regla al crear sesiones nuevas y ampliar el detector solo si aparece un patrón no cubierto (por ejemplo, un `input()` que realmente capture una respuesta académica y no configuración).
 - [ ] **El PDA vigente de 2026.** El PDF que hay en el repo es el PDA **2023-I**; el archivo `PDA_2026-02_BIGDATA.pdf` recibido después es idéntico byte a byte. Subir el PDA vigente y actualizar `docs/PDA_guia.md` (porcentajes de evaluación, temas y las diferencias con `course.json`).
-- [ ] **Desplegar distractores S09:** el porte selectivo de #91 quedó completo (22/22 etiquetas plausibles) en `lms-s09-distractor-quality-v55.sql` con validador idempotente. Falta aplicar esa migración en Supabase antes de S09.
-- [ ] **Profundización (PR #52):** 5 diapositivas nuevas (Laboratorio integrado, Vector por dentro, Distancia y similitud, Persistencia en MongoDB, Recall vs Precision). Decisión de contenido y de dosis (`AGENTS.md` §2): quizá solo «Vector por dentro» y «Recall vs Precision». Portar primero la presentación y después el generador del cuaderno; el orden con #91 y con el LAB 9 importa: #91, luego #52, luego LAB 9.
+- [ ] **Desplegar distractores S09:** las 22/22 etiquetas plausibles ya están integradas en `main` mediante `lms-s09-distractor-quality-v55.sql`, con validador idempotente y sin cambiar `value` ni hashes. Falta aplicar esa migración en Supabase antes de S09.
+- [ ] **Profundización S09, solo si añade valor neto:** quedaron como ideas históricas cinco ampliaciones (Laboratorio integrado, Vector por dentro, Distancia y similitud, Persistencia en MongoDB, Recall vs Precision). No hay PR pendiente asociado. Evaluar únicamente «Vector por dentro» y «Recall vs Precision» contra la dosis de `AGENTS.md` §2 y descartarlas si duplican lo ya publicado.
 
 ## 3. Wall de competencia (funcionalidad nueva)
 
@@ -32,7 +31,7 @@ Tablero **estructurado** de progreso de clase, no un foro: alias «Jugador NN» 
 - [ ] **Responder las 12 decisiones de la §8 antes de construir**, en especial D1 (visibilidad; apagado en sesiones evaluativas), D2 (qué cuenta en S09), D4 (cohorte mínima) y D8 (¿cuenta un LAB en revisión?).
 - [ ] Construir en 5 PR (unos 3,25 a 5 días): A esquema y puntaje, B backend, C frontend, D retiro de código, E retiro de datos. A–C son aditivos; D y E no se deshacen.
 - Hallazgos que cambian el plan: al quitar `wall_post` de `lms-kit.js` una cola offline pendiente puede atascarse (devolver 410/422 en `deliver()`); la competencia BD-E7 exige 2 evidencias y solo un LAB puede aportarla, así que no incluir competencias en el puntaje de S09 v1; `accepted` no siempre significa verificado; los recursos «visitar» nunca llegan a `completed`, por eso el puntaje de #102 no sirve tal cual.
-- No portar de #102 su alias (hash de 4 hex: colisiona y es derivable), su puntaje por `required` ni su `drop table` inmediato.
+- No reutilizar el diseño legado de alias por hash corto, puntaje por `required` ni retiro inmediato de tablas: el diseño vigente es `docs/diseno-wall-competencia.md`.
 
 ## 4. Peso del repositorio y datos
 
@@ -45,8 +44,10 @@ Hoy hay ~413 MB en 5 archivos que la guardia `check_repo_hygiene.py` lista con s
 
 ## 5. Gobernanza de GitHub
 
+No hay PR abiertos ni ramas con código divergente: las ramas históricas fueron alineadas al SHA de `main` después de cerrar sus PR. Los nombres de esas ramas todavía pueden aparecer en GitHub porque el conector disponible no expone la operación DELETE de refs; no contienen trabajo pendiente distinto de `main`.
+
 - [ ] Ajustes del repo (hoy: `delete_branch_on_merge`, `allow_auto_merge` y rulesets desactivados): borrar rama al fusionar, squash merge, PR obligatorio y checks `qa`, `visual` y `higiene` obligatorios. Se hace en Settings; no se ha tocado.
-- [ ] Borrar las ramas remotas históricas una vez cerrados sus PR. El conector usado para mantenimiento no expone borrado de refs; hacerlo desde Settings/GitHub CLI cuando se habilite ese paso.
+- [ ] Cuando haya acceso a borrado de refs, eliminar nominalmente las ramas históricas ya alineadas. Es limpieza de nombres, no recuperación de trabajo pendiente.
 
 ## 6. Consolidación de arquitectura (V55)
 
