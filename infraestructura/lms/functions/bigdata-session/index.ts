@@ -289,6 +289,7 @@ async function evidenceByCode(body:any){
 }
 
 async function wallPost(ctx:any,run:any,n:number,activityCode:string,rawBody:any,evidenceId:any=null,rawClientId:any=null){
+  if(!["teacher","admin"].includes(ctx.user.role))throw new Error("El muro abierto fue retirado: el estudiante ya no publica texto libre");
   const {data:activity,error:activityError}=await db.from("bd_lms_activities").select("code,kind")
     .eq("code",activityCode).eq("course_code",COURSE).eq("session_number",n).maybeSingle();
   failIf(activityError,"No se pudo validar el LAB");

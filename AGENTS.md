@@ -77,6 +77,14 @@ Lo que se califica debe anclarse en algo que solo existe si esa persona ejecutó
 
 Cuidado con lo determinista: un resultado idéntico para todo el grupo circula por mensajería en cinco minutos. La resistencia no viene de que sea difícil, viene de que **sea distinto para cada uno**.
 
+### El estudiante no escribe respuestas abiertas
+
+Las decisiones, alternativas descartadas y límites del estudiante se capturan con **opciones estructuradas y contextualizadas, valores numéricos, código ejecutado, archivos, URLs o evidencia verificable**. El LMS no pide respuestas abiertas de texto al estudiante —ni en entregas, discusiones, revisión por pares, muros ni contribuciones de equipo— salvo autorización explícita del docente para una actividad concreta.
+
+- **Por qué:** la prosa libre es lo que un asistente de IA redacta mejor que el estudiante y obliga a calificar sin criterio observable. Una pregunta cerrada bien construida, cuyos distractores son errores que este grupo comete de verdad, sí distingue quién ejecutó.
+- **Qué NO es una respuesta abierta:** un campo de texto que es una *herramienta* (probar un tokenizer, una consulta, un embedding) o un formulario del *docente*. Lo que se prohíbe es el campo que **envía** una respuesta académica.
+- **Cómo se sabe que se logró:** el validador de superficies de estudiante no encuentra un campo de texto que envíe respuesta, y el backend rechaza lo que la interfaz ya no ofrece: esconder el formulario no basta.
+
 ### Un quiz evalúa la sesión en la que se aplica
 
 Un quiz que cobra sesiones anteriores rompe el momento en que el estudiante acaba de entender algo y se siente como un peaje. El quiz se apoya en **un ejercicio hecho en clase**: el estudiante entrega lo que produjo y las preguntas van sobre eso.

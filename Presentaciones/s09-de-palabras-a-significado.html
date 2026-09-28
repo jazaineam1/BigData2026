@@ -216,7 +216,7 @@ function labControlValue(el){
   if(el.type==='checkbox'||el.type==='radio')return !!el.checked;
   if(el.type==='range'||el.type==='number')return Number(el.value);
   if(el.tagName==='SELECT')return String(el.value).slice(0,80);
-  if(el.tagName==='TEXTAREA')return 'len:'+String(el.value||'').length;
+  if(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&!['checkbox','radio','range','number'].includes(el.type)))return 'len:'+String(el.value||'').length;
   return String(el.value||el.textContent||'').trim().slice(0,80);
 }
 function queueLabInteraction(code,el){
