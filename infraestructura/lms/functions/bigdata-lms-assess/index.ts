@@ -198,6 +198,11 @@ async function fileDownloadUrl(ctx:any,run:any,body:any){
 }
 
 /* ------------------------------- Questions -------------------------------- */
+// V54-B · Tipos activos: solo respuestas cerradas u objetivas (AGENTS.md §4).
+// LEGACY_OPEN_TYPE es un tipo RETIRADO: existe únicamente para LEER y calificar intentos históricos
+// (finalizeAttempt / gradeResponse). Nunca se crea, se agrega a un quiz ni se responde de nuevo.
+const ACTIVE_QUESTION_TYPES=["single_choice","multiple_choice","true_false","numeric"];
+const LEGACY_OPEN_TYPE="short_text";
 function cleanOptions(raw:any){
   if(!Array.isArray(raw))return [];
   const seen=new Set<string>(),out:any[]=[];
@@ -210,7 +215,7 @@ function cleanOptions(raw:any){
 }
 function cleanQuestion(body:any){
   const type=String(body.question_type||"");
-  if(!["single_choice","multiple_choice","true_false","numeric"].includes(type))throw new Error("Solo se permiten preguntas objetivas; las respuestas abiertas están deshabilitadas");
+  if(!ACTIVE_QUESTION_TYPES.includes(type))throw new Error("Solo se permiten preguntas objetivas; las respuestas abiertas están deshabilitadas");
   const prompt=text(body.prompt,8000,true),explanation=text(body.explanation,8000),points=Number(body.default_points||1);
   if(!Number.isFinite(points)||points<=0||points>1000)throw new Error("Puntaje inválido");
   const tags=(Array.isArray(body.tags)?body.tags:[]).slice(0,20).map((x:any)=>text(x,60)).filter(Boolean);
@@ -282,6 +287,9 @@ async function saveQuestion(ctx:any,run:any,body:any){
   if(id){
     const {data}=await db.from("lms_questions_v2").select("*").eq("id",id).eq("course_run_id",run.id).maybeSingle();
     prior=data;if(!prior)throw new Error("Pregunta no encontrada");if(prior.code!==code)throw new Error("El código no cambia entre versiones");
+    // Una fila histórica de tipo retirado no admite UPDATE (el CHECK de V54-B lo rechaza) y por tanto no se puede
+    // desactivar al versionarla: se corta antes de insertar para no dejar dos versiones activas.
+    if(prior.question_type===LEGACY_OPEN_TYPE)throw new Error("Esta pregunta es de un tipo retirado (respuesta abierta) y no se versiona; crea una pregunta objetiva con otro código");
     const {data:maxRows}=await db.from("lms_questions_v2").select("version").eq("course_run_id",run.id).eq("code",code).order("version",{ascending:false}).limit(1);
     version=Number(maxRows?.[0]?.version||0)+1;
   }else{
@@ -371,8 +379,9 @@ async function setQuizItems(ctx:any,run:any,body:any){
   const {data:quiz}=await db.from("lms_quizzes_v2").select("*").eq("id",quizId).eq("course_run_id",run.id).maybeSingle();if(!quiz)throw new Error("Quiz no encontrado");
   const raw=Array.isArray(body.items)?body.items.slice(0,100):[];if(!raw.length)throw new Error("Selecciona al menos una pregunta");
   const ids=[...new Set(raw.map((x:any)=>String(x.question_id)))];
-  const {data:qs}=await db.from("lms_questions_v2").select("id,course_run_id,default_points").in("id",ids);
+  const {data:qs}=await db.from("lms_questions_v2").select("id,course_run_id,default_points,question_type").in("id",ids);
   if((qs||[]).length!==ids.length||(qs||[]).some((q:any)=>q.course_run_id!==run.id))throw new Error("Hay preguntas fuera de esta cohorte");
+  if((qs||[]).some((q:any)=>!ACTIVE_QUESTION_TYPES.includes(q.question_type)))throw new Error("El quiz incluye una pregunta de tipo retirado (respuesta abierta); quítala o reemplázala por una objetiva");
   const qmap=new Map((qs||[]).map((q:any)=>[q.id,q]));
   const rows=raw.map((x:any,i:number)=>{const q:any=qmap.get(String(x.question_id)),points=Number(x.points??q.default_points);if(!Number.isFinite(points)||points<=0||points>1000)throw new Error("Puntaje de ítem inválido");return {quiz_id:quizId,question_id:q.id,position:i+1,points,required:x.required!==false}});
   const {error:del}=await db.from("lms_quiz_items_v2").delete().eq("quiz_id",quizId);if(del)throw del;
@@ -447,7 +456,7 @@ function cleanResponse(q:any,raw:any){
   }
   if(q.question_type==="true_false"){if(typeof raw?.value!=="boolean")throw new Error("Selecciona verdadero o falso");return {value:raw.value}}
   if(q.question_type==="numeric"){const n=Number(raw?.value);if(!Number.isFinite(n))throw new Error("Respuesta numérica inválida");return {value:n}}
-  if(q.question_type==="short_text")return {text:text(raw?.text,5000,true)};
+  if(q.question_type===LEGACY_OPEN_TYPE)throw new Error("Esta pregunta es de un tipo retirado: el curso no admite respuestas abiertas del estudiante");
   throw new Error("Tipo de pregunta desconocido");
 }
 async function saveResponse(ctx:any,run:any,body:any){
@@ -487,7 +496,8 @@ async function finalizeAttempt(ctx:any,run:any,attemptId:string,expired=false){
   const rm=new Map((responses||[]).map((r:any)=>[r.question_id,r]));let auto=0,manual=0,pendingManual=0;
   for(const item of items){
     const r:any=rm.get(item.question_id),pts=Number(item.points);
-    if(item.question.question_type==="short_text"){
+    if(item.question.question_type===LEGACY_OPEN_TYPE){
+      // Solo HISTÓRICO: la respuesta ya estaba guardada antes de V54-B. Sin respuesta cuenta 0 y no queda pendiente.
       const answered=!!String(r?.response?.text||"").trim();
       if(!answered){manual+=0;continue}
       if(r?.manual_score===null||r?.manual_score===undefined)pendingManual++;else manual+=Number(r.manual_score||0);
@@ -512,12 +522,12 @@ async function gradeResponse(ctx:any,run:any,body:any){
   const {data:a}=await db.from("lms_quiz_attempts_v2").select("*").eq("id",attemptId).maybeSingle();if(!a)throw new Error("Intento no encontrado");
   const {data:qz}=await db.from("lms_quizzes_v2").select("*").eq("id",a.quiz_id).eq("course_run_id",run.id).maybeSingle();if(!qz)throw new Error("Quiz fuera de la cohorte");
   const {data:item}=await db.from("lms_quiz_items_v2").select("*").eq("quiz_id",a.quiz_id).eq("question_id",questionId).maybeSingle();if(!item)throw new Error("Pregunta fuera del quiz");
-  const {data:q}=await db.from("lms_questions_v2").select("question_type").eq("id",questionId).maybeSingle();if(q?.question_type!=="short_text")throw new Error("Solo las respuestas de texto requieren calificación manual");
+  const {data:q}=await db.from("lms_questions_v2").select("question_type").eq("id",questionId).maybeSingle();if(q?.question_type!==LEGACY_OPEN_TYPE)throw new Error("Solo las respuestas históricas de tipo retirado requieren calificación manual");
   const score=Number(body.score);if(!Number.isFinite(score)||score<0||score>Number(item.points))throw new Error("Puntaje fuera de rango");
   const {error}=await db.from("lms_quiz_responses_v2").update({manual_score:score,feedback:text(body.feedback,5000),graded_by:ctx.user.id,graded_at:new Date().toISOString()}).eq("attempt_id",attemptId).eq("question_id",questionId);if(error)throw error;
   const items=await quizItems(a.quiz_id),{data:rs}=await db.from("lms_quiz_responses_v2").select("*").eq("attempt_id",attemptId);
   const rm=new Map((rs||[]).map((r:any)=>[r.question_id,r]));let auto=0,manual=0,pending=0;
-  for(const x of items){const r:any=rm.get(x.question_id);auto+=Number(r?.auto_score||0);if(x.question.question_type==="short_text"){const answered=!!String(r?.response?.text||"").trim();if(!answered)continue;if(r?.manual_score===null||r?.manual_score===undefined)pending++;else manual+=Number(r.manual_score)}}
+  for(const x of items){const r:any=rm.get(x.question_id);auto+=Number(r?.auto_score||0);if(x.question.question_type===LEGACY_OPEN_TYPE){const answered=!!String(r?.response?.text||"").trim();if(!answered)continue;if(r?.manual_score===null||r?.manual_score===undefined)pending++;else manual+=Number(r.manual_score)}}
   const status=pending?"submitted":"reviewed",total=auto+manual;
   const {data:updated}=await db.from("lms_quiz_attempts_v2").update({manual_score:manual,auto_score:auto,score:total,status}).eq("id",attemptId).select("*").single();
   await syncQuizGrade(run,updated);await audit(ctx.user.id,"bigdata.quiz.response.grade","quiz_attempt",attemptId,{question_id:questionId,score});

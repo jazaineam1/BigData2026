@@ -97,10 +97,6 @@ function qtiItem(q:any){
     body='<qti-item-body><p>'+prompt+'</p><qti-text-entry-interaction response-identifier="RESPONSE" expected-length="16"/></qti-item-body>';
     const cond=tol>0?'<qti-equal tolerance-mode="absolute" tolerance="'+tol+'"><qti-variable identifier="RESPONSE"/><qti-correct identifier="RESPONSE"/></qti-equal>':'<qti-match><qti-variable identifier="RESPONSE"/><qti-correct identifier="RESPONSE"/></qti-match>';
     processing=qtiSetScore(max,cond);
-  }else if(q.question_type==="short_text"){
-    decl='<qti-response-declaration identifier="RESPONSE" cardinality="single" base-type="string"/>';
-    body='<qti-item-body><p>'+prompt+'</p><qti-extended-text-interaction response-identifier="RESPONSE" expected-lines="5"/></qti-item-body>';
-    processing="";
   }else{
     throw new Error("Tipo de pregunta no soportado por el exportador QTI: "+String(q.question_type||""));
   }
@@ -110,13 +106,22 @@ function qtiManifest(items:any[]){
   const resources=items.map(q=>{const id=ident(q.code+"-v"+q.version),href="items/"+id+".xml";return '<resource identifier="'+id+'" type="imsqti_item_xmlv3p0" href="'+href+'"><file href="'+href+'"/></resource>'}).join("");
   return '<?xml version="1.0" encoding="UTF-8"?>\n<manifest identifier="BIGDATA-QTI3" xmlns="http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqtiv3p0_imscpv1p2_v1p0.xsd"><metadata><schema>QTI Package</schema><schemaversion>3.0.0</schemaversion></metadata><organizations/><resources>'+resources+'</resources></manifest>';
 }
+// V54-B · Solo se exportan tipos objetivos. LEGACY_OPEN_TYPE es un tipo RETIRADO que puede seguir existiendo como
+// historia en la BD: se OMITE del paquete (no se degrada a un ítem sin calificación ni se propaga a otro LMS
+// una respuesta abierta que este curso ya no admite) y se avisa con su código para que el docente lo sepa.
+// Este archivo solo exporta: no hay importador QTI; cuando exista deberá rechazar qti-extended-text-interaction.
+const QTI_EXPORT_TYPES=["single_choice","multiple_choice","true_false","numeric"];
+const LEGACY_OPEN_TYPE="short_text";
 async function exportQti(ctx:any,run:any){
   requireTeacher(ctx);
-  const {data,error}=await db.from("lms_questions_v2").select("*").eq("course_run_id",run.id).eq("active",true).order("code");if(error)throw error;
-  const items=data||[];if(!items.length)throw new Error("No hay preguntas activas para exportar");
+  const {data,error}=await db.from("lms_questions_v2").select("*").eq("course_run_id",run.id).eq("active",true).in("question_type",QTI_EXPORT_TYPES).order("code");if(error)throw error;
+  const {data:legacy,error:legacyError}=await db.from("lms_questions_v2").select("code,version").eq("course_run_id",run.id).eq("active",true).eq("question_type",LEGACY_OPEN_TYPE).order("code");if(legacyError)throw legacyError;
+  const items=data||[],omitted=legacy||[];if(!items.length)throw new Error("No hay preguntas activas de tipo objetivo para exportar");
   const files=[{name:"imsmanifest.xml",content:qtiManifest(items),mime:"application/xml"},...items.map(q=>{const id=ident(q.code+"-v"+q.version);return {name:"items/"+id+".xml",content:qtiItem(q),mime:"application/xml"}})];
-  await audit(ctx.user.id,"bigdata.interop.export.qti","interop_export",null,{items:items.length,profile:"QTI 3.0"});
-  return {ok:true,format:"QTI 3.0 package",certified:false,files,warnings:["Exportación basada en QTI 3.0/3.0.1. No equivale a certificación de conformidad 1EdTech."]};
+  await audit(ctx.user.id,"bigdata.interop.export.qti","interop_export",null,{items:items.length,omitted_retired_type:omitted.length,profile:"QTI 3.0"});
+  const warnings=["Exportación basada en QTI 3.0/3.0.1. No equivale a certificación de conformidad 1EdTech."];
+  if(omitted.length)warnings.push("Se omitieron "+omitted.length+" pregunta(s) activa(s) de un tipo retirado (respuesta abierta), que el curso ya no admite: "+omitted.map((x:any)=>x.code+"-v"+x.version).join(", ")+". Siguen legibles en el LMS como historia, pero no se exportan.");
+  return {ok:true,format:"QTI 3.0 package",certified:false,files,warnings};
 }
 
 /* -------------------------- OneRoster 1.2.1 bulk -------------------------- */
@@ -203,7 +208,7 @@ async function saveRunDates(ctx:any,run:any,body:any){
 async function overview(ctx:any,run:any){
   requireTeacher(ctx);
   const [{count:questions},{count:students},{count:assignments}] = await Promise.all([
-    db.from("lms_questions_v2").select("*",{count:"exact",head:true}).eq("course_run_id",run.id).eq("active",true),
+    db.from("lms_questions_v2").select("*",{count:"exact",head:true}).eq("course_run_id",run.id).eq("active",true).in("question_type",QTI_EXPORT_TYPES),
     db.from("lms_run_enrollments").select("*",{count:"exact",head:true}).eq("course_run_id",run.id).eq("status","active").eq("role","student"),
     db.from("lms_assignments_v2").select("*",{count:"exact",head:true}).eq("course_run_id",run.id).eq("active",true)
   ]);

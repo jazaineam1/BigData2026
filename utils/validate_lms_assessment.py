@@ -40,7 +40,7 @@ except Exception as ex:
 checks=[
     ("API evaluación separada", "bigdata-lms-assess" in client and "async function assess" in client),
     ("banco versionado", "lms_questions_v2" in schema and "version integer not null" in schema and "question.version.create" in assess),
-    ("tipos objetivos disponibles", all(x in schema for x in ["single_choice","multiple_choice","true_false","numeric"]) and '["single_choice","multiple_choice","true_false","numeric"].includes(type)' in assess),
+    ("tipos objetivos disponibles", all(x in schema for x in ["single_choice","multiple_choice","true_false","numeric"]) and 'const ACTIVE_QUESTION_TYPES=["single_choice","multiple_choice","true_false","numeric"];' in assess and "ACTIVE_QUESTION_TYPES.includes(type)" in assess),
     ("quiz intenta y guarda respuestas", "lms_quiz_attempts_v2" in schema and "lms_quiz_responses_v2" in schema),
     ("aleatorización", "shuffle_questions" in schema and "shuffle_options" in schema and "shuffled(" in assess),
     ("quiz vacío no se publica", 'Agrega al menos una pregunta antes de publicar' in assess),

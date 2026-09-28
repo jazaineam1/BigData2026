@@ -12,6 +12,7 @@ Distingue dos cosas que se parecen y no son lo mismo:
 Agregar un textarea nuevo obliga a declararlo aquí con su razón, no a esquivar la guardia.
 """
 from pathlib import Path
+import os
 import re
 import sys
 
@@ -135,14 +136,80 @@ s09 = read("Presentaciones/s09-de-palabras-a-significado.html")
 if "el.tagName==='INPUT'&&!['checkbox','radio','range','number'].includes(el.type)" not in s09:
     errors.append("S09: labControlValue envía el contenido de campos <input> de texto al backend (debe enviar solo len:N)")
 
-# Deuda conocida, todavía sin cerrar: se informa, no falla (ver plan V54-B).
-pending = []
-for rel in ["infraestructura/lms/functions/bigdata-lms-assess/index.ts",
-            "infraestructura/lms/functions/bigdata-lms-interop/index.ts",
-            "infraestructura/lms/lms-assessment-engine-v2.sql"]:
-    n = read(rel).count("short_text")
-    if n:
-        pending.append(f"{rel}: {n} mención(es) de short_text")
+# V54-B · Tipos de pregunta: solo respuestas cerradas u objetivas, en todas las capas.
+# El tipo abierto retirado solo puede aparecer donde LEE historia (declarado una vez como constante) o donde se
+# prohíbe (la migración, la guardia, el validador de interop). Cualquier otro archivo que lo nombre es una
+# reintroducción: la CI falla y quien la haga debe declarar aquí su razón, no esquivar la guardia.
+QUESTION_TYPES = ["single_choice", "multiple_choice", "true_false", "numeric"]
+RETIRED_TYPE = "short_text"
+RETIRED_ALLOWLIST = {
+    "infraestructura/lms/functions/bigdata-lms-assess/index.ts": "declara LEGACY_OPEN_TYPE una vez; solo lee y califica historia",
+    "infraestructura/lms/functions/bigdata-lms-interop/index.ts": "declara LEGACY_OPEN_TYPE una vez; solo para omitir y avisar al exportar",
+    "infraestructura/lms/lms-assessment-engine-v2.sql": "migración histórica ya aplicada; la sustituye lms-v54b-question-types.sql",
+    "infraestructura/lms/lms-v54b-question-types.sql": "la migración que lo prohíbe",
+    "utils/validate_no_open_student.py": "esta guardia",
+    "utils/validate_lms_interop.py": "comprueba que la exportación QTI no lo emite",
+}
+SCAN_SUFFIXES = {".ts", ".js", ".mjs", ".html", ".sql", ".py", ".json", ".yml", ".yaml"}
+SKIP_DIRS = {".git", "node_modules", "__pycache__", ".local-docente"}
+for dirpath, dirnames, filenames in os.walk(ROOT):
+    dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+    for name in filenames:
+        p = Path(dirpath) / name
+        if p.suffix.lower() not in SCAN_SUFFIXES:
+            continue
+        rel = p.relative_to(ROOT).as_posix()
+        if rel in RETIRED_ALLOWLIST:
+            continue
+        if RETIRED_TYPE in p.read_text("utf-8", errors="replace"):
+            errors.append(f"{rel}: menciona el tipo de pregunta retirado '{RETIRED_TYPE}' (respuesta abierta)")
+
+def types_in(list_src):
+    return re.findall(r"""["']([a-z_]+)["']""", list_src)
+
+def strip_sql_comments(sql):
+    return "\n".join(l for l in sql.splitlines() if not l.strip().startswith("--"))
+
+assess = read("infraestructura/lms/functions/bigdata-lms-assess/index.ts")
+interop = read("infraestructura/lms/functions/bigdata-lms-interop/index.ts")
+m = re.search(r"const ACTIVE_QUESTION_TYPES=\[([^\]]*)\]", assess)
+clean_response = assess.split("function cleanResponse")[-1].split("async function saveResponse")[0]
+question_checks = [
+    ("API: tipos activos de pregunta = los 4 objetivos", bool(m) and types_in(m.group(1)) == QUESTION_TYPES),
+    ("API: el tipo retirado se declara una sola vez (LEGACY_OPEN_TYPE)",
+     assess.count(f'"{RETIRED_TYPE}"') == 1 and f'const LEGACY_OPEN_TYPE="{RETIRED_TYPE}";' in assess),
+    ("API: crear pregunta valida contra ACTIVE_QUESTION_TYPES", "if(!ACTIVE_QUESTION_TYPES.includes(type))throw" in assess),
+    ("API: agregar pregunta a un quiz rechaza el tipo retirado",
+     "!ACTIVE_QUESTION_TYPES.includes(q.question_type)" in assess.split("async function setQuizItems")[-1].split("function publicQuestion")[0]),
+    ("API: no se versiona una pregunta del tipo retirado", "prior.question_type===LEGACY_OPEN_TYPE)throw" in assess),
+    ("API: responder el tipo retirado se rechaza y no guarda texto",
+     "question_type===LEGACY_OPEN_TYPE)throw new Error" in clean_response and "text:" not in clean_response),
+    ("QTI: exportación con los mismos 4 tipos y sin ítem de texto",
+     'const QTI_EXPORT_TYPES=["single_choice","multiple_choice","true_false","numeric"];' in interop
+     and "<qti-extended-text-interaction" not in interop and interop.count(f'"{RETIRED_TYPE}"') == 1),
+]
+migration = read("infraestructura/lms/lms-v54b-question-types.sql")
+mig_code = strip_sql_comments(migration).lower()
+mm = re.search(r"check\s*\(\s*question_type\s+in\s*\(([^)]*)\)\s*\)\s*not\s+valid", mig_code)
+question_checks += [
+    ("BD: la migración V54-B fija el CHECK con los 4 tipos y NOT VALID", bool(mm) and types_in(mm.group(1)) == QUESTION_TYPES),
+    ("BD: la migración no nombra el tipo retirado en código ejecutable", RETIRED_TYPE not in mig_code),
+    ("BD: la migración descubre el CHECK viejo y es idempotente", "pg_constraint" in mig_code and "if not exists" in mig_code),
+    ("BD: la migración inicial remite a V54-B", "lms-v54b-question-types.sql" in read("infraestructura/lms/lms-assessment-engine-v2.sql")),
+]
+teacher_q = read("lms/teacher-quizzes.html")
+sel = re.search(r'<select[^>]*name="question_type"[^>]*>(.*?)</select>', teacher_q, re.S)
+question_checks += [
+    ("UI docente: el selector de tipo ofrece solo los 4 tipos",
+     bool(sel) and re.findall(r'<option value="([^"]+)"', sel.group(1)) == QUESTION_TYPES),
+    ("UI estudiante: no envía texto libre en quizzes", "{text:" not in read("lms/quizzes.html")),
+    ("Docs: STANDARDS.md declara el tipo retirado y no lo lista como mapeo vigente",
+     "Tipo retirado" in read("infraestructura/lms/STANDARDS.md")
+     and f"- `{RETIRED_TYPE}` →" not in read("infraestructura/lms/STANDARDS.md")),
+]
+for label, ok in question_checks:
+    if not ok:
+        errors.append("Tipos de pregunta: " + label)
 
 if errors:
     print("SIN RESPUESTAS ABIERTAS: FAIL")
@@ -154,5 +221,4 @@ print("SIN RESPUESTAS ABIERTAS: OK")
 print(f" - {checked} superficies revisadas; {len(ALLOWLIST)} excepciones declaradas con razón")
 print(" - entregas, colaboración y muro sin texto libre del estudiante")
 print(" - el backend rechaza lo que la UI ya no ofrece")
-for x in pending:
-    print(" ! PENDIENTE V54-B:", x)
+print(f" - tipos de pregunta: solo {', '.join(QUESTION_TYPES)} (UI, API, BD, QTI y docs); el tipo abierto retirado solo se lee como historia")
