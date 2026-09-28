@@ -1,4 +1,4 @@
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
 const db=createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -7,6 +7,7 @@ const db=createClient(
 );
 const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
+const RELEASE="2026-09-28-v56";
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 
 function origin(req:Request){
@@ -19,7 +20,8 @@ function headers(req:Request){
   return {"Access-Control-Allow-Origin":o||"https://jazaineam1.github.io",
     "Access-Control-Allow-Headers":"authorization, content-type",
     "Access-Control-Allow-Methods":"GET, POST, OPTIONS","Vary":"Origin","Cache-Control":"no-store",
-    "X-Content-Type-Options":"nosniff","Referrer-Policy":"strict-origin-when-cross-origin"};
+    "X-Content-Type-Options":"nosniff","X-BigData-Release":RELEASE,
+    "Referrer-Policy":"strict-origin-when-cross-origin"};
 }
 function out(req:Request,body:unknown,status=200){
   return new Response(JSON.stringify(body),{status,headers:{...headers(req),"Content-Type":"application/json"}});
