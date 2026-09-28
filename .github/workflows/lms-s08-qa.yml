@@ -232,9 +232,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          base="origin/${{ github.base_ref }}"
-          changed="$(git diff --name-only "$base"...HEAD)"
-          if grep -Eq '^infraestructura/lms/functions/(bigdata-session|bigdata-session9|bigdata-lms-core|bigdata-lms-assess|bigdata-lms-interop)/index\.ts
+          changed="$(git diff --name-only origin/main...HEAD)"
+          if grep -Eq '^infraestructura/lms/functions/(bigdata-session|bigdata-session9|bigdata-lms-core|bigdata-lms-assess|bigdata-lms-interop)/index[.]ts
         run: node --test utils/test_lms_kit.mjs
       - name: Smoke endpoints BigData
         shell: bash
@@ -255,7 +254,7 @@ jobs:
 
  <<<"$changed"; then
             grep -qx 'infraestructura/lms/production-release.json' <<<"$changed" || { echo "Cambió una función crítica sin production-release.json"; exit 1; }
-            old="$(git show "$base:infraestructura/lms/production-release.json" 2>/dev/null | python -c 'import json,sys; print(json.load(sys.stdin)["release"])' 2>/dev/null || echo '__missing__')"
+            old="$(git show origin/main:infraestructura/lms/production-release.json 2>/dev/null | python -c 'import json,sys; print(json.load(sys.stdin)["release"])' 2>/dev/null || echo '__missing__')"
             new="$(python -c 'import json; print(json.load(open("infraestructura/lms/production-release.json"))["release"])')"
             test "$old" != "$new" || { echo "El release debe cambiar: $new"; exit 1; }
           fi
