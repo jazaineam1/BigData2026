@@ -169,16 +169,21 @@ print("Tarea 4 — edad confirmada de Carrie-Anne Moss:", resultado_4)
     )
     cells += tarea(
         5, "Decisión de modelado: una relación nueva",
-        "Crea una relación `KNOWS` nueva entre Bob y Peter. Decide en qué dirección la creas (`Bob -> Peter` o `Peter -> Bob`) y **explica en una frase** cuál alternativa descartaste y por qué.",
-        "la dirección que elegiste, tu alternativa descartada, y la razón.",
+        "Crea una relación `KNOWS` nueva entre Bob y Peter. Decide en qué dirección la creas (`Bob -> Peter` o `Peter -> Bob`) y selecciona la alternativa descartada y el criterio de modelado que sustenta tu decisión.",
+        "la dirección elegida, la alternativa descartada y un criterio estructurado de modelado.",
         '''
 # Escribe aquí tu MERGE de la nueva relación KNOWS
 
-decision_direccion = ""  # "Bob -> Peter" o "Peter -> Bob"
-alternativa_descartada = ""  # la otra dirección
-razon = ""  # por qué elegiste una y no la otra
+decision_direccion = "Elige una opción"  #@param ["Elige una opción", "Bob -> Peter", "Peter -> Bob"]
+alternativa_descartada = "Elige una opción"  #@param ["Elige una opción", "Bob -> Peter", "Peter -> Bob"]
+razon = "Elige una opción"  #@param ["Elige una opción", "La dirección forma parte del modelo y la consulta posterior debe respetar la lectura elegida.", "La relación KNOWS siempre debe apuntar de la persona mayor a la menor.", "Neo4j ignora la dirección de todas las relaciones al consultar."]
 
-print("Tarea 5 — decisión:", decision_direccion, "| descartada:", alternativa_descartada, "| razón:", razon)
+assert decision_direccion != "Elige una opción", "Elige una dirección."
+assert alternativa_descartada != "Elige una opción", "Elige la alternativa descartada."
+assert decision_direccion != alternativa_descartada, "La alternativa descartada debe ser distinta de la decisión."
+assert razon != "Elige una opción", "Elige un criterio de modelado."
+
+print("Tarea 5 — decisión:", decision_direccion, "| descartada:", alternativa_descartada, "| criterio:", razon)
 ''',
     )
     cells += tarea(
@@ -219,19 +224,22 @@ print("Tarea 8 — personas sin ninguna relación:", resultado_8)
     )
     cells += tarea(
         9, "El límite de DELETE sin DETACH",
-        "Intenta borrar el nodo de Bob usando `DELETE` **sin** `DETACH` (a sabiendas de que probablemente falle). Copia el mensaje de error exacto que te devuelve Neo4j, y explica en una frase por qué el motor lo bloquea.",
-        "el mensaje de error textual, y tu explicación de por qué ocurre.",
+        "Intenta borrar el nodo de Bob usando `DELETE` **sin** `DETACH` (a sabiendas de que probablemente falle). Observa el mensaje de error real y selecciona la explicación correcta de por qué el motor lo bloquea.",
+        "el mensaje de error capturado por la celda y la causa seleccionada.",
         '''
-mensaje_error = ""  # pega aquí el texto exacto del error
-explicacion = ""  # por qué Neo4j bloquea este DELETE
+mensaje_error = ""
+explicacion = "Elige una opción"  #@param ["Elige una opción", "Bob todavía tiene relaciones y DELETE no las elimina automáticamente; DETACH DELETE elimina primero esas relaciones.", "DELETE falla porque la etiqueta Person es obligatoria y no puede borrarse.", "Neo4j prohíbe borrar cualquier nodo que haya sido creado con MERGE."]
 
 try:
     driver.execute_query("MATCH (p:Person {name:$name}) DELETE p", name="Bob")
 except Exception as e:
     mensaje_error = str(e)
 
+assert mensaje_error, "La prueba debe producir el error real de DELETE sin DETACH."
+assert explicacion != "Elige una opción", "Selecciona la causa del error."
+
 print("Tarea 9 — error obtenido:", mensaje_error)
-print("Tarea 9 — explicación:", explicacion)
+print("Tarea 9 — causa seleccionada:", explicacion)
 ''',
     )
     cells += tarea(

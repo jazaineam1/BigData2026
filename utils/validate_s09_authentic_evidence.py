@@ -12,7 +12,36 @@ nb=json.loads(read("Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb"))
 wall=read("lms/wall.html")
 sources=["".join(c.get("source",[])) for c in nb.get("cells",[])]
 
+# Regla de laboratorios: se decide ELIGIENDO en listas cerradas, no redactando (AGENTS.md §4).
+import ast, re
+CATALOGS=("RAZONES","ENFOQUES","LIMITES")
+def closed_choice_cell():
+    cell=next((s for s in sources if "resultado_defendible_1" in s and "RAZONES" in s),None)
+    if cell is None: return None
+    catalogs={}
+    for node in ast.parse(cell).body:
+        if isinstance(node,ast.Assign) and isinstance(node.targets[0],ast.Name) and node.targets[0].id in CATALOGS:
+            catalogs[node.targets[0].id]=ast.literal_eval(node.value)
+    menus={}
+    for line in cell.splitlines():
+        m=re.match(r"^(\w+) = .*#@param (\[.*\])\s*$",line)
+        if m and m.group(1) in ("razon","decision","alternativa_descartada","limite"):
+            menus[m.group(1)]=[x for x in json.loads(m.group(2)) if x!="Elige una opción"]
+    return cell,catalogs,menus
+
+_cc=closed_choice_cell()
+def menu_matches_catalog():
+    if not _cc: return False
+    _,cat,menu=_cc
+    return (len(cat)==3 and menu.get("razon")==cat["RAZONES"] and menu.get("decision")==cat["ENFOQUES"]
+            and menu.get("alternativa_descartada")==cat["ENFOQUES"] and menu.get("limite")==cat["LIMITES"])
+
 checks=[
+ ("LAB9 sin texto libre: listas cerradas con RAZONES, ENFOQUES y LIMITES", bool(_cc) and len(_cc[1])==3 and all(len(v)>=3 for v in _cc[1].values())),
+ ("LAB9: el menú desplegable es idéntico al catálogo que valida la celda", menu_matches_catalog()),
+ ("LAB9: la celda rechaza texto libre y exige opciones distintas", bool(_cc) and "no se admite texto libre" in _cc[0] and "assert decision != alternativa_descartada" in _cc[0]),
+ ("LAB9: ningún campo de respuesta queda como texto de instrucciones para escribir", bool(_cc) and not re.search(r'^(razon|decision|alternativa_descartada|limite|resultado_defendible_\d|falso_positivo)\s*=\s*"(?!Elige)[^"]*(explica|qué |por qué|ID o nombre)',_cc[0],re.M|re.I)),
+ ("LAB9: los resultados se eligen por posición en el Top-5 propio", bool(_cc) and "posicion_defendible_1" in _cc[0] and "top5_evidencia" in _cc[0]),
  ("LAB9 authentic-review", "evaluator='authentic-review'" in migration and "requires_review" in migration),
  ("constraint permite authentic-review", "bd_activity_catalog_evaluator_check" in migration and "'authentic-review'::text" in migration),
  ("rúbrica 5x2", all(x in migration for x in ["reproducible_result","supported_decision","rejected_alternative","ranking_interpretation","concrete_limit"])),
@@ -27,8 +56,9 @@ checks=[
  ("notebook envía decisión", any('"decision": decision' in s for s in sources)),
  ("notebook envía alternativa y límite", any('"rejected_alternative": alternativa_descartada' in s and '"limit": limite' in s for s in sources)),
  ("notebook envía rankings compactos", any('"top5_lexical": _ids(top_lex)' in s and '"top5_hybrid": _ids(top_hibrido)' in s for s in sources)),
- ("generador coincide con contrato", "FINAL_LMS_CODE" in generator and "bd-s09-lab9" in generator and "qué enfoque final eliges" in generator),
+ ("generador coincide con contrato", "FINAL_LMS_CODE" in generator and "bd-s09-lab9" in generator and "ENFOQUES" in generator),
  ("presentación no suplanta LAB9", "lab9EvidencePanel" in deck and "Evidencia auténtica · LAB 9" in deck),
+ ("presentación LAB9 sin campos abiertos", all(f'<select id="{x}"' in deck for x in ["evQ","evGood","evBad","evAlt","evLim"]) and not any(f'<input id="{x}"' in deck for x in ["evQ","evGood","evBad","evAlt","evLim"])),
  ("WALL revisa con rúbrica", "RUBRIC_FIELDS" in wall and "submitEvidenceReview" in wall and "Pedir ajuste" in wall),
 ]
 failed=[n for n,ok in checks if not ok]

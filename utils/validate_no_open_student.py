@@ -135,6 +135,11 @@ for label, ok in backend_checks:
 s09 = read("Presentaciones/s09-de-palabras-a-significado.html")
 if "el.tagName==='INPUT'&&!['checkbox','radio','range','number'].includes(el.type)" not in s09:
     errors.append("S09: labControlValue envía el contenido de campos <input> de texto al backend (debe enviar solo len:N)")
+for evidence_id in ("evQ","evGood","evBad","evAlt","evLim"):
+    if re.search(rf'<input\b[^>]*\bid="{evidence_id}"', s09):
+        errors.append(f"S09: LAB9 conserva <input> abierto '{evidence_id}'; debe ser una selección estructurada")
+    if not re.search(rf'<select\b[^>]*\bid="{evidence_id}"', s09):
+        errors.append(f"S09: LAB9 no tiene selección estructurada '{evidence_id}'")
 
 # V54-B · Tipos de pregunta: solo respuestas cerradas u objetivas, en todas las capas.
 # El tipo abierto retirado solo puede aparecer donde LEE historia (declarado una vez como constante) o donde se
@@ -211,6 +216,49 @@ for label, ok in question_checks:
     if not ok:
         errors.append("Tipos de pregunta: " + label)
 
+# Laboratorios en cuadernos: el estudiante decide ELIGIENDO, no redactando (AGENTS.md §4). Una celda que deja
+# una variable de respuesta vacía o con instrucciones para redactar ("explica…", "qué…") captura texto libre.
+# Un menú de Colab (`#@param [...]`) es una lista cerrada y no cuenta. Los `input()` no se miran: en su mayoría
+# piden configuración (URI, claves), no respuestas académicas.
+import json
+
+ANSWER_VAR = re.compile(
+    r"""^\s*(raz[oó]n|decisi[oó]n|alternativa\w*|l[ií]mite|justificaci[oó]n|explicaci[oó]n|conclusi[oó]n|reflexi[oó]n|"""
+    r"""interpretaci[oó]n|comentario|respuesta\w*|hip[oó]tesis)\s*=\s*(["'])(.*?)\2\s*(?:#(?!@param).*)?$""", re.I)
+INSTRUCTION = re.compile(r"^(explica\b|escribe\b|describe\b|indica\b|justifica\b|redacta\b|qu[eé]\b|por qu[eé]\b|c[oó]mo\b|"
+                         r"cu[aá]l\b|ID o nombre\b)", re.I)
+
+def asks_to_write(value):
+    """Vacía, o con instrucciones para que el estudiante redacte. Un texto ya escrito por el autor no cuenta."""
+    v = value.strip()
+    return v == "" or bool(INSTRUCTION.match(v))
+
+def notebook_open_answers(path):
+    try:
+        nb = json.loads(path.read_text("utf-8-sig"))
+    except (OSError, ValueError):
+        return [("(ilegible)", 0)]
+    found = []
+    for i, cell in enumerate(nb.get("cells", [])):
+        if cell.get("cell_type") != "code":
+            continue
+        for line in "".join(cell.get("source", [])).splitlines():
+            if "#@param" in line:
+                continue
+            m = ANSWER_VAR.match(line)
+            if m and asks_to_write(m.group(3)):
+                found.append((m.group(1), i))
+    return found
+
+nb_checked = 0
+for nbp in sorted((ROOT / "Cuadernos").rglob("*.ipynb")):
+    rel = nbp.relative_to(ROOT).as_posix()
+    nb_checked += 1
+    hits = notebook_open_answers(nbp)
+    if hits:
+        vars_ = ", ".join(sorted({f"{v} (celda {c})" for v, c in hits})[:4])
+        errors.append(f"{rel}: pide texto libre en una celda ({vars_}); usa una lista cerrada (`#@param [...]`) y rechaza lo demás")
+
 if errors:
     print("SIN RESPUESTAS ABIERTAS: FAIL")
     for e in errors:
@@ -221,4 +269,5 @@ print("SIN RESPUESTAS ABIERTAS: OK")
 print(f" - {checked} superficies revisadas; {len(ALLOWLIST)} excepciones declaradas con razón")
 print(" - entregas, colaboración y muro sin texto libre del estudiante")
 print(" - el backend rechaza lo que la UI ya no ofrece")
+print(f" - laboratorios en cuadernos: {nb_checked} revisados; cero excepciones legacy de texto libre")
 print(f" - tipos de pregunta: solo {', '.join(QUESTION_TYPES)} (UI, API, BD, QTI y docs); el tipo abierto retirado solo se lee como historia")

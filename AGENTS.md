@@ -79,11 +79,20 @@ Cuidado con lo determinista: un resultado idéntico para todo el grupo circula p
 
 ### El estudiante no escribe respuestas abiertas
 
-Las decisiones, alternativas descartadas y límites del estudiante se capturan con **opciones estructuradas y contextualizadas, valores numéricos, código ejecutado, archivos, URLs o evidencia verificable**. El LMS no pide respuestas abiertas de texto al estudiante —ni en entregas, discusiones, revisión por pares, muros ni contribuciones de equipo— salvo autorización explícita del docente para una actividad concreta.
+Las decisiones, alternativas descartadas y límites del estudiante se capturan con **opciones estructuradas y contextualizadas, valores numéricos, código ejecutado, archivos, URLs o evidencia verificable**. Ni el LMS ni ningún laboratorio pide respuestas abiertas de texto al estudiante —ni en entregas, discusiones, revisión por pares, muros, contribuciones de equipo, celdas de cuaderno o campos de una presentación— salvo autorización explícita del docente para una actividad concreta.
 
-- **Por qué:** la prosa libre es lo que un asistente de IA redacta mejor que el estudiante y obliga a calificar sin criterio observable. Una pregunta cerrada bien construida, cuyos distractores son errores que este grupo comete de verdad, sí distingue quién ejecutó.
+**Esto rige para todo laboratorio del repositorio**, sea un cuaderno de Colab, una presentación, un tutorial o una página del LMS. En un laboratorio el estudiante *decide eligiendo*: una opción de una lista cerrada, una posición en **su propio** resultado, un número, código que ejecuta o un archivo. Nunca redactando. Una lista cerrada no debe traer una opción preseleccionada que sea la respuesta correcta.
+
+- **Por qué:** la prosa libre es lo que un asistente de IA redacta mejor que el estudiante y obliga a calificar sin criterio observable. Una pregunta cerrada bien construida, cuyos distractores son errores que este grupo comete de verdad, sí distingue quién ejecutó. Elegir una posición del propio ranking además produce un resultado distinto para cada estudiante.
 - **Qué NO es una respuesta abierta:** un campo de texto que es una *herramienta* (probar un tokenizer, una consulta, un embedding) o un formulario del *docente*. Lo que se prohíbe es el campo que **envía** una respuesta académica.
-- **Cómo se sabe que se logró:** el validador de superficies de estudiante no encuentra un campo de texto que envíe respuesta, y el backend rechaza lo que la interfaz ya no ofrece: esconder el formulario no basta.
+- **Cómo se sabe que se logró:** el validador de superficies de estudiante no encuentra un campo de texto que envíe respuesta; el validador de cuadernos no encuentra una celda que deje una variable de respuesta vacía o con instrucciones para redactar; y el backend rechaza lo que la interfaz ya no ofrece: esconder el formulario no basta. Una celda de laboratorio debe **rechazar** el texto libre al ejecutarse, no solo no ofrecerlo.
+
+### El PDA es la fuente de guía de la evaluación
+
+El Plan de Desarrollo de la Asignatura vigente fija la finalidad del curso, los porcentajes de evaluación y las producciones esperadas. Toda entrega evaluable y toda rúbrica deben poder trazarse a él.
+
+- **Por qué:** una evaluación que el PDA no respalda es una decisión que el docente no autorizó, y una que el PDA exige y el material no cubre deja al estudiante sin ruta.
+- **Cómo se sabe que se logró:** para cada entrega evaluable puedes señalar qué componente y qué porcentaje del PDA la respalda. Si el PDA en el repositorio no es el vigente, se dice en su guía y se pide el vigente; no se rellena de memoria.
 
 ### Un quiz evalúa la sesión en la que se aplica
 
