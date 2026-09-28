@@ -135,6 +135,11 @@ for label, ok in backend_checks:
 s09 = read("Presentaciones/s09-de-palabras-a-significado.html")
 if "el.tagName==='INPUT'&&!['checkbox','radio','range','number'].includes(el.type)" not in s09:
     errors.append("S09: labControlValue envía el contenido de campos <input> de texto al backend (debe enviar solo len:N)")
+for evidence_id in ("evQ","evGood","evBad","evAlt","evLim"):
+    if re.search(rf'<input\b[^>]*\bid="{evidence_id}"', s09):
+        errors.append(f"S09: LAB9 conserva <input> abierto '{evidence_id}'; debe ser una selección estructurada")
+    if not re.search(rf'<select\b[^>]*\bid="{evidence_id}"', s09):
+        errors.append(f"S09: LAB9 no tiene selección estructurada '{evidence_id}'")
 
 # V54-B · Tipos de pregunta: solo respuestas cerradas u objetivas, en todas las capas.
 # El tipo abierto retirado solo puede aparecer donde LEE historia (declarado una vez como constante) o donde se
@@ -228,12 +233,6 @@ def asks_to_write(value):
     v = value.strip()
     return v == "" or bool(INSTRUCTION.match(v))
 
-# Cuadernos anteriores a la regla que aún capturan texto libre: se migran, y esta lista solo puede encogerse.
-LEGACY_NOTEBOOKS = {
-    "Cuadernos/Quiz_Neo4j_Fundamentos.ipynb":
-        "quiz de práctica anterior a la regla: deja razon, alternativa_descartada y explicacion vacías para escribirlas; migrar a opciones cerradas",
-}
-
 def notebook_open_answers(path):
     try:
         nb = json.loads(path.read_text("utf-8-sig"))
@@ -251,19 +250,14 @@ def notebook_open_answers(path):
                 found.append((m.group(1), i))
     return found
 
-nb_checked, legacy_seen = 0, set()
-for nbp in sorted((ROOT / "Cuadernos").glob("*.ipynb")):
+nb_checked = 0
+for nbp in sorted((ROOT / "Cuadernos").rglob("*.ipynb")):
     rel = nbp.relative_to(ROOT).as_posix()
     nb_checked += 1
     hits = notebook_open_answers(nbp)
-    if hits and rel in LEGACY_NOTEBOOKS:
-        legacy_seen.add(rel)
-    elif hits:
+    if hits:
         vars_ = ", ".join(sorted({f"{v} (celda {c})" for v, c in hits})[:4])
         errors.append(f"{rel}: pide texto libre en una celda ({vars_}); usa una lista cerrada (`#@param [...]`) y rechaza lo demás")
-for rel in LEGACY_NOTEBOOKS:
-    if rel not in legacy_seen:
-        errors.append(f"LEGACY_NOTEBOOKS obsoleto: {rel} ya no captura texto libre; bórralo de la lista")
 
 if errors:
     print("SIN RESPUESTAS ABIERTAS: FAIL")
@@ -275,5 +269,5 @@ print("SIN RESPUESTAS ABIERTAS: OK")
 print(f" - {checked} superficies revisadas; {len(ALLOWLIST)} excepciones declaradas con razón")
 print(" - entregas, colaboración y muro sin texto libre del estudiante")
 print(" - el backend rechaza lo que la UI ya no ofrece")
-print(f" - laboratorios en cuadernos: {nb_checked} revisados, ninguno nuevo pide texto libre; pendientes de migrar: {', '.join(sorted(legacy_seen)) or 'ninguno'}")
+print(f" - laboratorios en cuadernos: {nb_checked} revisados; cero excepciones legacy de texto libre")
 print(f" - tipos de pregunta: solo {', '.join(QUESTION_TYPES)} (UI, API, BD, QTI y docs); el tipo abierto retirado solo se lee como historia")
