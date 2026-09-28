@@ -20,13 +20,9 @@ El merge publica solo el **frontend** (Pages). Nada de lo siguiente se despliega
 
 ## 2. Antes de la clase del 8 de octubre (S09)
 
-- [ ] **Regla «los laboratorios no piden texto libre» (`AGENTS.md` §4): lo que queda.** El LAB 9 de S09 ya está migrado (listas cerradas, posición en el Top-5 propio, celda que rechaza texto libre; sin cambios de backend: se envía el texto fijo de la opción elegida). Faltan:
-  - **`Cuadernos/Quiz_Neo4j_Fundamentos.ipynb`:** deja `razon`, `alternativa_descartada` y `explicacion` vacías para escribirlas. Es la única excepción de `LEGACY_NOTEBOOKS` en `utils/validate_no_open_student.py`; migrarla a opciones cerradas y borrar la excepción.
-  - **Presentación de S09, diapositiva «Evidencia final» (LAB 9):** los campos `evAlt` («Alternativa descartada») y `evLim` («Límite») son `<input>` de texto que solo generan un JSON local y no viajan al LMS (la telemetría envía solo su longitud). Convertirlos en listas cerradas con el mismo catálogo del cuaderno para que la presentación y el cuaderno no se contradigan.
-  - **Otros laboratorios:** revisar los que capturan texto sin usar el patrón «variable de respuesta» (p. ej. `input()` de respuestas) y el LAB de la sesión 8, y ampliar la guardia si aparece otro patrón.
-  - Sin valores por defecto que regalen la respuesta: de #102 **no** portar `razon_clave="complementarias"`, `decision_clave="hibrida"` ni `alternativa_clave="sumar_scores"`.
+- [ ] **Cobertura de laboratorios sin texto libre:** LAB 9 de S09, el quiz Neo4j y el constructor de evidencia de la presentación ya usan opciones estructuradas y la guardia recorre los cuadernos sin excepciones legacy. Mantener la regla al crear sesiones nuevas y ampliar el detector solo si aparece un patrón no cubierto (por ejemplo, un `input()` que realmente capture una respuesta académica y no configuración).
 - [ ] **El PDA vigente de 2026.** El PDF que hay en el repo es el PDA **2023-I**; el archivo `PDA_2026-02_BIGDATA.pdf` recibido después es idéntico byte a byte. Subir el PDA vigente y actualizar `docs/PDA_guia.md` (porcentajes de evaluación, temas y las diferencias con `course.json`).
-- [ ] **Distractores de calidad (PR #91):** 20 de 22 cambios ya portados (D2, D5 y `lms-s09-distractor-quality-v55.sql`, idempotente, con `validate_s09_distractors.py`). **Falta decidir la redacción de dos** que se dejaron con su etiqueta anterior porque rozan la respuesta correcta: lab8 paso 0 opción 2 (propuesta: «Solo los documentos que aparecen en ambos rankings (intersección)») y lab4 paso 1 opción 2 (propuesta: «Semántica con un embedding de más dimensiones, porque conserva mejor los caracteres exactos»). Están fijados como `PENDING` en el validador. Al fusionar el porte, desplegar el SQL y cerrar #91.
+- [ ] **Desplegar distractores S09:** el porte selectivo de #91 quedó completo (22/22 etiquetas plausibles) en `lms-s09-distractor-quality-v55.sql` con validador idempotente. Falta aplicar esa migración en Supabase antes de S09.
 - [ ] **Profundización (PR #52):** 5 diapositivas nuevas (Laboratorio integrado, Vector por dentro, Distancia y similitud, Persistencia en MongoDB, Recall vs Precision). Decisión de contenido y de dosis (`AGENTS.md` §2): quizá solo «Vector por dentro» y «Recall vs Precision». Portar primero la presentación y después el generador del cuaderno; el orden con #91 y con el LAB 9 importa: #91, luego #52, luego LAB 9.
 
 ## 3. Wall de competencia (funcionalidad nueva)
@@ -47,12 +43,10 @@ Hoy hay ~413 MB en 5 archivos que la guardia `check_repo_hygiene.py` lista con s
 - [ ] **Reescribir el historial** (`git filter-repo`) para bajar el peso real de los clones. Operación aparte: copia de respaldo (`git bundle`), congelar, force push coordinado y recrear ramas. No hacerlo cerca de una clase.
 - [ ] Ajustar `GRANDFATHERED` en `check_repo_hygiene.py` a medida que salgan archivos.
 
-## 5. PR antiguos y gobernanza de GitHub
+## 5. Gobernanza de GitHub
 
-- [ ] **#66 (TC1 2025–2026):** conservar solo como referencia. Portarlo cambiaría reglas y versión del validador con los estudiantes ya entregando, y el corte dinámico da un snapshot distinto a cada grupo (choca con `AGENTS.md` §10). Reutilizables con poco riesgo: las 3 preguntas de caso y sus límites.
-- [ ] **#102, #91, #52:** cerrar como «superado por V54» solo cuando su contenido útil esté portado (secciones 2 y 3).
-- [ ] Rama `fix/student-ux-no-open-wall-v3`: revisar sus 2 commits (cuaderno S09 y `bigdata-lms-assess`) y borrarla.
 - [ ] Ajustes del repo (hoy: `delete_branch_on_merge`, `allow_auto_merge` y rulesets desactivados): borrar rama al fusionar, squash merge, PR obligatorio y checks `qa`, `visual` y `higiene` obligatorios. Se hace en Settings; no se ha tocado.
+- [ ] Borrar las ramas remotas históricas una vez cerrados sus PR. El conector usado para mantenimiento no expone borrado de refs; hacerlo desde Settings/GitHub CLI cuando se habilite ese paso.
 
 ## 6. Consolidación de arquitectura (V55)
 
