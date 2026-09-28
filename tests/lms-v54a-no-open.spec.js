@@ -75,12 +75,15 @@ test('colaboración: el estudiante no tiene campos de texto y envía solo opcion
 
   await page.getByRole('button', { name: 'Revisión por pares' }).click();
   await expect(page.locator('textarea')).toHaveCount(0);
+  // El envío grupal recarga la página y redibuja este formulario: se reintenta si quedó vacío.
   const peer = page.locator('[data-peer="p1"]');
-  await peer.locator('[data-peer-code=c1]').fill('4');
-  await peer.locator('[data-peer-code=c2]').fill('3');
-  await peer.locator('select[name=weakest_criterion]').selectOption('c2');
-  await peer.getByRole('button', { name: 'Enviar revisión' }).click();
-  await expect.poll(() => sent.some(b => b.action === 'submit_peer_review')).toBeTruthy();
+  await expect(async () => {
+    await peer.locator('[data-peer-code=c1]').fill('4');
+    await peer.locator('[data-peer-code=c2]').fill('3');
+    await peer.locator('select[name=weakest_criterion]').selectOption('c2');
+    await peer.getByRole('button', { name: 'Enviar revisión' }).click();
+    expect(sent.some(b => b.action === 'submit_peer_review')).toBeTruthy();
+  }).toPass({ timeout: 10000 });
   const r = sent.find(b => b.action === 'submit_peer_review');
   expect(r).toMatchObject({ weakest_criterion: 'c2', rubric_scores: { c1: 4, c2: 3 } });
   expect(r).not.toHaveProperty('feedback');
@@ -130,9 +133,14 @@ test('colaboración docente: publica comunicados y responde con texto', async ({
   await expect.poll(() => sent.some(b => b.action === 'create_thread')).toBeTruthy();
   expect(sent.find(b => b.action === 'create_thread')).toMatchObject({ title: 'Traigan su manifest', session_number: '8' });
 
+  // Tras publicar, la página recarga y vuelve a dibujar las conversaciones: si eso ocurre entre
+  // escribir y enviar, el campo nuevo queda vacío y el navegador bloquea el envío (required).
+  // Por eso se reintenta escribir y enviar hasta que el envío realmente ocurre.
   const reply = page.locator('[data-post="t1"]');
-  await reply.locator('textarea[name=body]').fill('Sí, hasta el miércoles.');
-  await reply.getByRole('button', { name: 'Responder' }).click();
-  await expect.poll(() => sent.some(b => b.action === 'post_discussion')).toBeTruthy();
+  await expect(async () => {
+    await reply.locator('textarea[name=body]').fill('Sí, hasta el miércoles.');
+    await reply.getByRole('button', { name: 'Responder' }).click();
+    expect(sent.some(b => b.action === 'post_discussion')).toBeTruthy();
+  }).toPass({ timeout: 10000 });
   expect(sent.find(b => b.action === 'post_discussion')).toMatchObject({ thread_id: 't1' });
 });
