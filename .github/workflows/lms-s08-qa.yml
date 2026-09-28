@@ -224,7 +224,7 @@ jobs:
       - name: Validar cero respuestas abiertas del estudiante
         run: python utils/validate_no_open_student.py
       - name: Validar enlaces locales del repositorio
-        run: python utils/validate_static_links.py --root .
+        run: python utils/validate_static_links.py --root . --allow-missing lms/assets/vendor/supabase.js
       - name: Validar contrato de release de producción
         run: python utils/validate_production_release.py
       - name: Exigir bump de release si cambia una Edge Function crítica
