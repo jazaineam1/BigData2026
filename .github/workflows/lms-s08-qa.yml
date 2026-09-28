@@ -233,26 +233,7 @@ jobs:
         run: |
           set -euo pipefail
           changed="$(git diff --name-only origin/main...HEAD)"
-          if grep -Eq '^infraestructura/lms/functions/(bigdata-session|bigdata-session9|bigdata-lms-core|bigdata-lms-assess|bigdata-lms-interop)/index[.]ts
-        run: node --test utils/test_lms_kit.mjs
-      - name: Smoke endpoints BigData
-        shell: bash
-        run: |
-          set -euo pipefail
-          BASE="https://gnpouhsvsisqoxketlfr.supabase.co/functions/v1"
-          ORIGIN="https://jazaineam1.github.io"
-          for fn in bigdata-auth bigdata-access-request bigdata-access-review; do
-            code="$(curl -sS -o /tmp/${fn}-options.txt -w '%{http_code}' -X OPTIONS "${BASE}/${fn}" -H "Origin: ${ORIGIN}" -H 'Access-Control-Request-Method: POST')"
-            test "$code" = "200"
-          done
-          code="$(curl -sS -o /tmp/bigdata-auth.json -w '%{http_code}' -X POST "${BASE}/bigdata-auth" -H "Origin: ${ORIGIN}" -H 'Content-Type: application/json' --data '{"action":"me"}')"
-          test "$code" = "401"
-          code="$(curl -sS -o /tmp/bigdata-request.json -w '%{http_code}' -X POST "${BASE}/bigdata-access-request" -H "Origin: ${ORIGIN}" -H 'Content-Type: application/json' --data '{"full_name":"A","email":"bad","website":""}')"
-          test "$code" = "400"
-          code="$(curl -sS -o /tmp/bigdata-review.json -w '%{http_code}' -X POST "${BASE}/bigdata-access-review" -H "Origin: ${ORIGIN}" -H 'Content-Type: application/json' --data '{"action":"approve","request_id":"00000000-0000-0000-0000-000000000000"}')"
-          test "$code" = "401"
-
- <<<"$changed"; then
+          if grep -Eq '^infraestructura/lms/functions/(bigdata-session|bigdata-session9|bigdata-lms-core|bigdata-lms-assess|bigdata-lms-interop)/index[.]ts$' <<<"$changed"; then
             grep -qx 'infraestructura/lms/production-release.json' <<<"$changed" || { echo "Cambió una función crítica sin production-release.json"; exit 1; }
             old="$(git show origin/main:infraestructura/lms/production-release.json 2>/dev/null | python -c 'import json,sys; print(json.load(sys.stdin)["release"])' 2>/dev/null || echo '__missing__')"
             new="$(python -c 'import json; print(json.load(open("infraestructura/lms/production-release.json"))["release"])')"
