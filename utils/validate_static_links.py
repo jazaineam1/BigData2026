@@ -34,10 +34,12 @@ def target_for(root:Path,source:Path,raw:str):
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--root",type=Path,default=Path("."))
+    ap.add_argument("--allow-missing",action="append",default=[],help="Ruta relativa al root generada en otra etapa")
     args=ap.parse_args()
     root=args.root.resolve()
     if not root.exists():
         raise SystemExit(f"LINK CHECK: no existe {root}")
+    allowed={(root/Path(p)).resolve() for p in args.allow_missing}
     checked=0
     errors=[]
     html_files=sorted(root.rglob("*.html"))
@@ -54,7 +56,7 @@ def main():
             except ValueError:
                 errors.append((source,raw,"sale del artefacto"))
                 continue
-            if not target.exists():
+            if not target.exists() and target not in allowed:
                 errors.append((source,raw,str(target.relative_to(root))))
     if errors:
         print(f"LINK CHECK: FAIL · {len(errors)} referencia(s) local(es) rota(s)")
