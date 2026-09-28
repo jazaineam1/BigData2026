@@ -6,7 +6,7 @@
 -- V54-A; v55 es el siguiente libre y queda después de todas ellas.
 --
 -- QUÉ HACE
---   Reemplaza la ETIQUETA (label) de 20 opciones incorrectas de las
+--   Reemplaza la ETIQUETA (label) de 22 opciones incorrectas de las
 --   autocomprobaciones bd-s09-lab1, lab2, lab-e5, lab-chunk, lab4, lab5, lab6,
 --   lab7 y lab8 por errores plausibles que el grupo comete de verdad. La
 --   autocomprobación sigue siendo formativa; se mejora su poder diagnóstico.
@@ -24,9 +24,7 @@
 --   * No toca ninguna fila de bd_evidence / progreso ni datos de estudiantes.
 --   * No sobrescribe una etiqueta editada a mano después de V51 (si la etiqueta
 --     actual no es la antigua esperada, esa opción se deja como está).
---   * No cambia dos opciones que quedan PENDIENTES de decisión docente:
---     bd-s09-lab8 paso 0 opción 2 (value 'embeddings') y bd-s09-lab4 paso 1
---     opción 2 (value 'none'). Conservan su etiqueta de V51.
+--   * No cambia las respuestas correctas, los value internos ni los hashes.
 --   * No toca S07.
 
 do $$
@@ -60,6 +58,7 @@ begin
         ('bd-s09-lab-chunk',0, 2, 'no_effect',         'No cambia nada',                         'Mejora contexto sin aumentar duplicación ni costo de proceso'),
         ('bd-s09-lab-chunk',1, 1, 'perfect_relevance', 'Garantiza relevancia perfecta',          'Evita por completo los falsos positivos en los límites de fragmento'),
         ('bd-s09-lab4',     0, 2, 'random',            'Aleatoria',                              'Lexical/BM25 aumentando el peso de términos raros, aunque no haya equivalentes textuales'),
+        ('bd-s09-lab4',     1, 2, 'none',              'Ninguna búsqueda',                       'Semántica con un embedding de más dimensiones, porque el vector preserva exactamente el identificador'),
         ('bd-s09-lab5',     0, 2, 'sql_join',          'Basada en JOIN relacional',              'Aproximada sobre una muestra aleatoria del corpus'),
         ('bd-s09-lab5',     1, 1, 'perfect_accuracy',  'Garantiza recall perfecto y costo cero', 'Mantiene siempre el mismo recall que una búsqueda exacta si el grafo está bien construido'),
         ('bd-s09-lab5',     1, 2, 'no_index',          'No necesita índice',                     'Reduce costo principalmente porque evita mantener estructuras auxiliares de índice'),
@@ -69,6 +68,7 @@ begin
         ('bd-s09-lab7',     0, 2, 'document_id',       'Solo el ID del documento',               'El vector de un documento de referencia elegido manualmente'),
         ('bd-s09-lab7',     1, 2, 'dimensions',        'La dimensión del vector',                'La cantidad de vecinos que quedan después del corte final'),
         ('bd-s09-lab7',     2, 2, 'index_size',        'El tamaño del índice',                   'El número de candidatos que se exploran antes del ranking final'),
+        ('bd-s09-lab8',     0, 2, 'embeddings',        'Vectores concatenados',                  'Solo los documentos que aparecen en ambos rankings (intersección)'),
         ('bd-s09-lab8',     1, 2, 'no_numbers',        'Porque ninguno produce números',         'Porque el coseno siempre domina numéricamente al score BM25')
       ) as t(code, step_idx, opt_idx, opt_value, old_label, new_label)
       where t.code = a.code
