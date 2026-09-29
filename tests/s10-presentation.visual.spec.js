@@ -146,7 +146,7 @@ test('S10 herramientas pedagógicas responden en modo local',async({page})=>{
   await expect(page.locator('#samplingInterval')).toContainText('6.0 s');
 
   await page.evaluate(()=>{location.hash='#s33'});
-  await page.locator('#ans-bd-s10-c8').selectOption('sha256_sampling');
+  await page.locator('#ans-bd-s10-c8').selectOption('b');
   await page.locator('[data-submit-challenge="bd-s10-c8"]').click();
   await expect(page.locator('#fb-bd-s10-c8')).toContainText('módulo LMS');
 });

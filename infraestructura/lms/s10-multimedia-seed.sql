@@ -57,14 +57,14 @@ on conflict (code) do update set
 
 insert into public.bd_lms_activity_keys(activity_code,session_number,answer_hash,hint)
 values
-('bd-s10-c1',10,'6edb2e96de687a310049a542bdd5ffcafa7e4fd66db058acde09d6a8b8390e6d','Cuenta archivos procesables, no modalidades ni noticias.'),
-('bd-s10-c2',10,'ebb031520306d7f719f398ee120dcf2e5132194b1add303c99f4b88c1ede9001','El RAW entra; metadata describe; derived nace del RAW.'),
-('bd-s10-c3',10,'1830ab2e9b890df57e2823c4665aef9ec4ec1796f2d501d7c96942f9f7ddcea9','Identifica e inspecciona antes de transformar.'),
-('bd-s10-c4',10,'af484f06684f480191ebb363e64c1dde0c382d70d19448c2524f7237cf9dff49','SHA-256 responde identidad exacta de bytes, no significado.'),
-('bd-s10-c5',10,'1d9d3114434666b836fe2d13dde5436ef3fb8d8cd8c1e0f54e0d637d2c649c9c','MP4 organiza streams; H.264 y AAC codifican señales.'),
-('bd-s10-c6',10,'0e001199cea558cc9b85276eebbd8f4e7d8d2103d6576d02ca18be25c88796dd','-ac controla canales y -ar sample rate.'),
-('bd-s10-c7',10,'82c1f8f954a321d3a77877bc78a5a56640ee60ffff78b2179516a7d5c2699579','Divide duración entre el máximo de frames.'),
-('bd-s10-c8',10,'bb4847f195eccb64e9d5bd6ccfdc8561246da3688d036be4af588b64b76ecf16','Falta identidad y el conteo de frames viola el límite.')
+('bd-s10-c1',10,'01609ba7872bb096b1edd8b9e0fb8d1442153680addb690bafe63ac4c17eb819','Cuenta archivos procesables, no modalidades ni noticias.'),
+('bd-s10-c2',10,'be49b14c52fec72a946ecb3f39ced1ac7c451dc9bb321120da7639b7b908e6cd','El RAW entra; metadata describe; derived nace del RAW.'),
+('bd-s10-c3',10,'0474872d07584f1380bc5833362a34b7c1b5f4fd1fa2397d801bdaf440d0a8b6','Identifica e inspecciona antes de transformar.'),
+('bd-s10-c4',10,'e4607f34d0c16d42092839ddba17aa9c17ed810633b451bf2dbfa1b83f01ed2e','SHA-256 responde identidad exacta de bytes, no significado.'),
+('bd-s10-c5',10,'af87e1780e02b593c9c0191eea1d92a44564d07a65345f494a4aa073fb593674','MP4 organiza streams; H.264 y AAC codifican señales.'),
+('bd-s10-c6',10,'05162abf0415e1bb875a85b821efee6f057313aa248707d115c1c703948409ed','-ac controla canales y -ar sample rate.'),
+('bd-s10-c7',10,'b1efec6387dbd3cc127a87d84ab24db1b0b5dcb8cbad5cfcfc23e808add1083b','Divide duración entre el máximo de frames.'),
+('bd-s10-c8',10,'432f6299404b196d826c0c78677af193b3186885d58d0ea31800b168e8a5faca','Falta identidad y el conteo de frames viola el límite.')
 on conflict(activity_code) do update set session_number=excluded.session_number,answer_hash=excluded.answer_hash,hint=excluded.hint,updated_at=now();
 
 insert into public.bd_activity_catalog(code,evaluator,steps,config,competency_code,seeded,wall_prompt,version,updated_at)
