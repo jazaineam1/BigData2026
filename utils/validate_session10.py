@@ -64,6 +64,8 @@ need(all(code in deck for code in ["bd-s10-lab-image","bd-s10-lab-audio","bd-s10
 for marker in ["S10 LIVE","articleIndex","hashText","pipelineBuilder","mediaFile","audioRate","videoMaxFrames","manifestPreview"]:
     need(marker in deck,f"presentación: falta herramienta {marker}")
 need("answer_challenge" in deck and "data-submit-challenge" in deck,"presentación: desafíos no están conectados al LMS")
+need("LOCAL_ANSWERS" not in deck,"presentación: no debe exponer clave local de D1-D8")
+need("sessionControlBanner" in deck and "renderTeacherControls" in deck,"presentación: controles docentes no están integrados")
 need("K.evidence" in deck and "data-submit-lab" in deck,"presentación: LAB no registran evidencia")
 need('data-session="10"' in deck and "lms-kit.js" in deck,"presentación: falta LMS Kit S10")
 

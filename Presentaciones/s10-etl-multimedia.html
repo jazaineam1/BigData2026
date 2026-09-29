@@ -72,6 +72,8 @@ pre{margin:.35cqw 0;background:var(--code);color:#f7fbff;border-radius:.9cqw;pad
 #s19 .lab-check>.feedback,#s23 .lab-check>.feedback,#s29 .lab-check>.feedback{grid-column:1/-1}
 #s19 .lab-check label,#s23 .lab-check label,#s29 .lab-check label{min-width:0}
 #s19 .lab-check select,#s23 .lab-check select,#s29 .lab-check select{padding:.42cqw .48cqw}
+
+.control-banner{position:fixed;z-index:65;top:58px;left:50%;transform:translateX(-50%);width:min(760px,calc(100vw - 24px));display:flex;align-items:center;gap:10px;background:#fff7e8;border:2px solid #d77a12;border-radius:14px;padding:10px 12px;box-shadow:0 10px 32px rgba(18,34,83,.18);color:var(--ink);font-size:14px}.control-banner>span{flex:1}.control-close{border:0;background:transparent;color:var(--navy);font-size:20px;font-weight:950;cursor:pointer}
 </style>
 </head>
 <body>
@@ -444,7 +446,7 @@ channels = 1</pre><p>El codec/formato puede decidirse después; aquí fijamos la
  <div class="card ex"><b>Puente S11</b><ul><li>¿cómo partimos el trabajo?</li><li>¿quién asigna tareas a workers?</li><li>¿cómo reintentamos una partición?</li><li>¿qué operaciones obligan a mover datos?</li></ul><button class="btn alt" id="finalLiveBtn" type="button">Ver mi S10 Live</button></div>
 </div></div></div>
 </section></div>
-<div class="bar"><i id="bar"></i></div>
+<div class="bar"><i id="bar"></i></div><div id="sessionControlBanner" class="control-banner hidden" aria-live="polite"><span id="sessionControlText"></span><button id="sessionControlGo" class="btn ghost hidden" type="button">Ir</button><button id="sessionControlClose" class="control-close" type="button" aria-label="Ocultar aviso">×</button></div>
 <div class="top"><span id="moduleIdentity" class="identity-pill">Modo local</span><button id="liveBtn" type="button">S10 Live</button><a id="wallLink" class="hidden" href="../lms/wall.html?s=10">WALL</a><a href="../lms/session.html?s=10">Módulo</a><a target="_blank" rel="noopener" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/10_ETL_Multimedia.ipynb">Cuaderno</a><button type="button" onclick="toggleDrawer()">Mapa</button><button id="fs" type="button" aria-label="Pantalla completa">⛶</button></div>
 <aside class="live-drawer" id="liveDrawer" aria-label="S10 Live"><div class="live-head"><div><div class="k">S10 LIVE</div><h2 style="margin:0">Tu progreso conceptual</h2></div><button class="btn ghost" id="closeLive" type="button">Cerrar</button></div><p id="liveIdentity" class="mini">Modo local: las herramientas funcionan sin registrar progreso.</p><div id="liveStats" class="live-grid"></div><h3 class="live-section-title">D1–D8</h3><div id="liveChallenges" class="live-list"></div><h3 class="live-section-title">LAB</h3><div id="liveLabs" class="live-list"></div><div id="liveStatus" class="feedback">Primer intento y dominio son formativos; no premian velocidad.</div></aside><nav class="nav" aria-label="Navegación de diapositivas"><button id="prev" aria-label="Anterior">‹</button><span class="count" id="count"></span><button id="next" aria-label="Siguiente">›</button></nav>
 <aside class="drawer" id="drawer" aria-label="Mapa de diapositivas"><h2>Mapa S10 · V2</h2><p>Problema → herramienta → desafío → LAB → verificación.</p><a href="#s1" onclick="toggleDrawer(false)">01 · ETL multimodal: de imágenes, audio y video a datos trazables</a><a href="#s2" onclick="toggleDrawer(false)">02 · Una noticia es un objeto compuesto</a><a href="#s3" onclick="toggleDrawer(false)">03 · Hoy construimos la entrada de las siguientes sesiones</a><a href="#s4" onclick="toggleDrawer(false)">04 · Representar no es conservar el original</a><a href="#s5" onclick="toggleDrawer(false)">05 · Nuestro dataset ya era multimodal</a><a href="#s6" onclick="toggleDrawer(false)">06 · La unidad de procesamiento cambia: noticia → asset</a><a href="#s7" onclick="toggleDrawer(false)">07 · La tecnología cambia; el patrón ETL permanece</a><a href="#s8" onclick="toggleDrawer(false)">08 · Cinco objetos que no debemos confundir</a><a href="#s9" onclick="toggleDrawer(false)">09 · El hash responde: ¿son exactamente los mismos bytes?</a><a href="#s10" onclick="toggleDrawer(false)">10 · La extensión del nombre no demuestra el contenido</a><a href="#s11" onclick="toggleDrawer(false)">11 · Container, codec y stream son conceptos distintos</a><a href="#s12" onclick="toggleDrawer(false)">12 · ffprobe convierte multimedia en metadata estructurada</a><a href="#s13" onclick="toggleDrawer(false)">13 · Desarma un activo multimedia</a><a href="#s14" onclick="toggleDrawer(false)">14 · Cambian los transformadores; no cambia la arquitectura</a><a href="#s15" onclick="toggleDrawer(false)">15 · Una imagen también tiene estructura técnica</a><a href="#s16" onclick="toggleDrawer(false)">16 · Transformar no significa destruir</a><a href="#s17" onclick="toggleDrawer(false)">17 · Del píxel al texto procesable</a><a href="#s18" onclick="toggleDrawer(false)">18 · Noticia real de El Tiempo → identidad → metadata → thumbnail</a><a href="#s19" onclick="toggleDrawer(false)">19 · Cuatro preguntas obligatorias después de una salida</a><a href="#s20" onclick="toggleDrawer(false)">20 · Una señal digital se inspecciona antes de normalizar</a><a href="#s21" onclick="toggleDrawer(false)">21 · Tres audios pueden exigir una entrada común</a><a href="#s22" onclick="toggleDrawer(false)">22 · Normalizar y volver a medir</a><a href="#s23" onclick="toggleDrawer(false)">23 · Del artículo real a un fixture reproducible y un WAV canónico</a><a href="#s24" onclick="toggleDrawer(false)">24 · Ya tenemos identidad, metadata y derivados</a><a href="#s25" onclick="toggleDrawer(false)">25 · Un video es un container con varios streams</a><a href="#s26" onclick="toggleDrawer(false)">26 · No procesamos todos los frames porque existan</a><a href="#s27" onclick="toggleDrawer(false)">27 · ¿Cuántos frames produciría tu regla?</a><a href="#s28" onclick="toggleDrawer(false)">28 · Extraer frames es una transformación trazable</a><a href="#s29" onclick="toggleDrawer(false)">29 · Video = inspector + ETL de audio + ETL de imagen</a><a href="#s30" onclick="toggleDrawer(false)">30 · La restricción cambia: máximo 10 frames por video</a><a href="#s31" onclick="toggleDrawer(false)">31 · Crear → inspeccionar → muestrear → comprobar</a><a href="#s32" onclick="toggleDrawer(false)">32 · El producto de ETL no es una carpeta: es un contrato estructurado</a><a href="#s33" onclick="toggleDrawer(false)">33 · La sesión termina con reglas objetivas, no con “parece funcionar”</a><a href="#s34" onclick="toggleDrawer(false)">34 · El pipeline funciona. Ahora cambia la escala.</a></aside>
@@ -478,8 +480,25 @@ let s10Model=null,stopRealtime=null;
 const CHALLENGE_SLIDES={"bd-s10-c1":3,"bd-s10-c2":8,"bd-s10-c3":11,"bd-s10-c4":14,"bd-s10-c5":18,"bd-s10-c6":22,"bd-s10-c7":28,"bd-s10-c8":33};
 const CHALLENGE_LABELS={"bd-s10-c1":"D1 · grano","bd-s10-c2":"D2 · objetos","bd-s10-c3":"D3 · pipeline","bd-s10-c4":"D4 · hash","bd-s10-c5":"D5 · container","bd-s10-c6":"D6 · audio","bd-s10-c7":"D7 · sampling","bd-s10-c8":"D8 · gates"};
 const LAB_LABELS={"bd-s10-lab-image":"LAB 1 · imagen","bd-s10-lab-audio":"LAB 2 · audio","bd-s10-lab-video":"LAB 3 · video"};
-const LOCAL_ANSWERS={"bd-s10-c1":"4_assets","bd-s10-c2":"raw_original__metadata_duration__derived_thumbnail","bd-s10-c3":"raw>identify>inspect>transform>validate>manifest","bd-s10-c4":"bytes_identicos","bd-s10-c5":"mp4_container__h264_aac_codecs","bd-s10-c6":"ac1_ar16000","bd-s10-c7":"6","bd-s10-c8":"sha256_sampling"};
+const PIPELINE_TARGET="raw>identify>inspect>transform>validate>manifest";
 const progressMap=()=>new Map((s10Model?.activity_progress||[]).map(x=>[x.activity_code,x]));
+
+function controlFor(key){return (s10Model?.controls||[]).find(x=>x.control_key===key)}
+function labClosed(code){return controlFor('lab:'+code)?.control_type==='close_lab'}
+function renderTeacherControls(){
+ const banner=document.getElementById('sessionControlBanner'),txt=document.getElementById('sessionControlText'),go=document.getElementById('sessionControlGo');
+ if(!s10Model){banner.classList.add('hidden');return}
+ const hint=controlFor('hint'),slide=controlFor('slide'),closed=(s10Model.controls||[]).filter(x=>String(x.control_key||'').startsWith('lab:')&&x.control_type==='close_lab');
+ const parts=[];
+ if(hint?.payload?.text)parts.push('Pista del docente: '+hint.payload.text);
+ if(closed.length)parts.push('LAB cerrado temporalmente: '+closed.map(x=>x.payload?.title||String(x.control_key).slice(4)).join(', '));
+ if(slide?.payload?.slide){go.classList.remove('hidden');go.textContent='Ir a S'+slide.payload.slide;go.onclick=()=>show(Number(slide.payload.slide));}
+ else{go.classList.add('hidden');go.onclick=null}
+ if(parts.length||slide?.payload?.slide){txt.textContent=parts.join(' · ')||(slide.payload?.label?'Sugerencia: '+slide.payload.label:'El docente sugirió una diapositiva.');banner.classList.remove('hidden')}
+ else banner.classList.add('hidden');
+}
+document.getElementById('sessionControlClose').onclick=()=>document.getElementById('sessionControlBanner').classList.add('hidden');
+
 function challengeState(p){const m=p?.metadata||{};return {attempted:Number(p?.attempts||0)>0,first:m.first_attempt_correct,mastery:m.mastery===true}}
 async function refreshS10(){
  if(!L?.auth?.()?.token){renderLive();return}
@@ -487,7 +506,7 @@ async function refreshS10(){
   s10Model=await L.session('me',{session_number:10});
   K.identityPill(document.getElementById('moduleIdentity'),s10Model.viewer);
   if(['teacher','admin'].includes(s10Model.viewer?.role))document.getElementById('wallLink').classList.remove('hidden');
-  renderLive();
+  renderLive();renderTeacherControls();
  }catch(e){document.getElementById('liveStatus').textContent='No se pudo actualizar S10 Live: '+e.message}
 }
 function renderLive(){
@@ -511,7 +530,7 @@ async function answerChallenge(code){
    fb.className='feedback '+(x.correct?'ok':'bad');fb.textContent=x.correct?'✓ Correcto · dominio registrado.':'✕ Todavía no · pista: '+(x.hint||'revisa el concepto y vuelve a intentar.');
    await refreshS10();
   }else{
-   const ok=LOCAL_ANSWERS[code]===answer;fb.className='feedback '+(ok?'ok':'bad');fb.textContent=ok?'✓ Correcto en modo local. Abre desde el LMS para registrar dominio.':'✕ No todavía. Revisa el ejemplo anterior.';
+   fb.className='feedback';fb.textContent='Abre esta presentación desde el módulo LMS para comprobar D1–D8 y registrar primer intento/dominio.';
   }
  }catch(e){fb.className='feedback bad';fb.textContent='No se pudo registrar: '+e.message}
  finally{if(btn)btn.disabled=false}
@@ -520,7 +539,7 @@ document.querySelectorAll('[data-submit-challenge]').forEach(b=>b.addEventListen
 async function submitLab(code){
  const section=document.querySelector('[data-lab="'+code+'"]')?.closest('.slide')||document.querySelector('[data-submit-lab="'+code+'"]')?.closest('.slide');
  const panel=document.querySelector('[data-submit-lab="'+code+'"]')?.closest('.lab-check'),fb=document.querySelector('[data-lab-feedback="'+code+'"]');
- if(!panel||!fb)return;const payload={};
+ if(!panel||!fb)return;if(labClosed(code)){fb.className='feedback bad';fb.textContent='Este LAB está cerrado temporalmente por el docente.';return}const payload={};
  panel.querySelectorAll('[data-lab-field]').forEach(el=>payload[el.dataset.labField]=el.value);
  if(Object.values(payload).some(v=>!v)){fb.className='feedback bad';fb.textContent='Completa todas las comprobaciones usando tu salida del cuaderno.';return}
  if(!L?.auth?.()?.token){fb.className='feedback';fb.textContent='Valores listos. Abre la presentación desde el LMS para registrar evidencia.';return}
@@ -552,7 +571,7 @@ async function calcHash(){const t=document.getElementById('hashText').value,h=aw
 document.getElementById('hashCalc').onclick=calcHash;document.getElementById('hashMutate').onclick=()=>{const el=document.getElementById('hashText');el.value=el.value.endsWith('.')?el.value.slice(0,-1):el.value+'.';calcHash()};
 
 // Pipeline builder.
-document.getElementById('pipelinePreviewBtn').onclick=()=>{const vals=[...document.querySelectorAll('[data-pipe-pos]')].map(x=>x.value);const out=document.getElementById('pipelinePreview');const ok=vals.join('>')===LOCAL_ANSWERS['bd-s10-c3'];out.textContent=(ok?'✓ ':'✕ ')+(vals.every(Boolean)?vals.join(' → '):'Completa los seis pasos')+(ok?' · orden defendible.':' · identidad debe ocurrir antes de transformar.')};
+document.getElementById('pipelinePreviewBtn').onclick=()=>{const vals=[...document.querySelectorAll('[data-pipe-pos]')].map(x=>x.value);const out=document.getElementById('pipelinePreview');const ok=vals.join('>')===PIPELINE_TARGET;out.textContent=(ok?'✓ ':'✕ ')+(vals.every(Boolean)?vals.join(' → '):'Completa los seis pasos')+(ok?' · orden defendible.':' · identidad debe ocurrir antes de transformar.')};
 
 // Local media inspector.
 document.getElementById('mediaFile').addEventListener('change',async e=>{const f=e.target.files?.[0],out=document.getElementById('mediaInspectOut');if(!f)return;const cells=out.querySelectorAll('span');cells[0].textContent=f.name;cells[1].textContent=f.type||'desconocido';cells[2].textContent=new Intl.NumberFormat('es-CO').format(f.size)+' bytes';cells[3].textContent=(await digestHex(await f.arrayBuffer())).slice(0,24)+'…';cells[4].textContent='leyendo…';if(f.type.startsWith('image/')){const img=new Image();img.onload=()=>{cells[4].textContent=img.naturalWidth+' × '+img.naturalHeight+' px';URL.revokeObjectURL(img.src)};img.src=URL.createObjectURL(f)}else if(f.type.startsWith('audio/')||f.type.startsWith('video/')){const m=document.createElement(f.type.startsWith('video/')?'video':'audio');m.preload='metadata';m.onloadedmetadata=()=>{cells[4].textContent=(Number(m.duration)||0).toFixed(2)+' s'+(m.videoWidth?' · '+m.videoWidth+'×'+m.videoHeight:'');URL.revokeObjectURL(m.src)};m.src=URL.createObjectURL(f)}else cells[4].textContent='tipo no soportado por el inspector'});
