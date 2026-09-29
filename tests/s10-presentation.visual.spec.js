@@ -64,13 +64,20 @@ for(const vp of viewports){
 }
 
 test('S10 controles interactivos y orden cognitivo',async({page})=>{
-  await page.goto('/Presentaciones/s10-etl-multimedia.html#s13');
-  await expect(page.locator('#inspectOut')).toContainText('container');
-  await page.getByRole('button',{name:'Audio'}).click();
-  await expect(page.locator('#inspectOut')).toContainText('sample rate');
+  await page.goto('/Presentaciones/s10-etl-multimedia.html#s10');
+  const selects=page.locator('[data-pipe-pos]');
+  await selects.nth(0).selectOption('raw');
+  await selects.nth(1).selectOption('identify');
+  await selects.nth(2).selectOption('inspect');
+  await selects.nth(3).selectOption('transform');
+  await selects.nth(4).selectOption('validate');
+  await selects.nth(5).selectOption('manifest');
+  await page.locator('#pipelinePreviewBtn').click();
+  await expect(page.locator('#pipelinePreview')).toContainText('orden defendible');
   await page.evaluate(()=>{location.hash='#s27'});
-  await page.locator('#sampleEvery').fill('4');
-  await expect(page.locator('#sampleMeter')).toContainText('8 frames');
+  await page.locator('#videoDuration').fill('60');
+  await page.locator('#videoMaxFrames').fill('10');
+  await expect(page.locator('#samplingInterval')).toContainText('6.0 s');
 });
 
 test('S10 accesibilidad crítica',async({page})=>{

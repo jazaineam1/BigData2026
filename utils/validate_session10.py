@@ -30,11 +30,11 @@ for n in range(1,35):
     need('class="' in s and ("visual" in s or "<svg" in s or "<pre" in s or "<table" in s),f"S{n}: falta ancla visual")
     need(len(re.sub(r"<[^>]+>"," ",s).split())>=18,f"S{n}: contenido demasiado ligero")
 
-for term,slide in [("Asset / activo",6),("Hash",9),("MIME type",10),("Container",11),("Codec",11),("Stream",11),("Canonicalización",21),("Sampling temporal",26),("Manifest",32)]:
+for term,slide in [("Asset / activo",5),("Hash",12),("MIME",15),("Container",15),("Codec",15),("Stream",15),("Canonicalizar",20),("Sampling temporal",26),("Manifest",30)]:
     section=re.search(rf'id="s{slide}".*?</section>',deck,re.S)
     need(section and term.lower() in section.group(0).lower(),f"S{slide}: falta definición explícita de {term}")
 
-need('<span>Noticias</span><i style="--w:100%">126</i>' in deck and '<span>con video</span><i style="--w:6.35%">8</i>' in deck,"presentación: faltan conteos reales del dataset de El Tiempo")
+need("126 noticias" in deck and "8 con video" in deck,"presentación: faltan conteos reales del dataset de El Tiempo")
 need("fixture_derivado" in deck,"presentación: debe declarar explícitamente el fallback fixture_derivado")
 need("INDICE_ARTICULO = 7 #@param" in text,"notebook: falta índice numérico cerrado")
 need("noticias_eltiempo_2026-08.json" in text,"notebook: no usa dataset real de El Tiempo")
@@ -59,11 +59,6 @@ with tempfile.TemporaryDirectory() as td:
         regen=json.loads(tmp.read_text("utf-8"))
         need(regen==nb,"generador y notebook no están sincronizados")
 
-if errors:
-    print("SESION 10: FAIL")
-    for e in errors: print(" -",e)
-    raise SystemExit(1)
-print("SESION 10: OK")
 need(all(code in deck for code in [f"bd-s10-c{i}" for i in range(1,9)]),"presentación: faltan checkpoints D1-D8")
 need(all(code in deck for code in ["bd-s10-lab-image","bd-s10-lab-audio","bd-s10-lab-video"]),"presentación: faltan LAB imagen/audio/video")
 for marker in ["S10 LIVE","articleIndex","hashText","pipelineBuilder","mediaFile","audioRate","videoMaxFrames","manifestPreview"]:
@@ -71,6 +66,12 @@ for marker in ["S10 LIVE","articleIndex","hashText","pipelineBuilder","mediaFile
 need("answer_challenge" in deck and "data-submit-challenge" in deck,"presentación: desafíos no están conectados al LMS")
 need("K.evidence" in deck and "data-submit-lab" in deck,"presentación: LAB no registran evidencia")
 need('data-session="10"' in deck and "lms-kit.js" in deck,"presentación: falta LMS Kit S10")
+
+if errors:
+    print("SESION 10: FAIL")
+    for e in errors: print(" -",e)
+    raise SystemExit(1)
+print("SESION 10: OK")
 print(" - 34 diapositivas con ancla visual y densidad mínima")
 print(" - El Tiempo real + fallback de procedencia explícita")
 print(" - D1-D8 + S10 Live + 7 herramientas/simuladores")

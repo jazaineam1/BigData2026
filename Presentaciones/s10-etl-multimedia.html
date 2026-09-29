@@ -556,13 +556,6 @@ refreshS10();
 if(window.LMSRealtime&&L?.auth?.()?.token){window.LMSRealtime.subscribe({session_number:10,scopes:['progress','controls','teacher_wall'],onSignal:()=>refreshS10().catch(()=>{})}).then(stop=>stopRealtime=stop).catch(()=>{})}
 addEventListener('pagehide',()=>{if(stopRealtime)stopRealtime()});
 
-const kinds={
- image:[['Objeto','archivo de imagen'],['MIME','image/jpeg'],['Metadata','width · height · mode'],['Derived','thumbnail · OCR']],
- audio:[['Objeto','stream de audio'],['Codec','PCM / MP3 / AAC'],['Metadata','sample rate · channels'],['Derived','WAV canónico']],
- video:[['Objeto','container'],['Streams','video + audio'],['Metadata','fps · resolución · duración'],['Derived','frames + audio']]
-};
-function inspectKind(kind){document.getElementById('inspectOut').innerHTML=kinds[kind].map(x=>'<div><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join('')}
-function updateSampling(v){document.getElementById('sampleLabel').textContent=v;const n=Math.ceil(32/Number(v));document.getElementById('filmFrames').innerHTML=Array.from({length:n},()=>'<i></i>').join('');document.getElementById('sampleMeter').textContent=n+' frames aprox.'}
-inspectKind('video');updateSampling(5);fromHash();
+fromHash();
 </script>
 </body></html>
