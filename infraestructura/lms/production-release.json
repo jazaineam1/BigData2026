@@ -1,6 +1,6 @@
 {
-  "release": "2026-09-28-v56",
-  "schema_release": "2026-09-28-v56",
+  "release": "2026-09-29-v57",
+  "schema_release": "2026-09-29-v57",
   "project_ref": "gnpouhsvsisqoxketlfr",
   "critical_functions": [
     "bigdata-session",

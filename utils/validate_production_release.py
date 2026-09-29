@@ -16,7 +16,7 @@ for slug in manifest["critical_functions"]:
 session=(ROOT/"infraestructura/lms/functions/bigdata-session/index.ts").read_text("utf-8")
 if 'action==="deployment_status"' not in session or '"bd_deployment_state"' not in session:
     errors.append("bigdata-session: falta deployment_status")
-marker=(ROOT/"infraestructura/lms/lms-v56-deployment-state.sql").read_text("utf-8")
+marker=(ROOT/"infraestructura/lms/lms-v57-deployment-state.sql").read_text("utf-8")
 if release not in marker:
     errors.append("migración de canary no coincide con release")
 if errors:

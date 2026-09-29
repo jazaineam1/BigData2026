@@ -8,12 +8,16 @@ ROOT=Path(__file__).resolve().parents[1]
 DECK=ROOT/"Presentaciones/s10-etl-multimedia.html"
 GEN=ROOT/"utils/build_session10_multimedia.py"
 NB=ROOT/"Cuadernos/10_ETL_Multimedia.ipynb"
+SEED=ROOT/"infraestructura/lms/s10-multimedia-seed.sql"
+BACKEND=ROOT/"infraestructura/lms/functions/bigdata-session/index.ts"
 errors=[]
 
 def need(cond,msg):
     if not cond: errors.append(msg)
 
 deck=DECK.read_text("utf-8")
+seed=SEED.read_text("utf-8")
+backend=BACKEND.read_text("utf-8")
 nb=json.loads(NB.read_text("utf-8"))
 text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
 
@@ -71,6 +75,15 @@ need("sessionControlBanner" in deck and "renderTeacherControls" in deck,"present
 need('id="videoMaxFrames" type="range" min="4" max="20" value="10"' in deck,"presentación: MAX_FRAMES debe iniciar en 10")
 need("K.evidence" in deck and "data-submit-lab" in deck,"presentación: LAB no registran evidencia")
 need('data-session="10"' in deck and "lms-kit.js" in deck,"presentación: falta LMS Kit S10")
+need(seed.count('"blocks_session_completion":true')==3,"seed: los tres LAB S10 deben bloquear completion")
+for code in ["bd-s10-lab-image","bd-s10-lab-audio","bd-s10-lab-video"]:
+    row=re.search(rf"\('{code}'.*?\)::jsonb\)",seed)
+    need(bool(row and ",'lab',0," in row.group(0) and ",true," in row.group(0)),f"seed: {code} debe ser required")
+need('const blockingLabs=activities.filter(a=>a.kind==="lab"&&a.required&&a.metadata?.blocks_session_completion===true);' in backend,"backend: falta política opt-in de LAB bloqueantes")
+need('metadata?.evidence_verified===true' in backend,"backend: completion debe exigir evidencia verificada")
+need('lab_completed:labsVerified,lab_total:blockingLabs.length' in backend,"backend: resumen no expone progreso LAB bloqueante")
+need('body.client_evidence_id,def.activities' in backend,"backend: evidencia de presentación no recalcula con definición de sesión")
+need("D1–D8 y evidencia correcta en LAB 1–3" in deck,"presentación: falta regla de cierre explícita")
 
 if errors:
     print("SESION 10: FAIL")
@@ -81,6 +94,7 @@ print(" - 34 diapositivas con ancla visual y densidad mínima")
 print(" - El Tiempo real + fallback de procedencia explícita")
 print(" - D1-D8 + S10 Live + 7 herramientas/simuladores")
 print(" - LAB imagen, audio y video con evidencia estructurada")
+print(" - cierre S10 exige D1-D8 + LAB 1-3 verificados")
 print(" - imagen, audio y video encadenados en un solo ETL")
 print(" - JSONL + Parquet + manifest + quality gates")
 print(" - generador y notebook sincronizados")

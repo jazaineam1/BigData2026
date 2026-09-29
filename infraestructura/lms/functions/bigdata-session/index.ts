@@ -8,7 +8,7 @@ const db=createClient(
 
 const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
-const RELEASE="2026-09-28-v56";
+const RELEASE="2026-09-29-v57";
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 const PUBLIC_TRACK_EVENTS=new Set([
   "session_entered","page_opened","page_closed","heartbeat",
@@ -133,7 +133,7 @@ async function ownEvidence(userId:string,runId:string,n:number){
   return data||[];
 }
 const TRANSFER_REVIEW_CODES=new Set(["bd-s09-lab3","bd-s09-lab4","bd-s09-lab8"]);
-async function submitEvidence(userId:string,runId:string,n:number,activity:any,payload:any,source:string,rawClientId:any=null){
+async function submitEvidence(userId:string,runId:string,n:number,activity:any,payload:any,source:string,rawClientId:any=null,activities:any[]|null=null){
   if(!activity||activity.kind!=="lab")throw new Error("La actividad no es un laboratorio");
   const evidenceClientId=clientId(rawClientId,"client_evidence_id");
   if(evidenceClientId){
@@ -143,8 +143,11 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     failIf(existingError,"No se pudo comprobar la idempotencia de la evidencia");
     if(existing){
       if(existing.activity_code!==activity.code)throw new Error("client_evidence_id ya fue usado en otra actividad");
+      const defs=Array.isArray(activities)&&activities.length?activities:(await db.from("bd_lms_activities")
+        .select("code,kind,required,points,metadata").eq("course_code",COURSE).eq("session_number",n)).data||[];
+      const summary=await recomputeSession(userId,runId,n,defs);
       return {ok:true,duplicate:true,completed:["correct","accepted"].includes(existing.verdict),
-        verdict:existing.verdict,feedback:existing.feedback,evidence:existing};
+        verdict:existing.verdict,feedback:existing.feedback,evidence:existing,...summary};
     }
   }
   const {data:catalog,error:catalogError}=await db.from("bd_activity_catalog").select("*")
@@ -283,7 +286,10 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
     });
     failIf(verifiedError,"No se pudo registrar la verificación");
   }
-  return {ok:true,completed,verdict,feedback,evidence};
+  const defs=Array.isArray(activities)&&activities.length?activities:(await db.from("bd_lms_activities")
+    .select("code,kind,required,points,metadata").eq("course_code",COURSE).eq("session_number",n)).data||[];
+  const summary=await recomputeSession(userId,runId,n,defs);
+  return {ok:true,completed,verdict,feedback,evidence,...summary};
 }
 async function issueLabCode(ctx:any,run:any,n:number){
   const now=new Date(),expires=new Date(now.getTime()+6*3600_000).toISOString();
@@ -546,24 +552,32 @@ async function heartbeat(userId:string,runId:string,n:number,delta:number){
 }
 async function recomputeSession(userId:string,runId:string,n:number,activities:any[]){
   const checkpoints=activities.filter(a=>a.kind==="checkpoint"&&a.required);
+  const blockingLabs=activities.filter(a=>a.kind==="lab"&&a.required&&a.metadata?.blocks_session_completion===true);
   const codes=activities.map(a=>a.code);
   const {data:rows}=codes.length
     ?await db.from("bd_lms_activity_progress").select("activity_code,status,metadata").eq("user_id",userId).eq("course_run_id",runId).in("activity_code",codes)
     :({data:[]} as any);
   const pm=new Map((rows||[]).map((x:any)=>[x.activity_code,x]));
   const mastered=checkpoints.filter(a=>Boolean(pm.get(a.code)?.metadata?.mastery)||pm.get(a.code)?.status==="completed").length;
-  const done=checkpoints.length>0&&mastered===checkpoints.length;
+  const labsVerified=blockingLabs.filter(a=>pm.get(a.code)?.status==="completed"&&pm.get(a.code)?.metadata?.evidence_verified===true).length;
+  const totalRequired=checkpoints.length+blockingLabs.length;
+  const done=totalRequired>0&&mastered===checkpoints.length&&labsVerified===blockingLabs.length;
+  const enforceLabs=blockingLabs.length>0;
   const now=new Date().toISOString();
   const {data:p}=await db.from("bd_lms_session_progress").select("*")
     .eq("user_id",userId).eq("course_run_id",runId).eq("session_number",n).maybeSingle();
   await db.from("bd_lms_session_progress").upsert({
     user_id:userId,course_run_id:runId,session_number:n,
-    status:done?"completed":(p?.status==="completed"?"completed":"in_progress"),
+    status:done?"completed":(enforceLabs?"in_progress":(p?.status==="completed"?"completed":"in_progress")),
     started_at:p?.started_at||now,active_seconds:Number(p?.active_seconds||0),
-    last_activity_at:now,completed_at:done?(p?.completed_at||now):(p?.completed_at||null),
+    last_activity_at:now,completed_at:done?(p?.completed_at||now):(enforceLabs?null:(p?.completed_at||null)),
     score:mastered,max_score:checkpoints.length,updated_at:now
   },{onConflict:"user_id,course_run_id,session_number"});
-  return {completed:mastered,total:checkpoints.length,done};
+  return {
+    completed:mastered+labsVerified,total:totalRequired,done,
+    checkpoint_completed:mastered,checkpoint_total:checkpoints.length,
+    lab_completed:labsVerified,lab_total:blockingLabs.length
+  };
 }
 async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:any,activities:any[]){
   const activity=activities.find((a:any)=>a.code===code&&a.kind==="checkpoint");
@@ -938,7 +952,7 @@ Deno.serve(async(req:Request)=>{
     if(action==="evidence"){
       const activity=def.activities.find((a:any)=>a.code===String(body.activity_code||""));
       if(activity&&await isLabClosed(run.id,n,activity.code))throw new Error("Este LAB está cerrado temporalmente por el docente");
-      const result=await submitEvidence(ctx.user.id,run.id,n,activity,body.payload||{},String(body.source||"presentation"),body.client_evidence_id);
+      const result=await submitEvidence(ctx.user.id,run.id,n,activity,body.payload||{},String(body.source||"presentation"),body.client_evidence_id,def.activities);
       await realtimeSignal(n,"progress");return out(req,result);
     }
     if(action==="lab_code")return out(req,{ok:true,...await issueLabCode(ctx,run,n)});

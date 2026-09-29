@@ -8,7 +8,7 @@ const db=createClient(
 
 const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
-const RELEASE="2026-09-28-v56";
+const RELEASE="2026-09-29-v57";
 const SESSION=9;
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 const RESOURCE_CODES=new Set(["bd-s09-presentation","bd-s09-notebook"]);

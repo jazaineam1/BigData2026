@@ -441,7 +441,7 @@ channels = 1</pre><p>El codec/formato puede decidirse después; aquí fijamos la
 <div class="cols bigleft">
  <div class="stack">
   <div class="scale-bridge visual"><div><span>S10</span><b>pipeline correcto</b><small>identidad · metadata · derived · gates</small></div><i>→</i><div class="massive"><span>S11</span><b>millones de assets</b><small>particiones · workers · scheduler · shuffle</small></div></div>
-  <div class="note"><b>Antes de irte.</b> Abre S10 Live: D1–D8 deben mostrar dominio. Los LAB quedan como evidencia formativa separada.</div>
+  <div class="note"><b>Antes de irte.</b> Abre S10 Live: la sesión se completa con dominio D1–D8 <b>y</b> evidencia correcta en LAB 1–3.</div>
  </div>
  <div class="card ex"><b>Puente S11</b><ul><li>¿cómo partimos el trabajo?</li><li>¿quién asigna tareas a workers?</li><li>¿cómo reintentamos una partición?</li><li>¿qué operaciones obligan a mover datos?</li></ul><button class="btn alt" id="finalLiveBtn" type="button">Ver mi S10 Live</button></div>
 </div></div></div>
@@ -515,7 +515,9 @@ function renderLive(){
  const mastered=rows.filter(x=>x.mastery).length,attempted=rows.filter(x=>x.attempted).length;
  const evidence=new Set((s10Model?.evidence||[]).filter(x=>['correct','accepted'].includes(x.verdict)).map(x=>x.activity_code));
  document.getElementById('liveIdentity').textContent=auth?.token?(s10Model?.viewer?.display_name||s10Model?.viewer?.username||'Estudiante')+' · S10':'Modo local: abre desde el LMS para registrar progreso.';
- document.getElementById('liveStats').innerHTML='<div class="live-stat"><span>Intentados</span><b>'+attempted+'/8</b></div><div class="live-stat"><span>Dominio</span><b>'+mastered+'/8</b></div><div class="live-stat"><span>LAB verificados</span><b>'+evidence.size+'/3</b></div>';
+ const sessionDone=s10Model?.session_progress?.status==='completed';
+ document.getElementById('liveStats').innerHTML='<div class="live-stat"><span>Intentados</span><b>'+attempted+'/8</b></div><div class="live-stat"><span>Dominio</span><b>'+mastered+'/8</b></div><div class="live-stat"><span>LAB verificados</span><b>'+evidence.size+'/3</b></div><div class="live-stat"><span>Sesión</span><b>'+(sessionDone?'Completa':'En curso')+'</b></div>';
+ if(auth?.token)document.getElementById('liveStatus').textContent=sessionDone?'✓ Ruta completa: D1–D8 dominados y LAB 1–3 verificados.':'Para completar S10 necesitas dominio D1–D8 y evidencia correcta en LAB 1–3.';
  document.getElementById('liveChallenges').innerHTML=rows.map(x=>'<div class="live-row"><span class="live-dot '+(x.mastery?'done':x.attempted?'try':'')+'">'+(x.mastery?'✓':x.attempted?'•':'–')+'</span><span><b>'+x.label+'</b><br><small>'+(x.first===true?'1.er intento ✓':x.first===false?'1.er intento ✗':x.attempted?'intentado':'pendiente')+'</small></span><a class="btn ghost" href="#s'+CHALLENGE_SLIDES[x.code]+'">Ir</a></div>').join('');
  document.getElementById('liveLabs').innerHTML=Object.entries(LAB_LABELS).map(([code,label])=>'<div class="live-row"><span class="live-dot '+(evidence.has(code)?'done':'')+'">'+(evidence.has(code)?'✓':'–')+'</span><span><b>'+label+'</b><br><small>'+(evidence.has(code)?'evidencia verificada':'pendiente')+'</small></span><a class="btn ghost" href="#s'+({["bd-s10-lab-image"]:19,["bd-s10-lab-audio"]:23,["bd-s10-lab-video"]:29}[code])+'">Ir</a></div>').join('');
  Object.entries(CHALLENGE_LABELS).forEach(([code])=>{const fb=document.getElementById('fb-'+code),s=challengeState(map.get(code));if(fb&&s.attempted)fb.textContent=(s.first===true?'1.er intento ✓':'1.er intento ✗')+' · '+(s.mastery?'dominio ✓':'dominio pendiente; usa la pista y reintenta')});
