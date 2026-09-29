@@ -77,8 +77,8 @@ need("K.evidence" in deck and "data-submit-lab" in deck,"presentación: LAB no r
 need('data-session="10"' in deck and "lms-kit.js" in deck,"presentación: falta LMS Kit S10")
 need(seed.count('"blocks_session_completion":true')==3,"seed: los tres LAB S10 deben bloquear completion")
 for code in ["bd-s10-lab-image","bd-s10-lab-audio","bd-s10-lab-video"]:
-    row=re.search(rf"\('{code}'.*?\)::jsonb\)",seed)
-    need(bool(row and ",'lab',0," in row.group(0) and ",true," in row.group(0)),f"seed: {code} debe ser required")
+    row=next((line for line in seed.splitlines() if line.startswith(f"('{code}'")), "")
+    need(bool(row and ",'lab',0," in row and ",true,'" in row and '"blocks_session_completion":true' in row),f"seed: {code} debe ser required y bloqueante")
 need('const blockingLabs=activities.filter(a=>a.kind==="lab"&&a.required&&a.metadata?.blocks_session_completion===true);' in backend,"backend: falta política opt-in de LAB bloqueantes")
 need('metadata?.evidence_verified===true' in backend,"backend: completion debe exigir evidencia verificada")
 need('lab_completed:labsVerified,lab_total:blockingLabs.length' in backend,"backend: resumen no expone progreso LAB bloqueante")
