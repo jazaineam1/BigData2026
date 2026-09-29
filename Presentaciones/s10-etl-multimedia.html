@@ -55,6 +55,23 @@ pre{margin:.35cqw 0;background:var(--code);color:#f7fbff;border-radius:.9cqw;pad
 .manifest-builder{grid-template-columns:.78fr 1.22fr}.manifest-fields{display:grid;grid-template-columns:1fr 1fr;gap:.42cqw}.manifest-fields label{display:flex;align-items:center;gap:.45cqw;background:#f8fafc;border:1px solid var(--line);border-radius:.6cqw;padding:.5cqw}.manifest-fields input{width:auto}.manifest-builder pre{margin:0}.gate-list{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:.45cqw}.gate-list span{border-radius:.55cqw;padding:.48cqw;text-align:center;font-weight:900}.gate-list .pass{background:#e7f5ef;color:#145b43}.gate-list .fail{background:#fff0eb;color:#8e2418}
 .live-drawer{position:fixed;z-index:70;left:12px;top:60px;width:min(540px,calc(100vw - 24px));max-height:calc(100dvh - 84px);overflow:auto;background:#fff;border:2px solid #087477;border-radius:18px;padding:16px;box-shadow:0 18px 70px rgba(18,34,83,.28);display:none;color:var(--ink)}.live-drawer.on{display:block}.live-head{display:flex;gap:10px;align-items:center}.live-head button{margin-left:auto}.live-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.live-stat{border:1px solid var(--line);border-radius:10px;padding:9px;background:#f8fafc}.live-stat b{display:block;color:var(--navy);font-size:1.1rem}.live-list{display:grid;gap:6px}.live-row{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px}.live-dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:950;background:#edf1f7}.live-dot.done{background:#dff4e8;color:#12633c}.live-dot.try{background:#fff3e8;color:#8a4200}.live-section-title{margin:13px 0 6px;color:var(--navy)}
 @media(max-width:900px){.tool-grid,.tool-grid.three,.pipeline-builder,.inspect-grid,.sampling-metrics,.manifest-builder,.gate-list{grid-template-columns:1fr}.manifest-fields{grid-template-columns:1fr 1fr}.live-grid{grid-template-columns:1fr 1fr}.learn-table{font-size:14px}.hash-output{font-size:12px}.sampling-metrics b{font-size:20px}}
+
+/* S10 V2 · distribución explícita: conservar escala S07 sin comprimir tarjetas */
+#s15 .body,#s26 .body{align-content:start;grid-auto-rows:max-content}
+#s15 .container-box{padding:.72cqw;gap:.52cqw}
+#s15 .container-title{padding:.55cqw}
+#s15 .stream{padding:.62cqw .78cqw}
+#s15 .three{align-items:start}
+#s26 .calc{min-height:8.8cqw}
+#s26 .calc div{padding:.9cqw}
+#s19 .cols,#s23 .cols,#s29 .cols{grid-template-columns:.92fr 1.08fr;align-items:start;align-self:start}
+#s19 .lab,#s23 .lab,#s29 .lab{height:auto;min-height:0}
+#s19 .lab-check,#s23 .lab-check,#s29 .lab-check{grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:.5cqw .65cqw}
+#s19 .lab-check>b,#s23 .lab-check>b,#s29 .lab-check>b,
+#s19 .lab-check>.btn,#s23 .lab-check>.btn,#s29 .lab-check>.btn,
+#s19 .lab-check>.feedback,#s23 .lab-check>.feedback,#s29 .lab-check>.feedback{grid-column:1/-1}
+#s19 .lab-check label,#s23 .lab-check label,#s29 .lab-check label{min-width:0}
+#s19 .lab-check select,#s23 .lab-check select,#s29 .lab-check select{padding:.42cqw .48cqw}
 </style>
 </head>
 <body>
