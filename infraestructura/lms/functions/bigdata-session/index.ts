@@ -147,7 +147,7 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
         .select("code,kind,required,points,metadata").eq("course_code",COURSE).eq("session_number",n)).data||[];
       const summary=await recomputeSession(userId,runId,n,defs);
       return {ok:true,duplicate:true,completed:["correct","accepted"].includes(existing.verdict),
-        verdict:existing.verdict,feedback:existing.feedback,evidence:existing,...summary};
+        verdict:existing.verdict,feedback:existing.feedback,evidence:existing,session_completion:summary};
     }
   }
   const {data:catalog,error:catalogError}=await db.from("bd_activity_catalog").select("*")
@@ -289,7 +289,7 @@ async function submitEvidence(userId:string,runId:string,n:number,activity:any,p
   const defs=Array.isArray(activities)&&activities.length?activities:(await db.from("bd_lms_activities")
     .select("code,kind,required,points,metadata").eq("course_code",COURSE).eq("session_number",n)).data||[];
   const summary=await recomputeSession(userId,runId,n,defs);
-  return {ok:true,completed,verdict,feedback,evidence,...summary};
+  return {ok:true,completed,verdict,feedback,evidence,session_completion:summary};
 }
 async function issueLabCode(ctx:any,run:any,n:number){
   const now=new Date(),expires=new Date(now.getTime()+6*3600_000).toISOString();
