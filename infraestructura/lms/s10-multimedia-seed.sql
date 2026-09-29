@@ -111,10 +111,11 @@ select
     "class_time_local":"18:00",
     "estimated_minutes":180,
     "outcomes":[
-      "Distinguir RAW, metadata, derived asset y manifest",
+      "Distinguir noticia, asset, RAW, metadata, derived asset y manifest",
       "Inspeccionar imagen, audio y video antes de transformarlos",
       "Aplicar SHA-256, canonicalización y sampling con reglas reproducibles",
-      "Construir JSONL, Parquet y un manifest con provenance y quality gates"
+      "Construir y depurar un manifest mediante quality gates",
+      "Demostrar dominio en ocho desafíos y tres LAB verificables"
     ]
   }'::jsonb,
   now(),now()
