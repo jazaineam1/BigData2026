@@ -107,3 +107,39 @@ test('S10 conserva la escala visual de S07',async({page})=>{
   expect(s10Card).toBeGreaterThanOrEqual(refCard*0.95);
   expect(s10Code).toBeGreaterThanOrEqual(refCode*0.95);
 });
+
+test('S10 V2 tiene Live, D1-D8, simuladores y LAB verificables',async({page})=>{
+  await page.goto('/Presentaciones/s10-etl-multimedia.html#s1');
+  await expect(page.locator('#liveBtn')).toBeVisible();
+  await page.locator('#liveBtn').click();
+  await expect(page.locator('#liveDrawer')).toHaveClass(/on/);
+  await expect(page.locator('[data-submit-challenge]')).toHaveCount(8);
+  await expect(page.locator('[data-submit-lab]')).toHaveCount(3);
+  for(const id of ['articleIndex','hashText','pipelineBuilder','mediaFile','audioRate','videoMaxFrames','manifestPreview'])await expect(page.locator('#'+id)).toHaveCount(1);
+});
+
+test('S10 herramientas pedagógicas responden en modo local',async({page})=>{
+  await page.goto('/Presentaciones/s10-etl-multimedia.html#s13');
+  await page.locator('#hashCalc').click();
+  const h1=await page.locator('#hashOut').textContent();
+  expect((h1||'').trim().length).toBe(64);
+  await page.locator('#hashMutate').click();
+  const h2=await page.locator('#hashOut').textContent();
+  expect(h2).not.toBe(h1);
+
+  await page.evaluate(()=>{location.hash='#s21'});
+  await page.locator('#audioRate').selectOption('16000');
+  await page.locator('#audioChannels').selectOption('1');
+  await page.locator('#audioFormat').selectOption('wav');
+  await expect(page.locator('#audioGoal')).toContainText('Cumple');
+
+  await page.evaluate(()=>{location.hash='#s27'});
+  await page.locator('#videoDuration').fill('60');
+  await page.locator('#videoMaxFrames').fill('10');
+  await expect(page.locator('#samplingInterval')).toContainText('6.0 s');
+
+  await page.evaluate(()=>{location.hash='#s33'});
+  await page.locator('#ans-bd-s10-c8').selectOption('sha256_sampling');
+  await page.locator('[data-submit-challenge="bd-s10-c8"]').click();
+  await expect(page.locator('#fb-bd-s10-c8')).toContainText('Correcto');
+});
