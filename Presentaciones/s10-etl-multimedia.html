@@ -274,7 +274,8 @@ thumbnail.jpg</pre></div>
  </div>
  <div class="lab lab-check">
   <b>Autocomprobación estructurada</b>
-  <label>Origen observado<select data-lab-field="origin_kind"><option value="">—</option><option value="eltiempo_real">eltiempo_real</option><option value="fixture_derivado">fixture_derivado</option></select></label>
+  <label>Origen observado<select id="imageOriginObserved"><option value="">—</option><option value="eltiempo_real">eltiempo_real</option><option value="fixture_derivado">fixture_derivado</option></select></label>
+  <label>¿origin_kind quedó registrado en el manifest?<select data-lab-field="origin_declared"><option value="">—</option><option value="si">Sí</option><option value="no">No</option></select></label>
   <label>Longitud SHA-256<select data-lab-field="sha_len"><option value="">—</option><option value="64">64</option><option value="32">32</option></select></label>
   <label>¿RAW sigue existiendo?<select data-lab-field="raw_preserved"><option value="">—</option><option value="si">Sí</option><option value="no">No</option></select></label>
   <button class="btn" data-submit-lab="bd-s10-lab-image">Comprobar LAB 1</button><div class="feedback" data-lab-feedback="bd-s10-lab-image">Usa los valores que produjo tu ejecución.</div>
