@@ -48,9 +48,9 @@ values
 ('bd-s10-c6','bigdata',10,'D6 · Canonicalización de audio','checkpoint',1,8,true,'{"slide":22,"formative":true,"completion_rule":"mastery"}'::jsonb),
 ('bd-s10-c7','bigdata',10,'D7 · Sampling temporal','checkpoint',1,9,true,'{"slide":28,"formative":true,"completion_rule":"mastery"}'::jsonb),
 ('bd-s10-c8','bigdata',10,'D8 · Quality gates','checkpoint',1,10,true,'{"slide":33,"formative":true,"completion_rule":"mastery"}'::jsonb),
-('bd-s10-lab-image','bigdata',10,'LAB 1 · Imagen real El Tiempo','lab',0,11,false,'{"slide":19,"formative":true,"completion_rule":"evidence"}'::jsonb),
-('bd-s10-lab-audio','bigdata',10,'LAB 2 · Audio canónico','lab',0,12,false,'{"slide":23,"formative":true,"completion_rule":"evidence"}'::jsonb),
-('bd-s10-lab-video','bigdata',10,'LAB 3 · Video y sampling','lab',0,13,false,'{"slide":29,"formative":true,"completion_rule":"evidence"}'::jsonb)
+('bd-s10-lab-image','bigdata',10,'LAB 1 · Imagen real El Tiempo','lab',0,11,true,'{"slide":19,"formative":true,"completion_rule":"evidence","blocks_session_completion":true}'::jsonb),
+('bd-s10-lab-audio','bigdata',10,'LAB 2 · Audio canónico','lab',0,12,true,'{"slide":23,"formative":true,"completion_rule":"evidence","blocks_session_completion":true}'::jsonb),
+('bd-s10-lab-video','bigdata',10,'LAB 3 · Video y sampling','lab',0,13,true,'{"slide":29,"formative":true,"completion_rule":"evidence","blocks_session_completion":true}'::jsonb)
 on conflict (code) do update set
   course_code=excluded.course_code,session_number=excluded.session_number,title=excluded.title,kind=excluded.kind,
   points=excluded.points,position=excluded.position,required=excluded.required,metadata=excluded.metadata;

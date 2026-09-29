@@ -7,7 +7,7 @@ const db=createClient(
 );
 const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
-const RELEASE="2026-09-28-v56";
+const RELEASE="2026-09-29-v57";
 const BUCKET="bigdata-lms-private";
 const MAX_FILE=20*1024*1024;
 const ALLOWED_MIME=new Set([
