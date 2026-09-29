@@ -16,8 +16,11 @@ async function inspect(page,n){
     const r=rect(slide),br=rect(body),hr=rect(h1),nr=rect(nav),tr=rect(top);
     const overlap=(a,b)=>a.left<b.right-2&&a.right>b.left+2&&a.top<b.bottom-2&&a.bottom>b.top+2;
     const badOverflow=[...slide.querySelectorAll('.card,.note,.lab,.diagram,.inspector,.sampling,pre')].filter(e=>e.scrollWidth>e.clientWidth+3||e.scrollHeight>e.clientHeight+3).map(e=>e.className||e.tagName);
-    const visual=slide.querySelector('.visual,svg,pre,table');
-    const vr=visual?rect(visual):null;
+    const visualRects=[...slide.querySelectorAll('.visual,svg,pre,table')]
+      .map(el=>rect(el))
+      .filter(r=>r&&r.width>0&&r.height>0)
+      .sort((a,b)=>(b.width*b.height)-(a.width*a.height));
+    const vr=visualRects[0]||null;
     const bodyText=[...slide.querySelectorAll('p,li,td,th,.card span,.card')].filter(e=>e.children.length===0||e.matches('p,li,td,th')).map(e=>parseFloat(getComputedStyle(e).fontSize)).filter(Number.isFinite);
     const codeText=[...slide.querySelectorAll('pre')].map(e=>parseFloat(getComputedStyle(e).fontSize));
     return {
