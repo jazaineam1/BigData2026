@@ -35,7 +35,7 @@ for term,slide in [("Asset / activo",6),("Hash",9),("MIME type",10),("Container"
     need(section and term.lower() in section.group(0).lower(),f"S{slide}: falta definición explícita de {term}")
 
 need("126 noticias" in deck and "8 con video" in deck,"presentación: faltan conteos reales del dataset de El Tiempo")
-need("fixture_derivado" in deck and "eltiempo_real" not in deck or True,"presentación: debe distinguir procedencia")
+need("fixture_derivado" in deck,"presentación: debe declarar explícitamente el fallback fixture_derivado")
 need("INDICE_ARTICULO = 7 #@param" in text,"notebook: falta índice numérico cerrado")
 need("noticias_eltiempo_2026-08.json" in text,"notebook: no usa dataset real de El Tiempo")
 need("fixture_derivado" in text and "eltiempo_real" in text,"notebook: no distingue binario real de fixture")
