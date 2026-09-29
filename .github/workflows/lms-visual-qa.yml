@@ -9,6 +9,10 @@ on:
       - index.html
       - lms/**
       - Presentaciones/s09-de-palabras-a-significado.html
+      - Presentaciones/s10-etl-multimedia.html
+      - Cuadernos/10_ETL_Multimedia.ipynb
+      - utils/build_session10_multimedia.py
+      - utils/validate_session10.py
       - tests/**
       - package.json
       - package-lock.json
@@ -19,6 +23,10 @@ on:
       - index.html
       - lms/**
       - Presentaciones/s09-de-palabras-a-significado.html
+      - Presentaciones/s10-etl-multimedia.html
+      - Cuadernos/10_ETL_Multimedia.ipynb
+      - utils/build_session10_multimedia.py
+      - utils/validate_session10.py
       - tests/**
       - package.json
       - package-lock.json
