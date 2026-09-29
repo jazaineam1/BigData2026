@@ -68,6 +68,7 @@ need("LOCAL_ANSWERS" not in deck,"presentación: no debe exponer clave local de 
 for leaked in ["4_assets","bytes_identicos","sha256_sampling","ac1_ar16000","mp4_container__h264_aac_codecs"]:
     need(leaked not in deck,f"presentación: value semántico expone respuesta: {leaked}")
 need("sessionControlBanner" in deck and "renderTeacherControls" in deck,"presentación: controles docentes no están integrados")
+need('id="videoMaxFrames" type="range" min="4" max="20" value="10"' in deck,"presentación: MAX_FRAMES debe iniciar en 10")
 need("K.evidence" in deck and "data-submit-lab" in deck,"presentación: LAB no registran evidencia")
 need('data-session="10"' in deck and "lms-kit.js" in deck,"presentación: falta LMS Kit S10")
 
