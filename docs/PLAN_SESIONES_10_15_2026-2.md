@@ -70,41 +70,48 @@ Reglas de diseño:
 
 ---
 
-# S10 · De texto crudo a datos trazables
+# S10 · ETL multimodal: de imágenes, audio y video a datos trazables
 
 **Fecha de trabajo:** 15 de octubre de 2026  
-**Problema profesional:** S09 permite recuperar texto por significado, pero ¿cómo se construye
-un corpus confiable cuando la fuente llega como HTML, PDF, JSON o texto libre?
+**Problema profesional:** una noticia ya no es solo texto. ¿Cómo convertir activos heterogéneos en datos reproducibles sin perder el archivo original ni su procedencia?
 
-### Conceptos
-- dato estructurado, semiestructurado y no estructurado;
-- extracción vs transformación;
-- parser;
-- normalización;
-- deduplicación;
-- chunking como decisión de ETL, no como truco de embeddings;
-- metadata/provenance;
-- schema-on-read;
-- data quality para texto;
-- JSONL y Parquet como artefactos intermedios.
+### Conceptos núcleo
+- asset / activo y cambio de grano: noticia → activo;
+- RAW inmutable, metadata y derived asset;
+- SHA-256, MIME type e identidad;
+- container, codec y stream;
+- canonicalización;
+- sampling temporal;
+- provenance y manifest;
+- quality gates para multimedia;
+- OCR como extensión conceptual, no como caja negra obligatoria.
 
-### Laboratorio
-Una pequeña colección de documentos de contratación/noticias:
-1. ingerir 2–3 formatos;
-2. conservar fuente y SHA-256;
-3. extraer texto;
-4. limpiar sin destruir evidencia;
-5. detectar duplicados;
-6. generar chunks con metadata;
-7. escribir un dataset Parquet/JSONL;
-8. comprobar conteos antes/después y trazabilidad.
+### Caso y laboratorio
+Se reutiliza el dataset real de El Tiempo ya construido en S03. El estudiante selecciona una noticia mediante un índice numérico cerrado. La tubería:
+1. conserva article_id, article_url e image_url reales;
+2. intenta una sola descarga de la imagen del artículo y registra si fue real o fallback;
+3. calcula SHA-256, tipo, dimensiones y thumbnail;
+4. genera un fixture de audio reproducible derivado del article_id porque el dataset curado actual no conserva el binario de audio;
+5. inspecciona y canonicaliza audio a WAV 16 kHz mono;
+6. construye un MP4 reproducible, inspecciona container/streams y extrae frames;
+7. limita sampling con MAX_FRAMES;
+8. exporta assets.jsonl, assets.parquet y manifest_s10.json;
+9. ejecuta quality gates objetivos.
+
+Los fixtures derivados se etiquetan como `fixture_derivado`; nunca se presentan como contenido editorial real.
+
+### Dos recursos visibles
+1. `Presentaciones/s10-etl-multimedia.html` — explicación + laboratorio integrado + herramientas interactivas.
+2. `Cuadernos/10_ETL_Multimedia.ipynb` — ejecución reproducible generada por `utils/build_session10_multimedia.py`.
+
+### QA
+Además de sintaxis y contratos pedagógicos, S10 tiene QA visual Playwright en tres viewports reales. El gate verifica disposición para ojo humano: títulos ≥30 px, cuerpo/código legibles, orden título→cuerpo, ausencia de solapamientos/overflow, ancla visual en cada diapositiva y escala automática nunca menor de 0.82.
 
 ### Evidencia
-`manifest_s10.json` con archivos, hashes, filas/documentos, duplicados, chunks y reglas aplicadas.
+`assets.jsonl` + `assets.parquet` + `manifest_s10.json`, con hashes, procedencia, metadata, derivados y quality gates.
 
 ### Puente
-"Ya tengo un pipeline correcto. ¿Qué cambia cuando el volumen deja de caber cómodamente en un
-solo proceso?"
+"El pipeline funciona en un proceso. ¿Qué cambia cuando son millones de activos?" → S11: particiones, scheduler, workers, Dask y shuffle.
 
 ---
 

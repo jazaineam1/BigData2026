@@ -1,5 +1,5 @@
 {
-  "version": 13,
+  "version": 14,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
@@ -65,8 +65,11 @@
     },
     {
       "n": 10,
-      "title": "Sesión 10 · por publicar",
-      "status": "draft"
+      "title": "ETL multimodal: de imágenes, audio y video a datos trazables",
+      "status": "draft",
+      "starts_at": "2026-10-15T18:00:00-05:00",
+      "class_date": "2026-10-15",
+      "class_kind": "learning"
     },
     {
       "n": 11,
