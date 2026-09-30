@@ -93,18 +93,18 @@ create index if not exists bd_lms_session_progress_run_idx on public.bd_lms_sess
 create index if not exists bd_lms_session_windows_opened_by_idx on public.bd_lms_session_windows(opened_by);
 
 insert into public.bd_lms_sessions(course_code,session_number,title,path,position,required,metadata)
-values('bigdata',8,'Integra 6 CSV y construye una solución NoSQL','lms/session-08.html',8,true,
-'{"type":"evaluation","source":"Cuadernos/Taller_Control_1.ipynb","max_score":100}'::jsonb)
+values('bigdata',8,'SECOP Data Pipeline · API, concurrencia y NoSQL','lms/session-08.html',8,true,
+'{"type":"evaluation","source":"Cuadernos/Taller_Control_1.ipynb","reference":"assets/tutoriales/s08-secoppipeline.html","max_score":100,"estimated_minutes":360,"work_mode":"class_and_home","group_assessment":true,"validator_version":"2026-09-30-secoppipeline-v5"}'::jsonb)
 on conflict(course_code,session_number) do update set title=excluded.title,path=excluded.path,position=excluded.position,required=excluded.required,metadata=excluded.metadata;
 
 insert into public.bd_lms_activities(code,course_code,session_number,title,kind,points,position,required,metadata) values
-('bd-s08-e1','bigdata',8,'E1 · Histórico y JSON','validator_stage',20,1,true,'{"checks":["E1_integracion_6_archivos","E1_esquema_y_tipos","E1_json_y_control"]}'),
-('bd-s08-e2','bigdata',8,'E2 · MongoDB Atlas','validator_stage',30,2,true,'{"checks":["E2_atlas_real_y_carga","E2_consulta_A_count","E2_consulta_B_find","E2_consulta_C_aggregate","E2_evidencia_atlas"]}'),
-('bd-s08-e3','bigdata',8,'E3 · Bandeja histórica','validator_stage',10,3,true,'{"checks":["E3_pipeline_bandeja","E3_artefacto_bandeja"]}'),
+('bd-s08-e1','bigdata',8,'E1 · API SECOP, concurrencia y trazabilidad','validator_stage',25,1,true,'{"checks":["E1_contrato_y_query","E1_descarga_secuencial","E1_concurrencia_equivalente","E1_trazabilidad_calidad"]}'),
+('bd-s08-e2','bigdata',8,'E2 · Modelo documental + Atlas idempotente','validator_stage',25,2,true,'{"checks":["E2_modelo_documental","E2_atlas_idempotente","E2_indices","E2_consulta_A_count","E2_consulta_B_find","E2_evidencia_atlas"]}'),
+('bd-s08-e3','bigdata',8,'E3 · Producto analítico desde Atlas','validator_stage',10,3,true,'{"checks":["E3_pipeline_bandeja","E3_artefacto_bandeja"]}'),
 ('bd-s08-e4','bigdata',8,'E4 · Cassandra query-first','validator_stage',15,4,true,'{"checks":["E4_datos_cassandra","E4_modelo_query_first","E4_consulta_simulada"]}'),
-('bd-s08-e5','bigdata',8,'E5 · Neo4j y evidencia relacional','validator_stage',20,5,true,'{"checks":["E5_historial_y_ancla","E5_metrica_relacional","E5_cypher","E5_subgrafo"]}'),
-('bd-s08-e6','bigdata',8,'E6 · Informe y paquete','validator_stage',5,6,true,'{"checks":["E6_informe","E6_paquete"]}'),
-('bd-s08-final','bigdata',8,'Validación final · manifest_tc1.json','manifest',100,7,true,'{"validator_version":"2026-09-17-v3-historico-atlas"}')
+('bd-s08-e5','bigdata',8,'E5 · Neo4j y contexto relacional','validator_stage',15,5,true,'{"checks":["E5_historial_y_ancla","E5_metrica_relacional","E5_cypher","E5_subgrafo"]}'),
+('bd-s08-e6','bigdata',8,'E6 · Decisiones, informe y paquete','validator_stage',10,6,true,'{"checks":["E6_decisiones_informe","E6_microdefensa_grupal","E6_paquete_reproducible"]}'),
+('bd-s08-final','bigdata',8,'Validación final · manifest_tc1.json','manifest',100,7,true,'{"validator_versions":["2026-09-30-secoppipeline-v5"],"current":"2026-09-30-secoppipeline-v5"}')
 on conflict(code) do update set title=excluded.title,kind=excluded.kind,points=excluded.points,position=excluded.position,required=excluded.required,metadata=excluded.metadata;
 
 -- El docente existente se matricula sin cambiar su identidad ni contraseña.
