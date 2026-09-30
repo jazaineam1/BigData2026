@@ -16,6 +16,7 @@ nb_text=read("Cuadernos/Taller_Control_1.ipynb")
 builder=read("utils/build_taller_control_1.py")
 tutorial=read("assets/tutoriales/s08-secoppipeline.html")
 validator=read("utils/tc1_validator.py")
+validator_pinned=read("utils/tc1_validator_20260930.py")
 s08=read("lms/session-08.html")
 edge=read("infraestructura/lms/functions/bigdata-learning/index.ts")
 sql=read("infraestructura/lms/tc1-v4-secoppipeline.sql")
@@ -35,8 +36,12 @@ checks=[
     ("recap S01-S07 antes de la rúbrica", "## Antes de empezar · reconstruye el andamiaje S01–S07" in all_src and all_src.index("## Antes de empezar · reconstruye el andamiaje S01–S07") < all_src.index("## Rúbrica oficial · 100 puntos")),
     ("recap cubre las siete sesiones previas", all(("S0"+str(i)) in all_src for i in range(1,8))),
     ("recap solo usa elecciones cerradas", "#@title Autocomprobación de arranque · S01–S07" in all_src and all_src.count('#@param ["— selecciona —"') >= 7 and "input(" not in all_src[all_src.index("#@title Autocomprobación de arranque · S01–S07"):all_src.index("### Del repaso al TC1")]),
-    ("recap enlaza decisiones con E1-E6", all(x in all_src for x in ["E1 · ¿puedo adquirir exactamente el mismo snapshot","E2 · ¿cómo represento ese proceso como documento","E4 · ¿qué patrón de acceso operacional","E5 · ¿qué relación necesito recorrer","E6 · ¿qué decisiones tomé"])),
+    ("recap enlaza decisiones con E1-E6", all(x in all_src for x in ["E1 · ¿puedo adquirir exactamente el mismo snapshot","E2 · ¿cómo represento ese proceso como documento","E4 · ¿qué patrón de acceso operacional","E5 · ¿qué relación contractual necesito recorrer","E6 · ¿qué decisiones tomé"])),
     ("dos endpoints SECOP", "p6dx-8zbt" in all_src and "jbjy-vk9h" in all_src),
+    ("contrato API real", all(x in all_src for x in ["fecha_de_publicacion_del","id_del_portafolio","nombre_del_proveedor","proceso_de_compra"]) and "nombre_del_proveedor_adjudicado" not in all_src),
+    ("join contractual correcto", '"procesos.id_del_portafolio": "contratos.proceso_de_compra"' in all_src),
+    ("población adaptativa", all(x in all_src for x in ["PAGE_SIZE = 250","count_rows","N_PROCESOS = min(TARGET_PROCESOS, TOTAL_PROCESOS)","OFFSETS_PROCESOS"])),
+    ("benchmark mismos offsets", "same_offsets" in all_src and "offsets_sequential" in all_src and "offsets_threaded" in all_src),
     ("ThreadPoolExecutor", "ThreadPoolExecutor" in all_src),
     ("micro-lab antes del reto", "demo_dos_paginas" in all_src and "no suma puntos" in all_src),
     ("retry/backoff", "RETRY_STATUS" in all_src and "base_backoff" in all_src),
@@ -47,13 +52,15 @@ checks=[
     ("Atlas idempotente", "bulk_write" in all_src and "UpdateOne" in all_src and "upsert=True" in all_src),
     ("decision log", "decision_log" in all_src),
     ("carga mínima 6h", "6–8 horas por grupo" in all_src and "Dedicación mínima prevista por grupo: 6 horas" in all_src),
-    ("microdefensa grupal", "defensa_grupal" in all_src and "06_microdefensa_grupal.json" in all_src and "E6_microdefensa_grupal" in validator),
-    ("validador actual", 'VERSION = "2026-09-26-secoppipeline"' in validator),
+    ("microdefensa estructurada", "defensa_grupal" in all_src and "06_microdefensa_grupal.json" in all_src and "E6_microdefensa_grupal" in validator and all_src.count("#@param") >= 12),
+    ("sin respuesta abierta E6", "respuesta_concurrencia" not in all_src and "respuesta_calidad" not in all_src),
+    ("validador actual", 'VERSION = "2026-09-30-secoppipeline-v5"' in validator),
+    ("validador fijado idéntico", validator == validator_pinned and bool(validator_pinned)),
     ("E1 adquisición completa", all(x in validator for x in ["E1_contrato_y_query","E1_descarga_secuencial","E1_concurrencia_equivalente","E1_trazabilidad_calidad"])),
     ("E2 idempotencia", "E2_atlas_idempotente" in validator and "E2_indices" in validator),
     ("no speedup mínimo", "speedup >=" not in validator.lower()),
-    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-09-26-secoppipeline" in edge and "security_no_secrets" in edge),
-    ("gate de secretos", "secret_patterns" in validator and '"gates":gates' in validator),
+    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-09-30-secoppipeline-v5" in edge and "security_no_secrets" in edge),
+    ("gate de secretos", "secret_patterns" in validator and '"gates":gates' in validator and '".ipynb"' in validator and "ENTREGA BLOQUEADA" in validator),
     ("backend persiste versión real", "manifest_version:m.version" in edge and "validator_version:m.version" in edge),
     ("calificación grupal", "tc1GroupContext" in edge and "syncManifestGroupGradebook" in edge and "lms_group_submissions_v2" in edge and "Calificación grupal TC1" in edge),
 
@@ -75,7 +82,7 @@ checks=[
     ("rúbrica detallada solo en notebook", "Rúbrica oficial · 100 puntos" not in s08 and "Concurrencia equivalente" not in s08 and "Microdefensa grupal" not in s08 and "Contrato de datos y consulta SoQL" in all_src),
     ("evidencia auditable requerida", "evidenceUrl" in s08 and "evidence_url" in edge and "carpeta de evidencia" in sql),
     ("revisión docente abre evidencia", "Abrir evidencia del grupo" in teacher_collab and "Desglose automático" in teacher_collab),
-    ("notebook incluye rúbrica detallada", "Contrato de datos y consulta SoQL" in all_src and "Microdefensa grupal basada en resultados propios" in all_src),
+    ("notebook incluye rúbrica detallada", "Contrato de datos y consulta SoQL" in all_src and "Microdefensa estructurada basada en resultados propios" in all_src),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
