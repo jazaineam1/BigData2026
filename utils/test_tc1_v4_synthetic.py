@@ -250,6 +250,7 @@ Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran f
     assert manifest["puntaje"]==100, manifest
     assert manifest["maximo"]==100
     assert manifest["version"]==V.VERSION
+    assert manifest["logic_version"]==V.LOGIC_VERSION
     assert manifest["gates"]["security_no_secrets"]["ok"] is True
     print("TC1 V5 synthetic (<1000 procesos) 100/100: OK")
 
