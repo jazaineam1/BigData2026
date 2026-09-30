@@ -12,7 +12,7 @@ set title='SECOP Data Pipeline · API, concurrencia y NoSQL',
       'estimated_minutes',360,
       'work_mode','class_and_home',
       'group_assessment',true,
-      'validator_version','2026-09-26-secoppipeline'
+      'validator_version','2026-09-30-secoppipeline-v5'
     )
 where course_code='bigdata' and session_number=8;
 
@@ -51,7 +51,7 @@ set title='E6 · Decisiones, informe y paquete',
 where code='bd-s08-e6';
 
 update public.bd_lms_activities
-set metadata='{"validator_versions":["2026-09-26-secoppipeline"],"current":"2026-09-26-secoppipeline"}'::jsonb
+set metadata='{"validator_versions":["2026-09-30-secoppipeline-v5"],"current":"2026-09-30-secoppipeline-v5"}'::jsonb
 where code='bd-s08-final';
 
 update public.lms_assignments_v2
@@ -105,7 +105,7 @@ set enabled=true,
     updated_at=now();
 
 update public.lms_assignments_v2
-set instructions='Proyecto grupal de trabajo en clase y en casa. Dedicación mínima esperada: 6 horas por grupo. Entregables: notebook ejecutado, TC1_<pareja>.zip y manifest_tc1.json. El notebook y el ZIP deben quedar en una carpeta de evidencia accesible al docente. Un integrante registra el enlace de esa carpeta y carga el manifest validado; el LMS registra una sola calificación del equipo y la replica a todos sus integrantes. La microdefensa escrita forma parte de la evidencia E6 y no crea una segunda nota.',
+set instructions='Proyecto grupal de trabajo en clase y en casa. Dedicación mínima esperada: 6 horas por grupo. Entregables: notebook ejecutado, TC1_<pareja>.zip y manifest_tc1.json. El notebook y el ZIP deben quedar en una carpeta de evidencia accesible al docente. Un integrante registra el enlace de esa carpeta y carga el manifest validado; el LMS registra una sola calificación del equipo y la replica a todos sus integrantes. La microdefensa estructurada forma parte de la evidencia E6 y no crea una segunda nota.',
     updated_at=now()
 where code='bd-s08-control'
   and course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1);
