@@ -29,7 +29,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <section class="card">
 <div class="ey">Misión</div><h2>Construir un pipeline reproducible, no seguir pasos.</h2>
 <p>La solución debe consultar SECOP II, demostrar equivalencia entre adquisición secuencial y concurrente, conservar trazabilidad, operar Atlas sin duplicados y reutilizar el mismo snapshot para preguntas documental, operacional y relacional.</p>
-<div class="note"><b>Criterio central:</b> una decisión técnica vale cuando puede defenderse con evidencia de su propia ejecución.</div>
+<div class="note"><b>Criterio central:</b> una decisión técnica vale cuando puede defenderse con evidencia de su propia ejecución.</div><div class="note" style="margin-top:10px"><b>Contrato de datos V5:</b> Procesos se filtra por <code>fecha_de_publicacion_del</code>; la relación con Contratos usa <code>id_del_portafolio → proceso_de_compra</code>. El tamaño objetivo se adapta a la población real de la ventana.</div>
 <div class="note" style="margin-top:10px"><b>Carga de trabajo:</b> el proyecto está diseñado para 6–8 horas por grupo y se completa parcialmente fuera de clase. El tiempo no suma puntos; la profundidad y la evidencia sí.</div>
 </section>
 
@@ -60,11 +60,11 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <div class="ey">Tarjetas de referencia</div><h2>Conceptos que puede consultar sin recibir la solución</h2>
 <div class="refs">
 <div class="ref"><h3>Socrata / SoQL</h3><p><code>$select</code> reduce columnas, <code>$where</code> reduce filas y un <code>$order</code> estable evita que la paginación cambie de orden entre páginas.</p></div>
-<div class="ref"><h3>Concurrencia</h3><p>Las peticiones HTTP son I/O-bound. Más workers no implican mejor solución. Compare tiempos, errores y —sobre todo— equivalencia del resultado.</p></div>
+<div class="ref"><h3>Concurrencia</h3><p>Las peticiones HTTP son I/O-bound. Secuencial y concurrente deben consultar exactamente los mismos offsets. Un speedup menor que 1 puede ser correcto cuando hay pocas páginas: se evalúa la equivalencia, no “ganar” velocidad.</p></div>
 <div class="ref"><h3>Resiliencia</h3><p>Timeout finito, retry acotado y backoff son controles operativos. Un 429 significa que debe reducir presión y respetar la política del servicio.</p></div>
 <div class="ref"><h3>Idempotencia</h3><p>Reejecutar una carga no debe crear duplicados. La identidad estable, un índice único y escrituras tipo upsert permiten comprobarlo.</p></div>
-<div class="ref"><h3>Cassandra</h3><p>La tabla nace de la consulta que debe responder. La clave de partición determina dónde buscar y el clustering define orden dentro de la partición.</p></div>
-<div class="ref"><h3>Neo4j</h3><p>Una relación contractual aporta contexto. No convierte una conexión en prueba de fraude, favorecimiento o colusión.</p></div>
+<div class="ref"><h3>Cassandra · diseño + simulación</h3><p>La tabla nace de la consulta que debe responder. La clave de partición determina dónde buscar y el clustering define orden dentro de la partición. En TC1 se evalúan el CQL y una simulación local; no se exige desplegar Astra.</p></div>
+<div class="ref"><h3>Neo4j · contratos enlazados</h3><p>El grafo usa relaciones reales Entidad → Contrato → Proveedor derivadas del cruce de fuentes. Se evalúan Cypher y un subgrafo local verificable; no se exige Aura. Una conexión no prueba fraude, favorecimiento o colusión.</p></div>
 </div>
 </section>
 
@@ -92,7 +92,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <tr><td>5xx / timeout</td><td>retry acotado, backoff y tamaño de consulta</td></tr>
 <tr><td>hash distinto</td><td>orden estable, offsets, ventana y duplicados</td></tr>
 <tr><td>segunda carga aumenta conteo</td><td>identidad del documento, índice único y estrategia de escritura</td></tr>
-<tr><td>join coverage bajo</td><td>grano, claves de unión y universo temporal; no rellene artificialmente</td></tr>
+<tr><td>join coverage bajo</td><td>verifique <code>id_del_portafolio → proceso_de_compra</code> y el universo temporal; no rellene artificialmente</td></tr><tr><td>join coverage = 0</td><td>deténgase en el precheck: E2–E5 necesitan población contractual enlazada</td></tr>
 </tbody></table>
 </section>
 
