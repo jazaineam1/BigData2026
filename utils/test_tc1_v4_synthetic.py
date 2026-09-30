@@ -156,7 +156,7 @@ def main():
     top10=(bc[(bc.anio==part[0])&(bc.departamento==part[1])]
            .sort_values(["valor_contratos","id_proceso"],ascending=[False,True],kind="mergesort").head(10))
 
-    pmap=procesos[["id_del_portafolio","id_del_proceso"]].copy()
+    pmap=procesos[["id_del_portafolio","id_del_proceso"]].rename(columns={"id_del_proceso":"id_proceso"}).copy()
     relaciones=contratos.merge(pmap,left_on="proceso_de_compra",right_on="id_del_portafolio",how="inner")
     relaciones["nit_proveedor"]=relaciones["documento_proveedor"].astype(str)
     relaciones["proveedor"]=relaciones["proveedor_adjudicado"].astype(str)
