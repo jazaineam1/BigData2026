@@ -1,0 +1,63 @@
+{
+  "gates": {
+    "harness_validate": {
+      "command": [
+        "python",
+        "-m",
+        "utils.harness.cli",
+        "validate"
+      ],
+      "timeout": 120
+    },
+    "harness_unit": {
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/harness",
+        "-p",
+        "test_*.py"
+      ],
+      "timeout": 180
+    },
+    "repo_hygiene": {
+      "command": [
+        "python",
+        "utils/check_repo_hygiene.py"
+      ],
+      "timeout": 300
+    },
+    "secrets": {
+      "command": [
+        "python",
+        "utils/scan_secrets_pii.py"
+      ],
+      "timeout": 300
+    },
+    "no_open_student": {
+      "command": [
+        "python",
+        "utils/validate_no_open_student.py"
+      ],
+      "timeout": 300
+    },
+    "index_calendar": {
+      "command": [
+        "python",
+        "utils/validate_index_calendar.py"
+      ],
+      "timeout": 300
+    },
+    "static_links": {
+      "command": [
+        "python",
+        "utils/validate_static_links.py",
+        "--allow-missing",
+        "lms/assets/vendor/supabase.js"
+      ],
+      "timeout": 600
+    }
+  }
+}

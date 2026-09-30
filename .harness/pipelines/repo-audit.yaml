@@ -1,0 +1,12 @@
+{
+  "id": "repo-audit",
+  "description": "Parallel read-only audit followed by deterministic repository gates.",
+  "base_ref": "HEAD",
+  "tasks": [
+    {"id": "requirements", "type": "agent", "role": "requirements", "mode": "read", "objective": "Translate the user goal, AGENTS.md, current repository state and pending decisions into explicit constraints and acceptance criteria."},
+    {"id": "architecture", "type": "agent", "role": "qa", "mode": "read", "objective": "Audit architecture, generators, tests, CI coupling and likely regression surfaces."},
+    {"id": "security", "type": "agent", "role": "security", "mode": "read", "objective": "Audit secrets, PII, trust boundaries and dangerous external actions."},
+    {"id": "accessibility", "type": "agent", "role": "accessibility", "mode": "read", "objective": "Audit accessibility and visual/readability risks in affected student-facing surfaces."},
+    {"id": "gates", "type": "command", "depends_on": ["requirements", "architecture", "security", "accessibility"], "gates": ["harness_validate", "repo_hygiene", "secrets"]}
+  ]
+}

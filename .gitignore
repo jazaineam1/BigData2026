@@ -40,3 +40,8 @@ blob-report/
 
 # SDK Realtime generado por QA/Pages desde npm fijado
 lms/assets/vendor/supabase.js
+
+# Agent harness: ejecuciones, worktrees y locks locales
+.agent-runs/
+.agent-worktrees/
+.agent-locks/

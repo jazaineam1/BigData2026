@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BigData2026 Harness Task",
+  "type": "object",
+  "required": ["id", "type"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "type": {"enum": ["agent", "command", "integrate"]},
+    "role": {"type": "string"},
+    "mode": {"enum": ["read", "write"]},
+    "objective": {"type": "string"},
+    "depends_on": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "workspace_from": {"type": "string"},
+    "scope": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "locks": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "gates": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "commit": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}
