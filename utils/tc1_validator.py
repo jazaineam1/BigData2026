@@ -329,6 +329,7 @@ def evaluar(ns):
         pmap["id_del_portafolio"]=pmap["id_del_portafolio"].astype(str).str.strip()
         pmap["id_del_proceso"]=pmap["id_del_proceso"].astype(str).str.strip()
         pmap=pmap[pmap["id_del_portafolio"].ne("")].drop_duplicates("id_del_portafolio")
+        pmap=pmap.rename(columns={"id_del_proceso":"id_proceso"})
 
         rc=contratos.copy()
         rc["proceso_de_compra"]=rc["proceso_de_compra"].fillna("").astype(str).str.strip()
