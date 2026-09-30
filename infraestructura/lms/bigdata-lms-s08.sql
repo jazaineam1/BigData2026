@@ -94,7 +94,7 @@ create index if not exists bd_lms_session_windows_opened_by_idx on public.bd_lms
 
 insert into public.bd_lms_sessions(course_code,session_number,title,path,position,required,metadata)
 values('bigdata',8,'SECOP Data Pipeline · API, concurrencia y NoSQL','lms/session-08.html',8,true,
-'{"type":"evaluation","source":"Cuadernos/Taller_Control_1.ipynb","reference":"assets/tutoriales/s08-secoppipeline.html","max_score":100,"estimated_minutes":360,"work_mode":"class_and_home","group_assessment":true,"validator_version":"2026-09-30-secoppipeline-v5"}'::jsonb)
+'{"type":"evaluation","source":"Cuadernos/Taller_Control_1.ipynb","reference":"assets/tutoriales/s08-secoppipeline.html","max_score":100,"estimated_minutes":360,"work_mode":"class_and_home","group_assessment":true,"validator_version":"2026-09-26-secoppipeline","validator_logic_version":"2026-09-30-secoppipeline-v5"}'::jsonb)
 on conflict(course_code,session_number) do update set title=excluded.title,path=excluded.path,position=excluded.position,required=excluded.required,metadata=excluded.metadata;
 
 insert into public.bd_lms_activities(code,course_code,session_number,title,kind,points,position,required,metadata) values
@@ -104,7 +104,7 @@ insert into public.bd_lms_activities(code,course_code,session_number,title,kind,
 ('bd-s08-e4','bigdata',8,'E4 · Cassandra query-first','validator_stage',15,4,true,'{"checks":["E4_datos_cassandra","E4_modelo_query_first","E4_consulta_simulada"]}'),
 ('bd-s08-e5','bigdata',8,'E5 · Neo4j y contexto relacional','validator_stage',15,5,true,'{"checks":["E5_historial_y_ancla","E5_metrica_relacional","E5_cypher","E5_subgrafo"]}'),
 ('bd-s08-e6','bigdata',8,'E6 · Decisiones, informe y paquete','validator_stage',10,6,true,'{"checks":["E6_decisiones_informe","E6_microdefensa_grupal","E6_paquete_reproducible"]}'),
-('bd-s08-final','bigdata',8,'Validación final · manifest_tc1.json','manifest',100,7,true,'{"validator_versions":["2026-09-30-secoppipeline-v5"],"current":"2026-09-30-secoppipeline-v5"}')
+('bd-s08-final','bigdata',8,'Validación final · manifest_tc1.json','manifest',100,7,true,'{"validator_versions":["2026-09-26-secoppipeline"],"current":"2026-09-26-secoppipeline","logic_version":"2026-09-30-secoppipeline-v5"}')
 on conflict(code) do update set title=excluded.title,kind=excluded.kind,points=excluded.points,position=excluded.position,required=excluded.required,metadata=excluded.metadata;
 
 -- El docente existente se matricula sin cambiar su identidad ni contraseña.

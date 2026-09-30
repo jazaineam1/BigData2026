@@ -2,7 +2,8 @@ from pathlib import Path
 import json, re, hashlib, zipfile
 import pandas as pd
 
-VERSION = "2026-09-30-secoppipeline-v5"
+VERSION = "2026-09-26-secoppipeline"
+LOGIC_VERSION = "2026-09-30-secoppipeline-v5"
 STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}
 FEEDBACK = {
     "E1_contrato_y_query": "Revise el contrato de datos y el plan SoQL: fuente, campos, filtros y orden estable deben corresponder a la ventana asignada.",
@@ -497,6 +498,7 @@ def evaluar(ns):
     manifest={
         "taller":"TC1 · SECOP Data Pipeline",
         "version":VERSION,
+        "logic_version":LOGIC_VERSION,
         "pareja_id":pareja,
         "integrantes":[
             {"nombre":ns.get("INTEGRANTE_1",""),"codigo":ns.get("CODIGO_1","")},
