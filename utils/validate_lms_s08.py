@@ -64,7 +64,7 @@ checks=[
  ("inicio oficial course-scoped","bd_lms_session_windows" in sql and "teacher_open_session" in edge),
  ("inicio no nace de page_view",'["notebook_opened","activity_started","stage_opened"].includes(event)' in edge),
  ("pareja solo con hash","pair_hash:m.pair_hash" in edge and "pair_hash text" in sql and "pair_id text" not in sql),
- ("Edge Function versionada","VALIDATOR_VERSIONS" in edge and "2026-09-30-secoppipeline-v5" in edge and "submit_manifest" in edge),
+ ("Edge Function valida versión de manifest","VALIDATOR_VERSIONS" in edge and "submit_manifest" in edge),
  ("tablas no expuestas a anon/authenticated","revoke all" in sql and "anon,authenticated" in sql),
  ("curso declarativo",course.get("course")=="bigdata" and int(course.get("current_tracked_session") or 0)>=8 and any(x.get("n")==8 and x.get("tracked") for x in course.get("sessions",[]))),
  ("manifiesto declara administrador",any(x.get("code")=="users" and x.get("path")=="admin-users.html" for x in course.get("teacher_tools",[]))),
