@@ -16,7 +16,7 @@ nb_text=read("Cuadernos/Taller_Control_1.ipynb")
 builder=read("utils/build_taller_control_1.py")
 tutorial=read("assets/tutoriales/s08-secoppipeline.html")
 validator=read("utils/tc1_validator.py")
-validator_pinned=read("utils/tc1_validator_20260930.py")
+validator_pinned=read("utils/tc1_validator_20261001.py")
 s08=read("lms/session-08.html")
 edge=read("infraestructura/lms/functions/bigdata-learning/index.ts")
 sql=read("infraestructura/lms/tc1-v4-secoppipeline.sql")
@@ -49,17 +49,20 @@ checks=[
     ("hash canónico", "canonical_hash" in all_src and "same_hash" in all_src),
     ("workers limitados", "MAX_WORKERS = 4" in all_src and "2–6 workers" in all_src),
     ("RAW parquet", 'RAW = OUT / "raw"' in all_src and "to_parquet" in all_src),
+    ("cache reanudable por páginas", all(x in all_src for x in ["RAW_PAGES","fetch_page_persisted","query_signature","_atomic_write","from_cache"])),
+    ("chunks firmados", all(x in validator for x in ["_validate_page_cache","query_signature","sha256","quedaron archivos .part"])),
+    ("consolidación solo tras equivalencia", all(x in all_src for x in ["No consolide RAW","same_offsets","same_rows","same_hash"])),
     ("Atlas idempotente", "bulk_write" in all_src and "UpdateOne" in all_src and "upsert=True" in all_src),
     ("decision log", "decision_log" in all_src),
-    ("carga mínima 6h", "6–8 horas por grupo" in all_src and "Dedicación mínima prevista por grupo: 6 horas" in all_src),
+    ("carga estimada 6–8h", "6–8 horas por grupo" in all_src and "Dedicación prevista por grupo: 6–8 horas" in all_src),
     ("microdefensa estructurada", "defensa_grupal" in all_src and "06_microdefensa_grupal.json" in all_src and "E6_microdefensa_grupal" in validator and all_src.count("#@param") >= 12),
     ("sin respuesta abierta E6", "respuesta_concurrencia" not in all_src and "respuesta_calidad" not in all_src),
-    ("validador actual", 'VERSION = "2026-09-30-secoppipeline-v5"' in validator),
+    ("validador actual", 'VERSION = "2026-10-01-secoppipeline-v6"' in validator),
     ("validador fijado idéntico", validator == validator_pinned and bool(validator_pinned)),
     ("E1 adquisición completa", all(x in validator for x in ["E1_contrato_y_query","E1_descarga_secuencial","E1_concurrencia_equivalente","E1_trazabilidad_calidad"])),
     ("E2 idempotencia", "E2_atlas_idempotente" in validator and "E2_indices" in validator),
     ("no speedup mínimo", "speedup >=" not in validator.lower()),
-    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-09-30-secoppipeline-v5" in edge and "security_no_secrets" in edge),
+    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-10-01-secoppipeline-v6" in edge and "security_no_secrets" in edge),
     ("gate de secretos", "secret_patterns" in validator and '"gates":gates' in validator and '".ipynb"' in validator and "ENTREGA BLOQUEADA" in validator),
     ("backend persiste versión real", "manifest_version:m.version" in edge and "validator_version:m.version" in edge),
     ("calificación grupal", "tc1GroupContext" in edge and "syncManifestGroupGradebook" in edge and "lms_group_submissions_v2" in edge and "Calificación grupal TC1" in edge),
@@ -79,10 +82,13 @@ checks=[
     ("carga horaria vive en notebook, no en LMS", "mínimo 6 horas por grupo" not in s08 and "6–8 horas" not in s08 and "6–8 horas por grupo" in all_src and "'estimated_minutes',360" in sql),
     ("LMS grupal en SQL", "lms_assignment_group_settings_v2" in sql and "'group_assessment',true" in sql and "Proyecto grupal" in sql),
     ("manifest único por grupo", "Este manifest ya fue registrado por otro equipo" in edge),
-    ("rúbrica detallada solo en notebook", "Rúbrica oficial · 100 puntos" not in s08 and "Concurrencia equivalente" not in s08 and "Microdefensa grupal" not in s08 and "Contrato de datos y consulta SoQL" in all_src),
+    ("rúbrica detallada solo en notebook", "Rúbrica oficial · 100 puntos" not in s08 and "Concurrencia equivalente" not in s08 and "Microdefensa grupal" not in s08 and "E1 · Adquisición SECOP" in all_src),
     ("evidencia auditable requerida", "evidenceUrl" in s08 and "evidence_url" in edge and "carpeta de evidencia" in sql),
     ("revisión docente abre evidencia", "Abrir evidencia del grupo" in teacher_collab and "Desglose automático" in teacher_collab),
-    ("notebook incluye rúbrica detallada", "Contrato de datos y consulta SoQL" in all_src and "Microdefensa estructurada basada en resultados propios" in all_src),
+    ("notebook incluye rúbrica detallada", "E1 · Adquisición SECOP" in all_src and "E6 · Decisiones y entrega" in all_src and "TOTAL" in all_src),
+    ("metodología de entrega explícita", all(x in all_src for x in ["Metodología de entrega","Un solo integrante","manifest_tc1.json","ventana de incógnito"])),
+    ("fecha máxima explícita", "17 de octubre de 2026" in all_src and "11:59 p. m." in all_src and "2026-10-17T23:59:59-05:00" in sql and "17 de octubre de 2026" in s08),
+    ("backend respeta fecha máxima", 'select("id,max_attempts,max_score,due_at")' in edge and "La fecha máxima de entrega del TC1 ya venció." in edge),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)

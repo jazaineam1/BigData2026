@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,{auth:{persistSession:false}});
-const COURSE="bigdata",RUN_CODE="bigdata-2026-2",SESSION=8,CURRENT_VALIDATOR_VERSION="2026-09-30-secoppipeline-v5";
+const COURSE="bigdata",RUN_CODE="bigdata-2026-2",SESSION=8,CURRENT_VALIDATOR_VERSION="2026-10-01-secoppipeline-v6";
 const VALIDATOR_VERSIONS=new Set([CURRENT_VALIDATOR_VERSION]);
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 const TRACK_EVENTS=new Set(["page_opened","page_closed","heartbeat","notebook_opened","activity_started","stage_opened","ui_action"]);
@@ -100,8 +100,9 @@ async function verifyManifest(rawInput:string){
  return {pair_hash:await digestHex(pair),score,note,sha:supplied,controls:clean,stageScores,stageMax,version}
 }
 async function syncManifestGroupGradebook(ctx:any,run:any,m:any,groupCtx:any,evidenceUrl:string){
- const {data:a}=await db.from("lms_assignments_v2").select("id,max_attempts,max_score").eq("course_run_id",run.id).eq("code","bd-s08-control").eq("active",true).maybeSingle();
+ const {data:a}=await db.from("lms_assignments_v2").select("id,max_attempts,max_score,due_at").eq("course_run_id",run.id).eq("code","bd-s08-control").eq("active",true).maybeSingle();
  if(!a)throw new Error("No existe la tarea TC1 activa en el Gradebook.");
+ if(a.due_at&&Date.parse(a.due_at)<Date.now())throw new Error("La fecha máxima de entrega del TC1 ya venció.");
  const {data:setting}=await db.from("lms_assignment_group_settings_v2").select("enabled").eq("assignment_id",a.id).eq("enabled",true).maybeSingle();
  if(!setting)throw new Error("TC1 no está habilitado como entrega grupal.");
  const now=new Date().toISOString(),maxAttempts=Number(a.max_attempts||20);

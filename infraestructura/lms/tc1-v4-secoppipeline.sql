@@ -12,7 +12,7 @@ set title='SECOP Data Pipeline · API, concurrencia y NoSQL',
       'estimated_minutes',360,
       'work_mode','class_and_home',
       'group_assessment',true,
-      'validator_version','2026-09-30-secoppipeline-v5'
+      'validator_version','2026-10-01-secoppipeline-v6'
     )
 where course_code='bigdata' and session_number=8;
 
@@ -51,12 +51,13 @@ set title='E6 · Decisiones, informe y paquete',
 where code='bd-s08-e6';
 
 update public.bd_lms_activities
-set metadata='{"validator_versions":["2026-09-30-secoppipeline-v5"],"current":"2026-09-30-secoppipeline-v5"}'::jsonb
+set metadata='{"validator_versions":["2026-10-01-secoppipeline-v6"],"current":"2026-10-01-secoppipeline-v6"}'::jsonb
 where code='bd-s08-final';
 
 update public.lms_assignments_v2
 set title='TC1 · SECOP Data Pipeline',
     instructions='Construya una adquisición reproducible de SECOP II, compare secuencial vs ThreadPoolExecutor, documente calidad/trazabilidad, cargue Atlas de forma idempotente y produzca evidencia Cassandra/Neo4j. La entrega se registra al validar manifest_tc1.json.',
+    due_at='2026-10-17T23:59:59-05:00'::timestamptz,
     rubric='[
       {"code":"E1","title":"API SECOP + concurrencia + trazabilidad","max":25},
       {"code":"E2","title":"Modelo documental + Atlas idempotente","max":25},
@@ -105,7 +106,8 @@ set enabled=true,
     updated_at=now();
 
 update public.lms_assignments_v2
-set instructions='Proyecto grupal de trabajo en clase y en casa. Dedicación mínima esperada: 6 horas por grupo. Entregables: notebook ejecutado, TC1_<pareja>.zip y manifest_tc1.json. El notebook y el ZIP deben quedar en una carpeta de evidencia accesible al docente. Un integrante registra el enlace de esa carpeta y carga el manifest validado; el LMS registra una sola calificación del equipo y la replica a todos sus integrantes. La microdefensa estructurada forma parte de la evidencia E6 y no crea una segunda nota.',
+set instructions='Proyecto grupal. Entregables: notebook ejecutado, TC1_<pareja>.zip y manifest_tc1.json en una carpeta de evidencia accesible al docente. Un solo integrante registra el enlace de la carpeta y carga el manifest validado desde S08; el LMS valida SHA, versión y controles y replica la misma calificación a todo el equipo. Fecha máxima: 17 de octubre de 2026, 11:59 p. m. hora de Bogotá.',
+    due_at='2026-10-17T23:59:59-05:00'::timestamptz,
     updated_at=now()
 where code='bd-s08-control'
   and course_run_id=(select id from public.lms_course_runs where code='bigdata-2026-2' limit 1);
