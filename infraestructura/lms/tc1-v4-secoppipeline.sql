@@ -56,7 +56,7 @@ where code='bd-s08-final';
 
 update public.lms_assignments_v2
 set title='TC1 · SECOP Data Pipeline',
-    instructions='Construya una adquisición reproducible de SECOP II, compare secuencial vs ThreadPoolExecutor, documente calidad/trazabilidad, cargue Atlas de forma idempotente y produzca evidencia Cassandra/Neo4j. La entrega se registra al validar manifest_tc1.json.',
+    instructions='Construya una adquisición reproducible de SECOP II, compare secuencial vs ThreadPoolExecutor, documente calidad/trazabilidad, cargue Atlas de forma idempotente y produzca evidencia Cassandra/Neo4j. El LMS no es canal de entrega: la entrega oficial se realiza mediante Google Drive + correo institucional al docente.',
     due_at='2026-10-17T23:59:59-05:00'::timestamptz,
     rubric='[
       {"code":"E1","title":"API SECOP + concurrencia + trazabilidad","max":25},
@@ -106,7 +106,7 @@ set enabled=true,
     updated_at=now();
 
 update public.lms_assignments_v2
-set instructions='Proyecto grupal. Entregables: notebook ejecutado, TC1_<pareja>.zip y manifest_tc1.json en una carpeta de evidencia accesible al docente. Un solo integrante registra el enlace de la carpeta y carga el manifest validado desde S08; el LMS valida SHA, versión y controles y replica la misma calificación a todo el equipo. Fecha máxima: 17 de octubre de 2026, 11:59 p. m. hora de Bogotá.',
+set instructions='Proyecto grupal. Entregables: notebook ejecutado, TC1_<pareja>.zip y manifest_tc1.json en Google Drive. Un solo integrante envía el enlace por correo institucional a jzaineam@ucentral.edu.co y copia a su compañero. GitHub es opcional y no reemplaza Drive + correo. Fecha máxima: 17 de octubre de 2026, 11:59 p. m. hora de Bogotá. El LMS no se usa para entregar.',
     due_at='2026-10-17T23:59:59-05:00'::timestamptz,
     updated_at=now()
 where code='bd-s08-control'

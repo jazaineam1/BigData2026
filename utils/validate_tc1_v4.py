@@ -70,7 +70,7 @@ checks=[
     ("migración actividad", "E1 · API SECOP, concurrencia y trazabilidad" in sql),
     ("rúbrica 25/25/10/15/15/10", 'STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}' in validator and sql.count('"max":25')>=2 and sql.count('"max":15')>=2 and sql.count('"max":10')>=2),
     ("S08 nueva", "SECOP Data Pipeline" in s08 and "s08-secoppipeline.html" not in s08 and "V4" not in s08),
-    ("S08 entrega por equipo", "group_context" in edge and "Sin equipo asignado" in s08 and "misma calificación" in s08),
+    ("S08 informa entrega externa", "no se entrega por el LMS" in s08 and "Google Drive + correo institucional" in s08 and "jzaineam@ucentral.edu.co" in s08),
     ("S08 sin acciones redundantes", "Ruta simple" not in s08 and "Trabajar etapa" not in s08 and "Qué cuenta como completado" not in s08),
     ("S08 progreso plegable", "Ver avance por etapa" in s08 and "stageSummary" in s08),
 
@@ -83,10 +83,11 @@ checks=[
     ("LMS grupal en SQL", "lms_assignment_group_settings_v2" in sql and "'group_assessment',true" in sql and "Proyecto grupal" in sql),
     ("manifest único por grupo", "Este manifest ya fue registrado por otro equipo" in edge),
     ("rúbrica detallada solo en notebook", "Rúbrica oficial · 100 puntos" not in s08 and "Concurrencia equivalente" not in s08 and "Microdefensa grupal" not in s08 and "E1 · Adquisición SECOP" in all_src),
-    ("evidencia auditable requerida", "evidenceUrl" in s08 and "evidence_url" in edge and "carpeta de evidencia" in sql),
+    ("evidencia auditable por Drive y correo", "Google Drive" in all_src and "jzaineam@ucentral.edu.co" in all_src and "sello de tiempo" in all_src.lower() and "Google Drive + correo" in sql),
     ("revisión docente abre evidencia", "Abrir evidencia del grupo" in teacher_collab and "Desglose automático" in teacher_collab),
     ("notebook incluye rúbrica detallada", "E1 · Adquisición SECOP" in all_src and "E6 · Decisiones y entrega" in all_src and "TOTAL" in all_src),
-    ("metodología de entrega explícita", all(x in all_src for x in ["Metodología de entrega","Un solo integrante","manifest_tc1.json","ventana de incógnito"])),
+    ("metodología de entrega explícita", all(x in all_src for x in ["Metodología oficial de entrega","Un solo integrante","manifest_tc1.json","ventana de incógnito","Google Drive","correo institucional"])),
+    ("GitHub opcional con tutorial", all(x in all_src for x in ["GitHub opcional","Add file → Upload files","git init","git push -u origin main","jazaineam1"])),
     ("fecha máxima explícita", "17 de octubre de 2026" in all_src and "11:59 p. m." in all_src and "2026-10-17T23:59:59-05:00" in sql and "17 de octubre de 2026" in s08),
     ("backend respeta fecha máxima", 'select("id,max_attempts,max_score,due_at")' in edge and "La fecha máxima de entrega del TC1 ya venció." in edge),
 ]

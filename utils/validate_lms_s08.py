@@ -41,12 +41,12 @@ checks=[
  ("S08 abre Taller_Control_1","Cuadernos/Taller_Control_1.ipynb" in s08),
  ("S08 sin referencia paralela","s08-secoppipeline.html" not in s08 and "Talleres/Taller_Control_1.md" not in s08),
  ("S08 no expone versión interna","V4" not in s08 and "v4" not in s08),
- ("S08 acepta manifest","manifest_tc1.json" in s08 and 'type="file"' in s08),
- ("S08 ruta cognitiva simple",all(x in s08 for x in ["Abre el taller en Colab","Registra la evidencia del grupo","Progreso del equipo"]) and "Ruta simple" not in s08),
+ ("S08 no usa LMS para entregar","Este TC1 no se entrega en el LMS." in s08 and "Google Drive + correo institucional" in s08 and '<div style="display:none" aria-hidden="true">' in s08),
+ ("S08 ruta cognitiva simple",all(x in s08 for x in ["Abre el taller en Colab","Google Drive + correo institucional","jzaineam@ucentral.edu.co"]) and "Ruta simple" not in s08),
  ("S08 oculta telemetría al estudiante",all(x not in s08 for x in ["Tiempo activo","Inicio</span>","Qué cuenta como completado","Trabajar etapa"])),
  ("S08 detalle de etapas plegable","<details><summary>Ver avance por etapa</summary>" in s08),
  ("S08 no duplica rúbrica","Rúbrica oficial · 100 puntos" not in s08 and "Concurrencia equivalente" not in s08 and "Paquete reproducible completo" not in s08),
- ("S08 exige enlace de evidencia","evidenceUrl" in s08 and "evidence_url" in edge),
+ ("S08 declara canal oficial externo","El canal oficial es una carpeta de Google Drive" in s08 and "correo institucional" in s08),
  ("S08 no marca abrir como entregar","Abrir el notebook no registra una entrega ni una nota." in s08),
  ("WALL declara desempate por inicio","demora de inicio" in wall),
  ("WALL usa modo docente BigData","requireBigData({teacher:true})" in wall and "teacher_wall" in edge),
@@ -89,5 +89,5 @@ if errors:
 print("LMS S08: OK")
 print(" - S07 intacta por Git blob SHA")
 print(" - Login LMS reutilizado")
-print(" - S08 + manifest + WALL presentes")
+print(" - S08 informa entrega externa + WALL presente")
 print(" - RLS/revocación declarados")
