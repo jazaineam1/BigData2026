@@ -82,7 +82,7 @@ checks=[
     ("carga horaria vive en notebook, no en LMS", "mínimo 6 horas por grupo" not in s08 and "6–8 horas" not in s08 and "6–8 horas por grupo" in all_src and "'estimated_minutes',360" in sql),
     ("LMS grupal en SQL", "lms_assignment_group_settings_v2" in sql and "'group_assessment',true" in sql and "Proyecto grupal" in sql),
     ("manifest único por grupo", "Este manifest ya fue registrado por otro equipo" in edge),
-    ("rúbrica detallada solo en notebook", "Rúbrica oficial · 100 puntos" not in s08 and "Concurrencia equivalente" not in s08 and "Microdefensa grupal" not in s08 and "Contrato de datos y consulta SoQL" in all_src),
+    ("rúbrica detallada solo en notebook", "Rúbrica oficial · 100 puntos" not in s08 and "Concurrencia equivalente" not in s08 and "Microdefensa grupal" not in s08 and "E1 · Adquisición SECOP" in all_src),
     ("evidencia auditable requerida", "evidenceUrl" in s08 and "evidence_url" in edge and "carpeta de evidencia" in sql),
     ("revisión docente abre evidencia", "Abrir evidencia del grupo" in teacher_collab and "Desglose automático" in teacher_collab),
     ("notebook incluye rúbrica detallada", "E1 · Adquisición SECOP" in all_src and "E6 · Decisiones y entrega" in all_src and "TOTAL" in all_src),
