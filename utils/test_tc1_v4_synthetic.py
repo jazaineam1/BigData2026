@@ -118,7 +118,7 @@ def main():
     }
     query_plan={
       "procesos":{"where":"fecha_de_publicacion_del >= '2025-01-01' and fecha_de_publicacion_del < '2025-03-01'",
-                  "order":"fecha_de_publicacion_del ASC,id_del_proceso ASC"},
+                  "order":"fecha_de_publicacion_del ASC,id_del_proceso ASC,nit_del_proveedor_adjudicado ASC,nombre_del_proveedor ASC"},
       "contratos":{"where":"fecha_de_firma >= '2025-01-01' and fecha_de_firma < '2025-03-01'",
                    "order":"fecha_de_firma ASC,id_contrato ASC"}
     }
@@ -210,7 +210,11 @@ def main():
     top10=(bc[(bc.anio==part[0])&(bc.departamento==part[1])]
            .sort_values(["valor_contratos","id_proceso"],ascending=[False,True],kind="mergesort").head(10))
 
-    pmap=procesos[["id_del_portafolio","id_del_proceso"]].rename(columns={"id_del_proceso":"id_proceso"}).copy()
+    pmap=procesos[["id_del_portafolio","id_del_proceso"]].copy()
+    pmap=pmap.dropna(subset=["id_del_portafolio","id_del_proceso"])
+    pmap["id_del_portafolio"]=pmap["id_del_portafolio"].astype(str).str.strip()
+    pmap=pmap[pmap["id_del_portafolio"].ne("")].drop_duplicates("id_del_portafolio")
+    pmap=pmap.rename(columns={"id_del_proceso":"id_proceso"})
     relaciones=contratos.merge(pmap,left_on="proceso_de_compra",right_on="id_del_portafolio",how="inner")
     relaciones["nit_proveedor"]=relaciones["documento_proveedor"].astype(str)
     relaciones["proveedor"]=relaciones["proveedor_adjudicado"].astype(str)
@@ -222,7 +226,8 @@ def main():
           .sort_values(["contratos","nit_entidad"],ascending=[False,True],kind="mergesort").reset_index(drop=True))
     nit_ancla=str(rank.iloc[0]["nit_entidad"])
     rel_ancla=relaciones[relaciones.nit_entidad.astype(str)==nit_ancla]
-    entidad_ancla=sorted(set(rel_ancla.entidad.astype(str)))[-1]  # variante válida para el mismo NIT
+    nombres_ancla=sorted(set(rel_ancla.entidad.astype(str)))
+    entidad_ancla=nombres_ancla[-1]  # cualquier variante observada para el mismo NIT es válida
     a=rel_ancla.groupby("nit_proveedor")["id_contrato"].nunique().rename("contratos_con_ancla").reset_index()
     g=relaciones.groupby("nit_proveedor")["nit_entidad"].nunique().rename("entidades_conectadas").reset_index()
     rel=a.merge(g,on="nit_proveedor").sort_values(
@@ -263,7 +268,7 @@ Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran f
     correct_cov="La cobertura mide qué proporción de procesos encontró contrato en este snapshot; no se inventan los faltantes"
     defensa={
       "escenario_429":{"workers_observados":4,"same_hash":True,"seleccion":correct_d429},
-      "escenario_cobertura":{"join_coverage":coverage,"matched_processes":linked,"seleccion":correct_cov},
+      "escenario_cobertura":{"join_coverage":coverage,"matched_processes":matched_rows,"seleccion":correct_cov},
     }
     touch(out/"06_microdefensa_grupal.json",json.dumps(defensa))
 
