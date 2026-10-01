@@ -231,7 +231,7 @@ def evaluar(ns):
             and CONTRACT_FIELDS.issubset(set(contratos.columns))
             and isinstance(join_cov,(int,float)) and 0<float(join_cov)<=1 and matched>0
             and quality.get("join_key")=="id_del_portafolio -> proceso_de_compra"
-            and isinstance(acq,dict) and acq.get("schema")=="2026-10-01-secoppipeline-v6"
+            and isinstance(acq,dict) and acq.get("schema")==VERSION
             and acq.get("datasets",{}).get("procesos",{}).get("id")=="p6dx-8zbt"
             and acq.get("datasets",{}).get("contratos",{}).get("id")=="jbjy-vk9h"
             and acq.get("datasets",{}).get("procesos",{}).get("snapshot_sha256")==bench.get("hash_threaded")
