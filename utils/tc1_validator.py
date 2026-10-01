@@ -2,13 +2,13 @@ from pathlib import Path
 import json, re, hashlib, zipfile
 import pandas as pd
 
-VERSION = "2026-09-30-secoppipeline-v5"
+VERSION = "2026-10-01-secoppipeline-v6"
 STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}
 FEEDBACK = {
     "E1_contrato_y_query": "Revise el contrato de datos y el plan SoQL: fuente, campos, filtros y orden estable deben corresponder a la ventana asignada.",
     "E1_descarga_secuencial": "La descarga secuencial debe producir exactamente la población objetivo real de su ventana; no se exige un mínimo artificial de 1.000 filas.",
     "E1_concurrencia_equivalente": "Compare en igualdad de condiciones: mismos offsets, mismas filas y mismo hash canónico. El speedup puede ser menor que 1.",
-    "E1_trazabilidad_calidad": "Guarde RAW, metadata y calidad; el cruce id_del_portafolio → proceso_de_compra debe producir población relacional (>0) y no debe incluir secretos.",
+    "E1_trazabilidad_calidad": "Guarde RAW consolidado y páginas reanudables con firma/SHA-256; no deben quedar .part, el manifest debe enumerar los offsets y el cruce id_del_portafolio → proceso_de_compra debe producir población relacional (>0).",
     "E2_modelo_documental": "Construya un documento coherente por proceso y conserve el snapshot integrado como evidencia.",
     "E2_atlas_idempotente": "La colección debe ser real y la segunda ejecución no puede aumentar el número de documentos.",
     "E2_indices": "Debe existir un índice único de identidad y al menos un índice adicional justificado por una consulta.",
@@ -60,6 +60,39 @@ def _read_json(path):
         return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
     except Exception:
         return None
+
+def _validate_page_cache(cache_dir, expected_offsets):
+    cache_dir=Path(cache_dir)
+    if not cache_dir.exists(): return False, "cache ausente"
+    if list(cache_dir.glob("*.part")): return False, "quedaron archivos .part"
+    expected=[int(x) for x in expected_offsets]
+    seen=[]
+    for offset in expected:
+        stem=f"page_{offset:07d}"
+        data_path=cache_dir/f"{stem}.json"
+        meta_path=cache_dir/f"{stem}.meta.json"
+        if not data_path.exists() or not meta_path.exists():
+            return False, f"falta chunk {offset}"
+        try:
+            raw=data_path.read_bytes()
+            meta=json.loads(meta_path.read_text(encoding="utf-8"))
+            rows=json.loads(raw.decode("utf-8"))
+        except Exception:
+            return False, f"chunk ilegible {offset}"
+        if not isinstance(rows,list): return False, f"chunk no es lista {offset}"
+        if int(meta.get("offset",-1))!=offset: return False, f"offset metadata inválido {offset}"
+        if int(meta.get("rows",-1))!=len(rows): return False, f"conteo metadata inválido {offset}"
+        if not re.fullmatch(r"[0-9a-f]{64}",str(meta.get("query_signature",""))): return False, f"firma inválida {offset}"
+        sha=hashlib.sha256(raw).hexdigest()
+        if meta.get("sha256")!=sha: return False, f"sha inválido {offset}"
+        seen.append(offset)
+    extras=[]
+    for p in cache_dir.glob("page_*.json"):
+        if p.name.endswith(".meta.json"): continue
+        m=re.fullmatch(r"page_(\d{7})\.json",p.name)
+        if m and int(m.group(1)) not in expected: extras.append(int(m.group(1)))
+    if extras: return False, "chunks extra: "+",".join(map(str,extras))
+    return seen==expected, f"{len(seen)} chunks válidos"
 
 def evaluar(ns):
     OUT=Path(ns.get("OUT","entrega_tc1")); OUT.mkdir(exist_ok=True)
@@ -151,14 +184,44 @@ def evaluar(ns):
         raw_proc=(OUT/"raw"/"procesos.parquet")
         raw_cont=(OUT/"raw"/"contratos.parquet")
         secret_blob=json.dumps(acq,ensure_ascii=False).lower()
+
+        expected_proc=list(ns.get("OFFSETS_PROCESOS",[]) or [])
+        expected_cont=list(ns.get("OFFSETS_CONTRATOS",[]) or [])
+        raw_pages=Path(ns.get("RAW_PAGES",OUT/"raw"/"pages"))
+        cache_seq=Path(ns.get("CACHE_SEQ_PROCESOS",raw_pages/"procesos"/"sequential"))
+        cache_thr=Path(ns.get("CACHE_THR_PROCESOS",raw_pages/"procesos"/"threaded"))
+        cache_cont=Path(ns.get("CACHE_CONTRATOS",raw_pages/"contratos"/"official"))
+        seq_ok,seq_ev=_validate_page_cache(cache_seq,expected_proc)
+        thr_ok,thr_ev=_validate_page_cache(cache_thr,expected_proc)
+        cont_ok,cont_ev=_validate_page_cache(cache_cont,expected_cont)
+
+        pages_seq=acq.get("datasets",{}).get("procesos",{}).get("pages_sequential",[])
+        pages_thr=acq.get("datasets",{}).get("procesos",{}).get("pages_threaded",[])
+        pages_cont=acq.get("datasets",{}).get("contratos",{}).get("pages",[])
+        man_offsets_seq=[int(x.get("offset",-1)) for x in pages_seq]
+        man_offsets_thr=[int(x.get("offset",-1)) for x in pages_thr]
+        man_offsets_cont=[int(x.get("offset",-1)) for x in pages_cont]
+        page_fields=lambda xs: all(
+            isinstance(x,dict)
+            and re.fullmatch(r"[0-9a-f]{64}",str(x.get("sha256","")))
+            and re.fullmatch(r"[0-9a-f]{64}",str(x.get("query_signature","")))
+            and int(x.get("rows",-1))>=0
+            for x in xs
+        )
+
         e14=(
             isinstance(contratos,pd.DataFrame) and len(contratos)>0
             and CONTRACT_FIELDS.issubset(set(contratos.columns))
             and isinstance(join_cov,(int,float)) and 0<float(join_cov)<=1 and matched>0
             and quality.get("join_key")=="id_del_portafolio -> proceso_de_compra"
-            and isinstance(acq,dict) and acq.get("schema")=="2026-09-30-secoppipeline-v5"
+            and isinstance(acq,dict) and acq.get("schema")=="2026-10-01-secoppipeline-v6"
             and acq.get("datasets",{}).get("procesos",{}).get("id")=="p6dx-8zbt"
             and acq.get("datasets",{}).get("contratos",{}).get("id")=="jbjy-vk9h"
+            and acq.get("datasets",{}).get("procesos",{}).get("snapshot_sha256")==bench.get("hash_threaded")
+            and re.fullmatch(r"[0-9a-f]{64}",str(acq.get("datasets",{}).get("contratos",{}).get("snapshot_sha256","")))
+            and man_offsets_seq==expected_proc and man_offsets_thr==expected_proc and man_offsets_cont==expected_cont
+            and page_fields(pages_seq) and page_fields(pages_thr) and page_fields(pages_cont)
+            and seq_ok and thr_ok and cont_ok
             and int(acq.get("workers",0))==int(bench.get("workers",0))
             and "queried_at_utc" in acq
             and "password" not in secret_blob and "mongodb+srv" not in secret_blob and "app_token" not in secret_blob
@@ -167,9 +230,10 @@ def evaluar(ns):
             and (OUT/"01_acquisition_manifest.json").exists()
             and (OUT/"01_quality_report.json").exists()
         )
+        e14_ev=f"seq={seq_ev}; threaded={thr_ev}; contratos={cont_ev}; join={join_cov:.4f}"
     except Exception as e:
-        print("E1.4",type(e).__name__,e); e14=False
-    check("E1_trazabilidad_calidad",e14,9)
+        print("E1.4",type(e).__name__,e); e14=False; e14_ev=str(e)
+    check("E1_trazabilidad_calidad",e14,9,e14_ev)
 
     # E2 · 25
     historico=ns.get("historico"); documentos=ns.get("documentos")
