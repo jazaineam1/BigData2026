@@ -2,7 +2,7 @@ from pathlib import Path
 import json, re, hashlib, zipfile
 import pandas as pd
 
-VERSION = "2026-10-01-secoppipeline-v6"
+VERSION = "2026-10-01-secoppipeline-v6.1"
 STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}
 FEEDBACK = {
     "E1_contrato_y_query": "Revise el contrato de datos y el plan SoQL: fuente, campos, filtros y orden estable deben corresponder a la ventana asignada.",
@@ -11,7 +11,7 @@ FEEDBACK = {
     "E1_trazabilidad_calidad": "Guarde RAW consolidado y páginas reanudables con firma/SHA-256; no deben quedar .part, el manifest debe enumerar los offsets y el cruce id_del_portafolio → proceso_de_compra debe producir población relacional (>0).",
     "E2_modelo_documental": "Construya un documento coherente por proceso y conserve el snapshot integrado como evidencia.",
     "E2_atlas_idempotente": "La colección debe ser real y la segunda ejecución no puede aumentar el número de documentos.",
-    "E2_indices": "Debe existir un índice único de identidad y al menos un índice adicional justificado por una consulta.",
+    "E2_indices": "E2.3 Índices: debe existir un índice UNIQUE sobre id_proceso y al menos un índice adicional alineado con una consulta del taller. Revise la evidencia de índices observados.",
     "E2_consulta_A_count": "Recalcule la consulta A directamente en Atlas y contraste el conteo con el snapshot local.",
     "E2_consulta_B_find": "El top 10 debe coincidir con el orden de referencia: valor contractual descendente e id_proceso ascendente.",
     "E2_evidencia_atlas": "Registre carga, consultas e índices en 02_atlas_evidence.json sin credenciales.",
@@ -44,8 +44,13 @@ CONTRACT_FIELDS = {
 def _canon_df(df, key):
     if not isinstance(df, pd.DataFrame) or key not in df.columns:
         return None
-    x=df.copy().sort_values(key,kind="mergesort").reset_index(drop=True)
-    payload=x.to_json(orient="records",force_ascii=False,date_format="iso")
+    # Hash de multiconjunto: conserva duplicados, pero no depende del orden accidental
+    # con que Socrata devuelva filas empatadas.
+    x=df.copy().where(pd.notna(df), None)
+    rows=[]
+    for rec in x.to_dict("records"):
+        rows.append(json.dumps(rec,ensure_ascii=False,sort_keys=True,separators=(",",":"),default=str))
+    payload="\n".join(sorted(rows))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 def _safe_float(x):
@@ -91,7 +96,13 @@ def _validate_page_cache(cache_dir, expected_offsets):
         if p.name.endswith(".meta.json"): continue
         m=re.fullmatch(r"page_(\d{7})\.json",p.name)
         if m and int(m.group(1)) not in expected: extras.append(int(m.group(1)))
-    if extras: return False, "chunks extra: "+",".join(map(str,extras))
+    if extras:
+        return False, (
+            "chunks extra: "+",".join(map(str,extras))
+            + ". Esto suele ocurrir si cambió PAREJA_ID/ventana. "
+              "Elimine esos page_*.json y sus .meta.json correspondientes, "
+              "o borre solo la carpeta de cache de esta fuente y reejecute E1."
+        )
     return seen==expected, f"{len(seen)} chunks válidos"
 
 def evaluar(ns):
@@ -109,7 +120,9 @@ def evaluar(ns):
         }
         print(("✅" if ok else "❌"),k,f"{checks[k]['puntos']}/{puntos}")
         if not ok:
-            print("   ↳",checks[k]["feedback"])
+            if checks[k]["evidencia"]:
+                print("   ↳ Evidencia:",checks[k]["evidencia"])
+            print("   ↳ Qué revisar:",checks[k]["feedback"])
 
     pareja=str(ns.get("PAREJA_ID","")).strip()
     procesos=ns.get("procesos_df"); contratos=ns.get("contratos_df")
@@ -132,7 +145,11 @@ def evaluar(ns):
             and data_contract.get("join",{}).get("procesos.id_del_portafolio")=="contratos.proceso_de_compra"
             and isinstance(q1.get("where"),str) and "fecha_de_publicacion_del" in q1["where"]
             and isinstance(q2.get("where"),str) and "fecha_de_firma" in q2["where"]
-            and "order" in q1 and "fecha_de_publicacion_del" in q1["order"] and "id_del_proceso" in q1["order"]
+            and "order" in q1
+            and all(x in q1["order"] for x in [
+                "fecha_de_publicacion_del","id_del_proceso",
+                "nit_del_proveedor_adjudicado","nombre_del_proveedor"
+            ])
             and "order" in q2 and "id_contrato" in q2["order"]
             and (OUT/"00_dataset_contract.json").exists()
         )
@@ -243,7 +260,9 @@ def evaluar(ns):
         nested_ok=bool(sample) and all(required_top.issubset(d.keys()) for d in sample)
         cr_ok=all(isinstance(d.get("contratos_resumen"),dict) and {"cantidad","valor_total","estados"}.issubset(d["contratos_resumen"].keys()) for d in sample)
         e21=(
-            isinstance(historico,pd.DataFrame) and len(historico)==len(procesos)
+            isinstance(historico,pd.DataFrame)
+            and isinstance(procesos,pd.DataFrame)
+            and len(historico)==procesos["id_del_proceso"].nunique()
             and historico["id_proceso"].nunique()==len(historico)
             and isinstance(documentos,list) and len(documentos)==len(historico)
             and nested_ok and cr_ok
@@ -252,7 +271,12 @@ def evaluar(ns):
         )
     except Exception as e:
         print("E2.1",type(e).__name__,e); e21=False
-    check("E2_modelo_documental",e21,5)
+    check(
+        "E2_modelo_documental",e21,5,
+        f"historico={0 if not isinstance(historico,pd.DataFrame) else len(historico)}; "
+        f"procesos_unicos={0 if not isinstance(procesos,pd.DataFrame) or 'id_del_proceso' not in procesos.columns else procesos['id_del_proceso'].nunique()}; "
+        f"documentos={0 if not isinstance(documentos,list) else len(documentos)}"
+    )
 
     coleccion=ns.get("coleccion")
     try:
@@ -283,8 +307,16 @@ def evaluar(ns):
             for name,v in info.items()
         )
         e23=unique_id and additional_index and isinstance(ns.get("atlas_indexes"),list)
-    except Exception: e23=False
-    check("E2_indices",e23,4)
+    except Exception as e:
+        e23=False
+        info={}
+    check(
+        "E2_indices",e23,4,
+        "índices observados="+json.dumps(
+            {k:v.get("key",[]) for k,v in (info or {}).items()},
+            ensure_ascii=False,default=str
+        )
+    )
 
     try:
         ref_a=sum(
@@ -421,17 +453,24 @@ def evaluar(ns):
               .sort_values(["contratos","nit_entidad"],ascending=[False,True],kind="mergesort").reset_index(drop=True))
         ref_nit=str(rank.iloc[0]["nit_entidad"])
         ref_ancla=ref_rel[ref_rel["nit_entidad"]==ref_nit].copy()
-        ref_entidad=str(ref_ancla["entidad"].dropna().iloc[0]) if len(ref_ancla) else ""
+        ref_nombres_entidad={
+            str(x).strip() for x in ref_ancla["entidad"].dropna().tolist()
+            if str(x).strip()
+        }
         e51=(
             len(ref_rel)>0
             and isinstance(relaciones,pd.DataFrame)
             and got_rel.to_dict("records")==ref_rel.to_dict("records")
             and str(ns.get("nit_ancla"))==ref_nit
-            and str(ns.get("entidad_ancla","")).strip()==ref_entidad
+            and str(ns.get("entidad_ancla","")).strip() in ref_nombres_entidad
         )
     except Exception as e:
         print("E5.1",type(e).__name__,e); e51=False; ref_rel=pd.DataFrame(); ref_ancla=pd.DataFrame()
-    check("E5_historial_y_ancla",e51,4)
+    check(
+        "E5_historial_y_ancla",e51,4,
+        f"nit_ancla_esperado={locals().get('ref_nit','')}; "
+        f"nombres_válidos={sorted(locals().get('ref_nombres_entidad',set()))[:8]}"
+    )
 
     try:
         a=ref_ancla.groupby("nit_proveedor")["id_contrato"].nunique().rename("contratos_con_ancla").reset_index()
