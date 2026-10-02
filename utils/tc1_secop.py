@@ -23,7 +23,6 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 import pandas as pd
-import requests
 
 import tc1_contrato as C
 
@@ -47,6 +46,7 @@ def _espera_retry_after(valor, intento, base):
 
 def request_json(url, params, *, timeout=60, max_attempts=6, base_backoff=1.0):
     '''GET con timeout finito, reintentos acotados y backoff; respeta Retry-After.'''
+    import requests  # solo al descargar: revisar una entrega no necesita red
     ultimo = None
     for intento in range(1, max_attempts + 1):
         inicio = time.perf_counter()

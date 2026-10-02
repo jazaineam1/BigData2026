@@ -182,6 +182,41 @@ def main():
     (entrega / C.MANIFEST).write_text(json.dumps(externo), encoding="utf-8")
     r = TV.revisar(entrega, None, {})
     caso("docente detecta manifest externo editado", any("NO es idéntico" in a for a in r["avisos"]))
+    # Flujo docente real: ZIP de Drive, lote, versión anterior, una fila por pareja, capturas a la vista
+    import zipfile
+    revision = trabajo / "revision_docente"
+    externo_ok = json.loads(C.rutas(out)["manifest"].read_text(encoding="utf-8"))
+    (entrega / C.MANIFEST).write_text(json.dumps(externo_ok, ensure_ascii=False, indent=2), encoding="utf-8")
+    shutil.copyfile(C.rutas(out)["manifest"], entrega / C.MANIFEST)
+    lote = trabajo / "lote"
+    lote.mkdir()
+    drive_zip = lote / "TC1_BIGDATA_P03_PRUEBA-20261017T235112Z-001.zip"
+    with zipfile.ZipFile(drive_zip, "w") as z:
+        for p in entrega.iterdir():
+            z.write(p, arcname=f"{entrega.name}/{p.name}")
+    r = TV.revisar(drive_zip, None, {}, revision)
+    caso("el ZIP tal como lo baja Drive se revisa bien (no 0/100)", r["docente"] and r["docente"]["puntaje"] == 100, r.get("avisos"))
+    caso("las capturas quedan copiadas para mirarlas", len(r.get("capturas_extraidas", [])) == 3)
+    v7 = lote / "P05_v7"
+    v7.mkdir()
+    man_v7 = {"version": "2026-10-01-secoppipeline-v7", "pareja_id": "P05", "puntaje": 92}
+    (v7 / C.MANIFEST).write_text(json.dumps(man_v7), encoding="utf-8")
+    with zipfile.ZipFile(v7 / "TC1_P05.zip", "w") as z:
+        z.writestr(C.MANIFEST, json.dumps(man_v7))
+        z.writestr("00_dataset_contract.json", "{}")
+    r7 = TV.revisar(v7, None, {}, revision)
+    caso("una entrega V7 se reconoce y no recibe una nota inventada", r7["docente"] is None and "versión anterior" in TV.estado(r7))
+    (lote / "carpeta_suelta").mkdir()
+    TV.guardar(TV.revisar(drive_zip, None, {}, revision), revision)
+    TV.guardar(TV.revisar(drive_zip, None, {"E2": True, "E4": True, "E5": True}, revision), revision)
+    TV.guardar(r7, revision)
+    import csv as _csv
+    with open(revision / "notas_tc1.csv", newline="", encoding="utf-8") as fh:
+        filas = list(_csv.DictReader(fh))
+    caso("revisar dos veces deja una sola fila por pareja, con su estado", [f["pareja"] for f in filas] == ["P03", "P05"]
+         and filas[0]["estado"] == "definitiva", filas)
+    caso("se genera la retroalimentación de la pareja", (revision / "P03" / "retroalimentacion_P03.md").exists())
+
     caso("el ZIP no contiene archivos de credenciales", not any(X.prohibido(n.split("/")[-1]) for n in __import__("zipfile").ZipFile(zip_path).namelist()))
 
     # Manipulaciones y errores que el validador debe detectar
