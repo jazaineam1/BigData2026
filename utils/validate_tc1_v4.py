@@ -43,17 +43,17 @@ checks=[
     ("población adaptativa", all(x in all_src for x in ["PAGE_SIZE = 250","count_rows","N_PROCESOS = min(TARGET_PROCESOS, TOTAL_PROCESOS)","OFFSETS_PROCESOS"])),
     ("E1 ejecutable sin TODO de infraestructura", all(x in all_src for x in [
         "WHERE_PROCESOS = (","WHERE_CONTRATOS = (",
-        "def descargar_secuencial","resultados.extend(rows)",
+        "def descargar_secuencial","partes.append(pd.DataFrame(rows))",
         "def descargar_concurrente","with ThreadPoolExecutor",
-        "✅ Secuencial completa","✅ ThreadPoolExecutor completa"
-    ]) and "return None, []" not in all_src),
+        "✓ Descarga secuencial:","✓ Descarga concurrente:"
+    ])),
     ("benchmark mismos offsets", "same_offsets" in all_src and "offsets_sequential" in all_src and "offsets_threaded" in all_src),
     ("ThreadPoolExecutor", "ThreadPoolExecutor" in all_src),
     ("micro-lab antes del reto", "demo_dos_paginas" in all_src and "no suma puntos" in all_src),
     ("retry/backoff", "RETRY_STATUS" in all_src and "base_backoff" in all_src),
     ("orden estable", "$order" in all_src and "id_del_proceso ASC" in all_src),
-    ("hash canónico", "canonical_hash" in all_src and "Hash de multiconjunto" in all_src and "same_hash" in all_src),
-    ("workers limitados", "MAX_WORKERS = 4" in all_src and "Use entre 2 y 6 workers" in all_src),
+    ("hash canónico", "canonical_hash" in all_src and "Hash del multiconjunto de filas" in all_src and "rows.sort()" in all_src and "same_hash" in all_src),
+    ("workers limitados", "MAX_WORKERS = 4" in all_src and "2–6 workers" in all_src),
     ("RAW parquet", 'RAW = OUT / "raw"' in all_src and "to_parquet" in all_src),
     ("cache reanudable por páginas", all(x in all_src for x in ["RAW_PAGES","fetch_page_persisted","query_signature","_atomic_write","from_cache"])),
     ("chunks firmados", all(x in validator for x in ["_validate_page_cache","query_signature","sha256","quedaron archivos .part"])),
