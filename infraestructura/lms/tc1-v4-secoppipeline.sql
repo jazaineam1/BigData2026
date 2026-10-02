@@ -1,9 +1,9 @@
--- TC1 · SECOP Data Pipeline
+-- TC1 · Compras Claras · un caso, tres modelos
 -- Migración del esquema actual del TC1.
 -- Mantiene códigos de actividad e historial del LMS; actualiza títulos, pesos, checks y rúbrica.
 
 update public.bd_lms_sessions
-set title='SECOP Data Pipeline · API, concurrencia y NoSQL',
+set title='Compras Claras · un caso, tres modelos · API, concurrencia y NoSQL',
     metadata=jsonb_build_object(
       'type','evaluation',
       'source','Cuadernos/Taller_Control_1.ipynb',
@@ -12,59 +12,60 @@ set title='SECOP Data Pipeline · API, concurrencia y NoSQL',
       'estimated_minutes',360,
       'work_mode','class_and_home',
       'group_assessment',true,
-      'validator_version','2026-10-01-secoppipeline-v7'
+      'validator_version','2026-10-01-tc1-native-v8'
     )
 where course_code='bigdata' and session_number=8;
 
 update public.bd_lms_activities
-set title='E1 · API SECOP, concurrencia y trazabilidad',
-    points=25,
-    metadata='{"checks":["E1_contrato_y_query","E1_descarga_secuencial","E1_concurrencia_equivalente","E1_trazabilidad_calidad"]}'::jsonb
+set title='E1 · Snapshot SECOP reproducible',
+    points=15,
+    metadata='{"checks":["Contrato de datos","Secuencial = concurrente","Cache íntegro","RAW reutilizable y población relacional"]}'::jsonb
 where code='bd-s08-e1';
 
 update public.bd_lms_activities
-set title='E2 · Modelo documental + Atlas idempotente',
-    points=25,
-    metadata='{"checks":["E2_modelo_documental","E2_atlas_idempotente","E2_indices","E2_consulta_A_count","E2_consulta_B_find","E2_evidencia_atlas"]}'::jsonb
+set title='E2 · MongoDB Atlas · priorización',
+    points=30,
+    metadata='{"checks":["Modelo documental preparado","Pipeline real de Atlas","Resultado de priorización Atlas","Pipeline guardado"]}'::jsonb
 where code='bd-s08-e2';
 
 update public.bd_lms_activities
-set title='E3 · Producto analítico desde Atlas',
-    metadata='{"checks":["E3_pipeline_bandeja","E3_artefacto_bandeja"]}'::jsonb
+set title='E3 · Astra/Cassandra · consulta query-first',
+    points=20,
+    metadata='{"checks":["Diseño Cassandra query-first","Top 5 de CQL Console"]}'::jsonb
 where code='bd-s08-e3';
 
 update public.bd_lms_activities
-set title='E4 · Cassandra query-first',
-    metadata='{"checks":["E4_datos_cassandra","E4_modelo_query_first","E4_consulta_simulada"]}'::jsonb
+set title='E4 · Neo4j Aura · contexto relacional',
+    points=25,
+    metadata='{"checks":["Consulta Cypher relacional","Resultado de Aura Query","Subgrafo cargable de la entidad ancla"]}'::jsonb
 where code='bd-s08-e4';
 
 update public.bd_lms_activities
-set title='E5 · Neo4j y contexto relacional',
-    points=15,
-    metadata='{"checks":["E5_historial_y_ancla","E5_metrica_relacional","E5_cypher","E5_subgrafo"]}'::jsonb
+set title='E5 · Integración y entrega',
+    points=10,
+    metadata='{"checks":["Decisiones de modelo","Seguridad de la entrega"]}'::jsonb
 where code='bd-s08-e5';
 
 update public.bd_lms_activities
-set title='E6 · Decisiones, informe y paquete',
-    points=10,
-    metadata='{"checks":["E6_decisiones_informe","E6_microdefensa_grupal","E6_paquete_reproducible"]}'::jsonb
+set title='V8 · etapa histórica sin puntaje',
+    points=0,
+    metadata='{"checks":[]}'::jsonb
 where code='bd-s08-e6';
 
 update public.bd_lms_activities
-set metadata='{"validator_versions":["2026-10-01-secoppipeline-v7"],"current":"2026-10-01-secoppipeline-v7"}'::jsonb
+set metadata='{"validator_versions":["2026-10-01-tc1-native-v8"],"current":"2026-10-01-tc1-native-v8"}'::jsonb
 where code='bd-s08-final';
 
 update public.lms_assignments_v2
-set title='TC1 · SECOP Data Pipeline',
-    instructions='Construya una adquisición reproducible de SECOP II, compare secuencial vs ThreadPoolExecutor, documente calidad/trazabilidad, cargue Atlas de forma idempotente y produzca evidencia Cassandra/Neo4j. El LMS no es canal de entrega: la entrega oficial se realiza mediante Google Drive + correo institucional al docente.',
+set title='TC1 · Compras Claras · un caso, tres modelos',
+    instructions='Construya un único expediente SECOP: prepare un snapshot reproducible en Colab y resuelva tres preguntas profesionales en MongoDB Atlas Data Explorer/Aggregations, Astra CQL Console y Neo4j Aura Query. Colab prepara y valida; los motores se usan en sus interfaces nativas. El LMS no es canal de entrega: la entrega oficial se realiza mediante Google Drive + correo institucional al docente.',
     due_at='2026-10-17T23:59:59-05:00'::timestamptz,
     rubric='[
-      {"code":"E1","title":"API SECOP + concurrencia + trazabilidad","max":25},
-      {"code":"E2","title":"Modelo documental + Atlas idempotente","max":25},
-      {"code":"E3","title":"Producto analítico","max":10},
-      {"code":"E4","title":"Cassandra query-first","max":15},
-      {"code":"E5","title":"Neo4j y contexto relacional","max":15},
-      {"code":"E6","title":"Decisiones + informe reproducible","max":10}
+      {"code":"E1","title":"Snapshot SECOP reproducible","max":15},
+      {"code":"E2","title":"MongoDB Atlas · Data Explorer/Aggregations","max":30},
+      {"code":"E3","title":"Astra/Cassandra · CQL Console","max":20},
+      {"code":"E4","title":"Neo4j Aura · Aura Query/Cypher","max":25},
+      {"code":"E5","title":"Integración y entrega","max":10}
     ]'::jsonb,
     updated_at=now()
 where code='bd-s08-control'
