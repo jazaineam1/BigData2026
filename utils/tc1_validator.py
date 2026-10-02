@@ -281,6 +281,7 @@ def evaluar(ns):
 
     # E2 · 25
     historico=ns.get("historico"); documentos=ns.get("documentos")
+    unique_processes=-1
     try:
         sample=documentos[:20] if isinstance(documentos,list) else []
         required_top={"id_proceso","entidad","proceso","proveedor_adjudicado","contratos_resumen","metadata_ingesta"}
@@ -300,6 +301,7 @@ def evaluar(ns):
     check("E2_modelo_documental",e21,5,f"filas_raw={0 if not isinstance(procesos,pd.DataFrame) else len(procesos)}; procesos_únicos={unique_processes}; historico={0 if not isinstance(historico,pd.DataFrame) else len(historico)}; documentos={0 if not isinstance(documentos,list) else len(documentos)}")
 
     coleccion=ns.get("coleccion")
+    idem={}; local_n=-1; remote=-2
     try:
         modulo=type(coleccion).__module__.casefold() if coleccion is not None else ""
         idem=ns.get("atlas_idempotencia",{})
@@ -319,6 +321,7 @@ def evaluar(ns):
         print("E2.2",type(e).__name__,e); e22=False
     check("E2_atlas_idempotente",e22,7,f"local={local_n}; remoto={remote}; ping={ns.get('atlas_ping')}; primera={idem.get('count_after_first')}; segunda={idem.get('count_after_second')}; duplicados={idem.get('duplicates_after_second')}")
 
+    info={}; unique_id=False; additional_index=False
     try:
         info=coleccion.index_information() if coleccion is not None else {}
         unique_id=any(v.get("unique") is True and any(k=="id_proceso" for k,_ in v.get("key",[])) for v in info.values())
@@ -341,6 +344,7 @@ def evaluar(ns):
     except Exception: e24=False
     check("E2_consulta_A_count",e24,3,f"resultado={ns.get('resultado_a')}; esperado={ref_a}")
 
+    ref_b=[]; got=[]; got2=[]
     try:
         ref_b=sorted(
             [
@@ -359,6 +363,7 @@ def evaluar(ns):
         print("E2.5",type(e).__name__,e); e25=False
     check("E2_consulta_B_find",e25,3,f"obtenido={[x.get('id_proceso') for x in got2[:3]]}; esperado={[x.get('id_proceso') for x in ref_b[:3]]}")
 
+    af=None
     try:
         ar=ns.get("atlas_resultados",{})
         af=_read_json(OUT/"02_atlas_evidence.json")
@@ -373,6 +378,7 @@ def evaluar(ns):
 
     # E3 · 10
     bandeja=ns.get("bandeja_historica")
+    ids_ref=[]
     try:
         ref=sorted(
             [
@@ -410,6 +416,7 @@ def evaluar(ns):
     except Exception:e41=False
     check("E4_datos_cassandra",e41,5,f"filas={0 if not isinstance(bc,pd.DataFrame) else len(bc)}; columnas={[] if not isinstance(bc,pd.DataFrame) else list(bc.columns)}")
 
+    cql=""; pk=None; order=None
     try:
         cql=re.sub(r"\s+"," ",str(ns.get("cql_create","")).casefold())
         pk=re.search(r"primary\s+key\s*\(\s*\(\s*anio\s*,\s*departamento\s*\)\s*,\s*valor_contratos\s*,\s*id_proceso\s*\)",cql)
@@ -418,6 +425,7 @@ def evaluar(ns):
     except Exception:e42=False
     check("E4_modelo_query_first",e42,6,f"pk_ok={pk is not None}; order_ok={order is not None}; allow_filtering={'allow filtering' in cql}; archivo={(OUT/'04_modelo_cassandra.cql').exists()}")
 
+    ref_part=None; top=None
     try:
         counts=(bc.groupby(["anio","departamento"],dropna=False).size().rename("n").reset_index()
                 .sort_values(["n","anio","departamento"],ascending=[False,True,True],kind="mergesort").reset_index(drop=True))
@@ -432,6 +440,7 @@ def evaluar(ns):
 
     # E5 · 15
     relaciones=ns.get("relaciones_contrato")
+    ref_nit=""; entidad_dada=""; nombres_validos=set(); ref_rel=pd.DataFrame(); ref_ancla=pd.DataFrame()
     try:
         pmap=procesos[["id_del_portafolio","id_del_proceso"]].copy()
         pmap=pmap.dropna(subset=["id_del_portafolio","id_del_proceso"])
@@ -480,6 +489,7 @@ def evaluar(ns):
         print("E5.1",type(e).__name__,e); e51=False; ref_rel=pd.DataFrame(); ref_ancla=pd.DataFrame()
     check("E5_historial_y_ancla",e51,4,f"nit_obtenido={ns.get('nit_ancla')}; nit_esperado={ref_nit}; nombre_obtenido={entidad_dada}; nombres_válidos={sorted(nombres_validos)[:5] if 'nombres_validos' in locals() else []}; relaciones={len(ref_rel)}")
 
+    ref_metric=pd.DataFrame(); got=None
     try:
         a=ref_ancla.groupby("nit_proveedor")["id_contrato"].nunique().rename("contratos_con_ancla").reset_index()
         g=ref_rel.groupby("nit_proveedor")["nit_entidad"].nunique().rename("entidades_conectadas").reset_index()
@@ -499,6 +509,7 @@ def evaluar(ns):
     except Exception:e52=False
     check("E5_metrica_relacional",e52,4,f"filas_obtenidas={0 if not isinstance(got,pd.DataFrame) else len(got)}; filas_esperadas={len(ref_metric)}")
 
+    qc=""; q1=""; q2=""; q3=""
     try:
         qc=re.sub(r"\s+"," ",str(ns.get("cypher_carga","")).casefold())
         q1=str(ns.get("cypher_contexto","")).casefold(); q2=str(ns.get("cypher_compartidos","")).casefold(); q3=str(ns.get("cypher_ranking","")).casefold()
@@ -510,6 +521,7 @@ def evaluar(ns):
     except Exception:e53=False
     check("E5_cypher",e53,5,f"carga_unwind={'unwind $rows' in qc}; carga_merge={'merge' in qc}; contexto_param={'$nit_ancla' in q1}; compartidos_param={'$nit_ancla' in q2}; archivo={(OUT/'05_neo4j_consultas.cypher').exists()}")
 
+    nc_=0; nv_=0; edge_cp=0
     try:
         import networkx as nx
         G=ns.get("G")
