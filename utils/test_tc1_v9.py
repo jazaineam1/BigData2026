@@ -12,6 +12,7 @@
 '''
 from __future__ import annotations
 
+import atexit
 import hashlib
 import json
 import shutil
@@ -126,7 +127,8 @@ def construir_paquete(trabajo):
 
 
 def variante(base, nombre, mutar):
-    destino = Path(tempfile.mkdtemp(prefix=f"tc1_{nombre}_"))
+    # Dentro de la carpeta de trabajo de la prueba: se borra con ella (antes cada corrida dejaba ≈190 MB en %TEMP%).
+    destino = Path(tempfile.mkdtemp(prefix=f"tc1_{nombre}_", dir=Path(base).parent))
     shutil.copytree(base, destino / base.name)
     copia = destino / base.name
     mutar(C.rutas(copia), copia)
@@ -145,6 +147,7 @@ def puntos(m, item):
 
 def main():
     trabajo = Path(tempfile.mkdtemp(prefix="tc1_v9_"))
+    atexit.register(shutil.rmtree, trabajo, True)  # también si una prueba falla o el proceso sale antes
     import contextlib
     import io
 
