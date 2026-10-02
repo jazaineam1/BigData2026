@@ -2,16 +2,42 @@ from pathlib import Path
 import json, re, hashlib, zipfile
 import pandas as pd
 
-VERSION = "2026-10-01-secoppipeline-v6"
+VERSION = "2026-10-01-secoppipeline-v7"
+MIN_MATCHED_PROCESSES = 30
+
+DISPLAY_NAME = {
+    "E1_contrato_y_query": "E1.1 · Contrato y consulta",
+    "E1_descarga_secuencial": "E1.2 · Descarga secuencial",
+    "E1_concurrencia_equivalente": "E1.3 · ThreadPoolExecutor equivalente",
+    "E1_trazabilidad_calidad": "E1.4 · Trazabilidad, cache y calidad",
+    "E2_modelo_documental": "E2.1 · Histórico y modelo documental",
+    "E2_atlas_idempotente": "E2.2 · Atlas e idempotencia",
+    "E2_indices": "E2.3 · Índices Atlas",
+    "E2_consulta_A_count": "E2.4 · Consulta A",
+    "E2_consulta_B_find": "E2.5 · Consulta B",
+    "E2_evidencia_atlas": "E2.6 · Evidencia Atlas",
+    "E3_pipeline_bandeja": "E3.1 · Pipeline de bandeja",
+    "E3_artefacto_bandeja": "E3.2 · CSV de bandeja",
+    "E4_datos_cassandra": "E4.1 · Datos Cassandra",
+    "E4_modelo_query_first": "E4.2 · Modelo query-first",
+    "E4_consulta_simulada": "E4.3 · Consulta simulada",
+    "E5_historial_y_ancla": "E5.1 · Relaciones y entidad ancla",
+    "E5_metrica_relacional": "E5.2 · Métrica relacional",
+    "E5_cypher": "E5.3 · Cypher",
+    "E5_subgrafo": "E5.4 · Subgrafo",
+    "E6_decisiones_informe": "E6.1 · Decisiones e informe",
+    "E6_microdefensa_grupal": "E6.2 · Microdefensa",
+    "E6_paquete_reproducible": "E6.3 · Paquete reproducible",
+}
 STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}
 FEEDBACK = {
     "E1_contrato_y_query": "Revise el contrato de datos y el plan SoQL: fuente, campos, filtros y orden estable deben corresponder a la ventana asignada.",
     "E1_descarga_secuencial": "La descarga secuencial debe producir exactamente la población objetivo real de su ventana; no se exige un mínimo artificial de 1.000 filas.",
     "E1_concurrencia_equivalente": "Compare en igualdad de condiciones: mismos offsets, mismas filas y mismo hash canónico. El speedup puede ser menor que 1.",
-    "E1_trazabilidad_calidad": "Guarde RAW consolidado y páginas reanudables con firma/SHA-256; no deben quedar .part, el manifest debe enumerar los offsets y el cruce id_del_portafolio → proceso_de_compra debe producir población relacional (>0).",
-    "E2_modelo_documental": "Construya un documento coherente por proceso y conserve el snapshot integrado como evidencia.",
+    "E1_trazabilidad_calidad": "Guarde RAW consolidado y páginas reanudables con firma/SHA-256; no deben quedar .part ni chunks extra en el cache activo y deben existir al menos 30 procesos con contrato relacionado.",
+    "E2_modelo_documental": "Construya exactamente una fila/documento por id_del_proceso único, no una fila por registro crudo SECOP.",
     "E2_atlas_idempotente": "La colección debe ser real y la segunda ejecución no puede aumentar el número de documentos.",
-    "E2_indices": "Debe existir un índice único de identidad y al menos un índice adicional justificado por una consulta.",
+    "E2_indices": "E2.3: cree un índice único por id_proceso y al menos un índice adicional alineado con una consulta real.",
     "E2_consulta_A_count": "Recalcule la consulta A directamente en Atlas y contraste el conteo con el snapshot local.",
     "E2_consulta_B_find": "El top 10 debe coincidir con el orden de referencia: valor contractual descendente e id_proceso ascendente.",
     "E2_evidencia_atlas": "Registre carga, consultas e índices en 02_atlas_evidence.json sin credenciales.",
@@ -42,11 +68,27 @@ CONTRACT_FIELDS = {
 }
 
 def _canon_df(df, key):
-    if not isinstance(df, pd.DataFrame) or key not in df.columns:
+    """Hash del multiconjunto de filas: conserva duplicados y no depende del orden accidental."""
+    if not isinstance(df,pd.DataFrame) or key not in df.columns:
         return None
-    x=df.copy().sort_values(key,kind="mergesort").reset_index(drop=True)
-    payload=x.to_json(orient="records",force_ascii=False,date_format="iso")
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    x=df.copy()
+    cols=sorted(str(c) for c in x.columns)
+    x=x[cols]
+
+    def canon(v):
+        try:
+            if pd.isna(v): return None
+        except Exception:
+            pass
+        if isinstance(v,pd.Timestamp): return v.isoformat()
+        return str(v)
+
+    rows=[]
+    for record in x.to_dict("records"):
+        normalized={str(k):canon(v) for k,v in record.items()}
+        rows.append(json.dumps(normalized,ensure_ascii=False,sort_keys=True,separators=(",",":")))
+    rows.sort()
+    return hashlib.sha256("\n".join(rows).encode("utf-8")).hexdigest()
 
 def _safe_float(x):
     try:
@@ -107,9 +149,11 @@ def evaluar(ns):
             "evidencia":str(evidencia)[:500],
             "feedback":"" if ok else FEEDBACK.get(k,"Revise la evidencia y vuelva a ejecutar el criterio.")
         }
-        print(("✅" if ok else "❌"),k,f"{checks[k]['puntos']}/{puntos}")
+        label=DISPLAY_NAME.get(k,k)
+        print(("✅" if ok else "❌"),label,f"{checks[k]['puntos']}/{puntos}")
         if not ok:
             print("   ↳",checks[k]["feedback"])
+            print("   Evidencia:",checks[k]["evidencia"] or "(sin evidencia calculable; revise el paso anterior)")
 
     pareja=str(ns.get("PAREJA_ID","")).strip()
     procesos=ns.get("procesos_df"); contratos=ns.get("contratos_df")
@@ -132,12 +176,12 @@ def evaluar(ns):
             and data_contract.get("join",{}).get("procesos.id_del_portafolio")=="contratos.proceso_de_compra"
             and isinstance(q1.get("where"),str) and "fecha_de_publicacion_del" in q1["where"]
             and isinstance(q2.get("where"),str) and "fecha_de_firma" in q2["where"]
-            and "order" in q1 and "fecha_de_publicacion_del" in q1["order"] and "id_del_proceso" in q1["order"]
+            and "order" in q1 and all(x in q1["order"] for x in ["fecha_de_publicacion_del","id_del_proceso","nit_del_proveedor_adjudicado","nombre_del_proveedor"])
             and "order" in q2 and "id_contrato" in q2["order"]
             and (OUT/"00_dataset_contract.json").exists()
         )
     except Exception: e11=False
-    check("E1_contrato_y_query",e11,4)
+    check("E1_contrato_y_query",e11,4,f"pareja={pareja}; order_procesos={q1.get('order')}; order_contratos={q2.get('order')}")
 
     expected_n=int(ns.get("N_PROCESOS",0) or 0)
     expected_offsets=list(ns.get("OFFSETS_PROCESOS",[]) or [])
@@ -176,7 +220,7 @@ def evaluar(ns):
         )
     except Exception as e:
         print("E1.3",type(e).__name__,e); e13=False
-    check("E1_concurrencia_equivalente",e13,8)
+    check("E1_concurrencia_equivalente",e13,8,f"workers={workers}; rows_seq={0 if not isinstance(procesos_seq,pd.DataFrame) else len(procesos_seq)}; rows_thr={0 if not isinstance(procesos,pd.DataFrame) else len(procesos)}; same_offsets={bench.get('same_offsets')}; same_hash={bench.get('same_hash')}")
 
     try:
         join_cov=quality.get("join_coverage")
@@ -212,9 +256,9 @@ def evaluar(ns):
         e14=(
             isinstance(contratos,pd.DataFrame) and len(contratos)>0
             and CONTRACT_FIELDS.issubset(set(contratos.columns))
-            and isinstance(join_cov,(int,float)) and 0<float(join_cov)<=1 and matched>0
+            and isinstance(join_cov,(int,float)) and 0<float(join_cov)<=1 and matched>=MIN_MATCHED_PROCESSES
             and quality.get("join_key")=="id_del_portafolio -> proceso_de_compra"
-            and isinstance(acq,dict) and acq.get("schema")=="2026-10-01-secoppipeline-v6"
+            and isinstance(acq,dict) and acq.get("schema")=="2026-10-01-secoppipeline-v7"
             and acq.get("datasets",{}).get("procesos",{}).get("id")=="p6dx-8zbt"
             and acq.get("datasets",{}).get("contratos",{}).get("id")=="jbjy-vk9h"
             and acq.get("datasets",{}).get("procesos",{}).get("snapshot_sha256")==bench.get("hash_threaded")
@@ -230,7 +274,7 @@ def evaluar(ns):
             and (OUT/"01_acquisition_manifest.json").exists()
             and (OUT/"01_quality_report.json").exists()
         )
-        e14_ev=f"seq={seq_ev}; threaded={thr_ev}; contratos={cont_ev}; join={join_cov:.4f}"
+        e14_ev=f"seq={seq_ev}; threaded={thr_ev}; contratos={cont_ev}; matched={matched}; mínimo={MIN_MATCHED_PROCESSES}; join={join_cov:.4f}"
     except Exception as e:
         print("E1.4",type(e).__name__,e); e14=False; e14_ev=str(e)
     check("E1_trazabilidad_calidad",e14,9,e14_ev)
@@ -242,8 +286,9 @@ def evaluar(ns):
         required_top={"id_proceso","entidad","proceso","proveedor_adjudicado","contratos_resumen","metadata_ingesta"}
         nested_ok=bool(sample) and all(required_top.issubset(d.keys()) for d in sample)
         cr_ok=all(isinstance(d.get("contratos_resumen"),dict) and {"cantidad","valor_total","estados"}.issubset(d["contratos_resumen"].keys()) for d in sample)
+        unique_processes=procesos["id_del_proceso"].nunique() if isinstance(procesos,pd.DataFrame) and "id_del_proceso" in procesos.columns else -1
         e21=(
-            isinstance(historico,pd.DataFrame) and len(historico)==len(procesos)
+            isinstance(historico,pd.DataFrame) and len(historico)==unique_processes
             and historico["id_proceso"].nunique()==len(historico)
             and isinstance(documentos,list) and len(documentos)==len(historico)
             and nested_ok and cr_ok
@@ -252,7 +297,7 @@ def evaluar(ns):
         )
     except Exception as e:
         print("E2.1",type(e).__name__,e); e21=False
-    check("E2_modelo_documental",e21,5)
+    check("E2_modelo_documental",e21,5,f"filas_raw={0 if not isinstance(procesos,pd.DataFrame) else len(procesos)}; procesos_únicos={unique_processes}; historico={0 if not isinstance(historico,pd.DataFrame) else len(historico)}; documentos={0 if not isinstance(documentos,list) else len(documentos)}")
 
     coleccion=ns.get("coleccion")
     try:
@@ -272,7 +317,7 @@ def evaluar(ns):
         )
     except Exception as e:
         print("E2.2",type(e).__name__,e); e22=False
-    check("E2_atlas_idempotente",e22,7)
+    check("E2_atlas_idempotente",e22,7,f"local={local_n}; remoto={remote}; ping={ns.get('atlas_ping')}; primera={idem.get('count_after_first')}; segunda={idem.get('count_after_second')}; duplicados={idem.get('duplicates_after_second')}")
 
     try:
         info=coleccion.index_information() if coleccion is not None else {}
@@ -284,7 +329,7 @@ def evaluar(ns):
         )
         e23=unique_id and additional_index and isinstance(ns.get("atlas_indexes"),list)
     except Exception: e23=False
-    check("E2_indices",e23,4)
+    check("E2_indices",e23,4,f"unique_id={unique_id}; additional_index={additional_index}; indices={list(info.keys()) if isinstance(info,dict) else info}")
 
     try:
         ref_a=sum(
@@ -294,7 +339,7 @@ def evaluar(ns):
         )
         e24=isinstance(ns.get("filtro_a"),dict) and ns.get("resultado_a")==ref_a
     except Exception: e24=False
-    check("E2_consulta_A_count",e24,3,ns.get("resultado_a"))
+    check("E2_consulta_A_count",e24,3,f"resultado={ns.get('resultado_a')}; esperado={ref_a}")
 
     try:
         ref_b=sorted(
@@ -312,7 +357,7 @@ def evaluar(ns):
         e25=got2==ref_b
     except Exception as e:
         print("E2.5",type(e).__name__,e); e25=False
-    check("E2_consulta_B_find",e25,3)
+    check("E2_consulta_B_find",e25,3,f"obtenido={[x.get('id_proceso') for x in got2[:3]]}; esperado={[x.get('id_proceso') for x in ref_b[:3]]}")
 
     try:
         ar=ns.get("atlas_resultados",{})
@@ -324,7 +369,7 @@ def evaluar(ns):
             and "consulta_a" in af and "consulta_b" in af
         )
     except Exception: e26=False
-    check("E2_evidencia_atlas",e26,3)
+    check("E2_evidencia_atlas",e26,3,f"archivo={(OUT/'02_atlas_evidence.json').exists()}; docs_memoria={0 if not isinstance(documentos,list) else len(documentos)}; docs_evidencia={None if not isinstance(af,dict) else af.get('carga',{}).get('documentos')}")
 
     # E3 · 10
     bandeja=ns.get("bandeja_historica")
@@ -349,11 +394,11 @@ def evaluar(ns):
         )
     except Exception as e:
         print("E3.1",type(e).__name__,e); e31=False
-    check("E3_pipeline_bandeja",e31,7)
+    check("E3_pipeline_bandeja",e31,7,f"filas_bandeja={0 if not isinstance(bandeja,pd.DataFrame) else len(bandeja)}; esperadas={len(ids_ref)}; pipeline_stages={0 if not isinstance(ns.get('pipeline_bandeja'),list) else len(ns.get('pipeline_bandeja'))}")
     try:
         e32=(OUT/"03_bandeja_historica.csv").exists() and len(bandeja)<=100 and {"id_proceso","valor_contratos"}.issubset(bandeja.columns)
     except Exception:e32=False
-    check("E3_artefacto_bandeja",e32,3)
+    check("E3_artefacto_bandeja",e32,3,f"archivo={(OUT/'03_bandeja_historica.csv').exists()}; columnas={[] if not isinstance(bandeja,pd.DataFrame) else list(bandeja.columns)}")
 
     # E4 · 15
     bc=ns.get("bandeja_cassandra")
@@ -363,7 +408,7 @@ def evaluar(ns):
             and {"anio","departamento","valor_contratos","id_proceso"}.issubset(bc.columns)
         )
     except Exception:e41=False
-    check("E4_datos_cassandra",e41,5)
+    check("E4_datos_cassandra",e41,5,f"filas={0 if not isinstance(bc,pd.DataFrame) else len(bc)}; columnas={[] if not isinstance(bc,pd.DataFrame) else list(bc.columns)}")
 
     try:
         cql=re.sub(r"\s+"," ",str(ns.get("cql_create","")).casefold())
@@ -371,7 +416,7 @@ def evaluar(ns):
         order=re.search(r"clustering\s+order\s+by\s*\(\s*valor_contratos\s+desc\s*,\s*id_proceso\s+asc\s*\)",cql)
         e42="tc1.procesos_por_anio_departamento" in cql and pk is not None and order is not None and "allow filtering" not in cql and (OUT/"04_modelo_cassandra.cql").exists()
     except Exception:e42=False
-    check("E4_modelo_query_first",e42,6)
+    check("E4_modelo_query_first",e42,6,f"pk_ok={pk is not None}; order_ok={order is not None}; allow_filtering={'allow filtering' in cql}; archivo={(OUT/'04_modelo_cassandra.cql').exists()}")
 
     try:
         counts=(bc.groupby(["anio","departamento"],dropna=False).size().rename("n").reset_index()
@@ -383,7 +428,7 @@ def evaluar(ns):
         e43=tuple(ns.get("particion_prueba"))==ref_part and isinstance(top,pd.DataFrame) and list(top["id_proceso"])==list(ref_top["id_proceso"])
     except Exception as e:
         print("E4.3",type(e).__name__,e); e43=False
-    check("E4_consulta_simulada",e43,4)
+    check("E4_consulta_simulada",e43,4,f"partición_obtenida={ns.get('particion_prueba')}; partición_esperada={ref_part}; top_rows={0 if not isinstance(top,pd.DataFrame) else len(top)}")
 
     # E5 · 15
     relaciones=ns.get("relaciones_contrato")
@@ -421,17 +466,19 @@ def evaluar(ns):
               .sort_values(["contratos","nit_entidad"],ascending=[False,True],kind="mergesort").reset_index(drop=True))
         ref_nit=str(rank.iloc[0]["nit_entidad"])
         ref_ancla=ref_rel[ref_rel["nit_entidad"]==ref_nit].copy()
-        ref_entidad=str(ref_ancla["entidad"].dropna().iloc[0]) if len(ref_ancla) else ""
+        nombres_validos=set(ref_ancla["entidad"].dropna().astype(str).str.strip())
+        nombres_validos={x for x in nombres_validos if x}
+        entidad_dada=str(ns.get("entidad_ancla","")).strip()
         e51=(
             len(ref_rel)>0
             and isinstance(relaciones,pd.DataFrame)
             and got_rel.to_dict("records")==ref_rel.to_dict("records")
             and str(ns.get("nit_ancla"))==ref_nit
-            and str(ns.get("entidad_ancla","")).strip()==ref_entidad
+            and entidad_dada in nombres_validos
         )
     except Exception as e:
         print("E5.1",type(e).__name__,e); e51=False; ref_rel=pd.DataFrame(); ref_ancla=pd.DataFrame()
-    check("E5_historial_y_ancla",e51,4)
+    check("E5_historial_y_ancla",e51,4,f"nit_obtenido={ns.get('nit_ancla')}; nit_esperado={ref_nit}; nombre_obtenido={entidad_dada}; nombres_válidos={sorted(nombres_validos)[:5] if 'nombres_validos' in locals() else []}; relaciones={len(ref_rel)}")
 
     try:
         a=ref_ancla.groupby("nit_proveedor")["id_contrato"].nunique().rename("contratos_con_ancla").reset_index()
@@ -450,7 +497,7 @@ def evaluar(ns):
             and (OUT/"05_resultado_relacional.csv").exists()
         )
     except Exception:e52=False
-    check("E5_metrica_relacional",e52,4)
+    check("E5_metrica_relacional",e52,4,f"filas_obtenidas={0 if not isinstance(got,pd.DataFrame) else len(got)}; filas_esperadas={len(ref_metric)}")
 
     try:
         qc=re.sub(r"\s+"," ",str(ns.get("cypher_carga","")).casefold())
@@ -461,7 +508,7 @@ def evaluar(ns):
             and "count(distinct" in q3 and (OUT/"05_neo4j_consultas.cypher").exists()
         )
     except Exception:e53=False
-    check("E5_cypher",e53,5)
+    check("E5_cypher",e53,5,f"carga_unwind={'unwind $rows' in qc}; carga_merge={'merge' in qc}; contexto_param={'$nit_ancla' in q1}; compartidos_param={'$nit_ancla' in q2}; archivo={(OUT/'05_neo4j_consultas.cypher').exists()}")
 
     try:
         import networkx as nx
@@ -470,7 +517,7 @@ def evaluar(ns):
         edge_cp=ref_ancla[["id_contrato","nit_proveedor"]].drop_duplicates().shape[0]
         e54=isinstance(G,nx.DiGraph) and ns.get("nodos_grafo")==1+nc_+nv_ and ns.get("aristas_grafo")==nc_+edge_cp
     except Exception:e54=False
-    check("E5_subgrafo",e54,2)
+    check("E5_subgrafo",e54,2,f"nodos_obtenidos={ns.get('nodos_grafo')}; nodos_esperados={1+nc_+nv_}; aristas_obtenidas={ns.get('aristas_grafo')}; aristas_esperadas={nc_+edge_cp}")
 
     # E6 · 10
     decisions=ns.get("decision_log",[])
@@ -494,7 +541,7 @@ def evaluar(ns):
             and (OUT/"06_informe_tecnico.md").exists()
         )
     except Exception:e61=False
-    check("E6_decisiones_informe",e61,5)
+    check("E6_decisiones_informe",e61,5,f"decisiones={len(decisions) if isinstance(decisions,list) else 0}; informe={(OUT/'06_informe_tecnico.md').exists()}; log={(OUT/'06_decision_log.json').exists()}")
 
     defensa=ns.get("defensa_grupal",{})
     try:
@@ -512,7 +559,7 @@ def evaluar(ns):
             and (OUT/"06_microdefensa_grupal.json").exists()
         )
     except Exception:e62=False
-    check("E6_microdefensa_grupal",e62,3)
+    check("E6_microdefensa_grupal",e62,3,f"respuesta_429={ns.get('respuesta_429')}; respuesta_cobertura={ns.get('respuesta_cobertura')}; archivo={(OUT/'06_microdefensa_grupal.json').exists()}")
 
     files=[
         "00_dataset_contract.json","01_acquisition_manifest.json","01_benchmark_threads.json","01_quality_report.json",
@@ -520,8 +567,9 @@ def evaluar(ns):
         "03_bandeja_historica.csv","04_modelo_cassandra.cql","05_neo4j_consultas.cypher",
         "05_resultado_relacional.csv","06_decision_log.json","06_informe_tecnico.md","06_microdefensa_grupal.json",
     ]
-    e63=all((OUT/f).exists() and (OUT/f).stat().st_size>0 for f in files)
-    check("E6_paquete_reproducible",e63,2)
+    missing=[f for f in files if not (OUT/f).exists() or (OUT/f).stat().st_size<=0]
+    e63=not missing
+    check("E6_paquete_reproducible",e63,2,f"faltantes={missing}")
 
     secret_patterns=[
         re.compile(r"mongodb\+srv://[^\s:@/]+:[^\s@]+@",re.I),
