@@ -53,7 +53,10 @@ checks=[
     ("WALL universal", "requireSession(sessionNumber,{teacher:true})" in wall),
     ("máximo dos recursos en módulo", "slice(0,2)" in session),
     ("regla SQL máximo dos recursos", "x.rn>2" in evidence_sql and "integrated_support" in evidence_sql),
-    ("portada sin recursos externos directos", "colab.research.google.com" not in index and "Marcar revisada" not in index),
+    # Desde 2026-10-02 la portada abre el material en un clic (AGENTS.md §12):
+    # el Colab directo ya no es una fuga del LMS, es la regla.
+    ("portada sin marcar revisada", "Marcar revisada" not in index),
+    ("portada: S08 abre Colab en un clic", "Cuadernos/Taller_Control_1.ipynb" in index and "lms/session.html?s=8" not in index),
     ("runtime único V5", "window.LMS=api" in kit and "lms.bigdata.queue.v1" in kit),
     ("cola limitada", "MAX_QUEUE=500" in kit and "compactQueue" in kit),
     ("prioriza evidencia", "entry.kind==='evidence'||entry.kind==='wall_post'" in kit),
