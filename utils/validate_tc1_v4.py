@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import hashlib, json, re, subprocess, sys, tempfile
+import ast, hashlib, json, re, subprocess, sys, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 errors=[]
@@ -41,28 +41,34 @@ checks=[
     ("contrato API real", all(x in all_src for x in ["fecha_de_publicacion_del","id_del_portafolio","nombre_del_proveedor","proceso_de_compra"]) and "nombre_del_proveedor_adjudicado" not in all_src),
     ("join contractual correcto", '"procesos.id_del_portafolio": "contratos.proceso_de_compra"' in all_src),
     ("población adaptativa", all(x in all_src for x in ["PAGE_SIZE = 250","count_rows","N_PROCESOS = min(TARGET_PROCESOS, TOTAL_PROCESOS)","OFFSETS_PROCESOS"])),
+    ("E1 ejecutable sin TODO de infraestructura", all(x in all_src for x in [
+        "WHERE_PROCESOS = (","WHERE_CONTRATOS = (",
+        "def descargar_secuencial","resultados.extend(rows)",
+        "def descargar_concurrente","with ThreadPoolExecutor",
+        "✅ Secuencial completa","✅ ThreadPoolExecutor completa"
+    ]) and "return None, []" not in all_src),
     ("benchmark mismos offsets", "same_offsets" in all_src and "offsets_sequential" in all_src and "offsets_threaded" in all_src),
     ("ThreadPoolExecutor", "ThreadPoolExecutor" in all_src),
     ("micro-lab antes del reto", "demo_dos_paginas" in all_src and "no suma puntos" in all_src),
     ("retry/backoff", "RETRY_STATUS" in all_src and "base_backoff" in all_src),
     ("orden estable", "$order" in all_src and "id_del_proceso ASC" in all_src),
-    ("hash canónico", "canonical_hash" in all_src and "same_hash" in all_src),
-    ("workers limitados", "MAX_WORKERS = 4" in all_src and "2–6 workers" in all_src),
+    ("hash canónico", "canonical_hash" in all_src and "Hash de multiconjunto" in all_src and "same_hash" in all_src),
+    ("workers limitados", "MAX_WORKERS = 4" in all_src and "Use entre 2 y 6 workers" in all_src),
     ("RAW parquet", 'RAW = OUT / "raw"' in all_src and "to_parquet" in all_src),
     ("cache reanudable por páginas", all(x in all_src for x in ["RAW_PAGES","fetch_page_persisted","query_signature","_atomic_write","from_cache"])),
     ("chunks firmados", all(x in validator for x in ["_validate_page_cache","query_signature","sha256","quedaron archivos .part"])),
     ("consolidación solo tras equivalencia", all(x in all_src for x in ["No consolide RAW","same_offsets","same_rows","same_hash"])),
     ("Atlas idempotente", "bulk_write" in all_src and "UpdateOne" in all_src and "upsert=True" in all_src),
     ("decision log", "decision_log" in all_src),
-    ("carga estimada 6–8h", "6–8 horas por grupo" in all_src and "Dedicación prevista por grupo: 6–8 horas" in all_src),
+    ("carga estimada 6–8h", "6–8 horas" in all_src and "Dedicación orientativa por grupo" in all_src),
     ("microdefensa estructurada", "defensa_grupal" in all_src and "06_microdefensa_grupal.json" in all_src and "E6_microdefensa_grupal" in validator and all_src.count("#@param") >= 12),
     ("sin respuesta abierta E6", "respuesta_concurrencia" not in all_src and "respuesta_calidad" not in all_src),
-    ("validador actual", 'VERSION = "2026-10-01-secoppipeline-v6"' in validator),
+    ("validador actual", 'VERSION = "2026-10-01-secoppipeline-v6.1"' in validator),
     ("validador fijado idéntico", validator == validator_pinned and bool(validator_pinned)),
     ("E1 adquisición completa", all(x in validator for x in ["E1_contrato_y_query","E1_descarga_secuencial","E1_concurrencia_equivalente","E1_trazabilidad_calidad"])),
     ("E2 idempotencia", "E2_atlas_idempotente" in validator and "E2_indices" in validator),
     ("no speedup mínimo", "speedup >=" not in validator.lower()),
-    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-10-01-secoppipeline-v6" in edge and "security_no_secrets" in edge),
+    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-10-01-secoppipeline-v6.1" in edge and "security_no_secrets" in edge),
     ("gate de secretos", "secret_patterns" in validator and '"gates":gates' in validator and '".ipynb"' in validator and "ENTREGA BLOQUEADA" in validator),
     ("backend persiste versión real", "manifest_version:m.version" in edge and "validator_version:m.version" in edge),
     ("calificación grupal", "tc1GroupContext" in edge and "syncManifestGroupGradebook" in edge and "lms_group_submissions_v2" in edge and "Calificación grupal TC1" in edge),
@@ -86,7 +92,13 @@ checks=[
     ("evidencia auditable por Drive y correo", "Google Drive" in all_src and "jzaineam@ucentral.edu.co" in all_src and "sello de tiempo" in all_src.lower() and "Google Drive + correo" in sql),
     ("revisión docente abre evidencia", "Abrir evidencia del grupo" in teacher_collab and "Desglose automático" in teacher_collab),
     ("notebook incluye rúbrica detallada", "E1 · Adquisición SECOP" in all_src and "E6 · Decisiones y entrega" in all_src and "TOTAL" in all_src),
-    ("metodología de entrega explícita", all(x in all_src for x in ["Metodología oficial de entrega","Un solo integrante","manifest_tc1.json","ventana de incógnito","Google Drive","correo institucional"])),
+    ("ruta paso a paso visible", all(x in all_src for x in [
+        "Qué debe hacer y qué debe entregar cada grupo",
+        "Condición para pasar",
+        "Checkpoint de E1",
+        "Entrega final del grupo"
+    ])),
+    ("metodología de entrega explícita", all(x in all_src for x in ["Entrega final del grupo","manifest_tc1.json","Google Drive","correo del docente","GitHub opcional"])),
     ("GitHub opcional con tutorial", all(x in all_src for x in ["GitHub opcional","Add file → Upload files","git init","git push -u origin main","jazaineam1"])),
     ("fecha máxima explícita", "17 de octubre de 2026" in all_src and "11:59 p. m." in all_src and "2026-10-17T23:59:59-05:00" in sql and "17 de octubre de 2026" in s08),
     ("backend respeta fecha máxima", 'select("id,max_attempts,max_score,due_at")' in edge and "La fecha máxima de entrega del TC1 ya venció." in edge),
@@ -94,10 +106,24 @@ checks=[
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
 
-# Ponderación exacta del validador
-pts=[int(x) for x in re.findall(r'check\("[^"]+",[^,]+,(\d+)',validator)]
-if sum(pts)!=100:
-    errors.append(f"Validador no suma 100: {sum(pts)}")
+# Ponderación exacta del validador: AST, no regex, porque algunos check() son multilínea.
+try:
+    tree=ast.parse(validator)
+    pts=[]
+    for node in ast.walk(tree):
+        if (
+            isinstance(node,ast.Call)
+            and isinstance(node.func,ast.Name)
+            and node.func.id=="check"
+            and len(node.args)>=3
+            and isinstance(node.args[2],ast.Constant)
+            and isinstance(node.args[2].value,int)
+        ):
+            pts.append(node.args[2].value)
+    if sum(pts)!=100:
+        errors.append(f"Validador no suma 100: {sum(pts)}; puntos={pts}")
+except Exception as e:
+    errors.append("No se pudo inspeccionar ponderación del validador: "+str(e))
 
 # Notebook sin salidas/soluciones incrustadas
 if any(c.get("cell_type")=="code" and c.get("outputs") for c in nb.get("cells",[])):

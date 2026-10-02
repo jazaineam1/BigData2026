@@ -21,8 +21,12 @@ class FakeCollection:
         }
 
 def chash(df,key):
-    x=df.copy().sort_values(key,kind="mergesort").reset_index(drop=True)
-    return hashlib.sha256(x.to_json(orient="records",force_ascii=False,date_format="iso").encode()).hexdigest()
+    x=df.copy().where(pd.notna(df),None)
+    rows=[
+      json.dumps(rec,ensure_ascii=False,sort_keys=True,separators=(",",":"),default=str)
+      for rec in x.to_dict("records")
+    ]
+    return hashlib.sha256("\n".join(sorted(rows)).encode("utf-8")).hexdigest()
 
 def touch(p,txt="ok"):
     p.parent.mkdir(parents=True,exist_ok=True)
@@ -37,11 +41,12 @@ def main():
     cache_cont=raw_pages/"contratos"/"official"
     for p in [cache_seq,cache_thr,cache_cont]:
       p.mkdir(parents=True,exist_ok=True)
-    n=637               # prueba explícita: una ventana real puede tener < 1000 procesos
+    unique_n=637        # procesos únicos
+    duplicate_rows=25   # mismas identidades con proveedores distintos
     linked=320
     pro=[]; hist=[]; docs=[]; cont=[]
 
-    for i in range(n):
+    for i in range(unique_n):
       pid=f"CO1.REQ.{i:05d}"
       portfolio=f"CO1.BDOS.{i:05d}"
       nit_ent=str(100+i%3)
@@ -71,19 +76,28 @@ def main():
         "proceso":{"fecha_publicacion":"2025-01-15","anio":2025,"precio_base":float(1_000_000+i),"modalidad":"Directa","estado":"Adjudicado","adjudicado":True},
         "proveedor_adjudicado":{"nit":nit_prov,"nombre":f"Proveedor {nit_prov}"},
         "contratos_resumen":{"cantidad":1 if has else 0,"valor_total":val,"estados":["En ejecución"] if has else []},
-        "metadata_ingesta":{"dataset":"p6dx-8zbt","pareja_id":"TEST-V6","window_start":"2025-01-01","window_end":"2025-03-01"}
+        "metadata_ingesta":{"dataset":"p6dx-8zbt","pareja_id":"TEST-V6.1","window_start":"2025-01-01","window_end":"2025-03-01"}
       })
       if has:
         cont.append({
           "proceso_de_compra":portfolio,"id_contrato":f"C{i:05d}","estado_contrato":"En ejecución","tipo_de_contrato":"Servicios",
           "modalidad_de_contratacion":"Directa","fecha_de_firma":"2025-02-01T00:00:00",
-          "nombre_entidad":f"Entidad {nit_ent}","nit_entidad":nit_ent,
+          "nombre_entidad":("Entidad 100 Alterna" if i==3 else f"Entidad {nit_ent}"),"nit_entidad":nit_ent,
           "proveedor_adjudicado":f"Proveedor {nit_prov}","documento_proveedor":nit_prov,
           "valor_del_contrato":str(val)
         })
 
+    # Duplicados reales de grano API: mismo id_del_proceso, proveedor distinto.
+    for j in range(duplicate_rows):
+      d=dict(pro[j])
+      d["nit_del_proveedor_adjudicado"]=f"99{j:04d}"
+      d["nombre_del_proveedor"]=f"Proveedor duplicado {j:02d}"
+      pro.append(d)
+
     procesos=pd.DataFrame(pro); procesos_seq=procesos.copy()
     historico=pd.DataFrame(hist); contratos=pd.DataFrame(cont)
+    n=len(procesos)
+    matched_rows=linked+duplicate_rows
 
     offsets=list(range(0,n,250))
     offsets_cont=list(range(0,linked,250))
@@ -104,14 +118,14 @@ def main():
     }
     query_plan={
       "procesos":{"where":"fecha_de_publicacion_del >= '2025-01-01' and fecha_de_publicacion_del < '2025-03-01'",
-                  "order":"fecha_de_publicacion_del ASC,id_del_proceso ASC"},
+                  "order":"fecha_de_publicacion_del ASC,id_del_proceso ASC,nit_del_proveedor_adjudicado ASC,nombre_del_proveedor ASC"},
       "contratos":{"where":"fecha_de_firma >= '2025-01-01' and fecha_de_firma < '2025-03-01'",
                    "order":"fecha_de_firma ASC,id_contrato ASC"}
     }
-    coverage=linked/n
+    coverage=matched_rows/n
     quality={
       "join_key":"id_del_portafolio -> proceso_de_compra",
-      "matched_processes":linked,"join_coverage":coverage,
+      "matched_processes":matched_rows,"join_coverage":coverage,
       "procesos":{"rows":n},"contratos":{"rows":linked}
     }
     def write_cache(cache_dir, df, offsets_, endpoint, signature_seed):
@@ -136,7 +150,7 @@ def main():
     cont_pages=write_cache(cache_cont,contratos,offsets_cont,"jbjy-vk9h","cont")
 
     acq={
-      "schema":"2026-10-01-secoppipeline-v6",
+      "schema":"2026-10-01-secoppipeline-v6.1",
       "queried_at_utc":"2026-10-01T00:00:00+00:00","workers":4,"page_size":250,
       "target_rows":{"procesos":n,"contratos":linked},
       "datasets":{
@@ -160,14 +174,14 @@ def main():
       out/"02_secop_integrado.parquet",out/"02_modelo_documental.json"
     ]: touch(p)
 
-    idem={"count_after_first":n,"count_after_second":n,"duplicates_after_second":0}
+    idem={"count_after_first":unique_n,"count_after_second":unique_n,"duplicates_after_second":0}
     ref_a=linked
     topdocs=sorted(
       [{"id_proceso":d["id_proceso"],"valor_contratos":float(d["contratos_resumen"]["valor_total"])} for d in docs],
       key=lambda x:(-x["valor_contratos"],x["id_proceso"])
     )[:10]
     atlas_resultados={
-      "carga":{"documentos":n,"server_version":"8.0","idempotencia":idem,"indices":["id_proceso_1","valor_contratos_-1"]},
+      "carga":{"documentos":unique_n,"server_version":"8.0","idempotencia":idem,"indices":["id_proceso_1","valor_contratos_-1"]},
       "consulta_a":{"filtro":{"x":1},"resultado":ref_a},
       "consulta_b":{"filtro":{},"proyeccion":{},"resultado":topdocs}
     }
@@ -196,7 +210,11 @@ def main():
     top10=(bc[(bc.anio==part[0])&(bc.departamento==part[1])]
            .sort_values(["valor_contratos","id_proceso"],ascending=[False,True],kind="mergesort").head(10))
 
-    pmap=procesos[["id_del_portafolio","id_del_proceso"]].rename(columns={"id_del_proceso":"id_proceso"}).copy()
+    pmap=procesos[["id_del_portafolio","id_del_proceso"]].copy()
+    pmap=pmap.dropna(subset=["id_del_portafolio","id_del_proceso"])
+    pmap["id_del_portafolio"]=pmap["id_del_portafolio"].astype(str).str.strip()
+    pmap=pmap[pmap["id_del_portafolio"].ne("")].drop_duplicates("id_del_portafolio")
+    pmap=pmap.rename(columns={"id_del_proceso":"id_proceso"})
     relaciones=contratos.merge(pmap,left_on="proceso_de_compra",right_on="id_del_portafolio",how="inner")
     relaciones["nit_proveedor"]=relaciones["documento_proveedor"].astype(str)
     relaciones["proveedor"]=relaciones["proveedor_adjudicado"].astype(str)
@@ -208,7 +226,8 @@ def main():
           .sort_values(["contratos","nit_entidad"],ascending=[False,True],kind="mergesort").reset_index(drop=True))
     nit_ancla=str(rank.iloc[0]["nit_entidad"])
     rel_ancla=relaciones[relaciones.nit_entidad.astype(str)==nit_ancla]
-    entidad_ancla=str(rel_ancla.entidad.iloc[0])
+    nombres_ancla=sorted(set(rel_ancla.entidad.astype(str)))
+    entidad_ancla=nombres_ancla[-1]  # cualquier variante observada para el mismo NIT es válida
     a=rel_ancla.groupby("nit_proveedor")["id_contrato"].nunique().rename("contratos_con_ancla").reset_index()
     g=relaciones.groupby("nit_proveedor")["nit_entidad"].nunique().rename("entidades_conectadas").reset_index()
     rel=a.merge(g,on="nit_proveedor").sort_values(
@@ -237,7 +256,7 @@ Procesos={n}; contratos={linked}; clave=id_del_portafolio→proceso_de_compra.
 ## 2. Concurrencia, robustez y calidad
 Workers=4; mismos_offsets=True; mismo_hash=True; join_coverage={coverage}.
 ## 3. Modelo documental e idempotencia Atlas
-Documentos={n}; idempotencia={idem}; índices=['id_proceso_1','valor_contratos_-1'].
+Documentos={unique_n}; idempotencia={idem}; índices=['id_proceso_1','valor_contratos_-1'].
 ## 4. Producto analítico y Cassandra
 Filas_bandeja={len(bandeja)}; modelo Cassandra=query-first + simulación local.
 ## 5. Neo4j, decisiones y límites
@@ -249,7 +268,7 @@ Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran f
     correct_cov="La cobertura mide qué proporción de procesos encontró contrato en este snapshot; no se inventan los faltantes"
     defensa={
       "escenario_429":{"workers_observados":4,"same_hash":True,"seleccion":correct_d429},
-      "escenario_cobertura":{"join_coverage":coverage,"matched_processes":linked,"seleccion":correct_cov},
+      "escenario_cobertura":{"join_coverage":coverage,"matched_processes":matched_rows,"seleccion":correct_cov},
     }
     touch(out/"06_microdefensa_grupal.json",json.dumps(defensa))
 
@@ -257,13 +276,13 @@ Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran f
     ns={
       "OUT":out,"RAW_PAGES":raw_pages,
       "CACHE_SEQ_PROCESOS":cache_seq,"CACHE_THR_PROCESOS":cache_thr,"CACHE_CONTRATOS":cache_cont,
-      "PAREJA_ID":"TEST-V6","INTEGRANTE_1":"A","CODIGO_1":"1","INTEGRANTE_2":"B","CODIGO_2":"2",
+      "PAREJA_ID":"TEST-V6.1","INTEGRANTE_1":"A","CODIGO_1":"1","INTEGRANTE_2":"B","CODIGO_2":"2",
       "N_PROCESOS":n,"OFFSETS_PROCESOS":offsets,"OFFSETS_CONTRATOS":offsets_cont,
       "data_contract":data_contract,"query_plan":query_plan,
       "procesos_seq":procesos_seq,"procesos_df":procesos,"contratos_df":contratos,
       "benchmark_threads":bench,"acquisition_manifest":acq,"quality_report":quality,
       "historico":historico,"relaciones_contrato":relaciones,"documentos":docs,
-      "coleccion":FakeCollection(n),"atlas_ping":True,"atlas_server_version":"8.0",
+      "coleccion":FakeCollection(unique_n),"atlas_ping":True,"atlas_server_version":"8.0",
       "atlas_idempotencia":idem,"atlas_indexes":["id_proceso_1","valor_contratos_-1"],
       "filtro_a":{"x":1},"resultado_a":ref_a,"filtro_b":{},"proyeccion_b":{},"resultado_b":topdocs,
       "atlas_resultados":atlas_resultados,
@@ -286,13 +305,21 @@ Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran f
     try:
       os.chdir(td)
 
-      # Camino estudiante roto: un .part debe invalidar E1.4.
+      # Cache de otra ventana: un chunk extra debe invalidar E1.4.
+      extra=cache_thr/"page_0999999.json"
+      extra.write_text("[]",encoding="utf-8")
+      broken_extra=V.evaluar(ns)
+      assert broken_extra["controles"]["E1_trazabilidad_calidad"]["ok"] is False, broken_extra
+      extra.unlink()
+      print("TC1 V6.1 detecta chunk extra de otra ventana: OK")
+
+      # Descarga interrumpida: un .part debe invalidar E1.4.
       bad_part=cache_thr/"page_0000000.json.part"
       bad_part.write_text("descarga interrumpida",encoding="utf-8")
       broken=V.evaluar(ns)
       assert broken["controles"]["E1_trazabilidad_calidad"]["ok"] is False, broken
       bad_part.unlink()
-      print("TC1 V6 detecta descarga incompleta: OK")
+      print("TC1 V6.1 detecta descarga incompleta: OK")
 
       # Camino reparado: la misma solución debe alcanzar 100/100.
       manifest=V.evaluar(ns)
@@ -303,7 +330,7 @@ Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran f
     assert manifest["maximo"]==100
     assert manifest["version"]==V.VERSION
     assert manifest["gates"]["security_no_secrets"]["ok"] is True
-    print("TC1 V6 student-path (<1000 procesos + cache reanudable) 100/100: OK")
+    print("TC1 V6.1 student-path (duplicados + <1000 únicos + cache reanudable) 100/100: OK")
 
 if __name__=="__main__":
   main()
