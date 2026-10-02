@@ -753,7 +753,7 @@ NIT_ANCLA = taller.ancla_e5()'''),
 | `count(DISTINCT x)` | cuenta nodos distintos, no caminos | ver el ejemplo de abajo |
 | `ORDER BY … DESC, … ASC` | ordena; cada columna siguiente desempata a la anterior | igual que el Sort de Atlas y el clustering de Cassandra |
 
-**Ejemplo para entender `DISTINCT`.** María le compra a la misma tienda el lunes, el miércoles y el viernes. ¿A cuántas tiendas le compra? A una, aunque haya tres compras. En tu grafo, los contratos son las compras y las entidades son las tiendas: `count(otra)` cuenta compras (3); `count(DISTINCT otra)` cuenta tiendas (1).
+**Ejemplo para entender `DISTINCT`.** Un proveedor firma tres contratos con la misma alcaldía: el lunes, el miércoles y el viernes. ¿Con cuántas entidades contrata? Con una, aunque haya tres contratos. Tu consulta llega a esa alcaldía por tres caminos, uno por contrato: `count(otra)` cuenta caminos (3); `count(DISTINCT otra)` cuenta entidades (1).
 
 **E5.3a · Compartidos — COMPLETA.** Completa el `____` del `WHERE`: la «otra» entidad no puede ser la ancla. Devuelve una fila por proveedor con `nit_proveedor`, `proveedor` y la lista `otras_entidades`. En Aura mira la pestaña **Graph**.
 
