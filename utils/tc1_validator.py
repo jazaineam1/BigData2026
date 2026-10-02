@@ -1,653 +1,331 @@
 from pathlib import Path
-import json, re, hashlib, zipfile
+import hashlib, json, math, re, zipfile
 import pandas as pd
 
-VERSION = "2026-10-01-secoppipeline-v7"
-MIN_MATCHED_PROCESSES = 30
+VERSION = "2026-10-01-tc1-native-v8"
+STAGE_MAX = {"E1":15, "E2":30, "E3":20, "E4":25, "E5":10}
 
-DISPLAY_NAME = {
-    "E1_contrato_y_query": "E1.1 · Contrato y consulta",
-    "E1_descarga_secuencial": "E1.2 · Descarga secuencial",
-    "E1_concurrencia_equivalente": "E1.3 · ThreadPoolExecutor equivalente",
-    "E1_trazabilidad_calidad": "E1.4 · Trazabilidad, cache y calidad",
-    "E2_modelo_documental": "E2.1 · Histórico y modelo documental",
-    "E2_atlas_idempotente": "E2.2 · Atlas e idempotencia",
-    "E2_indices": "E2.3 · Índices Atlas",
-    "E2_consulta_A_count": "E2.4 · Consulta A",
-    "E2_consulta_B_find": "E2.5 · Consulta B",
-    "E2_evidencia_atlas": "E2.6 · Evidencia Atlas",
-    "E3_pipeline_bandeja": "E3.1 · Pipeline de bandeja",
-    "E3_artefacto_bandeja": "E3.2 · CSV de bandeja",
-    "E4_datos_cassandra": "E4.1 · Datos Cassandra",
-    "E4_modelo_query_first": "E4.2 · Modelo query-first",
-    "E4_consulta_simulada": "E4.3 · Consulta simulada",
-    "E5_historial_y_ancla": "E5.1 · Relaciones y entidad ancla",
-    "E5_metrica_relacional": "E5.2 · Métrica relacional",
-    "E5_cypher": "E5.3 · Cypher",
-    "E5_subgrafo": "E5.4 · Subgrafo",
-    "E6_decisiones_informe": "E6.1 · Decisiones e informe",
-    "E6_microdefensa_grupal": "E6.2 · Microdefensa",
-    "E6_paquete_reproducible": "E6.3 · Paquete reproducible",
-}
-STAGE_MAX = {"E1": 25, "E2": 25, "E3": 10, "E4": 15, "E5": 15, "E6": 10}
-FEEDBACK = {
-    "E1_contrato_y_query": "Revise el contrato de datos y el plan SoQL: fuente, campos, filtros y orden estable deben corresponder a la ventana asignada.",
-    "E1_descarga_secuencial": "La descarga secuencial debe producir exactamente la población objetivo real de su ventana; no se exige un mínimo artificial de 1.000 filas.",
-    "E1_concurrencia_equivalente": "Compare en igualdad de condiciones: mismos offsets, mismas filas y mismo hash canónico. El speedup puede ser menor que 1.",
-    "E1_trazabilidad_calidad": "Guarde RAW consolidado y páginas reanudables con firma/SHA-256; no deben quedar .part ni chunks extra en el cache activo y deben existir al menos 30 procesos con contrato relacionado.",
-    "E2_modelo_documental": "Construya exactamente una fila/documento por id_del_proceso único, no una fila por registro crudo SECOP.",
-    "E2_atlas_idempotente": "La colección debe ser real y la segunda ejecución no puede aumentar el número de documentos.",
-    "E2_indices": "E2.3: cree un índice único por id_proceso y al menos un índice adicional alineado con una consulta real.",
-    "E2_consulta_A_count": "Recalcule la consulta A directamente en Atlas y contraste el conteo con el snapshot local.",
-    "E2_consulta_B_find": "El top 10 debe coincidir con el orden de referencia: valor contractual descendente e id_proceso ascendente.",
-    "E2_evidencia_atlas": "Registre carga, consultas e índices en 02_atlas_evidence.json sin credenciales.",
-    "E3_pipeline_bandeja": "La bandeja debe derivarse de Atlas y conservar exactamente la priorización especificada.",
-    "E3_artefacto_bandeja": "Exporte la bandeja con las columnas y límite requeridos.",
-    "E4_datos_cassandra": "Prepare el DataFrame operacional con año, departamento, valor e identificador.",
-    "E4_modelo_query_first": "Diseñe la PRIMARY KEY desde la consulta objetivo y evite ALLOW FILTERING.",
-    "E4_consulta_simulada": "La simulación debe devolver el mismo top 10 que el patrón query-first definido.",
-    "E5_historial_y_ancla": "Construya relaciones desde contratos realmente enlazados por id_del_portafolio → proceso_de_compra y derive la entidad ancla por número de contratos.",
-    "E5_metrica_relacional": "La métrica de proveedores compartidos debe coincidir con el cálculo tabular sobre contratos enlazados.",
-    "E5_cypher": "El Cypher debe cargar Entidad–Contrato–Proveedor con MERGE/UNWIND y responder las consultas parametrizadas solicitadas.",
-    "E5_subgrafo": "El subgrafo NetworkX debe representar la estructura Entidad–Contrato–Proveedor de la entidad ancla.",
-    "E6_decisiones_informe": "Complete las tres decisiones estructuradas; el informe se genera con evidencia de su propia ejecución y declara límites explícitos.",
-    "E6_microdefensa_grupal": "Complete las dos decisiones cerradas de transferencia sobre HTTP 429 y cobertura del cruce.",
-    "E6_paquete_reproducible": "Complete todos los artefactos requeridos antes de generar la entrega final.",
-}
+def _truthy(x):
+    return bool(x)
 
-PROCESS_FIELDS = {
-    "id_del_proceso","id_del_portafolio","entidad","nit_entidad","departamento_entidad","ciudad_entidad",
-    "fecha_de_publicacion_del","precio_base","modalidad_de_contratacion",
-    "respuestas_al_procedimiento","estado_del_procedimiento","adjudicado",
-    "nombre_del_proveedor","nit_del_proveedor_adjudicado","urlproceso",
-}
-CONTRACT_FIELDS = {
-    "proceso_de_compra","id_contrato","estado_contrato","tipo_de_contrato",
-    "modalidad_de_contratacion","fecha_de_firma","nombre_entidad","nit_entidad",
-    "proveedor_adjudicado","documento_proveedor","valor_del_contrato",
-}
+def _norm(s):
+    return re.sub(r"\s+"," ",str(s or "")).strip().lower()
 
-def _canon_df(df, key):
-    """Hash del multiconjunto de filas: conserva duplicados y no depende del orden accidental."""
-    if not isinstance(df,pd.DataFrame) or key not in df.columns:
-        return None
-    x=df.copy()
-    cols=sorted(str(c) for c in x.columns)
-    x=x[cols]
-
-    def canon(v):
-        try:
-            if pd.isna(v): return None
-        except Exception:
-            pass
-        if isinstance(v,pd.Timestamp): return v.isoformat()
-        return str(v)
-
-    rows=[]
-    for record in x.to_dict("records"):
-        normalized={str(k):canon(v) for k,v in record.items()}
-        rows.append(json.dumps(normalized,ensure_ascii=False,sort_keys=True,separators=(",",":")))
-    rows.sort()
-    return hashlib.sha256("\n".join(rows).encode("utf-8")).hexdigest()
-
-def _safe_float(x):
+def _num(x):
     try:
-        if pd.isna(x): return None
         return float(x)
     except Exception:
         return None
 
-def _read_json(path):
-    try:
-        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
-    except Exception:
-        return None
+def _close(a,b,tol=1e-6):
+    a=_num(a); b=_num(b)
+    if a is None or b is None: return False
+    return abs(a-b) <= max(tol, abs(b)*1e-9)
 
 def _validate_page_cache(cache_dir, expected_offsets):
     cache_dir=Path(cache_dir)
-    if not cache_dir.exists(): return False, "cache ausente"
-    if list(cache_dir.glob("*.part")): return False, "quedaron archivos .part"
-    expected=[int(x) for x in expected_offsets]
-    seen=[]
-    for offset in expected:
-        stem=f"page_{offset:07d}"
-        data_path=cache_dir/f"{stem}.json"
-        meta_path=cache_dir/f"{stem}.meta.json"
-        if not data_path.exists() or not meta_path.exists():
-            return False, f"falta chunk {offset}"
+    if not cache_dir.exists():
+        return False, "cache ausente"
+    if list(cache_dir.glob("*.part")):
+        return False, "quedaron archivos .part"
+
+    expected=set(int(x) for x in expected_offsets)
+    seen=set()
+    for data_path in sorted(cache_dir.glob("page_*.json")):
+        m=re.fullmatch(r"page_(\d{7})\.json", data_path.name)
+        if not m:
+            continue
+        offset=int(m.group(1))
+        meta_path=data_path.with_name(data_path.stem+".meta.json")
+        if not meta_path.exists():
+            return False, f"falta metadata para offset {offset}"
         try:
             raw=data_path.read_bytes()
-            meta=json.loads(meta_path.read_text(encoding="utf-8"))
             rows=json.loads(raw.decode("utf-8"))
-        except Exception:
-            return False, f"chunk ilegible {offset}"
-        if not isinstance(rows,list): return False, f"chunk no es lista {offset}"
-        if int(meta.get("offset",-1))!=offset: return False, f"offset metadata inválido {offset}"
-        if int(meta.get("rows",-1))!=len(rows): return False, f"conteo metadata inválido {offset}"
-        if not re.fullmatch(r"[0-9a-f]{64}",str(meta.get("query_signature",""))): return False, f"firma inválida {offset}"
-        sha=hashlib.sha256(raw).hexdigest()
-        if meta.get("sha256")!=sha: return False, f"sha inválido {offset}"
-        seen.append(offset)
-    extras=[]
-    for p in cache_dir.glob("page_*.json"):
-        if p.name.endswith(".meta.json"): continue
-        m=re.fullmatch(r"page_(\d{7})\.json",p.name)
-        if m and int(m.group(1)) not in expected: extras.append(int(m.group(1)))
-    if extras: return False, "chunks extra: "+",".join(map(str,extras))
-    return seen==expected, f"{len(seen)} chunks válidos"
+            meta=json.loads(meta_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            return False, f"chunk ilegible {offset}: {exc}"
+        if not isinstance(rows,list):
+            return False, f"chunk no es lista {offset}"
+        if int(meta.get("offset",-1)) != offset:
+            return False, f"offset metadata inválido {offset}"
+        if int(meta.get("rows",-1)) != len(rows):
+            return False, f"conteo metadata inválido {offset}"
+        if not re.fullmatch(r"[0-9a-f]{64}", str(meta.get("query_signature",""))):
+            return False, f"firma inválida {offset}"
+        if meta.get("sha256") != hashlib.sha256(raw).hexdigest():
+            return False, f"sha inválido {offset}"
+        seen.add(offset)
+
+    extras=sorted(seen-expected)
+    missing=sorted(expected-seen)
+    if extras:
+        return False, "chunks extra: "+",".join(map(str,extras))
+    if missing:
+        return False, "faltan chunks: "+",".join(map(str,missing))
+    return True, f"{len(seen)} chunks válidos"
+
+def _atlas_pipeline_ok(pipeline, departamento):
+    if not isinstance(pipeline,list) or len(pipeline) < 4:
+        return False, "el pipeline debe tener al menos $match, $group, $sort y $limit"
+    stages=[next(iter(x.keys()),"") if isinstance(x,dict) and x else "" for x in pipeline]
+    needed=["$match","$group","$sort","$limit"]
+    pos=[]
+    for k in needed:
+        try: pos.append(stages.index(k))
+        except ValueError: return False, f"falta etapa {k}"
+    if pos != sorted(pos):
+        return False, "las etapas deben conservar el orden match → group → sort → limit"
+
+    match=pipeline[pos[0]].get("$match",{})
+    if str(match.get("entidad.departamento","")).strip() != str(departamento).strip():
+        return False, "$match no usa el departamento asignado"
+    shared=match.get("red.proveedores_compartidos")
+    if not (isinstance(shared,dict) and _num(shared.get("$gt")) == 0):
+        return False, "$match debe exigir red.proveedores_compartidos > 0"
+
+    group=pipeline[pos[1]].get("$group",{})
+    gid=group.get("_id")
+    if not isinstance(gid,dict):
+        return False, "$group debe agrupar por NIT y nombre"
+    if gid.get("nit") != "$entidad.nit" or gid.get("nombre") != "$entidad.nombre":
+        return False, "$group debe usar entidad.nit y entidad.nombre"
+    valor=group.get("valor_total")
+    if not (isinstance(valor,dict) and valor.get("$sum") == "$contratos.valor_total"):
+        return False, "$group debe sumar contratos.valor_total"
+
+    sort=pipeline[pos[2]].get("$sort",{})
+    if _num(sort.get("valor_total")) != -1 or _num(sort.get("_id.nit")) != 1:
+        return False, "$sort debe ser valor_total DESC y _id.nit ASC"
+    if int(pipeline[pos[3]].get("$limit",0) or 0) != 5:
+        return False, "$limit debe ser 5"
+    return True, "pipeline Atlas correcto"
+
+def _cql_design_ok(cql):
+    s=_norm(cql)
+    if "allow filtering" in s:
+        return False, "no use ALLOW FILTERING"
+    pk=re.search(r"primary\s+key\s*\(\s*\(\s*corte\s*,\s*departamento\s*\)\s*,\s*valor_contratos\s*,\s*id_proceso\s*\)",s,re.I)
+    clustering=re.search(r"clustering\s+order\s+by\s*\(\s*valor_contratos\s+desc\s*,\s*id_proceso\s+asc\s*\)",s,re.I)
+    if not pk:
+        return False, "PRIMARY KEY no corresponde a corte + departamento → valor + id"
+    if not clustering:
+        return False, "CLUSTERING ORDER BY debe ser valor DESC, id ASC"
+    return True, "diseño query-first correcto"
+
+def _cypher_ok(q):
+    s=_norm(q)
+    required=["match","publica","adjudicado_a","otra.nit <> a.nit","count(distinct otra)","order by otras_entidades desc","limit 5"]
+    missing=[x for x in required if x not in s]
+    if missing:
+        return False, "faltan elementos Cypher: "+", ".join(missing)
+    return True, "consulta Cypher relacional correcta"
+
+def _scan_secrets(paths):
+    pats=[
+        re.compile(r"mongodb\+srv://[^\s]+:[^\s]+@",re.I),
+        re.compile(r"AstraCS:[A-Za-z0-9_-]{20,}",re.I),
+        re.compile(r"(?:password|contrase(?:n|ñ)a)\s*[:=]\s*['\"][^'\"]{4,}",re.I),
+    ]
+    hits=[]
+    for p in paths:
+        p=Path(p)
+        if not p.exists() or p.suffix.lower() not in {".json",".cql",".cypher",".md",".txt"}:
+            continue
+        try: txt=p.read_text(encoding="utf-8",errors="ignore")
+        except Exception: continue
+        if any(rx.search(txt) for rx in pats):
+            hits.append(p.name)
+    return hits
 
 def evaluar(ns):
-    OUT=Path(ns.get("OUT","entrega_tc1")); OUT.mkdir(exist_ok=True)
-    checks={}
+    OUT=Path(ns.get("OUT","entrega_tc1"))
+    RAW=Path(ns.get("RAW",OUT/"raw"))
+    OUT.mkdir(parents=True,exist_ok=True)
 
-    def check(k,ok,puntos,evidencia=""):
-        ok=bool(ok)
-        checks[k]={
-            "ok":ok,
-            "puntos":puntos if ok else 0,
-            "maximo":puntos,
-            "evidencia":str(evidencia)[:500],
-            "feedback":"" if ok else FEEDBACK.get(k,"Revise la evidencia y vuelva a ejecutar el criterio.")
-        }
-        label=DISPLAY_NAME.get(k,k)
-        print(("✅" if ok else "❌"),label,f"{checks[k]['puntos']}/{puntos}")
-        if not ok:
-            print("   ↳",checks[k]["feedback"])
-            print("   Evidencia:",checks[k]["evidencia"] or "(sin evidencia calculable; revise el paso anterior)")
+    scores={k:0 for k in STAGE_MAX}
+    checks=[]
+    def check(stage,label,ok,pts,evidence=""):
+        if ok: scores[stage]+=pts
+        checks.append({"stage":stage,"label":label,"ok":bool(ok),"points":pts if ok else 0,"max":pts,"evidence":str(evidence)})
+        icon="✅" if ok else "❌"
+        print(f"{icon} {stage} · {label}: {pts if ok else 0}/{pts}")
+        if not ok and evidence:
+            print("   ↳",evidence)
 
-    pareja=str(ns.get("PAREJA_ID","")).strip()
-    procesos=ns.get("procesos_df"); contratos=ns.get("contratos_df")
-    procesos_seq=ns.get("procesos_seq")
+    # ---------- E1 ----------
     data_contract=ns.get("data_contract",{})
-    query_plan=ns.get("query_plan",{})
     bench=ns.get("benchmark_threads",{})
     acq=ns.get("acquisition_manifest",{})
     quality=ns.get("quality_report",{})
+    matched=int(ns.get("matched_processes",0) or 0)
 
-    # E1 · 25
-    try:
-        q1=query_plan.get("procesos",{}); q2=query_plan.get("contratos",{})
-        e11=(
-            len(pareja)>=3
-            and data_contract.get("procesos",{}).get("id")=="p6dx-8zbt"
-            and data_contract.get("contratos",{}).get("id")=="jbjy-vk9h"
-            and PROCESS_FIELDS.issubset(set(data_contract.get("procesos",{}).get("fields",[])))
-            and CONTRACT_FIELDS.issubset(set(data_contract.get("contratos",{}).get("fields",[])))
-            and data_contract.get("join",{}).get("procesos.id_del_portafolio")=="contratos.proceso_de_compra"
-            and isinstance(q1.get("where"),str) and "fecha_de_publicacion_del" in q1["where"]
-            and isinstance(q2.get("where"),str) and "fecha_de_firma" in q2["where"]
-            and "order" in q1 and all(x in q1["order"] for x in ["fecha_de_publicacion_del","id_del_proceso","nit_del_proveedor_adjudicado","nombre_del_proveedor"])
-            and "order" in q2 and "id_contrato" in q2["order"]
-            and (OUT/"00_dataset_contract.json").exists()
-        )
-    except Exception: e11=False
-    check("E1_contrato_y_query",e11,4,f"pareja={pareja}; order_procesos={q1.get('order')}; order_contratos={q2.get('order')}")
+    e11=(
+        data_contract.get("procesos",{}).get("id")=="p6dx-8zbt"
+        and data_contract.get("contratos",{}).get("id")=="jbjy-vk9h"
+        and data_contract.get("join",{}).get("procesos.id_del_portafolio")=="contratos.proceso_de_compra"
+    )
+    check("E1","Contrato de datos",e11,3,"endpoints y clave de cruce")
 
-    expected_n=int(ns.get("N_PROCESOS",0) or 0)
-    expected_offsets=list(ns.get("OFFSETS_PROCESOS",[]) or [])
-    try:
-        e12=(
-            expected_n>0
-            and isinstance(procesos_seq,pd.DataFrame) and len(procesos_seq)==expected_n
-            and PROCESS_FIELDS.issubset(set(procesos_seq.columns))
-            and bench.get("rows_sequential")==len(procesos_seq)
-            and int(bench.get("target_rows",0) or 0)==expected_n
-            and isinstance(bench.get("seconds_sequential"),(int,float))
-            and bench.get("seconds_sequential")>0
-        )
-    except Exception: e12=False
-    check("E1_descarga_secuencial",e12,4,f"rows={0 if not isinstance(procesos_seq,pd.DataFrame) else len(procesos_seq)}; objetivo={expected_n}")
+    e12=all(bool(bench.get(k)) for k in ["same_offsets","same_rows","same_hash"])
+    check("E1","Secuencial = concurrente",e12,4,f"offsets={bench.get('same_offsets')} rows={bench.get('same_rows')} hash={bench.get('same_hash')}")
 
-    try:
-        h_seq=_canon_df(procesos_seq,"id_del_proceso")
-        h_thr=_canon_df(procesos,"id_del_proceso")
-        workers=int(bench.get("workers",0))
-        off_seq=list(bench.get("offsets_sequential",[]) or [])
-        off_thr=list(bench.get("offsets_threaded",[]) or [])
-        e13=(
-            expected_n>0
-            and isinstance(procesos,pd.DataFrame) and len(procesos)==expected_n
-            and PROCESS_FIELDS.issubset(set(procesos.columns))
-            and 2<=workers<=6
-            and bench.get("rows_threaded")==len(procesos)
-            and len(procesos)==len(procesos_seq)
-            and off_seq==expected_offsets and off_thr==expected_offsets and bench.get("same_offsets") is True
-            and h_seq is not None and h_seq==h_thr
-            and bench.get("same_rows") is True and bench.get("same_hash") is True
-            and bench.get("hash_sequential")==h_seq and bench.get("hash_threaded")==h_thr
-            and isinstance(bench.get("seconds_threaded"),(int,float)) and bench["seconds_threaded"]>0
-            and (OUT/"01_benchmark_threads.json").exists()
-        )
-    except Exception as e:
-        print("E1.3",type(e).__name__,e); e13=False
-    check("E1_concurrencia_equivalente",e13,8,f"workers={workers}; rows_seq={0 if not isinstance(procesos_seq,pd.DataFrame) else len(procesos_seq)}; rows_thr={0 if not isinstance(procesos,pd.DataFrame) else len(procesos)}; same_offsets={bench.get('same_offsets')}; same_hash={bench.get('same_hash')}")
+    seq_ok,seq_ev=_validate_page_cache(ns.get("CACHE_SEQ_PROCESOS",""),ns.get("OFFSETS_PROCESOS",[]))
+    thr_ok,thr_ev=_validate_page_cache(ns.get("CACHE_THR_PROCESOS",""),ns.get("OFFSETS_PROCESOS",[]))
+    con_ok,con_ev=_validate_page_cache(ns.get("CACHE_CONTRATOS",""),ns.get("OFFSETS_CONTRATOS",[]))
+    check("E1","Cache íntegro",seq_ok and thr_ok and con_ok,4,f"seq={seq_ev}; threads={thr_ev}; contratos={con_ev}")
 
-    try:
-        join_cov=quality.get("join_coverage")
-        matched=int(quality.get("matched_processes",0) or 0)
-        raw_proc=(OUT/"raw"/"procesos.parquet")
-        raw_cont=(OUT/"raw"/"contratos.parquet")
-        secret_blob=json.dumps(acq,ensure_ascii=False).lower()
+    e14=(
+        acq.get("schema")==VERSION
+        and matched>=30
+        and _num(quality.get("join_coverage")) is not None
+        and (RAW/"procesos.parquet").exists()
+        and (RAW/"contratos.parquet").exists()
+    )
+    check("E1","RAW reutilizable y población relacional",e14,4,f"matched={matched}; join={quality.get('join_coverage')}; schema={acq.get('schema')}")
 
-        expected_proc=list(ns.get("OFFSETS_PROCESOS",[]) or [])
-        expected_cont=list(ns.get("OFFSETS_CONTRATOS",[]) or [])
-        raw_pages=Path(ns.get("RAW_PAGES",OUT/"raw"/"pages"))
-        cache_seq=Path(ns.get("CACHE_SEQ_PROCESOS",raw_pages/"procesos"/"sequential"))
-        cache_thr=Path(ns.get("CACHE_THR_PROCESOS",raw_pages/"procesos"/"threaded"))
-        cache_cont=Path(ns.get("CACHE_CONTRATOS",raw_pages/"contratos"/"official"))
-        seq_ok,seq_ev=_validate_page_cache(cache_seq,expected_proc)
-        thr_ok,thr_ev=_validate_page_cache(cache_thr,expected_proc)
-        cont_ok,cont_ev=_validate_page_cache(cache_cont,expected_cont)
+    # ---------- E2 ----------
+    historico=ns.get("historico")
+    documentos=ns.get("documentos")
+    esperado=ns.get("ATLAS_ESPERADO",{})
+    dept=ns.get("DEPARTAMENTO_OBJETIVO","")
+    model_ok=(
+        isinstance(historico,pd.DataFrame)
+        and isinstance(documentos,list)
+        and len(documentos)==historico["id_proceso"].nunique()
+        and bool(dept)
+        and bool(esperado)
+        and (OUT/"02_atlas_documentos.json").exists()
+    )
+    check("E2","Modelo documental preparado",model_ok,5,f"documentos={len(documentos) if isinstance(documentos,list) else 'NA'}; departamento={dept}")
 
-        pages_seq=acq.get("datasets",{}).get("procesos",{}).get("pages_sequential",[])
-        pages_thr=acq.get("datasets",{}).get("procesos",{}).get("pages_threaded",[])
-        pages_cont=acq.get("datasets",{}).get("contratos",{}).get("pages",[])
-        man_offsets_seq=[int(x.get("offset",-1)) for x in pages_seq]
-        man_offsets_thr=[int(x.get("offset",-1)) for x in pages_thr]
-        man_offsets_cont=[int(x.get("offset",-1)) for x in pages_cont]
-        page_fields=lambda xs: all(
-            isinstance(x,dict)
-            and re.fullmatch(r"[0-9a-f]{64}",str(x.get("sha256","")))
-            and re.fullmatch(r"[0-9a-f]{64}",str(x.get("query_signature","")))
-            and int(x.get("rows",-1))>=0
-            for x in xs
-        )
+    pipeline=ns.get("atlas_pipeline_student")
+    p_ok,p_ev=_atlas_pipeline_ok(pipeline,dept)
+    check("E2","Pipeline real de Atlas",p_ok,10,p_ev)
 
-        e14=(
-            isinstance(contratos,pd.DataFrame) and len(contratos)>0
-            and CONTRACT_FIELDS.issubset(set(contratos.columns))
-            and isinstance(join_cov,(int,float)) and 0<float(join_cov)<=1 and matched>=MIN_MATCHED_PROCESSES
-            and quality.get("join_key")=="id_del_portafolio -> proceso_de_compra"
-            and isinstance(acq,dict) and acq.get("schema")=="2026-10-01-secoppipeline-v7"
-            and acq.get("datasets",{}).get("procesos",{}).get("id")=="p6dx-8zbt"
-            and acq.get("datasets",{}).get("contratos",{}).get("id")=="jbjy-vk9h"
-            and acq.get("datasets",{}).get("procesos",{}).get("snapshot_sha256")==bench.get("hash_threaded")
-            and re.fullmatch(r"[0-9a-f]{64}",str(acq.get("datasets",{}).get("contratos",{}).get("snapshot_sha256","")))
-            and man_offsets_seq==expected_proc and man_offsets_thr==expected_proc and man_offsets_cont==expected_cont
-            and page_fields(pages_seq) and page_fields(pages_thr) and page_fields(pages_cont)
-            and seq_ok and thr_ok and cont_ok
-            and int(acq.get("workers",0))==int(bench.get("workers",0))
-            and "queried_at_utc" in acq
-            and "password" not in secret_blob and "mongodb+srv" not in secret_blob and "app_token" not in secret_blob
-            and isinstance(quality.get("procesos"),dict) and isinstance(quality.get("contratos"),dict)
-            and raw_proc.exists() and raw_cont.exists()
-            and (OUT/"01_acquisition_manifest.json").exists()
-            and (OUT/"01_quality_report.json").exists()
-        )
-        e14_ev=f"seq={seq_ev}; threaded={thr_ev}; contratos={cont_ev}; matched={matched}; mínimo={MIN_MATCHED_PROCESSES}; join={join_cov:.4f}"
-    except Exception as e:
-        print("E1.4",type(e).__name__,e); e14=False; e14_ev=str(e)
-    check("E1_trazabilidad_calidad",e14,9,e14_ev)
+    atlas_ev=ns.get("atlas_evidence",{})
+    top_ok=(
+        str(atlas_ev.get("top_nit","")).strip()==str(esperado.get("nit_entidad","")).strip()
+        and _close(atlas_ev.get("top_valor"),esperado.get("valor_total"))
+    )
+    check("E2","Resultado de priorización Atlas",top_ok,10,f"esperado NIT={esperado.get('nit_entidad')} valor={esperado.get('valor_total')}; recibido NIT={atlas_ev.get('top_nit')} valor={atlas_ev.get('top_valor')}")
 
-    # E2 · 25
-    historico=ns.get("historico"); documentos=ns.get("documentos")
-    unique_processes=-1
-    try:
-        sample=documentos[:20] if isinstance(documentos,list) else []
-        required_top={"id_proceso","entidad","proceso","proveedor_adjudicado","contratos_resumen","metadata_ingesta"}
-        nested_ok=bool(sample) and all(required_top.issubset(d.keys()) for d in sample)
-        cr_ok=all(isinstance(d.get("contratos_resumen"),dict) and {"cantidad","valor_total","estados"}.issubset(d["contratos_resumen"].keys()) for d in sample)
-        unique_processes=procesos["id_del_proceso"].nunique() if isinstance(procesos,pd.DataFrame) and "id_del_proceso" in procesos.columns else -1
-        e21=(
-            isinstance(historico,pd.DataFrame) and len(historico)==unique_processes
-            and historico["id_proceso"].nunique()==len(historico)
-            and isinstance(documentos,list) and len(documentos)==len(historico)
-            and nested_ok and cr_ok
-            and (OUT/"02_secop_integrado.parquet").exists()
-            and (OUT/"02_modelo_documental.json").exists()
-        )
-    except Exception as e:
-        print("E2.1",type(e).__name__,e); e21=False
-    check("E2_modelo_documental",e21,5,f"filas_raw={0 if not isinstance(procesos,pd.DataFrame) else len(procesos)}; procesos_únicos={unique_processes}; historico={0 if not isinstance(historico,pd.DataFrame) else len(historico)}; documentos={0 if not isinstance(documentos,list) else len(documentos)}")
+    expected_name=f"tc1_{str(ns.get('PAREJA_ID','')).strip()}_priorizacion".lower()
+    saved_ok=str(atlas_ev.get("pipeline_guardado","")).strip().lower()==expected_name
+    check("E2","Pipeline guardado",saved_ok,5,f"nombre esperado={expected_name}")
 
-    coleccion=ns.get("coleccion")
-    idem={}; local_n=-1; remote=-2
-    try:
-        modulo=type(coleccion).__module__.casefold() if coleccion is not None else ""
-        idem=ns.get("atlas_idempotencia",{})
-        local_n=len(documentos) if isinstance(documentos,list) else -1
-        remote=coleccion.count_documents({}) if coleccion is not None else -2
-        e22=(
-            coleccion is not None and "pymongo" in modulo
-            and ns.get("atlas_ping") is True
-            and isinstance(ns.get("atlas_server_version"),str) and bool(ns.get("atlas_server_version"))
-            and remote==local_n and local_n>=1
-            and isinstance(idem,dict)
-            and idem.get("count_after_first")==local_n
-            and idem.get("count_after_second")==local_n
-            and int(idem.get("duplicates_after_second",999))==0
-        )
-    except Exception as e:
-        print("E2.2",type(e).__name__,e); e22=False
-    check("E2_atlas_idempotente",e22,7,f"local={local_n}; remoto={remote}; ping={ns.get('atlas_ping')}; primera={idem.get('count_after_first')}; segunda={idem.get('count_after_second')}; duplicados={idem.get('duplicates_after_second')}")
+    # ---------- E3 ----------
+    cql_ev=ns.get("astra_evidence",{})
+    cql_ok,cql_msg=_cql_design_ok(cql_ev.get("create_table",""))
+    check("E3","Diseño Cassandra query-first",cql_ok,10,cql_msg)
 
-    info={}; unique_id=False; additional_index=False
-    try:
-        info=coleccion.index_information() if coleccion is not None else {}
-        unique_id=any(v.get("unique") is True and any(k=="id_proceso" for k,_ in v.get("key",[])) for v in info.values())
-        additional_index=any(
-            name!="_id_"
-            and not (len(v.get("key",[]))==1 and v.get("key",[])[0][0]=="id_proceso")
-            for name,v in info.items()
-        )
-        e23=unique_id and additional_index and isinstance(ns.get("atlas_indexes"),list)
-    except Exception: e23=False
-    check("E2_indices",e23,4,f"unique_id={unique_id}; additional_index={additional_index}; indices={list(info.keys()) if isinstance(info,dict) else info}")
+    got_ids=[str(x).strip() for x in cql_ev.get("top5_ids",[]) if str(x).strip()]
+    exp_ids=[str(x).strip() for x in ns.get("ASTRA_TOP5_ESPERADO",[]) if str(x).strip()]
+    ids_ok=(len(exp_ids)==5 and got_ids==exp_ids and (OUT/"03_astra_carga.cql").exists())
+    check("E3","Top 5 de CQL Console",ids_ok,10,f"esperado={exp_ids}; recibido={got_ids}")
 
-    try:
-        ref_a=sum(
-            1 for d in documentos
-            if (_safe_float(d.get("proceso",{}).get("precio_base")) or 0)>0
-            and int(d.get("contratos_resumen",{}).get("cantidad") or 0)>0
-        )
-        e24=isinstance(ns.get("filtro_a"),dict) and ns.get("resultado_a")==ref_a
-    except Exception: e24=False
-    check("E2_consulta_A_count",e24,3,f"resultado={ns.get('resultado_a')}; esperado={ref_a}")
+    # ---------- E4 ----------
+    neo_ev=ns.get("neo4j_evidence",{})
+    cy_ok,cy_msg=_cypher_ok(neo_ev.get("query",""))
+    check("E4","Consulta Cypher relacional",cy_ok,10,cy_msg)
 
-    ref_b=[]; got=[]; got2=[]
-    try:
-        ref_b=sorted(
-            [
-                {
-                    "id_proceso":d.get("id_proceso"),
-                    "valor_contratos":float(d.get("contratos_resumen",{}).get("valor_total") or 0),
-                }
-                for d in documentos
-            ],
-            key=lambda x:(-x["valor_contratos"],str(x["id_proceso"]))
-        )[:10]
-        got=ns.get("resultado_b",[])
-        got2=[{"id_proceso":x.get("id_proceso"),"valor_contratos":float(x.get("valor_contratos") or 0)} for x in got]
-        e25=got2==ref_b
-    except Exception as e:
-        print("E2.5",type(e).__name__,e); e25=False
-    check("E2_consulta_B_find",e25,3,f"obtenido={[x.get('id_proceso') for x in got2[:3]]}; esperado={[x.get('id_proceso') for x in ref_b[:3]]}")
+    neo_exp=ns.get("NEO4J_ESPERADO",{})
+    neo_result=(
+        str(neo_ev.get("nit_proveedor","")).strip()==str(neo_exp.get("nit_proveedor","")).strip()
+        and int(neo_ev.get("otras_entidades",0) or 0)==int(neo_exp.get("otras_entidades",0) or 0)
+    )
+    check("E4","Resultado de Aura Query",neo_result,10,f"esperado NIT={neo_exp.get('nit_proveedor')} otras={neo_exp.get('otras_entidades')}; recibido NIT={neo_ev.get('nit_proveedor')} otras={neo_ev.get('otras_entidades')}")
 
-    af=None
-    try:
-        ar=ns.get("atlas_resultados",{})
-        af=_read_json(OUT/"02_atlas_evidence.json")
-        e26=(
-            isinstance(ar,dict) and isinstance(af,dict)
-            and ar.get("carga",{}).get("documentos")==len(documentos)
-            and af.get("carga",{}).get("documentos")==len(documentos)
-            and "consulta_a" in af and "consulta_b" in af
-        )
-    except Exception: e26=False
-    check("E2_evidencia_atlas",e26,3,f"archivo={(OUT/'02_atlas_evidence.json').exists()}; docs_memoria={0 if not isinstance(documentos,list) else len(documentos)}; docs_evidencia={None if not isinstance(af,dict) else af.get('carga',{}).get('documentos')}")
+    load_ok=(
+        (OUT/"04_neo4j_carga.cypher").exists()
+        and bool(ns.get("ENTIDAD_ANCLA_NIT"))
+        and isinstance(ns.get("rel_grafo"),pd.DataFrame)
+        and len(ns.get("rel_grafo"))>0
+    )
+    check("E4","Subgrafo cargable de la entidad ancla",load_ok,5,f"ancla={ns.get('ENTIDAD_ANCLA_NIT')}; relaciones={len(ns.get('rel_grafo')) if isinstance(ns.get('rel_grafo'),pd.DataFrame) else 0}")
 
-    # E3 · 10
-    bandeja=ns.get("bandeja_historica")
-    ids_ref=[]
-    try:
-        ref=sorted(
-            [
-                {
-                    "id_proceso":d.get("id_proceso"),
-                    "valor_contratos":float(d.get("contratos_resumen",{}).get("valor_total") or 0),
-                }
-                for d in documentos
-                if (_safe_float(d.get("proceso",{}).get("precio_base")) or 0)>0
-                and int(d.get("contratos_resumen",{}).get("cantidad") or 0)>0
-            ],
-            key=lambda x:(-x["valor_contratos"],str(x["id_proceso"]))
-        )[:100]
-        ids_ref=[x["id_proceso"] for x in ref]
-        e31=(
-            isinstance(ns.get("pipeline_bandeja"),list) and len(ns.get("pipeline_bandeja"))>=3
-            and isinstance(bandeja,pd.DataFrame)
-            and list(bandeja["id_proceso"])==ids_ref
-        )
-    except Exception as e:
-        print("E3.1",type(e).__name__,e); e31=False
-    check("E3_pipeline_bandeja",e31,7,f"filas_bandeja={0 if not isinstance(bandeja,pd.DataFrame) else len(bandeja)}; esperadas={len(ids_ref)}; pipeline_stages={0 if not isinstance(ns.get('pipeline_bandeja'),list) else len(ns.get('pipeline_bandeja'))}")
-    try:
-        e32=(OUT/"03_bandeja_historica.csv").exists() and len(bandeja)<=100 and {"id_proceso","valor_contratos"}.issubset(bandeja.columns)
-    except Exception:e32=False
-    check("E3_artefacto_bandeja",e32,3,f"archivo={(OUT/'03_bandeja_historica.csv').exists()}; columnas={[] if not isinstance(bandeja,pd.DataFrame) else list(bandeja.columns)}")
+    # ---------- E5 ----------
+    d=ns.get("decision_log",{})
+    decision_ok=(
+        d.get("rol_atlas")=="Explorar/agregar documentos flexibles y priorizar entidades"
+        and d.get("rol_cassandra")=="Servir repetidamente corte + departamento → top 5"
+        and d.get("rol_neo4j")=="Recorrer proveedores compartidos entre entidades"
+        and d.get("limite_relacional")=="Un proveedor compartido describe conectividad, no prueba irregularidad"
+    )
+    check("E5","Decisiones de modelo",decision_ok,6,"seleccione el papel correcto de cada motor y el límite de interpretación")
 
-    # E4 · 15
-    bc=ns.get("bandeja_cassandra")
-    try:
-        e41=(
-            isinstance(bc,pd.DataFrame) and len(bc)==len(bandeja)
-            and {"anio","departamento","valor_contratos","id_proceso"}.issubset(bc.columns)
-        )
-    except Exception:e41=False
-    check("E4_datos_cassandra",e41,5,f"filas={0 if not isinstance(bc,pd.DataFrame) else len(bc)}; columnas={[] if not isinstance(bc,pd.DataFrame) else list(bc.columns)}")
-
-    cql=""; pk=None; order=None
-    try:
-        cql=re.sub(r"\s+"," ",str(ns.get("cql_create","")).casefold())
-        pk=re.search(r"primary\s+key\s*\(\s*\(\s*anio\s*,\s*departamento\s*\)\s*,\s*valor_contratos\s*,\s*id_proceso\s*\)",cql)
-        order=re.search(r"clustering\s+order\s+by\s*\(\s*valor_contratos\s+desc\s*,\s*id_proceso\s+asc\s*\)",cql)
-        e42="tc1.procesos_por_anio_departamento" in cql and pk is not None and order is not None and "allow filtering" not in cql and (OUT/"04_modelo_cassandra.cql").exists()
-    except Exception:e42=False
-    check("E4_modelo_query_first",e42,6,f"pk_ok={pk is not None}; order_ok={order is not None}; allow_filtering={'allow filtering' in cql}; archivo={(OUT/'04_modelo_cassandra.cql').exists()}")
-
-    ref_part=None; top=None
-    try:
-        counts=(bc.groupby(["anio","departamento"],dropna=False).size().rename("n").reset_index()
-                .sort_values(["n","anio","departamento"],ascending=[False,True,True],kind="mergesort").reset_index(drop=True))
-        rr=counts.iloc[0]; ref_part=(int(rr["anio"]),rr["departamento"])
-        ref_top=(bc[(bc["anio"]==ref_part[0])&(bc["departamento"]==ref_part[1])]
-                 .sort_values(["valor_contratos","id_proceso"],ascending=[False,True],kind="mergesort").head(10))
-        top=ns.get("top10_cassandra")
-        e43=tuple(ns.get("particion_prueba"))==ref_part and isinstance(top,pd.DataFrame) and list(top["id_proceso"])==list(ref_top["id_proceso"])
-    except Exception as e:
-        print("E4.3",type(e).__name__,e); e43=False
-    check("E4_consulta_simulada",e43,4,f"partición_obtenida={ns.get('particion_prueba')}; partición_esperada={ref_part}; top_rows={0 if not isinstance(top,pd.DataFrame) else len(top)}")
-
-    # E5 · 15
-    relaciones=ns.get("relaciones_contrato")
-    ref_nit=""; entidad_dada=""; nombres_validos=set(); ref_rel=pd.DataFrame(); ref_ancla=pd.DataFrame()
-    try:
-        pmap=procesos[["id_del_portafolio","id_del_proceso"]].copy()
-        pmap=pmap.dropna(subset=["id_del_portafolio","id_del_proceso"])
-        pmap["id_del_portafolio"]=pmap["id_del_portafolio"].astype(str).str.strip()
-        pmap["id_del_proceso"]=pmap["id_del_proceso"].astype(str).str.strip()
-        pmap=pmap[pmap["id_del_portafolio"].ne("")].drop_duplicates("id_del_portafolio")
-        pmap=pmap.rename(columns={"id_del_proceso":"id_proceso"})
-
-        rc=contratos.copy()
-        rc["proceso_de_compra"]=rc["proceso_de_compra"].fillna("").astype(str).str.strip()
-        rc=rc.merge(pmap,left_on="proceso_de_compra",right_on="id_del_portafolio",how="inner")
-        rc["nit_entidad"]=rc["nit_entidad"].fillna("").astype(str).str.strip()
-        rc["nit_proveedor"]=rc["documento_proveedor"].fillna("").astype(str).str.strip()
-        rc["entidad"]=rc["nombre_entidad"].fillna("").astype(str).str.strip()
-        rc["proveedor"]=rc["proveedor_adjudicado"].fillna("").astype(str).str.strip()
-        rc["id_contrato"]=rc["id_contrato"].fillna("").astype(str).str.strip()
-        ref_rel=rc[
-            rc["nit_entidad"].ne("")
-            & rc["nit_proveedor"].ne("")
-            & rc["id_contrato"].ne("")
-            & rc["nit_proveedor"].str.casefold().ne("no definido")
-        ][["id_contrato","id_proceso","nit_entidad","entidad","nit_proveedor","proveedor"]].copy()
-        ref_rel=ref_rel.sort_values(["id_contrato","id_proceso","nit_proveedor"],kind="mergesort").reset_index(drop=True)
-
-        req_cols=["id_contrato","id_proceso","nit_entidad","entidad","nit_proveedor","proveedor"]
-        got_rel=relaciones[req_cols].copy() if isinstance(relaciones,pd.DataFrame) else pd.DataFrame()
-        for c in req_cols:
-            if c in got_rel: got_rel[c]=got_rel[c].fillna("").astype(str).str.strip()
-        got_rel=got_rel.sort_values(["id_contrato","id_proceso","nit_proveedor"],kind="mergesort").reset_index(drop=True)
-
-        rank=(ref_rel.groupby("nit_entidad")["id_contrato"].nunique().rename("contratos").reset_index()
-              .sort_values(["contratos","nit_entidad"],ascending=[False,True],kind="mergesort").reset_index(drop=True))
-        ref_nit=str(rank.iloc[0]["nit_entidad"])
-        ref_ancla=ref_rel[ref_rel["nit_entidad"]==ref_nit].copy()
-        nombres_validos=set(ref_ancla["entidad"].dropna().astype(str).str.strip())
-        nombres_validos={x for x in nombres_validos if x}
-        entidad_dada=str(ns.get("entidad_ancla","")).strip()
-        e51=(
-            len(ref_rel)>0
-            and isinstance(relaciones,pd.DataFrame)
-            and got_rel.to_dict("records")==ref_rel.to_dict("records")
-            and str(ns.get("nit_ancla"))==ref_nit
-            and entidad_dada in nombres_validos
-        )
-    except Exception as e:
-        print("E5.1",type(e).__name__,e); e51=False; ref_rel=pd.DataFrame(); ref_ancla=pd.DataFrame()
-    check("E5_historial_y_ancla",e51,4,f"nit_obtenido={ns.get('nit_ancla')}; nit_esperado={ref_nit}; nombre_obtenido={entidad_dada}; nombres_válidos={sorted(nombres_validos)[:5] if 'nombres_validos' in locals() else []}; relaciones={len(ref_rel)}")
-
-    ref_metric=pd.DataFrame(); got=None
-    try:
-        a=ref_ancla.groupby("nit_proveedor")["id_contrato"].nunique().rename("contratos_con_ancla").reset_index()
-        g=ref_rel.groupby("nit_proveedor")["nit_entidad"].nunique().rename("entidades_conectadas").reset_index()
-        ref_metric=a.merge(g,on="nit_proveedor").sort_values(
-            ["entidades_conectadas","contratos_con_ancla","nit_proveedor"],
-            ascending=[False,False,True],kind="mergesort"
-        ).reset_index(drop=True)
-        got=ns.get("resultado_relacional")
-        e52=(
-            isinstance(got,pd.DataFrame)
-            and {"nit_proveedor","contratos_con_ancla","entidades_conectadas"}.issubset(got.columns)
-            and list(got["nit_proveedor"].astype(str))==list(ref_metric["nit_proveedor"].astype(str))
-            and list(got["contratos_con_ancla"])==list(ref_metric["contratos_con_ancla"])
-            and list(got["entidades_conectadas"])==list(ref_metric["entidades_conectadas"])
-            and (OUT/"05_resultado_relacional.csv").exists()
-        )
-    except Exception:e52=False
-    check("E5_metrica_relacional",e52,4,f"filas_obtenidas={0 if not isinstance(got,pd.DataFrame) else len(got)}; filas_esperadas={len(ref_metric)}")
-
-    qc=""; q1=""; q2=""; q3=""
-    try:
-        qc=re.sub(r"\s+"," ",str(ns.get("cypher_carga","")).casefold())
-        q1=str(ns.get("cypher_contexto","")).casefold(); q2=str(ns.get("cypher_compartidos","")).casefold(); q3=str(ns.get("cypher_ranking","")).casefold()
-        e53=(
-            "unwind $rows" in qc and "merge" in qc and ":entidad" in qc and ":contrato" in qc and ":proveedor" in qc
-            and "$nit_ancla" in q1 and "$nit_ancla" in q2 and ("<>" in q2 or "!=" in q2)
-            and "count(distinct" in q3 and (OUT/"05_neo4j_consultas.cypher").exists()
-        )
-    except Exception:e53=False
-    check("E5_cypher",e53,5,f"carga_unwind={'unwind $rows' in qc}; carga_merge={'merge' in qc}; contexto_param={'$nit_ancla' in q1}; compartidos_param={'$nit_ancla' in q2}; archivo={(OUT/'05_neo4j_consultas.cypher').exists()}")
-
-    nc_=0; nv_=0; edge_cp=0
-    try:
-        import networkx as nx
-        G=ns.get("G")
-        nc_=ref_ancla["id_contrato"].nunique(); nv_=ref_ancla["nit_proveedor"].nunique()
-        edge_cp=ref_ancla[["id_contrato","nit_proveedor"]].drop_duplicates().shape[0]
-        e54=isinstance(G,nx.DiGraph) and ns.get("nodos_grafo")==1+nc_+nv_ and ns.get("aristas_grafo")==nc_+edge_cp
-    except Exception:e54=False
-    check("E5_subgrafo",e54,2,f"nodos_obtenidos={ns.get('nodos_grafo')}; nodos_esperados={1+nc_+nv_}; aristas_obtenidas={ns.get('aristas_grafo')}; aristas_esperadas={nc_+edge_cp}")
-
-    # E6 · 10
-    decisions=ns.get("decision_log",[])
-    informe=str(ns.get("informe_tecnico","")); inf=informe.casefold()
-    try:
-        e61=(
-            ns.get("decision_429")==ns.get("CORRECT_429")
-            and ns.get("decision_indice")==ns.get("CORRECT_INDICE")
-            and ns.get("decision_limite")==ns.get("CORRECT_LIMITE")
-            and isinstance(decisions,list) and len(decisions)==3
-            and all(isinstance(d,dict) and all(str(d.get(k,"")).strip() for k in ["decision","evidence","alternative","risk"]) for d in decisions)
-            and (OUT/"06_decision_log.json").exists()
-            and all(x in inf for x in [
-                "## 1. adquisición y contrato de datos",
-                "## 2. concurrencia, robustez y calidad",
-                "## 3. modelo documental e idempotencia atlas",
-                "## 4. producto analítico y cassandra",
-                "## 5. neo4j, decisiones y límites",
-            ])
-            and "no demuestran fraude ni causalidad" in inf
-            and (OUT/"06_informe_tecnico.md").exists()
-        )
-    except Exception:e61=False
-    check("E6_decisiones_informe",e61,5,f"decisiones={len(decisions) if isinstance(decisions,list) else 0}; informe={(OUT/'06_informe_tecnico.md').exists()}; log={(OUT/'06_decision_log.json').exists()}")
-
-    defensa=ns.get("defensa_grupal",{})
-    try:
-        d1=defensa.get("escenario_429",{})
-        d2=defensa.get("escenario_cobertura",{})
-        e62=(
-            ns.get("respuesta_429")==ns.get("CORRECT_DEFENSA_429")
-            and ns.get("respuesta_cobertura")==ns.get("CORRECT_DEFENSA_COBERTURA")
-            and isinstance(defensa,dict)
-            and int(d1.get("workers_observados",0) or 0)==int(bench.get("workers",0) or 0)
-            and d1.get("same_hash") is True
-            and isinstance(d2.get("join_coverage"),(int,float))
-            and abs(float(d2.get("join_coverage"))-float(quality.get("join_coverage")))<1e-12
-            and int(d2.get("matched_processes",0) or 0)==int(quality.get("matched_processes",0) or 0)
-            and (OUT/"06_microdefensa_grupal.json").exists()
-        )
-    except Exception:e62=False
-    check("E6_microdefensa_grupal",e62,3,f"respuesta_429={ns.get('respuesta_429')}; respuesta_cobertura={ns.get('respuesta_cobertura')}; archivo={(OUT/'06_microdefensa_grupal.json').exists()}")
-
-    files=[
-        "00_dataset_contract.json","01_acquisition_manifest.json","01_benchmark_threads.json","01_quality_report.json",
-        "02_secop_integrado.parquet","02_modelo_documental.json","02_atlas_evidence.json",
-        "03_bandeja_historica.csv","04_modelo_cassandra.cql","05_neo4j_consultas.cypher",
-        "05_resultado_relacional.csv","06_decision_log.json","06_informe_tecnico.md","06_microdefensa_grupal.json",
-    ]
-    missing=[f for f in files if not (OUT/f).exists() or (OUT/f).stat().st_size<=0]
-    e63=not missing
-    check("E6_paquete_reproducible",e63,2,f"faltantes={missing}")
-
-    secret_patterns=[
-        re.compile(r"mongodb\+srv://[^\s:@/]+:[^\s@]+@",re.I),
-        re.compile(r"(?i)(x-app-token|app_token)\s*[:=]\s*['\"][A-Za-z0-9_-]{8,}"),
-        re.compile(r"(?i)(password|passwd|pwd)\s*[:=]\s*['\"][^'\"]{4,}"),
-    ]
-    secret_hits=[]
-    for p in OUT.rglob("*"):
-        if not p.is_file() or p.suffix.lower() not in {".json",".csv",".md",".cql",".cypher",".txt",".ipynb"}:
-            continue
-        try:
-            txt=p.read_text(encoding="utf-8",errors="ignore")
-        except Exception:
-            continue
-        if any(rx.search(txt) for rx in secret_patterns):
-            secret_hits.append(str(p.relative_to(OUT)))
-
-    notebook_json=ns.get("notebook_json_for_secret_scan")
-    if notebook_json is not None:
-        try:
-            notebook_blob=json.dumps(notebook_json,ensure_ascii=False)
-            if any(rx.search(notebook_blob) for rx in secret_patterns):
-                secret_hits.append("notebook_ejecutado.ipynb")
-        except Exception:
-            pass
-
-    gates={
-        "security_no_secrets":{
-            "ok":not secret_hits,
-            "message":"Sin secretos detectados." if not secret_hits else "Elimine credenciales o tokens de: "+", ".join(secret_hits)
-        }
+    # Evidence artifacts are generated from structured values.
+    evidence_paths=[]
+    artifacts={
+        "02_atlas_evidencia.json": ns.get("atlas_evidence",{}),
+        "03_astra_evidencia.json": ns.get("astra_evidence",{}),
+        "04_neo4j_evidencia.json": ns.get("neo4j_evidence",{}),
+        "05_decisiones.json": ns.get("decision_log",{}),
     }
+    for name,obj in artifacts.items():
+        p=OUT/name
+        p.write_text(json.dumps(obj,ensure_ascii=False,indent=2),encoding="utf-8")
+        evidence_paths.append(p)
 
-    puntaje=sum(x["puntos"] for x in checks.values()); maximo=sum(x["maximo"] for x in checks.values())
-    assert maximo==100, f"El validador debe sumar 100, suma {maximo}"
-    nota=round(1+4*puntaje/maximo,2)
+    secret_paths=list(OUT.glob("*.json"))+list(OUT.glob("*.cql"))+list(OUT.glob("*.cypher"))
+    secret_hits=_scan_secrets(secret_paths)
+    security_ok=not secret_hits
+    check("E5","Seguridad de la entrega",security_ok,4,"archivos con posible secreto: "+",".join(secret_hits) if secret_hits else "sin secretos detectados")
+
+    total=sum(scores.values())
+    note=round(1+4*(total/100),2)
+
     manifest={
-        "taller":"TC1 · SECOP Data Pipeline",
-        "version":VERSION,
-        "pareja_id":pareja,
-        "integrantes":[
-            {"nombre":ns.get("INTEGRANTE_1",""),"codigo":ns.get("CODIGO_1","")},
-            {"nombre":ns.get("INTEGRANTE_2",""),"codigo":ns.get("CODIGO_2","")},
-        ],
-        "puntaje":puntaje,"maximo":maximo,"nota_5":nota,
-        "controles":checks,"gates":gates,
-        "feedback_summary":[{"control":k,"feedback":v["feedback"]} for k,v in checks.items() if not v["ok"]],
-        "artefactos":files,
+        "validator_version":VERSION,
+        "pair_id":str(ns.get("PAREJA_ID","")),
+        "score":total,
+        "grade_1_to_5":note,
+        "rubric_scores":scores,
+        "checks":checks,
+        "case":{
+            "department":dept,
+            "anchor_nit":str(ns.get("ENTIDAD_ANCLA_NIT","")),
+            "anchor_entity":str(ns.get("ENTIDAD_ANCLA","")),
+        },
+        "security_no_secrets":security_ok,
     }
-    previo=json.dumps(manifest,ensure_ascii=False,indent=2)
-    manifest["sha256"]=hashlib.sha256(previo.encode("utf-8")).hexdigest()
-    (OUT/"manifest_tc1.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
+    manifest_path=OUT/"manifest_tc1.json"
+    manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
 
-    safe_pair=re.sub(r"[^A-Za-z0-9_-]+","_",pareja or "pareja")
-    zip_path=Path(f"TC1_{safe_pair}.zip")
-    print("="*72)
-    print(f"RESULTADO: {puntaje}/{maximo} · NOTA {nota}/5.0")
-    if secret_hits:
-        print("ENTREGA BLOQUEADA: se detectaron posibles secretos. Corrija antes de generar el ZIP.")
-        print("ARCHIVOS/ORIGEN:", ", ".join(secret_hits))
+    package_candidates=[
+        OUT/"00_dataset_contract.json",
+        OUT/"01_acquisition_manifest.json",
+        OUT/"01_benchmark_threads.json",
+        OUT/"01_quality_report.json",
+        RAW/"procesos.parquet",
+        RAW/"contratos.parquet",
+        OUT/"02_atlas_documentos.json",
+        OUT/"02_atlas_evidencia.json",
+        OUT/"03_astra_carga.cql",
+        OUT/"03_astra_evidencia.json",
+        OUT/"04_neo4j_carga.cypher",
+        OUT/"04_neo4j_evidencia.json",
+        OUT/"05_decisiones.json",
+        manifest_path,
+    ]
+
+    zip_path=OUT/f"TC1_{str(ns.get('PAREJA_ID','EQUIPO')).strip() or 'EQUIPO'}.zip"
+    if security_ok:
+        with zipfile.ZipFile(zip_path,"w",compression=zipfile.ZIP_DEFLATED) as z:
+            for p in package_candidates:
+                if Path(p).exists():
+                    p=Path(p)
+                    arc=("raw/"+p.name) if p.parent==RAW else p.name
+                    z.write(p,arcname=arc)
     else:
-        with zipfile.ZipFile(zip_path,"w",zipfile.ZIP_DEFLATED) as zf:
-            for p in sorted(OUT.rglob("*")):
-                if p.is_file():
-                    zf.write(p,arcname=str(p.relative_to(OUT)))
-        print("ENTREGA:",zip_path)
-    print("SHA-256:",manifest["sha256"])
+        if zip_path.exists(): zip_path.unlink()
+
+    print("="*72)
+    print(f"RESULTADO: {total}/100 · NOTA {note}/5.0")
+    if security_ok:
+        print("ENTREGA:",zip_path.name)
+        print("SHA-256:",hashlib.sha256(zip_path.read_bytes()).hexdigest())
+    else:
+        print("ENTREGA BLOQUEADA: elimine secretos y vuelva a validar.")
     print("="*72)
     return manifest
