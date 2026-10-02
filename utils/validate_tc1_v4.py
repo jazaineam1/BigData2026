@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import hashlib, json, re, subprocess, sys, tempfile
+import ast, hashlib, json, re, subprocess, sys, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 errors=[]
@@ -106,10 +106,24 @@ checks=[
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
 
-# Ponderación exacta del validador
-pts=[int(x) for x in re.findall(r'check\("[^"]+",[^,]+,(\d+)',validator)]
-if sum(pts)!=100:
-    errors.append(f"Validador no suma 100: {sum(pts)}")
+# Ponderación exacta del validador: AST, no regex, porque algunos check() son multilínea.
+try:
+    tree=ast.parse(validator)
+    pts=[]
+    for node in ast.walk(tree):
+        if (
+            isinstance(node,ast.Call)
+            and isinstance(node.func,ast.Name)
+            and node.func.id=="check"
+            and len(node.args)>=3
+            and isinstance(node.args[2],ast.Constant)
+            and isinstance(node.args[2].value,int)
+        ):
+            pts.append(node.args[2].value)
+    if sum(pts)!=100:
+        errors.append(f"Validador no suma 100: {sum(pts)}; puntos={pts}")
+except Exception as e:
+    errors.append("No se pudo inspeccionar ponderación del validador: "+str(e))
 
 # Notebook sin salidas/soluciones incrustadas
 if any(c.get("cell_type")=="code" and c.get("outputs") for c in nb.get("cells",[])):
