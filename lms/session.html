@@ -82,11 +82,23 @@ function trackedResource(a){
 }
 function presentationResource(){return (data.resources||[]).find(r=>r.resource_type==='presentation')||null}
 function eventForResource(r){return r.resource_type==='presentation'?'presentation_opened':r.resource_type==='notebook'?'notebook_opened':r.resource_type==='guide'?'guide_opened':r.resource_type==='lab'?'lab_started':'resource_opened'}
-async function openResource(r,a){
+// Un clic lleva al material final. Una página intermedia del LMS (session-NN.html)
+// se salta: se abre su destino declarado (metadata.direct_url) o el cuaderno Colab de la sesión.
+const isColab=u=>/^https:\/\/colab\.research\.google\.com\//i.test(String(u||''));
+const isLmsWrapper=u=>/^(\.\/)?session-\d+\.html([?#]|$)/i.test(String(u||''));
+function directUrl(r){
+  const d=String(r?.metadata?.direct_url||'');
+  if(/^https:\/\//i.test(d))return d;
+  if(isLmsWrapper(r?.url)){const nb=(data.resources||[]).find(x=>x.resource_type==='notebook'&&isColab(x.url));if(nb)return nb.url}
+  return r?.url||'';
+}
+function openResource(r,a){
   if(!r)return;
-  try{await K.track(eventForResource(r),{session_number:sessionNumber,activity_code:a?.code||r.metadata?.tracked_activity||null,metadata:{source:'module-v5',resource_type:r.resource_type,resource_id:r.id,label:r.title,path:r.url},client_at:new Date().toISOString()})}catch{}
-  if(/^https?:/i.test(r.url)){window.open(r.url,'_blank','noopener');setTimeout(refresh,500)}
-  else location.href=r.url;
+  const url=directUrl(r);
+  // El registro no frena la apertura: sale en segundo plano y sobrevive al cambio de página.
+  K.keepaliveTrack(eventForResource(r),{session_number:sessionNumber,activity_code:a?.code||r.metadata?.tracked_activity||null,metadata:{source:'module-v6',resource_type:r.resource_type,resource_id:r.id,label:r.title,path:url},client_at:new Date().toISOString()});
+  if(/^https?:/i.test(url)){window.open(url,'_blank','noopener');setTimeout(refresh,1500)}
+  else location.href=url;
 }
 function openCheckpoint(a){
   const slide=Number(a.metadata?.slide||0),r=presentationResource();
@@ -94,14 +106,16 @@ function openCheckpoint(a){
   if(r){openResource(r,(data.activities||[]).find(x=>x.code===r.metadata?.tracked_activity));return}
   location.href='progress.html?s='+sessionNumber;
 }
-function openStage(a){
+function stageResource(a){
   const slide=Number(a?.metadata?.slide||0),r=presentationResource();
-  if(a?.kind==='lab'&&r&&slide>0){
-    const u=r.url.replace(/#.*$/,'')+'#s'+slide;
-    openResource({...r,url:u,resource_type:'lab'},a);return;
-  }
-  const lab=(data.resources||[]).find(r=>r.resource_type==='lab')||(data.resources||[])[0];
-  if(lab)openResource(lab,a);
+  if(a?.kind==='lab'&&r&&slide>0)return {...r,url:r.url.replace(/#.*$/,'')+'#s'+slide,resource_type:'lab'};
+  return (data.resources||[]).find(r=>r.resource_type==='lab')||(data.resources||[])[0]||null;
+}
+function openStage(a){const r=stageResource(a);if(r)openResource(r,a)}
+function stageStep(a){
+  const r=stageResource(a);
+  if(r&&isColab(directUrl(r)))return {title:'Continuar en Colab',text:'El taller se trabaja en el cuaderno. Se abre directamente en Colab.',run:()=>openStage(a)};
+  return {title:'Continuar en la presentación',text:'Tienes una actividad pendiente en esta sesión.',run:()=>openStage(a)};
 }
 function primaryAction(){
   const pm=progressMap(),resume=data.resume;
@@ -111,7 +125,7 @@ function primaryAction(){
     const p=pm.get(a.code),state=activityState(a,p);
     if(a.kind==='resource'&&!p){const r=trackedResource(a);if(r)return {title:'Abrir '+a.title,text:'Este es el siguiente recurso requerido de la sesión.',run:()=>openResource(r,a)}}
     if(a.kind==='checkpoint'&&state.label!=='Dominado')return {title:'Continuar en la presentación',text:'Tienes una actividad pendiente en esta sesión.',run:()=>openCheckpoint(a)}
-    if(!['resource','checkpoint'].includes(a.kind)&&p?.status!=='completed')return {title:'Continuar en la presentación',text:'Tienes una actividad pendiente en esta sesión.',run:()=>openStage(a)}
+    if(!['resource','checkpoint'].includes(a.kind)&&p?.status!=='completed')return stageStep(a)
   }
   const first=(data.resources||[])[0];if(first)return {title:'Revisar la sesión',text:'Puedes volver a abrir el material cuando lo necesites.',run:()=>openResource(first,(data.activities||[]).find(a=>a.code===first.metadata?.tracked_activity))};
   return {title:'Ver mi progreso',text:'No hay recursos publicados adicionales para esta sesión.',run:()=>location.assign('progress.html?s='+sessionNumber)}
@@ -132,9 +146,10 @@ function render(){
   const visibleResources=(data.resources||[]).filter(r=>r.visible!==false).slice(0,2);
   L.$('resources').innerHTML=visibleResources.map(r=>{
     const a=(data.activities||[]).find(x=>x.code===r.metadata?.tracked_activity),p=a?pm.get(a.code):null;
-    const label=r.resource_type==='presentation'?'Presentación + laboratorio':r.resource_type==='notebook'?'Cuaderno':'Recurso';
-    const description=r.resource_type==='presentation'?'Explicaciones, ejemplos y actividades.':r.resource_type==='notebook'?'Práctica reproducible en Python.':'Material de la sesión.';
-    return '<article class="resource-v4"><div><span class="pill">'+L.esc(label)+'</span><h3>'+L.esc(r.title)+'</h3><p>'+L.esc(description)+'</p></div><button class="btn '+(p?'alt':'primary')+'" data-resource-id="'+L.esc(r.id)+'">'+(p?'Volver a abrir':'Abrir')+'</button></article>'
+    const colab=isColab(directUrl(r));
+    const label=r.resource_type==='presentation'?'Presentación + laboratorio':r.resource_type==='notebook'?'Cuaderno':r.resource_type==='lab'?'Taller':'Recurso';
+    const description=r.resource_type==='presentation'?'Explicaciones, ejemplos y actividades.':colab?'Se abre directamente en Colab.':r.resource_type==='notebook'?'Práctica reproducible en Python.':'Material de la sesión.';
+    return '<article class="resource-v4"><div><span class="pill">'+L.esc(label)+'</span><h3>'+L.esc(r.title)+'</h3><p>'+L.esc(description)+'</p></div><button class="btn '+(p?'alt':'primary')+'" data-resource-id="'+L.esc(r.id)+'">'+(p?'Volver a abrir':'Abrir')+(colab?' en Colab ↗':'')+'</button></article>'
   }).join('')||'<div class="empty">No hay recursos publicados.</div>';
   document.querySelectorAll('[data-resource-id]').forEach(b=>b.onclick=()=>{const r=visibleResources.find(x=>String(x.id)===b.dataset.resourceId),a=(data.activities||[]).find(x=>x.code===r?.metadata?.tracked_activity);if(r)openResource(r,a)});
 

@@ -250,6 +250,7 @@ El cuaderno sí lleva un **mapa sin relojes**: la secuencia de bloques, qué res
 - Una tarjeta está bien hecha cuando ocupa el lugar cronológico correcto, el título nombra la pregunta de la sesión y no la herramienta, la descripción dice qué sabrá hacer el estudiante, y el enlace apunta a un archivo que existe en `main`.
 - Verifica el enlace con una petición real, nunca de memoria.
 - Toca solo la tarjeta de la que se trate; las demás quedan intactas.
+- **De la entrada de la sesión al material hay un solo clic.** Si la sesión se trabaja en una presentación o en un cuaderno, el botón de la entrada abre eso directamente: sin páginas intermedias del LMS y sin esperar a que el servidor registre la visita (el registro sale en segundo plano). Cada salto cuesta segundos de carga y un clic más a quien llega cansado. Se logró cuando, desde la página de la sesión, un clic deja al estudiante en la presentación o en Colab, y ningún botón espera una respuesta del servidor antes de abrir.
 - Después de publicar, abre la página, pulsa la tarjeta y comprueba que el cuaderno abre. Un workflow verde no prueba que la página funcione.
 - Si `actions/configure-pages` informa `Get Pages site failed: Not Found`, revisa que Pages esté habilitado para desplegar mediante Actions antes de cambiar código sin evidencia.
 
