@@ -43,7 +43,7 @@ checks=[
     ("Mi progreso sin analítica estudiante", "L.core('analytics')" not in progress and "renderAnalytics" not in progress),
     ("Navegación Progreso mínima", all(x not in progress_header for x in ['href="assignments.html"','href="competencies.html"','href="collaboration.html"']) and 'href="account.html"' in progress_header),
     ("Tracking permanece fuera de la UI", "K.track('session_entered'" in session and "activity_progress" in session),
-    ("S08 estudiante una sola ruta", all(x in s08 for x in ["Tu equipo","Abre el taller en Colab","Registra la evidencia del grupo","Progreso del equipo"])),
+    ("S08 estudiante una sola ruta", all(x in s08 for x in ["Abre el taller en Colab","Entregar fuera del LMS","Google Drive + correo institucional"]) and '<div style="display:none" aria-hidden="true">' in s08),
     ("S08 no duplica contenido del notebook", all(x not in s08 for x in ["Rúbrica oficial · 100 puntos","Trabajo fuera de clase","6–8 horas","Qué cuenta como completado","s08-secoppipeline.html"])),
     ("S08 no expone telemetría ni acciones repetidas", all(x not in s08 for x in ["Tiempo activo","Trabajar etapa"]) and "<details><summary>Ver avance por etapa</summary>" in s08),
 ]
