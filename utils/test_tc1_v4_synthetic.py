@@ -150,7 +150,7 @@ def main():
     cont_pages=write_cache(cache_cont,contratos,offsets_cont,"jbjy-vk9h","cont")
 
     acq={
-      "schema":"2026-10-01-secoppipeline-v6.1",
+      "schema":"2026-10-01-secoppipeline-v7",
       "queried_at_utc":"2026-10-01T00:00:00+00:00","workers":4,"page_size":250,
       "target_rows":{"procesos":n,"contratos":linked},
       "datasets":{
