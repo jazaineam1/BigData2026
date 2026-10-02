@@ -12,7 +12,7 @@ set title='SECOP Data Pipeline · API, concurrencia y NoSQL',
       'estimated_minutes',360,
       'work_mode','class_and_home',
       'group_assessment',true,
-      'validator_version','2026-10-01-secoppipeline-v6.1'
+      'validator_version','2026-10-01-secoppipeline-v7'
     )
 where course_code='bigdata' and session_number=8;
 
@@ -51,7 +51,7 @@ set title='E6 · Decisiones, informe y paquete',
 where code='bd-s08-e6';
 
 update public.bd_lms_activities
-set metadata='{"validator_versions":["2026-10-01-secoppipeline-v6.1"],"current":"2026-10-01-secoppipeline-v6.1"}'::jsonb
+set metadata='{"validator_versions":["2026-10-01-secoppipeline-v7"],"current":"2026-10-01-secoppipeline-v7"}'::jsonb
 where code='bd-s08-final';
 
 update public.lms_assignments_v2

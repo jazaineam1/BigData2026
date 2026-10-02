@@ -21,12 +21,8 @@ class FakeCollection:
         }
 
 def chash(df,key):
-    x=df.copy().where(pd.notna(df),None)
-    rows=[
-      json.dumps(rec,ensure_ascii=False,sort_keys=True,separators=(",",":"),default=str)
-      for rec in x.to_dict("records")
-    ]
-    return hashlib.sha256("\n".join(sorted(rows)).encode("utf-8")).hexdigest()
+    # Debe usar exactamente la misma definición canónica que el validador V7.
+    return V._canon_df(df,key)
 
 def touch(p,txt="ok"):
     p.parent.mkdir(parents=True,exist_ok=True)
@@ -76,7 +72,7 @@ def main():
         "proceso":{"fecha_publicacion":"2025-01-15","anio":2025,"precio_base":float(1_000_000+i),"modalidad":"Directa","estado":"Adjudicado","adjudicado":True},
         "proveedor_adjudicado":{"nit":nit_prov,"nombre":f"Proveedor {nit_prov}"},
         "contratos_resumen":{"cantidad":1 if has else 0,"valor_total":val,"estados":["En ejecución"] if has else []},
-        "metadata_ingesta":{"dataset":"p6dx-8zbt","pareja_id":"TEST-V6.1","window_start":"2025-01-01","window_end":"2025-03-01"}
+        "metadata_ingesta":{"dataset":"p6dx-8zbt","pareja_id":"TEST-V7","window_start":"2025-01-01","window_end":"2025-03-01"}
       })
       if has:
         cont.append({
@@ -150,7 +146,7 @@ def main():
     cont_pages=write_cache(cache_cont,contratos,offsets_cont,"jbjy-vk9h","cont")
 
     acq={
-      "schema":"2026-10-01-secoppipeline-v6.1",
+      "schema":"2026-10-01-secoppipeline-v7",
       "queried_at_utc":"2026-10-01T00:00:00+00:00","workers":4,"page_size":250,
       "target_rows":{"procesos":n,"contratos":linked},
       "datasets":{
@@ -276,7 +272,7 @@ Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran f
     ns={
       "OUT":out,"RAW_PAGES":raw_pages,
       "CACHE_SEQ_PROCESOS":cache_seq,"CACHE_THR_PROCESOS":cache_thr,"CACHE_CONTRATOS":cache_cont,
-      "PAREJA_ID":"TEST-V6.1","INTEGRANTE_1":"A","CODIGO_1":"1","INTEGRANTE_2":"B","CODIGO_2":"2",
+      "PAREJA_ID":"TEST-V7","INTEGRANTE_1":"A","CODIGO_1":"1","INTEGRANTE_2":"B","CODIGO_2":"2",
       "N_PROCESOS":n,"OFFSETS_PROCESOS":offsets,"OFFSETS_CONTRATOS":offsets_cont,
       "data_contract":data_contract,"query_plan":query_plan,
       "procesos_seq":procesos_seq,"procesos_df":procesos,"contratos_df":contratos,
@@ -311,7 +307,7 @@ Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran f
       broken_extra=V.evaluar(ns)
       assert broken_extra["controles"]["E1_trazabilidad_calidad"]["ok"] is False, broken_extra
       extra.unlink()
-      print("TC1 V6.1 detecta chunk extra de otra ventana: OK")
+      print("TC1 V7 detecta chunk extra de otra ventana: OK")
 
       # Descarga interrumpida: un .part debe invalidar E1.4.
       bad_part=cache_thr/"page_0000000.json.part"
@@ -319,7 +315,7 @@ Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran f
       broken=V.evaluar(ns)
       assert broken["controles"]["E1_trazabilidad_calidad"]["ok"] is False, broken
       bad_part.unlink()
-      print("TC1 V6.1 detecta descarga incompleta: OK")
+      print("TC1 V7 detecta descarga incompleta: OK")
 
       # Camino reparado: la misma solución debe alcanzar 100/100.
       manifest=V.evaluar(ns)
@@ -330,7 +326,7 @@ Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran f
     assert manifest["maximo"]==100
     assert manifest["version"]==V.VERSION
     assert manifest["gates"]["security_no_secrets"]["ok"] is True
-    print("TC1 V6.1 student-path (duplicados + <1000 únicos + cache reanudable) 100/100: OK")
+    print("TC1 V7 student-path (duplicados + <1000 únicos + cache reanudable) 100/100: OK")
 
 if __name__=="__main__":
   main()

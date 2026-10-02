@@ -16,7 +16,7 @@ nb_text=read("Cuadernos/Taller_Control_1.ipynb")
 builder=read("utils/build_taller_control_1.py")
 tutorial=read("assets/tutoriales/s08-secoppipeline.html")
 validator=read("utils/tc1_validator.py")
-validator_pinned=read("utils/tc1_validator_20261001.py")
+validator_pinned=read("utils/tc1_validator_20261001_v7.py")
 s08=read("lms/session-08.html")
 edge=read("infraestructura/lms/functions/bigdata-learning/index.ts")
 sql=read("infraestructura/lms/tc1-v4-secoppipeline.sql")
@@ -43,32 +43,32 @@ checks=[
     ("población adaptativa", all(x in all_src for x in ["PAGE_SIZE = 250","count_rows","N_PROCESOS = min(TARGET_PROCESOS, TOTAL_PROCESOS)","OFFSETS_PROCESOS"])),
     ("E1 ejecutable sin TODO de infraestructura", all(x in all_src for x in [
         "WHERE_PROCESOS = (","WHERE_CONTRATOS = (",
-        "def descargar_secuencial","resultados.extend(rows)",
+        "def descargar_secuencial","partes.append(pd.DataFrame(rows))",
         "def descargar_concurrente","with ThreadPoolExecutor",
-        "✅ Secuencial completa","✅ ThreadPoolExecutor completa"
-    ]) and "return None, []" not in all_src),
+        "✓ Descarga secuencial:","✓ Descarga concurrente:"
+    ])),
     ("benchmark mismos offsets", "same_offsets" in all_src and "offsets_sequential" in all_src and "offsets_threaded" in all_src),
     ("ThreadPoolExecutor", "ThreadPoolExecutor" in all_src),
     ("micro-lab antes del reto", "demo_dos_paginas" in all_src and "no suma puntos" in all_src),
     ("retry/backoff", "RETRY_STATUS" in all_src and "base_backoff" in all_src),
     ("orden estable", "$order" in all_src and "id_del_proceso ASC" in all_src),
-    ("hash canónico", "canonical_hash" in all_src and "Hash de multiconjunto" in all_src and "same_hash" in all_src),
-    ("workers limitados", "MAX_WORKERS = 4" in all_src and "Use entre 2 y 6 workers" in all_src),
+    ("hash canónico", "canonical_hash" in all_src and "Hash del multiconjunto de filas" in all_src and "rows.sort()" in all_src and "same_hash" in all_src),
+    ("workers limitados", "MAX_WORKERS = 4" in all_src and "2–6 workers" in all_src),
     ("RAW parquet", 'RAW = OUT / "raw"' in all_src and "to_parquet" in all_src),
     ("cache reanudable por páginas", all(x in all_src for x in ["RAW_PAGES","fetch_page_persisted","query_signature","_atomic_write","from_cache"])),
     ("chunks firmados", all(x in validator for x in ["_validate_page_cache","query_signature","sha256","quedaron archivos .part"])),
     ("consolidación solo tras equivalencia", all(x in all_src for x in ["No consolide RAW","same_offsets","same_rows","same_hash"])),
     ("Atlas idempotente", "bulk_write" in all_src and "UpdateOne" in all_src and "upsert=True" in all_src),
     ("decision log", "decision_log" in all_src),
-    ("carga estimada 6–8h", "6–8 horas" in all_src and "Dedicación orientativa por grupo" in all_src),
+    ("carga estimada 6–8h", "6–8 horas por grupo" in all_src and "Dedicación orientativa" in all_src),
     ("microdefensa estructurada", "defensa_grupal" in all_src and "06_microdefensa_grupal.json" in all_src and "E6_microdefensa_grupal" in validator and all_src.count("#@param") >= 12),
     ("sin respuesta abierta E6", "respuesta_concurrencia" not in all_src and "respuesta_calidad" not in all_src),
-    ("validador actual", 'VERSION = "2026-10-01-secoppipeline-v6.1"' in validator),
+    ("validador actual", 'VERSION = "2026-10-01-secoppipeline-v7"' in validator),
     ("validador fijado idéntico", validator == validator_pinned and bool(validator_pinned)),
     ("E1 adquisición completa", all(x in validator for x in ["E1_contrato_y_query","E1_descarga_secuencial","E1_concurrencia_equivalente","E1_trazabilidad_calidad"])),
     ("E2 idempotencia", "E2_atlas_idempotente" in validator and "E2_indices" in validator),
     ("no speedup mínimo", "speedup >=" not in validator.lower()),
-    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-10-01-secoppipeline-v6.1" in edge and "security_no_secrets" in edge),
+    ("backend exige versión actual", "VALIDATOR_VERSIONS" in edge and "2026-10-01-secoppipeline-v7" in edge and "security_no_secrets" in edge),
     ("gate de secretos", "secret_patterns" in validator and '"gates":gates' in validator and '".ipynb"' in validator and "ENTREGA BLOQUEADA" in validator),
     ("backend persiste versión real", "manifest_version:m.version" in edge and "validator_version:m.version" in edge),
     ("calificación grupal", "tc1GroupContext" in edge and "syncManifestGroupGradebook" in edge and "lms_group_submissions_v2" in edge and "Calificación grupal TC1" in edge),
@@ -95,7 +95,7 @@ checks=[
     ("ruta paso a paso visible", all(x in all_src for x in [
         "Qué debe hacer y qué debe entregar cada grupo",
         "Condición para pasar",
-        "Checkpoint de E1",
+        "Checkpoint E1",
         "Entrega final del grupo"
     ])),
     ("metodología de entrega explícita", all(x in all_src for x in ["Entrega final del grupo","manifest_tc1.json","Google Drive","correo del docente","GitHub opcional"])),
