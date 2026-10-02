@@ -64,7 +64,7 @@ def main():
     respuestas_getpass = []
 
     def preparar(src):
-        if src.startswith("#@title 0 · Identidad"):
+        if src.startswith("#@title 0 · ELIGE · Identidad"):
             src = reemplazar(src, r'^PAREJA_ID = ".*?"', f'PAREJA_ID = "{PAREJA}"')
             src = reemplazar(src, r'^INTEGRANTE_1 = ""', 'INTEGRANTE_1 = "Estudiante de prueba"')
             src = reemplazar(src, r'^CODIGO_1 = ""', 'CODIGO_1 = "000000"')
@@ -88,7 +88,7 @@ def main():
             src = src.replace("pega aquí tu filtro", '{"proceso.precio_base": {"$gt": 0}, "contratos_resumen.cantidad": {"$gt": 0}}')
         elif src.startswith("# E2.5"):
             src = src.replace("pega aquí tu sort", "{contratos_resumen.valor_total: -1, id_proceso: 1}")
-        elif src.startswith("# E3 · Pega"):
+        elif src.startswith("# E3 · PEGA"):
             export = ("# Requires the PyMongo package.\nclient = MongoClient('mongodb+srv://<db_username>:<db_password>@x.mongodb.net/')\n"
                       "result = client['tc1_bigdata']['tc1_p03'].aggregate([\n"
                       "    {'$match': {'proceso.precio_base': {'$gt': 0}, 'contratos_resumen.cantidad': {'$gt': 0}}},\n"
@@ -164,8 +164,8 @@ def main():
         nbformat.write(nb, a.guardar)
     # Reinicio de Colab: kernel nuevo, solo preparación + identidad, repetir E2.1 y validar desde archivos.
     reinicio = [c for c in nb.cells if c.cell_type == "code" and c.source.startswith(
-        ("#@title Preparar el entorno", "#@title 0 · Identidad", "#@title E2.1"))]
-    reinicio.append(nbformat.v4.new_code_cell("M2 = T.validar()\nprint('PUNTAJE_TRAS_REINICIO', M2['puntaje'])"))
+        ("#@title Preparar el entorno", "#@title 0 · ELIGE · Identidad", "#@title E2.1"))]
+    reinicio.append(nbformat.v4.new_code_cell("M2 = taller.validar()\nprint('PUNTAJE_TRAS_REINICIO', M2['puntaje'])"))
     nb2 = nbformat.v4.new_notebook(cells=reinicio)
     cliente2 = NotebookClient(nb2, timeout=600, kernel_name="python3", resources={"metadata": {"path": str(trabajo)}})
     cliente2.execute()

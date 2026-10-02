@@ -157,6 +157,23 @@ def main():
     html = (ROOT / "assets" / "tutoriales" / "s08-secoppipeline.html").read_text(encoding="utf-8")
     faltan = verificar_evidencias(html, capturado.getvalue(), omitir={"e5a", "e5b", "e5c"})
     caso("cada evidencia del checklist aparece en la salida real (salvo E5, que se prueba con Neo4j)", not faltan, faltan)
+    salida = capturado.getvalue()
+    caso("cada checkpoint lista los archivos de su etapa", all(f"Archivos de {e} en tu carpeta" in salida for e in ("E1", "E2", "E3", "E4"))
+         and "✓ E1/raw/procesos.parquet" in salida and "páginas firmadas" in salida)
+    caso("E1.4 dice cuántos contratos cruzan, no solo cuántos procesos", "Contratos que cruzan con tus procesos:" in salida)
+    import contextlib as _ctx
+    import io as _io
+    arbol = _io.StringIO()
+    with _ctx.redirect_stdout(arbol):
+        T.ver_carpeta()
+    caso("ver_carpeta muestra el árbol completo del ZIP", all(f"✓ {e}/" in arbol.getvalue() for e in C.ARTEFACTOS)
+         and "manifest_tc1.json" in arbol.getvalue(), arbol.getvalue()[-400:])
+    try:
+        T.iniciar("P03", [("Sin apellido", "000000", "")], "No", base=trabajo / "sin_apellido")
+        caso("la identidad exige el apellido (nombra la carpeta de entrega)", False)
+    except ValueError:
+        caso("la identidad exige el apellido (nombra la carpeta de entrega)", True)
+    T.ESTADO["out"] = out
     print(f"API simulada: {api['peticiones']} peticiones, 429 inyectados: {api['429_enviados']}")
     caso("paquete completo obtiene 100/100", m["puntaje"] == 100,
          {k: c["evidencia"] for k, c in m["controles"].items() if not c["ok"]})
@@ -214,8 +231,31 @@ def main():
     with open(revision / "notas_tc1.csv", newline="", encoding="utf-8") as fh:
         filas = list(_csv.DictReader(fh))
     caso("revisar dos veces deja una sola fila por pareja, con su estado", [f["pareja"] for f in filas] == ["P03", "P05"]
-         and filas[0]["estado"] == "definitiva", filas)
-    caso("se genera la retroalimentación de la pareja", (revision / "P03" / "retroalimentacion_P03.md").exists())
+         and filas[0]["estado"] == "definitiva" and filas[0]["equipo"] == "P03_PRUEBA", filas)
+    caso("se genera la retroalimentación de la pareja", (revision / "P03_PRUEBA" / "retroalimentacion_P03.md").exists())
+
+    # PAREJA_ID repetido o ajeno: el docente no asignó números de antemano
+    def revision_falsa(pareja, apellido, codigo):
+        return {"docente": {"pareja_id": pareja, "integrantes": [{"apellido": apellido, "codigo": codigo}]},
+                "estudiante": {}, "avisos": []}
+    a, b, c = revision_falsa("P03", "Prueba", "000000"), revision_falsa("P03", "Gómez", "111111"), revision_falsa("P04", "Ruiz", "222222")
+    TV.conflictos([a, b, c])
+    caso("dos equipos con el mismo PAREJA_ID reciben el aviso, los demás no",
+         any("PAREJA_ID repetido" in x and "P03_GOMEZ" in x for x in a["avisos"])
+         and any("P03_PRUEBA" in x for x in b["avisos"]) and not c["avisos"], (a["avisos"], b["avisos"], c["avisos"]))
+    caso("el equipo se nombra como la carpeta de entrega", TV.equipo(b) == "P03_GOMEZ")
+    d = revision_falsa("P03", "Prueba", "000000")
+    TV.conflictos([d], None, [("P03", "P03_GOMEZ")])
+    caso("también avisa contra equipos ya registrados en el CSV", any("P03_GOMEZ" in x for x in d["avisos"]))
+    tabla = trabajo / "asignacion_parejas.csv"
+    tabla.write_text("pareja,codigo_1,codigo_2\nP01,,\nP03,000000,\nP04,999999,\n", encoding="utf-8")
+    asignacion = TV.leer_asignacion(tabla)
+    a2, c2 = revision_falsa("P03", "Prueba", "000000"), revision_falsa("P04", "Ruiz", "222222")
+    TV.conflictos([a2, c2], asignacion)
+    caso("la tabla de asignación detecta un PAREJA_ID ajeno", not a2["avisos"] and any("otros códigos" in x for x in c2["avisos"]),
+         (a2["avisos"], c2["avisos"]))
+    tabla.write_text("pareja,codigo_1,codigo_2\nP01,,\nP02,,\n", encoding="utf-8")
+    caso("una tabla de asignación vacía no genera avisos", TV.leer_asignacion(tabla) is None)
 
     caso("el ZIP no contiene archivos de credenciales", not any(X.prohibido(n.split("/")[-1]) for n in __import__("zipfile").ZipFile(zip_path).namelist()))
 
@@ -329,6 +369,14 @@ def main():
     caso("ninguna lista trae una opción preseleccionada", len(listas) == 12 and all(f'= "{C.SIN_SELECCION}" #@param' in l for l in listas))
     codigo = "\n".join(f for f, c in zip(fuentes, nb["cells"]) if c["cell_type"] == "code")
     caso("tres huecos de código (E1 y dos en E5)", codigo.count("____") == 3)
+    visibles = [f for f, c in zip(fuentes, nb["cells"]) if c["cell_type"] == "code" and not f.startswith("#@title Preparar")]
+    caso("el cuaderno llama a los módulos por nombres descriptivos, no por letras",
+         not any(__import__("re").search(r"(?<![\w.])[TSXVC]\.[a-z_]+", f) for f in visibles)
+         and "taller.checkpoint(" in codigo and "secop.fetch_page(" in codigo)
+    caso("la fecha de entrega es el 18 de octubre", C.FECHA_LIMITE in todo and "18 de octubre" in C.FECHA_LIMITE
+         and "17 de octubre" not in todo)
+    caso("el diccionario nombra cada columna que se descarga",
+         all(f"`{col}`" in todo for col in C.SELECT_PROCESOS + C.SELECT_CONTRATOS))
     caso("el cuaderno no contiene secretos", not V.escanear_secretos(trabajo / "vacio", notebook=nb))
     caso("los módulos no contienen secretos", not [p for p in (ROOT / "utils").glob("tc1_*.py") for _, pat in C.PATRONES_SECRETOS
                                                    if __import__("re").search(pat, p.read_text(encoding="utf-8"))])

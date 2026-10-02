@@ -41,10 +41,12 @@ def _sin_tildes(texto):
 # ── 0 · Identidad ─────────────────────────────────────────────────────────────
 def iniciar(pareja, integrantes, guardar_drive, base=None):
     if pareja not in C.VENTANAS:
-        raise ValueError("Elige tu PAREJA_ID en la lista (el docente te lo asignó).")
+        raise ValueError("Elige en la lista el PAREJA_ID que te confirmó el docente por correo. Si aún no lo tienes, "
+                         f"escríbele a {C.CORREO_DOCENTE} antes de seguir: no elijas uno por tu cuenta.")
     vivos = [{"nombre": n.strip(), "codigo": c.strip(), "apellido": a.strip()} for n, c, a in integrantes if n.strip()]
-    if not vivos or any(not x["codigo"] for x in vivos):
-        raise ValueError("Escribe el nombre y el código de cada integrante.")
+    if not vivos or any(not x["codigo"] or not x["apellido"] for x in vivos):
+        raise ValueError("Escribe el nombre, el código y el primer apellido de cada integrante "
+                         "(los apellidos nombran tu carpeta de entrega).")
     raiz_drive = None
     if guardar_drive.startswith("Sí") and X.EN_COLAB:
         raiz_drive = X.montar_drive()
@@ -56,6 +58,7 @@ def iniciar(pareja, integrantes, guardar_drive, base=None):
     X.escribir_json(C.rutas(out)["identidad"], {"pareja": pareja, "integrantes": vivos, "version": C.VERSION})
     ini, fin = C.VENTANAS[pareja]
     print(f"Pareja {pareja} · ventana {ini[:10]} → {fin[:10]}")
+    print(f"Si {pareja} no es el número que te asignó el docente, corrígelo ahora: con otro número descargarías datos ajenos.")
     print(f"Carpeta de trabajo: {out}")
     print("Avance en Drive: " + ("restaurado desde tu última sesión" if restaurado else
                                  "activado" if raiz_drive else "desactivado (si Colab se reinicia, repites desde E1)"))
@@ -83,8 +86,42 @@ def checkpoint(etapa):
     e = m["etapas"][etapa]
     print(f"  → {e['puntos']}/{e['maximo']} puntos en {etapa}.", "Puedes pasar a la siguiente etapa." if e["puntos"] == e["maximo"]
           else "Corrige lo marcado con ✗ antes de seguir (puedes seguir, pero esos puntos quedan en 0).")
+    print(f"  Archivos de {etapa} en tu carpeta (irán en el ZIP):")
+    for linea in _arbol_etapa(etapa):
+        print("    " + linea)
     guardar_avance()
     return m
+
+
+# La captura de E2 se sube en la celda de captura de E3; las demás, en su propia etapa.
+CAPTURA_SE_SUBE_EN = {"E2": "E3", "E4": "E4", "E5": "E5"}
+
+
+def _arbol_etapa(etapa):
+    R = _R()
+    lineas = []
+    for rel in C.ARTEFACTOS[etapa]:
+        p = R[etapa] / rel
+        kb = p.stat().st_size / 1024 if p.exists() else 0
+        nota = (f" · {kb:,.0f} KB" if kb >= 1 else " · <1 KB") if p.exists() else ""
+        if not p.exists() and rel == C.CAPTURAS.get(etapa):
+            nota = f" (captura: se sube en la celda CAPTURA de {CAPTURA_SE_SUBE_EN[etapa]})"
+        lineas.append(f"{'✓' if p.exists() else '✗'} {etapa}/{rel}{nota}")
+    if etapa == "E1":
+        paginas = [p for p in (R["raw"] / "pages").rglob("page_*.json") if not p.name.endswith(".meta.json")]
+        lineas.append(f"{'✓' if paginas else '✗'} E1/raw/pages/ · {len(paginas)} páginas firmadas (procesos ×2 y contratos)")
+    return lineas
+
+
+def ver_carpeta():
+    '''Tu carpeta de trabajo tal como irá en el ZIP: ✓ lo que existe, ✗ lo que falta.'''
+    R, out = _R(), ESTADO["out"]
+    print(f"{out.name}/   ← tu carpeta de trabajo = el contenido de TC1_{ESTADO['pareja']}.zip")
+    print(f"  {'✓' if R['identidad'].exists() else '✗'} identidad.json")
+    for etapa in C.ARTEFACTOS:
+        for linea in _arbol_etapa(etapa):
+            print("  " + linea)
+    print(f"  {'✓' if R['manifest'].exists() else '✗'} {C.MANIFEST} (lo escribe la validación final)")
 
 
 # ── E1 ────────────────────────────────────────────────────────────────────────
@@ -112,6 +149,8 @@ def preflight_e1():
     ESTADO.update({"plan": plan, "total_p": total_p, "total_c": total_c, "n_p": n_p, "n_c": n_c})
     print(f"Procesos en tu ventana: {total_p:,} · descargarás los primeros {n_p:,} ({len(S.offsets_para(n_p))} páginas de {C.PAGE_SIZE})")
     print(f"Contratos con empresas en tu ventana: {total_c:,} · descargarás los primeros {n_c:,} ({len(S.offsets_para(n_c))} páginas)")
+    print(f"En total pedirás {len(S.offsets_para(n_p))} páginas de procesos dos veces (secuencial y concurrente) "
+          f"y {len(S.offsets_para(n_c))} de contratos.")
     return (S.descargador(pareja, "procesos", n_p, R["pag_seq"]),
             S.descargador(pareja, "procesos", n_p, R["pag_thr"]),
             S.offsets_para(n_p), n_p)
@@ -144,8 +183,9 @@ def comparar_e1(paginas_seq, seg_seq, paginas_thr, seg_thr, workers):
     if any(bench["paginas_desde_cache"].values()):
         print("ℹ Algunas páginas salieron del caché: los tiempos no son un benchmark limpio, la equivalencia sí vale.")
     if not bench["mismo_hash"]:
-        print("✗ Los hashes no coinciden. Si SECOP cambió entre las dos corridas, repite limpio: "
-              "ejecuta S.limpiar_cache(C.rutas(OUT)['pag_seq']) y S.limpiar_cache(C.rutas(OUT)['pag_thr']) y vuelve a descargar.")
+        print("✗ Los hashes no coinciden. Si SECOP cambió entre las dos corridas, repite limpio: ejecuta "
+              "secop.limpiar_cache(reglas.rutas(OUT)['pag_seq']) y secop.limpiar_cache(reglas.rutas(OUT)['pag_thr']) "
+              "y vuelve a descargar.")
     return bench
 
 
@@ -185,6 +225,8 @@ def consolidar_e1(paginas_contratos):
     print(f"Tu snapshot de procesos cubre {fp[0]} → {fp[1]} ({fp[2]} día(s)); el de contratos {fc[0]} → {fc[1]} ({fc[2]} días).")
     print(f"Procesos únicos con contrato cruzado: {cruce['matched_processes']} de {cruce['procesos_unicos']} "
           f"(cobertura {100 * cruce['join_coverage']:.1f} %) · mínimo exigido {C.MIN_MATCHED_PROCESSES}")
+    enlazados = int(contratos["proceso_de_compra"].isin(set(procesos["id_del_portafolio"].dropna())).sum())
+    print(f"Contratos que cruzan con tus procesos: {enlazados:,} de {len(contratos):,}")
     print("RAW consolidado: E1/raw/procesos.parquet y E1/raw/contratos.parquet. Desde E2 no se vuelve a consultar la API.")
     return cruce
 
@@ -620,6 +662,8 @@ def entregar(manifest):
         p = destino / nombre
         print(f"  {_marca(p.exists())} {nombre}" + (f" · {p.stat().st_size / 1024:.0f} KB" if p.exists() else
                                                      " · descárgalo con Archivo → Descargar → .ipynb y súbelo a esta carpeta"))
+    if ESTADO.get("drive"):
+        print(f"Comparte SOLO esta carpeta. {X.carpeta_drive(ESTADO['drive'], pareja).name}/avance es tu copia de trabajo: no la compartas.")
     print(f"\nHUELLA DE ENTREGA (SHA-256 de manifest_tc1.json): {huella}")
     print("Copia esta huella en el correo. Si vuelves a validar, la huella cambia: envía siempre la última.")
     return destino, huella

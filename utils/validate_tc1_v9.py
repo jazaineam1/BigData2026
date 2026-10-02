@@ -93,6 +93,23 @@ falla(len(filas_rubrica) == len(C.RUBRICA) and sum(int(p) for _, p in filas_rubr
 for nombre in C.CAPTURAS.values():
     falla(nombre in todo, f"el cuaderno no pide {nombre}")
 
+# Claridad: qué hacer en cada celda, qué trae cada fuente y qué demuestra cada huella.
+ACCIONES = ("EJECUTA", "ELIGE", "COMPLETA", "PEGA", "CAPTURA")
+for f in codigo:
+    titulo = f.splitlines()[0]
+    falla(any(f" {a} " in titulo for a in ACCIONES), f"la celda «{titulo[:60]}» no dice qué hacer (EJECUTA, ELIGE, COMPLETA, PEGA o CAPTURA)")
+    falla(("____" in f) == (" COMPLETA " in titulo), f"«{titulo[:60]}»: COMPLETA debe marcar exactamente las celdas con hueco")
+    falla(("pega aquí" in f) == (" PEGA " in titulo), f"«{titulo[:60]}»: PEGA debe marcar exactamente las celdas donde se pega")
+falla("Cómo leer cada celda" in todo, "falta la leyenda de acciones (Cómo leer cada celda)")
+for frase in ("proceso de contratación", "contrato electrónico", "procesos.id_del_portafolio = contratos.proceso_de_compra",
+              "Función usada: `hashlib.sha256`", "huella de entrega", "Función usada: `pd.read_parquet`",
+              "El problema de Laura", "¿Qué resolvimos para Laura, y qué no?", "Variables del taller", "asigna el docente"):
+    falla(frase in todo, f"el cuaderno no explica «{frase}»")
+for col in C.SELECT_PROCESOS + C.SELECT_CONTRATOS:
+    falla(f"`{col}`" in todo, f"el diccionario no describe la columna {col}")
+falla(not re.search(r"(?<![\w.])[TSXVC]\.[a-z_]+", "\n".join(f for f in codigo if not f.startswith("#@title Preparar"))),
+      "el cuaderno usa alias de una letra (T., S., X.) en vez de taller, secop, plataformas")
+
 # ── Checklist ─────────────────────────────────────────────────────────────────
 html = leer("assets/tutoriales/s08-secoppipeline.html")
 for etapa in ("h0", "h1", "h2", "h3", "h4", "h5", "h6"):
@@ -120,6 +137,13 @@ falla("Este TC1 no se entrega en el LMS." in s08 and '<div style="display:none" 
 index = leer("index.html")
 tarjeta = index[index.find('data-session="8"'):index.find('data-session="9"')]
 falla(all(x in tarjeta for x in ("Atlas", "Astra", "Aura", "Drive")), "la tarjeta S08 del índice no describe el TC1 V9")
+# Una sola fecha de entrega en todas las superficies que ve el estudiante.
+dia = C.FECHA_LIMITE.split(" de ")[0]
+for nombre, texto in (("cuaderno", todo), ("checklist", html), ("LMS S08", s08)):
+    falla(f"{dia} de octubre" in texto, f"{nombre}: no dice la fecha de entrega ({dia} de octubre)")
+    otras = set(re.findall(r"\b(\d{1,2}) de octubre", texto)) - {dia}
+    falla(not otras, f"{nombre}: menciona otra fecha de octubre ({', '.join(sorted(otras))})")
+falla(f"antes del {dia} de octubre" in tarjeta, f"la tarjeta S08 del índice no dice «antes del {dia} de octubre»")
 resumen = json.loads(leer("Datos/tc1_ventanas_resumen.json") or "{}")
 ventanas = resumen.get("ventanas", {})
 falla(set(ventanas) == set(C.VENTANAS), "el control de datos no cubre las 12 ventanas")

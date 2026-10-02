@@ -21,8 +21,8 @@ VERSION = "2026-10-02-tc1-v9"
 VERSION_VISIBLE = "V9 · 2026-10-02"
 E1_SCHEMA = "2026-10-02-tc1-e1-v9"
 
-FECHA_LIMITE = "17 de octubre de 2026 · 11:59 p. m. · hora de Bogotá"
-FECHA_LIMITE_ISO = "2026-10-17T23:59:59-05:00"
+FECHA_LIMITE = "18 de octubre de 2026 · 11:59 p. m. · hora de Bogotá"
+FECHA_LIMITE_ISO = "2026-10-18T23:59:59-05:00"
 CORREO_DOCENTE = "jzaineam@ucentral.edu.co"
 CHECKLIST_URL = "https://jazaineam1.github.io/BigData2026/assets/tutoriales/s08-secoppipeline.html"
 COLAB_URL = "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb"
@@ -75,6 +75,37 @@ ORDER_PROCESOS = ("fecha_de_publicacion_del ASC,id_del_proceso ASC,"
                   "nit_del_proveedor_adjudicado ASC,nombre_del_proveedor ASC,:id ASC")
 ORDER_CONTRATOS = "fecha_de_firma ASC,id_contrato ASC,:id ASC"
 JOIN = {"procesos.id_del_portafolio": "contratos.proceso_de_compra"}
+
+# Diccionario que el cuaderno muestra en E1.0: (columnas, qué contienen, dónde las usas).
+# Cubre exactamente SELECT_PROCESOS y SELECT_CONTRATOS (lo comprueba un assert al final).
+DICCIONARIO = {
+    "procesos": [
+        (["id_del_proceso"], "identificador del proceso (CO1.REQ.…)", "`id_proceso` del documento (E2) y de la tabla (E4)"),
+        (["id_del_portafolio"], "portafolio del proceso (CO1.BDOS.…)", "cruce con contratos (E1, E2)"),
+        (["entidad", "nit_entidad"], "entidad que compra", "`entidad.nombre` y `entidad.nit` (E2)"),
+        (["departamento_entidad", "ciudad_entidad"], "ubicación de la entidad", "`entidad.departamento` (E2) y partición (E4)"),
+        (["fecha_de_publicacion_del"], "fecha de publicación del proceso", "tu ventana (E1) y `proceso.anio` (E2, E4)"),
+        (["precio_base"], "lo que la entidad estimó gastar, en pesos", "`proceso.precio_base`: consulta A y bandeja"),
+        (["modalidad_de_contratacion", "estado_del_procedimiento"], "cómo se contrata y en qué va el proceso",
+         "`proceso.modalidad` y `proceso.estado` (E2)"),
+        (["nombre_del_proveedor", "nit_del_proveedor_adjudicado"], "proveedor adjudicado («No Definido» si aún no hay)",
+         "`proveedor_adjudicado` (E2)"),
+        (["respuestas_al_procedimiento", "adjudicado", "urlproceso"], "ofertas recibidas, si ya se adjudicó y enlace en SECOP II",
+         "solo en el RAW: sirven para revisar un caso a mano"),
+    ],
+    "contratos": [
+        (["proceso_de_compra"], "portafolio del proceso que originó el contrato (CO1.BDOS.…)", "cruce con procesos (E1, E2)"),
+        (["id_contrato"], "identificador del contrato (CO1.PCCNTR.…)", "`contratos_resumen.cantidad` (E2) y nodo `:Contrato` (E5)"),
+        (["fecha_de_firma"], "fecha de firma del contrato", "tu ventana (E1)"),
+        (["valor_del_contrato"], "valor pactado, en pesos", "`contratos_resumen.valor_total` (E2, E3, E4)"),
+        (["estado_contrato"], "estado del contrato", "`contratos_resumen.estados` (E2)"),
+        (["nombre_entidad", "nit_entidad"], "entidad que firma", "nodo `:Entidad` (E5)"),
+        (["proveedor_adjudicado", "documento_proveedor"], "contratista y su documento", "nodo `:Proveedor` (E5)"),
+        (["tipodocproveedor", "es_grupo"], "tipo de documento del contratista y si es consorcio o unión temporal",
+         "filtro de la descarga: solo NIT y no consorcio"),
+        (["tipo_de_contrato", "modalidad_de_contratacion"], "tipo de contrato y modalidad", "solo en el RAW y en el grafo (E5)"),
+    ],
+}
 
 PAGE_SIZE = 250
 TARGET_PROCESOS = 3000
@@ -424,3 +455,5 @@ assert puntos_totales() == 100, "La rúbrica debe sumar 100"
 assert {k: sum(p for _, e, p, _, _ in RUBRICA if e == k) for k in STAGE_MAX} == STAGE_MAX
 assert len(CAPTURAS) == 3
 assert len(set(VENTANAS.values())) == len(VENTANAS), "Dos parejas no pueden compartir ventana"
+for _fuente, _select in (("procesos", SELECT_PROCESOS), ("contratos", SELECT_CONTRATOS)):
+    assert sorted(c for cols, _, _ in DICCIONARIO[_fuente] for c in cols) == sorted(_select), f"diccionario de {_fuente} incompleto"
