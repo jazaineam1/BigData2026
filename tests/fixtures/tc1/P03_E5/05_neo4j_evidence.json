@@ -1,0 +1,215 @@
+{
+  "capturado_por": "neo4j-driver",
+  "conteos": {
+    "entidades": 1201,
+    "contratos": 3999,
+    "proveedores": 3179,
+    "firma": 3999,
+    "adjudicado_a": 3999
+  },
+  "conteos_primera_carga": {
+    "entidades": 1201,
+    "contratos": 3999,
+    "proveedores": 3179,
+    "firma": 3999,
+    "adjudicado_a": 3999
+  },
+  "momento_utc": "2026-10-02T04:15:06+00:00",
+  "ancla_aura": [
+    {
+      "nit": "899999239",
+      "entidad": "ICBF REGIONAL GUAJIRA",
+      "proveedores_compartidos": 11,
+      "contratos": 514
+    },
+    {
+      "nit": "899999034",
+      "entidad": "SENA REGIONAL ATLANTICO",
+      "proveedores_compartidos": 10,
+      "contratos": 46
+    },
+    {
+      "nit": "899999061",
+      "entidad": "ALCALDIA LOCAL DE USAQUEN",
+      "proveedores_compartidos": 10,
+      "contratos": 25
+    },
+    {
+      "nit": "890905211",
+      "entidad": "DISTRITO ESPECIAL DE CIENCIA TECNOLOGIA E INNOVACION DE MEDELLIN",
+      "proveedores_compartidos": 8,
+      "contratos": 34
+    },
+    {
+      "nit": "890900286",
+      "entidad": "DEPARTAMENTO DE ANTIOQUIA//",
+      "proveedores_compartidos": 8,
+      "contratos": 17
+    }
+  ],
+  "nit_ancla": "899999239",
+  "nombres_bajo_nit": 30,
+  "contexto": [
+    {
+      "entidad": "ICBF REGIONAL GUAJIRA",
+      "contratos": 514,
+      "proveedores": 410
+    }
+  ],
+  "compartidos": [
+    {
+      "nit_proveedor": "890801132",
+      "proveedor": "MUNICIPIO DE AGUADAS",
+      "otras_entidades": [
+        "GOBERNACION DE CALDAS"
+      ]
+    },
+    {
+      "nit_proveedor": "800055599",
+      "proveedor": "FUNDACION APOYAR FUNDAP",
+      "otras_entidades": [
+        "MUNICIPIO DE VICTORIA"
+      ]
+    },
+    {
+      "nit_proveedor": "900582157",
+      "proveedor": "FUNDACION FUNDAFES",
+      "otras_entidades": [
+        "ALCALDÍA MUNICIPIO DE SAN JOSÉ DE FRAGUA"
+      ]
+    },
+    {
+      "nit_proveedor": "860402837",
+      "proveedor": "INVERSIONES MONTE SACRO S.A.S",
+      "otras_entidades": [
+        "ALCALDIA MUNICIPIO DE VALDIVIA"
+      ]
+    },
+    {
+      "nit_proveedor": "832003813",
+      "proveedor": "FUNDACIÓN DE INVESTIGACIÓN AGROAMBIENTAL IAJM",
+      "otras_entidades": [
+        "MUNICIPIO DE SOACHA."
+      ]
+    },
+    {
+      "nit_proveedor": "800215465",
+      "proveedor": "Corporación Educativa Minuto de Dios",
+      "otras_entidades": [
+        "INSTITUTO DE CASAS FISCALES DE EJERCITO"
+      ]
+    },
+    {
+      "nit_proveedor": "900332511",
+      "proveedor": "ASOCIACION DE MADRES COMUNITARIAS Y MUJERES TRABAJADORAS POR LA PRIMERA INFANCIA",
+      "otras_entidades": [
+        "MUNICIPIO DE TAME"
+      ]
+    },
+    {
+      "nit_proveedor": "900264963",
+      "proveedor": "CORPORACION DE PROFESIONALES ASESORES",
+      "otras_entidades": [
+        "MUNICIPIO DE ITAGUI"
+      ]
+    },
+    {
+      "nit_proveedor": "901000607",
+      "proveedor": "FUNDACION DE PROFESIONALES PARA EL DESARROLLO Y BIENESTAR DE LA COMUNIDAD",
+      "otras_entidades": [
+        "ICBF REGIONAL SANTANDER"
+      ]
+    },
+    {
+      "nit_proveedor": "860031909",
+      "proveedor": "FE Y ALEGRIA",
+      "otras_entidades": [
+        "SENA REGIONAL ATLANTICO"
+      ]
+    },
+    {
+      "nit_proveedor": "899999063",
+      "proveedor": "UNIVERSIDAD NACIONAL DE COLOMBIA",
+      "otras_entidades": [
+        "Institución Universitaria Pascual Bravo COMPRADOR",
+        "AUTORIDAD NACIONAL DE LICENCIAS AMBIENTALES - ANLA",
+        "ADRES"
+      ]
+    }
+  ],
+  "ranking": [
+    {
+      "nit_proveedor": "899999063",
+      "proveedor": "UNIVERSIDAD NACIONAL DE COLOMBIA",
+      "contratos_con_ancla": 1,
+      "entidades_conectadas": 3
+    },
+    {
+      "nit_proveedor": "800215465",
+      "proveedor": "Corporación Educativa Minuto de Dios",
+      "contratos_con_ancla": 4,
+      "entidades_conectadas": 1
+    },
+    {
+      "nit_proveedor": "832003813",
+      "proveedor": "FUNDACIÓN DE INVESTIGACIÓN AGROAMBIENTAL IAJM",
+      "contratos_con_ancla": 4,
+      "entidades_conectadas": 1
+    },
+    {
+      "nit_proveedor": "890801132",
+      "proveedor": "MUNICIPIO DE AGUADAS",
+      "contratos_con_ancla": 2,
+      "entidades_conectadas": 1
+    },
+    {
+      "nit_proveedor": "900582157",
+      "proveedor": "FUNDACION FUNDAFES",
+      "contratos_con_ancla": 2,
+      "entidades_conectadas": 1
+    },
+    {
+      "nit_proveedor": "800055599",
+      "proveedor": "FUNDACION APOYAR FUNDAP",
+      "contratos_con_ancla": 1,
+      "entidades_conectadas": 1
+    },
+    {
+      "nit_proveedor": "860031909",
+      "proveedor": "FE Y ALEGRIA",
+      "contratos_con_ancla": 1,
+      "entidades_conectadas": 1
+    },
+    {
+      "nit_proveedor": "860402837",
+      "proveedor": "INVERSIONES MONTE SACRO S.A.S",
+      "contratos_con_ancla": 1,
+      "entidades_conectadas": 1
+    },
+    {
+      "nit_proveedor": "900264963",
+      "proveedor": "CORPORACION DE PROFESIONALES ASESORES",
+      "contratos_con_ancla": 1,
+      "entidades_conectadas": 1
+    },
+    {
+      "nit_proveedor": "900332511",
+      "proveedor": "ASOCIACION DE MADRES COMUNITARIAS Y MUJERES TRABAJADORAS POR LA PRIMERA INFANCIA",
+      "contratos_con_ancla": 1,
+      "entidades_conectadas": 1
+    },
+    {
+      "nit_proveedor": "901000607",
+      "proveedor": "FUNDACION DE PROFESIONALES PARA EL DESARROLLO Y BIENESTAR DE LA COMUNIDAD",
+      "contratos_con_ancla": 1,
+      "entidades_conectadas": 1
+    }
+  ],
+  "proveedor_top": "899999063",
+  "contratos_con_ancla": 1,
+  "entidades_conectadas": 3,
+  "consultas": {
+    "compartidos": "\nMATCH (a:Entidad {nit: $nit_ancla})-[:FIRMA]->(:Contrato)-[:ADJUDICADO_A]->(p:Proveedor)<-[:ADJUDICADO_A]-(:Contrato)<-[:FIRMA]-(otra:Entidad)\nWHERE otra <> a\nRETURN p.nit AS nit_proveedor, p.nombre AS proveedor, collect(DISTINCT otra.nombre) AS otras_entidades\n",
+    "ranking": "\nMATCH (a:Entidad {nit: $nit_ancla})-[:FIRMA]->(ca:Contrato)-[:ADJUDICADO_A]->(p:Proveedor)\nWITH a, p, count(DISTINCT ca) AS contratos_con_ancla\nMATCH (p)<-[:ADJUDICADO_A]-(:Contrato)<-[:FIRMA]-(otra:Entidad)\nWHERE otra <> a\nRETURN p.nit AS nit_proveedor, p.nombre AS proveedor, contratos_con_ancla, count(DISTINCT otra) AS entidades_conectadas\nORDER BY entidades_conectadas DESC, contratos_con_ancla DESC, nit_proveedor ASC\n"
+  }
+}

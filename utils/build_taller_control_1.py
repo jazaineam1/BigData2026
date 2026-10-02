@@ -1,29 +1,644 @@
-from pathlib import Path
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+'''Generador del cuaderno TC1 (S08) · V9.
+
+Fuente única: utils/tc1_contrato.py (rúbrica, ventanas, checkpoints, opciones de las listas)
+y los módulos utils/tc1_*.py, que se incrustan en una celda oculta con su SHA-256.
+
+Uso:
+    python utils/build_taller_control_1.py           # regenera Cuadernos/Taller_Control_1.ipynb
+    python utils/build_taller_control_1.py --check   # falla si el cuaderno versionado no coincide
+'''
+from __future__ import annotations
+
+import argparse
+import base64
+import hashlib
 import json
+import sys
+import zlib
+from pathlib import Path
 
-CELLS = json.loads("[{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"view-in-github\",\"colab_type\":\"text\"},\"source\":\"<a href=\\\"https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb\\\" target=\\\"_parent\\\"><img src=\\\"https://colab.research.google.com/assets/colab-badge.svg\\\" alt=\\\"Open In Colab\\\"/></a>\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"vEpGohZl7wBL\"},\"source\":\"# TC1 · SECOP Data Pipeline\\n\\n> **VERSIÓN OPERATIVA: V7 · 2026-10-01**  \\n> Si no ves esta etiqueta, no estás usando el notebook actualizado.\\n\\n## Misión profesional\\n\\n**Curso:** Big Data · Maestría en Analítica de Datos  \\n**Modalidad:** parejas · **100 puntos** · **trabajo dentro y fuera de clase**\\n\\nUn equipo de analítica necesita construir un pipeline reproducible sobre SECOP II. El producto debe adquirir datos desde una API real, conservar trazabilidad, resistir fallos transitorios, demostrar equivalencia entre una estrategia secuencial y otra concurrente y reutilizar el mismo snapshot en modelos documental, wide-column y de grafo.\\n\\n> **La evaluación se centra en resultados verificables y decisiones de ingeniería.** No se califica memorizar sintaxis ni seguir una receta.\\n\\nEste notebook contiene el **briefing, instrucciones, rúbrica, trabajo y tutorial de entrega**. El LMS no es necesario para resolver ni entregar el TC1.\\n\\n```text\\nSECOP II API\\n   ↓\\nadquisición reproducible\\n   ↓\\nsecuencial ↔ concurrente\\n   ↓\\nRAW + calidad + trazabilidad\\n   ↓\\nAtlas idempotente\\n   ↓\\nproducto analítico\\n   ↓\\nCassandra + Neo4j\\n   ↓\\ndecisiones + evidencia verificable\\n```\\n\\n### Dedicación esperada\\n\\nEste no es un ejercicio de 180 minutos. Se inicia en clase y se completa en casa.\\n\\n**Dedicación orientativa: 6–8 horas por grupo**, distribuidas entre adquisición, depuración, modelado, ejecución en servicios reales, validación, corrección y preparación de evidencia.\\n\\nEl tiempo no otorga puntos ni se valida; la estimación sirve únicamente para dimensionar la profundidad esperada.\",\"id\":\"vEpGohZl7wBL\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"5MnTOV-T7wBQ\"},\"source\":\"## Antes de empezar · reconstruye el andamiaje S01–S07\\n\\n**Tiempo máximo: 20 minutos.** Esto no agrega teoría nueva ni puntos al TC1. Sirve para volver a conectar las decisiones que ya aprendiste antes de comenzar la evaluación.\\n\\nEl curso no ha sido una colección de herramientas. Desde S01 hemos seguido una misma pregunta:\\n\\n> **¿Cómo convertir datos reales, imperfectos y crecientes en evidencia reproducible para una decisión?**\\n\\n| Sesión | Idea que debes recuperar | Dónde reaparece en TC1 |\\n|---|---|---|\\n| **S01 · Big Data e ingesta** | Big Data es un problema de diseño; define unidad de observación, completitud y lectura por fragmentos. | E1 · contrato de datos, paginación, RAW y controles de completitud. |\\n| **S02 · Arquitectura** | La evidencia viaja por fuente → ingesta → almacenamiento → procesamiento → consumo; cada componente debe responder una necesidad. | E1–E6 · justificar por qué existe cada etapa y qué problema resuelve. |\\n| **S03 · MongoDB documental** | Una fila deja de ser suficiente cuando el objeto tiene estructura anidada o cambiante; el documento debe conservar grano y contexto. | E2 · documento por proceso, contratos relacionados e idempotencia. |\\n| **S04 · Atlas + Cassandra** | No existe un único modelo NoSQL: documental y wide-column responden preguntas y patrones de acceso distintos. | E2 y E4 · Atlas para documento flexible; Cassandra query-first para acceso operacional. |\\n| **S05 · Bandeja operacional** | Una vista o tabla útil operacionaliza evidencia; priorizar no equivale a probar irregularidad. | E3–E4 · bandeja priorizada y consulta operacional reproducible. |\\n| **S06 · Neo4j** | Nodos y relaciones permiten responder preguntas sobre conectividad que son incómodas en una tabla; una conexión no demuestra causalidad. | E5 · entidad ancla, proveedores compartidos y contraste relacional. |\\n| **S07 · Elasticsearch** | Analizar texto produce tokens; el índice invertido y BM25 permiten recuperar y ordenar documentos. | No es requisito directo del TC1, pero recuerda la diferencia entre **filtrar**, **relacionar** y **buscar/rankear**. |\\n\\n### Regla para el taller\\n\\nAntes de escribir código en una etapa, identifica estas cuatro cosas:\\n\\n1. **pregunta** que quieres responder;\\n2. **grano** del dato que necesitas;\\n3. **estructura/modelo** que facilita esa pregunta;\\n4. **evidencia verificable** que demostraría que el paso funcionó.\\n\\nSi no puedes señalar esas cuatro piezas, vuelve al mapa antes de continuar.\\n\",\"id\":\"5MnTOV-T7wBQ\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"4IPffIbM7wBR\"},\"source\":\"#@title Autocomprobación de arranque · S01–S07 { display-mode: \\\"form\\\" }\\n# No se escribe texto libre: elige una opción en cada lista y ejecuta.\\n\\ns01 = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"Definir grano, paginar y comprobar completitud\\\",\\\"Cargar todo a memoria y confiar en que terminó\\\",\\\"Elegir primero la base de datos y después la pregunta\\\"]\\ns02 = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"Separar fuente, ingesta, almacenamiento, procesamiento y consumo\\\",\\\"Usar una sola herramienta para todas las capas\\\",\\\"Optimizar código antes de definir el problema\\\"]\\ns03 = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"Modelar un proceso como documento cuando necesita contexto anidado\\\",\\\"Convertir cada campo en una tabla independiente siempre\\\",\\\"Usar MongoDB únicamente porque no requiere esquema\\\"]\\ns04 = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"Elegir el modelo a partir del patrón de acceso\\\",\\\"Usar Cassandra como reemplazo universal de MongoDB\\\",\\\"Usar el mismo esquema para cualquier consulta\\\"]\\ns05 = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"Construir una bandeja reproducible y declarar sus límites\\\",\\\"Interpretar una prioridad como prueba de fraude\\\",\\\"Ordenar por una sola señal y omitir controles\\\"]\\ns06 = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"Usar relaciones para estudiar conectividad sin convertirla en causalidad\\\",\\\"Crear un grafo solo para obtener una visualización bonita\\\",\\\"Asumir que proveedor compartido significa colusión\\\"]\\ns07 = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"Analizar texto → índice invertido → BM25 → ranking\\\",\\\"contains() produce el mismo ranking que Elasticsearch\\\",\\\"Un mapping solo cambia el aspecto visual del índice\\\"]\\n\\ncorrectas = {\\n    \\\"s01\\\": \\\"Definir grano, paginar y comprobar completitud\\\",\\n    \\\"s02\\\": \\\"Separar fuente, ingesta, almacenamiento, procesamiento y consumo\\\",\\n    \\\"s03\\\": \\\"Modelar un proceso como documento cuando necesita contexto anidado\\\",\\n    \\\"s04\\\": \\\"Elegir el modelo a partir del patrón de acceso\\\",\\n    \\\"s05\\\": \\\"Construir una bandeja reproducible y declarar sus límites\\\",\\n    \\\"s06\\\": \\\"Usar relaciones para estudiar conectividad sin convertirla en causalidad\\\",\\n    \\\"s07\\\": \\\"Analizar texto → índice invertido → BM25 → ranking\\\",\\n}\\nelegidas = {\\\"s01\\\":s01,\\\"s02\\\":s02,\\\"s03\\\":s03,\\\"s04\\\":s04,\\\"s05\\\":s05,\\\"s06\\\":s06,\\\"s07\\\":s07}\\npendientes = [k.upper() for k,v in elegidas.items() if v == \\\"— selecciona —\\\"]\\naciertos = [k.upper() for k,v in elegidas.items() if v == correctas[k]]\\nerrores = [k.upper() for k,v in elegidas.items() if v != \\\"— selecciona —\\\" and v != correctas[k]]\\n\\nprint(f\\\"Reconstrucción: {len(aciertos)}/7\\\")\\nif pendientes:\\n    print(\\\"Falta elegir:\\\", \\\", \\\".join(pendientes))\\nif errores:\\n    print(\\\"Revisa en el mapa:\\\", \\\", \\\".join(errores))\\nelif not pendientes:\\n    print(\\\"✓ Andamiaje recuperado. Ya puedes comenzar E1.\\\")\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"4IPffIbM7wBR\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"XDk8SdN47wBT\"},\"source\":\"### Del repaso al TC1 · no vuelvas a aprender cada herramienta\\n\\nDurante el taller no avances por nombres de tecnologías sino por **decisiones**:\\n\\n```text\\nE1 · ¿puedo adquirir exactamente el mismo snapshot y demostrarlo?\\n          ↓\\nE2 · ¿cómo represento ese proceso como documento y lo cargo sin duplicar?\\n          ↓\\nE3 · ¿qué producto analítico reutilizable sale de esa evidencia?\\n          ↓\\nE4 · ¿qué patrón de acceso operacional exige el modelo Cassandra?\\n          ↓\\nE5 · ¿qué relación contractual necesito recorrer y qué NO puedo concluir de ella?\\n          ↓\\nE6 · ¿qué decisiones tomé, con qué evidencia y con qué límite?\\n```\\n\\nEn clase se reconstruye el criterio S01–S07, se inicia la adquisición y se deja un checkpoint verificable. El resto se completa fuera de clase con el mismo notebook y los mismos artefactos.\\n\\n> La meta del arranque no es recordar sintaxis. Es recuperar el **criterio de modelado** para no comenzar el TC1 desde cero.\\n\",\"id\":\"XDk8SdN47wBT\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"P8-v3fSe7wBT\"},\"source\":\"## Rúbrica oficial · 100 puntos\\n\\nLa calificación es **grupal**. El mismo puntaje y la misma nota se registran para todos los integrantes del equipo.\\n\\n| Etapa | Evidencia que se evalúa | Puntos |\\n|---|---|---:|\\n| **E1 · Adquisición SECOP** | contrato de datos y SoQL (4), descarga secuencial (4), concurrencia equivalente con mismos offsets/filas/hash (8), trazabilidad + RAW reanudable + calidad/join (9) | **25** |\\n| **E2 · Modelo documental + Atlas** | modelo documental (5), carga Atlas idempotente (7), índices alineados a consultas (4), consulta A (3), consulta B (3), evidencia Atlas (3) | **25** |\\n| **E3 · Producto analítico** | pipeline de bandeja desde Atlas (7), artefacto CSV reproducible (3) | **10** |\\n| **E4 · Cassandra query-first** | datos preparados (5), modelo CQL derivado de la consulta (6), consulta simulada coherente (4) | **15** |\\n| **E5 · Neo4j / contexto relacional** | relaciones y entidad ancla (4), métrica relacional (4), Cypher (5), subgrafo local (2) | **15** |\\n| **E6 · Decisiones y entrega** | decisiones/informe estructurado (5), microdefensa cerrada (3), paquete reproducible completo (2) | **10** |\\n| | **TOTAL** | **100** |\\n\\n### Conversión a nota\\n\\n`nota = 1 + 4 × (puntaje / 100)`\\n\\nEjemplos: 50/100 → 3,00 · 75/100 → 4,00 · 100/100 → 5,00.\\n\\n### Reglas de evaluación\\n\\n- No se exige un *speedup* mínimo: una ejecución concurrente puede ser más lenta y seguir siendo correcta.\\n- No se exige una población artificial de 1.000 filas: se evalúa contra la población real de la ventana.\\n- E4 y E5 evalúan diseño/modelado reproducible; no exigen cuentas externas de Cassandra/Aura.\\n- E2 sí exige MongoDB Atlas real para los puntos de conexión, idempotencia y evidencia Atlas.\\n- Ningún criterio exige respuestas abiertas: las decisiones de E6 son estructuradas.\\n- Un secreto detectado bloquea la generación del paquete final.\\n- Los nombres exactos de los artefactos exigidos están declarados en cada etapa; no hay archivos ocultos.\\n\\n## Fecha máxima de entrega\\n\\n**Sábado 17 de octubre de 2026, 11:59 p. m. (hora de Bogotá).**\\n\\nLa entrega oficial es Drive + correo institucional. El sello de tiempo del correo recibido por el docente debe ser anterior a esa fecha, salvo una ampliación individual informada por el docente.\\n\",\"id\":\"P8-v3fSe7wBT\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"sGkJIjue7wBU\"},\"source\":\"## Qué debe hacer y qué debe entregar cada grupo\\n\\n**Trabajo en parejas.** Un solo grupo produce una sola entrega. No se entrega una carpeta por integrante.\\n\\n### Resumen en una mirada\\n\\n| Etapa | Qué hace el grupo | Resultado que debe quedar | Condición para seguir |\\n|---|---|---|---|\\n| **E1 · SECOP** | Ejecutar la adquisición provista, comparar secuencial vs `ThreadPoolExecutor`, descargar Contratos y validar el cruce | RAW + benchmark + calidad + manifest de adquisición | mismos offsets, mismas filas, mismo hash, **≥30 procesos únicos con contrato**, cero `.part`/chunks extra en el cache activo |\\n| **E2 · MongoDB Atlas** | Construir una fila/documento por proceso único, cargar Atlas dos veces, crear índices y ejecutar consultas | integrado + JSON documental + evidencia Atlas | `len(historico) == procesos[\\\"id_del_proceso\\\"].nunique()`, documentos únicos, carga idempotente, consultas correctas |\\n| **E3 · Producto** | Construir desde Atlas una bandeja priorizada | `03_bandeja_historica.csv` | ≤100 filas, columnas exigidas, orden correcto |\\n| **E4 · Cassandra** | Diseñar el modelo query-first y simular la consulta | `04_modelo_cassandra.cql` | PRIMARY KEY/orden correctos, sin `ALLOW FILTERING`, top 10 reproducible |\\n| **E5 · Grafo** | Construir relaciones, entidad ancla, métrica y Cypher | CSV relacional + archivo Cypher | relaciones exactas, NIT ancla correcto, nombre válido observado para ese NIT, métricas/grafo coherentes |\\n| **E6 · Cierre** | Completar decisiones cerradas, microdefensa y ejecutar validador | informe + manifest + ZIP | todos los checks, sin secretos, paquete reproducible |\\n\\n### Qué código debe escribir el estudiante\\n\\n- **E1:** la infraestructura de red, paginación, cache y `ThreadPoolExecutor` está **provista y funciona**. Deben ejecutarla, entenderla y comprobar su equivalencia.\\n- **E2:** ustedes construyen `historico`, `relaciones_contrato`, `documentos` y la carga/consultas de Atlas.\\n- **E3:** ustedes construyen el pipeline de bandeja desde Atlas.\\n- **E4:** ustedes diseñan el CQL y la función de consulta simulada.\\n- **E5:** ustedes construyen la métrica relacional, Cypher y el subgrafo.\\n- **E6:** ustedes completan decisiones cerradas y ejecutan el validador.\\n\\n### Archivos de trabajo que debe producir el notebook\\n\\n```text\\nentrega_tc1/\\n├── 00_dataset_contract.json\\n├── 01_acquisition_manifest.json\\n├── 01_benchmark_threads.json\\n├── 01_quality_report.json\\n├── 02_secop_integrado.parquet\\n├── 02_modelo_documental.json\\n├── 02_atlas_evidence.json\\n├── 03_bandeja_historica.csv\\n├── 04_modelo_cassandra.cql\\n├── 05_resultado_relacional.csv\\n├── 05_neo4j_consultas.cypher\\n├── 06_decision_log.json\\n├── 06_informe_tecnico.md\\n├── 06_microdefensa_grupal.json\\n├── manifest_tc1.json\\n└── TC1_<PAREJA_ID>.zip\\n```\\n\\nLos archivos intermedios se empacan dentro del ZIP. **No tienen que enviarlos uno por uno.**\\n\\n## Entrega final del grupo\\n\\nLa entrega final contiene solamente:\\n\\n1. **`TC1_<PAREJA_ID>.ipynb`** ejecutado, con salidas visibles.\\n2. **`TC1_<PAREJA_ID>.zip`** generado por el validador.\\n3. **`manifest_tc1.json`** original.\\n\\nSe suben los tres a una **carpeta restringida de Google Drive compartida directamente con `jzaineam@ucentral.edu.co` como Lector**. Un integrante envía el enlace al **correo del docente** y pone al compañero en copia. GitHub es opcional.\\n\\nEn el correo deben incluir también el **SHA-256 de `manifest_tc1.json`** que imprime el notebook al final.\\n\\n### Fecha máxima\\n\\n**17 de octubre de 2026 · 11:59 p. m. · hora de Bogotá.**\\n\\nEl sello de tiempo del correo recibido por el docente es la referencia oficial.\\n\",\"id\":\"sGkJIjue7wBU\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"BPcHhXgD7wBV\"},\"source\":\"# Instalación mínima en Colab\\n!pip -q install pymongo pyarrow networkx\\n\\nfrom pathlib import Path\\nfrom concurrent.futures import ThreadPoolExecutor, as_completed\\nfrom datetime import datetime, timezone\\nfrom getpass import getpass\\nimport hashlib, json, math, os, random, re, time\\n\\nimport pandas as pd\\nimport requests\\n\\nOUT = Path(\\\"entrega_tc1\\\")\\nRAW = OUT / \\\"raw\\\"\\nRAW_PAGES = RAW / \\\"pages\\\"\\nfor p in [OUT, RAW, RAW_PAGES]:\\n    p.mkdir(parents=True, exist_ok=True)\\n\\nprint(\\\"Carpeta de trabajo:\\\", OUT.resolve())\\nprint(\\\"Cache reanudable de páginas:\\\", RAW_PAGES.resolve())\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"BPcHhXgD7wBV\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"DpzSczTp7wBW\"},\"source\":\"## 0 · Identidad y partición determinística\\n\\nCada pareja recibe una ventana temporal a partir de `PAREJA_ID`. Así todos resuelven la misma competencia, pero no producen exactamente los mismos resultados.\\n\\n**Completen estos datos antes de seguir.**\",\"id\":\"DpzSczTp7wBW\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"14Y_jBza7wBW\"},\"source\":\"PAREJA_ID = \\\"\\\"        # TODO: ejemplo \\\"P03\\\"\\nINTEGRANTE_1 = \\\"\\\"      # TODO\\nCODIGO_1 = \\\"\\\"          # TODO\\nINTEGRANTE_2 = \\\"\\\"      # TODO\\nCODIGO_2 = \\\"\\\"          # TODO\\n\\nVENTANAS_2025 = [\\n    (\\\"2025-01-01T00:00:00.000\\\", \\\"2025-03-01T00:00:00.000\\\"),\\n    (\\\"2025-03-01T00:00:00.000\\\", \\\"2025-05-01T00:00:00.000\\\"),\\n    (\\\"2025-05-01T00:00:00.000\\\", \\\"2025-07-01T00:00:00.000\\\"),\\n    (\\\"2025-07-01T00:00:00.000\\\", \\\"2025-09-01T00:00:00.000\\\"),\\n    (\\\"2025-09-01T00:00:00.000\\\", \\\"2025-11-01T00:00:00.000\\\"),\\n    (\\\"2025-11-01T00:00:00.000\\\", \\\"2026-01-01T00:00:00.000\\\"),\\n]\\n\\nif len(PAREJA_ID.strip()) < 3:\\n    print(\\\"⚠️ Completen PAREJA_ID antes de descargar.\\\")\\nelse:\\n    idx = int(hashlib.sha256(PAREJA_ID.strip().encode()).hexdigest()[:8], 16) % len(VENTANAS_2025)\\n    FECHA_INI, FECHA_FIN = VENTANAS_2025[idx]\\n    CACHE_SCOPE = hashlib.sha256(\\n        f\\\"{PAREJA_ID.strip()}|{FECHA_INI}|{FECHA_FIN}\\\".encode(\\\"utf-8\\\")\\n    ).hexdigest()[:12]\\n    print(\\\"Ventana asignada:\\\", FECHA_INI, \\\"→\\\", FECHA_FIN)\\n    print(\\\"Cache aislado de esta pareja/ventana:\\\", CACHE_SCOPE)\",\"execution_count\":null,\"outputs\":[],\"id\":\"14Y_jBza7wBW\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"4HKwlN927wBX\"},\"source\":\"## E1 · Adquisición SECOP verificable — 25 puntos\\n\\nUsarán dos fuentes oficiales:\\n\\n- **Procesos SECOP II:** `p6dx-8zbt`\\n- **Contratos SECOP II:** `jbjy-vk9h`\\n\\nLa API debe recibir **solo las columnas necesarias**. Esto es *query pushdown*: filtrar y proyectar antes de transferir.\\n\\nUn App Token es opcional. Socrata permite consultas públicas sin token, pero un token separa el throttling de la aplicación del pool compartido por IP. Nunca escriban un secreto en el notebook.\",\"id\":\"4HKwlN927wBX\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"guheXlLb7wBY\"},\"source\":\"# Infraestructura provista · configuración mínima\\nBASE = \\\"https://www.datos.gov.co/resource\\\"\\nENDPOINTS = {\\n    \\\"procesos\\\": \\\"p6dx-8zbt\\\",\\n    \\\"contratos\\\": \\\"jbjy-vk9h\\\",\\n}\\n\\n# Nombres API verificados contra la metadata oficial de datos.gov.co.\\nSELECT_PROCESOS = [\\n    \\\"id_del_proceso\\\",\\\"id_del_portafolio\\\",\\\"entidad\\\",\\\"nit_entidad\\\",\\\"departamento_entidad\\\",\\\"ciudad_entidad\\\",\\n    \\\"fecha_de_publicacion_del\\\",\\\"precio_base\\\",\\\"modalidad_de_contratacion\\\",\\n    \\\"respuestas_al_procedimiento\\\",\\\"estado_del_procedimiento\\\",\\\"adjudicado\\\",\\n    \\\"nombre_del_proveedor\\\",\\\"nit_del_proveedor_adjudicado\\\",\\\"urlproceso\\\"\\n]\\n\\nSELECT_CONTRATOS = [\\n    \\\"proceso_de_compra\\\",\\\"id_contrato\\\",\\\"estado_contrato\\\",\\\"tipo_de_contrato\\\",\\n    \\\"modalidad_de_contratacion\\\",\\\"fecha_de_firma\\\",\\\"nombre_entidad\\\",\\\"nit_entidad\\\",\\n    \\\"proveedor_adjudicado\\\",\\\"documento_proveedor\\\",\\\"valor_del_contrato\\\"\\n]\\n\\n# Nunca escriba el token como literal en el notebook.\\nAPP_TOKEN = getpass(\\\"Socrata App Token (opcional; Enter para omitir): \\\").strip()\\nHEADERS = {\\\"Accept\\\": \\\"application/json\\\"}\\nif APP_TOKEN:\\n    HEADERS[\\\"X-App-Token\\\"] = APP_TOKEN\\n\\ndata_contract = {\\n    \\\"procesos\\\": {\\\"id\\\": ENDPOINTS[\\\"procesos\\\"], \\\"grain\\\": \\\"proceso de contratación\\\", \\\"fields\\\": SELECT_PROCESOS},\\n    \\\"contratos\\\": {\\\"id\\\": ENDPOINTS[\\\"contratos\\\"], \\\"grain\\\": \\\"contrato electrónico\\\", \\\"fields\\\": SELECT_CONTRATOS},\\n    \\\"join\\\": {\\\"procesos.id_del_portafolio\\\": \\\"contratos.proceso_de_compra\\\"},\\n    \\\"window\\\": {\\\"start\\\": globals().get(\\\"FECHA_INI\\\"), \\\"end\\\": globals().get(\\\"FECHA_FIN\\\")},\\n}\\n(OUT / \\\"00_dataset_contract.json\\\").write_text(json.dumps(data_contract, ensure_ascii=False, indent=2), encoding=\\\"utf-8\\\")\\ndata_contract\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"guheXlLb7wBY\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"Xl911VkY7wBY\"},\"source\":\"# Infraestructura provista · cliente HTTP resiliente + cache reanudable\\nRETRY_STATUS = {429, 500, 502, 503, 504}\\n\\ndef request_json(url, params, *, timeout=45, max_attempts=5, base_backoff=1.0):\\n    last_error = None\\n    for attempt in range(1, max_attempts + 1):\\n        started = time.perf_counter()\\n        try:\\n            r = requests.get(url, params=params, headers=HEADERS, timeout=timeout)\\n            elapsed = time.perf_counter() - started\\n            if r.status_code in RETRY_STATUS:\\n                retry_after = r.headers.get(\\\"Retry-After\\\")\\n                wait = float(retry_after) if retry_after and retry_after.isdigit() else base_backoff * (2 ** (attempt - 1))\\n                if attempt == max_attempts:\\n                    r.raise_for_status()\\n                time.sleep(min(wait, 12))\\n                continue\\n            if r.status_code >= 400:\\n                try:\\n                    detail = r.json().get(\\\"message\\\") or r.text[:500]\\n                except Exception:\\n                    detail = r.text[:500]\\n                raise ValueError(\\n                    f\\\"HTTP {r.status_code} en Socrata: {detail}\\\\n\\\"\\n                    \\\"Revise $select/$where; un nombre de columna inválido no se corrige reintentando.\\\"\\n                )\\n            return r.json(), {\\n                \\\"status\\\": r.status_code,\\n                \\\"elapsed_s\\\": round(elapsed, 4),\\n                \\\"bytes\\\": len(r.content),\\n                \\\"attempts\\\": attempt,\\n            }\\n        except requests.RequestException as exc:\\n            last_error = exc\\n            if attempt == max_attempts:\\n                raise\\n            time.sleep(min(base_backoff * (2 ** (attempt - 1)), 12))\\n    raise RuntimeError(last_error)\\n\\ndef query_signature(endpoint_id, *, select, where, order, limit):\\n    payload = {\\n        \\\"endpoint\\\": endpoint_id,\\n        \\\"select\\\": list(select),\\n        \\\"where\\\": str(where),\\n        \\\"order\\\": str(order),\\n        \\\"limit\\\": int(limit),\\n    }\\n    canon = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(\\\",\\\", \\\":\\\"))\\n    return hashlib.sha256(canon.encode(\\\"utf-8\\\")).hexdigest()\\n\\ndef _page_paths(cache_dir, offset):\\n    cache_dir = Path(cache_dir)\\n    cache_dir.mkdir(parents=True, exist_ok=True)\\n    stem = f\\\"page_{int(offset):07d}\\\"\\n    return cache_dir / f\\\"{stem}.json\\\", cache_dir / f\\\"{stem}.meta.json\\\"\\n\\ndef _atomic_write(path, payload_bytes):\\n    path = Path(path)\\n    tmp = path.with_suffix(path.suffix + \\\".part\\\")\\n    tmp.write_bytes(payload_bytes)\\n    os.replace(tmp, path)\\n\\ndef _read_cached_page(data_path, meta_path, *, signature, offset, limit):\\n    if not data_path.exists() or not meta_path.exists():\\n        return None\\n    try:\\n        raw = data_path.read_bytes()\\n        meta = json.loads(meta_path.read_text(encoding=\\\"utf-8\\\"))\\n        if (\\n            meta.get(\\\"query_signature\\\") != signature\\n            or int(meta.get(\\\"offset\\\", -1)) != int(offset)\\n            or int(meta.get(\\\"limit\\\", -1)) != int(limit)\\n            or meta.get(\\\"sha256\\\") != hashlib.sha256(raw).hexdigest()\\n        ):\\n            return None\\n        rows = json.loads(raw.decode(\\\"utf-8\\\"))\\n        if not isinstance(rows, list) or int(meta.get(\\\"rows\\\", -1)) != len(rows):\\n            return None\\n        meta = dict(meta)\\n        meta[\\\"from_cache\\\"] = True\\n        return rows, meta\\n    except Exception:\\n        return None\\n\\ndef fetch_page_persisted(\\n    endpoint_id, *, select, where, order, limit, offset, cache_dir,\\n    reuse_cache=True\\n):\\n    \\\"\\\"\\\"\\n    Descarga UNA página y la deja persistida de forma atómica.\\n    Si existe un chunk válido de la misma consulta, lo reutiliza.\\n    Un .part nunca se toma como evidencia válida.\\n    \\\"\\\"\\\"\\n    signature = query_signature(\\n        endpoint_id, select=select, where=where, order=order, limit=limit\\n    )\\n    data_path, meta_path = _page_paths(cache_dir, offset)\\n\\n    if reuse_cache:\\n        cached = _read_cached_page(\\n            data_path, meta_path, signature=signature, offset=offset, limit=limit\\n        )\\n        if cached is not None:\\n            return cached\\n\\n    params = {\\n        \\\"$select\\\": \\\",\\\".join(select),\\n        \\\"$where\\\": where,\\n        \\\"$order\\\": order,\\n        \\\"$limit\\\": int(limit),\\n        \\\"$offset\\\": int(offset),\\n    }\\n    rows, request_meta = request_json(f\\\"{BASE}/{endpoint_id}.json\\\", params)\\n\\n    # Serialización canónica: el SHA detecta archivos incompletos/corruptos.\\n    raw = json.dumps(\\n        rows, ensure_ascii=False, sort_keys=True, separators=(\\\",\\\", \\\":\\\")\\n    ).encode(\\\"utf-8\\\")\\n    sha = hashlib.sha256(raw).hexdigest()\\n\\n    meta = {\\n        **request_meta,\\n        \\\"endpoint\\\": endpoint_id,\\n        \\\"offset\\\": int(offset),\\n        \\\"limit\\\": int(limit),\\n        \\\"rows\\\": len(rows),\\n        \\\"query_signature\\\": signature,\\n        \\\"sha256\\\": sha,\\n        \\\"downloaded_at_utc\\\": datetime.now(timezone.utc).isoformat(),\\n        \\\"from_cache\\\": False,\\n    }\\n\\n    _atomic_write(data_path, raw)\\n    _atomic_write(\\n        meta_path,\\n        json.dumps(meta, ensure_ascii=False, indent=2, sort_keys=True).encode(\\\"utf-8\\\")\\n    )\\n    return rows, meta\\n\\ndef fetch_page(endpoint_id, *, select, where, order, limit, offset):\\n    \\\"\\\"\\\"Lectura directa sin persistencia; se conserva para el micro-lab de dos páginas.\\\"\\\"\\\"\\n    params = {\\n        \\\"$select\\\": \\\",\\\".join(select),\\n        \\\"$where\\\": where,\\n        \\\"$order\\\": order,\\n        \\\"$limit\\\": int(limit),\\n        \\\"$offset\\\": int(offset),\\n    }\\n    rows, meta = request_json(f\\\"{BASE}/{endpoint_id}.json\\\", params)\\n    meta.update({\\\"endpoint\\\": endpoint_id, \\\"offset\\\": int(offset), \\\"limit\\\": int(limit), \\\"rows\\\": len(rows)})\\n    return rows, meta\\n\\ndef count_rows(endpoint_id, *, where):\\n    rows, _ = request_json(\\n        f\\\"{BASE}/{endpoint_id}.json\\\",\\n        {\\\"$select\\\": \\\"count(*) AS n\\\", \\\"$where\\\": where},\\n    )\\n    if not rows or \\\"n\\\" not in rows[0]:\\n        raise RuntimeError(\\\"Socrata no devolvió el conteo esperado.\\\")\\n    return int(rows[0][\\\"n\\\"])\\n\\ndef cache_summary(cache_dir):\\n    metas = []\\n    for p in sorted(Path(cache_dir).glob(\\\"page_*.meta.json\\\")):\\n        try:\\n            metas.append(json.loads(p.read_text(encoding=\\\"utf-8\\\")))\\n        except Exception:\\n            pass\\n    return {\\n        \\\"pages\\\": len(metas),\\n        \\\"rows\\\": sum(int(x.get(\\\"rows\\\", 0) or 0) for x in metas),\\n        \\\"cache_hits\\\": sum(bool(x.get(\\\"from_cache\\\")) for x in metas),\\n    }\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"Xl911VkY7wBY\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"ktYQ0ao97wBZ\"},\"source\":\"### E1.1 · Primera consulta: pequeña y explicable\\n\\nAntes de paralelizar, demuestren que la consulta funciona con **50 filas**. El orden debe ser estable.\\n\\nLa ventana ya fue asignada a partir de `PAREJA_ID`, por lo tanto el notebook construye automáticamente los filtros temporales:\\n\\n- **Procesos:** `fecha_de_publicacion_del` dentro de `FECHA_INI → FECHA_FIN`;\\n- **Contratos:** `fecha_de_firma` dentro de la misma ventana.\\n\\nLa identidad del proceso es `id_del_proceso`, pero la relación con Contratos Electrónicos usa **`id_del_portafolio → proceso_de_compra`**.\\n\\nSu tarea aquí es **leer, ejecutar y comprobar** el plan de consulta, no escribir manualmente una cadena `WHERE` para desbloquear el taller.\\n\\nSi Socrata devuelve HTTP 400, el cliente mostrará el detalle del campo/filtro que deben revisar.\\n\",\"id\":\"ktYQ0ao97wBZ\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"7h5N-GwV7wBa\"},\"source\":\"# Infraestructura provista · filtros derivados de la ventana de la pareja\\nif \\\"FECHA_INI\\\" not in globals() or \\\"FECHA_FIN\\\" not in globals():\\n    raise ValueError(\\n        \\\"Primero complete PAREJA_ID y ejecute la celda de identidad para obtener FECHA_INI y FECHA_FIN.\\\"\\n    )\\n\\nWHERE_PROCESOS = (\\n    f\\\"fecha_de_publicacion_del >= '{FECHA_INI}' \\\"\\n    f\\\"AND fecha_de_publicacion_del < '{FECHA_FIN}'\\\"\\n)\\nWHERE_CONTRATOS = (\\n    f\\\"fecha_de_firma >= '{FECHA_INI}' \\\"\\n    f\\\"AND fecha_de_firma < '{FECHA_FIN}'\\\"\\n)\\n\\nquery_plan = {\\n    \\\"procesos\\\": {\\n        \\\"where\\\": WHERE_PROCESOS,\\n        \\\"order\\\": (\\n            \\\"fecha_de_publicacion_del ASC,\\\"\\n            \\\"id_del_proceso ASC,\\\"\\n            \\\"nit_del_proveedor_adjudicado ASC,\\\"\\n            \\\"nombre_del_proveedor ASC\\\"\\n        ),\\n        \\\"select\\\": SELECT_PROCESOS,\\n    },\\n    \\\"contratos\\\": {\\n        \\\"where\\\": WHERE_CONTRATOS,\\n        \\\"order\\\": \\\"fecha_de_firma ASC,id_contrato ASC\\\",\\n        \\\"select\\\": SELECT_CONTRATOS,\\n    },\\n}\\n\\nprint(\\\"Ventana:\\\", FECHA_INI, \\\"→\\\", FECHA_FIN)\\nprint(\\\"WHERE_PROCESOS:\\\", WHERE_PROCESOS)\\nprint(\\\"WHERE_CONTRATOS:\\\", WHERE_CONTRATOS)\\nprint(\\\"ORDER_PROCESOS:\\\", query_plan[\\\"procesos\\\"][\\\"order\\\"])\\n\\n# Evidencia de prueba controlada: 50 filas reales por fuente.\\nrows_p, meta_muestra_p = fetch_page(\\n    ENDPOINTS[\\\"procesos\\\"],\\n    select=SELECT_PROCESOS,\\n    where=WHERE_PROCESOS,\\n    order=query_plan[\\\"procesos\\\"][\\\"order\\\"],\\n    limit=50,\\n    offset=0,\\n)\\nrows_c, meta_muestra_c = fetch_page(\\n    ENDPOINTS[\\\"contratos\\\"],\\n    select=SELECT_CONTRATOS,\\n    where=WHERE_CONTRATOS,\\n    order=query_plan[\\\"contratos\\\"][\\\"order\\\"],\\n    limit=50,\\n    offset=0,\\n)\\n\\nmuestra_procesos = pd.DataFrame(rows_p)\\nmuestra_contratos = pd.DataFrame(rows_c)\\n\\nprint(\\\"✓ Procesos muestra:\\\", len(muestra_procesos), \\\"filas\\\")\\nprint(\\\"✓ Contratos muestra:\\\", len(muestra_contratos), \\\"filas\\\")\\ndisplay(muestra_procesos.head(3))\\ndisplay(muestra_contratos.head(3))\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"7h5N-GwV7wBa\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"w3n7k7DA7wBa\"},\"source\":\"### E1.2 · Preflight + descarga secuencial reanudable\\n\\nLa adquisición ya viene implementada. Ejecútenla y observen cómo trabaja.\\n\\n**Paso a paso:**\\n\\n1. El preflight cuenta cuántos registros existen en la ventana.\\n2. Se fija `N_PROCESOS=min(3000,total)` y `N_CONTRATOS=min(4000,total)`.\\n3. La ruta secuencial descarga páginas de 250 filas.\\n4. Cada página queda firmada con SHA-256 y se puede reanudar.\\n5. La ruta concurrente descargará **los mismos offsets** usando `ThreadPoolExecutor`.\\n6. Después se comparan filas y hash.\\n7. Finalmente se descarga Contratos y se valida el cruce.\\n\\n**No deben escribir esta infraestructura desde cero.**\\n\\nPara aprobar E1 deben terminar con:\\n\\n- `same_offsets=True`;\\n- `same_rows=True`;\\n- `same_hash=True`;\\n- al menos **30 procesos únicos** relacionados con contratos;\\n- ningún archivo `.part` en el cache activo;\\n- RAW consolidado en Parquet.\\n\",\"id\":\"w3n7k7DA7wBa\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"zKFtF8q_7wBa\"},\"source\":\"PAGE_SIZE = 250\\nTARGET_PROCESOS = 3000\\nTARGET_CONTRATOS = 4000\\nMIN_MATCHED_PROCESSES = 30\\n\\nif not isinstance(WHERE_PROCESOS, str) or not WHERE_PROCESOS.strip():\\n    raise RuntimeError(\\\"PRECHECK E1: no se pudo construir WHERE_PROCESOS desde la ventana asignada.\\\")\\nif not isinstance(WHERE_CONTRATOS, str) or not WHERE_CONTRATOS.strip():\\n    raise RuntimeError(\\\"PRECHECK E1: no se pudo construir WHERE_CONTRATOS desde la ventana asignada.\\\")\\n\\nTOTAL_PROCESOS = count_rows(ENDPOINTS[\\\"procesos\\\"], where=WHERE_PROCESOS)\\nTOTAL_CONTRATOS = count_rows(ENDPOINTS[\\\"contratos\\\"], where=WHERE_CONTRATOS)\\nN_PROCESOS = min(TARGET_PROCESOS, TOTAL_PROCESOS)\\nN_CONTRATOS = min(TARGET_CONTRATOS, TOTAL_CONTRATOS)\\n\\nif N_PROCESOS <= 0:\\n    raise RuntimeError(\\\"PRECHECK E1: la ventana no contiene procesos. Revise el filtro antes de continuar.\\\")\\nif N_CONTRATOS <= 0:\\n    raise RuntimeError(\\\"PRECHECK E1: la ventana no contiene contratos. Revise el filtro antes de continuar.\\\")\\n\\nOFFSETS_PROCESOS = list(range(0, N_PROCESOS, PAGE_SIZE))\\nOFFSETS_CONTRATOS = list(range(0, N_CONTRATOS, PAGE_SIZE))\\n\\nCACHE_SCOPE = hashlib.sha256(\\n    f\\\"{PAREJA_ID.strip()}|{FECHA_INI}|{FECHA_FIN}\\\".encode(\\\"utf-8\\\")\\n).hexdigest()[:12]\\n\\nCACHE_ROOT = RAW_PAGES / CACHE_SCOPE\\nCACHE_SEQ_PROCESOS = CACHE_ROOT / \\\"procesos\\\" / \\\"sequential\\\"\\nCACHE_THR_PROCESOS = CACHE_ROOT / \\\"procesos\\\" / \\\"threaded\\\"\\nCACHE_CONTRATOS = CACHE_ROOT / \\\"contratos\\\" / \\\"official\\\"\\n\\nprint(\\\"Preflight OK\\\")\\nprint(\\\"Cache de esta ejecución:\\\", CACHE_ROOT)\\nprint(\\\"Procesos disponibles/objetivo:\\\", TOTAL_PROCESOS, \\\"/\\\", N_PROCESOS, \\\"· páginas:\\\", len(OFFSETS_PROCESOS))\\nprint(\\\"Contratos disponibles/objetivo:\\\", TOTAL_CONTRATOS, \\\"/\\\", N_CONTRATOS, \\\"· páginas:\\\", len(OFFSETS_CONTRATOS))\\n\\ndef descargar_secuencial(endpoint_id, *, select, where, order, max_rows, cache_dir, page_size=PAGE_SIZE):\\n    \\\"\\\"\\\"Descarga páginas en orden y reutiliza únicamente chunks válidos.\\\"\\\"\\\"\\n    offsets = list(range(0, int(max_rows), int(page_size)))\\n    partes = []\\n    metas = []\\n\\n    for offset in offsets:\\n        limit = min(int(page_size), int(max_rows) - int(offset))\\n        rows, meta = fetch_page_persisted(\\n            endpoint_id,\\n            select=select,\\n            where=where,\\n            order=order,\\n            limit=limit,\\n            offset=offset,\\n            cache_dir=cache_dir,\\n        )\\n        partes.append(pd.DataFrame(rows))\\n        metas.append(meta)\\n        origen = \\\"cache\\\" if meta.get(\\\"from_cache\\\") else \\\"API\\\"\\n        print(f\\\"[secuencial] offset={offset:5d} · filas={len(rows):3d} · {origen}\\\")\\n\\n    df = pd.concat(partes, ignore_index=True) if partes else pd.DataFrame(columns=select)\\n    if len(df) != int(max_rows):\\n        raise RuntimeError(\\n            f\\\"Descarga secuencial incompleta: se esperaban {max_rows} filas y llegaron {len(df)}.\\\"\\n        )\\n    return df.reset_index(drop=True), metas\\n\\ninicio_seq = time.perf_counter()\\nprocesos_seq, meta_procesos_seq = descargar_secuencial(\\n    ENDPOINTS[\\\"procesos\\\"],\\n    select=SELECT_PROCESOS,\\n    where=WHERE_PROCESOS,\\n    order=query_plan[\\\"procesos\\\"][\\\"order\\\"],\\n    max_rows=N_PROCESOS,\\n    cache_dir=CACHE_SEQ_PROCESOS,\\n)\\ntiempo_seq = time.perf_counter() - inicio_seq if isinstance(procesos_seq, pd.DataFrame) else None\\n\\n\\nprint(\\\"✓ Descarga secuencial:\\\", len(procesos_seq), \\\"filas en\\\", round(tiempo_seq, 2), \\\"s\\\")\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"zKFtF8q_7wBa\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"B4MkGAZ37wBb\"},\"source\":\"### E1.3 · Descarga concurrente reanudable con `ThreadPoolExecutor`\\n\\nEsto es I/O-bound: durante gran parte del tiempo Python está esperando respuestas de red.\\n\\nLa implementación está **provista y visible** para que puedan estudiarla. Observen cuatro elementos:\\n\\n1. `ThreadPoolExecutor(max_workers=MAX_WORKERS)`;\\n2. un futuro por cada `offset`;\\n3. `as_completed()` para recoger las respuestas cuando terminan;\\n4. ordenamiento posterior por `offset` antes de concatenar.\\n\\nSecuencial y concurrente solicitan **exactamente los mismos offsets y límites**. El objetivo evaluado no es memorizar la función: es demostrar que ambas rutas producen las mismas filas y el mismo hash.\\n\\nSe permiten **2–6 workers**. No se premia usar más workers ni obtener un *speedup* > 1.\\n\",\"id\":\"B4MkGAZ37wBb\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"NB7lCmSo7wBb\"},\"source\":\"### Micro-lab · dos llamadas concurrentes (no evaluado)\\n\\nAntes de construir la función general, observe un patrón mínimo con **dos páginas de 25 filas**. El objetivo es entender tres ideas:\\n\\n1. cada llamada sigue siendo una petición HTTP normal;\\n2. el executor coordina esperas de I/O, no “acelera Python”;\\n3. los resultados pueden terminar en distinto orden, por eso debe conservar el `offset`.\\n\\nEjecute este ejemplo después de definir `WHERE_PROCESOS`. Luego construya su propia solución general sin copiar una lista fija de offsets.\",\"id\":\"NB7lCmSo7wBb\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"dxtVW5Eu7wBb\"},\"source\":\"# Micro-lab provisto · patrón mínimo, no suma puntos\\ndef demo_dos_paginas():\\n    if not isinstance(WHERE_PROCESOS, str) or not WHERE_PROCESOS.strip():\\n        raise ValueError(\\\"Defina WHERE_PROCESOS antes del micro-lab.\\\")\\n\\n    offsets = [0, 25]\\n    resultados = []\\n    with ThreadPoolExecutor(max_workers=2) as pool:\\n        futuros = {\\n            pool.submit(\\n                fetch_page,\\n                ENDPOINTS[\\\"procesos\\\"],\\n                select=SELECT_PROCESOS,\\n                where=WHERE_PROCESOS,\\n                order=query_plan[\\\"procesos\\\"][\\\"order\\\"],\\n                limit=25,\\n                offset=offset,\\n            ): offset\\n            for offset in offsets\\n        }\\n        for futuro in as_completed(futuros):\\n            offset = futuros[futuro]\\n            rows, meta = futuro.result()\\n            resultados.append((offset, rows, meta))\\n\\n    resultados.sort(key=lambda x: x[0])\\n    return resultados\\n\\ndemo_resultados = demo_dos_paginas() if isinstance(WHERE_PROCESOS, str) and WHERE_PROCESOS.strip() else []\\n[(offset, len(rows)) for offset, rows, _ in demo_resultados]\",\"execution_count\":null,\"outputs\":[],\"id\":\"dxtVW5Eu7wBb\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"96AwlQ0I7wBb\"},\"source\":\"MAX_WORKERS = 4\\n\\ndef descargar_concurrente(\\n    endpoint_id, *, select, where, order, max_rows, cache_dir,\\n    page_size=PAGE_SIZE, max_workers=MAX_WORKERS\\n):\\n    \\\"\\\"\\\"Descarga las mismas páginas en paralelo y reconstruye el orden por offset.\\\"\\\"\\\"\\n    offsets = list(range(0, int(max_rows), int(page_size)))\\n    resultados = []\\n\\n    with ThreadPoolExecutor(max_workers=int(max_workers)) as pool:\\n        futuros = {}\\n        for offset in offsets:\\n            limit = min(int(page_size), int(max_rows) - int(offset))\\n            futuro = pool.submit(\\n                fetch_page_persisted,\\n                endpoint_id,\\n                select=select,\\n                where=where,\\n                order=order,\\n                limit=limit,\\n                offset=offset,\\n                cache_dir=cache_dir,\\n            )\\n            futuros[futuro] = offset\\n\\n        for futuro in as_completed(futuros):\\n            offset = futuros[futuro]\\n            rows, meta = futuro.result()\\n            resultados.append((offset, rows, meta))\\n            origen = \\\"cache\\\" if meta.get(\\\"from_cache\\\") else \\\"API\\\"\\n            print(f\\\"[threads]    offset={offset:5d} · filas={len(rows):3d} · {origen}\\\")\\n\\n    resultados.sort(key=lambda x: x[0])\\n    partes = [pd.DataFrame(rows) for _, rows, _ in resultados]\\n    metas = [meta for _, _, meta in resultados]\\n\\n    df = pd.concat(partes, ignore_index=True) if partes else pd.DataFrame(columns=select)\\n    if len(df) != int(max_rows):\\n        raise RuntimeError(\\n            f\\\"Descarga concurrente incompleta: se esperaban {max_rows} filas y llegaron {len(df)}.\\\"\\n        )\\n    return df.reset_index(drop=True), metas\\n\\ninicio_threads = time.perf_counter()\\nprocesos_df, meta_procesos = descargar_concurrente(\\n    ENDPOINTS[\\\"procesos\\\"],\\n    select=SELECT_PROCESOS,\\n    where=WHERE_PROCESOS,\\n    order=query_plan[\\\"procesos\\\"][\\\"order\\\"],\\n    max_rows=N_PROCESOS,\\n    cache_dir=CACHE_THR_PROCESOS,\\n    max_workers=MAX_WORKERS,\\n)\\ntiempo_threads = time.perf_counter() - inicio_threads\\n\\nprint(\\\"✓ Descarga concurrente:\\\", len(procesos_df), \\\"filas en\\\", round(tiempo_threads, 2), \\\"s\\\")\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"96AwlQ0I7wBb\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"CJr1odsA7wBb\"},\"source\":\"# Infraestructura provista · comparación canónica V7\\ndef canonical_hash(df, key):\\n    \\\"\\\"\\\"Hash del multiconjunto de filas: conserva duplicados y no depende del orden accidental.\\\"\\\"\\\"\\n    if not isinstance(df, pd.DataFrame) or key not in df.columns:\\n        return None\\n\\n    x = df.copy()\\n    cols = sorted(str(c) for c in x.columns)\\n    x = x[cols]\\n\\n    def canon(v):\\n        try:\\n            if pd.isna(v):\\n                return None\\n        except Exception:\\n            pass\\n        if isinstance(v, pd.Timestamp):\\n            return v.isoformat()\\n        return str(v)\\n\\n    rows = []\\n    for record in x.to_dict(\\\"records\\\"):\\n        normalized = {str(k): canon(v) for k, v in record.items()}\\n        rows.append(json.dumps(\\n            normalized,\\n            ensure_ascii=False,\\n            sort_keys=True,\\n            separators=(\\\",\\\", \\\":\\\"),\\n        ))\\n\\n    rows.sort()\\n    return hashlib.sha256(\\\"\\\\n\\\".join(rows).encode(\\\"utf-8\\\")).hexdigest()\\n\\nhash_seq = canonical_hash(procesos_seq, \\\"id_del_proceso\\\")\\nhash_threads = canonical_hash(procesos_df, \\\"id_del_proceso\\\")\\n\\noffsets_seq = sorted(int(x.get(\\\"offset\\\")) for x in meta_procesos_seq if isinstance(x, dict) and x.get(\\\"offset\\\") is not None)\\noffsets_threads = sorted(int(x.get(\\\"offset\\\")) for x in meta_procesos if isinstance(x, dict) and x.get(\\\"offset\\\") is not None)\\ncache_hits_seq = sum(bool(x.get(\\\"from_cache\\\")) for x in meta_procesos_seq if isinstance(x, dict))\\ncache_hits_threads = sum(bool(x.get(\\\"from_cache\\\")) for x in meta_procesos if isinstance(x, dict))\\n\\nsame_rows = isinstance(procesos_seq, pd.DataFrame) and isinstance(procesos_df, pd.DataFrame) and len(procesos_seq) == len(procesos_df)\\nsame_hash = bool(hash_seq) and hash_seq == hash_threads\\nsame_offsets = offsets_seq == offsets_threads == OFFSETS_PROCESOS\\nbenchmark_fresh = cache_hits_seq == 0 and cache_hits_threads == 0\\n\\nbenchmark_threads = {\\n    \\\"workers\\\": MAX_WORKERS,\\n    \\\"target_rows\\\": N_PROCESOS,\\n    \\\"page_size\\\": PAGE_SIZE,\\n    \\\"rows_sequential\\\": 0 if procesos_seq is None else len(procesos_seq),\\n    \\\"rows_threaded\\\": 0 if procesos_df is None else len(procesos_df),\\n    \\\"seconds_sequential\\\": tiempo_seq,\\n    \\\"seconds_threaded\\\": tiempo_threads,\\n    \\\"hash_sequential\\\": hash_seq,\\n    \\\"hash_threaded\\\": hash_threads,\\n    \\\"offsets_sequential\\\": offsets_seq,\\n    \\\"offsets_threaded\\\": offsets_threads,\\n    \\\"cache_hits_sequential\\\": cache_hits_seq,\\n    \\\"cache_hits_threaded\\\": cache_hits_threads,\\n    \\\"benchmark_fresh\\\": benchmark_fresh,\\n    \\\"same_offsets\\\": same_offsets,\\n    \\\"same_rows\\\": same_rows,\\n    \\\"same_hash\\\": same_hash,\\n}\\n\\nprint(\\\"Mismos offsets:\\\", same_offsets)\\nprint(\\\"Mismas filas:\\\", same_rows)\\nprint(\\\"Mismo hash:\\\", same_hash)\\nprint(\\\"Cache hits seq/threaded:\\\", cache_hits_seq, \\\"/\\\", cache_hits_threads)\\nif not benchmark_fresh:\\n    print(\\\"ℹ️ Ejecución reanudada: no interprete los tiempos como benchmark limpio.\\\")\\nbenchmark_threads\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"CJr1odsA7wBb\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"zjltDhW47wBb\"},\"source\":\"### E1.4 · Segunda fuente: Contratos Electrónicos\\n\\nAhora el notebook reutiliza **la misma infraestructura reanudable** para `jbjy-vk9h`. Esta descarga también es ejecutable directamente.\\n\\n- cache oficial: `raw/pages/<CACHE_SCOPE>/contratos/official/`;\\n- cada chunk conserva firma + SHA-256;\\n- si Colab repite la celda, reutiliza únicamente chunks válidos;\\n- al completar, consoliden una sola vez en `raw/contratos.parquet`.\\n\\nLa relación correcta entre las dos fuentes es:\\n\\n```\\nprocesos.id_del_portafolio == contratos.proceso_de_compra\\n```\\n\\n`id_del_proceso` sigue siendo la identidad del proceso; **no** es la clave de cruce con `proceso_de_compra`.\\n\\nSi hay menos de **30 procesos únicos con contrato relacionado**, el precheck se detiene porque E2–E5 no tendrían una población relacional suficiente.\\n\",\"id\":\"zjltDhW47wBb\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"B60dd-p47wBc\"},\"source\":\"# Infraestructura provista · segunda fuente SECOP con descarga reanudable\\ninicio_contratos = time.perf_counter()\\ncontratos_df, meta_contratos = descargar_concurrente(\\n    ENDPOINTS[\\\"contratos\\\"],\\n    select=SELECT_CONTRATOS,\\n    where=WHERE_CONTRATOS,\\n    order=query_plan[\\\"contratos\\\"][\\\"order\\\"],\\n    max_rows=N_CONTRATOS,\\n    cache_dir=CACHE_CONTRATOS,\\n    max_workers=MAX_WORKERS,\\n)\\ntiempo_contratos = time.perf_counter() - inicio_contratos if isinstance(contratos_df, pd.DataFrame) else None\\n\\njoin_coverage = None\\nmatched_processes = 0\\n\\nif isinstance(procesos_df, pd.DataFrame) and isinstance(contratos_df, pd.DataFrame):\\n    claves_contrato = set(contratos_df[\\\"proceso_de_compra\\\"].dropna().astype(str).str.strip())\\n    claves_proceso = procesos_df[\\\"id_del_portafolio\\\"].fillna(\\\"\\\").astype(str).str.strip()\\n    mask_join = claves_proceso.ne(\\\"\\\") & claves_proceso.isin(claves_contrato)\\n\\n    procesos_unicos = int(procesos_df[\\\"id_del_proceso\\\"].nunique())\\n    matched_processes = int(procesos_df.loc[mask_join, \\\"id_del_proceso\\\"].nunique())\\n    join_coverage = float(matched_processes / procesos_unicos) if procesos_unicos else 0.0\\n\\n    print(\\\"Procesos únicos con contrato relacionado:\\\", matched_processes, \\\"/\\\", procesos_unicos)\\n    print(\\\"join_coverage única:\\\", round(join_coverage, 4))\\n    print(\\\"Chunks contratos:\\\", len(meta_contratos), \\\"· cache hits:\\\", sum(bool(x.get(\\\"from_cache\\\")) for x in meta_contratos))\\n    if matched_processes < MIN_MATCHED_PROCESSES:\\n        raise RuntimeError(\\n            f\\\"PRECHECK RELACIONAL: solo {matched_processes} procesos únicos tienen contrato relacionado; \\\"\\n            f\\\"se requieren al menos {MIN_MATCHED_PROCESSES}. \\\"\\n            \\\"No continúe a E2. Revise que ejecutó la ventana correcta, que no cambió los filtros y \\\"\\n            \\\"que el cruce sea id_del_portafolio → proceso_de_compra.\\\"\\n        )\\n\\n\\nprint(\\\"✓ Contratos descargados:\\\", len(contratos_df), \\\"filas en\\\", round(tiempo_contratos, 2), \\\"s\\\")\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"B60dd-p47wBc\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"uqrQANBX7wBc\"},\"source\":\"### E1.5 · Checkpoint E1 y consolidación RAW\\n\\nLas páginas JSON son la **evidencia reanudable de adquisición**. Cuando la equivalencia de Procesos ya fue demostrada, consoliden el snapshot en Parquet para que E2–E5 **no vuelvan a tocar Socrata**.\\n\\nDeben quedar:\\n\\n- `raw/pages/<CACHE_SCOPE>/procesos/sequential/page_*.json` + `.meta.json`;\\n- `raw/pages/<CACHE_SCOPE>/procesos/threaded/page_*.json` + `.meta.json`;\\n- `raw/pages/<CACHE_SCOPE>/contratos/official/page_*.json` + `.meta.json`;\\n- `raw/procesos.parquet`;\\n- `raw/contratos.parquet`;\\n- `01_acquisition_manifest.json`;\\n- `01_benchmark_threads.json`;\\n- `01_quality_report.json`.\\n\\n### Condición para pasar a E2\\n\\nAntes de escribir Parquet debe cumplirse:\\n\\n```text\\nmismos offsets\\n+ mismas filas\\n+ mismo hash\\n+ procesos únicos con contrato ≥ 30\\n```\\n\\nA partir de aquí, E2–E5 deben leer/reutilizar el snapshot consolidado y no hacer nuevas llamadas a datos.gov.co.\\n\\n\\n**Cambio de PAREJA_ID:** cada pareja/ventana usa un `CACHE_SCOPE` distinto. Si corrigieron un `PAREJA_ID` mal escrito, los chunks de la ejecución anterior quedan aislados y **no invalidan** la nueva entrega.\\n\",\"id\":\"uqrQANBX7wBc\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"Y0E71-Uq7wBc\"},\"source\":\"def profile_quality(df, key):\\n    return {\\n        \\\"rows\\\": int(len(df)),\\n        \\\"columns\\\": int(df.shape[1]),\\n        \\\"duplicate_keys\\\": int(df[key].duplicated().sum()) if key in df else None,\\n        \\\"null_key\\\": int(df[key].isna().sum()) if key in df else None,\\n        \\\"null_pct\\\": {c: round(float(df[c].isna().mean() * 100), 2) for c in df.columns[:20]},\\n    }\\n\\nif not benchmark_threads.get(\\\"same_offsets\\\"):\\n    raise RuntimeError(\\\"No consolide RAW: secuencial y concurrente no usaron los mismos offsets.\\\")\\nif not benchmark_threads.get(\\\"same_rows\\\") or not benchmark_threads.get(\\\"same_hash\\\"):\\n    raise RuntimeError(\\\"No consolide RAW: las dos estrategias no produjeron el mismo snapshot.\\\")\\nif not isinstance(join_coverage, (int, float)) or join_coverage <= 0:\\n    raise RuntimeError(\\\"No consolide RAW: el cruce con Contratos no produjo población relacionada.\\\")\\n\\n# El snapshot oficial usa la ruta concurrente ya contrastada contra la secuencial.\\nprocesos_df.to_parquet(RAW / \\\"procesos.parquet\\\", index=False)\\ncontratos_df.to_parquet(RAW / \\\"contratos.parquet\\\", index=False)\\n\\nquality_report = {\\n    \\\"procesos\\\": profile_quality(procesos_df, \\\"id_del_proceso\\\"),\\n    \\\"contratos\\\": profile_quality(contratos_df, \\\"id_contrato\\\"),\\n    \\\"join_key\\\": \\\"id_del_portafolio -> proceso_de_compra\\\",\\n    \\\"matched_processes\\\": matched_processes,\\n    \\\"join_coverage\\\": join_coverage,\\n}\\n\\ndef page_manifest(meta_rows):\\n    return [\\n        {\\n            \\\"offset\\\": int(x[\\\"offset\\\"]),\\n            \\\"limit\\\": int(x[\\\"limit\\\"]),\\n            \\\"rows\\\": int(x[\\\"rows\\\"]),\\n            \\\"sha256\\\": x.get(\\\"sha256\\\"),\\n            \\\"query_signature\\\": x.get(\\\"query_signature\\\"),\\n            \\\"from_cache\\\": bool(x.get(\\\"from_cache\\\")),\\n            \\\"attempts\\\": int(x.get(\\\"attempts\\\", 0) or 0),\\n        }\\n        for x in sorted(meta_rows, key=lambda z: int(z[\\\"offset\\\"]))\\n    ]\\n\\nacquisition_manifest = {\\n    \\\"schema\\\": \\\"2026-10-01-secoppipeline-v7\\\",\\n    \\\"queried_at_utc\\\": datetime.now(timezone.utc).isoformat(),\\n    \\\"pair\\\": PAREJA_ID,\\n    \\\"cache_scope\\\": CACHE_SCOPE,\\n    \\\"window\\\": {\\\"start\\\": globals().get(\\\"FECHA_INI\\\"), \\\"end\\\": globals().get(\\\"FECHA_FIN\\\")},\\n    \\\"workers\\\": MAX_WORKERS,\\n    \\\"page_size\\\": PAGE_SIZE,\\n    \\\"target_rows\\\": {\\\"procesos\\\": N_PROCESOS, \\\"contratos\\\": N_CONTRATOS},\\n    \\\"datasets\\\": {\\n        \\\"procesos\\\": {\\n            \\\"id\\\": ENDPOINTS[\\\"procesos\\\"],\\n            \\\"rows\\\": len(procesos_df),\\n            \\\"pages_sequential\\\": page_manifest(meta_procesos_seq),\\n            \\\"pages_threaded\\\": page_manifest(meta_procesos),\\n            \\\"snapshot_sha256\\\": hash_threads,\\n        },\\n        \\\"contratos\\\": {\\n            \\\"id\\\": ENDPOINTS[\\\"contratos\\\"],\\n            \\\"rows\\\": len(contratos_df),\\n            \\\"pages\\\": page_manifest(meta_contratos),\\n            \\\"snapshot_sha256\\\": canonical_hash(contratos_df, \\\"id_contrato\\\"),\\n        },\\n    },\\n    \\\"benchmark\\\": benchmark_threads,\\n}\\n\\n(OUT / \\\"01_acquisition_manifest.json\\\").write_text(json.dumps(acquisition_manifest, ensure_ascii=False, indent=2), encoding=\\\"utf-8\\\")\\n(OUT / \\\"01_benchmark_threads.json\\\").write_text(json.dumps(benchmark_threads, ensure_ascii=False, indent=2), encoding=\\\"utf-8\\\")\\n(OUT / \\\"01_quality_report.json\\\").write_text(json.dumps(quality_report, ensure_ascii=False, indent=2), encoding=\\\"utf-8\\\")\\n\\nprint(\\\"RAW consolidado.\\\")\\nprint(\\\"Procesos:\\\", RAW / \\\"procesos.parquet\\\")\\nprint(\\\"Contratos:\\\", RAW / \\\"contratos.parquet\\\")\\nprint(\\\"Desde E2 en adelante no vuelva a consultar Socrata.\\\")\\nquality_report\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"Y0E71-Uq7wBc\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"2qMcVXfF7wBc\"},\"source\":\"## E2 · Modelo documental + MongoDB Atlas — 25 puntos\\n\\nDesde aquí **no vuelvan a consultar Socrata**. Trabajen con los Parquet generados en E1.\\n\\n### E2.1 · Histórico, relaciones y documentos — 5 puntos\\n\\n**Qué deben hacer:**\\n\\n1. Leer/reutilizar `procesos_df` y `contratos_df`.\\n2. Normalizar identificadores como texto, fechas y valores numéricos.\\n3. Construir `historico` con **una fila por `id_del_proceso` único**.\\n4. Construir `relaciones_contrato` usando exclusivamente:\\n   `id_del_portafolio → proceso_de_compra`.\\n5. Construir `documentos` con un documento por fila de `historico`.\\n6. Guardar los dos artefactos exigidos.\\n\\n**Condición exacta:**\\n\\n```python\\nlen(historico) == procesos_df[\\\"id_del_proceso\\\"].nunique()\\nhistorico[\\\"id_proceso\\\"].nunique() == len(historico)\\nlen(documentos) == len(historico)\\nlen(relaciones_contrato) > 0\\n```\\n\\n### Columnas mínimas\\n\\n`historico`:\\n- `id_proceso`, `entidad`, `nit_entidad`, `departamento`, `fecha_publicacion`, `anio`;\\n- `precio_base`, `modalidad`;\\n- `contratos_cantidad`, `valor_contratos`, `contratos_estados`.\\n\\n`relaciones_contrato`:\\n- `id_contrato`, `id_proceso`, `nit_entidad`, `entidad`, `nit_proveedor`, `proveedor`.\\n\\n`documentos`: un documento anidado por proceso con `id_proceso`, `entidad`, `proceso`, `proveedor_adjudicado`, `contratos_resumen` y `metadata_ingesta`.\\n\\n**Archivos que deben quedar:**\\n\\n- `02_secop_integrado.parquet`;\\n- `02_modelo_documental.json`.\\n\\n> SECOP puede traer varias filas para el mismo proceso. **No creen un documento por fila cruda.**\\n\",\"id\":\"2qMcVXfF7wBc\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"4jsrAxNd7wBc\"},\"source\":\"# Reto · integración y modelo documental\\n# Contrato de salida:\\n# - historico: una fila por id_proceso\\n# - relaciones_contrato: una fila por contrato enlazado mediante id_del_portafolio -> proceso_de_compra\\n# - documentos: lista de documentos anidados coherentes con el briefing\\n#\\n# Normalización explícita de identidad:\\n# al cruzar, renombre procesos.id_del_proceso -> id_proceso en la tabla relacional.\\n# No use id_del_proceso como clave de join; el join sigue siendo id_del_portafolio -> proceso_de_compra.\\n#\\n# columnas mínimas de relaciones_contrato:\\n# id_contrato, id_proceso, nit_entidad, entidad, nit_proveedor, proveedor\\n#\\n# Entregables:\\n# OUT / \\\"02_secop_integrado.parquet\\\"\\n# OUT / \\\"02_modelo_documental.json\\\"\\n\\nif join_coverage == 0:\\n    raise RuntimeError(\\\"PRECHECK E2: no existe población relacionada; vuelva a E1.4 antes de modelar.\\\")\\n\\nhistorico = None\\nrelaciones_contrato = None\\ndocumentos = None\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"4jsrAxNd7wBc\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"Pn5M19xj7wBc\"},\"source\":\"### E2.2 · Atlas real e idempotencia — 7 puntos\\n\\nEsta es la única etapa que exige una base externa real. La conexión no es el objetivo principal del taller, por eso separen **preflight de conexión** de **carga evaluada**.\\n\\n1. Obtengan su URI de MongoDB Atlas.\\n2. Captúrenla con `getpass()`; **no la escriban como literal**.\\n3. Usen un timeout corto para el preflight y ejecuten `client.admin.command(\\\"ping\\\")`.\\n4. Solo si el ping funciona continúen con la carga.\\n\\nDiagnóstico frecuente:\\n\\n| Error | Qué revisar |\\n|---|---|\\n| autenticación | usuario/contraseña y usuario de base creado en Atlas |\\n| timeout / server selection | Network Access / IP permitida y conectividad |\\n| DNS / SRV | URI copiada completa y acceso de red |\\n| URI visible en una celda/salida | elimínela, reinicie la salida y use `getpass()` |\\n\\nPara la carga evaluada:\\n\\n- índice único por `id_proceso`;\\n- `bulk_write`;\\n- `UpdateOne(..., upsert=True)`;\\n- ejecutar la carga **dos veces**;\\n- demostrar que el conteo después de la segunda ejecución es igual al primero y no aparecen duplicados;\\n- crear al menos un índice adicional alineado con una consulta real del taller.\\n\\n\\n### E2.3 · Índices Atlas — 4 puntos\\n\\nAdemás de `_id_`, deben crear:\\n\\n1. un índice **único** por `id_proceso`;\\n2. al menos un índice adicional que corresponda a una consulta real del taller.\\n\\nGuarden `atlas_indexes = list(coleccion.index_information().keys())`.\\n\",\"id\":\"Pn5M19xj7wBc\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"OCwN4gtw7wBc\"},\"source\":\"from pymongo import MongoClient, UpdateOne, ASCENDING, DESCENDING\\n\\natlas_ping = False\\natlas_server_version = None\\ncoleccion = None\\natlas_idempotencia = {}\\natlas_indexes = []\\n\\n# Preflight de infraestructura (provisto como contrato, no como respuesta de modelado):\\n# atlas_uri = getpass(\\\"MongoDB Atlas URI: \\\").strip()\\n# client = MongoClient(atlas_uri, serverSelectionTimeoutMS=10000)\\n# client.admin.command(\\\"ping\\\")\\n# atlas_ping = True\\n# atlas_server_version = str(client.server_info().get(\\\"version\\\", \\\"\\\"))\\n#\\n# Reto evaluado:\\n# - use la base \\\"tc1_bigdata\\\" y una colección propia del equipo;\\n# - cree índice único por id_proceso;\\n# - cargue documentos con bulk_write + UpdateOne(..., upsert=True);\\n# - ejecute DOS veces y registre count_after_first / count_after_second / duplicates_after_second;\\n# - cree al menos un índice adicional justificado por consulta;\\n# - guarde atlas_indexes = list(coleccion.index_information().keys()).\\n#\\n# Nunca imprima atlas_uri ni la incluya en ningún JSON de evidencia.\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"OCwN4gtw7wBc\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"J02WMV2D7wBc\"},\"source\":\"### E2.4 · Consulta A — 3 puntos\\n\\nContar en Atlas los procesos con:\\n\\n- `precio_base > 0`;\\n- al menos un contrato asociado.\\n\\nGuardar el filtro en `filtro_a` y el conteo en `resultado_a`.\\n\\n### E2.5 · Consulta B — 3 puntos\\n\\nObtener desde Atlas el **top 10** por `valor_contratos DESC` y desempatar por `id_proceso ASC`.\\n\\nGuardar `filtro_b`, `proyeccion_b` y `resultado_b`.\\n\\n### E2.6 · Evidencia Atlas — 3 puntos\\n\\nEl notebook debe escribir `02_atlas_evidence.json` con:\\n\\n- conteos de carga;\\n- idempotencia;\\n- índices;\\n- filtros/proyección;\\n- resultados de A y B.\\n\\nNo debe contener URI, usuario, contraseña ni App Token.\\n\",\"id\":\"J02WMV2D7wBc\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"WO-4v2CA7wBc\"},\"source\":\"filtro_a = None       # TODO\\nresultado_a = None    # TODO: count_documents\\n\\nfiltro_b = None       # TODO\\nproyeccion_b = None   # TODO\\nresultado_b = None    # TODO: lista top 10\\n\\natlas_resultados = {\\n    \\\"carga\\\": {\\n        \\\"documentos\\\": None if coleccion is None else coleccion.count_documents({}),\\n        \\\"server_version\\\": atlas_server_version,\\n        \\\"idempotencia\\\": atlas_idempotencia,\\n        \\\"indices\\\": atlas_indexes,\\n    },\\n    \\\"consulta_a\\\": {\\\"filtro\\\": filtro_a, \\\"resultado\\\": resultado_a},\\n    \\\"consulta_b\\\": {\\\"filtro\\\": filtro_b, \\\"proyeccion\\\": proyeccion_b, \\\"resultado\\\": resultado_b},\\n}\\n(OUT / \\\"02_atlas_evidence.json\\\").write_text(json.dumps(atlas_resultados, ensure_ascii=False, indent=2, default=str), encoding=\\\"utf-8\\\")\",\"execution_count\":null,\"outputs\":[],\"id\":\"WO-4v2CA7wBc\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"9M_Ds9Zi7wBd\"},\"source\":\"## E3 · Producto analítico desde Atlas — 10 puntos\\n\\n**Qué deben hacer:**\\n\\n1. Construir un pipeline de agregación de MongoDB desde `coleccion`.\\n2. Filtrar procesos con `precio_base > 0` y al menos un contrato.\\n3. Ordenar por `valor_contratos DESC` y luego `id_proceso ASC`.\\n4. Limitar a máximo 100.\\n5. Convertir el resultado en `bandeja_historica`.\\n\\n**Debe contener como mínimo:**\\n\\n- `id_proceso`;\\n- `anio`;\\n- `departamento`;\\n- `valor_contratos`.\\n\\n**Archivo obligatorio:** `03_bandeja_historica.csv`.\\n\\n**Condición para pasar:** el orden y los IDs deben coincidir con la referencia calculada desde sus propios documentos y debe haber ≤100 filas.\\n\\nLa bandeja prioriza revisión; **no demuestra fraude**.\\n\",\"id\":\"9M_Ds9Zi7wBd\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"211_GiY57wBd\"},\"source\":\"pipeline_bandeja = None       # TODO: pipeline MongoDB (match → project/sort → limit)\\nbandeja_documentos = None      # TODO: resultado leído desde Atlas\\nbandeja_historica = None       # TODO: DataFrame\\n\\n# Criterio de aceptación antes de E4:\\n# isinstance(bandeja_historica, pd.DataFrame)\\n# len(bandeja_historica) <= 100\\n# {\\\"id_proceso\\\",\\\"anio\\\",\\\"departamento\\\",\\\"valor_contratos\\\"}.issubset(bandeja_historica.columns)\\n#\\n# Entregable:\\n# bandeja_historica.to_csv(OUT / \\\"03_bandeja_historica.csv\\\", index=False)\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"211_GiY57wBd\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"IQvRDaWv7wBd\"},\"source\":\"## E4 · Cassandra query-first — 15 puntos\\n\\nNo necesitan una cuenta real de Cassandra/Astra. Aquí se evalúa **diseño query-first**.\\n\\n### Pregunta operacional\\n\\n> Dado un `anio` y un `departamento`, mostrar hasta 10 procesos comenzando por mayor `valor_contratos`; en empate, `id_proceso ASC`.\\n\\n**Qué deben hacer:**\\n\\n1. Construir `bandeja_cassandra` desde E3.\\n2. Escribir `cql_create`.\\n3. Usar `PRIMARY KEY ((anio, departamento), valor_contratos, id_proceso)`.\\n4. Usar `CLUSTERING ORDER BY (valor_contratos DESC, id_proceso ASC)`.\\n5. No usar `ALLOW FILTERING`.\\n6. Implementar `consulta_cassandra_simulada(...)`.\\n7. Generar `particion_prueba` y `top10_cassandra`.\\n\\n**Archivo obligatorio:** `04_modelo_cassandra.cql`.\\n\\n**Condición para pasar:** la simulación debe devolver exactamente el top 10 esperado para la partición de prueba.\\n\",\"id\":\"IQvRDaWv7wBd\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"aVCruzsn7wBd\"},\"source\":\"if isinstance(bandeja_historica, pd.DataFrame) and bandeja_historica.empty:\\n    raise RuntimeError(\\\"PRECHECK E4: la bandeja está vacía. Corrija E1–E3 antes de diseñar Cassandra.\\\")\\n\\nbandeja_cassandra = None\\ncql_create = \\\"\\\"   # TODO\\n\\ndef consulta_cassandra_simulada(df, anio, departamento, n=10):\\n    # TODO\\n    return None\\n\\nparticion_prueba = None\\ntop10_cassandra = None\\n\\n# Entregable obligatorio:\\n# OUT / \\\"04_modelo_cassandra.cql\\\"\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"aVCruzsn7wBd\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"08T8gZ2B7wBd\"},\"source\":\"## E5 · Neo4j y contexto relacional — 15 puntos\\n\\nNo necesitan Neo4j Aura. Se evalúan relaciones, Cypher y un subgrafo local.\\n\\n### Pregunta\\n\\n> ¿Qué proveedores conectan a la entidad con mayor número de contratos con otras entidades dentro del snapshot?\\n\\n**Qué deben hacer:**\\n\\n1. Reutilizar `relaciones_contrato` de E2.\\n2. Determinar el `nit_ancla`: NIT de la entidad con más contratos únicos.\\n3. Asignar `entidad_ancla`.\\n4. Construir `resultado_relacional` con:\\n   - `nit_proveedor`;\\n   - `contratos_con_ancla`;\\n   - `entidades_conectadas`.\\n5. Escribir:\\n   - `cypher_carga`;\\n   - `cypher_contexto`;\\n   - `cypher_compartidos`;\\n   - `cypher_ranking`.\\n6. Construir `G = nx.DiGraph()` con **Entidad → Contrato → Proveedor**.\\n7. Calcular `nodos_grafo` y `aristas_grafo`.\\n\\n**Archivos obligatorios:**\\n\\n- `05_resultado_relacional.csv`;\\n- `05_neo4j_consultas.cypher`.\\n\\n**Nombres de entidad:** el NIT es la identidad. Si SECOP trae varias grafías para el mismo NIT, `entidad_ancla` puede usar **cualquiera de los nombres realmente observados para ese NIT**.\\n\\nUna conexión contractual no demuestra colusión, favorecimiento ni fraude.\\n\",\"id\":\"08T8gZ2B7wBd\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"NGeTreOH7wBd\"},\"source\":\"import networkx as nx\\n\\nif isinstance(relaciones_contrato, pd.DataFrame) and relaciones_contrato.empty:\\n    raise RuntimeError(\\\"PRECHECK E5: no hay contratos enlazados. Corrija E1.4/E2 antes de construir el grafo.\\\")\\n\\nnit_ancla = None\\nentidad_ancla = None\\nresultado_relacional = None\\n\\ncypher_carga = \\\"\\\"\\ncypher_contexto = \\\"\\\"\\ncypher_compartidos = \\\"\\\"\\ncypher_ranking = \\\"\\\"\\n\\nG = nx.DiGraph()\\nnodos_grafo = 0\\naristas_grafo = 0\\n\\n# Entregables obligatorios:\\n# OUT / \\\"05_resultado_relacional.csv\\\"\\n# OUT / \\\"05_neo4j_consultas.cypher\\\"\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"NGeTreOH7wBd\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"VN-I26IV7wBd\"},\"source\":\"## E6 · Decisiones, microdefensa y paquete — 10 puntos\\n\\n### E6.1 · Decisiones e informe — 5 puntos\\n\\nCompleten las tres selecciones cerradas sobre:\\n\\n- HTTP 429;\\n- índice adicional Atlas;\\n- límites de la priorización/grafo.\\n\\nEl notebook genera `06_decision_log.json` y `06_informe_tecnico.md`.\\n\\n### E6.2 · Microdefensa cerrada — 3 puntos\\n\\nRespondan los dos escenarios cerrados sobre concurrencia y cobertura. Se genera `06_microdefensa_grupal.json`.\\n\\n### E6.3 · Paquete reproducible — 2 puntos\\n\\nEjecuten el validador. Debe encontrar todos los archivos y no detectar secretos.\\n\\nAl final deben existir:\\n\\n- `manifest_tc1.json`;\\n- `TC1_<PAREJA_ID>.zip`.\\n\\nSi un check falla, la V7 imprime **feedback + evidencia concreta** para que sepan qué valor no coincide.\\n\",\"id\":\"VN-I26IV7wBd\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"WvShc2EE7wBe\"},\"source\":\"#@title E6.1 · Tres decisiones de ingeniería { display-mode: \\\"form\\\" }\\ndecision_429 = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"Reducir concurrencia, respetar Retry-After/backoff y volver a comprobar filas + hash\\\",\\\"Subir a 32 workers para terminar antes\\\",\\\"Eliminar retries para que el error aparezca rápido\\\"]\\ndecision_indice = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"Crear un índice adicional alineado con una consulta real y comprobarlo con index_information()\\\",\\\"Crear cualquier índice compuesto aunque ninguna consulta lo use\\\",\\\"Conservar solo _id_ porque MongoDB indexa todo automáticamente\\\"]\\ndecision_limite = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"La priorización y las conexiones orientan revisión; no demuestran fraude ni causalidad\\\",\\\"Una conexión repetida demuestra favorecimiento\\\",\\\"El top 10 prueba irregularidad porque está ordenado por valor\\\"]\\n\\nCORRECT_429 = \\\"Reducir concurrencia, respetar Retry-After/backoff y volver a comprobar filas + hash\\\"\\nCORRECT_INDICE = \\\"Crear un índice adicional alineado con una consulta real y comprobarlo con index_information()\\\"\\nCORRECT_LIMITE = \\\"La priorización y las conexiones orientan revisión; no demuestran fraude ni causalidad\\\"\\n\\nselecciones_decision = {\\n    \\\"429\\\": decision_429,\\n    \\\"indice\\\": decision_indice,\\n    \\\"limite\\\": decision_limite,\\n}\\nif any(v == \\\"— selecciona —\\\" for v in selecciones_decision.values()):\\n    raise ValueError(\\\"Complete las tres decisiones estructuradas antes de generar E6.\\\")\\n\\ndecision_log = [\\n    {\\n        \\\"decision\\\": decision_429,\\n        \\\"evidence\\\": f\\\"workers={MAX_WORKERS}; same_offsets={benchmark_threads.get('same_offsets')}; same_hash={benchmark_threads.get('same_hash')}\\\",\\n        \\\"alternative\\\": \\\"Aumentar workers sin controlar throttling\\\",\\n        \\\"risk\\\": \\\"Cambiar la estrategia sin verificar equivalencia puede alterar o truncar el snapshot.\\\",\\n    },\\n    {\\n        \\\"decision\\\": decision_indice,\\n        \\\"evidence\\\": f\\\"indices={atlas_indexes}\\\",\\n        \\\"alternative\\\": \\\"Crear un índice por forma y no por patrón de acceso\\\",\\n        \\\"risk\\\": \\\"Índices innecesarios agregan costo de escritura y no aceleran la consulta objetivo.\\\",\\n    },\\n    {\\n        \\\"decision\\\": decision_limite,\\n        \\\"evidence\\\": f\\\"join_coverage={join_coverage}; matched_processes={matched_processes}\\\",\\n        \\\"alternative\\\": \\\"Interpretar prioridad o conectividad como prueba\\\",\\n        \\\"risk\\\": \\\"Confundir señal descriptiva con causalidad o irregularidad.\\\",\\n    },\\n]\\n(OUT / \\\"06_decision_log.json\\\").write_text(json.dumps(decision_log, ensure_ascii=False, indent=2), encoding=\\\"utf-8\\\")\\n\\ninforme_tecnico = f\\\"\\\"\\\"## 1. Adquisición y contrato de datos\\nProcesos={0 if procesos_df is None else len(procesos_df)}; contratos={0 if contratos_df is None else len(contratos_df)}; clave=id_del_portafolio→proceso_de_compra.\\n\\n## 2. Concurrencia, robustez y calidad\\nWorkers={MAX_WORKERS}; mismos_offsets={benchmark_threads.get('same_offsets')}; mismo_hash={benchmark_threads.get('same_hash')}; join_coverage={join_coverage}.\\n\\n## 3. Modelo documental e idempotencia Atlas\\nDocumentos={0 if documentos is None else len(documentos)}; idempotencia={atlas_idempotencia}; índices={atlas_indexes}.\\n\\n## 4. Producto analítico y Cassandra\\nFilas_bandeja={0 if bandeja_historica is None else len(bandeja_historica)}; modelo Cassandra=query-first + simulación local.\\n\\n## 5. Neo4j, decisiones y límites\\nEntidad ancla={entidad_ancla}; nodos={nodos_grafo}; aristas={aristas_grafo}. La priorización y las conexiones no demuestran fraude ni causalidad.\\n\\\"\\\"\\\"\\n(OUT / \\\"06_informe_tecnico.md\\\").write_text(informe_tecnico, encoding=\\\"utf-8\\\")\\ninforme_tecnico\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"WvShc2EE7wBe\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"ZPRTpuWZ7wBf\"},\"source\":\"### E6.2 · Microdefensa estructurada basada en su ejecución\\n\\nNo redacten respuestas. Seleccionen la acción/interpretación que sea coherente con el resultado que obtuvieron.\\n\\n- **Escenario 1 — concurrencia:** la API comienza a responder HTTP 429.\\n- **Escenario 2 — calidad:** su `join_coverage` es menor que 1.\\n\\nEl archivo resultante guarda las selecciones y los valores propios de su ejecución para que la defensa sea verificable.\\n\",\"id\":\"ZPRTpuWZ7wBf\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"GbUvmzda7wBf\"},\"source\":\"#@title E6.2 · Microdefensa estructurada { display-mode: \\\"form\\\" }\\nrespuesta_429 = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"Reducir workers, respetar Retry-After/backoff y repetir la comparación de filas + hash\\\",\\\"Aumentar workers hasta que desaparezca el 429\\\",\\\"Aceptar menos filas si la descarga concurrente terminó primero\\\"]\\nrespuesta_cobertura = \\\"— selecciona —\\\" #@param [\\\"— selecciona —\\\",\\\"La cobertura mide qué proporción de procesos encontró contrato en este snapshot; no se inventan los faltantes\\\",\\\"Los procesos sin contrato deben rellenarse con valor cero para completar el análisis\\\",\\\"Una cobertura menor que 1 invalida automáticamente todos los datos SECOP\\\"]\\n\\nCORRECT_DEFENSA_429 = \\\"Reducir workers, respetar Retry-After/backoff y repetir la comparación de filas + hash\\\"\\nCORRECT_DEFENSA_COBERTURA = \\\"La cobertura mide qué proporción de procesos encontró contrato en este snapshot; no se inventan los faltantes\\\"\\n\\nif respuesta_429 == \\\"— selecciona —\\\" or respuesta_cobertura == \\\"— selecciona —\\\":\\n    raise ValueError(\\\"Complete las dos decisiones de la microdefensa.\\\")\\n\\ndefensa_grupal = {\\n    \\\"escenario_429\\\": {\\n        \\\"workers_observados\\\": MAX_WORKERS,\\n        \\\"same_hash\\\": benchmark_threads.get(\\\"same_hash\\\"),\\n        \\\"seleccion\\\": respuesta_429,\\n    },\\n    \\\"escenario_cobertura\\\": {\\n        \\\"join_coverage\\\": join_coverage,\\n        \\\"matched_processes\\\": matched_processes,\\n        \\\"seleccion\\\": respuesta_cobertura,\\n    },\\n}\\n\\n(OUT / \\\"06_microdefensa_grupal.json\\\").write_text(\\n    json.dumps(defensa_grupal, ensure_ascii=False, indent=2),\\n    encoding=\\\"utf-8\\\"\\n)\\ndefensa_grupal\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"GbUvmzda7wBf\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"voh5fXfP7wBg\"},\"source\":\"## Validación final\\n\\nEl validador evalúa invariantes de ingeniería y coherencia entre sus propios artefactos.\\n\\nLa V7 añade controles sobre procesos únicos, cache aislado, población relacional mínima, nombres alternos por NIT y evidencia visible de cada fallo. La versión está fijada para que el criterio no cambie a mitad de la entrega.\\n\\nEjecuten esta celda solo cuando hayan completado E1–E6.\\n\",\"id\":\"voh5fXfP7wBg\"},{\"cell_type\":\"code\",\"metadata\":{\"id\":\"oOwkLJzI7wBg\"},\"source\":\"# Descargar el validador oficial VERSIONADO de S08\\nVALIDATOR_VERSION = \\\"2026-10-01-secoppipeline-v7\\\"\\nVALIDATOR_URL = \\\"https://raw.githubusercontent.com/jazaineam1/BigData2026/main/utils/tc1_validator_20261001_v7.py\\\"\\nr_validator = requests.get(VALIDATOR_URL, timeout=30)\\nr_validator.raise_for_status()\\nvalidator_text = r_validator.text\\nif \\\"def evaluar\\\" not in validator_text or f'VERSION = \\\"{VALIDATOR_VERSION}\\\"' not in validator_text:\\n    raise RuntimeError(\\\"El validador descargado no corresponde a la versión oficial de S08.\\\")\\nPath(\\\"tc1_validator.py\\\").write_text(validator_text, encoding=\\\"utf-8\\\")\\n\\n# En Colab intentamos inspeccionar también el notebook ejecutado para detectar secretos\\n# en código/salidas. Si el frontend no expone el JSON, el validador conserva el gate\\n# sobre todos los artefactos de entrega y la captura segura mediante getpass().\\nnotebook_json_for_secret_scan = None\\ntry:\\n    from google.colab import _message\\n    notebook_json_for_secret_scan = _message.blocking_request(\\\"get_ipynb\\\")\\nexcept Exception:\\n    pass\\n\\nimport importlib.util\\nspec = importlib.util.spec_from_file_location(\\\"tc1_validator\\\", \\\"tc1_validator.py\\\")\\ntc1_validator = importlib.util.module_from_spec(spec)\\nspec.loader.exec_module(tc1_validator)\\n\\nmanifest = tc1_validator.evaluar(globals())\\nmanifest\\n\\n\\n# Huella para registrar la entrega por correo\\nmanifest_path = OUT / \\\"manifest_tc1.json\\\"\\nif manifest_path.exists():\\n    MANIFEST_SHA256 = hashlib.sha256(manifest_path.read_bytes()).hexdigest()\\n    print(\\\"SHA-256 manifest_tc1.json:\\\", MANIFEST_SHA256)\\nelse:\\n    MANIFEST_SHA256 = None\\n\",\"execution_count\":null,\"outputs\":[],\"id\":\"oOwkLJzI7wBg\"},{\"cell_type\":\"markdown\",\"metadata\":{\"id\":\"FQ8I6OKp7wBg\"},\"source\":\"## Entrega final · Google Drive + correo institucional\\n\\n**No se entrega por LMS.**\\n\\nLa entrega oficial queda registrada cuando el docente recibe el correo del equipo con un enlace funcional a la carpeta de Google Drive.\\n\\n---\\n\\n# A. Preparar los archivos\\n\\nAntes de subir nada:\\n\\n1. Ejecuten el notebook desde el inicio hasta el validador final.\\n2. Verifiquen que la validación corresponda a la última versión de su trabajo.\\n3. Descarguen/guarden el notebook ejecutado y renómbrenlo:\\n   `TC1_<PAREJA_ID>.ipynb`.\\n4. Confirmen que existen:\\n   - `TC1_<PAREJA_ID>.ipynb`;\\n   - `TC1_<PAREJA_ID>.zip`;\\n   - `manifest_tc1.json`.\\n5. No renombren `manifest_tc1.json`.\\n6. No modifiquen manualmente el manifest después de generarlo.\\n\\n---\\n\\n# B. Tutorial completo · entrega principal en Google Drive\\n\\n## B1. Crear la carpeta\\n\\n1. Entren a **Google Drive** con su cuenta institucional o personal.\\n2. Pulsen **Nuevo → Nueva carpeta**.\\n3. Usen este formato:\\n\\n```text\\nTC1_BIGDATA_<PAREJA_ID>_<APELLIDO1>_<APELLIDO2>\\n```\\n\\nEjemplo:\\n\\n```text\\nTC1_BIGDATA_P03_GARCIA_ROJAS\\n```\\n\\n## B2. Subir los tres archivos\\n\\n1. Abran la carpeta recién creada.\\n2. Pulsen **Nuevo → Subir archivo**.\\n3. Seleccionen:\\n   - `TC1_<PAREJA_ID>.ipynb`;\\n   - `TC1_<PAREJA_ID>.zip`;\\n   - `manifest_tc1.json`.\\n4. Esperen a que Drive muestre que las tres cargas terminaron.\\n5. Revisen que no exista un archivo con tamaño 0 bytes ni una copia antigua con el mismo nombre.\\n\\n## B3. Compartir correctamente\\n\\n**Opción recomendada por privacidad: carpeta restringida y compartida directamente con el docente.**\\n\\nEl paquete contiene nombres y códigos de los integrantes, por lo que no se recomienda publicar la carpeta con acceso abierto si no es necesario.\\n\\n1. Clic derecho sobre la **carpeta**, no sobre cada archivo.\\n2. Seleccionen **Compartir**.\\n3. Mantengan **Acceso general: Restringido**.\\n4. Agreguen:\\n   `jzaineam@ucentral.edu.co`\\n5. Asignen rol **Lector**.\\n6. Activen la notificación.\\n7. Copien el vínculo de la carpeta.\\n\\nSolo si su configuración de Drive impide compartir directamente con el docente, utilicen **Cualquier persona que tenga el vínculo → Lector** como alternativa y prueben el vínculo en incógnito.\\n\\n## B4. Prueba de acceso\\n\\nSi compartieron directamente, verifiquen que el panel **Compartir** muestre:\\n\\n`jzaineam@ucentral.edu.co · Lector`\\n\\nSi utilizaron la alternativa \\\"Cualquier persona que tenga el vínculo\\\":\\n\\n1. Abran una ventana de incógnito/privada.\\n2. Peguen el vínculo.\\n3. Comprueben que pueden ver la carpeta sin solicitar permiso.\\n4. Comprueben que aparecen notebook, ZIP y manifest.\\n\\nSi el enlace alternativo pide autorización, **todavía no está listo para entregar**.\\n\\n---\\n\\n# C. Correo que registra oficialmente la entrega\\n\\n**Un solo integrante** envía el correo y pone al otro integrante en copia.\\n\\nEnviar a:\\n\\n```text\\njzaineam@ucentral.edu.co\\n```\\n\\nAsunto obligatorio:\\n\\n```text\\n[BIG DATA 2026-2S][TC1] <PAREJA_ID> - <APELLIDO1> - <APELLIDO2>\\n```\\n\\nEjemplo:\\n\\n```text\\n[BIG DATA 2026-2S][TC1] P03 - GARCIA - ROJAS\\n```\\n\\nCuerpo del correo:\\n\\n```text\\nProfesor,\\n\\nRealizamos la entrega del Taller de Control 1.\\n\\nPareja: <PAREJA_ID>\\n\\nIntegrante 1:\\nNombre:\\nCódigo:\\n\\nIntegrante 2:\\nNombre:\\nCódigo:\\n\\nCarpeta de Google Drive:\\n<PEGAR ENLACE>\\n\\nGitHub (opcional):\\n<PEGAR ENLACE O ESCRIBIR \\\"No aplica\\\">\\n\\nSHA-256 de manifest_tc1.json:\\n<PEGAR SHA-256>\\n\\nConfirmamos que la carpeta contiene:\\n- TC1_<PAREJA_ID>.ipynb\\n- TC1_<PAREJA_ID>.zip\\n- manifest_tc1.json\\n\\nFecha de envío:\\n<FECHA>\\n```\\n\\nNo adjunten el ZIP al correo si ya está en Drive. El correo sirve para registrar **quién entregó, qué pareja es, cuál es el enlace y cuándo se envió**.\\n\\nSi necesitan corregir algo antes del cierre:\\n\\n- respondan **sobre el mismo hilo**;\\n- indiquen `CORRECCIÓN DE ENTREGA`;\\n- mantengan el mismo enlace si reemplazaron los archivos;\\n- la versión válida será la última enviada antes de la fecha máxima.\\n\\n---\\n\\n# D. GitHub opcional · carga por navegador\\n\\nGitHub **no es obligatorio** y no reemplaza Drive + correo.\\n\\nSi desean usarlo:\\n\\n## D1. Crear repositorio\\n\\n1. Entren a GitHub.\\n2. Pulsen **New repository**.\\n3. Nombre sugerido:\\n\\n```text\\nTC1-BIGDATA-2026-<PAREJA_ID>\\n```\\n\\n4. Se recomienda **Private**.\\n5. Pueden inicializar con `README.md`.\\n6. Creen el repositorio.\\n\\n## D2. Si el repositorio es privado\\n\\n1. Entren a **Settings → Collaborators**.\\n2. Agreguen como colaborador:\\n   `jazaineam1`\\n3. Confirmen la invitación.\\n\\n## D3. Subir archivos desde el navegador\\n\\n1. Entren al repositorio.\\n2. **Add file → Upload files**.\\n3. Arrastren el notebook y el manifest.\\n4. También pueden subir el ZIP **solo si su tamaño permite la carga por navegador**.\\n5. Escriban un mensaje de commit, por ejemplo:\\n   `Entrega TC1 P03`.\\n6. Pulsen **Commit changes**.\\n\\nGitHub limita actualmente la carga por navegador a **25 MiB por archivo**. Si el ZIP supera ese tamaño, **déjenlo únicamente en Drive** o utilicen Git/Git LFS; Drive sigue siendo la fuente oficial de la entrega.\\n\\n## D4. README mínimo recomendado\\n\\n```markdown\\n# TC1 Big Data 2026-2S\\n\\nPareja: P03\\n\\nIntegrantes:\\n- Nombre — código\\n- Nombre — código\\n\\nContenido:\\n- notebook ejecutado\\n- manifest del validador\\n- evidencia reproducible del TC1\\n\\nLa entrega oficial fue realizada por Google Drive + correo al docente.\\n```\\n\\n---\\n\\n# E. GitHub opcional · alternativa con Git por terminal\\n\\nÚsenla solo si ya manejan Git.\\n\\n```bash\\nmkdir TC1-BIGDATA-2026-P03\\ncd TC1-BIGDATA-2026-P03\\n\\ngit init\\ngit branch -M main\\n\\n# Copiar aquí los archivos que deseen versionar.\\n\\ngit add .\\ngit commit -m \\\"Entrega TC1 P03\\\"\\n\\ngit remote add origin https://github.com/<USUARIO>/TC1-BIGDATA-2026-P03.git\\ngit push -u origin main\\n```\\n\\nGitHub admite archivos mayores por línea de comandos que por navegador, pero los archivos muy grandes requieren Git LFS. Para este taller **no es necesario versionar el ZIP en GitHub**: manténganlo en Drive.\\n\\n---\\n\\n# F. Checklist antes de enviar el correo\\n\\n- [ ] El notebook está ejecutado y tiene salidas visibles.\\n- [ ] El nombre del notebook incluye el `PAREJA_ID`.\\n- [ ] El ZIP fue generado por el validador.\\n- [ ] `manifest_tc1.json` no fue modificado manualmente.\\n- [ ] Calculé el SHA-256 de `manifest_tc1.json` y lo pegué en el correo.\\n- [ ] La carpeta de Drive contiene los tres archivos.\\n- [ ] El enlace abre correctamente o el docente está agregado como Lector.\\n- [ ] No hay App Token, URI de Atlas, usuario ni contraseña expuestos.\\n- [ ] Un integrante envía el correo.\\n- [ ] El compañero está en copia.\\n- [ ] El asunto usa el formato obligatorio.\\n- [ ] El correo se envía antes del **17 de octubre de 2026 a las 11:59 p. m. (Bogotá)**.\\n\\n**El LMS no forma parte de la entrega de este TC1. La entrega oficial es Drive restringido + correo institucional.**\\n\",\"id\":\"FQ8I6OKp7wBg\"}]")
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "utils"))
+sys.path.insert(0, str(ROOT))
 
-def build():
-    cells=[]
-    for c in CELLS:
-        cell={k:v for k,v in c.items() if k not in {"source","execution_count","outputs"}}
-        cell["source"]=c["source"].splitlines(keepends=True)
-        if c["cell_type"]=="code":
-            cell.update({"execution_count":None,"outputs":[]})
-        cells.append(cell)
-    nb={
-        "cells":cells,
-        "metadata":{
-            "kernelspec":{"display_name":"Python 3","language":"python","name":"python3"},
-            "language_info":{"name":"python","version":"3.11"},
-            "colab":{"name":"Taller_Control_1.ipynb","provenance":[],"include_colab_link":True}
-        },
-        "nbformat":4,
-        "nbformat_minor":5
-    }
-    out=Path(__file__).resolve().parents[1]/"Cuadernos"/"Taller_Control_1.ipynb"
-    out.write_text(json.dumps(nb,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    print(out)
+import tc1_contrato as C  # noqa: E402
+from utils.make_notebook import build, code, md, validate  # noqa: E402
 
-if __name__=="__main__":
-    build()
+DESTINO = ROOT / "Cuadernos" / "Taller_Control_1.ipynb"
+MODULOS = ["tc1_contrato.py", "tc1_secop.py", "tc1_servicios.py", "tc1_validador.py", "tc1_cuaderno.py"]
+REPO = "https://github.com/jazaineam1/BigData2026/blob/main/utils/"
+
+
+def opciones(lista):
+    return "[" + ", ".join(json.dumps(x, ensure_ascii=False) for x in lista) + "]"
+
+
+def ficha(etapa, objetivo, pregunta, donde, provisto, pasos, evidencia, puntos):
+    filas = [
+        ("Objetivo", objetivo), ("Pregunta", pregunta), ("Dónde trabajas", donde), ("Ya está provisto", provisto),
+        ("Tú haces", "<br>".join(f"{i}. {p}" for i, p in enumerate(pasos, 1))),
+        ("Checkpoint para avanzar", "<br>".join(f"☐ {c}" for c in C.CHECKPOINTS[etapa])),
+        ("Evidencia que queda", evidencia), ("Puntos", puntos),
+    ]
+    tabla = "\n".join(f"| **{k}** | {v} |" for k, v in filas)
+    return md(f"# {etapa} · {C.STAGE_NOMBRE[etapa]} — {C.STAGE_MAX[etapa]} puntos\n\n| | |\n|---|---|\n{tabla}")
+
+
+def lectura(como, dice, no_permite, error):
+    return md(f"**Cómo se lee.** {como}\n\n**Qué nos dice.** {dice}\n\n"
+              f"**Qué NO permite concluir todavía.** {no_permite}\n\n**Qué error común.** {error}")
+
+
+def celda_infraestructura():
+    lineas = ["#@title Preparar el entorno · instala dos librerías y carga la infraestructura provista (no se evalúa)",
+              "# Código legible y versionado: " + REPO + "tc1_contrato.py (y los demás utils/tc1_*.py).",
+              "# Aquí va comprimido para que un solo Ctrl+Enter deje todo listo; el SHA-256 garantiza que es la versión oficial.",
+              "import base64, hashlib, importlib, subprocess, sys, zlib",
+              "from pathlib import Path",
+              "subprocess.run([sys.executable, '-m', 'pip', '-q', 'install', 'pymongo>=4.6,<5', 'neo4j>=5,<7'], check=False)",
+              "MODULOS = {"]
+    for nombre in MODULOS:
+        fuente = (ROOT / "utils" / nombre).read_bytes().replace(b"\r\n", b"\n")
+        sha = hashlib.sha256(fuente).hexdigest()
+        blob = base64.b64encode(zlib.compress(fuente, 9)).decode()
+        partes = [blob[i:i + 120] for i in range(0, len(blob), 120)]
+        lineas.append(f"    {nombre!r}: ({sha!r},")
+        lineas += [f"        {p!r}" for p in partes]
+        lineas.append("    ),")
+    lineas += [
+        "}",
+        "for nombre, (sha, blob) in MODULOS.items():",
+        "    fuente = zlib.decompress(base64.b64decode(blob))",
+        "    assert hashlib.sha256(fuente).hexdigest() == sha, f'{nombre} no coincide con la versión oficial'",
+        "    Path(nombre).write_bytes(fuente)",
+        "import time, json",
+        "from concurrent.futures import ThreadPoolExecutor, as_completed",
+        "import pandas as pd",
+        "import tc1_contrato as C, tc1_secop as S, tc1_servicios as X, tc1_validador as V, tc1_cuaderno as T",
+        "for modulo in (C, S, X, V, T):",
+        "    importlib.reload(modulo)",
+        "print(f'TC1 {C.VERSION_VISIBLE} listo. Siguiente paso: la celda «0 · Identidad de la pareja».')",
+    ]
+    return code("\n".join(lineas))
+
+
+def cells():
+    ventanas = "\n".join(f"| {p} | {i[:10]} | {f[:10]} |" for p, (i, f) in C.VENTANAS.items())
+    rubrica = "\n".join(f"| {cod} | {desc} | {pts} | {'automático' if t == 'auto' else 'automático + captura'} |"
+                        for cod, _, pts, desc, t in C.RUBRICA)
+    lista_parejas = opciones([C.SIN_SELECCION] + C.PAREJAS)
+    return [
+        md(f'<a href="{C.COLAB_URL}" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" '
+           'alt="Abrir el TC1 en Google Colab"/></a>'),
+        md(f'''# TC1 · Un snapshot de SECOP, tres preguntas, tres modelos
+
+**VERSIÓN {C.VERSION_VISIBLE}** · Taller de Control 1 · Big Data · Maestría en Analítica de Datos · Universidad Central
+
+## OBJETIVO DEL TC1
+
+Construir, en parejas, un pipeline reproducible sobre SECOP II y demostrar que **un mismo snapshot** se reutiliza en distintos modelos de datos según la pregunta que hay que responder.
+
+Al terminar habrás demostrado:
+
+1. **adquisición reproducible**: la descarga secuencial y la concurrente producen el mismo snapshot;
+2. **modelo documental**: un proceso es un documento en MongoDB Atlas, cargado sin duplicar;
+3. **producto analítico**: una bandeja priorizada construida en Atlas;
+4. **patrón query-first**: una tabla Cassandra diseñada desde su consulta y ejecutada en Astra;
+5. **contexto relacional**: los proveedores que conectan entidades, consultados en Neo4j Aura;
+6. **evidencia reproducible**: el docente puede recalcular tu resultado sin confiar en tu palabra.
+
+| Pregunta | Respuesta |
+|---|---|
+| ¿Qué voy a hacer? | Un pipeline sobre SECOP II: de la API a tres bases de datos, con evidencia verificable. |
+| ¿Qué voy a entregar? | Tres archivos: `TC1_<PAREJA_ID>.ipynb`, `TC1_<PAREJA_ID>.zip` y `manifest_tc1.json`. |
+| ¿Cuántas etapas? | Seis: E1 → E2 → E3 → E4 → E5 → E6. |
+| ¿Dónde trabajo? | E1 Colab · E2 Colab + **Atlas** · E3 **Atlas** + Colab · E4 Colab + **Astra** · E5 Colab + **Aura** · E6 Colab |
+| ¿Cómo sé si puedo avanzar? | Cada etapa termina en un **checkpoint** que imprime ✓ o ✗ y dice qué falta. |
+| ¿Cómo me califican? | Resultados que se recalculan desde tus datos + artefactos + tres capturas de los servicios. |
+
+**HAZ ESTO AHORA.** Abre el [checklist paso a paso]({C.CHECKLIST_URL}) en otra pestaña. Marca cada paso cuando su evidencia exista.'''),
+        md(f'''## La ruta: un hilo, seis etapas
+
+| Etapa | Pregunta que responde | Dónde trabajas | Evidencia que queda |
+|---|---|---|---|
+| **E1** · 25 | ¿Puedo usar concurrencia sin alterar la población descargada? | Colab | RAW firmado + benchmark + calidad |
+| **E2** · 25 | ¿Cómo represento un proceso como documento y lo cargo sin duplicar? | Colab → **Atlas** | modelo JSON + evidencia de Atlas |
+| **E3** · 10 | ¿Qué procesos reviso primero? | **Atlas** → Colab | pipeline + bandeja CSV + `E2_atlas.png` |
+| **E4** · 15 | Dado un año y un departamento, ¿cuáles son los 10 procesos de mayor valor? | Colab → **Astra** | `.cql` + salida de Astra + `E4_astra.png` |
+| **E5** · 15 | ¿Qué proveedores conectan a la entidad ancla con otras entidades? | Colab → **Aura** | `.cypher` + ranking + `E5_neo4j.png` |
+| **E6** · 10 | ¿Qué decidí, con qué evidencia y con qué límite? | Colab | decisiones + informe + paquete |
+
+**Por qué este orden.** Lo que produce una etapa es la entrada de la siguiente: el RAW de E1 se convierte en los documentos de E2; la colección de E2 produce la bandeja de E3; la bandeja de E3 es lo que E4 sirve en Cassandra; los contratos de E1 forman el grafo de E5, y E6 decide con todo lo anterior. Cada motor aparece porque responde una pregunta distinta: Atlas filtra y agrega documentos; Cassandra sirve una consulta conocida de antemano; Neo4j recorre relaciones.
+
+### Calificación
+
+**100 puntos, grupal**: la misma nota para todos los integrantes. `nota = 1 + 4 × puntaje / 100` (50 → 3,0 · 75 → 4,0 · 100 → 5,0). Se registra con un decimal, como pide el PDA (4,84 → 4,8). Sin entrega: 0,0. Corresponde al componente *primer taller de evaluación (teórico-práctico)* del PDA; el docente confirma su porcentaje con el PDA vigente.
+
+<details><summary><b>Rúbrica completa: 22 controles, todos verificables</b></summary>
+
+| Control | Qué se verifica | Puntos | Cómo |
+|---|---|---:|---|
+{rubrica}
+| | **TOTAL** | **100** | |
+
+Con captura: resultado correcto + captura válida = puntaje completo; resultado correcto sin captura válida = puntaje parcial (E2.6: 1 de 3 · E4.3: 2 de 4 · E5.4: 1 de 2); resultado incorrecto = 0. **Una captura sola no da puntos.** El docente vuelve a calcular todo desde tu ZIP con el mismo validador y revisa las tres capturas.
+</details>
+
+### Entrega
+
+**Fecha máxima: {C.FECHA_LIMITE}.** Una carpeta de Google Drive **restringida**, compartida con `{C.CORREO_DOCENTE}` como Lector, con exactamente los tres archivos, y un correo institucional. El LMS no es canal de entrega. GitHub es opcional. El último bloque del cuaderno deja los tres archivos listos.'''),
+        md(f'''## Antes de empezar: tus tres cuentas
+
+| Servicio | Lo usas en | Revisa hoy | Si no está |
+|---|---|---|---|
+| MongoDB Atlas (M0) | E2, E3 | clúster activo, usuario de base de datos, Network Access con tu IP o 0.0.0.0/0 | [tutorial de conexión de S04](https://jazaineam1.github.io/BigData2026/assets/tutoriales/atlas-guia-conexion.html) |
+| Astra DB (Serverless non-vector) | E4 | la base está **Active** y tiene el keyspace `compras_claras` | Astra pone en *Hibernated* las bases gratuitas tras 48 h sin uso y **las borra a los 30 días**: pulsa *Resume* o crea una nueva ([tutorial S05](https://jazaineam1.github.io/BigData2026/assets/tutoriales/astra-cassandra-paso-a-paso-v3.html)) |
+| Neo4j Aura Free | E5 | la instancia está **Running** y tienes su contraseña | Aura pausa la instancia tras 72 h sin uso y **la borra si sigue pausada 30 días**: reanúdala o crea otra ([tutorial S06](https://jazaineam1.github.io/BigData2026/assets/tutoriales/neo4j-aura-s06-paso-a-paso.html)) |
+
+**OJO.** Si una plataforma falla de verdad (caída del servicio o cuenta bloqueada), escríbelo en el correo con una captura del error y el docente decide la excepción. Lo que no depende del servicio se califica igual: por ejemplo, el diseño de tu `.cql` (E4.2) y tu archivo Cypher (E5.3).
+
+### Qué está provisto y qué haces tú
+
+| Provisto: no se califica reescribirlo | Tú decides o escribes: se califica |
+|---|---|
+| cliente HTTP con reintentos, caché firmado por páginas, hash canónico | la descarga secuencial y la concurrente con `ThreadPoolExecutor` (un hueco) |
+| carga técnica a Atlas y a Aura (Atlas no importa archivos desde el navegador; S04 cargó igual) | el grano documental, la estrategia de carga, los índices, el filtro A, el orden B y el pipeline E3, **en Atlas** |
+| el script CQL que se genera desde tus decisiones | la partición, el clustering y el tipo de la tabla; ejecutarla **en Astra** |
+| el validador y el empaquetado | dos consultas Cypher (un hueco cada una) ejecutadas **en Aura**; las decisiones de E6 |
+
+**Regla de avance.** No avances porque existe una celda siguiente: avanza cuando el checkpoint de la etapa esté en ✓.'''),
+        celda_infraestructura(),
+        md(f'''## 0 · Identidad de la pareja
+
+Tu `PAREJA_ID` lo asignó el docente y fija tu **ventana** de SECOP: dos parejas nunca comparten datos y la ventana no depende de cómo escribas el identificador.
+
+<details><summary>Tabla de ventanas</summary>
+
+| Pareja | Inicio | Fin |
+|---|---|---|
+{ventanas}
+</details>
+
+Escribe el nombre, el código y el **primer apellido** de cada integrante: los apellidos forman el nombre de la carpeta de entrega. Si trabajas solo, deja vacío el integrante 2. Los nombres y códigos solo viajan en tu entrega privada al docente; no los publiques. Guardar el avance en Drive deja una copia de tu carpeta de trabajo tras cada checkpoint: si Colab se reinicia, al volver a ejecutar esta celda recuperas lo hecho.'''),
+        code(f'''#@title 0 · Identidad de la pareja {{ display-mode: "form" }}
+PAREJA_ID = "{C.SIN_SELECCION}" #@param {lista_parejas}
+INTEGRANTE_1 = "" #@param {{type:"string"}}
+CODIGO_1 = "" #@param {{type:"string"}}
+APELLIDO_1 = "" #@param {{type:"string"}}
+INTEGRANTE_2 = "" #@param {{type:"string"}}
+CODIGO_2 = "" #@param {{type:"string"}}
+APELLIDO_2 = "" #@param {{type:"string"}}
+GUARDAR_AVANCE_EN_DRIVE = "Sí (recomendado)" #@param ["Sí (recomendado)", "No"]
+
+OUT, DRIVE = T.iniciar(PAREJA_ID, [(INTEGRANTE_1, CODIGO_1, APELLIDO_1), (INTEGRANTE_2, CODIGO_2, APELLIDO_2)],
+                       GUARDAR_AVANCE_EN_DRIVE)'''),
+        ficha("E1",
+              "Demostrar que una descarga secuencial y una concurrente producen exactamente el mismo snapshot.",
+              "¿Puedo usar concurrencia sin alterar la población descargada?",
+              "Google Colab.",
+              "cliente HTTP con reintentos y backoff; caché por páginas con firma de la consulta y SHA-256; escritura atómica (un `.part` nunca cuenta como página); conteos; hash canónico.",
+              ["Ejecuta el contrato de datos y la prueba de 50 filas.", "Ejecuta el preflight y la descarga secuencial.",
+               "Completa el hueco de la descarga concurrente y ejecútala.", "Compara offsets, filas y hash.",
+               "Descarga los contratos con tu misma función concurrente.", "Consolida el RAW y corre el checkpoint."],
+              "`E1/00_dataset_contract.json`, `E1/01_acquisition_manifest.json`, `E1/01_benchmark_threads.json`, `E1/01_quality_report.json` y `E1/raw/` (páginas firmadas + parquet).",
+              "25: contrato 4 · secuencial 4 · concurrencia equivalente 8 · trazabilidad 9. **No se exige speedup**: una ejecución concurrente más lenta también puede ser correcta."),
+        md('''### E1.0 · Tu contrato de datos
+
+La consulta no se escribe a mano: sale del contrato de tu pareja. Se filtra y se proyecta en la API (*query pushdown*) para no transferir datos que no se usarán.
+
+**Una decisión que ya está tomada, y por qué.** El snapshot de contratos guarda solo contratos con **personas jurídicas que no son consorcio** (`tipodocproveedor = 'NIT' AND es_grupo = 'No'`). La gran mayoría de contratos de SECOP son con personas naturales (en enero y febrero de 2025, el 94 %), que suelen firmar con una sola entidad y no forman red; los consorcios se crean para un solo proceso. Sin este filtro, la pregunta de E5 quedaba vacía, o con dos o tres proveedores, en las ventanas que se probaron. Con él, las 12 ventanas del curso tienen respuesta (`Datos/tc1_ventanas_resumen.json`).'''),
+        code('''#@title E1.0 · Contrato de datos de tu pareja { display-mode: "form" }
+PLAN = T.contrato_e1()'''),
+        code('''# E1.1 · Prueba pequeña antes de descargar: 50 filas reales
+q = PLAN["procesos"]
+muestra, meta = S.fetch_page(q["endpoint"], select=q["select"], where=q["where"], order=q["order"], limit=50, offset=0)
+print(f"{len(muestra)} filas en {meta['elapsed_s']} s (intento {meta['attempts']})")
+pd.DataFrame(muestra)[["id_del_proceso", "entidad", "fecha_de_publicacion_del", "precio_base"]].head(5)'''),
+        lectura("Cada fila es un registro de la API de procesos. `id_del_proceso` identifica el proceso; la misma clave puede repetirse si SECOP trae varias filas para un proceso.",
+                "La consulta, los filtros y el orden funcionan antes de lanzar miles de peticiones.",
+                "Cuántos registros existen en tu ventana ni cuántas páginas hay que pedir: eso lo dice el preflight.",
+                "Lanzar la descarga completa sin probar la consulta. Un nombre de columna mal escrito no se corrige reintentando."),
+        code('''#@title E1.2a · Preflight: cuántos registros hay y qué páginas pedir { display-mode: "form" }
+pagina_secuencial, pagina_concurrente, OFFSETS, N_PROCESOS = T.preflight_e1()'''),
+        code('''# E1.2b · Descarga secuencial: una página después de otra
+def descargar_secuencial(descargar_pagina, offsets):
+    paginas = {}
+    for offset in offsets:
+        paginas[offset] = descargar_pagina(offset)      # cada llamada devuelve (filas, metadatos)
+    return paginas
+
+inicio = time.perf_counter()
+paginas_seq = descargar_secuencial(pagina_secuencial, OFFSETS)
+SEG_SEQ = time.perf_counter() - inicio
+print(f"Secuencial: {sum(len(f) for f, _ in paginas_seq.values()):,} filas en {SEG_SEQ:.1f} s · {len(paginas_seq)} páginas")'''),
+        md('''### E1.3 · La misma descarga con `ThreadPoolExecutor`
+
+Pedir páginas a una API es trabajo **I/O-bound**: casi todo el tiempo Python espera la red. Varios hilos pueden esperar a la vez sin cambiar qué se descarga.
+
+**Función usada: `ThreadPoolExecutor` + `as_completed`**
+
+| | |
+|---|---|
+| Para qué sirve | lanzar varias llamadas a la vez y recoger cada resultado cuando llega |
+| Parámetros usados | `max_workers` (entre 2 y 6 en este taller) |
+| Qué devuelve | `pool.submit(f, x)` devuelve un *futuro*; `as_completed` los entrega en orden de llegada |
+| Cómo se interpreta | el orden de llegada cambia en cada ejecución; por eso se guarda cada página por su `offset` |
+| Error frecuente | concatenar en orden de llegada, o pedir páginas distintas de las secuenciales |
+
+**HAZ ESTO AHORA.** En la celda siguiente reemplaza `____` por el dato que identifica qué página debe descargar cada futuro.
+
+**Error más probable:** `NameError: name '____' is not defined` significa que aún no completaste el hueco. Si pones otro valor, el checkpoint mostrará offsets distintos.
+
+<details><summary>Si te atascas</summary>Cada futuro descarga <b>su</b> página: el argumento que falta es <code>offset</code>.</details>'''),
+        code('''# E1.3 · Descarga concurrente (completa el hueco)
+MAX_WORKERS = 4   # entre 2 y 6
+
+def descargar_concurrente(descargar_pagina, offsets, max_workers):
+    paginas = {}
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futuros = {pool.submit(descargar_pagina, ____): offset for offset in offsets}
+        for futuro in as_completed(futuros):          # llegan en cualquier orden
+            offset = futuros[futuro]
+            paginas[offset] = futuro.result()
+    return paginas
+
+inicio = time.perf_counter()
+paginas_thr = descargar_concurrente(pagina_concurrente, OFFSETS, MAX_WORKERS)
+SEG_THR = time.perf_counter() - inicio
+BENCH = T.comparar_e1(paginas_seq, SEG_SEQ, paginas_thr, SEG_THR, MAX_WORKERS)'''),
+        lectura("Mismos offsets: se pidieron las mismas páginas. Mismas filas: llegó la misma cantidad. Mismo hash: la huella del conjunto de filas, que no depende del orden y conserva los duplicados, es idéntica.",
+                "Si las tres respuestas son ✓, la concurrencia cambió *cómo* se descargó, no *qué* se descargó.",
+                "Que la concurrencia sea más rápida en general: con pocas páginas, la creación de hilos y la latencia pueden hacerla más lenta. Para afirmarlo harían falta varias corridas limpias, sin caché.",
+                "Comparar solo el número de filas. Dos snapshots con las mismas 3.000 filas pueden tener filas distintas; por eso se compara el hash."),
+        code('''#@title E1.4 · Contratos con tu misma función concurrente y consolidación del RAW { display-mode: "form" }
+pagina_contrato, OFFSETS_CONTRATOS = T.descargador_contratos()
+paginas_con = descargar_concurrente(pagina_contrato, OFFSETS_CONTRATOS, MAX_WORKERS)
+CRUCE = T.consolidar_e1(paginas_con)
+_ = T.checkpoint("E1")'''),
+        lectura("La cobertura es la fracción de procesos únicos de tu snapshot que encontró al menos un contrato por `id_del_portafolio → proceso_de_compra`. Las fechas dicen qué días cubre realmente tu snapshot.",
+                "Hay población cruzada suficiente para E2–E4, y tu snapshot cubre **pocos días** del inicio de tu ventana, no los dos meses.",
+                "Nada sobre la ventana completa ni sobre 2025: es el comienzo de la ventana. Tampoco que los procesos sin contrato no tengan contrato: puede firmarse otro día o con una persona natural, que el filtro excluye.",
+                "Rellenar con cero los procesos sin contrato o cruzar por `id_del_proceso`. La clave de cruce es `id_del_portafolio → proceso_de_compra`."),
+        md('''**PARA LLEVAR.** Desde aquí no se vuelve a consultar la API: E2–E5 trabajan sobre este RAW consolidado y firmado. Si el checkpoint de E1 está en ✓, pasa a E2.'''),
+        ficha("E2",
+              "Representar un proceso SECOP como documento y comprobar que MongoDB Atlas responde las consultas del caso.",
+              "¿Cómo represento un proceso como documento y lo cargo sin duplicar?",
+              "Colab para preparar y cargar; **MongoDB Atlas → Data Explorer** (Documents, Indexes) para consultar.",
+              "la construcción de los documentos según el grano que elijas, la conexión segura (`getpass`) y la carga técnica en dos pasadas.",
+              ["Elige el grano y genera los documentos.", "Conecta Atlas y elige la estrategia de carga.",
+               "En Atlas crea el índice único y un índice alineado con una consulta.", "En Atlas escribe el filtro A y pégalo aquí.",
+               "En Atlas ordena y limita (consulta B) y pégalo aquí."],
+              "`E2/02_modelo_documental.json`, `E2/02_secop_integrado.parquet`, `E2/02_atlas_evidence.json`; la captura `E2_atlas.png` se toma en E3.",
+              "25: modelo documental 5 · Atlas idempotente 7 · índices 4 · consulta A 3 · consulta B 3 · evidencia + captura 3."),
+        md(f'''### E2.1 · El grano: ¿qué es un documento?
+
+SECOP puede traer varias filas para el mismo proceso. El caso necesita **un documento por proceso**, con sus contratos resumidos dentro. Estas son las rutas de campo que usarás en Atlas:
+
+| Dato | Ruta en el documento |
+|---|---|
+| identificador | `{C.CAMPO['id']}` |
+| precio base | `{C.CAMPO['precio_base']}` |
+| año de publicación | `{C.CAMPO['anio']}` |
+| departamento | `{C.CAMPO['departamento']}` |
+| contratos cruzados | `{C.CAMPO['cantidad']}` |
+| valor de los contratos | `{C.CAMPO['valor']}` |
+
+<details><summary>Documento de ejemplo</summary>
+
+```json
+{json.dumps(C.EJEMPLO_DOCUMENTO, ensure_ascii=False, indent=2)}
+```
+</details>
+
+**HAZ ESTO AHORA.** Elige el grano en la lista y ejecuta. Si eliges mal, la celda te muestra la consecuencia: puedes cambiarlo y repetir.'''),
+        code(f'''#@title E2.1 · Elige el grano del documento {{ display-mode: "form" }}
+GRANO = "{C.SIN_SELECCION}" #@param {opciones([C.SIN_SELECCION] + C.GRANOS)}
+DOCUMENTOS = T.documentos_e2(GRANO)'''),
+        lectura("Compara tres números: filas de la API, procesos únicos y documentos generados. Si coinciden los dos últimos y no hay identificadores repetidos, cada proceso es un documento.",
+                "El grano define qué cuenta como «uno»: con un documento por fila, una consulta de los 10 procesos de mayor valor podría repetir el mismo proceso.",
+                "Que los valores sean correctos: el grano solo garantiza que no se duplica la identidad.",
+                "Elegir el grano por comodidad («así viene de la API») y no por la pregunta que el documento debe responder."),
+        md('''### E2.2 · Conectar Atlas y cargar sin duplicar
+
+La carga se hace desde Colab porque el Data Explorer de Atlas no importa archivos, igual que en S04. **Tu decisión es cómo escribir**: la celda prueba tu estrategia dos veces en una colección de ensayo y luego hace la carga oficial.
+
+**OJO.** La URI se pide en un campo oculto (`getpass`). Nunca la escribas en una celda ni la imprimas: el validador bloquea la entrega si encuentra una URI con contraseña.'''),
+        code('''#@title E2.2a · Conectar Atlas { display-mode: "form" }
+ATLAS = T.conectar_atlas_e2()'''),
+        code(f'''#@title E2.2b · Elige la estrategia de carga y ejecuta {{ display-mode: "form" }}
+ESTRATEGIA = "{C.SIN_SELECCION}" #@param {opciones([C.SIN_SELECCION] + C.ESTRATEGIAS_CARGA)}
+CARGA = T.cargar_e2(ESTRATEGIA)'''),
+        lectura("La primera y la segunda carga deben dejar el mismo número de documentos, sin errores y con 0 duplicados.",
+                "Una carga **idempotente** se puede repetir, por un corte de red o por una corrección, sin alterar la colección.",
+                "Que los documentos estén actualizados: un índice único evita duplicados pero hace fallar la segunda carga y no actualiza nada.",
+                "Creer que «sin error» significa «sin duplicados»: `insert_many` duplica en silencio."),
+        md(f'''### E2.3 · Índices: **SAL DE COLAB. AHORA TRABAJAS EN MONGODB ATLAS.**
+
+**HAZ ESTO AHORA.**
+1. Atlas → **Data Explorer** → base `{C.ATLAS_DB}` → colección `tc1_<tu pareja en minúscula>` (por ejemplo `tc1_p03`). Comprueba que el número de documentos es el que imprimió E2.2.
+2. Pestaña **Indexes** → **Create Index** → `{{ "id_proceso": 1 }}` y, en *Options*, marca **Create unique index**.
+3. Crea **un índice más** cuyo primer campo use una consulta del taller (mira las consultas A, B y E3). Decide cuál y por qué: en E6 lo defenderás.
+4. Vuelve y ejecuta la celda siguiente: lee los índices directamente de Atlas.'''),
+        code('''#@title E2.3 · Leer los índices de Atlas { display-mode: "form" }
+INDICES = T.indices_e2()'''),
+        md(f'''### E2.4 · Consulta A en Atlas → Documents → Filter
+
+**Pregunta:** ¿cuántos procesos tienen `precio base > 0` y **al menos un contrato** cruzado?
+
+**HAZ ESTO AHORA.** Escribe el filtro en la barra *Filter* de tu colección, pulsa **Find** y mira el conteo. Luego copia el filtro **exactamente** como lo escribiste y pégalo entre las comillas de la celda siguiente.'''),
+        code('''# E2.4 · Pega aquí el filtro que escribiste en Atlas (Documents → Filter)
+FILTRO_A = \'\'\'pega aquí tu filtro\'\'\'
+CONTEO_A = T.consulta_a_e2(FILTRO_A)'''),
+        md('''### E2.5 · Consulta B en Atlas → Documents → Options
+
+**Pregunta:** ¿cuáles son los 10 procesos con mayor valor de contratos? Desempate: `id_proceso` ascendente.
+
+**HAZ ESTO AHORA.** En *Options* escribe el **Sort** y pon **Limit** en 10. Pulsa **Find**, comprueba el orden y pega aquí el Sort que usaste.'''),
+        code('''# E2.5 · Pega aquí el Sort que usaste en Atlas (Documents → Options → Sort)
+ORDEN_B = \'\'\'pega aquí tu sort\'\'\'
+TOP10_B = T.consulta_b_e2(ORDEN_B)'''),
+        lectura("El número de A y la lista de B salen de **tu** colección en Atlas: la celda vuelve a ejecutar lo que pegaste y lo compara con la referencia calculada desde tu RAW.",
+                "Tu modelo y tus consultas responden lo que el caso pregunta.",
+                "Que esos procesos tengan sobrecosto: B ordena por valor y no dice si el valor es razonable.",
+                "En B, olvidar el desempate: con valores iguales, el orden de Atlas puede cambiar entre ejecuciones."),
+        code('''#@title Checkpoint E2 { display-mode: "form" }
+_ = T.checkpoint("E2")'''),
+        ficha("E3",
+              "Construir en Atlas una bandeja priorizada, reproducible y explicable.",
+              "¿Qué procesos reviso primero?",
+              "**MongoDB Atlas → Data Explorer → Aggregations**; Colab solo vuelve a ejecutar tu pipeline y guarda el CSV.",
+              "la lectura del pipeline que pegues, su ejecución contra tu colección y la exportación a CSV.",
+              ["En Aggregations, modo Texto, escribe el pipeline de cuatro etapas.", "Ejecútalo y guárdalo con el nombre pedido.",
+               "Exporta el código y pégalo aquí.", "Toma la captura `E2_atlas.png` y súbela."],
+              "`E3/03_pipeline_bandeja.json`, `E3/03_resultado_atlas.json`, `E3/03_bandeja_historica.csv` y `E2/E2_atlas.png`.",
+              "10: pipeline (estructura y resultado en orden) 7 · CSV 3."),
+        md(f'''### E3 · **SAL DE COLAB. AHORA TRABAJAS EN MONGODB ATLAS → Aggregations.**
+
+| Etapa | Qué debe hacer en tu pipeline | Error frecuente |
+|---|---|---|
+| `$match` | quedarse con los procesos con `{C.CAMPO['precio_base']}` > 0 y `{C.CAMPO['cantidad']}` > 0 | filtrar después de ordenar |
+| `$project` | producir exactamente `id_proceso`, `anio`, `departamento`, `entidad`, `valor_contratos` (desde `{C.CAMPO['anio']}`, `{C.CAMPO['departamento']}`, `entidad.nombre` y `{C.CAMPO['valor']}`) | dejar los nombres anidados |
+| `$sort` | `valor_contratos` descendente y `id_proceso` ascendente | olvidar el desempate |
+| `$limit` | máximo {C.BANDEJA_MAX} | no limitar: la bandeja deja de ser una cola de trabajo |
+
+**HAZ ESTO AHORA.**
+1. En tu colección abre **Aggregations** y activa el modo **Texto** (ícono `</>`), como en S04.
+2. Escribe el pipeline, pulsa **Run** y revisa que salgan como máximo {C.BANDEJA_MAX} filas.
+3. **Save → Save as** con el nombre exacto `tc1-bandeja-<tu pareja en minúscula>` (por ejemplo `tc1-bandeja-p03`).
+4. **Export Code → Python 3**, desmarca *Include driver syntax* si aparece, copia el código y pégalo en la celda siguiente.
+5. **Captura `E2_atlas.png`.** Debe verse la interfaz de Atlas, el nombre del pipeline guardado y su resultado. En Windows: `Win + Shift + S`; la imagen queda en *Imágenes → Capturas de pantalla*.
+
+**OJO.** Antes de capturar, comprueba que en la pantalla no aparezcan contraseñas, tokens, URI ni cadenas de conexión.'''),
+        code('''# E3 · Pega aquí el código que exportaste (Export Code → Python 3) o el pipeline del modo Texto
+PIPELINE_E3 = \'\'\'pega aquí tu pipeline\'\'\'
+BANDEJA = T.pipeline_e3(PIPELINE_E3)
+BANDEJA.head(10)'''),
+        code('''#@title Subir la captura E2_atlas.png (Atlas: pipeline guardado + resultado) { display-mode: "form" }
+ruta, (ok, motivo) = X.guardar_captura(OUT, "E2")
+print(("✓ " if ok else "✗ ") + f"{ruta.name}: {motivo}")
+_ = T.checkpoint("E3")'''),
+        lectura("Cada fila es un proceso que pasa los dos filtros, en orden de valor de contratos. El orden es reproducible porque el desempate es explícito.",
+                "Es una **cola de revisión**: con un equipo que no alcanza a revisar todo, dice por dónde empezar.",
+                "Que esos procesos tengan sobrecosto, fraude o irregularidad. Para eso falta un precio de referencia del mercado para el mismo objeto, y la bandeja no lo tiene.",
+                "Leer la posición 1 como «el peor proceso». La bandeja prioriza; no califica."),
+        ficha("E4",
+              "Diseñar una tabla Cassandra desde su patrón de acceso y ejecutarla en el servicio real.",
+              "Dado un año y un departamento, ¿cuáles son los 10 procesos con mayor `valor_contratos`?",
+              "Colab para decidir y generar el script; **Astra DB → CQL Console** para crear, cargar y consultar.",
+              "la generación del script CQL (DROP, CREATE, INSERT de tu bandeja y los dos SELECT) a partir de **tus** decisiones, y la lectura de la salida de la consola.",
+              ["Elige partición, clustering y tipo de `valor_contratos`.", "En Astra pega el script por bloques.",
+               "Copia la salida de los dos SELECT y pégala aquí.", "Si algo falla, lee la consecuencia, cambia tu decisión y repite.",
+               "Toma la captura `E4_astra.png` y súbela."],
+              "`E4/04_datos_cassandra.csv`, `E4/04_modelo_cassandra.cql`, `E4/04_cassandra_evidence.json` y `E4/E4_astra.png`.",
+              "15: datos cargados (COUNT correcto) 5 · modelo query-first 6 · ejecución real (top 10 + captura) 4."),
+        md('''### E4.1 · Primero la consulta, después la tabla
+
+En Cassandra no se diseña la tabla y luego se pregunta: **la consulta define la tabla**. La pregunta de esta etapa es fija:
+
+```sql
+SELECT id_proceso, valor_contratos FROM ... WHERE anio = ? AND departamento = ? LIMIT 10;   -- de mayor a menor valor
+```
+
+| Concepto | Qué decide | Recuerda de S05 |
+|---|---|---|
+| partición | en qué partición vive cada fila; la consulta debe fijar sus columnas **con igualdad** | sin eso, Cassandra pide `ALLOW FILTERING`, que está prohibido |
+| clustering | cómo se ordenan las filas **dentro** de la partición y qué hace única cada fila | dos filas con la misma PRIMARY KEY se sobrescriben |
+| tipo | cómo se compara el valor al ordenar | un número guardado como texto se ordena alfabéticamente |
+
+**HAZ ESTO AHORA.** Toma las tres decisiones. La celda te anuncia qué pasará en Astra antes de que lo ejecutes.'''),
+        code(f'''#@title E4.1 · Diseña la tabla {{ display-mode: "form" }}
+PARTICION = "{C.SIN_SELECCION}" #@param {opciones([C.SIN_SELECCION] + list(C.OPCIONES_PARTICION))}
+CLUSTERING = "{C.SIN_SELECCION}" #@param {opciones([C.SIN_SELECCION] + list(C.OPCIONES_CLUSTERING))}
+TIPO_VALOR = "{C.SIN_SELECCION}" #@param {opciones([C.SIN_SELECCION] + C.OPCIONES_TIPO_VALOR)}
+KEYSPACE = "{C.KEYSPACE_DEFECTO}" #@param {{type:"string"}}
+CQL = T.cql_e4(PARTICION, CLUSTERING, TIPO_VALOR, KEYSPACE)
+BLOQUES = T.bloques_cql()'''),
+        md('''### E4.2 · **SAL DE COLAB. AHORA TRABAJAS EN ASTRA → CQL Console.**
+
+**HAZ ESTO AHORA.**
+1. Abre tu base en Astra. Si dice *Hibernated*, pulsa **Resume** y espera a que diga *Active*.
+2. Abre **CQL Console** y pega los bloques **en orden**: primero DROP + CREATE, luego los INSERT y al final los dos SELECT. Espera a que cada bloque termine.
+3. Selecciona y copia la salida de los dos SELECT: desde `count` hasta `(10 rows)`. Pégala entre las comillas de la celda siguiente.
+4. **Captura `E4_astra.png`**: debe verse CQL Console con el SELECT, la partición (año y departamento) y el resultado con algunos IDs. Sin tokens a la vista.
+
+**Si Astra responde con error**, es la consecuencia de tu diseño: vuelve a E4.1, cambia la decisión, ejecuta de nuevo y pega otra vez los bloques. El DROP del primer bloque borra la tabla anterior.'''),
+        code('''# E4.2 · Pega aquí la salida de CQL Console (desde "count" hasta "(10 rows)")
+SALIDA_ASTRA = \'\'\'pega aquí la salida de Astra\'\'\'
+LEIDO = T.astra_e4(SALIDA_ASTRA)'''),
+        code('''#@title Subir la captura E4_astra.png (CQL Console: SELECT + resultado) { display-mode: "form" }
+ruta, (ok, motivo) = X.guardar_captura(OUT, "E4")
+print(("✓ " if ok else "✗ ") + f"{ruta.name}: {motivo}")
+_ = T.checkpoint("E4")'''),
+        lectura("El COUNT dice cuántas filas quedaron en la partición; el top 10 sale ordenado sin `ORDER BY` porque el clustering ya ordena por valor dentro de la partición.",
+                "Tu tabla responde la pregunta en una sola partición: la lectura no crece con el resto de la tabla.",
+                "Que esta tabla sirva para otra pregunta: «los 10 de una entidad» o «los de todo el país» necesitarían otra tabla. En Cassandra se duplica para responder.",
+                "Diseñar la clave mirando qué columnas «parecen importantes» en lugar de mirar el `WHERE` de la consulta."),
+        ficha("E5",
+              "Responder una pregunta de conectividad contractual con un grafo real.",
+              "¿Qué proveedores conectan a la entidad ancla con otras entidades dentro del snapshot?",
+              "Colab para cargar el grafo; **Neo4j Aura → Query** para consultarlo.",
+              "la carga con `UNWIND $filas` + `MERGE` (el patrón de S06), la consulta que encuentra la ancla y la consulta de contexto.",
+              ["Conecta Aura y carga el grafo.", "En Aura ejecuta la consulta de la ancla.",
+               "Completa los dos huecos (compartidos y ranking).", "Ejecuta ambas en Aura.",
+               "Captura `E5_neo4j.png` y sube la evidencia."],
+              "`E5/05_relaciones_grafo.csv`, `E5/05_neo4j_consultas.cypher`, `E5/05_resultado_relacional.csv`, `E5/05_neo4j_evidence.json` y `E5/E5_neo4j.png`.",
+              "15: grafo y ancla 4 · métrica relacional 4 · Cypher 5 · ejecución real + captura 2."),
+        md('''### E5.1 · El grafo y la regla de la ancla
+
+El modelo es el de S06, con el contrato como nodo:
+
+```
+(:Entidad {nit})-[:FIRMA]->(:Contrato {id})-[:ADJUDICADO_A]->(:Proveedor {nit})
+```
+
+Un **proveedor compartido** es un proveedor que tiene contratos con dos o más entidades. La **entidad ancla** es la entidad con más proveedores compartidos (desempate: más contratos, luego el NIT). La regla se eligió por los datos: con la regla anterior, «la entidad con más contratos», la ancla no compartía ningún proveedor en ninguna de las seis ventanas que se probaron; con esta regla, las 12 ventanas del curso tienen una red con respuesta.
+
+**OJO.** La contraseña de Aura se pide oculta. La carga solo borra contratos de cargas anteriores del TC1; no toca lo que hiciste en S06.'''),
+        code('''#@title E5.1 · Conectar Aura y cargar el grafo { display-mode: "form" }
+AURA = T.conectar_aura_e5()
+CONTEOS = T.cargar_e5()'''),
+        md('''### E5.2 · **SAL DE COLAB. AHORA TRABAJAS EN NEO4J AURA → Query.**
+
+**HAZ ESTO AHORA.**
+1. Ejecuta `RETURN 1 AS conexion` para comprobar que Query responde.
+2. Ejecuta la consulta de la ancla que imprime la celda siguiente y mira la pestaña **Table**.
+3. Vuelve: la celda lee el mismo resultado desde tu instancia y fija tu ancla.'''),
+        code('''#@title E5.2 · La consulta de la ancla (cópiala en Aura) y tu ancla { display-mode: "form" }
+print(S.CYPHER_ANCLA, "\\n")
+NIT_ANCLA = T.ancla_e5()'''),
+        md('''### E5.3 · Dos consultas, un hueco en cada una
+
+| Cypher | Para qué |
+|---|---|
+| `WHERE` | descartar caminos; aquí, que la «otra» entidad no sea la ancla |
+| `count(DISTINCT x)` | contar nodos distintos, no caminos (un proveedor puede llegar a la misma entidad por varios contratos) |
+| `WITH` | pasar un resultado intermedio a la siguiente parte de la consulta |
+
+**HAZ ESTO AHORA.** Completa el `____` de cada celda y ejecútala. La celda imprime la versión para pegar en Aura (con tu NIT en lugar de `$nit_ancla`). Ejecuta ambas en Aura; en *compartidos* mira la pestaña **Graph**.
+
+**Error más probable:** contar filas con `count(otra)`. Los números saldrán inflados y el checkpoint marcará ✗ en la métrica.
+
+<details><summary>Si te atascas</summary>Compartidos: <code>WHERE otra <> a</code>. Ranking: <code>count(DISTINCT otra)</code>.</details>'''),
+        code('''# E5.3a · Proveedores compartidos (completa el WHERE)
+CYPHER_COMPARTIDOS = \'\'\'
+MATCH (a:Entidad {nit: $nit_ancla})-[:FIRMA]->(:Contrato)-[:ADJUDICADO_A]->(p:Proveedor)<-[:ADJUDICADO_A]-(:Contrato)<-[:FIRMA]-(otra:Entidad)
+WHERE ____
+RETURN p.nit AS nit_proveedor, p.nombre AS proveedor, collect(DISTINCT otra.nombre) AS otras_entidades
+\'\'\'
+T.preparar_consulta_e5("compartidos", CYPHER_COMPARTIDOS)'''),
+        code('''# E5.3b · Ranking de proveedores puente (completa el conteo)
+CYPHER_RANKING = \'\'\'
+MATCH (a:Entidad {nit: $nit_ancla})-[:FIRMA]->(ca:Contrato)-[:ADJUDICADO_A]->(p:Proveedor)
+WITH a, p, count(DISTINCT ca) AS contratos_con_ancla
+MATCH (p)<-[:ADJUDICADO_A]-(:Contrato)<-[:FIRMA]-(otra:Entidad)
+WHERE otra <> a
+RETURN p.nit AS nit_proveedor, p.nombre AS proveedor, contratos_con_ancla, ____ AS entidades_conectadas
+ORDER BY entidades_conectadas DESC, contratos_con_ancla DESC, nit_proveedor ASC
+\'\'\'
+T.preparar_consulta_e5("ranking", CYPHER_RANKING)'''),
+        md('''**HAZ ESTO AHORA.** Con las dos consultas ya ejecutadas en Aura, toma **`E5_neo4j.png`**: debe verse Aura Query con la consulta de ranking y su resultado (o la vista Graph de compartidos, si aporta más). Sin contraseñas a la vista. Después ejecuta la celda siguiente.'''),
+        code('''#@title E5.4 · Capturar tus resultados de Aura y subir E5_neo4j.png { display-mode: "form" }
+RANKING = T.capturar_e5()
+ruta, (ok, motivo) = X.guardar_captura(OUT, "E5")
+print(("✓ " if ok else "✗ ") + f"{ruta.name}: {motivo}")
+_ = T.checkpoint("E5")'''),
+        lectura("Cada fila del ranking es un proveedor de la ancla que también contrata con otras entidades: cuántos contratos tiene con la ancla y con cuántas entidades distintas más.",
+                "Qué proveedores hacen de **puente** entre tu entidad ancla y el resto de tu snapshot: el contexto que una tabla de contratos no muestra de un vistazo.",
+                "Colusión, favorecimiento ni fraude. Además, un NIT puede agrupar varias sedes (SENA, ICBF): su centralidad puede reflejar tamaño administrativo, no comportamiento. Y solo ves contratos con empresas durante pocos días.",
+                "Leer «conecta muchas entidades» como «es sospechoso». Un proveedor de seguros o de vigilancia contrata con muchas entidades por la naturaleza de su servicio."),
+        ficha("E6",
+              "Tomar tres decisiones de ingeniería y dos de interpretación ancladas a **tus** resultados, y entregar.",
+              "¿Qué decidí, con qué evidencia y con qué límite?",
+              "Google Colab.",
+              "el informe técnico (se genera desde tus artefactos), el validador y el empaquetado.",
+              ["Responde las decisiones mirando tus salidas.", "Responde la microdefensa.",
+               "Ejecuta el validador final.", "Genera los tres archivos y entrégalos por Drive + correo."],
+              "`E6/06_decision_log.json`, `E6/06_informe_tecnico.md`, `E6/06_microdefensa_grupal.json`, `manifest_tc1.json` y `TC1_<PAREJA_ID>.zip`.",
+              "10: decisiones e informe 5 · microdefensa 3 · paquete completo y sin secretos 2."),
+        md('''### E6.1 · Decisiones con tu evidencia
+
+Aquí **no se escribe**: se elige. Cada respuesta se compara con **tus** datos, así que copiar la de otra pareja no sirve.
+
+- **Concurrencia y 429.** Mira en E1.3 cuántos segundos tardó tu descarga concurrente.
+- **Índice.** Elige el índice adicional que **creaste** en Atlas y la consulta que atiende.
+- **Límite de la bandeja.** Elige una posición de **tu** bandeja (E3), escribe su `valor_contratos` en millones y elige qué dato falta para hablar de sobrecosto.'''),
+        code(f'''#@title E6.1 · Tres decisiones ancladas a tus resultados {{ display-mode: "form" }}
+DECISION_429 = "{C.SIN_SELECCION}" #@param {opciones(C.E6_DECISION_429)}
+SEGUNDOS_DESCARGA_CONCURRENTE = 0 #@param {{type:"integer"}}
+INDICE_ADICIONAL = "{C.SIN_SELECCION}" #@param {opciones(C.E6_INDICE)}
+POSICION_EN_TU_BANDEJA = 1 #@param {{type:"slider", min:1, max:10, step:1}}
+VALOR_EN_MILLONES = 0 #@param {{type:"integer"}}
+DATO_QUE_FALTA = "{C.SIN_SELECCION}" #@param {opciones(C.E6_DATO_FALTANTE)}
+_ = T.decisiones_e6(DECISION_429, SEGUNDOS_DESCARGA_CONCURRENTE, INDICE_ADICIONAL, POSICION_EN_TU_BANDEJA,
+                    VALOR_EN_MILLONES, DATO_QUE_FALTA)'''),
+        code(f'''#@title E6.2 · Microdefensa {{ display-mode: "form" }}
+RANGO_DE_TU_COBERTURA = "{C.SIN_SELECCION}" #@param {opciones(C.E6_RANGOS_COBERTURA)}
+QUE_EXPLICA_TU_COBERTURA = "{C.SIN_SELECCION}" #@param {opciones(C.E6_CAUSA_COBERTURA)}
+QUE_NO_PERMITE_CONCLUIR_LA_RED = "{C.SIN_SELECCION}" #@param {opciones(C.E6_LIMITE_RED)}
+ENTIDADES_DE_TU_PROVEEDOR_PUENTE = 0 #@param {{type:"integer"}}
+T.microdefensa_e6(RANGO_DE_TU_COBERTURA, QUE_EXPLICA_TU_COBERTURA, QUE_NO_PERMITE_CONCLUIR_LA_RED,
+                  ENTIDADES_DE_TU_PROVEEDOR_PUENTE)'''),
+        md('''### E6.3 · Validación final
+
+El validador recalcula todo desde tus archivos, igual que lo hará el docente sobre tu ZIP: no confía en ninguna variable de memoria. Imprime tu puntaje por etapa y, por cada control en ✗, **qué revisar** y **qué encontró**. Si detecta un posible secreto, bloquea la entrega y dice dónde está.
+
+Los controles con captura salen como **provisionales** hasta que el docente vea tus tres imágenes.'''),
+        code('''#@title E6.3 · Validar todo { display-mode: "form" }
+MANIFEST = T.validar()'''),
+        code('''#@title Entregar · genera los tres archivos (en Drive si activaste el avance) { display-mode: "form" }
+CARPETA_ENTREGA, HUELLA = T.entregar(MANIFEST)'''),
+        md(f'''## Entrega: Google Drive restringido + correo institucional
+
+1. Abre la carpeta que imprimió la celda anterior en tu Drive. Debe contener **solo** `TC1_<PAREJA_ID>.ipynb`, `TC1_<PAREJA_ID>.zip` y `manifest_tc1.json`. Si no activaste Drive, descarga los tres archivos y súbelos a una carpeta nueva con el nombre impreso.
+2. Clic derecho sobre la **carpeta** → **Compartir** → deja **Acceso general: Restringido** → agrega `{C.CORREO_DOCENTE}` como **Lector**.
+3. Un integrante envía el correo a `{C.CORREO_DOCENTE}` con copia al compañero:
+   - **Asunto:** `[BIG DATA 2026-2S][TC1] <PAREJA_ID> - <APELLIDO1> - <APELLIDO2>`
+   - **Cuerpo:** pareja, nombres y códigos, enlace de la carpeta y la **huella SHA-256** que imprimió la celda anterior (una sola huella).
+4. Si corriges algo antes del cierre, vuelve a validar y entregar, reemplaza los archivos en la misma carpeta y responde en el mismo hilo con `CORRECCIÓN DE ENTREGA` y la huella nueva.
+
+**Fecha máxima: {C.FECHA_LIMITE}.** Cuenta el sello de tiempo del correo.
+
+**GitHub es opcional:** solo por el navegador (*Add file → Upload files*), en un repositorio **privado** y sin códigos de estudiante en el README. No reemplaza Drive + correo.'''),
+        md(f'''## Cierre
+
+**La historia, en cinco frases.** Descargaste un snapshot de SECOP de dos maneras y demostraste que es el mismo. Lo convertiste en documentos, un proceso por documento, y lo cargaste en Atlas sin duplicar. En Atlas construiste una bandeja que dice por dónde empezar a revisar. Serviste esa bandeja en Cassandra con una tabla diseñada desde su consulta. Y en Neo4j viste qué proveedores conectan a una entidad con otras.
+
+**La idea más importante.** El mismo dato necesita modelos distintos según la pregunta: documento para leer un proceso completo, tabla query-first para servir una consulta conocida, grafo para recorrer relaciones. Ninguno reemplaza a los otros.
+
+**Errores comunes.** Comparar solo conteos en vez de hashes · un documento por fila · `insert_many` repetido · olvidar el desempate · diseñar la tabla Cassandra sin mirar el `WHERE` · contar filas en vez de entidades distintas · leer prioridad o conexión como prueba de irregularidad.
+
+**MÁS ADELANTE.** S09 cambia la pregunta: ¿qué pasa cuando las palabras de la consulta no coinciden con las del documento? Ahí aparecen los embeddings y la búsqueda vectorial.
+
+### Hoja de trucos
+
+| Necesitas | Herramienta |
+|---|---|
+| descargar en paralelo sin cambiar el resultado | `ThreadPoolExecutor` + `as_completed`, guardando por `offset` |
+| filtrar en Atlas (Documents → Filter) | `{{"campo.anidado": {{"$gt": 0}}, "otro.campo": {{"$gt": 0}}}}`: varias condiciones = todas deben cumplirse |
+| ordenar en Atlas (Documents → Options) | Sort `{{"campo": -1, "desempate": 1}}` (-1 descendente, 1 ascendente) · Limit |
+| bandeja en Atlas | `$match` → `$project` → `$sort` → `$limit` |
+| tabla query-first | `PRIMARY KEY ((columnas del WHERE), columna de orden, id)` + `CLUSTERING ORDER BY` |
+| grafo | `UNWIND $filas AS fila MERGE ...`; contar con `count(DISTINCT ...)` |
+| validar en cualquier momento | `T.checkpoint("E2")` (o la etapa que quieras) |'''),
+    ]
+
+
+def notebook():
+    celdas = cells()
+    validate(celdas)
+    ocultas = (lambda c: c["cell_type"] == "code" and "{ display-mode: \"form\" }" in "".join(c["source"])
+               or (c["cell_type"] == "code" and "".join(c["source"]).startswith("#@title Preparar el entorno")))
+    for i, c in enumerate(celdas):
+        c["id"] = f"tc1-v9-{i:02d}"
+        if ocultas(c):
+            c["metadata"] = {"cellView": "form", "jupyter": {"source_hidden": True}}
+    nb = build(celdas, python_version="3.11")
+    nb["metadata"]["colab"] = {"name": "Taller_Control_1.ipynb", "provenance": [], "toc_visible": True,
+                               "include_colab_link": True}
+    return nb
+
+
+def serializar(nb):
+    return json.dumps(nb, ensure_ascii=False, indent=1) + "\n"
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--check", action="store_true")
+    a = ap.parse_args()
+    texto = serializar(notebook())
+    if a.check:
+        actual = DESTINO.read_bytes().decode("utf-8") if DESTINO.exists() else ""
+        if actual != texto:
+            print("FALLA: Cuadernos/Taller_Control_1.ipynb no coincide con el generador. Ejecuta el generador.")
+            sys.exit(1)
+        print("OK: el cuaderno versionado es exactamente el que produce el generador.")
+        return
+    DESTINO.write_bytes(texto.encode("utf-8"))
+    print(f"[OK] {DESTINO.relative_to(ROOT)} · {len(json.loads(texto)['cells'])} celdas")
+
+
+if __name__ == "__main__":
+    main()

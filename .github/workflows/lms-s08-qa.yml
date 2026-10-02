@@ -20,10 +20,12 @@ on:
       - utils/validate_lms_assessment.py
       - utils/validate_lms_interop.py
       - utils/validate_lms_ops.py
-      - utils/validate_tc1_v4.py
-      - utils/test_tc1_v4_synthetic.py
-      - utils/tc1_validator.py
+      - utils/validate_tc1_v9.py
+      - utils/test_tc1_v9.py
+      - utils/tc1_*.py
       - utils/build_taller_control_1.py
+      - tests/fixtures/tc1/**
+      - Datos/tc1_ventanas_resumen.json
       - Cuadernos/Taller_Control_1.ipynb
       - assets/tutoriales/s08-secoppipeline.html
       - Presentaciones/s07-del-vecindario-al-texto.html
@@ -73,10 +75,12 @@ on:
       - utils/validate_lms_analytics.py
       - utils/validate_lms_collaboration.py
       - utils/validate_lms_assessment.py
-      - utils/validate_tc1_v4.py
-      - utils/test_tc1_v4_synthetic.py
-      - utils/tc1_validator.py
+      - utils/validate_tc1_v9.py
+      - utils/test_tc1_v9.py
+      - utils/tc1_*.py
       - utils/build_taller_control_1.py
+      - tests/fixtures/tc1/**
+      - Datos/tc1_ventanas_resumen.json
       - Cuadernos/Taller_Control_1.ipynb
       - assets/tutoriales/s08-secoppipeline.html
       - Presentaciones/s07-del-vecindario-al-texto.html
@@ -138,27 +142,17 @@ jobs:
         with:
           node-version: '24'
       - name: Comprobar sintaxis de validadores
-        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py utils/validate_lms_core.py utils/validate_lms_gradebook.py utils/validate_lms_competencies.py utils/validate_lms_analytics.py utils/validate_lms_collaboration.py utils/validate_lms_assessment.py utils/validate_lms_interop.py utils/validate_lms_ops.py utils/validate_tc1_v4.py utils/test_tc1_v4_synthetic.py utils/tc1_validator.py utils/build_taller_control_1.py utils/build_session9_notebook.py utils/build_session10_multimedia.py utils/validate_session9.py utils/validate_session10.py utils/validate_s09_authentic_evidence.py utils/validate_s09_competency_evidence.py utils/validate_s09_transfer_evidence.py utils/validate_s09_distractors.py utils/validate_lms_v3.py utils/validate_lms_evidence_v4.py utils/validate_lms_contract_v5.py utils/validate_lms_security_v51.py utils/validate_lms_auth_expiry.py utils/validate_auth_rate_limit.py utils/validate_lms_v6.py utils/validate_realtime_scale.py utils/validate_lms_v7.py utils/validate_lms_v8.py utils/validate_lms_auto_snapshot.py utils/validate_access_review_safety.py utils/validate_student_ux_simple.py utils/validate_october_schedule.py utils/validate_index_calendar.py utils/validate_no_open_student.py utils/validate_static_links.py utils/validate_production_release.py
+        run: python -m py_compile utils/validate_lms_s08.py utils/validate_lms_admin.py utils/validate_lms_core.py utils/validate_lms_gradebook.py utils/validate_lms_competencies.py utils/validate_lms_analytics.py utils/validate_lms_collaboration.py utils/validate_lms_assessment.py utils/validate_lms_interop.py utils/validate_lms_ops.py utils/validate_tc1_v9.py utils/test_tc1_v9.py utils/tc1_contrato.py utils/tc1_secop.py utils/tc1_servicios.py utils/tc1_validador.py utils/tc1_cuaderno.py utils/tc1_pruebas.py utils/tc1_teacher_validator.py utils/tc1_data_gates.py utils/build_taller_control_1.py utils/build_session9_notebook.py utils/build_session10_multimedia.py utils/validate_session9.py utils/validate_session10.py utils/validate_s09_authentic_evidence.py utils/validate_s09_competency_evidence.py utils/validate_s09_transfer_evidence.py utils/validate_s09_distractors.py utils/validate_lms_v3.py utils/validate_lms_evidence_v4.py utils/validate_lms_contract_v5.py utils/validate_lms_security_v51.py utils/validate_lms_auth_expiry.py utils/validate_auth_rate_limit.py utils/validate_lms_v6.py utils/validate_realtime_scale.py utils/validate_lms_v7.py utils/validate_lms_v8.py utils/validate_lms_auto_snapshot.py utils/validate_access_review_safety.py utils/validate_student_ux_simple.py utils/validate_october_schedule.py utils/validate_index_calendar.py utils/validate_no_open_student.py utils/validate_static_links.py utils/validate_production_release.py
       - name: Validar LMS S08 y guardia S07
         run: python utils/validate_lms_s08.py
       - name: Instalar dependencias QA TC1
-        run: pip install -q pandas networkx
-      - name: Probar TC1 con caso sintético 100/100
-        run: python utils/test_tc1_v4_synthetic.py
-      - name: Verificar notebook reproducible
-        run: |
-          cp Cuadernos/Taller_Control_1.ipynb /tmp/Taller_Control_1.ipynb
-          python utils/build_taller_control_1.py
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          original=json.loads(Path("/tmp/Taller_Control_1.ipynb").read_text(encoding="utf-8"))
-          rebuilt=json.loads(Path("Cuadernos/Taller_Control_1.ipynb").read_text(encoding="utf-8"))
-          assert original==rebuilt, "El notebook generado no coincide semánticamente con el versionado"
-          print("Notebook reproducible: OK")
-          PY
-      - name: Validar recurso TC1
-        run: python utils/validate_tc1_v4.py
+        run: pip install -q "pandas>=2.2" pyarrow requests pymongo mongomock nbformat
+      - name: Verificar que el cuaderno TC1 es el del generador
+        run: python utils/build_taller_control_1.py --check
+      - name: Probar TC1 V9 (paquete real, revalidación docente y manipulaciones)
+        run: python utils/test_tc1_v9.py
+      - name: Validar estructura TC1 V9 (cuaderno, checklist, LMS y datos)
+        run: python utils/validate_tc1_v9.py
       - name: Verificar notebook S09 reproducible
         run: |
           cp Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb /tmp/S09.ipynb

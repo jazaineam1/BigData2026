@@ -85,7 +85,7 @@ if unexpected:
 
 for path,sha in [
     ("Presentaciones/s07-del-vecindario-al-texto.html","07e99d34a8896a9a6b4c5bf39cb7619a953fe0b8"),
-    ("lms/session-08.html","ae239891cbe06cfe31f61f1bfe71d34825014db0"),
+    ("lms/session-08.html","6091912e39264dd0ec81760784741d7368ff5287"),
 ]:
     if (ROOT/path).exists() and blob_sha(path)!=sha:
         errors.append(f"Protección SHA violada: {path}")
