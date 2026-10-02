@@ -41,7 +41,7 @@ button{font:inherit;padding:6px 12px;border-radius:8px;border:1px solid var(--li
 <main class="wrap">
 <p><a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb">← Abrir el cuaderno del TC1 en Colab</a></p>
 <h1>TC1 · Checklist paso a paso</h1>
-<p class="lead">Un snapshot de SECOP, tres preguntas, tres modelos. Esta página no reemplaza el cuaderno: te dice el orden, dónde trabajas y qué evidencia debe aparecer en cada paso. Marca un paso solo cuando veas su evidencia. Dedicación estimada: entre 5 y 7 horas por pareja, mejor en 2 o 3 sesiones.</p>
+<p class="lead">Un snapshot de SECOP, tres preguntas, tres modelos. Esta página no reemplaza el cuaderno: te dice el orden, dónde trabajas y qué evidencia debe aparecer en cada paso. Marca un paso solo cuando veas su evidencia. Avanza a tu ritmo: lo que cuenta es que cada checkpoint quede en ✓.</p>
 
 <div class="barra" role="region" aria-label="Progreso">
   <div class="prog" aria-hidden="true"><span id="relleno"></span></div>
@@ -67,6 +67,7 @@ button{font:inherit;padding:6px 12px;border-radius:8px;border:1px solid var(--li
 <tr><td><b>EJECUTA</b></td><td>pulsa ▶ y lee la salida: no hay nada que editar</td></tr>
 <tr><td><b>ELIGE</b></td><td>escoge en las listas o escribe en los campos de la derecha y ejecuta</td></tr>
 <tr><td><b>COMPLETA</b></td><td>reemplaza el único <code>____</code> del código y ejecuta</td></tr>
+<tr><td><b>ESCRIBE</b></td><td>escribe tú el código completo: la celda dice qué debe devolver y te muestra si coincide</td></tr>
 <tr><td><b>PEGA</b></td><td>pega entre las <code>'''</code> lo que copiaste del servicio y ejecuta</td></tr>
 <tr><td><b>CAPTURA</b></td><td>ejecuta y sube la imagen PNG que se pide</td></tr>
 <tr><td><b>SAL DE COLAB</b> (en el texto)</td><td>trabaja en Atlas, Astra o Aura con los pasos numerados y vuelve</td></tr>
@@ -81,10 +82,10 @@ button{font:inherit;padding:6px 12px;border-radius:8px;border:1px solid var(--li
 <dt>Evidencia</dt><dd><span class="ev">TC1 V9 · 2026-10-02 listo.</span></dd></dl></div>
 <div class="paso" data-paso="p0b"><label><input type="checkbox">Identidad de la pareja</label><dl>
 <dt>Dónde</dt><dd>Colab · celda «0 · Identidad de la pareja»</dd>
-<dt>Qué haces</dt><dd>Elige en la lista el <code>PAREJA_ID</code> que te confirmó el docente por correo; escribe nombres, códigos y primer apellido, y deja el avance en Drive activado.</dd>
-<dt>Por qué</dt><dd>La pareja fija tu ventana de SECOP: con números distintos, dos parejas nunca comparten datos.</dd>
-<dt>Si no tienes número</dt><dd>Escribe al docente antes de E1. No elijas uno por tu cuenta: dos parejas con el mismo número descargan los mismos datos y el docente lo detecta al revisar.</dd>
-<dt>Evidencia</dt><dd><span class="ev">Pareja P0X · ventana …</span> y <span class="ev">Carpeta de trabajo: …</span></dd></dl></div>
+<dt>Qué haces</dt><dd>Escribe en <code>PAREJA_ID</code> el nombre de tu pareja, el que quieras (por ejemplo, el que ya venías usando); luego nombres, códigos y primer apellido. Deja el avance en Drive activado.</dd>
+<dt>Por qué</dt><dd>Tu ventana de datos de SECOP sale de los códigos de los integrantes, no del nombre: dos parejas con el mismo nombre no comparten datos.</dd>
+<dt>Ojo</dt><dd>Escribe el mismo nombre y los mismos códigos en cada sesión: si cambias un código, cambia tu ventana y hay que repetir E1.</dd>
+<dt>Evidencia</dt><dd><span class="ev">Tu ventana de datos: … (sale de los códigos de los integrantes)</span> y <span class="ev">Tus nombres: colección de Atlas …</span></dd></dl></div>
 </section>
 
 <section aria-labelledby="h1"><h2 id="h1">E1 · Adquisición SECOP · 25 puntos · Colab</h2>
@@ -129,7 +130,7 @@ button{font:inherit;padding:6px 12px;border-radius:8px;border:1px solid var(--li
 <section aria-labelledby="h3"><h2 id="h3">E3 · Producto analítico · 10 puntos · Atlas → Colab</h2>
 <div class="paso" data-paso="e3a"><label><input type="checkbox">Pipeline en Aggregations</label><dl>
 <dt>Dónde</dt><dd>Atlas → <b>Aggregations</b>, modo Texto (<code>&lt;/&gt;</code>)</dd>
-<dt>Qué haces</dt><dd><code>$match</code> → <code>$project</code> → <code>$sort</code> → <code>$limit</code>; Run; <b>Save as</b> <code>tc1-bandeja-p0x</code>; <b>Export Code → Python 3</b> y pega en E3.</dd>
+<dt>Qué haces</dt><dd><code>$match</code> → <code>$project</code> → <code>$sort</code> → <code>$limit</code>; Run; <b>Save as</b> con el nombre de pipeline que imprimió la celda de identidad (por ejemplo <code>tc1-bandeja-p03</code>); <b>Export Code → Python 3</b> y pega en E3.</dd>
 <dt>Evidencia</dt><dd><span class="ev">Mismo resultado y orden que la referencia: ✓ sí</span></dd></dl></div>
 <div class="paso" data-paso="e3b"><label><input type="checkbox">Captura E2_atlas.png</label><dl>
 <dt>Qué haces</dt><dd>Captura Atlas con el pipeline guardado y su resultado (Windows: <code>Win + Shift + S</code>) y súbela.</dd>
@@ -158,8 +159,9 @@ button{font:inherit;padding:6px 12px;border-radius:8px;border:1px solid var(--li
 <dt>Evidencia</dt><dd><span class="ev">Segunda carga igual a la primera (MERGE no duplica): ✓ sí</span></dd></dl></div>
 <div class="paso" data-paso="e5b"><label><input type="checkbox">En Aura: ancla, compartidos y ranking</label><dl>
 <dt>Dónde</dt><dd>Aura → <b>Query</b></dd>
-<dt>Qué haces</dt><dd>Ejecuta la consulta de la ancla (E5.2), completa los dos huecos (E5.3a y E5.3b) y ejecuta ambas versiones en Aura.</dd>
-<dt>Evidencia</dt><dd><span class="ev">Tu entidad ancla: NIT …</span></dd></dl></div>
+<dt>Qué haces</dt><dd>Ejecuta la consulta de la ancla (E5.2), completa el hueco de compartidos (E5.3a), escribe completa la consulta de ranking (E5.3b) y ejecuta ambas versiones en Aura.</dd>
+<dt>Si falla</dt><dd>E5.3b te dice qué revisar (filas de más o de menos, conteos, orden) y cómo deben empezar tus filas. Las pistas están en el cuaderno, de menos a más.</dd>
+<dt>Evidencia</dt><dd><span class="ev">Tu entidad ancla: NIT …</span> y <span class="ev">✓ Tu ranking coincide con la referencia calculada desde tu RAW</span></dd></dl></div>
 <div class="paso" data-paso="e5c"><label><input type="checkbox">Captura E5_neo4j.png y checkpoint E5</label><dl>
 <dt>Qué haces</dt><dd>Aura Query con el ranking y su resultado; ejecuta E5.4 para capturar y subir.</dd>
 <dt>Evidencia</dt><dd><span class="ev">Guardado: E5/05_neo4j_consultas.cypher, E5/05_resultado_relacional.csv, E5/05_neo4j_evidence.json</span></dd></dl></div>

@@ -33,7 +33,9 @@ import tc1_secop as S  # noqa: E402
 import tc1_servicios as X  # noqa: E402
 import tc1_teacher_validator as TV  # noqa: E402
 import tc1_validador as V  # noqa: E402
-from tc1_pruebas import FIXTURES, png, servidor_socrata  # noqa: E402
+from tc1_pruebas import FIXTURE_VENTANA, FIXTURES, codigo_para, png, servidor_socrata  # noqa: E402
+
+CODIGO = codigo_para(FIXTURE_VENTANA)
 
 FILTRO_A = '{"proceso.precio_base": {"$gt": 0}, "contratos_resumen.cantidad": {"$gt": 0}}'
 ORDEN_B = "{contratos_resumen.valor_total: -1, id_proceso: 1}"
@@ -64,10 +66,10 @@ def caso(nombre, condicion, detalle=""):
 
 
 def construir_paquete(trabajo):
-    srv, api = servidor_socrata("P03")
+    srv, api = servidor_socrata()
     S.BASE = f"http://127.0.0.1:{srv.server_port}/resource"
     print(f"TC1 {C.VERSION_VISIBLE} listo. Siguiente paso: la celda «0 · Identidad de la pareja».")
-    out, _ = T.iniciar("P03", [("Estudiante de prueba", "000000", "Prueba")], "No", base=trabajo)
+    out, _ = T.iniciar("P03", [("Estudiante de prueba", CODIGO, "Prueba")], "No", base=trabajo)
     T.contrato_e1()
     seq, thr, offsets, _ = T.preflight_e1()
     t0 = time.perf_counter()
@@ -169,7 +171,7 @@ def main():
     caso("ver_carpeta muestra el árbol completo del ZIP", all(f"✓ {e}/" in arbol.getvalue() for e in C.ARTEFACTOS)
          and "manifest_tc1.json" in arbol.getvalue(), arbol.getvalue()[-400:])
     try:
-        T.iniciar("P03", [("Sin apellido", "000000", "")], "No", base=trabajo / "sin_apellido")
+        T.iniciar("P03", [("Sin apellido", CODIGO, "")], "No", base=trabajo / "sin_apellido")
         caso("la identidad exige el apellido (nombra la carpeta de entrega)", False)
     except ValueError:
         caso("la identidad exige el apellido (nombra la carpeta de entrega)", True)
@@ -234,28 +236,28 @@ def main():
          and filas[0]["estado"] == "definitiva" and filas[0]["equipo"] == "P03_PRUEBA", filas)
     caso("se genera la retroalimentación de la pareja", (revision / "P03_PRUEBA" / "retroalimentacion_P03.md").exists())
 
-    # PAREJA_ID repetido o ajeno: el docente no asignó números de antemano
-    def revision_falsa(pareja, apellido, codigo):
+    # Nombre libre: dos equipos se distinguen por nombre + apellidos; se avisa si comparten datos o descarga
+    def revision_falsa(pareja, apellido, codigo, descarga):
         return {"docente": {"pareja_id": pareja, "integrantes": [{"apellido": apellido, "codigo": codigo}]},
-                "estudiante": {}, "avisos": []}
-    a, b, c = revision_falsa("P03", "Prueba", "000000"), revision_falsa("P03", "Gómez", "111111"), revision_falsa("P04", "Ruiz", "222222")
+                "estudiante": {}, "avisos": [], "ventana": C.ventana_de([codigo]), "descarga_utc": descarga}
+    c1 = codigo_para("2025-03", "1")
+    c2 = codigo_para("2025-03", "2")
+    c3 = codigo_para("2025-04", "3")
+    a, b, c = (revision_falsa("1", "Prueba", c1, "t1"), revision_falsa("1", "Gómez", c2, "t2"),
+               revision_falsa("1", "Ruiz", c3, "t3"))
     TV.conflictos([a, b, c])
-    caso("dos equipos con el mismo PAREJA_ID reciben el aviso, los demás no",
-         any("PAREJA_ID repetido" in x and "P03_GOMEZ" in x for x in a["avisos"])
-         and any("P03_PRUEBA" in x for x in b["avisos"]) and not c["avisos"], (a["avisos"], b["avisos"], c["avisos"]))
-    caso("el equipo se nombra como la carpeta de entrega", TV.equipo(b) == "P03_GOMEZ")
-    d = revision_falsa("P03", "Prueba", "000000")
-    TV.conflictos([d], None, [("P03", "P03_GOMEZ")])
-    caso("también avisa contra equipos ya registrados en el CSV", any("P03_GOMEZ" in x for x in d["avisos"]))
-    tabla = trabajo / "asignacion_parejas.csv"
-    tabla.write_text("pareja,codigo_1,codigo_2\nP01,,\nP03,000000,\nP04,999999,\n", encoding="utf-8")
-    asignacion = TV.leer_asignacion(tabla)
-    a2, c2 = revision_falsa("P03", "Prueba", "000000"), revision_falsa("P04", "Ruiz", "222222")
-    TV.conflictos([a2, c2], asignacion)
-    caso("la tabla de asignación detecta un PAREJA_ID ajeno", not a2["avisos"] and any("otros códigos" in x for x in c2["avisos"]),
-         (a2["avisos"], c2["avisos"]))
-    tabla.write_text("pareja,codigo_1,codigo_2\nP01,,\nP02,,\n", encoding="utf-8")
-    caso("una tabla de asignación vacía no genera avisos", TV.leer_asignacion(tabla) is None)
+    caso("mismo nombre de pareja en dos equipos: filas distintas y sin aviso si sus datos difieren",
+         TV.equipo(a) == "1_PRUEBA" and TV.equipo(c) == "1_RUIZ" and not c["avisos"], c["avisos"])
+    caso("dos equipos que comparten ventana por azar reciben el aviso",
+         any("comparte la ventana de datos 2025-03" in x and "1_GOMEZ" in x for x in a["avisos"])
+         and any("1_PRUEBA" in x for x in b["avisos"]), (a["avisos"], b["avisos"]))
+    d, e = revision_falsa("Los Datos", "Pérez", c3, "t9"), revision_falsa("X", "Rojas", codigo_para("2025-06", "4"), "t9")
+    TV.conflictos([d, e])
+    caso("la misma descarga en dos entregas se marca como posible copia", all(any("posible paquete copiado" in x for x in r["avisos"])
+                                                                            for r in (d, e)), (d["avisos"], e["avisos"]))
+    f = revision_falsa("1", "Prueba", c1, "t1")
+    TV.conflictos([f], [("1_GOMEZ", "2025-03", "t2")])
+    caso("también compara con las revisiones ya guardadas en el CSV", any("1_GOMEZ" in x for x in f["avisos"]))
 
     caso("el ZIP no contiene archivos de credenciales", not any(X.prohibido(n.split("/")[-1]) for n in __import__("zipfile").ZipFile(zip_path).namelist()))
 
@@ -273,8 +275,13 @@ def main():
     m2 = variante(out, "pagina", alterar_pagina)
     caso("página RAW alterada invalida E1 (SHA-256)", puntos(m2, "E1.3") == 0)
 
-    m2 = variante(out, "pareja", lambda R, o: editar_json(R["identidad"], lambda d: d.update(pareja="P04")))
-    caso("cambiar PAREJA_ID no hereda el RAW de otra ventana", puntos(m2, "E1.1") == 0)
+    def otros_codigos(R, o):
+        editar_json(R["identidad"], lambda d: d["integrantes"][0].update(codigo=codigo_para("2025-04")))
+    m2 = variante(out, "codigos", otros_codigos)
+    caso("cambiar los códigos (otra ventana) no hereda el RAW descargado", puntos(m2, "E1.1") == 0)
+    m2 = variante(out, "nombre", lambda R, o: editar_json(R["identidad"], lambda d: d.update(pareja="Otro nombre")))
+    caso("el nombre de la pareja no decide los datos (cambiarlo no altera E1 ni el cruce)",
+         puntos(m2, "E1.2") == 4 and puntos(m2, "E1.3") == 8 and puntos(m2, "E1.4") == 9)
 
     def duplicar(R, o):
         editar_json(R["E2"] / "02_modelo_documental.json", lambda d: d["documentos"].append(dict(d["documentos"][0])))
@@ -348,7 +355,16 @@ def main():
 
     # Contrato y cuaderno
     caso("rúbrica 25/25/10/15/15/10 = 100", C.puntos_totales() == 100 and list(C.STAGE_MAX.values()) == [25, 25, 10, 15, 15, 10])
-    caso("ventanas únicas por pareja", len(set(C.VENTANAS.values())) == len(C.VENTANAS) == 12)
+    caso("30 ventanas mensuales distintas, y la ventana sale solo de los códigos",
+         len(set(C.VENTANAS.values())) == len(C.VENTANAS) == 30
+         and C.ventana_de(["2021-0001", "b7"]) == C.ventana_de(["B7", "20210001"])
+         and C.slug("  Los Analistas #1 ") == "LOSANALISTAS1" and C.slug("—") == "")
+    try:
+        T.iniciar("—", [("Alguien", CODIGO, "Prueba")], "No", base=trabajo / "sin_nombre")
+        caso("la identidad pide un nombre de pareja con letras o números", False)
+    except ValueError:
+        caso("la identidad pide un nombre de pareja con letras o números", True)
+    T.ESTADO["out"] = out
     caso("exactamente tres capturas", list(C.CAPTURAS.values()) == ["E2_atlas.png", "E4_astra.png", "E5_neo4j.png"])
     import build_taller_control_1 as B
     nb_txt = (ROOT / "Cuadernos" / "Taller_Control_1.ipynb").read_bytes().decode("utf-8")
@@ -366,9 +382,11 @@ def main():
     caso("cada lectura usa los cuatro rótulos en orden", len(lecturas) >= 8 and all(
         f.index("Cómo se lee") < f.index("Qué nos dice") < f.index("Qué NO permite concluir todavía") < f.index("Qué error común") for f in lecturas))
     listas = [l for f in fuentes for l in f.splitlines() if "#@param [" in l and not l.startswith("GUARDAR_AVANCE")]
-    caso("ninguna lista trae una opción preseleccionada", len(listas) == 12 and all(f'= "{C.SIN_SELECCION}" #@param' in l for l in listas))
+    caso("ninguna lista trae una opción preseleccionada", len(listas) == 11 and all(f'= "{C.SIN_SELECCION}" #@param' in l for l in listas))
     codigo = "\n".join(f for f, c in zip(fuentes, nb["cells"]) if c["cell_type"] == "code")
-    caso("tres huecos de código (E1 y dos en E5)", codigo.count("____") == 3)
+    caso("dos huecos (E1.3 y E5.3a) y el ranking escrito completo por el estudiante (E5.3b)",
+         codigo.count("____") == 2 and codigo.count("escribe aquí tu consulta") == 1
+         and "count(DISTINCT otra) AS entidades_conectadas" not in todo)
     visibles = [f for f, c in zip(fuentes, nb["cells"]) if c["cell_type"] == "code" and not f.startswith("#@title Preparar")]
     caso("el cuaderno llama a los módulos por nombres descriptivos, no por letras",
          not any(__import__("re").search(r"(?<![\w.])[TSXVC]\.[a-z_]+", f) for f in visibles)

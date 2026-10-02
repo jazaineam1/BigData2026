@@ -44,8 +44,17 @@ def miles(n):
     return f"{n:,}".replace(",", ".")
 
 
+MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre",
+         "noviembre", "diciembre"]
+
+
+def mes_es(clave):
+    anio, mes = clave.split("-")
+    return f"{MESES[int(mes) - 1]} de {anio}"
+
+
 def rango_datos():
-    '''Rangos reales de las 12 ventanas (Datos/tc1_ventanas_resumen.json): el texto del cuaderno no se escribe a mano.'''
+    '''Rangos reales de las ventanas (Datos/tc1_ventanas_resumen.json): el texto del cuaderno no se escribe a mano.'''
     v = json.loads((ROOT / "Datos" / "tc1_ventanas_resumen.json").read_text(encoding="utf-8"))["ventanas"].values()
     rango = lambda xs: (min(xs), max(xs))
     return {"cruzan": rango([x["matched_processes"] for x in v]),
@@ -122,10 +131,8 @@ def celda_infraestructura():
 
 
 def cells():
-    ventanas = "\n".join(f"| {p} | {i[:10]} | {f[:10]} |" for p, (i, f) in C.VENTANAS.items())
     rubrica = "\n".join(f"| {cod} | {desc} | {pts} | {'automático' if t == 'auto' else 'automático + captura'} |"
                         for cod, _, pts, desc, t in C.RUBRICA)
-    lista_parejas = opciones([C.SIN_SELECCION] + C.PAREJAS)
     D = rango_datos()
     return [
         md(f'<a href="{C.COLAB_URL}" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" '
@@ -136,7 +143,7 @@ def cells():
 
 ## El problema de Laura
 
-Laura coordina la revisión de compras públicas en **Compras Claras**. SECOP II registra más de cien mil procesos al mes y su equipo alcanza a revisar unos cien. Necesita decidir **dónde mirar primero**, no si hay irregularidad. Te pide cuatro cosas, y cada una es una etapa del taller:
+Laura coordina la revisión de compras públicas en **Compras Claras**. SECOP II registra decenas de miles de procesos cada mes y su equipo alcanza a revisar unos cien. Necesita decidir **dónde mirar primero**, no si hay irregularidad. Te pide cuatro cosas, y cada una es una etapa del taller:
 
 | Laura necesita | Etapa | Modelo que lo resuelve |
 |---|---|---|
@@ -161,8 +168,7 @@ Construir, en parejas, un pipeline reproducible sobre SECOP II y demostrar que *
 | Pregunta | Respuesta |
 |---|---|
 | ¿Qué voy a entregar? | Tres archivos: `TC1_<PAREJA_ID>.ipynb`, `TC1_<PAREJA_ID>.zip` y `manifest_tc1.json`, en una carpeta de Drive restringida, más un correo. |
-| ¿Qué necesito antes de empezar? | Tu `PAREJA_ID` confirmado por el docente y tus tres cuentas activas: Atlas, Astra y Aura. |
-| ¿Cuánto me toma? | Entre 5 y 7 horas de trabajo por pareja; conviene repartirlas en 2 o 3 sesiones. Lo más largo es el trabajo en Atlas, Astra y Aura (E2 a E5). |
+| ¿Qué necesito antes de empezar? | Un nombre para tu pareja (el que quieras), los códigos de los integrantes y tus tres cuentas activas: Atlas, Astra y Aura. |
 | ¿Dónde trabajo? | E1 Colab · E2 Colab + **Atlas** · E3 **Atlas** + Colab · E4 Colab + **Astra** · E5 Colab + **Aura** · E6 Colab |
 | ¿Cómo sé si puedo avanzar? | Cada etapa termina en un **checkpoint** que imprime ✓ o ✗, dice qué falta y lista los archivos que dejó la etapa. |
 | ¿Cómo me califican? | Resultados que se recalculan desde tus archivos + tres capturas de los servicios. |
@@ -226,6 +232,7 @@ El título de cada celda empieza por lo que te toca hacer:
 | **EJECUTA** | pulsa ▶ y lee la salida: no hay nada que editar |
 | **ELIGE** | escoge en las listas o escribe en los campos de la derecha (nombres, códigos, números) y ejecuta |
 | **COMPLETA** | reemplaza el único `____` del código y ejecuta |
+| **ESCRIBE** | escribe tú el código completo: la celda dice qué debe devolver y te muestra si coincide |
 | **PEGA** | pega entre las `\'\'\'` lo que copiaste del servicio y ejecuta |
 | **CAPTURA** | ejecuta y sube la imagen PNG que se pide |
 | **SAL DE COLAB** (en el texto) | trabaja en Atlas, Astra o Aura con los pasos numerados y vuelve |
@@ -256,20 +263,19 @@ La celda siguiente carga cinco módulos. En el cuaderno los verás con estos nom
         celda_infraestructura(),
         md(f'''## 0 · Identidad de la pareja
 
-Tu `PAREJA_ID` (P01 a P12) fija tu **ventana** de SECOP: con números distintos, dos parejas nunca comparten datos, y la ventana no depende de cómo escribas el identificador.
-
-**OJO.** El número lo **asigna el docente**, uno por pareja, y te lo confirma por correo. Si todavía no lo tienes, escribe a `{C.CORREO_DOCENTE}` con el asunto `[BIG DATA 2026-2S][TC1] PAREJA_ID - <APELLIDO1> - <APELLIDO2>` **antes de ejecutar E1**; mientras tanto, revisa tus tres cuentas. No elijas un número por tu cuenta: dos parejas con el mismo número descargan los mismos datos, y el docente lo detecta al revisar.
-
-<details><summary>Tabla de ventanas</summary>
-
-| Pareja | Inicio | Fin |
+| Campo | Qué escribes | Para qué sirve |
 |---|---|---|
-{ventanas}
-</details>
+| `PAREJA_ID` | el nombre de tu pareja, el que quieras: un número, una palabra… (por ejemplo, el que ya venías usando) | nombra tu carpeta, tu colección de Atlas, tu tabla de Astra y tus archivos |
+| `CODIGO_1` · `CODIGO_2` | el código de cada integrante | fija tu **ventana de datos** de SECOP |
+| `APELLIDO_1` · `APELLIDO_2` | el primer apellido de cada integrante | nombra tu carpeta de entrega |
 
-Escribe el nombre, el código y el **primer apellido** de cada integrante: los apellidos nombran tu carpeta de entrega. Si trabajas solo, deja vacío el integrante 2. Los nombres y códigos solo viajan en tu entrega privada al docente; no los publiques. Guardar el avance en Drive deja una copia de tu carpeta de trabajo tras cada checkpoint: si Colab se reinicia, al volver a ejecutar esta celda recuperas lo hecho.'''),
+**Tu ventana de datos sale de los códigos, no del nombre.** Dos parejas que escriban el mismo nombre (por ejemplo, «1») no comparten datos. Cada ventana empieza el día 1 de un mes entre {mes_es(C.ORDEN_VENTANAS[0])} y {mes_es(C.ORDEN_VENTANAS[-1])} ({len(C.VENTANAS)} posibles, todas verificadas); la celda te dice cuál te tocó y los nombres exactos que usarás en Atlas y Astra.
+
+**OJO.** Escribe el mismo nombre y los mismos códigos en cada sesión. Si cambias un código, cambia tu ventana y la descarga de E1 deja de ser tuya (la celda te avisa); si cambias el nombre, el cuaderno empieza una carpeta nueva.
+
+Si trabajas solo, deja vacío el integrante 2. Los nombres y códigos solo viajan en tu entrega privada al docente; no los publiques. Guardar el avance en Drive deja una copia de tu carpeta de trabajo tras cada checkpoint: si Colab se reinicia, al volver a ejecutar esta celda recuperas lo hecho.'''),
         code(f'''#@title 0 · ELIGE · Identidad de la pareja {{ display-mode: "form" }}
-PAREJA_ID = "{C.SIN_SELECCION}" #@param {lista_parejas}
+PAREJA_ID = "" #@param {{type:"string"}}
 INTEGRANTE_1 = "" #@param {{type:"string"}}
 CODIGO_1 = "" #@param {{type:"string"}}
 APELLIDO_1 = "" #@param {{type:"string"}}
@@ -309,7 +315,7 @@ SECOP II publica la compra pública en dos conjuntos de datos, y vas a descargar
 
 **Cómo se unen.** Un proceso puede terminar sin contrato, con uno o con varios. El puente es el **portafolio**: `procesos.id_del_portafolio = contratos.proceso_de_compra`. El `id_del_proceso` (CO1.REQ) no existe en la tabla de contratos: cruzar por él da cero filas.
 
-**Cuántos cruzan.** Pocos, y es lo esperado: en las 12 ventanas del curso, entre {D['cruzan'][0]} y {D['cruzan'][1]} procesos (del {D['cobertura'][0]} % al {D['cobertura'][1]} % de los únicos) encuentran su contrato, casi siempre uno por proceso. E1.4 imprime tu número y las fechas que cubre cada descarga; en E6 explicarás por qué es bajo.
+**Cuántos cruzan.** Pocos, y es lo esperado: en las {len(C.VENTANAS)} ventanas posibles, entre {D['cruzan'][0]} y {D['cruzan'][1]} procesos (del {D['cobertura'][0]} % al {D['cobertura'][1]} % de los únicos) encuentran su contrato, casi siempre uno por proceso. E1.4 imprime tu número y las fechas que cubre cada descarga; en E6 explicarás por qué es bajo.
 
 <details><summary>Diccionario: qué trae cada columna que pides y dónde la usas</summary>
 
@@ -328,11 +334,20 @@ SECOP II publica la compra pública en dos conjuntos de datos, y vas a descargar
 La API de Socrata entrega todos los valores como texto; los números se convierten al construir los documentos (E2).
 </details>
 
-**Tu contrato de datos.** La consulta no se escribe a mano: sale del contrato de tu pareja. Se filtra y se proyecta en la API (*query pushdown*) para no transferir datos que no se usarán.
+**Tu contrato de datos.** La consulta no se escribe a mano: sale del contrato de tu pareja y de tu ventana. La celda siguiente la imprime; después de ella están las tres ideas para leerla.
 
-**Una decisión que ya está tomada, y por qué.** El snapshot de contratos guarda solo contratos con **personas jurídicas que no son consorcio** (`tipodocproveedor = 'NIT' AND es_grupo = 'No'`). La gran mayoría de contratos de SECOP son con personas naturales (en enero y febrero de 2025, el 94 %), que suelen firmar con una sola entidad y no forman red; los consorcios se crean para un solo proceso. Sin este filtro, la pregunta de E5 quedaba vacía, o con dos o tres proveedores, en las ventanas que se probaron. Con él, las 12 ventanas del curso tienen respuesta (`Datos/tc1_ventanas_resumen.json`).'''),
+**Una decisión que ya está tomada, y por qué.** El snapshot de contratos guarda solo contratos con **personas jurídicas que no son consorcio** (`tipodocproveedor = 'NIT' AND es_grupo = 'No'`). La gran mayoría de contratos de SECOP son con personas naturales (en enero y febrero de 2025, el 94 %), que suelen firmar con una sola entidad y no forman red; los consorcios se crean para un solo proceso. Sin este filtro, la pregunta de E5 quedaba vacía, o con dos o tres proveedores, en las ventanas que se probaron. Con él, las {len(C.VENTANAS)} ventanas posibles tienen respuesta (`Datos/tc1_ventanas_resumen.json`).'''),
         code('''#@title E1.0 · EJECUTA · Contrato de datos de tu pareja { display-mode: "form" }
 PLAN = taller.contrato_e1()'''),
+        md(f'''### Tres ideas para leer lo que acabas de imprimir
+
+| Idea | Qué es | Ejemplo para recordarla | En tu taller |
+|---|---|---|---|
+| **Snapshot** | una foto fija de los datos en un momento | el extracto bancario del día 30: tu cuenta sigue moviéndose, pero el extracto ya no cambia | SECOP se actualiza todos los días; tu análisis usa la foto que descargas en E1, y el docente la recalcula desde tu ZIP |
+| **Filtrar en la API** | pedirle al servidor solo las filas (`$where`), las columnas (`$select`) y el orden (`$order`) que necesitas | en la biblioteca pides «los libros de economía de 2025»; no te llevas la biblioteca a casa para buscarlos allá | traes solo {len(C.SELECT_PROCESOS)} columnas de procesos y {len(C.SELECT_CONTRATOS)} de contratos, y solo de tu ventana |
+| **Paginación** | la API entrega el resultado por partes: `$limit` dice cuántas filas trae cada página y `$offset` desde qué fila empieza | un libro de 3.000 páginas que te prestan de a 250: el préstamo que empieza en la página 500 es `offset = 500, limit = 250` | {C.TARGET_PROCESOS // C.PAGE_SIZE} páginas de procesos (offsets 0, 250, …, {miles(C.TARGET_PROCESOS - C.PAGE_SIZE)}) y {C.TARGET_CONTRATOS // C.PAGE_SIZE} de contratos |
+
+**Pruébalo mentalmente** (no se califica): si pides dos veces `offset = 250, limit = 250`, ¿obtienes filas nuevas? No: obtienes la misma página. Por eso cada descarga se guarda por su `offset`, y por eso la descarga concurrente de E1.3 debe pedir los mismos offsets que la secuencial.'''),
         code('''# E1.1 · EJECUTA · Prueba pequeña antes de descargar: 50 filas reales
 q = PLAN["procesos"]
 muestra, meta = secop.fetch_page(q["endpoint"], select=q["select"], where=q["where"], order=q["order"], limit=50, offset=0)
@@ -344,6 +359,12 @@ pd.DataFrame(muestra)[["id_del_proceso", "entidad", "fecha_de_publicacion_del", 
                 "Lanzar la descarga completa sin probar la consulta. Un nombre de columna mal escrito no se corrige reintentando."),
         code('''#@title E1.2a · EJECUTA · Preflight: cuántos registros hay y qué páginas pedir { display-mode: "form" }
 pagina_secuencial, pagina_concurrente, OFFSETS, N_PROCESOS = taller.preflight_e1()'''),
+        md('''### E1.2 · Qué pasa con cada página que descargas
+
+| Idea | Qué es | Ejemplo para recordarla | En tu taller |
+|---|---|---|---|
+| **Caché** | guardar lo que ya descargaste para no pedirlo otra vez | fotocopias el capítulo que necesitas para no volver a la biblioteca | cada página queda en `E1/raw/pages/`; si vuelves a ejecutar, se lee del disco. Por eso una segunda corrida es casi instantánea y sus tiempos no sirven para comparar velocidades |
+| **Escritura atómica** | el archivo se escribe primero como borrador (`.part`) y solo cuando está completo se renombra | no firmas un contrato hasta que tiene todas sus páginas | si Colab se cae a mitad de una página, queda un `.part` que nunca cuenta como página descargada: no hay páginas a medias |'''),
         code('''# E1.2b · EJECUTA · Descarga secuencial: una página después de otra
 def descargar_secuencial(descargar_pagina, offsets):
     paginas = {}
@@ -392,6 +413,12 @@ for texto in ["CO1.REQ.7614406", "CO1.REQ.7614407"]:
 
 Pedir páginas a una API es trabajo **I/O-bound**: casi todo el tiempo Python espera la red. Varios hilos pueden esperar a la vez sin cambiar qué se descarga.
 
+**Ejemplo.** Tienes que pedir 12 pizzas por teléfono. Con un solo teléfono llamas, esperas la confirmación y vuelves a llamar: casi todo el tiempo esperas (eso es la descarga secuencial). Con 4 teléfonos —4 *workers*— cuatro pedidos esperan a la vez: la cocina no es más rápida, pero tú esperas en paralelo. Eso es un trabajo **I/O-bound**: el tiempo se va esperando, no calculando. Si el trabajo fuera calcular (*CPU-bound*), más hilos de Python no lo acelerarían.
+
+**Speedup** = tiempo secuencial ÷ tiempo concurrente: 2,0 es el doble de rápido; menos de 1, más lento. Aquí no se califica: se califica que las dos descargas traigan lo mismo.
+
+**Y si pides demasiado rápido.** Una API protege su servidor limitando cuántas peticiones acepta. Si te pasas, responde **HTTP 429 Too Many Requests** y a veces agrega **Retry-After**: «vuelve en N segundos». El cliente del taller **reintenta con backoff**: espera 1 s, luego 2, 4, 8 y 16 s (o lo que diga Retry-After), hasta 6 intentos. Ejemplo: en una ventanilla te dicen «vuelva en diez minutos»; si vuelves cada segundo, no te atienden antes y retrasas a los demás. La celda E1.3 te dice cuántos reintentos y cuántos 429 hubo en tus descargas; en E6 decidirás qué hacer ante un 429.
+
 **Función usada: `ThreadPoolExecutor` + `as_completed`**
 
 | | |
@@ -434,11 +461,11 @@ CRUCE = taller.consolidar_e1(paginas_con)
 _ = taller.checkpoint("E1")'''),
         lectura("La cobertura es la fracción de procesos únicos de tu snapshot que encontró al menos un contrato por `id_del_portafolio → proceso_de_compra`. Las fechas dicen qué días cubre realmente cada descarga.",
                 "Hay población cruzada suficiente para E2–E4, y tu snapshot cubre **pocos días** del inicio de tu ventana, no los dos meses.",
-                "Nada sobre la ventana completa ni sobre 2025: es el comienzo de la ventana. Tampoco que los procesos sin contrato no tengan contrato: puede firmarse otro día o con una persona natural, que el filtro excluye.",
+                "Nada sobre la ventana completa ni sobre el año: es el comienzo de la ventana. Tampoco que los procesos sin contrato no tengan contrato: puede firmarse otro día o con una persona natural, que el filtro excluye.",
                 "Rellenar con cero los procesos sin contrato o cruzar por `id_del_proceso`. La clave de cruce es `id_del_portafolio → proceso_de_compra`."),
         md('''### E1.5 · Tu RAW en Parquet: un proceso junto a su contrato
 
-E1.4 guardó el snapshot consolidado en dos archivos **Parquet**: `E1/raw/procesos.parquet` y `E1/raw/contratos.parquet`. Parquet es un formato **columnar**: guarda los valores de cada columna juntos y comprimidos, con el nombre y el tipo de cada columna. Por eso, en la prueba del taller, 3.000 procesos ocuparon unos 120 KB en Parquet frente a casi 2 MB en las páginas JSON, y leer dos columnas no obliga a leer las quince. Es el formato que leen pandas, Spark y Dask.
+**RAW** son los datos tal como llegaron de la API, sin transformar: la base de la que sale todo lo demás, y la que el docente recalcula. E1.4 guardó tu RAW consolidado en dos archivos **Parquet**: `E1/raw/procesos.parquet` y `E1/raw/contratos.parquet`. Parquet es un formato **columnar**: guarda los valores de cada columna juntos y comprimidos, con el nombre y el tipo de cada columna. Por eso, en la prueba del taller, 3.000 procesos ocuparon unos 120 KB en Parquet frente a casi 2 MB en las páginas JSON, y leer dos columnas no obliga a leer las quince. Es el formato que leen pandas, Spark y Dask.
 
 **Función usada: `pd.read_parquet`**
 
@@ -482,7 +509,7 @@ print(f"  firmado el {uno['fecha_de_firma'][:10]} · valor {valor:,.0f}")'''),
               "25: modelo documental 5 · Atlas idempotente 7 · índices 4 · consulta A 3 · consulta B 3 · evidencia + captura 3."),
         md(f'''### E2.1 · El grano: ¿qué es un documento?
 
-SECOP puede traer varias filas para el mismo proceso: en las ventanas del curso, entre {D['repetidas'][0]} y {D['repetidas'][1]} de las {miles(C.TARGET_PROCESOS)} filas repiten un proceso ya visto. El caso necesita **un documento por proceso**, con sus contratos resumidos dentro. Estas son las rutas de campo que usarás en Atlas:
+SECOP puede traer varias filas para el mismo proceso: en las ventanas posibles, entre {D['repetidas'][0]} y {D['repetidas'][1]} de las {miles(C.TARGET_PROCESOS)} filas repiten un proceso ya visto. El caso necesita **un documento por proceso**, con sus contratos resumidos dentro. Estas son las rutas de campo que usarás en Atlas:
 
 | Dato | Ruta en el documento |
 |---|---|
@@ -512,6 +539,14 @@ DOCUMENTOS = taller.documentos_e2(GRANO)'''),
 
 La carga se hace desde Colab porque el Data Explorer de Atlas no importa archivos, igual que en S04. **Tu decisión es cómo escribir**: la celda prueba tu estrategia dos veces en una colección de ensayo y luego hace la carga oficial.
 
+**Idempotente** significa que repetir una operación deja el mismo resultado que hacerla una vez. Ejemplo: el botón «Guardar» de un documento es idempotente; «Pegar» no, porque cada vez agrega otra copia. Una carga debe ser idempotente porque en la vida real se repite: se corta la red, corriges un dato, vuelves a ejecutar la celda.
+
+| Estrategia | Qué hace cada vez que se ejecuta |
+|---|---|
+| `insert_many` | agrega todos los documentos como nuevos |
+| `insert_many` con índice único en `id_proceso` | agrega todos; la base rechaza los que repiten un `id_proceso` ya guardado |
+| **upsert** por `id_proceso` (`UpdateOne` + `upsert=True`) | *update + insert*: busca cada documento por su `id_proceso`; si existe, lo reemplaza con la versión nueva; si no, lo inserta. Ejemplo: actualizar una lista de asistencia por código: si el código ya está, corriges su fila; si no, agregas una |
+
 **OJO.** La URI se pide en un campo oculto (`getpass`). Nunca la escribas en una celda ni la imprimas: el validador bloquea la entrega si encuentra una URI con contraseña.'''),
         code('''#@title E2.2a · EJECUTA · Conectar Atlas (la URI se pide oculta) { display-mode: "form" }
 ATLAS = taller.conectar_atlas_e2()'''),
@@ -524,8 +559,10 @@ CARGA = taller.cargar_e2(ESTRATEGIA)'''),
                 "Creer que «sin error» significa «sin duplicados»: `insert_many` duplica en silencio."),
         md(f'''### E2.3 · Índices: **SAL DE COLAB. AHORA TRABAJAS EN MONGODB ATLAS.**
 
+**Índice.** Una estructura que lleva directo a los documentos que cumplen una condición, sin revisar toda la colección. Ejemplo: el índice alfabético de un libro te lleva a la página de «Cassandra» sin hojear las 300 páginas. Un **índice único** además impide que dos documentos tengan el mismo valor, como la cédula: no hay dos personas con el mismo número. Un índice ayuda a una consulta cuando su **primer campo** es el que esa consulta filtra u ordena; un índice sobre un campo que ninguna consulta usa solo ocupa espacio.
+
 **HAZ ESTO AHORA.**
-1. Atlas → **Data Explorer** → base `{C.ATLAS_DB}` → colección `tc1_<tu pareja en minúscula>` (por ejemplo `tc1_p03`). Comprueba que el número de documentos es el que imprimió E2.2.
+1. Atlas → **Data Explorer** → base `{C.ATLAS_DB}` → tu colección, la que imprimió la celda de identidad (por ejemplo `tc1_p03`). Comprueba que el número de documentos es el que imprimió E2.2.
 2. Pestaña **Indexes** → **Create Index** → `{{ "id_proceso": 1 }}` y, en *Options*, marca **Create unique index**.
 3. Crea **un índice más** cuyo primer campo use una consulta del taller (mira las consultas A, B y E3). Decide cuál y por qué: en E6 lo defenderás.
 4. Vuelve y ejecuta la celda siguiente: lee los índices directamente de Atlas.'''),
@@ -578,7 +615,7 @@ _ = taller.checkpoint("E2")'''),
 **HAZ ESTO AHORA.**
 1. En tu colección abre **Aggregations** y activa el modo **Texto** (ícono `</>`), como en S04.
 2. Escribe el pipeline, pulsa **Run** y revisa que salgan como máximo {C.BANDEJA_MAX} filas.
-3. **Save → Save as** con el nombre exacto `tc1-bandeja-<tu pareja en minúscula>` (por ejemplo `tc1-bandeja-p03`).
+3. **Save → Save as** con el nombre exacto de pipeline que imprimió la celda de identidad (por ejemplo `tc1-bandeja-p03`).
 4. **Export Code → Python 3**, desmarca *Include driver syntax* si aparece, copia el código y pégalo en la celda siguiente. Si se copia también la línea de conexión (`client = MongoClient(...)`), no importa: la celda toma solo el pipeline y descarta la conexión.
 5. **Captura `E2_atlas.png`.** Debe verse la interfaz de Atlas, el nombre del pipeline guardado y su resultado. En Windows: `Win + Shift + S`; la imagen queda en *Imágenes → Capturas de pantalla*.
 
@@ -625,6 +662,8 @@ SELECT id_proceso, valor_contratos FROM ... WHERE anio = ? AND departamento = ? 
 | partición | en qué partición vive cada fila; la consulta debe fijar sus columnas **con igualdad** | sin eso, Cassandra pide `ALLOW FILTERING`, que está prohibido |
 | clustering | cómo se ordenan las filas **dentro** de la partición y qué hace única cada fila | dos filas con la misma PRIMARY KEY se sobrescriben |
 | tipo | cómo se compara el valor al ordenar | un número guardado como texto se ordena alfabéticamente |
+
+Tu bandeja tiene procesos de varios departamentos. Para probar la consulta, la celda elige la **partición de prueba**: la combinación (año, departamento) con más filas en tu bandeja, y te dice cuál es y cuántas filas tiene.
 
 **HAZ ESTO AHORA.** Toma las tres decisiones. La celda te anuncia qué pasará en Astra antes de que lo ejecutes.'''),
         code(f'''#@title E4.1 · ELIGE · Diseña la tabla {{ display-mode: "form" }}
@@ -677,7 +716,7 @@ _ = taller.checkpoint("E4")'''),
               "Colab para cargar el grafo; **Neo4j Aura → Query** para consultarlo.",
               "la carga con `UNWIND $filas` + `MERGE` (el patrón de S06), la consulta que encuentra la ancla y la consulta de contexto.",
               ["Conecta Aura y carga el grafo.", "En Aura ejecuta la consulta de la ancla.",
-               "Completa los dos huecos (compartidos y ranking).", "Ejecuta ambas en Aura.",
+               "Completa el hueco de compartidos y escribe completa la consulta de ranking.", "Ejecuta ambas en Aura.",
                "Captura `E5_neo4j.png` y sube la evidencia."],
               "`E5/05_relaciones_grafo.csv`, `E5/05_neo4j_consultas.cypher`, `E5/05_resultado_relacional.csv`, `E5/05_neo4j_evidence.json` y `E5/E5_neo4j.png`.",
               "15: grafo y ancla 4 · métrica relacional 4 · Cypher 5 · ejecución real + captura 2."),
@@ -689,7 +728,7 @@ El modelo es el de S06, con el contrato como nodo. El grafo usa **todos** tus co
 (:Entidad {nit})-[:FIRMA]->(:Contrato {id})-[:ADJUDICADO_A]->(:Proveedor {nit})
 ```
 
-Un **proveedor compartido** es un proveedor que tiene contratos con dos o más entidades. La **entidad ancla** es la entidad con más proveedores compartidos (desempate: más contratos, luego el NIT). La regla se eligió por los datos: con la regla anterior, «la entidad con más contratos», la ancla no compartía ningún proveedor en ninguna de las seis ventanas que se probaron; con esta regla, las 12 ventanas del curso tienen una red con respuesta.
+Un **proveedor compartido** es un proveedor que tiene contratos con dos o más entidades. La **entidad ancla** es la entidad con más proveedores compartidos (desempate: más contratos, luego el NIT). La regla se eligió por los datos: con la regla anterior, «la entidad con más contratos», la ancla no compartía ningún proveedor en ninguna de las seis ventanas que se probaron; con esta regla, las ''' + str(len(C.VENTANAS)) + ''' ventanas posibles tienen una red con respuesta.
 
 **OJO.** La contraseña de Aura se pide oculta. La carga solo borra contratos de cargas anteriores del TC1; no toca lo que hiciste en S06.'''),
         code('''#@title E5.1 · EJECUTA · Conectar Aura y cargar el grafo { display-mode: "form" }
@@ -704,21 +743,42 @@ CONTEOS = taller.cargar_e5()'''),
         code('''#@title E5.2 · EJECUTA · La consulta de la ancla (cópiala en Aura) y tu ancla { display-mode: "form" }
 print(secop.CYPHER_ANCLA, "\\n")
 NIT_ANCLA = taller.ancla_e5()'''),
-        md('''### E5.3 · Dos consultas, un hueco en cada una
+        md('''### E5.3 · Dos consultas: una con un hueco, otra escrita por ti
 
-| Cypher | Para qué |
+| Cypher | Para qué | Ejemplo en tu grafo |
+|---|---|---|
+| `MATCH` | describe con flechas el camino que buscas | `(e:Entidad)-[:FIRMA]->(c:Contrato)`: una entidad que firma un contrato |
+| `WHERE` | descarta caminos que no sirven | `WHERE c.valor > 0`: solo contratos con valor |
+| `WITH` | cierra un tramo de la consulta y pasa sus resultados (y sus conteos) al tramo siguiente | `WITH e, count(DISTINCT c) AS firmados`: por cada entidad, cuántos contratos firmó |
+| `count(DISTINCT x)` | cuenta nodos distintos, no caminos | ver el ejemplo de abajo |
+| `ORDER BY … DESC, … ASC` | ordena; cada columna siguiente desempata a la anterior | igual que el Sort de Atlas y el clustering de Cassandra |
+
+**Ejemplo para entender `DISTINCT`.** María le compra a la misma tienda el lunes, el miércoles y el viernes. ¿A cuántas tiendas le compra? A una, aunque haya tres compras. En tu grafo, los contratos son las compras y las entidades son las tiendas: `count(otra)` cuenta compras (3); `count(DISTINCT otra)` cuenta tiendas (1).
+
+**E5.3a · Compartidos — COMPLETA.** Completa el `____` del `WHERE`: la «otra» entidad no puede ser la ancla. Devuelve una fila por proveedor con `nit_proveedor`, `proveedor` y la lista `otras_entidades`. En Aura mira la pestaña **Graph**.
+
+**E5.3b · Ranking de proveedores puente — ESCRIBE.** Escribe tú la consulta completa. Por cada proveedor de la ancla que también contrata con otras entidades debe devolver estas columnas, con estos nombres:
+
+| Columna | Qué es |
 |---|---|
-| `WHERE` | descartar caminos; aquí, que la «otra» entidad no sea la ancla |
-| `count(DISTINCT x)` | contar nodos distintos, no caminos (un proveedor puede llegar a la misma entidad por varios contratos) |
-| `WITH` | pasar un resultado intermedio a la siguiente parte de la consulta |
+| `nit_proveedor` | el NIT del proveedor |
+| `proveedor` | su nombre |
+| `contratos_con_ancla` | cuántos contratos **distintos** tiene con la ancla |
+| `entidades_conectadas` | con cuántas entidades **distintas**, aparte de la ancla, tiene contratos |
 
-**HAZ ESTO AHORA.** Completa el `____` de cada celda y ejecútala. La celda imprime la versión para pegar en Aura (con tu NIT en lugar de `$nit_ancla`). Ejecuta ambas en Aura; en *compartidos* mira la pestaña **Graph**.
+Ordenadas por `entidades_conectadas` de mayor a menor, luego `contratos_con_ancla` de mayor a menor y luego `nit_proveedor` ascendente. Usa el parámetro `$nit_ancla` para la entidad ancla. Al ejecutarla, la celda imprime la versión para Aura (con tu NIT), la corre en tu instancia y te dice si coincide con la referencia calculada desde tu RAW; si no coincide, te dice qué revisar y cómo deben verse tus primeras filas.
 
-**Así debe verse.** *Compartidos* devuelve una fila por proveedor con `nit_proveedor`, `proveedor` y la lista `otras_entidades`. *Ranking* devuelve `nit_proveedor`, `proveedor`, `contratos_con_ancla` y `entidades_conectadas`, de mayor a menor número de entidades.
+**Error más probable:** contar caminos con `count(otra)`: los números salen inflados.
 
-**Error más probable:** contar filas con `count(otra)`. Los números saldrán inflados y el checkpoint marcará ✗ en la métrica.
+<details><summary>Si te atascas en E5.3a</summary><code>WHERE otra <> a</code></details>
 
-<details><summary>Si te atascas</summary>Compartidos: <code>WHERE otra <> a</code>. Ranking: <code>count(DISTINCT otra)</code>.</details>'''),
+<details><summary>Pistas para E5.3b, de menos a más (ábrelas una por una)</summary>
+
+1. La consulta de E5.3a ya recorre el camino completo: ancla → contrato → proveedor → contrato → otra entidad. El ranking usa ese mismo camino, partido en dos tramos.
+2. Primer tramo: de la ancla a sus proveedores. Antes de seguir, cuenta por proveedor los contratos distintos con la ancla y pásalos con `WITH`.
+3. Segundo tramo: de cada proveedor a las otras entidades que le compran; descarta la ancla con `WHERE`.
+4. En el `RETURN`, cuenta las otras entidades sin repetir, nombra las cuatro columnas con `AS` y termina con el `ORDER BY` de tres claves.
+</details>'''),
         code('''# E5.3a · COMPLETA · Proveedores compartidos (un hueco en el WHERE)
 CYPHER_COMPARTIDOS = \'\'\'
 MATCH (a:Entidad {nit: $nit_ancla})-[:FIRMA]->(:Contrato)-[:ADJUDICADO_A]->(p:Proveedor)<-[:ADJUDICADO_A]-(:Contrato)<-[:FIRMA]-(otra:Entidad)
@@ -726,14 +786,9 @@ WHERE ____
 RETURN p.nit AS nit_proveedor, p.nombre AS proveedor, collect(DISTINCT otra.nombre) AS otras_entidades
 \'\'\'
 taller.preparar_consulta_e5("compartidos", CYPHER_COMPARTIDOS)'''),
-        code('''# E5.3b · COMPLETA · Ranking de proveedores puente (un hueco en el conteo)
+        code('''# E5.3b · ESCRIBE · Ranking de proveedores puente (la consulta completa es tuya)
 CYPHER_RANKING = \'\'\'
-MATCH (a:Entidad {nit: $nit_ancla})-[:FIRMA]->(ca:Contrato)-[:ADJUDICADO_A]->(p:Proveedor)
-WITH a, p, count(DISTINCT ca) AS contratos_con_ancla
-MATCH (p)<-[:ADJUDICADO_A]-(:Contrato)<-[:FIRMA]-(otra:Entidad)
-WHERE otra <> a
-RETURN p.nit AS nit_proveedor, p.nombre AS proveedor, contratos_con_ancla, ____ AS entidades_conectadas
-ORDER BY entidades_conectadas DESC, contratos_con_ancla DESC, nit_proveedor ASC
+escribe aquí tu consulta
 \'\'\'
 taller.preparar_consulta_e5("ranking", CYPHER_RANKING)'''),
         md('''**HAZ ESTO AHORA.** Con las dos consultas ya ejecutadas en Aura, toma **`E5_neo4j.png`**: debe verse Aura Query con la consulta de ranking y su resultado (o la vista Graph de compartidos, si aporta más). Sin contraseñas a la vista. Después ejecuta la celda siguiente.'''),
@@ -744,7 +799,7 @@ print(("✓ " if ok else "✗ ") + f"{ruta.name}: {motivo}")
 _ = taller.checkpoint("E5")'''),
         lectura("Cada fila del ranking es un proveedor de la ancla que también contrata con otras entidades: cuántos contratos tiene con la ancla y con cuántas entidades distintas más.",
                 "Qué proveedores hacen de **puente** entre tu entidad ancla y el resto de tu snapshot: el contexto que una tabla de contratos no muestra de un vistazo.",
-                "Colusión, favorecimiento ni fraude. Además, un NIT puede agrupar varias sedes (SENA, ICBF): su centralidad puede reflejar tamaño administrativo, no comportamiento. Y solo ves contratos con empresas durante pocos días.",
+                "Colusión, favorecimiento ni fraude. Además, un NIT puede agrupar varias sedes (SENA, ICBF): su número de conexiones (en grafos, su *centralidad de grado*) puede reflejar tamaño administrativo, no comportamiento. Y solo ves contratos con empresas durante pocos días.",
                 "Leer «conecta muchas entidades» como «es sospechoso». Un proveedor de seguros o de vigilancia contrata con muchas entidades por la naturaleza de su servicio."),
         ficha("E6",
               "Tomar tres decisiones de ingeniería y dos de interpretación ancladas a **tus** resultados, y entregar.",
@@ -847,8 +902,8 @@ TC1_BIGDATA_<PAREJA_ID>_<APELLIDO1>_<APELLIDO2>/
 | cruzar procesos con contratos | `id_del_portafolio` (procesos) = `proceso_de_compra` (contratos) |
 | descargar en paralelo sin cambiar el resultado | `ThreadPoolExecutor` + `as_completed`, guardando por `offset` |
 | saber si dos descargas son iguales | comparar su huella SHA-256, no su número de filas |
-| filtrar en Atlas (Documents → Filter) | `{{"campo.anidado": {{"$gt": 0}}, "otro.campo": {{"$gt": 0}}}}`: varias condiciones = todas deben cumplirse |
-| ordenar en Atlas (Documents → Options) | Sort `{{"campo": -1, "desempate": 1}}` (-1 descendente, 1 ascendente) · Limit |
+| filtrar en Atlas (Documents → Filter) | operadores de comparación de S03: `$gt` (>), `$gte` (≥), `$lt` (<), `$lte` (≤), `$eq` (=); un campo anidado se escribe con punto |
+| ordenar en Atlas (Documents → Options) | en Sort, `1` es ascendente y `-1` descendente; con varias claves, cada una desempata a la anterior · Limit |
 | bandeja en Atlas | `$match` → `$project` → `$sort` → `$limit` |
 | tabla query-first | `PRIMARY KEY ((columnas del WHERE), columna de orden, id)` + `CLUSTERING ORDER BY` |
 | grafo | `UNWIND $filas AS fila MERGE ...`; contar con `count(DISTINCT ...)` |

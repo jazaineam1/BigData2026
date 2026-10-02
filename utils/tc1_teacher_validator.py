@@ -17,10 +17,11 @@ Para cada entrega:
 6. deja en la carpeta de revisión las tres capturas, la retroalimentación de la pareja y una
    sola fila por equipo en notas_tc1.csv (la última revisión reemplaza a la anterior).
 
-El equipo se identifica por PAREJA_ID + apellidos, como su carpeta de entrega: si dos equipos
-usaron el mismo PAREJA_ID (descargaron los mismos datos), quedan en filas distintas y ambos
-reciben el aviso. Si existe la tabla privada asignacion_parejas.csv (pareja,codigo_1,codigo_2),
-se avisa también cuando un equipo usó un PAREJA_ID que no es el suyo.
+El PAREJA_ID es libre (cada pareja escribió el que quiso) y la ventana de datos sale de los
+códigos de los integrantes. Cada equipo se identifica por PAREJA_ID + apellidos, como su carpeta
+de entrega, así que dos equipos con el mismo nombre no se pisan. Se avisa cuando dos equipos
+comparten ventana de datos (pasa por azar, ≈ 1 en 30 por cada par de equipos) y cuando dos entregas
+traen la misma descarga (mismo instante de consulta a la API: una copió el paquete de la otra).
 
 Una entrega de la versión anterior (V7) no se puede recalcular (V7 validaba variables en
 memoria): se reconoce, no se le inventa una nota y queda marcada para revisión manual.
@@ -29,7 +30,6 @@ Uso:
     python utils/tc1_teacher_validator.py --lote <carpeta con las descargas de Drive>
     python utils/tc1_teacher_validator.py --entrega <zip de Drive | carpeta | TC1_Pxx.zip>
            [--sha-correo HEX] [--capturas E2=ok,E4=ok,E5=no] [--abrir] [--salida <carpeta privada>]
-           [--asignacion <asignacion_parejas.csv>]
 '''
 from __future__ import annotations
 
@@ -53,10 +53,9 @@ sys.path.insert(0, str(ROOT / "utils"))
 import tc1_contrato as C  # noqa: E402
 
 SALIDA_DEFECTO = ROOT / ".local-docente" / "tc1" / "revisiones"
-ASIGNACION_DEFECTO = ROOT / ".local-docente" / "tc1" / "asignacion_parejas.csv"
-ZIP_ESTUDIANTE = re.compile(r"^TC1_P\d{2}\.zip$", re.I)
-COLUMNAS_CSV = ["pareja", "equipo", "codigos", "estado", "puntaje", "nota_exacta", "nota_registrada", *C.STAGE_MAX,
-                "capturas", "discrepancias", "avisos", "huella_manifest", "revisado_utc"]
+ZIP_ESTUDIANTE = re.compile(r"^TC1_(?!BIGDATA_)[A-Z0-9]+\.zip$", re.I)
+COLUMNAS_CSV = ["pareja", "equipo", "codigos", "ventana", "estado", "puntaje", "nota_exacta", "nota_registrada", *C.STAGE_MAX,
+                "capturas", "discrepancias", "avisos", "huella_manifest", "descarga_utc", "revisado_utc"]
 
 
 def requisitos():
@@ -154,8 +153,10 @@ def revisar(entrega, sha_correo=None, capturas=None, salida=None):
             avisos.append("el PAREJA_ID del manifest no coincide con el de la carpeta de trabajo")
         diferencias = [k for k, c in docente["controles"].items()
                        if (estudiante.get("controles") or {}).get(k, {}).get("puntos") != c["puntos"]]
+        acq = json.loads((paquete / "E1" / "01_acquisition_manifest.json").read_text(encoding="utf-8"))             if (paquete / "E1" / "01_acquisition_manifest.json").exists() else {}
         r = {"entrega": str(entrega), "origen": arch["origen"], "huella_manifest": huella, "avisos": avisos,
-             "estudiante": estudiante, "docente": docente, "diferencias": diferencias, "anterior": None}
+             "estudiante": estudiante, "docente": docente, "diferencias": diferencias, "anterior": None,
+             "ventana": docente.get("ventana"), "descarga_utc": acq.get("consultado_utc")}
         if salida:
             r["capturas_extraidas"] = _guardar_capturas(paquete, Path(salida) / equipo(r))
         return r
@@ -196,38 +197,21 @@ def codigos(r):
     return sorted(str(x.get("codigo", "")).strip() for x in _integrantes(r) if str(x.get("codigo", "")).strip())
 
 
-def leer_asignacion(path):
-    '''{PAREJA_ID: códigos} desde la tabla privada del docente; None si no existe o está vacía.'''
-    path = Path(path) if path else None
-    if not path or not path.exists():
-        return None
-    tabla = {}
-    with open(path, newline="", encoding="utf-8-sig") as fh:
-        for fila in csv.DictReader(fh):
-            pareja = (fila.get("pareja") or "").strip().upper()
-            if pareja:
-                tabla[pareja] = sorted(v.strip() for k, v in fila.items() if k and k.startswith("codigo") and v and v.strip())
-    return tabla if any(tabla.values()) else None
-
-
-def conflictos(resultados, asignacion=None, registradas=()):
-    '''Avisa cuando dos equipos usan el mismo PAREJA_ID (mismos datos de SECOP) o cuando un equipo
-    usa un PAREJA_ID asignado a otros códigos. registradas: (pareja, equipo) ya guardados en el CSV.'''
-    usos = {}
-    for p, e in registradas:
-        usos.setdefault(p, set()).add(e)
+def conflictos(resultados, registradas=()):
+    '''Avisa cuando dos equipos distintos comparten ventana de datos (pasa por azar) o traen la misma
+    descarga (mismo instante de consulta a la API: paquete copiado). registradas: (equipo, ventana,
+    descarga_utc) que ya están en notas_tc1.csv, para comparar también con revisiones anteriores.'''
+    vistos = list(registradas) + [(equipo(r), r.get("ventana"), r.get("descarga_utc")) for r in resultados]
     for r in resultados:
-        usos.setdefault(pareja_de(r), set()).add(equipo(r))
-    for r in resultados:
-        p, e = pareja_de(r), equipo(r)
-        otros = sorted(usos[p] - {e})
-        if otros:
-            r["avisos"].append(f"PAREJA_ID repetido: {p} también lo usa {', '.join(otros)} (mismos datos de SECOP)")
-        if asignacion is not None and r["docente"] is not None:
-            if not asignacion.get(p):
-                r["avisos"].append(f"{p} no tiene códigos asignados en asignacion_parejas.csv")
-            elif codigos(r) != asignacion[p]:
-                r["avisos"].append(f"{p} está asignado a otros códigos en asignacion_parejas.csv")
+        e, v, d = equipo(r), r.get("ventana"), r.get("descarga_utc")
+        copia = sorted({x for x, _, dd in vistos if x != e and d and dd == d})
+        misma = sorted({x for x, vv, _ in vistos if x != e and v and vv == v})
+        if copia:
+            r["avisos"].append(f"misma descarga que {', '.join(copia)} (mismo instante de consulta a la API): "
+                               "posible paquete copiado")
+        elif misma:
+            r["avisos"].append(f"comparte la ventana de datos {v} con {', '.join(misma)} (por azar): tienen las mismas "
+                               "respuestas de referencia; compara sus capturas y sus decisiones de E6")
     return resultados
 
 
@@ -254,7 +238,7 @@ def panel(r):
         return "\n".join(lineas)
     d = r["docente"]
     nombres = " / ".join(x.get("apellido") or x.get("nombre", "") for x in d.get("integrantes", []))
-    lineas = [f"TC1 · {d['pareja_id']} · {nombres} · estado: {estado(r).upper()}", ""]
+    lineas = [f"TC1 · {d['pareja_id']} · {nombres} · ventana {d.get('ventana') or '?'} · estado: {estado(r).upper()}", ""]
     for etapa, info in d["etapas"].items():
         marca = "✓" if info["puntos"] == info["maximo"] else "⚠"
         lineas.append(f"{etapa} · {info['nombre']:<34} {info['puntos']:>2} / {info['maximo']:<2}  {marca}")
@@ -304,8 +288,8 @@ def _filas_csv(salida):
 
 
 def registradas(salida):
-    '''(pareja, equipo) ya guardados en notas_tc1.csv: para avisar de un PAREJA_ID repetido entre revisiones.'''
-    return [(f["pareja"], clave) for clave, f in _filas_csv(salida).items()] if salida else []
+    '''(equipo, ventana, descarga_utc) ya guardados en notas_tc1.csv: para comparar con revisiones anteriores.'''
+    return [(clave, f.get("ventana"), f.get("descarga_utc")) for clave, f in _filas_csv(salida).items()] if salida else []
 
 
 def guardar(r, salida):
@@ -317,7 +301,8 @@ def guardar(r, salida):
     (carpeta / "revision.json").write_text(json.dumps(r, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     if d:
         (carpeta / f"retroalimentacion_{pareja}.md").write_text(retroalimentacion(r), encoding="utf-8")
-    fila = {"pareja": pareja, "equipo": clave, "codigos": " ".join(codigos(r)), "estado": estado(r),
+    fila = {"pareja": pareja, "equipo": clave, "codigos": " ".join(codigos(r)), "ventana": r.get("ventana") or "",
+            "descarga_utc": r.get("descarga_utc") or "", "estado": estado(r),
             "revisado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "huella_manifest": r["huella_manifest"], "avisos": " | ".join(r["avisos"]),
             "discrepancias": " ".join(r["diferencias"])}
@@ -350,16 +335,13 @@ def main():
     ap.add_argument("--capturas", default="", help="E2=ok,E4=ok,E5=no tras mirar las capturas")
     ap.add_argument("--abrir", action="store_true", help="abre las capturas con el visor del sistema")
     ap.add_argument("--salida", default=str(SALIDA_DEFECTO))
-    ap.add_argument("--asignacion", default=str(ASIGNACION_DEFECTO),
-                    help="tabla privada pareja,codigo_1,codigo_2 (si no existe o está vacía, no se usa)")
     ap.add_argument("--no-guardar", action="store_true")
     a = ap.parse_args()
     requisitos()
     salida = None if a.no_guardar else a.salida
-    asignacion = leer_asignacion(a.asignacion)
     if a.entrega:
         r = revisar(a.entrega, a.sha_correo, _capturas(a.capturas), salida)
-        conflictos([r], asignacion, registradas(salida))
+        conflictos([r], registradas(salida))
         print(panel(r))
         if salida:
             print(f"\nRevisión guardada en {guardar(r, salida)} · notas en {Path(salida) / 'notas_tc1.csv'}")
@@ -373,7 +355,7 @@ def main():
             resultados.append(revisar(entrega, None, {}, salida))
         except SystemExit as exc:
             ajenas.append((entrega.name, str(exc)))
-    conflictos(resultados, asignacion, [x for x in registradas(salida) if x[1] not in {equipo(r) for r in resultados}])
+    conflictos(resultados, [x for x in registradas(salida) if x[0] not in {equipo(r) for r in resultados}])
     print(f"{'Equipo':<30} {'Puntaje':<16} Estado")
     for r in resultados:
         if salida:
@@ -382,7 +364,7 @@ def main():
         nota = f"{d['puntaje']}/100 → {d['nota_registrada']:.1f}" if d else "sin nota"
         print(f"{equipo(r):<30} {nota:<16} {estado(r)}")
         for aviso in r["avisos"]:
-            if aviso.startswith("PAREJA_ID repetido") or "asignacion_parejas.csv" in aviso:
+            if aviso.startswith(("misma descarga", "comparte la ventana")):
                 print(f"{'':<30} ⚠ {aviso}")
     for nombre, motivo in ajenas:
         print(f"{nombre:<30} {'':<16} no es una entrega del TC1 · {motivo}")

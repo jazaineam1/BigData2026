@@ -14,13 +14,23 @@ from urllib.parse import parse_qs, urlparse
 import tc1_contrato as C
 
 FIXTURES = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "tc1"
+# Los datos congelados P03_* son los de la ventana 2025-03 (marzo de 2025).
+FIXTURE, FIXTURE_VENTANA = "P03", "2025-03"
 
 
-def servidor_socrata(pareja, offset_429="500"):
+def codigo_para(ventana, prefijo="9"):
+    '''Un código de prueba cuya ventana es la pedida: así las pruebas descargan los datos congelados de esa ventana.'''
+    for i in range(100000, 1000000):
+        if C.ventana_de([f"{prefijo}{i}"]) == ventana:
+            return f"{prefijo}{i}"
+    raise ValueError(f"no hay código para {ventana}")
+
+
+def servidor_socrata(fixture=FIXTURE, offset_429="500"):
     '''Sirve $select/$limit/$offset y count(*) sobre los datos congelados; inyecta un 429 una vez.'''
     datos = {}
     for nombre in ("procesos", "contratos"):
-        with gzip.open(FIXTURES / f"{pareja}_{nombre}.json.gz", "rt", encoding="utf-8") as fh:
+        with gzip.open(FIXTURES / f"{fixture}_{nombre}.json.gz", "rt", encoding="utf-8") as fh:
             datos[C.ENDPOINTS[nombre]] = json.load(fh)
     estado = {"peticiones": 0, "429_enviados": 0}
 

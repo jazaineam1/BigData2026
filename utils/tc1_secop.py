@@ -153,14 +153,14 @@ def fetch_page(endpoint_id, *, select, where, order, limit, offset):
     return filas, {**meta, "endpoint": endpoint_id, "offset": int(offset), "limit": int(limit), "rows": len(filas)}
 
 
-# ── Plan de consulta por pareja ───────────────────────────────────────────────
-def plan_consulta(pareja):
-    '''Las dos consultas SoQL de la pareja, tomadas del contrato (no se escriben a mano).'''
+# ── Plan de consulta por ventana ──────────────────────────────────────────────
+def plan_consulta(ventana):
+    '''Las dos consultas SoQL de una ventana, tomadas del contrato (no se escriben a mano).'''
     return {
         "procesos": {"endpoint": C.ENDPOINTS["procesos"], "select": C.SELECT_PROCESOS,
-                     "where": C.where_procesos(pareja), "order": C.ORDER_PROCESOS},
+                     "where": C.where_procesos(ventana), "order": C.ORDER_PROCESOS},
         "contratos": {"endpoint": C.ENDPOINTS["contratos"], "select": C.SELECT_CONTRATOS,
-                      "where": C.where_contratos(pareja), "order": C.ORDER_CONTRATOS},
+                      "where": C.where_contratos(ventana), "order": C.ORDER_CONTRATOS},
     }
 
 
@@ -172,9 +172,9 @@ def limite_pagina(offset, n, page_size=C.PAGE_SIZE):
     return min(int(page_size), int(n) - int(offset))
 
 
-def descargador(pareja, dataset, n, cache_dir):
-    '''Devuelve descargar_pagina(offset) -> (filas, meta) para una fuente de la pareja.'''
-    q = plan_consulta(pareja)[dataset]
+def descargador(ventana, dataset, n, cache_dir):
+    '''Devuelve descargar_pagina(offset) -> (filas, meta) para una fuente de la ventana.'''
+    q = plan_consulta(ventana)[dataset]
 
     def descargar_pagina(offset):
         return fetch_page_persisted(q["endpoint"], select=q["select"], where=q["where"], order=q["order"],

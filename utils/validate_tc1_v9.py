@@ -84,7 +84,9 @@ for f in lecturas:
           "una lectura no usa los cuatro rótulos en orden")
 listas = [ln for f in codigo for ln in f.splitlines() if "#@param [" in ln and not ln.startswith("GUARDAR_AVANCE")]
 falla(listas and all(f'= "{C.SIN_SELECCION}" #@param' in ln for ln in listas), "alguna lista trae una opción preseleccionada")
-falla(sum(f.count("____") for f in codigo) == 3, "debe haber exactamente tres huecos de código (E1.3, E5.3a, E5.3b)")
+falla(sum(f.count("____") for f in codigo) == 2, "debe haber exactamente dos huecos de código (E1.3 y E5.3a)")
+falla(sum("escribe aquí" in f for f in codigo) == 1, "la consulta de ranking (E5.3b) la escribe completa el estudiante")
+falla("count(DISTINCT otra) AS entidades_conectadas" not in todo, "la solución del ranking no puede aparecer en el cuaderno")
 for prohibido in ("APP_TOKEN", "X-App-Token", "networkx", "consulta_cassandra_simulada", "nx.DiGraph"):
     falla(prohibido not in todo, f"el cuaderno todavía contiene {prohibido}")
 falla(todo.count("SAL DE COLAB") >= 4, "Atlas, Astra y Aura deben anunciarse con «SAL DE COLAB» (E2, E3, E4, E5)")
@@ -94,17 +96,21 @@ for nombre in C.CAPTURAS.values():
     falla(nombre in todo, f"el cuaderno no pide {nombre}")
 
 # Claridad: qué hacer en cada celda, qué trae cada fuente y qué demuestra cada huella.
-ACCIONES = ("EJECUTA", "ELIGE", "COMPLETA", "PEGA", "CAPTURA")
+ACCIONES = ("EJECUTA", "ELIGE", "COMPLETA", "ESCRIBE", "PEGA", "CAPTURA")
 for f in codigo:
     titulo = f.splitlines()[0]
-    falla(any(f" {a} " in titulo for a in ACCIONES), f"la celda «{titulo[:60]}» no dice qué hacer (EJECUTA, ELIGE, COMPLETA, PEGA o CAPTURA)")
+    falla(any(f" {a} " in titulo for a in ACCIONES), f"la celda «{titulo[:60]}» no dice qué hacer (EJECUTA, ELIGE, COMPLETA, ESCRIBE, PEGA o CAPTURA)")
     falla(("____" in f) == (" COMPLETA " in titulo), f"«{titulo[:60]}»: COMPLETA debe marcar exactamente las celdas con hueco")
     falla(("pega aquí" in f) == (" PEGA " in titulo), f"«{titulo[:60]}»: PEGA debe marcar exactamente las celdas donde se pega")
+    falla(("escribe aquí" in f) == (" ESCRIBE " in titulo), f"«{titulo[:60]}»: ESCRIBE debe marcar exactamente las celdas donde se escribe el código completo")
 falla("Cómo leer cada celda" in todo, "falta la leyenda de acciones (Cómo leer cada celda)")
 for frase in ("proceso de contratación", "contrato electrónico", "procesos.id_del_portafolio = contratos.proceso_de_compra",
               "Función usada: `hashlib.sha256`", "huella de entrega", "Función usada: `pd.read_parquet`",
-              "El problema de Laura", "¿Qué resolvimos para Laura, y qué no?", "Variables del taller", "asigna el docente"):
+              "El problema de Laura", "¿Qué resolvimos para Laura, y qué no?", "Variables del taller",
+              "Tu ventana de datos sale de los códigos, no del nombre"):
     falla(frase in todo, f"el cuaderno no explica «{frase}»")
+# El nombre de la pareja es libre (texto), no una lista que obligue a coordinar números.
+falla('PAREJA_ID = "" #@param {type:"string"}' in todo, "PAREJA_ID debe ser texto libre: cada pareja escribe el nombre que quiera")
 for col in C.SELECT_PROCESOS + C.SELECT_CONTRATOS:
     falla(f"`{col}`" in todo, f"el diccionario no describe la columna {col}")
 falla(not re.search(r"(?<![\w.])[TSXVC]\.[a-z_]+", "\n".join(f for f in codigo if not f.startswith("#@title Preparar"))),
@@ -146,7 +152,7 @@ for nombre, texto in (("cuaderno", todo), ("checklist", html), ("LMS S08", s08))
 falla(f"antes del {dia} de octubre" in tarjeta, f"la tarjeta S08 del índice no dice «antes del {dia} de octubre»")
 resumen = json.loads(leer("Datos/tc1_ventanas_resumen.json") or "{}")
 ventanas = resumen.get("ventanas", {})
-falla(set(ventanas) == set(C.VENTANAS), "el control de datos no cubre las 12 ventanas")
+falla(set(ventanas) == set(C.VENTANAS), f"el control de datos no cubre las {len(C.VENTANAS)} ventanas del contrato")
 for p, v in ventanas.items():
     falla(v.get("pasa") is True and v.get("inicio") == C.VENTANAS[p][0][:10], f"{p}: la ventana no pasó el control de datos")
 for f in ("P03_procesos.json.gz", "P03_contratos.json.gz", "P03_cqlsh_salida.txt", "P03_E5/05_neo4j_evidence.json"):
@@ -159,5 +165,5 @@ if errores:
     sys.exit(1)
 print("TC1 V9: OK")
 print(f" - cuaderno = generador · {len(nb['cells'])} celdas · infraestructura incrustada con SHA-256")
-print(" - 6 fichas de etapa completas, lecturas de cuatro rótulos, listas sin preselección, 3 huecos")
-print(" - checklist con evidencias que el código imprime · LMS sin nota del TC1 · 12 ventanas con datos verificados")
+print(" - 6 fichas de etapa completas, lecturas de cuatro rótulos, listas sin preselección, 2 huecos y un ranking escrito por el estudiante")
+print(f" - checklist con evidencias que el código imprime · LMS sin nota del TC1 · {len(C.VENTANAS)} ventanas con datos verificados")

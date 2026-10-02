@@ -5,4 +5,5 @@
 update public.lms_assignments_v2
 set due_at='2026-10-18T23:59:59-05:00'::timestamptz,
     updated_at=now()
-where code in ('bd-s08-final','bd-s08-control');
+where code in ('bd-s08-final','bd-s08-control')
+returning code, due_at;

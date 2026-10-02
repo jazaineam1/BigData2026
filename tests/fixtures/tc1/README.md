@@ -10,6 +10,8 @@ Datos reales congelados para probar el TC1 sin consultar la API en cada ejecuci�
 | `P03_cqlsh_salida.txt` | salida real de Cassandra 4.1 (`cqlsh -f`) para el script CQL correcto de P03 | `utils/test_tc1_v9_e2e.py` contra Cassandra en Docker |
 | `P03_E5/` | evidencia real de Neo4j 5 (carga, ancla, compartidos y ranking) para P03 | `utils/test_tc1_v9_e2e.py` contra Neo4j en Docker |
 
-Criterios de selección: los mismos del contrato del taller (`utils/tc1_contrato.py`). El resumen de las 12 ventanas, con los umbrales que cada una supera, está en `Datos/tc1_ventanas_resumen.json`.
+Los datos `P03_*` son los de la ventana `2025-03` (se nombraron cuando las ventanas se identificaban como P01–P12). Hoy la ventana de una pareja sale de los códigos de sus integrantes (`tc1_contrato.ventana_de`): las pruebas usan un código de prueba que cae en `2025-03` (`tc1_pruebas.codigo_para`).
+
+Criterios de selección: los mismos del contrato del taller (`utils/tc1_contrato.py`). El resumen de todas las ventanas, con los umbrales que cada una supera, está en `Datos/tc1_ventanas_resumen.json`.
 
 Son datos públicos de datos.gov.co; no contienen información de estudiantes.

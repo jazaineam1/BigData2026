@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 '''Control de datos del TC1: comprueba, ventana por ventana, que el taller es posible.
 
+Cada pareja recibe una ventana según los códigos de sus integrantes (tc1_contrato.ventana_de),
+así que TODAS las ventanas del contrato deben pasar este control antes de publicar.
+
 Descarga una sola vez, del lado docente, con pausa entre peticiones y User-Agent
 identificado, lo mismo que descargará cada pareja (misma consulta, mismo código de
 tc1_secop). Para cada ventana verifica los umbrales del contrato:
@@ -12,9 +15,9 @@ tc1_secop). Para cada ventana verifica los umbrales del contrato:
       >= MIN_OTRAS_ENTIDADES entidades
 
 Uso:
-    python utils/tc1_data_gates.py --cache <carpeta> [--parejas P01 P02 ...]
+    python utils/tc1_data_gates.py --cache <carpeta> [--ventanas 2025-03 2025-04 ...]
                                    [--resumen Datos/tc1_ventanas_resumen.json]
-                                   [--fixture P03 --fixture-dir tests/fixtures/tc1]
+                                   [--fixture 2025-03 --fixture-dir tests/fixtures/tc1]
 '''
 from __future__ import annotations
 
@@ -35,12 +38,12 @@ import tc1_secop as S  # noqa: E402
 S.HEADERS["User-Agent"] = "BigData2026-docente-QA (controles de datos TC1; descarga unica)"
 
 
-def descargar(pareja, dataset, cache, pausa):
-    q = S.plan_consulta(pareja)[dataset]
+def descargar(ventana, dataset, cache, pausa):
+    q = S.plan_consulta(ventana)[dataset]
     total = S.count_rows(q["endpoint"], q["where"])
     n = min(C.TARGET_PROCESOS if dataset == "procesos" else C.TARGET_CONTRATOS, total)
-    carpeta = Path(cache) / pareja / dataset
-    bajar = S.descargador(pareja, dataset, n, carpeta)
+    carpeta = Path(cache) / ventana / dataset
+    bajar = S.descargador(ventana, dataset, n, carpeta)
     paginas = {}
     for offset in S.offsets_para(n):
         filas, meta = bajar(offset)
@@ -50,13 +53,13 @@ def descargar(pareja, dataset, cache, pausa):
     df, _ = S.unir_paginas(paginas, n, q["select"])
     ok, msg = S.validar_cache(carpeta, S.offsets_para(n))
     if not ok:
-        raise RuntimeError(f"{pareja}/{dataset}: caché inválido ({msg})")
+        raise RuntimeError(f"{ventana}/{dataset}: caché inválido ({msg})")
     return df, total
 
 
-def evaluar_ventana(pareja, procesos, contratos, totales):
+def evaluar_ventana(ventana, procesos, contratos, totales):
     cruce = S.cruce(procesos, contratos)
-    docs = S.construir_documentos(procesos, contratos, C.GRANO_CORRECTO, pareja)
+    docs = S.construir_documentos(procesos, contratos, C.GRANO_CORRECTO, ventana)
     bandeja = S.ref_bandeja(docs)
     datos = S.datos_cassandra(bandeja)
     anio, dep = S.particion_prueba(datos)
@@ -67,7 +70,7 @@ def evaluar_ventana(pareja, procesos, contratos, totales):
     otras = int(rel[rel["nit_proveedor"].isin(set(rank["nit_proveedor"])) & rel["nit_entidad"].ne(ancla["nit_ancla"])]["nit_entidad"].nunique())
     fp, fc = S.rango_fechas(procesos["fecha_de_publicacion_del"]), S.rango_fechas(contratos["fecha_de_firma"])
     r = {
-        "inicio": C.VENTANAS[pareja][0][:10], "fin": C.VENTANAS[pareja][1][:10],
+        "inicio": C.VENTANAS[ventana][0][:10], "fin": C.VENTANAS[ventana][1][:10],
         "procesos": {"total_api": totales["procesos"], "descargados": int(len(procesos)), "unicos": cruce["procesos_unicos"],
                      "fechas": fp},
         "contratos": {"total_api": totales["contratos"], "descargados": int(len(contratos)), "fechas": fc},
@@ -83,21 +86,21 @@ def evaluar_ventana(pareja, procesos, contratos, totales):
     return r
 
 
-def guardar_fixture(pareja, procesos, contratos, totales, destino):
+def guardar_fixture(nombre_fixture, procesos, contratos, totales, destino):
     destino = Path(destino)
     destino.mkdir(parents=True, exist_ok=True)
     for nombre, df in (("procesos", procesos), ("contratos", contratos)):
         filas = [{k: v for k, v in fila.items() if not (isinstance(v, float) and pd.isna(v)) and v is not None}
                  for fila in df.to_dict("records")]
-        with gzip.open(destino / f"{pareja}_{nombre}.json.gz", "wt", encoding="utf-8") as fh:
+        with gzip.open(destino / f"{nombre_fixture}_{nombre}.json.gz", "wt", encoding="utf-8") as fh:
             json.dump(filas, fh, ensure_ascii=False)
-    (destino / f"{pareja}_totales.json").write_text(json.dumps(totales, indent=2), encoding="utf-8")
+    (destino / f"{nombre_fixture}_totales.json").write_text(json.dumps(totales, indent=2), encoding="utf-8")
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cache", required=True)
-    ap.add_argument("--parejas", nargs="*", default=C.PAREJAS)
+    ap.add_argument("--ventanas", nargs="*", default=C.ORDEN_VENTANAS)
     ap.add_argument("--resumen")
     ap.add_argument("--pausa", type=float, default=0.8)
     ap.add_argument("--fixture", nargs="*", default=[])
@@ -108,29 +111,30 @@ def main():
                "fuente": "datos.gov.co · SECOP II Procesos (p6dx-8zbt) y Contratos (jbjy-vk9h)",
                "criterios": {"procesos": "primeros 3000 registros desde el inicio de la ventana, orden estable con :id",
                              "contratos": f"primeros 4000 desde el inicio de la ventana con {C.FILTRO_CONTRATOS}",
-                             "ancla_e5": "entidad con más proveedores compartidos (desempate: más contratos, NIT)"},
+                             "ancla_e5": "entidad con más proveedores compartidos (desempate: más contratos, NIT)",
+                             "ventana": "día 1 de cada mes; cada pareja recibe una según los códigos de sus integrantes"},
                "umbrales": {"matched_processes": C.MIN_MATCHED_PROCESSES, "particion_e4": C.MIN_PARTICION_E4,
                             "compartidos_ancla": C.MIN_COMPARTIDOS_ANCLA, "otras_entidades": C.MIN_OTRAS_ENTIDADES},
                "ventanas": {}}
     fallan = []
-    for pareja in a.parejas:
-        procesos, tp = descargar(pareja, "procesos", a.cache, a.pausa)
-        contratos, tc = descargar(pareja, "contratos", a.cache, a.pausa)
+    for ventana in a.ventanas:
+        procesos, tp = descargar(ventana, "procesos", a.cache, a.pausa)
+        contratos, tc = descargar(ventana, "contratos", a.cache, a.pausa)
         totales = {"procesos": tp, "contratos": tc}
-        r = evaluar_ventana(pareja, procesos, contratos, totales)
-        resumen["ventanas"][pareja] = r
+        r = evaluar_ventana(ventana, procesos, contratos, totales)
+        resumen["ventanas"][ventana] = r
         e5 = r["ancla_e5"]
-        print(f"{pareja} {r['inicio']} | días P/C {r['procesos']['fechas'][2]}/{r['contratos']['fechas'][2]} | "
+        print(f"{ventana} {r['inicio']} | días P/C {r['procesos']['fechas'][2]}/{r['contratos']['fechas'][2]} | "
               f"cruzados {r['matched_processes']:>4} | consA {r['consulta_a']:>4} | E4 {r['particion_e4']['filas']:>3} | "
               f"E5 compartidos {e5['proveedores_compartidos']:>3} otras {e5['otras_entidades']:>3} puente {e5['puente_max_entidades']:>2} | "
               f"{'PASA' if r['pasa'] else 'FALLA'} · {e5['entidad'][:40]}", flush=True)
         if not r["pasa"]:
-            fallan.append(pareja)
-        if pareja in a.fixture:
-            guardar_fixture(pareja, procesos, contratos, totales, a.fixture_dir)
+            fallan.append(ventana)
+        if ventana in a.fixture:
+            guardar_fixture(ventana, procesos, contratos, totales, a.fixture_dir)
             print(f"   fixture guardado en {a.fixture_dir}")
     if a.resumen:
-        Path(a.resumen).write_text(json.dumps(resumen, ensure_ascii=False, indent=2), encoding="utf-8")
+        Path(a.resumen).write_bytes(json.dumps(resumen, ensure_ascii=False, indent=2).encode("utf-8"))  # LF también en Windows
         print("resumen:", a.resumen)
     print("CONTROL DE DATOS:", "OK" if not fallan else f"FALLA en {fallan}")
     sys.exit(1 if fallan else 0)

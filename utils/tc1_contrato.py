@@ -15,7 +15,10 @@ Plataformas verificadas el 2026-10-01 en su documentación vigente:
 '''
 from __future__ import annotations
 
+import hashlib
 import math
+import re
+import unicodedata
 
 VERSION = "2026-10-02-tc1-v9"
 VERSION_VISIBLE = "V9 · 2026-10-02"
@@ -28,27 +31,53 @@ CHECKLIST_URL = "https://jazaineam1.github.io/BigData2026/assets/tutoriales/s08-
 COLAB_URL = "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb"
 
 # ── Identidad y ventanas ──────────────────────────────────────────────────────
-# Tabla explícita (no un hash): dos parejas nunca comparten datos y "p03" no cambia la
-# ventana. P01, P02, P04, P05 y P06 conservan la ventana que les asignó la V7; P03 se
-# movió a mar-abr porque la V7 la hacía coincidir con P02. P07–P12 cubren grupos de una
-# persona. Cada snapshot toma los primeros registros desde el inicio de su ventana, así
-# que los cortes que empiezan el día 1 de meses distintos no comparten datos.
-VENTANAS = {
-    "P01": ("2025-07-01T00:00:00.000", "2025-09-01T00:00:00.000"),
-    "P02": ("2025-11-01T00:00:00.000", "2026-01-01T00:00:00.000"),
-    "P03": ("2025-03-01T00:00:00.000", "2025-05-01T00:00:00.000"),
-    "P04": ("2025-01-01T00:00:00.000", "2025-03-01T00:00:00.000"),
-    "P05": ("2025-09-01T00:00:00.000", "2025-11-01T00:00:00.000"),
-    "P06": ("2025-05-01T00:00:00.000", "2025-07-01T00:00:00.000"),
-    "P07": ("2025-02-01T00:00:00.000", "2025-04-01T00:00:00.000"),
-    "P08": ("2025-04-01T00:00:00.000", "2025-06-01T00:00:00.000"),
-    "P09": ("2025-06-01T00:00:00.000", "2025-08-01T00:00:00.000"),
-    "P10": ("2025-08-01T00:00:00.000", "2025-10-01T00:00:00.000"),
-    "P11": ("2025-10-01T00:00:00.000", "2025-12-01T00:00:00.000"),
-    "P12": ("2025-12-01T00:00:00.000", "2026-02-01T00:00:00.000"),
-}
-PAREJAS = list(VENTANAS)
+# El nombre de la pareja es libre (el docente dijo a cada pareja que escribiera el que
+# quisiera): solo nombra archivos, colecciones y tablas. La ventana de datos NO sale del
+# nombre, sale de los códigos de los integrantes: dos parejas que escriben el mismo nombre
+# no comparten datos, y nadie tiene que coordinar nada. Cada ventana empieza el día 1 de un
+# mes; el snapshot toma los primeros registros desde ese día (1–4 días de procesos y 7–26
+# de contratos en las 30 ventanas), así que dos meses distintos nunca comparten datos. Coincidir en la misma
+# ventana es posible por azar (≈ 1 en 30 por cada par de equipos): el revalidador docente
+# lo detecta. Todas las ventanas pasaron el control de datos (Datos/tc1_ventanas_resumen.json).
+def _inicio_mes(anio, mes):
+    return f"{anio:04d}-{mes:02d}-01T00:00:00.000"
+
+
+def _meses(desde, hasta):
+    anio, mes = desde
+    while (anio, mes) <= hasta:
+        yield anio, mes
+        anio, mes = (anio + 1, 1) if mes == 12 else (anio, mes + 1)
+
+
+def _mas_meses(anio, mes, n):
+    total = anio * 12 + (mes - 1) + n
+    return total // 12, total % 12 + 1
+
+
+VENTANAS = {f"{a:04d}-{m:02d}": (_inicio_mes(a, m), _inicio_mes(*_mas_meses(a, m, 2)))
+            for a, m in _meses((2024, 1), (2026, 6))}
+ORDEN_VENTANAS = sorted(VENTANAS)
 SIN_SELECCION = "— selecciona —"
+
+
+def slug(texto) -> str:
+    '''Nombre de la pareja apto para archivos, colecciones y tablas: letras y números, en mayúscula.'''
+    t = unicodedata.normalize("NFKD", str(texto or "")).encode("ascii", "ignore").decode()
+    return re.sub(r"[^A-Za-z0-9]+", "", t).upper()[:20]
+
+
+def normalizar_codigo(codigo) -> str:
+    return re.sub(r"[^0-9A-Za-z]+", "", str(codigo or "")).upper()
+
+
+def ventana_de(codigos) -> str:
+    '''La ventana de datos sale de los códigos de los integrantes (sin importar el orden ni el nombre de la pareja).'''
+    limpios = sorted({normalizar_codigo(c) for c in codigos} - {""})
+    if not limpios:
+        raise ValueError("faltan los códigos de los integrantes")
+    huella = hashlib.sha256(("TC1|" + "|".join(limpios)).encode("utf-8")).hexdigest()
+    return ORDEN_VENTANAS[int(huella, 16) % len(ORDEN_VENTANAS)]
 
 # ── Fuentes y contrato de datos (E1) ──────────────────────────────────────────
 BASE_SOCRATA = "https://www.datos.gov.co/resource"
@@ -117,28 +146,28 @@ MIN_COMPARTIDOS_ANCLA = 2
 MIN_OTRAS_ENTIDADES = 2
 
 
-def where_procesos(pareja: str) -> str:
-    ini, fin = VENTANAS[pareja]
+def where_procesos(ventana: str) -> str:
+    ini, fin = VENTANAS[ventana]
     return f"fecha_de_publicacion_del >= '{ini}' AND fecha_de_publicacion_del < '{fin}'"
 
 
-def where_contratos(pareja: str) -> str:
-    ini, fin = VENTANAS[pareja]
+def where_contratos(ventana: str) -> str:
+    ini, fin = VENTANAS[ventana]
     return f"fecha_de_firma >= '{ini}' AND fecha_de_firma < '{fin}' AND {FILTRO_CONTRATOS}"
 
 
-def contrato_de_datos(pareja: str) -> dict:
+def contrato_de_datos(pareja: str, ventana: str) -> dict:
     '''Lo que E1 escribe en 00_dataset_contract.json y E1.1 compara.'''
-    ini, fin = VENTANAS[pareja]
+    ini, fin = VENTANAS[ventana]
     return {
         "version": VERSION,
         "pareja": pareja,
-        "ventana": {"inicio": ini, "fin": fin},
+        "ventana": {"id": ventana, "inicio": ini, "fin": fin},
         "procesos": {"id": ENDPOINTS["procesos"], "grano": "fila de proceso de contratación",
-                     "select": SELECT_PROCESOS, "where": where_procesos(pareja),
+                     "select": SELECT_PROCESOS, "where": where_procesos(ventana),
                      "order": ORDER_PROCESOS, "objetivo": TARGET_PROCESOS},
         "contratos": {"id": ENDPOINTS["contratos"], "grano": "contrato electrónico con persona jurídica",
-                      "select": SELECT_CONTRATOS, "where": where_contratos(pareja),
+                      "select": SELECT_CONTRATOS, "where": where_contratos(ventana),
                       "order": ORDER_CONTRATOS, "objetivo": TARGET_CONTRATOS},
         "join": JOIN,
         "page_size": PAGE_SIZE,
@@ -188,15 +217,15 @@ ATLAS_DB = "tc1_bigdata"
 
 
 def coleccion_oficial(pareja: str) -> str:
-    return f"tc1_{pareja.lower()}"
+    return f"tc1_{slug(pareja).lower()}"
 
 
 def coleccion_ensayo(pareja: str) -> str:
-    return f"tc1_{pareja.lower()}_ensayo"
+    return f"tc1_{slug(pareja).lower()}_ensayo"
 
 
 def nombre_pipeline(pareja: str) -> str:
-    return f"tc1-bandeja-{pareja.lower()}"
+    return f"tc1-bandeja-{slug(pareja).lower()}"
 
 
 BANDEJA_MAX = 100
@@ -207,7 +236,7 @@ KEYSPACE_DEFECTO = "compras_claras"
 
 
 def tabla_cassandra(pareja: str) -> str:
-    return f"tc1_{pareja.lower()}_prioridades"
+    return f"tc1_{slug(pareja).lower()}_prioridades"
 
 
 OPCIONES_PARTICION = {
@@ -307,7 +336,7 @@ CAPTURA_DE_ITEM = {"E2.6": "E2", "E4.3": "E4", "E5.4": "E5"}
 
 # Lo que el estudiante ve cuando un control falla: qué revisar, sin regalar la respuesta.
 FEEDBACK = {
-    "E1.1": "Ejecuta E1 con tu PAREJA_ID de la lista: las páginas deben venir de la consulta oficial de tu ventana (no edites el plan de consulta).",
+    "E1.1": "Ejecuta E1 con tu identidad actual: tu ventana sale de los códigos de los integrantes; si cambiaste un código, la descarga anterior ya no es de tu ventana y hay que repetir E1 (no edites el plan de consulta).",
     "E1.2": "Repite la descarga secuencial hasta que el caché tenga todas las páginas y el número de filas sea el objetivo.",
     "E1.3": "Compara en igualdad de condiciones: mismos offsets, mismas filas y mismo hash; usa entre 2 y 6 workers. El speedup no se califica.",
     "E1.4": "Descarga los contratos, consolida el RAW y verifica que ningún .part ni chunk extra quede en el caché y que crucen ≥30 procesos.",
@@ -323,8 +352,8 @@ FEEDBACK = {
     "E4.2": "La tabla debe nacer de la consulta: partición por los campos que filtras con igualdad y orden por valor dentro de la partición, sin ALLOW FILTERING.",
     "E4.3": "Pega la salida del SELECT que ejecutaste en Astra y sube E4_astra.png con la consulta y su resultado.",
     "E5.1": "Carga el grafo desde Colab, ejecuta en Aura la consulta de la ancla y captura los conteos.",
-    "E5.2": "Completa el hueco de la consulta de ranking: cuenta entidades distintas, no filas.",
-    "E5.3": "El archivo Cypher necesita la carga con UNWIND $filas y MERGE, el contexto, los compartidos (otra entidad distinta de la ancla) y el ranking.",
+    "E5.2": "Revisa tu consulta de ranking: cuenta contratos y entidades distintos, no caminos, y ordena con los dos desempates.",
+    "E5.3": "El archivo Cypher necesita la carga con UNWIND $filas y MERGE, el contexto, los compartidos (otra entidad distinta de la ancla) y tu ranking con $nit_ancla, las cuatro columnas y un conteo con DISTINCT.",
     "E5.4": "Ejecuta el ranking en Aura Query y sube E5_neo4j.png con la consulta y el resultado.",
     "E6.1": "Responde las tres decisiones mirando TUS salidas: segundos de tu descarga, el índice que creaste y el valor de la posición elegida.",
     "E6.2": "Ubica tu cobertura en su rango real y escoge el límite que tus datos sostienen.",
@@ -454,6 +483,7 @@ def puntos_totales() -> int:
 assert puntos_totales() == 100, "La rúbrica debe sumar 100"
 assert {k: sum(p for _, e, p, _, _ in RUBRICA if e == k) for k in STAGE_MAX} == STAGE_MAX
 assert len(CAPTURAS) == 3
-assert len(set(VENTANAS.values())) == len(VENTANAS), "Dos parejas no pueden compartir ventana"
+assert len(set(VENTANAS.values())) == len(VENTANAS), "Dos ventanas no pueden coincidir"
+assert ventana_de(["b", "a"]) == ventana_de(["A", "B "]), "la ventana no depende del orden ni del formato de los códigos"
 for _fuente, _select in (("procesos", SELECT_PROCESOS), ("contratos", SELECT_CONTRATOS)):
     assert sorted(c for cols, _, _ in DICCIONARIO[_fuente] for c in cols) == sorted(_select), f"diccionario de {_fuente} incompleto"

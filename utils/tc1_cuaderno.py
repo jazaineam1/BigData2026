@@ -40,25 +40,35 @@ def _sin_tildes(texto):
 
 # ── 0 · Identidad ─────────────────────────────────────────────────────────────
 def iniciar(pareja, integrantes, guardar_drive, base=None):
-    if pareja not in C.VENTANAS:
-        raise ValueError("Elige en la lista el PAREJA_ID que te confirmó el docente por correo. Si aún no lo tienes, "
-                         f"escríbele a {C.CORREO_DOCENTE} antes de seguir: no elijas uno por tu cuenta.")
+    nombre = C.slug(pareja)
+    if not nombre:
+        raise ValueError("Escribe en PAREJA_ID el nombre de tu pareja: el que quieras, con letras o números "
+                         "(por ejemplo, el que ya venías usando).")
     vivos = [{"nombre": n.strip(), "codigo": c.strip(), "apellido": a.strip()} for n, c, a in integrantes if n.strip()]
     if not vivos or any(not x["codigo"] or not x["apellido"] for x in vivos):
         raise ValueError("Escribe el nombre, el código y el primer apellido de cada integrante "
-                         "(los apellidos nombran tu carpeta de entrega).")
+                         "(los códigos fijan tu ventana de datos y los apellidos nombran tu carpeta de entrega).")
+    ventana = C.ventana_de([x["codigo"] for x in vivos])
     raiz_drive = None
     if guardar_drive.startswith("Sí") and X.EN_COLAB:
         raiz_drive = X.montar_drive()
-    out = Path(base or ("/content" if X.EN_COLAB else ".")) / f"tc1_{pareja}"
-    restaurado = X.restaurar_avance(out, pareja, raiz_drive)
+    out = Path(base or ("/content" if X.EN_COLAB else ".")) / f"tc1_{nombre}"
+    restaurado = X.restaurar_avance(out, nombre, raiz_drive)
     out.mkdir(parents=True, exist_ok=True)
+    anterior = (X.leer_json(C.rutas(out)["identidad"], {}) or {}).get("ventana")
     ESTADO.clear()
-    ESTADO.update({"out": out, "pareja": pareja, "drive": raiz_drive, "integrantes": vivos})
-    X.escribir_json(C.rutas(out)["identidad"], {"pareja": pareja, "integrantes": vivos, "version": C.VERSION})
-    ini, fin = C.VENTANAS[pareja]
-    print(f"Pareja {pareja} · ventana {ini[:10]} → {fin[:10]}")
-    print(f"Si {pareja} no es el número que te asignó el docente, corrígelo ahora: con otro número descargarías datos ajenos.")
+    ESTADO.update({"out": out, "pareja": nombre, "ventana": ventana, "drive": raiz_drive, "integrantes": vivos})
+    X.escribir_json(C.rutas(out)["identidad"], {"pareja": nombre, "pareja_escrita": str(pareja).strip(), "integrantes": vivos,
+                                                "ventana": ventana, "version": C.VERSION})
+    ini, fin = C.VENTANAS[ventana]
+    print(f"Pareja {nombre}" + (f" (escribiste «{str(pareja).strip()}»; en los archivos se usa {nombre})"
+                                if nombre != str(pareja).strip() else ""))
+    print(f"Tu ventana de datos: {ini[:10]} → {fin[:10]} (sale de los códigos de los integrantes)")
+    print(f"Tus nombres: colección de Atlas {C.coleccion_oficial(nombre)} · pipeline {C.nombre_pipeline(nombre)} · "
+          f"tabla de Astra {C.tabla_cassandra(nombre)}")
+    if anterior and anterior != ventana:
+        print(f"⚠ Tu ventana cambió ({anterior} → {ventana}) porque cambiaron los códigos. Si fue un error al escribirlos, "
+              "corrígelos y vuelve a ejecutar esta celda; si no, repite E1 completa: la descarga anterior ya no es de tu ventana.")
     print(f"Carpeta de trabajo: {out}")
     print("Avance en Drive: " + ("restaurado desde tu última sesión" if restaurado else
                                  "activado" if raiz_drive else "desactivado (si Colab se reinicia, repites desde E1)"))
@@ -126,10 +136,10 @@ def ver_carpeta():
 
 # ── E1 ────────────────────────────────────────────────────────────────────────
 def contrato_e1():
-    R, pareja = _R(), ESTADO["pareja"]
-    contrato = C.contrato_de_datos(pareja)
+    R, pareja, ventana = _R(), ESTADO["pareja"], ESTADO["ventana"]
+    contrato = C.contrato_de_datos(pareja, ventana)
     X.escribir_json(R["E1"] / "00_dataset_contract.json", contrato)
-    plan = S.plan_consulta(pareja)
+    plan = S.plan_consulta(ventana)
     ESTADO["plan"] = plan
     for nombre, q in plan.items():
         print(f"{nombre.upper()} · {q['endpoint']}")
@@ -141,8 +151,8 @@ def contrato_e1():
 
 
 def preflight_e1():
-    R, pareja = _R(), ESTADO["pareja"]
-    plan = S.plan_consulta(pareja)
+    R, ventana = _R(), ESTADO["ventana"]
+    plan = S.plan_consulta(ventana)
     total_p = S.count_rows(plan["procesos"]["endpoint"], plan["procesos"]["where"])
     total_c = S.count_rows(plan["contratos"]["endpoint"], plan["contratos"]["where"])
     n_p, n_c = min(C.TARGET_PROCESOS, total_p), min(C.TARGET_CONTRATOS, total_c)
@@ -151,8 +161,8 @@ def preflight_e1():
     print(f"Contratos con empresas en tu ventana: {total_c:,} · descargarás los primeros {n_c:,} ({len(S.offsets_para(n_c))} páginas)")
     print(f"En total pedirás {len(S.offsets_para(n_p))} páginas de procesos dos veces (secuencial y concurrente) "
           f"y {len(S.offsets_para(n_c))} de contratos.")
-    return (S.descargador(pareja, "procesos", n_p, R["pag_seq"]),
-            S.descargador(pareja, "procesos", n_p, R["pag_thr"]),
+    return (S.descargador(ventana, "procesos", n_p, R["pag_seq"]),
+            S.descargador(ventana, "procesos", n_p, R["pag_thr"]),
             S.offsets_para(n_p), n_p)
 
 
@@ -180,6 +190,8 @@ def comparar_e1(paginas_seq, seg_seq, paginas_thr, seg_thr, workers):
           f"Mismo hash: {_marca(bench['mismo_hash'])}")
     print(f"Tiempo secuencial {seg_seq:.1f} s · concurrente {seg_thr:.1f} s con {workers} workers "
           f"(speedup {seg_seq / seg_thr if seg_thr else 0:.2f}; no se califica)")
+    print(f"Reintentos en tus descargas: {bench['eventos_http'].get('reintentos', 0)} · "
+          f"respuestas HTTP 429: {bench['eventos_http'].get('http_429', 0)}")
     if any(bench["paginas_desde_cache"].values()):
         print("ℹ Algunas páginas salieron del caché: los tiempos no son un benchmark limpio, la equivalencia sí vale.")
     if not bench["mismo_hash"]:
@@ -190,10 +202,10 @@ def comparar_e1(paginas_seq, seg_seq, paginas_thr, seg_thr, workers):
 
 
 def descargador_contratos():
-    R, pareja = _R(), ESTADO["pareja"]
+    R, ventana = _R(), ESTADO["ventana"]
     if "n_c" not in ESTADO:
         raise RuntimeError("Ejecuta antes la celda del preflight de E1.")
-    return S.descargador(pareja, "contratos", ESTADO["n_c"], R["pag_con"]), S.offsets_para(ESTADO["n_c"])
+    return S.descargador(ventana, "contratos", ESTADO["n_c"], R["pag_con"]), S.offsets_para(ESTADO["n_c"])
 
 
 def consolidar_e1(paginas_contratos):
@@ -212,7 +224,8 @@ def consolidar_e1(paginas_contratos):
     paginas = lambda metas: [{k: m.get(k) for k in ("offset", "limit", "rows", "sha256", "query_signature", "attempts", "from_cache")}
                              for m in metas]
     X.escribir_json(R["E1"] / "01_acquisition_manifest.json", {
-        "schema": C.E1_SCHEMA, "version": C.VERSION, "pareja": pareja, "ventana": C.VENTANAS[pareja],
+        "schema": C.E1_SCHEMA, "version": C.VERSION, "pareja": pareja,
+        "ventana": {"id": ESTADO["ventana"], "inicio": C.VENTANAS[ESTADO["ventana"]][0], "fin": C.VENTANAS[ESTADO["ventana"]][1]},
         "consultado_utc": X.ahora_utc(), "totales": {"procesos": ESTADO["total_p"], "contratos": ESTADO["total_c"]},
         "objetivos": {"procesos": ESTADO["n_p"], "contratos": ESTADO["n_c"]},
         "workers": ESTADO["bench"]["workers"], "page_size": C.PAGE_SIZE,
@@ -514,17 +527,69 @@ def _guardar_e5(**partes):
     return ev
 
 
+COLUMNAS_RANKING = ["nit_proveedor", "proveedor", "contratos_con_ancla", "entidades_conectadas"]
+
+
 def preparar_consulta_e5(nombre, consulta):
     if "____" in consulta:
         raise ValueError("Todavía queda el hueco ____: complétalo antes de ejecutar la celda.")
+    if "escribe aquí" in consulta:
+        raise ValueError("Todavía no escribiste la consulta: reemplaza «escribe aquí tu consulta» por tu Cypher.")
     if not X.es_solo_lectura(consulta):
         raise ValueError("Esta consulta debe ser de lectura (sin CREATE, MERGE, SET ni DELETE).")
+    if "$nit_ancla" not in consulta:
+        raise ValueError("Usa el parámetro $nit_ancla para la entidad ancla: la celda lo reemplaza por tu NIT en la versión para Aura.")
     ESTADO.setdefault("consultas", {})[nombre] = consulta
     if set(ESTADO["consultas"]) == {"compartidos", "ranking"}:
         _escribir_cypher(ESTADO["consultas"])
         print("Archivo Cypher guardado: E5/05_neo4j_consultas.cypher")
     print(f"Versión para pegar en Aura Query ({nombre}):\n")
     print(S.cypher_para_aura(consulta, ESTADO["nit_ancla"]))
+    if nombre == "ranking" and "aura" in ESTADO:
+        _revisar_ranking(consulta)
+
+
+def _revisar_ranking(consulta):
+    '''Corre tu ranking en Aura y lo compara con la referencia calculada desde tu RAW: dice qué revisar, no la consulta.'''
+    nit = ESTADO["nit_ancla"]
+    rel = ESTADO.get("rel")
+    if rel is None:
+        rel = S.relaciones_grafo(_raw()[1])
+    esperado_df = S.ranking_ancla(rel, nit)
+    print()
+    try:
+        filas = X.ejecutar_lectura(ESTADO["aura"], consulta, {"nit_ancla": nit})
+    except Exception as exc:
+        print(f"✗ Aura no pudo ejecutar tu consulta: {str(exc)[:300]}")
+        return False
+    faltan = [c for c in COLUMNAS_RANKING if filas and c not in filas[0]]
+    if not filas:
+        print("✗ Tu consulta no devolvió filas. Revisa que el primer MATCH parta de la ancla con $nit_ancla.")
+    elif faltan:
+        print(f"✗ Faltan columnas en el RETURN: {faltan}. Nómbralas exactamente así con AS.")
+    else:
+        try:
+            obtenido = V._filas_ranking(filas)
+        except (TypeError, ValueError):
+            obtenido = None
+        esperado = V._filas_ranking(esperado_df.to_dict("records"))
+        if obtenido == esperado:
+            print(f"✓ Tu ranking coincide con la referencia calculada desde tu RAW ({len(filas)} proveedores).")
+            return True
+        if obtenido is None:
+            print("✗ contratos_con_ancla y entidades_conectadas deben ser conteos (números enteros).")
+        elif len(obtenido) != len(esperado):
+            print(f"✗ Tu consulta devuelve {len(obtenido)} proveedores y la referencia {len(esperado)}. ¿Descartaste la ancla "
+                  "como «otra» entidad? ¿Quedaron solo los proveedores que contratan con otras entidades?")
+        elif sorted(obtenido) == sorted(esperado):
+            print("✗ Las filas son las correctas, pero el orden no: revisa el ORDER BY y sus dos desempates.")
+        else:
+            print("✗ Los conteos no coinciden con la referencia. ¿Contaste caminos en lugar de contratos o entidades distintas?")
+    print("Así deben empezar tus filas (calculadas desde tu RAW):")
+    for r in esperado_df.head(3).to_dict("records"):
+        print(f"  {r['nit_proveedor']} · {str(r['proveedor'])[:40]} · contratos_con_ancla {r['contratos_con_ancla']} · "
+              f"entidades_conectadas {r['entidades_conectadas']}")
+    return False
 
 
 def _escribir_cypher(consultas):

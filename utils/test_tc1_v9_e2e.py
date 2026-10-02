@@ -33,9 +33,17 @@ from nbclient.exceptions import CellExecutionError
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "utils"))
 import tc1_contrato as C  # noqa: E402
-from tc1_pruebas import png, servidor_socrata  # noqa: E402
+from tc1_pruebas import FIXTURE_VENTANA, codigo_para, png, servidor_socrata  # noqa: E402
 
 PAREJA = "P03"
+# Lo que escribiría un estudiante en E5.3b (la celda solo trae «escribe aquí tu consulta»).
+SOLUCION_RANKING = ("MATCH (a:Entidad {nit: $nit_ancla})-[:FIRMA]->(ca:Contrato)-[:ADJUDICADO_A]->(p:Proveedor)\n"
+                    "WITH a, p, count(DISTINCT ca) AS contratos_con_ancla\n"
+                    "MATCH (p)<-[:ADJUDICADO_A]-(:Contrato)<-[:FIRMA]-(otra:Entidad)\n"
+                    "WHERE otra <> a\n"
+                    "RETURN p.nit AS nit_proveedor, p.nombre AS proveedor, contratos_con_ancla, "
+                    "count(DISTINCT otra) AS entidades_conectadas\n"
+                    "ORDER BY entidades_conectadas DESC, contratos_con_ancla DESC, nit_proveedor ASC")
 
 
 def reemplazar(src, patron, valor):
@@ -51,7 +59,7 @@ def main():
     a = ap.parse_args()
     trabajo = Path(a.trabajo)
     trabajo.mkdir(parents=True, exist_ok=True)
-    srv, est_api = servidor_socrata(PAREJA)
+    srv, est_api = servidor_socrata()
     os.environ["TC1_SOCRATA_BASE"] = f"http://127.0.0.1:{srv.server_port}/resource"
     capturas = trabajo / "capturas"
     capturas.mkdir(exist_ok=True)
@@ -67,7 +75,7 @@ def main():
         if src.startswith("#@title 0 · ELIGE · Identidad"):
             src = reemplazar(src, r'^PAREJA_ID = ".*?"', f'PAREJA_ID = "{PAREJA}"')
             src = reemplazar(src, r'^INTEGRANTE_1 = ""', 'INTEGRANTE_1 = "Estudiante de prueba"')
-            src = reemplazar(src, r'^CODIGO_1 = ""', 'CODIGO_1 = "000000"')
+            src = reemplazar(src, r'^CODIGO_1 = ""', f'CODIGO_1 = "{codigo_para(FIXTURE_VENTANA)}"')
             src = reemplazar(src, r'^APELLIDO_1 = ""', 'APELLIDO_1 = "Prueba"')
             src = reemplazar(src, r'^GUARDAR_AVANCE_EN_DRIVE = ".*?"', 'GUARDAR_AVANCE_EN_DRIVE = "No"')
             src = src.replace("GUARDAR_AVANCE_EN_DRIVE)", f"GUARDAR_AVANCE_EN_DRIVE, base={str(trabajo)!r})")
@@ -115,7 +123,7 @@ def main():
         elif src.startswith("# E5.3a"):
             src = src.replace("WHERE ____", "WHERE otra <> a")
         elif src.startswith("# E5.3b"):
-            src = src.replace("____ AS entidades_conectadas", "count(DISTINCT otra) AS entidades_conectadas")
+            src = src.replace("escribe aquí tu consulta", SOLUCION_RANKING)
         elif src.startswith("#@title E6.1"):
             bench = json.loads((out / "E1" / "01_benchmark_threads.json").read_text(encoding="utf-8"))
             import pandas as pd
@@ -149,6 +157,14 @@ def main():
                     "_X.getpass = lambda prompt='': next(_resp)")
                 client.execute_cell(inyeccion, -1)
                 respuestas_getpass.clear()
+            if cell.source.startswith("# E5.3b"):
+                # Primer intento equivocado, como el de un estudiante: olvida descartar la ancla.
+                mal = SOLUCION_RANKING.replace("WHERE otra <> a\n", "")
+                intento = nbformat.v4.new_code_cell(f"taller.preparar_consulta_e5('ranking', {mal!r})")
+                client.execute_cell(intento, -1)
+                texto = "".join(o.get("text", "") for o in intento.outputs if o.get("output_type") == "stream")
+                assert "✗ " in texto and "Así deben empezar tus filas" in texto, texto[-800:]
+                print("E5.3b: un ranking que no descarta la ancla recibe una pista y las filas esperadas.")
             import time
             t0 = time.perf_counter()
             try:

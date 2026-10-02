@@ -56,7 +56,12 @@ def _contexto(out):
     ctx = {"R": R, "out": Path(out)}
     ident = X.leer_json(R["identidad"], {}) or {}
     ctx["identidad"] = ident
-    ctx["pareja"] = str(ident.get("pareja", "")).strip()
+    ctx["pareja"] = C.slug(ident.get("pareja", ""))
+    # La ventana se recalcula desde los códigos: no se confía en la que diga el archivo.
+    try:
+        ctx["ventana"] = C.ventana_de([x.get("codigo") for x in ident.get("integrantes", []) or []])
+    except ValueError:
+        ctx["ventana"] = None
     ctx["acq"] = X.leer_json(R["E1"] / "01_acquisition_manifest.json", {}) or {}
     ctx["bench"] = X.leer_json(R["E1"] / "01_benchmark_threads.json", {}) or {}
     ctx["calidad"] = X.leer_json(R["E1"] / "01_quality_report.json", {}) or {}
@@ -74,7 +79,7 @@ def _contexto(out):
     if ctx["cache"]["pag_con"][0]:
         ctx["contratos"] = _df(S.leer_paginas(R["pag_con"], ctx["off_c"]), C.SELECT_CONTRATOS)
     ctx["docs_ref"] = ctx["bandeja_ref"] = ctx["rel_ref"] = None
-    if ctx["procesos"] is not None and ctx["contratos"] is not None and ctx["pareja"] in C.VENTANAS:
+    if ctx["procesos"] is not None and ctx["contratos"] is not None and ctx["ventana"] is not None:
         ctx["docs_ref"] = S.construir_documentos(ctx["procesos"], ctx["contratos"], C.GRANO_CORRECTO, ctx["pareja"])
         ctx["bandeja_ref"] = S.ref_bandeja(ctx["docs_ref"])
         ctx["rel_ref"] = S.relaciones_grafo(ctx["contratos"])
@@ -82,7 +87,7 @@ def _contexto(out):
 
 
 def _firmas_oficiales(ctx, dataset, carpeta, offsets, n):
-    q = S.plan_consulta(ctx["pareja"])[dataset]
+    q = S.plan_consulta(ctx["ventana"])[dataset]
     esperadas = [S.query_signature(q["endpoint"], select=q["select"], where=q["where"], order=q["order"],
                                    limit=S.limite_pagina(o, n)) for o in offsets]
     try:
@@ -93,16 +98,16 @@ def _firmas_oficiales(ctx, dataset, carpeta, offsets, n):
 
 # ── E1 ────────────────────────────────────────────────────────────────────────
 def _e1(ctx, reg):
-    R, pareja = ctx["R"], ctx["pareja"]
+    R, pareja, ventana = ctx["R"], ctx["pareja"], ctx["ventana"]
     try:
-        oficial = C.contrato_de_datos(pareja) if pareja in C.VENTANAS else None
+        oficial = C.contrato_de_datos(pareja, ventana) if pareja and ventana else None
         dado = ctx["contrato"]
         ok = (oficial is not None and dado.get("pareja") == pareja
               and all(dado.get(k, {}).get(c) == oficial[k][c] for k in ("procesos", "contratos")
                       for c in ("id", "select", "where", "order"))
               and _firmas_oficiales(ctx, "procesos", R["pag_thr"], ctx["off_p"], ctx["n_proc"])
               and _firmas_oficiales(ctx, "contratos", R["pag_con"], ctx["off_c"], ctx["n_con"]))
-        reg.poner("E1.1", 4 if ok else 0, f"pareja={pareja or '(vacía)'}; ventana={C.VENTANAS.get(pareja)}; "
+        reg.poner("E1.1", 4 if ok else 0, f"pareja={pareja or '(vacía)'}; ventana por códigos={ventana or '(sin códigos)'}; "
                   f"páginas con la consulta oficial={ok}")
     except Exception as exc:
         reg.fallo("E1.1", exc)
@@ -401,7 +406,11 @@ def analizar_cypher(texto):
                   and ":firma]" in carga and ":adjudicado_a]" in carga),
         "contexto": "match" in plano.get("contexto", "") and ("$nit_ancla" in plano.get("contexto", "") or re.search(r"nit: ?\"\d+\"", plano.get("contexto", ""))),
         "compartidos": ("____" not in comp and comp.count(":adjudicado_a") >= 2 and ("<>" in comp or "!=" in comp)),
-        "ranking": ("____" not in rank and re.search(r"count\(distinct [\w.]+\) as entidades_conectadas", rank) is not None
+        # El ranking lo escribe el estudiante completo: se aceptan formas equivalentes. El resultado se compara en E5.2.
+        "ranking": ("____" not in rank and "escribe aquí" not in rank and "$nit_ancla" in rank
+                    and all(f"as {c}" in rank for c in ("nit_proveedor", "proveedor", "contratos_con_ancla", "entidades_conectadas"))
+                    and re.search(r"(count\(\s*distinct [\w.]+\s*\)|size\(\s*collect\(\s*distinct [\w.]+\s*\)\s*\))\s+as entidades_conectadas",
+                                  rank) is not None
                     and "order by" in rank and "desc" in rank),
     }
 
@@ -565,6 +574,7 @@ def evaluar(out, *, modo="estudiante", capturas=None, notebook=None, escribir=Tr
         "version": C.VERSION,
         "modo": modo,
         "pareja_id": ctx["pareja"],
+        "ventana": ctx["ventana"],
         "integrantes": ident.get("integrantes", []),
         "puntaje": puntaje,
         "maximo": C.puntos_totales(),

@@ -1,12 +1,13 @@
 {
-  "generado_utc": "2026-10-02T03:59:41+00:00",
+  "generado_utc": "2026-10-02T06:22:55+00:00",
   "script": "utils/tc1_data_gates.py",
   "version": "2026-10-02-tc1-v9",
   "fuente": "datos.gov.co · SECOP II Procesos (p6dx-8zbt) y Contratos (jbjy-vk9h)",
   "criterios": {
     "procesos": "primeros 3000 registros desde el inicio de la ventana, orden estable con :id",
     "contratos": "primeros 4000 desde el inicio de la ventana con tipodocproveedor = 'NIT' AND es_grupo = 'No'",
-    "ancla_e5": "entidad con más proveedores compartidos (desempate: más contratos, NIT)"
+    "ancla_e5": "entidad con más proveedores compartidos (desempate: más contratos, NIT)",
+    "ventana": "día 1 de cada mes; cada pareja recibe una según los códigos de sus integrantes"
   },
   "umbrales": {
     "matched_processes": 30,
@@ -15,130 +16,499 @@
     "otras_entidades": 2
   },
   "ventanas": {
-    "P01": {
-      "inicio": "2025-07-01",
-      "fin": "2025-09-01",
+    "2024-01": {
+      "inicio": "2024-01-01",
+      "fin": "2024-03-01",
       "procesos": {
-        "total_api": 305715,
+        "total_api": 331673,
         "descargados": 3000,
-        "unicos": 2946,
+        "unicos": 3000,
         "fechas": [
-          "2025-07-01",
-          "2025-07-01",
+          "2024-01-01",
+          "2024-01-02",
+          2
+        ]
+      },
+      "contratos": {
+        "total_api": 14596,
+        "descargados": 4000,
+        "fechas": [
+          "2024-01-01",
+          "2024-01-26",
+          26
+        ]
+      },
+      "matched_processes": 201,
+      "join_coverage": 0.067,
+      "consulta_a": 201,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2024,
+        "departamento": "Cauca",
+        "filas": 37
+      },
+      "ancla_e5": {
+        "nit": "890701033",
+        "entidad": "HOSPITAL SAN RAFAEL DE EL ESPINAL TOLIMA E.S.E",
+        "nombres_bajo_nit": 1,
+        "proveedores_compartidos": 23,
+        "otras_entidades": 33,
+        "puente_max_entidades": 13
+      },
+      "pasa": true
+    },
+    "2024-02": {
+      "inicio": "2024-02-01",
+      "fin": "2024-04-01",
+      "procesos": {
+        "total_api": 302869,
+        "descargados": 3000,
+        "unicos": 2945,
+        "fechas": [
+          "2024-02-01",
+          "2024-02-01",
           1
         ]
       },
       "contratos": {
-        "total_api": 23738,
+        "total_api": 18808,
         "descargados": 4000,
         "fechas": [
-          "2025-07-01",
-          "2025-07-10",
-          10
+          "2024-02-01",
+          "2024-02-14",
+          14
         ]
       },
-      "matched_processes": 113,
-      "join_coverage": 0.0384,
-      "consulta_a": 100,
+      "matched_processes": 120,
+      "join_coverage": 0.0407,
+      "consulta_a": 119,
       "bandeja_filas": 100,
       "particion_e4": {
-        "anio": 2025,
-        "departamento": "Antioquia",
-        "filas": 12
+        "anio": 2024,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 18
       },
       "ancla_e5": {
-        "nit": "899999034",
-        "entidad": "SENA REGIONAL SANTANDER Grupo de Apoyo Administrativo Mixto",
-        "nombres_bajo_nit": 63,
-        "proveedores_compartidos": 54,
-        "otras_entidades": 72,
-        "puente_max_entidades": 4
+        "nit": "899999061",
+        "entidad": "PERSONERÍA DE BOGOTA",
+        "nombres_bajo_nit": 15,
+        "proveedores_compartidos": 11,
+        "otras_entidades": 54,
+        "puente_max_entidades": 32
       },
       "pasa": true
     },
-    "P02": {
-      "inicio": "2025-11-01",
-      "fin": "2026-01-01",
+    "2024-03": {
+      "inicio": "2024-03-01",
+      "fin": "2024-05-01",
       "procesos": {
-        "total_api": 278469,
+        "total_api": 259847,
         "descargados": 3000,
-        "unicos": 2981,
+        "unicos": 2872,
         "fechas": [
-          "2025-11-01",
-          "2025-11-03",
-          3
+          "2024-03-01",
+          "2024-03-01",
+          1
         ]
       },
       "contratos": {
-        "total_api": 34269,
+        "total_api": 19908,
         "descargados": 4000,
         "fechas": [
-          "2025-11-01",
-          "2025-11-07",
-          7
+          "2024-03-01",
+          "2024-03-14",
+          14
         ]
       },
-      "matched_processes": 138,
-      "join_coverage": 0.0463,
-      "consulta_a": 134,
+      "matched_processes": 188,
+      "join_coverage": 0.0655,
+      "consulta_a": 182,
       "bandeja_filas": 100,
       "particion_e4": {
-        "anio": 2025,
-        "departamento": "Distrito Capital de Bogotá",
-        "filas": 54
+        "anio": 2024,
+        "departamento": "Tolima",
+        "filas": 23
       },
       "ancla_e5": {
-        "nit": "900258711",
-        "entidad": "INSTITUTO DE CAMINOS Y CONSTRUCCIONES DE CUNDINAMARCA - ICCU",
-        "nombres_bajo_nit": 1,
-        "proveedores_compartidos": 41,
-        "otras_entidades": 13,
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL VALLE Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 28,
+        "proveedores_compartidos": 16,
+        "otras_entidades": 50,
+        "puente_max_entidades": 9
+      },
+      "pasa": true
+    },
+    "2024-04": {
+      "inicio": "2024-04-01",
+      "fin": "2024-06-01",
+      "procesos": {
+        "total_api": 269465,
+        "descargados": 3000,
+        "unicos": 2874,
+        "fechas": [
+          "2024-04-01",
+          "2024-04-01",
+          1
+        ]
+      },
+      "contratos": {
+        "total_api": 21681,
+        "descargados": 4000,
+        "fechas": [
+          "2024-04-01",
+          "2024-04-15",
+          15
+        ]
+      },
+      "matched_processes": 130,
+      "join_coverage": 0.0452,
+      "consulta_a": 124,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2024,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 21
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL VALLE Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 52,
+        "proveedores_compartidos": 38,
+        "otras_entidades": 53,
+        "puente_max_entidades": 5
+      },
+      "pasa": true
+    },
+    "2024-05": {
+      "inicio": "2024-05-01",
+      "fin": "2024-07-01",
+      "procesos": {
+        "total_api": 247903,
+        "descargados": 3000,
+        "unicos": 2858,
+        "fechas": [
+          "2024-05-01",
+          "2024-05-02",
+          2
+        ]
+      },
+      "contratos": {
+        "total_api": 20153,
+        "descargados": 4000,
+        "fechas": [
+          "2024-05-01",
+          "2024-05-14",
+          14
+        ]
+      },
+      "matched_processes": 275,
+      "join_coverage": 0.0962,
+      "consulta_a": 274,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2024,
+        "departamento": "Bolívar",
+        "filas": 47
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL VALLE Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 52,
+        "proveedores_compartidos": 25,
+        "otras_entidades": 29,
         "puente_max_entidades": 2
       },
       "pasa": true
     },
-    "P03": {
-      "inicio": "2025-03-01",
-      "fin": "2025-05-01",
+    "2024-06": {
+      "inicio": "2024-06-01",
+      "fin": "2024-08-01",
       "procesos": {
-        "total_api": 294218,
+        "total_api": 233780,
         "descargados": 3000,
-        "unicos": 2971,
+        "unicos": 2920,
         "fechas": [
-          "2025-03-01",
-          "2025-03-03",
-          3
+          "2024-06-01",
+          "2024-06-04",
+          4
         ]
       },
       "contratos": {
-        "total_api": 22604,
+        "total_api": 18613,
         "descargados": 4000,
         "fechas": [
-          "2025-03-01",
-          "2025-03-12",
-          12
+          "2024-06-01",
+          "2024-06-17",
+          17
         ]
       },
-      "matched_processes": 132,
-      "join_coverage": 0.0444,
-      "consulta_a": 130,
-      "bandeja_filas": 100,
+      "matched_processes": 86,
+      "join_coverage": 0.0295,
+      "consulta_a": 80,
+      "bandeja_filas": 80,
       "particion_e4": {
-        "anio": 2025,
-        "departamento": "Chocó",
-        "filas": 22
+        "anio": 2024,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 19
       },
       "ancla_e5": {
-        "nit": "899999239",
-        "entidad": "ICBF REGIONAL ANTIOQUIA",
-        "nombres_bajo_nit": 30,
-        "proveedores_compartidos": 11,
-        "otras_entidades": 13,
-        "puente_max_entidades": 3
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL SANTANDER Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 60,
+        "proveedores_compartidos": 47,
+        "otras_entidades": 78,
+        "puente_max_entidades": 7
       },
       "pasa": true
     },
-    "P04": {
+    "2024-07": {
+      "inicio": "2024-07-01",
+      "fin": "2024-09-01",
+      "procesos": {
+        "total_api": 272428,
+        "descargados": 3000,
+        "unicos": 2910,
+        "fechas": [
+          "2024-07-01",
+          "2024-07-02",
+          2
+        ]
+      },
+      "contratos": {
+        "total_api": 20018,
+        "descargados": 4000,
+        "fechas": [
+          "2024-07-01",
+          "2024-07-13",
+          13
+        ]
+      },
+      "matched_processes": 69,
+      "join_coverage": 0.0237,
+      "consulta_a": 69,
+      "bandeja_filas": 69,
+      "particion_e4": {
+        "anio": 2024,
+        "departamento": "Antioquia",
+        "filas": 13
+      },
+      "ancla_e5": {
+        "nit": "899999114",
+        "entidad": "DEPARTAMENTO DE CUNDINAMARCA - SECRETARIA DE EDUCACION",
+        "nombres_bajo_nit": 7,
+        "proveedores_compartidos": 63,
+        "otras_entidades": 15,
+        "puente_max_entidades": 4
+      },
+      "pasa": true
+    },
+    "2024-08": {
+      "inicio": "2024-08-01",
+      "fin": "2024-10-01",
+      "procesos": {
+        "total_api": 307596,
+        "descargados": 3000,
+        "unicos": 2900,
+        "fechas": [
+          "2024-08-01",
+          "2024-08-01",
+          1
+        ]
+      },
+      "contratos": {
+        "total_api": 21071,
+        "descargados": 4000,
+        "fechas": [
+          "2024-08-01",
+          "2024-08-13",
+          13
+        ]
+      },
+      "matched_processes": 231,
+      "join_coverage": 0.0797,
+      "consulta_a": 226,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2024,
+        "departamento": "Boyacá",
+        "filas": 57
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL VALLE Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 52,
+        "proveedores_compartidos": 26,
+        "otras_entidades": 40,
+        "puente_max_entidades": 9
+      },
+      "pasa": true
+    },
+    "2024-09": {
+      "inicio": "2024-09-01",
+      "fin": "2024-11-01",
+      "procesos": {
+        "total_api": 320924,
+        "descargados": 3000,
+        "unicos": 2932,
+        "fechas": [
+          "2024-09-01",
+          "2024-09-02",
+          2
+        ]
+      },
+      "contratos": {
+        "total_api": 23924,
+        "descargados": 4000,
+        "fechas": [
+          "2024-09-01",
+          "2024-09-12",
+          12
+        ]
+      },
+      "matched_processes": 88,
+      "join_coverage": 0.03,
+      "consulta_a": 78,
+      "bandeja_filas": 78,
+      "particion_e4": {
+        "anio": 2024,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 20
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL VALLE Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 58,
+        "proveedores_compartidos": 34,
+        "otras_entidades": 51,
+        "puente_max_entidades": 13
+      },
+      "pasa": true
+    },
+    "2024-10": {
+      "inicio": "2024-10-01",
+      "fin": "2024-12-01",
+      "procesos": {
+        "total_api": 291892,
+        "descargados": 3000,
+        "unicos": 2924,
+        "fechas": [
+          "2024-10-01",
+          "2024-10-01",
+          1
+        ]
+      },
+      "contratos": {
+        "total_api": 27027,
+        "descargados": 4000,
+        "fechas": [
+          "2024-10-01",
+          "2024-10-10",
+          10
+        ]
+      },
+      "matched_processes": 148,
+      "join_coverage": 0.0506,
+      "consulta_a": 138,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2024,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 22
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA DIRECCIÓN GENERAL Dirección de Promoción y Relaciones Corporativas",
+        "nombres_bajo_nit": 58,
+        "proveedores_compartidos": 39,
+        "otras_entidades": 50,
+        "puente_max_entidades": 4
+      },
+      "pasa": true
+    },
+    "2024-11": {
+      "inicio": "2024-11-01",
+      "fin": "2025-01-01",
+      "procesos": {
+        "total_api": 237595,
+        "descargados": 3000,
+        "unicos": 2967,
+        "fechas": [
+          "2024-11-01",
+          "2024-11-01",
+          1
+        ]
+      },
+      "contratos": {
+        "total_api": 32477,
+        "descargados": 4000,
+        "fechas": [
+          "2024-11-01",
+          "2024-11-09",
+          9
+        ]
+      },
+      "matched_processes": 310,
+      "join_coverage": 0.1045,
+      "consulta_a": 304,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2024,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 17
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA DISTRITO CAPITAL GRUPO DE APOYO ADMINISTRATIVO - CGI",
+        "nombres_bajo_nit": 48,
+        "proveedores_compartidos": 25,
+        "otras_entidades": 35,
+        "puente_max_entidades": 4
+      },
+      "pasa": true
+    },
+    "2024-12": {
+      "inicio": "2024-12-01",
+      "fin": "2025-02-01",
+      "procesos": {
+        "total_api": 328664,
+        "descargados": 3000,
+        "unicos": 2946,
+        "fechas": [
+          "2024-12-01",
+          "2024-12-02",
+          2
+        ]
+      },
+      "contratos": {
+        "total_api": 25174,
+        "descargados": 4000,
+        "fechas": [
+          "2024-12-01",
+          "2024-12-09",
+          9
+        ]
+      },
+      "matched_processes": 169,
+      "join_coverage": 0.0574,
+      "consulta_a": 164,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2024,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 20
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA GRUPO DE APOYO ADMINISTRATIVO INTERCENTROS CAZUCA",
+        "nombres_bajo_nit": 56,
+        "proveedores_compartidos": 28,
+        "otras_entidades": 35,
+        "puente_max_entidades": 4
+      },
+      "pasa": true
+    },
+    "2025-01": {
       "inicio": "2025-01-01",
       "fin": "2025-03-01",
       "procesos": {
@@ -179,89 +549,7 @@
       },
       "pasa": true
     },
-    "P05": {
-      "inicio": "2025-09-01",
-      "fin": "2025-11-01",
-      "procesos": {
-        "total_api": 332571,
-        "descargados": 3000,
-        "unicos": 2902,
-        "fechas": [
-          "2025-09-01",
-          "2025-09-01",
-          1
-        ]
-      },
-      "contratos": {
-        "total_api": 27840,
-        "descargados": 4000,
-        "fechas": [
-          "2025-09-01",
-          "2025-09-10",
-          10
-        ]
-      },
-      "matched_processes": 171,
-      "join_coverage": 0.0589,
-      "consulta_a": 164,
-      "bandeja_filas": 100,
-      "particion_e4": {
-        "anio": 2025,
-        "departamento": "Distrito Capital de Bogotá",
-        "filas": 44
-      },
-      "ancla_e5": {
-        "nit": "899999034",
-        "entidad": "SENA REGIONAL SANTANDER Grupo de Apoyo Administrativo Mixto",
-        "nombres_bajo_nit": 58,
-        "proveedores_compartidos": 38,
-        "otras_entidades": 60,
-        "puente_max_entidades": 5
-      },
-      "pasa": true
-    },
-    "P06": {
-      "inicio": "2025-05-01",
-      "fin": "2025-07-01",
-      "procesos": {
-        "total_api": 278750,
-        "descargados": 3000,
-        "unicos": 2952,
-        "fechas": [
-          "2025-05-01",
-          "2025-05-02",
-          2
-        ]
-      },
-      "contratos": {
-        "total_api": 22210,
-        "descargados": 4000,
-        "fechas": [
-          "2025-05-01",
-          "2025-05-13",
-          13
-        ]
-      },
-      "matched_processes": 101,
-      "join_coverage": 0.0342,
-      "consulta_a": 98,
-      "bandeja_filas": 98,
-      "particion_e4": {
-        "anio": 2025,
-        "departamento": "Distrito Capital de Bogotá",
-        "filas": 24
-      },
-      "ancla_e5": {
-        "nit": "899999034",
-        "entidad": "SENA REGIONAL NORTE DE SANTANDER Grupo de Apoyo Administrativo Mixto",
-        "nombres_bajo_nit": 59,
-        "proveedores_compartidos": 37,
-        "otras_entidades": 55,
-        "puente_max_entidades": 11
-      },
-      "pasa": true
-    },
-    "P07": {
+    "2025-02": {
       "inicio": "2025-02-01",
       "fin": "2025-04-01",
       "procesos": {
@@ -302,7 +590,48 @@
       },
       "pasa": true
     },
-    "P08": {
+    "2025-03": {
+      "inicio": "2025-03-01",
+      "fin": "2025-05-01",
+      "procesos": {
+        "total_api": 294218,
+        "descargados": 3000,
+        "unicos": 2971,
+        "fechas": [
+          "2025-03-01",
+          "2025-03-03",
+          3
+        ]
+      },
+      "contratos": {
+        "total_api": 22604,
+        "descargados": 4000,
+        "fechas": [
+          "2025-03-01",
+          "2025-03-12",
+          12
+        ]
+      },
+      "matched_processes": 132,
+      "join_coverage": 0.0444,
+      "consulta_a": 130,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2025,
+        "departamento": "Chocó",
+        "filas": 22
+      },
+      "ancla_e5": {
+        "nit": "899999239",
+        "entidad": "ICBF REGIONAL ANTIOQUIA",
+        "nombres_bajo_nit": 30,
+        "proveedores_compartidos": 11,
+        "otras_entidades": 13,
+        "puente_max_entidades": 3
+      },
+      "pasa": true
+    },
+    "2025-04": {
       "inicio": "2025-04-01",
       "fin": "2025-06-01",
       "procesos": {
@@ -343,7 +672,48 @@
       },
       "pasa": true
     },
-    "P09": {
+    "2025-05": {
+      "inicio": "2025-05-01",
+      "fin": "2025-07-01",
+      "procesos": {
+        "total_api": 278750,
+        "descargados": 3000,
+        "unicos": 2952,
+        "fechas": [
+          "2025-05-01",
+          "2025-05-02",
+          2
+        ]
+      },
+      "contratos": {
+        "total_api": 22210,
+        "descargados": 4000,
+        "fechas": [
+          "2025-05-01",
+          "2025-05-13",
+          13
+        ]
+      },
+      "matched_processes": 101,
+      "join_coverage": 0.0342,
+      "consulta_a": 98,
+      "bandeja_filas": 98,
+      "particion_e4": {
+        "anio": 2025,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 24
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL NORTE DE SANTANDER Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 59,
+        "proveedores_compartidos": 37,
+        "otras_entidades": 55,
+        "puente_max_entidades": 11
+      },
+      "pasa": true
+    },
+    "2025-06": {
       "inicio": "2025-06-01",
       "fin": "2025-08-01",
       "procesos": {
@@ -384,7 +754,48 @@
       },
       "pasa": true
     },
-    "P10": {
+    "2025-07": {
+      "inicio": "2025-07-01",
+      "fin": "2025-09-01",
+      "procesos": {
+        "total_api": 305715,
+        "descargados": 3000,
+        "unicos": 2946,
+        "fechas": [
+          "2025-07-01",
+          "2025-07-01",
+          1
+        ]
+      },
+      "contratos": {
+        "total_api": 23738,
+        "descargados": 4000,
+        "fechas": [
+          "2025-07-01",
+          "2025-07-10",
+          10
+        ]
+      },
+      "matched_processes": 113,
+      "join_coverage": 0.0384,
+      "consulta_a": 100,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2025,
+        "departamento": "Antioquia",
+        "filas": 12
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL SANTANDER Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 63,
+        "proveedores_compartidos": 54,
+        "otras_entidades": 72,
+        "puente_max_entidades": 4
+      },
+      "pasa": true
+    },
+    "2025-08": {
       "inicio": "2025-08-01",
       "fin": "2025-10-01",
       "procesos": {
@@ -425,7 +836,48 @@
       },
       "pasa": true
     },
-    "P11": {
+    "2025-09": {
+      "inicio": "2025-09-01",
+      "fin": "2025-11-01",
+      "procesos": {
+        "total_api": 332571,
+        "descargados": 3000,
+        "unicos": 2902,
+        "fechas": [
+          "2025-09-01",
+          "2025-09-01",
+          1
+        ]
+      },
+      "contratos": {
+        "total_api": 27840,
+        "descargados": 4000,
+        "fechas": [
+          "2025-09-01",
+          "2025-09-10",
+          10
+        ]
+      },
+      "matched_processes": 171,
+      "join_coverage": 0.0589,
+      "consulta_a": 164,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2025,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 44
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL SANTANDER Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 58,
+        "proveedores_compartidos": 38,
+        "otras_entidades": 60,
+        "puente_max_entidades": 5
+      },
+      "pasa": true
+    },
+    "2025-10": {
       "inicio": "2025-10-01",
       "fin": "2025-12-01",
       "procesos": {
@@ -466,7 +918,48 @@
       },
       "pasa": true
     },
-    "P12": {
+    "2025-11": {
+      "inicio": "2025-11-01",
+      "fin": "2026-01-01",
+      "procesos": {
+        "total_api": 278469,
+        "descargados": 3000,
+        "unicos": 2981,
+        "fechas": [
+          "2025-11-01",
+          "2025-11-03",
+          3
+        ]
+      },
+      "contratos": {
+        "total_api": 34269,
+        "descargados": 4000,
+        "fechas": [
+          "2025-11-01",
+          "2025-11-07",
+          7
+        ]
+      },
+      "matched_processes": 138,
+      "join_coverage": 0.0463,
+      "consulta_a": 134,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2025,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 54
+      },
+      "ancla_e5": {
+        "nit": "900258711",
+        "entidad": "INSTITUTO DE CAMINOS Y CONSTRUCCIONES DE CUNDINAMARCA - ICCU",
+        "nombres_bajo_nit": 1,
+        "proveedores_compartidos": 41,
+        "otras_entidades": 13,
+        "puente_max_entidades": 2
+      },
+      "pasa": true
+    },
+    "2025-12": {
       "inicio": "2025-12-01",
       "fin": "2026-02-01",
       "procesos": {
@@ -504,6 +997,252 @@
         "proveedores_compartidos": 43,
         "otras_entidades": 57,
         "puente_max_entidades": 5
+      },
+      "pasa": true
+    },
+    "2026-01": {
+      "inicio": "2026-01-01",
+      "fin": "2026-03-01",
+      "procesos": {
+        "total_api": 670896,
+        "descargados": 3000,
+        "unicos": 2999,
+        "fechas": [
+          "2026-01-01",
+          "2026-01-02",
+          2
+        ]
+      },
+      "contratos": {
+        "total_api": 27483,
+        "descargados": 4000,
+        "fechas": [
+          "2026-01-01",
+          "2026-01-19",
+          19
+        ]
+      },
+      "matched_processes": 282,
+      "join_coverage": 0.094,
+      "consulta_a": 282,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2026,
+        "departamento": "Boyacá",
+        "filas": 30
+      },
+      "ancla_e5": {
+        "nit": "890700666",
+        "entidad": "HOSPITAL SAN JUAN DE DIOS DE HONDA ESE",
+        "nombres_bajo_nit": 1,
+        "proveedores_compartidos": 16,
+        "otras_entidades": 18,
+        "puente_max_entidades": 7
+      },
+      "pasa": true
+    },
+    "2026-02": {
+      "inicio": "2026-02-01",
+      "fin": "2026-04-01",
+      "procesos": {
+        "total_api": 195404,
+        "descargados": 3000,
+        "unicos": 2992,
+        "fechas": [
+          "2026-02-01",
+          "2026-02-02",
+          2
+        ]
+      },
+      "contratos": {
+        "total_api": 11780,
+        "descargados": 4000,
+        "fechas": [
+          "2026-02-01",
+          "2026-02-24",
+          24
+        ]
+      },
+      "matched_processes": 70,
+      "join_coverage": 0.0234,
+      "consulta_a": 70,
+      "bandeja_filas": 70,
+      "particion_e4": {
+        "anio": 2026,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 14
+      },
+      "ancla_e5": {
+        "nit": "890801099",
+        "entidad": "HOSPITAL DEPARTAMENTAL UNIVERSITARIO SANTA SOFIA DE CALDAS",
+        "nombres_bajo_nit": 1,
+        "proveedores_compartidos": 11,
+        "otras_entidades": 18,
+        "puente_max_entidades": 7
+      },
+      "pasa": true
+    },
+    "2026-03": {
+      "inicio": "2026-03-01",
+      "fin": "2026-05-01",
+      "procesos": {
+        "total_api": 123571,
+        "descargados": 3000,
+        "unicos": 2902,
+        "fechas": [
+          "2026-03-01",
+          "2026-03-02",
+          2
+        ]
+      },
+      "contratos": {
+        "total_api": 13790,
+        "descargados": 4000,
+        "fechas": [
+          "2026-03-01",
+          "2026-03-19",
+          19
+        ]
+      },
+      "matched_processes": 243,
+      "join_coverage": 0.0837,
+      "consulta_a": 242,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2026,
+        "departamento": "Norte de Santander",
+        "filas": 14
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL ATLANTICO",
+        "nombres_bajo_nit": 41,
+        "proveedores_compartidos": 26,
+        "otras_entidades": 61,
+        "puente_max_entidades": 12
+      },
+      "pasa": true
+    },
+    "2026-04": {
+      "inicio": "2026-04-01",
+      "fin": "2026-06-01",
+      "procesos": {
+        "total_api": 114380,
+        "descargados": 3000,
+        "unicos": 2802,
+        "fechas": [
+          "2026-04-01",
+          "2026-04-04",
+          4
+        ]
+      },
+      "contratos": {
+        "total_api": 13740,
+        "descargados": 4000,
+        "fechas": [
+          "2026-04-01",
+          "2026-04-21",
+          21
+        ]
+      },
+      "matched_processes": 100,
+      "join_coverage": 0.0357,
+      "consulta_a": 100,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2026,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 30
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL VALLE Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 62,
+        "proveedores_compartidos": 65,
+        "otras_entidades": 106,
+        "puente_max_entidades": 7
+      },
+      "pasa": true
+    },
+    "2026-05": {
+      "inicio": "2026-05-01",
+      "fin": "2026-07-01",
+      "procesos": {
+        "total_api": 146711,
+        "descargados": 3000,
+        "unicos": 2922,
+        "fechas": [
+          "2026-05-01",
+          "2026-05-04",
+          4
+        ]
+      },
+      "contratos": {
+        "total_api": 14322,
+        "descargados": 4000,
+        "fechas": [
+          "2026-05-01",
+          "2026-05-20",
+          20
+        ]
+      },
+      "matched_processes": 85,
+      "join_coverage": 0.0291,
+      "consulta_a": 85,
+      "bandeja_filas": 85,
+      "particion_e4": {
+        "anio": 2026,
+        "departamento": "Distrito Capital de Bogotá",
+        "filas": 12
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL VALLE Grupo de Apoyo Administrativo Mixto",
+        "nombres_bajo_nit": 68,
+        "proveedores_compartidos": 79,
+        "otras_entidades": 112,
+        "puente_max_entidades": 8
+      },
+      "pasa": true
+    },
+    "2026-06": {
+      "inicio": "2026-06-01",
+      "fin": "2026-08-01",
+      "procesos": {
+        "total_api": 258708,
+        "descargados": 3000,
+        "unicos": 2766,
+        "fechas": [
+          "2026-06-01",
+          "2026-06-01",
+          1
+        ]
+      },
+      "contratos": {
+        "total_api": 18723,
+        "descargados": 4000,
+        "fechas": [
+          "2026-06-01",
+          "2026-06-17",
+          17
+        ]
+      },
+      "matched_processes": 201,
+      "join_coverage": 0.0727,
+      "consulta_a": 200,
+      "bandeja_filas": 100,
+      "particion_e4": {
+        "anio": 2026,
+        "departamento": "Norte de Santander",
+        "filas": 19
+      },
+      "ancla_e5": {
+        "nit": "899999034",
+        "entidad": "SENA REGIONAL RISARALDA Grupo de Apoyo Administrativo Mixto//",
+        "nombres_bajo_nit": 71,
+        "proveedores_compartidos": 79,
+        "otras_entidades": 132,
+        "puente_max_entidades": 8
       },
       "pasa": true
     }
