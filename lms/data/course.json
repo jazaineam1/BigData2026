@@ -11,32 +11,56 @@
     {
       "n": 1,
       "title": "Introducción a Big Data e ingesta",
-      "status": "visible"
+      "status": "visible",
+      "entry": {
+        "url": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/sesion1_introducci_n.ipynb",
+        "label": "Abrir cuaderno en Colab"
+      }
     },
     {
       "n": 2,
       "title": "Del problema de negocio a una arquitectura",
-      "status": "visible"
+      "status": "visible",
+      "entry": {
+        "url": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb",
+        "label": "Abrir cuaderno en Colab"
+      }
     },
     {
       "n": 3,
       "title": "Cuando una fila ya no representa el dato",
-      "status": "visible"
+      "status": "visible",
+      "entry": {
+        "url": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/3_MongoDB_Documental.ipynb",
+        "label": "Abrir cuaderno en Colab"
+      }
     },
     {
       "n": 4,
       "title": "Atlas y Cassandra: dos preguntas, dos modelos",
-      "status": "visible"
+      "status": "visible",
+      "entry": {
+        "url": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/4_Atlas_Cassandra_Laura.ipynb",
+        "label": "Abrir cuaderno en Colab"
+      }
     },
     {
       "n": 5,
       "title": "De evidencia a bandeja operacional",
-      "status": "visible"
+      "status": "visible",
+      "entry": {
+        "url": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/5_Atlas_Cassandra_Query_First.ipynb",
+        "label": "Abrir cuaderno en Colab"
+      }
     },
     {
       "n": 6,
       "title": "De la fila priorizada al contexto relacional",
-      "status": "visible"
+      "status": "visible",
+      "entry": {
+        "url": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/6_Neo4j_Contexto_Relacional.ipynb",
+        "label": "Abrir cuaderno en Colab"
+      }
     },
     {
       "n": 7,
