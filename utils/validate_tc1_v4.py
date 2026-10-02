@@ -48,7 +48,7 @@ checks=[
     ("sin driver Cassandra evaluado", "from cassandra.cluster import Cluster" not in all_src and "session.execute(" not in all_src),
     ("sin driver Neo4j evaluado", "driver.execute_query(" not in all_src and "GraphDatabase" not in all_src),
     ("sin NetworkX", "networkx" not in all_src.lower()),
-    ("sin preguntas abiertas", "input("Alternativa" not in all_src and "respuesta_concurrencia" not in all_src and all_src.count("#@param") >= 8),
+    ("sin preguntas abiertas", 'input("Alternativa' not in all_src and "respuesta_concurrencia" not in all_src and all_src.count("#@param") >= 8),
     ("entrega tres archivos", "## Entrega final · exactamente tres archivos" in all_src and all(x in all_src for x in ["TC1_<PAREJA_ID>.ipynb","TC1_<PAREJA_ID>.zip","manifest_tc1.json"])),
     ("Drive restringido", "Acceso general: Restringido" in all_src and "jzaineam@ucentral.edu.co" in all_src),
     ("fecha máxima", "17 de octubre de 2026" in all_src and "11:59 p. m." in all_src),
