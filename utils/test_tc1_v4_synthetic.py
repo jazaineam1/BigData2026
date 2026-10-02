@@ -3,153 +3,330 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import hashlib, json, os, sys
 import pandas as pd
+import networkx as nx
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"utils"))
 import tc1_validator as V
 
-def write_cache(cache_dir, df, offsets, endpoint):
-    cache_dir.mkdir(parents=True,exist_ok=True)
-    for off in offsets:
-        part=df.iloc[off:off+250].to_dict("records")
-        raw=json.dumps(part,ensure_ascii=False,sort_keys=True,separators=(",",":"),default=str).encode()
-        stem=f"page_{off:07d}"
-        (cache_dir/f"{stem}.json").write_bytes(raw)
-        meta={
-            "endpoint":endpoint,"offset":off,"limit":250,"rows":len(part),
-            "query_signature":hashlib.sha256(f"{endpoint}:{off}".encode()).hexdigest(),
-            "sha256":hashlib.sha256(raw).hexdigest(),"attempts":1,"from_cache":False,
+class FakeCollection:
+    __module__="pymongo.collection"
+    def __init__(self,n): self.n=n
+    def count_documents(self,_): return self.n
+    def index_information(self):
+        return {
+            "_id_":{"key":[("_id",1)]},
+            "id_proceso_1":{"key":[("id_proceso",1)],"unique":True},
+            "valor_contratos_-1":{"key":[("contratos_resumen.valor_total",-1)]},
         }
-        (cache_dir/f"{stem}.meta.json").write_text(json.dumps(meta),encoding="utf-8")
 
-def touch(p,content="ok"):
-    p=Path(p); p.parent.mkdir(parents=True,exist_ok=True)
-    if isinstance(content,bytes): p.write_bytes(content)
-    else: p.write_text(content,encoding="utf-8")
+def chash(df,key):
+    # Debe usar exactamente la misma definición canónica que el validador V7.
+    return V._canon_df(df,key)
+
+def touch(p,txt="ok"):
+    p.parent.mkdir(parents=True,exist_ok=True)
+    p.write_text(txt,encoding="utf-8")
 
 def main():
   with TemporaryDirectory() as td:
-    td=Path(td); out=td/"entrega_tc1"; raw=out/"raw"; pages=raw/"pages"/"scope-test"
-    seq=pages/"procesos"/"sequential"; thr=pages/"procesos"/"threaded"; con=pages/"contratos"/"official"
-    n=40; matched=35
+    out=Path(td)/"entrega_tc1"; raw=out/"raw"; raw.mkdir(parents=True)
+    raw_pages=raw/"pages"
+    cache_seq=raw_pages/"procesos"/"sequential"
+    cache_thr=raw_pages/"procesos"/"threaded"
+    cache_cont=raw_pages/"contratos"/"official"
+    for p in [cache_seq,cache_thr,cache_cont]:
+      p.mkdir(parents=True,exist_ok=True)
+    unique_n=637        # procesos únicos
+    duplicate_rows=25   # mismas identidades con proveedores distintos
+    linked=320
+    pro=[]; hist=[]; docs=[]; cont=[]
 
-    procesos=pd.DataFrame([
-      {"id_del_proceso":f"P{i:03d}","id_del_portafolio":f"B{i:03d}","entidad":f"Entidad {i%4}",
-       "nit_entidad":str(100+i%4),"departamento_entidad":"Bogotá D.C.","precio_base":1000+i}
-      for i in range(n)
-    ])
-    contratos=pd.DataFrame([
-      {"proceso_de_compra":f"B{i:03d}","id_contrato":f"C{i:03d}","valor_del_contrato":str(100000-i*1000)}
-      for i in range(matched)
-    ])
-    offsets=[0]; offsets_c=[0]
-    write_cache(seq,procesos,offsets,"p6dx-8zbt")
-    write_cache(thr,procesos,offsets,"p6dx-8zbt")
-    write_cache(con,contratos,offsets_c,"jbjy-vk9h")
+    for i in range(unique_n):
+      pid=f"CO1.REQ.{i:05d}"
+      portfolio=f"CO1.BDOS.{i:05d}"
+      nit_ent=str(100+i%3)
+      dept=["Antioquia","Bogotá D.C.","Valle"][i%3]
+      nit_prov=str(900+i%17)
+      has=i<linked
+      val=float(5_000_000+i*25_000) if has else 0.0
+      pro.append({
+        "id_del_proceso":pid,"id_del_portafolio":portfolio,
+        "entidad":f"Entidad {nit_ent}","nit_entidad":nit_ent,"departamento_entidad":dept,
+        "ciudad_entidad":"Ciudad","fecha_de_publicacion_del":"2025-01-15T00:00:00.000","precio_base":float(1_000_000+i),
+        "modalidad_de_contratacion":"Directa","respuestas_al_procedimiento":0,"estado_del_procedimiento":"Adjudicado",
+        "adjudicado":"Si","nombre_del_proveedor":f"Proveedor {nit_prov}","nit_del_proveedor_adjudicado":nit_prov,
+        "urlproceso":f"https://example.test/{pid}"
+      })
+      hist.append({
+        "id_proceso":pid,"id_portafolio":portfolio,"entidad":f"Entidad {nit_ent}","nit_entidad":nit_ent,
+        "departamento":dept,"ciudad":"Ciudad","fecha_publicacion":pd.Timestamp("2025-01-15"),"anio":2025,
+        "precio_base":float(1_000_000+i),"modalidad":"Directa","respuestas":0,"estado":"Adjudicado",
+        "adjudicado":True,"proveedor":f"Proveedor {nit_prov}","nit_proveedor":nit_prov,
+        "url":f"https://example.test/{pid}","contratos_cantidad":1 if has else 0,"valor_contratos":val,
+        "contratos_estados":["En ejecución"] if has else []
+      })
+      docs.append({
+        "id_proceso":pid,
+        "entidad":{"nit":nit_ent,"nombre":f"Entidad {nit_ent}","departamento":dept,"ciudad":"Ciudad"},
+        "proceso":{"fecha_publicacion":"2025-01-15","anio":2025,"precio_base":float(1_000_000+i),"modalidad":"Directa","estado":"Adjudicado","adjudicado":True},
+        "proveedor_adjudicado":{"nit":nit_prov,"nombre":f"Proveedor {nit_prov}"},
+        "contratos_resumen":{"cantidad":1 if has else 0,"valor_total":val,"estados":["En ejecución"] if has else []},
+        "metadata_ingesta":{"dataset":"p6dx-8zbt","pareja_id":"TEST-V7","window_start":"2025-01-01","window_end":"2025-03-01"}
+      })
+      if has:
+        cont.append({
+          "proceso_de_compra":portfolio,"id_contrato":f"C{i:05d}","estado_contrato":"En ejecución","tipo_de_contrato":"Servicios",
+          "modalidad_de_contratacion":"Directa","fecha_de_firma":"2025-02-01T00:00:00",
+          "nombre_entidad":("Entidad 100 Alterna" if i==3 else f"Entidad {nit_ent}"),"nit_entidad":nit_ent,
+          "proveedor_adjudicado":f"Proveedor {nit_prov}","documento_proveedor":nit_prov,
+          "valor_del_contrato":str(val)
+        })
 
-    raw.mkdir(parents=True,exist_ok=True)
-    touch(raw/"procesos.parquet",b"PAR1")
-    touch(raw/"contratos.parquet",b"PAR1")
-    for name in ["00_dataset_contract.json","01_acquisition_manifest.json","01_benchmark_threads.json","01_quality_report.json"]:
-      touch(out/name,"{}")
+    # Duplicados reales de grano API: mismo id_del_proceso, proveedor distinto.
+    for j in range(duplicate_rows):
+      d=dict(pro[j])
+      d["nit_del_proveedor_adjudicado"]=f"99{j:04d}"
+      d["nombre_del_proveedor"]=f"Proveedor duplicado {j:02d}"
+      pro.append(d)
 
-    historico=pd.DataFrame([
-      {"id_proceso":f"P{i:03d}","nit_entidad":str(100+i%4),"entidad":f"Entidad {i%4}",
-       "departamento":"Bogotá D.C.","valor_contratos":float(100000-i*1000)}
-      for i in range(n)
-    ])
-    documentos=[{"id_proceso":x} for x in historico.id_proceso]
-    touch(out/"02_atlas_documentos.json",json.dumps(documentos))
+    procesos=pd.DataFrame(pro); procesos_seq=procesos.copy()
+    historico=pd.DataFrame(hist); contratos=pd.DataFrame(cont)
+    n=len(procesos)
+    matched_rows=linked+duplicate_rows
 
-    atlas_expected={"nit_entidad":"100","entidad":"Entidad 0","valor_total":970000.0}
-    atlas_pipeline=[
-      {"$match":{"entidad.departamento":"Bogotá D.C.","red.proveedores_compartidos":{"$gt":0}}},
-      {"$group":{"_id":{"nit":"$entidad.nit","nombre":"$entidad.nombre"},
-                  "valor_total":{"$sum":"$contratos.valor_total"},"procesos":{"$sum":1}}},
-      {"$sort":{"valor_total":-1,"_id.nit":1}},
-      {"$limit":5},
-    ]
-    atlas_evidence={
-      "pipeline":atlas_pipeline,"top_nit":"100","top_entidad":"Entidad 0",
-      "top_valor":970000.0,"pipeline_guardado":"tc1_test_priorizacion"
+    offsets=list(range(0,n,250))
+    offsets_cont=list(range(0,linked,250))
+    h=chash(procesos,"id_del_proceso")
+    bench={
+      "workers":4,"target_rows":n,"page_size":250,
+      "rows_sequential":n,"rows_threaded":n,
+      "seconds_sequential":2.8,"seconds_threaded":3.1,
+      "hash_sequential":h,"hash_threaded":h,
+      "offsets_sequential":offsets,"offsets_threaded":offsets,
+      "same_offsets":True,"same_rows":True,"same_hash":True
+    }
+    data_contract={
+      "procesos":{"id":"p6dx-8zbt","grain":"proceso","fields":sorted(V.PROCESS_FIELDS)},
+      "contratos":{"id":"jbjy-vk9h","grain":"contrato","fields":sorted(V.CONTRACT_FIELDS)},
+      "join":{"procesos.id_del_portafolio":"contratos.proceso_de_compra"},
+      "window":{"start":"2025-01-01","end":"2025-03-01"}
+    }
+    query_plan={
+      "procesos":{"where":"fecha_de_publicacion_del >= '2025-01-01' and fecha_de_publicacion_del < '2025-03-01'",
+                  "order":"fecha_de_publicacion_del ASC,id_del_proceso ASC,nit_del_proveedor_adjudicado ASC,nombre_del_proveedor ASC"},
+      "contratos":{"where":"fecha_de_firma >= '2025-01-01' and fecha_de_firma < '2025-03-01'",
+                   "order":"fecha_de_firma ASC,id_contrato ASC"}
+    }
+    coverage=matched_rows/n
+    quality={
+      "join_key":"id_del_portafolio -> proceso_de_compra",
+      "matched_processes":matched_rows,"join_coverage":coverage,
+      "procesos":{"rows":n},"contratos":{"rows":linked}
+    }
+    def write_cache(cache_dir, df, offsets_, endpoint, signature_seed):
+      metas=[]
+      for off in offsets_:
+        part=df.iloc[off:off+250].to_dict("records")
+        raw_bytes=json.dumps(part,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")
+        sha=hashlib.sha256(raw_bytes).hexdigest()
+        sig=hashlib.sha256(f"{signature_seed}:{off}".encode()).hexdigest()
+        stem=f"page_{off:07d}"
+        (cache_dir/f"{stem}.json").write_bytes(raw_bytes)
+        meta={
+          "endpoint":endpoint,"offset":off,"limit":250,"rows":len(part),
+          "query_signature":sig,"sha256":sha,"attempts":1,"from_cache":False
+        }
+        (cache_dir/f"{stem}.meta.json").write_text(json.dumps(meta),encoding="utf-8")
+        metas.append(meta)
+      return metas
+
+    seq_pages=write_cache(cache_seq,procesos,offsets,"p6dx-8zbt","seq")
+    thr_pages=write_cache(cache_thr,procesos,offsets,"p6dx-8zbt","thr")
+    cont_pages=write_cache(cache_cont,contratos,offsets_cont,"jbjy-vk9h","cont")
+
+    acq={
+      "schema":"2026-10-01-secoppipeline-v7",
+      "queried_at_utc":"2026-10-01T00:00:00+00:00","workers":4,"page_size":250,
+      "target_rows":{"procesos":n,"contratos":linked},
+      "datasets":{
+        "procesos":{
+          "id":"p6dx-8zbt","rows":n,
+          "pages_sequential":seq_pages,
+          "pages_threaded":thr_pages,
+          "snapshot_sha256":h
+        },
+        "contratos":{
+          "id":"jbjy-vk9h","rows":linked,
+          "pages":cont_pages,
+          "snapshot_sha256":chash(contratos,"id_contrato")
+        }
+      }
     }
 
-    cql="""CREATE TABLE IF NOT EXISTS compras_claras.prioridades_tc1_test (
-      corte text, departamento text, valor_contratos decimal, id_proceso text,
-      entidad text, nit_entidad text,
-      PRIMARY KEY ((corte, departamento), valor_contratos, id_proceso)
+    for p in [
+      raw/"procesos.parquet",raw/"contratos.parquet",out/"00_dataset_contract.json",
+      out/"01_acquisition_manifest.json",out/"01_benchmark_threads.json",out/"01_quality_report.json",
+      out/"02_secop_integrado.parquet",out/"02_modelo_documental.json"
+    ]: touch(p)
+
+    idem={"count_after_first":unique_n,"count_after_second":unique_n,"duplicates_after_second":0}
+    ref_a=linked
+    topdocs=sorted(
+      [{"id_proceso":d["id_proceso"],"valor_contratos":float(d["contratos_resumen"]["valor_total"])} for d in docs],
+      key=lambda x:(-x["valor_contratos"],x["id_proceso"])
+    )[:10]
+    atlas_resultados={
+      "carga":{"documentos":unique_n,"server_version":"8.0","idempotencia":idem,"indices":["id_proceso_1","valor_contratos_-1"]},
+      "consulta_a":{"filtro":{"x":1},"resultado":ref_a},
+      "consulta_b":{"filtro":{},"proyeccion":{},"resultado":topdocs}
+    }
+    touch(out/"02_atlas_evidence.json",json.dumps(atlas_resultados))
+
+    band_ref=sorted(
+      [{"id_proceso":d["id_proceso"],"valor_contratos":float(d["contratos_resumen"]["valor_total"])}
+       for d in docs if d["contratos_resumen"]["cantidad"]>0],
+      key=lambda x:(-x["valor_contratos"],x["id_proceso"])
+    )[:100]
+    bandeja=pd.DataFrame(band_ref)
+    bandeja["anio"]=2025
+    depmap=dict(zip(historico.id_proceso,historico.departamento))
+    bandeja["departamento"]=bandeja.id_proceso.map(depmap)
+    bandeja.to_csv(out/"03_bandeja_historica.csv",index=False)
+
+    bc=bandeja.copy()
+    cql="""CREATE TABLE tc1.procesos_por_anio_departamento (
+      anio int, departamento text, valor_contratos double, id_proceso text,
+      PRIMARY KEY ((anio, departamento), valor_contratos, id_proceso)
     ) WITH CLUSTERING ORDER BY (valor_contratos DESC, id_proceso ASC);"""
-    top5=["P000","P001","P002","P003","P004"]
-    touch(out/"03_astra_carga.cql",cql)
-    astra_evidence={"create_table":cql,"top5_ids":top5}
+    touch(out/"04_modelo_cassandra.cql",cql)
+    counts=(bc.groupby(["anio","departamento"],dropna=False).size().rename("n").reset_index()
+            .sort_values(["n","anio","departamento"],ascending=[False,True,True],kind="mergesort").reset_index(drop=True))
+    rr=counts.iloc[0]; part=(int(rr["anio"]),rr["departamento"])
+    top10=(bc[(bc.anio==part[0])&(bc.departamento==part[1])]
+           .sort_values(["valor_contratos","id_proceso"],ascending=[False,True],kind="mergesort").head(10))
 
-    rel_grafo=pd.DataFrame([
-      {"id_contrato":"C0","id_proceso":"P000","nit_entidad":"100","entidad":"Entidad 0","nit_proveedor":"900","proveedor":"Proveedor X"},
-      {"id_contrato":"C1","id_proceso":"P001","nit_entidad":"101","entidad":"Entidad 1","nit_proveedor":"900","proveedor":"Proveedor X"},
-      {"id_contrato":"C2","id_proceso":"P002","nit_entidad":"102","entidad":"Entidad 2","nit_proveedor":"900","proveedor":"Proveedor X"},
-    ])
-    cypher='''MATCH (a:Entidad {nit:"100"})-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v:Proveedor)
-MATCH (otra:Entidad)-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v)
-WHERE otra.nit <> a.nit
-RETURN v.nit AS nit_proveedor, v.nombre AS proveedor, count(DISTINCT otra) AS otras_entidades
-ORDER BY otras_entidades DESC, nit_proveedor ASC
-LIMIT 5'''
-    touch(out/"04_neo4j_carga.cypher",cypher)
-    neo_expected={"nit_proveedor":"900","proveedor":"Proveedor X","otras_entidades":2}
-    neo_evidence={"query":cypher,"nit_proveedor":"900","proveedor":"Proveedor X","otras_entidades":2}
+    pmap=procesos[["id_del_portafolio","id_del_proceso"]].copy()
+    pmap=pmap.dropna(subset=["id_del_portafolio","id_del_proceso"])
+    pmap["id_del_portafolio"]=pmap["id_del_portafolio"].astype(str).str.strip()
+    pmap=pmap[pmap["id_del_portafolio"].ne("")].drop_duplicates("id_del_portafolio")
+    pmap=pmap.rename(columns={"id_del_proceso":"id_proceso"})
+    relaciones=contratos.merge(pmap,left_on="proceso_de_compra",right_on="id_del_portafolio",how="inner")
+    relaciones["nit_proveedor"]=relaciones["documento_proveedor"].astype(str)
+    relaciones["proveedor"]=relaciones["proveedor_adjudicado"].astype(str)
+    relaciones["entidad"]=relaciones["nombre_entidad"].astype(str)
+    relaciones=relaciones[["id_contrato","id_proceso","nit_entidad","entidad","nit_proveedor","proveedor"]]
+    relaciones=relaciones.sort_values(["id_contrato","id_proceso","nit_proveedor"],kind="mergesort").reset_index(drop=True)
 
-    decision_log={
-      "rol_atlas":"Explorar/agregar documentos flexibles y priorizar entidades",
-      "rol_cassandra":"Servir repetidamente corte + departamento → top 5",
-      "rol_neo4j":"Recorrer proveedores compartidos entre entidades",
-      "limite_relacional":"Un proveedor compartido describe conectividad, no prueba irregularidad",
+    rank=(relaciones.groupby("nit_entidad")["id_contrato"].nunique().rename("contratos").reset_index()
+          .sort_values(["contratos","nit_entidad"],ascending=[False,True],kind="mergesort").reset_index(drop=True))
+    nit_ancla=str(rank.iloc[0]["nit_entidad"])
+    rel_ancla=relaciones[relaciones.nit_entidad.astype(str)==nit_ancla]
+    nombres_ancla=sorted(set(rel_ancla.entidad.astype(str)))
+    entidad_ancla=nombres_ancla[-1]  # cualquier variante observada para el mismo NIT es válida
+    a=rel_ancla.groupby("nit_proveedor")["id_contrato"].nunique().rename("contratos_con_ancla").reset_index()
+    g=relaciones.groupby("nit_proveedor")["nit_entidad"].nunique().rename("entidades_conectadas").reset_index()
+    rel=a.merge(g,on="nit_proveedor").sort_values(
+      ["entidades_conectadas","contratos_con_ancla","nit_proveedor"],
+      ascending=[False,False,True],kind="mergesort"
+    ).reset_index(drop=True)
+    rel.to_csv(out/"05_resultado_relacional.csv",index=False)
+
+    cy_load="UNWIND $rows AS row MERGE (e:Entidad {nit: row.nit_entidad}) MERGE (c:Contrato {id: row.id_contrato}) MERGE (v:Proveedor {nit: row.nit_proveedor})"
+    cy_ctx="MATCH (e:Entidad {nit:$nit_ancla}) RETURN e"
+    cy_share="MATCH (e:Entidad {nit:$nit_ancla})--(:Contrato)--(v:Proveedor)--(:Contrato)--(o:Entidad) WHERE o.nit <> $nit_ancla RETURN v,o"
+    cy_rank="MATCH (v:Proveedor)--(:Contrato)--(e:Entidad) RETURN v.nit, count(distinct e) AS entidades"
+    touch(out/"05_neo4j_consultas.cypher","\n".join([cy_load,cy_ctx,cy_share,cy_rank]))
+
+    correct_429="Reducir concurrencia, respetar Retry-After/backoff y volver a comprobar filas + hash"
+    correct_indice="Crear un índice adicional alineado con una consulta real y comprobarlo con index_information()"
+    correct_limite="La priorización y las conexiones orientan revisión; no demuestran fraude ni causalidad"
+    decisions=[
+      {"decision":correct_429,"evidence":"workers=4; same_offsets=True; same_hash=True","alternative":"Aumentar workers sin controlar throttling","risk":"snapshot"},
+      {"decision":correct_indice,"evidence":"indices=['id_proceso_1','valor_contratos_-1']","alternative":"índice sin consulta","risk":"costo de escritura"},
+      {"decision":correct_limite,"evidence":f"join_coverage={coverage}; matched_processes={linked}","alternative":"interpretar como prueba","risk":"sobreinterpretación"},
+    ]
+    touch(out/"06_decision_log.json",json.dumps(decisions))
+    report=f"""## 1. Adquisición y contrato de datos
+Procesos={n}; contratos={linked}; clave=id_del_portafolio→proceso_de_compra.
+## 2. Concurrencia, robustez y calidad
+Workers=4; mismos_offsets=True; mismo_hash=True; join_coverage={coverage}.
+## 3. Modelo documental e idempotencia Atlas
+Documentos={unique_n}; idempotencia={idem}; índices=['id_proceso_1','valor_contratos_-1'].
+## 4. Producto analítico y Cassandra
+Filas_bandeja={len(bandeja)}; modelo Cassandra=query-first + simulación local.
+## 5. Neo4j, decisiones y límites
+Entidad ancla={entidad_ancla}. La priorización y las conexiones no demuestran fraude ni causalidad.
+"""
+    touch(out/"06_informe_tecnico.md",report)
+
+    correct_d429="Reducir workers, respetar Retry-After/backoff y repetir la comparación de filas + hash"
+    correct_cov="La cobertura mide qué proporción de procesos encontró contrato en este snapshot; no se inventan los faltantes"
+    defensa={
+      "escenario_429":{"workers_observados":4,"same_hash":True,"seleccion":correct_d429},
+      "escenario_cobertura":{"join_coverage":coverage,"matched_processes":matched_rows,"seleccion":correct_cov},
     }
+    touch(out/"06_microdefensa_grupal.json",json.dumps(defensa))
 
+    G=nx.DiGraph()
     ns={
-      "OUT":out,"RAW":raw,
-      "CACHE_SEQ_PROCESOS":seq,"CACHE_THR_PROCESOS":thr,"CACHE_CONTRATOS":con,
-      "OFFSETS_PROCESOS":offsets,"OFFSETS_CONTRATOS":offsets_c,
-      "PAREJA_ID":"TEST",
-      "data_contract":{
-        "procesos":{"id":"p6dx-8zbt"},"contratos":{"id":"jbjy-vk9h"},
-        "join":{"procesos.id_del_portafolio":"contratos.proceso_de_compra"}
-      },
-      "benchmark_threads":{"same_offsets":True,"same_rows":True,"same_hash":True},
-      "acquisition_manifest":{"schema":V.VERSION},
-      "quality_report":{"join_coverage":matched/n},
-      "matched_processes":matched,
-      "historico":historico,"documentos":documentos,
-      "DEPARTAMENTO_OBJETIVO":"Bogotá D.C.","ATLAS_ESPERADO":atlas_expected,
-      "atlas_pipeline_student":atlas_pipeline,"atlas_evidence":atlas_evidence,
-      "ASTRA_TOP5_ESPERADO":top5,"astra_evidence":astra_evidence,
-      "neo4j_evidence":neo_evidence,"NEO4J_ESPERADO":neo_expected,
-      "ENTIDAD_ANCLA_NIT":"100","ENTIDAD_ANCLA":"Entidad 0","rel_grafo":rel_grafo,
-      "decision_log":decision_log,
+      "OUT":out,"RAW_PAGES":raw_pages,
+      "CACHE_SEQ_PROCESOS":cache_seq,"CACHE_THR_PROCESOS":cache_thr,"CACHE_CONTRATOS":cache_cont,
+      "PAREJA_ID":"TEST-V7","INTEGRANTE_1":"A","CODIGO_1":"1","INTEGRANTE_2":"B","CODIGO_2":"2",
+      "N_PROCESOS":n,"OFFSETS_PROCESOS":offsets,"OFFSETS_CONTRATOS":offsets_cont,
+      "data_contract":data_contract,"query_plan":query_plan,
+      "procesos_seq":procesos_seq,"procesos_df":procesos,"contratos_df":contratos,
+      "benchmark_threads":bench,"acquisition_manifest":acq,"quality_report":quality,
+      "historico":historico,"relaciones_contrato":relaciones,"documentos":docs,
+      "coleccion":FakeCollection(unique_n),"atlas_ping":True,"atlas_server_version":"8.0",
+      "atlas_idempotencia":idem,"atlas_indexes":["id_proceso_1","valor_contratos_-1"],
+      "filtro_a":{"x":1},"resultado_a":ref_a,"filtro_b":{},"proyeccion_b":{},"resultado_b":topdocs,
+      "atlas_resultados":atlas_resultados,
+      "pipeline_bandeja":[{"$match":{}},{"$sort":{}},{"$limit":100}],"bandeja_historica":bandeja,
+      "bandeja_cassandra":bc,"cql_create":cql,"particion_prueba":part,"top10_cassandra":top10,
+      "nit_ancla":nit_ancla,"entidad_ancla":entidad_ancla,"resultado_relacional":rel,
+      "cypher_carga":cy_load,"cypher_contexto":cy_ctx,"cypher_compartidos":cy_share,"cypher_ranking":cy_rank,
+      "G":G,"nodos_grafo":1+rel_ancla.id_contrato.nunique()+rel_ancla.nit_proveedor.nunique(),
+      "aristas_grafo":rel_ancla.id_contrato.nunique()+rel_ancla[["id_contrato","nit_proveedor"]].drop_duplicates().shape[0],
+      "decision_429":correct_429,"CORRECT_429":correct_429,
+      "decision_indice":correct_indice,"CORRECT_INDICE":correct_indice,
+      "decision_limite":correct_limite,"CORRECT_LIMITE":correct_limite,
+      "decision_log":decisions,"informe_tecnico":report,
+      "respuesta_429":correct_d429,"CORRECT_DEFENSA_429":correct_d429,
+      "respuesta_cobertura":correct_cov,"CORRECT_DEFENSA_COBERTURA":correct_cov,
+      "defensa_grupal":defensa,
     }
 
     old=os.getcwd()
     try:
       os.chdir(td)
 
-      # Riesgo conocido: chunk sobrante debe verse claramente y restar E1.
-      extra=thr/"page_0999999.json"
+      # Cache de otra ventana: un chunk extra debe invalidar E1.4.
+      extra=cache_thr/"page_0999999.json"
       extra.write_text("[]",encoding="utf-8")
-      broken=V.evaluar(ns)
-      assert broken["score"] < 100
-      assert any((not c["ok"]) and c["stage"]=="E1" for c in broken["checks"])
+      broken_extra=V.evaluar(ns)
+      assert broken_extra["controles"]["E1_trazabilidad_calidad"]["ok"] is False, broken_extra
       extra.unlink()
-      print("V8 detecta chunk extra: OK")
+      print("TC1 V7 detecta chunk extra de otra ventana: OK")
 
+      # Descarga interrumpida: un .part debe invalidar E1.4.
+      bad_part=cache_thr/"page_0000000.json.part"
+      bad_part.write_text("descarga interrumpida",encoding="utf-8")
+      broken=V.evaluar(ns)
+      assert broken["controles"]["E1_trazabilidad_calidad"]["ok"] is False, broken
+      bad_part.unlink()
+      print("TC1 V7 detecta descarga incompleta: OK")
+
+      # Camino reparado: la misma solución debe alcanzar 100/100.
       manifest=V.evaluar(ns)
     finally:
       os.chdir(old)
 
-    assert manifest["validator_version"]==V.VERSION, manifest
-    assert manifest["score"]==100, manifest
-    assert manifest["rubric_scores"]=={"E1":15,"E2":30,"E3":20,"E4":25,"E5":10}
-    assert manifest["security_no_secrets"] is True
-    assert (out/"TC1_TEST.zip").exists()
-    print("TC1 V8 native-tools synthetic path 100/100: OK")
+    assert manifest["puntaje"]==100, manifest
+    assert manifest["maximo"]==100
+    assert manifest["version"]==V.VERSION
+    assert manifest["gates"]["security_no_secrets"]["ok"] is True
+    print("TC1 V7 student-path (duplicados + <1000 únicos + cache reanudable) 100/100: OK")
 
 if __name__=="__main__":
   main()
