@@ -85,11 +85,25 @@ def guardar_avance():
         print(f"Avance guardado en Drive: {destino.name}")
 
 
+def _captura_de_otra_etapa(item, c):
+    '''El control solo espera una captura que se sube en una celda de la etapa siguiente (E2.6 se sube en E3).'''
+    etapa = C.CAPTURA_DE_ITEM.get(item)
+    return (etapa is not None and CAPTURA_SE_SUBE_EN[etapa] != etapa
+            and c["puntos"] == C.NIVELES_VISUALES[item][1]
+            and not (_R()[etapa] / C.CAPTURAS[etapa]).exists())
+
+
 def checkpoint(etapa):
     m = V.evaluar(ESTADO["out"], escribir=False)
     print(f"CHECKPOINT {etapa} · {C.STAGE_NOMBRE[etapa]}")
+    pendientes = []
     for item, c in m["controles"].items():
         if c["etapa"] != etapa:
+            continue
+        if not c["ok"] and _captura_de_otra_etapa(item, c):
+            sube = CAPTURA_SE_SUBE_EN[C.CAPTURA_DE_ITEM[item]]
+            pendientes.append(sube)
+            print(f"  ⏳ {item} · {c['descripcion']} · {c['puntos']}/{c['maximo']} (pendiente: la captura se sube en {sube})")
             continue
         estado = "✓" if c["ok"] else "✗"
         nota = " (provisional: falta que el docente vea la captura)" if c["pendiente_visual"] else ""
@@ -98,8 +112,15 @@ def checkpoint(etapa):
             print(f"      Qué revisar: {c['feedback']}")
             print(f"      Encontrado: {c['evidencia']}")
     e = m["etapas"][etapa]
-    print(f"  → {e['puntos']}/{e['maximo']} puntos en {etapa}.", "Puedes pasar a la siguiente etapa." if e["puntos"] == e["maximo"]
-          else "Corrige lo marcado con ✗ antes de seguir (puedes seguir, pero esos puntos quedan en 0).")
+    faltan = [k for k, c in m["controles"].items() if c["etapa"] == etapa and not c["ok"]]
+    if e["puntos"] == e["maximo"]:
+        siguiente = "Puedes pasar a la siguiente etapa."
+    elif len(faltan) == len(pendientes):
+        siguiente = (f"Puedes pasar a {pendientes[0]}: lo único pendiente es la captura, que se sube allí "
+                     "y completa estos puntos.")
+    else:
+        siguiente = "Corrige lo marcado con ✗ antes de seguir (puedes seguir, pero esos puntos quedan en 0)."
+    print(f"  → {e['puntos']}/{e['maximo']} puntos en {etapa}.", siguiente)
     print(f"  Archivos de {etapa} en tu carpeta (irán en el ZIP):")
     for linea in _arbol_etapa(etapa):
         print("    " + linea)
@@ -199,9 +220,10 @@ def comparar_e1(paginas_seq, seg_seq, paginas_thr, seg_thr, workers):
     if any(bench["paginas_desde_cache"].values()):
         print("ℹ Algunas páginas salieron del caché: los tiempos no son un benchmark limpio, la equivalencia sí vale.")
     if not bench["mismo_hash"]:
-        print("✗ Los hashes no coinciden. Si SECOP cambió entre las dos corridas, repite limpio: ejecuta "
-              "secop.limpiar_cache(reglas.rutas(OUT)['pag_seq']) y secop.limpiar_cache(reglas.rutas(OUT)['pag_thr']) "
-              "y vuelve a descargar.")
+        print("✗ Los hashes no coinciden. Primero revisa el hueco de E1.3: cada futuro debe descargar la página de SU "
+              "offset (si todos bajan la misma página, las filas cuentan igual pero el hash no). Solo si el hueco está bien, "
+              "SECOP pudo cambiar entre las dos corridas: repite limpio con "
+              "secop.limpiar_cache(reglas.rutas(OUT)['pag_seq']) y secop.limpiar_cache(reglas.rutas(OUT)['pag_thr']).")
     return bench
 
 
@@ -271,8 +293,16 @@ def documentos_e2(grano):
     print(f"Filas de la API: {len(procesos):,} · procesos únicos: {unicos:,} · documentos con este grano: {len(docs):,}")
     print(f"id_proceso repetidos entre documentos: {repetidos:,}")
     if grano != C.GRANO_CORRECTO:
-        print("✗ Con este grano un mismo proceso aparece en varios documentos (o faltan procesos sin contrato): "
-              "la consulta B contaría el mismo proceso dos veces. Elige otro grano y vuelve a ejecutar.")
+        if repetidos:
+            print(f"✗ Con este grano {repetidos:,} procesos aparecen en más de un documento: la consulta B contaría el "
+                  "mismo proceso dos veces. Elige otro grano y vuelve a ejecutar.")
+        elif len(docs) != unicos:
+            print(f"✗ Este grano deja {len(docs):,} documentos para {unicos:,} procesos únicos: los procesos sin contrato "
+                  "quedan fuera. Elige otro grano y vuelve a ejecutar.")
+        else:
+            print("✗ En tu snapshot ninguna fila repite un proceso, así que este grano coincide hoy por casualidad: con otra "
+                  "descarga, un proceso con varias filas daría varios documentos. El grano debe garantizar un documento "
+                  "por proceso siempre. Elige otro grano y vuelve a ejecutar.")
         return docs
     rel = S.relaciones_contrato(procesos, contratos)
     R["E2"].mkdir(parents=True, exist_ok=True)
@@ -401,7 +431,19 @@ def pipeline_e3(texto):
         print(f"✓ E3/03_bandeja_historica.csv con {len(df)} filas")
     ref = [f["id_proceso"] for f in S.ref_bandeja(_docs())]
     print(f"Mismo resultado y orden que la referencia: {_marca(ids == ref)}")
-    return df
+    return vista_bandeja(df)
+
+
+def vista_bandeja(df):
+    '''La bandeja para leerla: posición desde 1 (la que pide E6.1), valores enteros y en millones.
+    El CSV conserva las columnas originales; esto solo cambia cómo se muestra.'''
+    vista = df.copy()
+    vista.index = pd.RangeIndex(1, len(vista) + 1, name="posición")
+    if "valor_contratos" in vista.columns:
+        valor = pd.to_numeric(vista["valor_contratos"], errors="coerce")
+        vista["valor_contratos"] = valor.round().astype("Int64")
+        vista["valor_millones"] = (valor / 1e6).round().astype("Int64")
+    return vista
 
 
 # ── E4 ────────────────────────────────────────────────────────────────────────
@@ -428,11 +470,19 @@ def cql_e4(particion, clustering, tipo_valor, keyspace):
     R["E4"].mkdir(parents=True, exist_ok=True)
     datos.to_csv(R["E4"] / "04_datos_cassandra.csv", index=False)
     (R["E4"] / "04_modelo_cassandra.cql").write_text(cql["script"], encoding="utf-8")
-    X.escribir_json(R["E4"] / "04_cassandra_evidence.json", {"diseno": diseno, "keyspace": keyspace, "tabla": C.tabla_cassandra(pareja),
-                                                             "anio": part[0], "departamento": part[1]})
+    nueva = {"diseno": diseno, "keyspace": keyspace, "tabla": C.tabla_cassandra(pareja), "anio": part[0], "departamento": part[1]}
+    previa = X.leer_json(R["E4"] / "04_cassandra_evidence.json", {}) or {}
+    if all(previa.get(k) == v for k, v in nueva.items()):
+        # Mismo diseño (por ejemplo, tras un reinicio de Colab): se conserva la salida de Astra que ya pegaste.
+        nueva = {**previa, **nueva}
+    elif previa.get("salida_consola"):
+        print("ℹ Cambiaste el diseño: pega otra vez los bloques en Astra y su salida en E4.2.")
+    X.escribir_json(R["E4"] / "04_cassandra_evidence.json", nueva)
     ESTADO.update({"cql": cql, "particion": part, "diseno": diseno})
+    esperado = S.ref_cassandra(datos, part)["count"]
     print(f"PRIMARY KEY ({cql['primary_key']}) · valor_contratos {tipo_valor}")
     print(f"Partición de prueba: anio = {part[0]} · departamento = '{part[1]}' ({len(datos)} filas en total para cargar)")
+    print(f"Filas en esa partición: {esperado}. Es el COUNT que debes ver en Astra si tu tabla no sobrescribe filas.")
     for aviso in S.consecuencia_diseno(diseno):
         print("⚠ Qué pasará en Astra:", aviso)
     print("Script guardado en E4/04_modelo_cassandra.cql. Pégalo en CQL Console por bloques:")
@@ -440,6 +490,9 @@ def cql_e4(particion, clustering, tipo_valor, keyspace):
 
 
 def bloques_cql(tamano=40):
+    if "cql" not in ESTADO:
+        raise RuntimeError("Vuelve a ejecutar la celda E4.1 con tus mismas decisiones: arma los bloques otra vez "
+                           "(Colab pudo reiniciarse) y conserva la salida de Astra que ya pegaste.")
     cql = ESTADO["cql"]
     bloques = ["\n".join([cql["script"].splitlines()[0], cql["create"]])]
     for i in range(0, len(cql["inserts"]), tamano):
@@ -501,9 +554,26 @@ def cargar_e5():
     return segunda
 
 
+def _aura():
+    if "aura" not in ESTADO:
+        raise RuntimeError("Ejecuta la celda E5.1 (Conectar Aura y cargar el grafo): Colab pudo reiniciarse. "
+                           "Volver a cargar no duplica nada (MERGE).")
+    return ESTADO["aura"]
+
+
+def _nit_ancla():
+    '''La ancla fijada en E5.2. Tras un reinicio de Colab se recupera de E5/05_neo4j_evidence.json.'''
+    if not ESTADO.get("nit_ancla"):
+        nit = (X.leer_json(_R()["E5"] / "05_neo4j_evidence.json", {}) or {}).get("nit_ancla")
+        if not nit:
+            raise RuntimeError("Todavía no tienes entidad ancla: ejecuta la celda E5.2.")
+        ESTADO["nit_ancla"] = str(nit)
+    return ESTADO["nit_ancla"]
+
+
 def ancla_e5():
     R = _R()
-    filas = X.ejecutar_lectura(ESTADO["aura"], S.CYPHER_ANCLA)
+    filas = X.ejecutar_lectura(_aura(), S.CYPHER_ANCLA)
     if not filas:
         raise RuntimeError("Aura no devolvió entidades: revisa que la carga terminó.")
     nit = str(filas[0]["nit"])
@@ -517,7 +587,7 @@ def ancla_e5():
     for f in filas:
         print(f"  {f['nit']} · {f['entidad'][:60]} · {f['proveedores_compartidos']} proveedores compartidos · {f['contratos']} contratos")
     print(f"Tu entidad ancla: NIT {nit}. Bajo ese NIT aparecen {nombres} nombres distintos en tus contratos.")
-    contexto = X.ejecutar_lectura(ESTADO["aura"], S.CYPHER_CONTEXTO, {"nit_ancla": nit})
+    contexto = X.ejecutar_lectura(_aura(), S.CYPHER_CONTEXTO, {"nit_ancla": nit})
     _guardar_e5(contexto=contexto)
     print("Consulta de contexto para pegar en Aura Query:\n")
     print(S.cypher_para_aura(S.CYPHER_CONTEXTO, nit))
@@ -548,14 +618,14 @@ def preparar_consulta_e5(nombre, consulta):
         _escribir_cypher(ESTADO["consultas"])
         print("Archivo Cypher guardado: E5/05_neo4j_consultas.cypher")
     print(f"Versión para pegar en Aura Query ({nombre}):\n")
-    print(S.cypher_para_aura(consulta, ESTADO["nit_ancla"]))
+    print(S.cypher_para_aura(consulta, _nit_ancla()))
     if nombre == "ranking" and "aura" in ESTADO:
         _revisar_ranking(consulta)
 
 
 def _revisar_ranking(consulta):
     '''Corre tu ranking en Aura y lo compara con la referencia calculada desde tu RAW: dice qué revisar, no la consulta.'''
-    nit = ESTADO["nit_ancla"]
+    nit = _nit_ancla()
     rel = ESTADO.get("rel")
     if rel is None:
         rel = S.relaciones_grafo(_raw()[1])
@@ -589,10 +659,10 @@ def _revisar_ranking(consulta):
             print("✗ Las filas son las correctas, pero el orden no: revisa el ORDER BY y sus dos desempates.")
         else:
             print("✗ Los conteos no coinciden con la referencia. ¿Contaste caminos en lugar de contratos o entidades distintas?")
-    print("Así deben empezar tus filas (calculadas desde tu RAW):")
-    for r in esperado_df.head(3).to_dict("records"):
-        print(f"  {r['nit_proveedor']} · {str(r['proveedor'])[:40]} · contratos_con_ancla {r['contratos_con_ancla']} · "
-              f"entidades_conectadas {r['entidades_conectadas']}")
+        if obtenido is not None:
+            # Dónde mirar, sin mostrar las filas esperadas: la respuesta sale de tu consulta, no de copiar la referencia.
+            k = next((i for i, (a, b) in enumerate(zip(obtenido, esperado), 1) if a != b), min(len(obtenido), len(esperado)) + 1)
+            print(f"  Tu ranking se aparta de la referencia desde la fila {k}: compara esa fila con lo que pide la tabla de E5.3b.")
     return False
 
 
@@ -609,12 +679,13 @@ def _escribir_cypher(consultas):
 
 
 def capturar_e5():
-    R, nit = _R(), ESTADO["nit_ancla"]
+    R, nit = _R(), _nit_ancla()
     consultas = ESTADO.get("consultas", {})
     if set(consultas) != {"compartidos", "ranking"}:
-        raise RuntimeError("Prepara primero las dos consultas (compartidos y ranking).")
-    compartidos = X.ejecutar_lectura(ESTADO["aura"], consultas["compartidos"], {"nit_ancla": nit})
-    ranking = X.ejecutar_lectura(ESTADO["aura"], consultas["ranking"], {"nit_ancla": nit})
+        raise RuntimeError("Ejecuta primero las celdas E5.3a y E5.3b (compartidos y ranking): tras un reinicio de Colab "
+                           "basta volver a ejecutarlas, tu código sigue en ellas.")
+    compartidos = X.ejecutar_lectura(_aura(), consultas["compartidos"], {"nit_ancla": nit})
+    ranking = X.ejecutar_lectura(_aura(), consultas["ranking"], {"nit_ancla": nit})
     top = ranking[0] if ranking else {}
     _guardar_e5(compartidos=compartidos, ranking=ranking, proveedor_top=top.get("nit_proveedor"),
                 contratos_con_ancla=top.get("contratos_con_ancla"), entidades_conectadas=top.get("entidades_conectadas"),
@@ -631,10 +702,16 @@ def capturar_e5():
 
 
 # ── E6 ────────────────────────────────────────────────────────────────────────
+def _de_la_lista(*pares):
+    '''Cada valor debe ser una opción de su lista: si la celda se editó a mano, se rechaza antes de guardar nada.'''
+    for valor, lista in pares:
+        if valor == C.SIN_SELECCION or valor not in lista:
+            raise ValueError("Elige una opción en cada lista desplegable: aquí no se escribe, se decide. "
+                             "Si editaste el texto de una opción, vuelve a elegirla en la lista.")
+
+
 def decisiones_e6(decision_429, segundos, indice, posicion, valor_millones, dato_faltante):
-    for v in (decision_429, indice, dato_faltante):
-        if v == C.SIN_SELECCION:
-            raise ValueError("Elige una opción en cada lista: aquí no se escribe, se decide.")
+    _de_la_lista((decision_429, C.E6_DECISION_429), (indice, C.E6_INDICE), (dato_faltante, C.E6_DATO_FALTANTE))
     R = _R()
     bench = X.leer_json(R["E1"] / "01_benchmark_threads.json", {}) or {}
     bandeja = _bandeja()[0]
@@ -655,9 +732,7 @@ def decisiones_e6(decision_429, segundos, indice, posicion, valor_millones, dato
 
 
 def microdefensa_e6(rango, causa, limite_red, entidades_puente):
-    for v in (rango, causa, limite_red):
-        if v == C.SIN_SELECCION:
-            raise ValueError("Elige una opción en cada lista: aquí no se escribe, se decide.")
+    _de_la_lista((rango, C.E6_RANGOS_COBERTURA), (causa, C.E6_CAUSA_COBERTURA), (limite_red, C.E6_LIMITE_RED))
     X.escribir_json(_R()["E6"] / "06_microdefensa_grupal.json", {
         "cobertura": {"rango": rango, "causa": causa},
         "red": {"limite": limite_red, "entidades_puente": int(entidades_puente)}})
@@ -733,6 +808,7 @@ def entregar(manifest):
                                                      " · descárgalo con Archivo → Descargar → .ipynb y súbelo a esta carpeta"))
     if ESTADO.get("drive"):
         print(f"Comparte SOLO esta carpeta. {X.carpeta_drive(ESTADO['drive'], pareja).name}/avance es tu copia de trabajo: no la compartas.")
-    print(f"\nHUELLA DE ENTREGA (SHA-256 de manifest_tc1.json): {huella}")
+    print(f"\nASUNTO DEL CORREO (cópialo tal cual): [BIG DATA 2026-2S][TC1] {' - '.join([pareja] + apellidos)}")
+    print(f"HUELLA DE ENTREGA (SHA-256 de manifest_tc1.json): {huella}")
     print("Copia esta huella en el correo. Si vuelves a validar, la huella cambia: envía siempre la última.")
     return destino, huella

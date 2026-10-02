@@ -54,8 +54,8 @@ import tc1_contrato as C  # noqa: E402
 
 SALIDA_DEFECTO = ROOT / ".local-docente" / "tc1" / "revisiones"
 ZIP_ESTUDIANTE = re.compile(r"^TC1_(?!BIGDATA_)[A-Z0-9]+\.zip$", re.I)
-COLUMNAS_CSV = ["pareja", "equipo", "codigos", "ventana", "estado", "puntaje", "nota_exacta", "nota_registrada", *C.STAGE_MAX,
-                "capturas", "discrepancias", "avisos", "huella_manifest", "descarga_utc", "revisado_utc"]
+COLUMNAS_CSV = ["pareja", "equipo", "clave", "codigos", "ventana", "estado", "puntaje", "nota_exacta", "nota_registrada",
+                *C.STAGE_MAX, "capturas", "discrepancias", "avisos", "huella_manifest", "descarga_utc", "revisado_utc"]
 
 
 def requisitos():
@@ -158,7 +158,7 @@ def revisar(entrega, sha_correo=None, capturas=None, salida=None):
              "estudiante": estudiante, "docente": docente, "diferencias": diferencias, "anterior": None,
              "ventana": docente.get("ventana"), "descarga_utc": acq.get("consultado_utc")}
         if salida:
-            r["capturas_extraidas"] = _guardar_capturas(paquete, Path(salida) / equipo(r))
+            r["capturas_extraidas"] = _guardar_capturas(paquete, carpeta_equipo(r, salida))
         return r
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
@@ -197,15 +197,32 @@ def codigos(r):
     return sorted(str(x.get("codigo", "")).strip() for x in _integrantes(r) if str(x.get("codigo", "")).strip())
 
 
+def clave(r):
+    '''Identidad interna del equipo: huella de sus códigos normalizados, sin importar el orden de los integrantes.
+    El nombre libre y los apellidos son solo el rótulo (equipo): dos equipos con el mismo rótulo no se pisan.
+    Sin códigos (por ejemplo, una entrega de otra versión), la identidad es el rótulo.'''
+    limpios = sorted({C.normalizar_codigo(c) for c in codigos(r)} - {""})
+    if not limpios:
+        return equipo(r)
+    return hashlib.sha256(("EQUIPO|" + "|".join(limpios)).encode("utf-8")).hexdigest()[:12]
+
+
+def _visto(x):
+    '''(clave, rótulo, ventana, descarga). Acepta también las tuplas viejas (rótulo, ventana, descarga).'''
+    return tuple(x) if len(x) == 4 else (x[0], x[0], x[1], x[2])
+
+
 def conflictos(resultados, registradas=()):
     '''Avisa cuando dos equipos distintos comparten ventana de datos (pasa por azar) o traen la misma
-    descarga (mismo instante de consulta a la API: paquete copiado). registradas: (equipo, ventana,
-    descarga_utc) que ya están en notas_tc1.csv, para comparar también con revisiones anteriores.'''
-    vistos = list(registradas) + [(equipo(r), r.get("ventana"), r.get("descarga_utc")) for r in resultados]
+    descarga (mismo instante de consulta a la API: paquete copiado). registradas: (clave, equipo, ventana,
+    descarga_utc) que ya están en notas_tc1.csv, para comparar también con revisiones anteriores.
+    Dos equipos son el mismo cuando tienen los mismos códigos, aunque cambie el orden de los integrantes.'''
+    vistos = [_visto(x) for x in registradas] + [(clave(r), equipo(r), r.get("ventana"), r.get("descarga_utc"))
+                                                 for r in resultados]
     for r in resultados:
-        e, v, d = equipo(r), r.get("ventana"), r.get("descarga_utc")
-        copia = sorted({x for x, _, dd in vistos if x != e and d and dd == d})
-        misma = sorted({x for x, vv, _ in vistos if x != e and v and vv == v})
+        k, v, d = clave(r), r.get("ventana"), r.get("descarga_utc")
+        copia = sorted({e for kk, e, _, dd in vistos if kk != k and d and dd == d})
+        misma = sorted({e for kk, e, vv, _ in vistos if kk != k and v and vv == v})
         if copia:
             r["avisos"].append(f"misma descarga que {', '.join(copia)} (mismo instante de consulta a la API): "
                                "posible paquete copiado")
@@ -284,24 +301,32 @@ def _filas_csv(salida):
     if not archivo.exists():
         return {}
     with open(archivo, newline="", encoding="utf-8") as fh:
-        return {f.get("equipo") or f["pareja"]: f for f in csv.DictReader(fh)}
+        return {f.get("clave") or f.get("equipo") or f["pareja"]: f for f in csv.DictReader(fh)}
 
 
 def registradas(salida):
-    '''(equipo, ventana, descarga_utc) ya guardados en notas_tc1.csv: para comparar con revisiones anteriores.'''
-    return [(clave, f.get("ventana"), f.get("descarga_utc")) for clave, f in _filas_csv(salida).items()] if salida else []
+    '''(clave, equipo, ventana, descarga_utc) ya guardados en notas_tc1.csv: para comparar con revisiones anteriores.'''
+    return [(k, f.get("equipo") or k, f.get("ventana"), f.get("descarga_utc"))
+            for k, f in _filas_csv(salida).items()] if salida else []
+
+
+def carpeta_equipo(r, salida):
+    '''Carpeta de revisión del equipo: su rótulo; si otro equipo (otros códigos) ya usa ese rótulo, se le agrega la clave.'''
+    rotulo, k = equipo(r), clave(r)
+    ocupada = any(f.get("equipo") == rotulo and (f.get("clave") or rotulo) != k for f in _filas_csv(salida).values())
+    return Path(salida) / (f"{rotulo}_{k[:6]}" if ocupada else rotulo)
 
 
 def guardar(r, salida):
     salida = Path(salida)
     salida.mkdir(parents=True, exist_ok=True)
-    d, pareja, clave = r["docente"], pareja_de(r), equipo(r)
-    carpeta = salida / clave
+    d, pareja, rotulo, k = r["docente"], pareja_de(r), equipo(r), clave(r)
+    carpeta = carpeta_equipo(r, salida)
     carpeta.mkdir(parents=True, exist_ok=True)
     (carpeta / "revision.json").write_text(json.dumps(r, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     if d:
         (carpeta / f"retroalimentacion_{pareja}.md").write_text(retroalimentacion(r), encoding="utf-8")
-    fila = {"pareja": pareja, "equipo": clave, "codigos": " ".join(codigos(r)), "ventana": r.get("ventana") or "",
+    fila = {"pareja": pareja, "equipo": rotulo, "clave": k, "codigos": " ".join(codigos(r)), "ventana": r.get("ventana") or "",
             "descarga_utc": r.get("descarga_utc") or "", "estado": estado(r),
             "revisado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "huella_manifest": r["huella_manifest"], "avisos": " | ".join(r["avisos"]),
@@ -311,12 +336,12 @@ def guardar(r, salida):
                      **{k: d["etapas"][k]["puntos"] for k in C.STAGE_MAX},
                      "capturas": "pendientes: " + " ".join(d["pendiente_confirmacion_visual"]) if d["pendiente_confirmacion_visual"] else "confirmadas o ausentes"})
     filas = _filas_csv(salida)
-    filas[clave] = fila
+    filas[k] = fila
     with open(salida / "notas_tc1.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=COLUMNAS_CSV)
         w.writeheader()
-        for k in sorted(filas):
-            w.writerow({c: filas[k].get(c, "") for c in COLUMNAS_CSV})
+        for clave_fila in sorted(filas, key=lambda x: (filas[x].get("equipo") or x, x)):
+            w.writerow({c: filas[clave_fila].get(c, "") for c in COLUMNAS_CSV})
     return carpeta
 
 
@@ -355,7 +380,7 @@ def main():
             resultados.append(revisar(entrega, None, {}, salida))
         except SystemExit as exc:
             ajenas.append((entrega.name, str(exc)))
-    conflictos(resultados, [x for x in registradas(salida) if x[0] not in {equipo(r) for r in resultados}])
+    conflictos(resultados, [x for x in registradas(salida) if x[0] not in {clave(r) for r in resultados}])
     print(f"{'Equipo':<30} {'Puntaje':<16} Estado")
     for r in resultados:
         if salida:

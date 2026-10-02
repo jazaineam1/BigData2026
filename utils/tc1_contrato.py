@@ -353,7 +353,7 @@ FEEDBACK = {
     "E4.3": "Pega la salida del SELECT que ejecutaste en Astra y sube E4_astra.png con la consulta y su resultado.",
     "E5.1": "Carga el grafo desde Colab, ejecuta en Aura la consulta de la ancla y captura los conteos.",
     "E5.2": "Revisa tu consulta de ranking: cuenta contratos y entidades distintos, no caminos, y ordena con los dos desempates.",
-    "E5.3": "El archivo Cypher necesita la carga con UNWIND $filas y MERGE, el contexto, los compartidos (otra entidad distinta de la ancla) y tu ranking con $nit_ancla, las cuatro columnas y un conteo con DISTINCT.",
+    "E5.3": "El archivo Cypher necesita la carga con UNWIND $filas y MERGE, el contexto, los compartidos (otra entidad distinta de la ancla) y tu ranking con $nit_ancla, las cuatro columnas y un conteo con DISTINCT. Si cambiaste el ranking después de E5.4, vuelve a ejecutar E5.4: el archivo debe ser la consulta que corrió en Aura.",
     "E5.4": "Ejecuta el ranking en Aura Query y sube E5_neo4j.png con la consulta y el resultado.",
     "E6.1": "Responde las tres decisiones mirando TUS salidas: segundos de tu descarga, el índice que creaste y el valor de la posición elegida.",
     "E6.2": "Ubica tu cobertura en su rango real y escoge el límite que tus datos sostienen.",
@@ -386,11 +386,12 @@ CHECKPOINTS = {
 }
 
 # ── E6: decisiones cerradas ancladas al resultado propio ──────────────────────
+# La opción correcta no ocupa siempre la misma posición: E6_CORRECTAS la nombra por su texto.
 E6_DECISION_429 = [
     SIN_SELECCION,
-    "Reducir workers y respetar Retry-After/backoff; descarto subir workers porque el 429 indica presión sobre la API",
     "Subir workers para terminar antes; descarto reintentar porque alarga la descarga",
     "Desactivar los reintentos para ver el error rápido; descarto el backoff porque no cambia el resultado",
+    "Reducir workers y respetar Retry-After/backoff; descarto subir workers porque el 429 indica presión sobre la API",
     "Aceptar las filas que alcanzaron a llegar; descarto comparar el hash porque la descarga ya es concurrente",
 ]
 E6_INDICE = [
@@ -410,8 +411,8 @@ E6_INDICE_CAMPO = {
 }
 E6_DATO_FALTANTE = [
     SIN_SELECCION,
-    "Un precio de referencia del mercado para el mismo objeto (estudio de mercado o contratos comparables)",
     "Más contratos de la misma entidad dentro de la bandeja",
+    "Un precio de referencia del mercado para el mismo objeto (estudio de mercado o contratos comparables)",
     "Un índice adicional en Atlas sobre valor_total",
     "La captura de pantalla de Atlas con la bandeja",
 ]
@@ -419,23 +420,25 @@ E6_RANGOS_COBERTURA = [SIN_SELECCION, "menos de 5 %", "entre 5 % y 10 %", "entre
                        "entre 20 % y 40 %", "más de 40 %"]
 E6_CAUSA_COBERTURA = [
     SIN_SELECCION,
-    "Mis procesos son de pocos días y casi todos de prestación de servicios con personas; mis contratos son solo con empresas y de otras fechas",
     "La descarga concurrente perdió filas de contratos",
     "El cruce debía hacerse por id_del_proceso y no por id_del_portafolio",
     "SECOP borra los contratos de los procesos recientes",
+    "Mis procesos son de pocos días y casi todos de prestación de servicios con personas; mis contratos son solo con empresas y de otras fechas",
 ]
+# «Qué NO permite concluir la red»: una sola opción es un límite. Las otras tres son cosas que la red
+# SÍ muestra (lo que se lee en el ranking) o la conclusión que no se puede sacar presentada como demostrada.
 E6_LIMITE_RED = [
     SIN_SELECCION,
-    "Que la entidad ancla actúe de forma anómala: su NIT puede agrupar varias sedes y solo veo contratos con empresas durante pocos días",
+    "Que el primer proveedor de mi ranking contrata con al menos tantas entidades distintas como el segundo",
     "Nada: la red demuestra que los proveedores puente favorecen a la entidad ancla",
-    "Que los proveedores puente estén coludidos entre sí",
-    "Que la entidad con más proveedores compartidos sea la más irregular del país",
+    "Que la entidad ancla actúe de forma anómala: su NIT puede agrupar varias sedes y solo veo contratos con empresas durante pocos días",
+    "Qué proveedores de la entidad ancla también contratan con otras entidades de mi snapshot",
 ]
 E6_CORRECTAS = {
-    "decision_429": E6_DECISION_429[1],
-    "dato_faltante": E6_DATO_FALTANTE[1],
-    "causa_cobertura": E6_CAUSA_COBERTURA[1],
-    "limite_red": E6_LIMITE_RED[1],
+    "decision_429": E6_DECISION_429[3],
+    "dato_faltante": E6_DATO_FALTANTE[2],
+    "causa_cobertura": E6_CAUSA_COBERTURA[4],
+    "limite_red": E6_LIMITE_RED[3],
 }
 
 

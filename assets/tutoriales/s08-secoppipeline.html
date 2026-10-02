@@ -54,7 +54,7 @@ button{font:inherit;padding:6px 12px;border-radius:8px;border:1px solid var(--li
 <table>
 <thead><tr><th>Servicio</th><th>Qué revisar</th><th>Si falla</th></tr></thead>
 <tbody>
-<tr><td>MongoDB Atlas (M0)</td><td>clúster activo, usuario de base de datos, Network Access con tu IP</td><td><a href="atlas-guia-conexion.html">tutorial de conexión (S04)</a></td></tr>
+<tr><td>MongoDB Atlas (M0)</td><td>clúster activo, usuario de base de datos, Network Access con <code>0.0.0.0/0</code> (Colab no tiene IP fija: tu IP de casa no sirve)</td><td>si dice <i>Paused</i>, pulsa <i>Resume</i>; si la regla de S04 venció o la borraste, vuelve a agregarla (<a href="atlas-guia-conexion.html">tutorial de conexión S04</a>)</td></tr>
 <tr><td>Astra DB (Serverless non-vector)</td><td>la base dice <b>Active</b>; keyspace <code>compras_claras</code></td><td>tras 48 h sin uso queda <i>Hibernated</i> y se borra a los 30 días: <i>Resume</i> o crea otra (<a href="astra-cassandra-paso-a-paso-v3.html">tutorial S05</a>)</td></tr>
 <tr><td>Neo4j Aura Free</td><td>la instancia dice <b>Running</b>; tienes la contraseña</td><td>se pausa tras 72 h y se borra si sigue pausada 30 días (<a href="neo4j-aura-s06-paso-a-paso.html">tutorial S06</a>)</td></tr>
 </tbody>

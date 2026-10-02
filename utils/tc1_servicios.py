@@ -142,8 +142,9 @@ def campos_de(obj, prefijo=""):
 DIAGNOSTICO_ATLAS = [
     ("authentication failed", "usuario o contraseña del usuario de base de datos (Database Access en Atlas)"),
     ("bad auth", "usuario o contraseña del usuario de base de datos (Database Access en Atlas)"),
-    ("timed out", "Network Access: tu IP o 0.0.0.0/0 debe estar permitida en Atlas"),
-    ("serverselection", "Network Access o conectividad; espera 1 minuto si acabas de cambiar la IP permitida"),
+    ("timed out", "Network Access: agrega 0.0.0.0/0 en Atlas (Colab no tiene IP fija, así que tu IP de casa no sirve); "
+                  "si la regla de S04 venció o la borraste, vuelve a agregarla. Si el clúster dice Paused, pulsa Resume"),
+    ("serverselection", "Network Access (0.0.0.0/0) o el clúster en pausa (Resume); espera 1 minuto si acabas de cambiarlo"),
     ("dns", "la URI está incompleta: cópiala completa desde Connect → Drivers"),
     ("invalid uri", "la URI está mal formada: debe empezar por mongodb+srv://"),
 ]
@@ -209,9 +210,13 @@ def ensayar_estrategia(db, pareja, documentos, estrategia):
 
 
 def cargar_oficial(db, pareja, documentos, estrategia, server_version):
-    '''Carga oficial: vacía la colección (conserva sus índices) y carga dos veces.'''
+    '''Carga oficial: vacía la colección (conserva los índices que creaste tú) y carga dos veces.'''
     col = db[C.coleccion_oficial(pareja)]
     col.delete_many({})
+    # El índice que deja la estrategia «insert_many con índice único» es de la prueba, no tuyo: si quedara,
+    # Atlas diría en E2.3 que ese índice ya existe.
+    if "id_proceso_unico" in col.index_information():
+        col.drop_index("id_proceso_unico")
     error_1 = _aplicar(col, documentos, estrategia)
     n1 = col.count_documents({})
     error_2 = _aplicar(col, documentos, estrategia)
@@ -331,7 +336,9 @@ _ESCRITURA = re.compile(r"\b(CREATE|MERGE|DELETE|DETACH|SET|REMOVE|DROP|LOAD\s+C
 
 def es_solo_lectura(consulta):
     sin_textos = re.sub(r"'[^']*'|\"[^\"]*\"", "''", str(consulta))
-    return not _ESCRITURA.search(sin_textos)
+    # Un comentario no se ejecuta: «// aquí no hay CREATE» no convierte la consulta en escritura.
+    sin_comentarios = re.sub(r"//[^\n]*", " ", re.sub(r"/\*.*?\*/", " ", sin_textos, flags=re.S))
+    return not _ESCRITURA.search(sin_comentarios)
 
 
 def ejecutar_lectura(driver, consulta, parametros=None):
@@ -408,13 +415,24 @@ def validar_captura(path):
 def guardar_captura(out, etapa, ruta=None):
     '''Sube (Colab) o copia (local) la captura y la guarda con el nombre exigido.'''
     nombre = C.CAPTURAS[etapa]
+    respaldo = Path("/content") / nombre
     if ruta:
         contenido = Path(ruta).read_bytes()
+    elif EN_COLAB and respaldo.exists():
+        # Ruta de respaldo: la imagen se arrastró al panel de archivos de Colab con el nombre exigido.
+        contenido = respaldo.read_bytes()
+        print(f"Uso {respaldo} (la imagen del panel 📁). Para subir otra, borra ese archivo del panel y vuelve a ejecutar.")
     elif EN_COLAB:
         from google.colab import files
-        subido = files.upload()
+        try:
+            subido = files.upload()
+        except Exception as exc:
+            raise RuntimeError(f"El botón de subir falló ({type(exc).__name__}; pasa cuando el navegador bloquea las cookies "
+                               f"de terceros). Arrastra tu imagen al panel 📁 de la izquierda, renómbrala {nombre} "
+                               "y vuelve a ejecutar esta celda.") from None
         if not subido:
-            raise RuntimeError("No se subió ningún archivo.")
+            raise RuntimeError(f"No se subió ningún archivo. Si el botón no aparece, arrastra tu imagen al panel 📁 de la "
+                               f"izquierda, renómbrala {nombre} y vuelve a ejecutar esta celda.")
         contenido = next(iter(subido.values()))
     else:
         raise RuntimeError("Fuera de Colab indica la ruta del archivo: guardar_captura(OUT, etapa, ruta='...').")

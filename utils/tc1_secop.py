@@ -17,6 +17,7 @@ import math
 import os
 import re
 import shutil
+import threading
 import time
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -103,7 +104,9 @@ def _rutas_pagina(cache_dir, offset):
 
 def _escritura_atomica(path, contenido: bytes):
     path = Path(path)
-    tmp = path.with_suffix(path.suffix + ".part")
+    # Un borrador por hilo: si dos hilos escriben la misma página (por ejemplo, con el hueco de E1.3 mal
+    # completado), no chocan en el mismo .part y el error que se ve es el del hash, no uno de Windows.
+    tmp = path.with_name(f"{path.name}.{threading.get_ident()}.part")
     tmp.write_bytes(contenido)
     os.replace(tmp, path)
 

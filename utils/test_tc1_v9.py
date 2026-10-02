@@ -145,6 +145,11 @@ def puntos(m, item):
     return m["controles"][item]["puntos"]
 
 
+def pd_bandeja(out):
+    import pandas as pd
+    return pd.read_csv(C.rutas(out)["E3"] / "03_bandeja_historica.csv", dtype={"id_proceso": str})
+
+
 def main():
     trabajo = Path(tempfile.mkdtemp(prefix="tc1_v9_"))
     atexit.register(shutil.rmtree, trabajo, True)  # también si una prueba falla o el proceso sale antes
@@ -336,6 +341,99 @@ def main():
     m2 = variante(out, "e6", lambda R, o: editar_json(R["E6"] / "06_decision_log.json",
                                                      lambda d: d["decisiones"][2].update(valor_millones=d["decisiones"][2]["valor_millones"] + 50)))
     caso("decisión con un valor que no es el propio pierde puntos", puntos(m2, "E6.1") == 3)
+
+    # Auditoría V9: respuestas válidas que no deben perder puntos, y archivos incoherentes que sí
+    def dos_indices(R, o):
+        def f(d):
+            d["indices"].append({"nombre": "proceso.precio_base_1", "clave": [["proceso.precio_base", 1]], "unico": False})
+        editar_json(R["E2"] / "02_atlas_evidence.json", f)
+        editar_json(R["E6"] / "06_decision_log.json", lambda d: d["decisiones"][1].update(seleccion=C.E6_INDICE[3]))
+    m2 = variante(out, "dos_indices", dos_indices)
+    caso("con dos índices alineados vale defender el segundo (no depende del orden de creación)",
+         puntos(m2, "E6.1") == 5 and puntos(m2, "E2.3") == 4, m2["controles"]["E6.1"]["evidencia"])
+
+    def cypher_formato(R, o):
+        p = R["E5"] / "05_neo4j_consultas.cypher"
+        t = p.read_text(encoding="utf-8").replace("count(DISTINCT otra) AS entidades_conectadas",
+                                                  "count (DISTINCT otra) AS `entidades_conectadas` // conteo sin repetir")
+        p.write_text(t, encoding="utf-8")
+        editar_json(R["E5"] / "05_neo4j_evidence.json",
+                    lambda d: d["consultas"].update(ranking=V.secciones_cypher(t)["ranking"]))
+    m2 = variante(out, "cypher_formato", cypher_formato)
+    caso("un ranking equivalente con espacio, acentos graves y comentario conserva E5.3", puntos(m2, "E5.3") == 5,
+         m2["controles"]["E5.3"]["evidencia"])
+
+    def cypher_distinto(R, o):
+        p = R["E5"] / "05_neo4j_consultas.cypher"
+        p.write_text(p.read_text(encoding="utf-8").replace("nit_proveedor ASC", "nit_proveedor DESC"), encoding="utf-8")
+    m2 = variante(out, "cypher_distinto", cypher_distinto)
+    caso("un .cypher distinto del ranking que se ejecutó en Aura pierde E5.3", puntos(m2, "E5.3") == 0)
+
+    def cypher_sin_aura(R, o):
+        editar_json(R["E5"] / "05_neo4j_evidence.json", lambda d: d.pop("consultas", None))
+    m2 = variante(out, "cypher_sin_aura", cypher_sin_aura)
+    caso("sin ejecución en Aura, el archivo Cypher se califica solo (E5.3)", puntos(m2, "E5.3") == 5)
+
+    caso("E6.2: una sola opción es un límite de la red y ninguna lista pone la correcta siempre primero",
+         C.E6_CORRECTAS["limite_red"] in C.E6_LIMITE_RED and len(set(C.E6_LIMITE_RED)) == len(C.E6_LIMITE_RED)
+         and not any(x in " ".join(C.E6_LIMITE_RED) for x in ("coludidos", "más irregular"))
+         and len({lista.index(C.E6_CORRECTAS[k]) for k, lista in (("decision_429", C.E6_DECISION_429),
+                                                                    ("dato_faltante", C.E6_DATO_FALTANTE),
+                                                                    ("causa_cobertura", C.E6_CAUSA_COBERTURA),
+                                                                    ("limite_red", C.E6_LIMITE_RED))}) > 1)
+    try:
+        T.microdefensa_e6(C.E6_RANGOS_COBERTURA[1], "texto que el estudiante escribió", C.E6_LIMITE_RED[1], 3)
+        caso("una celda de decisión editada a mano rechaza el texto libre", False)
+    except ValueError:
+        caso("una celda de decisión editada a mano rechaza el texto libre", True)
+    caso("un comentario con CREATE no convierte una lectura en escritura",
+         X.es_solo_lectura("MATCH (n) // aquí no hay CREATE\nRETURN n") and not X.es_solo_lectura("MATCH (n) DETACH DELETE n"))
+
+    # Reinicio de Colab: la ancla se recupera de los archivos y repetir E4.1 no borra la salida de Astra
+    T.ESTADO.clear()
+    T.iniciar("P03", [("Estudiante de prueba", CODIGO, "Prueba")], "No", base=trabajo)
+    caso("tras un reinicio, E5 recupera la ancla desde 05_neo4j_evidence.json",
+         T._nit_ancla() == json.loads((C.rutas(out)["E5"] / "05_neo4j_evidence.json").read_text(encoding="utf-8"))["nit_ancla"])
+    try:
+        T.bloques_cql()
+        caso("tras un reinicio, bloques_cql dice qué celda volver a ejecutar", False)
+    except RuntimeError as exc:
+        caso("tras un reinicio, bloques_cql dice qué celda volver a ejecutar", "E4.1" in str(exc))
+    import contextlib as _c4
+    import io as _i4
+    with _c4.redirect_stdout(_i4.StringIO()):
+        T.cql_e4(C.DISENO_CORRECTO["particion"], C.DISENO_CORRECTO["clustering"], "decimal", C.KEYSPACE_DEFECTO)
+    m2 = V.evaluar(out, escribir=False)
+    caso("repetir E4.1 con el mismo diseño conserva la salida de Astra (E4.1 y E4.3)",
+         puntos(m2, "E4.1") == 5 and puntos(m2, "E4.3") == 4, m2["controles"]["E4.1"]["evidencia"])
+
+    # Checkpoint E2: si solo falta la captura que se sube en E3, dice que se puede pasar
+    sin_captura = Path(tempfile.mkdtemp(prefix="tc1_e2cap_", dir=trabajo)) / out.name
+    shutil.copytree(out, sin_captura)
+    (C.rutas(sin_captura)["E2"] / C.CAPTURAS["E2"]).unlink()
+    T.ESTADO["out"] = sin_captura
+    texto = _i4.StringIO()
+    with _c4.redirect_stdout(texto):
+        T.checkpoint("E2")
+    T.ESTADO["out"] = out
+    caso("el checkpoint E2 sin la captura (se sube en E3) dice que se puede pasar a E3",
+         "Puedes pasar a E3" in texto.getvalue() and "pendiente: la captura se sube en E3" in texto.getvalue(), texto.getvalue()[-500:])
+    caso("la bandeja se muestra con posición desde 1 y valor en millones",
+         list(T.vista_bandeja(pd_bandeja(out)).index[:2]) == [1, 2] and "valor_millones" in T.vista_bandeja(pd_bandeja(out)).columns)
+
+    # Revalidador docente: la identidad son los códigos, no el nombre ni el orden de los integrantes
+    def revision_dos(pareja, integrantes, descarga):
+        return {"docente": {"pareja_id": pareja, "integrantes": [{"apellido": a, "codigo": c} for a, c in integrantes]},
+                "estudiante": {}, "avisos": [], "ventana": C.ventana_de([c for _, c in integrantes]), "descarga_utc": descarga}
+    uno = revision_dos("X", [("Uno", "20230001"), ("Dos", "20230002")], "t1")
+    invertido = revision_dos("X", [("Dos", "20230002"), ("Uno", "20230001")], "t1")
+    TV.conflictos([uno, invertido])
+    caso("el mismo equipo con los integrantes en otro orden no recibe una falsa sospecha de copia",
+         TV.clave(uno) == TV.clave(invertido) and not uno["avisos"] and not invertido["avisos"], (uno["avisos"], invertido["avisos"]))
+    gemelo_a = revision_dos("1", [("Prueba", "20231111")], "t5")
+    gemelo_b = revision_dos("1", [("Prueba", "20232222")], "t6")
+    caso("dos equipos con el mismo nombre y apellido pero otros códigos tienen claves distintas",
+         TV.equipo(gemelo_a) == TV.equipo(gemelo_b) and TV.clave(gemelo_a) != TV.clave(gemelo_b))
 
     # Lectores de lo que el estudiante pega
     caso("lee JSON estricto", X.parse_consulta(FILTRO_A) == json.loads(FILTRO_A))

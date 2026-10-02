@@ -163,8 +163,8 @@ def main():
                 intento = nbformat.v4.new_code_cell(f"taller.preparar_consulta_e5('ranking', {mal!r})")
                 client.execute_cell(intento, -1)
                 texto = "".join(o.get("text", "") for o in intento.outputs if o.get("output_type") == "stream")
-                assert "✗ " in texto and "Así deben empezar tus filas" in texto, texto[-800:]
-                print("E5.3b: un ranking que no descarta la ancla recibe una pista y las filas esperadas.")
+                assert "✗ " in texto and "se aparta de la referencia desde la fila" in texto, texto[-800:]
+                print("E5.3b: un ranking que no descarta la ancla recibe una pista y la fila donde se aparta, sin las filas esperadas.")
             import time
             t0 = time.perf_counter()
             try:

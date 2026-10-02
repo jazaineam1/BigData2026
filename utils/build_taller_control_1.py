@@ -58,7 +58,8 @@ def rango_datos():
     v = json.loads((ROOT / "Datos" / "tc1_ventanas_resumen.json").read_text(encoding="utf-8"))["ventanas"].values()
     rango = lambda xs: (min(xs), max(xs))
     return {"cruzan": rango([x["matched_processes"] for x in v]),
-            "cobertura": tuple(round(100 * c) for c in rango([x["join_coverage"] for x in v])),
+            # Con un decimal: redondear a entero convertía un 10,45 % real en «10 %», que en E6.2 cae en otro rango.
+            "cobertura": tuple(f"{100 * c:.1f}".replace(".", ",") for c in rango([x["join_coverage"] for x in v])),
             "repetidas": rango([x["procesos"]["descargados"] - x["procesos"]["unicos"] for x in v]),
             "procesos_api": rango([x["procesos"]["total_api"] for x in v]),
             "contratos_api": rango([x["contratos"]["total_api"] for x in v])}
@@ -99,7 +100,8 @@ def arbol_zip():
 def celda_infraestructura():
     lineas = ["#@title Preparar el entorno · EJECUTA una vez por sesión · instala dos librerías y carga la infraestructura provista (no se evalúa)",
               "# Código legible y versionado: " + REPO + "tc1_contrato.py (y los demás utils/tc1_*.py).",
-              "# Aquí va comprimido para que un solo Ctrl+Enter deje todo listo; el SHA-256 garantiza que es la versión oficial.",
+              "# Aquí va comprimido para que un solo Ctrl+Enter deje todo listo; el SHA-256 comprueba que el bloque no se dañó al copiarlo.",
+              "# El docente no confía en esta celda: recalcula tu ZIP con su propia copia del validador.",
               "import base64, hashlib, importlib, subprocess, sys, zlib",
               "from pathlib import Path",
               "subprocess.run([sys.executable, '-m', 'pip', '-q', 'install', 'pymongo>=4.6,<5', 'neo4j>=5,<7'], check=False)",
@@ -209,9 +211,9 @@ Con captura: resultado correcto + captura válida = puntaje completo; resultado 
 
 | Servicio | Lo usas en | Revisa hoy | Si no está |
 |---|---|---|---|
-| MongoDB Atlas (M0) | E2, E3 | clúster activo, usuario de base de datos, Network Access con tu IP o 0.0.0.0/0 | [tutorial de conexión de S04](https://jazaineam1.github.io/BigData2026/assets/tutoriales/atlas-guia-conexion.html) |
+| MongoDB Atlas (M0) | E2, E3 | clúster activo, usuario de base de datos y Network Access con **0.0.0.0/0**: Colab no tiene IP fija, así que tu IP de casa no sirve | Atlas **pausa** los clústeres gratuitos tras 30 días sin conexiones: si dice *Paused*, pulsa *Resume*. Si la regla 0.0.0.0/0 de S04 venció o la borraste, vuelve a agregarla ([tutorial de conexión de S04](https://jazaineam1.github.io/BigData2026/assets/tutoriales/atlas-guia-conexion.html)) |
 | Astra DB (Serverless non-vector) | E4 | la base está **Active** y tiene el keyspace `compras_claras` | Astra pone en *Hibernated* las bases gratuitas tras 48 h sin uso y **las borra a los 30 días**: pulsa *Resume* o crea una nueva ([tutorial S05](https://jazaineam1.github.io/BigData2026/assets/tutoriales/astra-cassandra-paso-a-paso-v3.html)) |
-| Neo4j Aura Free | E5 | la instancia está **Running** y tienes su contraseña | Aura pausa la instancia tras 72 h sin uso y **la borra si sigue pausada 30 días**: reanúdala o crea otra ([tutorial S06](https://jazaineam1.github.io/BigData2026/assets/tutoriales/neo4j-aura-s06-paso-a-paso.html)) |
+| Neo4j Aura Free | E5 | la instancia está **Running** y tienes su contraseña | Aura pausa la instancia tras 72 h sin uso y **la borra si sigue pausada 30 días**: reanúdala o crea otra ([tutorial S06](https://jazaineam1.github.io/BigData2026/assets/tutoriales/neo4j-aura-s06-paso-a-paso.html)). Si creas otra, guarda en ese momento la URI, el usuario y la contraseña (descarga el archivo de credenciales que ofrece Aura): es lo que pide E5.1 |
 
 **OJO.** Si una plataforma falla de verdad (caída del servicio o cuenta bloqueada), escríbelo en el correo con una captura del error y el docente decide la excepción. Lo que no depende del servicio se califica igual: por ejemplo, el diseño de tu `.cql` (E4.2) y tu archivo Cypher (E5.3).
 
@@ -222,7 +224,7 @@ Con captura: resultado correcto + captura válida = puntaje completo; resultado 
 | cliente HTTP con reintentos, caché firmado por páginas, hash canónico | la descarga secuencial y la concurrente con `ThreadPoolExecutor` (un hueco) |
 | carga técnica a Atlas y a Aura (Atlas no importa archivos desde el navegador; S04 cargó igual) | el grano documental, la estrategia de carga, los índices, el filtro A, el orden B y el pipeline E3, **en Atlas** |
 | el script CQL que se genera desde tus decisiones | la partición, el clustering y el tipo de la tabla; ejecutarla **en Astra** |
-| el validador y el empaquetado | dos consultas Cypher (un hueco cada una) ejecutadas **en Aura**; las decisiones de E6 |
+| el validador y el empaquetado | la consulta Cypher de compartidos (un hueco) y la de ranking (la escribes completa), ejecutadas **en Aura**; las decisiones de E6 |
 
 ### Cómo leer cada celda
 
@@ -260,7 +262,7 @@ La celda siguiente carga cinco módulos. En el cuaderno los verás con estos nom
 | Aura: nodos `Entidad`, `Contrato`, `Proveedor` | el grafo de tus contratos | E5.1 carga; tú consultas |
 </details>
 
-**Regla de avance.** No avances porque existe una celda siguiente: avanza cuando el checkpoint de la etapa esté en ✓.'''),
+**Regla de avance.** No avances porque existe una celda siguiente: avanza cuando el checkpoint de la etapa esté en ✓, o cuando te diga que puedes pasar porque lo único pendiente es una captura que se sube en la etapa siguiente. Si E3 no queda completa, E4 trabaja con una bandeja de referencia: pierdes los puntos de E3, no los de E4.'''),
         celda_infraestructura(),
         md(f'''## 0 · Identidad de la pareja
 
@@ -270,9 +272,11 @@ La celda siguiente carga cinco módulos. En el cuaderno los verás con estos nom
 | `CODIGO_1` · `CODIGO_2` | el código de cada integrante | fija tu **ventana de datos** de SECOP |
 | `APELLIDO_1` · `APELLIDO_2` | el primer apellido de cada integrante | nombra tu carpeta de entrega |
 
-**Tu ventana de datos sale de los códigos, no del nombre.** Dos parejas que escriban el mismo nombre (por ejemplo, «1») no comparten datos. Cada ventana empieza el día 1 de un mes entre {mes_es(C.ORDEN_VENTANAS[0])} y {mes_es(C.ORDEN_VENTANAS[-1])} ({len(C.VENTANAS)} posibles, todas verificadas); la celda te dice cuál te tocó y los nombres exactos que usarás en Atlas y Astra.
+**Tu ventana de datos sale de los códigos, no del nombre.** Escribir el mismo nombre que otra pareja (por ejemplo, «1») no les da los mismos datos. Como hay {len(C.VENTANAS)} ventanas, dos parejas distintas pueden coincidir por azar en la misma; aun así, tus decisiones de E6 y tus capturas salen de tu trabajo. Cada ventana empieza el día 1 de un mes entre {mes_es(C.ORDEN_VENTANAS[0])} y {mes_es(C.ORDEN_VENTANAS[-1])} ({len(C.VENTANAS)} posibles, todas verificadas); la celda te dice cuál te tocó y los nombres exactos que usarás en Atlas y Astra.
 
 **OJO.** Escribe el mismo nombre y los mismos códigos en cada sesión. Si cambias un código, cambia tu ventana y la descarga de E1 deja de ser tuya (la celda te avisa); si cambias el nombre, el cuaderno empieza una carpeta nueva.
+
+**Quién ejecuta.** Un solo integrante ejecuta el cuaderno, con **sus** cuentas de Google, Atlas, Astra y Aura; el otro trabaja a su lado. El avance en Drive queda en la cuenta de Google de quien ejecuta: si cambian de computador, sigue ejecutando la misma persona.
 
 Si trabajas solo, deja vacíos los tres campos del integrante 2 (nombre, código y apellido): tu ventana sale de tu código y tu carpeta de entrega lleva solo tu apellido. Los nombres y códigos solo viajan en tu entrega privada al docente; no los publiques. Guardar el avance en Drive deja una copia de tu carpeta de trabajo tras cada checkpoint: si Colab se reinicia, al volver a ejecutar esta celda recuperas lo hecho.'''),
         code(f'''#@title 0 · ELIGE · Identidad de la pareja {{ display-mode: "form" }}
@@ -360,6 +364,10 @@ pd.DataFrame(muestra)[["id_del_proceso", "entidad", "fecha_de_publicacion_del", 
                 "Lanzar la descarga completa sin probar la consulta. Un nombre de columna mal escrito no se corrige reintentando."),
         code('''#@title E1.2a · EJECUTA · Preflight: cuántos registros hay y qué páginas pedir { display-mode: "form" }
 pagina_secuencial, pagina_concurrente, OFFSETS, N_PROCESOS = taller.preflight_e1()'''),
+        lectura("La primera cifra de cada línea es lo que existe en tu ventana; la segunda, lo que vas a descargar (los primeros registros, en el orden de la consulta).",
+                "Cuántas páginas pedirás y que tu ventana tiene más registros de los que descargas.",
+                "Que tu snapshot represente la ventana completa: descargas los primeros N de M registros, ordenados por fecha. Ahí nace el límite de cobertura que defenderás en E6.2.",
+                "Leer el total de la ventana como el tamaño de tu snapshot."),
         md('''### E1.2 · Qué pasa con cada página que descargas
 
 | Idea | Qué es | Ejemplo para recordarla | En tu taller |
@@ -432,7 +440,7 @@ Pedir páginas a una API es trabajo **I/O-bound**: casi todo el tiempo Python es
 
 **HAZ ESTO AHORA.** En la celda siguiente reemplaza `____` por el dato que identifica qué página debe descargar cada futuro.
 
-**Error más probable:** `NameError: name '____' is not defined` significa que aún no completaste el hueco. Si pones otro valor, el checkpoint mostrará offsets distintos.
+**Error más probable:** `NameError: name '____' is not defined` significa que aún no completaste el hueco. Si pones otro valor (por ejemplo, `0`), verás *Mismos offsets ✓ · Mismas filas ✓ · Mismo hash ✗*: los offsets salen del diccionario y siempre coinciden, pero todos los futuros bajaron la misma página. No es que SECOP haya cambiado: revisa el hueco.
 
 <details><summary>Si te atascas</summary>Cada futuro descarga <b>su</b> página: el argumento que falta es <code>offset</code>.</details>'''),
         code('''# E1.3 · COMPLETA · Descarga concurrente (un hueco)
@@ -534,7 +542,7 @@ GRANO = "{C.SIN_SELECCION}" #@param {opciones([C.SIN_SELECCION] + C.GRANOS)}
 DOCUMENTOS = taller.documentos_e2(GRANO)'''),
         lectura("Compara tres números: filas de la API, procesos únicos y documentos generados. Si coinciden los dos últimos y no hay identificadores repetidos, cada proceso es un documento.",
                 "El grano define qué cuenta como «uno»: con un documento por fila, una consulta de los 10 procesos de mayor valor podría repetir el mismo proceso.",
-                "Que los valores sean correctos: el grano solo garantiza que no se duplica la identidad.",
+                "Que los valores sean correctos: el grano solo garantiza que no se duplica la identidad. Para eso falta comparar cada valor con la página RAW de la que salió.",
                 "Elegir el grano por comodidad («así viene de la API») y no por la pregunta que el documento debe responder."),
         md('''### E2.2 · Conectar Atlas y cargar sin duplicar
 
@@ -546,7 +554,7 @@ La carga se hace desde Colab porque el Data Explorer de Atlas no importa archivo
 |---|---|
 | `insert_many` | agrega todos los documentos como nuevos |
 | `insert_many` con índice único en `id_proceso` | agrega todos; la base rechaza los que repiten un `id_proceso` ya guardado |
-| **upsert** por `id_proceso` (`UpdateOne` + `upsert=True`) | *update + insert*: busca cada documento por su `id_proceso`; si existe, lo reemplaza con la versión nueva; si no, lo inserta. Ejemplo: actualizar una lista de asistencia por código: si el código ya está, corriges su fila; si no, agregas una |
+| **upsert** por `id_proceso` (`UpdateOne` + `upsert=True`) | *update + insert*: busca cada documento por su `id_proceso`; si existe, actualiza los campos que envías (con `$set`; los que no envías se conservan); si no existe, lo inserta. Ejemplo: actualizar una lista de asistencia por código: si el código ya está, corriges su fila; si no, agregas una |
 
 **OJO.** La URI se pide en un campo oculto (`getpass`). Nunca la escribas en una celda ni la imprimas: el validador bloquea la entrega si encuentra una URI con contraseña.'''),
         code('''#@title E2.2a · EJECUTA · Conectar Atlas (la URI se pide oculta) { display-mode: "form" }
@@ -556,7 +564,7 @@ ESTRATEGIA = "{C.SIN_SELECCION}" #@param {opciones([C.SIN_SELECCION] + C.ESTRATE
 CARGA = taller.cargar_e2(ESTRATEGIA)'''),
         lectura("La primera y la segunda carga deben dejar el mismo número de documentos, sin errores y con 0 duplicados.",
                 "Una carga **idempotente** se puede repetir, por un corte de red o por una corrección, sin alterar la colección.",
-                "Que los documentos estén actualizados: un índice único evita duplicados pero hace fallar la segunda carga y no actualiza nada.",
+                "Que el contenido de cada documento en Atlas sea el correcto: la prueba cuenta documentos y duplicados, no compara campo por campo con tu RAW.",
                 "Creer que «sin error» significa «sin duplicados»: `insert_many` duplica en silencio."),
         md(f'''### E2.3 · Índices: **SAL DE COLAB. AHORA TRABAJAS EN MONGODB ATLAS.**
 
@@ -569,6 +577,10 @@ CARGA = taller.cargar_e2(ESTRATEGIA)'''),
 4. Vuelve y ejecuta la celda siguiente: lee los índices directamente de Atlas.'''),
         code('''#@title E2.3 · EJECUTA · Leer los índices que creaste en Atlas { display-mode: "form" }
 INDICES = taller.indices_e2()'''),
+        lectura("Cada línea es un índice de tu colección y sus campos (1 ascendente, -1 descendente). `_id_` lo crea Atlas siempre.",
+                "Qué índices existen y si el primer campo de alguno coincide con lo que filtra u ordena una consulta del taller.",
+                "Que tus consultas se volvieron más rápidas: para afirmarlo falta el plan de ejecución (*Explain* en Atlas) o medir el tiempo con y sin el índice.",
+                "Crear un índice sobre un campo que ninguna consulta usa: ocupa espacio y no ayuda."),
         md('''### E2.4 · Consulta A en Atlas → Documents → Filter
 
 **Pregunta:** ¿cuántos procesos tienen `precio base > 0` y **al menos un contrato** cruzado?
@@ -590,8 +602,8 @@ CONTEO_A = taller.consulta_a_e2(FILTRO_A)'''),
 ORDEN_B = \'\'\'pega aquí tu sort\'\'\'
 TOP10_B = taller.consulta_b_e2(ORDEN_B)'''),
         lectura("El número de A y la lista de B salen de **tu** colección en Atlas: la celda vuelve a ejecutar lo que pegaste y lo compara con la referencia calculada desde tu RAW.",
-                "Tu modelo y tus consultas responden lo que el caso pregunta.",
-                "Que esos procesos tengan sobrecosto: B ordena por valor y no dice si el valor es razonable.",
+                "Si las dos celdas dicen ✓ sí, tu modelo y tus consultas responden lo que el caso pregunta.",
+                "Que esos procesos tengan sobrecosto: B ordena por valor y no dice si el valor es razonable; para eso falta un precio de referencia para el mismo objeto.",
                 "En B, olvidar el desempate: con valores iguales, el orden de Atlas puede cambiar entre ejecuciones."),
         code('''#@title Checkpoint E2 · EJECUTA { display-mode: "form" }
 _ = taller.checkpoint("E2")'''),
@@ -613,19 +625,28 @@ _ = taller.checkpoint("E2")'''),
 | `$sort` | `valor_contratos` descendente y `id_proceso` ascendente | olvidar el desempate |
 | `$limit` | máximo {C.BANDEJA_MAX} | no limitar: la bandeja deja de ser una cola de trabajo |
 
+**Etapa usada: `$project` con un campo anidado**
+
+| | |
+|---|---|
+| Para qué sirve | elegir qué campos salen de cada documento y con qué nombre |
+| Ejemplo con otro campo | `{{ "$project": {{ "_id": 0, "id_proceso": 1, "ciudad": "$entidad.ciudad" }} }}` |
+| Cómo se lee | `"_id": 0` quita el identificador interno; `"id_proceso": 1` deja el campo como está; `"ciudad": "$entidad.ciudad"` crea una columna `ciudad` con el **valor** del campo anidado: el `$` delante de la ruta significa «el valor de este campo» |
+| Error frecuente | escribir `"ciudad": "entidad.ciudad"` sin `$`: cada fila tendría el texto «entidad.ciudad», no la ciudad |
+
 **HAZ ESTO AHORA.**
 1. En tu colección abre **Aggregations** y activa el modo **Texto** (ícono `</>`), como en S04.
 2. Escribe el pipeline, pulsa **Run** y revisa que salgan como máximo {C.BANDEJA_MAX} filas.
 3. **Save → Save as** con el nombre exacto de pipeline que imprimió la celda de identidad (por ejemplo `tc1-bandeja-p03`).
 4. **Export Code → Python 3**, desmarca *Include driver syntax* si aparece, copia el código y pégalo en la celda siguiente. Si se copia también la línea de conexión (`client = MongoClient(...)`), no importa: la celda toma solo el pipeline y descarta la conexión.
-5. **Captura `E2_atlas.png`.** Debe verse la interfaz de Atlas, el nombre del pipeline guardado y su resultado. En Windows: `Win + Shift + S`; la imagen queda en *Imágenes → Capturas de pantalla*.
+5. **Captura `E2_atlas.png`.** Debe verse la interfaz de Atlas, el nombre del pipeline guardado y su resultado. En Windows: `Win + Shift + S`; la imagen queda en *Imágenes → Capturas de pantalla*. Si al subirla el botón no aparece o falla (pasa cuando el navegador bloquea las cookies de terceros), arrastra la imagen al panel 📁 de Colab, renómbrala `E2_atlas.png` y vuelve a ejecutar la celda; lo mismo sirve para las otras dos capturas.
 
-**Así debe verse la bandeja** que imprime la celda: hasta {C.BANDEJA_MAX} filas, una por proceso, de mayor a menor valor (valores de ejemplo):
+**Así debe verse la bandeja** que imprime la celda: hasta {C.BANDEJA_MAX} filas, una por proceso, de mayor a menor valor (valores de ejemplo). La `posición` empieza en 1, como la que elegirás en E6.1, y `valor_millones` es el mismo valor en millones; el CSV guarda solo las cinco columnas pedidas:
 
-| id_proceso | anio | departamento | entidad | valor_contratos |
-|---|---|---|---|---|
-| CO1.REQ.… | 2025 | Antioquia | ENTIDAD EJEMPLO | 950000000.0 |
-| CO1.REQ.… | 2025 | Bogotá D.C. | OTRA ENTIDAD | 870000000.0 |
+| posición | id_proceso | anio | departamento | entidad | valor_contratos | valor_millones |
+|---|---|---|---|---|---|---|
+| 1 | CO1.REQ.… | 2025 | Antioquia | ENTIDAD EJEMPLO | 950000000 | 950 |
+| 2 | CO1.REQ.… | 2025 | Bogotá D.C. | OTRA ENTIDAD | 870000000 | 870 |
 
 **OJO.** Antes de capturar, comprueba que en la pantalla no aparezcan contraseñas, tokens, URI ni cadenas de conexión.'''),
         code('''# E3 · PEGA · el código que exportaste (Export Code → Python 3) o el pipeline del modo Texto
@@ -664,7 +685,7 @@ SELECT id_proceso, valor_contratos FROM ... WHERE anio = ? AND departamento = ? 
 | clustering | cómo se ordenan las filas **dentro** de la partición y qué hace única cada fila | dos filas con la misma PRIMARY KEY se sobrescriben |
 | tipo | cómo se compara el valor al ordenar | un número guardado como texto se ordena alfabéticamente |
 
-Tu bandeja tiene procesos de varios departamentos. Para probar la consulta, la celda elige la **partición de prueba**: la combinación (año, departamento) con más filas en tu bandeja, y te dice cuál es y cuántas filas tiene.
+Tu bandeja tiene procesos de varios departamentos. Para probar la consulta, la celda elige la **partición de prueba**: la combinación (año, departamento) con más filas en tu bandeja. Te dice cuál es, cuántas filas tiene (ese es el COUNT que debes ver en Astra) y cuántas filas cargarás en total.
 
 **HAZ ESTO AHORA.** Toma las tres decisiones. La celda te anuncia qué pasará en Astra antes de que lo ejecutes.'''),
         code(f'''#@title E4.1 · ELIGE · Diseña la tabla {{ display-mode: "form" }}
@@ -699,7 +720,12 @@ BLOQUES = taller.bloques_cql()'''),
 (10 rows)
 ```
 
-**Si Astra responde con error**, es la consecuencia de tu diseño: vuelve a E4.1, cambia la decisión, ejecuta de nuevo y pega otra vez los bloques. El DROP del primer bloque borra la tabla anterior.'''),
+**Si Astra responde con error**, mira primero de dónde viene:
+
+| Si el error dice… | Viene de | Qué haces |
+|---|---|---|
+| `InvalidRequest`, `ALLOW FILTERING`, `Cannot execute this query` | tu diseño | vuelve a E4.1, cambia la decisión, ejecuta de nuevo y pega otra vez los bloques: el DROP del primer bloque borra la tabla anterior |
+| que la base está *Hibernated*, no hay conexión o la sesión venció | el servicio | pulsa *Resume*, espera a que diga *Active* y vuelve a pegar el bloque que falló |'''),
         code('''# E4.2 · PEGA · la salida de CQL Console (desde "count" hasta "(10 rows)")
 SALIDA_ASTRA = \'\'\'pega aquí la salida de Astra\'\'\'
 LEIDO = taller.astra_e4(SALIDA_ASTRA)'''),
@@ -709,7 +735,7 @@ print(("✓ " if ok else "✗ ") + f"{ruta.name}: {motivo}")
 _ = taller.checkpoint("E4")'''),
         lectura("El COUNT dice cuántas filas quedaron en la partición; el top 10 sale ordenado sin `ORDER BY` porque el clustering ya ordena por valor dentro de la partición.",
                 "Tu tabla responde la pregunta en una sola partición: la lectura no crece con el resto de la tabla.",
-                "Que esta tabla sirva para otra pregunta: «los 10 de una entidad» o «los de todo el país» necesitarían otra tabla. En Cassandra se duplica para responder.",
+                "Que sea el top 10 del departamento en todo el año: la tabla solo tiene las filas de tu bandeja (hasta 100 procesos con contrato cruzado de tu snapshot); para eso faltan todos los procesos del departamento. Tampoco sirve para otra pregunta: «los 10 de una entidad» necesitaría otra tabla, porque en Cassandra se duplica para responder.",
                 "Diseñar la clave mirando qué columnas «parecen importantes» en lugar de mirar el `WHERE` de la consulta."),
         ficha("E5",
               "Responder una pregunta de conectividad contractual con un grafo real.",
@@ -735,6 +761,10 @@ Un **proveedor compartido** es un proveedor que tiene contratos con dos o más e
         code('''#@title E5.1 · EJECUTA · Conectar Aura y cargar el grafo { display-mode: "form" }
 AURA = taller.conectar_aura_e5()
 CONTEOS = taller.cargar_e5()'''),
+        lectura("Tres conteos de nodos en tu instancia (entidades, contratos, proveedores) y si la segunda carga dejó lo mismo que la primera.",
+                "El grafo tiene tus contratos con empresas, y `MERGE` no duplica: puedes volver a ejecutar la celda sin inflar los conteos.",
+                "Cuántas entidades contratan en todo SECOP: el grafo solo tiene los contratos de tu snapshot, sin personas naturales ni consorcios.",
+                "Leer «proveedores» como «empresas distintas del país»: son los proveedores que aparecen en tus contratos descargados."),
         md('''### E5.2 · **SAL DE COLAB. AHORA TRABAJAS EN NEO4J AURA → Query.**
 
 **HAZ ESTO AHORA.**
@@ -744,6 +774,10 @@ CONTEOS = taller.cargar_e5()'''),
         code('''#@title E5.2 · EJECUTA · La consulta de la ancla (cópiala en Aura) y tu ancla { display-mode: "form" }
 print(secop.CYPHER_ANCLA, "\\n")
 NIT_ANCLA = taller.ancla_e5()'''),
+        lectura("Las primeras líneas son las entidades con más proveedores compartidos; la primera es tu ancla. La línea «Tu entidad ancla» dice cuántos nombres distintos aparecen bajo su NIT.",
+                "Desde qué entidad vas a mirar la red en E5.3.",
+                "Que la ancla tenga una red inusual: se eligió **por** tener más proveedores compartidos, el mismo rasgo que mide el ranking, así que «tiene muchos» es la regla de selección, no un hallazgo. Además, un NIT puede agrupar muchas sedes (el número de nombres que imprime la celda); falta saber qué sede firmó cada contrato.",
+                "Leer el nombre impreso como una sola oficina: el nodo `Entidad` reúne todo lo firmado con ese NIT."),
         md('''### E5.3 · Dos consultas: una con un hueco, otra escrita por ti
 
 | Cypher | Para qué | Ejemplo en tu grafo |
@@ -767,7 +801,7 @@ NIT_ANCLA = taller.ancla_e5()'''),
 | `contratos_con_ancla` | cuántos contratos **distintos** tiene con la ancla |
 | `entidades_conectadas` | con cuántas entidades **distintas**, aparte de la ancla, tiene contratos |
 
-Ordenadas por `entidades_conectadas` de mayor a menor, luego `contratos_con_ancla` de mayor a menor y luego `nit_proveedor` ascendente. Usa el parámetro `$nit_ancla` para la entidad ancla. Al ejecutarla, la celda imprime la versión para Aura (con tu NIT), la corre en tu instancia y te dice si coincide con la referencia calculada desde tu RAW; si no coincide, te dice qué revisar y cómo deben verse tus primeras filas.
+Ordenadas por `entidades_conectadas` de mayor a menor, luego `contratos_con_ancla` de mayor a menor y luego `nit_proveedor` ascendente. Usa el parámetro `$nit_ancla` para la entidad ancla. Al ejecutarla, la celda imprime la versión para Aura (con tu NIT), la corre en tu instancia y te dice si coincide con la referencia calculada desde tu RAW; si no coincide, te dice qué revisar y desde qué fila se aparta.
 
 **Error más probable:** contar caminos con `count(otra)`: los números salen inflados.
 
@@ -800,7 +834,7 @@ print(("✓ " if ok else "✗ ") + f"{ruta.name}: {motivo}")
 _ = taller.checkpoint("E5")'''),
         lectura("Cada fila del ranking es un proveedor de la ancla que también contrata con otras entidades: cuántos contratos tiene con la ancla y con cuántas entidades distintas más.",
                 "Qué proveedores hacen de **puente** entre tu entidad ancla y el resto de tu snapshot: el contexto que una tabla de contratos no muestra de un vistazo.",
-                "Colusión, favorecimiento ni fraude. Además, un NIT puede agrupar varias sedes (SENA, ICBF): su número de conexiones (en grafos, su *centralidad de grado*) puede reflejar tamaño administrativo, no comportamiento. Y solo ves contratos con empresas durante pocos días.",
+                "Colusión, favorecimiento ni fraude. Además, un NIT puede agrupar varias sedes (SENA, ICBF): su número de conexiones puede reflejar tamaño administrativo, no comportamiento. Y solo ves contratos con empresas durante pocos días.",
                 "Leer «conecta muchas entidades» como «es sospechoso». Un proveedor de seguros o de vigilancia contrata con muchas entidades por la naturaleza de su servicio."),
         ficha("E6",
               "Tomar tres decisiones de ingeniería y dos de interpretación ancladas a **tus** resultados, y entregar.",
@@ -813,7 +847,7 @@ _ = taller.checkpoint("E5")'''),
               "10: decisiones e informe 5 · microdefensa 3 · paquete completo y sin secretos 2."),
         md('''### E6.1 · Decisiones con tu evidencia
 
-Aquí **no se escribe**: se elige. Cada respuesta se compara con **tus** datos, así que copiar la de otra pareja no sirve.
+Aquí **no se escribe**: se elige. Cada respuesta se compara con **tus** datos y tu snapshot: aunque otra pareja coincidiera contigo en la ventana, sus índices, su bandeja y sus tiempos son los suyos.
 
 - **Concurrencia y 429.** Mira en E1.3 cuántos segundos tardó tu descarga concurrente.
 - **Índice.** Elige el índice adicional que **creaste** en Atlas y la consulta que atiende.
@@ -827,6 +861,13 @@ VALOR_EN_MILLONES = 0 #@param {{type:"integer"}}
 DATO_QUE_FALTA = "{C.SIN_SELECCION}" #@param {opciones(C.E6_DATO_FALTANTE)}
 _ = taller.decisiones_e6(DECISION_429, SEGUNDOS_DESCARGA_CONCURRENTE, INDICE_ADICIONAL, POSICION_EN_TU_BANDEJA,
                          VALOR_EN_MILLONES, DATO_QUE_FALTA)'''),
+        md('''### E6.2 · Microdefensa: dos límites con tus resultados
+
+La *microdefensa* es la defensa corta de tus resultados: no se escribe, se elige en tres listas y se completa con un número que ya imprimiste.
+
+- **Cobertura.** El porcentaje que imprimió E1.4 (la línea `cobertura … %`). Elige su rango y qué lo explica.
+- **Red.** El límite: qué **no** permite concluir tu red de E5.
+- **Proveedor puente.** El **primero** de tu ranking en E5.4: escribe su número de `entidades_conectadas`.'''),
         code(f'''#@title E6.2 · ELIGE · Microdefensa {{ display-mode: "form" }}
 RANGO_DE_TU_COBERTURA = "{C.SIN_SELECCION}" #@param {opciones(C.E6_RANGOS_COBERTURA)}
 QUE_EXPLICA_TU_COBERTURA = "{C.SIN_SELECCION}" #@param {opciones(C.E6_CAUSA_COBERTURA)}
@@ -870,11 +911,11 @@ Si trabajas solo, la carpeta lleva solo tu apellido: `TC1_BIGDATA_<PAREJA_ID>_<A
 1. Abre la carpeta que imprimió la celda anterior en tu Drive. Debe contener **solo** los tres archivos. Si no activaste Drive, descarga los tres archivos y súbelos a una carpeta nueva con el nombre impreso. La carpeta `TC1_BIGDATA_<PAREJA_ID>/avance` es tu copia de trabajo: **no la compartas**.
 2. Clic derecho sobre la **carpeta de entrega** → **Compartir** → deja **Acceso general: Restringido** → agrega `{C.CORREO_DOCENTE}` como **Lector**.
 3. Un integrante envía el correo a `{C.CORREO_DOCENTE}`, con copia al compañero si trabajan en pareja:
-   - **Asunto:** `[BIG DATA 2026-2S][TC1] <PAREJA_ID> - <APELLIDO1> - <APELLIDO2>` (si trabajas solo, termina en tu apellido: `… - <APELLIDO1>`)
+   - **Asunto:** cópialo tal cual de la línea `ASUNTO DEL CORREO` que imprimió la celda «Entregar». Tiene la forma `[BIG DATA 2026-2S][TC1] <PAREJA_ID> - <APELLIDO1> - <APELLIDO2>`, con el nombre de tu pareja como queda en los archivos (si trabajas solo, termina en tu apellido).
    - **Cuerpo:** pareja, nombres y códigos, enlace de la carpeta y la **huella SHA-256** que imprimió la celda anterior (una sola huella).
 4. Si corriges algo antes del cierre, vuelve a validar y entregar, reemplaza los archivos en la misma carpeta y responde en el mismo hilo con `CORRECCIÓN DE ENTREGA` y la huella nueva.
 
-**Por qué la huella.** Es la SHA-256 de `manifest_tc1.json` (E1.2c). El sello de tiempo del correo fija **qué** entregaste y **cuándo**: si el manifest de la carpeta cambiara después en un solo carácter, su huella ya no coincidiría con la del correo. Por eso, si vuelves a validar, envías la huella nueva.
+**Por qué la huella.** Es la SHA-256 de `manifest_tc1.json` (E1.2c). El sello de tiempo del correo fija **tu manifest** —tus puntajes, control por control— y **cuándo** lo enviaste: si el manifest de la carpeta cambiara después en un solo carácter, su huella ya no coincidiría con la del correo. Por eso, si vuelves a validar, envías la huella nueva.
 
 **Fecha máxima: {C.FECHA_LIMITE}.** Cuenta el sello de tiempo del correo.
 
@@ -914,7 +955,16 @@ Si trabajas solo, la carpeta lleva solo tu apellido: `TC1_BIGDATA_<PAREJA_ID>_<A
 
 ### Variables del taller
 
-Si Colab se reinicia, las variables se pierden pero tus archivos no: vuelve a ejecutar «Preparar el entorno», «0 · Identidad» y, si la necesitas, la conexión del servicio.
+**Si Colab se reinicia** (se pierden las variables) **o se desconecta** (también se pierden los archivos de Colab, salvo el avance que guardaste en Drive):
+
+| Ibas en | Vuelve a ejecutar |
+|---|---|
+| cualquier etapa | «Preparar el entorno» y «0 · Identidad» (con Drive activado, si Colab se desconectó, esta celda restaura tu carpeta tal como quedó en tu último checkpoint) |
+| E2 o E3 | además, E2.2a (conectar Atlas) |
+| E4 | además, E4.1 con tus mismas decisiones: arma otra vez los bloques y conserva la salida de Astra que ya pegaste |
+| E5 | además, E5.1 (conectar y cargar; no duplica) y las celdas E5.3a y E5.3b: tu ancla se recupera sola de tus archivos |
+
+Sin avance en Drive, si Colab se desconecta, se repite desde E1.
 
 | Variable | Qué contiene | Nace en |
 |---|---|---|

@@ -149,7 +149,8 @@ for nombre, texto in (("cuaderno", todo), ("checklist", html), ("LMS S08", s08))
     falla(f"{dia} de octubre" in texto, f"{nombre}: no dice la fecha de entrega ({dia} de octubre)")
     otras = set(re.findall(r"\b(\d{1,2}) de octubre", texto)) - {dia}
     falla(not otras, f"{nombre}: menciona otra fecha de octubre ({', '.join(sorted(otras))})")
-falla(f"antes del {dia} de octubre" in tarjeta, f"la tarjeta S08 del índice no dice «antes del {dia} de octubre»")
+# «hasta el 18, 11:59 p. m.»: «antes del 18» se lee como «hasta el 17».
+falla(f"hasta el {dia} de octubre, 11:59 p. m." in tarjeta, f"la tarjeta S08 del índice no dice «hasta el {dia} de octubre, 11:59 p. m.»")
 resumen = json.loads(leer("Datos/tc1_ventanas_resumen.json") or "{}")
 ventanas = resumen.get("ventanas", {})
 falla(set(ventanas) == set(C.VENTANAS), f"el control de datos no cubre las {len(C.VENTANAS)} ventanas del contrato")

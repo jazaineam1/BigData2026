@@ -158,16 +158,23 @@ def _e1(ctx, reg):
 
 
 # ── E2 ────────────────────────────────────────────────────────────────────────
-def _indice_alineado(indices):
+def _indices_alineados(indices):
+    '''Primer campo de cada índice alineado con una consulta, en el orden en que Atlas los lista.'''
+    salida = []
     for ix in indices or []:
         if ix.get("nombre") == "_id_":
             continue
         clave = [c[0] for c in ix.get("clave", [])]
         if clave == ["id_proceso"]:
             continue
-        if clave and clave[0] in C.CAMPOS_INDICE_ALINEADOS:
-            return clave[0]
-    return None
+        if clave and clave[0] in C.CAMPOS_INDICE_ALINEADOS and clave[0] not in salida:
+            salida.append(clave[0])
+    return salida
+
+
+def _indice_alineado(indices):
+    alineados = _indices_alineados(indices)
+    return alineados[0] if alineados else None
 
 
 def _e2(ctx, reg):
@@ -395,9 +402,20 @@ def secciones_cypher(texto):
     return {k: "\n".join(v).strip() for k, v in partes.items()}
 
 
+def plano_cypher(texto):
+    '''Cypher en una línea y en minúscula para comparar formas equivalentes: sin comentarios (respetando las
+    cadenas), sin acentos graves en los nombres y sin espacios antes del paréntesis de una función.'''
+    partes = re.split(r"('[^']*'|\"[^\"]*\")", str(texto or ""))
+    for i in range(0, len(partes), 2):
+        sin_comentarios = re.sub(r"/\*.*?\*/", " ", partes[i], flags=re.S)
+        sin_comentarios = re.sub(r"//[^\n]*", " ", sin_comentarios)
+        partes[i] = re.sub(r"\b(count|size|collect)\s+\(", r"\1(", sin_comentarios.replace("`", ""), flags=re.I)
+    return re.sub(r"\s+", " ", "".join(partes)).strip().lower()
+
+
 def analizar_cypher(texto):
     sec = secciones_cypher(texto)
-    plano = {k: re.sub(r"\s+", " ", v).lower() for k, v in sec.items()}
+    plano = {k: plano_cypher(v) for k, v in sec.items()}
     carga = plano.get("carga", "")
     comp = plano.get("compartidos", "")
     rank = plano.get("ranking", "")
@@ -449,7 +467,13 @@ def _e5(ctx, reg):
         reg.fallo("E5.2", exc)
     try:
         archivo = R["E5"] / "05_neo4j_consultas.cypher"
-        a = analizar_cypher(archivo.read_text(encoding="utf-8") if archivo.exists() else "")
+        texto = archivo.read_text(encoding="utf-8") if archivo.exists() else ""
+        a = analizar_cypher(texto)
+        # Si hubo ejecución en Aura (E5.4 guarda las consultas junto al resultado), el ranking del archivo debe ser
+        # el que se ejecutó. Sin ejecución (servicio caído), el archivo se califica solo, como promete el cuaderno.
+        ejecutado = plano_cypher((ev.get("consultas") or {}).get("ranking", "")).rstrip(";").strip()
+        en_archivo = plano_cypher(secciones_cypher(texto).get("ranking", "")).rstrip(";").strip()
+        a["ranking_ejecutado"] = not ejecutado or ejecutado == en_archivo
         reg.poner("E5.3", 5 if all(a.values()) else 0, f"secciones={ {k: bool(v) for k, v in a.items()} }")
     except Exception as exc:
         reg.fallo("E5.3", exc)
@@ -474,8 +498,9 @@ def _e6(ctx, reg, hallazgos_secretos):
         detalle.append(f"429: {'ok' if puntos == 2 else 'revisar'}")
         d2 = dec.get("indice_atlas", {})
         ev2 = X.leer_json(R["E2"] / "02_atlas_evidence.json", {}) or {}
-        alineado = _indice_alineado(ev2.get("indices"))
-        if alineado and C.E6_INDICE_CAMPO.get(d2.get("seleccion")) == alineado:
+        # Si creaste dos índices alineados, vale defender cualquiera de los dos (no el primero que liste Atlas).
+        alineados = _indices_alineados(ev2.get("indices"))
+        if alineados and C.E6_INDICE_CAMPO.get(d2.get("seleccion")) in alineados:
             puntos += 1
             detalle.append("índice: ok")
         else:
