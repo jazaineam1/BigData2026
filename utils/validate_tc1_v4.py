@@ -60,7 +60,7 @@ checks=[
     ("consolidación solo tras equivalencia", all(x in all_src for x in ["No consolide RAW","same_offsets","same_rows","same_hash"])),
     ("Atlas idempotente", "bulk_write" in all_src and "UpdateOne" in all_src and "upsert=True" in all_src),
     ("decision log", "decision_log" in all_src),
-    ("carga estimada 6–8h", "6–8 horas" in all_src and "Dedicación orientativa por grupo" in all_src),
+    ("carga estimada 6–8h", "6–8 horas por grupo" in all_src and "Dedicación orientativa" in all_src),
     ("microdefensa estructurada", "defensa_grupal" in all_src and "06_microdefensa_grupal.json" in all_src and "E6_microdefensa_grupal" in validator and all_src.count("#@param") >= 12),
     ("sin respuesta abierta E6", "respuesta_concurrencia" not in all_src and "respuesta_calidad" not in all_src),
     ("validador actual", 'VERSION = "2026-10-01-secoppipeline-v7"' in validator),
@@ -95,7 +95,7 @@ checks=[
     ("ruta paso a paso visible", all(x in all_src for x in [
         "Qué debe hacer y qué debe entregar cada grupo",
         "Condición para pasar",
-        "Checkpoint de E1",
+        "Checkpoint E1",
         "Entrega final del grupo"
     ])),
     ("metodología de entrega explícita", all(x in all_src for x in ["Entrega final del grupo","manifest_tc1.json","Google Drive","correo del docente","GitHub opcional"])),
