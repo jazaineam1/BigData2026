@@ -39,7 +39,7 @@
 <div class="ey">Qué hacer ahora</div>
 <h2 id="nextTitle">Buscando tu siguiente paso…</h2>
 <p id="nextText" class="muted"></p>
-<div class="actions"><button id="continueBtn" class="btn primary">Continuar</button></div>
+<div id="nextActions" class="actions"><button id="continueBtn" class="btn primary">Continuar</button></div>
 </div>
 
 <section class="card">
@@ -63,12 +63,17 @@
 
 <script src="assets/bigdata-lms.js?v=20260926-v3"></script>
 <script src="assets/lms-kit.js?v=20260926-v5"></script>
+<script src="assets/session-entry.js?v=20261002-1"></script>
 <script>
 (async()=>{'use strict';
 const L=window.BIGDATA_LMS,K=window.LMS;L.wireLogout();const status=L.$('status');
 const params=new URLSearchParams(location.search),sessionNumber=Math.trunc(Number(params.get('s')||0));
 if(!Number.isInteger(sessionNumber)||sessionNumber<1){location.replace('portal.html');return}
-let data=null;
+let data=null,entry=null;
+const ENTRY=window.LMS_ENTRY;
+// Si la sesión declara su material en course.json, el botón aparece antes de que responda la API.
+function showEntry(){L.$('nextTitle').textContent=entry.label;L.$('nextText').textContent='Un clic: se abre directamente.';L.$('nextActions').innerHTML=ENTRY.link(sessionNumber,entry,'btn primary')}
+ENTRY.ready.then(m=>{entry=m.get(sessionNumber)||null;if(entry)showEntry()});
 const progressMap=()=>new Map((data?.activity_progress||[]).map(x=>[x.activity_code,x]));
 const activityState=(a,p)=>{
   const m=p?.metadata||{};
@@ -87,6 +92,7 @@ function eventForResource(r){return r.resource_type==='presentation'?'presentati
 const isColab=u=>/^https:\/\/colab\.research\.google\.com\//i.test(String(u||''));
 const isLmsWrapper=u=>/^(\.\/)?session-\d+\.html([?#]|$)/i.test(String(u||''));
 function directUrl(r){
+  if(entry&&(r?.resource_type==='lab'||isLmsWrapper(r?.url)))return entry.url;
   const d=String(r?.metadata?.direct_url||'');
   if(/^https:\/\//i.test(d))return d;
   if(isLmsWrapper(r?.url)){const nb=(data.resources||[]).find(x=>x.resource_type==='notebook'&&isColab(x.url));if(nb)return nb.url}
@@ -153,6 +159,7 @@ function render(){
   }).join('')||'<div class="empty">No hay recursos publicados.</div>';
   document.querySelectorAll('[data-resource-id]').forEach(b=>b.onclick=()=>{const r=visibleResources.find(x=>String(x.id)===b.dataset.resourceId),a=(data.activities||[]).find(x=>x.code===r?.metadata?.tracked_activity);if(r)openResource(r,a)});
 
+  if(entry){showEntry();return}
   const next=primaryAction();
   L.$('nextTitle').textContent=next.title;
   L.$('nextText').textContent=next.text;

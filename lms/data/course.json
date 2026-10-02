@@ -42,7 +42,11 @@
       "n": 7,
       "title": "Construye un buscador: del corpus al ranking",
       "status": "visible",
-      "protected": true
+      "protected": true,
+      "entry": {
+        "url": "/BigData2026/Presentaciones/s07-del-vecindario-al-texto.html",
+        "label": "Abrir presentación"
+      }
     },
     {
       "n": 8,
@@ -51,7 +55,11 @@
       "tracked": true,
       "starts_at": "2026-10-01T18:00:00-05:00",
       "class_date": "2026-10-01",
-      "class_kind": "assessment_workshop"
+      "class_kind": "assessment_workshop",
+      "entry": {
+        "url": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_1.ipynb",
+        "label": "Abrir el taller en Colab"
+      }
     },
     {
       "n": 9,
@@ -61,7 +69,11 @@
       "formative": true,
       "starts_at": "2026-10-08T18:00:00-05:00",
       "class_date": "2026-10-08",
-      "class_kind": "learning"
+      "class_kind": "learning",
+      "entry": {
+        "url": "/BigData2026/Presentaciones/s09-de-palabras-a-significado.html#s1",
+        "label": "Abrir presentación"
+      }
     },
     {
       "n": 10,
@@ -70,7 +82,11 @@
       "starts_at": "2026-10-15T18:00:00-05:00",
       "class_date": "2026-10-15",
       "class_kind": "learning",
-      "tracked": true
+      "tracked": true,
+      "entry": {
+        "url": "/BigData2026/Presentaciones/s10-etl-multimedia.html#s1",
+        "label": "Abrir presentación"
+      }
     },
     {
       "n": 11,
@@ -181,5 +197,6 @@
       "title": "Mi progreso",
       "path": "progress.html?s=9"
     }
-  ]
+  ],
+  "entry_policy": "sessions[].entry: material que abre la portada, el portal y el módulo en un clic (AGENTS.md §12)."
 }
