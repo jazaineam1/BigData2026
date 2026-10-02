@@ -44,6 +44,10 @@ def iniciar(pareja, integrantes, guardar_drive, base=None):
     if not nombre:
         raise ValueError("Escribe en PAREJA_ID el nombre de tu pareja: el que quieras, con letras o números "
                          "(por ejemplo, el que ya venías usando).")
+    for i, (n, c, a) in enumerate(integrantes, 1):
+        if not n.strip() and (c.strip() or a.strip()):
+            raise ValueError(f"El integrante {i} tiene código o apellido pero no nombre: complétalo. Si trabajas solo, "
+                             f"deja vacíos los tres campos del integrante {i} (nombre, código y apellido).")
     vivos = [{"nombre": n.strip(), "codigo": c.strip(), "apellido": a.strip()} for n, c, a in integrantes if n.strip()]
     if not vivos or any(not x["codigo"] or not x["apellido"] for x in vivos):
         raise ValueError("Escribe el nombre, el código y el primer apellido de cada integrante "

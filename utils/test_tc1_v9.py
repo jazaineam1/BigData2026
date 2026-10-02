@@ -364,6 +364,17 @@ def main():
         caso("la identidad pide un nombre de pareja con letras o números", False)
     except ValueError:
         caso("la identidad pide un nombre de pareja con letras o números", True)
+    # Grupos de una o dos personas: nadie desaparece en silencio de la entrega
+    try:
+        T.iniciar("Uno", [("Ana", CODIGO, "Ruiz"), ("", "20239999", "Mora")], "No", base=trabajo / "a_medias")
+        caso("un integrante 2 con código o apellido pero sin nombre se rechaza", False)
+    except ValueError:
+        caso("un integrante 2 con código o apellido pero sin nombre se rechaza", True)
+    pareja_dos, _ = T.iniciar("Dos", [("Ana", CODIGO, "Ruiz"), ("Jorge", "20231002", "Pérez")], "No", base=trabajo / "dos")
+    ident_dos = json.loads((pareja_dos / "identidad.json").read_text(encoding="utf-8"))
+    caso("una pareja de dos guarda ambos integrantes y su ventana sale de los dos códigos",
+         len(ident_dos["integrantes"]) == 2 and ident_dos["ventana"] == C.ventana_de([CODIGO, "20231002"])
+         and TV.equipo({"docente": {"pareja_id": "DOS", "integrantes": ident_dos["integrantes"]}, "estudiante": {}}) == "DOS_RUIZ_PEREZ")
     T.ESTADO["out"] = out
     caso("exactamente tres capturas", list(C.CAPTURAS.values()) == ["E2_atlas.png", "E4_astra.png", "E5_neo4j.png"])
     import build_taller_control_1 as B

@@ -169,6 +169,7 @@ Construir, en parejas, un pipeline reproducible sobre SECOP II y demostrar que *
 |---|---|
 | ¿Qué voy a entregar? | Tres archivos: `TC1_<PAREJA_ID>.ipynb`, `TC1_<PAREJA_ID>.zip` y `manifest_tc1.json`, en una carpeta de Drive restringida, más un correo. |
 | ¿Qué necesito antes de empezar? | Un nombre para tu pareja (el que quieras), los códigos de los integrantes y tus tres cuentas activas: Atlas, Astra y Aura. |
+| ¿Puedo trabajar solo? | Sí: deja vacíos los tres campos del integrante 2. El taller, la rúbrica y la entrega son los mismos. |
 | ¿Dónde trabajo? | E1 Colab · E2 Colab + **Atlas** · E3 **Atlas** + Colab · E4 Colab + **Astra** · E5 Colab + **Aura** · E6 Colab |
 | ¿Cómo sé si puedo avanzar? | Cada etapa termina en un **checkpoint** que imprime ✓ o ✗, dice qué falta y lista los archivos que dejó la etapa. |
 | ¿Cómo me califican? | Resultados que se recalculan desde tus archivos + tres capturas de los servicios. |
@@ -273,7 +274,7 @@ La celda siguiente carga cinco módulos. En el cuaderno los verás con estos nom
 
 **OJO.** Escribe el mismo nombre y los mismos códigos en cada sesión. Si cambias un código, cambia tu ventana y la descarga de E1 deja de ser tuya (la celda te avisa); si cambias el nombre, el cuaderno empieza una carpeta nueva.
 
-Si trabajas solo, deja vacío el integrante 2. Los nombres y códigos solo viajan en tu entrega privada al docente; no los publiques. Guardar el avance en Drive deja una copia de tu carpeta de trabajo tras cada checkpoint: si Colab se reinicia, al volver a ejecutar esta celda recuperas lo hecho.'''),
+Si trabajas solo, deja vacíos los tres campos del integrante 2 (nombre, código y apellido): tu ventana sale de tu código y tu carpeta de entrega lleva solo tu apellido. Los nombres y códigos solo viajan en tu entrega privada al docente; no los publiques. Guardar el avance en Drive deja una copia de tu carpeta de trabajo tras cada checkpoint: si Colab se reinicia, al volver a ejecutar esta celda recuperas lo hecho.'''),
         code(f'''#@title 0 · ELIGE · Identidad de la pareja {{ display-mode: "form" }}
 PAREJA_ID = "" #@param {{type:"string"}}
 INTEGRANTE_1 = "" #@param {{type:"string"}}
@@ -855,6 +856,8 @@ TC1_BIGDATA_<PAREJA_ID>_<APELLIDO1>_<APELLIDO2>/
 └── manifest_tc1.json         ← tu puntaje control por control, calculado por el validador
 ```
 
+Si trabajas solo, la carpeta lleva solo tu apellido: `TC1_BIGDATA_<PAREJA_ID>_<APELLIDO1>/`. La celda «Entregar» imprime el nombre exacto.
+
 <details><summary>Qué hay dentro del ZIP</summary>
 
 ```
@@ -866,8 +869,8 @@ TC1_BIGDATA_<PAREJA_ID>_<APELLIDO1>_<APELLIDO2>/
 
 1. Abre la carpeta que imprimió la celda anterior en tu Drive. Debe contener **solo** los tres archivos. Si no activaste Drive, descarga los tres archivos y súbelos a una carpeta nueva con el nombre impreso. La carpeta `TC1_BIGDATA_<PAREJA_ID>/avance` es tu copia de trabajo: **no la compartas**.
 2. Clic derecho sobre la **carpeta de entrega** → **Compartir** → deja **Acceso general: Restringido** → agrega `{C.CORREO_DOCENTE}` como **Lector**.
-3. Un integrante envía el correo a `{C.CORREO_DOCENTE}` con copia al compañero:
-   - **Asunto:** `[BIG DATA 2026-2S][TC1] <PAREJA_ID> - <APELLIDO1> - <APELLIDO2>`
+3. Un integrante envía el correo a `{C.CORREO_DOCENTE}`, con copia al compañero si trabajan en pareja:
+   - **Asunto:** `[BIG DATA 2026-2S][TC1] <PAREJA_ID> - <APELLIDO1> - <APELLIDO2>` (si trabajas solo, termina en tu apellido: `… - <APELLIDO1>`)
    - **Cuerpo:** pareja, nombres y códigos, enlace de la carpeta y la **huella SHA-256** que imprimió la celda anterior (una sola huella).
 4. Si corriges algo antes del cierre, vuelve a validar y entregar, reemplaza los archivos en la misma carpeta y responde en el mismo hilo con `CORRECCIÓN DE ENTREGA` y la huella nueva.
 
