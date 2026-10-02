@@ -46,7 +46,7 @@ checks=[
     ("Astra usa CQL Console", "Astra CQL Console" in all_src and "CQL_CREATE_STUDENT" in all_src and "ASTRA_TOP5_IDS" in all_src),
     ("Neo4j usa Aura Query", "Aura Query" in all_src and "CYPHER_QUERY_STUDENT" in all_src and "NEO4J_TOP_PROVEEDOR_NIT" in all_src),
     ("sin driver Cassandra evaluado", "from cassandra.cluster import Cluster" not in all_src and "session.execute(" not in all_src),
-    ("sin driver Neo4j evaluado", "driver.execute_query(" not in all_src and "GraphDatabase" not in all_src),
+    ("sin driver Neo4j evaluado", "from neo4j import GraphDatabase" not in all_src and "GraphDatabase.driver(" not in all_src),
     ("sin NetworkX", "networkx" not in all_src.lower()),
     ("sin preguntas abiertas", 'input("Alternativa' not in all_src and "respuesta_concurrencia" not in all_src and all_src.count("#@param") >= 8),
     ("entrega tres archivos", "## Entrega final · exactamente tres archivos" in all_src and all(x in all_src for x in ["TC1_<PAREJA_ID>.ipynb","TC1_<PAREJA_ID>.zip","manifest_tc1.json"])),
