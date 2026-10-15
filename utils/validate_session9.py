@@ -217,7 +217,7 @@ checks=[
     ("WALL sin ranking por velocidad","No es un ranking de velocidad" in deck and "localeCompare" in backend),
     ("primer intento + dominio server-side","first_attempt_correct" in backend and "mastery" in backend and "challenge_stats" in backend),
     ("posición de lectura server-side","slide_viewed" in backend and "resume" in backend and "last_slide" in backend),
-    ("presentación obliga identidad","reason=login" in deck and "Vista previa · sin seguimiento" in deck and "moduleIdentity" in deck),
+    ("presentación pública y WALL protegido","Acceso libre · S09" in deck and "reason=login" not in deck and "requireS09({teacher:true})" in deck and "L.s09('me')" in deck),
     ("presentación registra diapositiva","queueSlideTrack" in deck and "K.track('slide_viewed'" in deck),
     ("WALL docente muestra posición","<th>Posición</th>" in deck and "r.last_slide" in deck),
     ("WALL docente filtra estudiantes","id=\"teacherSearch\"" in deck and "id=\"teacherFilter\"" in deck and "filterTeacherRows" in deck),
