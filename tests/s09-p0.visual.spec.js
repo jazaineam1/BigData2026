@@ -179,3 +179,36 @@ test('S09 modo público no muestra controles de seguimiento LMS ni en portada',a
   await expect(page.locator('#liveDrawer')).toBeHidden();
   await expect(page.locator('#moduleIdentity')).toContainText('Acceso libre');
 });
+
+
+test('S09 reflexión Precision@5 no inventa ceros antes de juicios',async({page})=>{
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s32');
+ await expect(page.locator('#pOut')).toContainText('Sin evaluar · 0/5');
+ const choices=page.locator('#pBtns button');
+ await expect(choices).toHaveCount(5);
+ await choices.nth(0).click();
+ await expect(page.locator('#pOut')).toContainText('Sin evaluar · 1/5');
+ for(let i=1;i<5;i++)await choices.nth(i).click();
+ await expect(page.locator('#pOut')).toContainText('Precision@5 = 1.00');
+ await choices.nth(0).click();
+ await expect(page.locator('#pOut')).toContainText('Precision@5 = 0.80');
+ await page.getByRole('button',{name:'Restablecer'}).click();
+ await expect(page.locator('#pOut')).toContainText('Sin evaluar · 0/5');
+});
+test('S09 explica modelos y faltas ortográficas sin prometer autocorrección de E5',async({page})=>{
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s6');
+ await page.locator('#lexQ').selectOption({label:'mantenimieto de aeronavess'});
+ await page.getByRole('button',{name:'Ver coincidencia de tokens'}).click();
+ await expect(page.locator('#lexOut')).toContainText('BM25 NO corrige');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s12');
+ await expect(page.locator('#s12')).toContainText('intfloat/multilingual-e5-small');
+ await expect(page.locator('#s12')).toContainText('384');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s28');
+ await expect(page.locator('#s28')).toContainText('Atlas es opcional');
+});
+test('S09 muestra que el formulario final es ejemplo y el JSON real sale de Colab',async({page})=>{
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s33');
+ await expect(page.locator('#s33')).toContainText('Ejemplo, NO resultado del motor');
+ await expect(page.getByRole('button',{name:'Generar JSON ilustrativo'})).toBeVisible();
+ await expect(page.locator('#s33')).toContainText('evidencia real sale de Colab');
+});
