@@ -33,6 +33,10 @@ assert "def buscar_lexical" in full and "def buscar_semantico_local" in full
 assert "def rrf_fusion" in full and "def buscar_s09" in full
 assert "def comparar_s09" in full and "def exportar_s09" in full
 assert "USAR_ATLAS = False" in full
+assert "LIMITE = 6000" in full
+assert "SECOP ampliado (6000)" in full
+assert "sugerir_correcciones" in full and "ortografia_ui" in full
+assert "rapidfuzz" in full and "multilingual-e5-small" in full
 
 # Simulación sin E5 remoto ni cuentas: comprueba que los motores usan el mismo
 # corpus, ID y metadatos, y producen resultados y expediente reproducibles.
@@ -65,6 +69,10 @@ assert ns["corpus"]["texto_busqueda"].str.len().min() >= 6
 
 exec(compile(source_containing("#@title 3. Construye el índice lexical"),"bm25.py","exec"),ns)
 assert not ns["buscar_lexical"]("aeronaves militares",5).empty
+assert ns["tokens"]("Reparación") == ["reparacion"], "Debe normalizar acentos."
+corregida,cambios=ns["sugerir_correcciones"]("aeronavess")
+assert cambios.get("aeronavess") == "aeronaves", f"Sugerencia real no detectada: {cambios}"
+assert ns["sugerir_correcciones"]("CO1.REQ.123")[1] == {}, "No debe corregir IDs/códigos."
 ns["modelo"] = ModeloE5Ficticio()
 ns["embeddings"] = ns["modelo"].encode(["passage: " + t for t in ns["corpus"]["texto_busqueda"]])
 ns["MODEL_NAME"] = "fake-e5-for-smoke"
@@ -102,8 +110,44 @@ with tempfile.TemporaryDirectory() as tmp:
         assert data["falso_positivo"] is not None
         assert data["decision"] != data["alternativa_descartada"]
         assert data["corpus"]["sha256"]
+        assert data["modo_ortografia"] == "sugerir"
+        assert data["consulta_empleada"] == data["consulta"]
+        assert data["sugerencias_ortograficas"] == {} or isinstance(data["sugerencias_ortograficas"], dict)
+        # Aplicar correcciones debe cambiar la consulta usada solo si se solicita.
+        ns["consulta_ui"].value = "aeronavess"
+        ns["ortografia_ui"].value = "aplicar"
+        ns["buscar_s09"]()
+        assert ns["estado_s09"]["consulta"] == "aeronavess"
+        assert ns["estado_s09"]["consulta_usada"] == "aeronaves"
+        ns["ortografia_ui"].value = "sin"
+        ns["buscar_s09"]()
+        assert ns["estado_s09"]["consulta_usada"] == "aeronavess"
     finally:
         os.chdir(cwd)
+
+# Ensayo de 6.000 filas: no duplicar IDs, mantener la trazabilidad y los filtros.
+with tempfile.TemporaryDirectory() as tmp:
+    demo=Path(tmp)/"6000.csv"
+    df=pd.DataFrame({
+        "radicado":[f"SECOP-{j:05d}" for j in range(6000)],
+        "asunto":[f"Contrato de servicios {j}" for j in range(6000)],
+        "contenido":[f"Servicio operativo y mantenimiento de equipo {j%50}" for j in range(6000)],
+        "dependencia":["Operaciones" if j%2 else "Tecnología" for j in range(6000)],
+        "enlace":["" for _ in range(6000)]
+    })
+    df.to_csv(demo,index=False)
+    load_file=source_containing("#@title 1. Selecciona de dónde salen tus datos")
+    load_file=load_file.replace('MODE_DATOS = "SECOP ampliado (6000)"','MODE_DATOS = "Subir CSV desde computador"')
+    load_file=load_file.replace('ARCHIVO_CSV = ""',f"ARCHIVO_CSV = {str(demo)!r}")
+    sandbox={"__name__":"__main__"}
+    exec(compile(load_file,"six_thousand_csv.py","exec"),sandbox)
+    mapping=source_containing("#@title 2. Identifica y configura")
+    for key,val in {"COLUMNA_ID":"radicado","COLUMNA_TITULO":"asunto","COLUMNA_TEXTO":"contenido",
+                    "COLUMNA_GRUPO":"dependencia","COLUMNA_ENLACE":"enlace"}.items():
+        mapping=re.sub(r"^"+key+r" = [^\\n]+",f'{key} = "{val}"',mapping,flags=re.M)
+    exec(compile(mapping,"six_thousand_mapping.py","exec"),sandbox)
+    assert len(sandbox["corpus"]) == 6000
+    assert sandbox["corpus"]["id_proceso"].nunique() == 6000
 
 # Verifica transferencia: columnas de un CSV distinto se mapean sin reescribir
 # los motores ni depender de un archivo SECOP.
