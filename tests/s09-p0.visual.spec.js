@@ -152,8 +152,7 @@ test('S09 chunking muestra palabras solapadas y actualiza controles',async({page
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s14');
   await expect(page.locator('#chunkOut .chunk-lane')).toHaveCount(4);
   await expect(page.locator('#chunkOut .chunk-token.shared')).not.toHaveCount(0);
-  await page.locator('#chunkOverlap').fill('0');
-  await page.locator('#chunkOverlap').dispatchEvent('input');
+  await page.locator('#chunkOverlap').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}));});
   await expect(page.locator('#chunkOverlapValue')).toHaveText('0');
   await expect(page.locator('#chunkOut .chunk-token.shared')).toHaveCount(0);
   await expect(page.locator('#chunkMeta')).toContainText('overlap: 0');
