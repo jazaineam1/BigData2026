@@ -83,7 +83,7 @@ test('S09 P0 no pregunta nivel de confianza en D1-D5',async({page})=>{
 
 test('S09 P0 mantiene una barra simple sin Mi progreso global',async({page})=>{
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?preview=1#s1');
-  await expect(page.getByRole('button',{name:'Progreso S09'})).toBeVisible();
+  await expect(page.locator('#liveBtn')).toBeHidden(); // acceso público sin panel de progreso
   await expect(page.locator('a[href="../lms/progress.html?s=9"]')).toHaveCount(0);
   await expect(page.getByText('Mi progreso',{exact:true})).toHaveCount(0);
 });
@@ -156,4 +156,26 @@ test('S09 chunking muestra palabras solapadas y actualiza controles',async({page
   await expect(page.locator('#chunkOverlapValue')).toHaveText('0');
   await expect(page.locator('#chunkOut .chunk-token.shared')).toHaveCount(0);
   await expect(page.locator('#chunkMeta')).toContainText('overlap: 0');
+});
+
+
+test('S09 acceso público: la diapositiva 20 no tapa el contenido con un panel LMS',async({page})=>{
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s20');
+  await expect(page.locator('#s20')).toBeVisible();
+  await expect(page.locator('#s20')).toContainText('Coseno = 0.91');
+  await expect(page.locator('#s20')).toContainText('Precision@5');
+  await expect(page.locator('#s20')).not.toContainText('Comprueba S09 Live');
+  await expect(page.locator('#liveBtn')).toBeHidden();
+  await expect(page.locator('#liveDrawer')).toBeHidden();
+  await expect(page.locator('#s20 button')).toHaveCount(0);
+  await page.keyboard.press('ArrowRight');
+  await expect(page).toHaveURL(/#s21$/);
+  await expect(page.locator('#liveDrawer')).toBeHidden();
+});
+
+test('S09 modo público no muestra controles de seguimiento LMS ni en portada',async({page})=>{
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s1');
+  await expect(page.locator('#liveBtn')).toBeHidden();
+  await expect(page.locator('#liveDrawer')).toBeHidden();
+  await expect(page.locator('#moduleIdentity')).toContainText('Acceso libre');
 });
