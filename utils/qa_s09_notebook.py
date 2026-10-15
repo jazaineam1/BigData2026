@@ -144,7 +144,7 @@ with tempfile.TemporaryDirectory() as tmp:
     mapping=source_containing("#@title 2. Identifica y configura")
     for key,val in {"COLUMNA_ID":"radicado","COLUMNA_TITULO":"asunto","COLUMNA_TEXTO":"contenido",
                     "COLUMNA_GRUPO":"dependencia","COLUMNA_ENLACE":"enlace"}.items():
-        mapping=re.sub(r"^"+key+r" = [^\\n]+",f'{key} = "{val}"',mapping,flags=re.M)
+        mapping=re.sub(r"^"+key+r" = [^\n]+",f'{key} = "{val}"',mapping,flags=re.M)
     exec(compile(mapping,"six_thousand_mapping.py","exec"),sandbox)
     assert len(sandbox["corpus"]) == 6000
     assert sandbox["corpus"]["id_proceso"].nunique() == 6000
