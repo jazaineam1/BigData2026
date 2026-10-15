@@ -1,0 +1,27 @@
+name: S09 - Laboratorio reproducible
+on:
+  push:
+    paths:
+      - "utils/build_session9_notebook.py"
+      - "Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb"
+      - "utils/qa_s09_notebook.py"
+      - ".github/workflows/s09-laboratorio-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notebook:
+    name: Esquema, busqueda, evaluacion y transferencia
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Instalar dependencias de prueba (sin descargar E5)
+        run: python -m pip install numpy pandas rank-bm25 ipywidgets ipython
+      - name: Validar S09 con corpus sintetico y CSV ajeno
+        run: python utils/qa_s09_notebook.py
