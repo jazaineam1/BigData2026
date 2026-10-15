@@ -99,3 +99,35 @@ test('S09 se abre sin usuario y permite autocomprobar D1 en modo público',async
   await expect(page.locator('#fb-bd-s09-c1')).toContainText('sin registro');
   await expect(page.getByText('Iniciar sesión',{exact:true})).toHaveCount(0);
 });
+
+test('S09 conserva la navegación cuando el usuario escribe en un campo',async({page})=>{
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s2');
+  await page.locator('#caseQ').focus();
+  await page.keyboard.press('Space');
+  await expect(page).toHaveURL(/#s2$/);
+  await expect(page.locator('#caseQ')).toHaveValue(/\s$/);
+});
+
+test('S09 Precision@5 requiere evaluar los cinco resultados',async({page})=>{
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s21');
+  await expect(page.locator('#rankScore')).not.toContainText('P@5 =');
+  for(const panel of ['#lexRank','#semRank']){
+    const buttons=page.locator(panel+' button.rel');
+    await expect(buttons).toHaveCount(5);
+    for(let i=0;i<5;i++)await buttons.nth(i).click();
+  }
+  await expect(page.locator('#rankScore')).toContainText('P@5 = 1.00');
+});
+
+test('muro S09 público abre sin credenciales y evalúa en modo local',async({page})=>{
+  await page.goto('/Presentaciones/s09-muro-publico.html');
+  await expect(page.getByText('Muro didáctico abierto')).toBeVisible();
+  await page.locator('#choices button[data-value="hibrida"]').click();
+  await page.locator('#reveal').click();
+  await expect(page.locator('#answer')).toContainText('Correcto como hipótesis');
+  await expect(page.locator('#precision')).toHaveText('0/5');
+  const labels=page.locator('#items button');
+  await expect(labels).toHaveCount(5);
+  for(let i=0;i<5;i++)await labels.nth(i).click();
+  await expect(page.locator('#precision')).toHaveText('1.00');
+});
