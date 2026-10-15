@@ -131,3 +131,30 @@ test('muro S09 público abre sin credenciales y evalúa en modo local',async({pa
   for(let i=0;i<5;i++)await labels.nth(i).click();
   await expect(page.locator('#precision')).toHaveText('1.00');
 });
+
+
+test('S09 diagramas corregidos mantienen texto dentro del SVG en seis diapositivas',async({page})=>{
+  await page.setViewportSize({width:1366,height:768});
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s4');
+  for(const n of [4,10,11,12,14,15,17,21,22,25,27,30,31]){
+    const x=await inspectSlide(page,n);
+    expect(x.labels,'S'+n+' textos fuera del SVG').toEqual([]);
+    expect(x.topOverlap,'S'+n+' barra solapada con título').toBeFalsy();
+  }
+});
+test('S09 slide 12 explica mean pooling y las 384 dimensiones',async({page})=>{
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s12');
+  await expect(page.locator('#s12')).toContainText('Mean pooling');
+  await expect(page.locator('#s12')).toContainText('tokens válidos');
+  await expect(page.locator('#s12')).toContainText('384');
+});
+test('S09 chunking muestra palabras solapadas y actualiza controles',async({page})=>{
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s14');
+  await expect(page.locator('#chunkOut .chunk-lane')).toHaveCount(4);
+  await expect(page.locator('#chunkOut .chunk-token.shared')).not.toHaveCount(0);
+  await page.locator('#chunkOverlap').fill('0');
+  await page.locator('#chunkOverlap').dispatchEvent('input');
+  await expect(page.locator('#chunkOverlapValue')).toHaveText('0');
+  await expect(page.locator('#chunkOut .chunk-token.shared')).toHaveCount(0);
+  await expect(page.locator('#chunkMeta')).toContainText('overlap: 0');
+});
