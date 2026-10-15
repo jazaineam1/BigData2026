@@ -50,7 +50,7 @@ def build_cells():
     out = []
     for x in CELLS:
         out.append(md(x["source"]) if x["kind"]=="md" else code(x["source"]))
-        if x["kind"] == "code" and x["source"].startswith("import json, re, time"):
+        if x["kind"] == "code" and "CORPUS_URL =" in x["source"] and "MODEL_NAME =" in x["source"]:
             out.extend([md(BRIDGE_MD), code(BRIDGE_CODE)])
         if x["kind"] == "code" and "Archivo generado: s09_evidencia_semantica.json" in x["source"]:
             out.append(code(FINAL_LMS_CODE))
