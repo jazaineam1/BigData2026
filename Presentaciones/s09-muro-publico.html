@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#142153"><title>Muro abierto S09 · Del texto a la evidencia</title>
+<style>
+:root{--navy:#142153;--teal:#087e81;--orange:#e95d0f;--cream:#faf8f3;--ink:#182342;--line:#dce2ec;--muted:#43506d}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,"Segoe UI",Arial,sans-serif;color:var(--ink);background:radial-gradient(ellipse at top right,#dfedef,transparent 48%),var(--cream);min-height:100vh}
+header{background:var(--navy);color:#fff;padding:18px clamp(16px,3vw,44px);display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+header a{color:#fff;text-decoration:none;border:1px solid #ffffff80;border-radius:10px;padding:10px;font-weight:700}
+header a:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid #ffb15b;outline-offset:3px}
+main{width:min(1480px,96%);margin:26px auto 60px}.eyebrow{font-weight:900;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;font-size:.86rem}
+h1{font-size:clamp(2.2rem,5vw,5rem);line-height:1.04;color:var(--navy);margin:.16em 0}h2{font-size:clamp(1.25rem,2.25vw,2rem);color:var(--navy);margin:0 0 12px}
+.lead{font-size:clamp(1rem,1.6vw,1.35rem);line-height:1.45;max-width:1000px;color:var(--muted)}
+.notice{border-left:6px solid var(--teal);background:#eaf7f5;padding:14px;border-radius:12px;line-height:1.5}
+.pills{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}.pill{font-size:.94rem;font-weight:800;border-radius:100px;background:#e5ebf7;color:var(--navy);padding:9px 14px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:20px}
+.panel{background:white;border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 12px 30px #1421530d}
+.wide{grid-column:1/-1}.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.choice{background:#f7f9fd;border:2px solid var(--line);border-radius:16px;padding:18px;color:var(--ink);font-weight:900;font-size:1.03rem;text-align:left;cursor:pointer;min-height:100px;transition:transform .15s,border-color .15s}
+.choice:hover{transform:translateY(-2px);border-color:var(--teal)}.choice[aria-pressed=true]{border-color:var(--teal);background:#e8f7f5}
+button{font:inherit}button.primary{background:var(--teal);border:0;color:white;font-weight:900;padding:12px 18px;border-radius:12px;cursor:pointer}button.secondary{background:#e9edf5;border:0;color:var(--navy);font-weight:800;padding:12px 18px;border-radius:12px;cursor:pointer}
+button.primary:disabled{opacity:.4;cursor:not-allowed}
+.feedback{margin-top:15px;padding:14px;border-radius:12px;background:#f1f5fb;font-weight:750;line-height:1.5;min-height:62px}
+.case{font-size:clamp(1.35rem,2.6vw,2.15rem);line-height:1.2;font-weight:850;max-width:700px}
+.flow{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.node{border:1px solid var(--line);padding:10px 14px;border-radius:10px;background:white;font-weight:800}.arrow{font-size:1.8rem;color:var(--orange)}
+select{font:inherit;padding:12px;border:2px solid var(--line);border-radius:11px;max-width:100%}
+.rows{display:grid;gap:8px}.result{border:1px solid var(--line);padding:11px;border-radius:12px;display:flex;gap:12px;justify-content:space-between;align-items:center}.result button{border:2px solid #b6c4d8;background:#fff;border-radius:10px;min-width:80px;padding:7px;cursor:pointer;font-weight:800}.result button.yes{color:#00643c;background:#e2f5e8}.result button.no{color:#9a2514;background:#fff0e8}
+.kpi{font-size:2.5rem;font-weight:950;color:var(--teal)}small{color:var(--muted)}footer{padding:28px;text-align:center;color:var(--muted)}
+@media(max-width:800px){.grid,.three{grid-template-columns:1fr}.wide{grid-column:auto}.panel{padding:18px}header{padding:14px}}
+@media(prefers-reduced-motion:reduce){.choice{transition:none}}
+</style></head><body>
+<header><div><strong>UNIVERSIDAD CENTRAL</strong> · MAESTRÍA EN ANALÍTICA DE DATOS · S09</div><nav aria-label="Enlaces"><a href="s09-de-palabras-a-significado.html#s1">Presentación</a> <a href="../lms/wall.html?s=9">WALL docente protegido</a> <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb" target="_blank" rel="noopener">Cuaderno</a></nav></header>
+<main>
+<section><span class="eyebrow">Muro didáctico abierto · sin usuario</span><h1>Del texto a la evidencia.</h1><p class="lead">Un solo problema: encontrar procesos relevantes aunque la consulta y los documentos usen palabras distintas. Decide, experimenta, contrasta y defiende.</p>
+<div class="notice"><b>Modo de proyección:</b> funciona sin iniciar sesión. Las decisiones se guardan <b>únicamente en este navegador</b>; no representan votos de otros participantes ni muestran datos personales. Para ver los avances reales de la cohorte, ingresa al <a href="../lms/wall.html?s=9">WALL docente</a> con tu cuenta autorizada.</div>
+<div class="pills"><span class="pill">00–35 · Dilema</span><span class="pill">35–90 · Embeddings</span><span class="pill">90–100 · Pausa</span><span class="pill">100–135 · Atlas</span><span class="pill">135–180 · Evidencia</span></div></section>
+<div class="grid">
+<section class="panel wide" aria-labelledby="dilemma"><span class="eyebrow">Momento 1 · El conflicto</span><h2 id="dilemma">Una consulta y tres estrategias</h2><p class="case">«Servicios para mantener aeronaves militares disponibles»</p><div class="flow"><span class="node">consulta</span><span class="arrow">→</span><span class="node">BM25</span><span class="node">Embeddings</span><span class="node">Híbrida</span><span class="arrow">→</span><span class="node">Resultados</span></div>
+<p>¿Qué estrategia explorarías primero para recuperar paráfrasis, pero sin perder identificadores exactos?</p>
+<div class="three" id="choices"><button class="choice" type="button" data-value="lexica" aria-pressed="false">A · Solo coincidencias textuales</button><button class="choice" type="button" data-value="semantica" aria-pressed="false">B · Solo cercanía semántica</button><button class="choice" type="button" data-value="hibrida" aria-pressed="false">C · Combinar señales y evaluar</button></div>
+<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap"><button class="primary" id="reveal" disabled>Revelar criterio</button><button class="secondary" id="reset">Reiniciar decisión local</button></div><p class="feedback" id="answer" role="status" aria-live="polite">Elige una estrategia. La explicación aparecerá cuando pulses «Revelar criterio».</p>
+</section>
+<section class="panel"><span class="eyebrow">Momento 2 · Comparación</span><h2>Recuperar no es acertar</h2><p><b>Embedding:</b> representación vectorial aprendida. <b>Coseno:</b> cercanía geométrica, nunca una probabilidad. <b>Top-k:</b> candidatos ordenados, no resultados verdaderos.</p><p>Para comparar dos buscadores, necesitas los mismos documentos, consultas y juicios humanos de relevancia.</p><div class="notice"><b>Error frecuente:</b> «coseno 0,91 = 91 % de relevancia» es falso.</div></section>
+<section class="panel"><span class="eyebrow">Momento 3 · Decisión técnica</span><h2>La base no crea el significado</h2><div class="flow"><span class="node">texto</span><span class="arrow">→</span><span class="node">modelo E5</span><span class="arrow">→</span><span class="node">vector 384D</span><span class="arrow">→</span><span class="node">índice</span></div><p>El modelo produce vectores; MongoDB conserva documentos, metadatos e índices. ANN acelera la recuperación aproximando vecinos, no la verdad.</p><p>El cuaderno permite completar la actividad sin Atlas y utilizar Atlas solo cuando la conexión esté lista.</p></section>
+<section class="panel wide"><span class="eyebrow">Momento 4 · Laboratorio de evidencia</span><h2>¿Puedes afirmar que tu ranking es bueno?</h2>
+<p>Simula juicios humanos para estos cinco resultados. Pulsa <b>?</b> y marca <b>sí</b> o <b>no</b>. Hasta juzgar los cinco, no existe Precision@5.</p>
+<div class="rows" id="items"></div>
+<div style="margin-top:14px;display:flex;align-items:center;gap:20px;flex-wrap:wrap"><div><small>Relevancia juzgada</small><div class="kpi" id="precision" aria-live="polite">Pendiente</div></div><button class="secondary" id="resetPrecision">Borrar juicios</button></div>
+<p class="feedback" id="interpretation">Necesitas criterios de relevancia sobre el contenido, no solo números del motor.</p></section>
+</div></main><footer>Universidad Central · S09 · Vista local de proyección (no sincronizada con estudiantes)</footer>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id),buttons=[...document.querySelectorAll('#choices button')],reveal=$('reveal'),answer=$('answer');
+let choice='';
+buttons.forEach(b=>b.addEventListener('click',()=>{choice=b.dataset.value;buttons.forEach(x=>x.setAttribute('aria-pressed',String(x===b)));reveal.disabled=false;answer.textContent='Decisión registrada localmente. Revela el criterio después de discutirlo.'}));
+reveal.onclick=()=>{answer.textContent=choice==='hibrida'?'Correcto como hipótesis inicial: híbrida reúne coincidencia exacta y paráfrasis; solo la evaluación humana verifica si mejoró el ranking.':choice==='semantica'?'Semántica ayuda con paráfrasis, pero puede perder precisión con identificadores y traer falsos positivos. Contrasta con BM25 e híbrida.':'BM25 conserva coincidencias exactas, pero puede perder una necesidad expresada con otras palabras. Contrasta una ruta semántica e híbrida.'};
+$('reset').onclick=()=>{choice='';reveal.disabled=true;buttons.forEach(x=>x.setAttribute('aria-pressed','false'));answer.textContent='Elige una estrategia para empezar.'};
+const examples=['Mantenimiento programado de aeronaves KFIR','Suministro de repuestos para helicópteros','Construcción de edificio administrativo militar','Inspección estructural de avión C-130','Renovación de software administrativo'];
+let states=[null,null,null,null,null];function draw(){
+ $('items').innerHTML=examples.map((x,i)=>'<div class="result"><span><b>'+(i+1)+'.</b> '+x+'</span><button type="button" data-i="'+i+'" class="'+(states[i]===true?'yes':states[i]===false?'no':'')+'" aria-label="Juicio del resultado '+(i+1)+'">'+(states[i]===true?'✓ Sí':states[i]===false?'× No':'? Evaluar')+'</button></div>').join('');
+ document.querySelectorAll('#items button').forEach(b=>b.onclick=()=>{let i=Number(b.dataset.i);states[i]=states[i]===null?true:states[i]===true?false:null;draw()});
+ const evaluated=states.filter(x=>x!==null).length;
+ $('precision').textContent=evaluated<5?evaluated+'/5':(states.filter(Boolean).length/5).toFixed(2);
+ $('interpretation').textContent=evaluated<5?'Has revisado '+evaluated+' de 5 resultados. Lee el objeto de cada proceso antes de etiquetarlo.':'Precision@5 = '+(states.filter(Boolean).length/5).toFixed(2)+' según TUS juicios didácticos. No sustituye una referencia independiente ni permite concluir recall.';
+}
+$('resetPrecision').onclick=()=>{states=[null,null,null,null,null];draw()};draw();
+})();
+</script></body></html>
