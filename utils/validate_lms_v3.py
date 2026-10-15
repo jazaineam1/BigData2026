@@ -66,7 +66,7 @@ checks=[
     ("recursos S01-S09 declarativos","bd-s01-r1" in sql and "bd-s07-r1" in sql and "bd-s08-module" in sql and "bd-s09-c5" in sql),
     ("rutas canónicas SQL","set path = 'session.html?s=' || session_number::text" in sql and "canonical_module" in sql),
     ("S09 vuelve a módulo universal sin duplicar progreso",'href="../lms/session.html?s=9"' in deck and 'href="../lms/progress.html?s=9"' not in deck),
-    ("S09 login vuelve a módulo universal","../lms/session.html?s=9&reason=login" in deck),
+    ("S09 permite acceso público sin quitar seguimiento LMS","Acceso libre · S09" in deck and "reason=login" not in deck and "L.s09('me')" in deck and "requireS09({teacher:true})" in deck),
     ("SVG S09 contenidos","overflow:hidden" in re.search(r'\.svg\{[^}]*\}',deck).group(0) and "height:auto" in re.search(r'\.svg\{[^}]*\}',deck).group(0)),
     ("estándar viz-frame",".viz-frame{" in css and ":focus-visible" in css),
     ("bridge recursos internos","requireSession(n)" in bridge and "guide_opened" in bridge and all("resource-bridge.js" in x for x in [atlas_guide,astra_guide,neo4j_guide])),
