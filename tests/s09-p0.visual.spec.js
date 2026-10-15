@@ -87,3 +87,15 @@ test('S09 P0 mantiene una barra simple sin Mi progreso global',async({page})=>{
   await expect(page.locator('a[href="../lms/progress.html?s=9"]')).toHaveCount(0);
   await expect(page.getByText('Mi progreso',{exact:true})).toHaveCount(0);
 });
+
+
+test('S09 se abre sin usuario y permite autocomprobar D1 en modo público',async({page})=>{
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s9');
+  await expect(page).toHaveURL(/s09-de-palabras-a-significado\.html#s9$/);
+  await expect(page.locator('#moduleIdentity')).toContainText('Acceso libre');
+  await page.locator('#ans-bd-s09-c1').selectOption('lexical');
+  await page.locator('#s9 .challenge button').click();
+  await expect(page.locator('#fb-bd-s09-c1')).toContainText('Correcto');
+  await expect(page.locator('#fb-bd-s09-c1')).toContainText('sin registro');
+  await expect(page.getByText('Iniciar sesión',{exact:true})).toHaveCount(0);
+});
