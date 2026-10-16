@@ -65,7 +65,7 @@ if start>=0 and end>=0:
     source_array=deck[start:end]+"\n];"
     js_validator=r"""
 const src=process.argv[1];
-const names=[...new Set([...src.matchAll(/\\b(svg[A-Za-z0-9_]+)\\(\\)/g)].map(m=>m[1])),'challengeChoice'];
+const names=[...new Set([...src.matchAll(/\b(svg[A-Za-z0-9_]+)\(\)/g)].map(m=>m[1])),'challengeChoice'];
 const mock=names.map(()=>()=>'<svg></svg>');
 const slides=(new Function(...names,src+'; return slides;'))(...mock);
 if(slides.length!==35)throw Error('Cantidad de slides: '+slides.length);
