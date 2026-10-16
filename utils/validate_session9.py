@@ -59,6 +59,24 @@ else:
     raw=deck[start:end]
     slides=[x for x in re.split(r'\n(?=\{t:[\'"])',raw) if re.search(r'\{t:[\'"]',x)]
 
+# Validación ejecutable del arreglo: JS sintácticamente válido puede contener
+# una expresión que convierte un objeto slide en string y renderiza "undefined".
+if start>=0 and end>=0:
+    source_array=deck[start:end]+"\n];"
+    js_validator=r"""
+const src=process.argv[1];
+const names=[...new Set([...src.matchAll(/\\b(svg[A-Za-z0-9_]+)\\(\\)/g)].map(m=>m[1])),'challengeChoice'];
+const mock=names.map(()=>()=>'<svg></svg>');
+const slides=(new Function(...names,src+'; return slides;'))(...mock);
+if(slides.length!==35)throw Error('Cantidad de slides: '+slides.length);
+const invalid=slides.flatMap((x,i)=>!x||typeof x!=='object'||
+  ['t','k','h','b'].some(key=>typeof x[key]!=='string'||!x[key].trim())?[i+1]:[]);
+if(invalid.length)throw Error('Slide sin propiedades válidas: '+invalid.join(','));
+"""
+    valid=subprocess.run(["node","-e",js_validator,source_array],capture_output=True,text=True)
+    if valid.returncode:
+        errors.append("S09 estructura runtime inválida: "+valid.stderr.strip()[:600])
+
 resource_seed_start=seed.find("insert into public.lms_run_resources_v2")
 resource_seed=seed[resource_seed_start:] if resource_seed_start>=0 else ""
 resource_selects=len(re.findall(r"select\s+id,9,",resource_seed,re.I))
