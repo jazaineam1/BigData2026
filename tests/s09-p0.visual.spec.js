@@ -181,34 +181,34 @@ test('S09 modo público no muestra controles de seguimiento LMS ni en portada',a
 });
 
 
-test('S09 reflexión Precision@5 no inventa ceros antes de juicios',async({page})=>{
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s32');
- await expect(page.locator('#pOut')).toContainText('Sin evaluar · 0/5');
- const choices=page.locator('#pBtns button');
- await expect(choices).toHaveCount(5);
- await choices.nth(0).click();
- await expect(page.locator('#pOut')).toContainText('Sin evaluar · 1/5');
- for(let i=1;i<5;i++)await choices.nth(i).click();
- await expect(page.locator('#pOut')).toContainText('Precision@5 = 1.00');
- await choices.nth(0).click();
- await expect(page.locator('#pOut')).toContainText('Precision@5 = 0.80');
- await page.getByRole('button',{name:'Restablecer'}).click();
- await expect(page.locator('#pOut')).toContainText('Sin evaluar · 0/5');
+test('S09 taller Atlas conserva S1-S21 y muestra el flujo operativo desde S22',async({page})=>{
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s21');
+ await expect(page.locator('#s21')).toContainText('Modelo E5');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s22');
+ await expect(page.locator('#s22')).toContainText('menos de una hora');
+ await expect(page.locator('#s22')).toContainText('Abrir ruta exprés en Colab');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s27');
+ await expect(page.locator('#s27')).toContainText('bulk_write');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s29');
+ await expect(page.locator('#s29')).toContainText('queryable');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s30');
+ await expect(page.locator('#s30')).toContainText('$vectorSearch');
 });
-test('S09 explica modelos y faltas ortográficas sin prometer autocorrección de E5',async({page})=>{
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s6');
- await page.locator('#lexQ').selectOption({label:'mantenimieto de aeronavess'});
- await page.getByRole('button',{name:'Ver coincidencia de tokens'}).click();
- await expect(page.locator('#lexOut')).toContainText('BM25 NO corrige');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s12');
- await expect(page.locator('#s12')).toContainText('intfloat/multilingual-e5-small');
- await expect(page.locator('#s12')).toContainText('384');
+test('S09 presenta Atlas en 55 minutos y distingue NumPy de Atlas',async({page})=>{
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s25');
+ await expect(page.locator('#s25')).toContainText('intfloat/multilingual-e5-small');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s28');
- await expect(page.locator('#s28')).toContainText('Atlas es opcional');
+ await expect(page.locator('#s28')).toContainText('Search');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s32');
+ await expect(page.locator('#s32')).toContainText('NumPy');
+ await expect(page.locator('#s32')).toContainText('no llamarla');
 });
-test('S09 muestra que el formulario final es ejemplo y el JSON real sale de Colab',async({page})=>{
+test('S09 obliga a presentar evidencia Atlas real o respaldo local honesto',async({page})=>{
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s33');
- await expect(page.locator('#s33')).toContainText('Ejemplo, NO resultado del motor');
- await expect(page.getByRole('button',{name:'Generar JSON ilustrativo'})).toBeVisible();
- await expect(page.locator('#s33')).toContainText('evidencia real sale de Colab');
+ await expect(page.locator('#s33')).toContainText('MongoDB Atlas Vector Search');
+ await expect(page.locator('#s33')).toContainText('JSON');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s34');
+ await expect(page.locator('#s34')).toContainText('modo=local');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s35');
+ await expect(page.locator('#s35')).toContainText('Atlas');
 });
