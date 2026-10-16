@@ -212,3 +212,59 @@ test('S09 obliga a presentar evidencia Atlas real o respaldo local honesto',asyn
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s35');
  await expect(page.locator('#s35')).toContainText('Atlas');
 });
+
+
+test('S09 valida en ejecución que las 35 diapositivas sean objetos completos',async({page})=>{
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?qa=structure#s34');
+  const state=await page.evaluate(()=>({
+    count:slides.length,
+    broken:slides.flatMap((s,i)=>!s || typeof s!=='object' || ['t','k','h','b'].some(k=>typeof s[k]!=='string'||!s[k].trim())?[i+1]:[]),
+    fallback:typeof slideStructureErrors!=='undefined'?slideStructureErrors:[],
+    rendered:[...document.querySelectorAll('.slide')].map(s=>({h:s.querySelector('h1')?.textContent,k:s.querySelector('.k')?.textContent}))
+  }));
+  expect(state.count).toBe(35);
+  expect(state.broken).toEqual([]);
+  expect(state.fallback).toEqual([]);
+  expect(state.rendered.filter(x=>!x.h||!x.k||/undefined/i.test(x.h)||/undefined/i.test(x.k))).toEqual([]);
+  await expect(page.locator('#s34')).toBeVisible();
+  await expect(page.locator('#s34 h1')).toHaveText('Plan B sin confundir una simulación con Atlas.');
+  await expect(page.locator('#s34 .challenge')).toHaveCount(1);
+  await page.locator('#next').click();
+  await expect(page).toHaveURL(/#s35$/);
+  await expect(page.locator('#s35 h1')).toContainText('sistema');
+});
+
+test('S09 móvil · sin título undefined, navegación funcional y encabezado despejado',async({page})=>{
+  await page.setViewportSize({width:393,height:820});
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?qa=mobile#s34');
+  const x=await page.evaluate(()=>{
+    const slide=document.querySelector('.slide.on');
+    const r=el=>el.getBoundingClientRect(),title=r(slide.querySelector('h1')),head=r(document.querySelector('.top'));
+    return {titleTop:title.top,toolbarBottom:head.bottom,scrollable:slide.scrollHeight>slide.clientHeight,html:slide.querySelector('h1').textContent};
+  });
+  expect(x.titleTop).toBeGreaterThanOrEqual(x.toolbarBottom-2);
+  expect(x.html).not.toMatch(/undefined/i);
+  expect(x.scrollable).toBe(true);
+  await page.locator('#next').click();
+  await expect(page).toHaveURL(/#s35$/);
+  await expect(page.locator('#s35 h1')).toBeVisible();
+  await page.locator('#prev').click();
+  await expect(page).toHaveURL(/#s34$/);
+});
+
+test('S09 móvil · etapa de Atlas accesible sin que la barra tape el h1',async({page})=>{
+  await page.setViewportSize({width:360,height:740});
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?qa=mobile#s22');
+  await expect(page.locator('#s22 h1')).toContainText('menos de una hora');
+  await expect(page.locator('#s22 a[href*="colab.research.google.com"]')).toBeAttached();
+  for (const n of [22,23,24,25,26,27,28,29,30,31,32,33,34,35]){
+    await page.evaluate(number=>location.hash='#s'+number,n);
+    const rects=await page.evaluate(()=>{
+      const h=document.querySelector('.slide.on h1').getBoundingClientRect();
+      const top=document.querySelector('.top').getBoundingClientRect();
+      return {hTop:h.top,tBottom:top.bottom,words:document.querySelector('.slide.on h1').textContent};
+    });
+    expect(rects.words,'S'+n).not.toMatch(/undefined/i);
+    expect(rects.hTop,'S'+n+' toolbar cubre el titulo').toBeGreaterThanOrEqual(rects.tBottom-2);
+  }
+});
