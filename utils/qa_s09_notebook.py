@@ -33,6 +33,22 @@ assert "def buscar_lexical" in full and "def buscar_semantico_local" in full
 assert "def rrf_fusion" in full and "def buscar_s09" in full
 assert "def comparar_s09" in full and "def exportar_s09" in full
 assert "USAR_ATLAS = False" in full
+# La ruta express debe estar delante del apéndice, tener pasos independientes,
+# y ejecutar consultas Atlas únicamente si el índice fue confirmado.
+quick = ["".join(c["source"]) for c in nb["cells"][:17]]
+assert quick[0].startswith("# S09 · Taller exprés de MongoDB Atlas Vector Search")
+assert "#@title 1 · Cargar SECOP" in quick[3]
+assert 'SentenceTransformer(MODEL_NAME)' in quick[5]
+assert 'client.admin.command("ping")' in quick[7]
+assert 'col.bulk_write(' in quick[9]
+assert 'SearchIndexModel(' in quick[11]
+assert 'col.list_search_indexes(' in quick[12]
+assert '"$vectorSearch"' in quick[14]
+assert 'resultados_atlas=pd.DataFrame' in quick[14]
+assert 's09_atlas_evidencia.json' in quick[15]
+assert 'if atlas_ok and atlas_cargado and indice_queryable:' in quick[14]
+assert 'MongoDB Atlas Vector Search' in quick[15]
+assert 'NumPy local (respaldo)' in quick[15]
 assert "LIMITE = 6000" in full
 assert "SECOP ampliado (6000)" in full
 assert "sugerir_correcciones" in full and "ortografia_ui" in full
@@ -60,7 +76,7 @@ class ModeloE5Ficticio:
 
 ns = {"__name__":"__main__"}
 load = source_containing("#@title 1. Selecciona de dónde salen tus datos")
-load = load.replace('MODE_DATOS = "SECOP del curso"', 'MODE_DATOS = "Ejemplo sintético de respaldo"')
+load = load.replace('MODE_DATOS = "SECOP ampliado (6000)"', 'MODE_DATOS = "Ejemplo sintético de respaldo"')
 exec(compile(load,"synthetic_data.py","exec"),ns)
 exec(compile(source_containing("#@title 2. Identifica y configura"),"mapping.py","exec"),ns)
 assert len(ns["corpus"]) == 6
@@ -159,7 +175,7 @@ with tempfile.TemporaryDirectory() as tmp:
         {"radicado":"A-3","asunto":"Sin acceso al portal","contenido":"No abre el formulario de solicitudes","dependencia":"Tecnología","enlace":""}
     ]).to_csv(demo,index=False)
     load_file=source_containing("#@title 1. Selecciona de dónde salen tus datos")
-    load_file=load_file.replace('MODE_DATOS = "SECOP del curso"','MODE_DATOS = "Subir CSV desde computador"')
+    load_file=load_file.replace('MODE_DATOS = "SECOP ampliado (6000)"','MODE_DATOS = "Subir CSV desde computador"')
     load_file=load_file.replace('ARCHIVO_CSV = ""',f"ARCHIVO_CSV = {str(demo)!r}")
     other={"__name__":"__main__"}
     exec(compile(load_file,"new_csv.py","exec"),other)
