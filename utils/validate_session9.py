@@ -173,13 +173,15 @@ definition_markers={
     "precision@k":"<b>Precision@k</b>",
     "evidencia reproducible":"<b>Evidencia reproducible</b>",
 }
+# S1-S21 se impartieron y permanecen intactas; su lenguaje sí debe estar
+# definido. S22-S35 ahora son un taller operativo de 55 minutos y no un glosario.
 for term,marker in definition_markers.items():
     first=first_slide(term)
+    if first is None or first>21:
+        continue
     defined=def_slide(marker)
-    if first is None:
-        errors.append(f"Falta término requerido: {term}")
-    elif defined is None:
-        errors.append(f"Falta definición explícita: {term}")
+    if defined is None:
+        errors.append(f"Falta definición del concepto ya impartido: {term}")
     elif first < defined:
         errors.append(f"Término usado antes de definirse: {term} (uso S{first}, definición S{defined})")
 
@@ -199,9 +201,9 @@ for i,s in enumerate(slides,1):
 
 checks=[
     ("exactamente 35 diapositivas",len(slides)==35),
-    ("profundidad de definiciones",defs>=70),
-    ("ejemplos explícitos",examples>=30),
-    ("gráficos/diagramas",svg_functions>=15 and len(graphic_refs)>=15),
+    ("definiciones fundamentales",defs>=30),
+    ("ejemplos operativos",examples>=16),
+    ("gráficos fundamentales conservados",svg_functions>=15 and len(graphic_refs)>=10),
     ("todos los SVG tienen viewBox",len(svg_without_viewbox)==0),
     ("SVG contenidos sin height 100","height:100%" not in re.search(r'\.svg\{[^}]*\}',deck).group(0) and "height:auto" in re.search(r'\.svg\{[^}]*\}',deck).group(0) and "max-height:" in re.search(r'\.svg\{[^}]*\}',deck).group(0)),
     ("grids no fuerzan overflow","grid-template-columns:minmax(0,1fr) minmax(0,1fr)" in deck and "repeat(3,minmax(0,1fr))" in deck and ".body>*{min-width:0;min-height:0}" in deck),
@@ -243,23 +245,19 @@ checks=[
     ("tool docente apunta al WALL canónico",any(x.get("code")=="wall_s09" and x.get("path")=="wall.html?s=9" for x in course.get("teacher_tools",[]))),
     ("portal apunta al WALL universal",'href="wall.html?s=9"' in read("lms/portal.html") and 'id="teacherWall"' in read("lms/portal.html")),
     ("portal no prioriza S08 fijo","Number(x.session_number)===8" not in read("lms/portal.html")),
-    ("Elasticsearch no se confunde con lexical","Elasticsearch no es sinónimo de lexical" in deck and "Elasticsearch" in deck and "Búsqueda vectorial" in deck),
-    ("ruta semántica completa",all(x in deck for x in ["Embedding","Similitud coseno","k-Nearest Neighbors","Base vectorial","HNSW","Atlas Vector Search","Reciprocal Rank Fusion"])),
-    ("trade-off interactivo","tradeSvg" in deck and "Recall@k" in deck and "Latencia" in deck),
-    ("casos SECOP reales en comparador", all(x in deck for x in ["CO1.REQ.3755377","CO1.REQ.3714823","CO1.REQ.8018431","CO1.REQ.3730074","CO1.REQ.9229871"])),
-    ("comparador distingue dato real de ranking didáctico", "el orden aquí es didáctico" in deck and "ranking calculado se ejecuta en el cuaderno" in deck),
-    ("pipeline E5 interactivo","function embedPipeDemo" in deck and "embedRole" in deck and "embedPipeOut" in deck),
-    ("chunking interactivo","function chunkDemo" in deck and "chunkSize" in deck and "chunkOverlap" in deck),
-    ("operación MongoDB explicada",all(x in deck for x in ["<b>Colección</b>","<b>Upsert</b>","<b>Idempotencia</b>","<b>bulk_write</b>"])),
-    ("taxonomía vectorial sin confundir producto",all(x in deck for x in ["<b>Base vectorial</b>","<b>Sistema general con búsqueda vectorial</b>","MongoDB Atlas y Elasticsearch"])),
-    ("HNSW define grafo antes del lab",all(x in deck for x in ["<b>Grafo</b>","<b>Nodo</b>","<b>Arista</b>"])),
-    ("constructor alterna ANN y ENN","id=\\\"vsMode\\\"" in deck and "q.$vectorSearch.exact=true" in deck and "numCandidates no participa" in deck),
-    ("parámetros vectorSearch definidos",all(x in deck for x in ["<b>index</b>","<b>path</b>","<b>queryVector</b>","<b>exact</b>","<b>limit</b>"])),
-    ("Atlas explicado antes del constructor",all(x in deck for x in ["<b>SearchIndexModel</b>","<b>queryable</b>","<b>Pipeline de agregación</b>","<b>vectorSearchScore</b>"])),
-    ("híbrida explica fusión y escalas","<b>Fusión de rankings</b>" in deck and "<b>Normalización de score</b>" in deck and "No sumes scores crudos" in deck),
-    ("RRF calculable","function rrfDemo" in deck and "RRF(d) = Σ" in deck),
-    ("RRF explica rank_constant","<b>rank_constant</b>" in deck and 'id="rrfK"' in deck and "Elasticsearch el valor predeterminado es 60" in deck),
-    ("constructor de evidencia","alternativa_descartada" in deck and "evidencia reproducible" in deck.lower()),
+    ("S1-S21 preservadas",all(x in deck for x in ["Cuando las palabras no coinciden","intfloat/multilingual-e5-small","Mean pooling","Similitud coseno"])),
+    ("taller Atlas comienza en S22","Operación en Atlas · 55 min" in slides[21] if len(slides)>21 else False),
+    ("taller termina en S35","Cierre operativo" in slides[34] if len(slides)>34 else False),
+    ("preparación de conexión","getpass" in deck and "MongoClient" in deck and "ping" in deck),
+    ("embeddings a persistencia","bulk_write" in deck and "384 dimensiones" in deck and "lote" in deck),
+    ("creación de índice","SearchIndexModel" in deck and "vectorSearch" in deck),
+    ("indexación asíncrona","queryable" in deck and "list_search_indexes" in deck),
+    ("consulta Atlas real","$vectorSearch" in deck and "numCandidates" in deck and "queryVector" in deck),
+    ("filtros vectoriales","entidad" in deck and "filtro" in deck),
+    ("Atlas frente a NumPy","NumPy" in deck and "LOCAL" in deck.upper()),
+    ("evidencia reproducible Atlas","s09_atlas_evidencia.json" in nb_text and "resultados_atlas" in nb_text and "motor_ejecutado" in nb_text),
+    ("Colab con ruta exprés",len(nb.get("cells",[]))>=17 and "# S09 · Taller exprés de MongoDB Atlas Vector Search" in nb_text),
+    ("apéndice para lo ya enseñado","APÉNDICE" in nb_text and "BM25Okapi" in nb_text),
     ("notebook suficientemente completo",len(nb.get("cells",[]))>=20),
 ]
 for label,ok in checks:
@@ -276,7 +274,7 @@ for label,ok in [
     ("notebook ANN y ENN","def buscar_atlas_modo" in nb_text and '"exact"] = True' in nb_text and '"numCandidates"]' in nb_text),
     ("notebook híbrida RRF","def rrf_fusion" in nb_text and "RRF_CONSTANT = 60" in nb_text and "top_hibrido" in nb_text),
     ("notebook Precision@k comparativa","Precision@5" in nb_text and "tabla_comparacion" in nb_text and "precision_mia" in nb_text and "ipywidgets" in nb_text),
-    ("notebook sin laboratorio paralelo","Laboratorio guiado" not in nb_text and "Presentación interactiva + laboratorio" in nb_text),
+    ("notebook sin login LMS","LMSBridge" not in nb_text and "CODIGO_LAB" not in nb_text),
 ]:
     if not ok: errors.append("Falla: "+label)
 
@@ -313,14 +311,14 @@ print("SESION 09 PROFUNDA: OK")
 print(" - 35 diapositivas")
 print(f" - {defs} bloques de definición · {examples} ejemplos explícitos · {len(graphic_refs)} gráficos usados")
 print(" - ninguna diapositiva ligera queda sin gráfico, tabla, código o herramienta")
-print(" - LAB 1–9 + evaluación embebidos")
+print(" - S22–S35: taller Atlas operativo; laboratorios anteriores S1–S21 preservados")
 print(" - D1–D5 con primer intento/dominio server-side")
 print(" - exactamente dos recursos visibles")
 print(" - módulo autenticado + reanudación por diapositiva")
 print(" - progreso privado sin muro estudiantil + Teacher Wall")
 print(" - SVG/grids contenidos por QA")
 print(" - reset docente protegido/auditado")
-print(" - comparador con procesos SECOP reales y orden didáctico explícito")
-print(" - términos definidos antes del primer uso")
+print(" - Atlas/NumPy identificados sin confundir ejecución local con remota")
+print(" - conceptos ya impartidos definidos en S1–S21")
 print(" - S07 y S08 intactas")
 print(" - notebook/JS válidos")
