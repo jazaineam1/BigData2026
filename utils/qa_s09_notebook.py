@@ -186,4 +186,39 @@ with tempfile.TemporaryDirectory() as tmp:
     exec(compile(mapping,"other_mapping.py","exec"),other)
     assert other["corpus"]["id_proceso"].tolist() == ["A-1","A-2","A-3"]
     assert other["corpus"].iloc[0]["entidad"] == "Tecnología"
+# Ruta exprés: comprobar fallback LOCAL sin red de Atlas ni inferencia real E5.
+# Es un test de ejecución de flujo, NO prueba que Atlas esté conectado.
+with tempfile.TemporaryDirectory() as tmp:
+    import os
+    original_dir=os.getcwd()
+    try:
+        os.chdir(tmp)
+        entorno={"__name__":"__main__"}
+        cargar=source_containing("#@title 1 · Cargar SECOP y preparar un lote")
+        cargar=cargar.replace('MODO_DEMO = "rápido (120)"',
+                              'MODO_DEMO = "respaldo sintético"')
+        exec(compile(cargar,"atlas_express_corpus.py","exec"),entorno)
+        assert len(entorno["corpus"]) == 6
+        modelo_falso=ModeloE5Ficticio()
+        entorno["modelo"]=modelo_falso
+        entorno["embeddings"]=modelo_falso.encode(
+            ["passage: "+t for t in entorno["corpus"]["texto_busqueda"]])
+        entorno.update(atlas_ok=False,atlas_cargado=False,indice_queryable=False)
+        consulta=source_containing("#@title 7 · Ejecutar búsqueda Atlas real")
+        exec(compile(consulta,"atlas_express_search.py","exec"),entorno)
+        assert len(entorno["resultados_numpy"]) == 5
+        assert entorno["resultados_atlas"].empty
+        export=source_containing("#@title 8 · Medir coincidencia")
+        exec(compile(export,"atlas_express_evidence.py","exec"),entorno)
+        ruta=Path("s09_atlas_evidencia.json")
+        assert ruta.exists()
+        payload=json.loads(ruta.read_text(encoding="utf-8"))
+        assert payload["motor_ejecutado"] == "NumPy local (respaldo)"
+        assert payload["resultados_atlas"] == []
+        assert len(payload["resultados_locales"]) == 5
+        assert payload["index"] is None
+        assert "URI" not in payload and "password" not in payload
+    finally:
+        os.chdir(original_dir)
+
 print("S09 QA OK: celdas sincronizadas, sintaxis, búsqueda, evaluación, exportación y CSV propio.")
