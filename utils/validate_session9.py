@@ -214,8 +214,6 @@ for i,s in enumerate(slides,1):
 
 nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
 
-nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
-
 checks=[
     ("exactamente 35 diapositivas",len(slides)==35),
     ("definiciones fundamentales",defs>=30),
