@@ -39,12 +39,32 @@ El grupo ya conoció búsqueda lexical/Elasticsearch, BM25, E5, embeddings, cose
 | 18–23 | 26 | «¿Qué demuestra ping?» Conectividad, no índice listo. | Activar USAR_ATLAS y conectar sin publicar contraseña. |
 | 23–30 | 27 | «¿Qué pasa si cargamos dos veces?» Debe conservar N sin duplicar. | Upsert, conteo del lote, documento de 384 dimensiones. |
 | 30–36 | 28 | «¿Lote y entidad son dimensiones del embedding?» No, son metadatos. | Crear/verificar índice vectorial y filtros. |
-| 36–40 | 29 | «¿Una solicitud de índice equivale a índice disponible?» No. | Confirmar queryable=True en Atlas. |
-| 40–45 | 30 | «¿Quién devuelve este Top-5?» Atlas mediante $vectorSearch. | Ejecutar ANN con filtro lote. |
+| 36–40 | 29 | «¿Una solicitud de índice equivale a índice disponible?» No. | Ver Pending/Ready en Atlas UI; reejecutar celda 5 si el índice se creó desde interfaz; verificar queryable=True. |
+| 40–45 | 30 | «¿Quién devuelve este Top-5?» Atlas mediante $vectorSearch. | Ejecutar ANN con filtro lote por PyMongo; generar pipeline JSON para pegar en Data Explorer → Aggregations → Text → Run. |
 | 45–48 | 31 | «¿El filtro cambia el embedding?» No, restringe elegibilidad. | Repetir activando SOLO_ENTIDAD_FRECUENTE. |
 | 48–51 | 32 | «¿Quién busca exacto y quién aproximado?» ENN y ANN dentro de Atlas si es compatible. | Activar COMPARAR_ENN_ATLAS y comparar IDs, no probabilidades. |
 | 51–53 | 33 | «¿Se puede reproducir la operación sin ver mi contraseña?» Sí: consulta, lote, índice, modelo y resultados. | Exportar s09_atlas_evidencia.json. |
 | 53–55 | 34–35 | «¿Ciento veinte filas prueban Big Data?» No. «¿Qué mediríamos con un millón?» | Memoria, latencia distribuida, actualización, costo y calidad. |
+
+## Demostración obligatoria de MongoDB Atlas UI
+
+**El mismo índice y consulta se trabajan en dos interfaces.** La clase no termina solo con un `col.aggregate()` mostrado en Python.
+
+**Crear/verificar índice en Atlas UI:**
+1. Antes de la celda 5 en Colab, decide crear el índice desde la interfaz. En la celda 5 selecciona `CREAR_INDICE_EN_COLAB=False`; así PyMongo no se adelanta a crearlo.
+2. En [Atlas](https://cloud.mongodb.com/) abre tu proyecto → **Search & Vector Search** → **Create Search Index**. Escoge **Vector Search**, base `clase_s09_demo`, colección `secop_vectores`, nombre `s09_vector_index` y **JSON Editor**.
+3. Copia la definición completa mostrada por la **celda 5**, también disponible en `s09_indice_atlas_ui.json`. Debe declarar vector `embedding` (384, `cosine`) y filtros `lote` / `entidad`. Confirma la creación. **No crees otro índice si ya existe uno con ese nombre.**
+4. En Atlas, observa **Pending → Ready** en Search & Vector Search. Regresa a Colab, vuelve a ejecutar la celda 5 y luego la 6: `queryable=True` confirma disponibilidad.
+
+**Ejecutar Vector Search en la propia consola Atlas:**
+1. Ejecuta la **celda 7** de Colab para calcular `q` a partir de la consulta. **No se pega una frase en el campo `queryVector`: se necesitan 384 números del modelo E5 usado para documentos.**
+2. Ejecuta la **celda 8**. Además del expediente, produce el fichero **`s09_pipeline_atlas_ui.json`** y un bloque desplegable para copiar el pipeline completo con `$vectorSearch` y `$project`, incluyendo el vector real y el filtro de lote.
+3. En Atlas abre **Data Explorer → clase_s09_demo → secop_vectores → Aggregations → &lt;&gt; Text**. Pega el pipeline completo y pulsa **Run**. La consola debe mostrar los documentos recuperados; comprueba `id_proceso`, `entidad` y `score`.
+4. Repite desde Colab/PyMongo y verifica que ambas ejecuciones consultan el mismo índice. El **JSON de evidencia de Colab solo certifica las acciones que Colab haya ejecutado**; los resultados de una ejecución exclusivamente en Atlas UI deben comprobarse en Atlas.
+
+Si se elige el camino PyMongo desde el principio, deja `CREAR_INDICE_EN_COLAB=True`; Atlas UI sirve para **inspeccionar estado y ejecutar de nuevo el pipeline**, pero no es necesario crear un segundo índice.
+
+Documentación oficial: [crear índices Vector Search](https://www.mongodb.com/docs/vector-search/indexes/vector-search-type/) · [crear pipelines en Data Explorer](https://www.mongodb.com/docs/atlas/atlas-ui/create-agg-pipeline/) · [consultas ANN/ENN](https://www.mongodb.com/docs/vector-search/query/aggregation-stages/vector-search-stage/).
 
 ## Lo que realmente mide cada herramienta
 
