@@ -212,6 +212,8 @@ for i,s in enumerate(slides,1):
     if len(s)<850 and not visual:
         light_without_visual.append(i)
 
+nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
+
 checks=[
     ("exactamente 35 diapositivas",len(slides)==35),
     ("definiciones fundamentales",defs>=30),
@@ -259,18 +261,18 @@ checks=[
     ("portal apunta al WALL universal",'href="wall.html?s=9"' in read("lms/portal.html") and 'id="teacherWall"' in read("lms/portal.html")),
     ("portal no prioriza S08 fijo","Number(x.session_number)===8" not in read("lms/portal.html")),
     ("S1-S21 preservadas",all(x in deck for x in ["Cuando las palabras no coinciden","intfloat/multilingual-e5-small","Mean pooling","Similitud coseno"])),
-    ("taller Atlas comienza en S22","Operación en Atlas · 55 min" in slides[21] if len(slides)>21 else False),
-    ("taller termina en S35","Cierre operativo" in slides[34] if len(slides)>34 else False),
+    ("taller Atlas comienza en S22","El sistema completo" in slides[21] if len(slides)>21 else False),
+    ("taller termina en S35","Cierre verificable" in slides[34] if len(slides)>34 else False),
     ("preparación de conexión","getpass" in deck and "MongoClient" in deck and "ping" in deck),
     ("embeddings a persistencia","bulk_write" in deck and "384 dimensiones" in deck and "lote" in deck),
-    ("creación de índice","SearchIndexModel" in deck and "vectorSearch" in deck),
+    ("creación de índice","SearchIndexModel" in nb_text and "numDimensions" in nb_text and "vectorSearch" in deck),
     ("indexación asíncrona","queryable" in deck and "list_search_indexes" in deck),
     ("consulta Atlas real","$vectorSearch" in deck and "numCandidates" in deck and "queryVector" in deck),
     ("filtros vectoriales","entidad" in deck and "filtro" in deck),
     ("Atlas frente a NumPy","NumPy" in deck and "LOCAL" in deck.upper()),
-    ("evidencia reproducible Atlas","s09_atlas_evidencia.json" in nb_text and "resultados_atlas" in nb_text and "motor_ejecutado" in nb_text),
-    ("Colab con ruta exprés",len(nb.get("cells",[]))>=17 and "# S09 · Taller exprés de MongoDB Atlas Vector Search" in nb_text),
-    ("apéndice para lo ya enseñado","APÉNDICE" in nb_text and "BM25Okapi" in nb_text),
+    ("evidencia reproducible Atlas","s09_atlas_evidencia.json" in nb_text and "resultados_ann_atlas" in nb_text and "motor_ann_ejecutado" in nb_text),
+    ("Colab con ruta exprés",len(nb.get("cells",[]))==21 and "# S09 · SECOP a MongoDB Atlas Vector Search" in nb_text),
+    ("extensiones de ingeniería separadas","EJECUTAR_BENCHMARK = False" in nb_text and "Extensión A" in nb_text),
     ("notebook suficientemente completo",len(nb.get("cells",[]))>=20),
 ]
 for label,ok in checks:
@@ -278,15 +280,14 @@ for label,ok in checks:
 
 nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
 for label,ok in [
-    ("notebook E5","intfloat/multilingual-e5-small" in nb_text and "query: " in nb_text and "passage: " in nb_text),
-    ("notebook baseline lexical","BM25Okapi" in nb_text and "buscar_lexical" in nb_text),
-    ("notebook semántico local","buscar_semantico_local" in nb_text and "embeddings @ q" in nb_text),
-    ("notebook Atlas","SearchIndexModel" in nb_text and "$vectorSearch" in nb_text),
-    ("notebook evidencia","s09_evidencia_semantica.json" in nb_text and "falso_positivo" in nb_text and "alternativa_descartada" in nb_text),
-    ("notebook chunking","def chunk_palabras" in nb_text and "overlap" in nb_text and "ranking_chunks" in nb_text),
-    ("notebook ANN y ENN","def buscar_atlas_modo" in nb_text and '"exact"] = True' in nb_text and '"numCandidates"]' in nb_text),
-    ("notebook híbrida RRF","def rrf_fusion" in nb_text and "RRF_CONSTANT = 60" in nb_text and "top_hibrido" in nb_text),
-    ("notebook Precision@k comparativa","Precision@5" in nb_text and "tabla_comparacion" in nb_text and "precision_mia" in nb_text and "ipywidgets" in nb_text),
+    ("notebook E5","intfloat/multilingual-e5-small" in nb_text and '"query: "' in nb_text and '"passage: "' in nb_text),
+    ("notebook contrato SECOP / CSV","COLUMNA_ID" in nb_text and "MAX_FILAS" in nb_text and "LOTE" in nb_text),
+    ("notebook persistencia idempotente","UpdateOne" in nb_text and "upsert=True" in nb_text and '"s09:"+LOTE' in nb_text),
+    ("notebook creación índice","SearchIndexModel" in nb_text and '"type":"vector"' in nb_text and '"numDimensions":384' in nb_text),
+    ("notebook controla queryable","indice_queryable" in nb_text and "list_search_indexes" in nb_text),
+    ("notebook ANN y ENN Atlas",'"$vectorSearch"' in nb_text and '"exact":True' in nb_text and '"numCandidates"' in nb_text),
+    ("notebook evidencia","s09_atlas_evidencia.json" in nb_text and "solapamiento_ann_enn_atlas" in nb_text),
+    ("notebook modo local declarado","NumPy exacto LOCAL" in nb_text and "NO EJECUTADO" in nb_text),
     ("notebook sin login LMS","LMSBridge" not in nb_text and "CODIGO_LAB" not in nb_text),
 ]:
     if not ok: errors.append("Falla: "+label)
