@@ -118,6 +118,10 @@ with tempfile.TemporaryDirectory() as directory:
                        NOMBRE_COL="secop_vectores")
         # Respaldo: Atlas apagado, NumPy devuelve vecinos; JSON declara fallo remoto.
         sandbox.update(atlas_ok=False,atlas_cargado=False,indice_queryable=False)
+        # El JSON del índice/variable definition nace en la celda 12, ANTES de la búsqueda.
+        # Atlas apagado: debe crear el JSON sin intentar conectar ni crear índice remoto.
+        exec(compile(snippet(12),"local_index_config.py","exec"),sandbox)
+        assert Path("s09_indice_atlas_ui.json").exists()
         exec(compile(snippet(15),"local_search.py","exec"),sandbox)
         assert sandbox["resultados_atlas"].empty
         assert len(sandbox["resultados_numpy"])==5
