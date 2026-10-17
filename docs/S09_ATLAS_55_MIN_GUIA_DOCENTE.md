@@ -58,7 +58,7 @@ El grupo ya conoció búsqueda lexical/Elasticsearch, BM25, E5, embeddings, cose
 
 **Ejecutar Vector Search en la propia consola Atlas:**
 1. Ejecuta la **celda 7** de Colab para calcular `q` a partir de la consulta. **No se pega una frase en el campo `queryVector`: se necesitan 384 números del modelo E5 usado para documentos.**
-2. Ejecuta la **celda 8**. Además del expediente, produce el fichero **`s09_pipeline_atlas_ui.json`** y un bloque desplegable para copiar el pipeline completo con `$vectorSearch` y `$project`, incluyendo el vector real y el filtro de lote.
+2. La **celda 7** genera inmediatamente **`s09_pipeline_atlas_ui.json`** y un bloque desplegable con el pipeline completo, incluidos `$vectorSearch`, `$project`, el vector de 384 números y el filtro de lote. La celda 8 exporta la evidencia.
 3. En Atlas abre **Data Explorer → clase_s09_demo → secop_vectores → Aggregations → &lt;&gt; Text**. Pega el pipeline completo y pulsa **Run**. La consola debe mostrar los documentos recuperados; comprueba `id_proceso`, `entidad` y `score`.
 4. Repite desde Colab/PyMongo y verifica que ambas ejecuciones consultan el mismo índice. El **JSON de evidencia de Colab solo certifica las acciones que Colab haya ejecutado**; los resultados de una ejecución exclusivamente en Atlas UI deben comprobarse en Atlas.
 
