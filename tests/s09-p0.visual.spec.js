@@ -185,8 +185,8 @@ test('S09 taller Atlas conserva S1-S21 y muestra el flujo operativo desde S22',a
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s21');
  await expect(page.locator('#s21')).toContainText('Modelo E5');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s22');
- await expect(page.locator('#s22')).toContainText('menos de una hora');
- await expect(page.locator('#s22')).toContainText('Abrir ruta exprés en Colab');
+ await expect(page.locator('#s22')).toContainText('Hoy construimos');
+ await expect(page.locator('#s22')).toContainText('Ir al Colab');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s27');
  await expect(page.locator('#s27')).toContainText('bulk_write');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s29');
@@ -201,14 +201,14 @@ test('S09 presenta Atlas en 55 minutos y distingue NumPy de Atlas',async({page})
  await expect(page.locator('#s28')).toContainText('Search');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s32');
  await expect(page.locator('#s32')).toContainText('NumPy');
- await expect(page.locator('#s32')).toContainText('no llamarla');
+ await expect(page.locator('#s32')).toContainText('exact:true');
 });
 test('S09 obliga a presentar evidencia Atlas real o respaldo local honesto',async({page})=>{
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s33');
- await expect(page.locator('#s33')).toContainText('MongoDB Atlas Vector Search');
+ await expect(page.locator('#s33')).toContainText('motor_ann_ejecutado');
  await expect(page.locator('#s33')).toContainText('JSON');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s34');
- await expect(page.locator('#s34')).toContainText('modo=local');
+ await expect(page.locator('#s34')).toContainText('NumPy LOCAL');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s35');
  await expect(page.locator('#s35')).toContainText('Atlas');
 });
@@ -227,11 +227,11 @@ test('S09 valida en ejecución que las 35 diapositivas sean objetos completos',a
   expect(state.fallback).toEqual([]);
   expect(state.rendered.filter(x=>!x.h||!x.k||/undefined/i.test(x.h)||/undefined/i.test(x.k))).toEqual([]);
   await expect(page.locator('#s34')).toBeVisible();
-  await expect(page.locator('#s34 h1')).toHaveText('Plan B sin confundir una simulación con Atlas.');
+  await expect(page.locator('#s34 h1')).toHaveText('120 documentos prueban un flujo; no prueban que escala.');
   await expect(page.locator('#s34 .challenge')).toHaveCount(1);
   await page.locator('#next').click();
   await expect(page).toHaveURL(/#s35$/);
-  await expect(page.locator('#s35 h1')).toContainText('sistema');
+  await expect(page.locator('#s35 h1')).toContainText('base vectorial funcionando');
 });
 
 test('S09 móvil · sin título undefined, navegación funcional y encabezado despejado',async({page})=>{
@@ -255,7 +255,7 @@ test('S09 móvil · sin título undefined, navegación funcional y encabezado de
 test('S09 móvil · etapa de Atlas accesible sin que la barra tape el h1',async({page})=>{
   await page.setViewportSize({width:360,height:740});
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?qa=mobile#s22');
-  await expect(page.locator('#s22 h1')).toContainText('menos de una hora');
+  await expect(page.locator('#s22 h1')).toContainText('Hoy construimos');
   await expect(page.locator('#s22 a[href*="colab.research.google.com"]')).toBeAttached();
   for (const n of [22,23,24,25,26,27,28,29,30,31,32,33,34,35]){
     await page.evaluate(number=>location.hash='#s'+number,n);
@@ -267,4 +267,31 @@ test('S09 móvil · etapa de Atlas accesible sin que la barra tape el h1',async(
     expect(rects.words,'S'+n).not.toMatch(/undefined/i);
     expect(rects.hTop,'S'+n+' toolbar cubre el titulo').toBeGreaterThanOrEqual(rects.tBottom-2);
   }
+});
+
+
+test('S09 Vector DB · control ANN/ENN cambia configuración sin inventar métricas',async({page})=>{
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s32');
+ const mode=page.locator('#atlasMode'),range=page.locator('#atlasN');
+ await expect(page.locator('#atlasOut')).toContainText('numCandidates=100');
+ await range.fill('200');
+ await expect(page.locator('#atlasOut')).toContainText('40×');
+ await mode.selectOption('enn');
+ await expect(range).toBeDisabled();
+ await expect(page.locator('#atlasOut')).toContainText('exact=true');
+ await mode.selectOption('ann');
+ await expect(range).toBeEnabled();
+});
+test('S09 Vector DB · S22-S35 distinguen datos y operación real a escala',async({page})=>{
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s24');
+ await expect(page.locator('#s24')).toContainText('no es aleatoria simple');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s27');
+ await expect(page.locator('#s27')).toContainText('upsert=True');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s28');
+ await expect(page.locator('#s28')).toContainText('numDimensions=384');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s33');
+ await expect(page.locator('#s33')).toContainText('NO EJECUTADO');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s34');
+ await expect(page.locator('#s34')).toContainText('1.000.000');
+ await expect(page.locator('#s34')).toContainText('no prueban que escala');
 });
