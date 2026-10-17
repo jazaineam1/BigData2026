@@ -153,6 +153,20 @@ with tempfile.TemporaryDirectory() as directory:
         assert all(k.startswith("s09:"+sandbox["LOTE"]+":") for k in atlas.rows)
         exec(compile(snippet(10),"upsert_again.py","exec"),sandbox)
         assert len(atlas.rows)==6, "Duplicados al repetir bulk_write"
+        # Ruta de consola Atlas UI: el notebook NO debe crear el índice
+        # si se eligió explícitamente la interfaz web.
+        atlas_ui=AtlasFalso()
+        sandbox["col"]=atlas_ui
+        ui_source=snippet(12).replace(
+            "CREAR_INDICE_EN_COLAB = True","CREAR_INDICE_EN_COLAB = False")
+        exec(compile(ui_source,"index_ui_manual.py","exec"),sandbox)
+        assert not sandbox["indice_creado"] and atlas_ui.idx is None
+        # Simular que el docente lo creó en Atlas UI y reejecutó celda 5:
+        atlas_ui.idx=Index(sandbox["definition"],"s09_vector_index","vectorSearch")
+        exec(compile(ui_source,"index_ui_existing.py","exec"),sandbox)
+        assert sandbox["indice_creado"] and atlas_ui.idx is not None
+        # Reponer la colección de prueba; ruta PyMongo crea de forma programática.
+        sandbox["col"]=atlas
         exec(compile(snippet(12),"index.py","exec"),sandbox)
         assert sandbox["indice_creado"] and atlas.idx is not None
         sandbox["indice_queryable"]=True
