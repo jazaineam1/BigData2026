@@ -5,6 +5,8 @@ on:
       - "utils/build_session9_notebook.py"
       - "Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb"
       - "utils/qa_s09_notebook.py"
+      - "utils/qa_s09_deck.cjs"
+      - "Presentaciones/s09-de-palabras-a-significado.html"
       - ".github/workflows/s09-laboratorio-qa.yml"
   workflow_dispatch:
 
@@ -22,6 +24,8 @@ jobs:
         with:
           python-version: "3.11"
       - name: Instalar dependencias de prueba (sin descargar E5)
-        run: python -m pip install numpy pandas rank-bm25 rapidfuzz ipywidgets ipython
-      - name: Validar S09 con corpus sintetico y CSV ajeno
+        run: python -m pip install numpy pandas ipython
+      - name: Validar cuaderno Atlas, ruta local e indice de UI simulado
         run: python utils/qa_s09_notebook.py
+      - name: Validar las 35 diapositivas y la secuencia Atlas UI
+        run: node utils/qa_s09_deck.cjs
