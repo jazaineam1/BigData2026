@@ -214,6 +214,8 @@ for i,s in enumerate(slides,1):
 
 nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
 
+nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
+
 checks=[
     ("exactamente 35 diapositivas",len(slides)==35),
     ("definiciones fundamentales",defs>=30),
@@ -278,7 +280,6 @@ checks=[
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
 
-nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
 for label,ok in [
     ("notebook E5","intfloat/multilingual-e5-small" in nb_text and '"query: "' in nb_text and '"passage: "' in nb_text),
     ("notebook contrato SECOP / CSV","COLUMNA_ID" in nb_text and "MAX_FILAS" in nb_text and "LOTE" in nb_text),
