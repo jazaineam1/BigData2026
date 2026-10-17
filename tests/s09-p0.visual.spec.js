@@ -295,3 +295,19 @@ test('S09 Vector DB · S22-S35 distinguen datos y operación real a escala',asyn
  await expect(page.locator('#s34')).toContainText('1.000.000');
  await expect(page.locator('#s34')).toContainText('no prueban que escala');
 });
+
+
+test('S09 Atlas UI · presenta la ruta de índice y Aggregations',async({page})=>{
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s28');
+ await expect(page.locator('#s28')).toContainText('Search & Vector Search');
+ await expect(page.locator('#s28')).toContainText('CREAR_INDICE_EN_COLAB=False');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s29');
+ await expect(page.locator('#s29')).toContainText('Pending');
+ await expect(page.locator('#s29')).toContainText('Ready');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s30');
+ await expect(page.locator('#s30')).toContainText('Aggregations');
+ await expect(page.locator('#s30')).toContainText('384 números reales');
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s33');
+ await expect(page.locator('#s33')).toContainText('s09_pipeline_atlas_ui.json');
+ await expect(page.locator('#s33')).toContainText('no registra automáticamente');
+});
