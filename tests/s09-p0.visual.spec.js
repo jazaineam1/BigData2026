@@ -274,7 +274,7 @@ test('S09 Vector DB · control ANN/ENN cambia configuración sin inventar métri
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s32');
  const mode=page.locator('#atlasMode'),range=page.locator('#atlasN');
  await expect(page.locator('#atlasOut')).toContainText('numCandidates=100');
- await range.fill('200');
+ await range.evaluate(el=>{el.value='200';el.dispatchEvent(new Event('input',{bubbles:true}));});
  await expect(page.locator('#atlasOut')).toContainText('40×');
  await mode.selectOption('enn');
  await expect(range).toBeDisabled();
