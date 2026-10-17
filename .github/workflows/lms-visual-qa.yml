@@ -1,23 +1,6 @@
 name: QA visual LMS
 
 on:
-  push:
-    branches:
-      - main
-      - feat/lms-v3-unified
-    paths:
-      - index.html
-      - lms/**
-      - Presentaciones/s09-de-palabras-a-significado.html
-      - Presentaciones/s10-etl-multimedia.html
-      - Cuadernos/10_ETL_Multimedia.ipynb
-      - utils/build_session10_multimedia.py
-      - utils/validate_session10.py
-      - tests/**
-      - package.json
-      - package-lock.json
-      - playwright.config.js
-      - .github/workflows/lms-visual-qa.yml
   pull_request:
     paths:
       - index.html
@@ -32,6 +15,10 @@ on:
       - package-lock.json
       - playwright.config.js
       - .github/workflows/lms-visual-qa.yml
+
+concurrency:
+  group: qa-pr-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

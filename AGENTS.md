@@ -358,3 +358,10 @@ Fuerte, porque depende de la ejecución y la decisión de esa persona:
 | Introducción a Spark | Sección 1: Por qué Spark importa |
 | Ejemplo de lectura CSV | Sección 4: Lectura guiada de datos |
 ```
+
+
+---
+
+## Prepublicación obligatoria
+
+Antes de cada cambio al sitio, presentación, cuaderno o LMS: desarrollar en una rama, reproducir localmente las verificaciones relevantes y abrir un pull request; no usar `main` para probar. Los workflows de QA del LMS y de la sesión se ejecutan antes de integrar la rama, no por cada push a `main`. Si una prueba falla, detener la publicación, revisar logs, reproducir y corregir en el entorno de trabajo antes de otro push. No desactivar pruebas ni publicar si la validación es inconclusa. Mantener activas la higiene de secretos y la publicación de Pages. Esta regla no reemplaza la protección de ramas de GitHub, que debe activarse para impedir técnicamente los pushes directos.
