@@ -1,224 +1,159 @@
 #!/usr/bin/env python3
-"""QA sin red del laboratorio S09: fuente, sintaxis y recorrido operacional simulado."""
+"""QA S09: cuaderno sincronizado y pruebas offline para Atlas + respaldo local."""
 import hashlib
 import json
 import re
 import tempfile
 from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[1]
-from build_session9_notebook import build_notebook
-
-nb = json.loads((ROOT/"Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb").read_text(encoding="utf-8"))
-expected = build_notebook()
-assert nb == expected, "El notebook publicado no coincide con el generador de fuente."
-assert len(nb["cells"]) >= 25, "El recorrido quedó incompleto."
-
-def source_containing(fragment):
-    matches = ["".join(c["source"]) for c in nb["cells"] if fragment in "".join(c["source"])]
-    assert len(matches) == 1, f"No se identificó una sola celda: {fragment!r}; halladas {len(matches)}"
-    return matches[0]
-
-for i,c in enumerate(nb["cells"],1):
-    if c["cell_type"] != "code":
-        continue
-    text = "".join(c["source"])
-    py = "\n".join(line for line in text.splitlines() if not line.lstrip().startswith(("%","!")))
-    if py:
-        compile(py, f"notebook_s09_{i}.py", "exec")
-full = "\n".join("".join(c["source"]) for c in nb["cells"])
-assert "LMSBridge" not in full and "CODIGO_LAB" not in full
-assert "COLUMNA_ID" in full and "MODE_DATOS" in full
-assert "def buscar_lexical" in full and "def buscar_semantico_local" in full
-assert "def rrf_fusion" in full and "def buscar_s09" in full
-assert "def comparar_s09" in full and "def exportar_s09" in full
-assert "USAR_ATLAS = False" in full
-# La ruta express debe estar delante del apéndice, tener pasos independientes,
-# y ejecutar consultas Atlas únicamente si el índice fue confirmado.
-quick = ["".join(c["source"]) for c in nb["cells"][:17]]
-assert quick[0].startswith("# S09 · Taller exprés de MongoDB Atlas Vector Search")
-assert "#@title 1 · Cargar SECOP" in quick[3]
-assert 'SentenceTransformer(MODEL_NAME)' in quick[5]
-assert 'client.admin.command("ping")' in quick[7]
-assert 'col.bulk_write(' in quick[9]
-assert 'SearchIndexModel(' in quick[11]
-assert 'col.list_search_indexes(' in quick[12]
-assert '"$vectorSearch"' in quick[14]
-assert 'resultados_atlas=pd.DataFrame' in quick[14]
-assert 's09_atlas_evidencia.json' in quick[15]
-assert 'if atlas_ok and atlas_cargado and indice_queryable:' in quick[14]
-assert 'MongoDB Atlas Vector Search' in quick[15]
-assert 'NumPy local (respaldo)' in quick[15]
-assert "LIMITE = 6000" in full
-assert "SECOP ampliado (6000)" in full
-assert "sugerir_correcciones" in full and "ortografia_ui" in full
-assert "rapidfuzz" in full and "multilingual-e5-small" in full
-
-# Simulación sin E5 remoto ni cuentas: comprueba que los motores usan el mismo
-# corpus, ID y metadatos, y producen resultados y expediente reproducibles.
 import numpy as np
 import pandas as pd
 
-class ModeloE5Ficticio:
-    """Solo sustituto determinista para QA, no resultados de E5 real."""
-    def encode(self, textos, normalize_embeddings=True, **kwargs):
-        filas = []
-        for txt in textos:
-            v = np.zeros(384, dtype=float)
-            for token in re.findall(r"[a-záéíóúüñ0-9]+", str(txt).lower()):
-                if token in ("passage", "query"):
-                    continue
-                j = int(hashlib.sha256(token.encode()).hexdigest()[:8],16) % 384
-                v[j] += 1
-            norm = np.linalg.norm(v)
-            filas.append(v / norm if normalize_embeddings and norm > 0 else v)
-        return np.stack(filas)
+ROOT=Path(__file__).resolve().parents[1]
+from build_session9_notebook import build_notebook
+nb=json.loads((ROOT/"Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb").read_text(encoding="utf-8"))
+assert nb==build_notebook(), "Cuaderno y generador desincronizados"
+assert len(nb["cells"])==21, "La ruta debía tener 21 celdas, no el apéndice antiguo de 48"
+sources=["".join(c["source"]) for c in nb["cells"]]
+def snippet(n): return sources[n-1]
+assert "SECOP a MongoDB Atlas" in snippet(1)
+assert "MODO_DEMO" in snippet(4) and "COLUMNA_ID" in snippet(4)
+assert 'intfloat/multilingual-e5-small' in snippet(4)
+assert "MAX_TOKENS" in snippet(6)
+assert 'upsert=True' in snippet(10) and '"s09:"+LOTE' in snippet(10)
+assert "SearchIndexModel(" in snippet(12)
+assert 'list_search_indexes(' in snippet(13) and 'queryable' in snippet(13)
+assert '"$vectorSearch"' in snippet(15) and '"exact":True' in snippet(15)
+assert "solapamiento_ann_enn_atlas" in snippet(16)
+assert "s09_atlas_evidencia.json" in snippet(16)
+assert "EJECUTAR_BENCHMARK = False" in snippet(21)
+assert "LMSBridge" not in "\n".join(sources)
+for i,c in enumerate(nb["cells"],1):
+    if c["cell_type"]!="code":continue
+    program="\n".join(l for l in sources[i-1].splitlines()
+                      if not l.lstrip().startswith(("%","!")))
+    compile(program,f"s09_cell_{i}.py","exec")
 
-ns = {"__name__":"__main__"}
-load = source_containing("#@title 1. Selecciona de dónde salen tus datos")
-load = load.replace('MODE_DATOS = "SECOP ampliado (6000)"', 'MODE_DATOS = "Ejemplo sintético de respaldo"')
-exec(compile(load,"synthetic_data.py","exec"),ns)
-exec(compile(source_containing("#@title 2. Identifica y configura"),"mapping.py","exec"),ns)
-assert len(ns["corpus"]) == 6
-assert ns["corpus"]["id_proceso"].is_unique
-assert ns["corpus"]["texto_busqueda"].str.len().min() >= 6
+class ModeloFalso:
+    """Sólo para QA offline: NO emula el rendimiento ni precisión de E5."""
+    def encode(self,texts,normalize_embeddings=True,**_):
+        vectors=[]
+        for t in texts:
+            v=np.zeros(384,dtype=np.float32)
+            for word in re.findall(r"\w+",str(t).lower()):
+                if word in ("query","passage"):continue
+                j=int(hashlib.sha256(word.encode()).hexdigest()[:8],16)%384
+                v[j]+=1
+            norm=np.linalg.norm(v)
+            vectors.append(v/norm if norm else v)
+        return np.array(vectors,dtype=np.float32)
 
-exec(compile(source_containing("#@title 3. Construye el índice lexical"),"bm25.py","exec"),ns)
-assert not ns["buscar_lexical"]("aeronaves militares",5).empty
-assert ns["tokens"]("Reparación") == ["reparacion"], "Debe normalizar acentos."
-corregida,cambios=ns["sugerir_correcciones"]("aeronavess")
-assert cambios.get("aeronavess") == "aeronaves", f"Sugerencia real no detectada: {cambios}"
-assert ns["sugerir_correcciones"]("CO1.REQ.123")[1] == {}, "No debe corregir IDs/códigos."
-ns["modelo"] = ModeloE5Ficticio()
-ns["embeddings"] = ns["modelo"].encode(["passage: " + t for t in ns["corpus"]["texto_busqueda"]])
-ns["MODEL_NAME"] = "fake-e5-for-smoke"
-exec(compile(source_containing("#@title 5. Recupera por significado"),"semantic.py","exec"),ns)
-sem = ns["buscar_semantico_local"]("aviones militares",5)
-assert len(sem) == 5 and "score_semantico" in sem.columns
-exec(compile(source_containing("#@title 6. Fusiona BM25"),"rrf.py","exec"),ns)
-hybrid=ns["rrf_fusion"](ns["buscar_lexical"]("aviones militares",5),sem,60)
-assert not hybrid.empty and "fuentes" in hybrid.columns
+class Update:
+    def __init__(self,where,change,upsert=False):
+        self.where,self.change,self.upsert=where,change,upsert
 
-# UI headless: verifica que los controles se crean, los tres rankings se buscan
-# y la descarga no solicita token ni registra progreso oficial.
-with tempfile.TemporaryDirectory() as tmp:
+class Index:
+    def __init__(self,definition,name,type):
+        self.definition,self.name,self.type=definition,name,type
+
+class AtlasFalso:
+    """Interfaz mínima de PyMongo. Resultados de prueba, NO Atlas real."""
+    def __init__(self):
+        self.rows={}
+        self.idx=None
+        self.query_params=[]
+    def bulk_write(self,requests,ordered=False):
+        for req in requests:
+            assert req.upsert
+            self.rows[req.where["_id"]]=req.change["$set"]
+    def count_documents(self,filtro):
+        return sum(all(doc.get(k)==v for k,v in filtro.items())
+                   for doc in self.rows.values())
+    def find_one(self,filtro,projection=None):
+        return next((v for v in self.rows.values()
+                     if all(v.get(k)==val for k,val in filtro.items())),None)
+    def list_search_indexes(self,name=None):
+        if self.idx is None:return []
+        return [dict(name=self.idx.name,queryable=True,
+                     latestDefinition=self.idx.definition)]
+    def create_search_index(self,model):
+        assert model.type=="vectorSearch"
+        self.idx=model
+        return model.name
+    def aggregate(self,pipeline,maxTimeMS=None):
+        stage=pipeline[0]["$vectorSearch"]
+        self.query_params.append(stage)
+        assert stage["path"]=="embedding" and len(stage["queryVector"])==384
+        assert "lote" in stage["filter"] and stage["index"]=="s09_vector_index"
+        assert not ("exact" in stage and "numCandidates" in stage)
+        if not stage.get("exact"):
+            assert stage["numCandidates"]>=stage["limit"]
+        docs=[x for x in self.rows.values()
+              if all(x.get(k)==v for k,v in stage["filter"].items())]
+        q=np.array(stage["queryVector"])
+        docs.sort(key=lambda x:float(np.array(x["embedding"])@q),reverse=True)
+        return [dict(_id=x["_id"],id_proceso=x["id_proceso"],
+                     nombre_proceso=x["nombre_proceso"],
+                     entidad=x["entidad"],url_secop=x["url_secop"],
+                     score=float(np.array(x["embedding"])@q))
+                for x in docs[:stage["limit"]]]
+
+with tempfile.TemporaryDirectory() as directory:
     import os
-    cwd=os.getcwd()
+    before=os.getcwd()
+    os.chdir(directory)
     try:
-        os.chdir(tmp)
-        exec(compile(source_containing("#@title 7. CONSOLA DE BÚSQUEDA"),"ui.py","exec"),ns)
-        assert ns["estado_s09"]["consulta"]
-        assert set(ns["estado_s09"]["rankings"]) == {"BM25","E5 semántico","RRF híbrido"}
-        assert ns["precision_mia"] is None
-        for i,control in enumerate(ns["juicios_controles"].values()):
-            control.value = i % 3 != 0
-        ns["comparar_s09"](None)
-        assert ns["precision_mia"] is not None
-        ns["decision_ui"].value="RRF híbrido"
-        ns["alternativa_ui"].value="BM25"
-        ns["exportar_s09"](None)
-        evidence=Path("s09_evidencia_semantica.json")
-        assert evidence.exists(), "No se descargó el expediente local."
-        data=json.loads(evidence.read_text(encoding="utf-8"))
-        assert data["modelo_embedding"] == ns["MODEL_NAME"]
-        assert data["precision_at_k"] is not None
-        assert data["origen"]["modo"] == "Ejemplo sintético de respaldo"
-        assert data["falso_positivo"] is not None
-        assert data["decision"] != data["alternativa_descartada"]
-        assert data["corpus"]["sha256"]
-        assert data["modo_ortografia"] == "sugerir"
-        assert data["consulta_empleada"] == data["consulta"]
-        assert data["sugerencias_ortograficas"] == {} or isinstance(data["sugerencias_ortograficas"], dict)
-        # Aplicar correcciones debe cambiar la consulta usada solo si se solicita.
-        ns["consulta_ui"].value = "aeronavess"
-        ns["ortografia_ui"].value = "aplicar"
-        ns["buscar_s09"]()
-        assert ns["estado_s09"]["consulta"] == "aeronavess"
-        assert ns["estado_s09"]["consulta_usada"] == "aeronaves"
-        ns["ortografia_ui"].value = "sin"
-        ns["buscar_s09"]()
-        assert ns["estado_s09"]["consulta_usada"] == "aeronavess"
+        sandbox={"__name__":"__main__"}
+        source=snippet(4).replace(
+            'MODO_DEMO = "SECOP curso · 120"',
+            'MODO_DEMO = "Respaldo sintético · 6"')
+        exec(compile(source,"load.py","exec"),sandbox)
+        assert len(sandbox["corpus"])==6 and sandbox["corpus"]["id_proceso"].is_unique
+        assert "SINTÉTICO" in sandbox["ORIGEN"]
+        model=ModeloFalso()
+        sandbox["modelo"]=model
+        sandbox["embeddings"]=model.encode(
+            ["passage: "+s for s in sandbox["corpus"]["texto_busqueda"]])
+        sandbox.update(UpdateOne=Update,SearchIndexModel=Index,
+                       INDEX_NAME="s09_vector_index",NOMBRE_BD="clase_s09_demo",
+                       NOMBRE_COL="secop_vectores")
+        # Respaldo: Atlas apagado, NumPy devuelve vecinos; JSON declara fallo remoto.
+        sandbox.update(atlas_ok=False,atlas_cargado=False,indice_queryable=False)
+        exec(compile(snippet(15),"local_search.py","exec"),sandbox)
+        assert sandbox["resultados_atlas"].empty
+        assert len(sandbox["resultados_numpy"])==5
+        exec(compile(snippet(16),"local_evidence.py","exec"),sandbox)
+        evidence=json.loads(Path("s09_atlas_evidencia.json").read_text())
+        assert evidence["motor_ann_ejecutado"]=="NO EJECUTADO"
+        assert evidence["motor_enn_ejecutado"]=="NO EJECUTADO"
+        assert evidence["respaldo"].startswith("NumPy exacto LOCAL")
+        assert not evidence["resultados_ann_atlas"]
+
+        # Simulación de una colección remota: comprobar idempotencia y contratos,
+        # nunca llamar a este mock evidencia de Atlas verdadero.
+        atlas=AtlasFalso()
+        sandbox.update(atlas_ok=True,col=atlas,atlas_cargado=False)
+        exec(compile(snippet(10),"upsert.py","exec"),sandbox)
+        assert sandbox["atlas_cargado"] and len(atlas.rows)==6
+        assert all(k.startswith("s09:"+sandbox["LOTE"]+":") for k in atlas.rows)
+        exec(compile(snippet(10),"upsert_again.py","exec"),sandbox)
+        assert len(atlas.rows)==6, "Duplicados al repetir bulk_write"
+        exec(compile(snippet(12),"index.py","exec"),sandbox)
+        assert sandbox["indice_creado"] and atlas.idx is not None
+        sandbox["indice_queryable"]=True
+        exec(compile(snippet(15),"remote_mock.py","exec"),sandbox)
+        assert sandbox["atlas_query_ejecutada"]
+        assert sandbox["enn_query_ejecutada"]
+        assert len(atlas.query_params)==2
+        assert "exact" not in atlas.query_params[0]
+        assert atlas.query_params[1].get("exact") is True
+        assert "numCandidates" not in atlas.query_params[1]
+        exec(compile(snippet(16),"remote_mock_evidence.py","exec"),sandbox)
+        evidence=json.loads(Path("s09_atlas_evidencia.json").read_text())
+        assert evidence["motor_ann_ejecutado"]=="MongoDB Atlas Vector Search"
+        assert evidence["motor_enn_ejecutado"]=="MongoDB Atlas ENN"
+        assert evidence["solapamiento_ann_enn_atlas"]==1
+        assert len(evidence["resultados_ann_atlas"])==5
+        assert "password" not in evidence and "URI_ATLAS" not in evidence
     finally:
-        os.chdir(cwd)
-
-# Ensayo de 6.000 filas: no duplicar IDs, mantener la trazabilidad y los filtros.
-with tempfile.TemporaryDirectory() as tmp:
-    demo=Path(tmp)/"6000.csv"
-    df=pd.DataFrame({
-        "radicado":[f"SECOP-{j:05d}" for j in range(6000)],
-        "asunto":[f"Contrato de servicios {j}" for j in range(6000)],
-        "contenido":[f"Servicio operativo y mantenimiento de equipo {j%50}" for j in range(6000)],
-        "dependencia":["Operaciones" if j%2 else "Tecnología" for j in range(6000)],
-        "enlace":["" for _ in range(6000)]
-    })
-    df.to_csv(demo,index=False)
-    load_file=source_containing("#@title 1. Selecciona de dónde salen tus datos")
-    load_file=load_file.replace('MODE_DATOS = "SECOP ampliado (6000)"','MODE_DATOS = "Subir CSV desde computador"')
-    load_file=load_file.replace('ARCHIVO_CSV = ""',f"ARCHIVO_CSV = {str(demo)!r}")
-    sandbox={"__name__":"__main__"}
-    exec(compile(load_file,"six_thousand_csv.py","exec"),sandbox)
-    mapping=source_containing("#@title 2. Identifica y configura")
-    for key,val in {"COLUMNA_ID":"radicado","COLUMNA_TITULO":"asunto","COLUMNA_TEXTO":"contenido",
-                    "COLUMNA_GRUPO":"dependencia","COLUMNA_ENLACE":"enlace"}.items():
-        mapping=re.sub(r"^"+key+r" = [^\n]+",f'{key} = "{val}"',mapping,flags=re.M)
-    exec(compile(mapping,"six_thousand_mapping.py","exec"),sandbox)
-    assert len(sandbox["corpus"]) == 6000
-    assert sandbox["corpus"]["id_proceso"].nunique() == 6000
-
-# Verifica transferencia: columnas de un CSV distinto se mapean sin reescribir
-# los motores ni depender de un archivo SECOP.
-with tempfile.TemporaryDirectory() as tmp:
-    demo=Path(tmp)/"tickets.csv"
-    pd.DataFrame([
-        {"radicado":"A-1","asunto":"Red inestable","contenido":"Se cae la conexión del edificio","dependencia":"Tecnología","enlace":""},
-        {"radicado":"A-2","asunto":"Error de facturación","contenido":"La factura llegó duplicada","dependencia":"Finanzas","enlace":""},
-        {"radicado":"A-3","asunto":"Sin acceso al portal","contenido":"No abre el formulario de solicitudes","dependencia":"Tecnología","enlace":""}
-    ]).to_csv(demo,index=False)
-    load_file=source_containing("#@title 1. Selecciona de dónde salen tus datos")
-    load_file=load_file.replace('MODE_DATOS = "SECOP ampliado (6000)"','MODE_DATOS = "Subir CSV desde computador"')
-    load_file=load_file.replace('ARCHIVO_CSV = ""',f"ARCHIVO_CSV = {str(demo)!r}")
-    other={"__name__":"__main__"}
-    exec(compile(load_file,"new_csv.py","exec"),other)
-    mapping=source_containing("#@title 2. Identifica y configura")
-    for k,val in {"COLUMNA_ID":"radicado","COLUMNA_TITULO":"asunto","COLUMNA_TEXTO":"contenido",
-                  "COLUMNA_GRUPO":"dependencia","COLUMNA_ENLACE":"enlace"}.items():
-        mapping=re.sub(r"^"+k+r" = [^\n]+",f'{k} = "{val}"',mapping,flags=re.M)
-    exec(compile(mapping,"other_mapping.py","exec"),other)
-    assert other["corpus"]["id_proceso"].tolist() == ["A-1","A-2","A-3"]
-    assert other["corpus"].iloc[0]["entidad"] == "Tecnología"
-# Ruta exprés: comprobar fallback LOCAL sin red de Atlas ni inferencia real E5.
-# Es un test de ejecución de flujo, NO prueba que Atlas esté conectado.
-with tempfile.TemporaryDirectory() as tmp:
-    import os
-    original_dir=os.getcwd()
-    try:
-        os.chdir(tmp)
-        entorno={"__name__":"__main__"}
-        cargar=source_containing("#@title 1 · Cargar SECOP y preparar un lote")
-        cargar=cargar.replace('MODO_DEMO = "rápido (120)"',
-                              'MODO_DEMO = "respaldo sintético"')
-        exec(compile(cargar,"atlas_express_corpus.py","exec"),entorno)
-        assert len(entorno["corpus"]) == 6
-        modelo_falso=ModeloE5Ficticio()
-        entorno["modelo"]=modelo_falso
-        entorno["embeddings"]=modelo_falso.encode(
-            ["passage: "+t for t in entorno["corpus"]["texto_busqueda"]])
-        entorno.update(atlas_ok=False,atlas_cargado=False,indice_queryable=False)
-        consulta=source_containing("#@title 7 · Ejecutar búsqueda Atlas real")
-        exec(compile(consulta,"atlas_express_search.py","exec"),entorno)
-        assert len(entorno["resultados_numpy"]) == 5
-        assert entorno["resultados_atlas"].empty
-        export=source_containing("#@title 8 · Medir coincidencia")
-        exec(compile(export,"atlas_express_evidence.py","exec"),entorno)
-        ruta=Path("s09_atlas_evidencia.json")
-        assert ruta.exists()
-        payload=json.loads(ruta.read_text(encoding="utf-8"))
-        assert payload["motor_ejecutado"] == "NumPy local (respaldo)"
-        assert payload["resultados_atlas"] == []
-        assert len(payload["resultados_locales"]) == 5
-        assert payload["index"] is None
-        assert "URI" not in payload and "password" not in payload
-    finally:
-        os.chdir(original_dir)
-
-print("S09 QA OK: celdas sincronizadas, sintaxis, búsqueda, evaluación, exportación y CSV propio.")
+        os.chdir(before)
+print("S09 QA OK: 21 celdas sincronizadas + sintaxis + ruta local + Atlas simulado (NO conexión real).")
