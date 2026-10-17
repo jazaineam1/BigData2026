@@ -50,13 +50,14 @@ except Exception as ex:
 
 # Parsear el array real de diapositivas.
 start=deck.find("const slides=[")
-end_match=re.search(r"\n\];\s*\n\s*function challengeChoice",deck[start:]) if start>=0 else None
-end=(start+end_match.start()) if end_match else -1
-if start<0 or end<0:
+# El array termina en la primera línea '];'. No exigir que a continuación
+# venga inmediatamente challengeChoice: entre ambos hay un guard de estructura.
+end=deck.find("\n];",start) if start>=0 else -1
+raw=deck[start:end] if start>=0 and end>start else ""
+if not raw:
     slides=[]
     errors.append("No se pudo localizar el array de diapositivas S09")
 else:
-    raw=deck[start:end]
     slides=[x for x in re.split(r'\n(?=\{t:[\'"])',raw) if re.search(r'\{t:[\'"]',x)]
 
 # Validación ejecutable del arreglo: JS sintácticamente válido puede contener
