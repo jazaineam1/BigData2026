@@ -23,6 +23,14 @@ for (const [index,slide] of slides.entries()){
     assert(!/\bundefined\b/.test(slide[field]),"S"+(index+1)+" contiene undefined");
   }
 }
+// Un fallo anterior mostraba "\n" literalmente dentro de las tarjetas de código.
+for (let i=21; i<slides.length; i++) {
+  const codes=[...slides[i].b.matchAll(/<pre\b[^>]*>([\s\S]*?)<\/pre>/gi)];
+  for (const code of codes) {
+    assert(!code[1].includes('\\n'),
+      "S"+(i+1)+" muestra texto literal \\n en lugar de un salto de línea");
+  }
+}
 assert(slides[21].b.includes("atlas-chain"),"S22 sin flujo Colab-Atlas");
 assert(slides[27].b.includes("JSON Editor"),"S28 sin creación UI");
 assert(slides[28].b.includes("queryable"),"S29 sin verificación de estado");
