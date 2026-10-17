@@ -127,6 +127,18 @@ with tempfile.TemporaryDirectory() as directory:
         assert evidence["motor_enn_ejecutado"]=="NO EJECUTADO"
         assert evidence["respaldo"].startswith("NumPy exacto LOCAL")
         assert not evidence["resultados_ann_atlas"]
+        index_ui=json.loads(Path("s09_indice_atlas_ui.json").read_text())
+        pipeline_ui=json.loads(Path("s09_pipeline_atlas_ui.json").read_text())
+        assert index_ui["fields"][0]["path"]=="embedding"
+        assert index_ui["fields"][0]["numDimensions"]==384
+        assert len(pipeline_ui)==2
+        assert len(pipeline_ui[0]["$vectorSearch"]["queryVector"])==384
+        assert pipeline_ui[0]["$vectorSearch"]["filter"]["lote"]==sandbox["LOTE"]
+        assert pipeline_ui[0]["$vectorSearch"]["limit"]==5
+        assert pipeline_ui[1]["$project"]["score"]=={"$meta":"vectorSearchScore"}
+        assert "password" not in json.dumps(pipeline_ui).lower()
+        assert "mongodb+srv://" not in json.dumps(pipeline_ui)
+
 
         # Simulación de una colección remota: comprobar idempotencia y contratos,
         # nunca llamar a este mock evidencia de Atlas verdadero.
