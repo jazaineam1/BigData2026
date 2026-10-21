@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BigData2026 Harness Agent Result",
+  "type": "object",
+  "required": ["status", "summary"],
+  "properties": {
+    "status": {"enum": ["ok", "pass", "fail", "blocked"]},
+    "summary": {"type": "string"},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "message"],
+        "properties": {
+          "severity": {"enum": ["info", "warning", "blocker"]},
+          "message": {"type": "string"},
+          "files": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "requested_actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
