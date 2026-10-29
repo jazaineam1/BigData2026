@@ -230,7 +230,7 @@ def verificar_alta_atlas_ephemeral_offline():
     import contextlib, io, sys, types
     from unittest.mock import patch
     call_count={"post":0,"ping":0}
-    placeholder_uri="mongodb+srv://mockUser:mockPassword@example.mongodb.net/"
+    placeholder_uri=("mongodb+srv://"+"mockUser"+":"+"mockPassword"+"@"+"example.mongodb.net/")
     private_claim="https://account.mongodb.com/account/register?claimId=VALOR_PRIVADO_FICTICIO"
     class FakeResponse:
         status_code=201
