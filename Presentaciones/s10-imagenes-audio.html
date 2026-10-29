@@ -259,25 +259,176 @@ document.querySelectorAll('[data-question]').forEach(function(group){group.query
 var original=document.getElementById('imageOriginal'),out=document.getElementById('imageResult'),histo=document.getElementById('imageHistogram');
 var ctx=original.getContext('2d',{willReadFrequently:true}),outCtx=out.getContext('2d',{willReadFrequently:true});
 function demoImage(){original.width=320;original.height=180;ctx.fillStyle='#e7edf5';ctx.fillRect(0,0,320,180);ctx.fillStyle='#203b60';ctx.fillRect(22,18,275,140);ctx.fillStyle='#fff';ctx.fillRect(28,24,264,128);ctx.fillStyle='#164c70';ctx.fillRect(40,36,92,14);ctx.fillStyle='#6a879e';for(var i=0;i<7;i++)ctx.fillRect(42,59+i*11,150+(i%3)*22,3);ctx.fillStyle='#d5a850';ctx.fillRect(222,40,45,45);ctx.fillStyle='#387d79';ctx.beginPath();ctx.arc(246,63,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#243e53';ctx.font='12px system-ui';ctx.fillText('CASO DEMO · ORIGINAL',38,140)}
-function histDraw(hist){var g=histo.getContext('2d'),w=histo.width,h=histo.height;g.clearRect(0,0,w,h);g.fillStyle='#f8fbfe';g.fillRect(0,0,w,h);var max=Math.max.apply(null,hist.concat([1]));g.fillStyle='#197e86';for(var i=0;i<256;i++){g.fillRect(i*w/256,h-1-hist[i]/max*(h-16),Math.max(1,w/256),hist[i]/max*(h-16))}}
-function imageUpdate(){var side=+document.getElementById('imageSize').value,threshold=+document.getElementById('imageThreshold').value,binary=document.getElementById('imageBinary').checked;
-document.getElementById('sizeValue').textContent=side;document.getElementById('thresholdValue').textContent=threshold;
-var ratio=Math.min(1,side/Math.max(original.width,original.height)),w=Math.max(1,Math.round(original.width*ratio)),h=Math.max(1,Math.round(original.height*ratio));
-var t=document.createElement('canvas');t.width=w;t.height=h;var g=t.getContext('2d',{willReadFrequently:true});g.drawImage(original,0,0,w,h);var pix=g.getImageData(0,0,w,h),sum=0,bright=0,hist=Array(256).fill(0);
-for(var i=0;i<pix.data.length;i+=4){var gray=Math.round(.2126*pix.data[i]+.7152*pix.data[i+1]+.0722*pix.data[i+2]);if(binary){gray=gray>=threshold?255:0;pix.data[i]=gray;pix.data[i+1]=gray;pix.data[i+2]=gray}sum+=gray;hist[gray]++;if(gray>=threshold)bright++}
-g.putImageData(pix,0,0);out.width=w;out.height=h;outCtx.drawImage(t,0,0);histDraw(hist);var count=w*h;document.getElementById('imageStats').textContent='Derivado: '+w+' × '+h+' = '+count+' píxeles · luminancia media: '+(sum/count).toFixed(1)+' · proporción por encima del umbral: '+(100*bright/count).toFixed(1)+' %.';window.imageMetrics={width:w,height:h,pixels:count,mean_luminance:+(sum/count).toFixed(2),fraction_above_threshold:bright/count,binarized:binary,threshold:threshold}}
-['imageSize','imageThreshold','imageBinary'].forEach(function(id){document.getElementById(id).addEventListener('input',imageUpdate)});
+
+function histDraw(hist,bins){
+ var g=histo.getContext('2d'),w=histo.width,h=histo.height;
+ g.clearRect(0,0,w,h);g.fillStyle='#f8fbfe';g.fillRect(0,0,w,h);
+ var left=48,right=18,top=14,bottom=38,plotW=w-left-right,plotH=h-top-bottom;
+ var counts=Array(bins).fill(0);
+ for(var level=0;level<256;level++)counts[Math.min(bins-1,Math.floor(level*bins/256))]+=hist[level];
+ var max=Math.max.apply(null,counts.concat([1])),barW=plotW/bins;
+ g.fillStyle='#147e87';
+ counts.forEach(function(count,i){
+   var bh=count/max*(plotH-8);
+   g.fillRect(left+i*barW+.5,top+plotH-bh,Math.max(1,barW-1.5),bh);
+ });
+ g.strokeStyle='#273b55';g.beginPath();g.moveTo(left,top);g.lineTo(left,top+plotH);g.lineTo(left+plotW,top+plotH);g.stroke();
+ g.fillStyle='#243c53';g.font='14px system-ui';g.fillText('Píxeles',3,15);
+ g.fillText('0 · negro',left,top+plotH+20);g.fillText('128',left+plotW/2-15,top+plotH+20);
+ g.fillText('255 · blanco',left+plotW-94,top+plotH+20);
+ g.fillText('Mayor conteo: '+max,50,32);
+ var highest=counts.indexOf(max),lo=Math.round(highest*256/bins),hi=Math.min(255,Math.round((highest+1)*256/bins)-1);
+ return {counts:counts,peak_bin:highest,peak_low:lo,peak_high:hi,peak_count:max};
+}
+var selectedPixel=null;
+function showPixelDetails(){
+ if(!out.width||!out.height)return;
+ var x=selectedPixel?Math.min(out.width-1,selectedPixel.x):Math.floor(out.width/2);
+ var y=selectedPixel?Math.min(out.height-1,selectedPixel.y):Math.floor(out.height/2);
+ selectedPixel={x:x,y:y};
+ var z=document.getElementById('imagePixelZoom'),zg=z.getContext('2d'),cell=z.width/9;
+ zg.clearRect(0,0,z.width,z.height);zg.fillStyle='#edf3f7';zg.fillRect(0,0,z.width,z.height);
+ for(var dy=-4;dy<=4;dy++)for(var dx=-4;dx<=4;dx++){
+  var xx=x+dx,yy=y+dy;
+  if(xx>=0&&yy>=0&&xx<out.width&&yy<out.height){
+   var color=outCtx.getImageData(xx,yy,1,1).data;
+   zg.fillStyle='rgb('+color[0]+','+color[1]+','+color[2]+')';
+  }else{zg.fillStyle='#d6dfe7'}
+  zg.fillRect((dx+4)*cell,(dy+4)*cell,cell,cell);
+  zg.strokeStyle='rgba(0,0,0,.3)';zg.strokeRect((dx+4)*cell,(dy+4)*cell,cell,cell);
+ }
+ zg.lineWidth=3;zg.strokeStyle='#ff8b25';zg.strokeRect(4*cell+1,4*cell+1,cell-2,cell-2);
+ var p=outCtx.getImageData(x,y,1,1).data;
+ var lum=Math.round(.2126*p[0]+.7152*p[1]+.0722*p[2]);
+ document.getElementById('pixelStats').textContent='Píxel ('+x+','+y+') · RGB ('+[p[0],p[1],p[2]].join(', ')+') · luminancia ≈ '+lum+'. El contorno naranja indica el píxel seleccionado.';
+ window.pixelMetrics={x:x,y:y,red:p[0],green:p[1],blue:p[2],luminance:lum};
+}
+out.addEventListener('click',function(event){
+ var rect=out.getBoundingClientRect();
+ if(!rect.width||!rect.height)return;
+ selectedPixel={x:Math.min(out.width-1,Math.max(0,Math.floor((event.clientX-rect.left)*out.width/rect.width))),
+ y:Math.min(out.height-1,Math.max(0,Math.floor((event.clientY-rect.top)*out.height/rect.height)))};
+ showPixelDetails();
+});
+function imageUpdate(){
+ var side=+document.getElementById('imageSize').value,threshold=+document.getElementById('imageThreshold').value,
+ binary=document.getElementById('imageBinary').checked,brightness=+document.getElementById('imageBrightness').value,
+ contrast=+document.getElementById('imageContrast').value/100,bins=+document.getElementById('histogramBins').value;
+ document.getElementById('sizeValue').textContent=side;document.getElementById('thresholdValue').textContent=threshold;
+ document.getElementById('brightnessValue').textContent=brightness>0?'+'+brightness:brightness;
+ document.getElementById('contrastValue').textContent=Math.round(contrast*100);
+ document.getElementById('binsValue').textContent=bins;
+ var ratio=Math.min(1,side/Math.max(original.width,original.height)),w=Math.max(1,Math.round(original.width*ratio)),h=Math.max(1,Math.round(original.height*ratio));
+ var t=document.createElement('canvas');t.width=w;t.height=h;var g=t.getContext('2d',{willReadFrequently:true});g.drawImage(original,0,0,w,h);
+ var pix=g.getImageData(0,0,w,h),sum=0,bright=0,hist=Array(256).fill(0);
+ for(var i=0;i<pix.data.length;i+=4){
+  for(var channel=0;channel<3;channel++){
+   var value=(pix.data[i+channel]-128)*contrast+128+brightness;
+   pix.data[i+channel]=Math.max(0,Math.min(255,Math.round(value)));
+  }
+  var gray=Math.round(.2126*pix.data[i]+.7152*pix.data[i+1]+.0722*pix.data[i+2]);
+  if(binary){gray=gray>=threshold?255:0;pix.data[i]=gray;pix.data[i+1]=gray;pix.data[i+2]=gray}
+  sum+=gray;hist[gray]++;if(gray>=threshold)bright++;
+ }
+ g.putImageData(pix,0,0);out.width=w;out.height=h;outCtx.drawImage(t,0,0);
+ var grouped=histDraw(hist,bins),count=w*h,mean=sum/count;
+ document.getElementById('imageStats').textContent='Derivado: '+w+' × '+h+' = '+count+' píxeles · luminancia media: '+mean.toFixed(1)+' · proporción por encima del umbral: '+(100*bright/count).toFixed(1)+' %.';
+ document.getElementById('histogramExplanation').textContent=bins+' barras · cada barra agrupa unos '+(256/bins).toFixed(1)+' niveles de luminancia. La barra con más píxeles agrupa valores entre '+grouped.peak_low+' y '+grouped.peak_high+' ('+grouped.peak_count+' píxeles). Total contado: '+grouped.counts.reduce(function(a,b){return a+b},0)+'.';
+ window.imageMetrics={width:w,height:h,pixels:count,mean_luminance:+mean.toFixed(2),
+ fraction_above_threshold:bright/count,binarized:binary,threshold:threshold,brightness:brightness,
+ contrast_percent:Math.round(contrast*100),histogram_bins:bins,histogram_counts:grouped.counts};
+ selectedPixel=null;showPixelDetails();
+}
+['imageSize','imageThreshold','imageBinary','imageBrightness','imageContrast','histogramBins'].forEach(function(id){
+ document.getElementById(id).addEventListener('input',imageUpdate);
+});
 document.getElementById('resetImage').onclick=function(){demoImage();imageUpdate()};
 document.getElementById('saveImage').onclick=function(){var a=document.createElement('a');a.download='s10-imagen-derivada.png';a.href=out.toDataURL('image/png');a.click()};
 document.getElementById('imageUpload').onchange=function(e){var f=e.target.files&&e.target.files[0];if(!f)return;if(f.size>8*1024*1024){alert('Límite educativo 8 MiB');return}var url=URL.createObjectURL(f),im=new Image();im.onload=function(){if(im.width*im.height>12000000){alert('Imagen demasiado grande');URL.revokeObjectURL(url);return}original.width=im.width;original.height=im.height;ctx.drawImage(im,0,0);URL.revokeObjectURL(url);imageUpdate()};im.onerror=function(){URL.revokeObjectURL(url);alert('No se pudo abrir la imagen')};im.src=url};demoImage();imageUpdate();
 var audioCtx=null,signal=null,sr=16000,recorder=null,chunks=[],sourceKind='original_sintetico';
 function ac(){audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();return audioCtx}
 function loadSignal(array,rate,kind){signal=array;sr=rate;sourceKind=kind;audioUpdate()}
-function synth(){var rate=16000,len=rate*3,arr=new Float32Array(len);for(var i=0;i<len;i++){var t=i/rate;var f=t<1?190:t<2?0:360;var env=(t<.1||t>2.9)?0:t<1?.48:t<2?0:.32;arr[i]=env*(Math.sin(2*Math.PI*f*t)+.18*Math.sin(2*Math.PI*2*f*t))/1.18}loadSignal(arr,rate,'original_sintetico')}
+function synth(){
+ var rate=16000,len=rate*3,arr=new Float32Array(len),low=+document.getElementById('toneLow').value,
+ high=+document.getElementById('toneHigh').value,gain=+document.getElementById('toneGain').value/100;
+ for(var i=0;i<len;i++){
+   var t=i/rate,f=t<1?low:t<2?0:high;
+   var env=(t<.1||t>2.9)?0:t<1?.48:t<2?0:.32;
+   arr[i]=gain*env*(Math.sin(2*Math.PI*f*t)+.18*Math.sin(2*Math.PI*2*f*t))/1.18;
+ }
+ loadSignal(arr,rate,'original_sintetico');
+}
 function drawSignal(canvas,values,min,max){var c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;c.clearRect(0,0,w,h);c.fillStyle='#f7fafc';c.fillRect(0,0,w,h);c.strokeStyle='#c9d7e1';c.beginPath();c.moveTo(0,h/2);c.lineTo(w,h/2);c.stroke();c.strokeStyle='#087b83';c.beginPath();values.forEach(function(v,i){var x=i/(values.length-1)*w,y=h-(v-min)/(max-min)*h;if(i)c.lineTo(x,y);else c.moveTo(x,y)});c.stroke()}
-function audioUpdate(){if(!signal)return;var n=signal.length,duration=n/sr,start=Math.min(n-1024,Math.floor(n*Number(document.getElementById('audioStart').value)/100)),win=signal.subarray(Math.max(0,start),Math.max(0,start)+Math.min(1024,n));var sum=0,peak=0;for(var i=0;i<win.length;i++){sum+=win[i]*win[i];peak=Math.max(peak,Math.abs(win[i]))}var rms=Math.sqrt(sum/win.length);var view=Array.from({length:400},function(_,k){return signal[Math.min(n-1,Math.floor(k*(n-1)/399))]});drawSignal(document.getElementById('waveCanvas'),view,-1,1);
-var bins=160,spec=[];for(var k=0;k<bins;k++){var re=0,im=0;for(var j=0;j<win.length;j++){var v=win[j]*(.5-.5*Math.cos(2*Math.PI*j/(win.length-1)));re+=v*Math.cos(2*Math.PI*k*j/win.length);im-=v*Math.sin(2*Math.PI*k*j/win.length)}spec.push(Math.sqrt(re*re+im*im))}var mx=Math.max.apply(null,spec.concat([.0001]));drawSignal(document.getElementById('spectrumCanvas'),spec,0,mx*1.05);var kPeak=spec.indexOf(Math.max.apply(null,spec));window.audioMetrics={duration_seconds:+duration.toFixed(3),sample_rate_hz:sr,window_rms:+rms.toFixed(4),peak_amplitude:+peak.toFixed(4),peak_frequency_hz:+(kPeak*sr/win.length).toFixed(1),source_kind:sourceKind};
-document.getElementById('startValue').textContent=document.getElementById('audioStart').value;document.getElementById('audioStats').textContent='Duración: '+duration.toFixed(2)+' s · muestreo: '+sr+' Hz · RMS ventana: '+rms.toFixed(3)+' · amplitud pico: '+peak.toFixed(3)+' · pico espectral aproximado: '+window.audioMetrics.peak_frequency_hz+' Hz. Para voz, un pico NO equivale a una palabra.'}
+
+function spectrogramDraw(){
+ if(!signal)return;
+ var el=document.getElementById('audioSpectrogram'),g=el.getContext('2d'),W=el.width,H=el.height,left=44,right=12,top=12,bottom=28;
+ var w=W-left-right,h=H-top-bottom,columns=64,fftSize=256,rows=32;
+ g.fillStyle='#0c2940';g.fillRect(0,0,W,H);
+ for(var c=0;c<columns;c++){
+  var anchor=Math.max(0,Math.floor((signal.length-fftSize)*c/(columns-1))),window=signal.subarray(anchor,anchor+fftSize);
+  for(var b=0;b<rows;b++){
+   var freq=(b+.5)*2000/rows,k=Math.round(freq*fftSize/sr);
+   var re=0,im=0;
+   for(var i=0;i<window.length;i++){
+    var v=window[i]*(.5-.5*Math.cos(2*Math.PI*i/(window.length-1))),angle=2*Math.PI*k*i/window.length;
+    re+=v*Math.cos(angle);im-=v*Math.sin(angle);
+   }
+   var magnitude=Math.sqrt(re*re+im*im),intensity=Math.max(0,Math.min(1,Math.log1p(magnitude)/Math.log(1+28)));
+   g.fillStyle='rgb('+Math.round(10+224*intensity)+','+Math.round(45+175*intensity)+','+Math.round(68+80*intensity)+')';
+   g.fillRect(left+c*w/columns,top+h-(b+1)*h/rows,w/columns+1,h/rows+1);
+  }
+ }
+ g.fillStyle='#fff';g.font='13px system-ui';g.fillText('2000 Hz',3,20);g.fillText('0 Hz',6,top+h);g.fillText('0 s',left,top+h+18);
+ g.fillText((signal.length/sr).toFixed(1)+' s',W-52,top+h+18);
+}
+function audioUpdate(){
+ if(!signal||signal.length<4)return;
+ var n=signal.length,duration=n/sr,requested=+document.getElementById('fftWindow').value;
+ var size=Math.min(n,requested),start=Math.max(0,Math.min(n-size,Math.floor(n*Number(document.getElementById('audioStart').value)/100)));
+ var win=signal.subarray(start,start+size);
+ var sum=0,peak=0;
+ for(var i=0;i<win.length;i++){sum+=win[i]*win[i];peak=Math.max(peak,Math.abs(win[i]))}
+ var rms=Math.sqrt(sum/win.length);
+ var view=Array.from({length:400},function(_,k){return signal[Math.min(n-1,Math.floor(k*(n-1)/399))]});
+ drawSignal(document.getElementById('waveCanvas'),view,-1,1);
+ var bins=Math.min(160,Math.floor(win.length/2)),spec=[];
+ for(var k=0;k<bins;k++){
+  var re=0,im=0;
+  for(var j=0;j<win.length;j++){
+   var v=win[j]*(.5-.5*Math.cos(2*Math.PI*j/(win.length-1)));
+   re+=v*Math.cos(2*Math.PI*k*j/win.length);im-=v*Math.sin(2*Math.PI*k*j/win.length);
+  }
+  spec.push(Math.sqrt(re*re+im*im));
+ }
+ var mx=Math.max.apply(null,spec.concat([.0001]));
+ drawSignal(document.getElementById('spectrumCanvas'),spec,0,mx*1.05);
+ var kPeak=spec.indexOf(Math.max.apply(null,spec)),resolution=sr/win.length;
+ window.audioMetrics={duration_seconds:+duration.toFixed(3),sample_rate_hz:sr,window_rms:+rms.toFixed(4),
+ peak_amplitude:+peak.toFixed(4),peak_frequency_hz:+(kPeak*resolution).toFixed(1),source_kind:sourceKind,
+ fft_window_samples:win.length,frequency_resolution_hz:+resolution.toFixed(3),
+ first_tone_hz:+document.getElementById('toneLow').value,second_tone_hz:+document.getElementById('toneHigh').value,
+ demo_amplitude_percent:+document.getElementById('toneGain').value};
+ document.getElementById('startValue').textContent=document.getElementById('audioStart').value;
+ document.getElementById('fftWindowValue').textContent=requested;
+ document.getElementById('audioStats').textContent='Duración: '+duration.toFixed(2)+' s · muestreo: '+sr+
+ ' Hz · RMS ventana: '+rms.toFixed(3)+' · amplitud pico: '+peak.toFixed(3)+
+ ' · pico espectral aproximado: '+window.audioMetrics.peak_frequency_hz+' Hz. Para voz, un pico NO equivale a una palabra.';
+ document.getElementById('audioEditorExplanation').textContent='Ventana de '+win.length+' muestras = '+(1000*win.length/sr).toFixed(1)+
+ ' milisegundos. Separación entre frecuencias FFT ≈ '+resolution.toFixed(2)+' Hz. '+
+ (sourceKind==='original_sintetico'?'Tonos editables: '+document.getElementById('toneLow').value+' y '+document.getElementById('toneHigh').value+
+ ' Hz; amplitud '+document.getElementById('toneGain').value+' %.':'Estás analizando un archivo o grabación propia; editar los tonos no lo altera.');
+ spectrogramDraw();
+}
+['toneLow','toneHigh','toneGain'].forEach(function(id){
+ document.getElementById(id).addEventListener('input',function(){
+  document.getElementById('toneLowValue').textContent=document.getElementById('toneLow').value;
+  document.getElementById('toneHighValue').textContent=document.getElementById('toneHigh').value;
+  document.getElementById('toneGainValue').textContent=document.getElementById('toneGain').value;
+  if(sourceKind==='original_sintetico'){synth();}else{audioUpdate();}
+ });
+});
+document.getElementById('fftWindow').addEventListener('change',audioUpdate);
 document.getElementById('audioStart').oninput=audioUpdate;
 document.getElementById('demoAudio').onclick=synth;
 document.getElementById('playAudio').onclick=async function(){if(!signal)synth();var ctx=ac();await ctx.resume();var b=ctx.createBuffer(1,signal.length,sr);b.copyToChannel(signal,0);var src=ctx.createBufferSource();src.buffer=b;src.connect(ctx.destination);src.start()};
