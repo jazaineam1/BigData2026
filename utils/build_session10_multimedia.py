@@ -1,266 +1,441 @@
-"""Fuente de verdad S10: apoyo ejecutable al proyecto VS Code, imágenes reales."""
-from __future__ import annotations
-import argparse
-import hashlib
-import json
+"""S10: dos recursos. Notebook autosuficiente, E/T/L visible y tutorial integrado."""
 from pathlib import Path
-import sys
-import zipfile
+import argparse,ast,json,sys
 ROOT=Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
+sys.path.insert(0,str(ROOT))
 from utils.make_notebook import md,code
-
 OUTPUT='Cuadernos/10_ETL_Multimedia.ipynb'
+COLAB='https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/'+OUTPUT
+STEPS=[
+ ('preparar','Preparar y conectar entradas','Entorno, snapshot real y contexto disponibles.'),
+ ('extraer','Extraer y conservar RAW','Original decodificable, fuente y SHA-256.'),
+ ('transformar','Transformar una imagen','Derivado real, parámetros y RAW conservado.'),
+ ('lotes','Repetir por lotes y continuar','Estados, trabajo nuevo y reutilizado separados.'),
+ ('cargar','Cargar, releer y consultar','JSONL/Parquet coherentes y galería desde el catálogo.'),
+ ('cerrar','Decidir y conservar','Selección propia, límite y catálogo verificado.')]
 
+def core_source(names):
+    source=(ROOT/'utils/s10_pipeline.py').read_text(encoding='utf-8')
+    tree=ast.parse(source)
+    result = '\n\n'.join(ast.get_source_segment(source,n) for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in names)
+    return result.replace(chr(34)*3, chr(39)*3)
 
 def reading(how,what,missing,error):
-    return '\n\n'.join('**'+k+'** '+v for k,v in zip(
-        ['Cómo se lee','Qué nos dice','Qué NO permite concluir todavía','Qué error común'],[how,what,missing,error]))
-
+    return '\n\n'.join('**'+k+':** '+v for k,v in zip(['Cómo se lee','Qué nos dice','Qué NO permite concluir todavía','Qué error común'],[how,what,missing,error]))
 
 def build_cells():
-    sha=hashlib.sha256((ROOT/'utils/s10_pipeline.py').read_bytes()).hexdigest()
     cells=[]
-    def m(s):cells.append(md(s))
-    def c(s,hidden=False):
-        cell=code(s)
-        if hidden:cell['metadata']['cellView']='form'
+    def m(id,s):
+        c=md(s);c['id']=id;c['metadata']['id']=id;cells.append(c)
+    def c(id,s,fold=False):
+        cell=code(s);cell['id']=id;cell['metadata']['id']=id
+        if fold:cell['metadata']['cellView']='form'
         cells.append(cell)
-    m('''# Universidad Central · Maestría en Analítica de Datos
-# S10 · ETL de imágenes reales: extraer, transformar y cargar
+    m('s10-inicio','''# Universidad Central · Maestría en Analítica de Datos
+# Big Data · S10 · De una noticia a un catálogo de imágenes reutilizable
 
-**¿Cómo prepara Laura las imágenes de sus noticias para un catálogo reutilizable?**
+**¿Cómo prepara Laura imágenes reales sin perder su origen y consigue volver a consultarlas?**
 
-La ruta principal de esta sesión es un **proyecto Python en VS Code**. Este cuaderno acompaña la explicación y permite consultar o ejecutar el mismo código. [Proyecto y comandos](https://github.com/jazaineam1/BigData2026/tree/main/laboratorios/s10_etl_imagenes) · [Presentación](https://jazaineam1.github.io/BigData2026/Presentaciones/s10-etl-multimedia.html#s1) · [Tutorial](https://jazaineam1.github.io/BigData2026/assets/tutoriales/s10-laboratorio-guiado.html).
+Dos recursos: [presentación y tutorial integrado](https://jazaineam1.github.io/BigData2026/Presentaciones/s10-etl-multimedia.html#s1) y **este cuaderno Python**. Todo el código ejecutable de la ETL está aquí. Puedes abrir el mismo `.ipynb` en **Colab** o en **VS Code con Python/Jupyter**; en VS Code selecciona el intérprete del kernel antes de ejecutar.
 
-**Producto formativo:** RAW conservados, thumbnails, catálogo JSONL/Parquet, manifiesto, estados y paquete portable. No se añade una nota. Trabajamos con imágenes reales adquiridas por el docente; no generamos imágenes sintéticas ni sustituimos descargas fallidas.
+**Producto formativo:** originales conservados, dos perfiles, catálogo JSONL/Parquet, consulta propia y carpeta reutilizable. No se añade una nota. Las entradas reales se obtienen automáticamente desde el repositorio del curso al ejecutar Preparar. No tienes que localizar ni cargar archivos manualmente.
 
-**Antes de ejecutar:** recibe `S10_entradas_reales.zip` del docente. Incluye originales reales, corpus, contexto y código de apoyo. El ZIP se distribuye por la vía docente, no se promete una descarga pública inexistente. En VS Code instala `requirements.txt` y abre `paso_a_paso.py`; la carpeta se prepara antes del encuentro.
-
-| Etapa | Qué responde | Qué deja |
+| Etapa | Pregunta | Producto |
 |---|---|---|
-| Contexto | ¿De qué noticia y entidad viene? | IDs y vínculos documentados |
-| E · Extracción | ¿Qué archivo recibimos? | RAW validado y huella |
-| T · Transformación | ¿Cómo lo adaptamos al uso? | Derivado con parámetros |
-| L · Carga | ¿Qué puede consultar otro proceso? | Catálogo escrito y reabierto |
-| Lotes | ¿Qué terminó y qué falta? | Checkpoint y métricas |
-| Cierre | ¿Puede abrirlo otra persona? | Paquete verificado |
-''')
-    m('''## 1 · El expediente de Laura continúa
+| Preparar | ¿Qué fuente y contexto tenemos? | Snapshot y relación entidad–noticia |
+| E | ¿Qué bytes llegaron? | RAW, metadata y hash |
+| T | ¿Cómo los adapto al uso? | Derivado con parámetros |
+| Lotes | ¿Qué terminé y qué puedo reutilizar? | Estados y métricas |
+| L | ¿Qué puede leer otro proceso? | Catálogo escrito, reabierto y consultado |
+| Cierre | ¿Qué decidí y qué no puedo concluir? | Evidencia y producto para S11 |
 
-S3 modeló noticias con `imagenes[]`; S4/S5 aportaron contexto de entidades; S6 siguió procesos y proveedores; S7/S9 enseñaron a recuperar candidatos. Ahora preparamos los archivos que ese contexto referencia.
+### Contrato de aprendizaje individual · trabaja sobre TU copia
 
-El corpus de contratación contiene **987 noticias, 976 con imágenes, 5.152 referencias y 4.071 URLs distintas**. El lote docente contiene **32 imágenes reales**. El catálogo completo y el lote procesado son cantidades distintas.
+1. Desde el LMS abre **Cuaderno** y, en Google Colab, selecciona **Archivo → Guardar una copia en Drive**. Cambia el nombre de esa copia; no edites el original compartido.
+2. Comprueba **Entorno de ejecución → Cambiar tipo de entorno → Python 3**. Trabaja de arriba hacia abajo con el botón ▶ de cada celda; una ejecución completa del docente **no sustituye** tu ejecución.
+3. En cada paso aplica **predecir → ejecutar → observar → explicar → cambiar una variable → volver a comprobar**. Compara la salida que ves con el control indicado; si hay error, recupera ese paso antes de avanzar.
+4. Puedes elegir **8 imágenes reales** para una práctica corta (elige `CANTIDAD=8` en E) o 32 para la completa. Las dos rutas enseñan E/T/L y producen `N × 2` trabajos.
+5. Al terminar, selecciona una fila y compara dos perfiles distintos; registra un límite real. **Una casilla de tutorial no demuestra una ejecución ni genera nota**.
+6. **Evidencia individual verificable:** tu `manifest_s10.json`, tus archivos RAW/derived, `outputs/assets.parquet`, `checks/decision.json` y la ruta de tu copia comprobada en Drive. No compartas permisos de edición indiscriminadamente.
 
-Ejemplo manual conceptual: dos noticias hacen tres referencias, dos con la misma URL. Hay tres apariciones y dos solicitudes distintas. Solo los bytes adquiridos permiten comprobar si los contenidos son iguales.
+**Convención de errores:** si una celda muestra una excepción, lee la última línea, corrige entrada/permiso/ruta y vuelve a ejecutarla; no saltes a L. Si cambia `INICIO` o `CANTIDAD` después de E, comienza en otra carpeta `S10_BASE` para no mezclar selecciones.''')
+    m('s10-preparar','''## Paso 1 · Preparar y conectar las entradas
 
-El ancla docente de S5/S6 es `CO1.REQ.2622868`, Fuerza Aeroespacial Colombiana, NIT `899999102`. Las noticias de ejemplo enlazan por entidad, no prueban hechos sobre ese contrato. El NIT no se inventa a partir de una foto.
+S09 dejó documentos y una selección de búsqueda; S10 prepara las imágenes de noticias que aportan contexto por entidad. **No se deduce que una foto retrate un contrato.** La conexión tiene claves: entidad → noticia de ejemplo → referencia de imagen. S11 ampliará este contrato a otros medios.
 
-**Pregunta para localizar en tu salida:** ¿qué noticia corresponde a la primera imagen de tu lote?''')
-    c('''#@title Preparar dependencias (en VS Code: pip install -r requirements.txt)
-%pip -q install pillow==13.0.0 pandas==3.1.0 pyarrow==26.0.0''',True)
-    c('''#@title Abrir la entrada docente real, sin volver a descargar las fotos
+El productor docente adquirió el snapshot una vez con pausas e identificación. Cada estudiante utiliza esa entrada, sin repetir descargas masivas del periódico. Las URLs editoriales describen procedencia. El curso conserva una copia de las imágenes reales para que el grupo no vuelva a descargarlas del periódico.
+
+**HAZ ESTO AHORA.** Ejecuta dependencias y conecta tu Google Drive cuando Colab lo solicite. Solo trabajaremos en `MyDrive/BigData2026`: S09 deja allí su expediente y S10 conservará la carpeta completa para S11. No pegues códigos de autorización en el cuaderno. Si cancelas, la celda se detiene: vuelve a ejecutarla y completa la conexión.
+
+Después ejecuta Preparar. Las imágenes se obtienen automáticamente; al repetir se reutilizan los archivos verificados. En VS Code no se monta Drive: conserva la carpeta local. No se pide una tarjeta ni una clave para S10.
+
+**Secuencia guiada, no solo instalación:** (1) entra con TU cuenta de Google; (2) pulsa ▶ en *Preparar bibliotecas*; (3) acepta el acceso solicitado a TU Drive, sin copiar contraseñas ni tokens en celdas; (4) espera el texto `CONSERVACIÓN PREPARADA`; (5) pulsa ▶ en *Utilidades* y luego *Preparar*; (6) confirma `ENTRADAS REALES: 32`; (7) ejecuta *Contexto* y anota si leyó TU expediente S09 o el ancla de respaldo.
+
+**Comprueba:** en *Archivos* de Colab existe `work_s10/entrada`. En Google Drive se creó `Mi unidad/BigData2026`. **Atasco habitual:** permiso denegado o Drive no montado → vuelve a ejecutar *Preparar bibliotecas* con tu cuenta. **Sin red:** después de haber descargado la entrada, ejecuta de nuevo desde la misma carpeta; no sustituyas los originales con imágenes inventadas.''')
+    c('s10-dependencias','''#@title Preparar bibliotecas (selecciona el kernel Python en VS Code)
+# Colab precarga bibliotecas: no las reemplazamos dentro de un kernel activo.
+# Verificado en Colab el 29-10-2026: google-colab requiere pandas 2.2.3.
+import importlib.util, importlib.metadata, subprocess, sys
 from pathlib import Path
-import hashlib, importlib.util, json, sys, zipfile
-INPUT_ZIP=Path(globals().get('S10_INPUT_ZIP','S10_entradas_reales.zip')).resolve()
-BASE=Path(globals().get('S10_BASE','work_s10_apoyo')).resolve()
-if not INPUT_ZIP.exists():
-    try:
-        from google.colab import files
-        subidos=files.upload()
-        if len(subidos)!=1:raise ValueError('Selecciona solo el ZIP docente')
-        INPUT_ZIP=Path(next(iter(subidos))).resolve()
-    except ImportError:
-        raise FileNotFoundError('Coloca S10_entradas_reales.zip junto al cuaderno o define S10_INPUT_ZIP con su ruta')
-bootstrap=BASE/'runtime';bootstrap.mkdir(parents=True,exist_ok=True)
-with zipfile.ZipFile(INPUT_ZIP) as z:
-    source=z.read('runtime/s10_pipeline.py')
-EXPECTED_SHA='''+repr(sha)+'''
-if hashlib.sha256(source).hexdigest()!=EXPECTED_SHA:
-    raise ValueError('El código del paquete y este cuaderno tienen versiones diferentes: solicita el paquete actualizado')
-module_path=bootstrap/'s10_pipeline.py';module_path.write_bytes(source)
-spec=importlib.util.spec_from_file_location('s10_pipeline',module_path)
-etl=importlib.util.module_from_spec(spec);spec.loader.exec_module(etl)
-TRABAJO=BASE/'ejecucion'
-print('Proyecto: VS Code · apoyo disponible en este cuaderno')
-print('Entrada real localizada:',INPUT_ZIP.name)''',True)
-    m('''## 2 · E: extraer y conservar una entrada real
-
-La adquisición HTTP ocurrió una vez del lado docente, con pausas e identificación. E en el proyecto recupera ese snapshot real y consolida RAW verificando las huellas y la procedencia. Tener una URL no equivale a tener bytes decodificables.
-
-`initialize(entrada, trabajo, inicio, cantidad)` abre el paquete y devuelve inventario y trabajos con rutas RAW. Una carpeta distinta permite conservar otra variante. No recorre de nuevo el sitio editorial.
-
-**HAZ ESTO AHORA.** Ejecuta E y abre el primer RAW. En VS Code: `python main.py extraer --entrada ../S10_entradas_reales.zip --trabajo work/s10`.
-''')
-    c('''# E · Inventario completo y lote real disponible
-INICIO=0 #@param {type:"integer"}
-CANTIDAD=32 #@param {type:"integer"}
-inventario,trabajos=etl.initialize(INPUT_ZIP,TRABAJO,start=INICIO,count=CANTIDAD)
-print('CATÁLOGO OBSERVADO:',inventario['counts'])
-print('IMÁGENES REALES DEL LOTE:',len(trabajos))
-print('CONTEXTO:',etl.context_for(inventario))
-primero=trabajos[0]
-raw=TRABAJO/primero['raw_path']
-print('article_id:',primero['article_id'],'· origen:',primero['origin_kind'])
-print('URL fuente:',primero['source_url'])
-print('RAW OBSERVADO:',etl.inspect_image(raw))''')
-    m(reading('Los conteos del catálogo y la cantidad de archivos del lote tienen distinto grano.',
-        'Qué archivos reales quedaron disponibles para esta ejecución y cómo vuelven a su noticia.',
-        'No conocemos la disponibilidad ni los bytes de las URLs que no adquirimos.',
-        'Contar 5.152 referencias como fotografías distintas procesadas.'))
-    m('''## 3 · Lee la implementación de una imagen
-
-Antes del lote, aprende la operación. `Image.open()` abre, `load()` decodifica; `format`, `size` y `mode` describen la entrada. `ImageOps.exif_transpose()` respeta orientación; `thumbnail()` modifica la imagen en memoria conservando proporción. `save()` escribe un archivo nuevo con formato explícito.
-
-**Error frecuente:** renombrar el sufijo y creer que convirtió el contenido. En la adquisición real las 32 imágenes se detectaron como WEBP; al guardar JPEG sí cambian los bytes.
-
-En VS Code abre `paso_a_paso.py` y ejecuta con `--lado 640`. Después cambia **solo** ese parámetro a 320. Mantén la misma entrada para comparar.''')
-    c('''# E → T → L · Operación visible, equivalente a paso_a_paso.py
+faltantes=[]
+for modulo,requisito in [('PIL','pillow==12.2.0'),('pandas','pandas==2.2.3'),('pyarrow','pyarrow==26.0.0'),('IPython','ipython>=8.20,<10')]:
+    if importlib.util.find_spec(modulo) is None:faltantes.append(requisito)
+if faltantes:subprocess.check_call([sys.executable,'-m','pip','install','-q',*faltantes])
+print('ENTORNO:',{nombre:importlib.metadata.version(nombre) for nombre in ['pillow','pandas','pyarrow']})
+USAR_GOOGLE_DRIVE=True #@param {type:"boolean"}
+DRIVE_CURSO=None
+try:
+    from google.colab import drive
+except ImportError:
+    drive=None
+if drive is not None and USAR_GOOGLE_DRIVE:
+    drive.mount('/content/drive')
+    DRIVE_CURSO=Path('/content/drive/MyDrive/BigData2026')
+    DRIVE_CURSO.mkdir(parents=True,exist_ok=True)
+    prueba=DRIVE_CURSO/'.escritura_colab.tmp'
+    prueba.write_text('s10',encoding='utf-8')
+    assert prueba.read_text(encoding='utf-8')=='s10', 'Drive montado sin lectura/escritura verificable'
+    prueba.unlink()
+    print('CONSERVACIÓN PREPARADA:',DRIVE_CURSO,'· lectura/escritura comprobada')
+elif drive is not None:
+    print('CONSERVACIÓN PENDIENTE: /content es temporal; activa Google Drive antes del cierre.')
+else:
+    print('ENTORNO LOCAL: conserva la carpeta work_s10 junto al cuaderno.')''',True)
+    c('s10-utilidades','''#@title Utilidades de archivos e integridad — código incluido; expande para inspeccionarlo
+from pathlib import Path, PureWindowsPath
+from datetime import datetime, timezone
+import hashlib, json, math, shutil, tempfile, time
+import urllib.request
 import pandas as pd
+import PIL
 from PIL import Image, ImageOps
 from IPython.display import display
-hash_antes=etl.sha256_file(raw)
-LADO_MAXIMO=640 #@param [320,640,1024] {type:"raw"}
-with Image.open(raw) as original:
-    original.load()
-    entrada_info={'format':original.format,'width':original.width,'height':original.height}
-    imagen=ImageOps.exif_transpose(original).convert('RGB')
-    imagen.thumbnail((LADO_MAXIMO,LADO_MAXIMO))
-    ejemplo=TRABAJO/'ejemplo'/('vista_'+str(LADO_MAXIMO)+'.jpg')
-    ejemplo.parent.mkdir(exist_ok=True)
-    imagen.save(ejemplo,'JPEG',quality=88)
-    imagen.close()
+VERSION="s10-batches-v1"
+PROFILES={"vista320":{"max_side":320,"quality":88},
+          "catalogo640":{"max_side":640,"quality":88}}
+ANCHOR={"process_id":"CO1.REQ.2622868","entity":"FUERZA AEROESPACIAL COLOMBIANA",
+        "nit":"899999102","relation":"contexto_por_entidad_no_evidencia_del_contrato"}
+'''+core_source({'digest','sha256_file','atomic_json','safe_path','inspect_image','build_inventory','context_for','normal_records','validate_record','export_package','verify_package','record_decision'}),True)
+    c('s10-entrada','''# Preparar: obtener entradas reales desde el curso, sin intervención manual.
+BASE=Path(globals().get('S10_BASE','work_s10')).resolve()
+TRABAJO=BASE/'ejecucion'
+ENTRADA=BASE/'entrada'
+ORIGEN_CURSO=globals().get('S10_ORIGEN',
+    'https://raw.githubusercontent.com/jazaineam1/BigData2026/main/')
+
+def obtener_archivo(relativa,destino,huella=None):
+    destino=Path(destino)
+    if destino.exists() and (huella is None or sha256_file(destino)==huella):
+        return 'reutilizado'
+    url=ORIGEN_CURSO.rstrip('/')+'/'+relativa
+    peticion=urllib.request.Request(url,headers={'User-Agent':'BigData-UCentral-S10/1.0'})
+    with urllib.request.urlopen(peticion,timeout=45) as respuesta:
+        datos=respuesta.read(32*1024**2+1)
+    if not 0<len(datos)<=32*1024**2:raise ValueError('Entrada vacía o demasiado grande')
+    if huella and digest(datos)!=huella:raise ValueError('La imagen no coincide con su SHA-256')
+    destino.parent.mkdir(parents=True,exist_ok=True)
+    temporal=destino.with_name(destino.name+'.tmp');temporal.write_bytes(datos);temporal.replace(destino)
+    return 'obtenido'
+
+for nombre in ['noticias_contratacion_2026.json','entidades_en_noticias_2026.json']:
+    obtener_archivo('Datos/'+nombre,ENTRADA/'sources'/nombre)
+obtener_archivo('Datos/s10_imagenes_reales/inputs.json',ENTRADA/'inputs/inputs.json')
+adquiridas=json.loads((ENTRADA/'inputs/inputs.json').read_text(encoding='utf-8'))
+estados=[]
+for imagen in adquiridas:
+    destino=safe_path(ENTRADA/'inputs',imagen['input_path'])
+    estados.append(obtener_archivo('Datos/s10_imagenes_reales/'+imagen['input_path'],
+                                  destino,imagen['input_sha256']))
+noticias=json.loads((ENTRADA/'sources/noticias_contratacion_2026.json').read_text(encoding='utf-8'))
+menciones=json.loads((ENTRADA/'sources/entidades_en_noticias_2026.json').read_text(encoding='utf-8'))
+inventario=build_inventory(noticias,menciones)
+print('ENTRADAS REALES:',len(adquiridas),'· obtenidas:',estados.count('obtenido'),
+      '· reutilizadas:',estados.count('reutilizado'))
+print('CATÁLOGO OBSERVADO:',inventario['counts'])''')
+    m('s10-lectura-entrada',reading('El catálogo cuenta noticias y referencias; las entradas locales son imágenes reales adquiridas previamente por el docente.',
+        'El snapshot tiene 987 noticias, 5.152 apariciones y 4.071 URLs distintas; no son 5.152 imágenes descargadas.',
+        'No conocemos la disponibilidad ni los bytes de las URLs no adquiridas.',
+        'Tratar una URL como un archivo ya procesado.'))
+    c('s10-contexto','''# Conexión de contexto en Python: entidad → noticia → referencia de imagen.
+referencias=pd.DataFrame(inventario['occurrences'])
+vinculos=pd.DataFrame(inventario['relations'])
+ENTIDAD=ANCHOR['entity']
+# Herramienta opcional: ruta al expediente propio exportado en S09.
+S09_EXPEDIENTE="" #@param {type:"string"}
+POSICION_S09=1 #@param {type:"integer"}
+if not S09_EXPEDIENTE and DRIVE_CURSO is not None:
+    candidato=DRIVE_CURSO/'S09/s09_atlas_evidencia.json'
+    if candidato.is_file():
+        S09_EXPEDIENTE=str(candidato)
+        print('EXPEDIENTE PROPIO EN DRIVE:',S09_EXPEDIENTE)
+if S09_EXPEDIENTE:
+    anterior=json.loads(Path(S09_EXPEDIENTE).read_text(encoding='utf-8'))
+    filas_s09=anterior.get('resultados_ann_atlas') or anterior.get('resultados_numpy_local') or []
+    if not 1<=POSICION_S09<=len(filas_s09):raise ValueError('Posición del resultado propio S09')
+    ENTIDAD=filas_s09[POSICION_S09-1]['entidad']
+    print('MOTOR DECLARADO S09:',anterior.get('motor_ann_ejecutado','No consta'))
+else:
+    print('SIN EXPEDIENTE S09: usamos el ancla del curso; no acredita una ejecución propia anterior.')
+contexto=referencias.merge(vinculos[vinculos.entity.eq(ENTIDAD)],on='article_id',how='inner')
+print('CONTEXTO:',ENTIDAD,'· referencias enlazadas:',len(contexto))
+display(contexto[['article_id','article_url','image_url','relation']].head(3))
+print('ALCANCE: ejemplos de menciones; no demuestra vínculo fotografía–contrato')''')
+    m('s10-lectura-contexto',reading('Cada fila enlaza una aparición de imagen con una noticia que menciona la entidad.',
+        'La unión es auditable por article_id; una entidad sin coincidencias produce cero filas.',
+        'Falta una evidencia específica para vincular una fotografía con un contrato.',
+        'Forzar una coincidencia o atribuir a Atlas un resultado de respaldo local.')+'\n\n**El lote de 32 imágenes es mixto.** La unión de contexto no lo filtra automáticamente: solo una noticia cuyo `article_id` coincide pertenece a los ejemplos enlazados de la entidad. La extracción muestra esa coincidencia por separado.')
+    m('s10-extraer','''## Paso 2 · E: extraer bytes y conservar el original
+
+Elegimos una selección del lote real y copiamos sus bytes a una ruta RAW. Guardamos fuente, crédito, fecha de adquisición y huella. **RAW no se sobrescribe para hacer un thumbnail.**
+
+Ejemplo manual: dos noticias pueden referenciar la misma URL. Conservamos las apariciones editoriales; la identidad del contenido se comprueba con los bytes.
+
+Funciones usadas: `json.loads()` convierte texto JSON en objetos; `shutil.copyfile(origen,destino)` conserva bytes en otra ruta; `Image.open()`/`load()` decodifican y `sha256_file()` devuelve una huella. Un sufijo `.jpg` no determina el formato real.
+
+**Haz y verifica en tu ejecución:** abre la celda `s10-raw` (▶), conserva `INICIO=0` y elige `CANTIDAD=8` para la ruta reducida o 32 para la completa. Antes de ejecutarla, predice si 8 imágenes con dos perfiles darán 8 o 16 transformaciones. Después comprueba `E · RAW REALES: N` y abre una ruta `raw/.../original.ext` desde el panel de archivos. Registra su `article_id` y comprueba si `contexto_entidad` es True o False.
+
+**Error y recuperación:** si la cantidad queda fuera del lote o se modificó el archivo, detente; comprueba `ENTRADAS REALES`, hash y selección. Si ya procesaste una selección diferente, asigna un `S10_BASE` nuevo y reejecuta desde Preparar. No borres RAW para intentar que la prueba pase.''')
+    c('s10-raw','''# E visible: seleccionar → comprobar origen → leer bytes → conservar RAW.
+INICIO=0 #@param {type:"integer"}
+CANTIDAD=32 #@param {type:"integer"}
+if type(INICIO) is not int or type(CANTIDAD) is not int or INICIO<0 or not 2<=CANTIDAD<=32:
+    raise ValueError('Inicio entero y cantidad de 2 a 32')
+adquiridas=json.loads((ENTRADA/'inputs/inputs.json').read_text(encoding='utf-8'))
+seleccion=adquiridas[INICIO:INICIO+CANTIDAD]
+if len(seleccion)<2:raise ValueError('Elige al menos dos imágenes disponibles')
+por_aparicion={r['occurrence_id']:r for r in inventario['occurrences']}
+trabajos=[]
+for registro in seleccion:
+    referencia=por_aparicion[registro['occurrence_id']]
+    if registro['source_url']!=referencia['image_url'] or registro['snapshot']!=inventario['snapshot']:
+        raise ValueError('Procedencia incompatible con el snapshot')
+    origen=safe_path(ENTRADA/'inputs',registro['input_path'])
+    info=inspect_image(origen)
+    if info['sha256']!=registro['input_sha256']:raise ValueError('Entrada alterada')
+    relativa=f"raw/{info['sha256']}/original.{info['format'].lower()}"
+    destino=safe_path(TRABAJO,relativa);destino.parent.mkdir(parents=True,exist_ok=True)
+    if destino.exists() and sha256_file(destino)!=info['sha256']:raise ValueError('RAW previo alterado')
+    if not destino.exists():shutil.copyfile(origen,destino)
+    trabajos.append(registro|{'raw_path':relativa,'path':str(destino)})
+previo=TRABAJO/'config/jobs.json'
+if previo.exists() and [j['job_id'] for j in json.loads(previo.read_text(encoding='utf-8'))]!=[j['job_id'] for j in trabajos]:
+    raise ValueError('Usa otra carpeta para otra selección')
+atomic_json(previo,[{k:v for k,v in j.items() if k!='path'} for j in trabajos])
+atomic_json(TRABAJO/'config/inventory.json',inventario)
+atomic_json(TRABAJO/'config/context.json',context_for(inventario,ENTIDAD))
+print('E · RAW REALES:',len(trabajos))
+vista_raw=pd.DataFrame(trabajos)
+vista_raw['contexto_entidad']=vista_raw.article_id.astype(str).isin(contexto.article_id.astype(str))
+print('EN ESTE LOTE · imágenes en noticias de contexto:',int(vista_raw.contexto_entidad.sum()))
+display(vista_raw[['article_id','contexto_entidad','source_url','credit','raw_path']].head(3))''')
+    m('s10-lectura-raw',reading('Cada trabajo apunta a un original identificado y a su noticia.',
+        'Los bytes existen y el hash coincide con la entrada adquirida.',
+        'La integridad no autentica por sí sola al autor editorial ni el contenido del contrato.',
+        'Sobrescribir RAW o inventar una imagen cuando falta el original.'))
+    m('s10-transformar','''## Paso 3 · T: adaptar una imagen a un propósito
+
+Queremos una vista de catálogo. Para una entrada de 1200×675 y lado máximo 640, la proporción es 640/1200 y la salida esperada 640×360. Cambiar el sufijo no convierte el archivo.
+
+`ImageOps.exif_transpose()` respeta orientación; `convert('RGB')` prepara canales; `thumbnail((lado,lado))` conserva proporción y no amplía; `save(...,'JPEG',quality=88)` escribe el derivado. Elige el lado para el uso: más pequeño no significa mejor calidad.
+
+Primero lee y ejecuta el ejemplo resuelto. Después cambia únicamente `LADO_MAXIMO`, manteniendo la misma entrada, formato y calidad.
+
+**Experimento controlado:** ejecuta `s10-funcion-t` y `s10-una-imagen` con `LADO_MAXIMO=640`. Antes de mirar, predice si conserva la relación de aspecto y si necesariamente reducirá bytes. Anota las dimensiones y `sha256` de `ORIGINAL` y `DERIVADO`. Cambia **solo** `LADO_MAXIMO=320` y vuelve a ejecutar `s10-una-imagen`. Describe qué cambió en dimensiones, bytes y legibilidad: **no cambies la imagen, la calidad ni el formato a la vez**.
+
+**Control:** ambas salidas deben indicar `RAW CONSERVADO: True`. Si falla Pillow o el origen no decodifica, vuelve a E y revisa el archivo original; renombrar la extensión no lo repara.''')
+    c('s10-funcion-t',core_source({'make_thumbnail'}))
+    c('s10-una-imagen','''# T visible: la función anterior contiene la operación Pillow completa.
+primero=trabajos[0];raw=TRABAJO/primero['raw_path']
+LADO_MAXIMO=640 #@param [320,640] {type:"raw"}
+perfil_ejemplo={'max_side':LADO_MAXIMO,'quality':88}
+antes=sha256_file(raw)
+ejemplo=TRABAJO/'ejemplo'/f'vista_{LADO_MAXIMO}.jpg'
+make_thumbnail(raw,ejemplo,'catalogo640' if LADO_MAXIMO==640 else 'vista320')
+print('ORIGINAL:',inspect_image(raw))
+print('DERIVADO:',inspect_image(ejemplo))
+print('RAW CONSERVADO:',sha256_file(raw)==antes)
 with Image.open(raw) as im:
     vista=ImageOps.exif_transpose(im).convert('RGB');vista.thumbnail((640,360));display(vista);vista.close()
-with Image.open(ejemplo) as im:display(im)
-print('ORIGINAL:',entrada_info,'· bytes:',raw.stat().st_size)
-print('DERIVADO:',etl.inspect_image(ejemplo))
-print('RAW conservado:',etl.sha256_file(raw)==hash_antes)
-fila={'article_id':primero['article_id'],'raw_bytes':raw.stat().st_size,
-      'derived_bytes':ejemplo.stat().st_size,'max_side':LADO_MAXIMO}
-pd.DataFrame([fila]).to_parquet(TRABAJO/'ejemplo/una_fila.parquet',index=False)
-display(pd.read_parquet(TRABAJO/'ejemplo/una_fila.parquet'))''')
-    m(reading('Compara original y derivado con dimensiones y bytes, no solo su apariencia en pantalla.',
-        'El efecto de ese perfil sobre una imagen concreta; RAW debe conservar su huella.',
-        'Faltan criterios y juicios independientes para afirmar calidad visual general.',
-        'Prometer ahorro al convertir WEBP a JPEG; los bytes pueden aumentar.'))
-    m('''## 4 · T: la misma operación por micro-lotes
+with Image.open(ejemplo) as im:display(im)''')
+    m('s10-lectura-t',reading('Observa imágenes, dimensiones y bytes del mismo original y su derivado.',
+        'Muestra el efecto de este parámetro; RAW conserva su huella.',
+        'Faltan criterios y juicios para afirmar calidad visual general.',
+        'Prometer ahorro: convertir WEBP a JPEG puede aumentar bytes.'))
+    m('s10-lotes','''## Paso 4 · Repetir la operación y continuar
 
-`run_batch()` aplica `make_thumbnail()` y registra resultado por trabajo. El código de la transformación está en el proyecto; el helper organiza checkpoint, escritura y límites.
+La transformación no cambia al pasar al lote. Cada trabajo recibe un resultado o un fallo explícito. Antes de reutilizar un resultado, comprobamos archivo, hash y parámetros. Si algo falta, se vuelve a procesar; no basta leer `DONE`.
 
-`batch_size` agrupa trabajos. `workers` limita cuántos están activos; no significa que todas las imágenes del lote se decodifiquen juntas. Empieza con uno. El estado durable es DONE/FAILED/PENDING; `skipped_verified` describe lo reutilizado en esta ejecución.
+El bucle es secuencial para poder seguirlo. `max_nuevos` permite observar una pausa y continuar sin provocar fallos. Los acumulados DONE/FAILED/PENDING y el trabajo nuevo/reutilizado responden preguntas diferentes.
 
-**HAZ ESTO AHORA.** Ejecuta un primer grupo y continúa los pendientes. No edites el checkpoint para aparentar completitud.''')
-    c('''# Primer micro-lote; stop_after deja pendientes visibles sin fabricar fallos
-resultados,primera_medida=etl.run_batch(trabajos,TRABAJO,profile='catalogo640',workers=1,
-                                      batch_size=16,stop_after=16)
-print('PRIMER MICRO-LOTE:',json.dumps(primera_medida,ensure_ascii=False,indent=2))''')
-    c('''# Continuar y comprobar que lo anterior se revalida
-resultados,segunda_medida=etl.run_batch(trabajos,TRABAJO,profile='catalogo640',workers=1,batch_size=16)
-print('CONTINUACIÓN:',json.dumps(segunda_medida,ensure_ascii=False,indent=2))''')
-    c('''# Comparar una alternativa sobre los mismos archivos reales
-alternativa,medida_alternativa=etl.run_batch(trabajos,TRABAJO,profile='vista320',workers=1,batch_size=16)
+**Ensayo de continuación que harás tú:** (1) ejecuta `s10-un-trabajo` y lee sus parámetros; (2) ejecuta `s10-bucle`; (3) ejecuta `s10-aplicar-lote`. Primero verás una pausa controlada del perfil 640 y luego su continuación; finalmente se completa el perfil 320. Comprueba en las métricas `DONE=N`, `FAILED=0` y `PENDING=0` para ambos perfiles.
+
+Después vuelve a ejecutar `procesar_lote('catalogo640')` en una celda de prueba propia: debe indicar `processed_now=0` y `skipped_verified=N`. La función `validate_record` devuelve **lista de errores**: `[]` significa válido, por eso `not validate_record(...)` permite reutilizarlo. También verás una prueba de hash alterado **solo en memoria**, sin destruir tus imágenes. Si aparecen fallos, lee su causa en `state/checkpoint.json`; al volver a ejecutar se intenta recuperar el trabajo.''')
+    c('s10-un-trabajo',core_source({'process_one'}))
+    c('s10-bucle','''# Control del lote visible: verificar previos → procesar pendientes → guardar estado.
+def procesar_lote(perfil,max_nuevos=None):
+    ruta=TRABAJO/'state/checkpoint.json'
+    firma=digest(json.dumps([[j['job_id'],j['input_sha256']] for j in trabajos]).encode())
+    estado=json.loads(ruta.read_text(encoding='utf-8')) if ruta.exists() else {'version':VERSION,'signature':firma,'profiles':{}}
+    if estado['signature']!=firma:raise ValueError('Otra selección requiere otra carpeta')
+    registros=estado['profiles'].setdefault(perfil,{})
+    nuevos=reutilizados=fallos=0;inicio=time.perf_counter()
+    for trabajo in trabajos:
+        key=trabajo['job_id'];prev=registros.get(key,{})
+        if prev.get('status')=='DONE' and not validate_record(TRABAJO,prev['result']):
+            reutilizados+=1;continue
+        if max_nuevos is not None and nuevos+fallos>=max_nuevos:
+            registros[key]={'status':'PENDING'};continue
+        try:
+            fila=process_one(trabajo,TRABAJO,perfil)
+            registros[key]={'status':'DONE','result':fila};nuevos+=1
+        except Exception as error:
+            registros[key]={'status':'FAILED','error':type(error).__name__+': '+str(error)};fallos+=1
+        atomic_json(ruta,estado)
+    atomic_json(ruta,estado)
+    conteos={s:sum(v['status']==s for v in registros.values()) for s in ['DONE','FAILED','PENDING']}
+    assert sum(conteos.values())==len(trabajos)
+    metrica={'profile':perfil,'planned':len(trabajos),'states':conteos,'processed_now':nuevos,
+             'skipped_verified':reutilizados,'failed_now':fallos,'seconds':time.perf_counter()-inicio,'workers':1}
+    salida=TRABAJO/'metrics'/f'{perfil}.json'
+    historial=json.loads(salida.read_text(encoding='utf-8')) if salida.exists() else []
+    atomic_json(salida,historial+[metrica])
+    print(json.dumps(metrica,ensure_ascii=False,indent=2))
+    return [v['result'] for v in registros.values() if v['status']=='DONE'],metrica''')
+    c('s10-aplicar-lote','''# Aplicar, continuar y comparar sobre las mismas imágenes reales.
+_,pausa=procesar_lote('catalogo640',max_nuevos=min(16,len(trabajos)))
+resultados,continuacion=procesar_lote('catalogo640')
+alternativa,comparacion=procesar_lote('vista320')
+assert all(m['states']['FAILED']==0 and m['states']['PENDING']==0 for m in [continuacion,comparacion])
 tabla=pd.DataFrame(resultados+alternativa)
-display(tabla[['article_id','profile','raw_format','derived_width','derived_height','raw_bytes','derived_bytes']].head(8))
-display(tabla.groupby('profile')[['raw_bytes','derived_bytes']].sum())''')
-    m(reading('processed_now cuenta trabajo nuevo; skipped_verified no vuelve a contarlo. Cada perfil debe terminar sus pendientes.',
-        'Cómo cambian las dimensiones, bytes y trabajo al comparar dos perfiles sobre la misma entrada.',
-        'Faltan otras cargas, hardware e I/O para generalizar rendimiento.',
-        'Confundir estado acumulado con throughput de la ejecución actual.'))
-    m('''## 5 · L: escribir, releer y consultar el catálogo
-
-Los binarios permanecen como archivos; el catálogo conserva IDs, rutas relativas, hashes, fuente y perfil. `to_json(..., lines=True)` escribe JSONL; `to_parquet(index=False)` escribe Parquet; `read_parquet()` devuelve la tabla para comprobar lo escrito. La dependencia de motor Parquet está fijada en el proyecto.
-
-El código del helper vuelve a leer archivos y compara esquemas/resultados. No basta que existan nombres. La integridad técnica no equivale a autenticidad editorial ni a una nota.
-
-**Pregunta desde tu ejecución:** ¿qué artículo y qué parámetros corresponden a la primera fila de tu catálogo?''')
-    c('''# L · Consolidar y releer salidas reales
-reporte=etl.export_package(TRABAJO,inventario,trabajos,etl.context_for(inventario))
-print('VERIFICACIÓN DE CARGA:',reporte)
-if not reporte['ok']:raise ValueError('Hay propiedades pendientes: '+str(reporte['errors']))
-catalogo=pd.read_parquet(TRABAJO/'outputs/assets.parquet')
-display(catalogo[['article_id','profile','raw_format','derived_width','derived_height']].head())
-print('Filas de trabajos/perfil:',len(catalogo))
-print('Catálogo completo de referencias:',len(pd.read_parquet(TRABAJO/'catalog/image_occurrences.parquet')))''')
-    m(reading('Cada fila de salida es un trabajo/perfil; la tabla de apariciones conserva contexto editorial por separado.',
-        'Qué salidas puede consumir otro proceso y dónde quedaron.',
-        'No se demuestra una relación de la foto con un contrato específico ni una evaluación de calidad general.',
-        'Declarar carga completa sin releer y comparar JSONL/Parquet.'))
-    c('''# Repetición segura: debe procesar cero trabajos nuevos si todos siguen válidos
-_,repeticion=etl.run_batch(trabajos,TRABAJO,profile='catalogo640',workers=1,batch_size=16)
-print('REEJECUCIÓN:',repeticion)
-# Actualizar la carga después de cambiar métricas o estados
-reporte=etl.export_package(TRABAJO,inventario,trabajos,etl.context_for(inventario))''')
-    m('''## 6 · Conserva una decisión propia y lleva el producto
-
-Selección estructurada, no una respuesta redactada. 0 deja pendiente. Perfiles: 1=vista320, 2=catalogo640, 3=detalle1024; elige solo los que ejecutaste. Posición: una fila de tu catálogo.
-
-Límites: 1=faltan juicios de calidad visual; 2=falta otra distribución de tamaños; 3=falta medir I/O/concurrencia; 4=contexto de entidad no prueba vínculo con un contrato.
-
-El paquete técnico puede estar verificado aunque tu selección formativa siga pendiente. El código no acredita una entrega académica por marcar opciones.''')
-    c('''#@title Elegir desde el resultado propio (0 = pendiente)
-POSICION=0 #@param {type:"integer"}
-PERFIL_ELEGIDO=0 #@param [0,1,2,3] {type:"raw"}
-ALTERNATIVA_DESCARTADA=0 #@param [0,1,2,3] {type:"raw"}
-LIMITE=0 #@param [0,1,2,3,4] {type:"raw"}
-print(etl.record_decision(TRABAJO,POSICION,PERFIL_ELEGIDO,ALTERNATIVA_DESCARTADA,LIMITE))''')
-    c('''# Paquete portable; origen y relaciones acompañan los archivos
-reporte=etl.export_package(TRABAJO,inventario,trabajos,etl.context_for(inventario))
-PAQUETE=BASE/'paquete_s10.zip'
-etl.pack(TRABAJO,PAQUETE)
-import tempfile
-with tempfile.TemporaryDirectory() as carpeta:
-    restaurado=etl.unpack_and_verify(PAQUETE,Path(carpeta)/'restaurado')
-print('PORTABILIDAD:',restaurado)
-print('PAQUETE:',PAQUETE)
-DESCARGAR=False #@param {type:"boolean"}
-if DESCARGAR:
-    try:
-        from google.colab import files
-        files.download(str(PAQUETE))
-    except ImportError:print('En VS Code el ZIP está en la ruta anterior.')''',True)
-    m(reading('La verificación lee el ZIP en otra carpeta; una selección pendiente no se transforma en una nota.',
-        'El producto puede abrirse fuera de la ruta original.',
-        'No certifica una procedencia independiente si entrada y manifest se alteran juntos.',
-        'Confundir progreso local, verificación técnica y evaluación oficial.'))
-    m('''## Hoja de consulta y puente
-
-| Necesidad | Operación |
-|---|---|
-| Abrir un original | `Image.open()` y `load()` |
-| Saber qué llegó | formato, dimensiones, modo, bytes, SHA-256 |
-| Adaptar sin borrar | orientación → RGB → thumbnail → guardar aparte |
-| Continuar pendientes | mismo snapshot/perfil y checkpoint verificado |
-| Cargar | JSONL/Parquet + manifest; releer |
-| Llevar | ZIP con rutas relativas y verificación en otra carpeta |
-
-**PARA LLEVAR.** E consigue y conserva la entrada; T la adapta; L deja un resultado consultable. S11 añade audio/video reales al mismo contrato; S12 integra ETL. Dask/Spark aparecen después.
-
-**Ampliación de escala:** el proyecto ofrece `main.py escenario --activos 1000000`, basado en las medidas de tu lote. Es un escenario condicionado, no una ejecución de millones. Memoria de decodificación ≈ ancho × alto × canales × tareas activas, antes de buffers.
-
-Si te atascas, vuelve al [checklist](https://jazaineam1.github.io/BigData2026/assets/tutoriales/s10-laboratorio-guiado.html). Un archivo ausente se recupera de la entrada real; no se genera un sustituto sintético.
+print('TRABAJOS COMPLETOS:',len(tabla),'= imágenes',len(trabajos),'× perfiles',tabla.profile.nunique())
+display(tabla[['article_id','profile','derived_width','derived_height','raw_bytes','derived_bytes']].head())
+# Prueba didáctica: validar un registro y detectar un hash incorrecto SIN tocar ningún archivo.
+fila_comprobada=tabla.iloc[0].to_dict()
+assert validate_record(TRABAJO,fila_comprobada)==[], 'El derivado real no superó la integridad'
+fila_alterada=dict(fila_comprobada)
+fila_alterada['derived_sha256']='0'*64
+assert 'derived_hash' in validate_record(TRABAJO,fila_alterada)
+print('CONTROL DE INTEGRIDAD: válido=[]; hash falso detectado=True (solo memoria)')
 ''')
+    m('s10-lectura-lote',reading('Las métricas distinguen nuevos, reutilizados y estados acumulados.',
+        'Dos perfiles completos dejan N×2 trabajos; continuar omite solo lo revalidado.',
+        'Faltan otras cargas, hardware e I/O para generalizar rendimiento.',
+        'Sumar trabajo antiguo al throughput actual o confundir dos perfiles con el doble de originales.'))
+    m('s10-cargar','''## Paso 5 · L: escribir, releer y consultar
+
+Los binarios quedan como archivos; una fila permite encontrar original, derivado y noticia. `DataFrame` organiza los registros. `to_json(orient='records',lines=True)` guarda JSONL; `to_parquet(index=False)` guarda una tabla tipada; `read_parquet()` vuelve a leerla.
+
+**HAZ ESTO AHORA.** Ejecuta la escritura y la lectura. Lee primero el ejemplo resuelto de consulta. Después cambia solo `POSICION_NOTICIA` por otra posición de la lista producida en tu ejecución y vuelve a ejecutar. Comprueba qué imágenes cambiaron y cuáles son sus perfiles. La carga debe producir algo que otro proceso pueda consultar.
+
+Si salió bien: la galería corresponde al `article_id` elegido y cada fila identifica su perfil y sus bytes. Error frecuente: usar la posición de la tabla de trabajos como si fuera una posición de la lista de noticias; una noticia puede tener varios trabajos. Si te atascas, usa 0 para volver al ejemplo resuelto.
+
+**Tarea propia:** pulsa ▶ en `s10-escribir`. Comprueba que `outputs/assets.jsonl` y `outputs/assets.parquet` existen y se volvieron a leer; deben tener exactamente `N × 2` filas. En `s10-consultar` ejecuta primero `POSICION_NOTICIA=0`; observa el `article_id` y sus perfiles. Luego elige una posición **distinta** de la tabla `NOTICIAS DE TU CATÁLOGO`; vuelve a ejecutar y verifica que cambió el `article_id`. Si solo hay una noticia en la selección, aumenta `CANTIDAD` en una carpeta nueva antes de ese contraste.
+
+**Contrasta:** cada imagen mostrada debe abrirse desde la `derived_path` de la fila consultada. Las sumas de bytes por perfil **no** son una comparación de calidad. Si la relectura difiere de la escritura, detente en L; no exportes un catálogo inconsistente.''')
+    c('s10-escribir','''# L visible: construir catálogo → escribir → releer ambos formatos.
+OUT=TRABAJO/'outputs';OUT.mkdir(exist_ok=True)
+catalogo=pd.DataFrame(resultados+alternativa)
+catalogo.to_json(OUT/'assets.jsonl',orient='records',lines=True,force_ascii=False)
+catalogo.to_parquet(OUT/'assets.parquet',index=False)
+recargado=pd.read_parquet(OUT/'assets.parquet')
+jsonl=pd.read_json(OUT/'assets.jsonl',orient='records',lines=True,convert_dates=False,dtype={'article_id':str})
+assert len(recargado)==len(trabajos)*len(PROFILES)>0
+assert normal_records(jsonl)==normal_records(recargado)
+print('L · FILAS REABIERTAS:',len(recargado))
+display(recargado[['article_id','profile','derived_path','derived_width','derived_height']].head())''')
+    c('s10-consultar','''# Ejemplo resuelto: 0 usa la primera noticia. Después elige otra posición de tu lista.
+noticias_disponibles=recargado[['article_id']].drop_duplicates().reset_index(drop=True)
+noticias_disponibles.index+=1
+print('NOTICIAS DE TU CATÁLOGO · posiciones desde 1:')
+display(noticias_disponibles)
+POSICION_NOTICIA=0 #@param {type:"integer"}
+if type(POSICION_NOTICIA) is not int or not 0<=POSICION_NOTICIA<=len(noticias_disponibles):
+    raise ValueError('Usa 0 para el ejemplo o una posición numérica de tu lista.')
+ARTICULO=str(noticias_disponibles.iloc[max(1,POSICION_NOTICIA)-1]['article_id'])
+print('CONSULTA PROPIA · artículo:',ARTICULO)
+consulta=recargado[recargado.article_id.astype(str).eq(ARTICULO)]
+display(consulta[['article_id','profile','derived_width','derived_height','derived_bytes']])
+display(recargado.groupby('profile')[['raw_bytes','derived_bytes']].sum())
+for _,fila in consulta.head(4).iterrows():
+    print('NOTICIA:',fila.article_id,'· PERFIL:',fila.profile,'· bytes:',fila.derived_bytes)
+    with Image.open(safe_path(TRABAJO,fila.derived_path)) as imagen:display(imagen)
+print('RAW ÚNICOS:',recargado.raw_sha256.nunique(),'· no sumar originales repetidos entre perfiles')''')
+    m('s10-lectura-carga',reading('Cada fila es un trabajo/perfil y su ruta vuelve a un binario real.',
+        'La tabla se puede consultar y las imágenes se recuperan desde sus filas.',
+        'La comparación visual no demuestra calidad general ni relación de la foto con un contrato.',
+        'Dar por cargado un archivo por su nombre, sin releerlo; duplicar RAW al sumar perfiles.'))
+    m('s10-cerrar','''## Paso 6 · Decidir, conservar y continuar en S11
+
+Elige una posición de tu tabla, un perfil usado y una alternativa descartada. **0 deja pendiente.** Límite: 1=faltan juicios de calidad visual; 2=falta otra distribución de tamaños; 3=falta medir I/O/concurrencia; 4=contexto de entidad no prueba vínculo con contrato. Perfiles: 1=vista320, 2=catalogo640.
+
+La selección es formativa. No se envía prosa ni se acredita una nota por marcar una casilla. Los archivos del catálogo describen la ejecución; una comprobación técnica no autentica por sí sola la fuente.
+
+**HAZ ESTO AHORA.** Ejecuta el cierre. En Colab busca `CONSERVADO EN DRIVE` y `COPIA REABIERTA Y VERIFICADA: True`. La carpeta de `/content` se pierde al eliminar el runtime; verla allí no significa conservarla para S11. En VS Code conserva la carpeta local completa, incluidos RAW, derivados y metadatos.
+
+**Cierre obligatorio del estudiante (no del docente):** después de ejecutar E/T/L, elige una posición real `POSICION=1..N×2`, un `PERFIL_ELEGIDO` y una `ALTERNATIVA_DESCARTADA` distintos, más `LIMITE=1..4`. Seleccionar `0` en cualquier control significa **pendiente** y así quedará declarado; no acredita el cierre. Ejecuta la celda de decisión y comprueba `complete: True`. En seguida ejecuta `s10-producto`.
+
+**Para aprobar tu comprobación técnica:** localiza los mensajes `CATÁLOGO VERIFICADO`, `CONSERVADO EN DRIVE`, `COPIA REABIERTA Y VERIFICADA: True` y `S11_USA_ESTA_CARPETA`. Cierra el runtime, vuelve a montar Drive en otra sesión y verifica que la carpeta indicada contiene `manifest_s10.json`, `outputs/assets.parquet` y `raw/`. Si falta cualquiera, **no** declares conservado el resultado. No publiques fotografías o datos privados.''')
+    c('s10-decision','''# Opciones cerradas sobre la salida propia; no se admite texto libre.
+POSICION=0 #@param {type:"integer"}
+PERFIL_ELEGIDO=0 #@param [0,1,2] {type:"raw"}
+ALTERNATIVA_DESCARTADA=0 #@param [0,1,2] {type:"raw"}
+LIMITE=0 #@param [0,1,2,3,4] {type:"raw"}
+decision_propia=record_decision(TRABAJO,POSICION,PERFIL_ELEGIDO,ALTERNATIVA_DESCARTADA,LIMITE)
+print('DECISIÓN DEL ESTUDIANTE:',decision_propia)
+if not decision_propia['complete']:
+    print('PENDIENTE: selecciona una fila real, dos perfiles distintos y un límite (no 0).')
+else:
+    print('DECISIÓN PROPIA COMPLETA: True; comprueba la carpeta final en Drive.')''')
+    c('s10-producto','''# Repetir sin duplicar y conservar la ETL en una carpeta reutilizable.
+_,repeticion=procesar_lote('catalogo640')
+print('REPETICIÓN · nuevos:',repeticion['processed_now'],'· reutilizados:',repeticion['skipped_verified'])
+reporte=export_package(TRABAJO,inventario,trabajos,context_for(inventario,ENTIDAD))
+if not reporte['ok']:raise ValueError(reporte['errors'])
+print('CATÁLOGO VERIFICADO:',reporte)
+print('PRODUCTO:',TRABAJO/'outputs/assets.parquet')
+if not json.loads((TRABAJO/'checks/decision.json').read_text(encoding='utf-8'))['complete']:
+    print('ATENCIÓN: catálogo técnico verificado, pero DECISIÓN INDIVIDUAL PENDIENTE.')
+print('CONSULTABLE:',len(pd.read_parquet(TRABAJO/'outputs/assets.parquet')),'filas')
+if DRIVE_CURSO is not None:
+    # La firma distingue selecciones; repetir conserva la misma carpeta.
+    firma=digest(json.dumps([[j['job_id'],j['input_sha256']] for j in trabajos]).encode())[:16]
+    conservado=DRIVE_CURSO/'S10'/firma
+    conservado.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copytree(TRABAJO,conservado,dirs_exist_ok=True)
+    verificacion_drive=verify_package(conservado)
+    if not verificacion_drive['ok']:raise ValueError(verificacion_drive['errors'])
+    print('CONSERVADO EN DRIVE:',conservado)
+    print('COPIA REABIERTA Y VERIFICADA:',verificacion_drive['ok'])
+    print('S11_USA_ESTA_CARPETA:',conservado)
+elif drive is not None:
+    raise RuntimeError('Catálogo temporal válido; conservación pendiente. Activa USAR_GOOGLE_DRIVE, repite Preparar y vuelve a ejecutar el cierre.')
+else:
+    print('CONSERVADO EN CARPETA LOCAL:',TRABAJO)''')
+    m('s10-lectura-cierre',reading('La verificación relee el catálogo y la repetición revalida los resultados.',
+        'La copia de Drive o la carpeta local fue reabierta y conserva rutas, parámetros y procedencia para la siguiente ETL.',
+        'No acredita calidad visual general, autenticidad editorial ni aprendizaje por sí solo.',
+        'Confundir la carpeta temporal de Colab o el progreso del checklist con un producto conservado y verificado.'))
+    m('s10-hoja','''## Para llevar · hoja de consulta
+
+| Necesidad | Operación que acabas de ejecutar |
+|---|---|
+| Abrir la fuente | `Path.read_text(encoding='utf-8')` + `json.loads()` |
+| Relacionar noticia/entidad | `DataFrame.merge(...,on='article_id')` |
+| Conservar el original | `shutil.copyfile()` + SHA-256 |
+| Transformar | `ImageOps.exif_transpose()` → RGB → `thumbnail()` → `save()` |
+| Repetir | `procesar_lote()` y condición de resultado revalidado |
+| Cargar y consultar | JSONL/Parquet → relectura → filtro/agrupación |
+| Conservar | Catálogo, binarios y metadatos junto a sus rutas relativas |
+
+S11 toma IDs, origen, RAW/derived, parámetros y catálogo para añadir audio/video reales. S12 integra ETL. El lote medido no es una prueba de escala a millones: una proyección exige declarar distribución de tamaños, hardware e I/O.
+
+Si falta una imagen, recupera la entrada real; no se inventa un sustituto. Si eliges otra selección, usa otra carpeta. Si reinicias el kernel, ejecuta desde Preparar: todo el código está en este cuaderno.
+
+**Autocomprobación final:** ¿puedes reconstruir de TU archivo `assets.parquet` la ruta de un RAW, su SHA-256, su noticia y los dos derivados? ¿Cambiaste un parámetro y observaste su efecto? ¿Repetiste el lote sin recomputar trabajos válidos? ¿Conservaste una decisión completa y una copia verificada? Si cualquiera es «no», identifica su celda y recupérala antes de S11.''')
     return cells
 
-
 def build_notebook():
-    return {'nbformat':4,'nbformat_minor':5,'metadata':{'kernelspec':{'display_name':'Python 3','language':'python','name':'python3'},
-            'language_info':{'name':'python','version':'3.12'}},'cells':build_cells()}
-
-
-def build_project_archive():
-    target=ROOT/'assets/tutoriales/s10_proyecto_VSCode.zip'
-    files={name:ROOT/'laboratorios/s10_etl_imagenes'/name for name in ['main.py','paso_a_paso.py','requirements.txt','README.md']}
-    files['runtime/s10_pipeline.py']=ROOT/'utils/s10_pipeline.py'
-    with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as z:
-        for name,path in sorted(files.items()):
-            info=zipfile.ZipInfo(name,date_time=(2026,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED
-            z.writestr(info,path.read_bytes())
-    return target
-
-
+    return {'nbformat':4,'nbformat_minor':5,'metadata':{'kernelspec':{'display_name':'Python 3','language':'python','name':'python3'},'language_info':{'name':'python','version':'3.12'}},'cells':build_cells()}
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--output',default=OUTPUT);args=parser.parse_args()
-    path=Path(args.output);path.parent.mkdir(parents=True,exist_ok=True)
-    path.write_text(json.dumps(build_notebook(),ensure_ascii=False,indent=1)+'\n',encoding='utf-8');print(path)
-    build_project_archive()
+    p=argparse.ArgumentParser();p.add_argument('--output',default=OUTPUT);a=p.parse_args()
+    dest=Path(a.output);dest.write_text(json.dumps(build_notebook(),ensure_ascii=False,indent=1)+'\n',encoding='utf-8');print(dest)
