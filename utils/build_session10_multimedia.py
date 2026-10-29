@@ -117,7 +117,7 @@ print('ALCANCE: ejemplos de menciones; no demuestra vínculo fotografía–contr
     m('s10-lectura-contexto',reading('Cada fila enlaza una aparición de imagen con una noticia que menciona la entidad.',
         'La unión es auditable por article_id; una entidad sin coincidencias produce cero filas.',
         'Falta una evidencia específica para vincular una fotografía con un contrato.',
-        'Forzar una coincidencia o atribuir a Atlas un resultado de respaldo local.'))
+        'Forzar una coincidencia o atribuir a Atlas un resultado de respaldo local.')+'\n\n**El lote de 32 imágenes es mixto.** La unión de contexto no lo filtra automáticamente: solo una noticia cuyo `article_id` coincide pertenece a los ejemplos enlazados de la entidad. La extracción muestra esa coincidencia por separado.')
     m('s10-extraer','''## Paso 2 · E: extraer bytes y conservar el original
 
 Elegimos una selección del lote real y copiamos sus bytes a una ruta RAW. Guardamos fuente, crédito, fecha de adquisición y huella. **RAW no se sobrescribe para hacer un thumbnail.**
@@ -154,7 +154,10 @@ atomic_json(previo,[{k:v for k,v in j.items() if k!='path'} for j in trabajos])
 atomic_json(TRABAJO/'config/inventory.json',inventario)
 atomic_json(TRABAJO/'config/context.json',context_for(inventario,ENTIDAD))
 print('E · RAW REALES:',len(trabajos))
-display(pd.DataFrame(trabajos)[['article_id','source_url','credit','raw_path']].head(3))''')
+vista_raw=pd.DataFrame(trabajos)
+vista_raw['contexto_entidad']=vista_raw.article_id.astype(str).isin(contexto.article_id.astype(str))
+print('EN ESTE LOTE · imágenes en noticias de contexto:',int(vista_raw.contexto_entidad.sum()))
+display(vista_raw[['article_id','contexto_entidad','source_url','credit','raw_path']].head(3))''')
     m('s10-lectura-raw',reading('Cada trabajo apunta a un original identificado y a su noticia.',
         'Los bytes existen y el hash coincide con la entrada adquirida.',
         'La integridad no autentica por sí sola al autor editorial ni el contenido del contrato.',
