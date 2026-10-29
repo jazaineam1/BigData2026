@@ -21,6 +21,14 @@ assert 'intfloat/multilingual-e5-small' in snippet(4)
 assert "MAX_TOKENS" in snippet(6)
 assert 'upsert=True' in snippet(10) and '"s09:"+LOTE' in snippet(10)
 assert "CREAR_INDICE_EN_COLAB = False" in snippet(12)
+# No basta mostrar un formulario vacío: el alumno necesita instrucciones de obtención.
+for phrase in ("Ruta A", "Ruta B", "FREE (M0)", "HOST_ATLAS", "USUARIO_ATLAS",
+               "IP_COLAB", "Network Access", "Connect", "Drivers", "contraseña",
+               "ATLAS REAL", "RUTA LOCAL", "col.aggregate"):
+    assert phrase in snippet(7), f"Guía del estudiante incompleta: {phrase}"
+assert "IP_COLAB" in snippet(2) and 'api.ipify.org' in snippet(2)
+assert "USAR_ATLAS = False" in snippet(8), "La ruta segura offline debe ser el valor inicial"
+
 assert "DESDE CERO" in snippet(7)
 assert "IP_COLAB" in snippet(2)
 assert "SearchIndexModel(" in snippet(12)
