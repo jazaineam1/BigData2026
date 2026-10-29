@@ -1,0 +1,19 @@
+name: S10 snapshot real
+on:
+  pull_request:
+    paths:
+      - 'Datos/s10_imagenes_reales/**'
+      - 'utils/prepare_s10_real_inputs.py'
+      - 'utils/validate_s10_snapshot.py'
+      - '.github/workflows/s10-datos-qa.yml'
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: python utils/validate_s10_snapshot.py
