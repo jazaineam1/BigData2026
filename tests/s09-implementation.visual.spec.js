@@ -29,3 +29,20 @@ test('S09 tutorial conserva progreso local sin redirigir',async({page})=>{
  await page.locator('#reset').click();await expect(page.locator('[data-step="1"]')).not.toBeChecked();
  await expect(page.locator('#progress')).toHaveText('0 de 6 pasos marcados en este navegador.');
 });
+
+for(const width of [1366,390])test('Atlas preparación embebida '+width,async({page})=>{
+ await page.setViewportSize({width,height:844});
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s26');
+ await page.locator('#s26 [data-atlas-setup]').click();
+ const dialog=page.getByRole('dialog',{name:'Atlas + Colab · preparación paso a paso'});
+ await expect(dialog).toBeVisible();
+ await expect(dialog.locator('.atlas-step')).toHaveCount(7);
+ await expect(dialog).toContainText('1 week');
+ await expect(dialog).toContainText('Specific Privileges');
+ await expect(dialog).toContainText('IP_COLAB');
+ expect(await dialog.evaluate(e=>e.scrollWidth<=e.clientWidth+2)).toBe(true);
+ await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();
+ await page.locator('#s26 [data-atlas-setup]').click();
+ await dialog.getByRole('button',{name:'Cerrar',exact:true}).click();
+ await expect(dialog).not.toBeVisible();
+});
