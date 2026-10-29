@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S10 · Laboratorio interactivo de imágenes y audio | Big Data UC</title>
+<style>
+:root{--navy:#142653;--ink:#17243a;--line:#cfd9e5;--paper:#fff;--soft:#f1f6fb;--accent:#00777d;--warn:#734513}
+*{box-sizing:border-box}body{margin:0;font:17px/1.52 system-ui,Arial;background:#edf2f8;color:var(--ink)}
+header{background:var(--navy);color:white;padding:10px clamp(14px,4vw,42px);display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+header a{color:white}header strong{font-size:1.08rem}header nav{display:flex;flex-wrap:wrap;gap:12px}
+main{max-width:1120px;margin:18px auto 80px;background:var(--paper);border-radius:16px;border:1px solid var(--line);min-height:550px;overflow:hidden}
+.slide{display:none;padding:clamp(18px,4vw,48px)}.slide.active{display:block}
+h1{font-size:clamp(1.65rem,3vw,2.55rem);color:var(--navy);line-height:1.15;margin:.25em 0 .5em}h2{font-size:1.4rem;color:var(--navy)}
+.kicker{color:var(--accent);font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:.86rem}
+.lead{font-size:1.12rem;max-width:850px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}
+.card{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}.card h2{margin-top:0}
+.note{border-left:4px solid var(--accent);padding:10px 14px;background:#e9f6f4;margin:15px 0}
+.warning{border-left-color:#b77a25;background:#fff6e7}
+.small{font-size:.87rem;color:#435369}a{color:#004e8f}label{font-weight:700;display:block;margin:12px 0 5px}
+input[type=range]{width:100%;max-width:460px;accent-color:var(--accent)}input[type=file]{max-width:100%;margin:7px 0}
+button,.btn{background:var(--navy);color:#fff;padding:10px 15px;border:0;border-radius:8px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+button.secondary,.btn.secondary{background:#e4eef6;color:var(--navy);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:not-allowed}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #dd7d13;outline-offset:2px}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+canvas{width:100%;height:auto;max-width:100%;border:1px solid var(--line);border-radius:6px;background:white}
+.sample{width:100%;max-width:400px;image-rendering:pixelated}table{border-collapse:collapse;width:100%;font-size:.92rem}td,th{border:1px solid var(--line);padding:9px;vertical-align:top;text-align:left}
+code,pre{font-family:ui-monospace,Consolas,monospace;background:#e8eef6;color:#17263f;overflow-wrap:anywhere}pre{white-space:pre-wrap;padding:15px;border-radius:8px}
+.choices{display:grid;gap:9px;margin:14px 0}.choices button{text-align:left;background:#eef4fb;color:var(--ink);border:1px solid #a9bfce}
+.feedback{padding:10px 14px;min-height:34px;font-weight:700}.metric{font-weight:750;font-variant-numeric:tabular-nums}
+#steps{max-width:1120px;margin:8px auto;display:flex;flex-wrap:wrap;gap:5px;padding:0 12px}
+#steps button{background:#fff;border:1px solid #bed0e2;color:var(--navy);padding:7px 10px;font-size:.84rem}
+#steps button.current{background:var(--navy);color:#fff}
+footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px max(12px,calc((100vw - 1080px)/2));box-shadow:0 -2px 12px #0001}
+footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.slide{padding:18px}footer{position:sticky;bottom:0}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style></head><body>
+<header><strong>Universidad Central · Big Data · S10</strong>
+<nav><a href="../index.html">Curso</a><a href="../lms/session.html?s=10">Módulo LMS</a>
+<a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/10_Imagenes_Audio.ipynb" target="_blank" rel="noopener">Cuaderno Colab</a>
+<a href="#s8">Laboratorio</a></nav></header>
+<nav id="steps" aria-label="Secciones de la lección"></nav>
+<main id="deck">
+<section class="slide active" id="s1"><div class="kicker">01 · Problema profesional</div><h1>¿Cómo analizar imágenes y audio como datos?</h1>
+<p class="lead">Laura construye una colección de noticias y expedientes. Ya encuentra textos mediante búsquedas; ahora necesita responder: ¿qué contienen las imágenes y qué información cuantificable existe en un audio?</p>
+<div class="grid"><div class="card"><h2>Imagen</h2><p>Una matriz de píxeles con dimensiones, canales, color, bordes, ruido y objetos posibles.</p></div><div class="card"><h2>Audio</h2><p>Una señal muestreada en el tiempo, con duración, frecuencia, amplitud, silencios y, a veces, voz.</p></div></div>
+<div class="note">Producto: una exploración visual y acústica con decisiones propias, más un catálogo JSONL/Parquet reproducible generado con el cuaderno. La presentación ofrece simulaciones visuales sin instalar software; <b>todo código Python se ejecuta en Google Colab</b>.</div>
+</section>
+<section class="slide" id="s2"><div class="kicker">02 · Continuidad del caso</div><h1>Una clave, medios diferentes</h1>
+<p>En S03–S08 modelamos y procesamos datos; S09 recupera información por significado. En S10 usamos el identificador editorial <code>article_id</code> como vínculo contextual entre registros, imágenes y audios.</p>
+<pre>{
+  "article_id": "3530042",
+  "article_feed": "https://www.eltiempo.com/servicios/feeds/articulo/3530042",
+  "audio_url": "https://servicios.eltiempo.com/audios/3530042.wav"
+}</pre>
+<p class="small">Este es un ejemplo de metadatos proporcionado para estudiar esquemas. Esta herramienta NO consulta ni descarga esos recursos. Un identificador coincidente tampoco demuestra que el sonido describa una imagen.</p>
+<div class="note warning"><b>Uso responsable:</b> las condiciones de El Tiempo limitan la extracción, transformación y el análisis automatizado sin autorización. Para el laboratorio ejecutable utilizamos señales e imágenes originales creadas para el curso, o archivos propios con permiso de tratamiento.</div></section>
+<section class="slide" id="s3"><div class="kicker">03 · Pregunta y predicción</div><h1>¿Una imagen más pequeña guarda la misma información?</h1>
+<div class="grid"><div class="card"><p>Antes de probar, elige una hipótesis.</p><div class="choices" data-question="q1">
+<button data-correct="0">Sí: reducir píxeles cambia el peso, nunca el detalle</button>
+<button data-correct="1">No necesariamente: puede conservar la escena general pero perder rasgos finos</button>
+<button data-correct="0">No: cualquier reducción cambia obligatoriamente los colores originales por negro</button></div><p class="feedback" aria-live="polite"></p></div>
+<div class="card"><h2>Intuición</h2><p>Una imagen RGB de 320 × 180 tiene 57.600 posiciones y tres canales por píxel; esos valores no son iguales al tamaño comprimido del archivo.</p><p>Especifica si comparas resolución, bytes o información relevante: son tres conceptos distintos.</p></div></div></section>
+<section class="slide" id="s4"><div class="kicker">04 · Teoría aplicada</div><h1>De píxel a característica</h1>
+<table><tr><th>Concepto</th><th>Qué mide</th><th>Qué no demuestra</th></tr>
+<tr><td>Resolución</td><td>Ancho × alto, cantidad de píxeles</td><td>Nitidez o utilidad por sí sola</td></tr>
+<tr><td>Promedio de luminancia</td><td>Intensidad gris media (0–255)</td><td>Significado de la escena</td></tr>
+<tr><td>Histograma</td><td>Distribución de intensidades</td><td>Ubicación espacial de los objetos</td></tr>
+<tr><td>Diferencias vecinas</td><td>Cambios locales de intensidad</td><td>Identificación fiable de texto u objetos</td></tr></table>
+<div class="note">Secuencia profesional: decodificar → transformar → extraer características → comprobar qué se perdió → interpretar. Para OCR se necesitaría una etapa adicional de reconocimiento y validación.</div></section>
+<section class="slide" id="s5"><div class="kicker">05 · Experimento en el navegador</div><h1>Laboratorio de imagen</h1>
+<p>La muestra original es un documento ilustrado generado por la herramienta, <b>no</b> una fotografía editorial. Puedes sustituirlo por una imagen propia que tengas permiso de analizar; no se envía al servidor.</p>
+<div class="grid"><div class="card"><h2>Original</h2><canvas id="imageOriginal" width="320" height="180" role="img" aria-label="Documento ilustrado original generado para el laboratorio"></canvas><label for="imageUpload">Cargar mi imagen (opcional)</label><input id="imageUpload" type="file" accept="image/png,image/jpeg,image/webp"></div>
+<div class="card"><h2>Transformación</h2><canvas id="imageResult" width="320" height="180" role="img" aria-label="Resultado de reducción y umbral de imagen"></canvas>
+<label for="imageSize">Lado máximo: <output id="sizeValue">160</output> px</label><input id="imageSize" type="range" min="40" max="320" step="40" value="160">
+<label for="imageThreshold">Umbral: <output id="thresholdValue">128</output></label><input id="imageThreshold" type="range" min="40" max="215" step="5" value="128">
+<label><input id="imageBinary" type="checkbox"> Aplicar binarización</label></div></div>
+<div id="imageStats" class="note" aria-live="polite"></div><canvas id="imageHistogram" width="700" height="160" role="img" aria-label="Histograma de luminancia de la imagen transformada"></canvas>
+<div class="actions"><button id="resetImage" class="secondary">Restaurar muestra</button><button id="saveImage">Guardar imagen derivada</button></div>
+<p class="small">Compara siempre la misma muestra. Al cambiar una sola variable, pregúntate qué mejora y qué empeora. La visualización está ampliada en pantalla; los píxeles del derivado son los indicados en las métricas.</p></section>
+<section class="slide" id="s6"><div class="kicker">06 · Interpretar</div><h1>¿Qué extraerías de una imagen?</h1>
+<div class="grid"><div class="card"><h2>Características clásicas</h2><p>Dimensiones, histogramas, proporción de píxeles claros, bordes y tamaño del derivado. Útiles para control de calidad, deduplicación aproximada y preparación de OCR.</p></div>
+<div class="card"><h2>Modelos de visión</h2><p>OCR para texto; modelos de detección para regiones u objetos; embeddings para buscar por similitud. Requieren modelos, datos adecuados y evaluación humana. Un histograma no identifica un contrato.</p></div></div>
+<div class="choices" data-question="q2"><button data-correct="0">Una imagen clara siempre permite OCR perfecto</button><button data-correct="0">Un histograma identifica la noticia que originó el archivo</button><button data-correct="1">Debo medir errores de OCR contra texto verificado y conservar el original</button></div><p class="feedback" aria-live="polite"></p></section>
+<section class="slide" id="s7"><div class="kicker">07 · Puente conceptual</div><h1>Un audio tampoco es un texto</h1>
+<p>Una muestra de audio representa la amplitud de una señal. <b>16.000 Hz</b> indica 16.000 muestras por segundo en un canal: no significa que el sonido tenga frecuencia de 16.000 Hz.</p>
+<table><tr><th>Medida</th><th>Interpretación</th></tr><tr><td>Duración</td><td>Tiempo total de las muestras</td></tr><tr><td>RMS</td><td>Energía media de amplitud (no volumen percibido)</td></tr><tr><td>Espectro</td><td>Frecuencias presentes en una ventana</td></tr><tr><td>Espectrograma</td><td>Cómo cambia el contenido frecuencial en el tiempo</td></tr><tr><td>Transcripción</td><td>Hipótesis de palabras de un sistema ASR; requiere validación</td></tr></table>
+<div class="note">Frecuencia de muestreo, frecuencia tonal y cantidad de muestras son magnitudes diferentes. También debes distinguir archivo WAV, códec PCM y señal decodificada.</div></section>
+<section class="slide" id="s8"><div class="kicker">08 · Audio: explorar y escuchar</div><h1>Laboratorio de señal sonora</h1>
+<p>El experimento en el navegador produce una señal original de tonos con silencios (no ejecuta Python); <b>no contiene palabras</b>. Para experimentar con voz, graba tu propia voz voluntariamente o abre un archivo autorizado. Todo el procesamiento ocurre en este navegador.</p>
+<div class="actions"><button id="demoAudio">Generar señal de ejemplo</button><button id="playAudio">Reproducir señal</button><button id="recordAudio">Grabar mi voz</button><button id="stopAudio" class="secondary" disabled>Detener grabación</button></div>
+<label for="audioUpload">O abrir un archivo propio de audio</label><input id="audioUpload" type="file" accept="audio/*">
+<div class="grid"><div class="card"><h2>Forma de onda</h2><canvas id="waveCanvas" width="640" height="220" role="img" aria-label="Amplitud de la señal a lo largo del tiempo"></canvas></div>
+<div class="card"><h2>Espectro de una ventana</h2><canvas id="spectrumCanvas" width="640" height="220" role="img" aria-label="Magnitud relativa por frecuencia"></canvas></div></div>
+<label for="audioStart">Ventana de análisis: <output id="startValue">25</output>% de duración</label><input id="audioStart" type="range" min="0" max="90" value="25" step="5">
+<div id="audioStats" class="note" aria-live="polite">Genera la señal de ejemplo para empezar.</div><p id="audioStatus" class="small" aria-live="polite"></p></section>
+<section class="slide" id="s9"><div class="kicker">09 · Interpretación acústica</div><h1>¿Qué te dice un pico de frecuencia?</h1>
+<p>En la ventana del experimento, un pico indica energía en torno a una frecuencia. No basta para identificar una palabra, una emoción, un hablante o la fuente.</p>
+<div class="choices" data-question="q3"><button data-correct="0">Un pico espectral equivale a una palabra reconocida</button><button data-correct="1">Para reconocer palabras hace falta un método ASR y comparar su salida con una referencia</button><button data-correct="0">Una forma de onda siempre revela el idioma</button></div>
+<p class="feedback" aria-live="polite"></p>
+<div class="note">Cambia la ventana del audio. Predice en qué región habrá silencio; comprueba que el RMS local y el espectro cambian. Esa es una observación verificable, no una inferencia semántica.</div></section>
+<section class="slide" id="s10"><div class="kicker">10 · Análisis de voz</div><h1>Señal, transcripción y significado son tres niveles</h1>
+<div class="grid"><div class="card"><h2>Señal</h2><p>La transformación numérica detecta silencios, energía, duración y cambios frecuenciales sin conocer las palabras.</p></div><div class="card"><h2>Transcripción ASR</h2><p>Un modelo transforma una señal de voz en texto probable. Debes verificar el texto, marcar el idioma y evitar presentar una hipótesis como certeza.</p></div>
+<div class="card"><h2>Búsqueda</h2><p>Cuando la transcripción tiene calidad suficiente, puedes aplicar BM25 o embeddings como en S07 y S09, conservando tiempos y procedencia.</p></div><div class="card"><h2>Evaluación</h2><p>Con referencia humana, calcula WER (errores de palabra) y observa fallas con nombres propios o ruido. Sin referencia no declares precisión.</p></div></div>
+<p>El cuaderno incluye el contrato de metadatos y características acústicas. ASR de voz real es una extensión opcional con archivos y modelos autorizados; no necesitas pagar una API para completar el laboratorio.</p></section>
+<section class="slide" id="s11"><div class="kicker">11 · Integración multimodal</div><h1>¿Qué se puede unir?</h1>
+<pre>article_id  ──► noticia (metadatos)
+     │
+     ├────────► imagen → píxeles → características visuales
+     │
+     └────────► audio  → muestras → características acústicas
+                               └──► transcripción (si hay voz y modelo)
+</pre>
+<p>La clave une archivos al registro de origen; no implica que una imagen ilustre la frase del audio. Para afirmar alineación semántica se necesita evidencia independiente y una tarea de evaluación explícita.</p>
+<div class="note">Diseño de catálogo: <code>asset_id, article_id, modality, source_kind, sha256, feature_version, metadata, derived_path</code>. Los activos originales se conservan por separado de las características.</div></section>
+<section class="slide" id="s12"><div class="kicker">12 · Laboratorio reproducible</div><h1>Ahora ejecutas Python de verdad</h1>
+<p>La aplicación sirve para explorar conceptos visualmente <b>sin ejecutar Python en esta página</b>. Todo el código del laboratorio se ejecuta en Google Colab; el cuaderno complementario ejecuta Python de punta a punta con datos originales del curso: <b>Pillow, NumPy, audio PCM, métricas, representaciones y catálogo Parquet/JSONL</b>.</p>
+<div class="actions"><a class="btn" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/10_Imagenes_Audio.ipynb" target="_blank" rel="noopener">Abrir cuaderno completo en Colab</a><a class="btn secondary" href="../Cuadernos/10_Imagenes_Audio.ipynb" download>Descargar para VS Code</a></div>
+<div class="grid"><div class="card"><h2>Paso A</h2><p>Ejecuta el ejemplo con su foto original y señal de audio. Comprueba formatos y tamaños.</p></div><div class="card"><h2>Paso B</h2><p>Cambia solo el lado de imagen y una ventana del audio; observa lo que cambia.</p></div><div class="card"><h2>Paso C</h2><p>Construye características por activo, carga el catálogo y consulta por modalidad.</p></div><div class="card"><h2>Paso D</h2><p>Elige una decisión cerrada sobre tu propio resultado y conserva carpeta verificable.</p></div></div></section>
+<section class="slide" id="s13"><div class="kicker">13 · Autoevaluación</div><h1>¿Qué evidencia necesitamos antes de afirmar algo?</h1>
+<div class="choices" data-question="q4"><button data-correct="0">Si guardé un .wav, la transcripción es perfecta</button><button data-correct="0">Si dos archivos tienen el mismo article_id, dicen lo mismo</button><button data-correct="1">Debo conservar origen, validar características y probar por separado las afirmaciones semánticas</button></div><p class="feedback" aria-live="polite"></p>
+<p class="small">Estas preguntas son formativas, no tienen nota. Elige y lee la explicación; puedes cambiar de respuesta.</p></section>
+<section class="slide" id="s14"><div class="kicker">14 · Producto</div><h1>Expediente multimodal verificable</h1>
+<p>La herramienta exporta un JSON con características observadas y decisiones del navegador. Es una ayuda para comparar; el producto técnico completo se crea en el cuaderno y se verifica al reabrir.</p>
+<div class="actions"><button id="exportObservations">Exportar observaciones JSON</button><label style="margin:0"><input id="checkOne" type="checkbox"> Comparé dos tamaños de imagen</label><label style="margin:0"><input id="checkTwo" type="checkbox"> Exploré dos ventanas de audio</label></div>
+<div class="note"><b>Para llevar:</b> un catálogo multimodal conecta la procedencia con características y transformaciones verificables. No confunde bytes con significado ni una mención con evidencia.</div></section>
+</main>
+<footer><button id="prev" class="secondary">Anterior</button><span id="count" aria-live="polite">1 / 14</span><button id="next">Siguiente</button></footer>
+<script>
+(function(){
+'use strict';
+var slides=[].slice.call(document.querySelectorAll('.slide')),stepNav=document.getElementById('steps'),pos=0;
+slides.forEach(function(s,i){var b=document.createElement('button');b.textContent=String(i+1).padStart(2,'0');b.title=s.querySelector('h1').textContent;b.onclick=function(){show(i)};stepNav.appendChild(b)});
+function show(i){pos=Math.max(0,Math.min(slides.length-1,i));slides.forEach(function(s,n){s.classList.toggle('active',n===pos)});[].slice.call(stepNav.children).forEach(function(b,n){b.classList.toggle('current',n===pos);b.setAttribute('aria-current',n===pos?'step':'false')});document.getElementById('count').textContent=(pos+1)+' / '+slides.length;document.getElementById('prev').disabled=pos===0;document.getElementById('next').disabled=pos===slides.length-1;history.replaceState(null,'','#s'+(pos+1));window.scrollTo(0,0)}
+document.getElementById('prev').onclick=function(){show(pos-1)};document.getElementById('next').onclick=function(){show(pos+1)};
+document.addEventListener('keydown',function(e){if(e.target.closest('button,input,textarea,select,a'))return;if(e.key==='ArrowRight')show(pos+1);if(e.key==='ArrowLeft')show(pos-1)});
+window.addEventListener('hashchange',function(){var n=Number(location.hash.replace('#s',''));if(n>=1&&n<=slides.length)show(n-1)});var init=Number(location.hash.replace('#s',''));show(init>=1&&init<=slides.length?init-1:0);
+document.querySelectorAll('[data-question]').forEach(function(group){group.querySelectorAll('button').forEach(function(b){b.onclick=function(){var f=group.nextElementSibling;if(!f||!f.classList.contains('feedback'))f=group.querySelector('.feedback');f.textContent=b.dataset.correct==='1'?'Correcto: es una conclusión compatible con la evidencia.':'Revisa la diferencia entre una característica medida y una afirmación que requiere validación.';f.style.color=b.dataset.correct==='1'?'#075f43':'#8c3c1c'}})});
+var original=document.getElementById('imageOriginal'),out=document.getElementById('imageResult'),histo=document.getElementById('imageHistogram');
+var ctx=original.getContext('2d',{willReadFrequently:true}),outCtx=out.getContext('2d',{willReadFrequently:true});
+function demoImage(){original.width=320;original.height=180;ctx.fillStyle='#e7edf5';ctx.fillRect(0,0,320,180);ctx.fillStyle='#203b60';ctx.fillRect(22,18,275,140);ctx.fillStyle='#fff';ctx.fillRect(28,24,264,128);ctx.fillStyle='#164c70';ctx.fillRect(40,36,92,14);ctx.fillStyle='#6a879e';for(var i=0;i<7;i++)ctx.fillRect(42,59+i*11,150+(i%3)*22,3);ctx.fillStyle='#d5a850';ctx.fillRect(222,40,45,45);ctx.fillStyle='#387d79';ctx.beginPath();ctx.arc(246,63,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#243e53';ctx.font='12px system-ui';ctx.fillText('CASO DEMO · ORIGINAL',38,140)}
+function histDraw(hist){var g=histo.getContext('2d'),w=histo.width,h=histo.height;g.clearRect(0,0,w,h);g.fillStyle='#f8fbfe';g.fillRect(0,0,w,h);var max=Math.max.apply(null,hist.concat([1]));g.fillStyle='#197e86';for(var i=0;i<256;i++){g.fillRect(i*w/256,h-1-hist[i]/max*(h-16),Math.max(1,w/256),hist[i]/max*(h-16))}}
+function imageUpdate(){var side=+document.getElementById('imageSize').value,threshold=+document.getElementById('imageThreshold').value,binary=document.getElementById('imageBinary').checked;
+document.getElementById('sizeValue').textContent=side;document.getElementById('thresholdValue').textContent=threshold;
+var ratio=Math.min(1,side/Math.max(original.width,original.height)),w=Math.max(1,Math.round(original.width*ratio)),h=Math.max(1,Math.round(original.height*ratio));
+var t=document.createElement('canvas');t.width=w;t.height=h;var g=t.getContext('2d',{willReadFrequently:true});g.drawImage(original,0,0,w,h);var pix=g.getImageData(0,0,w,h),sum=0,bright=0,hist=Array(256).fill(0);
+for(var i=0;i<pix.data.length;i+=4){var gray=Math.round(.2126*pix.data[i]+.7152*pix.data[i+1]+.0722*pix.data[i+2]);if(binary){gray=gray>=threshold?255:0;pix.data[i]=gray;pix.data[i+1]=gray;pix.data[i+2]=gray}sum+=gray;hist[gray]++;if(gray>=threshold)bright++}
+g.putImageData(pix,0,0);out.width=w;out.height=h;outCtx.drawImage(t,0,0);histDraw(hist);var count=w*h;document.getElementById('imageStats').textContent='Derivado: '+w+' × '+h+' = '+count+' píxeles · luminancia media: '+(sum/count).toFixed(1)+' · proporción por encima del umbral: '+(100*bright/count).toFixed(1)+' %.';window.imageMetrics={width:w,height:h,pixels:count,mean_luminance:+(sum/count).toFixed(2),fraction_above_threshold:bright/count,binarized:binary,threshold:threshold}}
+['imageSize','imageThreshold','imageBinary'].forEach(function(id){document.getElementById(id).addEventListener('input',imageUpdate)});
+document.getElementById('resetImage').onclick=function(){demoImage();imageUpdate()};
+document.getElementById('saveImage').onclick=function(){var a=document.createElement('a');a.download='s10-imagen-derivada.png';a.href=out.toDataURL('image/png');a.click()};
+document.getElementById('imageUpload').onchange=function(e){var f=e.target.files&&e.target.files[0];if(!f)return;if(f.size>8*1024*1024){alert('Límite educativo 8 MiB');return}var url=URL.createObjectURL(f),im=new Image();im.onload=function(){if(im.width*im.height>12000000){alert('Imagen demasiado grande');URL.revokeObjectURL(url);return}original.width=im.width;original.height=im.height;ctx.drawImage(im,0,0);URL.revokeObjectURL(url);imageUpdate()};im.onerror=function(){URL.revokeObjectURL(url);alert('No se pudo abrir la imagen')};im.src=url};demoImage();imageUpdate();
+var audioCtx=null,signal=null,sr=16000,recorder=null,chunks=[],sourceKind='original_sintetico';
+function ac(){audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();return audioCtx}
+function loadSignal(array,rate,kind){signal=array;sr=rate;sourceKind=kind;audioUpdate()}
+function synth(){var rate=16000,len=rate*3,arr=new Float32Array(len);for(var i=0;i<len;i++){var t=i/rate;var f=t<1?190:t<2?0:360;var env=(t<.1||t>2.9)?0:t<1?.48:t<2?0:.32;arr[i]=env*(Math.sin(2*Math.PI*f*t)+.18*Math.sin(2*Math.PI*2*f*t))/1.18}loadSignal(arr,rate,'original_sintetico')}
+function drawSignal(canvas,values,min,max){var c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;c.clearRect(0,0,w,h);c.fillStyle='#f7fafc';c.fillRect(0,0,w,h);c.strokeStyle='#c9d7e1';c.beginPath();c.moveTo(0,h/2);c.lineTo(w,h/2);c.stroke();c.strokeStyle='#087b83';c.beginPath();values.forEach(function(v,i){var x=i/(values.length-1)*w,y=h-(v-min)/(max-min)*h;if(i)c.lineTo(x,y);else c.moveTo(x,y)});c.stroke()}
+function audioUpdate(){if(!signal)return;var n=signal.length,duration=n/sr,start=Math.min(n-1024,Math.floor(n*Number(document.getElementById('audioStart').value)/100)),win=signal.subarray(Math.max(0,start),Math.max(0,start)+Math.min(1024,n));var sum=0,peak=0;for(var i=0;i<win.length;i++){sum+=win[i]*win[i];peak=Math.max(peak,Math.abs(win[i]))}var rms=Math.sqrt(sum/win.length);var view=Array.from({length:400},function(_,k){return signal[Math.min(n-1,Math.floor(k*(n-1)/399))]});drawSignal(document.getElementById('waveCanvas'),view,-1,1);
+var bins=160,spec=[];for(var k=0;k<bins;k++){var re=0,im=0;for(var j=0;j<win.length;j++){var v=win[j]*(.5-.5*Math.cos(2*Math.PI*j/(win.length-1)));re+=v*Math.cos(2*Math.PI*k*j/win.length);im-=v*Math.sin(2*Math.PI*k*j/win.length)}spec.push(Math.sqrt(re*re+im*im))}var mx=Math.max.apply(null,spec.concat([.0001]));drawSignal(document.getElementById('spectrumCanvas'),spec,0,mx*1.05);var kPeak=spec.indexOf(Math.max.apply(null,spec));window.audioMetrics={duration_seconds:+duration.toFixed(3),sample_rate_hz:sr,window_rms:+rms.toFixed(4),peak_amplitude:+peak.toFixed(4),peak_frequency_hz:+(kPeak*sr/win.length).toFixed(1),source_kind:sourceKind};
+document.getElementById('startValue').textContent=document.getElementById('audioStart').value;document.getElementById('audioStats').textContent='Duración: '+duration.toFixed(2)+' s · muestreo: '+sr+' Hz · RMS ventana: '+rms.toFixed(3)+' · amplitud pico: '+peak.toFixed(3)+' · pico espectral aproximado: '+window.audioMetrics.peak_frequency_hz+' Hz. Para voz, un pico NO equivale a una palabra.'}
+document.getElementById('audioStart').oninput=audioUpdate;
+document.getElementById('demoAudio').onclick=synth;
+document.getElementById('playAudio').onclick=async function(){if(!signal)synth();var ctx=ac();await ctx.resume();var b=ctx.createBuffer(1,signal.length,sr);b.copyToChannel(signal,0);var src=ctx.createBufferSource();src.buffer=b;src.connect(ctx.destination);src.start()};
+document.getElementById('audioUpload').onchange=async function(e){var f=e.target.files&&e.target.files[0];if(!f)return;if(f.size>20*1024*1024){alert('Límite educativo 20 MiB');return}try{var buf=await ac().decodeAudioData(await f.arrayBuffer()),length=Math.min(buf.length,buf.sampleRate*30),array=new Float32Array(length);for(var c=0;c<buf.numberOfChannels;c++){var data=buf.getChannelData(c);for(var i=0;i<length;i++)array[i]+=data[i]/buf.numberOfChannels}loadSignal(array,buf.sampleRate,'archivo_autorizado_local');document.getElementById('audioStatus').textContent='Archivo leído localmente; máximo 30 segundos analizados.'}catch(err){document.getElementById('audioStatus').textContent='No se pudo decodificar; prueba WAV PCM en formato compatible.'}};
+document.getElementById('recordAudio').onclick=async function(){try{var stream=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=function(e){if(e.data.size)chunks.push(e.data)};recorder.onstop=async function(){try{var blob=new Blob(chunks,{type:recorder.mimeType}),buf=await ac().decodeAudioData(await blob.arrayBuffer()),len=Math.min(buf.length,buf.sampleRate*30);loadSignal(new Float32Array(buf.getChannelData(0).slice(0,len)),buf.sampleRate,'microfono_propio_local');document.getElementById('audioStatus').textContent='Grabación analizada localmente; no se subió al servidor.'}catch(e){document.getElementById('audioStatus').textContent='El navegador no pudo decodificar esta grabación.'}finally{stream.getTracks().forEach(function(t){t.stop()})}};recorder.start();document.getElementById('stopAudio').disabled=false;document.getElementById('audioStatus').textContent='Grabando: di una frase corta o haz una pausa.'}catch(e){document.getElementById('audioStatus').textContent='Permiso de micrófono no concedido o dispositivo no compatible.'}};
+document.getElementById('stopAudio').onclick=function(){if(recorder&&recorder.state==='recording')recorder.stop();this.disabled=true};synth();
+document.getElementById('exportObservations').onclick=function(){var result={schema:'s10-multimodal-browser-v1',source:'laboratorio_pedagogico_local',image:window.imageMetrics,audio:window.audioMetrics,checklist:{compared_image_sizes:document.getElementById('checkOne').checked,compared_audio_windows:document.getElementById('checkTwo').checked},limitations:['caracteristicas_no_demuestran_semantica','uso_editorial_no_autorizado_para_mineria']};var blob=new Blob([JSON.stringify(result,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='s10-observaciones-locales.json';a.click();setTimeout(function(){URL.revokeObjectURL(url)},2000)};
+})();
+</script></body></html>

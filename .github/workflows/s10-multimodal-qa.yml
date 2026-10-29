@@ -1,0 +1,44 @@
+name: S10 · Imágenes y audio (QA)
+on:
+  pull_request:
+    paths:
+      - 'Cuadernos/10_Imagenes_Audio.ipynb'
+      - 'Presentaciones/s10-imagenes-audio.html'
+      - 'utils/validate_s10_multimodal.py'
+      - 'tests/s10-multimodal.visual.spec.js'
+      - 'playwright.s10-multimodal.config.cjs'
+      - 'index.html'
+      - 'lms/data/course.json'
+      - 'infraestructura/lms/s10-multimedia-seed.sql'
+      - '.github/workflows/s10-multimodal-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'Cuadernos/10_Imagenes_Audio.ipynb'
+      - 'Presentaciones/s10-imagenes-audio.html'
+      - 'utils/validate_s10_multimodal.py'
+permissions:
+  contents: read
+jobs:
+  notebook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: python -m pip install "pillow>=10,<13" "numpy>=1.26" "pandas>=2.2,<3" "pyarrow>=17" "matplotlib>=3.8" "ipython>=8"
+      - run: python utils/validate_s10_multimodal.py
+  navegador:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.s10-multimodal.config.cjs
