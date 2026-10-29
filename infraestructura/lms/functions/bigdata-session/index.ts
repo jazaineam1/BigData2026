@@ -8,7 +8,7 @@ const db=createClient(
 
 const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
-const RELEASE="2026-09-29-v57";
+const RELEASE="2026-10-28-v58-s10";
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 const PUBLIC_TRACK_EVENTS=new Set([
   "session_entered","page_opened","page_closed","heartbeat",
@@ -134,6 +134,7 @@ async function ownEvidence(userId:string,runId:string,n:number){
 }
 const TRANSFER_REVIEW_CODES=new Set(["bd-s09-lab3","bd-s09-lab4","bd-s09-lab8"]);
 async function submitEvidence(userId:string,runId:string,n:number,activity:any,payload:any,source:string,rawClientId:any=null,activities:any[]|null=null){
+  if(n===10&&activity?.metadata?.archived===true)throw new Error("Actividad histórica S10: no admite nuevas evidencias");
   if(!activity||activity.kind!=="lab")throw new Error("La actividad no es un laboratorio");
   const evidenceClientId=clientId(rawClientId,"client_evidence_id");
   if(evidenceClientId){
@@ -469,7 +470,7 @@ async function definition(runId:string,n:number,teacher=false){
   ]);
   if(!session)throw new Error("Sesión no configurada");
   if(session.status==="draft"&&!teacher)throw new Error("Sesión todavía no publicada");
-  return {session,activities:activities||[],resources:resources||[]};
+  return {session,activities:(activities||[]).filter((a:any)=>n!==10||a.metadata?.archived!==true),resources:resources||[]};
 }
 async function sessionWindow(runId:string,n:number){
   const {data}=await db.from("bd_lms_session_windows").select("opened_at,opened_by")
@@ -560,8 +561,12 @@ async function recomputeSession(userId:string,runId:string,n:number,activities:a
   const pm=new Map((rows||[]).map((x:any)=>[x.activity_code,x]));
   const mastered=checkpoints.filter(a=>Boolean(pm.get(a.code)?.metadata?.mastery)||pm.get(a.code)?.status==="completed").length;
   const labsVerified=blockingLabs.filter(a=>pm.get(a.code)?.status==="completed"&&pm.get(a.code)?.metadata?.evidence_verified===true).length;
-  const totalRequired=checkpoints.length+blockingLabs.length;
-  const done=totalRequired>0&&mastered===checkpoints.length&&labsVerified===blockingLabs.length;
+  // S10: acceso a recursos formativos, separado de dominio o evidencia verificada.
+  const visitResources=n===10&&checkpoints.length===0&&blockingLabs.length===0
+    ?activities.filter(a=>a.kind==="resource"&&a.required&&a.metadata?.completion_basis==="resource_visits"):[];
+  const resourceVisits=visitResources.filter(a=>pm.get(a.code)?.metadata?.visited===true||pm.get(a.code)?.status==="completed").length;
+  const totalRequired=checkpoints.length+blockingLabs.length+visitResources.length;
+  const done=totalRequired>0&&mastered===checkpoints.length&&labsVerified===blockingLabs.length&&resourceVisits===visitResources.length;
   const enforceLabs=blockingLabs.length>0;
   const now=new Date().toISOString();
   const {data:p}=await db.from("bd_lms_session_progress").select("*")
@@ -574,7 +579,8 @@ async function recomputeSession(userId:string,runId:string,n:number,activities:a
     score:mastered,max_score:checkpoints.length,updated_at:now
   },{onConflict:"user_id,course_run_id,session_number"});
   return {
-    completed:mastered+labsVerified,total:totalRequired,done,
+    completed:mastered+labsVerified+resourceVisits,total:totalRequired,done,
+    resource_visited:resourceVisits,resource_total:visitResources.length,
     checkpoint_completed:mastered,checkpoint_total:checkpoints.length,
     lab_completed:labsVerified,lab_total:blockingLabs.length
   };
@@ -582,6 +588,7 @@ async function recomputeSession(userId:string,runId:string,n:number,activities:a
 async function answerChallenge(ctx:any,run:any,n:number,code:string,rawAnswer:any,activities:any[]){
   const activity=activities.find((a:any)=>a.code===code&&a.kind==="checkpoint");
   if(!activity)throw new Error("Desafío no válido");
+  if(n===10&&activity.metadata?.archived===true)throw new Error("Actividad histórica S10: no admite nuevas respuestas");
   const answer=String(rawAnswer||"").trim().slice(0,160);if(!answer)throw new Error("Respuesta vacía");
   const {data:key}=await db.from("bd_lms_activity_keys").select("answer_hash,hint,session_number")
     .eq("activity_code",code).eq("session_number",n).maybeSingle();
@@ -946,6 +953,7 @@ Deno.serve(async(req:Request)=>{
         }
       }
       if(["slide_viewed","presentation_opened","notebook_opened","page_closed","lab_interaction"].includes(event))await realtimeSignal(n,"teacher_wall");
+      if(n===10&&def.activities.some((a:any)=>a.required&&a.metadata?.completion_basis==="resource_visits"))await recomputeSession(ctx.user.id,run.id,n,def.activities);
       return out(req,{ok:true});
     }
     if(action==="answer_challenge"){const result=await answerChallenge(ctx,run,n,String(body.activity_code||""),body.answer,def.activities);await realtimeSignal(n,"progress");return out(req,result)}
