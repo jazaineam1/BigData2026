@@ -6,6 +6,9 @@ on:
       - index.html
       - lms/**
       - Presentaciones/s09-de-palabras-a-significado.html
+      - assets/s09/**
+      - Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb
+      - utils/build_session9_notebook.py
       - Presentaciones/s10-etl-multimedia.html
       - Cuadernos/10_ETL_Multimedia.ipynb
       - utils/build_session10_multimedia.py
