@@ -36,23 +36,23 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <header><strong>Universidad Central · Big Data · S10</strong>
 <nav><a href="../index.html">Curso</a><a href="../lms/session.html?s=10">Módulo LMS</a>
 <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/10_Imagenes_Audio.ipynb" target="_blank" rel="noopener">Cuaderno Colab</a>
-<a href="#s8">Laboratorio</a></nav></header>
+<a href="#s8">Laboratorio</a><a href="#s12">Guía Colab desde cero</a></nav></header>
 <nav id="steps" aria-label="Secciones de la lección"></nav>
 <main id="deck">
 <section class="slide active" id="s1"><div class="kicker">01 · Problema profesional</div><h1>¿Cómo analizar imágenes y audio como datos?</h1>
 <p class="lead">Laura construye una colección de noticias y expedientes. Ya encuentra textos mediante búsquedas; ahora necesita responder: ¿qué contienen las imágenes y qué información cuantificable existe en un audio?</p>
 <div class="grid"><div class="card"><h2>Imagen</h2><p>Una matriz de píxeles con dimensiones, canales, color, bordes, ruido y objetos posibles.</p></div><div class="card"><h2>Audio</h2><p>Una señal muestreada en el tiempo, con duración, frecuencia, amplitud, silencios y, a veces, voz.</p></div></div>
-<div class="note">Producto: una exploración visual y acústica con decisiones propias, más un catálogo JSONL/Parquet reproducible generado con el cuaderno. La presentación ofrece simulaciones visuales sin instalar software; <b>todo código Python se ejecuta en Google Colab</b>.</div>
+<div class="note"><b>Reto de aprendizaje:</b> experimentar con imágenes, escuchar 10 voces reales autorizadas y crear tú mismo un catálogo de 13 filas que puedas verificar y guardar. No basta con leer las pantallas: tienes que ejecutar el cuaderno y comprobar las salidas. La presentación ofrece simulaciones visuales sin instalar software; <b>todo código Python se ejecuta en Google Colab</b>.</div>
 </section>
 <section class="slide" id="s2"><div class="kicker">02 · Continuidad del caso</div><h1>Una clave, medios diferentes</h1>
-<p>En S03–S08 modelamos y procesamos datos; S09 recupera información por significado. En S10 usamos el identificador editorial <code>article_id</code> como vínculo contextual entre registros, imágenes y audios.</p>
+<p>En S03–S08 modelamos y procesamos datos; S09 recupera información por significado. En una noticia, el identificador editorial <code>article_id</code> puede vincular metadatos con referencias a imágenes y audio. Pero nuestras <b>10 voces reales de MINDS-14 pertenecen a otro conjunto</b> y tienen su propio <code>source_record_id</code>: no están vinculadas a las noticias.</p>
 <pre>{
   "article_id": "3530042",
   "article_feed": "https://www.eltiempo.com/servicios/feeds/articulo/3530042",
   "audio_url": "https://servicios.eltiempo.com/audios/3530042.wav"
 }</pre>
 <p class="small">Este es un ejemplo de metadatos proporcionado para estudiar esquemas. Esta herramienta NO consulta ni descarga esos recursos. Un identificador coincidente tampoco demuestra que el sonido describa una imagen.</p>
-<div class="note warning"><b>Uso responsable:</b> las condiciones de El Tiempo limitan la extracción, transformación y el análisis automatizado sin autorización. Para el laboratorio ejecutable utilizamos señales e imágenes originales creadas para el curso, o archivos propios con permiso de tratamiento.</div></section>
+<div class="note warning"><b>Uso responsable:</b> las condiciones de El Tiempo limitan la extracción, transformación y el análisis automatizado sin autorización. Para el laboratorio ejecutable utilizamos muestras creadas para el curso y <b>10 grabaciones de voz humana con licencia CC BY 4.0</b>; no descargamos material editorial.</div></section>
 <section class="slide" id="s3"><div class="kicker">03 · Pregunta y predicción</div><h1>¿Una imagen más pequeña guarda la misma información?</h1>
 <div class="grid"><div class="card"><p>Antes de probar, elige una hipótesis.</p><div class="choices" data-question="q1">
 <button data-correct="0">Sí: reducir píxeles cambia el peso, nunca el detalle</button>
@@ -75,7 +75,7 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <label><input id="imageBinary" type="checkbox"> Aplicar binarización</label></div></div>
 <div id="imageStats" class="note" aria-live="polite"></div><canvas id="imageHistogram" width="700" height="160" role="img" aria-label="Histograma de luminancia de la imagen transformada"></canvas>
 <div class="actions"><button id="resetImage" class="secondary">Restaurar muestra</button><button id="saveImage">Guardar imagen derivada</button></div>
-<p class="small">Compara siempre la misma muestra. Al cambiar una sola variable, pregúntate qué mejora y qué empeora. La visualización está ampliada en pantalla; los píxeles del derivado son los indicados en las métricas.</p></section>
+<p><b>Prueba autónoma:</b> pon el lado máximo primero en <b>320</b> y después en <b>160</b>; observa <b>Derivado</b> y el histograma. Activa/desactiva binarización y describe qué información se pierde. Guarda la imagen final. <b>Resultado esperado:</b> cambia el número de píxeles y la distribución de intensidades. <b>Si no cambia:</b> pulsa «Restaurar muestra» y repite el experimento.</p><p class="small"><b>Cómo se lee:</b> «Derivado» indica el tamaño procesado. <b>Qué nos dice:</b> cuánto cambió la representación. <b>Qué NO permite concluir:</b> que el texto se haya reconocido. <b>Qué error común:</b> confundir resolución con semántica.</p></section>
 <section class="slide" id="s6"><div class="kicker">06 · Interpretar</div><h1>¿Qué extraerías de una imagen?</h1>
 <div class="grid"><div class="card"><h2>Características clásicas</h2><p>Dimensiones, histogramas, proporción de píxeles claros, bordes y tamaño del derivado. Útiles para control de calidad, deduplicación aproximada y preparación de OCR.</p></div>
 <div class="card"><h2>Modelos de visión</h2><p>OCR para texto; modelos de detección para regiones u objetos; embeddings para buscar por similitud. Requieren modelos, datos adecuados y evaluación humana. Un histograma no identifica un contrato.</p></div></div>
@@ -92,7 +92,7 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <div class="grid"><div class="card"><h2>Forma de onda</h2><canvas id="waveCanvas" width="640" height="220" role="img" aria-label="Amplitud de la señal a lo largo del tiempo"></canvas></div>
 <div class="card"><h2>Espectro de una ventana</h2><canvas id="spectrumCanvas" width="640" height="220" role="img" aria-label="Magnitud relativa por frecuencia"></canvas></div></div>
 <label for="audioStart">Ventana de análisis: <output id="startValue">25</output>% de duración</label><input id="audioStart" type="range" min="0" max="90" value="25" step="5">
-<div id="audioStats" class="note" aria-live="polite">Genera la señal de ejemplo para empezar.</div><p id="audioStatus" class="small" aria-live="polite"></p></section>
+<div id="audioStats" class="note" aria-live="polite">Genera la señal de ejemplo para empezar.</div><p><b>Prueba autónoma:</b> pulsa «Generar señal de ejemplo», luego «Reproducir señal». Cambia la ventana al <b>15 %, 50 % y 80 %</b>; compara RMS y el pico aproximado. <b>Resultado esperado:</b> cerca del 50 % hay silencio (RMS próximo a 0), pero no hay palabras. <b>Si no suena:</b> revisa el volumen y la reproducción automática del navegador; las métricas funcionan aunque no tengas altavoces.</p><p id="audioStatus" class="small" aria-live="polite"></p></section>
 <section class="slide" id="s9"><div class="kicker">09 · Interpretación acústica</div><h1>¿Qué te dice un pico de frecuencia?</h1>
 <p>En la ventana del experimento, un pico indica energía en torno a una frecuencia. No basta para identificar una palabra, una emoción, un hablante o la fuente.</p>
 <div class="choices" data-question="q3"><button data-correct="0">Un pico espectral equivale a una palabra reconocida</button><button data-correct="1">Para reconocer palabras hace falta un método ASR y comparar su salida con una referencia</button><button data-correct="0">Una forma de onda siempre revela el idioma</button></div>
@@ -103,28 +103,94 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <div class="card"><h2>Búsqueda</h2><p>Cuando la transcripción tiene calidad suficiente, puedes aplicar BM25 o embeddings como en S07 y S09, conservando tiempos y procedencia.</p></div><div class="card"><h2>Evaluación</h2><p>Con referencia humana, calcula WER (errores de palabra) y observa fallas con nombres propios o ruido. Sin referencia no declares precisión.</p></div></div>
 <p>El cuaderno ahora incluye diez WAV reales con transcripción de referencia y características acústicas. ASR con Whisper tiny en Colab es opcional: no se confunde una transcripción del dataset con una predicción ni se requiere una API de pago.</p></section>
 <section class="slide" id="s11"><div class="kicker">11 · Integración multimodal</div><h1>¿Qué se puede unir?</h1>
-<pre>article_id  ──► noticia (metadatos)
-     │
-     ├────────► imagen → píxeles → características visuales
-     │
-     └────────► audio  → muestras → características acústicas
-                               └──► transcripción (si hay voz y modelo)
+<pre>Noticias: article_id ──► metadatos de 24 artículos
+                              └──► 32 referencias de imagen
+
+Corpus MINDS-14: source_record_id ──► 10 WAV de voz
+                                            ├──► RMS / FFT
+                                            └──► texto de referencia
+
+Catálogo técnico común: source_kind + identificador + modalidad
 </pre>
-<p>La clave une archivos al registro de origen; no implica que una imagen ilustre la frase del audio. Para afirmar alineación semántica se necesita evidencia independiente y una tarea de evaluación explícita.</p>
-<div class="note">Diseño de catálogo: <code>asset_id, article_id, modality, source_kind, sha256, feature_version, metadata, derived_path</code>. Los activos originales se conservan por separado de las características.</div></section>
-<section class="slide" id="s12"><div class="kicker">12 · Laboratorio reproducible</div><h1>Ahora ejecutas Python de verdad</h1>
-<p>La aplicación sirve para explorar conceptos visualmente <b>sin ejecutar Python en esta página</b>. Todo el código del laboratorio se ejecuta en Google Colab; el cuaderno complementario ejecuta Python de punta a punta con datos originales del curso: <b>Pillow, NumPy, audio PCM, métricas, representaciones y catálogo Parquet/JSONL</b>.</p>
-<div class="actions"><a class="btn" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/10_Imagenes_Audio.ipynb" target="_blank" rel="noopener">Abrir cuaderno completo en Colab</a><a class="btn secondary" href="../Cuadernos/10_Imagenes_Audio.ipynb" download>Descargar para VS Code</a></div>
-<div class="grid"><div class="card"><h2>Paso A</h2><p>Ejecuta el ejemplo con su foto original y señal de audio. Comprueba formatos y tamaños.</p></div><div class="card"><h2>Paso B</h2><p>Cambia solo el lado de imagen y una ventana del audio; observa lo que cambia.</p></div><div class="card"><h2>Paso C</h2><p>Construye características por activo, carga el catálogo y consulta por modalidad.</p></div><div class="card"><h2>Paso D</h2><p>Elige una decisión cerrada sobre tu propio resultado y conserva carpeta verificable.</p></div></div></section>
-<section class="slide" id="s13"><div class="kicker">13 · Autoevaluación</div><h1>¿Qué evidencia necesitamos antes de afirmar algo?</h1>
+<p>Cada clave conserva los archivos en <b>su colección de origen</b>. Los audios de MINDS-14 no corresponden a ninguna de las noticias del inventario de imágenes; el número de relaciones editoriales entre ambos conjuntos es <b>cero</b>. Para afirmar alineación semántica se necesita evidencia independiente y una tarea de evaluación explícita.</p>
+<div class="note"><b>Cómo se lee:</b> el catálogo técnico agrupa representaciones y orígenes, no crea una «noticia con audio» ficticia. <b>Qué nos dice:</b> qué archivos se pueden buscar y validar. <b>Qué NO permite concluir:</b> que la voz describa la noticia. <b>Qué error común:</b> poner un <code>article_id</code> inventado a los 10 WAV.</div></section>
+<section class="slide" id="s12"><div class="kicker">12 · Ejecución independiente desde cero</div><h1>Google Colab: entra, guarda y ejecuta</h1>
+<p>Todo <b>Python se ejecuta en Google Colab</b>, no en esta presentación ni en VS Code. Requisitos: navegador, cuenta Google gratuita, internet y altavoces opcionales; no necesitas tarjeta bancaria, API de pago, GPU ni datos privados.</p>
+<div class="actions"><a class="btn" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/10_Imagenes_Audio.ipynb" target="_blank" rel="noopener">1. Abrir cuaderno S10 en Colab</a><a class="btn secondary" href="#s13">2. Continuar guía detallada</a></div>
+<div class="grid"><div class="card"><h2>1 · Conecta</h2><p>En la nueva pestaña, pulsa <b>Conectar</b> (esquina superior derecha). Mantén la opción de CPU gratuita. Si no inicia, comprueba tu cuenta Google y recarga Colab.</p></div>
+<div class="card"><h2>2 · Haz tu copia</h2><p>En Colab selecciona <b>Archivo → Guardar una copia en Drive</b>. Trabaja en la pestaña de tu copia, no en una versión de solo lectura.</p></div>
+<div class="card"><h2>3 · Ejecuta la primera celda</h2><p>Pulsa ▶ a la izquierda de <b>Preparar bibliotecas</b>. Debes ver <code>BIBLIOTECAS: listas</code> y <code>work_s10_multimodal</code>. Si no ocurre, revisa el error antes de seguir.</p></div>
+<div class="card"><h2>4 · Sigue la ruta</h2><p>Avanza por los pasos siguientes. Ejecuta las celdas en orden; en las actividades con parámetros, cambia un valor, vuelve a pulsar ▶ y compara la salida.</p></div></div>
+<p class="small"><b>Importante:</b> guardar el cuaderno no guarda los archivos temporales. Al terminar tendrás que descargar el ZIP o copiar el paquete a tu Drive. Sigue a <b>13 / 23</b>.</p></section>
+<section class="slide" id="s13"><div class="kicker">13 · Prueba guiada 1</div><h1>Antes de empezar: confirma que Colab funciona</h1>
+<p><b>En Colab, sección 1.</b> Abre tu copia, conecta el entorno y ejecuta <code>Preparar bibliotecas</code>. Espera a que termine (el indicador de ejecución deja de girar).</p>
+<table><tr><th>Qué haces</th><th>Qué compruebas</th><th>Si falla</th></tr>
+<tr><td>Conectar CPU</td><td>Indicador de conexión y RAM disponible</td><td>Comprueba cuenta Google; vuelve a conectar</td></tr>
+<tr><td>Ejecutar primera celda ▶</td><td><code>BIBLIOTECAS: listas</code></td><td>Lee el mensaje rojo y vuelve a ejecutar una vez</td></tr>
+<tr><td>Ver ruta de trabajo</td><td><code>work_s10_multimodal</code></td><td><b>Entorno de ejecución → Reiniciar sesión</b> y ejecutar en orden</td></tr></table>
+<div class="note"><b>Cómo se lee:</b> la ruta es el directorio temporal de ejecución. <b>Qué nos dice:</b> las bibliotecas y carpetas están disponibles. <b>Qué NO permite concluir:</b> que el catálogo ya exista. <b>Qué error común:</b> cerrar Colab creyendo que se guardaron los datos.</div></section>
+<section class="slide" id="s14"><div class="kicker">14 · Prueba guiada 2</div><h1>Ejecuta y transforma una imagen</h1>
+<p><b>En Colab, secciones 2 y 3.</b> Ejecuta, en orden, <code>Ejemplo de estructura</code>, <code>Imagen ORIGINAL</code>, <code>T — un solo parámetro</code> y <code>Propiedades cuantificables</code>. No descargues imágenes de El Tiempo: la ilustración se genera automáticamente.</p>
+<div class="grid"><div class="card"><h2>Experimento A</h2><p>Cambia <code>LADO=320</code> por <code>160</code> en la celda de transformación. Pulsa ▶ otra vez. Compara el tamaño de la imagen, la legibilidad de trazos y sus bytes.</p></div><div class="card"><h2>Experimento B</h2><p>Ejecuta la celda de características. Confirma una tabla con <b>dos filas</b>: <code>vista160</code> y <code>vista320</code>. Observa luminancia y diferencias entre píxeles.</p></div></div>
+<p><b>Resultado esperado:</b> dos archivos <code>derived/documento_160.png</code> y <code>derived/documento_320.png</code>. <b>Si no existen:</b> vuelve a ejecutar la celda de imagen original, luego transformación y características, en ese orden.</p>
+<div class="note"><b>Cómo se lee:</b> una fila representa un tamaño. <b>Qué nos dice:</b> el efecto de la reducción. <b>Qué NO permite concluir:</b> exactitud del OCR. <b>Qué error común:</b> igualar píxeles con bytes comprimidos.</div></section>
+<section class="slide" id="s15"><div class="kicker">15 · Prueba guiada 3</div><h1>Ejecuta el audio de demostración y descubre el silencio</h1>
+<p><b>En Colab, secciones 4 y 5.</b> Pulsa ▶ en <code>audio WAV PCM mono</code>, <code>características acústicas por ventana</code> y <code>Espectrograma</code>. Escucha la señal desde el reproductor que aparece.</p>
+<table><tr><th>Prueba que debes realizar</th><th>Resultado observable</th></tr>
+<tr><td>Duración y frecuencia de muestreo</td><td>3 segundos y 16.000 Hz</td></tr><tr><td>Ventana del primer tono</td><td>RMS positivo y pico de frecuencia</td></tr><tr><td>Ventana central de silencio</td><td>RMS prácticamente 0 (fila central de la tabla)</td></tr><tr><td>Espectrograma</td><td>Dos regiones tonales separadas por silencio</td></tr></table>
+<p><b>Haz una variación:</b> cambia <code>VENTANA_SEG</code> entre una región sonora y otra; pulsa ▶. Si aparece <code>NameError</code>, no ejecutes una celda aislada después de reiniciar: empieza otra vez desde la primera.</p>
+<div class="note"><b>Cómo se lee:</b> RMS mide amplitud eficaz de una ventana. <b>Qué nos dice:</b> cuándo hay energía. <b>Qué NO permite concluir:</b> que hay palabras. <b>Qué error común:</b> confundir 16.000 muestras por segundo con un tono de 16 kHz.</div></section>
+<section class="slide" id="s16"><div class="kicker">16 · Prueba guiada 4</div><h1>Obtén las 10 voces humanas reales</h1>
+<p><b>En Colab, sección 7A.</b> Ejecuta <code>Conseguir 10 grabaciones reales (MINDS-14 español, CC BY 4.0)</code>. El cuaderno descarga un Parquet del corpus autorizado, verifica su SHA-256, escoge diez registros de intenciones diferentes, conserva sus originales y produce WAV PCM16 reproducibles.</p>
+<div class="grid"><div class="card"><h2>Salida que debes observar</h2><p><code>VOCES REALES VERIFICADAS: 10 · intenciones: 10</code> y una tabla con diez identificadores, duraciones y huellas diferentes.</p></div><div class="card"><h2>Archivos que se crean</h2><p><code>raw/voz_real/voz_01_fuente.wav</code> y <code>voz_01.wav</code> hasta el número 10; <code>dataset_manifest.json</code> acredita su procedencia.</p></div></div>
+<p><b>¿Qué significa G.711?</b> WAV es un contenedor: el audio de origen puede usar compresión telefónica μ-law. Se decodifica a PCM16 antes del análisis. Los WAV de origen no se modifican.</p>
+<div class="note warning"><b>Si falla:</b> verifica que Colab tenga internet; vuelve a ejecutar 7A. Si no aparecen exactamente 10 archivos, <b>no continúes</b> a 7B. No sustituyas voces reales por audios de prueba.</div></section>
+<section class="slide" id="s17"><div class="kicker">17 · Prueba guiada 5</div><h1>Escucha dos personas y compara sus métricas</h1>
+<p><b>En Colab, sección 7B.</b> Ejecuta <code>Extraer características y escuchar una voz del corpus</code>. La tabla debe tener <b>diez filas</b> con duración, RMS, cruces por cero y centroide espectral. Elige <code>POSICION_VOZ=1</code> y escucha. Luego cambia el valor a <code>5</code>, pulsa ▶ de nuevo y escucha la otra voz.</p>
+<table><tr><th>Pregunta que responde</th><th>Qué debes inspeccionar</th></tr>
+<tr><td>¿Cuál dura más?</td><td><code>duration_seconds</code> de las dos filas</td></tr>
+<tr><td>¿Cambió la amplitud eficaz?</td><td><code>rms</code> de las dos filas</td></tr>
+<tr><td>¿Qué palabras dice?</td><td>Transcripción de referencia mostrada por el corpus, no inferida desde RMS</td></tr></table>
+<p><b>Resultado esperado:</b> un reproductor, una onda de voz y la transcripción de referencia correspondiente a la posición elegida. Si no escuchas, verifica la salida del reproductor y el volumen; la forma de onda y el texto deben seguir visibles.</p>
+<div class="note"><b>Cómo se lee:</b> cada voz tiene su clave de origen. <b>Qué nos dice:</b> diferencias acústicas medibles. <b>Qué NO permite concluir:</b> emoción, verdad o identidad de la persona. <b>Qué error común:</b> interpretar un pico como palabra.</div></section>
+<section class="slide" id="s18"><div class="kicker">18 · Profundización opcional y ejecutable</div><h1>Prueba ASR: voz real → texto probable → error</h1>
+<p><b>Solo después de 7B.</b> Busca la celda <code>ASR opcional: voz REAL del corpus</code>. Mantén <code>TIPO_ASR='corpus'</code>, activa <code>USAR_ASR=True</code> y ejecuta ▶. Colab instalará gratuitamente <code>faster-whisper</code> si hace falta y descargará el modelo pequeño <b>Whisper tiny</b>. Puede depender de la conexión.</p>
+<div class="grid"><div class="card"><h2>Lo que debe aparecer</h2><p><b>Referencia humana</b> del dataset, <b>predicción</b> del modelo y <b>WER</b> (tasa de errores de palabra). Cambia <code>POSICION_VOZ</code> en 7B y vuelve a ejecutar ASR para comparar.</p></div><div class="card"><h2>Si no funciona</h2><p>Revisa conectividad o espacio del runtime. Desactiva <code>USAR_ASR</code> y prosigue: el núcleo obligatorio analiza las diez voces sin descargar un modelo de reconocimiento.</p></div></div>
+<div class="note"><b>Cómo se lee:</b> WER 0 indica coincidencia tras normalización. <b>Qué nos dice:</b> errores de <em>esa</em> grabación. <b>Qué NO permite concluir:</b> precisión en todas las noticias. <b>Qué error común:</b> creer que la hipótesis del modelo es una cita verificada.</div></section>
+<section class="slide" id="s19"><div class="kicker">19 · Prueba guiada 6</div><h1>Relaciona inventarios, no inventes noticias con audio</h1>
+<p><b>En Colab, sección 7C.</b> Ejecuta <code>Integración de inventarios sin inventar relaciones editoriales</code>. Esa celda recupera el manifiesto de las imágenes ya estudiadas en la sesión anterior, sin descargar de nuevo sus fotografías.</p>
+<table><tr><th>Origen</th><th>Clave verdadera</th><th>Resultado esperado</th></tr>
+<tr><td>Snapshot de imágenes editoriales</td><td><code>article_id</code></td><td>32 referencias, 24 artículos</td></tr>
+<tr><td>10 voces de MINDS-14</td><td><code>source_record_id</code></td><td>10 registros, cero artículos</td></tr>
+<tr><td>Relación cruzada</td><td>No existe clave compartida</td><td><b>0 coincidencias editoriales</b></td></tr></table>
+<p><b>Comprueba:</b> <code>outputs/source_registry.json</code>. Si falla la obtención de metadatos, verifica tu conexión con GitHub y repite la celda. No asignes <code>article_id=3530041</code> a las voces bancarias: no pertenecen al medio.</p>
+<div class="note"><b>Cómo se lee:</b> son colecciones separadas. <b>Qué nos dice:</b> cuántos activos hay en cada origen. <b>Qué NO permite concluir:</b> que la voz se refiera a la noticia. <b>Qué error común:</b> realizar una unión por un identificador que no existe.</div></section>
+<section class="slide" id="s20"><div class="kicker">20 · Prueba guiada 7</div><h1>Construye, consulta y verifica el catálogo</h1>
+<p><b>En Colab, secciones 8 a 11.</b> Ejecuta, en orden, <code>L — esquema común</code>, <code>Ejercicio de consulta</code>, <code>Proyección matemática</code>, <code>Decisión individual</code> y <code>Manifiesto técnico</code>.</p>
+<div class="grid"><div class="card"><h2>Catálogo esperado</h2><p><code>L · CATÁLOGO REABIERTO: 13 filas</code>: <b>11 audios</b> (10 voces reales + 1 señal de prueba) y <b>2 imágenes</b> derivadas. Se guardan <code>outputs/assets.jsonl</code> y <code>assets.parquet</code>.</p></div><div class="card"><h2>Consultas y decisión</h2><p>Prueba <code>MODALIDAD='image'</code> y luego <code>'audio'</code>. Verifica el archivo que se abre y su SHA-256. Cambia los tres selectores de decisión de 0 a valores admitidos para obtener <code>complete: True</code>.</p></div></div>
+<p><b>Integridad:</b> la celda del manifiesto debe imprimir <code>PAQUETE VERIFICADO: {'ok': True, 'errors': [], 'rows': 13}</code>. Si la consulta falla, vuelve a ejecutar el catálogo; si una huella no coincide, comprueba que no hayas editado sus archivos originales.</p>
+<div class="note"><b>Cómo se lee:</b> una fila es una representación con origen y huella. <b>Qué nos dice:</b> qué datos reabrimos. <b>Qué NO permite concluir:</b> rendimiento de un clúster Big Data. <b>Qué error común:</b> presentar una proyección matemática como benchmark medido.</div></section>
+<section class="slide" id="s21"><div class="kicker">21 · Entrega individual y conservación</div><h1>Comprueba que realmente lo ejecutaste</h1>
+<p><b>En Colab, secciones 12 y 13.</b> Ejecuta <code>Comprobar el trabajo realizado</code>. Debe decir <b><code>AUTOCOMPROBACIÓN: LISTO (9/9)</code></b>. Si dice <code>INCOMPLETO</code>, sigue la fila pendiente; comprueba especialmente que las tres decisiones sean distintas de cero.</p>
+<p><b>Guarda evidencias:</b> activa <code>DESCARGAR_ZIP</code> para obtener <code>s10_multimodal_evidencia.zip</code>, o <code>CONSERVAR_EN_DRIVE</code> y concede acceso a tu propio Drive. Verifica que la copia incluya <code>manifest_s10.json</code>, <code>outputs/assets.parquet</code> y los diez WAV de voz.</p>
+<div class="card"><h2>Lista de cotejo personal — marca solo después de comprobar Colab</h2>
+<label><input type="checkbox" class="student-progress" id="studentP1"> Vi las dos imágenes derivadas y comparé sus métricas.</label>
+<label><input type="checkbox" class="student-progress" id="studentP2"> Escuché la señal de prueba y confirmé el silencio.</label>
+<label><input type="checkbox" class="student-progress" id="studentP3"> Obtuvieron 10 voces distintas y escuché las posiciones 1 y 5.</label>
+<label><input type="checkbox" class="student-progress" id="studentP4"> Distinguí 32 referencias de imágenes de 10 voces sin unión editorial.</label>
+<label><input type="checkbox" class="student-progress" id="studentP5"> Reabrí las 13 filas y vi LISTO (9/9) en Colab.</label>
+<label><input type="checkbox" class="student-progress" id="studentP6"> Descargué el ZIP o guardé el paquete verificado en Drive.</label>
+<p id="studentChecklistStatus" class="feedback" aria-live="polite">0 de 6 comprobaciones personales marcadas. Esta lista no puede leer tus archivos de Colab: la prueba técnica es el resultado 9/9 en el cuaderno.</p></div>
+<div class="note"><b>Si falta algo:</b> vuelve a la sección de Colab indicada; la presentación no puede verificar por sí sola los archivos alojados en tu sesión privada.</div></section>
+<section class="slide" id="s22"><div class="kicker">22 · Autoevaluación</div><h1>¿Qué evidencia necesitamos antes de afirmar algo?</h1>
 <div class="choices" data-question="q4"><button data-correct="0">Si guardé un .wav, la transcripción es perfecta</button><button data-correct="0">Si dos archivos tienen el mismo article_id, dicen lo mismo</button><button data-correct="1">Debo conservar origen, validar características y probar por separado las afirmaciones semánticas</button></div><p class="feedback" aria-live="polite"></p>
 <p class="small">Estas preguntas son formativas, no tienen nota. Elige y lee la explicación; puedes cambiar de respuesta.</p></section>
-<section class="slide" id="s14"><div class="kicker">14 · Producto</div><h1>Expediente multimodal verificable</h1>
-<p>La herramienta exporta un JSON con características observadas y decisiones del navegador. El catálogo técnico con <b>10 voces reales + 1 señal original + 2 derivaciones de imagen</b> se obtiene en Colab. Es una ayuda para comparar; el producto técnico completo se crea en el cuaderno y se verifica al reabrir.</p>
+<section class="slide" id="s23"><div class="kicker">23 · Producto</div><h1>Expediente multimodal verificable</h1>
+<p>Esta presentación exporta un resumen de tus exploraciones en el navegador, pero <b>el producto evaluable</b> se verifica en Colab con <code>AUTOCOMPROBACIÓN: LISTO (9/9)</code> y el ZIP o carpeta de Drive. El catálogo técnico con <b>10 voces reales + 1 señal original + 2 derivaciones de imagen</b> se obtiene en Colab. La exportación del navegador NO reemplaza el paquete del cuaderno.</p>
 <div class="actions"><button id="exportObservations">Exportar observaciones JSON</button><label style="margin:0"><input id="checkOne" type="checkbox"> Comparé dos tamaños de imagen</label><label style="margin:0"><input id="checkTwo" type="checkbox"> Exploré dos ventanas de audio</label></div>
 <div class="note"><b>Para llevar:</b> un catálogo multimodal conecta la procedencia con características y transformaciones verificables. No confunde bytes con significado ni una mención con evidencia.</div></section>
 </main>
-<footer><button id="prev" class="secondary">Anterior</button><span id="count" aria-live="polite">1 / 14</span><button id="next">Siguiente</button></footer>
+<footer><button id="prev" class="secondary">Anterior</button><span id="count" aria-live="polite">1 / 23</span><button id="next">Siguiente</button></footer>
 <script>
 (function(){
 'use strict';
@@ -163,6 +229,9 @@ document.getElementById('playAudio').onclick=async function(){if(!signal)synth()
 document.getElementById('audioUpload').onchange=async function(e){var f=e.target.files&&e.target.files[0];if(!f)return;if(f.size>20*1024*1024){alert('Límite educativo 20 MiB');return}try{var buf=await ac().decodeAudioData(await f.arrayBuffer()),length=Math.min(buf.length,buf.sampleRate*30),array=new Float32Array(length);for(var c=0;c<buf.numberOfChannels;c++){var data=buf.getChannelData(c);for(var i=0;i<length;i++)array[i]+=data[i]/buf.numberOfChannels}loadSignal(array,buf.sampleRate,'archivo_autorizado_local');document.getElementById('audioStatus').textContent='Archivo leído localmente; máximo 30 segundos analizados.'}catch(err){document.getElementById('audioStatus').textContent='No se pudo decodificar; prueba WAV PCM en formato compatible.'}};
 document.getElementById('recordAudio').onclick=async function(){try{var stream=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=function(e){if(e.data.size)chunks.push(e.data)};recorder.onstop=async function(){try{var blob=new Blob(chunks,{type:recorder.mimeType}),buf=await ac().decodeAudioData(await blob.arrayBuffer()),len=Math.min(buf.length,buf.sampleRate*30);loadSignal(new Float32Array(buf.getChannelData(0).slice(0,len)),buf.sampleRate,'microfono_propio_local');document.getElementById('audioStatus').textContent='Grabación analizada localmente; no se subió al servidor.'}catch(e){document.getElementById('audioStatus').textContent='El navegador no pudo decodificar esta grabación.'}finally{stream.getTracks().forEach(function(t){t.stop()})}};recorder.start();document.getElementById('stopAudio').disabled=false;document.getElementById('audioStatus').textContent='Grabando: di una frase corta o haz una pausa.'}catch(e){document.getElementById('audioStatus').textContent='Permiso de micrófono no concedido o dispositivo no compatible.'}};
 document.getElementById('stopAudio').onclick=function(){if(recorder&&recorder.state==='recording')recorder.stop();this.disabled=true};synth();
+document.querySelectorAll('.student-progress').forEach(function(c){c.addEventListener('change',function(){
+var total=document.querySelectorAll('.student-progress').length,checked=document.querySelectorAll('.student-progress:checked').length;
+document.getElementById('studentChecklistStatus').textContent=checked+' de '+total+' comprobaciones personales marcadas. '+(checked===total?'Contrasta ahora el resultado AUTOCOMPROBACIÓN: LISTO (9/9) en Colab; esta lista no lo reemplaza.':'Completa las pruebas en Colab antes de marcar las restantes.');})});
 document.getElementById('exportObservations').onclick=function(){var result={schema:'s10-multimodal-browser-v1',source:'laboratorio_pedagogico_local',image:window.imageMetrics,audio:window.audioMetrics,checklist:{compared_image_sizes:document.getElementById('checkOne').checked,compared_audio_windows:document.getElementById('checkTwo').checked},limitations:['caracteristicas_no_demuestran_semantica','uso_editorial_no_autorizado_para_mineria']};var blob=new Blob([JSON.stringify(result,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='s10-observaciones-locales.json';a.click();setTimeout(function(){URL.revokeObjectURL(url)},2000)};
 })();
 </script></body></html>
