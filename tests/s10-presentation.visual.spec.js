@@ -2,9 +2,9 @@ const {test,expect}=require('@playwright/test');
 const AxeBuilder=require('@axe-core/playwright').default;
 const route='/Presentaciones/s10-etl-multimedia.html';
 for(const vp of [{width:1366,height:768},{width:1920,height:1080},{width:390,height:844}]){
- test(`S10: 16 pantallas legibles ${vp.width}`,async({page})=>{
+ test(`S10: 17 pantallas legibles ${vp.width}`,async({page})=>{
   await page.setViewportSize(vp);const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(route+'#s1');
-  for(let n=1;n<=16;n++){
+  for(let n=1;n<=17;n++){
    await page.evaluate(n=>{location.hash='s'+n},n);await expect(page.locator('#s'+n)).toBeVisible();
    const box=await page.locator('#s'+n).evaluate(el=>{
     const content=el.querySelector('.slide-content').getBoundingClientRect(),nav=document.querySelector('.nav').getBoundingClientRect(),title=el.querySelector('h1').getBoundingClientRect(),top=document.querySelector('.top').getBoundingClientRect();
@@ -19,25 +19,27 @@ for(const vp of [{width:1366,height:768},{width:1920,height:1080},{width:390,hei
   expect(errors).toEqual([]);
  });
 }
-test('autoevaluación: todas las alternativas explican su resultado y arrancan pendientes',async({page})=>{
- await page.goto(route);const boxes=page.locator('[data-question]');expect(await boxes.count()).toBe(6);
- for(let i=0;i<6;i++){
-  const box=boxes.nth(i);await page.evaluate(id=>{location.hash='s'+document.querySelector(`[data-question="${id}"]`).closest('.slide').dataset.slide},i);
-  await expect(box.locator('select')).toHaveValue('');
-  for(const value of ['a','b','c']){await box.locator('select').selectOption(value);await box.locator('button').click();await expect(box.locator('[aria-live]')).toContainText('sin nota ni registro oficial');}
+test('tutorial nativo: pasos, enlaces al cuaderno y progreso local',async({page})=>{
+ await page.goto(route+'#s1');await expect(page.locator('#s1')).toContainText('Universidad Central');
+ await page.getByRole('link',{name:'Tutorial integrado',exact:true}).click();await expect(page).toHaveURL(/#s5$/);
+ const checks=page.locator('[data-step]');expect(await checks.count()).toBe(6);
+ for(const n of [5,7,9,11,13,16]){
+  await page.evaluate(n=>{location.hash='s'+n},n);
+  await expect(page.locator('#s'+n+' a')).toHaveAttribute('href',/colab.*#scrollTo=s10-/);
+  await page.locator('#s'+n+' [data-step]').check();
+  await expect(page.locator('#s'+n+' [aria-live]')).toContainText('no acredita');
  }
+ await page.reload();await expect(page.locator('#s16 [data-step]')).toBeChecked();
+ await expect(page.locator('#s16 [aria-live]')).toContainText('6 / 6');
+ expect(await page.locator('iframe,a[href$="s10_proyecto_VSCode.zip"]').count()).toBe(0);
+ await page.goto('/assets/tutoriales/s10-laboratorio-guiado.html');await expect(page).toHaveURL(/s10-etl-multimedia.html#s5$/);
 });
-test('teclado, enlaces directos y catálogo local sin interpretar HTML',async({page})=>{
+test('navegación por teclado y acceso al cuaderno',async({page})=>{
  await page.goto(route+'#s1');await page.keyboard.press('ArrowRight');await expect(page).toHaveURL(/#s2$/);
- await page.goto(route+'#s15');await page.locator('#catalogFile').setInputFiles({name:'assets.jsonl',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({article_id:'<img src=x onerror=alert(1)>',profile:'vista320',derived_width:320,derived_height:180})+'\n')});
- await expect(page.locator('#catalogPreview')).toContainText('1 filas');expect(await page.locator('#catalogPreview img').count()).toBe(0);
- await expect(page.locator('.top a').first()).toHaveAttribute('href','../assets/tutoriales/s10_proyecto_VSCode.zip');
- const response=await page.request.get('/assets/tutoriales/s10_proyecto_VSCode.zip');expect(response.ok()).toBe(true);
- await page.goto(route+'#s3');await page.locator('select:visible').focus();await page.keyboard.press('ArrowRight');await expect(page).toHaveURL(/#s3$/);
+ await expect(page.getByRole('link',{name:'Cuaderno Python',exact:true})).toHaveAttribute('href',/Cuadernos\/10_ETL_Multimedia.ipynb$/);
+ const res=await page.request.get('/Cuadernos/10_ETL_Multimedia.ipynb');expect(res.ok()).toBe(true);
+ const nb=await res.json();expect(nb.cells.length).toBe(29);
 });
-test('checklist guarda progreso local y permite reiniciar',async({page})=>{
- await page.goto('/assets/tutoriales/s10-laboratorio-guiado.html');const check=page.locator('input[type=checkbox]').first();await check.check();await page.reload();await expect(check).toBeChecked();await page.getByRole('button',{name:/Reiniciar/}).click();await expect(check).not.toBeChecked();
-});
-test('accesibilidad: portada, código, pregunta y archivos locales',async({page})=>{
- for(const n of [1,3,6,7,15]){await page.goto(route+'#s'+n);const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();expect(result.violations.map(x=>x.id+': '+x.nodes.map(y=>y.target).join(','))).toEqual([]);}
+test('accesibilidad: portada, código y tutorial',async({page})=>{
+ for(const n of [1,3,5,9,13,16]){await page.goto(route+'#s'+n);const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();expect(result.violations.map(x=>x.id+': '+x.nodes.map(y=>y.target).join(','))).toEqual([]);}
 });

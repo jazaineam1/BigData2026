@@ -36,4 +36,4 @@ jobs:
       - run: S10_QA_MODULES=/tmp/s10-db-qa/node_modules node utils/test_s10_lms.cjs
       # El ZIP editorial privado no se sube a GitHub ni se readquiere por cada PR.
       # La prueba completa con imágenes reales se ejecuta localmente con
-      # utils/validate_s10_runtime.py --entrada ZIP_DOCENTE --salida CARPETA_NUEVA.
+      # utils/validate_s10_notebook_runtime.py --entrada ZIP_DOCENTE --salida CARPETA_NUEVA.

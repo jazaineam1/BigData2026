@@ -188,7 +188,7 @@ El cuaderno sí lleva un **mapa sin relojes**: la secuencia de bloques, qué res
 
 ### Laboratorio guiado (checklist)
 
-- Toda sesión con un laboratorio ejecutable produce, además del cuaderno, un HTML de checklist en `assets/tutoriales/` — no lo reemplaza ni repite tutoriales de plataforma ya existentes: los enlaza.
+- Toda sesión con un laboratorio ejecutable incluye un checklist guiado. Si tiene presentación, el tutorial vive embebido en ella: presentación y cuaderno completo son los dos recursos docentes. Un enlace antiguo puede redirigir al tutorial integrado; no se agrega un ZIP de códigos como tercer recurso obligatorio. Esto mantiene el recorrido unido; se comprueba que desde la presentación se siguen todos los pasos del cuaderno sin abrir otra guía.
 - Cada paso del checklist declara qué hacer, por qué, y la **evidencia exacta que ese paso realmente produce** (la salida real del cuaderno, no una aproximación inventada) — y trae un control de verificación propio.
 - El checklist pedagógico puede guardar progreso local en el navegador para que el estudiante retome pasos sin fricción. Cuando una actividad esté integrada al LMS, el progreso académico oficial se registra en el backend y el almacenamiento local queda solo como apoyo de interfaz; nunca se presenta como evidencia oficial. La evidencia entregable sigue siendo el hito verificable que produce la actividad.
 - Enlaza el checklist desde la primera celda del cuaderno al que acompaña.
