@@ -20,6 +20,9 @@ assert "MODO_DEMO" in snippet(4) and "COLUMNA_ID" in snippet(4)
 assert 'intfloat/multilingual-e5-small' in snippet(4)
 assert "MAX_TOKENS" in snippet(6)
 assert 'upsert=True' in snippet(10) and '"s09:"+LOTE' in snippet(10)
+assert "CREAR_INDICE_EN_COLAB = False" in snippet(12)
+assert "DESDE CERO" in snippet(7)
+assert "IP_COLAB" in snippet(2)
 assert "SearchIndexModel(" in snippet(12)
 assert 'list_search_indexes(' in snippet(13) and 'queryable' in snippet(13)
 assert '"$vectorSearch"' in snippet(15) and '"exact":True' in snippet(15)
@@ -162,7 +165,7 @@ with tempfile.TemporaryDirectory() as directory:
         atlas_ui=AtlasFalso()
         sandbox["col"]=atlas_ui
         ui_source=snippet(12).replace(
-            "CREAR_INDICE_EN_COLAB = True","CREAR_INDICE_EN_COLAB = False")
+            "CREAR_INDICE_EN_COLAB = False","CREAR_INDICE_EN_COLAB = False")
         exec(compile(ui_source,"index_ui_manual.py","exec"),sandbox)
         assert not sandbox["indice_creado"] and atlas_ui.idx is None
         # Simular que el docente lo creó en Atlas UI y reejecutó celda 5:
@@ -171,7 +174,7 @@ with tempfile.TemporaryDirectory() as directory:
         assert sandbox["indice_creado"] and atlas_ui.idx is not None
         # Reponer la colección de prueba; ruta PyMongo crea de forma programática.
         sandbox["col"]=atlas
-        exec(compile(snippet(12),"index.py","exec"),sandbox)
+        exec(compile(snippet(12).replace("CREAR_INDICE_EN_COLAB = False","CREAR_INDICE_EN_COLAB = True"),"index.py","exec"),sandbox)
         assert sandbox["indice_creado"] and atlas.idx is not None
         sandbox["indice_queryable"]=True
         exec(compile(snippet(15).replace("COMPARAR_ENN_ATLAS = False","COMPARAR_ENN_ATLAS = True"),"remote_mock.py","exec"),sandbox)
