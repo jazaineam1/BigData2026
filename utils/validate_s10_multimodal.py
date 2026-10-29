@@ -32,7 +32,14 @@ with tempfile.TemporaryDirectory(prefix="bigdata-s10-qa-") as temp:
     assert (root/"raw/documento_demo.png").exists()
     assert (root/"raw/senal_demo.wav").exists()
     assert scope["informe"]["ok"], scope["informe"]
-    assert len(scope["reabierto"]) == 3
+    assert len(scope["reabierto"]) == 13
+    assert len(scope['audios_reales']) == 10
+    assert len(set(x['sha256'] for x in scope['audios_reales'])) == 10
+    assert all(x['license']=='CC-BY-4.0' for x in scope['audios_reales'])
+    assert all((root/x['path']).is_file() for x in scope['audios_reales'])
+    assert (root/'outputs/source_registry.json').is_file()
+    assert scope['registro_fuentes']['cross_dataset_article_matches'] == 0
+    assert scope['reabierto'].groupby('modality').size().to_dict()=={'audio':11,'image':2}
     assert scope["metricas_ventanas"].iloc[1]["rms"] == 0
     first=scope["comprobar"](root)
     assert first["ok"]
@@ -46,4 +53,4 @@ with tempfile.TemporaryDirectory(prefix="bigdata-s10-qa-") as temp:
     # Las decisiones inválidas no se aceptan.
     dec=scope["decision"]
     assert not dec["complete"], "El 0 predeterminado debe ser pendiente"
-    print("S10 OK: notebook ejecutado, 2 imágenes + 1 audio, catálogo reabierto, manifiesto e integridad")
+    print("S10 OK: notebook ejecutado, 2 imágenes + 11 audios (10 voces reales con licencia), catálogo reabierto, manifiesto e integridad")

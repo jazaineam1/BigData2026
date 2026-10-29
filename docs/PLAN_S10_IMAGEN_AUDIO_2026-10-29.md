@@ -33,3 +33,14 @@ Los términos publicados de El Tiempo restringen expresamente análisis, minerí
 - CI verde antes de fusionar. No afirmar cobertura de Colab real sin prueba de cuenta.
 - Publicar mediante GitHub Pages; ejecutar humo HTTP.
 - Luego S11 puede ampliar el mismo catálogo con archivos autorizados reales, lotes, transcripciones y evaluación contra referencia humana.
+
+## Ampliación de audio real (29 de octubre de 2026)
+
+- Se incorpora **PolyAI/MINDS14 es-ES**, conjunto de grabaciones humanas de voz en español con licencia **CC BY 4.0**, accesible en Parquet desde Hugging Face. Se descarga una sola vez en Colab (~39 MB) y se extraen de forma determinista **10 WAV correspondientes a diez intenciones distintas**, guardando huella, duración, identificación de origen, licencia y transcripción de referencia. Se detiene el ejercicio si falta cualquiera de los diez WAV; no se sustituye por señal sintética silenciosamente.
+- Audio: escuchar, comparar voces, onda, RMS, tasa de cruces por cero y centroide espectral; ASR opcional con Whisper tiny y evaluación posterior mediante WER sobre una referencia adecuada.
+- **Integración con S10 de imágenes anterior:** se lee exclusivamente el manifiesto de las 32 imágenes reales asociadas a 24 noticias, conservando el contrato `article_id`. El inventario del corpus de voz utiliza `source_record_id`; no se inventan coincidencias entre artículos y grabaciones de servicios financieros.
+- El catálogo Parquet/JSONL de la actividad contiene **13 filas**: 2 imágenes derivadas del ejemplo original, 1 WAV sintético de explicación y **10 WAV humanos**. Incluye manifiesto de integridad para todos los WAV, procedencia, licencia, catálogo reabierto y copia opcional en Drive.
+- Los datos editoriales de El Tiempo NO se descargan automáticamente para ASR ni minería: sus condiciones de uso restringen la extracción y reutilización sin autorización. Los feeds `/servicios/feeds/articulo/{id}` se explican como estructura de metadatos, nunca como licencia de uso.
+- QA: pruebas de ejecución end-to-end, exactamente diez WAV únicos con licencia y transcripciones, catálogo de 13 filas, revisión de hashes y detección de alteración de un derivado. **No afirmar éxito de la descarga real hasta que una prueba de red lo verifique.**
+
+Fuente: https://huggingface.co/datasets/PolyAI/minds14/tree/main/es-ES · licencia CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
