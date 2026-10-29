@@ -1,100 +1,43 @@
 #!/usr/bin/env python3
-"""Valida estructura, sincronía y contratos pedagógicos de S10."""
-from __future__ import annotations
-import json, re, subprocess, sys, tempfile
+"""Contratos verificables de S10. No sustituye ejecutar el ZIP real ni abrir Colab."""
+import importlib.util,json,sys,tempfile,zipfile
 from pathlib import Path
-
 ROOT=Path(__file__).resolve().parents[1]
-DECK=ROOT/"Presentaciones/s10-etl-multimedia.html"
-GEN=ROOT/"utils/build_session10_multimedia.py"
-NB=ROOT/"Cuadernos/10_ETL_Multimedia.ipynb"
-SEED=ROOT/"infraestructura/lms/s10-multimedia-seed.sql"
-BACKEND=ROOT/"infraestructura/lms/functions/bigdata-session/index.ts"
+sys.path.insert(0,str(ROOT/'utils'))
+import build_session10_multimedia as notebook
+import build_session10_deck as presentation
 errors=[]
-
-def need(cond,msg):
-    if not cond: errors.append(msg)
-
-deck=DECK.read_text("utf-8")
-seed=SEED.read_text("utf-8")
-backend=BACKEND.read_text("utf-8")
-nb=json.loads(NB.read_text("utf-8"))
-text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
-
-slides=re.findall(r'<section class="slide[^"]*" id="s(\d+)" data-slide="(\d+)">',deck)
-need(len(slides)==34,f"presentación: se esperaban 34 diapositivas y hay {len(slides)}")
-need([int(a) for a,b in slides]==list(range(1,35)),"presentación: numeración s1..s34 no es continua")
-need(all(a==b for a,b in slides),"presentación: id y data-slide difieren")
-for n in range(1,35):
-    m=re.search(rf'<section class="slide[^"]*" id="s{n}" data-slide="{n}">(.*?)</section>',deck,re.S)
-    need(bool(m),f"S{n}: no encontrada")
-    if not m: continue
-    s=m.group(1)
-    need("<h1>" in s,f"S{n}: falta h1")
-    need('class="' in s and ("visual" in s or "<svg" in s or "<pre" in s or "<table" in s),f"S{n}: falta ancla visual")
-    need(len(re.sub(r"<[^>]+>"," ",s).split())>=18,f"S{n}: contenido demasiado ligero")
-
-for term,slide in [("Asset / activo",5),("Hash",12),("MIME",15),("Container",15),("Codec",15),("Stream",15),("Canonicalizar",20),("Sampling temporal",26),("Manifest",30)]:
-    section=re.search(rf'id="s{slide}".*?</section>',deck,re.S)
-    need(section and term.lower() in section.group(0).lower(),f"S{slide}: falta definición explícita de {term}")
-
-need("126 noticias" in deck and "8 con video" in deck,"presentación: faltan conteos reales del dataset de El Tiempo")
-need("fixture_derivado" in deck,"presentación: debe declarar explícitamente el fallback fixture_derivado")
-need("INDICE_ARTICULO = 7 #@param" in text,"notebook: falta índice numérico cerrado")
-need("noticias_eltiempo_2026-08.json" in text,"notebook: no usa dataset real de El Tiempo")
-need("fixture_derivado" in text and "eltiempo_real" in text,"notebook: no distingue binario real de fixture")
-need("ffprobe_json" in text and "run_ffmpeg" in text,"notebook: faltan helpers multimedia")
-need("assets.jsonl" in text and "assets.parquet" in text and "manifest_s10.json" in text,"notebook: faltan tres outputs")
-need("QUALITY GATES: OK" in text,"notebook: faltan quality gates")
-need("Cómo se lee." in text and "Qué nos dice." in text and "Qué NO permite concluir" in text and "Error común." in text,"notebook: faltan cuatro rótulos de interpretación")
-need("#@param" in text and "Elige..." in text,"notebook: falta autoevaluación cerrada")
-
-for i,c in enumerate(nb.get("cells",[]),1):
-    if c.get("cell_type")!="code": continue
-    src="".join(c.get("source",[]))
-    try: compile(src,f"s10_cell_{i}.py","exec")
-    except SyntaxError as ex: errors.append(f"notebook: sintaxis Python celda {i}: {ex}")
-
-with tempfile.TemporaryDirectory() as td:
-    tmp=Path(td)/"regen.ipynb"
-    p=subprocess.run([sys.executable,str(GEN),"--output",str(tmp)],cwd=ROOT,capture_output=True,text=True)
-    need(p.returncode==0,"generador: falla al regenerar notebook: "+p.stderr[-500:])
-    if p.returncode==0:
-        regen=json.loads(tmp.read_text("utf-8"))
-        need(regen==nb,"generador y notebook no están sincronizados")
-
-need(all(code in deck for code in [f"bd-s10-c{i}" for i in range(1,9)]),"presentación: faltan checkpoints D1-D8")
-need(all(code in deck for code in ["bd-s10-lab-image","bd-s10-lab-audio","bd-s10-lab-video"]),"presentación: faltan LAB imagen/audio/video")
-for marker in ["S10 LIVE","articleIndex","hashText","pipelineBuilder","mediaFile","audioRate","videoMaxFrames","manifestPreview"]:
-    need(marker in deck,f"presentación: falta herramienta {marker}")
-need("answer_challenge" in deck and "data-submit-challenge" in deck,"presentación: desafíos no están conectados al LMS")
-need("LOCAL_ANSWERS" not in deck,"presentación: no debe exponer clave local de D1-D8")
-for leaked in ["4_assets","bytes_identicos","sha256_sampling","ac1_ar16000","mp4_container__h264_aac_codecs"]:
-    need(leaked not in deck,f"presentación: value semántico expone respuesta: {leaked}")
-need("sessionControlBanner" in deck and "renderTeacherControls" in deck,"presentación: controles docentes no están integrados")
-need('id="videoMaxFrames" type="range" min="4" max="20" value="10"' in deck,"presentación: MAX_FRAMES debe iniciar en 10")
-need("K.evidence" in deck and "data-submit-lab" in deck,"presentación: LAB no registran evidencia")
-need('data-session="10"' in deck and "lms-kit.js" in deck,"presentación: falta LMS Kit S10")
-need(seed.count('"blocks_session_completion":true')==3,"seed: los tres LAB S10 deben bloquear completion")
-for code in ["bd-s10-lab-image","bd-s10-lab-audio","bd-s10-lab-video"]:
-    row=next((line for line in seed.splitlines() if line.startswith(f"('{code}'")), "")
-    need(bool(row and ",'lab',0," in row and ",true,'" in row and '"blocks_session_completion":true' in row),f"seed: {code} debe ser required y bloqueante")
-need('const blockingLabs=activities.filter(a=>a.kind==="lab"&&a.required&&a.metadata?.blocks_session_completion===true);' in backend,"backend: falta política opt-in de LAB bloqueantes")
-need('metadata?.evidence_verified===true' in backend,"backend: completion debe exigir evidencia verificada")
-need('lab_completed:labsVerified,lab_total:blockingLabs.length' in backend,"backend: resumen no expone progreso LAB bloqueante")
-need('body.client_evidence_id,def.activities' in backend,"backend: evidencia de presentación no recalcula con definición de sesión")
-need("D1–D8 y evidencia correcta en LAB 1–3" in deck,"presentación: falta regla de cierre explícita")
-
+def need(ok,message):
+    if not ok:errors.append(message)
+nb=json.loads((ROOT/'Cuadernos/10_ETL_Multimedia.ipynb').read_text())
+need(nb==notebook.build_notebook(),'Notebook no sincronizado con generador')
+deck=(ROOT/'Presentaciones/s10-etl-multimedia.html').read_text()
+need(deck==presentation.build(),'Presentación no sincronizada con generador')
+need(len(presentation.SLIDES)==16,'Ruta de 16 diapositivas')
+for i,c in enumerate(nb['cells']):
+    src=''.join(c['source']);need(bool(src.strip()),f'Celda vacía {i}')
+    if c['cell_type']=='code':
+        try:compile('\n'.join(x for x in src.splitlines() if not x.startswith(('%','!'))),f'celda {i}','exec')
+        except SyntaxError as e:errors.append(str(e))
+with zipfile.ZipFile(ROOT/'assets/tutoriales/s10_proyecto_VSCode.zip') as z:
+    expected={'main.py':ROOT/'laboratorios/s10_etl_imagenes/main.py','paso_a_paso.py':ROOT/'laboratorios/s10_etl_imagenes/paso_a_paso.py',
+              'README.md':ROOT/'laboratorios/s10_etl_imagenes/README.md','requirements.txt':ROOT/'laboratorios/s10_etl_imagenes/requirements.txt',
+              'runtime/s10_pipeline.py':ROOT/'utils/s10_pipeline.py'}
+    need(set(z.namelist())==set(expected),'ZIP debe contener solo proyecto editable')
+    for name,path in expected.items():need(z.read(name)==path.read_bytes(),'ZIP desactualizado: '+name)
+for question,options,answer in presentation.QUESTIONS:
+    need(answer in [o[0] for o in options] and all(len(o)==3 and o[2] for o in options),'Opciones sin feedback')
+need('aria-live' in deck and "new Option('Elige una opción…','')" in deck,'Autoevaluación debe iniciar pendiente')
+checklist=(ROOT/'assets/tutoriales/s10-laboratorio-guiado.html').read_text()
+need(checklist.count('type="checkbox"')==6,'Checklist debe tener seis controles propios')
+need('s10-laboratorio-guiado.html' in ''.join(nb['cells'][0]['source']) or 's10-laboratorio-guiado.html' in ''.join(nb['cells'][1]['source']),'Falta checklist al inicio')
+seed=(ROOT/'infraestructura/lms/s10-multimedia-seed.sql').read_text()
+need('delete from' not in seed.lower(),'Seed no debe borrar historial')
+need('"archived":true' in seed and '"blocks_session_completion":false' in seed,'Requisitos anteriores deben retirarse')
+need("'bd-s10-project'" in seed and '"completion_basis": "resource_visits"' in seed,'Falta recurso VS Code y base de progreso explícita')
+for file in [ROOT/'index.html',ROOT/'lms/data/course.json']:
+    need('Presentaciones/s10-etl-multimedia.html#s1' in file.read_text(),'Ruta directa ausente '+str(file))
+for p in (ROOT/'laboratorios/s10_etl_imagenes').glob('*.py'):compile(p.read_text(),str(p),'exec')
 if errors:
-    print("SESION 10: FAIL")
-    for e in errors: print(" -",e)
-    raise SystemExit(1)
-print("SESION 10: OK")
-print(" - 34 diapositivas con ancla visual y densidad mínima")
-print(" - El Tiempo real + fallback de procedencia explícita")
-print(" - D1-D8 + S10 Live + 7 herramientas/simuladores")
-print(" - LAB imagen, audio y video con evidencia estructurada")
-print(" - cierre S10 exige D1-D8 + LAB 1-3 verificados")
-print(" - imagen, audio y video encadenados en un solo ETL")
-print(" - JSONL + Parquet + manifest + quality gates")
-print(" - generador y notebook sincronizados")
+    print('S10: FAIL\n'+'\n'.join(' - '+e for e in errors));sys.exit(1)
+print('S10: OK · fuentes sincronizadas, Python compilable, 16 pantallas, seis preguntas/checks, proyecto portable y LMS formativo')
