@@ -23,6 +23,8 @@ El grupo ya conoció búsqueda lexical/Elasticsearch, BM25, E5, embeddings, cose
 
 En la misma [diapositiva 21](https://jazaineam1.github.io/BigData2026/Presentaciones/s09-de-palabras-a-significado.html#s21) aparece el botón **Explorar base vectorial**. No agrega un tercer recurso LMS: usa `assets/s09/vector-lab.js` y `assets/s09/vector-lab.css` dentro de la presentación.
 
+Estas cinco etapas ocupan **13 minutos dentro de los 55 de la sesión**, reemplazando una parte de la exposición inicial; no deben sumarse como 13 minutos extra. Los 42 minutos restantes se concentran en observar la ejecución real y exportar la evidencia (o en una demostración docente Atlas cuando el acceso individual no esté disponible).
+
 **Secuencia formativa de cinco etapas:**
 
 1. **Documentos (3 min):** abrir un JSON ficticio con texto, entidad, ID y dos números didácticos; usar `upsert` dos veces para ver 8 → 9 → 9. Pregunta: «¿Qué cambia cuando el identificador ya existe?».
