@@ -10,6 +10,7 @@ on:
       - js/**
       - assets/**
       - Presentaciones/**
+      - Datos/s10_imagenes_reales/raw/**
       - lms/**
       - Cuadernos/Taller_Control_1.ipynb
       - Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb
@@ -62,6 +63,9 @@ jobs:
           cp index.html _site/
           cp -R css js assets _site/
           cp -R Presentaciones _site/
+          mkdir -p _site/Datos/s10_imagenes_reales
+          cp -R Datos/s10_imagenes_reales/raw _site/Datos/s10_imagenes_reales/
+          test -s _site/Datos/s10_imagenes_reales/raw/7a71615869df5c19563b4f8d.webp
           cp -R lms _site/
           mkdir -p _site/lms/assets/vendor
           cp /tmp/supabase-sdk/package/dist/umd/supabase.js _site/lms/assets/vendor/supabase.js
@@ -128,6 +132,9 @@ jobs:
             client="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/assets/bigdata-lms.js?v=${GITHUB_SHA}" || true)"
             realtime_sdk="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/assets/vendor/supabase.js?v=${GITHUB_SHA}" || true)"
             s09="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/s09-de-palabras-a-significado.html?v=${GITHUB_SHA}" || true)"
+            s10="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/s10-etl-multimedia.html?v=${GITHUB_SHA}" || true)"
+            s10_nb="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Cuadernos/10_ETL_Multimedia.ipynb?v=${GITHUB_SHA}" || true)"
+            image_status="$(curl -fsS -o /dev/null -w '%{http_code}' "${PAGE_URL}Datos/s10_imagenes_reales/raw/7a71615869df5c19563b4f8d.webp?v=${GITHUB_SHA}" || true)"
             open_wall="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/s09-muro-publico.html?v=${GITHUB_SHA}" || true)"
             if grep -q 'assets/img/bg-masthead.jpg' <<<"$html" \
               && ! grep -q 'Aprender haciendo, con evidencia' <<<"$html" \
@@ -141,6 +148,10 @@ jobs:
               && grep -q 'Acceso libre · S09' <<<"$s09" \
               && ! grep -q 'reason=login' <<<"$s09" \
               && grep -q 'Muro didáctico abierto' <<<"$open_wall" \
+              && grep -q 'Big Data · Sesión 10' <<<"$s10" \
+              && grep -q 'data-step="preparar"' <<<"$s10" \
+              && grep -q 's10-producto' <<<"$s10_nb" \
+              && [ "$image_status" = "200" ] \
               && [ -n "$realtime_sdk" ]; then
               ok=1
               break
