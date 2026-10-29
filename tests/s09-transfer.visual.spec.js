@@ -69,7 +69,9 @@ async function route(page){
 test('S09 LAB3/4/8 conservan autocomprobación sin transferencia abierta',async({page})=>{
   await auth(page);await route(page);
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s17');
-  for(const [slide,code] of [[17,'bd-s09-lab3'],[18,'bd-s09-lab4'],[31,'bd-s09-lab8']]){
+  const active=await page.evaluate(()=>Object.entries(LAB_BY_SLIDE).filter(([,code])=>['bd-s09-lab3','bd-s09-lab4','bd-s09-lab8'].includes(code)));
+  expect(active.map(([,code])=>code)).toEqual(['bd-s09-lab3','bd-s09-lab4']);
+  for(const [slide,code] of active){
     await page.evaluate(n=>location.hash='#s'+n,slide);
     await page.waitForTimeout(120);
     const selfCheck=page.locator('.slide.on [data-evidence-kind="self-check"]');

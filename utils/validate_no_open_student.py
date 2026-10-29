@@ -135,10 +135,12 @@ for label, ok in backend_checks:
 s09 = read("Presentaciones/s09-de-palabras-a-significado.html")
 if "el.tagName==='INPUT'&&!['checkbox','radio','range','number'].includes(el.type)" not in s09:
     errors.append("S09: labControlValue envía el contenido de campos <input> de texto al backend (debe enviar solo len:N)")
+from s09_current_contract import active_labs,validate_notebook
+validate_notebook()
 for evidence_id in ("evQ","evGood","evBad","evAlt","evLim"):
     if re.search(rf'<input\b[^>]*\bid="{evidence_id}"', s09):
         errors.append(f"S09: LAB9 conserva <input> abierto '{evidence_id}'; debe ser una selección estructurada")
-    if not re.search(rf'<select\b[^>]*\bid="{evidence_id}"', s09):
+    if "bd-s09-lab9" in active_labs(s09) and not re.search(rf'<select\b[^>]*\bid="{evidence_id}"', s09):
         errors.append(f"S09: LAB9 no tiene selección estructurada '{evidence_id}'")
 
 # V54-B · Tipos de pregunta: solo respuestas cerradas u objetivas, en todas las capas.

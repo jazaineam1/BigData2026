@@ -3,6 +3,7 @@ from pathlib import Path
 import hashlib, json, re, subprocess, sys, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
+from s09_current_contract import validate_notebook,active_labs,ACTIVE_LABS
 errors=[]
 
 def read(path):
@@ -102,14 +103,14 @@ checks=[
  ("WALL muestra LAB y evidencia", "LAB explorados" in wall and "detailEvidence" in wall and "evidence_count" in wall),
  ("muro histórico reservado al docente", "publish_first" in backend and all(x in backend for x in ['action==="wall_post"','action==="wall_list"','action==="wall_react"','action==="wall_moderate"']) and "Publica para ver" not in class_wall and '<textarea id="body"' not in class_wall and "if(!teacher){location.replace('session.html?s='+sessionNumber)" in class_wall),
  ("muro conserva anonimización histórica", "Compañero " in backend and "Esta vista queda reservada al docente" in class_wall),
- ("S09 instrumenta 12 LAB", "LAB_BY_SLIDE" in deck and all(x in deck for x in labs)),
+ ("S09 instrumenta los seis LAB activos; conserva catálogo histórico",active_labs(deck)==ACTIVE_LABS),
  ("S09 envía lab_interaction", "lab_interaction" in deck and "queueLabInteraction" in deck),
  ("S09 LAB3 registra evidencia", "submitLab3Evidence" in deck and "bd-s09-lab3" in deck and "¿Cuántos son claramente aeronáuticos?" in deck),
  ("S09 LAB9 evidencia auténtica", "lab9EvidencePanel" in deck and "authentic-review" in deck and "Evidencia auténtica · LAB 9" in deck),
  ("backend revisión LAB9", 'catalog.evaluator==="authentic-review"' in backend and "teacher_review_evidence" in backend and "pending_review" in backend),
  ("Colab no recibe bearer", "Authorization" not in generator and "Authorization" not in notebook),
- ("Colab usa código efímero", "LMSBridge" in generator and "evidence_by_code" in generator and "LMSBridge" in notebook),
- ("link de notebook vuelve a módulo universal", "lms/session.html?s=9" in generator and "lms/session.html?s=9" in notebook),
+ ("Cuaderno actual exporta evidencia local sin bearer",validate_notebook()),
+ ("Cuaderno continúa desde el material de clase", "s09-de-palabras-a-significado.html#s21" in notebook),
 ]
 for label,ok in checks:
     if not ok: errors.append("Falla: "+label)
@@ -117,9 +118,7 @@ for label,ok in checks:
 try:
     nb=json.loads(notebook)
     sources=["".join(c.get("source",[])) for c in nb.get("cells",[])]
-    if not any("class LMSBridge" in s for s in sources): errors.append("Falla: notebook generado sin LMSBridge")
-    if not any('lms.registrar("bd-s09-lab9"' in s for s in sources): errors.append("Falla: notebook no sincroniza la evidencia auténtica LAB9")
-    if not any("pending_review" in s and "Evidencia enviada" in s for s in sources): errors.append("Falla: notebook sin cierre de evidencia pendiente de revisión")
+    assert validate_notebook()
 except Exception as ex:
     errors.append("Notebook inválido: "+str(ex))
 
@@ -140,10 +139,10 @@ if errors:
 
 print("LMS EVIDENCE V4: OK")
 print(" - constraint de eventos versionada")
-print(" - 12 LAB declarados e instrumentados")
+print(" - 12 LAB históricos conservados; seis LAB activos instrumentados")
 print(" - autocomprobación determinística separada de evidencia auténtica LAB9")
 print(" - LAB3 seeded sin campos abiertos")
 print(" - hashes de respuesta validados contra opciones publicadas")
-print(" - código Colab efímero sin bearer")
+print(" - backend conserva código efímero histórico; cuaderno actual exporta sin bearer")
 print(" - Mi progreso y WALL consumen evidencia")
 print(" - reset y señal de atasco consistentes")
