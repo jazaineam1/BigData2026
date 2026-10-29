@@ -101,15 +101,15 @@
     },
     {
       "n": 10,
-      "title": "¿Cómo convertir imágenes reales en un catálogo reutilizable?",
+      "title": "¿Cómo convertir imágenes y audio en datos analizables?",
       "status": "visible",
       "starts_at": "2026-10-29T18:00:00-05:00",
       "class_date": "2026-10-29",
       "class_kind": "learning",
       "tracked": true,
       "entry": {
-        "url": "/BigData2026/Presentaciones/s10-etl-multimedia.html#s1",
-        "label": "Abrir presentación"
+        "url": "/BigData2026/Presentaciones/s10-imagenes-audio.html#s1",
+        "label": "Abrir laboratorio interactivo"
       }
     },
     {
