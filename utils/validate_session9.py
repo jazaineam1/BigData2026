@@ -219,6 +219,8 @@ for i,s in enumerate(slides,1):
 nb_text="\n".join("".join(c.get("source",[])) for c in nb.get("cells",[]))
 
 checks=[
+    ("aplicación vectorial integrada", 'src="../assets/s09/vector-lab.js' in deck and 'href="../assets/s09/vector-lab.css' in deck),
+    ("cuaderno enlaza simulación antes de Colab", "Explorar base vectorial" in nb_text),
     ("exactamente 35 diapositivas",len(slides)==35),
     ("definiciones fundamentales",defs>=30),
     ("ejemplos operativos",examples>=16),

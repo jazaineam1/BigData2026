@@ -39,4 +39,13 @@ assert(slides[31].b.includes("USAR_ENTIDAD_DEL_RESULTADO"),"S32 sin decisión so
 assert(slides[32].b.includes("s09_pipeline_atlas_ui.json"),"S33 sin pipeline real");
 assert(slides[20].b.includes("AQUÍ NOS HABÍAMOS QUEDADO"),"S21 sin marca de reanudación");
 for(const label of ["Cómo se lee","Qué nos dice","Qué NO permite concluir todavía","Qué error común"]) assert(slides[33].b.includes(label),"S34 sin interpretación: "+label);
+const vectorLabJs = fs.readFileSync("assets/s09/vector-lab.js","utf8");
+const vectorLabCss = fs.readFileSync("assets/s09/vector-lab.css","utf8");
+assert(html.includes('src="../assets/s09/vector-lab.js'),"S09 no carga la aplicación vectorial");
+assert(html.includes('href="../assets/s09/vector-lab.css'),"S09 no carga los estilos de la aplicación");
+new Function(vectorLabJs);
+assert(vectorLabJs.includes("SIMULACION_DIDACTICA_LOCAL_2D"),"Falta advertencia de motor simulado");
+assert(vectorLabJs.includes("motor_real_atlas_ejecutado:false"),"La simulación no debe reportar Atlas real");
+assert(vectorLabJs.includes("s09_simulacion_local.json"),"Salida simulada mal identificada");
+assert(vectorLabCss.includes("@media(max-width:760px)"),"Falta disposición móvil");
 console.log("S09 DECK QA OK: 35 slides válidas, scripts compilables y ruta Atlas UI.");
