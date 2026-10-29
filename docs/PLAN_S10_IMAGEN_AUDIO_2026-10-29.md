@@ -44,3 +44,12 @@ Los términos publicados de El Tiempo restringen expresamente análisis, minerí
 - QA: pruebas de ejecución end-to-end, exactamente diez WAV únicos con licencia y transcripciones, catálogo de 13 filas, revisión de hashes y detección de alteración de un derivado. **No afirmar éxito de la descarga real hasta que una prueba de red lo verifique.**
 
 Fuente: https://huggingface.co/datasets/PolyAI/minds14/tree/main/es-ES · licencia CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+
+## Auditoría de autonomía estudiantil y guía de pruebas (29 oct. 2026)
+
+- La presentación anterior (14 pantallas) **no era autoexplicativa**: no guiaba desde la cuenta de Colab a la ejecución, no detallaba cómo comprobar los diez WAV, ofrecía VS Code pese al requisito «solo Colab» y mostraba una unión `article_id` que podía confundir los dos corpus.
+- La presentación revisada tiene **23 pantallas**, de las que 12–21 actúan como instructivo desde cero: conectar Colab y guardar copia, instalar bibliotecas, imagen, audio sintético, corpus de 10 voces, análisis, ASR opcional, integración del snapshot de 32 imágenes, catálogo de 13 filas, nueve controles automáticos y ZIP/Drive. Cada tarea incluye resultado observable y recuperación ante fallo. Todo el código Python ejecutable sigue dentro del único cuaderno Colab.
+- El ASR opcional se desplazó a **después** de descargar y medir las diez voces: una persona que recorre el cuaderno en orden puede activar el modelo sobre un WAV existente.
+- El cuaderno produce `AUTOCOMPROBACIÓN: LISTO (9/9)` solamente si las nueve condiciones técnicas se cumplen, incluida una decisión individual con tres opciones no nulas. La ruta por defecto muestra `INCOMPLETO` hasta que el estudiante actúa, sin falsear éxito.
+- Se añadió ZIP descargable con **20 WAV** de voz (10 originales + 10 decodificados), JSONL/Parquet, manifiesto y metadatos, o conservación opcional en Drive. El ZIP excluye el Parquet caché transitorio, mantiene los 10 WAV y valida su contenido. La lista de cotejo de la presentación es solo declaración personal y **no puede leer la sesión privada Colab**.
+- QA prueba escritorio/móvil, navegación, contenidos y marcadores pedagógicos; ejecuta **todo el notebook** desde runtime limpio, confirma descarga y procesamiento auténticos, toma tres decisiones simuladas del estudiante, verifica los 9 controles y produce/reabre el ZIP con 20 WAV. Se mantiene como pendiente una prueba individual de autorización de Google Drive y un test de ASR con modelo externo si no hay constancia de ejecución de ese subpaso.
