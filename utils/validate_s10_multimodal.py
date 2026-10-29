@@ -27,7 +27,7 @@ assert "https://servicios.eltiempo.com/audios/3530042.wav" in html
 for term in ["Histograma", "luminancia", "píxel", "RMS", "FFT", "espectrograma",
              "binarización", "contraste", "frecuencia", "códec", "WER"]:
     assert term.lower() in html.lower(), f"Falta definición pedagógica de {term}"
-for control in ["quickGlossary","histogramBins","histogramExplanation","imageBrightness",
+for control in ["quickGlossary","rgbR","rgbG","rgbB","rgbResult","histogramBins","histogramExplanation","imageBrightness",
                 "imageContrast","imagePixelZoom","pixelStats","toneLow","toneHigh",
                 "toneGain","fftWindow","audioSpectrogram","audioEditorExplanation"]:
     assert f'id="{control}"' in html, f"Falta control funcional {control}"
