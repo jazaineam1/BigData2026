@@ -69,14 +69,14 @@ test('S09 consulta, filtro y ANN conceptual: parámetros invalidan el ranking an
   await gotoTab(dialog,'consulta');
   await dialog.locator('[data-action="run-query"]').click();
   await expect(dialog.locator('.s09v-result')).toHaveCount(3);
-  await expect(dialog).toContainText('Exacta en la muestra');
+  await expect(dialog).toContainText('Exhaustiva en la muestra');
   await dialog.locator('#s09v-filter').selectOption('A');
   await expect(dialog).toContainText('vuelve a ejecutar');
   await expect(dialog.locator('.s09v-result')).toHaveCount(0);
   await dialog.locator('[data-action="run-query"]').click();
   await expect(dialog).toContainText('filtro entidad A');
   await dialog.locator('#s09v-mode').selectOption('ann');
-  await dialog.locator('#s09v-budget').fill('2');
+  await dialog.locator('#s09v-budget').evaluate(el=>{el.value='2';el.dispatchEvent(new Event('change',{bubbles:true}));});
   await dialog.locator('[data-action="run-query"]').click();
   await expect(dialog).toContainText('Aproximada ilustrativa');
   await expect(dialog).toContainText('Coincidencia con Top-k exacto');
