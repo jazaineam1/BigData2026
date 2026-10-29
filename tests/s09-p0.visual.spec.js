@@ -103,13 +103,14 @@ test('S09 se abre sin usuario y permite autocomprobar D1 en modo público',async
 test('S09 conserva la navegación cuando el usuario escribe en un campo',async({page})=>{
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s2');
   await page.locator('#caseQ').focus();
+  await page.locator('#caseQ').press('End');
   await page.keyboard.press('Space');
   await expect(page).toHaveURL(/#s2$/);
   await expect(page.locator('#caseQ')).toHaveValue(/\s$/);
 });
 
 test('S09 Precision@5 requiere evaluar los cinco resultados',async({page})=>{
-  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s21');
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s18');
   await expect(page.locator('#rankScore')).not.toContainText('P@5 =');
   for(const panel of ['#lexRank','#semRank']){
     const buttons=page.locator(panel+' button.rel');
@@ -196,12 +197,13 @@ test('S09 taller Atlas conserva S1-S21 y muestra el flujo operativo desde S22',a
 });
 test('S09 presenta Atlas en 55 minutos y distingue NumPy de Atlas',async({page})=>{
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s25');
- await expect(page.locator('#s25')).toContainText('intfloat/multilingual-e5-small');
+ await expect(page.locator('#s25')).toContainText('E5');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s28');
- await expect(page.locator('#s28')).toContainText('Search');
+ await expect(page.locator('#s28')).toContainText('vector');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s32');
- await expect(page.locator('#s32')).toContainText('NumPy');
- await expect(page.locator('#s32')).toContainText('exact:true');
+ await expect(page.locator('#s32')).toContainText('ANN en Atlas');
+ await expect(page.locator('#s33')).toContainText('NumPy');
+ await expect(page.locator('#s32')).toContainText(/exact:\s*true/);
 });
 test('S09 obliga a presentar evidencia Atlas real o respaldo local honesto',async({page})=>{
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s33');
@@ -255,7 +257,7 @@ test('S09 móvil · sin título undefined, navegación funcional y encabezado de
 test('S09 móvil · etapa de Atlas accesible sin que la barra tape el h1',async({page})=>{
   await page.setViewportSize({width:360,height:740});
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?qa=mobile#s22');
-  await expect(page.locator('#s22 h1')).toContainText('Hoy construimos');
+  await expect(page.locator('#s22 h1')).toContainText('base vectorial');
   await expect(page.locator('#s22 a[href*="colab.research.google.com"]')).toBeAttached();
   for (const n of [22,23,24,25,26,27,28,29,30,31,32,33,34,35]){
     await page.evaluate(number=>location.hash='#s'+number,n);
