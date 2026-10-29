@@ -23,6 +23,19 @@ assert len(env['recargado'])==a.cantidad*2
 # Repetir carga y extracción no duplica ni invalida el trabajo posterior.
 for id in ['s10-entrada','s10-contexto','s10-raw']:exec(compile(sources[id],id,'exec'),env)
 _,metric=env['procesar_lote']('catalogo640');assert metric['processed_now']==0 and metric['skipped_verified']==a.cantidad
+# Sabotaje controlado EN LA CARPETA DE QA: un derivado inválido no debe quedar como DONE reutilizable.
+first=env['recargado'].iloc[0].to_dict()
+derived=env['safe_path'](env['TRABAJO'],first['derived_path'])
+assert derived.is_file() and env['validate_record'](env['TRABAJO'],first)==[]
+derived.write_bytes(b'QA: contenido deliberadamente invalido, NO imagen')
+corrupted_derived_detected=bool(env['validate_record'](env['TRABAJO'],first))
+assert corrupted_derived_detected, 'No se detectó un derivado corrupto'
+_,repair=env['procesar_lote'](first['profile'])
+assert repair['processed_now']==1 and repair['failed_now']==0, 'No se reparó exactamente el trabajo corrupto'
+checkpoint=json.loads((env['TRABAJO']/'state/checkpoint.json').read_text(encoding='utf-8'))
+repaired=checkpoint['profiles'][first['profile']][first['job_id']]['result']
+corrupted_derived_recovered=(env['validate_record'](env['TRABAJO'],repaired)==[])
+assert corrupted_derived_recovered, 'El derivado reparado no supera integridad'
 # Selección propia cerrada: válida; texto libre rechazado realmente al ejecutar.
 decision=env['record_decision'](env['TRABAJO'],1,1,2,4);assert decision['complete']
 for values in [('redacta',1,2,4),(True,1,2,4),(1,1,1,4)]:
@@ -43,5 +56,5 @@ for _ in range(2):exec(compile(sources['s10-producto'],'copia_y_verificacion_des
 assert env['verify_package'](env['conservado'])['ok']
 shutil.copytree(env['TRABAJO'],a.salida/'restauracion_final')
 assert env['verify_package'](a.salida/'restauracion_final')['ok']
-report={'ok':True,'images':a.cantidad,'rows':a.cantidad*2,'seconds':time.perf_counter()-started,'slowest_cell':max(timings,key=lambda t:t['seconds']),'load_repeated':True,'closed_decision_validated':True,'restore_verified':True,'encoding':'cp1252_simulado' if a.locale_cp1252 else 'UTF8_entorno','scope':'Python Linux; dependencias preinstaladas. No valida interfaz Colab ni Windows nativo.'}
+report={'ok':True,'images':a.cantidad,'rows':a.cantidad*2,'seconds':time.perf_counter()-started,'slowest_cell':max(timings,key=lambda t:t['seconds']),'load_repeated':True,'closed_decision_validated':True,'restore_verified':True,'corrupted_derived_detected':corrupted_derived_detected,'corrupted_derived_recovered':corrupted_derived_recovered,'encoding':'cp1252_simulado' if a.locale_cp1252 else 'UTF8_entorno','scope':'Python Linux; dependencias preinstaladas. No valida interfaz Colab ni Windows nativo.'}
 (a.salida/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8');print(json.dumps(report,ensure_ascii=False))
