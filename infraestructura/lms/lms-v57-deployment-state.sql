@@ -7,7 +7,7 @@ create table if not exists public.bd_deployment_state (
 alter table public.bd_deployment_state enable row level security;
 
 insert into public.bd_deployment_state(component,release,updated_at)
-values ('schema','2026-09-29-v57',now())
+values ('schema','2026-10-28-v58-s10',now())
 on conflict(component) do update
 set release=excluded.release,updated_at=excluded.updated_at;
 

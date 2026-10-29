@@ -101,7 +101,7 @@ test('S09 se abre sin usuario y permite autocomprobar D1 en modo público',async
 test('S09 conserva la navegación cuando el usuario escribe en un campo',async({page})=>{
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s2');
   await page.locator('#caseQ').focus();
-  await page.keyboard.press('Control+End');
+  await page.locator('#caseQ').press('End');
   await page.keyboard.press('Space');
   await expect(page).toHaveURL(/#s2$/);
   await expect(page.locator('#caseQ')).toHaveValue(/\s$/);

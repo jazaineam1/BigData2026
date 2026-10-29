@@ -7,7 +7,7 @@ const db=createClient(
 );
 const COURSE="bigdata";
 const RUN_CODE="bigdata-2026-2";
-const RELEASE="2026-09-29-v57";
+const RELEASE="2026-10-28-v58-s10";
 const ALLOWED=new Set(["https://jazaineam1.github.io"]);
 
 function origin(req:Request){
