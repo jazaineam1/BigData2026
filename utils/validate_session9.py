@@ -248,7 +248,7 @@ checks=[
     ("dos códigos de recurso", 'const RESOURCE_CODES=new Set(["bd-s09-presentation","bd-s09-notebook"])' in backend),
     ("sin guía en backend","bd-s09-guide" not in backend and "guide_opened" not in backend),
     ("dos recursos visibles en seed",resource_selects==2 and "'guide'" not in resource_seed and "bd-s09-guide" not in resource_seed),
-    ("checklist corresponde al cuaderno",all(f'data-step="{i}"' in guide for i in range(1,7)) and all(text in guide and text in nb_text for text in ["DOCUMENTO DE TRABAJO:","Embeddings reales:","s09_atlas_evidencia.json"])),
+    ("tutorial integrado corresponde al cuaderno",all(f'data-practice-step="{i}"' in deck for i in range(1,7)) and all(text in deck and text in nb_text for text in ["DOCUMENTO DE TRABAJO:","Embeddings reales:","s09_atlas_evidencia.json"]) and "Tutorial integrado" in guide and "Ruta individual de seis pasos" in deck),
     ("módulo universal autenticado","requireSession(sessionNumber)" in session and "Material de la sesión" in session and "Qué hacer ahora" in session),
     ("módulo universal reanuda","primaryAction" in session and "data.resume" in session and "Continuar donde quedaste" in session),
     ("módulo estudiante simplificado","resource-grid-v4" in session and "Seguimiento integrado" not in session and "Avance de la ruta" not in session and "Cómo leer el progreso" not in session),
