@@ -45,6 +45,11 @@ for(const width of [1366,390])test('Atlas preparación embebida '+width,async({p
  await expect(dialog).toContainText('1 week');
  await expect(dialog).toContainText('Specific Privileges');
  await expect(dialog).toContainText('IP_COLAB');
+ await expect(dialog).toContainText('FREE / M0');
+ await expect(dialog).toContainText('HOST_ATLAS');
+ await expect(dialog).toContainText('USUARIO_ATLAS');
+ await expect(dialog).toContainText('Add New Database User');
+ await expect(dialog).toContainText('CREAR_INDICE_EN_COLAB=True');
  expect(await dialog.evaluate(e=>e.scrollWidth<=e.clientWidth+2)).toBe(true);
  await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();
  await page.locator('#s26 [data-atlas-setup]').click();
