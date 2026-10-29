@@ -3,6 +3,7 @@ from pathlib import Path
 import hashlib, json, re, subprocess, sys, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
+from s09_current_contract import active_labs,ACTIVE_LABS
 errors=[]
 
 def read(path):
@@ -70,7 +71,7 @@ checks=[
     ("módulo usa runtime V5", "lms-kit.js?v=20260926-v5" in session and "K.track(" in session),
     ("muro estudiantil sin publicación abierta", "K.wallPost(" not in class_wall),
     ("bridge de recursos usa runtime V5", "loadKit" in read("lms/assets/resource-bridge.js") and "K.track('guide_opened'" in read("lms/assets/resource-bridge.js")),
-    ("12 LAB S09 declarados en presentación", len(labs)==12),
+    ("LAB S09 activos declarados en presentación", active_labs(deck)==ACTIVE_LABS),
     ("legacy módulo redirige", "session.html?" in legacy_session and "p.set('s','9')" in legacy_session),
     ("legacy progreso redirige", "progress.html?" in legacy_progress and "p.set('s','9')" in legacy_progress),
     ("legacy WALL redirige", "wall.html?" in legacy_wall and "p.set('s','9')" in legacy_wall),

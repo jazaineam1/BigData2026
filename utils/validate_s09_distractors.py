@@ -138,7 +138,7 @@ def main():
     add("D2 conserva value y usa error plausible",
         "['always_relevant','Un 0.91 es comparable directamente con 0.91 de cualquier otro modelo de embeddings']" in deck)
     add("D5 conserva value y usa error plausible",
-        "['vector_only','Conserva únicamente el ranking cuyo score máximo sea numéricamente mayor']" in deck)
+        "['vector_only','Conservar el resultado con score numérico mayor']" in deck)
     migrated = {(c, s, o): new for c, s, o, _, _, new in rows}
     add("LAB4 identificador usa distractor plausible",
         migrated.get(("bd-s09-lab4", 1, 2)) == "Semántica con un embedding de más dimensiones, porque el vector preserva exactamente el identificador")
