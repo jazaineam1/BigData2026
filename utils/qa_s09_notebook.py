@@ -20,17 +20,18 @@ assert "MODO_DEMO" in snippet(4) and "COLUMNA_ID" in snippet(4)
 assert 'intfloat/multilingual-e5-small' in snippet(4)
 assert "MAX_TOKENS" in snippet(6)
 assert 'upsert=True' in snippet(10) and '"s09:"+LOTE' in snippet(10)
-assert "CREAR_INDICE_EN_COLAB = False" in snippet(12)
+assert "CREAR_INDICE_EN_COLAB = True" in snippet(12), "La ruta personal crea el índice automáticamente"
 # No basta mostrar un formulario vacío: el alumno necesita instrucciones de obtención.
-for phrase in ("Ruta A", "Ruta B", "FREE (M0)", "HOST_ATLAS", "USUARIO_ATLAS",
-               "IP_COLAB", "Network Access", "Connect", "Drivers", "contraseña",
-               "ATLAS REAL", "RUTA LOCAL", "col.aggregate"):
+for phrase in ("Atlas temporal automático", "Reclamar mi clúster", "Data Explorer",
+               "Search & Vector Search", "0.0.0.0/0", "NO EJECUTADO ATLAS"):
     assert phrase in snippet(7), f"Guía del estudiante incompleta: {phrase}"
-assert "IP_COLAB" in snippet(2) and 'api.ipify.org' in snippet(2)
-assert "USAR_ATLAS = False" in snippet(8), "La ruta segura offline debe ser el valor inicial"
+assert "sin contraseñas ni configuración de IP" in snippet(2)
+assert 'MODO_ATLAS = "Atlas temporal automático"' in snippet(8), "Falta Atlas autónomo predeterminado"
+assert "ephemeralClusters:create" in snippet(8) and "application/vnd.atlas.preview+json" in snippet(8)
+assert '_s09_atlas_temporal_privado' in snippet(8) and "connectionString" in snippet(8)
+assert "getpass" in snippet(8) and "MongoClient" in snippet(8)
 
-assert "DESDE CERO" in snippet(7)
-assert "IP_COLAB" in snippet(2)
+assert "MongoDB Atlas real" in snippet(7)
 assert "SearchIndexModel(" in snippet(12)
 assert 'list_search_indexes(' in snippet(13) and 'queryable' in snippet(13)
 assert '"$vectorSearch"' in snippet(15) and '"exact":True' in snippet(15)
@@ -173,7 +174,7 @@ with tempfile.TemporaryDirectory() as directory:
         atlas_ui=AtlasFalso()
         sandbox["col"]=atlas_ui
         ui_source=snippet(12).replace(
-            "CREAR_INDICE_EN_COLAB = False","CREAR_INDICE_EN_COLAB = False")
+            "CREAR_INDICE_EN_COLAB = True","CREAR_INDICE_EN_COLAB = False")
         exec(compile(ui_source,"index_ui_manual.py","exec"),sandbox)
         assert not sandbox["indice_creado"] and atlas_ui.idx is None
         # Simular que el docente lo creó en Atlas UI y reejecutó celda 5:
@@ -182,7 +183,7 @@ with tempfile.TemporaryDirectory() as directory:
         assert sandbox["indice_creado"] and atlas_ui.idx is not None
         # Reponer la colección de prueba; ruta PyMongo crea de forma programática.
         sandbox["col"]=atlas
-        exec(compile(snippet(12).replace("CREAR_INDICE_EN_COLAB = False","CREAR_INDICE_EN_COLAB = True"),"index.py","exec"),sandbox)
+        exec(compile(snippet(12).replace("CREAR_INDICE_EN_COLAB = True","CREAR_INDICE_EN_COLAB = True"),"index.py","exec"),sandbox)
         assert sandbox["indice_creado"] and atlas.idx is not None
         sandbox["indice_queryable"]=True
         exec(compile(snippet(15).replace("COMPARAR_ENN_ATLAS = False","COMPARAR_ENN_ATLAS = True"),"remote_mock.py","exec"),sandbox)
@@ -219,4 +220,4 @@ with tempfile.TemporaryDirectory() as directory:
                 raise AssertionError("Aceptó respuesta académica no estructurada: "+invalid)
     finally:
         os.chdir(before)
-print("S09 QA OK: 21 celdas sincronizadas + sintaxis + ruta local + Atlas simulado (NO conexión real).")
+print("S09 QA OK: 21 celdas sincronizadas + sintaxis + Atlas automático por contrato + mocks offline (NO conexión real).")
