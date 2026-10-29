@@ -48,7 +48,7 @@ for(const width of [1366,390])test('Atlas autónomo guiado y consola UI '+width,
  await expect(dialog).toContainText('Data Explorer');
  await expect(dialog).toContainText('s09_vector_index');
  await expect(dialog).toContainText('s09_atlas_evidencia.json');
- await expect(dialog).toContainText('NO EJECUTADO');
+ await expect(dialog).toContainText('NumPy LOCAL');
  await expect(dialog.locator('details')).toContainText('HOST_ATLAS');
  expect(await dialog.evaluate(e=>e.scrollWidth<=e.clientWidth+2)).toBe(true);
  await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();
