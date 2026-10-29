@@ -38,6 +38,6 @@ seed=(ROOT/'infraestructura/lms/s10-multimedia-seed.sql').read_text(encoding='ut
 need('delete from' not in seed.lower(),'No borrar historial')
 need('"visible_resources": 2' in seed,'LMS debe declarar dos recursos')
 need('"tracked_activity": "bd-s10-notebook", "required": true' in seed,'Cuaderno debe ser principal')
-for file in [ROOT/'index.html',ROOT/'lms/data/course.json']:need('Presentaciones/s10-etl-multimedia.html#s1' in file.read_text(encoding='utf-8'),'Falta entrada directa')
+for file in [ROOT/'index.html',ROOT/'lms/data/course.json']:need('Presentaciones/s10-imagenes-audio.html#s1' in file.read_text(encoding='utf-8'),'Falta entrada directa actual')
 if errors:print('\n'.join(errors));sys.exit(1)
 print('S10 OK: sincronización, E/T/L visible, tutorial nativo, dos recursos, portada e historial conservado')
