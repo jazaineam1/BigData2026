@@ -21,13 +21,18 @@ for(const viewport of [{width:1366,height:680},{width:1366,height:768},{width:15
   }
  });
 }
-test('S09 tutorial conserva progreso local sin redirigir',async({page})=>{
+test('S09 tutorial integrado: seis pasos, progreso y enlace anterior',async({page})=>{
+ await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s21');
+ await page.locator('#s21 [data-s09-practice]').click();
+ const dialog=page.getByRole('dialog',{name:'S09 · Tu laboratorio en seis pasos'});
+ await expect(dialog).toBeVisible();await expect(dialog.locator('[data-practice-step]')).toHaveCount(6);
+ await dialog.locator('[data-practice-step="1"]').check();await page.reload();
+ await page.locator('#s21 [data-s09-practice]').click();
+ await expect(dialog.locator('[data-practice-step="1"]')).toBeChecked();
+ await dialog.locator('#s09PracticeReset').click();await expect(dialog.locator('#s09PracticeProgress')).toContainText('0 de 6 pasos');
+ await dialog.locator('[data-practice-close]').click();await expect(dialog).not.toBeVisible();
  await page.goto('/assets/tutoriales/s09-laboratorio-guiado.html');
- await expect(page.locator('[data-step]')).toHaveCount(6);
- await page.locator('[data-step="1"]').check();await page.reload();
- await expect(page.locator('[data-step="1"]')).toBeChecked();
- await page.locator('#reset').click();await expect(page.locator('[data-step="1"]')).not.toBeChecked();
- await expect(page.locator('#progress')).toHaveText('0 de 6 pasos marcados en este navegador.');
+ await expect(page).toHaveURL(/s09-de-palabras-a-significado.html#s21$/);
 });
 
 for(const width of [1366,390])test('Atlas preparación embebida '+width,async({page})=>{
