@@ -23,6 +23,18 @@ for widget in ["imageSize","imageThreshold","imageHistogram","audioUpload","reco
                "waveCanvas","spectrumCanvas","exportObservations","data-question"]:
     assert widget in html, widget
 assert "https://servicios.eltiempo.com/audios/3530042.wav" in html
+# Glosario contextual, instrumentos visuales editables y mediciones dependientes.
+for term in ["Histograma", "luminancia", "píxel", "RMS", "FFT", "espectrograma",
+             "binarización", "contraste", "frecuencia", "códec", "WER"]:
+    assert term.lower() in html.lower(), f"Falta definición pedagógica de {term}"
+for control in ["quickGlossary","histogramBins","histogramExplanation","imageBrightness",
+                "imageContrast","imagePixelZoom","pixelStats","toneLow","toneHigh",
+                "toneGain","fftWindow","audioSpectrogram","audioEditorExplanation"]:
+    assert f'id="{control}"' in html, f"Falta control funcional {control}"
+for term in ["histDraw(hist,bins)","showPixelDetails()","spectrogramDraw()",
+             "frequency_resolution_hz","histogram_counts"]:
+    assert term in html, f"Falta calcular o dibujar {term}"
+
 for slug in ['id="s12"','id="s13"','id="s14"','id="s15"','id="s16"','id="s17"',
              'id="s18"','id="s19"','id="s20"','id="s21"','id="s22"','id="s23"']:
     assert slug in html, slug
