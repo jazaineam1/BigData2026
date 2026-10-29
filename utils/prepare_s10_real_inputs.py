@@ -16,8 +16,8 @@ def main():
     (target/'sources').mkdir(parents=True,exist_ok=True)
     for name in ['noticias_contratacion_2026.json','entidades_en_noticias_2026.json']:
         shutil.copyfile(ROOT/'Datos'/name,target/'sources'/name)
-    inventory=etl.build_inventory(json.loads((target/'sources/noticias_contratacion_2026.json').read_text()),
-                                  json.loads((target/'sources/entidades_en_noticias_2026.json').read_text()))
+    inventory=etl.build_inventory(json.loads((target/'sources/noticias_contratacion_2026.json').read_text(encoding='utf-8')),
+                                  json.loads((target/'sources/entidades_en_noticias_2026.json').read_text(encoding='utf-8')))
     jobs=(etl.load_inputs(target/'inputs',inventory) if args.solo_empaquetar else
           etl.acquire_inputs(inventory,target/'inputs',args.variante,args.cantidad))
     (target/'runtime').mkdir(exist_ok=True)

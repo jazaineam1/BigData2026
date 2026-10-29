@@ -13,7 +13,7 @@ parser.add_argument('--lado',type=int,choices=[320,640,1024],default=640)
 args=parser.parse_args()
 root=args.trabajo.resolve()
 if not (root/'config/jobs.json').exists():parser.error('Primero ejecuta main.py extraer')
-jobs=json.loads((root/'config/jobs.json').read_text())
+jobs=json.loads((root/'config/jobs.json').read_text(encoding='utf-8'))
 if not 1<=args.posicion<=len(jobs):parser.error('Elige una posición del lote extraído')
 job=jobs[args.posicion-1]
 raw=(root/job['raw_path']).resolve()

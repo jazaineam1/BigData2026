@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Contratos verificables de S10. No sustituye ejecutar el ZIP real ni abrir Colab."""
-import importlib.util,json,sys,tempfile,zipfile
+import ast,importlib.util,json,sys,tempfile,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'utils'))
@@ -38,6 +38,13 @@ need("'bd-s10-project'" in seed and '"completion_basis": "resource_visits"' in s
 for file in [ROOT/'index.html',ROOT/'lms/data/course.json']:
     need('Presentaciones/s10-etl-multimedia.html#s1' in file.read_text(),'Ruta directa ausente '+str(file))
 for p in (ROOT/'laboratorios/s10_etl_imagenes').glob('*.py'):compile(p.read_text(),str(p),'exec')
+# Los JSON de origen y atomic_json son UTF-8 también bajo locale Windows-1252.
+for file in [ROOT/'utils/s10_pipeline.py',ROOT/'utils/prepare_s10_real_inputs.py',*sorted((ROOT/'laboratorios/s10_etl_imagenes').glob('*.py'))]:
+    tree=ast.parse(file.read_text(encoding='utf-8'))
+    for node in ast.walk(tree):
+        if isinstance(node,ast.Call) and isinstance(node.func,ast.Attribute) and node.func.attr in {'read_text','write_text'}:
+            encoding=next((kw.value for kw in node.keywords if kw.arg=='encoding'),None)
+            need(isinstance(encoding,ast.Constant) and encoding.value=='utf-8',f'Encoding explícito UTF-8 requerido: {file.name}:{node.lineno}')
 if errors:
     print('S10: FAIL\n'+'\n'.join(' - '+e for e in errors));sys.exit(1)
 print('S10: OK · fuentes sincronizadas, Python compilable, 16 pantallas, seis preguntas/checks, proyecto portable y LMS formativo')

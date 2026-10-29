@@ -8,7 +8,14 @@ from pathlib import Path
 import pandas as pd
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import s10_pipeline as e
-p=argparse.ArgumentParser(description=__doc__);p.add_argument('--entrada',type=Path,required=True);p.add_argument('--salida',type=Path,required=True);a=p.parse_args()
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('--entrada',type=Path,required=True);p.add_argument('--salida',type=Path,required=True);p.add_argument('--locale-cp1252',action='store_true',help='Simular el encoding de texto predeterminado de Windows; no emula el SO');a=p.parse_args()
+if a.locale_cp1252:
+    _read_text=Path.read_text;_write_text=Path.write_text
+    def windows_read(self,*args,**kwargs):
+        kwargs.setdefault('encoding','cp1252');return _read_text(self,*args,**kwargs)
+    def windows_write(self,*args,**kwargs):
+        kwargs.setdefault('encoding','cp1252');return _write_text(self,*args,**kwargs)
+    Path.read_text=windows_read;Path.write_text=windows_write
 if a.salida.exists():raise ValueError('Usa una carpeta nueva para no alterar trabajo previo')
 a.salida.mkdir(parents=True);root=a.salida/'work';checks=[];start=time.perf_counter()
 def check(ok,label):
@@ -43,14 +50,14 @@ def mutation(label,fn):
     target=a.salida/'negativo';shutil.copytree(root,target);fn(target)
     check(not e.verify_package(target)['ok'],label);shutil.rmtree(target)
 def change_manifest(t,fn):
-    file=t/'manifest_s10.json';obj=json.loads(file.read_text());fn(obj);e.atomic_json(file,obj)
-mutation('Rechaza catálogo JSONL vacío',lambda t:(t/'outputs/assets.jsonl').write_text(''))
+    file=t/'manifest_s10.json';obj=json.loads(file.read_text(encoding='utf-8'));fn(obj);e.atomic_json(file,obj)
+mutation('Rechaza catálogo JSONL vacío',lambda t:(t/'outputs/assets.jsonl').write_text('',encoding='utf-8'))
 mutation('Rechaza hash falso de export',lambda t:change_manifest(t,lambda o:o['files'].__setitem__('outputs/assets.parquet','0'*64)))
 mutation('Rechaza thumbnail ausente',lambda t:(t/rows[0]['derived_path']).unlink())
 mutation('Rechaza RAW alterado',lambda t:(t/jobs[0]['raw_path']).write_bytes(b'CORRUPT'))
 mutation('Rechaza origen distinto de adquisición real',lambda t:change_manifest(t,lambda o:o.__setitem__('origin_kind','otro')))
 mutation('Rechaza rutas fuera del paquete',lambda t:change_manifest(t,lambda o:o['files'].__setitem__('../escape','0'*64)))
-mutation('Rechaza decisión alterada después de cargar',lambda t:(t/'checks/decision.json').write_text('{}'))
+mutation('Rechaza decisión alterada después de cargar',lambda t:(t/'checks/decision.json').write_text('{}',encoding='utf-8'))
 # Recuperación: borrar un derivado real exige nuevo trabajo, nunca DONE ciego.
 (root/rows[0]['derived_path']).unlink();_,m=e.run_batch(jobs,root)
 check(m['processed_now']==1 and m['skipped_verified']==31,'Recupera un derivado faltante sin repetir otros 31')
@@ -60,5 +67,5 @@ for relative in ['../fuera','/absoluto','C:/drive','x\\escape']:
 bad=a.salida/'escape.zip'
 with zipfile.ZipFile(bad,'w') as z:z.writestr('../escape.txt','no')
 rejects(lambda:e.unpack_and_verify(bad,a.salida/'escape'),'ZIP con traversal rechazado')
-report={'ok':True,'checks':checks,'seconds':time.perf_counter()-start,'images':32,'results':64,'scope':'Linux Python 3.12; imágenes reales; no valida GUI de VS Code, Windows ni Colab'}
-(a.salida/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2));print(json.dumps(report,ensure_ascii=False,indent=2))
+report={'ok':True,'checks':checks,'seconds':time.perf_counter()-start,'images':32,'results':64,'default_text_encoding':'cp1252_simulado' if a.locale_cp1252 else 'del_entorno','scope':'Linux Python 3.12; imágenes reales; simulación de encoding no valida SO Windows ni GUI de VS Code o Colab'}
+(a.salida/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8');print(json.dumps(report,ensure_ascii=False,indent=2))

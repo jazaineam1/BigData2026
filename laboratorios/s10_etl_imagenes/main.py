@@ -56,9 +56,9 @@ def main(argv=None):
         result=etl.record_decision(root,args.posicion,args.elegido,args.descartado,args.limite)
     else:
         inv,jobs=etl.open_workspace(root)
-        cp=json.loads((root/'state/checkpoint.json').read_text())
+        cp=json.loads((root/'state/checkpoint.json').read_text(encoding='utf-8'))
         first=next(iter(cp['profiles']));rows=[r['result'] for r in cp['profiles'][first].values() if r['status']=='DONE']
-        metrics=json.loads((root/'metrics'/(first+'.json')).read_text())
+        metrics=json.loads((root/'metrics'/(first+'.json')).read_text(encoding='utf-8'))
         measured=[m for m in metrics if m['processed_now'] and m['workers']==1]
         if not rows or not measured:raise ValueError('Primero mide un micro-lote con un trabajador para el escenario secuencial')
         seconds=sum(m['seconds'] for m in measured)/sum(m['processed_now'] for m in measured)

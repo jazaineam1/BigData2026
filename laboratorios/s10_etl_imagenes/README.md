@@ -155,3 +155,5 @@ python main.py escenario --trabajo work/s10 --activos 1000000
 Es una **proyección condicionada** a medias del lote y una medición secuencial, no una ejecución de un millón de activos. Compara bytes comprimidos con píxeles decodificados, y nombra el recurso que falta medir.
 
 S11 amplía el mismo contrato a audio/video reales; S12 integra ETL. Los motores distribuidos se estudian después. La idea para llevar: **E obtiene una entrada identificada; T la adapta sin borrar el original; L deja una salida que otro proceso puede abrir y consultar**.
+
+Los JSON del corpus, configuración y estados se leen y escriben como UTF-8 explícito, también si Windows usa otra codificación de texto predeterminada.

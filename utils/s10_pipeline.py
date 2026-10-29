@@ -124,7 +124,7 @@ def acquire_inputs(inventory, directory, variant=0, count=32, pause=0.4):
     ordered=sorted(unique.values(),key=lambda r:(r['article_id'] not in context['article_ids'],
                    digest((str(variant)+r['image_url']).encode())))
     cache_path=directory/'inputs.json'
-    previous=json.loads(cache_path.read_text()) if cache_path.exists() else []
+    previous=json.loads(cache_path.read_text(encoding='utf-8')) if cache_path.exists() else []
     cached={j['job_id']:j for j in previous}
     rows=[];failures=[];attempts=0
     # Como máximo count+16 candidatos reales. Nunca un sustituto sintético.
@@ -179,7 +179,7 @@ def acquire_inputs(inventory, directory, variant=0, count=32, pause=0.4):
 
 def load_inputs(directory,inventory):
     directory=Path(directory)
-    jobs=json.loads((directory/'inputs.json').read_text())
+    jobs=json.loads((directory/'inputs.json').read_text(encoding='utf-8'))
     occurrences={r['occurrence_id']:r for r in inventory['occurrences']}
     if not jobs or len({j['job_id'] for j in jobs})!=len(jobs):raise ValueError('Inputs vacíos o duplicados')
     loaded=[]
@@ -229,15 +229,15 @@ def initialize(archive,root,start=0,count=32):
     inputs=root/'entrada'
     # El ZIP es el lote docente; se puede abrir sin red.
     safe_extract(archive,inputs)
-    news=json.loads((inputs/'sources/noticias_contratacion_2026.json').read_text())
-    mentions=json.loads((inputs/'sources/entidades_en_noticias_2026.json').read_text())
+    news=json.loads((inputs/'sources/noticias_contratacion_2026.json').read_text(encoding='utf-8'))
+    mentions=json.loads((inputs/'sources/entidades_en_noticias_2026.json').read_text(encoding='utf-8'))
     inventory=build_inventory(news,mentions)
     jobs=load_inputs(inputs/'inputs',inventory)[start:start+count]
     if len(jobs)<2:raise ValueError('Selecciona al menos dos imágenes del lote disponible')
     config=root/'config/inventory.json'
     signature=[j['job_id'] for j in jobs]
     if (root/'config/jobs.json').exists():
-        previous=json.loads((root/'config/jobs.json').read_text())
+        previous=json.loads((root/'config/jobs.json').read_text(encoding='utf-8'))
         if [j['job_id'] for j in previous]!=signature:raise ValueError('Usa otra carpeta para otra variante')
     atomic_json(config,inventory)
     atomic_json(root/'config/context.json',context_for(inventory))
@@ -248,8 +248,8 @@ def initialize(archive,root,start=0,count=32):
 def open_workspace(root):
     root=Path(root)
     if not (root/'config/jobs.json').exists():raise ValueError('Ejecuta primero la etapa extraer')
-    inventory=json.loads((root/'config/inventory.json').read_text())
-    jobs=json.loads((root/'config/jobs.json').read_text())
+    inventory=json.loads((root/'config/inventory.json').read_text(encoding='utf-8'))
+    jobs=json.loads((root/'config/jobs.json').read_text(encoding='utf-8'))
     for j in jobs:j['path']=str(safe_path(root,j['raw_path']))
     return inventory,jobs
 
@@ -325,7 +325,7 @@ def run_batch(jobs, root, profile="catalogo640", workers=1, stop_after=None, bat
     root = Path(root); root.mkdir(parents=True, exist_ok=True)
     cp_path = root / "state" / "checkpoint.json"
     signature = digest(json.dumps([[j['job_id'],j['input_sha256']] for j in jobs]).encode())
-    state = json.loads(cp_path.read_text()) if cp_path.exists() else {"version":VERSION,"signature":signature,"profiles":{}}
+    state = json.loads(cp_path.read_text(encoding='utf-8')) if cp_path.exists() else {"version":VERSION,"signature":signature,"profiles":{}}
     if state.get('signature') != signature or state.get('version') != VERSION: raise ValueError("Usa otra carpeta para otro lote/versión")
     records = state['profiles'].setdefault(profile,{})
     skipped=0; todo=[]
@@ -368,7 +368,7 @@ def run_batch(jobs, root, profile="catalogo640", workers=1, stop_after=None, bat
         "derived_bytes_written_now":sum(now[k]['derived_bytes'] for k in processed),
         "slowest_task_seconds":max(durations,default=0),"source":"imagenes_reales_adquiridas_por_docente"}
     assert metrics['processed_now']+metrics['skipped_verified']+metrics['failed_now']+metrics['not_attempted']==len(jobs)
-    path=root/'metrics'/(profile+'.json');history=json.loads(path.read_text()) if path.exists() else []
+    path=root/'metrics'/(profile+'.json');history=json.loads(path.read_text(encoding='utf-8')) if path.exists() else []
     history.append(metrics);atomic_json(path,history)
     return results, metrics
 
@@ -378,7 +378,7 @@ def normal_records(df):
 
 
 def export_package(root, inventory, jobs, context):
-    root=Path(root); cp=json.loads((root/'state/checkpoint.json').read_text())
+    root=Path(root); cp=json.loads((root/'state/checkpoint.json').read_text(encoding='utf-8'))
     if any(len(group)!=len(jobs) or any(x['status']!='DONE' for x in group.values()) for group in cp['profiles'].values()):
         raise ValueError('Completa los pendientes de cada perfil antes de cargar el paquete final')
     results=[x['result'] for group in cp['profiles'].values() for x in group.values() if x['status']=='DONE']
@@ -415,7 +415,7 @@ def export_package(root, inventory, jobs, context):
 def verify_package(root):
     root=Path(root); errors=[]
     try:
-        manifest=json.loads((root/'manifest_s10.json').read_text())
+        manifest=json.loads((root/'manifest_s10.json').read_text(encoding='utf-8'))
         if manifest['pipeline']!=VERSION or manifest['origin_kind']!='eltiempo_real':errors.append('manifest_origin')
         required={'outputs/assets.jsonl','outputs/assets.parquet','catalog/image_occurrences.parquet',
                   'catalog/source_relations.jsonl','jobs/jobs.json','state/checkpoint.json','config/jobs.json','config/inventory.json','config/context.json'}
@@ -430,12 +430,12 @@ def verify_package(root):
         if len(rows)!=manifest['result_count'] or len(rows)!=manifest['planned_jobs']*len(manifest['profiles']):errors.append('result_count')
         keys=[(r['job_id'],r['profile']) for r in rows]
         if len(keys)!=len(set(keys)):errors.append('duplicate_jobs')
-        jobs=json.loads((root/'jobs/jobs.json').read_text());byid={j['job_id']:j for j in jobs}
+        jobs=json.loads((root/'jobs/jobs.json').read_text(encoding='utf-8'));byid={j['job_id']:j for j in jobs}
         if len(jobs)!=manifest['planned_jobs'] or len(byid)!=len(jobs):errors.append('jobs_count')
         occurrence=pd.read_parquet(root/'catalog/image_occurrences.parquet')
         if len(occurrence)!=manifest['counts']['image_references'] or occurrence.image_url.nunique()!=manifest['counts']['unique_urls']:errors.append('catalog_counts')
         occs={r['occurrence_id']:r for r in normal_records(occurrence)}
-        cp=json.loads((root/'state/checkpoint.json').read_text())
+        cp=json.loads((root/'state/checkpoint.json').read_text(encoding='utf-8'))
         if sorted(cp['profiles'])!=manifest['profiles']:errors.append('profiles')
         for profile,states in cp['profiles'].items():
             if set(states)!=set(byid) or any(x['status']!='DONE' for x in states.values()):errors.append('incomplete:'+profile)
