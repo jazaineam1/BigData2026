@@ -26,6 +26,10 @@ assert '"$vectorSearch"' in snippet(15) and '"exact":True' in snippet(15)
 assert "solapamiento_ann_enn_atlas" in snippet(16)
 assert "s09_atlas_evidencia.json" in snippet(16)
 assert "EJECUTAR_BENCHMARK = False" in snippet(21)
+# La ruta SECOP curso no importa requests: conexión debe traer su propia dependencia.
+import ast
+connection_tree=ast.parse(snippet(8))
+assert any(isinstance(n,ast.Import) and any(a.name=="requests" for a in n.names) for n in ast.walk(connection_tree)), "IP de conexión depende de importación condicional externa"
 assert "LMSBridge" not in "\n".join(sources)
 for i,c in enumerate(nb["cells"],1):
     if c["cell_type"]!="code":continue
