@@ -29,6 +29,7 @@ test('audio: señal original, ventana y exportación de resumen',async({page})=>
  await expect(page.locator('#audioStats')).toContainText('RMS ventana');
  await page.locator('#audioStart').evaluate(el=>{el.value='50';el.dispatchEvent(new Event('input',{bubbles:true}))});
  expect(await page.evaluate(()=>window.audioMetrics.window_rms)).toBeLessThan(0.01);
+ await expect(page.locator('#s8')).toContainText('10 voces humanas reales');
  await page.goto(route+'#s14');
  const download=page.waitForEvent('download');
  await page.locator('#exportObservations').click();
