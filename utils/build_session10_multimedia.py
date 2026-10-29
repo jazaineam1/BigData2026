@@ -78,7 +78,7 @@ Después ejecuta Preparar. Las imágenes se obtienen automáticamente; al repeti
 import importlib.util, importlib.metadata, subprocess, sys
 from pathlib import Path
 faltantes=[]
-for modulo,requisito in [('PIL','pillow==12.2.0'),('pandas','pandas==2.2.3'),('pyarrow','pyarrow==26.0.0')]:
+for modulo,requisito in [('PIL','pillow==12.2.0'),('pandas','pandas==2.2.3'),('pyarrow','pyarrow==26.0.0'),('IPython','ipython>=8.20,<10')]:
     if importlib.util.find_spec(modulo) is None:faltantes.append(requisito)
 if faltantes:subprocess.check_call([sys.executable,'-m','pip','install','-q',*faltantes])
 print('ENTORNO:',{nombre:importlib.metadata.version(nombre) for nombre in ['pillow','pandas','pyarrow']})
