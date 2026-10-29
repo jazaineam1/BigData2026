@@ -70,3 +70,68 @@ test('autonomia: cada paso tiene accion, salida esperada, error y verificaciones
  await page.goto(route+'#s23');
  await expect(page.locator('#s23')).toContainText('el producto evaluable');
 });
+
+test('glosario: definiciones comprensibles y ejemplos de cuatro medidas',async({page})=>{
+ await page.goto(route+'#s1');
+ await page.locator('#quickGlossary summary').click();
+ for(const concept of ['Píxel','Luminancia','Histograma','RMS','FFT','Espectrograma','WAV','WER']){
+  await expect(page.locator('#quickGlossary')).toContainText(concept);
+ }
+ await page.goto(route+'#s4');
+ await page.locator('#s4 details.term-guide').first().locator('summary').click();
+ await expect(page.locator('#s4')).toContainText('R=255, G=0, B=0');
+ await page.goto(route+'#s7');
+ await expect(page.locator('#s7')).toContainText('¿Qué es RMS?');
+ await expect(page.locator('#s7')).toContainText('¿Qué significa tamaño de ventana?');
+});
+test('histograma editable: conteos se conservan, media cambia con brillo y binarización',async({page})=>{
+ await page.goto(route+'#s5');
+ const initial=await page.evaluate(()=>window.imageMetrics);
+ await page.locator('#histogramBins').evaluate(el=>{el.value='4';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ const grouped=await page.evaluate(()=>window.imageMetrics);
+ expect(grouped.histogram_bins).toBe(4);
+ expect(grouped.histogram_counts).toHaveLength(4);
+ expect(grouped.histogram_counts.reduce((a,b)=>a+b,0)).toBe(grouped.pixels);
+ expect(grouped.pixels).toBe(initial.pixels);
+ expect(grouped.mean_luminance).toBe(initial.mean_luminance);
+ await page.locator('#imageBrightness').evaluate(el=>{el.value='60';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ const bright=await page.evaluate(()=>window.imageMetrics);
+ expect(bright.mean_luminance).toBeGreaterThan(grouped.mean_luminance);
+ await page.locator('#imageContrast').evaluate(el=>{el.value='150';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ expect(await page.evaluate(()=>window.imageMetrics.contrast_percent)).toBe(150);
+ await page.locator('#imageBinary').check();
+ const binary=await page.evaluate(()=>window.imageMetrics);
+ expect(binary.histogram_counts.filter(x=>x>0).length).toBeLessThanOrEqual(2);
+ await expect(page.locator('#histogramExplanation')).toContainText('4 barras');
+ await page.locator('#imageResult').click({position:{x:75,y:40}});
+ const pixel=await page.evaluate(()=>window.pixelMetrics);
+ expect(pixel.x).toBeGreaterThanOrEqual(0);
+ expect(pixel.red===0||pixel.red===255).toBe(true);
+ await expect(page.locator('#pixelStats')).toContainText('RGB');
+});
+test('audio editable: editar tono cambia espectro, amplitud controla RMS y ventana cambia resolución',async({page})=>{
+ await page.goto(route+'#s8');
+ await page.locator('#audioStart').evaluate(el=>{el.value='25';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ const first=await page.evaluate(()=>window.audioMetrics);
+ expect(first.window_rms).toBeGreaterThan(0.01);
+ await page.locator('#toneLow').evaluate(el=>{el.value='400';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ const changed=await page.evaluate(()=>window.audioMetrics);
+ expect(changed.peak_frequency_hz).toBeGreaterThan(first.peak_frequency_hz+100);
+ await page.locator('#fftWindow').selectOption('2048');
+ const windowChanged=await page.evaluate(()=>window.audioMetrics);
+ expect(windowChanged.frequency_resolution_hz).toBeLessThan(changed.frequency_resolution_hz);
+ expect(windowChanged.fft_window_samples).toBe(2048);
+ await page.locator('#toneGain').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ expect(await page.evaluate(()=>window.audioMetrics.window_rms)).toBe(0);
+ await expect(page.locator('#audioEditorExplanation')).toContainText('amplitud 0 %');
+ await page.locator('#toneGain').evaluate(el=>{el.value='100';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ await page.locator('#audioStart').evaluate(el=>{el.value='50';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ expect(await page.evaluate(()=>window.audioMetrics.window_rms)).toBeLessThan(0.01);
+ const pixels=await page.locator('#audioSpectrogram').evaluate(el=>{
+  const d=el.getContext('2d').getImageData(50,25,el.width-55,el.height-55).data;
+  let min=255,max=0;for(let i=0;i<d.length;i+=4){min=Math.min(min,d[i]);max=Math.max(max,d[i]);}
+  return {min,max};
+ });
+ expect(pixels.max).toBeGreaterThan(pixels.min);
+ await expect(page.locator('#s8')).toContainText('Espectrograma: tiempo × frecuencia × color');
+});
