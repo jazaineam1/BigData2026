@@ -32,6 +32,8 @@ need('import s10_pipeline' not in allcode and 'sys.path' not in allcode,'Código
 need('files.upload(' not in allcode and 'ZipFile(' not in allcode,'La entrada debe obtenerse automáticamente sin carga manual')
 need('urllib.request.urlopen' in allcode and 'Datos/s10_imagenes_reales/' in allcode,'Falta conexión visible a las entradas reales del curso')
 need('files.download(' not in allcode and 'pack(TRABAJO' not in allcode,'El cierre debe dejar un catálogo, sin ZIP obligatorio')
+need('drive.mount(' in allcode and 'shutil.copytree(TRABAJO,conservado' in allcode and 'verify_package(conservado)' in allcode,'La conservación en Drive debe copiar y verificar la carpeta completa')
+need('POSICION_NOTICIA' in allcode and 'noticias_disponibles.iloc' in allcode,'Falta consulta elegida sobre el catálogo propio')
 seed=(ROOT/'infraestructura/lms/s10-multimedia-seed.sql').read_text(encoding='utf-8')
 need('delete from' not in seed.lower(),'No borrar historial')
 need('"visible_resources": 2' in seed,'LMS debe declarar dos recursos')

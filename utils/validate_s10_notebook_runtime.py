@@ -30,6 +30,17 @@ for values in [('redacta',1,2,4),(True,1,2,4),(1,1,1,4)]:
  except (TypeError,ValueError):pass
  else:raise AssertionError('Se aceptó respuesta no válida')
 assert env['export_package'](env['TRABAJO'],env['inventario'],env['trabajos'],env['context_for'](env['inventario'],env['ENTIDAD']))['ok']
+# La selección propia cambia la consulta, rechaza posiciones inválidas y permite volver al ejemplo.
+consulta=sources['s10-consultar'].replace('POSICION_NOTICIA=0','POSICION_NOTICIA=2')
+exec(compile(consulta,'consulta_propia','exec'),env)
+assert env['ARTICULO']==str(env['noticias_disponibles'].iloc[1]['article_id'])
+try:exec(compile(sources['s10-consultar'].replace('POSICION_NOTICIA=0','POSICION_NOTICIA=-1'),'consulta_invalida','exec'),env)
+except ValueError:pass
+else:raise AssertionError('Se aceptó posición negativa')
+# Prueba de copia idempotente y relectura del destino; no emula autorización de Google.
+env['DRIVE_CURSO']=a.salida/'drive_destino_de_prueba'
+for _ in range(2):exec(compile(sources['s10-producto'],'copia_y_verificacion_destino','exec'),env)
+assert env['verify_package'](env['conservado'])['ok']
 shutil.copytree(env['TRABAJO'],a.salida/'restauracion_final')
 assert env['verify_package'](a.salida/'restauracion_final')['ok']
 report={'ok':True,'images':a.cantidad,'rows':a.cantidad*2,'seconds':time.perf_counter()-started,'slowest_cell':max(timings,key=lambda t:t['seconds']),'load_repeated':True,'closed_decision_validated':True,'restore_verified':True,'encoding':'cp1252_simulado' if a.locale_cp1252 else 'UTF8_entorno','scope':'Python Linux; dependencias preinstaladas. No valida interfaz Colab ni Windows nativo.'}

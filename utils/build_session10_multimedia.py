@@ -54,16 +54,34 @@ S09 dejó documentos y una selección de búsqueda; S10 prepara las imágenes de
 
 El productor docente adquirió el snapshot una vez con pausas e identificación. Cada estudiante utiliza esa entrada, sin repetir descargas masivas del periódico. Las URLs editoriales describen procedencia. El curso conserva una copia de las imágenes reales para que el grupo no vuelva a descargarlas del periódico.
 
-**HAZ ESTO AHORA.** Ejecuta dependencias y Preparar. El cuaderno obtiene las entradas y las conserva en caché; al repetir reutiliza los archivos verificados. El mismo paso funciona en Colab y VS Code. No se pide una tarjeta ni una clave para S10.''')
+**HAZ ESTO AHORA.** Ejecuta dependencias y conecta tu Google Drive cuando Colab lo solicite. Solo trabajaremos en `MyDrive/BigData2026`: S09 deja allí su expediente y S10 conservará la carpeta completa para S11. No pegues códigos de autorización en el cuaderno. Si cancelas, la celda se detiene: vuelve a ejecutarla y completa la conexión.
+
+Después ejecuta Preparar. Las imágenes se obtienen automáticamente; al repetir se reutilizan los archivos verificados. En VS Code no se monta Drive: conserva la carpeta local. No se pide una tarjeta ni una clave para S10.''')
     c('s10-dependencias','''#@title Preparar bibliotecas (selecciona el kernel Python en VS Code)
 # Colab precarga bibliotecas: no las reemplazamos dentro de un kernel activo.
 # Verificado en Colab el 29-10-2026: google-colab requiere pandas 2.2.3.
 import importlib.util, importlib.metadata, subprocess, sys
+from pathlib import Path
 faltantes=[]
 for modulo,requisito in [('PIL','pillow==12.2.0'),('pandas','pandas==2.2.3'),('pyarrow','pyarrow==26.0.0')]:
     if importlib.util.find_spec(modulo) is None:faltantes.append(requisito)
 if faltantes:subprocess.check_call([sys.executable,'-m','pip','install','-q',*faltantes])
-print('ENTORNO:',{nombre:importlib.metadata.version(nombre) for nombre in ['pillow','pandas','pyarrow']})''',True)
+print('ENTORNO:',{nombre:importlib.metadata.version(nombre) for nombre in ['pillow','pandas','pyarrow']})
+USAR_GOOGLE_DRIVE=True #@param {type:"boolean"}
+DRIVE_CURSO=None
+try:
+    from google.colab import drive
+except ImportError:
+    drive=None
+if drive is not None and USAR_GOOGLE_DRIVE:
+    drive.mount('/content/drive')
+    DRIVE_CURSO=Path('/content/drive/MyDrive/BigData2026')
+    DRIVE_CURSO.mkdir(parents=True,exist_ok=True)
+    print('CONSERVACIÓN PREPARADA:',DRIVE_CURSO)
+elif drive is not None:
+    print('CONSERVACIÓN PENDIENTE: /content es temporal; activa Google Drive antes del cierre.')
+else:
+    print('ENTORNO LOCAL: conserva la carpeta work_s10 junto al cuaderno.')''',True)
     c('s10-utilidades','''#@title Utilidades de archivos e integridad — código incluido; expande para inspeccionarlo
 from pathlib import Path, PureWindowsPath
 from datetime import datetime, timezone
@@ -126,12 +144,19 @@ ENTIDAD=ANCHOR['entity']
 # Herramienta opcional: ruta al expediente propio exportado en S09.
 S09_EXPEDIENTE="" #@param {type:"string"}
 POSICION_S09=1 #@param {type:"integer"}
+if not S09_EXPEDIENTE and DRIVE_CURSO is not None:
+    candidato=DRIVE_CURSO/'S09/s09_atlas_evidencia.json'
+    if candidato.is_file():
+        S09_EXPEDIENTE=str(candidato)
+        print('EXPEDIENTE PROPIO EN DRIVE:',S09_EXPEDIENTE)
 if S09_EXPEDIENTE:
     anterior=json.loads(Path(S09_EXPEDIENTE).read_text(encoding='utf-8'))
     filas_s09=anterior.get('resultados_ann_atlas') or anterior.get('resultados_numpy_local') or []
     if not 1<=POSICION_S09<=len(filas_s09):raise ValueError('Posición del resultado propio S09')
     ENTIDAD=filas_s09[POSICION_S09-1]['entidad']
     print('MOTOR DECLARADO S09:',anterior.get('motor_ann_ejecutado','No consta'))
+else:
+    print('SIN EXPEDIENTE S09: usamos el ancla del curso; no acredita una ejecución propia anterior.')
 contexto=referencias.merge(vinculos[vinculos.entity.eq(ENTIDAD)],on='article_id',how='inner')
 print('CONTEXTO:',ENTIDAD,'· referencias enlazadas:',len(contexto))
 display(contexto[['article_id','article_url','image_url','relation']].head(3))
@@ -261,7 +286,9 @@ display(tabla[['article_id','profile','derived_width','derived_height','raw_byte
 
 Los binarios quedan como archivos; una fila permite encontrar original, derivado y noticia. `DataFrame` organiza los registros. `to_json(orient='records',lines=True)` guarda JSONL; `to_parquet(index=False)` guarda una tabla tipada; `read_parquet()` vuelve a leerla.
 
-**HAZ ESTO AHORA.** Ejecuta la escritura y la lectura. Después filtra una noticia y observa su imagen desde la ruta que devolvió el catálogo. La carga debe producir algo que otro proceso pueda consultar.''')
+**HAZ ESTO AHORA.** Ejecuta la escritura y la lectura. Lee primero el ejemplo resuelto de consulta. Después cambia solo `POSICION_NOTICIA` por otra posición de la lista producida en tu ejecución y vuelve a ejecutar. Comprueba qué imágenes cambiaron y cuáles son sus perfiles. La carga debe producir algo que otro proceso pueda consultar.
+
+Si salió bien: la galería corresponde al `article_id` elegido y cada fila identifica su perfil y sus bytes. Error frecuente: usar la posición de la tabla de trabajos como si fuera una posición de la lista de noticias; una noticia puede tener varios trabajos. Si te atascas, usa 0 para volver al ejemplo resuelto.''')
     c('s10-escribir','''# L visible: construir catálogo → escribir → releer ambos formatos.
 OUT=TRABAJO/'outputs';OUT.mkdir(exist_ok=True)
 catalogo=pd.DataFrame(resultados+alternativa)
@@ -273,8 +300,16 @@ assert len(recargado)==len(trabajos)*len(PROFILES)>0
 assert normal_records(jsonl)==normal_records(recargado)
 print('L · FILAS REABIERTAS:',len(recargado))
 display(recargado[['article_id','profile','derived_path','derived_width','derived_height']].head())''')
-    c('s10-consultar','''# Consulta real: noticia/perfil y costo observado. La galería parte de sus filas.
-ARTICULO=str(recargado.iloc[0]['article_id'])
+    c('s10-consultar','''# Ejemplo resuelto: 0 usa la primera noticia. Después elige otra posición de tu lista.
+noticias_disponibles=recargado[['article_id']].drop_duplicates().reset_index(drop=True)
+noticias_disponibles.index+=1
+print('NOTICIAS DE TU CATÁLOGO · posiciones desde 1:')
+display(noticias_disponibles)
+POSICION_NOTICIA=0 #@param {type:"integer"}
+if type(POSICION_NOTICIA) is not int or not 0<=POSICION_NOTICIA<=len(noticias_disponibles):
+    raise ValueError('Usa 0 para el ejemplo o una posición numérica de tu lista.')
+ARTICULO=str(noticias_disponibles.iloc[max(1,POSICION_NOTICIA)-1]['article_id'])
+print('CONSULTA PROPIA · artículo:',ARTICULO)
 consulta=recargado[recargado.article_id.astype(str).eq(ARTICULO)]
 display(consulta[['article_id','profile','derived_width','derived_height','derived_bytes']])
 display(recargado.groupby('profile')[['raw_bytes','derived_bytes']].sum())
@@ -290,7 +325,9 @@ print('RAW ÚNICOS:',recargado.raw_sha256.nunique(),'· no sumar originales repe
 
 Elige una posición de tu tabla, un perfil usado y una alternativa descartada. **0 deja pendiente.** Límite: 1=faltan juicios de calidad visual; 2=falta otra distribución de tamaños; 3=falta medir I/O/concurrencia; 4=contexto de entidad no prueba vínculo con contrato. Perfiles: 1=vista320, 2=catalogo640.
 
-La selección es formativa. No se envía prosa ni se acredita una nota por marcar una casilla. Los archivos del catálogo describen la ejecución; una comprobación técnica no autentica por sí sola la fuente.''')
+La selección es formativa. No se envía prosa ni se acredita una nota por marcar una casilla. Los archivos del catálogo describen la ejecución; una comprobación técnica no autentica por sí sola la fuente.
+
+**HAZ ESTO AHORA.** Ejecuta el cierre. En Colab busca `CONSERVADO EN DRIVE` y `COPIA REABIERTA Y VERIFICADA: True`. La carpeta de `/content` se pierde al eliminar el runtime; verla allí no significa conservarla para S11. En VS Code conserva la carpeta local completa, incluidos RAW, derivados y metadatos.''')
     c('s10-decision','''# Opciones cerradas sobre la salida propia; no se admite texto libre.
 POSICION=0 #@param {type:"integer"}
 PERFIL_ELEGIDO=0 #@param [0,1,2] {type:"raw"}
@@ -304,11 +341,26 @@ reporte=export_package(TRABAJO,inventario,trabajos,context_for(inventario,ENTIDA
 if not reporte['ok']:raise ValueError(reporte['errors'])
 print('CATÁLOGO VERIFICADO:',reporte)
 print('PRODUCTO:',TRABAJO/'outputs/assets.parquet')
-print('CONSULTABLE:',len(pd.read_parquet(TRABAJO/'outputs/assets.parquet')),'filas')''')
+print('CONSULTABLE:',len(pd.read_parquet(TRABAJO/'outputs/assets.parquet')),'filas')
+if DRIVE_CURSO is not None:
+    # La firma distingue selecciones; repetir conserva la misma carpeta.
+    firma=digest(json.dumps([[j['job_id'],j['input_sha256']] for j in trabajos]).encode())[:16]
+    conservado=DRIVE_CURSO/'S10'/firma
+    conservado.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copytree(TRABAJO,conservado,dirs_exist_ok=True)
+    verificacion_drive=verify_package(conservado)
+    if not verificacion_drive['ok']:raise ValueError(verificacion_drive['errors'])
+    print('CONSERVADO EN DRIVE:',conservado)
+    print('COPIA REABIERTA Y VERIFICADA:',verificacion_drive['ok'])
+    print('S11_USA_ESTA_CARPETA:',conservado)
+elif drive is not None:
+    raise RuntimeError('Catálogo temporal válido; conservación pendiente. Activa USAR_GOOGLE_DRIVE, repite Preparar y vuelve a ejecutar el cierre.')
+else:
+    print('CONSERVADO EN CARPETA LOCAL:',TRABAJO)''')
     m('s10-lectura-cierre',reading('La verificación relee el catálogo y la repetición revalida los resultados.',
-        'El catálogo puede releerse y conserva las rutas, parámetros y procedencia para la siguiente ETL.',
+        'La copia de Drive o la carpeta local fue reabierta y conserva rutas, parámetros y procedencia para la siguiente ETL.',
         'No acredita calidad visual general, autenticidad editorial ni aprendizaje por sí solo.',
-        'Confundir progreso de lectura con una ejecución o afirmar una carga sin releer el catálogo.'))
+        'Confundir la carpeta temporal de Colab o el progreso del checklist con un producto conservado y verificado.'))
     m('s10-hoja','''## Para llevar · hoja de consulta
 
 | Necesidad | Operación que acabas de ejecutar |
