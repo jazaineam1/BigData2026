@@ -34,6 +34,25 @@ jobs:
       - run: npx playwright test --config playwright.s10.config.cjs
       - run: npm install --prefix /tmp/s10-db-qa --no-audit --no-fund @electric-sql/pglite@0.3.14 typescript@5.9.3
       - run: S10_QA_MODULES=/tmp/s10-db-qa/node_modules node utils/test_s10_lms.cjs
-      # El snapshot real se lee del curso; no se readquiere del periódico por cada PR.
-      # La prueba completa con imágenes reales se ejecuta localmente con
-      # utils/validate_s10_notebook_runtime.py --salida CARPETA_NUEVA.
+      # Ejecución E/T/L real del cuaderno completo en Python limpio.
+      # Entradas file:// del checkout PR: no dependen del main publicado
+      # ni solicitan de nuevo fotos a sitios de noticias. Sin Drive ni Atlas.
+      - name: Instalar dependencias del cuaderno para ejecución real
+        run: python -m pip install "pillow==12.2.0" "pandas==2.2.3" "pyarrow==26.0.0"
+      - name: E/T/L completo con ocho imágenes reales + restauración
+        run: python utils/validate_s10_notebook_runtime.py --origen "file://${{ github.workspace }}/" --salida /tmp/qa-s10-8 --cantidad 8
+      - name: E/T/L completo con 32 imágenes reales y relectura
+        run: python utils/validate_s10_notebook_runtime.py --origen "file://${{ github.workspace }}/" --salida /tmp/qa-s10-32 --cantidad 32
+      - name: Comprobar salidas, fila propia y prueba de integridad
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for n in (8, 32):
+              r = json.loads(Path(f'/tmp/qa-s10-{n}/report.json').read_text(encoding='utf-8'))
+              assert r['ok'] and r['images']==n and r['rows']==2*n
+              assert r['load_repeated'] and r['closed_decision_validated']
+              assert r['restore_verified'] and r['corrupted_derived_detected']
+              assert r['corrupted_derived_recovered']
+              print('S10 REAL VALIDADO',n,'imágenes,',r['rows'],'filas',r['seconds'],'segundos')
+          PY
