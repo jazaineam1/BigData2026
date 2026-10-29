@@ -18,6 +18,23 @@ El grupo ya conoció búsqueda lexical/Elasticsearch, BM25, E5, embeddings, cose
 
 **Competencia evaluable:** diseñar, persistir, indexar y consultar documentos con embeddings en MongoDB Atlas Vector Search, distinguiendo ANN, ENN, filtros, identidad de los lotes y límites del resultado.
 
+
+## Nuevo laboratorio visual integrado — antes de activar Colab
+
+En la misma [diapositiva 21](https://jazaineam1.github.io/BigData2026/Presentaciones/s09-de-palabras-a-significado.html#s21) aparece el botón **Explorar base vectorial**. No agrega un tercer recurso LMS: usa `assets/s09/vector-lab.js` y `assets/s09/vector-lab.css` dentro de la presentación.
+
+**Secuencia formativa de cinco etapas:**
+
+1. **Documentos (3 min):** abrir un JSON ficticio con texto, entidad, ID y dos números didácticos; usar `upsert` dos veces para ver 8 → 9 → 9. Pregunta: «¿Qué cambia cuando el identificador ya existe?».
+2. **Índice (3 min):** configurar `embedding_demo_2d`/2 dimensiones. Probar deliberadamente 384 dimensiones: rechazar incompatibilidad. Solicitar índice y distinguir *pendiente* de *disponible*. Pregunta: «¿Pedir construir demuestra `queryable` en Atlas?».
+3. **Consulta (4 min):** ejecutar modo exacto, cambiar **solo** la entidad y comparar resultados. Después cambiar al grafo aproximado conceptual y reducir nodos explorados; comparar IDs con la referencia exacta. Pregunta: «¿Reducir candidatos garantiza conservar todo el Top-k?».
+4. **Evaluación (2 min):** emitir un juicio de pertinencia por cada resultado; solo al terminar se calcula Precision@k. Pregunta: «¿Un coseno alto es una probabilidad de relevancia?».
+5. **Evidencia (1 min):** inspeccionar `s09_simulacion_local.json` y su bandera `motor_real_atlas_ejecutado:false`. Abrir Colab para generar datos reales, índice compatible `embedding`/384D, consultas y `s09_atlas_evidencia.json`.
+
+**Delimitación:** todos los documentos y vectores del laboratorio visual son ejemplos inventados de dos dimensiones; el recorrido del grafo es pedagógico, **no HNSW real**, no genera E5 y no se conecta a MongoDB. Por ello se debe expresar «en la simulación observé…», no «Atlas respondió…». Con Atlas no disponible, la práctica NumPy del cuaderno sigue siendo válida como respaldo local, pero no demuestra persistencia ni consulta remota.
+
+**Control docente:** S09 Live y los desafíos D1–D5 existentes conservan su registro independiente. Las cinco etapas del laboratorio visual no se convierten automáticamente en calificación ni acreditan ejecución; el Teacher Wall no debe interpretar estas exploraciones como resultados Atlas.
+
 ## Preparar ANTES de la clase
 
 1. Tener un cluster MongoDB Atlas activo y compatible, con colección disponible.
