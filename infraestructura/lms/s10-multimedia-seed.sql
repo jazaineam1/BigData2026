@@ -1,9 +1,9 @@
--- S10 · imágenes reales en VS Code. Metadatos verificados contra documentación
+-- S10 · imágenes reales en Colab y VS Code. Metadatos verificados contra documentación
 -- vigente de Postgres/Supabase el 2026-10-28. Sin cambios de esquema ni permisos.
 -- Idempotente: conserva actividades/evidencias previas. Acceso no acredita dominio.
 begin;
 insert into public.bd_lms_sessions(course_code,session_number,title,path,position,required,metadata)
-values ('bigdata',10,'¿Cómo convertir imágenes reales en un catálogo reutilizable?','session.html?s=10',10,true,'{"type": "learning", "topic": "image-etl", "estimated_minutes": 120, "graded": false, "canonical_module": true, "visible_resources": 2, "class_date": "2026-10-15", "class_kind": "learning", "class_timezone": "America/Bogota", "class_time_local": "18:00", "completion_basis": "resource_visits", "outcomes": ["Implementar E, T y L de imágenes reales en VS Code", "Conservar RAW y procedencia por noticia", "Transformar por lotes, continuar pendientes y comparar perfiles", "Releer y verificar un catálogo JSONL/Parquet portable"]}'::jsonb)
+values ('bigdata',10,'¿Cómo convertir imágenes reales en un catálogo reutilizable?','session.html?s=10',10,true,'{"type": "learning", "topic": "image-etl", "estimated_minutes": 120, "graded": false, "canonical_module": true, "visible_resources": 2, "class_date": "2026-10-29", "class_kind": "learning", "class_timezone": "America/Bogota", "class_time_local": "18:00", "completion_basis": "resource_visits", "outcomes": ["Implementar E, T y L de imágenes reales en Colab y VS Code", "Conservar RAW y procedencia por noticia", "Transformar por lotes, continuar pendientes y comparar perfiles", "Releer y verificar un catálogo JSONL/Parquet portable"]}'::jsonb)
 on conflict(course_code,session_number) do update set title=excluded.title,metadata=excluded.metadata;
 
 -- Retirar requisitos anteriores sin borrar progreso, notas ni evidencia histórica.
@@ -24,8 +24,8 @@ values ('bd-s10-notebook','bigdata',10,'Cuaderno S10 · Python completo','resour
 on conflict(code) do update set title=excluded.title,position=excluded.position,required=excluded.required,metadata=excluded.metadata;
 
 insert into public.lms_run_sessions_v2(course_run_id,session_number,title,summary,status,path,starts_at,position,metadata,published_at,updated_at)
-select id,10,'¿Cómo convertir imágenes reales en un catálogo reutilizable?','E → T → L de imágenes reales: implementación en VS Code, lotes y catálogo portable. Práctica formativa; visitas no acreditan el laboratorio.',
-'visible','session.html?s=10','2026-10-15 23:00:00+00',10,'{"type": "learning", "topic": "image-etl", "estimated_minutes": 120, "graded": false, "canonical_module": true, "visible_resources": 2, "class_date": "2026-10-15", "class_kind": "learning", "class_timezone": "America/Bogota", "class_time_local": "18:00", "completion_basis": "resource_visits", "outcomes": ["Implementar E, T y L de imágenes reales en VS Code", "Conservar RAW y procedencia por noticia", "Transformar por lotes, continuar pendientes y comparar perfiles", "Releer y verificar un catálogo JSONL/Parquet portable"]}'::jsonb,now(),now()
+select id,10,'¿Cómo convertir imágenes reales en un catálogo reutilizable?','E → T → L de imágenes reales: implementación en Colab y VS Code, lotes y catálogo portable. Práctica formativa; visitas no acreditan el laboratorio.',
+'visible','session.html?s=10','2026-10-29 23:00:00+00',10,'{"type": "learning", "topic": "image-etl", "estimated_minutes": 120, "graded": false, "canonical_module": true, "visible_resources": 2, "class_date": "2026-10-29", "class_kind": "learning", "class_timezone": "America/Bogota", "class_time_local": "18:00", "completion_basis": "resource_visits", "outcomes": ["Implementar E, T y L de imágenes reales en Colab y VS Code", "Conservar RAW y procedencia por noticia", "Transformar por lotes, continuar pendientes y comparar perfiles", "Releer y verificar un catálogo JSONL/Parquet portable"]}'::jsonb,now(),now()
 from public.lms_course_runs where code='bigdata-2026-2' and course_code='bigdata'
 on conflict(course_run_id,session_number) do update set title=excluded.title,summary=excluded.summary,metadata=excluded.metadata,updated_at=now();
 
