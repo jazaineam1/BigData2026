@@ -95,4 +95,15 @@ with tempfile.TemporaryDirectory(prefix="bigdata-s10-qa-") as temp:
         assert "manifest_s10.json" in package.namelist()
         assert "outputs/assets.parquet" in package.namelist()
     print("AUTONOMÍA S10 OK: elección estudiantil 3/3, autocomprobación 9/9 y ZIP de 20 WAV")
+    if os.getenv("S10_TEST_ASR") == "1":
+        # Comprobar realmente la opción de voz->texto sobre una de las diez grabaciones.
+        # Descarga Whisper tiny de acceso público solo en este job de CI.
+        asr_src="".join(next(c for c in nb["cells"] if c["id"]=="s10-asr-ejecutar")["source"])
+        assert "USAR_ASR=False" in asr_src
+        asr_src=asr_src.replace("USAR_ASR=False","USAR_ASR=True",1)
+        exec(compile(asr_src,"s10-asr-estudiante-real","exec"),scope)
+        assert isinstance(scope.get("prediccion"),str) and len(scope["prediccion"].strip())>0
+        assert scope.get("wer_ejemplo") is not None and 0 <= scope["wer_ejemplo"] <= 10
+        print("ASR REAL OK: Whisper tiny ejecutado sobre una de las diez voces; WER calculado")
+
     print("S10 OK: notebook ejecutado, 2 imágenes + 11 audios (10 voces reales con licencia), catálogo reabierto, manifiesto e integridad")
