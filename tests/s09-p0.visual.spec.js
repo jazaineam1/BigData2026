@@ -10,7 +10,7 @@ async function inspectSlide(page,n){
   await page.evaluate(x=>{location.hash='#s'+x},n);
   await page.waitForTimeout(70);
   return page.evaluate(()=>{
-    const slide=document.querySelector('.slide.on'),stage=document.querySelector('.stage'),top=document.querySelector('.top'),nav=document.querySelector('.nav'),h1=slide?.querySelector('h1'),body=slide?.querySelector('.body');
+    const slide=document.querySelector('.slide.on'),stage=document.querySelector('.stage'),top=document.querySelector('.top'),nav=document.querySelector('.nav'),h1=slide?.querySelector('h1'),body=slide?.querySelector('.body, .vector-body');
     const rect=el=>el?el.getBoundingClientRect():null,overlap=(a,b,t=3)=>!!(a&&b&&a.left<b.right-t&&a.right>b.left+t&&a.top<b.bottom-t&&a.bottom>b.top+t);
     const sr=rect(stage),tr=rect(top),nr=rect(nav),hr=rect(h1),br=rect(body);
     return {
@@ -59,9 +59,7 @@ test('S09 P0 desafíos empiezan vacíos y la respuesta fuente no queda primera',
   const correct={
     'bd-s09-c1':'lexical',
     'bd-s09-c2':'similarity_not_probability',
-    'bd-s09-c3':'judge_relevance',
-    'bd-s09-c4':'embedding_model',
-    'bd-s09-c5':'rank_fusion'
+    'bd-s09-c3':'judge_relevance'
   };
   for(const [code,value] of Object.entries(correct)){
     const sel=page.locator('#ans-'+code);
@@ -72,11 +70,11 @@ test('S09 P0 desafíos empiezan vacíos y la respuesta fuente no queda primera',
   }
 });
 
-test('S09 P0 no pregunta nivel de confianza en D1-D5',async({page})=>{
+test('S09 P0 no pregunta nivel de confianza en conceptuales conservados',async({page})=>{
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?preview=1#s9');
   await expect(page.locator('[id^="conf-"]')).toHaveCount(0);
   await expect(page.getByText('¿Qué tan seguro estás?',{exact:true})).toHaveCount(0);
-  for(const code of ['bd-s09-c1','bd-s09-c2','bd-s09-c3','bd-s09-c4','bd-s09-c5']){
+  for(const code of ['bd-s09-c1','bd-s09-c2','bd-s09-c3']){
     await expect(page.locator('#ans-'+code)).toBeAttached();
   }
 });
@@ -182,39 +180,16 @@ test('S09 modo público no muestra controles de seguimiento LMS ni en portada',a
 });
 
 
-test('S09 taller Atlas conserva S1-S21 y muestra el flujo operativo desde S22',async({page})=>{
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s21');
- await expect(page.locator('#s21')).toContainText('Modelo E5');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s22');
- await expect(page.locator('#s22')).toContainText('Hoy construimos');
- await expect(page.locator('#s22')).toContainText('Ir al Colab');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s27');
- await expect(page.locator('#s27')).toContainText('bulk_write');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s29');
- await expect(page.locator('#s29')).toContainText('queryable');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s30');
- await expect(page.locator('#s30')).toContainText('$vectorSearch');
+test('S09 retoma en 21 y muestra persistencia, índice y consulta',async({page})=>{
+ for(const [n,text] of [[21,'AQUÍ NOS HABÍAMOS QUEDADO'],[22,'Abrir cuaderno Colab'],[27,'upsert=True'],[29,'queryable'],[30,'$vectorSearch']]){
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s'+n);
+  await expect(page.locator('#s'+n)).toContainText(text);
+ }
 });
-test('S09 presenta Atlas en 55 minutos y distingue NumPy de Atlas',async({page})=>{
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s25');
- await expect(page.locator('#s25')).toContainText('E5');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s28');
- await expect(page.locator('#s28')).toContainText('vector');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s32');
- await expect(page.locator('#s32')).toContainText('ANN en Atlas');
- await expect(page.locator('#s33')).toContainText('NumPy');
- await expect(page.locator('#s32')).toContainText(/exact:\s*true/);
-});
-test('S09 obliga a presentar evidencia Atlas real o respaldo local honesto',async({page})=>{
+test('S09 distingue configuración y evidencia ejecutada',async({page})=>{
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s33');
- await expect(page.locator('#s33')).toContainText('motor_ann_ejecutado');
- await expect(page.locator('#s33')).toContainText('JSON');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s34');
- await expect(page.locator('#s34')).toContainText('NumPy LOCAL');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s35');
- await expect(page.locator('#s35')).toContainText('Atlas');
+ for(const text of ['s09_indice_atlas_ui.json','s09_pipeline_atlas_ui.json','s09_atlas_evidencia.json','Generar el pipeline no demuestra ejecutarlo'])await expect(page.locator('#s33')).toContainText(text);
 });
-
 
 test('S09 valida en ejecución que las 35 diapositivas sean objetos completos',async({page})=>{
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?qa=structure#s34');
@@ -229,11 +204,11 @@ test('S09 valida en ejecución que las 35 diapositivas sean objetos completos',a
   expect(state.fallback).toEqual([]);
   expect(state.rendered.filter(x=>!x.h||!x.k||/undefined/i.test(x.h)||/undefined/i.test(x.k))).toEqual([]);
   await expect(page.locator('#s34')).toBeVisible();
-  await expect(page.locator('#s34 h1')).toHaveText('120 documentos prueban un flujo; no prueban que escala.');
-  await expect(page.locator('#s34 .challenge')).toHaveCount(1);
+  await expect(page.locator('#s34 h1')).toHaveText('Un vecino cercano sigue siendo un candidato.');
+  await expect(page.locator('#s34')).toContainText('Qué NO permite concluir todavía');
   await page.locator('#next').click();
   await expect(page).toHaveURL(/#s35$/);
-  await expect(page.locator('#s35 h1')).toContainText('base vectorial funcionando');
+  await expect(page.locator('#s35 h1')).toContainText('Reconstruye lo que acabas de ejecutar');
 });
 
 test('S09 móvil · sin título undefined, navegación funcional y encabezado despejado',async({page})=>{
@@ -246,7 +221,7 @@ test('S09 móvil · sin título undefined, navegación funcional y encabezado de
   });
   expect(x.titleTop).toBeGreaterThanOrEqual(x.toolbarBottom-2);
   expect(x.html).not.toMatch(/undefined/i);
-  expect(x.scrollable).toBe(true);
+  expect(x.titleTop).toBeGreaterThan(0); // El contenido puede caber sin scroll.
   await page.locator('#next').click();
   await expect(page).toHaveURL(/#s35$/);
   await expect(page.locator('#s35 h1')).toBeVisible();
@@ -257,7 +232,7 @@ test('S09 móvil · sin título undefined, navegación funcional y encabezado de
 test('S09 móvil · etapa de Atlas accesible sin que la barra tape el h1',async({page})=>{
   await page.setViewportSize({width:360,height:740});
   await page.goto('/Presentaciones/s09-de-palabras-a-significado.html?qa=mobile#s22');
-  await expect(page.locator('#s22 h1')).toContainText('base vectorial');
+  await expect(page.locator('#s22 h1')).toContainText('De una necesidad');
   await expect(page.locator('#s22 a[href*="colab.research.google.com"]')).toBeAttached();
   for (const n of [22,23,24,25,26,27,28,29,30,31,32,33,34,35]){
     await page.evaluate(number=>location.hash='#s'+number,n);
@@ -272,44 +247,17 @@ test('S09 móvil · etapa de Atlas accesible sin que la barra tape el h1',async(
 });
 
 
-test('S09 Vector DB · control ANN/ENN cambia configuración sin inventar métricas',async({page})=>{
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s32');
- const mode=page.locator('#atlasMode'),range=page.locator('#atlasN');
- await expect(page.locator('#atlasOut')).toContainText('numCandidates=100');
- await range.evaluate(el=>{el.value='200';el.dispatchEvent(new Event('input',{bubbles:true}));});
- await expect(page.locator('#atlasOut')).toContainText('40×');
- await mode.selectOption('enn');
- await expect(range).toBeDisabled();
- await expect(page.locator('#atlasOut')).toContainText('exact=true');
- await mode.selectOption('ann');
- await expect(range).toBeEnabled();
+test('S09 aplicación distingue filtro, límite y evidencia',async({page})=>{
+ for(const [n,texts] of [[24,['CO1.REQ.1139847','no para estimar frecuencias']],[28,['numDimensions','384','entidad']],[32,['USAR_ENTIDAD_DEL_RESULTADO','Misma consulta','ANN/ENN']],[34,['juicios independientes','probabilidad']]]){
+  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s'+n);
+  for(const text of texts)await expect(page.locator('#s'+n)).toContainText(text);
+ }
 });
-test('S09 Vector DB · S22-S35 distinguen datos y operación real a escala',async({page})=>{
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s24');
- await expect(page.locator('#s24')).toContainText('no es aleatoria simple');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s27');
- await expect(page.locator('#s27')).toContainText('upsert=True');
+test('S09 Atlas UI conserva inspección y ejecución de pipeline completo',async({page})=>{
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s28');
- await expect(page.locator('#s28')).toContainText('numDimensions=384');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s33');
- await expect(page.locator('#s33')).toContainText('NO EJECUTADO');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s34');
- await expect(page.locator('#s34')).toContainText('1.000.000');
- await expect(page.locator('#s34')).toContainText('no prueban que escala');
-});
-
-
-test('S09 Atlas UI · presenta la ruta de índice y Aggregations',async({page})=>{
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s28');
- await expect(page.locator('#s28')).toContainText('Search & Vector Search');
- await expect(page.locator('#s28')).toContainText('CREAR_INDICE_EN_COLAB=False');
+ await expect(page.locator('#s28')).toContainText('JSON Editor');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s29');
- await expect(page.locator('#s29')).toContainText('Pending');
- await expect(page.locator('#s29')).toContainText('Ready');
+ await expect(page.locator('#s29')).toContainText('asíncrona');
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s30');
- await expect(page.locator('#s30')).toContainText('Aggregations');
- await expect(page.locator('#s30')).toContainText('384 números reales');
- await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s33');
- await expect(page.locator('#s33')).toContainText('s09_pipeline_atlas_ui.json');
- await expect(page.locator('#s33')).toContainText('no registra automáticamente');
+ for(const text of ['Aggregations','Text','pipeline completo','384 números'])await expect(page.locator('#s30')).toContainText(text);
 });

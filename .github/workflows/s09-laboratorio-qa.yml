@@ -10,6 +10,10 @@ on:
       - "utils/test_s09_current_contract.py"
       - "Presentaciones/s09-de-palabras-a-significado.html"
       - ".github/workflows/s09-laboratorio-qa.yml"
+      - "tests/s09-p0.visual.spec.js"
+      - "tests/s09-implementation.visual.spec.js"
+      - "playwright.s09.config.cjs"
+      - "assets/tutoriales/s09-laboratorio-guiado.html"
   workflow_dispatch:
 
 concurrency:
@@ -37,3 +41,18 @@ jobs:
         run: python utils/qa_s09_notebook.py
       - name: Validar las 35 diapositivas y la secuencia Atlas UI
         run: node utils/qa_s09_deck.cjs
+
+  visual:
+    name: Legibilidad, navegación y tutorial S09
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verificar presentación y tutorial en portátil y móvil
+        run: npx playwright test --config=playwright.s09.config.cjs

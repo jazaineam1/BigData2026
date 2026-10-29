@@ -73,10 +73,13 @@ if(slides.length!==35)throw Error('Cantidad de slides: '+slides.length);
 const invalid=slides.flatMap((x,i)=>!x||typeof x!=='object'||
   ['t','k','h','b'].some(key=>typeof x[key]!=='string'||!x[key].trim())?[i+1]:[]);
 if(invalid.length)throw Error('Slide sin propiedades válidas: '+invalid.join(','));
+process.stdout.write(JSON.stringify(slides));
 """
     valid=subprocess.run(["node","-e",js_validator,source_array],capture_output=True,text=True)
     if valid.returncode:
         errors.append("S09 estructura runtime inválida: "+valid.stderr.strip()[:600])
+    else:
+        slides=["\n".join(x[k] for k in ["t","k","h","b"]) for x in json.loads(valid.stdout)]
 
 resource_seed_start=seed.find("insert into public.lms_run_resources_v2")
 resource_seed=seed[resource_seed_start:] if resource_seed_start>=0 else ""
@@ -209,7 +212,7 @@ svg_tags=re.findall(r'<svg\b[^>]*>',deck,re.I)
 svg_without_viewbox=[x for x in svg_tags if 'viewBox=' not in x]
 light_without_visual=[]
 for i,s in enumerate(slides,1):
-    visual=bool(re.search(r'svg[A-Za-z0-9_]+\(\)|<svg|class=\\?"(?:lab|table|diagram|three|cols)|<table|<pre|<select|<input|<textarea|challengeChoice\(',s,re.I))
+    visual=bool(re.search(r'svg[A-Za-z0-9_]+\(\)|<svg|class=\\?"(?:lab|table|diagram|three|cols|vgrid|vcard|resume-mark)|<table|<pre|<select|<input|<textarea|challengeChoice\(',s,re.I))
     if len(s)<850 and not visual:
         light_without_visual.append(i)
 
@@ -225,7 +228,7 @@ checks=[
     ("grids no fuerzan overflow","grid-template-columns:minmax(0,1fr) minmax(0,1fr)" in deck and "repeat(3,minmax(0,1fr))" in deck and ".body>*{min-width:0;min-height:0}" in deck),
     ("diapositivas ligeras compensadas visualmente",not light_without_visual),
     ("laboratorios de conceptos S1–S21 preservados",{1,2,3,4}.issubset(lab_numbers)),
-    ("D1–D5 embebidos",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,6)}),
+    ("autocomprobaciones anteriores preservadas",set(challenge_calls)=={f"bd-s09-c{i}" for i in range(1,4)}),
     ("S09 Live embebido",'id="liveDrawer"' in deck and "S09 LIVE" in deck and "renderStudentLive" in deck),
     ("Teacher Wall embebido",'id="teacherWall"' in deck and "S09 Teacher Wall" in deck and "wall')==='docente" in deck),
     ("reinicio docente visible", "id=\"teacherReset\"" in deck and "REINICIAR_S09" in deck and "teacher_reset_session" in deck),
@@ -245,7 +248,7 @@ checks=[
     ("dos códigos de recurso", 'const RESOURCE_CODES=new Set(["bd-s09-presentation","bd-s09-notebook"])' in backend),
     ("sin guía en backend","bd-s09-guide" not in backend and "guide_opened" not in backend),
     ("dos recursos visibles en seed",resource_selects==2 and "'guide'" not in resource_seed and "bd-s09-guide" not in resource_seed),
-    ("guía histórica solo redirige","no hay un laboratorio separado" in guide and "location.replace" in guide),
+    ("tutorial integrado corresponde al cuaderno",all(f'data-practice-step="{i}"' in deck for i in range(1,7)) and all(text in deck and text in nb_text for text in ["DOCUMENTO DE TRABAJO:","Embeddings reales:","s09_atlas_evidencia.json"]) and "Tutorial integrado" in guide and "Ruta individual de seis pasos" in deck),
     ("módulo universal autenticado","requireSession(sessionNumber)" in session and "Material de la sesión" in session and "Qué hacer ahora" in session),
     ("módulo universal reanuda","primaryAction" in session and "data.resume" in session and "Continuar donde quedaste" in session),
     ("módulo estudiante simplificado","resource-grid-v4" in session and "Seguimiento integrado" not in session and "Avance de la ruta" not in session and "Cómo leer el progreso" not in session),
@@ -262,10 +265,10 @@ checks=[
     ("portal apunta al WALL universal",'href="wall.html?s=9"' in read("lms/portal.html") and 'id="teacherWall"' in read("lms/portal.html")),
     ("portal no prioriza S08 fijo","Number(x.session_number)===8" not in read("lms/portal.html")),
     ("S1-S21 preservadas",all(x in deck for x in ["Cuando las palabras no coinciden","intfloat/multilingual-e5-small","Mean pooling","Similitud coseno"])),
-    ("taller Atlas comienza en S22","El sistema completo" in slides[21] if len(slides)>21 else False),
-    ("taller termina en S35","Cierre verificable" in slides[34] if len(slides)>34 else False),
+    ("taller Atlas comienza en S22","atlas-chain" in slides[21] and "colab.research.google.com" in slides[21] if len(slides)>21 else False),
+    ("taller termina en S35","S10" in slides[34] and "s09_atlas_evidencia.json" in slides[34] if len(slides)>34 else False),
     ("preparación de conexión","getpass" in deck and "MongoClient" in deck and "ping" in deck),
-    ("embeddings a persistencia","bulk_write" in deck and "384 dimensiones" in deck and "lote" in deck),
+    ("embeddings a persistencia","UpdateOne" in slides[26] and "upsert=True" in slides[26] and "384" in slides[27] and "lote" in slides[27]),
     ("creación de índice","SearchIndexModel" in nb_text and "numDimensions" in nb_text and "vectorSearch" in deck),
     ("indexación asíncrona","queryable" in deck and "list_search_indexes" in deck),
     ("consulta Atlas real","$vectorSearch" in deck and "numCandidates" in deck and "queryVector" in deck),
@@ -326,7 +329,7 @@ print(" - 35 diapositivas")
 print(f" - {defs} bloques de definición · {examples} ejemplos explícitos · {len(graphic_refs)} gráficos usados")
 print(" - ninguna diapositiva ligera queda sin gráfico, tabla, código o herramienta")
 print(" - S22–S35: taller Atlas operativo; laboratorios anteriores S1–S21 preservados")
-print(" - D1–D5 con primer intento/dominio server-side")
+print(" - Autocomprobaciones previas conservadas; selección propia ejecutada en cuaderno")
 print(" - exactamente dos recursos visibles")
 print(" - módulo autenticado + reanudación por diapositiva")
 print(" - progreso privado sin muro estudiantil + Teacher Wall")

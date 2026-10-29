@@ -137,8 +137,13 @@ def main():
     deck = read(DECK)
     add("D2 conserva value y usa error plausible",
         "['always_relevant','Un 0.91 es comparable directamente con 0.91 de cualquier otro modelo de embeddings']" in deck)
-    add("D5 conserva value y usa error plausible",
-        "['vector_only','Conservar el resultado con score numérico mayor']" in deck)
+    # D5 pertenece al taller anterior; si vuelve a renderizarse, conserva su
+    # distractor. En el recorrido actual se comprueba la decisión ejecutada.
+    d5_active=bool(re.search(r"challengeChoice\(['\"]bd-s09-c5['\"]",deck))
+    notebook=read(ROOT / "Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb")
+    add("D5 activo conserva distractor; ruta actual conserva selección propia cerrada",
+        ("['vector_only','Conservar el resultado con score numérico mayor']" in deck) if d5_active
+        else all(x in notebook for x in ["POSICION_EVIDENCIA", "LIMITE_ELEGIDO", "seleccion_propia"]))
     migrated = {(c, s, o): new for c, s, o, _, _, new in rows}
     add("LAB4 identificador usa distractor plausible",
         migrated.get(("bd-s09-lab4", 1, 2)) == "Semántica con un embedding de más dimensiones, porque el vector preserva exactamente el identificador")

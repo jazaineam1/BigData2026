@@ -26,6 +26,10 @@ assert '"$vectorSearch"' in snippet(15) and '"exact":True' in snippet(15)
 assert "solapamiento_ann_enn_atlas" in snippet(16)
 assert "s09_atlas_evidencia.json" in snippet(16)
 assert "EJECUTAR_BENCHMARK = False" in snippet(21)
+# La ruta SECOP curso no importa requests: conexión debe traer su propia dependencia.
+import ast
+connection_tree=ast.parse(snippet(8))
+assert any(isinstance(n,ast.Import) and any(a.name=="requests" for a in n.names) for n in ast.walk(connection_tree)), "IP de conexión depende de importación condicional externa"
 assert "LMSBridge" not in "\n".join(sources)
 for i,c in enumerate(nb["cells"],1):
     if c["cell_type"]!="code":continue
@@ -170,7 +174,7 @@ with tempfile.TemporaryDirectory() as directory:
         exec(compile(snippet(12),"index.py","exec"),sandbox)
         assert sandbox["indice_creado"] and atlas.idx is not None
         sandbox["indice_queryable"]=True
-        exec(compile(snippet(15),"remote_mock.py","exec"),sandbox)
+        exec(compile(snippet(15).replace("COMPARAR_ENN_ATLAS = False","COMPARAR_ENN_ATLAS = True"),"remote_mock.py","exec"),sandbox)
         assert sandbox["atlas_query_ejecutada"]
         assert sandbox["enn_query_ejecutada"]
         assert len(atlas.query_params)==2
@@ -184,6 +188,24 @@ with tempfile.TemporaryDirectory() as directory:
         assert evidence["solapamiento_ann_enn_atlas"]==1
         assert len(evidence["resultados_ann_atlas"])==5
         assert "password" not in evidence and "URI_ATLAS" not in evidence
+        # Una segunda consulta conserva el historial; el filtro viene de un resultado propio.
+        before_history=len(sandbox["historial_s09"])
+        filtered=snippet(15).replace("USAR_ENTIDAD_DEL_RESULTADO = False","USAR_ENTIDAD_DEL_RESULTADO = True").replace("POSICION_ENTIDAD = 0","POSICION_ENTIDAD = 1")
+        exec(compile(filtered,"own_entity.py","exec"),sandbox)
+        assert len(sandbox["historial_s09"])==before_history+1
+        assert sandbox["FILTRO_ENTIDAD"]
+        assert sandbox["ultimo_ranking_s09"].entidad.eq(sandbox["FILTRO_ENTIDAD"]).all()
+        selected=snippet(16).replace("POSICION_EVIDENCIA = 0","POSICION_EVIDENCIA = 1").replace("LIMITE_ELEGIDO = 0","LIMITE_ELEGIDO = 1")
+        exec(compile(selected,"selected_evidence.py","exec"),sandbox)
+        evidence=json.loads(Path("s09_atlas_evidencia.json").read_text())
+        assert evidence["seleccion_propia"]["id_proceso"]==sandbox["ultimo_ranking_s09"].iloc[0]["id_proceso"]
+        for invalid in ['"mi respuesta"','True', '-1']:
+            try:
+                exec(compile(snippet(16).replace("LIMITE_ELEGIDO = 0","LIMITE_ELEGIDO = "+invalid),"reject_free_response.py","exec"),sandbox)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("Aceptó respuesta académica no estructurada: "+invalid)
     finally:
         os.chdir(before)
 print("S09 QA OK: 21 celdas sincronizadas + sintaxis + ruta local + Atlas simulado (NO conexión real).")
