@@ -17,7 +17,7 @@ test('imagen: controles y cambios de medidas',async({page})=>{
  await page.goto(route+'#s5');
  await expect(page.locator('#imageStats')).toContainText('Derivado');
  const before=await page.evaluate(()=>window.imageMetrics.pixels);
- await page.locator('#imageSize').fill('80');
+ await page.locator('#imageSize').evaluate(el=>{el.value='80';el.dispatchEvent(new Event('input',{bubbles:true}))});
  const after=await page.evaluate(()=>window.imageMetrics.pixels);
  expect(after).toBeLessThan(before);
  await page.locator('#imageBinary').check();
@@ -27,7 +27,7 @@ test('audio: señal original, ventana y exportación de resumen',async({page})=>
  await page.goto(route+'#s8');
  await page.locator('#demoAudio').click();
  await expect(page.locator('#audioStats')).toContainText('RMS ventana');
- await page.locator('#audioStart').fill('50');
+ await page.locator('#audioStart').evaluate(el=>{el.value='50';el.dispatchEvent(new Event('input',{bubbles:true}))});
  expect(await page.evaluate(()=>window.audioMetrics.window_rms)).toBeLessThan(0.01);
  await page.goto(route+'#s14');
  const download=page.waitForEvent('download');
