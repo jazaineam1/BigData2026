@@ -20,17 +20,18 @@ assert "MODO_DEMO" in snippet(4) and "COLUMNA_ID" in snippet(4)
 assert 'intfloat/multilingual-e5-small' in snippet(4)
 assert "MAX_TOKENS" in snippet(6)
 assert 'upsert=True' in snippet(10) and '"s09:"+LOTE' in snippet(10)
-assert "CREAR_INDICE_EN_COLAB = False" in snippet(12)
+assert "CREAR_INDICE_EN_COLAB = True" in snippet(12), "La ruta personal crea el índice automáticamente"
 # No basta mostrar un formulario vacío: el alumno necesita instrucciones de obtención.
-for phrase in ("Ruta A", "Ruta B", "FREE (M0)", "HOST_ATLAS", "USUARIO_ATLAS",
-               "IP_COLAB", "Network Access", "Connect", "Drivers", "contraseña",
-               "ATLAS REAL", "RUTA LOCAL", "col.aggregate"):
+for phrase in ("Atlas temporal automático", "Reclamar mi clúster", "Data Explorer",
+               "Search & Vector Search", "0.0.0.0/0", "NO EJECUTADO ATLAS"):
     assert phrase in snippet(7), f"Guía del estudiante incompleta: {phrase}"
-assert "IP_COLAB" in snippet(2) and 'api.ipify.org' in snippet(2)
-assert "USAR_ATLAS = False" in snippet(8), "La ruta segura offline debe ser el valor inicial"
+assert "sin contraseñas ni configuración de IP" in snippet(2)
+assert 'MODO_ATLAS = "Atlas temporal automático"' in snippet(8), "Falta Atlas autónomo predeterminado"
+assert "ephemeralClusters:create" in snippet(8) and "application/vnd.atlas.preview+json" in snippet(8)
+assert '_s09_atlas_temporal_privado' in snippet(8) and "connectionString" in snippet(8)
+assert "getpass" in snippet(8) and "MongoClient" in snippet(8)
 
-assert "DESDE CERO" in snippet(7)
-assert "IP_COLAB" in snippet(2)
+assert "MongoDB Atlas real" in snippet(7)
 assert "SearchIndexModel(" in snippet(12)
 assert 'list_search_indexes(' in snippet(13) and 'queryable' in snippet(13)
 assert '"$vectorSearch"' in snippet(15) and '"exact":True' in snippet(15)
@@ -173,7 +174,7 @@ with tempfile.TemporaryDirectory() as directory:
         atlas_ui=AtlasFalso()
         sandbox["col"]=atlas_ui
         ui_source=snippet(12).replace(
-            "CREAR_INDICE_EN_COLAB = False","CREAR_INDICE_EN_COLAB = False")
+            "CREAR_INDICE_EN_COLAB = True","CREAR_INDICE_EN_COLAB = False")
         exec(compile(ui_source,"index_ui_manual.py","exec"),sandbox)
         assert not sandbox["indice_creado"] and atlas_ui.idx is None
         # Simular que el docente lo creó en Atlas UI y reejecutó celda 5:
@@ -182,7 +183,7 @@ with tempfile.TemporaryDirectory() as directory:
         assert sandbox["indice_creado"] and atlas_ui.idx is not None
         # Reponer la colección de prueba; ruta PyMongo crea de forma programática.
         sandbox["col"]=atlas
-        exec(compile(snippet(12).replace("CREAR_INDICE_EN_COLAB = False","CREAR_INDICE_EN_COLAB = True"),"index.py","exec"),sandbox)
+        exec(compile(snippet(12).replace("CREAR_INDICE_EN_COLAB = True","CREAR_INDICE_EN_COLAB = True"),"index.py","exec"),sandbox)
         assert sandbox["indice_creado"] and atlas.idx is not None
         sandbox["indice_queryable"]=True
         exec(compile(snippet(15).replace("COMPARAR_ENN_ATLAS = False","COMPARAR_ENN_ATLAS = True"),"remote_mock.py","exec"),sandbox)
@@ -219,4 +220,81 @@ with tempfile.TemporaryDirectory() as directory:
                 raise AssertionError("Aceptó respuesta académica no estructurada: "+invalid)
     finally:
         os.chdir(before)
-print("S09 QA OK: 21 celdas sincronizadas + sintaxis + ruta local + Atlas simulado (NO conexión real).")
+print("S09 QA OK: 21 celdas sincronizadas + sintaxis + Atlas automático por contrato + mocks offline (NO conexión real).")
+
+
+# CONTRATO DE APROVISIONAMIENTO TEMPORAL SIN RED:
+# Simular la API real (respuesta 201 y error 429) y el driver de MongoDB.
+# Nunca se crea clúster ni se utiliza una URI real durante la CI.
+def verificar_alta_atlas_ephemeral_offline():
+    import contextlib, io, sys, types
+    from unittest.mock import patch
+    call_count={"post":0,"ping":0}
+    placeholder_uri=("mongodb+srv://"+"mockUser"+":"+"mockPassword"+"@"+"example.mongodb.net/")
+    private_claim="https://account.mongodb.com/account/register?claimId=VALOR_PRIVADO_FICTICIO"
+    class FakeResponse:
+        status_code=201
+        def raise_for_status(self): return None
+        def json(self):
+            return {"connectionString":placeholder_uri,"clusterId":"PRIVATE-MOCK-ID",
+                    "claimUrl":private_claim,"expiresAt":"2026-10-31T22:00:00Z"}
+    def fake_post(url,headers,json,timeout):
+        assert url=="https://cloud.mongodb.com/api/atlas/v2/unauth/ephemeralClusters:create"
+        assert headers["Accept"]=="application/vnd.atlas.preview+json"
+        assert headers["Content-Type"]=="application/json"
+        assert json["clusterName"].startswith("S09-") and timeout>0
+        call_count["post"]+=1
+        return FakeResponse()
+    class FakeClient:
+        def __init__(self,uri,**options):
+            assert uri==placeholder_uri
+            self.admin=types.SimpleNamespace(command=self._ping)
+        def _ping(self,command):
+            assert command=="ping"
+            call_count["ping"]+=1
+            return {"ok":1}
+        def __getitem__(self,db):
+            assert db=="clase_s09_demo"
+            return types.SimpleNamespace(__getitem__=lambda key:None) if False else FakeDB()
+    class FakeDB:
+        def __getitem__(self,coll):
+            assert coll=="secop_vectores"
+            return "COLLECTION_MOCK"
+    fake_pymongo=types.ModuleType("pymongo")
+    fake_pymongo.MongoClient=FakeClient
+    fake_pymongo.UpdateOne=object
+    fake_operations=types.ModuleType("pymongo.operations")
+    fake_operations.SearchIndexModel=object
+    fake_requests=types.ModuleType("requests")
+    fake_requests.post=fake_post
+    with patch.dict(sys.modules,{"pymongo":fake_pymongo,
+                                 "pymongo.operations":fake_operations,
+                                 "requests":fake_requests}):
+        env={"__name__":"__main__"}
+        output=io.StringIO()
+        with contextlib.redirect_stdout(output):
+            exec(compile(snippet(8),"atlas_ephemeral_201_mock.py","exec"),env)
+            assert env["atlas_ok"] and env["col"]=="COLLECTION_MOCK"
+            assert env["_s09_atlas_temporal_privado"]["connectionString"]==placeholder_uri
+            assert call_count["post"]==1 and call_count["ping"]==1
+            # Reiniciar la celda debe reutilizar el recurso del mismo runtime.
+            exec(compile(snippet(8),"atlas_ephemeral_reuse_mock.py","exec"),env)
+            assert call_count["post"]==1 and call_count["ping"]==2
+        exposed=output.getvalue()
+        assert placeholder_uri not in exposed and "mockPassword" not in exposed
+        assert private_claim not in exposed and "PRIVATE-MOCK-ID" not in exposed
+        assert "ATLAS REAL · conexión confirmada" in exposed
+        class LimitedResponse:
+            status_code=429
+            def raise_for_status(self): raise AssertionError("429 must be handled first")
+        fake_requests.post=lambda *args,**kw:LimitedResponse()
+        no_conn={"__name__":"__main__"}
+        with contextlib.redirect_stdout(io.StringIO()) as output429:
+            exec(compile(snippet(8),"atlas_ephemeral_429_mock.py","exec"),no_conn)
+        assert not no_conn["atlas_ok"] and no_conn["col"] is None
+        assert "_s09_atlas_temporal_privado" not in no_conn
+        assert "ATLAS TEMPORAL NO CREADO" in output429.getvalue()
+        assert "NO SE EJECUTÓ ATLAS" in output429.getvalue()
+    print("S09 API MOCK OK: alta, reutilización, ping, 429 y no exposición de URI/claim.")
+
+verificar_alta_atlas_ephemeral_offline()

@@ -1,138 +1,72 @@
-# S09 · Guía docente final: Big Data y bases vectoriales
+# S09 · Libreto docente ÚNICO (55 minutos, desde la diapositiva 21)
 
-**Maestría en Analítica de Datos · Universidad Central · 55 minutos desde la diapositiva 21**
+**Universidad Central · Maestría en Analítica de Datos · Grupo 2 · Big Data 2026-2S**
 
-## Por qué se rediseñó
+## Qué cambió y qué se exige
 
-El grupo ya conoció búsqueda lexical/Elasticsearch, BM25, E5, embeddings, coseno y Top-k. **No volver a dictar esos conceptos**. El nuevo objetivo es explicar cómo pasar de una matriz local de vectores a un **sistema de base de datos vectorial persistente**, con modelo documental, índice, filtros y evidencias operativas.
+**Ruta principal autónoma:** cada estudiante abre su Colab y usa **Atlas temporal automático**. El notebook llama a la API oficial de **MongoDB Atlas Ephemeral Free/M0** para crear un clúster individual. La API devuelve una URI privada y un enlace de reclamación; el cuaderno no solicita host, usuario, contraseña ni IP al profesor. No reutiliza el clúster compartido del curso. En su servicio temporal MongoDB permite 0.0.0.0/0 con autenticación individual. No se cambia el acceso de ningún proyecto existente.
 
-| Antes | Problema | Corrección |
+**Lo que debe aprender realmente:** E5 produce embeddings; MongoDB conserva documentos y metadatos; un índice vectorial de 384D/cosine habilita ANN; el filtro restringe el universo; $vectorSearch devuelve candidatos, no una verdad. Se distinguen simulador 2D, NumPy local y Atlas auténtico.
+
+**Dos recursos estudiantiles:** presentación HTML con laboratorio visual y el cuaderno de 21 celdas. El tutorial está integrado; no se añade tercer recurso LMS.
+
+## Libreto unificado de 55 minutos
+
+| Tiempo | Diapositivas / recurso | Libreto y acción observable |
 | --- | --- | --- |
-| 48 celdas | Se repetía un segundo laboratorio completo después de Atlas | 21 celdas, 17 de ruta y 4 de ampliación |
-| 120 documentos tratados como Big Data | El tamaño no prueba capacidad de escalar | Muestras honestas de 120 / hasta 6.000 y cálculo de memoria |
-| Comparación NumPy vs Atlas ANN | No equivale a comparar ambos motores dentro de Atlas | Consultas reales ANN y ENN de Atlas, con el mismo índice y filtro cuando la versión lo admite |
-| IDs solo por proceso | Se podía sobrescribir una ronda/pareja diferente | ID con lote SHA-256 + identificador de proceso + equipo |
-| Crear índice confundido con usarlo | Creación asíncrona | Exigir estado queryable antes de consultar |
-| Latencia única como benchmark | Imposible inferir escalabilidad o p95 | Latencia etiquetada y extensión opcional de varias pruebas |
-| Glosarios y ejemplos de código inconexos | Poca conexión con Big Data | Una arquitectura visual, operaciones y evidencia por paso |
+| 00–04 | S21–S23 | «Ya representamos textos. ¿Cómo guardar y consultar los vectores sin perder identidad, filtros y trazabilidad?». Señalar E5 → documento → índice → consulta. |
+| 04–07 | Laboratorio visual: Documentos | Abrir «Explorar base vectorial». Insertar y repetir upsert: 8 → 9 → 9; explicar _id y persistencia conceptual. |
+| 07–10 | Laboratorio visual: Índice | Probar campo vectorial 2D válido, luego incompatibilidad 384D; distinguir solicitar índice de comprobar disponible. |
+| 10–14 | Laboratorio visual: Consulta | Ejecutar exacta, cambiar filtro, recorrer grafo aproximado. Explicar que el dibujo NO es HNSW ni E5 real. |
+| 14–17 | Laboratorio visual: Evaluación | Juzgar los k candidatos y calcular Precision@k. Exportar JSON marcado SIMULACIÓN LOCAL. |
+| 17–23 | S24–S25 / Colab celdas 0–2 | Abrir copia individual Colab; cargar SECOP curso 120; mostrar cantidad real N y E5 (N,384) normalizado. |
+| 23–31 | S26 / Colab celda 3 | Mantener «Atlas temporal automático». Ejecutar: API crea clúster M0, URI se guarda en memoria y ping verifica conexión real. No se introduce contraseña ni IP manualmente. Mostrar enlace para reclamar y ver la consola UI. |
+| 31–36 | S27 / Colab celda 4 | Cargar documentos de lote en Atlas; repetir bulk_write y mostrar conteo idéntico. |
+| 36–41 | S28–S29 / Colab celdas 5–6 | Mostrar JSON índice; crear índice real; comprobar queryable=True. No confundir crear con disponibilidad. |
+| 41–49 | S30–S32 / Colab celda 7 | Consulta $vectorSearch con filtro de lote. Cambiar frase, luego seleccionar entidad de ranking propio; comparar IDs. ENN opcional si instancia admite. |
+| 49–53 | S33 / Colab celda 8 | Exportar expediente JSON; demostrar motor real, lote, IDs, filtro e índice. Si Atlas falla, evidencia dice NO EJECUTADO y conserva NumPy local. |
+| 53–55 | S34–S35 | «¿Qué no probamos?». 120 registros no son Big Data; el coseno no es probabilidad; una consulta no estima precisión general ni rendimiento sostenido. |
 
-**Competencia evaluable:** diseñar, persistir, indexar y consultar documentos con embeddings en MongoDB Atlas Vector Search, distinguiendo ANN, ENN, filtros, identidad de los lotes y límites del resultado.
+**Al proyectar la consola Atlas real:** la opción de reclamar clúster es voluntaria y exige una cuenta personal MongoDB/Google para abrir Atlas UI. El resto (crear clúster, crear colección, construir índice, buscar) sí puede realizarse íntegramente por Python sin cuenta. Si quieres mostrar Atlas UI durante los 55 minutos, reclama previamente **tu propio clúster docente temporal** y proyecta Database → Data Explorer → clase_s09_demo → secop_vectores; luego Search & Vector Search → s09_vector_index y Aggregations → Text. No compartas el enlace privado de reclamación ni la URI.
 
+## Qué debe observarse y cómo interpretar cada prueba
 
-## Nuevo laboratorio visual integrado — antes de activar Colab
+| Prueba | Evidencia legítima | Qué NO demuestra |
+| --- | --- | --- |
+| Creación Ephemeral | Respuesta válida de API y URI privada en memoria | Que el índice está disponible |
+| ping | «ATLAS REAL · conexión confirmada» | Que se escribieron datos |
+| bulk_write + count_documents | «documentos del lote: N de N» | Que la recuperación funciona |
+| create_search_index | «creación del índice solicitada» | Que queryable ya es True |
+| list_search_indexes | «disponible: True» | Que los resultados son relevantes |
+| col.aggregate($vectorSearch) | Tabla Atlas REAL con ID, entidad, score | Precisión humana o escalabilidad |
+| NumPy local | Vecinos exactos en la muestra local | Persistencia ni búsqueda Atlas |
+| JSON de simulación | Relaciones conceptuales en vectores 2D | E5, HNSW o MongoDB |
 
-En la misma [diapositiva 21](https://jazaineam1.github.io/BigData2026/Presentaciones/s09-de-palabras-a-significado.html#s21) aparece el botón **Explorar base vectorial**. No agrega un tercer recurso LMS: usa `assets/s09/vector-lab.js` y `assets/s09/vector-lab.css` dentro de la presentación.
+## ¿Qué hace el alumno, sin requerir al docente?
 
-Estas cinco etapas ocupan **13 minutos dentro de los 55 de la sesión**, reemplazando una parte de la exposición inicial; no deben sumarse como 13 minutos extra. Los 42 minutos restantes se concentran en observar la ejecución real y exportar la evidencia (o en una demostración docente Atlas cuando el acceso individual no esté disponible).
+1. Abre el Colab publicado y usa **Entorno de ejecución → Ejecutar todo**. No se le solicita contraseña, IP ni host para la ruta predeterminada.
+2. Observa los cuatro hitos reales: ping, N documentos, índice queryable y Top-k remoto.
+3. Cambia una consulta y después una entidad desde resultados observados, una variable por vez.
+4. Descarga su expediente; la copia a Drive es opcional, no bloquea la ruta principal.
+5. Para **aprender la interfaz MongoDB Atlas** de forma individual, reclama desde el enlace privado mostrado y abre el Data Explorer, el índice y el constructor de agregaciones. Esto sí puede exigir cuenta y confirmación de correo personales; nunca del profesor.
 
-**Secuencia formativa de cinco etapas:**
+## Contingencias y límites
 
-1. **Documentos (3 min):** abrir un JSON ficticio con texto, entidad, ID y dos números didácticos; usar `upsert` dos veces para ver 8 → 9 → 9. Pregunta: «¿Qué cambia cuando el identificador ya existe?».
-2. **Índice (3 min):** configurar `embedding_demo_2d`/2 dimensiones. Probar deliberadamente 384 dimensiones: rechazar incompatibilidad. Solicitar índice y distinguir *pendiente* de *disponible*. Pregunta: «¿Pedir construir demuestra `queryable` en Atlas?».
-3. **Consulta (4 min):** ejecutar modo exacto, cambiar **solo** la entidad y comparar resultados. Después cambiar al grafo aproximado conceptual y reducir nodos explorados; comparar IDs con la referencia exacta. Pregunta: «¿Reducir candidatos garantiza conservar todo el Top-k?».
-4. **Evaluación (2 min):** emitir un juicio de pertinencia por cada resultado; solo al terminar se calcula Precision@k. Pregunta: «¿Un coseno alto es una probabilidad de relevancia?».
-5. **Evidencia (1 min):** inspeccionar `s09_simulacion_local.json` y su bandera `motor_real_atlas_ejecutado:false`. Abrir Colab para generar datos reales, índice compatible `embedding`/384D, consultas y `s09_atlas_evidencia.json`.
+- **API Atlas devuelve 429/5xx:** no se crea clúster. El cuaderno lo declara y continúa con NumPy; la ejecución real queda pendiente. No afirmar que conectó.
+- **Atlas demora en provisionar:** la celda de conexión reintenta ping; una conexión fallida no se disfraza de Atlas.
+- **Índice tarda:** reejecutar verificación; nunca usar «creado» como sustituto de queryable=True.
+- **El clúster se pausa o desaparece:** sin reclamar, MongoDB pausa a los 2 días y elimina a los 7. La evidencia JSON debe conservarse fuera del clúster.
+- **Red de cualquier origen:** solo aplica a cada Ephemeral aislado; no es una invitación a abrir 0.0.0.0/0 en el clúster compartido. Tras reclamar, MongoDB permite restringir IPs.
+- **No almacenamiento de credenciales:** la URI se mantiene en memoria del runtime; el notebook no escribe la contraseña ni el enlace privado de reclamación en JSON o código. El enlace de reclamación puede verse en la salida y no debe redistribuirse.
+- **Costo:** Free/M0 es gratuito sujeto a límites de capacidad y a la política vigente de MongoDB. Si el estudiante reclama el clúster, no debe seleccionar ofertas de pago.
+- **El laboratorio del navegador** sigue siendo conceptual. Su estado no se evalúa por el LMS como evidencia real de Atlas.
 
-**Delimitación:** todos los documentos y vectores del laboratorio visual son ejemplos inventados de dos dimensiones; el recorrido del grafo es pedagógico, **no HNSW real**, no genera E5 y no se conecta a MongoDB. Por ello se debe expresar «en la simulación observé…», no «Atlas respondió…». Con Atlas no disponible, la práctica NumPy del cuaderno sigue siendo válida como respaldo local, pero no demuestra persistencia ni consulta remota.
+## Material y verificaciones
 
-**Control docente:** S09 Live y los desafíos D1–D5 existentes conservan su registro independiente. Las cinco etapas del laboratorio visual no se convierten automáticamente en calificación ni acreditan ejecución; el Teacher Wall no debe interpretar estas exploraciones como resultados Atlas.
+- Presentación: https://jazaineam1.github.io/BigData2026/Presentaciones/s09-de-palabras-a-significado.html#s21
+- Colab: https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb
+- Documentación MongoDB Ephemeral: https://www.mongodb.com/docs/atlas/tutorial/create-ephemeral-cluster/
+- Índices desde PyMongo: https://www.mongodb.com/docs/search/indexes/manage-indexes/
+- Búsquedas: https://www.mongodb.com/docs/vector-search/query/aggregation-stages/vector-search-stage/
 
-## Preparar ANTES de la clase
-
-1. Tener un cluster MongoDB Atlas activo y compatible, con colección disponible.
-2. Crear usuario de base de datos con lectura/escritura. Para administrar índices de búsqueda el rol del proyecto debe ser Project Data Access Admin o superior.
-3. Configurar Network Access para permitir la IP de salida de Colab. No proyectar la URI ni compartir contraseñas administrativas. Se introduce mediante getpass.
-4. MongoDB Atlas Free permite **máximo 3 índices de búsqueda** y Flex hasta 10 según la documentación. Para 30 participantes, usar una demostración docente, no 30 índices sobre un cluster Free.
-5. Abrir el cuaderno y escoger **SECOP curso · 120**. Verificar N observado, IDs únicos, lote y que la matriz E5 tenga (N, 384) dimensiones; precargar modelo y embeddings antes de clase.
-6. Si la creación del índice tarda, dejar preparado el índice s09_vector_index con campo embedding de 384 dimensiones, cosine, y prefiltros lote/entidad.
-7. Si falla Atlas, usar **Respaldo sintético · 6** y NumPy local. No presentar esa ejecución como MongoDB Atlas.
-
-## Libreto de 55 minutos
-
-| Tiempo | Diapositiva | Guion hablado | Acción y evidencia |
-| --- | --- | --- | --- |
-| 00–04 | 21–22 | «Ya aprendimos a convertir texto en números. ¿Dónde se guardan y consultan los vectores si la solución tiene que operar?» | Señalar los cinco componentes del esquema. |
-| 04–08 | 23 | «¿Colab es Atlas? No: Colab ejecuta Python; Atlas mantiene la colección y el índice.» | Preparar usuario, conexión, permisos y red. |
-| 08–12 | 24 | «Sin identidad ni procedencia, los vecinos no son auditables.» | Cargar SECOP, mostrar recibidos/válidos/N/LOTE. |
-| 12–18 | 25 | «¿Quién produce 384 dimensiones?» E5, no la base de datos. | Generar o recuperar embeddings y tamaño MiB. |
-| 18–23 | 26 | «¿Qué demuestra ping?» Conectividad, no índice listo. | Activar USAR_ATLAS y conectar sin publicar contraseña. |
-| 23–30 | 27 | «¿Qué pasa si cargamos dos veces?» Debe conservar N sin duplicar. | Upsert, conteo del lote, documento de 384 dimensiones. |
-| 30–36 | 28 | «¿Lote y entidad son dimensiones del embedding?» No, son metadatos. | Crear/verificar índice vectorial y filtros. |
-| 36–40 | 29 | «¿Una solicitud de índice equivale a índice disponible?» No. | Ver Pending/Ready en Atlas UI; reejecutar celda 5 si el índice se creó desde interfaz; verificar queryable=True. |
-| 40–45 | 30 | «¿Quién devuelve este Top-5?» Atlas mediante $vectorSearch. | Ejecutar ANN con filtro lote por PyMongo; generar pipeline JSON para pegar en Data Explorer → Aggregations → Text → Run. |
-| 45–48 | 31 | «¿El filtro cambia el embedding?» No, restringe elegibilidad. | Repetir activando SOLO_ENTIDAD_FRECUENTE. |
-| 48–51 | 32 | «¿Quién busca exacto y quién aproximado?» ENN y ANN dentro de Atlas si es compatible. | Activar COMPARAR_ENN_ATLAS y comparar IDs, no probabilidades. |
-| 51–53 | 33 | «¿Se puede reproducir la operación sin ver mi contraseña?» Sí: consulta, lote, índice, modelo y resultados. | Exportar s09_atlas_evidencia.json. |
-| 53–55 | 34–35 | «¿Ciento veinte filas prueban Big Data?» No. «¿Qué mediríamos con un millón?» | Memoria, latencia distribuida, actualización, costo y calidad. |
-
-## Demostración obligatoria de MongoDB Atlas UI
-
-**El mismo índice y consulta se trabajan en dos interfaces.** La clase no termina solo con un `col.aggregate()` mostrado en Python.
-
-**Crear/verificar índice en Atlas UI:**
-1. Antes de la celda 5 en Colab, decide crear el índice desde la interfaz. En la celda 5 selecciona `CREAR_INDICE_EN_COLAB=False`; así PyMongo no se adelanta a crearlo.
-2. En [Atlas](https://cloud.mongodb.com/) abre tu proyecto → **Search & Vector Search** → **Create Search Index**. Escoge **Vector Search**, base `clase_s09_demo`, colección `secop_vectores`, nombre `s09_vector_index` y **JSON Editor**.
-3. Copia la definición completa mostrada por la **celda 5**, también disponible en `s09_indice_atlas_ui.json`. Debe declarar vector `embedding` (384, `cosine`) y filtros `lote` / `entidad`. Confirma la creación. **No crees otro índice si ya existe uno con ese nombre.**
-4. En Atlas, observa **Pending → Ready** en Search & Vector Search. Regresa a Colab, vuelve a ejecutar la celda 5 y luego la 6: `queryable=True` confirma disponibilidad.
-
-**Ejecutar Vector Search en la propia consola Atlas:**
-1. Ejecuta la **celda 7** de Colab para calcular `q` a partir de la consulta. **No se pega una frase en el campo `queryVector`: se necesitan 384 números del modelo E5 usado para documentos.**
-2. La **celda 7** genera inmediatamente **`s09_pipeline_atlas_ui.json`** y un bloque desplegable con el pipeline completo, incluidos `$vectorSearch`, `$project`, el vector de 384 números y el filtro de lote. La celda 8 exporta la evidencia.
-3. En Atlas abre **Data Explorer → clase_s09_demo → secop_vectores → Aggregations → &lt;&gt; Text**. Pega el pipeline completo y pulsa **Run**. La consola debe mostrar los documentos recuperados; comprueba `id_proceso`, `entidad` y `score`.
-4. Repite desde Colab/PyMongo y verifica que ambas ejecuciones consultan el mismo índice. El **JSON de evidencia de Colab solo certifica las acciones que Colab haya ejecutado**; los resultados de una ejecución exclusivamente en Atlas UI deben comprobarse en Atlas.
-
-Si se elige el camino PyMongo desde el principio, deja `CREAR_INDICE_EN_COLAB=True`; Atlas UI sirve para **inspeccionar estado y ejecutar de nuevo el pipeline**, pero no es necesario crear un segundo índice.
-
-Documentación oficial: [crear índices Vector Search](https://www.mongodb.com/docs/vector-search/indexes/vector-search-type/) · [crear pipelines en Data Explorer](https://www.mongodb.com/docs/atlas/atlas-ui/create-agg-pipeline/) · [consultas ANN/ENN](https://www.mongodb.com/docs/vector-search/query/aggregation-stages/vector-search-stage/).
-
-## Lo que realmente mide cada herramienta
-
-- **NumPy local:** calcula una referencia exacta en memoria, sobre la muestra del Colab. No constituye una búsqueda en Atlas.
-- **Atlas ANN:** ejecuta $vectorSearch con numCandidates (por ejemplo 100 para Top-5); el índice navega entre candidatos aproximados.
-- **Atlas ENN:** ejecuta $vectorSearch con exact=true y **sin numCandidates**. Si la versión no es compatible, el cuaderno registra NO EJECUTADO.
-- **Solapamiento@k de vecinos:** proporción de IDs devueltos por ANN que coinciden con los de ENN. No equivale a precisión humana.
-- **Precision@k humana:** proporción de resultados juzgados relevantes por una persona. La sesión no la estima sin etiquetas.
-- **Latencia:** tiempo de ida y vuelta de una consulta. Una medición aislada NO valida p50, p95 ni capacidad a escala.
-
-El cuaderno exporta **motor_ann_ejecutado** y **motor_enn_ejecutado** por separado, los conteos, lote, parámetros, resultados, latencias y fuente de datos. Nunca exporta URI ni contraseña.
-
-## Pensamiento Big Data
-
-Para vectores de 384 dimensiones float32, sin contar índice ni metadatos, la matriz consume aproximadamente:
-
-| Registros | Memoria de vectores |
-| ---: | ---: |
-| 120 | 0,18 MiB |
-| 6.000 | 8,79 MiB |
-| 100.000 | 146,48 MiB |
-| 1.000.000 | 1,43 GiB |
-
-La matriz NO representa el tamaño final de BSON, índice HNSW, caché del servidor, almacenamiento o coste del modelo. La escalabilidad exige ingestión por lotes, actualizaciones, colas/reintentos, indexación, partición, latencia p50/p95, carga concurrente y observabilidad. S11–S15 desarrollan esos temas.
-
-## Contingencias sin falsificar resultados
-
-- **SECOP no entrega 6.000 registros:** mostrar N verdadero; cambiar al CSV del curso si es necesario.
-- **E5 tarda en descargar:** usar un Colab docente preparado, sin inventar mediciones.
-- **Atlas rechaza ping:** revisar acceso, usuario, permisos y red; continuar local etiquetado LOCAL.
-- **Queryable tarda:** esperar o mostrar índice previamente configurado; no atribuir resultados no observados.
-- **Atlas sin soporte ENN:** dejar motor_enn_ejecutado como NO EJECUTADO y usar NumPy exacto solo como referencia local.
-- **Filtro reduce a cero resultados:** escoger la entidad que sí aparece en el lote; no alterar las etiquetas.
-- **Un alumno pierde la ejecución:** el expediente JSON debe indicar qué salió, qué no salió, con ID y parámetros.
-
-## Preguntas cerradas de salida
-
-1. ¿Qué biblioteca ejecuta E5? **SentenceTransformers, en Colab.**
-2. ¿Qué sistema almacena y consulta los vectores persistentemente? **MongoDB Atlas.**
-3. ¿Cuándo está disponible el índice? **Cuando queryable es True.**
-4. ¿Qué diferencia a ANN y ENN? **Aproximación frente a exactitud de vecinos.**
-5. ¿Un solapamiento de 1 demuestra relevancia humana? **No.**
-6. ¿6.000 embeddings implican automáticamente Big Data? **No.**
-
-## Recursos estudiantiles — máximo dos
-
-1. [Presentación desde S21](https://jazaineam1.github.io/BigData2026/Presentaciones/s09-de-palabras-a-significado.html#s21)
-2. [Cuaderno Colab de 21 celdas](https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb)
-
-Esta guía es **material del docente**, no un tercer recurso LMS.
-
-Referencias oficiales: [MongoDB Vector Search: índices](https://www.mongodb.com/docs/vector-search/indexes/vector-search-type/) y [consultas ANN y ENN](https://www.mongodb.com/docs/vector-search/query/aggregation-stages/vector-search-stage/).
+La CI offline comprueba estructura, rutas de recuperación y contratos mediante mocks; **no** certifica acceso remoto real, tasa de éxito de la API, experiencia del alumno ni ausencia de límites por instancia. Una verificación genuina debe observar el clúster, índice y consulta desde un runtime con red.

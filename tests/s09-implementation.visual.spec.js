@@ -35,21 +35,21 @@ test('S09 tutorial integrado: seis pasos, progreso y enlace anterior',async({pag
  await expect(page).toHaveURL(/s09-de-palabras-a-significado.html#s21$/);
 });
 
-for(const width of [1366,390])test('Atlas preparación embebida '+width,async({page})=>{
+for(const width of [1366,390])test('Atlas autónomo guiado y consola UI '+width,async({page})=>{
  await page.setViewportSize({width,height:844});
  await page.goto('/Presentaciones/s09-de-palabras-a-significado.html#s26');
  await page.locator('#s26 [data-atlas-setup]').click();
- const dialog=page.getByRole('dialog',{name:'Atlas + Colab · preparación paso a paso'});
+ const dialog=page.getByRole('dialog',{name:'MongoDB Atlas real · no necesitas pedir accesos'});
  await expect(dialog).toBeVisible();
- await expect(dialog.locator('.atlas-step')).toHaveCount(7);
- await expect(dialog).toContainText('1 week');
- await expect(dialog).toContainText('Specific Privileges');
- await expect(dialog).toContainText('IP_COLAB');
- await expect(dialog).toContainText('FREE / M0');
- await expect(dialog).toContainText('HOST_ATLAS');
- await expect(dialog).toContainText('USUARIO_ATLAS');
- await expect(dialog).toContainText('Add New Database User');
- await expect(dialog).toContainText('CREAR_INDICE_EN_COLAB=True');
+ await expect(dialog.locator('section.atlas-step')).toHaveCount(4);
+ await expect(dialog).toContainText('Atlas temporal automático');
+ await expect(dialog).toContainText('0.0.0.0/0');
+ await expect(dialog).toContainText('Reclamar mi clúster');
+ await expect(dialog).toContainText('Data Explorer');
+ await expect(dialog).toContainText('s09_vector_index');
+ await expect(dialog).toContainText('s09_atlas_evidencia.json');
+ await expect(dialog).toContainText('NumPy LOCAL');
+ await expect(dialog.locator('details')).toContainText('HOST_ATLAS');
  expect(await dialog.evaluate(e=>e.scrollWidth<=e.clientWidth+2)).toBe(true);
  await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();
  await page.locator('#s26 [data-atlas-setup]').click();
