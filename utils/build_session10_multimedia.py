@@ -47,7 +47,18 @@ Dos recursos: [presentación y tutorial integrado](https://jazaineam1.github.io/
 | T | ¿Cómo los adapto al uso? | Derivado con parámetros |
 | Lotes | ¿Qué terminé y qué puedo reutilizar? | Estados y métricas |
 | L | ¿Qué puede leer otro proceso? | Catálogo escrito, reabierto y consultado |
-| Cierre | ¿Qué decidí y qué no puedo concluir? | Evidencia y producto para S11 |''')
+| Cierre | ¿Qué decidí y qué no puedo concluir? | Evidencia y producto para S11 |
+
+### Contrato de aprendizaje individual · trabaja sobre TU copia
+
+1. Desde el LMS abre **Cuaderno** y, en Google Colab, selecciona **Archivo → Guardar una copia en Drive**. Cambia el nombre de esa copia; no edites el original compartido.
+2. Comprueba **Entorno de ejecución → Cambiar tipo de entorno → Python 3**. Trabaja de arriba hacia abajo con el botón ▶ de cada celda; una ejecución completa del docente **no sustituye** tu ejecución.
+3. En cada paso aplica **predecir → ejecutar → observar → explicar → cambiar una variable → volver a comprobar**. Compara la salida que ves con el control indicado; si hay error, recupera ese paso antes de avanzar.
+4. Puedes elegir **8 imágenes reales** para una práctica corta (elige `CANTIDAD=8` en E) o 32 para la completa. Las dos rutas enseñan E/T/L y producen `N × 2` trabajos.
+5. Al terminar, selecciona una fila y compara dos perfiles distintos; registra un límite real. **Una casilla de tutorial no demuestra una ejecución ni genera nota**.
+6. **Evidencia individual verificable:** tu `manifest_s10.json`, tus archivos RAW/derived, `outputs/assets.parquet`, `checks/decision.json` y la ruta de tu copia comprobada en Drive. No compartas permisos de edición indiscriminadamente.
+
+**Convención de errores:** si una celda muestra una excepción, lee la última línea, corrige entrada/permiso/ruta y vuelve a ejecutarla; no saltes a L. Si cambia `INICIO` o `CANTIDAD` después de E, comienza en otra carpeta `S10_BASE` para no mezclar selecciones.''')
     m('s10-preparar','''## Paso 1 · Preparar y conectar las entradas
 
 S09 dejó documentos y una selección de búsqueda; S10 prepara las imágenes de noticias que aportan contexto por entidad. **No se deduce que una foto retrate un contrato.** La conexión tiene claves: entidad → noticia de ejemplo → referencia de imagen. S11 ampliará este contrato a otros medios.
@@ -56,7 +67,11 @@ El productor docente adquirió el snapshot una vez con pausas e identificación.
 
 **HAZ ESTO AHORA.** Ejecuta dependencias y conecta tu Google Drive cuando Colab lo solicite. Solo trabajaremos en `MyDrive/BigData2026`: S09 deja allí su expediente y S10 conservará la carpeta completa para S11. No pegues códigos de autorización en el cuaderno. Si cancelas, la celda se detiene: vuelve a ejecutarla y completa la conexión.
 
-Después ejecuta Preparar. Las imágenes se obtienen automáticamente; al repetir se reutilizan los archivos verificados. En VS Code no se monta Drive: conserva la carpeta local. No se pide una tarjeta ni una clave para S10.''')
+Después ejecuta Preparar. Las imágenes se obtienen automáticamente; al repetir se reutilizan los archivos verificados. En VS Code no se monta Drive: conserva la carpeta local. No se pide una tarjeta ni una clave para S10.
+
+**Secuencia guiada, no solo instalación:** (1) entra con TU cuenta de Google; (2) pulsa ▶ en *Preparar bibliotecas*; (3) acepta el acceso solicitado a TU Drive, sin copiar contraseñas ni tokens en celdas; (4) espera el texto `CONSERVACIÓN PREPARADA`; (5) pulsa ▶ en *Utilidades* y luego *Preparar*; (6) confirma `ENTRADAS REALES: 32`; (7) ejecuta *Contexto* y anota si leyó TU expediente S09 o el ancla de respaldo.
+
+**Comprueba:** en *Archivos* de Colab existe `work_s10/entrada`. En Google Drive se creó `Mi unidad/BigData2026`. **Atasco habitual:** permiso denegado o Drive no montado → vuelve a ejecutar *Preparar bibliotecas* con tu cuenta. **Sin red:** después de haber descargado la entrada, ejecuta de nuevo desde la misma carpeta; no sustituyas los originales con imágenes inventadas.''')
     c('s10-dependencias','''#@title Preparar bibliotecas (selecciona el kernel Python en VS Code)
 # Colab precarga bibliotecas: no las reemplazamos dentro de un kernel activo.
 # Verificado en Colab el 29-10-2026: google-colab requiere pandas 2.2.3.
@@ -77,7 +92,11 @@ if drive is not None and USAR_GOOGLE_DRIVE:
     drive.mount('/content/drive')
     DRIVE_CURSO=Path('/content/drive/MyDrive/BigData2026')
     DRIVE_CURSO.mkdir(parents=True,exist_ok=True)
-    print('CONSERVACIÓN PREPARADA:',DRIVE_CURSO)
+    prueba=DRIVE_CURSO/'.escritura_colab.tmp'
+    prueba.write_text('s10',encoding='utf-8')
+    assert prueba.read_text(encoding='utf-8')=='s10', 'Drive montado sin lectura/escritura verificable'
+    prueba.unlink()
+    print('CONSERVACIÓN PREPARADA:',DRIVE_CURSO,'· lectura/escritura comprobada')
 elif drive is not None:
     print('CONSERVACIÓN PENDIENTE: /content es temporal; activa Google Drive antes del cierre.')
 else:
@@ -171,7 +190,11 @@ Elegimos una selección del lote real y copiamos sus bytes a una ruta RAW. Guard
 
 Ejemplo manual: dos noticias pueden referenciar la misma URL. Conservamos las apariciones editoriales; la identidad del contenido se comprueba con los bytes.
 
-Funciones usadas: `json.loads()` convierte texto JSON en objetos; `shutil.copyfile(origen,destino)` conserva bytes en otra ruta; `Image.open()`/`load()` decodifican y `sha256_file()` devuelve una huella. Un sufijo `.jpg` no determina el formato real.''')
+Funciones usadas: `json.loads()` convierte texto JSON en objetos; `shutil.copyfile(origen,destino)` conserva bytes en otra ruta; `Image.open()`/`load()` decodifican y `sha256_file()` devuelve una huella. Un sufijo `.jpg` no determina el formato real.
+
+**Haz y verifica en tu ejecución:** abre la celda `s10-raw` (▶), conserva `INICIO=0` y elige `CANTIDAD=8` para la ruta reducida o 32 para la completa. Antes de ejecutarla, predice si 8 imágenes con dos perfiles darán 8 o 16 transformaciones. Después comprueba `E · RAW REALES: N` y abre una ruta `raw/.../original.ext` desde el panel de archivos. Registra su `article_id` y comprueba si `contexto_entidad` es True o False.
+
+**Error y recuperación:** si la cantidad queda fuera del lote o se modificó el archivo, detente; comprueba `ENTRADAS REALES`, hash y selección. Si ya procesaste una selección diferente, asigna un `S10_BASE` nuevo y reejecuta desde Preparar. No borres RAW para intentar que la prueba pase.''')
     c('s10-raw','''# E visible: seleccionar → comprobar origen → leer bytes → conservar RAW.
 INICIO=0 #@param {type:"integer"}
 CANTIDAD=32 #@param {type:"integer"}
@@ -215,7 +238,11 @@ Queremos una vista de catálogo. Para una entrada de 1200×675 y lado máximo 64
 
 `ImageOps.exif_transpose()` respeta orientación; `convert('RGB')` prepara canales; `thumbnail((lado,lado))` conserva proporción y no amplía; `save(...,'JPEG',quality=88)` escribe el derivado. Elige el lado para el uso: más pequeño no significa mejor calidad.
 
-Primero lee y ejecuta el ejemplo resuelto. Después cambia únicamente `LADO_MAXIMO`, manteniendo la misma entrada, formato y calidad.''')
+Primero lee y ejecuta el ejemplo resuelto. Después cambia únicamente `LADO_MAXIMO`, manteniendo la misma entrada, formato y calidad.
+
+**Experimento controlado:** ejecuta `s10-funcion-t` y `s10-una-imagen` con `LADO_MAXIMO=640`. Antes de mirar, predice si conserva la relación de aspecto y si necesariamente reducirá bytes. Anota las dimensiones y `sha256` de `ORIGINAL` y `DERIVADO`. Cambia **solo** `LADO_MAXIMO=320` y vuelve a ejecutar `s10-una-imagen`. Describe qué cambió en dimensiones, bytes y legibilidad: **no cambies la imagen, la calidad ni el formato a la vez**.
+
+**Control:** ambas salidas deben indicar `RAW CONSERVADO: True`. Si falla Pillow o el origen no decodifica, vuelve a E y revisa el archivo original; renombrar la extensión no lo repara.''')
     c('s10-funcion-t',core_source({'make_thumbnail'}))
     c('s10-una-imagen','''# T visible: la función anterior contiene la operación Pillow completa.
 primero=trabajos[0];raw=TRABAJO/primero['raw_path']
@@ -238,7 +265,11 @@ with Image.open(ejemplo) as im:display(im)''')
 
 La transformación no cambia al pasar al lote. Cada trabajo recibe un resultado o un fallo explícito. Antes de reutilizar un resultado, comprobamos archivo, hash y parámetros. Si algo falta, se vuelve a procesar; no basta leer `DONE`.
 
-El bucle es secuencial para poder seguirlo. `max_nuevos` permite observar una pausa y continuar sin provocar fallos. Los acumulados DONE/FAILED/PENDING y el trabajo nuevo/reutilizado responden preguntas diferentes.''')
+El bucle es secuencial para poder seguirlo. `max_nuevos` permite observar una pausa y continuar sin provocar fallos. Los acumulados DONE/FAILED/PENDING y el trabajo nuevo/reutilizado responden preguntas diferentes.
+
+**Ensayo de continuación que harás tú:** (1) ejecuta `s10-un-trabajo` y lee sus parámetros; (2) ejecuta `s10-bucle`; (3) ejecuta `s10-aplicar-lote`. Primero verás una pausa controlada del perfil 640 y luego su continuación; finalmente se completa el perfil 320. Comprueba en las métricas `DONE=N`, `FAILED=0` y `PENDING=0` para ambos perfiles.
+
+Después vuelve a ejecutar `procesar_lote('catalogo640')` en una celda de prueba propia: debe indicar `processed_now=0` y `skipped_verified=N`. La función `validate_record` devuelve **lista de errores**: `[]` significa válido, por eso `not validate_record(...)` permite reutilizarlo. También verás una prueba de hash alterado **solo en memoria**, sin destruir tus imágenes. Si aparecen fallos, lee su causa en `state/checkpoint.json`; al volver a ejecutar se intenta recuperar el trabajo.''')
     c('s10-un-trabajo',core_source({'process_one'}))
     c('s10-bucle','''# Control del lote visible: verificar previos → procesar pendientes → guardar estado.
 def procesar_lote(perfil,max_nuevos=None):
@@ -277,7 +308,15 @@ alternativa,comparacion=procesar_lote('vista320')
 assert all(m['states']['FAILED']==0 and m['states']['PENDING']==0 for m in [continuacion,comparacion])
 tabla=pd.DataFrame(resultados+alternativa)
 print('TRABAJOS COMPLETOS:',len(tabla),'= imágenes',len(trabajos),'× perfiles',tabla.profile.nunique())
-display(tabla[['article_id','profile','derived_width','derived_height','raw_bytes','derived_bytes']].head())''')
+display(tabla[['article_id','profile','derived_width','derived_height','raw_bytes','derived_bytes']].head())
+# Prueba didáctica: validar un registro y detectar un hash incorrecto SIN tocar ningún archivo.
+fila_comprobada=tabla.iloc[0].to_dict()
+assert validate_record(TRABAJO,fila_comprobada)==[], 'El derivado real no superó la integridad'
+fila_alterada=dict(fila_comprobada)
+fila_alterada['derived_sha256']='0'*64
+assert 'derived_hash' in validate_record(TRABAJO,fila_alterada)
+print('CONTROL DE INTEGRIDAD: válido=[]; hash falso detectado=True (solo memoria)')
+''')
     m('s10-lectura-lote',reading('Las métricas distinguen nuevos, reutilizados y estados acumulados.',
         'Dos perfiles completos dejan N×2 trabajos; continuar omite solo lo revalidado.',
         'Faltan otras cargas, hardware e I/O para generalizar rendimiento.',
@@ -288,7 +327,11 @@ Los binarios quedan como archivos; una fila permite encontrar original, derivado
 
 **HAZ ESTO AHORA.** Ejecuta la escritura y la lectura. Lee primero el ejemplo resuelto de consulta. Después cambia solo `POSICION_NOTICIA` por otra posición de la lista producida en tu ejecución y vuelve a ejecutar. Comprueba qué imágenes cambiaron y cuáles son sus perfiles. La carga debe producir algo que otro proceso pueda consultar.
 
-Si salió bien: la galería corresponde al `article_id` elegido y cada fila identifica su perfil y sus bytes. Error frecuente: usar la posición de la tabla de trabajos como si fuera una posición de la lista de noticias; una noticia puede tener varios trabajos. Si te atascas, usa 0 para volver al ejemplo resuelto.''')
+Si salió bien: la galería corresponde al `article_id` elegido y cada fila identifica su perfil y sus bytes. Error frecuente: usar la posición de la tabla de trabajos como si fuera una posición de la lista de noticias; una noticia puede tener varios trabajos. Si te atascas, usa 0 para volver al ejemplo resuelto.
+
+**Tarea propia:** pulsa ▶ en `s10-escribir`. Comprueba que `outputs/assets.jsonl` y `outputs/assets.parquet` existen y se volvieron a leer; deben tener exactamente `N × 2` filas. En `s10-consultar` ejecuta primero `POSICION_NOTICIA=0`; observa el `article_id` y sus perfiles. Luego elige una posición **distinta** de la tabla `NOTICIAS DE TU CATÁLOGO`; vuelve a ejecutar y verifica que cambió el `article_id`. Si solo hay una noticia en la selección, aumenta `CANTIDAD` en una carpeta nueva antes de ese contraste.
+
+**Contrasta:** cada imagen mostrada debe abrirse desde la `derived_path` de la fila consultada. Las sumas de bytes por perfil **no** son una comparación de calidad. Si la relectura difiere de la escritura, detente en L; no exportes un catálogo inconsistente.''')
     c('s10-escribir','''# L visible: construir catálogo → escribir → releer ambos formatos.
 OUT=TRABAJO/'outputs';OUT.mkdir(exist_ok=True)
 catalogo=pd.DataFrame(resultados+alternativa)
@@ -327,13 +370,22 @@ Elige una posición de tu tabla, un perfil usado y una alternativa descartada. *
 
 La selección es formativa. No se envía prosa ni se acredita una nota por marcar una casilla. Los archivos del catálogo describen la ejecución; una comprobación técnica no autentica por sí sola la fuente.
 
-**HAZ ESTO AHORA.** Ejecuta el cierre. En Colab busca `CONSERVADO EN DRIVE` y `COPIA REABIERTA Y VERIFICADA: True`. La carpeta de `/content` se pierde al eliminar el runtime; verla allí no significa conservarla para S11. En VS Code conserva la carpeta local completa, incluidos RAW, derivados y metadatos.''')
+**HAZ ESTO AHORA.** Ejecuta el cierre. En Colab busca `CONSERVADO EN DRIVE` y `COPIA REABIERTA Y VERIFICADA: True`. La carpeta de `/content` se pierde al eliminar el runtime; verla allí no significa conservarla para S11. En VS Code conserva la carpeta local completa, incluidos RAW, derivados y metadatos.
+
+**Cierre obligatorio del estudiante (no del docente):** después de ejecutar E/T/L, elige una posición real `POSICION=1..N×2`, un `PERFIL_ELEGIDO` y una `ALTERNATIVA_DESCARTADA` distintos, más `LIMITE=1..4`. Seleccionar `0` en cualquier control significa **pendiente** y así quedará declarado; no acredita el cierre. Ejecuta la celda de decisión y comprueba `complete: True`. En seguida ejecuta `s10-producto`.
+
+**Para aprobar tu comprobación técnica:** localiza los mensajes `CATÁLOGO VERIFICADO`, `CONSERVADO EN DRIVE`, `COPIA REABIERTA Y VERIFICADA: True` y `S11_USA_ESTA_CARPETA`. Cierra el runtime, vuelve a montar Drive en otra sesión y verifica que la carpeta indicada contiene `manifest_s10.json`, `outputs/assets.parquet` y `raw/`. Si falta cualquiera, **no** declares conservado el resultado. No publiques fotografías o datos privados.''')
     c('s10-decision','''# Opciones cerradas sobre la salida propia; no se admite texto libre.
 POSICION=0 #@param {type:"integer"}
 PERFIL_ELEGIDO=0 #@param [0,1,2] {type:"raw"}
 ALTERNATIVA_DESCARTADA=0 #@param [0,1,2] {type:"raw"}
 LIMITE=0 #@param [0,1,2,3,4] {type:"raw"}
-print(record_decision(TRABAJO,POSICION,PERFIL_ELEGIDO,ALTERNATIVA_DESCARTADA,LIMITE))''')
+decision_propia=record_decision(TRABAJO,POSICION,PERFIL_ELEGIDO,ALTERNATIVA_DESCARTADA,LIMITE)
+print('DECISIÓN DEL ESTUDIANTE:',decision_propia)
+if not decision_propia['complete']:
+    print('PENDIENTE: selecciona una fila real, dos perfiles distintos y un límite (no 0).')
+else:
+    print('DECISIÓN PROPIA COMPLETA: True; comprueba la carpeta final en Drive.')''')
     c('s10-producto','''# Repetir sin duplicar y conservar la ETL en una carpeta reutilizable.
 _,repeticion=procesar_lote('catalogo640')
 print('REPETICIÓN · nuevos:',repeticion['processed_now'],'· reutilizados:',repeticion['skipped_verified'])
@@ -341,6 +393,8 @@ reporte=export_package(TRABAJO,inventario,trabajos,context_for(inventario,ENTIDA
 if not reporte['ok']:raise ValueError(reporte['errors'])
 print('CATÁLOGO VERIFICADO:',reporte)
 print('PRODUCTO:',TRABAJO/'outputs/assets.parquet')
+if not json.loads((TRABAJO/'checks/decision.json').read_text(encoding='utf-8'))['complete']:
+    print('ATENCIÓN: catálogo técnico verificado, pero DECISIÓN INDIVIDUAL PENDIENTE.')
 print('CONSULTABLE:',len(pd.read_parquet(TRABAJO/'outputs/assets.parquet')),'filas')
 if DRIVE_CURSO is not None:
     # La firma distingue selecciones; repetir conserva la misma carpeta.
@@ -375,7 +429,9 @@ else:
 
 S11 toma IDs, origen, RAW/derived, parámetros y catálogo para añadir audio/video reales. S12 integra ETL. El lote medido no es una prueba de escala a millones: una proyección exige declarar distribución de tamaños, hardware e I/O.
 
-Si falta una imagen, recupera la entrada real; no se inventa un sustituto. Si eliges otra selección, usa otra carpeta. Si reinicias el kernel, ejecuta desde Preparar: todo el código está en este cuaderno.''')
+Si falta una imagen, recupera la entrada real; no se inventa un sustituto. Si eliges otra selección, usa otra carpeta. Si reinicias el kernel, ejecuta desde Preparar: todo el código está en este cuaderno.
+
+**Autocomprobación final:** ¿puedes reconstruir de TU archivo `assets.parquet` la ruta de un RAW, su SHA-256, su noticia y los dos derivados? ¿Cambiaste un parámetro y observaste su efecto? ¿Repetiste el lote sin recomputar trabajos válidos? ¿Conservaste una decisión completa y una copia verificada? Si cualquiera es «no», identifica su celda y recupérala antes de S11.''')
     return cells
 
 def build_notebook():
