@@ -53,7 +53,11 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <div class="card"><b>FFT y espectro</b><p>La transformada rápida de Fourier (FFT) calcula qué componentes de frecuencia hay en una ventana. Un pico no equivale a una palabra.</p></div>
 <div class="card"><b>Espectrograma</b><p>Es una sucesión de espectros: horizontal = tiempo, vertical = frecuencia, color = magnitud de la señal.</p></div>
 <div class="card"><b>WAV y PCM</b><p>WAV es un contenedor de audio; PCM representa las muestras sin compresión perceptual. Un WAV puede contener otro códec, como G.711.</p></div>
-<div class="card"><b>ASR y WER</b><p>ASR transforma voz en texto probable. WER compara sus palabras con una referencia humana: número de inserciones, omisiones y sustituciones dividido entre palabras de referencia.</p></div>
+<div class="card"><b>ASR y WER</b><p>ASR transforma voz en texto probable. WER compara sus palabras con una referencia humana: inserciones, omisiones y sustituciones dividido entre palabras de referencia.</p></div>
+<div class="card"><b>Cruces por cero (ZCR)</b><p>Fracción de pasos entre muestras consecutivas que cambian de signo positivo a negativo o viceversa. Puede subir con componentes agudas y ruido. No identifica palabras ni intenciones.</p></div>
+<div class="card"><b>Centroide espectral</b><p>Promedio de frecuencias ponderado por su magnitud. Resume dónde se concentra la energía del espectro. Un centroide alto no demuestra emoción ni género de voz.</p></div>
+<div class="card"><b>SHA-256</b><p>Huella criptográfica del contenido de un archivo. Si cambias un byte normalmente cambia la huella; sirve para verificar integridad, no para saber si la noticia es verdadera.</p></div>
+<div class="card"><b>JSONL y Parquet</b><p>JSONL guarda un registro JSON por línea, fácil de inspeccionar. Parquet organiza columnas para consultar eficientemente. Ambos guardan datos, no contienen por sí solos las voces transcritas.</p></div>
 </div><p class="small">Abre las fichas contextualizadas en las diapositivas 4, 5, 7 y 8 para cambiar parámetros y ver el efecto.</p>
 </details></section>
 <section class="slide" id="s2"><div class="kicker">02 · Continuidad del caso</div><h1>Una clave, medios diferentes</h1>
@@ -84,6 +88,15 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <p><b>Resolución:</b> cantidad de columnas por filas; 160 × 90 = 14.400 píxeles. Menos píxeles implica menos posiciones, pero no siempre reduce los bytes en la misma proporción.</p>
 <p><b>Umbral:</b> valor que separa píxeles más claros u oscuros: si <code>Y ≥ 128</code> pasa a blanco y si es menor pasa a negro. <b>Binarización:</b> convertir la imagen a solo negro y blanco usando ese umbral.</p>
 <p><b>Contraste:</b> separa o acerca valores de claridad respecto al punto medio. <b>Brillo:</b> suma/resta claridad. En el siguiente laboratorio podrás editarlos sin alterar el original.</p></details>
+<div class="card"><h2>Experimenta con RGB: fabrica un píxel</h2>
+<p>Un píxel tiene valores rojo (R), verde (G) y azul (B). Mueve cada control de 0 a 255. Observa el color resultante y cómo cambia la luminancia calculada: esa cifra resume claridad, no significado.</p>
+<div class="controls-grid">
+<div><label for="rgbR">Rojo (R): <output id="rgbRValue">255</output></label><input type="range" id="rgbR" min="0" max="255" value="255" step="5"></div>
+<div><label for="rgbG">Verde (G): <output id="rgbGValue">0</output></label><input type="range" id="rgbG" min="0" max="255" value="0" step="5"></div>
+<div><label for="rgbB">Azul (B): <output id="rgbBValue">0</output></label><input type="range" id="rgbB" min="0" max="255" value="0" step="5"></div>
+<div><div id="rgbSwatch" role="img" aria-label="Vista del color RGB generado" style="height:86px;border:1px solid #778a99;border-radius:8px;background:rgb(255,0,0)"></div></div>
+</div><p id="rgbResult" class="live-caption" aria-live="polite">RGB (255, 0, 0) · luminancia ≈ 54.2</p>
+<p class="small"><b>Prueba:</b> mueve R a 0 y G a 255. ¿Por qué aumenta la luminancia aunque el píxel sigue teniendo solo un canal fuerte? Porque la fórmula pondera cada canal de manera distinta.</p></div>
 <div class="note">Secuencia profesional: decodificar → transformar → extraer características → comprobar qué se perdió → interpretar. Para OCR se necesitaría una etapa adicional de reconocimiento y validación.</div></section>
 <section class="slide" id="s5"><div class="kicker">05 · Experimento en el navegador</div><h1>Laboratorio de imagen</h1>
 <p>La muestra original es un documento ilustrado generado por la herramienta, <b>no</b> una fotografía editorial. Puedes sustituirlo por una imagen propia que tengas permiso de analizar; no se envía al servidor.</p>
@@ -143,8 +156,8 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <p class="small">Los tres primeros controles regeneran solo la <b>señal de demostración</b>, no sobrescriben grabaciones propias o archivos cargados.</p></div>
 <div class="actions"><button id="demoAudio">Generar señal de ejemplo</button><button id="playAudio">Reproducir señal</button><button id="recordAudio">Grabar mi voz</button><button id="stopAudio" class="secondary" disabled>Detener grabación</button></div>
 <label for="audioUpload">O abrir un archivo propio de audio</label><input id="audioUpload" type="file" accept="audio/*">
-<div class="grid"><div class="card"><h2>Forma de onda</h2><canvas id="waveCanvas" width="640" height="220" role="img" aria-label="Amplitud de la señal a lo largo del tiempo"></canvas></div>
-<div class="card"><h2>Espectro de una ventana</h2><canvas id="spectrumCanvas" width="640" height="220" role="img" aria-label="Magnitud relativa por frecuencia"></canvas></div></div>
+<div class="grid"><div class="card"><h2>Forma de onda</h2><canvas id="waveCanvas" width="640" height="220" role="img" aria-label="Amplitud de la señal a lo largo del tiempo"></canvas><p class="small"><b>Horizontal:</b> tiempo de izquierda a derecha. <b>Vertical:</b> amplitud de −1 a +1. A mayor amplitud, mayor oscilación.</p></div>
+<div class="card"><h2>Espectro de una ventana</h2><canvas id="spectrumCanvas" width="640" height="220" role="img" aria-label="Magnitud relativa por frecuencia"></canvas><p class="small"><b>Horizontal:</b> frecuencia en Hz (cada paso = tasa de muestreo / ventana). <b>Vertical:</b> magnitud relativa. La altura del pico no significa texto reconocido.</p></div></div>
 <div class="grid"><div class="card"><h2>Espectrograma: tiempo × frecuencia × color</h2><canvas id="audioSpectrogram" width="640" height="240" role="img" aria-label="Mapa espectral relativo en función del tiempo y la frecuencia"></canvas><p class="small">Horizontal: tiempo (s); vertical: frecuencia, de 0 a 2.000 Hz; más claro significa mayor energía relativa. No es transcripción.</p></div><div class="card"><h2>¿Cómo interpretar la señal?</h2><p><b>Forma de onda:</b> amplitud frente al tiempo. <b>RMS:</b> amplitud eficaz de la ventana que eliges.</p><p><b>Espectro:</b> componentes de frecuencia de UNA ventana. <b>Espectrograma:</b> muchos espectros en diferentes tiempos.</p><p><b>Prueba:</b> cambia el primer tono de 190 a 400 Hz, mira cómo se desplaza su banda; después baja amplitud a 0 % y comprueba que RMS cae a 0. Vuelve a 100 % para seguir.</p><p><b>Límite:</b> ninguno de estos gráficos revela palabras; ASR es otra etapa.</p></div></div>
 <label for="audioStart">Ventana de análisis: <output id="startValue">25</output>% de duración</label><input id="audioStart" type="range" min="0" max="90" value="25" step="5">
 <div id="audioStats" class="note" aria-live="polite">Genera la señal de ejemplo para empezar.</div><p><b>Prueba autónoma:</b> pulsa «Generar señal de ejemplo», luego «Reproducir señal». Cambia la ventana al <b>15 %, 50 % y 80 %</b>; compara RMS y el pico aproximado. <b>Resultado esperado:</b> cerca del 50 % hay silencio (RMS próximo a 0), pero no hay palabras. <b>Si no suena:</b> revisa el volumen y la reproducción automática del navegador; las métricas funcionan aunque no tengas altavoces.</p><p id="audioStatus" class="small" aria-live="polite"></p></section>
@@ -206,6 +219,9 @@ Catálogo técnico común: source_kind + identificador + modalidad
 <tr><td>¿Cuál dura más?</td><td><code>duration_seconds</code> de las dos filas</td></tr>
 <tr><td>¿Cambió la amplitud eficaz?</td><td><code>rms</code> de las dos filas</td></tr>
 <tr><td>¿Qué palabras dice?</td><td>Transcripción de referencia mostrada por el corpus, no inferida desde RMS</td></tr></table>
+<details class="term-guide"><summary>¿Qué son los cruces por cero y el centroide espectral que aparecen en mi tabla?</summary>
+<p><b>Zero-crossing rate (ZCR):</b> proporción de transiciones entre muestras de signo diferente. Ejemplo: <code>[1, -1, 1]</code> tiene 2 cambios en 2 pasos = 1,0. No es un clasificador de voz.</p>
+<p><b>Centroide espectral:</b> promedio de frecuencia ponderado por las magnitudes FFT: si tienes una magnitud 2 a 100 Hz y 1 a 400 Hz, centroide = (2×100+1×400)/(2+1)=200 Hz. Resume dónde está la energía, no qué palabra se dijo.</p></details>
 <p><b>Resultado esperado:</b> un reproductor, una onda de voz y la transcripción de referencia correspondiente a la posición elegida. Si no escuchas, verifica la salida del reproductor y el volumen; la forma de onda y el texto deben seguir visibles.</p>
 <div class="note"><b>Cómo se lee:</b> cada voz tiene su clave de origen. <b>Qué nos dice:</b> diferencias acústicas medibles. <b>Qué NO permite concluir:</b> emoción, verdad o identidad de la persona. <b>Qué error común:</b> interpretar un pico como palabra.</div></section>
 <section class="slide" id="s18"><div class="kicker">18 · Profundización opcional y ejecutable</div><h1>Prueba ASR: voz real → texto probable → error</h1>
@@ -223,7 +239,9 @@ Catálogo técnico común: source_kind + identificador + modalidad
 <section class="slide" id="s20"><div class="kicker">20 · Prueba guiada 7</div><h1>Construye, consulta y verifica el catálogo</h1>
 <p><b>En Colab, secciones 8 a 11.</b> Ejecuta, en orden, <code>L — esquema común</code>, <code>Ejercicio de consulta</code>, <code>Proyección matemática</code>, <code>Decisión individual</code> y <code>Manifiesto técnico</code>.</p>
 <div class="grid"><div class="card"><h2>Catálogo esperado</h2><p><code>L · CATÁLOGO REABIERTO: 13 filas</code>: <b>11 audios</b> (10 voces reales + 1 señal de prueba) y <b>2 imágenes</b> derivadas. Se guardan <code>outputs/assets.jsonl</code> y <code>assets.parquet</code>.</p></div><div class="card"><h2>Consultas y decisión</h2><p>Prueba <code>MODALIDAD='image'</code> y luego <code>'audio'</code>. Verifica el archivo que se abre y su SHA-256. Cambia los tres selectores de decisión de 0 a valores admitidos para obtener <code>complete: True</code>.</p></div></div>
-<p><b>Integridad:</b> la celda del manifiesto debe imprimir <code>PAQUETE VERIFICADO: {'ok': True, 'errors': [], 'rows': 13}</code>. Si la consulta falla, vuelve a ejecutar el catálogo; si una huella no coincide, comprueba que no hayas editado sus archivos originales.</p>
+<details class="term-guide"><summary>¿Qué son JSONL, Parquet, SHA-256 y manifiesto?</summary>
+<p><b>JSONL:</b> texto con un objeto JSON por línea, fácil de leer. <b>Parquet:</b> archivo tabular por columnas, útil para filtrar y procesar grandes colecciones. <b>SHA-256:</b> huella calculada de los bytes para descubrir archivos alterados. <b>Manifiesto:</b> inventario de rutas, huellas y cantidades que permite reabrir y comprobar un paquete.</p>
+<p><b>Prueba:</b> al reabrir el catálogo deben encontrarse 13 filas tanto en JSONL como en Parquet, y las huellas deben coincidir con los archivos reales.</p></details><p><b>Integridad:</b> la celda del manifiesto debe imprimir <code>PAQUETE VERIFICADO: {'ok': True, 'errors': [], 'rows': 13}</code>. Si la consulta falla, vuelve a ejecutar el catálogo; si una huella no coincide, comprueba que no hayas editado sus archivos originales.</p>
 <div class="note"><b>Cómo se lee:</b> una fila es una representación con origen y huella. <b>Qué nos dice:</b> qué datos reabrimos. <b>Qué NO permite concluir:</b> rendimiento de un clúster Big Data. <b>Qué error común:</b> presentar una proyección matemática como benchmark medido.</div></section>
 <section class="slide" id="s21"><div class="kicker">21 · Entrega individual y conservación</div><h1>Comprueba que realmente lo ejecutaste</h1>
 <p><b>En Colab, secciones 12 y 13.</b> Ejecuta <code>Comprobar el trabajo realizado</code>. Debe decir <b><code>AUTOCOMPROBACIÓN: LISTO (9/9)</code></b>. Si dice <code>INCOMPLETO</code>, sigue la fila pendiente; comprueba especialmente que las tres decisiones sean distintas de cero.</p>
@@ -255,6 +273,16 @@ function show(i){pos=Math.max(0,Math.min(slides.length-1,i));slides.forEach(func
 document.getElementById('prev').onclick=function(){show(pos-1)};document.getElementById('next').onclick=function(){show(pos+1)};
 document.addEventListener('keydown',function(e){if(e.target.closest('button,input,textarea,select,a'))return;if(e.key==='ArrowRight')show(pos+1);if(e.key==='ArrowLeft')show(pos-1)});
 window.addEventListener('hashchange',function(){var n=Number(location.hash.replace('#s',''));if(n>=1&&n<=slides.length)show(n-1)});var init=Number(location.hash.replace('#s',''));show(init>=1&&init<=slides.length?init-1:0);
+
+function updateRgbMixer(){
+ var r=+document.getElementById('rgbR').value,g=+document.getElementById('rgbG').value,b=+document.getElementById('rgbB').value;
+ ['R','G','B'].forEach(function(channel){document.getElementById('rgb'+channel+'Value').textContent=document.getElementById('rgb'+channel).value});
+ var lum=.2126*r+.7152*g+.0722*b;
+ document.getElementById('rgbSwatch').style.backgroundColor='rgb('+r+','+g+','+b+')';
+ document.getElementById('rgbResult').textContent='RGB ('+r+', '+g+', '+b+') · luminancia ≈ '+lum.toFixed(1)+' (de 0 a 255). El color por sí solo no identifica el contenido de una imagen.';
+ window.rgbMetrics={red:r,green:g,blue:b,luminance:+lum.toFixed(1)};
+}
+['rgbR','rgbG','rgbB'].forEach(function(id){document.getElementById(id).addEventListener('input',updateRgbMixer)});updateRgbMixer();
 document.querySelectorAll('[data-question]').forEach(function(group){group.querySelectorAll('button').forEach(function(b){b.onclick=function(){var f=group.nextElementSibling;if(!f||!f.classList.contains('feedback'))f=group.querySelector('.feedback');f.textContent=b.dataset.correct==='1'?'Correcto: es una conclusión compatible con la evidencia.':'Revisa la diferencia entre una característica medida y una afirmación que requiere validación.';f.style.color=b.dataset.correct==='1'?'#075f43':'#8c3c1c'}})});
 var original=document.getElementById('imageOriginal'),out=document.getElementById('imageResult'),histo=document.getElementById('imageHistogram');
 var ctx=original.getContext('2d',{willReadFrequently:true}),outCtx=out.getContext('2d',{willReadFrequently:true});
@@ -438,6 +466,6 @@ document.getElementById('stopAudio').onclick=function(){if(recorder&&recorder.st
 document.querySelectorAll('.student-progress').forEach(function(c){c.addEventListener('change',function(){
 var total=document.querySelectorAll('.student-progress').length,checked=document.querySelectorAll('.student-progress:checked').length;
 document.getElementById('studentChecklistStatus').textContent=checked+' de '+total+' comprobaciones personales marcadas. '+(checked===total?'Contrasta ahora el resultado AUTOCOMPROBACIÓN: LISTO (9/9) en Colab; esta lista no lo reemplaza.':'Completa las pruebas en Colab antes de marcar las restantes.');})});
-document.getElementById('exportObservations').onclick=function(){var result={schema:'s10-multimodal-browser-v1',source:'laboratorio_pedagogico_local',image:window.imageMetrics,audio:window.audioMetrics,checklist:{compared_image_sizes:document.getElementById('checkOne').checked,compared_audio_windows:document.getElementById('checkTwo').checked},limitations:['caracteristicas_no_demuestran_semantica','uso_editorial_no_autorizado_para_mineria']};var blob=new Blob([JSON.stringify(result,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='s10-observaciones-locales.json';a.click();setTimeout(function(){URL.revokeObjectURL(url)},2000)};
+document.getElementById('exportObservations').onclick=function(){var result={schema:'s10-multimodal-browser-v1',source:'laboratorio_pedagogico_local',image:window.imageMetrics,rgb:window.rgbMetrics,pixel:window.pixelMetrics,audio:window.audioMetrics,checklist:{compared_image_sizes:document.getElementById('checkOne').checked,compared_audio_windows:document.getElementById('checkTwo').checked},limitations:['caracteristicas_no_demuestran_semantica','uso_editorial_no_autorizado_para_mineria']};var blob=new Blob([JSON.stringify(result,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='s10-observaciones-locales.json';a.click();setTimeout(function(){URL.revokeObjectURL(url)},2000)};
 })();
 </script></body></html>
