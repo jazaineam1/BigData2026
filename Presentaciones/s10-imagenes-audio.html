@@ -86,6 +86,7 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <div class="note">Frecuencia de muestreo, frecuencia tonal y cantidad de muestras son magnitudes diferentes. También debes distinguir archivo WAV, códec PCM y señal decodificada.</div></section>
 <section class="slide" id="s8"><div class="kicker">08 · Audio: explorar y escuchar</div><h1>Laboratorio de señal sonora</h1>
 <p>El experimento en el navegador produce una señal original de tonos con silencios (no ejecuta Python); <b>no contiene palabras</b>. Para experimentar con voz, graba tu propia voz voluntariamente o abre un archivo autorizado. Todo el procesamiento ocurre en este navegador.</p>
+<div class="note"><b>Dos experiencias complementarias:</b> esta pantalla permite manipular una señal original sin instalar software. En el <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/10_Imagenes_Audio.ipynb" target="_blank" rel="noopener">cuaderno de Colab</a> se obtienen y analizan <b>10 voces humanas reales en español</b> del corpus MINDS-14 (CC BY 4.0): cada WAV tiene transcripción de referencia, duración, RMS, espectro y procedencia.</div>
 <div class="actions"><button id="demoAudio">Generar señal de ejemplo</button><button id="playAudio">Reproducir señal</button><button id="recordAudio">Grabar mi voz</button><button id="stopAudio" class="secondary" disabled>Detener grabación</button></div>
 <label for="audioUpload">O abrir un archivo propio de audio</label><input id="audioUpload" type="file" accept="audio/*">
 <div class="grid"><div class="card"><h2>Forma de onda</h2><canvas id="waveCanvas" width="640" height="220" role="img" aria-label="Amplitud de la señal a lo largo del tiempo"></canvas></div>
@@ -100,7 +101,7 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <section class="slide" id="s10"><div class="kicker">10 · Análisis de voz</div><h1>Señal, transcripción y significado son tres niveles</h1>
 <div class="grid"><div class="card"><h2>Señal</h2><p>La transformación numérica detecta silencios, energía, duración y cambios frecuenciales sin conocer las palabras.</p></div><div class="card"><h2>Transcripción ASR</h2><p>Un modelo transforma una señal de voz en texto probable. Debes verificar el texto, marcar el idioma y evitar presentar una hipótesis como certeza.</p></div>
 <div class="card"><h2>Búsqueda</h2><p>Cuando la transcripción tiene calidad suficiente, puedes aplicar BM25 o embeddings como en S07 y S09, conservando tiempos y procedencia.</p></div><div class="card"><h2>Evaluación</h2><p>Con referencia humana, calcula WER (errores de palabra) y observa fallas con nombres propios o ruido. Sin referencia no declares precisión.</p></div></div>
-<p>El cuaderno incluye el contrato de metadatos y características acústicas. ASR de voz real es una extensión opcional con archivos y modelos autorizados; no necesitas pagar una API para completar el laboratorio.</p></section>
+<p>El cuaderno ahora incluye diez WAV reales con transcripción de referencia y características acústicas. ASR con Whisper tiny en Colab es opcional: no se confunde una transcripción del dataset con una predicción ni se requiere una API de pago.</p></section>
 <section class="slide" id="s11"><div class="kicker">11 · Integración multimodal</div><h1>¿Qué se puede unir?</h1>
 <pre>article_id  ──► noticia (metadatos)
      │
@@ -119,7 +120,7 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <div class="choices" data-question="q4"><button data-correct="0">Si guardé un .wav, la transcripción es perfecta</button><button data-correct="0">Si dos archivos tienen el mismo article_id, dicen lo mismo</button><button data-correct="1">Debo conservar origen, validar características y probar por separado las afirmaciones semánticas</button></div><p class="feedback" aria-live="polite"></p>
 <p class="small">Estas preguntas son formativas, no tienen nota. Elige y lee la explicación; puedes cambiar de respuesta.</p></section>
 <section class="slide" id="s14"><div class="kicker">14 · Producto</div><h1>Expediente multimodal verificable</h1>
-<p>La herramienta exporta un JSON con características observadas y decisiones del navegador. Es una ayuda para comparar; el producto técnico completo se crea en el cuaderno y se verifica al reabrir.</p>
+<p>La herramienta exporta un JSON con características observadas y decisiones del navegador. El catálogo técnico con <b>10 voces reales + 1 señal original + 2 derivaciones de imagen</b> se obtiene en Colab. Es una ayuda para comparar; el producto técnico completo se crea en el cuaderno y se verifica al reabrir.</p>
 <div class="actions"><button id="exportObservations">Exportar observaciones JSON</button><label style="margin:0"><input id="checkOne" type="checkbox"> Comparé dos tamaños de imagen</label><label style="margin:0"><input id="checkTwo" type="checkbox"> Exploré dos ventanas de audio</label></div>
 <div class="note"><b>Para llevar:</b> un catálogo multimodal conecta la procedencia con características y transformaciones verificables. No confunde bytes con significado ni una mención con evidencia.</div></section>
 </main>
