@@ -192,6 +192,7 @@ El cuaderno sí lleva un **mapa sin relojes**: la secuencia de bloques, qué res
 - Cada paso del checklist declara qué hacer, por qué, y la **evidencia exacta que ese paso realmente produce** (la salida real del cuaderno, no una aproximación inventada) — y trae un control de verificación propio.
 - El checklist pedagógico puede guardar progreso local en el navegador para que el estudiante retome pasos sin fricción. Cuando una actividad esté integrada al LMS, el progreso académico oficial se registra en el backend y el almacenamiento local queda solo como apoyo de interfaz; nunca se presenta como evidencia oficial. La evidencia entregable sigue siendo el hito verificable que produce la actividad.
 - Enlaza el checklist desde la primera celda del cuaderno al que acompaña.
+- La preparación de entradas es automática y repetible: el estudiante ejecuta el cuaderno, que obtiene y verifica los archivos del curso. No debe localizar, subir ni descomprimir paquetes para comenzar, salvo que esa operación sea el objetivo explícito del ejercicio. Se comprueba desde un runtime limpio sin archivos cargados manualmente.
 
 **Cómo sabes que se logró:** cada paso corresponde a una celda real (o una acción externa real) y su evidencia esperada es texto que ese paso efectivamente imprime o produce — puedes verificarlo leyendo el generador, no de memoria.
 

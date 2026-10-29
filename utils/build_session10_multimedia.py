@@ -12,7 +12,7 @@ STEPS=[
  ('transformar','Transformar una imagen','Derivado real, parámetros y RAW conservado.'),
  ('lotes','Repetir por lotes y continuar','Estados, trabajo nuevo y reutilizado separados.'),
  ('cargar','Cargar, releer y consultar','JSONL/Parquet coherentes y galería desde el catálogo.'),
- ('cerrar','Decidir y transportar','Selección propia, límite y paquete restaurado.')]
+ ('cerrar','Decidir y conservar','Selección propia, límite y catálogo verificado.')]
 
 def core_source(names):
     source=(ROOT/'utils/s10_pipeline.py').read_text(encoding='utf-8')
@@ -38,7 +38,7 @@ def build_cells():
 
 Dos recursos: [presentación y tutorial integrado](https://jazaineam1.github.io/BigData2026/Presentaciones/s10-etl-multimedia.html#s1) y **este cuaderno Python**. Todo el código ejecutable de la ETL está aquí. Puedes abrir el mismo `.ipynb` en **Colab** o en **VS Code con Python/Jupyter**; en VS Code selecciona el intérprete del kernel antes de ejecutar.
 
-**Producto formativo:** originales conservados, dos perfiles, catálogo JSONL/Parquet, consulta propia y paquete portable. No se añade una nota. El docente entrega `S10_entradas_reales.zip`: es un paquete de **datos reales**, sin módulos Python. No necesitas un ZIP de códigos ni una guía externa.
+**Producto formativo:** originales conservados, dos perfiles, catálogo JSONL/Parquet, consulta propia y carpeta reutilizable. No se añade una nota. Las entradas reales se obtienen automáticamente desde el repositorio del curso al ejecutar Preparar. No tienes que localizar ni cargar archivos manualmente.
 
 | Etapa | Pregunta | Producto |
 |---|---|---|
@@ -52,15 +52,16 @@ Dos recursos: [presentación y tutorial integrado](https://jazaineam1.github.io/
 
 S09 dejó documentos y una selección de búsqueda; S10 prepara las imágenes de noticias que aportan contexto por entidad. **No se deduce que una foto retrate un contrato.** La conexión tiene claves: entidad → noticia de ejemplo → referencia de imagen. S11 ampliará este contrato a otros medios.
 
-El productor docente adquirió el snapshot una vez con pausas e identificación. Cada estudiante utiliza esa entrada, sin repetir descargas masivas del periódico. Las URLs describen procedencia; el ZIP contiene los bytes que vamos a inspeccionar.
+El productor docente adquirió el snapshot una vez con pausas e identificación. Cada estudiante utiliza esa entrada, sin repetir descargas masivas del periódico. Las URLs editoriales describen procedencia. El curso conserva una copia de las imágenes reales para que el grupo no vuelva a descargarlas del periódico.
 
-**HAZ ESTO AHORA.** Recibe el ZIP de datos, ejecuta dependencias y localiza la entrada. En Colab se ofrece una subida si el archivo no está presente; en VS Code guarda el ZIP junto al notebook o define su ruta. No se pide una tarjeta ni una clave para S10.''')
+**HAZ ESTO AHORA.** Ejecuta dependencias y Preparar. El cuaderno obtiene las entradas y las conserva en caché; al repetir reutiliza los archivos verificados. El mismo paso funciona en Colab y VS Code. No se pide una tarjeta ni una clave para S10.''')
     c('s10-dependencias','''#@title Preparar bibliotecas (selecciona el kernel Python en VS Code)
 %pip -q install pillow==13.0.0 pandas==3.1.0 pyarrow==26.0.0''',True)
     c('s10-utilidades','''#@title Utilidades de archivos e integridad — código incluido; expande para inspeccionarlo
 from pathlib import Path, PureWindowsPath
 from datetime import datetime, timezone
-import hashlib, json, math, shutil, tempfile, zipfile, time
+import hashlib, json, math, shutil, tempfile, time
+import urllib.request
 import pandas as pd
 import PIL
 from PIL import Image, ImageOps
@@ -70,30 +71,44 @@ PROFILES={"vista320":{"max_side":320,"quality":88},
           "catalogo640":{"max_side":640,"quality":88}}
 ANCHOR={"process_id":"CO1.REQ.2622868","entity":"FUERZA AEROESPACIAL COLOMBIANA",
         "nit":"899999102","relation":"contexto_por_entidad_no_evidencia_del_contrato"}
-'''+core_source({'digest','sha256_file','atomic_json','safe_path','inspect_image','build_inventory','context_for','safe_extract','normal_records','validate_record','export_package','verify_package','pack','unpack_and_verify','record_decision'}),True)
-    c('s10-entrada','''# Entrada: solo datos. No importamos código del ZIP ni del repositorio.
-INPUT_ZIP=Path(globals().get('S10_INPUT_ZIP','S10_entradas_reales.zip')).resolve()
+'''+core_source({'digest','sha256_file','atomic_json','safe_path','inspect_image','build_inventory','context_for','normal_records','validate_record','export_package','verify_package','record_decision'}),True)
+    c('s10-entrada','''# Preparar: obtener entradas reales desde el curso, sin intervención manual.
 BASE=Path(globals().get('S10_BASE','work_s10')).resolve()
 TRABAJO=BASE/'ejecucion'
 ENTRADA=BASE/'entrada'
-if not INPUT_ZIP.exists():
-    try:
-        from google.colab import files
-        subidos=files.upload()
-        if len(subidos)!=1:raise ValueError('Selecciona solo el ZIP de datos docente')
-        INPUT_ZIP=Path(next(iter(subidos))).resolve()
-    except ImportError:
-        raise FileNotFoundError('Localiza S10_entradas_reales.zip o define S10_INPUT_ZIP')
-with zipfile.ZipFile(INPUT_ZIP) as z:
-    if any(n.endswith(('.py','.ipynb')) for n in z.namelist()):
-        raise ValueError('Usa la entrada actualizada: este ZIP debe contener solo datos')
-safe_extract(INPUT_ZIP,ENTRADA)
+ORIGEN_CURSO=globals().get('S10_ORIGEN',
+    'https://raw.githubusercontent.com/jazaineam1/BigData2026/main/')
+
+def obtener_archivo(relativa,destino,huella=None):
+    destino=Path(destino)
+    if destino.exists() and (huella is None or sha256_file(destino)==huella):
+        return 'reutilizado'
+    url=ORIGEN_CURSO.rstrip('/')+'/'+relativa
+    peticion=urllib.request.Request(url,headers={'User-Agent':'BigData-UCentral-S10/1.0'})
+    with urllib.request.urlopen(peticion,timeout=45) as respuesta:
+        datos=respuesta.read(32*1024**2+1)
+    if not 0<len(datos)<=32*1024**2:raise ValueError('Entrada vacía o demasiado grande')
+    if huella and digest(datos)!=huella:raise ValueError('La imagen no coincide con su SHA-256')
+    destino.parent.mkdir(parents=True,exist_ok=True)
+    temporal=destino.with_name(destino.name+'.tmp');temporal.write_bytes(datos);temporal.replace(destino)
+    return 'obtenido'
+
+for nombre in ['noticias_contratacion_2026.json','entidades_en_noticias_2026.json']:
+    obtener_archivo('Datos/'+nombre,ENTRADA/'sources'/nombre)
+obtener_archivo('Datos/s10_imagenes_reales/inputs.json',ENTRADA/'inputs/inputs.json')
+adquiridas=json.loads((ENTRADA/'inputs/inputs.json').read_text(encoding='utf-8'))
+estados=[]
+for imagen in adquiridas:
+    destino=safe_path(ENTRADA/'inputs',imagen['input_path'])
+    estados.append(obtener_archivo('Datos/s10_imagenes_reales/'+imagen['input_path'],
+                                  destino,imagen['input_sha256']))
 noticias=json.loads((ENTRADA/'sources/noticias_contratacion_2026.json').read_text(encoding='utf-8'))
 menciones=json.loads((ENTRADA/'sources/entidades_en_noticias_2026.json').read_text(encoding='utf-8'))
 inventario=build_inventory(noticias,menciones)
-print('ENTRADA REAL:',INPUT_ZIP.name)
+print('ENTRADAS REALES:',len(adquiridas),'· obtenidas:',estados.count('obtenido'),
+      '· reutilizadas:',estados.count('reutilizado'))
 print('CATÁLOGO OBSERVADO:',inventario['counts'])''')
-    m('s10-lectura-entrada',reading('El catálogo cuenta noticias y referencias; el ZIP contiene un lote adquirido.',
+    m('s10-lectura-entrada',reading('El catálogo cuenta noticias y referencias; las entradas locales son imágenes reales adquiridas previamente por el docente.',
         'El snapshot tiene 987 noticias, 5.152 apariciones y 4.071 URLs distintas; no son 5.152 imágenes descargadas.',
         'No conocemos la disponibilidad ni los bytes de las URLs no adquiridas.',
         'Tratar una URL como un archivo ya procesado.'))
@@ -268,34 +283,25 @@ print('RAW ÚNICOS:',recargado.raw_sha256.nunique(),'· no sumar originales repe
 
 Elige una posición de tu tabla, un perfil usado y una alternativa descartada. **0 deja pendiente.** Límite: 1=faltan juicios de calidad visual; 2=falta otra distribución de tamaños; 3=falta medir I/O/concurrencia; 4=contexto de entidad no prueba vínculo con contrato. Perfiles: 1=vista320, 2=catalogo640.
 
-La selección es formativa. No se envía prosa ni se acredita una nota por marcar una casilla. El manifiesto describe la ejecución; una comprobación técnica no autentica por sí sola la fuente.''')
+La selección es formativa. No se envía prosa ni se acredita una nota por marcar una casilla. Los archivos del catálogo describen la ejecución; una comprobación técnica no autentica por sí sola la fuente.''')
     c('s10-decision','''# Opciones cerradas sobre la salida propia; no se admite texto libre.
 POSICION=0 #@param {type:"integer"}
 PERFIL_ELEGIDO=0 #@param [0,1,2] {type:"raw"}
 ALTERNATIVA_DESCARTADA=0 #@param [0,1,2] {type:"raw"}
 LIMITE=0 #@param [0,1,2,3,4] {type:"raw"}
 print(record_decision(TRABAJO,POSICION,PERFIL_ELEGIDO,ALTERNATIVA_DESCARTADA,LIMITE))''')
-    c('s10-producto','''# Continuar sin duplicar; verificar y transportar la misma salida.
+    c('s10-producto','''# Repetir sin duplicar y conservar la ETL en una carpeta reutilizable.
 _,repeticion=procesar_lote('catalogo640')
 print('REPETICIÓN · nuevos:',repeticion['processed_now'],'· reutilizados:',repeticion['skipped_verified'])
 reporte=export_package(TRABAJO,inventario,trabajos,context_for(inventario,ENTIDAD))
 if not reporte['ok']:raise ValueError(reporte['errors'])
-PAQUETE=BASE/'paquete_s10.zip'
-pack(TRABAJO,PAQUETE)
-with tempfile.TemporaryDirectory() as carpeta:
-    restaurado=unpack_and_verify(PAQUETE,Path(carpeta)/'restaurado')
-print('PORTABILIDAD:',restaurado)
-print('PRODUCTO:',PAQUETE)
-DESCARGAR=False #@param {type:"boolean"}
-if DESCARGAR:
-    try:
-        from google.colab import files
-        files.download(str(PAQUETE))
-    except ImportError:print('En VS Code conserva el archivo de la ruta anterior.')''')
-    m('s10-lectura-cierre',reading('La verificación relee archivos en otra carpeta y la repetición revalida resultados.',
-        'El producto puede continuar fuera de su ruta original y alimenta la siguiente ETL.',
+print('CATÁLOGO VERIFICADO:',reporte)
+print('PRODUCTO:',TRABAJO/'outputs/assets.parquet')
+print('CONSULTABLE:',len(pd.read_parquet(TRABAJO/'outputs/assets.parquet')),'filas')''')
+    m('s10-lectura-cierre',reading('La verificación relee el catálogo y la repetición revalida los resultados.',
+        'El catálogo puede releerse y conserva las rutas, parámetros y procedencia para la siguiente ETL.',
         'No acredita calidad visual general, autenticidad editorial ni aprendizaje por sí solo.',
-        'Confundir progreso de lectura con una ejecución o entregar solo el ZIP de códigos.'))
+        'Confundir progreso de lectura con una ejecución o afirmar una carga sin releer el catálogo.'))
     m('s10-hoja','''## Para llevar · hoja de consulta
 
 | Necesidad | Operación que acabas de ejecutar |
@@ -306,7 +312,7 @@ if DESCARGAR:
 | Transformar | `ImageOps.exif_transpose()` → RGB → `thumbnail()` → `save()` |
 | Repetir | `procesar_lote()` y condición de resultado revalidado |
 | Cargar y consultar | JSONL/Parquet → relectura → filtro/agrupación |
-| Trasladar | Manifiesto, binarios y comprobación en otra carpeta |
+| Conservar | Catálogo, binarios y metadatos junto a sus rutas relativas |
 
 S11 toma IDs, origen, RAW/derived, parámetros y catálogo para añadir audio/video reales. S12 integra ETL. El lote medido no es una prueba de escala a millones: una proyección exige declarar distribución de tamaños, hardware e I/O.
 
