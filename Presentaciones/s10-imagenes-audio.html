@@ -17,6 +17,7 @@ h1{font-size:clamp(1.65rem,3vw,2.55rem);color:var(--navy);line-height:1.15;margi
 .small{font-size:.87rem;color:#435369}a{color:#004e8f}label{font-weight:700;display:block;margin:12px 0 5px}
 input[type=range]{width:100%;max-width:460px;accent-color:var(--accent)}input[type=file]{max-width:100%;margin:7px 0}
 button,.btn{background:var(--navy);color:#fff;padding:10px 15px;border:0;border-radius:8px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+details.term-guide{background:#f1f6fb;border:1px solid var(--line);border-radius:9px;padding:9px 13px;margin:12px 0}details.term-guide summary{cursor:pointer;color:var(--navy);font-weight:750}details.term-guide p{margin:9px 0}.term-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.term-cards .card{padding:12px}.term-cards p{margin:3px 0 7px}.controls-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.mini-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;margin:8px 0}.live-caption{font-size:.92rem;background:#ecf7f4;border-left:4px solid var(--accent);padding:10px 13px;margin:10px 0}.pixel-inspector{max-width:210px;image-rendering:pixelated}.badge-mono{font-family:ui-monospace,monospace;font-weight:750}.term-action{font-weight:700;color:#115b61} @media(max-width:720px){.term-cards,.controls-grid{grid-template-columns:1fr}}
 button.secondary,.btn.secondary{background:#e4eef6;color:var(--navy);border:1px solid var(--line)}
 button:disabled{opacity:.5;cursor:not-allowed}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #dd7d13;outline-offset:2px}
 .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
@@ -36,14 +37,25 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <header><strong>Universidad Central · Big Data · S10</strong>
 <nav><a href="../index.html">Curso</a><a href="../lms/session.html?s=10">Módulo LMS</a>
 <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/10_Imagenes_Audio.ipynb" target="_blank" rel="noopener">Cuaderno Colab</a>
-<a href="#s8">Laboratorio</a><a href="#s12">Guía Colab desde cero</a></nav></header>
+<a href="#s8">Laboratorio</a><a href="#s4">Glosario y prácticas</a><a href="#s12">Guía Colab desde cero</a></nav></header>
 <nav id="steps" aria-label="Secciones de la lección"></nav>
 <main id="deck">
 <section class="slide active" id="s1"><div class="kicker">01 · Problema profesional</div><h1>¿Cómo analizar imágenes y audio como datos?</h1>
 <p class="lead">Laura construye una colección de noticias y expedientes. Ya encuentra textos mediante búsquedas; ahora necesita responder: ¿qué contienen las imágenes y qué información cuantificable existe en un audio?</p>
 <div class="grid"><div class="card"><h2>Imagen</h2><p>Una matriz de píxeles con dimensiones, canales, color, bordes, ruido y objetos posibles.</p></div><div class="card"><h2>Audio</h2><p>Una señal muestreada en el tiempo, con duración, frecuencia, amplitud, silencios y, a veces, voz.</p></div></div>
 <div class="note"><b>Reto de aprendizaje:</b> experimentar con imágenes, escuchar 10 voces reales autorizadas y crear tú mismo un catálogo de 13 filas que puedas verificar y guardar. No basta con leer las pantallas: tienes que ejecutar el cuaderno y comprobar las salidas. La presentación ofrece simulaciones visuales sin instalar software; <b>todo código Python se ejecuta en Google Colab</b>.</div>
-</section>
+<details class="term-guide" id="quickGlossary"><summary>Antes de empezar: abre el diccionario de términos (sin salir de la lección)</summary>
+<div class="term-cards">
+<div class="card"><b>Píxel y RGB</b><p>Un píxel es una posición de una imagen digital. RGB son tres intensidades de rojo, verde y azul, usualmente entre 0 y 255. Cambiar sus valores cambia el color.</p></div>
+<div class="card"><b>Luminancia</b><p>Es una medida aproximada de claridad calculada a partir del color. En esta aplicación: 0 representa negro, 255 blanco; no es el significado de la imagen.</p></div>
+<div class="card"><b>Histograma</b><p>Cuenta cuántos píxeles corresponden a cada intervalo de luminancia: eje horizontal = oscuridad a claridad; eje vertical = cantidad de píxeles.</p></div>
+<div class="card"><b>RMS</b><p>Raíz del promedio de cuadrados de la amplitud. Resume la amplitud eficaz de una ventana de audio; no reconoce palabras ni emociones.</p></div>
+<div class="card"><b>FFT y espectro</b><p>La transformada rápida de Fourier (FFT) calcula qué componentes de frecuencia hay en una ventana. Un pico no equivale a una palabra.</p></div>
+<div class="card"><b>Espectrograma</b><p>Es una sucesión de espectros: horizontal = tiempo, vertical = frecuencia, color = magnitud de la señal.</p></div>
+<div class="card"><b>WAV y PCM</b><p>WAV es un contenedor de audio; PCM representa las muestras sin compresión perceptual. Un WAV puede contener otro códec, como G.711.</p></div>
+<div class="card"><b>ASR y WER</b><p>ASR transforma voz en texto probable. WER compara sus palabras con una referencia humana: número de inserciones, omisiones y sustituciones dividido entre palabras de referencia.</p></div>
+</div><p class="small">Abre las fichas contextualizadas en las diapositivas 4, 5, 7 y 8 para cambiar parámetros y ver el efecto.</p>
+</details></section>
 <section class="slide" id="s2"><div class="kicker">02 · Continuidad del caso</div><h1>Una clave, medios diferentes</h1>
 <p>En S03–S08 modelamos y procesamos datos; S09 recupera información por significado. En una noticia, el identificador editorial <code>article_id</code> puede vincular metadatos con referencias a imágenes y audio. Pero nuestras <b>10 voces reales de MINDS-14 pertenecen a otro conjunto</b> y tienen su propio <code>source_record_id</code>: no están vinculadas a las noticias.</p>
 <pre>{
@@ -65,6 +77,13 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <tr><td>Promedio de luminancia</td><td>Intensidad gris media (0–255)</td><td>Significado de la escena</td></tr>
 <tr><td>Histograma</td><td>Distribución de intensidades</td><td>Ubicación espacial de los objetos</td></tr>
 <tr><td>Diferencias vecinas</td><td>Cambios locales de intensidad</td><td>Identificación fiable de texto u objetos</td></tr></table>
+<details class="term-guide"><summary>¿Qué es realmente un píxel? Haz este ejemplo mental</summary><p>Un píxel RGB con <code>R=255, G=0, B=0</code> aparece rojo; si cambias los tres valores a <code>0</code> será negro. Una imagen de 320 × 180 contiene <b>57.600 posiciones</b>, cada una con información de color. Haz clic en la imagen transformada de la diapositiva 5 para inspeccionar el RGB de un píxel real.</p></details>
+<details class="term-guide"><summary>Histograma, luminancia, umbral, resolución y binarización: definiciones con ejemplos</summary>
+<p><b>Histograma:</b> barras que cuentan cuántos píxeles son oscuros, intermedios o claros. Si toda una imagen es blanca, su conteo se concentra en el extremo derecho (255).</p>
+<p><b>Luminancia:</b> aproximación de claridad calculada como <code>0,2126×R + 0,7152×G + 0,0722×B</code>. Un píxel gris (100, 100, 100) tiene luminancia 100. No identifica el objeto.</p>
+<p><b>Resolución:</b> cantidad de columnas por filas; 160 × 90 = 14.400 píxeles. Menos píxeles implica menos posiciones, pero no siempre reduce los bytes en la misma proporción.</p>
+<p><b>Umbral:</b> valor que separa píxeles más claros u oscuros: si <code>Y ≥ 128</code> pasa a blanco y si es menor pasa a negro. <b>Binarización:</b> convertir la imagen a solo negro y blanco usando ese umbral.</p>
+<p><b>Contraste:</b> separa o acerca valores de claridad respecto al punto medio. <b>Brillo:</b> suma/resta claridad. En el siguiente laboratorio podrás editarlos sin alterar el original.</p></details>
 <div class="note">Secuencia profesional: decodificar → transformar → extraer características → comprobar qué se perdió → interpretar. Para OCR se necesitaría una etapa adicional de reconocimiento y validación.</div></section>
 <section class="slide" id="s5"><div class="kicker">05 · Experimento en el navegador</div><h1>Laboratorio de imagen</h1>
 <p>La muestra original es un documento ilustrado generado por la herramienta, <b>no</b> una fotografía editorial. Puedes sustituirlo por una imagen propia que tengas permiso de analizar; no se envía al servidor.</p>
@@ -72,8 +91,26 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <div class="card"><h2>Transformación</h2><canvas id="imageResult" width="320" height="180" role="img" aria-label="Resultado de reducción y umbral de imagen"></canvas>
 <label for="imageSize">Lado máximo: <output id="sizeValue">160</output> px</label><input id="imageSize" type="range" min="40" max="320" step="40" value="160">
 <label for="imageThreshold">Umbral: <output id="thresholdValue">128</output></label><input id="imageThreshold" type="range" min="40" max="215" step="5" value="128">
-<label><input id="imageBinary" type="checkbox"> Aplicar binarización</label></div></div>
-<div id="imageStats" class="note" aria-live="polite"></div><canvas id="imageHistogram" width="700" height="160" role="img" aria-label="Histograma de luminancia de la imagen transformada"></canvas>
+<label><input id="imageBinary" type="checkbox"> Aplicar binarización</label>
+<label for="imageBrightness">Brillo (sumar a cada canal): <output id="brightnessValue">0</output></label>
+<input id="imageBrightness" type="range" min="-100" max="100" value="0" step="10">
+<label for="imageContrast">Contraste: <output id="contrastValue">100</output>%</label>
+<input id="imageContrast" type="range" min="50" max="150" value="100" step="10"></div></div>
+<div class="card"><h2>¿Qué es un histograma?</h2><p><b>Eje X:</b> luminancia de 0 (negro) a 255 (blanco). <b>Eje Y:</b> cantidad de píxeles en ese rango de claridad. Cada barra suma píxeles, no identifica objetos.</p>
+<label for="histogramBins">Número de barras (intervalos): <output id="binsValue">16</output></label>
+<input id="histogramBins" type="range" min="4" max="64" step="4" value="16">
+<p id="histogramExplanation" class="live-caption" aria-live="polite">Cambia los intervalos para comparar cómo se agrupan las intensidades.</p>
+<details class="term-guide"><summary>Experimento explicado: ¿por qué cambia el histograma cuando edito los intervalos?</summary><p>Con <b>4 barras</b>, cada barra cuenta aproximadamente 64 niveles distintos de claridad. Con <b>16 barras</b>, cada una cuenta 16 niveles. Con <b>64 barras</b>, cada una agrupa 4. Los píxeles de la imagen NO cambian por modificar el número de barras; solo cambia la forma de agrupar sus valores.</p><p><b>Prueba:</b> mueve solo el control de intervalos y observa que la luminancia media y el número de píxeles permanecen iguales.</p></details></div>
+<div id="imageStats" class="note" aria-live="polite"></div><canvas id="imageHistogram" width="700" height="230" role="img" aria-label="Histograma de luminancia con ejes y barras agrupadas"></canvas>
+<div class="grid"><div class="card"><h2>Inspector de píxeles · haz clic en la imagen transformada</h2>
+<p>Un <b>píxel</b> tiene posición <code>(x,y)</code> y tres canales <code>R,G,B</code>. Toca o haz clic en el derivado y mira una cuadrícula ampliada de 9 × 9 píxeles.</p>
+<canvas id="imagePixelZoom" class="pixel-inspector" width="198" height="198" role="img" aria-label="Vecindario de nueve por nueve píxeles ampliado"></canvas>
+<div id="pixelStats" class="live-caption" aria-live="polite">Pulsa en un píxel del resultado para ver sus canales.</div></div>
+<div class="card"><h2>Prueba de interpretación · cambia un solo parámetro</h2>
+<p><b>1.</b> Pon brillo <b>+60</b>; observa si sube la luminancia media y las barras se desplazan hacia la derecha.</p>
+<p><b>2.</b> Regresa a brillo 0 y activa binarización. Observa cómo el histograma se concentra en negro y blanco.</p>
+<p><b>3.</b> Cambia 16 barras a 4: la cantidad de píxeles no debe cambiar.</p>
+<p><b>Cómo se lee:</b> las barras representan conteos por intervalo. <b>Qué nos dice:</b> cómo se distribuye la claridad. <b>Qué NO permite concluir:</b> texto u objetos reconocidos. <b>Qué error común:</b> creer que cambiar las barras modificó la imagen.</p></div></div>
 <div class="actions"><button id="resetImage" class="secondary">Restaurar muestra</button><button id="saveImage">Guardar imagen derivada</button></div>
 <p><b>Prueba autónoma:</b> pon el lado máximo primero en <b>320</b> y después en <b>160</b>; observa <b>Derivado</b> y el histograma. Activa/desactiva binarización y describe qué información se pierde. Guarda la imagen final. <b>Resultado esperado:</b> cambia el número de píxeles y la distribución de intensidades. <b>Si no cambia:</b> pulsa «Restaurar muestra» y repite el experimento.</p><p class="small"><b>Cómo se lee:</b> «Derivado» indica el tamaño procesado. <b>Qué nos dice:</b> cuánto cambió la representación. <b>Qué NO permite concluir:</b> que el texto se haya reconocido. <b>Qué error común:</b> confundir resolución con semántica.</p></section>
 <section class="slide" id="s6"><div class="kicker">06 · Interpretar</div><h1>¿Qué extraerías de una imagen?</h1>
@@ -83,14 +120,32 @@ footer button{padding:7px 12px}#count{font-weight:800;color:var(--navy)}
 <section class="slide" id="s7"><div class="kicker">07 · Puente conceptual</div><h1>Un audio tampoco es un texto</h1>
 <p>Una muestra de audio representa la amplitud de una señal. <b>16.000 Hz</b> indica 16.000 muestras por segundo en un canal: no significa que el sonido tenga frecuencia de 16.000 Hz.</p>
 <table><tr><th>Medida</th><th>Interpretación</th></tr><tr><td>Duración</td><td>Tiempo total de las muestras</td></tr><tr><td>RMS</td><td>Energía media de amplitud (no volumen percibido)</td></tr><tr><td>Espectro</td><td>Frecuencias presentes en una ventana</td></tr><tr><td>Espectrograma</td><td>Cómo cambia el contenido frecuencial en el tiempo</td></tr><tr><td>Transcripción</td><td>Hipótesis de palabras de un sistema ASR; requiere validación</td></tr></table>
-<div class="note">Frecuencia de muestreo, frecuencia tonal y cantidad de muestras son magnitudes diferentes. También debes distinguir archivo WAV, códec PCM y señal decodificada.</div></section>
+<div class="note">Frecuencia de muestreo, frecuencia tonal y cantidad de muestras son magnitudes diferentes. También debes distinguir archivo WAV, códec PCM y señal decodificada.</div>
+<div class="term-cards">
+<details class="term-guide"><summary>¿Qué es una forma de onda?</summary><p>Es un gráfico de <b>amplitud (vertical)</b> frente a <b>tiempo (horizontal)</b>. Cuando una parte queda casi horizontal en cero, la señal está en silencio o tiene muy poca amplitud. No muestra palabras.</p></details>
+<details class="term-guide"><summary>¿Qué es RMS?</summary><p>En una ventana con muestras <code>[1, −1, 0, 0]</code> el RMS es <code>√((1²+(-1)²+0²+0²)/4) ≈ 0,707</code>. Cuanto mayor sea la amplitud de una señal, mayor suele ser su RMS. No permite deducir la emoción del hablante.</p></details>
+<details class="term-guide"><summary>¿Qué son FFT, espectro y pico de frecuencia?</summary><p>La <b>FFT</b> es un algoritmo para analizar las frecuencias de una ventana. El <b>espectro</b> grafica la magnitud (vertical) por frecuencia en hercios (horizontal). Un pico en 200 Hz indica un componente alrededor de esa frecuencia, no una palabra.</p></details>
+<details class="term-guide"><summary>¿Qué es un espectrograma?</summary><p>Apila varios espectros en el tiempo: <b>eje horizontal</b> tiempo, <b>vertical</b> frecuencia, <b>color</b> magnitud relativa. Una pausa aparece como franja oscura. Cambia las frecuencias de los tonos en la diapositiva 8 para ver cómo se mueve la franja de energía.</p></details>
+<details class="term-guide"><summary>¿Qué significa tamaño de ventana?</summary><p>Una ventana es un fragmento de muestras. A 16.000 Hz, 256 muestras duran 0,016 s y 2.048 duran 0,128 s. Una ventana larga distingue frecuencias cercanas con mayor detalle, pero describe un intervalo de tiempo mayor.</p></details>
+<details class="term-guide"><summary>¿Qué es un códec?</summary><p>Es la regla para codificar y decodificar muestras. <b>WAV</b> es un contenedor y puede guardar PCM o G.711 μ-law. En Colab conservamos el audio G.711 y generamos una copia PCM16 que puede analizarse.</p></details>
+</div></section>
 <section class="slide" id="s8"><div class="kicker">08 · Audio: explorar y escuchar</div><h1>Laboratorio de señal sonora</h1>
 <p>El experimento en el navegador produce una señal original de tonos con silencios (no ejecuta Python); <b>no contiene palabras</b>. Para experimentar con voz, graba tu propia voz voluntariamente o abre un archivo autorizado. Todo el procesamiento ocurre en este navegador.</p>
 <div class="note"><b>Dos experiencias complementarias:</b> esta pantalla permite manipular una señal original sin instalar software. En el <a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/10_Imagenes_Audio.ipynb" target="_blank" rel="noopener">cuaderno de Colab</a> se obtienen y analizan <b>10 voces humanas reales en español</b> del corpus MINDS-14 (CC BY 4.0): cada WAV tiene transcripción de referencia, duración, RMS, espectro y procedencia.</div>
+<div class="card"><h2>Editor de señal · cambia los tonos originales</h2>
+<div class="controls-grid">
+<div><label for="toneLow">Frecuencia del primer tono: <output id="toneLowValue">190</output> Hz</label><input type="range" id="toneLow" min="100" max="600" step="10" value="190"></div>
+<div><label for="toneHigh">Frecuencia del segundo tono: <output id="toneHighValue">360</output> Hz</label><input type="range" id="toneHigh" min="200" max="900" step="10" value="360"></div>
+<div><label for="toneGain">Amplitud de la señal: <output id="toneGainValue">100</output>%</label><input type="range" id="toneGain" min="0" max="100" step="10" value="100"></div>
+<div><label for="fftWindow">Tamaño de ventana FFT: <output id="fftWindowValue">1024</output> muestras</label><select id="fftWindow"><option value="256">256 · frecuencia menos precisa</option><option value="512">512</option><option value="1024" selected>1024</option><option value="2048">2048 · frecuencia más precisa</option></select></div>
+</div>
+<div id="audioEditorExplanation" class="live-caption" aria-live="polite">Edita las frecuencias y vuelve a escuchar; el silencio central se conserva.</div>
+<p class="small">Los tres primeros controles regeneran solo la <b>señal de demostración</b>, no sobrescriben grabaciones propias o archivos cargados.</p></div>
 <div class="actions"><button id="demoAudio">Generar señal de ejemplo</button><button id="playAudio">Reproducir señal</button><button id="recordAudio">Grabar mi voz</button><button id="stopAudio" class="secondary" disabled>Detener grabación</button></div>
 <label for="audioUpload">O abrir un archivo propio de audio</label><input id="audioUpload" type="file" accept="audio/*">
 <div class="grid"><div class="card"><h2>Forma de onda</h2><canvas id="waveCanvas" width="640" height="220" role="img" aria-label="Amplitud de la señal a lo largo del tiempo"></canvas></div>
 <div class="card"><h2>Espectro de una ventana</h2><canvas id="spectrumCanvas" width="640" height="220" role="img" aria-label="Magnitud relativa por frecuencia"></canvas></div></div>
+<div class="grid"><div class="card"><h2>Espectrograma: tiempo × frecuencia × color</h2><canvas id="audioSpectrogram" width="640" height="240" role="img" aria-label="Mapa espectral relativo en función del tiempo y la frecuencia"></canvas><p class="small">Horizontal: tiempo (s); vertical: frecuencia, de 0 a 2.000 Hz; más claro significa mayor energía relativa. No es transcripción.</p></div><div class="card"><h2>¿Cómo interpretar la señal?</h2><p><b>Forma de onda:</b> amplitud frente al tiempo. <b>RMS:</b> amplitud eficaz de la ventana que eliges.</p><p><b>Espectro:</b> componentes de frecuencia de UNA ventana. <b>Espectrograma:</b> muchos espectros en diferentes tiempos.</p><p><b>Prueba:</b> cambia el primer tono de 190 a 400 Hz, mira cómo se desplaza su banda; después baja amplitud a 0 % y comprueba que RMS cae a 0. Vuelve a 100 % para seguir.</p><p><b>Límite:</b> ninguno de estos gráficos revela palabras; ASR es otra etapa.</p></div></div>
 <label for="audioStart">Ventana de análisis: <output id="startValue">25</output>% de duración</label><input id="audioStart" type="range" min="0" max="90" value="25" step="5">
 <div id="audioStats" class="note" aria-live="polite">Genera la señal de ejemplo para empezar.</div><p><b>Prueba autónoma:</b> pulsa «Generar señal de ejemplo», luego «Reproducir señal». Cambia la ventana al <b>15 %, 50 % y 80 %</b>; compara RMS y el pico aproximado. <b>Resultado esperado:</b> cerca del 50 % hay silencio (RMS próximo a 0), pero no hay palabras. <b>Si no suena:</b> revisa el volumen y la reproducción automática del navegador; las métricas funcionan aunque no tengas altavoces.</p><p id="audioStatus" class="small" aria-live="polite"></p></section>
 <section class="slide" id="s9"><div class="kicker">09 · Interpretación acústica</div><h1>¿Qué te dice un pico de frecuencia?</h1>
