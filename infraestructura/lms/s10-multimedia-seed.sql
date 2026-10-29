@@ -27,7 +27,7 @@ insert into public.lms_run_sessions_v2(course_run_id,session_number,title,summar
 select id,10,'¿Cómo convertir imágenes reales en un catálogo reutilizable?','E → T → L de imágenes reales: implementación en Colab y VS Code, lotes y catálogo portable. Práctica formativa; visitas no acreditan el laboratorio.',
 'visible','session.html?s=10','2026-10-29 23:00:00+00',10,'{"type": "learning", "topic": "image-etl", "estimated_minutes": 120, "graded": false, "canonical_module": true, "visible_resources": 2, "class_date": "2026-10-29", "class_kind": "learning", "class_timezone": "America/Bogota", "class_time_local": "18:00", "completion_basis": "resource_visits", "outcomes": ["Implementar E, T y L de imágenes reales en Colab y VS Code", "Conservar RAW y procedencia por noticia", "Transformar por lotes, continuar pendientes y comparar perfiles", "Releer y verificar un catálogo JSONL/Parquet portable"]}'::jsonb,now(),now()
 from public.lms_course_runs where code='bigdata-2026-2' and course_code='bigdata'
-on conflict(course_run_id,session_number) do update set title=excluded.title,summary=excluded.summary,metadata=excluded.metadata,updated_at=now();
+on conflict(course_run_id,session_number) do update set title=excluded.title,summary=excluded.summary,starts_at=excluded.starts_at,metadata=excluded.metadata,updated_at=now();
 
 -- Ocultar recursos sustituidos; conservar IDs para no romper referencias históricas.
 update public.lms_run_resources_v2 set visible=false,updated_at=now()
