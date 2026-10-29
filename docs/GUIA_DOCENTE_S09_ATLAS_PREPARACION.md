@@ -3,13 +3,15 @@
 **Curso:** Big Data · Universidad Central · Grupo 2.  
 **Objetivo:** que la sesión sobre SECOP, E5 y MongoDB Atlas sea ejecutable por alumnos con o sin acceso a Atlas. Esta es documentación operativa para el docente, **no forma parte de los dos recursos del LMS**. El repositorio GitHub es público: **no guardar aquí hosts privados, nombres de usuario personales, contraseñas, IP de estudiantes ni datos sensibles**.
 
-## 1. Elegir el esquema real antes de comenzar
+## 1. La ruta principal YA NO REQUIERE preparación docente de Atlas
 
-**Recomendación para clase guiada:** un clúster Atlas compartido y **un único índice** `s09_vector_index` en `clase_s09_demo.secop_vectores`, junto con usuarios de base de datos individualmente autorizados, cada uno con alias `EQUIPO` único. Esto evita que cada estudiante espere la creación del índice y reduce la carga administrativa. El `LOTE` incorpora la identidad del conjunto para no sobreescribir trabajos de otros. No compartir una sola contraseña docente.
+El cuaderno vigente tiene como opción predeterminada **Atlas temporal automático**. Cada estudiante crea por la API oficial de MongoDB su propio clúster Ephemeral Free/M0, con URI y usuario generados individualmente; ni host ni contraseña ni autorización de IP deben salir del docente. **No configures el clúster compartido para esta ruta.** El proveedor permite 0.0.0.0/0 exclusivamente en el clúster temporal y exige autenticación. Se pausa después de dos días y elimina después de siete si no se reclama.
 
-**Alternativa autónoma:** si no existe acceso individual en el clúster compartido, cada estudiante puede elegir un proyecto Atlas Free/M0 personal (cuando esté disponible) y crear **un índice para ese proyecto**. Confirmar explícitamente FREE y precio $0 antes de crear. Colab + búsqueda NumPy local es la ruta gratuita inmediata sin cuenta Atlas, pero no prueba persistencia remota.
+La consola Atlas se aprende con el enlace privado de reclamación que muestra la celda 3. El estudiante puede reclamar el clúster con su propia cuenta gratuita y examinar colección, índice y Aggregations. Esta acción opcional requiere login personal, pero no datos del docente.
 
-## 2. Preparación compartida del docente
+**Lo que sigue es SOLO una alternativa avanzada para quienes opten por un clúster compartido preexistente**, no un prerrequisito del curso.
+
+## 2. Opcional · preparación del clúster compartido (ruta alternativa)
 
 1. Verificar en [cloud.mongodb.com](https://cloud.mongodb.com/) la organización, proyecto y clúster activos. Preparar **un único índice** del tipo Vector Search en la colección del ejercicio: ruta `embedding`, dimensión 384, similitud `cosine` y filtros `lote` y `entidad`.
 2. La consola de Atlas necesita rol de proyecto autorizado para crear/administrar índices (según el método empleado, `Project Data Access Admin`, `Project Search Index Editor` o rol superior). El **usuario de base de datos** PyMongo puede tener `readWrite` en el ámbito acotado: no confundir roles de interfaz con roles de base de datos.
@@ -21,7 +23,7 @@
 ## 3. ¿Qué va en cada soporte?
 
 - **Presentación S09:** historia SECOP, significado de documentos y vectores, acceso a tutorial de seis pasos y guía de Atlas desde cero como ayuda, sin instrucciones de administración del proyecto.
-- **Colab S09:** celdas ejecutables, menús con valores seguros por defecto, instrucciones explícitas sobre cómo obtener HOST_ATLAS, USUARIO_ATLAS, IP_COLAB y contraseña oculta, y qué hacer ante errores.
+- **Colab S09:** Atlas temporal automático es predeterminado y no requiere datos del docente. La opción Mi Atlas propio conserva instrucciones y credenciales personales para usuarios avanzados.
 - **Este documento:** creación/gestión de usuarios e índices compartidos, roles, costes, seguridad, temporalidad de la red y contingencias docentes. **No se registra como tercer recurso LMS.**
 
 ## 4. Plan B si falla el acceso
