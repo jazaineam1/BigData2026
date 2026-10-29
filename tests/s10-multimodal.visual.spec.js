@@ -135,3 +135,22 @@ test('audio editable: editar tono cambia espectro, amplitud controla RMS y venta
  expect(pixels.max).toBeGreaterThan(pixels.min);
  await expect(page.locator('#s8')).toContainText('Espectrograma: tiempo × frecuencia × color');
 });
+
+test('mezclador RGB editable: color y luminancia son distintos según el canal',async({page})=>{
+ await page.goto(route+'#s4');
+ const initial=await page.evaluate(()=>window.rgbMetrics);
+ expect(initial.red).toBe(255);
+ expect(initial.luminance).toBeGreaterThan(50);
+ await page.locator('#rgbR').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ await page.locator('#rgbG').evaluate(el=>{el.value='255';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ const green=await page.evaluate(()=>window.rgbMetrics);
+ expect(green.red).toBe(0);
+ expect(green.green).toBe(255);
+ expect(green.luminance).toBeGreaterThan(initial.luminance);
+ await expect(page.locator('#rgbResult')).toContainText('RGB (0, 255, 0)');
+ await expect(page.locator('#rgbSwatch')).toHaveCSS('background-color','rgb(0, 255, 0)');
+ await page.goto(route+'#s17');
+ await expect(page.locator('#s17')).toContainText('cruces por cero');
+ await page.goto(route+'#s20');
+ await expect(page.locator('#s20')).toContainText('¿Qué son JSONL, Parquet, SHA-256 y manifiesto?');
+});
