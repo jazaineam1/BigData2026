@@ -56,7 +56,14 @@ El productor docente adquirió el snapshot una vez con pausas e identificación.
 
 **HAZ ESTO AHORA.** Ejecuta dependencias y Preparar. El cuaderno obtiene las entradas y las conserva en caché; al repetir reutiliza los archivos verificados. El mismo paso funciona en Colab y VS Code. No se pide una tarjeta ni una clave para S10.''')
     c('s10-dependencias','''#@title Preparar bibliotecas (selecciona el kernel Python en VS Code)
-%pip -q install pillow==13.0.0 pandas==3.1.0 pyarrow==26.0.0''',True)
+# Colab precarga bibliotecas: no las reemplazamos dentro de un kernel activo.
+# Verificado en Colab el 29-10-2026: google-colab requiere pandas 2.2.3.
+import importlib.util, importlib.metadata, subprocess, sys
+faltantes=[]
+for modulo,requisito in [('PIL','pillow==12.2.0'),('pandas','pandas==2.2.3'),('pyarrow','pyarrow==26.0.0')]:
+    if importlib.util.find_spec(modulo) is None:faltantes.append(requisito)
+if faltantes:subprocess.check_call([sys.executable,'-m','pip','install','-q',*faltantes])
+print('ENTORNO:',{nombre:importlib.metadata.version(nombre) for nombre in ['pillow','pandas','pyarrow']})''',True)
     c('s10-utilidades','''#@title Utilidades de archivos e integridad — código incluido; expande para inspeccionarlo
 from pathlib import Path, PureWindowsPath
 from datetime import datetime, timezone
