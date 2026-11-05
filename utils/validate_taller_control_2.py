@@ -66,6 +66,8 @@ def run():
         verify(meta["suma_histograma"]==960*520 and len(meta["histograma"])==16,"Imagen real/histograma 16 bins")
         p=c.perfil_imagen(i,t/"160.png",160,.85)
         verify(p["ancho"]<=160 and c.sha(t/"160.png")==p["sha256"],"Pillow: perfil y SHA")
+        small=c.inspeccion_imagen(t/"160.png")
+        verify(small["suma_histograma"]==small["ancho"]*small["alto"],"Inspector sin píxel fuera de límites en perfil reducido")
         import soundfile as sf
         x=np.sin(np.linspace(0,2*np.pi*440,16000,endpoint=False)).astype(np.float32)
         w=t/"demo.wav";sf.write(w,x,16000,subtype="PCM_16")
