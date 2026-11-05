@@ -32,7 +32,7 @@ ENTIDADES = {
 }
 CANTIDADES = [
     r"\b(?:m[aá]s\s+de\s+)?(?:cincuenta|50)\s+compa[nñ][ií]as\b",
-    r"(?<!\\w)(?:\\d{1,3}(?:[.,]\\d+)?\\s*%|\\d{1,3}(?:[.,]\\d+)?\\s+por\\s+ciento|veintitr[eé]s\\s+por\\s+ciento)(?!\\w)",
+    r"(?<!\w)(?:\d{1,3}(?:[.,]\d+)?\s*%|\d{1,3}(?:[.,]\d+)?\s+por\s+ciento|veintitr[eé]s\s+por\s+ciento)(?!\w)",
     r"\b(?:cuarenta\s+mil|40[ .]?000)\s+referencias\b",
     r"\b(?:cinco|5)\s+requerimientos\b",
     r"\b(?:dos\s+mil\s+veinticinco|2025)\b",
