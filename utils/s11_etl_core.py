@@ -270,12 +270,26 @@ def transformar_imagenes(raiz: Path, entradas: list[dict], lado: int = 320,
 
 def transformar_audios(raiz: Path, entradas: list[dict],
                        ganancia: float = 1.0, tasa_final: int = 16000,
-                       verbose: bool = True) -> list[dict]:
+                       verbose: bool = True, block_seconds: int = 8,
+                       on_block=None) -> list[dict]:
+    """ETL de WAV completo, incluso largo: decodificación y escritura incremental.
+
+    Cada bloque toma un pequeño halo a izquierda/derecha para mantener el
+    filtro polifásico de remuestreo continuo. El tamaño de los bloques se
+    alinea al denominador del factor racional de muestreo. No se recorta
+    silenciosamente el audio a 60 s ni se sobrescribe el RAW.
+
+    on_block(info) recibe avance REAL con número de muestras procesadas;
+    no se usa para definir una velocidad ficticia de procesamiento.
+    """
+    import os
     import numpy as np
     import soundfile as sf
     from scipy.signal import resample_poly
     if ganancia not in (0.5, 1.0, 1.5) or tasa_final != 16000:
         raise ValueError("Ganancia debe ser 0.5, 1.0 o 1.5; salida 16 kHz")
+    if not 1 <= block_seconds <= 30:
+        raise ValueError("block_seconds debe estar entre 1 y 30")
     raiz = Path(raiz)
     salida = []
     t0 = perf_counter()
@@ -283,48 +297,104 @@ def transformar_audios(raiz: Path, entradas: list[dict],
         ruta = raiz / entrada["original_path"]
         if sha256(ruta) != entrada["original_sha256"]:
             raise ValueError("RAW de audio alterado")
-        with sf.SoundFile(str(ruta)) as lector:
-            fs = lector.samplerate
-            muestras = lector.read(dtype="float32", always_2d=True)
-        if not 8000 <= fs <= 48000 or len(muestras) < fs // 2 or len(muestras) > fs * 60:
-            raise ValueError("Duración o tasa de muestreo fuera de límites")
-        mono = np.mean(muestras, axis=1, dtype=np.float32)
-        divisor = math.gcd(fs, tasa_final)
-        remuestreado = resample_poly(mono, tasa_final // divisor, fs // divisor)
-        real = remuestreado.astype(np.float64) * ganancia
-        recortes = int(np.count_nonzero(np.abs(real) >= 1.0))
-        pcm = np.rint(np.clip(real, -1, 1) * 32767).astype("<i2")
-        buffer = io.BytesIO()
-        with wave.open(buffer, "wb") as wav:
-            wav.setnchannels(1)
-            wav.setsampwidth(2)
-            wav.setframerate(tasa_final)
-            wav.writeframes(pcm.tobytes())
-        datos = buffer.getvalue()
         etiqueta = f"pcm16_{tasa_final}_g{int(ganancia*100)}"
         ruta_der = raiz / "derived" / "audios" / f"{entrada['original_sha256'][:16]}_{etiqueta}.wav"
-        guardar_sin_sobrescribir(ruta_der, datos, sha256(datos))
-        senal = pcm.astype(np.float64) / 32768
-        rms = float(np.sqrt(np.mean(senal * senal)))
-        zcr = float(np.mean(np.signbit(senal[:-1]) != np.signbit(senal[1:])))
-        segmento = senal[:min(len(senal), tasa_final // 2)]
+        ruta_der.parent.mkdir(parents=True, exist_ok=True)
+        with sf.SoundFile(str(ruta)) as lector:
+            fs, total = lector.samplerate, lector.frames
+            if not 8000 <= fs <= 48000 or total < fs // 2:
+                raise ValueError("Audio demasiado corto o frecuencia fuera del rango 8–48 kHz")
+            divisor = math.gcd(fs, tasa_final)
+            up, down = tasa_final // divisor, fs // divisor
+            # Todos los inicios son múltiplos de down: fase global estable.
+            step = max(down, int(math.ceil(fs * block_seconds / down)) * down)
+            halo = int(math.ceil(64 * max(up, down) / down)) * down
+            contador, suma_cuadrados, cambios_cero, recortes = 0, 0.0, 0, 0
+            previous_sign, espectro_inicial = None, []
+            n_bloques = 0
+            provisional = None
+            try:
+                with tempfile.NamedTemporaryFile(prefix=".s11-audio-", suffix=".wav",
+                                                 dir=ruta_der.parent, delete=False) as temp:
+                    provisional = Path(temp.name)
+                with wave.open(str(provisional), "wb") as destino:
+                    destino.setnchannels(1)
+                    destino.setsampwidth(2)
+                    destino.setframerate(tasa_final)
+                    for inicio in range(0, total, step):
+                        fin = min(total, inicio + step)
+                        izquierda = max(0, inicio - halo)
+                        derecha = min(total, fin + halo)
+                        lector.seek(izquierda)
+                        fragmento = lector.read(derecha - izquierda, dtype="float32",
+                                               always_2d=True)
+                        mono = np.mean(fragmento, axis=1, dtype=np.float32)
+                        remuestreado = resample_poly(mono, up, down)
+                        corte = (inicio - izquierda) * up // down
+                        # Ceil(n * up/down) reproduce el número global de muestras.
+                        salida_hasta = (fin * up + down - 1) // down
+                        salida_desde = (inicio * up + down - 1) // down
+                        longitud = salida_hasta - salida_desde
+                        parte = remuestreado[corte:corte + longitud]
+                        if len(parte) != longitud:
+                            raise ValueError("Pérdida de muestras en resampling por bloques")
+                        real = parte.astype(np.float64) * ganancia
+                        recortes += int(np.count_nonzero(np.abs(real) >= 1.0))
+                        pcm = np.rint(np.clip(real, -1, 1) * 32767).astype("<i2")
+                        destino.writeframesraw(pcm.tobytes())
+                        normal = pcm.astype(np.float64) / 32768
+                        suma_cuadrados += float(np.dot(normal, normal))
+                        signos = np.signbit(normal)
+                        if len(signos):
+                            if previous_sign is not None:
+                                cambios_cero += int(previous_sign != signos[0])
+                            cambios_cero += int(np.count_nonzero(signos[1:] != signos[:-1]))
+                            previous_sign = bool(signos[-1])
+                        if len(espectro_inicial) < tasa_final // 2:
+                            faltan = tasa_final // 2 - len(espectro_inicial)
+                            espectro_inicial.extend(normal[:faltan].tolist())
+                        contador += len(pcm)
+                        n_bloques += 1
+                        evento = {"source_id": entrada["source_id"],
+                                  "blocks": n_bloques, "processed_input_frames": fin,
+                                  "total_input_frames": total, "progress": fin / total}
+                        if on_block is not None:
+                            on_block(dict(evento))
+                        elif verbose and (n_bloques == 1 or fin == total or n_bloques % 5 == 0):
+                            print(f"T · AUDIO BLOQUES {n_bloques}: {fin}/{total} "
+                                  f"muestras de {entrada['source_id']}")
+                huella_derivada = sha256(provisional)
+                if ruta_der.exists():
+                    if sha256(ruta_der) != huella_derivada:
+                        raise ValueError("Derivado existente cambió: no se sobrescribe")
+                else:
+                    provisional.replace(ruta_der)
+                if sha256(ruta_der) != huella_derivada:
+                    raise ValueError("Derivado no verificable")
+            finally:
+                if provisional is not None:
+                    provisional.unlink(missing_ok=True)
+        segmento = np.asarray(espectro_inicial, dtype=np.float64)
         espectro = np.abs(np.fft.rfft(segmento * np.hanning(len(segmento))))
         hz = np.fft.rfftfreq(len(segmento), 1 / tasa_final)
         centroide = float(np.sum(hz * espectro) / max(float(np.sum(espectro)), 1e-12))
         metrica = {
             "source_rate_hz": fs, "sample_rate_hz": tasa_final,
-            "duration_seconds": round(len(senal) / tasa_final, 3),
-            "rms": round(rms, 6), "zero_crossing_rate": round(zcr, 6),
-            "spectral_centroid_hz": round(centroide, 2), "clipped_samples": recortes,
-            "channels": 1, "pcm_bits": 16,
-            "bytes_original": ruta.stat().st_size, "bytes_derived": len(datos),
+            "duration_seconds": round(contador / tasa_final, 3),
+            "rms": round(math.sqrt(suma_cuadrados / max(1, contador)), 6),
+            "zero_crossing_rate": round(cambios_cero / max(1, contador-1), 6),
+            "spectral_centroid_hz": round(centroide, 2),
+            "clipped_samples": recortes, "channels": 1, "pcm_bits": 16,
+            "processing_blocks": n_bloques, "processed_input_frames": total,
+            "bytes_original": ruta.stat().st_size, "bytes_derived": ruta_der.stat().st_size,
         }
         salida.append({**entrada, "modality": "audio",
                        "derived_path": ruta_der.relative_to(raiz).as_posix(),
-                       "derived_sha256": sha256(datos),
+                       "derived_sha256": huella_derivada,
                        "profile": etiqueta, "metrics": metrica})
     if verbose:
-        print(f"T · AUDIO: {len(salida)} WAV PCM16 mono {tasa_final} Hz · ganancia {ganancia} · {perf_counter()-t0:.2f} s")
+        print(f"T · AUDIO: {len(salida)} WAV PCM16 mono {tasa_final} Hz "
+              f"· ganancia {ganancia} · {perf_counter()-t0:.2f} s")
     return salida
 
 

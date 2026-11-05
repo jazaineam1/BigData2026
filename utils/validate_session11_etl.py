@@ -25,7 +25,7 @@ NOTEBOOK = ROOT / "Cuadernos" / "11_ETL_Audio_Imagenes.ipynb"
 def estructura():
     subprocess.check_call([sys.executable,str(ROOT/"utils"/"build_session11_etl_audio_imagenes.py"),"--check"])
     nb = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
-    assert len(nb["cells"]) == 40, "La lección S11 espera 40 celdas"
+    assert len(nb["cells"]) == 54, "La lección S11 espera 54 celdas"
     ids = [x["id"] for x in nb["cells"]]
     for id in ("s11-preparar","s11-cargar-motor","s11-elegir","s11-extraer-imagenes",
                "s11-extraer-audios","s11-transformar-imagenes","s11-transformar-audios",
@@ -36,6 +36,10 @@ def estructura():
             codigo = "".join(c["source"])
             compile(codigo, f"<S11:{c['id']}>", "exec")
             assert c["outputs"] == []
+            assert c.get("metadata", {}).get("cellView") != "form", "El código no debe ocultarse en un formulario"
+    assert ids.index("s11-formatos-practica") < ids.index("s11-calidad"), "Formatos antes de control QA"
+    assert ids.index("s11-threads-codigo") < ids.index("s11-live-f-benchmark")
+    assert ids.index("s11-audio-largo") < ids.index("s11-cargar")
     assert ids.index("s11-escala") < ids.index("s11-escala-lotes") < ids.index("s11-escala-comparar") < ids.index("s11-empaquetar")
     assert ids.index("s11-extraer-imagenes") < ids.index("s11-extraer-audios")
     print("VALIDACIÓN S11: estructura, contrato, orden de tutorial y sintaxis OK")
@@ -67,6 +71,10 @@ def laboratorio_real():
                     codigo = codigo.replace(
                         "LIMITE_ELEGIDO = 0 #@param",
                         "LIMITE_ELEGIDO = 2 #@param")
+                if celda["id"]=="s11-escala-lotes":
+                    # La prueba E2E ejercita la ampliación aunque para el alumno esté desactivada.
+                    codigo = codigo.replace("ACTIVAR_ESCALA = False #@param",
+                                            "ACTIVAR_ESCALA = True #@param")
                 if celda["id"]=="s11-empaquetar":
                     codigo = codigo.replace("DESCARGAR_ZIP=False #@param", "DESCARGAR_ZIP=False #@param")
                 print(f"\n>>> S11 · {celda['id']}",flush=True)
