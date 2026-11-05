@@ -34,6 +34,8 @@ test('imagen propia: archivo subido, derivado y descripci√≥n sin inferencia sem√
   await expect(page.locator('#catalogBody')).toContainText('mi_imagen.png');
   await expect(page.locator('#catalogBody tr')).toHaveCount(1);
   await expect(page.locator('.asset')).toContainText('No identifica objetos');
+  await expect(page.locator('.asset img')).toHaveCount(2); // RAW y derivado
+  await expect(page.locator('.asset canvas')).toHaveCount(1); // histograma dibujado
   await page.locator('#gray').check();
   await expect(page.locator('#manifestPreview')).toContainText('"gris": true');
   await expect(page.locator('#status')).toContainText('L: 1 filas');
