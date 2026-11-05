@@ -84,6 +84,24 @@ def laboratorio_real():
                     # La prueba E2E ejercita la ampliación aunque para el alumno esté desactivada.
                     codigo = codigo.replace("ACTIVAR_ESCALA = False #@param",
                                             "ACTIVAR_ESCALA = True #@param")
+                if celda["id"]=="s11-reto-ficha":
+                    # QA valida el contrato estructurado; no pretende certificar lo
+                    # que aparece semánticamente en la foto elegida al azar.
+                    codigo = codigo.replace(
+                        'CATEGORIA_VISUAL = "sin_seleccionar" #@param',
+                        'CATEGORIA_VISUAL = "no_determinado" #@param')
+                    codigo = codigo.replace(
+                        'ALTERNATIVA_VISUAL = "sin_seleccionar" #@param',
+                        'ALTERNATIVA_VISUAL = "personas" #@param')
+                    codigo = codigo.replace(
+                        'LIMITE_VISUAL = "sin_seleccionar" #@param',
+                        'LIMITE_VISUAL = "la_foto_no_demuestra_la_noticia" #@param')
+                if celda["id"]=="s11-audionoticia-asr" and os.environ.get("S11_CI_ASR")=="1":
+                    # Prueba de inferencia auténtica sobre voz MINDS-14, no sobre
+                    # el WAV editorial del docente (que no está publicado).
+                    codigo = codigo.replace(
+                        "ACTIVAR_ASR = False #@param",
+                        "ACTIVAR_ASR = True #@param")
                 if celda["id"]=="s11-empaquetar":
                     codigo = codigo.replace("DESCARGAR_ZIP=False #@param", "DESCARGAR_ZIP=False #@param")
                 print(f"\n>>> S11 · {celda['id']}",flush=True)
@@ -124,14 +142,30 @@ def laboratorio_real():
                 assert threads_med["manifest"]["sources"]==332
                 print("S11 THREADS MEDIO REAL: 332 fuentes con 4 threads, 564 derivados, SHA válido")
             assert espacio["prueba_evidencias"]["ok"]
-            assert espacio["analisis_audio"]["text_origin"]=="parafrasis_demo"
+            assert espacio["ruta_ficha"].is_file()
+            ficha_visual = json.loads(espacio["ruta_ficha"].read_text(encoding="utf-8"))
+            assert ficha_visual["evidencia_visual_estructurada"]["categoria_principal"] == "no_determinado"
+            assert "observacion_visual_del_estudiante" not in ficha_visual
+            assert espacio["texto_ocr_prueba"] is not None, "OCR Tesseract no corrió sobre imagen controlada"
+            assert "LAURA" in espacio["texto_ocr_prueba"].upper(), "OCR no recuperó texto conocido"
+            assert espacio["texto_ocr_real"] is not None, "OCR real no se ejecutó"
+            if os.environ.get("S11_CI_ASR")=="1":
+                assert espacio["analisis_audio"]["text_origin"]=="asr"
+                assert espacio["segmentos_asr"], "ASR real no obtuvo segmentos"
+                assert espacio["texto_asr"].strip(), "ASR real devolvió texto vacío"
+                print("S11 ASR REAL: voz MINDS-14 transcrita con Faster-Whisper en CPU")
+            else:
+                assert espacio["analisis_audio"]["text_origin"]=="parafrasis_demo"
             assert espacio["ruta_informe_audio"].is_file()
             assert espacio["ruta_bandeja"].is_file()
             assert espacio["path_zip_integral"].is_file()
             with zipfile.ZipFile(espacio["path_zip_integral"]) as z:
                 assert z.testzip() is None
                 assert "audio/ficha_audio.json" in z.namelist()
+                assert "imagen/ficha_noticia_imagen.json" in z.namelist()
+                assert "audio/bandeja_informacion.json" in z.namelist()
                 assert "manifest.json" in z.namelist()
+                assert len(json.loads(z.read("manifest.json"))["files"]) == 3
             assert espacio["resumen_multimedia"]["same_article_as_audio_verified"] is False
             print("S11 AUDIO NOTICIA: ASR opcional, entidades/cantidades y evidencia auditada; fuentes separadas")
             print("S11 E2E REAL: 32 imágenes y 10 WAV originales, 42 derivados, Parquet/JSONL, QA 9/9, ZIP OK")

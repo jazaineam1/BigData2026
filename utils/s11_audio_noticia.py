@@ -32,7 +32,7 @@ ENTIDADES = {
 }
 CANTIDADES = [
     r"\b(?:m[aá]s\s+de\s+)?(?:cincuenta|50)\s+compa[nñ][ií]as\b",
-    r"\b(?:veintitr[eé]s|23)\s*(?:por\s+ciento|%)\b",
+    r"(?<!\w)(?:\d{1,3}(?:[.,]\d+)?\s*%|\d{1,3}(?:[.,]\d+)?\s+por\s+ciento|veintitr[eé]s\s+por\s+ciento)(?!\w)",
     r"\b(?:cuarenta\s+mil|40[ .]?000)\s+referencias\b",
     r"\b(?:cinco|5)\s+requerimientos\b",
     r"\b(?:dos\s+mil\s+veinticinco|2025)\b",
@@ -83,17 +83,49 @@ def _clean(text: str) -> str:
     return re.sub(r"\s+", " ", str(text or "")).strip()
 
 
-def _evidence(text: str, match: re.Match, radius: int = 75) -> dict:
+def _segmentos_con_posiciones(text: str, segmentos: list[dict] | None) -> list[dict]:
+    """Relaciona segmentos ASR y texto normalizado sin inventar tiempos de palabras."""
+    if not segmentos:
+        return []
+    posiciones, cursor = [], 0
+    for registro in segmentos:
+        parte = _clean(registro.get("text", ""))
+        if not parte:
+            continue
+        indice = text.find(parte, cursor)
+        if indice < 0:
+            raise ValueError("Segmentos ASR no coinciden con el texto analizado")
+        inicio, fin = float(registro["start_s"]), float(registro["end_s"])
+        if not (0 <= inicio <= fin):
+            raise ValueError("Tiempo ASR inválido")
+        posiciones.append({"start_char": indice, "end_char": indice + len(parte),
+                           "start_s": inicio, "end_s": fin})
+        cursor = indice + len(parte)
+    return posiciones
+
+
+def _evidence(text: str, match: re.Match, radius: int = 75,
+              timeline: list[dict] | None = None) -> dict:
     raw = text[max(0, match.start() - radius):min(len(text), match.end() + radius)]
-    return {
+    evidencia = {
         "matched_text": match.group(0),
         "context": _clean(raw),
         "start_char": match.start(),
         "end_char": match.end(),
     }
+    segmentos = [s for s in (timeline or []) if s["start_char"] < match.end()
+                 and s["end_char"] > match.start()]
+    if segmentos:
+        evidencia["audio_interval_s"] = {
+            "start": round(min(s["start_s"] for s in segmentos), 2),
+            "end": round(max(s["end_s"] for s in segmentos), 2),
+            "precision": "segmento_asr_no_palabra",
+        }
+    return evidencia
 
 
-def extraer_informacion(texto: str, *, origen: str = "asr") -> dict:
+def extraer_informacion(texto: str, *, origen: str = "asr",
+                       segmentos: list[dict] | None = None) -> dict:
     """Convierte texto en candidatos con pruebas localizables, NO hechos certificados.
 
     origen debe distinguir 'asr', 'transcripcion_aportada' o 'parafrasis_demo'.
@@ -104,19 +136,22 @@ def extraer_informacion(texto: str, *, origen: str = "asr") -> dict:
     texto = _clean(texto)
     if not texto:
         raise ValueError("No hay texto para extraer información")
+    if segmentos and origen != "asr":
+        raise ValueError("Solo el ASR real permite asignar tiempos")
+    timeline = _segmentos_con_posiciones(texto, segmentos)
     entidades = []
     for nombre, patron in ENTIDADES.items():
         for m in list(re.finditer(patron, texto, flags=re.I))[:4]:
-            entidades.append({"candidate": nombre, **_evidence(texto, m)})
+            entidades.append({"candidate": nombre, **_evidence(texto, m, timeline=timeline)})
     cifras = []
     for patron in CANTIDADES:
         for m in list(re.finditer(patron, texto, flags=re.I))[:4]:
-            cifras.append({"kind": "number_or_quantity", **_evidence(texto, m)})
+            cifras.append({"kind": "number_or_quantity", **_evidence(texto, m, timeline=timeline)})
     topicos = []
     for etiqueta, patron in TOPICOS.items():
         found = re.search(patron, texto, flags=re.I)
         if found:
-            topicos.append({"topic": etiqueta, **_evidence(texto, found)})
+            topicos.append({"topic": etiqueta, **_evidence(texto, found, timeline=timeline)})
     palabras = re.findall(r"[a-záéíóúñ]{4,}", texto.lower())
     freq = Counter(w for w in palabras if w not in STOP).most_common(8)
     return {

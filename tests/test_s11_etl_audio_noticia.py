@@ -40,6 +40,37 @@ class AudioNoticiaTest(unittest.TestCase):
             for x in analysis[group]:
                 self.assertEqual(self.TEXT[x["start_char"]:x["end_char"]],x["matched_text"])
 
+    def test_percentages_with_symbol_and_decimals(self):
+        texto = "Se informó 23% en precios, 23 %., 12,5% en ofertas y 23 por ciento."
+        out=an.extraer_informacion(texto,origen="transcripcion_aportada")
+        cantidades=[e["matched_text"] for e in out["quantity_candidates"]]
+        self.assertIn("23%",cantidades)
+        self.assertIn("23 %",cantidades)
+        self.assertIn("12,5%",cantidades)
+        self.assertIn("23 por ciento",cantidades)
+        self.assertTrue(an.verificar_candidatos(texto,out)["ok"])
+
+    def test_timestamps_only_from_real_asr_segments(self):
+        segmentos=[
+            {"start_s":0.5,"end_s":2.1,"text":"La SIC reportó 23%"},
+            {"start_s":2.1,"end_s":4.4,"text":"en precios y competencia."},
+        ]
+        texto=" ".join(x["text"] for x in segmentos)
+        evidencia=an.extraer_informacion(texto,origen="asr",segmentos=segmentos)
+        self.assertTrue(an.verificar_candidatos(texto,evidencia)["ok"])
+        matched=next(x for x in evidencia["quantity_candidates"] if x["matched_text"]=="23%")
+        self.assertEqual(matched["audio_interval_s"]["start"],0.5)
+        self.assertEqual(matched["audio_interval_s"]["end"],2.1)
+        self.assertEqual(matched["audio_interval_s"]["precision"],"segmento_asr_no_palabra")
+        sin_tiempo=an.extraer_informacion(texto,origen="parafrasis_demo")
+        self.assertFalse(any("audio_interval_s" in item for item in
+                             sin_tiempo["quantity_candidates"]))
+        with self.assertRaises(ValueError):
+            an.extraer_informacion(texto,origen="transcripcion_aportada",segmentos=segmentos)
+        with self.assertRaises(ValueError):
+            an.extraer_informacion(texto,origen="asr",segmentos=[
+                {"start_s":0,"end_s":2,"text":"texto inventado"}])
+
     def test_no_asr_falsely_claimed_from_demo(self):
         x=an.extraer_informacion("La SIC analiza precios.",origen="parafrasis_demo")
         self.assertEqual(x["text_origin"],"parafrasis_demo")
