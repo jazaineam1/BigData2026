@@ -7,7 +7,7 @@ from unittest import mock
 import json
 import pandas as pd
 
-from tests.test_s11_etl import crear_datos
+from test_s11_etl import crear_datos
 from utils import s11_etl_core as core
 from utils import s11_etl_live as live
 
