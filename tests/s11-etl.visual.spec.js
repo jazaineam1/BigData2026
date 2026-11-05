@@ -139,3 +139,24 @@ test('S11 E2E permite modificar el audio y recuperar ZIP con huellas',async({pag
  await expect(page.locator('#verifyStatus')).toContainText('PAQUETE VERIFICADO');
  await expect(page.locator('#liveText')).toHaveText('2/2');
 });
+
+
+test('S11 E2E procesa completo un WAV de 65 s sin corte en 60 segundos',async({page})=>{
+  test.setTimeout(90000);
+  await page.goto('/assets/s11/etl-live.html');
+  // PCM16 mono 16 kHz: silencio de 65 s (fuente original válida, no editorial).
+  const sampleRate=16000,duration=65,n=sampleRate*duration;
+  const wav=Buffer.alloc(44+n*2);
+  wav.write('RIFF',0);wav.writeUInt32LE(wav.length-8,4);
+  wav.write('WAVEfmt ',8);wav.writeUInt32LE(16,16);
+  wav.writeUInt16LE(1,20);wav.writeUInt16LE(1,22);
+  wav.writeUInt32LE(sampleRate,24);wav.writeUInt32LE(sampleRate*2,28);
+  wav.writeUInt16LE(2,32);wav.writeUInt16LE(16,34);
+  wav.write('data',36);wav.writeUInt32LE(n*2,40);
+  await page.locator('#files').setInputFiles({name:'ensayo_65_segundos.wav',mimeType:'audio/wav',buffer:wav});
+  await expect(page.locator('#liveText')).toHaveText('1/1',{timeout:65000});
+  await expect(page.locator('#status')).toContainText('T: 1 derivados correctos');
+  await expect(page.locator('#cards')).toContainText('Audio 65 s');
+  await expect(page.locator('#cards')).not.toContainText('Audio de más de 60 s');
+  await expect(page.locator('#liveRows')).toContainText('SHA-256 OK');
+});
