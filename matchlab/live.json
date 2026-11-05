@@ -1,0 +1,10 @@
+{
+  "provider": "SportScore",
+  "competition": "categoria-primera-a",
+  "baseVersion": "4.0.0",
+  "staleReference": true,
+  "matches": [],
+  "updatedAt": null,
+  "note": "Sin marcador nuevo verificado en el respaldo inicial. Consulta programada pendiente. No equivale a un feed en directo.",
+  "source": "https://sportscore.com/"
+}

@@ -1,0 +1,43 @@
+name: MatchLab - marcadores programados
+on:
+  schedule:
+    - cron: '*/10 0-5,18-23 5-15 11 *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'matchlab/live_sync.py'
+      - 'matchlab/data/colombia-2026-ii.json'
+      - '.github/workflows/matchlab-live.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: matchlab-live
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probar la integridad del sincronizador
+        run: python matchlab/tests/test_live_sync.py
+      - name: Consultar partidos y producir resumen (sin confundir live y final)
+        run: python matchlab/live_sync.py
+      - name: Publicar cambios verificados
+        run: |
+          git add matchlab/live.json
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'data(matchlab): sincronizar resumen de marcadores'
+            git push origin HEAD:main
+          else
+            echo 'No hay cambios nuevos en los marcadores.'
+          fi
