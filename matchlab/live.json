@@ -2,9 +2,34 @@
   "provider": "SportScore",
   "competition": "categoria-primera-a",
   "baseVersion": "4.0.0",
-  "staleReference": true,
-  "matches": [],
-  "updatedAt": null,
-  "note": "Sin marcador nuevo verificado en el respaldo inicial. Consulta programada pendiente. No equivale a un feed en directo.",
-  "source": "https://sportscore.com/"
+  "staleReference": false,
+  "matches": [
+    {
+      "id": "18-CHI-INT",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-06"
+    },
+    {
+      "id": "18-FOR-DIM",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-07"
+    },
+    {
+      "id": "18-NAL-PER",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-07"
+    },
+    {
+      "id": "18-ONC-AGU",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-07"
+    }
+  ],
+  "note": "La fuente puede atrasarse. Solo resultados con estado terminado; no es autoridad oficial.",
+  "source": "https://sportscore.com/",
+  "updatedAt": "2026-11-05T07:29:44.646810+00:00"
 }
