@@ -222,9 +222,9 @@ def run_live(root, images, audios, *, workers=1, batch_size=32,
                         submit_one(*job, 1)
                 fill()
                 # Mantener cola pausada sin bloquear la posibilidad de cancelar.
-                while pending or (not signal.is_set() and pause.is_set()):
+                while pending or (not signal.is_set() and len(done) < len(group) and not failed):
                     if not pending:
-                        if not was_paused:
+                        if pause.is_set() and not was_paused:
                             emit("paused", message="Admisión pausada; no hay tareas activas.")
                             was_paused = True
                         sleep(0.06)
