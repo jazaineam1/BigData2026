@@ -568,8 +568,18 @@ def procesar_lotes_escala(raiz: Path, imagenes: list[dict], audios: list[dict],
         if len(releido) != len(filas):
             raise ValueError("Partición Parquet perdió registros")
         segundos = perf_counter() - start
+        # Pico de memoria residente del PROCESO desde su inicio, no consumo puntual del lote.
+        # En Linux ru_maxrss se reporta en KiB; en macOS en bytes.
+        try:
+            import resource
+            import sys
+            pico = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            pico_mb = round(pico / (1024 * 1024 if sys.platform == "darwin" else 1024), 2)
+        except (ImportError, OSError):
+            pico_mb = None
         part = {
             "name": ruta.name,
+            "peak_process_rss_mb": pico_mb,
             "sha256": sha256(ruta),
             "rows": len(filas),
             "original_sources": len(fragmento),
