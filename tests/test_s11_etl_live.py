@@ -140,6 +140,22 @@ class TestS11Live(unittest.TestCase):
         self.assertTrue(any(x["state"] == "resumed" for x in events))
         self.assertEqual(events[-1]["state"], "finished")
 
+    def test_fuentes_heterogeneas_uci_editorial_y_audio_en_threads(self):
+        uci = core.extraer_imagenes_digitos(self.root, 12)
+        all_images = self.images + uci
+        result = live.run_live(self.root, all_images, self.audios,
+                               workers=4, batch_size=8, label="qa_mix", core=core)
+        self.assertEqual(result["status"], "complete")
+        self.assertTrue(result["verified"]["ok"])
+        self.assertEqual(result["verified"]["sources"], 19)
+        self.assertEqual(result["verified"]["rows"], 35)
+        import pandas as pd
+        for part in result["manifest"]["partitions"]:
+            frame = pd.read_parquet(result["manifest_path"].parent / part["file"])
+            for _, row in frame.iterrows():
+                if str(row["source_kind"]).startswith("UCI_digits"):
+                    self.assertTrue(pd.isna(row["article_id"]))
+
     def test_pause_se_puede_reanudar_y_el_dashboard_refleja_eventos(self):
         from utils.s11_live_dashboard import LiveMonitor
         panel = LiveMonitor(sources=7)
