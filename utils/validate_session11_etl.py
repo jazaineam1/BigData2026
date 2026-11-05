@@ -25,7 +25,7 @@ NOTEBOOK = ROOT / "Cuadernos" / "11_ETL_Audio_Imagenes.ipynb"
 def estructura():
     subprocess.check_call([sys.executable,str(ROOT/"utils"/"build_session11_etl_audio_imagenes.py"),"--check"])
     nb = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
-    assert len(nb["cells"]) == 71, "La lección S11 espera 71 celdas"
+    assert len(nb["cells"]) == 73, "La lección S11 espera 73 celdas"
     ids = [x["id"] for x in nb["cells"]]
     for id in ("s11-preparar","s11-cargar-motor","s11-elegir","s11-extraer-imagenes",
                "s11-extraer-audios","s11-transformar-imagenes","s11-transformar-audios",
@@ -46,6 +46,7 @@ def estructura():
     assert ids.index("s11-reto-ficha") < ids.index("s11-audionoticia-entrada") < ids.index("s11-audionoticia-integral")
     assert "ACTIVAR_ASR = False" in "".join(next(x["source"] for x in nb["cells"] if x["id"]=="s11-audionoticia-asr"))
     assert "parafrasis_demo" in "".join(next(x["source"] for x in nb["cells"] if x["id"]=="s11-audionoticia-info"))
+    assert ids.index("s11-audionoticia-integral") < ids.index("s11-entrega-integral") < ids.index("s11-reto-cierre")
     assert ids.index("s11-escala") < ids.index("s11-escala-lotes") < ids.index("s11-escala-comparar") < ids.index("s11-empaquetar")
     assert ids.index("s11-extraer-imagenes") < ids.index("s11-extraer-audios")
     print("VALIDACIÓN S11: estructura, contrato, orden de tutorial y sintaxis OK")
@@ -126,6 +127,11 @@ def laboratorio_real():
             assert espacio["analisis_audio"]["text_origin"]=="parafrasis_demo"
             assert espacio["ruta_informe_audio"].is_file()
             assert espacio["ruta_bandeja"].is_file()
+            assert espacio["path_zip_integral"].is_file()
+            with zipfile.ZipFile(espacio["path_zip_integral"]) as z:
+                assert z.testzip() is None
+                assert "audio/ficha_audio.json" in z.namelist()
+                assert "manifest.json" in z.namelist()
             assert espacio["resumen_multimedia"]["same_article_as_audio_verified"] is False
             print("S11 AUDIO NOTICIA: ASR opcional, entidades/cantidades y evidencia auditada; fuentes separadas")
             print("S11 E2E REAL: 32 imágenes y 10 WAV originales, 42 derivados, Parquet/JSONL, QA 9/9, ZIP OK")
