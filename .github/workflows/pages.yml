@@ -160,7 +160,7 @@ jobs:
               && grep -q 'Acceso libre · S09' <<<"$s09" \
               && ! grep -q 'reason=login' <<<"$s09" \
               && grep -q 'Muro didáctico abierto' <<<"$open_wall" \
-              && grep -q 'MatchLab 4.1' <<<"$matchlab" \
+              && grep -q 'MatchLab 4.2' <<<"$matchlab" && grep -q 'id="team-players"' <<<"$matchlab" && grep -q 'id="league-probabilities"' <<<"$matchlab" \
               && grep -q 'certify-fixed' <<<"$matchlab" \
               && grep -q 'Big Data · Sesión 10' <<<"$s10" \
               && grep -q 'data-step="preparar"' <<<"$s10" \

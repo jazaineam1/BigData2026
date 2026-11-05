@@ -1,41 +1,32 @@
-# MatchLab 4.1 — Página pública (Colombia 2026-II)
+# MatchLab 4.2 · Identidad de clubes, análisis y jugadores
 
-Publicación: `https://jazaineam1.github.io/BigData2026/matchlab/`
+Sitio público: https://jazaineam1.github.io/BigData2026/matchlab/
 
-## Pantallas y cálculos
+## Novedades implementadas 5 de noviembre de 2026
+- Escudos para los 20 clubes de Liga BetPlay II 2026 en resumen, tabla y partidos, con alternativa textual.
+- Ficha de club: puntos actuales/máximo, posición, cotas matemáticas, diferencia respecto al octavo y próximos adversarios.
+- Probabilidades 1X2 vistas desde el club seleccionado, no solo desde el local.
+- Panel de muestra de goleadores de cada equipo, consultado en AS el 5 de noviembre, claramente separado del modelo predictivo; no es plantilla ni alineación.
+- Panorama conjunto de las 20 probabilidades simuladas y puntos esperados, con selección interactiva.
+- Navegación móvil horizontal y tabla compacta (#, club, PJ, DG, pts), tabla completa en escritorio.
+- Bloqueo preventivo: fuentes de resultados marcadas como atrasadas no pueden consolidar nuevos finales en la tabla; se conserva el corte histórico.
+- Conservados el motor de Monte Carlo, editor 1X2, índice 3^N y lectura de live.json.
 
-- **Real**: estadística de resultados finales confirmados, sin sumar partidos futuros.
-- **Mi escenario**: solamente los encuentros que el usuario fijó; cuando fija pocos, sigue mostrando 17–19 PJ según el club, por definición.
-- **Pronóstico completo**: un único calendario coherente de marcadores modales para todos los partidos restantes; todos llegan a 19 PJ.
-- **Promedio Monte Carlo**: distribución conjunta de temporadas; todos llegan a 19 PJ y el promedio de victorias, empates y puntos suele ser fraccionario. No representa una clasificación concreta.
-- **Explorador 3^N**: indexa todas las combinaciones de victoria, empate y derrota; el contador es exacto, sin afirmar que se enumeró todo.
+## Datos, limitaciones y derechos
+- Tabla y calendario: instantánea Liga BetPlay II del 5 de noviembre de 2026 con 17 PJ y 20 encuentros restantes. Marcadores posteriores sujetos a verificación del proveedor.
+- El motor Poisson no utiliza jugadores, lesiones, xG ni cuotas. Sus probabilidades son experimentales, no calibradas para apuestas ni pronósticos comerciales.
+- Escudos: URLs de identidad de equipo obtenidas de la API pública SportScore; son marcas de sus clubes. La atribución Powered by SportScore aparece en la página. Antes de un uso comercial, revisar la licencia y los derechos de imágenes.
+- Goleadores: muestra de ranking público de AS Liga BetPlay II 2026, consulta 5 de noviembre de 2026; no tiene actualización automática.
+- No se copian clasificaciones numéricas históricas de SportScore a la tabla vigente, porque su endpoint mezcla cortes de temporada.
 
-## Actualización de resultados
+Fuentes: https://sportscore.com/developers/ ; https://as.com/resultados/futbol/colombia_ii/2026/ranking/jugadores/goles/ ; https://www.sofascore.com/news/sofascores-redesigned-lineup-feature-take-match-analysis-to-the-next-level/ .
 
-1. El navegador intenta consultar el proveedor SportScore cada **60 segundos** (depende de CORS, conexión y disponibilidad).
-2. GitHub Actions ejecuta el respaldo cada **10 minutos durante horarios de partido y fechas 5–15 de noviembre de 2026**, con actualización de `matchlab/live.json` solamente al observar cambios. GitHub Pages vuelve a desplegar ese recurso.
-3. Cada fecha se consulta por competición, y se identifica por club local, visitante y fecha.
-4. Un marcador `live` **no se registra como final**. Solo el estado de finalización explícito, score válido y emparejamiento unívoco pueden modificar la instantánea de la página que lo consume.
-5. El proveedor puede estar retrasado. Si contradice partidos verificados del 4 de noviembre, muestra advertencia.
-6. Esta es una **integración de datos de terceros de mejor esfuerzo**; no tiene acuerdo de tiempo real ni latencia garantizada. Para producción comercial se necesita un proveedor licenciado con coberturas y SLA.
+## Pruebas
+- 20/20 clubes se seleccionan y presentan análisis y muestra de goleadores.
+- 20 encuentros compartidos -> 40 apariciones por clubes, sin duplicados.
+- Monte Carlo conjunto: top8 suma exactamente ocho por temporada.
+- Proyección completa: cada club termina con 19 PJ.
+- Chromium 1440px y 390px sin errores JS ni desbordamiento horizontal.
+- Fallback de escudos cuando bloqueamos la red al probar.
 
-## Seguridad y consistencia
-
-- El histórico verificado queda incrustado en la página, con versiones y hora de corte.
-- El resumen derivado en `live.json` no expone API keys y no reemplaza en GitHub el snapshot verificado.
-- No se almacenan marcadores de otros partidos ni se redistribuye la base completa del proveedor.
-- `live_sync.py` ignora estados sin score, identifica fechas y clubes, valida score 0–20 y comprueba duplicados.
-- Cualquier final nuevo recalcula el modelo y descarta cotas matemáticas antiguas.
-- `live.json` se produce mediante sustitución atómica, y se commitea solo cuando cambia.
-
-## Pruebas ejecutadas
-
-```bash
-python matchlab/tests/test_ui.py
-python matchlab/tests/test_regression.py
-python matchlab/tests/test_live_sync.py
-```
-
-Validan escritorio (1440px), móvil (390px), 20 filas y 19 PJ proyectados; incorporación de final y reducción de 3^20 a 3^19; marcador vivo separado del definitivo; consistencia de puntos y calendario.
-
-El optimizador de cotas de posiciones continúa en el backend Python separado; el sitio estático no anuncia certificación dinámica.
+**No es aún un producto de datos en vivo garantizados ni un modelo con impacto individual de jugadores.**

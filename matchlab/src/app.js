@@ -42,6 +42,56 @@ function forecastMatch(f){const a=data.teams[teamIndex.get(f.home)],b=data.teams
 }
 function scoreFromOutcome(o){return o===0?[1,0]:o===1?[0,0]:[0,1]}
 function own(tid){return data.teams.find(t=>t.id===tid)}
+
+/* Identidad de clubes: escudos publicados por SportScore. No se sustituyen estadísticas de la instantánea. */
+const CLUB_BADGES = {"AGU": "https://img.thesports.com/football/team/3190d6d022fe9b36c65d83cf98e16d15.png", "ALI": "https://img.thesports.com/football/team/242d6977e9b86cba5cea704d996edbf8.png", "AME": "https://img.thesports.com/football/team/ed6ae7fa894cb5bdbccfd605d1d6ad04.png", "BUC": "https://img.thesports.com/football/team/70c92764e181ce7abe6176c411a93fe3.png", "CAL": "https://img.thesports.com/football/team/b997a2811a0caed43ff38b631a708420.png", "CHI": "https://img.thesports.com/football/team/1cd42bcb186830f2cffdeef6df5fd2b0.png", "CUC": "https://img.thesports.com/football/team/972c2e951d1ba7680faee53a342bd0a2.png", "DIM": "https://img.thesports.com/football/team/6eef3985d6a6d69a6e5374e27b13b35f.png", "FOR": "https://img.thesports.com/football/team/5a721f997fe18b1c151116a96b1b4ea8.png", "INT": "https://img.thesports.com/football/team/265454b5fee1950f8aa1173147c8c593.png", "JAG": "https://img.thesports.com/football/team/b7f3a068b301edd82ad4c56496f41063.png", "JUN": "https://img.thesports.com/football/team/fd3230c7fa4ad7bde28c640f2f32ca43.png", "LLA": "https://img.thesports.com/football/team/f83a93401d7a60595338bae0337d344c.png", "MIL": "https://img.thesports.com/football/team/88bf2a10fe7e8d3f9a21b73f3f77fcde.png", "NAL": "https://img.thesports.com/football/team/4ee24366d09a9239bb2c4207a5008111.png", "ONC": "https://img.thesports.com/football/team/b060f70150fe2b52fba8aa026a930c4e.png", "PAS": "https://img.thesports.com/football/team/9fbd48de1577477753873c539c3ab106.png", "PER": "https://img.thesports.com/football/team/2a016d670dd775e37ae908540843a444.png", "SFE": "https://img.thesports.com/football/team/5761c77ebe56b383931a6870372f5e46.png", "TOL": "https://img.thesports.com/football/team/40f17f08ff7bb44a641273044db78c64.png"};
+/* Goleadores seleccionados, Liga BetPlay II 2026. Fuente: AS, consulta 5/11/2026. No son nóminas completas ni se usan para estimar probabilidades. */
+const SCORERS_SNAPSHOT = {"AGU": [["Ricardo Márquez", 4], ["Andrés Mosquera", 2]], "ALI": [["Felipe Pardo", 3]], "AME": [["Yeison Guzmán", 10], ["Tilman Palacios", 2]], "BUC": [["Luciano Pons", 8], ["Enmerson Batalla", 8]], "CAL": [["Eduard Bello", 6], ["Nicolás Benedetti", 5]], "CHI": [["Santiago Mera", 2], ["Jhonier Alomía", 2]], "CUC": [["Jaime Peralta", 5], ["Léider Berdugo", 2]], "DIM": [["John Montaño", 5], ["Jeison Medina", 4]], "FOR": [["Richardson Rivas", 2], ["Sebastián Navarro", 2]], "INT": [["Diego Duarte", 5], ["Fabricio Sanguinetti", 4]], "JAG": [["Andrés Rentería", 6], ["Darwin López", 4]], "JUN": [["Guillermo Paiva", 4], ["Jesús Rivas", 3]], "LLA": [["Néider Ospina", 5], ["Francisco Meza", 3]], "MIL": [["Andrey Estupiñán", 6], ["Leonardo Castro", 5]], "NAL": [["Andrés Sarmiento", 7], ["Edwin Cardona", 6]], "ONC": [["Jefry Zapata", 6], ["Andrés Roa", 2]], "PAS": [["Enrique Serje", 2], ["Diego Chávez", 2]], "PER": [["Jhon Largacha", 3], ["Jordy Monroy", 3]], "SFE": [["Nahuel Bustos", 6], ["Franco Fagúndez", 6]], "TOL": [["Adrián Parra", 4], ["Jorge Hurtado", 3]]};
+const PLAYERS_SOURCE = 'https://as.com/resultados/futbol/colombia_ii/2026/ranking/jugadores/goles/';
+function clubMark(id,size='sm'){
+ const name=own(id)?.name||String(id);
+ const url=CLUB_BADGES[id];
+ const initials=String(id).slice(0,3);
+ if(!url)return `<span class="crest-wrap crest-${size}"><span class="crest-fallback" style="display:inline-flex">${h(initials)}</span></span>`;
+ return `<span class="crest-wrap crest-${size}"><img class="crest-img" alt="Escudo de ${h(name)}" loading="lazy" referrerpolicy="no-referrer" src="${h(url)}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex'"><span class="crest-fallback">${h(initials)}</span></span>`;
+}
+function renderTeamAnalysis(){
+ const t=own(team),base=baseRank(),rank=base.findIndex(x=>x.id===team)+1;
+ const cutoff=base[data.meta.topN-1];const diff=t.pts-cutoff.pts;
+ const games=data.fixtures.map((f,i)=>({f,i})).filter(x=>x.f.home===team||x.f.away===team);
+ const badge=$('focus-crest');if(badge)badge.innerHTML=clubMark(team,'md');
+ if($('focus-name'))$('focus-name').textContent=t.name;
+ if($('focus-meta'))$('focus-meta').textContent=`${data.meta.name} · ${data.meta.season} · ${rank}º de ${base.length} equipos · ${t.pj} partidos disputados`;
+ if($('focus-pts'))$('focus-pts').textContent=t.pts;
+ if($('focus-sub'))$('focus-sub').textContent=`Máximo ${t.pts+games.length*3}`;
+ const st=hardStatus(team),bound=baseBounds(team);
+ const info=[
+  ['Estado matemático',st.text],
+  ['Respecto al 8.º',diff===0?'Mismos puntos':(diff>0?`+${diff}`:String(diff))+' puntos'],
+  ['Posición posible, por puntos',bound?`${bound.best}º a ${bound.worst}º`:'Sin certificar'],
+  ['Partidos por disputar',String(games.length)],
+  ['Goles a favor / contra',`${t.gf} / ${t.ga}`],
+  ['Diferencia de gol',(t.gf-t.ga>0?'+':'')+(t.gf-t.ga)]
+ ];
+ if($('team-analysis'))$('team-analysis').innerHTML=info.map(([name,v])=>`<div class="analysis-row"><span>${h(name)}</span><strong>${h(v)}</strong></div>`).join('');
+ if($('team-analysis-note'))$('team-analysis-note').textContent=st.kind==='eliminado'?'La eliminación está demostrada por cotas de puntos; no depende de las probabilidades.':st.kind==='clasificado'?'Ya tiene clasificación matemática asegurada según cotas de puntos.':'Los enfrentamientos restantes de todos los clubes pueden cambiar la posición. Los desempates oficiales adicionales pueden intervenir.';
+ if($('team-next'))$('team-next').innerHTML=games.length?games.map(({f,i})=>{
+  const home=f.home===team,opp=home?f.away:f.home,p=probs[i];const win=home?p[0]:p[2],draw=p[1],lose=home?p[2]:p[0];
+  const lbl=own(opp)?.name||opp;
+  return `<div class="team-game"><div class="date">J${h(f.round)}<br>${h(f.date||'Pendiente')}</div>${clubMark(opp,'xs')}<div class="club">${h(lbl)}<div class="probline">${home?'Local':'Visitante'} · G ${pct(win)} · E ${pct(draw)} · P ${pct(lose)}</div></div><span class="chance">${pct(win)}</span></div>`;
+ }).join(''):'<p class="hint">No quedan encuentros de esta fase.</p>';
+ const players=SCORERS_SNAPSHOT[team];
+ if($('team-players'))$('team-players').innerHTML=players?.length?players.map(([name,goals])=>`<div class="player-mini"><span class="player-avatar" aria-hidden="true">⚽</span><div style="flex:1;min-width:0"><div class="player-name">${h(name)}</div><div class="player-stat">Goles en Liga BetPlay II · consulta 05/11</div></div><div class="player-goals">${goals}<span>goles</span></div></div>`).join(''):'<p class="hint">No hay datos individuales verificados para este equipo en el subconjunto consultado.</p>';
+ if($('player-source'))$('player-source').innerHTML=`Muestra de goleadores, no nómina completa. Fuente: <a href="${PLAYERS_SOURCE}" target="_blank" rel="noopener noreferrer">ranking de AS, 5 nov. 2026</a>. No se incorporan al modelo Poisson ni se actualizan automáticamente.`;
+ if($('club-model'))$('club-model').textContent=`El pronóstico de ${t.name} se basa en goles a favor/en contra de los equipos y ventaja local. No utiliza todavía lesiones, alineaciones ni datos individuales. `+(sim?`Última simulación: ${fmt(sim.n)} temporadas; top ${data.meta.topN} = ${pct(sim.top[teamIndex.get(team)]/sim.n)} (estimación, no certeza).`:'Monte Carlo aún no ejecutado.');
+}
+function renderLeagueAnalysis(){
+ const el=$('league-probabilities');if(!el)return;
+ if(!sim){el.innerHTML='<p class="hint">El resumen probabilístico de los 20 equipos aparecerá tras la primera simulación.</p>';return}
+ const rows=data.teams.map((t,i)=>({t,i,p:sim.top[i]/sim.n,exp:sim.pt[i]/sim.n})).sort((a,b)=>b.p-a.p||b.exp-a.exp);
+ el.innerHTML=rows.map(({t,i,p,exp},idx)=>`<div class="analysis-row"><button type="button" data-global-team="${h(t.id)}">${clubMark(t.id,'xs')}<span class="team-label">${h(t.name)}</span></button><div style="min-width:77px;text-align:right"><strong>${pct(p)}</strong><div class="league-bar"><i style="width:${(p*100).toFixed(2)}%"></i></div><small>${exp.toFixed(1)} pts prom.</small></div></div>`).join('');
+}
+
 function outcomeOf(p){return p?.o??null}
 function standings(selection){const ts=data.teams.map(t=>({...t}));const ix=new Map(ts.map((t,i)=>[t.id,i]));
  for(let k=0;k<data.fixtures.length;k++){const p=selection[k];if(!p)continue;let f=data.fixtures[k],a=ts[ix.get(f.home)],b=ts[ix.get(f.away)];let [hg,ag]=p.score||scoreFromOutcome(p.o);
@@ -82,7 +132,7 @@ function renderFacts(){const t=own(team),current=baseRank().findIndex(x=>x.id===
  else comment+=` Tiene ${remaining} partidos restantes y un máximo de ${t.pts+3*remaining} puntos.`;
  $('reason').innerHTML=`<b>${h(st.text)}.</b> ${comment}<p class="hint" style="margin:9px 0 0">La posición exacta en caso de empates en puntos puede requerir goles visitantes y criterios adicionales de Dimayor.</p>`;
  $('reason-state').textContent=b?'Optimización MILP':'Cota básica';
- renderSimForTeam();
+ renderSimForTeam();renderTeamAnalysis();renderLeagueAnalysis();
 }
 function renderSimForTeam(){const el=$('chart');if(!sim){el.innerHTML='<p class="hint">Ninguna simulación ejecutada todavía.</p>';$('expected-points').textContent='—';$('observed-range').textContent='—';$('sim-status').textContent='Sin simulación';$('sim-description').textContent='La distribución aparecerá tras ejecutar Monte Carlo. El modo libre ignora las selecciones del editor.';return}
  const j=teamIndex.get(team),dist=sim.dist[j],n=sim.n;el.innerHTML=dist.map((v,i)=>`<div class="chart-row"><span>${i+1}º</span><div class="bar"><div style="width:${(v/n*100).toFixed(4)}%"></div></div><span class="value">${pct(v/n)}</span></div>`).join('');
@@ -128,14 +178,14 @@ function renderTable(){
  for(const button of document.querySelectorAll('[data-table-mode="modal"],[data-table-mode="expected"]'))button.textContent=button.dataset.tableMode==='modal'?'Pronóstico completo ('+data.meta.gamesPerTeam+' PJ)':'Promedio Monte Carlo ('+data.meta.gamesPerTeam+' PJ)';
  document.querySelectorAll('[data-table-mode]').forEach(b=>{const on=b.dataset.tableMode===tableMode;b.classList.toggle('primary',on);b.setAttribute('aria-pressed',String(on))});
  const num=(v)=>Number.isInteger(v)?String(v):Number(v).toFixed(1);
- $('table-body').innerHTML=arr.map((t,i)=>`<tr class="${i<data.meta.topN?'cut':'notcut'} ${t.id===team?'selected':''}"><td class="num">${i+1}</td><td class="name"><button class="table-row-btn" data-team="${h(t.id)}">${h(t.name)}</button></td><td class="num">${num(t.pj)}</td><td class="num">${num(t.w)}</td><td class="num">${num(t.d)}</td><td class="num">${num(t.l)}</td><td class="num">${num(t.gf)}</td><td class="num">${num(t.ga)}</td><td class="num">${t.dg>0?'+':''}${num(t.dg)}</td><td class="num"><b>${num(t.pts)}</b></td><td class="num">${t.max==null?'—':num(t.max)}</td></tr>`).join('');
+ $('table-body').innerHTML=arr.map((t,i)=>`<tr class="${i<data.meta.topN?'cut':'notcut'} ${t.id===team?'selected':''}"><td class="num">${i+1}</td><td class="name"><button class="table-row-btn" data-team="${h(t.id)}">${clubMark(t.id,'xs')}${h(t.name)}</button></td><td class="num">${num(t.pj)}</td><td class="num">${num(t.w)}</td><td class="num">${num(t.d)}</td><td class="num">${num(t.l)}</td><td class="num">${num(t.gf)}</td><td class="num">${num(t.ga)}</td><td class="num">${t.dg>0?'+':''}${num(t.dg)}</td><td class="num"><b>${num(t.pts)}</b></td><td class="num">${t.max==null?'—':num(t.max)}</td></tr>`).join('');
 }
 function renderFixtures(){const onlyTeam=$('only-team').checked,onlyUnfixed=$('only-unfixed').checked,rd=$('filter-round').value;let count=0;
  $('fixtures').innerHTML=data.fixtures.map((f,i)=>{
   if((onlyTeam&&!(f.home===team||f.away===team))||(onlyUnfixed&&picks[i])||(rd!=='all'&&String(f.round)!==rd))return '';
   count++;const p=picks[i],prob=probs[i],fixed=p!==null;
   const [hg,ag]=p?.score??['',''];const home=own(f.home).name,away=own(f.away).name;const live=liveOverlay.get(f.id);const liveInfo=live?`<span class="live-label">● EN JUEGO ${live.score[0]}–${live.score[1]} (${live.minute==null?'minuto no disponible':live.minute+' min'})</span>`:'';
-  return `<div class="fixture ${fixed?'sel':''}" data-fixture="${i}"><div class="round">Jornada ${h(f.round)}<br>${h(f.date||'Por confirmar')} ${h(f.time||'')}</div><div class="teams">${h(home)}<small>vs. ${h(away)}</small>${liveInfo}</div><div class="prob"><div class="probs"><span>1 ${pct(prob[0])}</span><span>X ${pct(prob[1])}</span><span>2 ${pct(prob[2])}</span></div><span>${p?.score?'Marcador exacto fijado':fixed?'Resultado 1X2 fijado':'Modelo Poisson · no verificado'}</span></div><div class="actions"><div class="outcomes"><button data-i="${i}" data-o="0" class="${p?.o===0?'active':''}">1</button><button data-i="${i}" data-o="1" class="${p?.o===1?'active':''}">X</button><button data-i="${i}" data-o="2" class="${p?.o===2?'active':''}">2</button><button data-i="${i}" data-o="clear" class="clear">↺</button></div><div class="score-control"><input type="number" min="0" max="15" data-score-i="${i}" data-side="h" value="${hg}" aria-label="Goles de ${h(home)}" placeholder="G"><span>–</span><input type="number" min="0" max="15" data-score-i="${i}" data-side="a" value="${ag}" aria-label="Goles de ${h(away)}" placeholder="G"><span class="hint">exacto</span></div></div><details class="advanced"><summary>Ajustar P(1/X/2) · ${h(f.note||'modelo estimado')}</summary><div class="triplet"><label>Local %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="0" value="${(prob[0]*100).toFixed(1)}"></label><label>Empate %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="1" value="${(prob[1]*100).toFixed(1)}"></label><label>Visita %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="2" value="${(prob[2]*100).toFixed(1)}"></label><button class="btn small" data-save-prob="${i}">Aplicar</button></div></details></div>`;
+  return `<div class="fixture ${fixed?'sel':''}" data-fixture="${i}"><div class="round">Jornada ${h(f.round)}<br>${h(f.date||'Por confirmar')} ${h(f.time||'')}</div><div class="teams"><span class="fixture-team">${clubMark(f.home,'sm')}${h(home)}</span><small>contra</small><span class="fixture-team">${clubMark(f.away,'sm')}${h(away)}</span>${liveInfo}</div><div class="prob"><div class="probs"><span>1 ${pct(prob[0])}</span><span>X ${pct(prob[1])}</span><span>2 ${pct(prob[2])}</span></div><span>${p?.score?'Marcador exacto fijado':fixed?'Resultado 1X2 fijado':'Modelo Poisson · no verificado'}</span></div><div class="actions"><div class="outcomes"><button data-i="${i}" data-o="0" class="${p?.o===0?'active':''}">1</button><button data-i="${i}" data-o="1" class="${p?.o===1?'active':''}">X</button><button data-i="${i}" data-o="2" class="${p?.o===2?'active':''}">2</button><button data-i="${i}" data-o="clear" class="clear">↺</button></div><div class="score-control"><input type="number" min="0" max="15" data-score-i="${i}" data-side="h" value="${hg}" aria-label="Goles de ${h(home)}" placeholder="G"><span>–</span><input type="number" min="0" max="15" data-score-i="${i}" data-side="a" value="${ag}" aria-label="Goles de ${h(away)}" placeholder="G"><span class="hint">exacto</span></div></div><details class="advanced"><summary>Ajustar P(1/X/2) · ${h(f.note||'modelo estimado')}</summary><div class="triplet"><label>Local %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="0" value="${(prob[0]*100).toFixed(1)}"></label><label>Empate %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="1" value="${(prob[1]*100).toFixed(1)}"></label><label>Visita %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="2" value="${(prob[2]*100).toFixed(1)}"></label><button class="btn small" data-save-prob="${i}">Aplicar</button></div></details></div>`;
  }).join('')||'<p class="hint">Ningún encuentro cumple el filtro.</p>';
  $('preview-remaining').textContent=`${count} visibles de ${data.fixtures.length} pendientes.`;
 }
@@ -227,6 +277,7 @@ function attachEvents(){
  $('clear-picks').addEventListener('click',()=>setPreset('clear'));
  document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>setPreset(b.dataset.preset)));
  $('table-body').addEventListener('click',e=>{const b=e.target.closest('[data-team]');if(b){team=b.dataset.team;renderAll();document.querySelector('#panorama').scrollIntoView({behavior:'smooth'})}});
+ $('league-probabilities').addEventListener('click',e=>{const b=e.target.closest('[data-global-team]');if(b){team=b.dataset.globalTeam;renderAll();document.querySelector('#panorama').scrollIntoView({behavior:'smooth'})}});
  $('fixtures').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.o!=null){choose(Number(b.dataset.i),b.dataset.o);return}
@@ -368,7 +419,7 @@ async function refreshCachedFeed(){
    const f=data.fixtures.find(x=>x.id===o.id),fromBase=SNAPSHOT.fixtures.find(x=>x.id===o.id);if(!f||!fromBase)return [];
    return [{home:f.home,away:f.away,status:o.status,score:o.score,minute:o.minute??null,dateUTC:o.utcDate,source:'SportScore (respaldo)'}];
   });
-  const result=newStateFromFeed(data,rows);
+  const result=payload.staleReference?{data,done:[],live:[]}:newStateFromFeed(data,rows);
   if(result.done.length||result.live.length)commitFeedUpdate(result.data,result.live);
   const ageMinutes=payload.updatedAt?(Date.now()-new Date(payload.updatedAt).getTime())/60000:Infinity;
   const status=payload.staleReference||ageMinutes>30?'stale':'ok';
@@ -387,7 +438,7 @@ async function refreshLive(){
   if(!responses.some(x=>x.status==='fulfilled'))throw Error('No se pudo consultar la API en ninguna fecha');
   const health=providerHealth(rows);
   // Source can lag. We never overwrite the verified cut with a stale upstream table.
-  const baseSnapshot=data;const result=newStateFromFeed(baseSnapshot,rows);
+  const baseSnapshot=data;const result=health.ok?newStateFromFeed(baseSnapshot,rows):{data:baseSnapshot,done:[],live:[]};
   const modified=commitFeedUpdate(result.data,result.live);
   feedState={status:health.ok?'ok':'stale',message:health.ok?(result.done.length?`${result.done.length} resultados finales nuevos incorporados. El pronóstico se recalculó para todos los equipos.`:`No hay nuevos finales confirmados. ${result.live.length} encuentros en juego observados. Se consulta cada minuto.`):health.reason+' No se atribuye frescura en vivo a esta respuesta.',lastCheck:new Date().toISOString(),source:'SportScore'};
   renderFeedState();
