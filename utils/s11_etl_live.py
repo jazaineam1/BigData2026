@@ -15,7 +15,7 @@ from pathlib import Path
 import re
 import statistics
 import threading
-from time import perf_counter
+from time import perf_counter, sleep
 import zipfile
 
 import pandas as pd
@@ -24,7 +24,7 @@ import pandas as pd
 SCHEMA = "s11-live-threads/v1"
 WORKERS = (1, 2, 4, 8)
 BATCHES = (8, 16, 32, 64, 128)
-STATES = ("started", "queued", "processed", "retry", "failed",
+STATES = ("started", "queued", "processed", "retry", "failed", "paused", "resumed",
           "partition_saved", "verified", "cancelled", "finished")
 
 
@@ -102,7 +102,7 @@ def _fingerprint(rows: list[dict]) -> str:
 
 
 def run_live(root, images, audios, *, workers=1, batch_size=32,
-             label="ensayo", on_event=None, cancel_event=None,
+             label="ensayo", on_event=None, cancel_event=None, pause_event=None,
              inject_once_at=None, inject_always_at=None, max_retries=1,
              core=None):
     """Ejecuta tareas limitando la cola a 2×workers; publica EVENTOS REALES.
@@ -140,6 +140,9 @@ def run_live(root, images, audios, *, workers=1, batch_size=32,
     output = root / "outputs" / "etl_live" / run_name
     output.mkdir(parents=True, exist_ok=True)
     signal = cancel_event if cancel_event is not None else threading.Event()
+    pause = pause_event if pause_event is not None else threading.Event()
+    if not hasattr(pause, "is_set"):
+        raise ValueError("pause_event debe ser threading.Event")
     if not hasattr(signal, "is_set"):
         raise ValueError("cancel_event debe ser threading.Event")
     total, total_derivatives = len(tasks), 2 * len(images) + len(audios)
@@ -201,15 +204,35 @@ def run_live(root, images, audios, *, workers=1, batch_size=32,
                     attempts[index] = attempt
                     emit("queued", index=index, modality=kind,
                          source_id=str(source["source_id"]), inflight=len(pending))
+                was_paused = False
                 def fill():
+                    nonlocal was_paused
                     while len(pending) < 2 * workers and not signal.is_set():
+                        if pause.is_set():
+                            if not was_paused:
+                                emit("paused", message="La admisión está pausada; tareas activas terminarán.")
+                                was_paused = True
+                            return
+                        if was_paused:
+                            emit("resumed", message="Reanudando admisión de trabajos.")
+                            was_paused = False
                         job = next(remaining, None)
                         if job is None:
                             return
                         submit_one(*job, 1)
                 fill()
-                while pending:
-                    finished, _ = wait(set(pending), return_when=FIRST_COMPLETED)
+                # Mantener cola pausada sin bloquear la posibilidad de cancelar.
+                while pending or (not signal.is_set() and pause.is_set()):
+                    if not pending:
+                        if not was_paused:
+                            emit("paused", message="Admisión pausada; no hay tareas activas.")
+                            was_paused = True
+                        sleep(0.06)
+                        fill()
+                        continue
+                    finished, _ = wait(set(pending), timeout=0.3, return_when=FIRST_COMPLETED)
+                    if not finished:
+                        continue
                     for future in finished:
                         index, kind, source = pending.pop(future)
                         attempt = attempts[index]
