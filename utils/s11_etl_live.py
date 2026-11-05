@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import sys
 import re
 import statistics
 import threading
@@ -26,6 +27,16 @@ WORKERS = (1, 2, 4, 8)
 BATCHES = (8, 16, 32, 64, 128)
 STATES = ("started", "queued", "processed", "retry", "failed", "paused", "resumed",
           "partition_saved", "verified", "cancelled", "finished")
+
+def _peak_rss_mb():
+    """RSS máximo acumulado del PROCESO, no RAM aislada de un thread/lote."""
+    try:
+        import resource
+        raw = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        return round(raw / (1024 * 1024 if sys.platform == "darwin" else 1024), 3)
+    except (ImportError, OSError):
+        return None
+
 
 
 def _core(core=None):
@@ -74,7 +85,9 @@ def _job(core, root: Path, index: int, kind: str, source: dict, attempt: int,
             raise ValueError("Huella no coincide tras transformación")
     return {"index": index, "kind": kind, "source_id": str(source["source_id"]),
             "rows": [core_row(core, r) for r in derived],
-            "seconds": perf_counter() - t0}
+            "seconds": perf_counter() - t0,
+            "bytes_raw": (root / source["original_path"]).stat().st_size,
+            "bytes_derived": sum((root / r["derived_path"]).stat().st_size for r in derived)}
 
 
 def core_row(core, row: dict) -> dict:
@@ -146,7 +159,8 @@ def run_live(root, images, audios, *, workers=1, batch_size=32,
     if not hasattr(signal, "is_set"):
         raise ValueError("cancel_event debe ser threading.Event")
     total, total_derivatives = len(tasks), 2 * len(images) + len(audios)
-    counts = dict(completed=0, derivatives=0, errors=0, retries=0)
+    counts = dict(completed=0, derivatives=0, errors=0, retries=0,
+                  bytes_raw=0, bytes_derived=0)
     partitions, errors, global_rows = [], [], []
     start = perf_counter()
 
@@ -169,6 +183,8 @@ def run_live(root, images, audios, *, workers=1, batch_size=32,
                 "inflight": inflight,
                 "sources_per_second": round(counts["completed"] / max(now, 0.000001), 2),
                 "derivatives_per_second": round(counts["derivatives"] / max(now, 0.000001), 2),
+                "mib_per_second": round((counts["bytes_raw"] + counts["bytes_derived"]) / 1048576 / max(now, 0.000001), 3),
+                "peak_process_rss_mb": _peak_rss_mb(),
                 "source_index": index, "source_id": source_id,
                 "modality": modality,
                 "task_seconds": round(elapsed, 5) if elapsed is not None else None,
@@ -241,6 +257,8 @@ def run_live(root, images, audios, *, workers=1, batch_size=32,
                             done[index] = item
                             counts["completed"] += 1
                             counts["derivatives"] += len(item["rows"])
+                            counts["bytes_raw"] += item["bytes_raw"]
+                            counts["bytes_derived"] += item["bytes_derived"]
                             emit("processed", index=index, modality=kind,
                                  source_id=str(source["source_id"]),
                                  elapsed=item["seconds"], inflight=len(pending))
@@ -302,6 +320,9 @@ def run_live(root, images, audios, *, workers=1, batch_size=32,
             "fingerprint": _fingerprint(global_rows) if success else None,
             "elapsed_seconds": round(elapsed, 6),
             "derivatives_per_second": round(counts["derivatives"] / max(elapsed, 0.000001), 4),
+            "mib_per_second": round((counts["bytes_raw"] + counts["bytes_derived"]) / 1048576 / max(elapsed, 0.000001), 4),
+            "bytes_raw_unique": counts["bytes_raw"], "bytes_derived": counts["bytes_derived"],
+            "peak_process_rss_mb_cumulative": _peak_rss_mb(),
         }
         _atomic_json(output / "manifest.json", manifest)
         if success:
@@ -398,6 +419,8 @@ def run_benchmark(root, images, audios, *, batch_size=32,
                 "rep": rep + 1, "workers": n, "batch_size": batch_size,
                 "elapsed_seconds": m["elapsed_seconds"],
                 "derivatives_per_second": m["derivatives_per_second"],
+                "mib_per_second": m["mib_per_second"],
+                "peak_rss_cumulative_mb": m["peak_process_rss_mb_cumulative"],
                 "sources": m["sources"], "derivatives": m["expected_derivatives"],
                 "fingerprint": m["fingerprint"],
             })
@@ -408,6 +431,7 @@ def run_benchmark(root, images, audios, *, batch_size=32,
     summary = (table.groupby("workers").agg(
         seconds_median=("elapsed_seconds", "median"),
         rate_median=("derivatives_per_second", "median"),
+        mib_rate_median=("mib_per_second", "median"),
         runs=("rep", "count")).reset_index())
     if 1 not in set(summary["workers"]):
         raise ValueError("Sin línea base de 1 worker no se calcula speedup")
@@ -422,6 +446,7 @@ def run_benchmark(root, images, audios, *, batch_size=32,
         "limitations": [
             "solo 1 proceso; no es clúster ni prueba de Dask/Spark",
             "la caché, E/S y bibliotecas nativas influyen en cada ejecución",
+            "ru_maxrss es pico acumulado del proceso, no memoria atribuible a threads individuales",
             "la métrica omite descarga inicial y carga de corpus",
         ],
     })
