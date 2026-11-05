@@ -117,8 +117,8 @@ def extraer_audios(raiz: Path, max_audios: int = 10) -> list[dict]:
     """Diez voces auténticas, una por intención; conserva WAV original comprimido."""
     import pandas as pd
     import soundfile as sf
-    if not 1 <= max_audios <= 10:
-        raise ValueError("max_audios debe estar entre 1 y 10")
+    if not 1 <= max_audios <= 400:
+        raise ValueError("max_audios debe estar entre 1 y 400")
     raiz = Path(raiz)
     cache = raiz / "cache" / "minds14_es_ES.parquet"
     if cache.exists():
@@ -137,8 +137,22 @@ def extraer_audios(raiz: Path, max_audios: int = 10) -> list[dict]:
             clases.add(clase)
         if len(seleccionados) == max_audios:
             break
+    # Los primeros diez conservan la selección de S11: una por intención.
+    # Los demás son grabaciones reales distintas, NO copias aumentadas.
+    if len(seleccionados) < max_audios:
+        usados = {str(x["path"]) for x in seleccionados}
+        for _, fila in corpus.iterrows():
+            if len(seleccionados) == max_audios:
+                break
+            identificador = str(fila["path"])
+            if identificador not in usados:
+                seleccionados.append(fila)
+                usados.add(identificador)
     if len(seleccionados) != max_audios:
-        raise ValueError("No hay suficientes clases de voces diferentes")
+        raise ValueError(
+            f"El corpus auditado contiene menos de {max_audios} voces distintas; "
+            f"se pudieron seleccionar {len(seleccionados)}"
+        )
     audios, huellas = [], set()
     for n, fila in enumerate(seleccionados, 1):
         contenedor = fila["audio"]
@@ -431,3 +445,249 @@ def empaquetar(raiz: Path) -> Path:
             raise ValueError("CRC-32 ZIP incorrecto")
     print("ENTREGA · ZIP VERIFICADO:", destino.name, "·", destino.stat().st_size, "bytes")
     return destino
+
+
+# --- Experimento progresivo S11: no cambia el expediente oficial de 42 filas. ---
+
+def extraer_imagenes_digitos(raiz: Path, max_imagenes: int = 200) -> list[dict]:
+    """Imágenes de trazos manuscritos del corpus UCI (test 1797), no noticias.
+
+    La matriz 8×8 contiene intensidades NORMALIZADAS 0–16. Este procedimiento
+    materializa el arreglo original como PNG sin pérdida para estudiar ETL.
+    NO son fotografías originales de formularios ni de procesos SECOP.
+    Fuente: E. Alpaydin & C. Kaynak (1998), UCI doi:10.24432/C50P49,
+    disponible vía sklearn.datasets.load_digits; CC BY 4.0 (atribución).
+    """
+    from sklearn.datasets import load_digits
+    from PIL import Image
+    import numpy as np
+
+    if not 1 <= max_imagenes <= 1797:
+        raise ValueError("max_imagenes debe estar entre 1 y 1797")
+    datos = load_digits()
+    if len(datos.images) != 1797:
+        raise ValueError("La colección de dígitos cambió: revisar fuente")
+    raiz = Path(raiz)
+    salida, vistos = [], set()
+    for i in range(len(datos.images)):
+        if len(salida) == max_imagenes:
+            break
+        raw8 = np.asarray(datos.images[i], dtype=np.float64)
+        if raw8.shape != (8, 8) or not np.isfinite(raw8).all():
+            raise ValueError("Muestra de escritura inválida")
+        pixeles = np.rint(raw8 * 255 / 16).clip(0, 255).astype(np.uint8)
+        salida_png = io.BytesIO()
+        Image.fromarray(pixeles, mode="L").save(salida_png, format="PNG")
+        contenido = salida_png.getvalue()
+        ruta = raiz / "raw" / "imagenes_digitos" / f"uci_test_{i:04d}.png"
+        esperado = sha256(contenido)
+        if esperado in vistos:
+            # Dos muestras iguales por bytes son un solo activo de ETL; se documenta la deduplicación.
+            continue
+        vistos.add(esperado)
+        guardar_sin_sobrescribir(ruta, contenido, esperado)
+        salida.append({
+            "original_path": ruta.relative_to(raiz).as_posix(),
+            "original_sha256": esperado,
+            "article_id": None,
+            "source_record_id": None,
+            "source_id": f"uci_test_{i:04d}",
+            "source_kind": "UCI_digits_8x8_normalized_pixels",
+            "source_url": "https://doi.org/10.24432/C50P49",
+            "credit": "Alpaydin y Kaynak (1998); UCI; sklearn.load_digits",
+            "license": "CC BY 4.0",
+            "digit_reference": int(datos.target[i]),
+            "input_encoding": "PNG 8x8 reconstruido desde matriz UCI 0-16",
+        })
+    if len(salida) != max_imagenes:
+        raise ValueError(f"Solo hay {len(salida)} imágenes únicas; se solicitaron {max_imagenes}")
+    print(f"E · DÍGITOS UCI: {len(salida)} imágenes originales normalizadas y únicas; NO son noticias")
+    return salida
+
+
+def _fila_escala(item: dict) -> dict:
+    """Esquema tabular común sin anidar métricas en Parquet."""
+    metrica = item["metrics"]
+    clave = "mean_luminance" if item["modality"] == "image" else "rms"
+    return {
+        **{k: v for k, v in item.items() if k not in ("metrics",)},
+        "schema_version": ESQUEMA,
+        "asset_id": item["original_sha256"],
+        "metric_name": clave,
+        "metric_value": metrica[clave],
+        "metrics_json": json.dumps(metrica, ensure_ascii=False, sort_keys=True),
+        "status": "ok",
+    }
+
+
+def procesar_lotes_escala(raiz: Path, imagenes: list[dict], audios: list[dict],
+                         tamano_lote: int = 32, etiqueta: str = "ensayo") -> dict:
+    """Procesa POR LOTES reales y guarda particiones, métricas y hashes.
+
+    No carga todos los derivados en RAM ni sobrescribe los outputs oficiales.
+    Dos perfiles por imagen (grises/bordes), uno PCM16 por grabación.
+    """
+    import pandas as pd
+    from time import perf_counter
+    if tamano_lote not in (8, 16, 32, 64, 128):
+        raise ValueError("tamano_lote debe ser 8, 16, 32, 64 o 128")
+    if etiqueta not in ("ensayo", "medio", "reto", "qa"):
+        raise ValueError("Etiqueta de experimento no admitida")
+    if not imagenes or not audios:
+        raise ValueError("El reto exige ambas modalidades")
+    raiz = Path(raiz)
+    lote_id = f"{etiqueta}_i{len(imagenes)}_a{len(audios)}_b{tamano_lote}"
+    destino = raiz / "outputs" / "escala" / lote_id
+    destino.mkdir(parents=True, exist_ok=True)
+    particiones = []
+    origenes = {x["original_sha256"]: x for x in [*imagenes, *audios]}
+    if len(origenes) != len(imagenes) + len(audios):
+        raise ValueError("Orígenes duplicados por SHA-256")
+    tareas = []
+    for modalidad, origen in [("image", x) for x in imagenes] + [("audio", x) for x in audios]:
+        tareas.append((modalidad, origen))
+    total = len(tareas)
+    print(f"RETO DE ESCALA · {total} RAW distintos; grupos de {tamano_lote} fuentes")
+    for inicio in range(0, total, tamano_lote):
+        fragmento = tareas[inicio:inicio + tamano_lote]
+        im = [x for clase, x in fragmento if clase == "image"]
+        au = [x for clase, x in fragmento if clase == "audio"]
+        start = perf_counter()
+        derivados = []
+        if im:
+            derivados.extend(transformar_imagenes(raiz, im, lado=160, perfil="grises"))
+            derivados.extend(transformar_imagenes(raiz, im, lado=160, perfil="bordes"))
+        if au:
+            derivados.extend(transformar_audios(raiz, au, ganancia=1.0, tasa_final=16000))
+        filas = [_fila_escala(x) for x in derivados]
+        secuencia = len(particiones)
+        ruta = destino / f"part_{secuencia:04d}.parquet"
+        pd.DataFrame(filas).to_parquet(ruta, index=False)
+        # Las filas deben reconstruirse desde el archivo, no desde la RAM previa.
+        releido = pd.read_parquet(ruta)
+        if len(releido) != len(filas):
+            raise ValueError("Partición Parquet perdió registros")
+        segundos = perf_counter() - start
+        # Pico de memoria residente del PROCESO desde su inicio, no consumo puntual del lote.
+        # En Linux ru_maxrss se reporta en KiB; en macOS en bytes.
+        try:
+            import resource
+            import sys
+            pico = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            pico_mb = round(pico / (1024 * 1024 if sys.platform == "darwin" else 1024), 2)
+        except (ImportError, OSError):
+            pico_mb = None
+        part = {
+            "name": ruta.name,
+            "peak_process_rss_mb": pico_mb,
+            "sha256": sha256(ruta),
+            "rows": len(filas),
+            "original_sources": len(fragmento),
+            "seconds": round(segundos, 6),
+            "rows_per_second": round(len(filas) / max(segundos, 1e-6), 2),
+            "bytes_raw_referenced": sum((raiz / x["original_path"]).stat().st_size
+                                        for _, x in fragmento),
+            "bytes_derived": sum((raiz / x["derived_path"]).stat().st_size
+                                 for x in derivados),
+        }
+        particiones.append(part)
+        print(f"PARTICIÓN {secuencia + 1:02d} | {part['rows']} derivados | "
+              f"{part['seconds']:.3f}s | {part['rows_per_second']} derivados/s")
+    fuentes = {x["original_path"]: x["original_sha256"] for x in origenes.values()}
+    manifiesto = {
+        "schema": "s11-escala-particiones/v1",
+        "case": "laura_etl_audio_imagenes",
+        "label": etiqueta,
+        "batch_size": tamano_lote,
+        "total_unique_sources": total,
+        "editorial_images": sum(x.get("article_id") is not None for x in imagenes),
+        "handwritten_digit_images": sum(x["source_kind"].startswith("UCI_digits") for x in imagenes),
+        "real_voices": len(audios),
+        "expected_derivatives": len(imagenes) * 2 + len(audios),
+        "workers": 1,
+        "processing": "secuencial por lotes; NO distribuido",
+        "data_policy": "UCI y voces no se asocian con noticias o contratos SECOP",
+        "originals": fuentes,
+        "partitions": particiones,
+    }
+    archivo = destino / "escala_manifest.json"
+    archivo.write_text(json.dumps(manifiesto, ensure_ascii=False, indent=2), encoding="utf-8")
+    control = verificar_lotes_escala(raiz, archivo)
+    if not control["ok"]:
+        raise ValueError("Lotes de escala fallaron la verificación: " + str(control["errors"][:3]))
+    return {
+        "manifest_path": archivo,
+        "manifest": manifiesto,
+        "particiones": pd.DataFrame(particiones),
+        "verified": control,
+    }
+
+
+def verificar_lotes_escala(raiz: Path, manifest_path: Path) -> dict:
+    """Reabre cada partición y valida identidad, licencias, SHA y cardinalidades."""
+    import pandas as pd
+    raiz, manifest_path = Path(raiz), Path(manifest_path)
+    info = json.loads(manifest_path.read_text(encoding="utf-8"))
+    errores = []
+    if info.get("schema") != "s11-escala-particiones/v1":
+        errores.append("schema")
+    if info.get("workers") != 1:
+        errores.append("metrica_workers")
+    count, seen = 0, set()
+    for rel, esperado in info.get("originals", {}).items():
+        target = (raiz / rel).resolve()
+        if not target.is_relative_to(raiz.resolve()) or not target.is_file() or sha256(target) != esperado:
+            errores.append("RAW:" + str(rel))
+    for part in info.get("partitions", []):
+        path = (manifest_path.parent / part["name"]).resolve()
+        if not path.is_relative_to(manifest_path.parent.resolve()):
+            errores.append("ruta_particion")
+            continue
+        if not path.is_file() or sha256(path) != part["sha256"]:
+            errores.append("particion:" + part["name"])
+            continue
+        data = pd.read_parquet(path)
+        if len(data) != part["rows"]:
+            errores.append("filas:" + part["name"])
+        for fila in data.to_dict("records"):
+            count += 1
+            clave = (str(fila["asset_id"]), str(fila["profile"]))
+            if clave in seen:
+                errores.append("derivado_duplicado")
+            seen.add(clave)
+            for k, col in (("original_path", "original_sha256"), ("derived_path", "derived_sha256")):
+                target = (raiz / str(fila[k])).resolve()
+                if (not target.is_relative_to(raiz.resolve())
+                    or not target.is_file() or sha256(target) != fila[col]):
+                    errores.append("archivo:" + str(fila[k]))
+            if fila["modality"] == "audio" and pd.notna(fila.get("article_id")):
+                errores.append("audio_relacionado_con_noticia")
+            if str(fila.get("source_kind", "")).startswith("UCI_digits") and pd.notna(fila.get("article_id")):
+                errores.append("digito_relacionado_con_noticia")
+    if count != info.get("expected_derivatives"):
+        errores.append("total_derivados")
+    return {"ok": not errores, "errors": errores, "rows": count,
+            "partitions": len(info.get("partitions", [])),
+            "sources": len(info.get("originals", {}))}
+
+
+def ejecutar_escala_s11(raiz: Path, modo: str = "ensayo",
+                       tamano_lote: int = 32) -> dict:
+    """Tres volúmenes medibles. Descarga voces reales una vez y preserva RAW.
+
+    No se ejecuta automáticamente desde el recorrido básico de 42 filas.
+    """
+    planes = {
+        "ensayo": (40, 30),
+        "medio": (200, 100),
+        "reto": (1000, 400),
+    }
+    if modo not in planes:
+        raise ValueError("Modo no admitido: ensayo / medio / reto")
+    digitos_n, voces_n = planes[modo]
+    base = extraer_imagenes(raiz, max_imagenes=32)
+    digitos = extraer_imagenes_digitos(raiz, digitos_n)
+    voces = extraer_audios(raiz, max_audios=voces_n)
+    result = procesar_lotes_escala(raiz, [*base, *digitos], voces,
+                                  tamano_lote=tamano_lote, etiqueta=modo)
+    return result

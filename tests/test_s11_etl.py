@@ -38,7 +38,7 @@ def crear_datos():
         })
     contenido[core.MANIFEST_IMAGENES] = json.dumps(inventario).encode("utf-8")
     voces = []
-    for n in range(10):
+    for n in range(40):
         rate = 8000
         t = np.arange(rate * 2) / rate
         muestras = (np.sin(2 * np.pi * (180 + 30 * n) * t) * 5000).astype("<i2")
@@ -49,7 +49,7 @@ def crear_datos():
         voces.append({
             "audio": {"bytes": b.getvalue(), "path": f"es-ES/qa_{n:02}.wav"},
             "path": f"es-ES/qa_{n:02}.wav",
-            "intent_class": n,
+            "intent_class": n % 14,
             "transcription": f"ejemplo de voz QA {n}",
         })
     salida = io.BytesIO()
@@ -103,6 +103,43 @@ class TestS11EtL(unittest.TestCase):
                 altered.write_bytes(altered.read_bytes() + b"qa")
                 self.assertFalse(core.verificar(root)["ok"])
 
+    def test_escala_real_40_voces_y_digitos_uci_por_particiones(self):
+        """El reto utiliza nuevas fuentes verificadas, no duplica 32 fotos."""
+        contenido = crear_datos()
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            with mock.patch.object(core, "obtener", side_effect=lambda url, limite: contenido[url]), \
+                 mock.patch.object(core, "SHA_PARQUET", core.sha256(contenido[core.PARQUET_VOZ])):
+                prensa=core.extraer_imagenes(root)
+                manuscritos=core.extraer_imagenes_digitos(root,12)
+                voces=core.extraer_audios(root,max_audios=30)
+                self.assertEqual(len(manuscritos),12)
+                self.assertEqual(len({x["original_sha256"] for x in manuscritos}),12)
+                self.assertEqual(len(voces),30)
+                self.assertTrue(all(x["article_id"] is None for x in manuscritos+voces))
+                esperado=2*(32+12)+30
+                primero=core.procesar_lotes_escala(root,prensa+manuscritos,voces,
+                                                   tamano_lote=8,etiqueta="qa")
+                self.assertEqual(primero["verified"]["rows"],esperado)
+                self.assertEqual(primero["verified"]["sources"],32+12+30)
+                self.assertEqual(len(primero["particiones"]),10)
+                # Misma entrada y configuración -> mismo SHA en particiones y mismos resultados.
+                huellas=[x["sha256"] for x in primero["manifest"]["partitions"]]
+                segundo=core.procesar_lotes_escala(root,prensa+manuscritos,voces,
+                                                   tamano_lote=8,etiqueta="qa")
+                self.assertEqual(huellas,[x["sha256"] for x in segundo["manifest"]["partitions"]])
+                self.assertTrue(core.verificar_lotes_escala(root,segundo["manifest_path"])["ok"])
+                # Fallo controlado: alterar UN derivado debe invalidar el manifiesto del reto.
+                import pandas as pd
+                parti=Path(segundo["manifest_path"]).parent/segundo["manifest"]["partitions"][0]["name"]
+                fila=pd.read_parquet(parti).iloc[0]
+                derivado=root/fila["derived_path"]
+                respaldo=derivado.read_bytes()
+                derivado.write_bytes(b"corrupcion intencional del test")
+                self.assertFalse(core.verificar_lotes_escala(root,segundo["manifest_path"])["ok"])
+                derivado.write_bytes(respaldo)
+                self.assertTrue(core.verificar_lotes_escala(root,segundo["manifest_path"])["ok"])
+
     def test_parametros_incorrectos_se_rechazan(self):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaisesRegex(ValueError, "lado"):
@@ -110,7 +147,7 @@ class TestS11EtL(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Ganancia"):
                 core.transformar_audios(Path(tmp), [], 9.0)
             with self.assertRaisesRegex(ValueError, "max_audios"):
-                core.extraer_audios(Path(tmp), 15)
+                core.extraer_audios(Path(tmp), 401)
             with self.assertRaisesRegex(ValueError, "max_imagenes"):
                 core.extraer_imagenes(Path(tmp), 0)
 
