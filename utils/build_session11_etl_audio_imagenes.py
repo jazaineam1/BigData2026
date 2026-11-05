@@ -33,7 +33,7 @@ def generar():
         c = {
             "cell_type": tipo,
             "id": d["id"],
-            "metadata": {"cellView": "form"} if tipo == "code" else {},
+            "metadata": {},  # Código SIEMPRE visible; controles @param siguen editables.
             "source": texto.splitlines(keepends=True),
         }
         if tipo == "code":
