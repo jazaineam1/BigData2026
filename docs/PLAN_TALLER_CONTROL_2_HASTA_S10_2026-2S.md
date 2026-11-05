@@ -1,150 +1,217 @@
-# TC2 · Plan editorial y técnico de publicación (S01–S10)
+# TC2 V2 — Del buscador al explorador inteligente de evidencias
 Universidad Central · Maestría en Analítica de Datos · Big Data 2026-2S
 
-**Estado: PROPUESTA PARA REVISIÓN.** Este documento no es un taller publicado, no modifica el calendario ni abre entregas. Fecha de inicio y vencimiento pendientes de definir. No afirmar que cumple el PDA 2026: el único PDA comprobado en el repositorio corresponde a 2023-I. Su segundo taller tenía un temario distinto; la equivalencia académica y el peso del 25 % requieren confirmación docente/institucional.
+**Estado: PLAN PARA REVISIÓN, NO PUBLICADO A ESTUDIANTES.**
+Alcance: competencias nuevas de S07 (BM25/Elasticsearch), S09 (embeddings, recuperación semántica, búsqueda vectorial, evaluación y RRF) y S10 (imágenes y audio).
+El TC1 S08 ya evaluó ingesta SECOP, concurrencia, contrato de datos, MongoDB documental, índices convencionales, agregaciones, Cassandra, Neo4j, SHA-256 de RAW y entrega técnica. TC2 NO asignará puntaje a repetir esas operaciones.
+El PDA disponible corresponde a 2023-I: verificar versión vigente y equivalencia de la evaluación antes de asignar peso oficial. Fecha y canal de entrega sujetos a aprobación.
 
-## 1. Auditoría de referencia: Taller de Control 1, versión V9
+## 1. Diagnóstico de redundancia, decisión de alcance
 
-Fuentes inspeccionadas: Cuadernos/Taller_Control_1.ipynb; utils/tc1_contrato.py; utils/validate_tc1_v9.py; assets/tutoriales/s08-secoppipeline.html; lms/session-08.html; AGENTS.md; docs/PDA_guia.md.
+| Habilidad ya evaluada en TC1 | Qué hace TC2 |
+|---|---|
+| Descarga SECOP y concurrencia | Proporcionar corpus fijo, sin evaluación de adquisición |
+| Modelo documental y upsert convencional de Atlas | Tomar documentos listos, no volver a modelarlos |
+| Índices B-tree, filtro, sort y aggregations convencionales | No volver a calificarlos |
+| Cassandra/query-first | Excluir |
+| Neo4j/Cypher | Excluir |
+| RAW, SHA-256, Parquet, manifest y ZIP | Utilizar como infraestructura, no como puntos |
+| Decisiones genéricas de infraestructura | Sustituir por decisiones nuevas: relevancia, semántica, imagen y señal |
 
-- TC1 tiene **81 celdas, 6 etapas y 22 controles que suman 100 puntos**. E1 adquisición/concurrencia 25; E2 MongoDB/documentos 25; E3 producto analítico 10; E4 Cassandra 15; E5 Neo4j 15; E6 decisiones/entrega 10. Es grupal o individual.
-- Su mayor acierto es el hilo de Laura: el mismo RAW se reutiliza, cada etapa explica qué hace el estudiante, qué está provisto, checkpoint y evidencia, qué no se puede concluir, y la puntuación se recalcula desde archivos.
-- Mantener el patrón de seis etapas, el enunciado único, la rúbrica anticipada, los cuatro rótulos interpretativos, las acciones EJECUTA/ELIGE/COMPLETA/ESCRIBE/PEGA, la identificación por equipo, una actividad propia y el manifest sellado.
-- Reducir fricción: TC1 requiere Colab, Atlas, Astra y Aura, además de Drive y correo. TC2 no debe exigir tres servicios externos ni repetir NoSQL básico, concurrencia y consultas Cypher/CQL.
-- TC1 pone Drive restringido + correo como entrega oficial; session-08.html mantiene código de formulario oculto y su backend rechaza manifiestos TC1. No crear una segunda ruta que prometa calificación oficial sin verificarla.
-- Las capturas son controles de respaldo: mejor priorizar resultados recalculables. El fallo de una etapa no debe impedir calificar las siguientes; usar un artefacto de referencia etiquetado y descontar solo la etapa no superada.
-- Calificación histórica TC1: puntaje 0–100; con entrega, nota = 1 + 4 × puntaje/100, redondeada a una décima; sin entrega, 0,0. Para TC2 conservar únicamente tras verificar regla institucional vigente.
-- **Seguridad independiente del TC2:** docs/PENDIENTES.md señala posibles credenciales históricas de MongoDB en 8_NoSQL_Mongo.ipynb. Resolver rotación/revocación antes de habilitar nuevas prácticas y no repetir reglas 0.0.0.0/0 sobre servicios compartidos.
+### Experiencia que sí aprende el estudiante
+La habilidad central es diferenciar *palabra*, *significado*, *relevancia* y *señal física*, y comprobar cómo un resultado útil cambia según decisiones observables. Cada etapa contiene seis movimientos:
+1. Problema concreto del personaje.
+2. Predicción por selección cerrada ANTES de ejecutar.
+3. Ejemplo mínimo con números legibles.
+4. Experimento con un parámetro cambiado por el estudiante.
+5. Diagnóstico automático y posibilidad de corregir.
+6. Interpretación: «Cómo se lee», «Qué nos dice», «Qué NO permite concluir todavía», «Qué error común».
 
-## 2. Enunciado propuesto para estudiantes
+Sin respuesta académica abierta: se permiten consultas como entrada técnica, código y números; las decisiones y los límites se registran con opciones cerradas y valores propios (AGENTS.md). La predicción debe ser guardada antes de mostrar la salida; una segunda oportunidad mejora dominio sin borrar el primer intento. Un estudiante no necesita conocer de antemano las respuestas para terminar.
 
-### TC2 · Compras Claras 2: del documento a la evidencia multimodal
+## 2. Historia y producto
 
-Laura ya cuenta con un conjunto de procesos públicos organizado. Necesita recuperar procesos aunque la consulta no repita sus palabras, comparar la recuperación léxica con la semántica y crear un catálogo verificable de imágenes y audios. No busca demostrar irregularidades ni atribuir un audio o una imagen a un contrato sin evidencia de origen.
+**Título para estudiantes:** TC2 · Compras Claras 2: cuando las palabras no coinciden y los archivos no hablan solos.
 
-**Objetivo:** sobre un corpus reproducible, construir y comparar dos rankings (BM25 y embeddings E5), obtener un ranking híbrido con RRF y ejecutar un ETL de imágenes/audio que conserve originales, derivados, procedencia e integridad. Al cierre, elegir una estrategia para una consulta del equipo y declarar un límite con un dato específico faltante.
+Laura conserva la bandeja contractual del TC1. Ahora una consulta sobre aeronaves no encuentra todos los procesos relevantes porque los redactores usan otras expresiones. Quiere entender por qué, mejorar el ranking y mostrar evidencia. También dispone de una nueva colección de grabaciones autorizadas y necesita extraer rasgos acústicos. La herramienta no debe confundir un espectrograma con transcripción, ni atribuir una grabación a un contrato sin relación comprobada.
 
-**Alcance:** sesiones 1–10 únicamente. No exigir Spark, Dask distribuido, Airflow, Kafka, MapReduce ejecutado, OCR productivo, Whisper/ASR obligatorio ni APIs de pago. La recuperación semántica sí utiliza el modelo intfloat/multilingual-e5-small (384 dimensiones), aprendido en S09.
+**Producto verificable:** un explorador HTML generado por el propio cuaderno:
+- Espacio «Expedientes SECOP»: consultas lexical, semántica e híbrida sobre exactamente el mismo corpus; Top-5, IDs, enlaces, pertinencia, filtro y métricas.
+- Espacio «Imagen del hallazgo»: gráfico PNG generado a partir del ranking realmente obtenido, inspector RGB/histograma y dos versiones transformadas para comparar legibilidad y tamaño.
+- Espacio «Voces autorizadas»: diez WAV de MINDS14 es-ES, escoger/reproducir, forma de onda, RMS, espectro y espectrograma de una selección; transcripción de referencia etiquetada como tal. No hay enlace causal ni editorial entre MINDS14 y SECOP.
+- Ficha final: estrategia seleccionada, alternativa descartada y límite comprobable, todos referidos a valores propios; fuentes diferenciadas.
+- El explorador es salida del estudiante, no un nuevo servicio que deba alojar o programar. El cuaderno es el motor, y la vista HTML es un resumen consultable offline de resultados ya calculados.
 
-**Modalidad:** parejas, con opción individual idéntica a TC1. No se penaliza a quienes no participaron exitosamente en TC1: el corpus y las entradas del TC2 se restauran sin necesitar la carpeta previa del taller 1. **Recursos visibles:** (1) cuaderno TC2 en Colab y (2) checklist web con el mapa de pasos y fallos. Los laboratorios S07/S09/S10 pueden enlazarse como referencias sin agregarse como recursos obligatorios. La presentación no ejecuta Python.
+**Recursos canónicos de estudiante (máximo dos):** Cuadernos/Taller_Control_2.ipynb (toda explicación más Python y autoevaluación) y assets/tutoriales/tc2-paso-a-paso.html (checklist, solución de errores, estado local sin pretender registrar nota). Los laboratorios S07/S09/S10 se vinculan desde las celdas como apoyo, no como requisitos adicionales. No hay tres sistemas obligatorios ni edición manual de HTML.
 
-### Caso y fuentes sin mezclas falsas
+## 3. Fuentes y reglas de evaluación justa
 
-1. **Corpus textual:** derivar un lote fijo, verificable y de hasta 120 documentos SECOP de Datos/s06_contexto_relacional.csv con las mismas columnas de S09: id_proceso, nombre_proceso, descripcion, entidad, url_secop. Antes de fijar el lote hay que validar IDs únicos, cobertura temática, longitud de textos y enlaces. Guardar manifest con versión, fecha de corte y SHA-256. No declarar aleatoriedad representativa: la muestra S09 tiene selección didáctica.
-2. **Consultas evaluables:** crear un banco de al menos 12 consultas en español, con dos asignadas determinísticamente a cada equipo y juicios de relevancia por id_proceso (qrels). Etiquetarlas manualmente contra el lote definitivo ANTES de publicar. Probar que cada consulta tiene suficientes positivos y negativos para comparar Precision@5 y Recall@5, sin usar scores como verdad de relevancia. Registrar la versión del banco; cambios de la fuente invalidan los qrels.
-3. **Multimedia:** imágenes de demostración del curso o archivo propio cuyo uso esté permitido; diez WAV humanos reales de PolyAI/MINDS14 es-ES, CC BY 4.0, con fuente, licencia, hash y referencia; incluir un respaldo licenciado para caída de red verificado con hashes. Las voces son consultas financieras, **no audios periodísticos de El Tiempo**. El inventario editorial de 32 imágenes/24 noticias solo puede usarse con atribución y derechos verificados; no inferir asociación con SECOP ni redistribuir binarios sin permiso.
-4. Se permiten archivos propios autorizados como extensión, pero la rúbrica básica debe poder aprobarse usando el paquete de referencia. Para evitar confusión, campos source_kind, source_record_id, source_license, source_sha256, article_id opcional y relacion_verificada deben explicar exactamente qué se conoce.
+### Corpus textual
+Se prepara una vez antes de publicar un subconjunto estable del corpus SECOP de S07/S09, inicialmente hasta 120 documentos, con campos id_proceso, nombre_proceso, descripcion, entidad y url_secop. Los estudiantes reciben el snapshot para que no se repita la adquisición de TC1.
+- Usar idénticos IDs y textos en BM25, E5 y RRF.
+- No premiar conteos, deduplicación ni hashes: se verifican como precondición automática.
+- Congelar un banco de seis *intenciones profesionales*, cada una expresada en versión literal y paráfrasis; seis parejas de consulta, 12 redacciones. Asignar a cada equipo un par mediante identificador no personal.
+- Juicios de relevancia independientes de ambos motores, validados por el docente contra los 120 documentos. Cada intención debe tener suficientes documentos relevantes y no relevantes (mínimo cinco relevantes) y una justificación factual. Si no se cumple, cambiar el banco antes de publicarlo; no inventar qrels.
+- El mismo conjunto de relevancia sirve para literal/paráfrasis de una intención. Comparación por ID, no por valores absolutos de score de motores diferentes.
+- La selección de 120 puede estar centrada en aeronáutica; no afirmar representatividad de SECOP ni generalizar latencia.
 
-## 3. Recorrido del estudiante
+### Imagen
+El PNG obligatorio se **genera desde el ranking propio del equipo** (por ejemplo, una visualización de los Top-5 y sus puntuaciones). Esto crea una relación auténtica entre búsqueda e imagen, sin descargar fotografías editoriales. Un segundo archivo propio autorizado es opcional. La imagen resultante permite inspeccionar píxeles, luminancia e histograma, y comparar dos perfiles con impacto en legibilidad de etiquetas.
+No usar El Tiempo como fuente automática de medios ni redistribuir imágenes editoriales de derechos no verificados.
 
-**Preparación, sin nota.** Colab: crear copia, inicializar alias de equipo (sin nombres o correos en artefactos públicos), obtener entradas oficiales con SHA-256, recuperar avance y ejecutar autodiagnóstico CPU/memoria/red. La descarga del modelo y el acceso a Atlas se prevalidan; hay ruta local de recuperación. No solicitar contraseña docente.
+### Audio
+Tomar los diez WAV reales de voz del conjunto PolyAI/MINDS14 es-ES, licencia CC BY 4.0, que ya utiliza S10; el material contiene referencia de transcripción, procedencia e intención de origen. El docente verificará hash, URL de origen, licencia y disponibilidad antes de publicar y proporcionará respaldo descargable autorizado si falla el acceso al proveedor.
+Los WAV no son audios de El Tiempo ni están vinculados con contratos SECOP. Es una colección separada de consultas habladas; la relación verificada es WAV ↔ referencia textual del mismo registro, no WAV ↔ contrato. ASR/Whisper y WER no son obligatorios.
 
-**E1 · Corpus y contrato (10 puntos).** Identificar unidad documental, verificar IDs únicos, construir texto de búsqueda y conservar snapshot firmado. Confirmar que la misma consulta usa la misma población en BM25 y E5. Evidencia: E1/corpus.parquet, E1/data_contract.json, E1/query_assignment.json y E1/qrels_version.json.
+## 4. Secuencia de aprendizaje y evaluación
 
-**E2 · Recuperación léxica BM25 (20 puntos).** Trabajar con una implementación BM25 provista o dependencias fijadas, inspeccionar tokenización y dos consultas asignadas, construir ranking Top-10 con desempate por ID y comparar efecto de un filtro real por entidad. El estudiante completa una decisión pequeña observable, no copia íntegra del motor. Exportar IDs, rangos, score, filtro y huella del corpus. Evidencia: E2/bm25_rankings.json y E2/bm25_experimento.json. Elastic Cloud no es obligatorio; sigue disponible como enlace de referencia de S07.
+### Desafío 0 — La consulta que falla (no calificable)
+Abrir Colab, guardar copia, seleccionar equipo, restaurar corpus y reproducir caso de Laura. Mostrar dos consultas distintas que expresan una misma intención. **Antes de buscar**, seleccionar cuál creen que encontrará más resultados útiles y por qué opción cerrada. Una predicción equivocada no resta puntos; sirve para abrir el problema.
+Demostración manual: tres documentos cortos, tokens, rareza, longitud y por qué una coincidencia léxica puede no equivaler a relevancia. Resultado esperado, diagnóstico y opción «reintentar preparación». Sin descargar SECOP.
 
-**E3 · Recuperación semántica y base vectorial (20 puntos).** Ejecutar E5 multilingual-e5-small con passage: y query:, guardar N × 384 float32 y demostrar coseno exacto en NumPy. Declarar claramente si hubo ping, upsert, índice queryable y consulta $vectorSearch REAL en Atlas; guardar resultados remotos por separado. La ruta Atlas Ephemeral Free es opcional en caso de indisponibilidad real; el validador nunca transforma NumPy en una pretendida ejecución Atlas. E3.4 da crédito íntegro por Atlas real o por contingencia de proveedor comprobada automáticamente y una alternativa local equivalente; una ruta local escogida sin contingencia puede obtener crédito parcial. Evidencia: E3/embeddings_meta.json, E3/sem_rankings.json, E3/vector_status.json, E3/atlas_evidencia.json cuando aplique. No exponer conexión ni enlace privado de reclamo.
+### E1 — ¿Por qué este documento aparece primero? BM25 (20 puntos, S07)
+- Ejemplo resuelto: tokens, analizador, frecuencia, rareza y longitud de documento en un universo mínimo.
+- Ejecutar búsqueda BM25 sobre snapshot fijo, comparando literal/paráfrasis, sin simular que Python es Elasticsearch.
+- Cambiar una palabra importante de la consulta y observar el movimiento de al menos un resultado (o demostrar que no cambió).
+- Comprobar orden Top-5 y desempate por ID en el motor canónico. Elasticsearch/Elastic Console puede utilizarse para contraste real si está disponible, pero no se exige abrir cuenta de pago ni se comparan scores absolutos entre implementaciones.
+- Registrar predicción inicial, Top-5 antes/después, tokens que influyeron y decisión de utilidad del ranking en un campo cerrado.
+- Salida para E2: consultas asignadas y rankings lexicales vinculados al mismo corpus.
+- Si no hay resultados, enseñar por qué (tokens/filtros), no cambiar la respuesta de forma silenciosa.
 
-**E4 · Evaluación y búsqueda híbrida (15 puntos).** Evaluar BM25 y E5 con juicios externos curados, no con su propia puntuación. Calcular Precision@5 y Recall@5 con denominadores correctos, contar falsos positivos y recuperar IDs. Implementar/completar RRF con constante k=60, comparar Top-5 lexical, semántico e híbrido y conservar desempate estable. Elegir un ranking con una decisión cerrada, valor numérico propio, alternativa descartada y límite concreto. Evidencia: E4/evaluacion.json, E4/rrf_ranking.json y E4/decision_ranking.json.
+### E2 — ¿Y si el contrato usa otras palabras? Embeddings y búsqueda vectorial (25 puntos, S09)
+- Ejemplo manual de vectores cortos y coseno: dirección frente a magnitud; mostrar caso donde coincidencia literal es insuficiente.
+- Transformar documentos con passage: y consultas con query: mediante multilingual-e5-small; mostrar N × 384 y comprobar que se usa el mismo modelo.
+- Generar Top-5 exacto en NumPy por coseno: identificar al menos un cambio de posición respecto al BM25 sobre paráfrasis.
+- Para base vectorial REAL, intentar Atlas Ephemeral, upsert de vectores e índice vectorial y consultar con $vectorSearch, guardando ping/índice/query_real. Es una habilidad nueva: no se recalifica el MongoDB documental convencional de TC1.
+- Experimento una variable: filtro por entidad o presupuesto de candidatos; contrastar elegibles y Top-k. No llamar Precision@k al solapamiento entre vecinos ni presentar latencia de una corrida como benchmark.
+- Contingencia justa: si Atlas devuelve error real verificable o 429, mantener ranking exacto NumPy y evidencia explícita «Atlas NO EJECUTADO», con evaluación alternativa de definición del índice/pipeline; no regalar crédito por declarar una caída sin prueba.
+- Salida E3: rankings lexicales y semánticos sobre el mismo conjunto.
 
-**E5 · ETL multimodal (25 puntos).** Reutilizar el contrato S10: E extraer bytes autorizados y registrar procedencia; T conservar RAW inmutable, producir dos perfiles de imagen (lado y luminancia/histograma) y calcular duración/RMS/ZCR/centroide/ventana FFT sobre diez WAV reales; L escribir JSONL y Parquet, releer y verificar equivalencia. Elegir parámetros propios entre opciones válidas, contrastar el efecto en el resultado y detectar un derivado intencionalmente alterado SIN modificar el RAW. Verificar idempotencia al reejecutar. El número de filas se calcula a partir de los archivos, no se fuerza a 13 si hay activos extra. La herramienta web reactiva de S10 puede exportar un ZIP s10-asset-v2 e importarse en Colab, pero no debe crear un tercer recurso obligatorio. Evidencia: E5/raw/, E5/derived/, E5/assets.jsonl, E5/assets.parquet, E5/manifest_assets.json y E5/quality_gates.json.
+### E3 — ¿Cuál recupera evidencia pertinente? Comparación e híbrida (15 puntos, S07+S09)
+- Antes de calcular, pedir que predigan si recuperar más documentos equivale a mejor precisión.
+- Con los juicios docentes del mismo corpus, calcular TP, Precision@5 y Recall@5 para las dos consultas y ambos mecanismos. Ejemplo manual pequeño y comprobación independiente.
+- Fusionar los rankings BM25 y E5 por Reciprocal Rank Fusion (RRF, constante 60) y mostrar posiciones, no comparar puntuaciones numéricas de modelos distintos.
+- Decidir entre BM25, E5 y RRF con una métrica propia, nombrar alternativa descartada y límite específico («la relevancia etiquetada cubre esta muestra, no todo SECOP»; no declarar fraude/causalidad).
+- Salida E4: ranking elegido convertido en insumo de una imagen de hallazgo.
+- Si E1/E2 falló, se proporciona ranking de respaldo etiquetado; la etapa fallida mantiene 0/parte de sus puntos, pero E3 se puede completar sin bloqueo.
 
-**E6 · Defensa estructurada y entrega (10 puntos).** Generar reporte con dos decisiones ancladas a resultados propios: (a) estrategia de ranking para una consulta con métrica y limitación; (b) perfil multimedia elegido con sus tamaños, hashes y lo que un histograma/espectro NO permite concluir. Seleccionar alternativas y límites mediante opciones contextualizadas, IDs y números, no texto libre. Validar paquete desde archivos, sin confiar en estado del notebook, generar manifest y sello SHA-256.
+### E4 — ¿Una imagen conserva lo que necesitamos ver? (20 puntos, S10)
+- Crear de forma reproducible el PNG del Top-5 del equipo, con títulos, etiquetas y escalas, sin pedir que el estudiante diseñe una interfaz.
+- Inspector de un píxel elegido: RGB, luminancia calculada a mano y lectura de histograma con ejes. Verificar que la suma de bins es igual a anchura × altura.
+- Probar dos perfiles (por ejemplo, 160 y 640 px en el lado mayor) y variar una transformación de contraste/umbral. Comparar legibilidad de texto, dimensiones, histograma y tamaño de salida.
+- Mostrar experimento donde una reducción/umbral extremo elimina información necesaria de la gráfica. El estudiante selecciona el perfil que preserva una etiqueta técnica, no el más pequeño automáticamente.
+- No dar puntos por calcular un hash o guardar RAW, ya evaluado en TC1; son guardias invisibles para no adulterar los resultados.
+- Salida E6: original y perfiles de la gráfica del ranking con medidas de calidad.
 
-## 4. Rúbrica de 22 controles, 100 puntos
+### E5 — ¿Qué nos dice realmente una grabación? Audio (15 puntos, S10)
+- Escuchar 2 de los 10 WAV con diferentes características, elegir la posición en la tabla.
+- Ejemplo manual: muestras por segundo, forma de onda, diferencia de duración y amplitud; RMS con cuatro muestras.
+- Calcular para los diez audios duración, tasa de muestreo, RMS y una característica espectral; representar forma de onda y espectrograma del audio elegido.
+- Elegir dos fragmentos del mismo archivo o dos audios y variar solamente tamaño de ventana FFT; observar resolución en Hz, espectro y cambios de energía. Interpretar diferencia entre volumen/amplitud y contenido lingüístico.
+- Mostrar transcripción humana del mismo WAV como **referencia preexistente**, no como salida de RMS/FFT ni como ASR ejecutado. No exigir Whisper, emoción de voz, diarización ni inferencia de intención a partir del espectro.
+- Decidir qué propiedad observada permite priorizar un archivo para escucha/inspección, y qué NO permite concluir.
+- Salida E6: diez fichas acústicas, audio reproducible y un espectrograma ligado al WAV correcto.
 
-| Control | Evidencia observable | Puntos | Verificación |
-|---|---|---:|---|
-| E1.1 | Fuente, campos, versión, hash y procedencia verificables | 4 | automática |
-| E1.2 | IDs únicos, limpieza y grano correctos | 3 | automática |
-| E1.3 | Dos consultas del equipo y qrels del mismo lote | 3 | automática |
-| E2.1 | BM25 sobre el corpus firmado; tokenización y configuración reproducibles | 6 | automática |
-| E2.2 | Dos rankings Top-10 con consulta/IDs/scores correctos | 5 | automática |
-| E2.3 | Filtro y desempate estables, consecuencia observada | 5 | automática |
-| E2.4 | Exportación reabierta y enlaces/identidad preservados | 4 | automática |
-| E3.1 | E5 real, prefijos correctos, vectores finitos y N × 384 | 6 | automática |
-| E3.2 | Top-k local por coseno consistente con referencia exacta | 5 | automática |
-| E3.3 | Persistencia/upsert reproducible, sin duplicación | 5 | automática |
-| E3.4 | Estado de Atlas honesto y consulta real o contingencia comprobada | 4 | automática + contingencia |
-| E4.1 | Precision@5 y Recall@5 correctamente calculados con qrels | 6 | automática |
-| E4.2 | Fusión RRF (k=60), IDs y ranking híbrido correctos | 5 | automática |
-| E4.3 | Elección, alternativa y limitación vinculadas a IDs/métricas propias | 4 | automática |
-| E5.1 | Fuentes, licencias, diez audios y originales con hashes | 5 | automática |
-| E5.2 | Imagen RAW intacta, dos perfiles y comparación de resultados | 6 | automática |
-| E5.3 | Métricas de diez WAV y experimento real de audio | 4 | automática |
-| E5.4 | Catálogo JSONL/Parquet y manifiesto coinciden tras relectura | 6 | automática |
-| E5.5 | Reejecución idempotente y corrupción detectada | 4 | automática |
-| E6.1 | Dos decisiones sustentadas por resultados individuales | 4 | automática |
-| E6.2 | Microdefensa estructurada con limitación específica | 3 | automática |
-| E6.3 | ZIP/manifest íntegros, sin secretos y con hash final | 3 | automática |
-| **Total** | **22 controles** | **100** | |
+### E6 — La demostración de Laura: producto y defensa (5 puntos, integración)
+- El cuaderno produce una única página HTML autosuficiente de consulta de resultados: espacio SECOP (Top-5 de los tres mecanismos + métricas + decisiones), imagen del ranking con perfiles, y diez fichas de voz con fuente y mediciones.
+- Dos enlaces o pestañas visuales separan las procedencias; no hay enlace artificial entre SECOP y MINDS14. Se admite comparar funciones del sistema, no afirmar conexión de contenido.
+- La defensa usa controles cerrados y números del resultado: «¿Cuál mecanismo eliges para tu consulta y cuál descartas?»; «¿Qué cambió en tu imagen?»; «¿Qué prueba el RMS y qué no?». El estudiante puede corregir y revalidar.
+- La exportación técnica (notebook ejecutado, HTML, ZIP, manifest de etapa) es una operación logística que **no agrega puntos por SHA/ZIP**.
 
-Cada ítem se califica independientemente con 0 o puntos definidos (o subniveles explícitos si hay evidencia parcial documentada). La interfaz muestra antes de empezar cómo obtener todos los puntos. Las etapas no se califican por velocidad o por pagar servicios. Captura no equivale a ejecución. El manifiesto contiene por ítem: id, máximos, obtenidos, evidencia, resultado, motivo del fallo y sugerencia concreta.
+## 5. Rúbrica completa — 18 controles, 100 puntos, sin repetir TC1
 
-## 5. Reglas de evaluación y honestidad
+| Control | Qué demuestra una habilidad nueva | Puntos |
+|---|---|---:|
+| E1.1 | Inspecciona y explica tokens, rareza y longitud en BM25 con valores del corpus | 6 |
+| E1.2 | Ejecuta y verifica los Top-5 BM25 para consulta literal y paráfrasis | 8 |
+| E1.3 | Cambia una condición léxica y explica la consecuencia observada | 6 |
+| E2.1 | Construye embeddings E5 con prefijos adecuados y 384 dimensiones | 7 |
+| E2.2 | Recupera por coseno Top-5 y reconoce coincidencias no literales | 8 |
+| E2.3 | Demuestra $vectorSearch Atlas real o contingencia válida con contrato de índice correcto | 6 |
+| E2.4 | Cambia filtro/candidatos y compara un resultado real sin confundir relevancia y solapamiento | 4 |
+| E3.1 | Calcula Precision@5 y Recall@5 contra juicios independientes del corpus | 6 |
+| E3.2 | Fusiona BM25 y E5 con RRF, posiciones y desempates correctos | 5 |
+| E3.3 | Selecciona estrategia por métricas propias, alternativa y límite específico | 4 |
+| E4.1 | Interpreta píxel RGB, luminancia y bins del histograma del PNG propio | 6 |
+| E4.2 | Genera dos transformaciones de imagen y compara sus efectos medibles | 8 |
+| E4.3 | Detecta pérdida de legibilidad útil y escoge perfil apropiado | 6 |
+| E5.1 | Escucha/inspecciona WAV reales; distingue tasa de muestreo, duración y amplitud | 5 |
+| E5.2 | Calcula RMS, FFT y espectrograma; altera ventana y observa el efecto | 6 |
+| E5.3 | Compara señales y explica límites frente a transcripción/intención | 4 |
+| E6.1 | Genera explorador funcional que reúne rankings, imagen y audio con origen separado | 3 |
+| E6.2 | Defiende una decisión integrada anclada a salidas reales, sin atribuciones falsas | 2 |
+| **Total** | **Solo competencias nuevas e integración** | **100** |
 
-- Conservar propuesta de conversión TC1 (1 + 4 × puntos/100, un decimal; sin entrega 0) solo tras verificar la norma vigente. 25 % del componente TC2, si se confirma PDA actual.
-- Evidencia del trabajo grupal con identidad restringida. No publicar nombres, códigos, cuentas, notas, llaves ni enlaces privados.
-- Toda consulta tiene fuente y hash; cada ranking usa el mismo universo para hacer comparaciones válidas. El modelo de embeddings y la normalización no pueden cambiar entre documentos y consultas de forma oculta.
-- Precision@k usa juicios de relevancia, nunca similitud ANN–ENN. Solapamiento de vecinos no equivale a relevancia.
-- No usar tamaño de muestra de 120 para afirmar escalabilidad, ni un solo tiempo para declarar que un motor es más rápido. No concluir irregularidades de SECOP, ni emoción/semántica de un espectro, ni contenido de una foto de su histograma.
-- Si un servicio falla, registrar estado verificable: NO EJECUTADO; el tutor ofrece diagnóstico, artefacto etiquetado para continuar y crédito parcial/contingencia según el control.
-- Cada bloque tiene los cuatro rótulos: Cómo se lee; Qué nos dice; Qué NO permite concluir todavía; Qué error común.
-- Cada bloque exige 1 decisión visible del estudiante; un botón de ejecutar todo, sin variación propia, no produce nota completa.
-- Nada de respuestas académicas abiertas; sí se admite código, consultas, parámetros, archivos y controles cerrados, según AGENTS.md.
+La nota se calcula por control y requiere un validador independiente desde salidas propias; no asignar puntos por pulsar Ejecutar todo, empaquetar o repetir E1 del TC1. Si el estudiante solo copia un ranking sin generar el experimento y decisión correspondiente, no alcanza el máximo.
 
-## 6. Diseño de los dos recursos de estudiante
+## 6. Cómo debe sentirse el recorrido
 
-1. **Cuadernos/Taller_Control_2.ipynb**, generado exclusivamente desde utils/build_taller_control_2.py: portada, objetivo y rúbrica completa, tabla de E1–E6, glosario contextual, preparación, fichas de etapa, celdas con verbos claros y una acción propia cada una, checkpoints, diagnóstico, interpretación, salida esperada, recuperación, hoja de trucos, cierre y entrega. Meta editorial: 35–50 celdas y un hilo corto; no perder definiciones por recortar.
-2. **assets/tutoriales/tc2-paso-a-paso.html**, checklist mobile/desktop con evidencia concreta por paso, estados guardados localmente SOLO como comodidad y vínculo a celdas Colab. No recoger texto abierto ni afirmar progreso académico por marcar casillas.
+**Pantalla inicial:** Laura plantea un problema de búsqueda concreto, el estudiante elige su predicción. Ver una respuesta inesperada crea una pregunta genuina y no una lista de definiciones.
 
-El ETL reactivo S10 ya publicado se enlaza dentro de estos materiales como extensión integrada opcional y conserva su contrato s10-asset-v2. No duplicar la herramienta ni registrar un tercer recurso evaluable.
+**Por desafío:** ficha de máximo una pantalla con:
+- Pregunta real que resuelve.
+- Lo mínimo que necesita recordar, con ejemplo manual y contraejemplo.
+- Lo que ya está preparado para no repetir TC1.
+- Lo que el estudiante cambia: UNA variable, una línea o una elección.
+- Botón/celda «Comprueba» con esperado, observado, evidencia y diagnóstico.
+- Interpretación con los cuatro rótulos fijos.
+- «Si te atascastes»: recuperación y resultado de referencia etiquetado.
+- «Lo que ahora puede hacer Laura»: conexión al próximo bloque.
 
-## 7. Entrega propuesta
+**Didáctica:** al menos un cambio de parámetro visible por desafío, un error intencional seguro por bloque (token sin coincidencia, filtro vacío, prefijo incorrecto, imagen demasiado pequeña, ventana FFT inapropiada), una corrección y una alternativa descartada. Las predicciones son formativas; los puntos nacen de la ejecución personal reproducible.
 
-Una sola entrega por equipo, compatible con la experiencia TC1 mientras no se verifique un canal privado LMS real:
+**Diseño editorial:** evitar glosarios largos al principio; introducir término justo cuando el caso lo exige. Aproximadamente 35–45 celdas, pero no sacrificar explicación por cumplir cifra. Un cuaderno es la clase; no un contenedor masivo de código.
 
-- Carpeta Drive **restringida** accesible al docente, con exactamente TC2_EQUIPO.ipynb, TC2_EQUIPO.zip y manifest_tc2.json.
-- Correo institucional con asunto normalizado, enlace restringido y SHA-256 del manifest. El timestamp de ese mensaje fija el cierre. NO declarar recepción LMS/Gradebook; una integración futura exige prueba autenticada de lectura/escritura y registro de nota.
-- El ZIP contiene E1–E6, no contiene conexiones, contraseñas, tokens ni archivos privados de otros equipos. Reimportación en un proceso Python limpio debe producir el mismo puntaje (salvo controles con servicio remoto, cuyo estado queda firmado).
-- Fecha y hora límite **pendientes de aprobación**; mostrar las mismas en notebook, checklist, portada, LMS y correo. No publicar una fecha inventada.
+## 7. Ruta del docente de 180 minutos
 
-## 8. QA y puertas de publicación
+El tiempo vive aquí, NO en el cuaderno del estudiante.
 
-**P0, seguridad:** resolver credenciales históricas del repositorio; escáner de secretos/PII sin excepciones ocultas; validar entradas ZIP contra traversal/bombas y MIME; nunca guardar URI MongoDB ni claimUrl. Los datasets solo con licencia/procedencia y hashes.
+| Minuto | Actividad | Acción observable |
+|---|---|---|
+| 0–15 | Historia de Laura y predicción | Dos frases, ¿mismo significado? |
+| 15–55 | Desafío E1 | BM25, consulta modificada y efecto en Top-5 |
+| 55–100 | Desafío E2 | E5, coseno, búsqueda real o contingencia |
+| 100–110 | Pausa | — |
+| 110–145 | Desafío E3 | Evaluación de pertinencia y RRF |
+| 145–170 | Desafío E4 (primera parte) | Imagen del ranking, RGB y perfiles |
+| 170–180 | Puente y trabajo independiente | Apertura de E5 audio y E6; dudas de procedimiento |
 
-**P1, contratos y datos:** congelar corpus textual, 12 consultas y juicios de relevancia; probar asignación para todos los posibles equipos; comprobar que no haya consultas sin positivos, IDs huérfanos ni sesgo que vuelva trivial la respuesta. Validar fuente de MINDS14 real, ten WAV únicos con referencia, licencia, hash, conversión G.711 a PCM16, y espejo de contingencia.
+Fuera del encuentro: completar perfiles de imagen, diez WAV, inspector acústico y página final, con una guía autónoma estimada de 90–150 minutos que debe validarse en piloto. Ningún bloque exige esperar una aprobación del docente para avanzar.
 
-**P2, corrección técnica:** unit tests BM25, coseno y RRF con ejemplos manuales; resultados ordenados de forma determinista; validación de N × 384 y no NaN; idempotencia en índices, catálogos y ZIP; corrupción de un byte rechazada; segundo ejecutable docente que calcule desde archivos, no desde variables de memoria. Pruebas de contingencia Atlas 429/sin red sin falsificar estado de producción.
+## 8. Formato, revisión y publicación
 
-**P3, autonomía pedagógica:** ejecución integral en Colab limpio CPU con un equipo de prueba y opciones reales (no solo mocks); reproducir la entrega en ambiente aislado; un estudiante de prueba recorre instrucciones desde cero. Contrastar tiempos de ejecución y bloqueos antes de fijar fecha de entrega. Documentar la salida esperada de cada etapa; no pedir instalar VS Code, pagar un servicio ni configurar credenciales del docente.
+**Formato estudiante:** notebook en Colab + checklist HTML responsive. Todo el Python en el notebook; un HTML local de resultado, no un sistema adicional que configurar. El estudiante visualiza progreso técnico propio dentro de la ejecución; ningún checkbox web se convierte en nota oficial.
 
-**P4, interfaz:** Playwright en móvil y escritorio (390, 768, 1366 px); sin desbordes ni errores JS; navegación por teclado, foco, contraste AA, tema oscuro de Colab y salida legible; pantalla de evaluación no revela respuestas correctas sin ejecución. Un recurso de notebook y un checklist en LMS, sin duplicar tareas.
+**Entrega:** seguir por defecto la modalidad de TC1 —carpeta de Drive restringida y correo institucional con fecha/hora coherentes— solo una vez confirmada. Si existe envío auténtico probado en LMS y el docente autoriza reemplazar el canal, anunciar UNO solo. No inventar fecha, correo nuevo ni porcentaje del curso. Propuesta de tres archivos: TC2_EQUIPO.ipynb, TC2_EQUIPO.zip y manifest_tc2.json; el ZIP contiene explorador HTML, resultados y medios permitidos. No distribuir audios de estudiantes ni datos personales.
 
-**P5, control editorial:** ejecutar validadores existentes y nuevos para rúbrica 22/100, preguntas no abiertas, enlaces, secretos, corpus, S07/S09/S10 sin regresiones, y GitHub Pages. PR con CI en verde y evidencia de ejecución real antes de fusionar; prueba pública HTTP después del deploy. En LMS publicar como actividad visible solo cuando se aprueben fecha, porcentaje y canal de entrega.
+**Criterios de liberación que requieren pruebas reales:**
+1. Congelar corpus, banco de seis intenciones, literal/paráfrasis y juicio humano para los documentos. Garantizar al menos cinco positivos por intención, sin IDs ajenos al corpus.
+2. Confirmar 10 WAV reales/licenciados de S10 y permitir descarga/respaldo verificable; no reproducir medios editoriales sin derechos. Verificar reproducción de audio desde HTML/ZIP en navegador objetivo.
+3. Test del ejemplo manual BM25, coseno, P@5, Recall@5, RRF e histogramas. Fijar normalización, corpus y desempate; los scores BM25 y coseno no son intercambiables.
+4. Test con corpus/consulta alterados, ausencia de qrels, vector de dimensión distinta, Atlas 429, índice no disponible, imagen ilegible, archivo de audio corrupto, ventana FFT y bin de histograma erróneos.
+5. Test de privacidad, origen y atribución; el manifest no contiene claimURL, secretos ni correos. La UI marca «NO EJECUTADO» donde falta servicio real.
+6. Ejecutar notebook completo en CPU Colab con una cuenta de prueba, comprobar perfiles en móvil/escritorio, zoom 200 %, tema oscuro, controles por teclado y accesibilidad, y volver a calificar el ZIP en proceso aislado.
+7. CI de notebook/generador, validador, HTML/Playwright, scan de secretos y no-respuesta-abierta; probar al menos dos equipos con consultas asignadas distintas.
+8. Reconciliar con PDA vigente; acordar fecha, duración de entrega, canal y peso; fusionar PR y publicar solo después de cumplir los gates.
 
-## 9. Orden de implementación por PR
+**Secuencia de implementación:**
+- A: fijar corpus y juicios independientes / licencias.
+- B: generador y notebook E1–E3; motor de score desde archivos.
+- C: E4/E5 con imagen derivada del ranking y MINDS14 audio real.
+- D: explorador generado, tutorial, validación adversarial, ejecución completa real.
+- E: revisión pedagógica y publicación en LMS tras aprobación, dejando TC1 intacto.
 
-- PR-A: corpus/conjunto de consultas y relevancia, hash y prueba de licencia.
-- PR-B: generador y notebook TC2 E1–E4, validador docente y tests de recuperación.
-- PR-C: ETL E5, integración S10, ZIP y manifest.
-- PR-D: E6, rúbrica, checklist, pruebas adversariales, accesibilidad y flujo limpio en Colab.
-- PR-E: integrar el LMS y publicar después de aprobar PDA, fecha, controles y entrega.
+## 9. Definición de éxito pedagógico
 
-No hacer merge de un plan editorial como si fuera un cuaderno ejecutable. Mantener TC1 y S07–S10 intactos hasta completar pruebas.
+Al terminar, una pareja puede explicar con sus resultados:
+- Por qué BM25 encontró o perdió un contrato con palabras diferentes.
+- Por qué una búsqueda por significado recuperó un documento y qué significa el coseno.
+- Por qué el ranking de mejor score no siempre tiene mejor Precision@5.
+- Qué aporta RRF y qué NO demuestra el solapamiento ANN–ENN.
+- Qué informa un histograma/píxel de la imagen del ranking, y cuándo una transformación destruyó legibilidad.
+- Qué informa RMS/FFT/espectrograma de una voz real, y por qué no transcriben palabras.
+- Qué medios se pueden relacionar por origen comprobable y cuáles deben quedar separados.
 
-## 10. Sesión de lanzamiento de 180 minutos
+**Decisión central:** TC2 evalúa 95 puntos de conceptos S07–S10 y 5 de integración. Los conocimientos ya evaluados en TC1 funcionan como infraestructura gratuita, no como un segundo examen.
 
-- 0–15: reconstruir la historia y contraste TC1–TC2.
-- 15–40: identidad, corpus, qrels y contrato.
-- 40–90: BM25 y variación de consulta/filtro con salidas propias.
-- 90–100: receso.
-- 100–145: embeddings E5, similitud y Atlas/alternativa.
-- 145–165: métricas y RRF con interpretación.
-- 165–180: explicar ETL multimedia, checkpoints, entrega y trabajo autónomo.
-- La ejecución íntegra de E5, decisiones y validación final continúa fuera del encuentro, con una carga estimativa a verificar en piloto. No tratar seis etapas evaluables como si cupieran completas en 180 minutos.
-
-**Criterio de listo para estudiantes:** un participante nuevo completa sin ayuda P1–P5, reabre su ZIP, obtiene puntaje reproducible, distingue Atlas real de NumPy local y entiende por qué su ranking/histograma no demuestran hechos externos.
-
----
-**Referencias internas:** AGENTS.md; README.md; docs/PDA_guia.md; docs/PENDIENTES.md; lms/data/course.json; Cuadernos/Taller_Control_1.ipynb; utils/validate_tc1_v9.py; Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb; Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb; Cuadernos/10_Imagenes_Audio.ipynb; Datos/s10_audio_reales/README.md; assets/s10/etl-reactivo.html.
+Fuentes del repositorio: AGENTS.md; docs/PDA_guia.md; Cuadernos/Taller_Control_1.ipynb; utils/tc1_contrato.py; Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb; Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb; Cuadernos/10_Imagenes_Audio.ipynb; Datos/s10_audio_reales/README.md; assets/s10/etl-reactivo.html.
