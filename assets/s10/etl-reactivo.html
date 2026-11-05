@@ -32,7 +32,10 @@ table{width:100%;border-collapse:collapse;font-size:.87rem}th,td{text-align:left
 <main>
 <section class="panel">
 <div class="kicker">Laboratorio complementario · ETL propio en el navegador</div>
-<h1>De tus imágenes y audios a un catálogo verificable</h1>
+<h1>Laura ya encuentra información. ¿Cómo preparar sus imágenes y audios?</h1>
+<p>En S01–S02 Laura aprendió a ingerir datos y planear una decisión; en S03–S06 representó noticias, procesos SECOP y sus relaciones; en S07–S09 aprendió a buscar texto y significado. <b>Ahora tiene fotografías y grabaciones que no se analizan igual que una tabla.</b> En esta sesión vas a convertirlas en activos reproducibles sin perder su procedencia.</p>
+<p><b>Misión:</b> conserva un original, genera un derivado, explica una métrica y guarda un catálogo que se pueda recuperar y comprobar.</p>
+<div class="note"><b>El contexto importa:</b> el curso conserva un <a href="../../Datos/s10_imagenes_reales/inputs.json" target="_blank" rel="noopener">inventario de 32 imágenes asociadas a 24 artículos</a> con <code>article_id</code>. Las diez voces de MINDS-14 tienen <code>source_record_id</code> y proceden de otra colección. Subir una imagen propia <b>no establece ninguna relación con SECOP ni con una noticia</b>.</div>
 <p>Elige archivos propios autorizados o crea una demostración. Observa las etapas <b>Extraer → Transformar → Cargar</b>; modifica un parámetro y comprueba qué cambia. El archivo original nunca se altera.</p>
 <div class="pipeline" aria-label="Tres etapas ETL">
 <div class="stage"><b>E · Extraer</b><span>Copiar bytes, identificar tipo y calcular SHA-256</span></div><div class="arrow" aria-hidden="true">→</div>
@@ -41,16 +44,16 @@ table{width:100%;border-collapse:collapse;font-size:.87rem}th,td{text-align:left
 <div class="note"><b>Privacidad:</b> todo el procesamiento ocurre en este navegador. No se envían archivos a GitHub, al LMS ni a terceros. El ZIP es una descarga local, <b>no una entrega ni calificación oficial</b>.</div>
 </section>
 <section class="panel" id="guia">
-<h2>Tutorial autónomo: seis pasos, sin instalaciones</h2>
-<details open><summary>1 · Prepara un ejemplo o elige tus archivos</summary><p><b>Haz esto ahora:</b> pulsa «Crear ejemplo» para probar sin archivos, o sube una fotografía/diagrama y un WAV o MP3 propios. Se admiten hasta 6 archivos de 8 MiB cada uno; audios de hasta 60 segundos. <b>Debe verse:</b> una fila por archivo con SHA-256. <b>Si falla:</b> usa el ejemplo incluido. <b>Interpretación:</b> el hash identifica los bytes, no su significado.</p></details>
-<details><summary>2 · Extrae: inspecciona lo que realmente entró</summary><p>Comprueba nombre, tipo, tamaño y origen de cada archivo. Revisa la vista previa. El navegador conserva una copia inmutable del original en memoria. <b>No concluyas:</b> que una fotografía demuestra hechos de un contrato o que un audio pertenece a una noticia.</p></details>
-<details><summary>3 · Transforma: cambia exactamente un parámetro</summary><p>En imágenes, cambia «Lado máximo» de 320 a 160 y compara dimensiones e histograma. Después prueba brillo, contraste, gris o umbral. En audios se genera WAV PCM16 mono de 16 kHz y se miden RMS, pico y tasa de cruces por cero. <b>Debe verse:</b> el resultado se actualiza sin volver a subir archivos. <b>Atención:</b> una característica acústica no es una transcripción.</p></details>
-<details><summary>4 · Carga: lee el catálogo y su descripción técnica</summary><p>Busca una fila por activo, modalidad, perfil, nombre de archivo, tamaño y huellas del original y derivado. <b>Debe verse:</b> «E», «T» y «L» con igual cantidad de activos correctos. El catálogo es consultable, pero el procesamiento sigue en memoria hasta exportarlo.</p></details>
-<details><summary>5 · Guarda y reabre el paquete</summary><p>Pulsa «Guardar ZIP verificable». Se incluirán <span class="mono">raw/</span>, <span class="mono">derived/</span>, <span class="mono">catalogo.jsonl</span> y <span class="mono">manifest.json</span>. Después selecciona ese mismo ZIP en «Reabrir ZIP»; el laboratorio relee sus contenidos y verifica hashes. <b>Debe verse:</b> «PAQUETE VERIFICADO».</p></details>
-<details><summary>6 · Concluye desde tus resultados (sin respuestas abiertas)</summary><p>Elige un <b>tipo de contenido</b> y un <b>límite de interpretación</b> en los controles. Repite una transformación y compara tamaños, luminancia o energía. El paquete registra esas elecciones junto con los parámetros y la traza técnica.</p></details>
+<h2>Un caso completo: seis decisiones sin instalaciones</h2>
+<details open><summary>1 · ¿Qué tiene Laura? Prepara tu entrada</summary><p><b>Haz esto ahora:</b> pulsa «Crear ejemplo» para probar sin archivos, o sube una fotografía/diagrama y un WAV o MP3 propios. Se admiten hasta 6 archivos de 8 MiB cada uno; audios de hasta 60 segundos. <b>Debe verse:</b> una fila por archivo con SHA-256. <b>Si falla:</b> usa el ejemplo incluido. <b>Interpretación:</b> el hash identifica los bytes, no su significado.</p></details>
+<details><summary>2 · ¿De dónde vino? Extrae el original</summary><p>Comprueba nombre, tipo, tamaño y origen de cada archivo. Revisa la vista previa. El navegador conserva una copia inmutable del original en memoria. <b>No concluyas:</b> que una fotografía demuestra hechos de un contrato o que un audio pertenece a una noticia.</p></details>
+<details><summary>3 · ¿Qué cambió? Transforma un parámetro</summary><p>En imágenes, cambia «Lado máximo» de 320 a 160 y compara dimensiones e histograma. Después prueba brillo, contraste, gris o umbral. En audios se genera WAV PCM16 mono de 16 kHz y se miden RMS, pico y tasa de cruces por cero. <b>Debe verse:</b> el resultado se actualiza sin volver a subir archivos. <b>Atención:</b> una característica acústica no es una transcripción.</p></details>
+<details><summary>4 · ¿Cómo se recuperará? Carga el catálogo</summary><p>Busca una fila por activo, modalidad, perfil, nombre de archivo, tamaño y huellas del original y derivado. <b>Debe verse:</b> «E», «T» y «L» con igual cantidad de activos correctos. El catálogo es consultable, pero el procesamiento sigue en memoria hasta exportarlo. Su contrato <code>s10-asset-v2</code> será reutilizado en Colab.</p></details>
+<details><summary>5 · ¿Puede comprobarlo Laura? Guarda y reabre</summary><p>Pulsa «Guardar ZIP verificable». Se incluirán <span class="mono">raw/</span>, <span class="mono">derived/</span>, <span class="mono">catalogo.jsonl</span> y <span class="mono">manifest.json</span>. Después selecciona ese mismo ZIP en «Reabrir ZIP»; el laboratorio relee sus contenidos y verifica hashes. <b>Debe verse:</b> «PAQUETE VERIFICADO».</p></details>
+<details><summary>6 · ¿Qué sabemos y qué falta? Interpreta tus resultados</summary><p>Elige un <b>tipo de contenido</b> y un <b>límite de interpretación</b> en los controles. Repite una transformación y compara tamaños, luminancia o energía. El paquete registra esas elecciones junto con los parámetros y la traza técnica.</p></details>
 </section>
 <section class="panel" id="entrada">
-<h2>E · Extraer archivos</h2>
+<h2>E · Extraer: ¿qué tenemos?</h2>
 <div class="grid">
 <div><label for="files">Subir imágenes o audios propios (PNG, JPG, WEBP, WAV, MP3 y formatos compatibles)</label><input id="files" type="file" accept="image/*,audio/*" multiple><p class="help">No subas información personal, expedientes reservados ni obras sin autorización.</p></div>
 <div><label for="category">¿Qué clase de imagen incorporas? (clasificación elegida, no reconocimiento automático)</label><select id="category"><option value="sin_clasificar">Elegir tipo de contenido</option><option value="fotografia">Fotografía</option><option value="documento_visual">Documento o captura</option><option value="diagrama">Diagrama o gráfico</option><option value="otro">Otro material autorizado</option></select>
@@ -60,7 +63,7 @@ table{width:100%;border-collapse:collapse;font-size:.87rem}th,td{text-align:left
 <p id="status" class="status" role="status" aria-live="polite">Sin archivos. Usa «Crear ejemplo» o sube tus archivos autorizados.</p>
 </section>
 <section class="panel" id="transformacion">
-<h2>T · Transformar: parámetros reactivos</h2>
+<h2>T · Transformar: ¿qué cambió y qué permanece?</h2>
 <div class="tools">
 <div><label for="maxSide">Lado máximo de imagen</label><select id="maxSide"><option value="160">160 px (miniatura)</option><option value="320" selected>320 px (catálogo)</option><option value="640">640 px (detalle)</option><option value="1024">1024 px (detalle ampliado)</option></select><p class="help">Se conserva la proporción; nunca aumenta la resolución original.</p></div>
 <div><label for="brightness">Brillo <output id="brightnessValue">100 %</output></label><input id="brightness" type="range" min="50" max="150" value="100" step="10"><label for="contrast">Contraste <output id="contrastValue">100 %</output></label><input id="contrast" type="range" min="50" max="150" value="100" step="10"></div>
@@ -73,7 +76,7 @@ table{width:100%;border-collapse:collapse;font-size:.87rem}th,td{text-align:left
 <div id="cards" aria-live="polite"><p class="muted">Aquí verás los derivados y su interpretación después de procesar.</p></div>
 </section>
 <section class="panel" id="carga">
-<h2>L · Cargar un catálogo y conservar la evidencia</h2>
+<h2>L · Cargar: ¿cómo volveremos a encontrar los activos?</h2>
 <p>Una fila por activo y un ZIP estándar que puedes extraer, compartir voluntariamente o guardar en Drive por tu cuenta. Los originales y los derivados mantienen nombres distintos.</p>
 <div class="scroll"><table><thead><tr><th>ID</th><th>Modalidad</th><th>Original</th><th>Derivado</th><th>Descripción técnica</th><th>SHA-256 (inicio)</th></tr></thead><tbody id="catalogBody"><tr><td colspan="6">Sin registros todavía.</td></tr></tbody></table></div>
 <div class="actions"><button id="save" disabled>Guardar ZIP verificable</button><label class="action alt" for="importZip">Reabrir ZIP guardado <input id="importZip" type="file" accept=".zip,application/zip" hidden></label></div>
@@ -118,6 +121,7 @@ async function addFiles(files,source){
    var raw=new Uint8Array(await f.arrayBuffer());
    if(raw.length===0)throw Error('Archivo vacío');
    var sha=await digest(raw);
+   if(state.items.some(function(x){return x.rawSha===sha&&x.kind===kind})){failures.push(f.name+': archivo idéntico omitido por SHA-256');continue}
    state.items.push({id:'a'+String(state.items.length+1).padStart(3,'0'),name:f.name,kind:kind,mime:f.type||(kind==='image'?'image/png':'audio/wav'),source:source,raw:raw,rawSha:sha});
    accepted++;
   }catch(e){failures.push(f.name+': '+e.message)}
@@ -179,7 +183,22 @@ async function process(){
   try{
    var r=item.kind==='image'?await transformImage(item,o):await transformAudio(item);
    r.derivedSha=await digest(r.bytes);
-   var row={record_id:item.id,modalidad:item.kind,nombre_original:item.name,origen:item.source,tipo_mime_original:item.mime,raw_path:'raw/'+item.id+'_original.'+safeExtension(item.name,item.mime),derived_path:'derived/'+item.id+'_procesado.'+r.extension,bytes_original:item.raw.length,bytes_derivado:r.bytes.length,sha256_original:item.rawSha,sha256_derivado:r.derivedSha,parametros:item.kind==='image'?{lado_maximo:o.lado_maximo,brillo_pct:o.brillo_pct,contraste_pct:o.contraste_pct,gris:o.gris,umbral_activo:o.umbral_activo,umbral:o.umbral}:{frecuencia_hz:16000,canales:1,pcm_bits:16},metricas:r.metrics,descripcion_tecnica:r.description,clase_contenido_elegida:item.kind==='image'?o.imagen_tipo_elegido:'no_aplica',limite_elegido:o.limite_elegido};
+   var pars=item.kind==='image'?{lado_maximo:o.lado_maximo,brillo_pct:o.brillo_pct,contraste_pct:o.contraste_pct,gris:o.gris,umbral_activo:o.umbral_activo,umbral:o.umbral}:{frecuencia_hz:16000,canales:1,pcm_bits:16};
+   var profile=item.kind==='image'?('imagen_'+o.lado_maximo+(o.gris?'_gris':'')+(o.umbral_activo?'_bin':'')+'_'+o.brillo_pct+'_'+o.contraste_pct):'audio_pcm16_mono_16000';
+   var metricName=item.kind==='image'?'mean_luminance':'rms';
+   var metricValue=item.kind==='image'?r.metrics.luminancia_media:r.metrics.rms;
+   var sourceKind=item.source==='ejemplo_generado'?'generated_for_course':'uploaded_by_student';
+   var rawPath='raw/'+item.id+'_original.'+safeExtension(item.name,item.mime),derivedPath='derived/'+item.id+'_procesado.'+r.extension;
+   var row={schema_version:'s10-asset-v2',record_id:item.id,asset_id:item.rawSha,
+    modality:item.kind,modalidad:item.kind,source_kind:sourceKind,source_type:sourceKind,source_id:null,
+    article_id:null,source_record_id:null,collection_id:null,
+    nombre_original:item.name,origen:item.source,tipo_mime_original:item.mime,original_path:rawPath,raw_path:rawPath,derived_path:derivedPath,
+    bytes_original:item.raw.length,bytes_derivado:r.bytes.length,
+    original_sha256:item.rawSha,source_original_sha256:item.rawSha,sha256_original:item.rawSha,
+    derived_sha256:r.derivedSha,sha256_derivado:r.derivedSha,sha256:r.derivedSha,
+    profile:profile,feature_version:'s10-v2',metric_name:metricName,metric_value:metricValue,
+    parameters_json:JSON.stringify(pars),metrics_json:JSON.stringify(r.metrics),
+    parametros:pars,metricas:r.metrics,status:'ok',descripcion_tecnica:r.description,clase_contenido_elegida:item.kind==='image'?o.imagen_tipo_elegido:'no_aplica',limite_elegido:o.limite_elegido};
    result.push({item:item,transformed:r,row:row});
   }catch(e){fail.push(item.name+': '+e.message)}
  }
@@ -234,7 +253,7 @@ function render(){
   var tr=document.createElement('tr'),values=[row.record_id,row.modalidad,row.nombre_original,row.derived_path,row.descripcion_tecnica,row.sha256_original.slice(0,12)+'…'];
   values.forEach(function(s){tr.appendChild(textEl('td',s))});body.appendChild(tr);
  }
- $('manifestPreview').textContent=JSON.stringify({schema:'bigdata-s10-etl-reactivo/v1',cantidad:state.rows.length,parametros_actuales:options(),primer_registro:state.rows[0].row},null,2);
+ $('manifestPreview').textContent=JSON.stringify({schema:'bigdata-s10-etl-reactivo/v2',cantidad:state.rows.length,parametros_actuales:options(),primer_registro:state.rows[0].row},null,2);
 }
 function utf(s){return encoder.encode(s)}
 function crc32(data){
@@ -276,7 +295,7 @@ async function save(){
   var o=options(),rows=state.rows.map(function(x){return x.row}),entries=[];
   state.rows.forEach(function(x){entries.push({name:x.row.raw_path,bytes:x.item.raw});entries.push({name:x.row.derived_path,bytes:x.transformed.bytes})});
   entries.push({name:'catalogo.jsonl',bytes:utf(rows.map(function(r){return JSON.stringify(r)}).join('\n')+'\n')});
-  var manifest={schema:'bigdata-s10-etl-reactivo/v1',generado_en:new Date().toISOString(),procesamiento:'navegador_local',cantidad:rows.length,parametros:o,registros:rows,limites:['no_reconocimiento_semantico','sin_transcripcion_ASR','sin_entrega_automatica_LMS']};
+  var manifest={schema:'bigdata-s10-etl-reactivo/v2',case_id:'laura_compras_claras_s10',relation_policy:'no_asociar_archivos_con_articulos_o_contratos_sin_evidencia',generado_en:new Date().toISOString(),procesamiento:'navegador_local',cantidad:rows.length,parametros:o,registros:rows,limites:['no_reconocimiento_semantico','sin_transcripcion_ASR','sin_entrega_automatica_LMS']};
   entries.push({name:'manifest.json',bytes:utf(JSON.stringify(manifest,null,2))});
   var data=zipBuild(entries),url=URL.createObjectURL(new Blob([data],{type:'application/zip'})),link=document.createElement('a');
   link.href=url;link.download='S10_ETL_evidencia_'+new Date().toISOString().slice(0,10)+'.zip';document.body.appendChild(link);link.click();link.remove();setTimeout(function(){URL.revokeObjectURL(url)},3000);
@@ -302,6 +321,7 @@ async function loadZip(file){
    seen.add(r.record_id);
    var raw=files.get(r.raw_path),derived=files.get(r.derived_path);
    if(!raw||!derived||raw.length!==r.bytes_original||derived.length!==r.bytes_derivado)throw Error('Falta original/derivado: '+r.record_id);
+   if(r.schema_version!=='s10-asset-v2'||r.asset_id!==r.sha256_original||r.original_sha256!==r.sha256_original||r.derived_sha256!==r.sha256_derivado||r.sha256!==r.sha256_derivado||r.modality!==r.modalidad||r.article_id!=null||r.source_record_id!=null)throw Error('Contrato incorrecto: '+r.record_id);
    if(await digest(raw)!==r.sha256_original||await digest(derived)!==r.sha256_derivado)throw Error('SHA-256 distinto: '+r.record_id);
    imported.push({id:r.record_id,name:r.nombre_original,kind:r.modalidad,mime:r.tipo_mime_original,source:r.origen,raw:raw,rawSha:r.sha256_original});
   }
