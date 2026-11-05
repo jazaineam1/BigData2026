@@ -25,11 +25,11 @@ NOTEBOOK = ROOT / "Cuadernos" / "11_ETL_Audio_Imagenes.ipynb"
 def estructura():
     subprocess.check_call([sys.executable,str(ROOT/"utils"/"build_session11_etl_audio_imagenes.py"),"--check"])
     nb = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
-    assert len(nb["cells"]) == 29, "La lección S11 espera 29 celdas"
+    assert len(nb["cells"]) == 40, "La lección S11 espera 40 celdas"
     ids = [x["id"] for x in nb["cells"]]
     for id in ("s11-preparar","s11-cargar-motor","s11-elegir","s11-extraer-imagenes",
                "s11-extraer-audios","s11-transformar-imagenes","s11-transformar-audios",
-               "s11-cargar","s11-calidad","s11-escala","s11-escala-lotes","s11-escala-comparar","s11-empaquetar","s11-autocomprobar"):
+               "s11-cargar","s11-calidad","s11-escala","s11-escala-lotes","s11-escala-comparar","s11-live-d-setup","s11-live-e-start","s11-live-e-wait","s11-live-f-benchmark","s11-live-g-fallos","s11-live-h-importar","s11-empaquetar","s11-autocomprobar"):
         assert id in ids
     for c in nb["cells"]:
         if c["cell_type"] == "code":
@@ -49,6 +49,9 @@ def laboratorio_real():
         base = Path(temp)
         (base/"utils").mkdir()
         shutil.copy2(ROOT/"utils"/"s11_etl_core.py",base/"utils"/"s11_etl_core.py")
+        shutil.copy2(ROOT/"utils"/"s11_etl_live.py",base/"utils"/"s11_etl_live.py")
+        shutil.copy2(ROOT/"utils"/"s11_live_dashboard.py",base/"utils"/"s11_live_dashboard.py")
+        shutil.copy2(ROOT/"utils"/"s10_asset_bridge.py",base/"utils"/"s10_asset_bridge.py")
         previo = Path.cwd()
         os.chdir(base)
         try:
@@ -73,6 +76,13 @@ def laboratorio_real():
             verificar=espacio["core"].verificar(espacio["RAIZ"])
             assert verificar["ok"] and verificar["filas"]==42,verificar
             assert espacio["ARCHIVO_FINAL"].exists()
+            assert espacio["RESULTADO_LIVE"]["verified"]["ok"]
+            assert espacio["BENCHMARK_S11"]["measurements"]["fingerprint"].nunique()==1
+            assert len(espacio["TABLA_THREADS"])==3
+            assert espacio["REINTENTO"]["manifest"]["retries"]==1
+            assert espacio["CANCELADO"]["status"]=="cancelled"
+            assert espacio["RECUPERADO"]["verified"]["ok"]
+            print("S11 LIVE E2E REAL: estados, threads 1/2/4, speedup, cancelación y huellas equivalentes")
             assert espacio["REPORTE_ESCALA"].is_file()
             import zipfile
             with zipfile.ZipFile(espacio["REPORTE_ESCALA"]) as report:
