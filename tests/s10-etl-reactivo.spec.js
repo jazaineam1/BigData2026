@@ -82,3 +82,41 @@ test('integridad negativa: ZIP manipulado es rechazado por CRC o SHA',async({pag
   await page.locator('#importZip').setInputFiles({name:'manipulado.zip',mimeType:'application/zip',buffer:bytes});
   await expect(page.locator('#verifyStatus')).toContainText('PAQUETE RECHAZADO');
 });
+
+test('contrato interoperable v2: el ZIP del navegador se abre en Python sin duplicar RAW',async({page})=>{
+  const fs=require('node:fs/promises');
+  const path=require('node:path');
+  const os=require('node:os');
+  const {execFileSync}=require('node:child_process');
+  await page.goto(route);
+  await page.locator('#demo').click();
+  await expect(page.locator('#catalogBody')).toContainText('imagen_demo.png');
+  const pending=page.waitForEvent('download');
+  await page.locator('#save').click();
+  const download=await pending;
+  const location=await download.path();
+  const root=await fs.mkdtemp(path.join(os.tmpdir(),'s10-bridge-'));
+  const script="import json,sys; from utils.s10_asset_bridge import importar_zip_etl_web; r=importar_zip_etl_web(sys.argv[1],sys.argv[2]); print(json.dumps({'cantidad':r['cantidad'],'sha_lote':r['sha_lote'],'carpeta':r['carpeta'],'schema':[x['schema_version'] for x in r['registros']],'ids':[x['asset_id'] for x in r['registros']]}))";
+  const run=()=>JSON.parse(execFileSync('python3',['-c',script,location,root],{cwd:process.cwd(),encoding:'utf8'}).trim());
+  try{
+    const first=run();
+    expect(first.cantidad).toBe(2);
+    expect(first.schema).toEqual(['s10-asset-v2','s10-asset-v2']);
+    const second=run();
+    expect(second.sha_lote).toBe(first.sha_lote);
+    expect(second.carpeta).toBe(first.carpeta); // la misma importación no duplica lotes
+    expect(await fs.readFile(path.join(first.carpeta,'catalogo_importado.jsonl'),'utf8')).toContain('"source_kind"');
+  }finally{await fs.rm(root,{recursive:true,force:true})}
+});
+
+test('el mismo archivo RAW se deduplica aunque se suba dos veces',async({page})=>{
+  await page.goto(route);
+  const url=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=10;c.height=10;c.getContext('2d').fillRect(0,0,4,4);return c.toDataURL('image/png')});
+  const image=Buffer.from(url.split(',')[1],'base64');
+  const file={name:'duplicada.png',mimeType:'image/png',buffer:image};
+  await page.locator('#files').setInputFiles(file);
+  await expect(page.locator('#catalogBody')).toContainText('duplicada.png');
+  await page.locator('#files').setInputFiles(file);
+  await expect(page.locator('#status')).toContainText('duplicado');
+  await expect(page.locator('#catalogBody tr')).toHaveCount(1);
+});
