@@ -1,16 +1,18 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111e"><title>MatchLab 4.0 · Escenarios y pronósticos del fútbol</title><meta name="description" content="MatchLab: simulador interactivo de la Liga BetPlay, escenarios, probabilidades y posiciones de todos los equipos. Datos verificados al 5 de noviembre de 2026."><meta name="description" content="Simulador de todos los escenarios 1X2, tablas compartidas, cotas matemáticas y Monte Carlo para cualquier equipo."><style>:root{--bg:#07111e;--panel:#0e2131;--panel2:#142b3c;--line:#294253;--text:#eaf5f6;--muted:#a2b7c2;--accent:#45dfb5;--blue:#8acaff;--yellow:#f8c77c;--red:#ff8295;--shade:#0b1b2a;color-scheme:dark}
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111e"><title>MatchLab 4.1 · Pronósticos completos y marcador verificado</title><meta name="description" content="Simulador de todos los escenarios 1X2, tablas compartidas, cotas matemáticas y Monte Carlo para cualquier equipo."><style>:root{--bg:#07111e;--panel:#0e2131;--panel2:#142b3c;--line:#294253;--text:#eaf5f6;--muted:#a2b7c2;--accent:#45dfb5;--blue:#8acaff;--yellow:#f8c77c;--red:#ff8295;--shade:#0b1b2a;color-scheme:dark}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--text);font:15px/1.48 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(ellipse 65% 30% at 93% -8%,#164c4d 0%,transparent 80%),var(--bg)}button,input,select{font:inherit}button,select,input[type=number],input[type=text]{color:var(--text)}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}a{color:var(--accent);text-underline-offset:3px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(29px,4vw,51px);line-height:1.1;letter-spacing:-1.3px;margin-bottom:12px}h2{font-size:23px;letter-spacing:-.4px;margin-bottom:8px}h3{font-size:17px;margin:0 0 8px}.wrap{max-width:1300px;padding:0 22px;margin:0 auto}.top{background:rgba(8,21,33,.96);position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line)}.top-row{min-height:74px;display:flex;align-items:center;gap:20px;justify-content:space-between}.brand{display:flex;align-items:center;font-weight:800;font-size:21px;letter-spacing:-.5px;white-space:nowrap}.ball{width:37px;height:37px;border-radius:12px;background:var(--accent);display:grid;place-items:center;margin-right:10px;color:#073028;font-size:21px}.brand span{color:var(--accent)}.version{font:600 11px system-ui;color:var(--muted);margin-left:8px}.nav{display:flex;gap:17px}.nav a{color:var(--muted);font-size:12px;text-decoration:none}.nav a:hover{color:var(--accent)}.pill{font-size:12px;border:1px solid var(--line);padding:6px 11px;border-radius:50px;color:var(--yellow);white-space:nowrap}.main{padding:28px 0 55px}.lead{display:grid;grid-template-columns:1fr 375px;gap:24px;align-items:center;margin-bottom:18px}.lead p{color:var(--muted);max-width:650px}.eyebrow{text-transform:uppercase;letter-spacing:2px;font-size:11px;color:var(--accent);font-weight:800;margin-bottom:10px}.card{border:1px solid var(--line);background:linear-gradient(147deg,rgba(22,49,65,.98),rgba(11,28,42,.97));border-radius:17px;padding:20px;min-width:0}.selector-card{display:grid;gap:12px}.selector-card label,.field label{display:block;color:var(--muted);font-weight:600;font-size:12px;margin-bottom:5px}select,input[type=number],input[type=text],input[type=search]{background:#0d1c2c;border:1px solid #3c566a;border-radius:9px;padding:10px 11px;max-width:100%;min-height:40px;width:100%}select{cursor:pointer}.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.btn{border:1px solid #466072;background:#203a4d;padding:9px 14px;border-radius:9px;font-weight:750;min-height:41px;font-size:13px}.btn.primary{background:var(--accent);border-color:var(--accent);color:#042f2b}.btn.alt{background:transparent}.btn:hover{filter:brightness(1.13)}.btn.small{padding:5px 10px;min-height:32px;font-size:12px}.btn:disabled{opacity:.55;cursor:default}.facts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:14px 0 23px}.fact{padding:15px 14px;border:1px solid var(--line);border-radius:13px;background:#102637}.fact label{display:block;color:var(--muted);font-size:11px;margin-bottom:3px;min-height:28px}.fact strong{font-size:clamp(19px,2.6vw,29px);letter-spacing:-.6px;display:block;line-height:1.3}.fact small{font-size:10px;color:var(--muted)}.green{color:var(--accent)}.yellow{color:var(--yellow)}.red{color:var(--red)}.blue{color:var(--blue)}.muted{color:var(--muted)}.hint{font-size:12px;color:var(--muted)}.notice{border-left:3px solid var(--yellow);background:#293027;padding:11px 14px;border-radius:9px;color:#edddba;font-size:13px;line-height:1.6}.notice.ok{border-color:var(--accent);background:#14332d;color:#caeee2}.two{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:16px;margin-bottom:18px}.section{margin-top:20px;scroll-margin-top:90px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.section-title h2{margin:0}.chart-row{display:grid;grid-template-columns:35px 1fr 52px;gap:8px;align-items:center;margin:6px 0}.bar{background:#274052;border-radius:8px;overflow:hidden;height:13px}.bar>div{height:100%;background:linear-gradient(90deg,#24ab98,#5ceac1);border-radius:8px}.chart-row .value{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;font-size:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.explain{border:1px solid #34515e;border-radius:12px;padding:14px;background:#152b35}.explain b{color:var(--accent)}.table-scroll{overflow-x:auto;border-radius:11px;border:1px solid var(--line)}table{width:100%;border-collapse:collapse;font-size:13px}th{color:var(--muted);background:#152a38;text-align:left;font-size:11px;font-weight:750;white-space:nowrap}td,th{border-bottom:1px solid #243948;padding:9px 10px}tr:last-child td{border-bottom:none}tbody tr:hover{background:#1c3746}tbody tr.selected{background:#163c3e}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}td.name{min-width:172px;font-weight:650}tr.cut td:first-child{border-left:3px solid var(--accent)}tr.notcut td:first-child{border-left:3px solid transparent}.chip{font-size:10px;border:1px solid #45657a;border-radius:999px;padding:3px 7px;display:inline-flex;color:var(--muted);gap:4px;align-items:center}.chip.ok{color:var(--accent);border-color:#37816f}.chip.warn{color:var(--yellow);border-color:#a37a3f}.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}.filters label{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}.fixture-list{display:grid;gap:8px}.fixture{display:grid;grid-template-columns:94px minmax(170px,1.2fr) minmax(115px,1fr) 170px;gap:10px;align-items:center;background:#102637;border:1px solid #304657;border-radius:12px;padding:12px}.fixture.sel{border-color:#398b84}.fixture .round{font-size:11px;color:var(--muted)}.fixture .teams{font-weight:670}.fixture .teams small{font-size:11px;color:var(--muted);display:block;font-weight:500}.fixture .prob{font-size:11px;color:var(--muted);white-space:nowrap}.fixture .probs{display:flex;gap:5px;align-items:center}.outcomes{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.outcomes button{padding:5px 0;border:1px solid #466070;border-radius:6px;background:#193345;font-size:11px;font-weight:750}.outcomes button.active{background:var(--accent);color:#06332c;border-color:var(--accent)}.outcomes button.clear{color:var(--muted);font-weight:500}.score-control{display:flex;gap:5px;align-items:center;margin-top:7px}.score-control input{width:45px;min-height:29px;padding:3px 4px;text-align:center;font-size:12px}.score-control span{color:var(--muted)}details.advanced{font-size:11px;grid-column:2/-1;color:var(--muted)}details summary{cursor:pointer;user-select:none}details .triplet{display:flex;gap:8px;margin-top:8px;max-width:360px}details .triplet label{width:100%;min-width:0}details .triplet input{padding:4px 6px;min-height:30px;font-size:12px}details .triplet button{align-self:end}.universe{display:grid;grid-template-columns:1fr 1fr;gap:12px}.counter{font-variant-numeric:tabular-nums;overflow-wrap:anywhere;font-size:23px;font-weight:800;color:var(--accent);letter-spacing:-.6px}.stat-row{display:flex;justify-content:space-between;border-bottom:1px solid #28404e;padding:7px 0;gap:10px}.stat-row:last-child{border-bottom:none}.footer{color:var(--muted);border-top:1px solid var(--line);padding:24px 0 45px;font-size:12px}.tiny{font-size:11px}.fileButton{position:relative;overflow:hidden}.fileButton input{position:absolute;inset:0;opacity:0;cursor:pointer}.statusline{margin-top:10px;font-size:12px;color:var(--muted)}.progress{height:6px;background:#274052;border-radius:5px;margin-top:8px;overflow:hidden}.progress>div{height:100%;width:0;background:var(--accent);transition:width .12s}.inline-field{display:flex;align-items:center;gap:10px}.inline-field select,.inline-field input{width:auto;min-width:100px}.hidden{display:none!important}.table-row-btn{background:transparent;border:0;padding:0;color:inherit;text-align:left;font-weight:inherit}.table-row-btn:hover{color:var(--accent)}.miniBox{padding:11px;background:#0c1b2b;border:1px solid #2b4153;border-radius:10px}.divider{height:1px;background:var(--line);margin:14px 0}.last-results{display:flex;gap:8px;flex-wrap:wrap}.last-results span{background:#172c3b;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--muted)}.code{font-family:ui-monospace,monospace;color:var(--blue)}@media(max-width:1100px){.fixture{grid-template-columns:75px minmax(155px,1fr) minmax(105px,.9fr) 152px}.facts{grid-template-columns:repeat(3,1fr)}}@media(max-width:800px){.wrap{padding:0 14px}.lead,.two,.universe{grid-template-columns:1fr}.top-row{min-height:65px}.top-row{flex-wrap:wrap;gap:5px}.nav{display:flex;order:3;flex:1 0 100%;justify-content:space-between;gap:10px;padding:4px 0 10px;overflow-x:auto}.nav a{font-size:11px;white-space:nowrap}.main{padding-top:20px}.lead{gap:12px}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.fact label{min-height:0}.fixture{grid-template-columns:1fr 155px;gap:8px}.fixture .round{grid-column:1/-1}.fixture .teams{grid-column:1;grid-row:2}.fixture .prob{grid-column:1;grid-row:3}.fixture .actions{grid-column:2;grid-row:2/4}details.advanced{grid-column:1/-1}.section-title{align-items:flex-start}.card{padding:15px}.top .pill{font-size:10px;padding:5px}.table-scroll{margin:0 -2px}}@media(max-width:430px){.brand{font-size:19px}.ball{width:33px;height:33px}.fixture{grid-template-columns:1fr}.fixture .round,.fixture .teams,.fixture .prob,.fixture .actions{grid-column:1;grid-row:auto}.outcomes{grid-template-columns:repeat(4,1fr)}.grid2{grid-template-columns:1fr}.top-row{gap:8px}.pill{white-space:normal;text-align:center}.inline-field{flex-wrap:wrap}h1{font-size:30px}}
+
+.live-surface{margin-top:12px;padding:12px;border:1px solid #385664;border-radius:12px;background:#0f2733;display:grid;gap:8px}.live-surface b{color:var(--accent)}.live-surface .hint{margin:0}.live-label{display:block;color:#ffcf7a;font-size:12px;font-weight:700;margin-top:5px}.live-error{color:#ffce88!important}.live-ok{color:#4defc1!important}#tabla .controls{gap:6px}#tabla .controls .btn{font-size:12px;padding:7px 10px}#table-status{max-width:850px}#feed-updated{font-size:11px}
 </style></head><body>
-<header class="top"><div class="wrap top-row"><div class="brand"><div class="ball" aria-hidden="true">⚽</div>Match<span>Lab</span><span class="version">4.0</span></div><nav class="nav" aria-label="Secciones"><a href="#panorama">Panorama</a><a href="#tabla">Tabla</a><a href="#escenarios">Escenarios</a><a href="#universo">3ᴺ rutas</a><a href="#modelo">Modelo y fuentes</a></nav><div class="pill" id="update-pill">● Corte: 5 nov 2026 · sin resultados en vivo</div></div></header>
+<header class="top"><div class="wrap top-row"><div class="brand"><div class="ball" aria-hidden="true">⚽</div>Match<span>Lab</span><span class="version">4.1</span></div><nav class="nav" aria-label="Secciones"><a href="#panorama">Panorama</a><a href="#tabla">Tabla</a><a href="#escenarios">Escenarios</a><a href="#universo">3ᴺ rutas</a><a href="#modelo">Modelo y fuentes</a></nav><div class="pill" id="update-pill">● Consultando marcador...</div></div></header>
 <main class="wrap main">
-<div class="lead"><div><div class="eyebrow">INTELIGENCIA DE ESCENARIOS FUTBOLÍSTICOS</div><h1>Tu equipo.<br><span class="green">Todos los caminos.</span></h1><p>Explora clasificaciones matemáticas y calendarios compatibles. Cambia cualquier partido y observa la tabla; después ejecuta un pronóstico probabilístico independiente o condicionado.</p><div class="last-results" id="recent-finals"></div></div><div class="card selector-card"><div class="field"><label for="league">Competición y temporada</label><select id="league"><option value="col">Colombia · Liga BetPlay II 2026</option><option value="demo">Demostración · liga sintética de 4 equipos</option></select></div><div class="field"><label for="team">Equipo a analizar</label><select id="team"></select></div><div class="controls"><label class="btn alt fileButton">Importar liga JSON<input id="import" type="file" accept=".json,application/json" aria-label="Importar fichero JSON"></label><button class="btn alt" id="export">Exportar escenario</button></div><div class="hint" id="competition-info">Instantánea: 5 de noviembre de 2026. Los datos no se refrescan solos.</div></div></div>
+<div class="lead"><div><div class="eyebrow">INTELIGENCIA DE ESCENARIOS FUTBOLÍSTICOS</div><h1>Tu equipo.<br><span class="green">Todos los caminos.</span></h1><p>Explora clasificaciones matemáticas y calendarios compatibles. Cambia cualquier partido y observa la tabla; después ejecuta un pronóstico probabilístico independiente o condicionado.</p><div class="last-results" id="recent-finals"></div></div><div class="card selector-card"><div class="field"><label for="league">Competición y temporada</label><select id="league"><option value="col">Colombia · Liga BetPlay II 2026</option><option value="demo">Demostración · liga sintética de 4 equipos</option></select></div><div class="field"><label for="team">Equipo a analizar</label><select id="team"></select></div><div class="controls"><label class="btn alt fileButton">Importar liga JSON<input id="import" type="file" accept=".json,application/json" aria-label="Importar fichero JSON"></label><button class="btn alt" id="export">Exportar escenario</button></div><div class="hint" id="competition-info">Corte de liga verificado al 5 de noviembre de 2026.</div><div class="live-surface"><b id="feed-label">Buscando marcadores actualizados...</b><p class="hint" id="feed-details">El modelo solo incorpora marcadores confirmados. Los partidos en directo se estiman de forma provisional.</p><button type="button" id="refresh-live" class="btn small">↻ Consultar ahora</button><span id="feed-updated" class="hint"></span></div></div></div>
 <div class="facts" id="panorama"><div class="fact"><label>Puesto actual</label><strong id="m-current">—</strong><small id="m-current-sub">Tabla vigente</small></div><div class="fact"><label>Puntos hoy / techo</label><strong id="m-points">—</strong><small id="m-points-sub">Puntos máximos posibles</small></div><div class="fact"><label>Mejor puesto matemático*</label><strong id="m-best">—</strong><small>Empates favorecen al club</small></div><div class="fact"><label>Peor puesto matemático*</label><strong id="m-worst">—</strong><small>Empates perjudican al club</small></div><div class="fact"><label>Zona objetivo / clasificación</label><strong id="m-status">—</strong><small id="m-status-sub">Evaluación por puntos</small></div><div class="fact"><label>Pronóstico de clasificación</label><strong id="m-chance">—</strong><small id="m-chance-sub">Ejecuta Monte Carlo</small></div></div>
 <section class="two section" id="model-summary"><div class="card"><div class="section-title"><h2>Distribución de posiciones</h2><span class="chip" id="sim-status">Sin simulación</span></div><div class="hint" id="sim-description">Ejecuta Monte Carlo para ver el pronóstico experimental del equipo seleccionado. La tabla de escenario NO fija el pronóstico libre.</div><div id="chart" style="margin:12px 0"></div><div class="grid2"><div class="miniBox"><div class="hint">Puntos finales esperados</div><b id="expected-points">—</b></div><div class="miniBox"><div class="hint">Rango de puestos observado</div><b id="observed-range">—</b></div></div></div><div class="card"><div class="section-title"><h2>¿Qué necesita tu equipo?</h2><span class="chip ok" id="reason-state">Análisis</span></div><div class="explain" id="reason"></div><div class="divider"></div><h3>Simular todos los equipos a la vez</h3><div class="controls" style="margin-bottom:9px"><div class="field" style="min-width:130px"><label for="samples">Muestras</label><select id="samples"><option value="2000">2.000</option><option value="10000" selected>10.000</option><option value="30000">30.000</option><option value="50000">50.000</option></select></div><div class="field" style="min-width:132px"><label for="seed">Semilla (opcional)</label><input id="seed" type="text" inputmode="numeric" placeholder="Aleatoria"></div></div><label class="inline-field hint"><input type="checkbox" id="condition"> Condicionar con resultados fijados del editor</label><button class="btn primary" id="run-sim" style="width:100%;margin-top:12px">▶ Simular temporadas</button><div class="statusline" id="progress-text" aria-live="polite">Libre = sin imponer el escenario de la tabla.</div><div class="progress"><div id="progress-bar"></div></div></div></section>
-<section class="section" id="tabla"><div class="section-title"><div><h2>Tabla de posiciones</h2><p class="hint" id="table-status">Corte oficial contrastado. Tabla parcial con resultados simulados al fijar partidos.</p></div><div class="controls"><button class="btn small" id="table-base">Ver tabla actual</button><button class="btn small primary" id="table-scenario">Ver tabla del escenario</button></div></div><div class="card" style="padding:12px"><div class="table-scroll"><table id="standings"><thead><tr><th class="num">#</th><th>Club</th><th class="num">PJ</th><th class="num">G</th><th class="num">E</th><th class="num">P</th><th class="num">GF</th><th class="num">GC</th><th class="num">DG</th><th class="num">Pts</th><th class="num">Máx.</th></tr></thead><tbody id="table-body"></tbody></table></div><div class="hint" style="margin-top:9px">* Tabla ordenada por puntos, diferencia de gol y goles a favor. Los desempates oficiales incluyen goles visitantes y criterios que esta instantánea no contiene; un empate residual necesita verificación reglamentaria.</div></div></section>
-<section class="section" id="escenarios"><div class="section-title"><div><h2>Laboratorio de escenarios</h2><p class="hint">Cada encuentro tiene un único resultado compartido. Fijar un partido cambia los puntos de ambos clubes.</p></div><span class="chip ok" id="picks-total">0 resultados fijados</span></div><div class="card"><div class="controls"><button class="btn small primary" id="clear-picks">Liberar todos</button><button class="btn small" data-preset="draw">Todos empatan</button><button class="btn small" data-preset="modal">Pronóstico modal</button><button class="btn small" data-preset="favorable">Ruta favorable*</button><button class="btn small" data-preset="adverse">Ruta adversa*</button><button class="btn small" data-preset="best">Certificado mejor*</button><button class="btn small" data-preset="worst">Certificado peor*</button></div><p class="hint" style="margin-top:11px" id="preset-description">* Los certificados usan posiciones por puntos con desempates supuestos; las rutas favorable/adversa son ilustrativas, no optimizaciones exactas adicionales.</p><div class="controls" style="margin-top:11px"><button class="btn small alt" id="certify-fixed" disabled title="Requiere backend Python, no disponible en GitHub Pages">Certificación en servidor: pendiente de conexión</button><span class="hint" id="certify-status">Las cotas iniciales ya están precalculadas; para recalcular con restricciones se requiere el backend.</span></div><div class="filters"><label><input type="checkbox" id="only-team"> Solo partidos de mi equipo</label><label><input type="checkbox" id="only-unfixed"> Solo sin fijar</label><div class="inline-field"><label for="filter-round">Jornada</label><select id="filter-round"><option value="all">Todas</option><option value="18">18</option><option value="19">19</option></select></div><div class="hint" id="preview-remaining"></div></div><div class="fixture-list" id="fixtures"></div></div></section>
+<section class="section" id="tabla"><div class="section-title"><div><h2>Tabla de posiciones</h2><p class="hint" id="table-status">Pronóstico completo de 19 partidos por equipo. Separa los partidos reales de los simulados.</p></div><div class="controls"><button class="btn small" data-table-mode="base">Real (17 PJ*)</button><button class="btn small" data-table-mode="scenario">Mi escenario parcial</button><button class="btn small primary" data-table-mode="modal">Pronóstico completo (19 PJ)</button><button class="btn small" data-table-mode="expected">Promedio Monte Carlo (19 PJ)</button></div></div><div class="card" style="padding:12px"><div class="table-scroll"><table id="standings"><thead><tr><th class="num">#</th><th>Club</th><th class="num">PJ</th><th class="num">G</th><th class="num">E</th><th class="num">P</th><th class="num">GF</th><th class="num">GC</th><th class="num">DG</th><th class="num">Pts</th><th class="num">Máx.</th></tr></thead><tbody id="table-body"></tbody></table></div><div class="hint" style="margin-top:9px">* Tabla ordenada por puntos, diferencia de gol y goles a favor. Los desempates oficiales incluyen goles visitantes y criterios que esta instantánea no contiene; un empate residual necesita verificación reglamentaria.</div></div></section>
+<section class="section" id="escenarios"><div class="section-title"><div><h2>Laboratorio de escenarios</h2><p class="hint">Cada encuentro tiene un único resultado compartido. Fijar un partido cambia los puntos de ambos clubes.</p></div><span class="chip ok" id="picks-total">0 resultados fijados</span></div><div class="card"><div class="controls"><button class="btn small primary" id="clear-picks">Liberar todos</button><button class="btn small" data-preset="draw">Todos empatan</button><button class="btn small" data-preset="modal">Pronóstico modal</button><button class="btn small" data-preset="favorable">Ruta favorable*</button><button class="btn small" data-preset="adverse">Ruta adversa*</button><button class="btn small" data-preset="best">Certificado mejor*</button><button class="btn small" data-preset="worst">Certificado peor*</button></div><p class="hint" style="margin-top:11px" id="preset-description">* Los certificados usan posiciones por puntos con desempates supuestos; las rutas favorable/adversa son ilustrativas, no optimizaciones exactas adicionales.</p><div class="controls" style="margin-top:11px"><button class="btn small alt" id="certify-fixed">Certificar escenarios fijados con servidor</button><span class="hint" id="certify-status">Las cotas iniciales ya están precalculadas; para recalcular con restricciones se requiere el backend.</span></div><div class="filters"><label><input type="checkbox" id="only-team"> Solo partidos de mi equipo</label><label><input type="checkbox" id="only-unfixed"> Solo sin fijar</label><div class="inline-field"><label for="filter-round">Jornada</label><select id="filter-round"><option value="all">Todas</option><option value="18">18</option><option value="19">19</option></select></div><div class="hint" id="preview-remaining"></div></div><div class="fixture-list" id="fixtures"></div></div></section>
 <section class="section" id="universo"><div class="section-title"><div><h2>Universo completo 3ᴺ</h2><p class="hint">Representación exacta de las rutas 1X2; no se están enumerando todas sus posiciones una por una.</p></div><span class="chip">Enteros BigInt</span></div><div class="universe"><div class="card"><div class="hint">Combinaciones totales (sin fijar)</div><div id="total-universe" class="counter">—</div><div class="divider"></div><div class="hint">Combinaciones compatibles con el editor</div><div id="compatible-universe" class="counter">—</div><p class="hint" id="universe-explanation"></p><div class="field"><label for="route-index">Identificador de ruta (de 0 a 3ᴺ−1)</label><input type="text" inputmode="numeric" id="route-index" value="0"></div><div class="controls" style="margin-top:10px"><button class="btn small" id="prev-route">◀ Anterior</button><button class="btn small primary" id="load-route">Cargar ruta</button><button class="btn small" id="next-route">Siguiente ▶</button><button class="btn small" id="random-route">Aleatoria</button></div><p class="hint" id="route-hint" aria-live="polite">Cada ruta determina un desenlace por encuentro, de forma reproducible.</p></div><div class="card"><div class="section-title"><h2>Probabilidad exacta de puntos</h2><span class="chip ok">Programación dinámica</span></div><p class="hint">Distribución de puntos del club seleccionado, usando las probabilidades por partido y suponiendo independencia. No equivale a la probabilidad exacta de cada puesto.</p><div id="points-distribution"></div><div class="hint" id="points-note"></div></div></div></section>
-<section class="section" id="modelo"><div class="section-title"><h2>Modelo, verificaciones y fuentes</h2></div><div class="two"><div class="card"><h3>Qué está calculando MatchLab</h3><div class="stat-row"><span>Resultados definitivos del 4 de noviembre</span><b id="audit-finals">—</b></div><div class="stat-row"><span>Encuentros pendientes únicos</span><b id="audit-fixtures">—</b></div><div class="stat-row"><span>Equipos con calendario completo</span><b id="audit-teams">—</b></div><div class="stat-row"><span>Balance GF / GC del corte</span><b id="audit-goals">—</b></div><div class="divider"></div><p class="hint">Las probabilidades iniciales proceden de un modelo Poisson suavizado con goles de la temporada y localía aproximada. <b>Es experimental; no tiene una calibración prospectiva demostrada en 2026.</b> Puedes editar las probabilidades de cada encuentro en «Ajustar P(1/X/2)».</p><p class="hint">«Probabilidad de liderar» significa terminar primero en la fase todos contra todos, no ganar la Liga ni los cuadrangulares.</p><div class="controls"><button id="reset-probs" class="btn small">Restaurar probabilidades</button><button id="demo-button" class="btn small">Probar liga sintética</button></div></div><div class="card"><h3>Fuentes y actualización</h3><p class="hint" id="data-meta"></p><div id="source-links"></div><div class="divider"></div><p class="notice">No hay conexión automática a un proveedor en vivo. Para nuevas fechas, usa un archivo JSON verificado o conecta el backend con un servicio licenciado. Nunca presentaremos un resultado en directo como «finalizado» sin confirmación.</p></div></div></section>
-</main><footer class="footer"><div class="wrap">MatchLab 4.0 · Sistema general de escenarios. Separación explícita entre <b>certificados por puntos</b>, <b>escenarios editables</b> y <b>probabilidades estimadas</b>. No es un producto de apuestas ni ofrece recomendaciones de apuestas.</div></footer>
+<section class="section" id="modelo"><div class="section-title"><h2>Modelo, verificaciones y fuentes</h2></div><div class="two"><div class="card"><h3>Qué está calculando MatchLab</h3><div class="stat-row"><span>Resultados definitivos del 4 de noviembre</span><b id="audit-finals">—</b></div><div class="stat-row"><span>Encuentros pendientes únicos</span><b id="audit-fixtures">—</b></div><div class="stat-row"><span>Equipos con calendario completo</span><b id="audit-teams">—</b></div><div class="stat-row"><span>Balance GF / GC del corte</span><b id="audit-goals">—</b></div><div class="divider"></div><p class="hint">Las probabilidades iniciales proceden de un modelo Poisson suavizado con goles de la temporada y localía aproximada. <b>Es experimental; no tiene una calibración prospectiva demostrada en 2026.</b> Puedes editar las probabilidades de cada encuentro en «Ajustar P(1/X/2)».</p><p class="hint">«Probabilidad de liderar» significa terminar primero en la fase todos contra todos, no ganar la Liga ni los cuadrangulares.</p><div class="controls"><button id="reset-probs" class="btn small">Restaurar probabilidades</button><button id="demo-button" class="btn small">Probar liga sintética</button></div></div><div class="card"><h3>Fuentes y actualización</h3><p class="hint" id="data-meta"></p><div id="source-links"></div><div class="divider"></div><p class="notice">Consulta de la fuente cada 60 segundos cuando el navegador y CORS lo permiten; respaldo por GitHub Actions durante jornadas programadas. No equivale a una transmisión certificada en tiempo real. La fuente puede atrasarse: ante discrepancias, se muestra una advertencia y se conserva el último marcador verificado. Nunca se registra un partido en curso como finalizado.</p></div></div></section>
+</main><footer class="footer"><div class="wrap">MatchLab 4.1 · Sistema general de escenarios. <a href="https://sportscore.com/" rel="dofollow" title="Sports data by SportScore">Powered by SportScore</a>. Separación explícita entre <b>certificados por puntos</b>, <b>escenarios editables</b> y <b>probabilidades estimadas</b>. No es un producto de apuestas ni ofrece recomendaciones de apuestas.</div></footer>
 <script>window.MATCHLAB_API_AUTO=false;window.MATCHLAB_INITIAL_DATA={
   "meta": {
     "id": "col-2026-ii",
@@ -1481,7 +1483,10 @@ const pct=x=>Number.isFinite(x)?new Intl.NumberFormat('es-CO',{style:'percent',m
 const h=(str)=>String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const clone=x=>JSON.parse(JSON.stringify(x));
 const DEMO={meta:{id:'demo',name:'Liga demostrativa',country:'Sintética',season:'Ejemplo',asOf:'—',timezone:'America/Bogota',topN:2,gamesPerTeam:3,status:'DATOS SINTÉTICOS'},teams:[{id:'A',name:'Aurora',pts:0,pj:0,w:0,d:0,l:0,gf:0,ga:0},{id:'B',name:'Brisa',pts:0,pj:0,w:0,d:0,l:0,gf:0,ga:0},{id:'C',name:'Cóndor',pts:0,pj:0,w:0,d:0,l:0,gf:0,ga:0},{id:'D',name:'Delta',pts:0,pj:0,w:0,d:0,l:0,gf:0,ga:0}],fixtures:[{id:'1-A-B',round:1,home:'A',away:'B'},{id:'1-C-D',round:1,home:'C',away:'D'},{id:'2-A-C',round:2,home:'A',away:'C'},{id:'2-B-D',round:2,home:'B',away:'D'},{id:'3-A-D',round:3,home:'A',away:'D'},{id:'3-B-C',round:3,home:'B',away:'C'}],recentFinals:[],sources:[]};
-let data=clone(window.MATCHLAB_INITIAL_DATA),team='DIM',picks=[],probs=[],goalGrids=[],modelProbs=[],sim=null,tableMode='scenario',busy=false,lastRoute=0n;
+let data=clone(window.MATCHLAB_INITIAL_DATA),team='DIM',picks=[],probs=[],goalGrids=[],modelProbs=[],goalLambdas=[],sim=null,tableMode='modal',busy=false,lastRoute=0n;
+let liveOverlay=new Map(),feedState={status:'starting',lastCheck:null,message:'Todavía no se ha consultado el proveedor',source:'SportScore',updatedAt:null};
+const SNAPSHOT=clone(window.MATCHLAB_INITIAL_DATA);
+
 let teamIndex=new Map();
 function validate(d){
  if(!d||!d.meta||!Array.isArray(d.teams)||!Array.isArray(d.fixtures))throw Error('JSON: se esperan meta, teams, fixtures.');
@@ -1499,7 +1504,7 @@ function validate(d){
  return true;
 }
 function initialize(d,initialTeam){validate(d);data=clone(d);teamIndex=new Map(data.teams.map((t,i)=>[t.id,i]));team=(initialTeam&&teamIndex.has(initialTeam))?initialTeam:data.teams[0].id;
- picks=Array(data.fixtures.length).fill(null);probs=[];modelProbs=[];goalGrids=[];data.fixtures.forEach(f=>{const m=forecastMatch(f);modelProbs.push(m.p);probs.push(m.p.slice());goalGrids.push(m.grids)});sim=null;tableMode='scenario';lastRoute=0n;
+ picks=Array(data.fixtures.length).fill(null);probs=[];modelProbs=[];goalGrids=[];goalLambdas=[];data.fixtures.forEach(f=>{const m=forecastMatch(f);modelProbs.push(m.p);probs.push(m.p.slice());goalGrids.push(m.grids);goalLambdas.push([m.lh,m.la])});sim=null;tableMode='modal';lastRoute=0n;
  renderAll(true);
 }
 function factorialPMF(lambda,max=10){let a=[Math.exp(-lambda)];for(let k=1;k<=max;k++)a.push(a[k-1]*lambda/k);return a}
@@ -1511,7 +1516,7 @@ function forecastMatch(f){const a=data.teams[teamIndex.get(f.home)],b=data.teams
  for(let x=0;x<ph.length;x++)for(let y=0;y<pa.length;y++){
   const o=x>y?0:x===y?1:2,wt=ph[x]*pa[y];grids[o].push([x,y,wt]);w[o]+=wt;
  }
- const sum=w.reduce((a,b)=>a+b,0);return {p:w.map(x=>x/sum),grids};
+ const sum=w.reduce((a,b)=>a+b,0);return {p:w.map(x=>x/sum),grids,lh,la};
 }
 function scoreFromOutcome(o){return o===0?[1,0]:o===1?[0,0]:[0,1]}
 function own(tid){return data.teams.find(t=>t.id===tid)}
@@ -1541,7 +1546,7 @@ function probabilities(i){return probs[i]}
 function renderSelectors(){let select=$('team');const previous=select.value;select.innerHTML=data.teams.slice().sort((a,b)=>a.name.localeCompare(b.name,'es')).map(t=>`<option value="${h(t.id)}">${h(t.name)}</option>`).join('');select.value=team;
  $('competition-info').textContent=`${data.meta.name} · ${data.meta.season} · Corte: ${data.meta.asOf||'no informado'} · ${data.meta.status||'datos importados'}.`;
  $('recent-finals').innerHTML=(data.recentFinals||[]).map(f=>`<span>Final: ${h(own(f.home)?.name||f.home)} ${f.homeGoals}–${f.awayGoals} ${h(own(f.away)?.name||f.away)}</span>`).join('')||'<span>Sin resultados recientes en esta muestra.</span>';
- $('update-pill').textContent=data.meta.status==='DATOS SINTÉTICOS'?'⚠ Liga de prueba':'● Datos de corte · no es en vivo';
+ $('update-pill').textContent=data.meta.status==='DATOS SINTÉTICOS'?'⚠ Liga de prueba':'● Corte de liga + consulta de marcadores';
  $('filter-round').innerHTML='<option value="all">Todas</option>'+[...new Set(data.fixtures.map(f=>f.round))].sort().map(r=>`<option value="${h(r)}">${h(r)}</option>`).join('');
 }
 function renderFacts(){const t=own(team),current=baseRank().findIndex(x=>x.id===team)+1,b=baseBounds(team),remaining=data.fixtures.filter(f=>f.home===team||f.away===team).length,st=hardStatus(team);
@@ -1561,18 +1566,54 @@ function renderSimForTeam(){const el=$('chart');if(!sim){el.innerHTML='<p class=
  const j=teamIndex.get(team),dist=sim.dist[j],n=sim.n;el.innerHTML=dist.map((v,i)=>`<div class="chart-row"><span>${i+1}º</span><div class="bar"><div style="width:${(v/n*100).toFixed(4)}%"></div></div><span class="value">${pct(v/n)}</span></div>`).join('');
  $('expected-points').textContent=(sim.pt[j]/n).toFixed(2);$('observed-range').textContent=(dist.findIndex(x=>x>0)+1)+'º–'+(dist.length-dist.slice().reverse().findIndex(x=>x>0))+'º';
  $('sim-status').textContent=(sim.conditional?'Condicionado':'Libre')+' · '+fmt(n)+' escenarios';
- $('sim-description').textContent=`Entre ${fmt(n)} muestras, ${h(own(team).name)} obtuvo top ${data.meta.topN} en ${pct(sim.top[j]/n)} y lideró la fase en ${pct(sim.first[j]/n)}. Semilla ${sim.seed}. No es la probabilidad de ganar el campeonato.`;
+ const pTop=sim.top[j]/n, margin=1.96*Math.sqrt(pTop*(1-pTop)/n);
+ $('sim-description').textContent=`Entre ${fmt(n)} muestras, ${h(own(team).name)} obtuvo top ${data.meta.topN} en ${pct(pTop)} (incertidumbre de muestreo aprox. ±${pct(margin)} al 95 %, sin incluir el error del modelo), y lideró la fase en ${pct(sim.first[j]/n)}. Semilla ${sim.seed}. No es la probabilidad de ganar el campeonato.`;
 }
-function renderTable(){const arr=standings(tableMode==='scenario'?picks:[]);const k=picks.filter(Boolean).length;
- $('table-status').textContent=tableMode==='scenario'?(k?`Tabla parcial con ${k} de ${data.fixtures.length} resultados fijados, el resto sin jugar.`:'Tabla vigente, sin partidos hipotéticos.'):'Tabla vigente sin los resultados simulados.';
- $('table-body').innerHTML=arr.map((t,i)=>`<tr class="${i<data.meta.topN?'cut':'notcut'} ${t.id===team?'selected':''}"><td class="num">${i+1}</td><td class="name"><button class="table-row-btn" data-team="${h(t.id)}">${h(t.name)}</button></td><td class="num">${t.pj}</td><td class="num">${t.w}</td><td class="num">${t.d}</td><td class="num">${t.l}</td><td class="num">${t.gf}</td><td class="num">${t.ga}</td><td class="num">${t.dg>0?'+':''}${t.dg}</td><td class="num"><b>${t.pts}</b></td><td class="num">${t.max}</td></tr>`).join('');
+function modalPick(i){
+ const live=liveOverlay.get(data.fixtures[i].id);
+ if(live){const [h,a]=live.score,minute=live.minute??45,frac=Math.max(0,Math.min(1,(90-minute)/90)),[lh,la]=goalLambdas[i];
+  const hm=Math.max(0,Math.floor(lh*frac)),am=Math.max(0,Math.floor(la*frac)),score=[h+hm,a+am];
+  return {o:score[0]>score[1]?0:score[0]===score[1]?1:2,score};
+ }
+ const ps=probs[i],o=ps.indexOf(Math.max(...ps));
+ const grids=goalGrids[i][o];const c=grids.reduce((best,x)=>x[2]>best[2]?x:best,grids[0]);
+ return {o,score:[c[0],c[1]]};
+}
+function modalTable(){return standings(data.fixtures.map((_,i)=>modalPick(i)))}
+function expectedTable(){
+ if(!sim)return modalTable();
+ const n=sim.n,rows=data.teams.map((t,j)=>({...t,
+   pj:data.meta.gamesPerTeam??t.pj+data.fixtures.filter(f=>f.home===t.id||f.away===t.id).length,
+   w:sim.w[j]/n,d:sim.d[j]/n,l:sim.l[j]/n,
+   gf:sim.gf[j]/n,ga:sim.ga[j]/n,pts:sim.pt[j]/n,
+   max:null
+ }));
+ rows.forEach(t=>t.dg=t.gf-t.ga);
+ rows.sort((a,b)=>b.pts-a.pts||b.dg-a.dg||b.gf-a.gf||a.name.localeCompare(b.name,'es'));
+ return rows;
+}
+function renderTable(){
+ let arr,desc;
+ const k=picks.filter(Boolean).length;
+ if(tableMode==='base'){arr=standings([]);desc=`Tabla de resultados finales incorporados: entre ${Math.min(...arr.map(t=>t.pj))} y ${Math.max(...arr.map(t=>t.pj))} PJ por equipo; no incluye los encuentros que siguen en juego.`;}
+ else if(tableMode==='scenario'){arr=standings(picks);desc=k?`Escenario parcial: ${k} encuentros fijados; los demás todavía NO se han simulado en esta tabla.`:'Sin partidos fijados, el escenario equivale a la tabla actual. Elige Pronóstico 19 PJ para proyectar todos los encuentros.';}
+ else if(tableMode==='expected'){arr=expectedTable();desc=sim?`Tabla de expectativas tras ${fmt(sim.n)} temporadas Monte Carlo conjuntas. Todos completan ${data.meta.gamesPerTeam} PJ; puntos y goles son promedios, no una clasificación realizable única.`:'Todavía no se ha ejecutado Monte Carlo: mostrando la proyección modal completa provisional.';}
+ else{arr=modalTable();desc=`Tabla PRONOSTICADA completa: todos los clubes terminan con ${data.meta.gamesPerTeam} PJ. Cada partido tiene un marcador modal compatible; es una ruta coherente, no una certeza.`;}
+ $('table-status').textContent=desc;
+ const basePlayed=Math.min(...data.teams.map(t=>t.pj));
+ const baseModeButton=document.querySelector('[data-table-mode="base"]');
+ if(baseModeButton)baseModeButton.textContent='Tabla real ('+basePlayed+'+ PJ)';
+ for(const button of document.querySelectorAll('[data-table-mode="modal"],[data-table-mode="expected"]'))button.textContent=button.dataset.tableMode==='modal'?'Pronóstico completo ('+data.meta.gamesPerTeam+' PJ)':'Promedio Monte Carlo ('+data.meta.gamesPerTeam+' PJ)';
+ document.querySelectorAll('[data-table-mode]').forEach(b=>{const on=b.dataset.tableMode===tableMode;b.classList.toggle('primary',on);b.setAttribute('aria-pressed',String(on))});
+ const num=(v)=>Number.isInteger(v)?String(v):Number(v).toFixed(1);
+ $('table-body').innerHTML=arr.map((t,i)=>`<tr class="${i<data.meta.topN?'cut':'notcut'} ${t.id===team?'selected':''}"><td class="num">${i+1}</td><td class="name"><button class="table-row-btn" data-team="${h(t.id)}">${h(t.name)}</button></td><td class="num">${num(t.pj)}</td><td class="num">${num(t.w)}</td><td class="num">${num(t.d)}</td><td class="num">${num(t.l)}</td><td class="num">${num(t.gf)}</td><td class="num">${num(t.ga)}</td><td class="num">${t.dg>0?'+':''}${num(t.dg)}</td><td class="num"><b>${num(t.pts)}</b></td><td class="num">${t.max==null?'—':num(t.max)}</td></tr>`).join('');
 }
 function renderFixtures(){const onlyTeam=$('only-team').checked,onlyUnfixed=$('only-unfixed').checked,rd=$('filter-round').value;let count=0;
  $('fixtures').innerHTML=data.fixtures.map((f,i)=>{
   if((onlyTeam&&!(f.home===team||f.away===team))||(onlyUnfixed&&picks[i])||(rd!=='all'&&String(f.round)!==rd))return '';
   count++;const p=picks[i],prob=probs[i],fixed=p!==null;
-  const [hg,ag]=p?.score??['',''];const home=own(f.home).name,away=own(f.away).name;
-  return `<div class="fixture ${fixed?'sel':''}" data-fixture="${i}"><div class="round">Jornada ${h(f.round)}<br>${h(f.date||'Por confirmar')} ${h(f.time||'')}</div><div class="teams">${h(home)}<small>vs. ${h(away)}</small></div><div class="prob"><div class="probs"><span>1 ${pct(prob[0])}</span><span>X ${pct(prob[1])}</span><span>2 ${pct(prob[2])}</span></div><span>${p?.score?'Marcador exacto fijado':fixed?'Resultado 1X2 fijado':'Modelo Poisson · no verificado'}</span></div><div class="actions"><div class="outcomes"><button data-i="${i}" data-o="0" class="${p?.o===0?'active':''}">1</button><button data-i="${i}" data-o="1" class="${p?.o===1?'active':''}">X</button><button data-i="${i}" data-o="2" class="${p?.o===2?'active':''}">2</button><button data-i="${i}" data-o="clear" class="clear">↺</button></div><div class="score-control"><input type="number" min="0" max="15" data-score-i="${i}" data-side="h" value="${hg}" aria-label="Goles de ${h(home)}" placeholder="G"><span>–</span><input type="number" min="0" max="15" data-score-i="${i}" data-side="a" value="${ag}" aria-label="Goles de ${h(away)}" placeholder="G"><span class="hint">exacto</span></div></div><details class="advanced"><summary>Ajustar P(1/X/2) · ${h(f.note||'modelo estimado')}</summary><div class="triplet"><label>Local %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="0" value="${(prob[0]*100).toFixed(1)}"></label><label>Empate %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="1" value="${(prob[1]*100).toFixed(1)}"></label><label>Visita %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="2" value="${(prob[2]*100).toFixed(1)}"></label><button class="btn small" data-save-prob="${i}">Aplicar</button></div></details></div>`;
+  const [hg,ag]=p?.score??['',''];const home=own(f.home).name,away=own(f.away).name;const live=liveOverlay.get(f.id);const liveInfo=live?`<span class="live-label">● EN JUEGO ${live.score[0]}–${live.score[1]} (${live.minute==null?'minuto no disponible':live.minute+' min'})</span>`:'';
+  return `<div class="fixture ${fixed?'sel':''}" data-fixture="${i}"><div class="round">Jornada ${h(f.round)}<br>${h(f.date||'Por confirmar')} ${h(f.time||'')}</div><div class="teams">${h(home)}<small>vs. ${h(away)}</small>${liveInfo}</div><div class="prob"><div class="probs"><span>1 ${pct(prob[0])}</span><span>X ${pct(prob[1])}</span><span>2 ${pct(prob[2])}</span></div><span>${p?.score?'Marcador exacto fijado':fixed?'Resultado 1X2 fijado':'Modelo Poisson · no verificado'}</span></div><div class="actions"><div class="outcomes"><button data-i="${i}" data-o="0" class="${p?.o===0?'active':''}">1</button><button data-i="${i}" data-o="1" class="${p?.o===1?'active':''}">X</button><button data-i="${i}" data-o="2" class="${p?.o===2?'active':''}">2</button><button data-i="${i}" data-o="clear" class="clear">↺</button></div><div class="score-control"><input type="number" min="0" max="15" data-score-i="${i}" data-side="h" value="${hg}" aria-label="Goles de ${h(home)}" placeholder="G"><span>–</span><input type="number" min="0" max="15" data-score-i="${i}" data-side="a" value="${ag}" aria-label="Goles de ${h(away)}" placeholder="G"><span class="hint">exacto</span></div></div><details class="advanced"><summary>Ajustar P(1/X/2) · ${h(f.note||'modelo estimado')}</summary><div class="triplet"><label>Local %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="0" value="${(prob[0]*100).toFixed(1)}"></label><label>Empate %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="1" value="${(prob[1]*100).toFixed(1)}"></label><label>Visita %<input type="number" min="0" max="100" step="0.1" data-pr="${i}" data-k="2" value="${(prob[2]*100).toFixed(1)}"></label><button class="btn small" data-save-prob="${i}">Aplicar</button></div></details></div>`;
  }).join('')||'<p class="hint">Ningún encuentro cumple el filtro.</p>';
  $('preview-remaining').textContent=`${count} visibles de ${data.fixtures.length} pendientes.`;
 }
@@ -1598,7 +1639,7 @@ function renderAudit(){const n=data.fixtures.length,counts=new Map(data.teams.ma
  const good=data.teams.filter(t=>!data.meta.gamesPerTeam||t.pj+counts.get(t.id)===data.meta.gamesPerTeam).length;
  const gf=data.teams.reduce((s,t)=>s+t.gf,0),ga=data.teams.reduce((s,t)=>s+t.ga,0);
  $('audit-finals').textContent=String(data.recentFinals?.length||0);$('audit-fixtures').textContent=n; $('audit-teams').textContent=good+'/'+data.teams.length;$('audit-goals').textContent=gf+' / '+ga;
- $('data-meta').textContent=`${data.meta.name} ${data.meta.season}. Corte declarado: ${data.meta.asOf}. ${data.meta.sourceNote||'Requiere verificar procedencia de datos importados.'}`;
+ $('data-meta').textContent=`${data.meta.name} ${data.meta.season}. Corte declarado: ${data.meta.asOf}. ${data.meta.sourceNote||'Requiere verificar procedencia de datos importados.'}`;renderFeedState();
  $('source-links').innerHTML=(data.sources||[]).map(x=>`<p style="margin:6px 0"><a href="${h(x.url)}" target="_blank" rel="noreferrer">${h(x.label)}</a></p>`).join('')||'<span class="hint">Liga sintética o importada sin fuentes declaradas.</span>';
 }
 function renderAll(resetFilter=false){if(resetFilter){renderSelectors();$('only-team').checked=window.matchMedia('(max-width:800px)').matches;$('only-unfixed').checked=false;$('condition').checked=false;$('filter-round').value='all'}else{$('team').value=team}
@@ -1622,37 +1663,44 @@ function loadRoute(v){const total=3n**BigInt(data.fixtures.length);if(v<0n||v>=t
 function uniformRandomIndex(max){const bits=max.toString(2).length,bytes=Math.ceil(bits/8);while(true){const arr=new Uint8Array(bytes);if(globalThis.crypto?.getRandomValues)crypto.getRandomValues(arr);else arr.forEach((_,i)=>{arr[i]=Math.floor(Math.random()*256)});let v=0n;for(const b of arr)v=v*256n+BigInt(b);if(v<max)return v}}
 function rng(seed){let x=(seed>>>0)||0x6d2b79f5;return ()=>{x+=0x6d2b79f5;let t=x;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296}}
 function sampleScore(i,o,rnd){const cells=goalGrids[i][o],weight=cells.reduce((s,v)=>s+v[2],0);let u=rnd()*weight;for(const c of cells){u-=c[2];if(u<=0)return [c[0],c[1]]}const c=cells.at(-1);return [c[0],c[1]]}
+function poissonSample(lambda,rnd){const cutoff=Math.exp(-Math.min(12,lambda));let p=1,k=0;do{k++;p*=rnd()}while(p>cutoff&&k<50);return k-1}
 function clearSimulation(){sim=null;renderFacts();$('progress-text').textContent='Parámetros modificados. Ejecuta nuevamente la simulación.';$('progress-bar').style.width='0'}
-async function runSimulation(){if(busy)return;const n=Number($('samples').value),conditioned=$('condition').checked;let seedText=$('seed').value.trim(),seed;
+async function runSimulation(nOverride=null){if(busy)return;const n=Number.isInteger(nOverride)?nOverride:Number($('samples').value),conditioned=$('condition').checked;let seedText=$('seed').value.trim(),seed;
  if(seedText){if(!/^\d{1,10}$/.test(seedText)){alert('Semilla: escribe un entero positivo de hasta 10 dígitos.');return}seed=Number(seedText)>>>0}else{seed=Math.floor(Math.random()*4294967296)>>>0}
- let rnd=rng(seed),N=data.teams.length,F=data.fixtures.length,dist=Array.from({length:N},()=>Array(N).fill(0)),top=Array(N).fill(0),first=Array(N).fill(0),pt=Array(N).fill(0),base=data.teams;busy=true;$('run-sim').disabled=true;$('run-sim').textContent='Calculando...';$('progress-bar').style.width='0';
+ let rnd=rng(seed),N=data.teams.length,F=data.fixtures.length,dist=Array.from({length:N},()=>Array(N).fill(0)),top=Array(N).fill(0),first=Array(N).fill(0),pt=Array(N).fill(0),gf=Array(N).fill(0),ga=Array(N).fill(0),w=Array(N).fill(0),d=Array(N).fill(0),l=Array(N).fill(0),base=data.teams;busy=true;$('run-sim').disabled=true;$('run-sim').textContent='Calculando...';$('progress-bar').style.width='0';
  const idx=teamIndex;
  for(let iteration=0;iteration<n;iteration++){
-  const standingsRun=base.map(t=>({id:t.id,name:t.name,pts:t.pts,gf:t.gf,ga:t.ga}));
+  const standingsRun=base.map(t=>({id:t.id,name:t.name,pts:t.pts,gf:t.gf,ga:t.ga,w:t.w,d:t.d,l:t.l}));
   for(let fi=0;fi<F;fi++){
    const f=data.fixtures[fi],preset=conditioned?picks[fi]:null,p=probs[fi];
-   let o;if(preset)o=preset.o;else{let r=rnd();o=r<p[0]?0:r<p[0]+p[1]?1:2}
-   const [hg,ag]=preset?.score||sampleScore(fi,o,rnd);
+   let score;
+   if(preset?.score)score=preset.score;
+   else if(preset)score=sampleScore(fi,preset.o,rnd);
+   else if(liveOverlay.has(f.id)){
+      const live=liveOverlay.get(f.id),[lh,la]=goalLambdas[fi],remaining=Math.max(0,Math.min(1,(90-(live.minute??45))/90));
+      score=[live.score[0]+poissonSample(lh*remaining,rnd),live.score[1]+poissonSample(la*remaining,rnd)];
+   }else{const r=rnd(),o=r<p[0]?0:r<p[0]+p[1]?1:2;score=sampleScore(fi,o,rnd)}
+   const [hg,ag]=score;
    let a=standingsRun[idx.get(f.home)],b=standingsRun[idx.get(f.away)];a.gf+=hg;a.ga+=ag;b.gf+=ag;b.ga+=hg;
-   if(hg>ag)a.pts+=3;else if(hg<ag)b.pts+=3;else{a.pts++;b.pts++}
+   if(hg>ag){a.pts+=3;a.w++;b.l++}else if(hg<ag){b.pts+=3;b.w++;a.l++}else{a.pts++;b.pts++;a.d++;b.d++}
   }
   standingsRun.sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf||a.name.localeCompare(b.name,'es'));
-  for(let pos=0;pos<N;pos++){let t=standingsRun[pos],j=idx.get(t.id);dist[j][pos]++;pt[j]+=t.pts;if(pos<data.meta.topN)top[j]++;if(pos===0)first[j]++}
+  for(let pos=0;pos<N;pos++){let t=standingsRun[pos],j=idx.get(t.id);dist[j][pos]++;pt[j]+=t.pts;gf[j]+=t.gf;ga[j]+=t.ga;w[j]+=t.w;d[j]+=t.d;l[j]+=t.l;if(pos<data.meta.topN)top[j]++;if(pos===0)first[j]++}
   if((iteration+1)%250===0){$('progress-text').textContent=`Procesadas ${fmt(iteration+1)} de ${fmt(n)} temporadas (${conditioned?'condicionadas':'libres'}).`;$('progress-bar').style.width=((iteration+1)/n*100).toFixed(1)+'%';await new Promise(r=>setTimeout(r,0))}
  }
- sim={n,seed,conditional:conditioned,dist,top,first,pt};busy=false;$('run-sim').disabled=false;$('run-sim').textContent='▶ Repetir simulación';$('progress-bar').style.width='100%';
- $('progress-text').textContent=`${fmt(n)} temporadas conjuntas. ${conditioned?'Se respetaron solo tus resultados fijados.':'No se impusieron resultados del editor.'} Semilla ${seed}.`;
- renderFacts();
+ sim={n,seed,conditional:conditioned,liveCount:liveOverlay.size,dist,top,first,pt,gf,ga,w,d,l};busy=false;$('run-sim').disabled=false;$('run-sim').textContent='▶ Repetir simulación';$('progress-bar').style.width='100%';
+ $('progress-text').textContent=`${fmt(n)} temporadas conjuntas, todos los ${F} encuentros pendientes, ${liveOverlay.size} en curso. ${conditioned?'Se respetaron tus resultados fijados.':'Sin imponer resultados del editor.'} Semilla ${seed}.`;
+ renderFacts();renderTable();
 }
-function normalizeManual(i,values){if(values.some(v=>!Number.isFinite(v)||v<0||v>100))throw Error('Probabilidades deben estar entre 0 y 100.');const total=values.reduce((s,v)=>s+v,0);if(total<1)throw Error('La suma de probabilidades debe ser positiva.');probs[i]=values.map(v=>v/total);clearSimulation();renderFixtures();renderUniverse()}
+function normalizeManual(i,values){if(values.some(v=>!Number.isFinite(v)||v<0||v>100))throw Error('Probabilidades deben estar entre 0 y 100.');const total=values.reduce((s,v)=>s+v,0);if(total<1)throw Error('La suma de probabilidades debe ser positiva.');probs[i]=values.map(v=>v/total);clearSimulation();renderFixtures();renderUniverse();renderTable()}
 function saveExport(){const payload={meta:data.meta,selectedTeam:team,model:'poisson-experimental',fixtures:data.fixtures.map((f,i)=>({...f,selectedResult:picks[i],probabilities:probs[i]})),exportedAt:new Date().toISOString()};let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});let url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='matchlab-escenario-'+data.meta.season+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
-function switchLeague(v){if(v==='demo')initialize(DEMO,'A');else initialize(window.MATCHLAB_INITIAL_DATA,'DIM')}
+function switchLeague(v){liveOverlay=new Map();if(v==='demo')initialize(DEMO,'A');else initialize(SNAPSHOT,'DIM');renderFeedState()}
 function attachEvents(){
  $('league').addEventListener('change',e=>switchLeague(e.target.value));
  $('team').addEventListener('change',e=>{team=e.target.value;renderAll();});
  $('condition').addEventListener('change',()=>{clearSimulation();renderUniverse()});
  $('run-sim').addEventListener('click',runSimulation);
- $('table-base').addEventListener('click',()=>{tableMode='base';renderTable()});$('table-scenario').addEventListener('click',()=>{tableMode='scenario';renderTable()});
+ document.querySelectorAll('[data-table-mode]').forEach(b=>b.addEventListener('click',()=>{tableMode=b.dataset.tableMode;renderTable()}));
  $('only-team').addEventListener('change',renderFixtures);$('only-unfixed').addEventListener('change',renderFixtures);$('filter-round').addEventListener('change',renderFixtures);
  $('clear-picks').addEventListener('click',()=>setPreset('clear'));
  document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>setPreset(b.dataset.preset)));
@@ -1683,7 +1731,151 @@ function attachEvents(){
  $('export').addEventListener('click',saveExport);
  $('import').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>1e6)throw Error('El archivo supera 1 MB');const json=JSON.parse(await file.text());validate(json);initialize(json,json.teams[0].id);$('league').innerHTML+='<option value="imported">Liga importada · '+h(json.meta.name||'Sin nombre')+'</option>';$('league').value='imported';$('competition-info').textContent+=' · Importación local sin verificación de fuente.';}catch(err){alert('No se pudo importar: '+err.message)}finally{e.target.value=''}});
 }
+
+/* CONSULTA AUTOMÁTICA DE MARCADORES. Solo los finales confirmados entran a la tabla base. */
+const PROVIDER='https://sportscore.com/api/v1/fixtures/';
+const NAME_ALIASES={
+ 'atletico nacional medellin':'NAL','atletico nacional':'NAL','america de cali':'AME','deportivo cali':'CAL',
+ 'mill onarios':'MIL','millonarios':'MIL','atletico buc aramanga':'BUC','atletico bucaramanga':'BUC',
+ 'independiente santa fe':'SFE','santa fe':'SFE','dep independiente medellin':'DIM','independiente medellin':'DIM',
+ 'aguilas doradas':'AGU','deportiva once caldas':'ONC','once caldas':'ONC','deportes tolima':'TOL','deportivo tolima':'TOL',
+ 'cucuta deportivo':'CUC','cucuta':'CUC','internacional de bogota':'INT','internacional bogota':'INT',
+ 'llaneros fc':'LLA','llaneros':'LLA','alianza futbol club':'ALI','alianza fc':'ALI',
+ 'deportivo pereira':'PER','atletico junior barranquilla':'JUN','junior':'JUN','boyaca chico':'CHI',
+ 'deportivo pasto':'PAS','jaguares de cordoba':'JAG','fortaleza f c':'FOR','fortaleza fc':'FOR'};
+function normalizeName(s){return String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+function mapTeam(s){return NAME_ALIASES[normalizeName(s)]||null}
+function providerMinute(row){const s=String(row.status_text||'').toLowerCase(),m=s.match(/(\d{1,3})\s*['’]?/);if(m)return Math.max(0,Math.min(90,+m[1]));if(/half.?time/.test(s))return 45;
+ const kickoff=new Date(row.time);if(Number.isFinite(+kickoff))return Math.max(0,Math.min(90,Math.round((Date.now()-kickoff.getTime())/60000)));
+ return null;
+}
+function eligibleDate(f,dateUTC){if(!dateUTC)return false;
+ const actual=new Date(dateUTC+'T00:00:00Z');if(!Number.isFinite(+actual))return false;
+ // Prevent accidental matching to earlier seasons or another stage.
+ if(f.date){const expected=new Date(f.date+'T00:00:00Z');return Math.abs(actual-expected)<=2*86400000}
+ return actual>=new Date('2026-11-10T00:00:00Z')&&actual<=new Date('2026-11-20T23:59:59Z');
+}
+function normalizeProviderRows(payload,dateUTC){
+ if(!payload||!Array.isArray(payload.matches))throw Error('Respuesta del proveedor sin lista de partidos');
+ const out=[];
+ for(const m of payload.matches){const home=mapTeam(m.home),away=mapTeam(m.away);if(!home||!away||home===away)continue;
+  const status=String(m.status||'').toLowerCase(),hg=Number(m.home_score),ag=Number(m.away_score);
+  const validScores=m.home_score!=null&&m.away_score!=null&&Number.isInteger(hg)&&Number.isInteger(ag)&&hg>=0&&ag>=0&&hg<=20&&ag<=20;
+  out.push({home,away,status,score:validScores?[hg,ag]:null,minute:providerMinute(m),dateUTC:dateUTC||null,source:'SportScore',url:m.url||null});
+ }
+ return out;
+}
+function statusIsFinal(s){return ['finished','final','ft','ended','completed'].includes(String(s).toLowerCase())}
+function statusIsLive(s){return ['live','in_progress','inprogress','1st half','2nd half','half-time'].includes(String(s).toLowerCase())}
+function providerHealth(rows){
+ const finals=SNAPSHOT.recentFinals||[];
+ const missed=finals.filter(f=>{const m=rows.find(x=>x.home===f.home&&x.away===f.away);return m&&!statusIsFinal(m.status)});
+ if(missed.length)return {ok:false,reason:`El proveedor todavía marca ${missed.length} partidos ya confirmados como no finalizados. Fuente retrasada.`};
+ const mismatched=finals.filter(f=>{const m=rows.find(x=>x.home===f.home&&x.away===f.away&&statusIsFinal(x.status)&&x.score);return m&&(m.score[0]!==f.homeGoals||m.score[1]!==f.awayGoals)});
+ if(mismatched.length)return {ok:false,reason:`El proveedor contradice ${mismatched.length} marcadores finales verificados. No se utilizarán sus datos para afirmar frescura.`};
+ return {ok:true,reason:'Coincide con los marcadores finales comprobables en el corte'};
+}
+function newStateFromFeed(base,rows){
+ const next=clone(base),done=[],live=[];
+ const decisions=new Map();
+ for(const m of rows){
+  const key=m.home+'|'+m.away,targets=next.fixtures.filter(f=>f.home===m.home&&f.away===m.away&&eligibleDate(f,m.dateUTC));
+  if(targets.length!==1)continue;
+  const f=targets[0];if(statusIsLive(m.status)&&m.score&&(!m.minute||m.minute<=120))live.push({...m,id:f.id});
+  if(!statusIsFinal(m.status)||!m.score)continue;
+  if(decisions.has(f.id)&&JSON.stringify(decisions.get(f.id).score)!==JSON.stringify(m.score))throw Error('Marcadores finales contradictorios del proveedor');
+  decisions.set(f.id,{...m,id:f.id});
+ }
+ const ix=new Map(next.teams.map(t=>[t.id,t]));
+ for(const [id,m] of decisions){
+  const fi=next.fixtures.findIndex(f=>f.id===id);if(fi<0)continue;
+  const f=next.fixtures[fi],a=ix.get(f.home),b=ix.get(f.away),[hg,ag]=m.score;
+  if(!a||!b)throw Error('Equipo no encontrado');
+  a.pj++;b.pj++;a.gf+=hg;a.ga+=ag;b.gf+=ag;b.ga+=hg;
+  if(hg>ag){a.w++;a.pts+=3;b.l++}else if(hg<ag){b.w++;b.pts+=3;a.l++}else{a.d++;b.d++;a.pts++;b.pts++}
+  done.push({home:f.home,away:f.away,homeGoals:hg,awayGoals:ag,status:'final',source:'SportScore',date:m.dateUTC});
+ }
+ next.fixtures=next.fixtures.filter(f=>!decisions.has(f.id));
+ next.recentFinals=[...(next.recentFinals||[]),...done];
+ if(done.length){next.meta.asOf=new Date().toISOString();next.meta.status='actualizado_por_feed_con_validacion';next.meta.sourceNote='Los partidos nuevos se incorporaron solo cuando el proveedor informó estado final. Fuente: SportScore.';next.bounds=null}
+ validate(next);return {data:next,done,live};
+}
+function renderFeedState(){
+ const el=$('feed-label'),detail=$('feed-details'),updated=$('feed-updated');if(!el)return;
+ const st=feedState.status;
+ el.className=st==='ok'?'live-ok':'live-error';
+ el.textContent=st==='ok'?`● Fuente consultada · ${liveOverlay.size} partidos en curso`:st==='starting'?'Buscando marcadores...':st==='stale'?'⚠ Proveedor retrasado':'⚠ Sin actualización de marcadores';
+ detail.textContent=feedState.message;
+ updated.textContent=feedState.lastCheck?`Última consulta ${new Date(feedState.lastCheck).toLocaleString('es-CO',{timeZone:'America/Bogota'})} (Bogotá)`:'Sin consulta todavía';
+}
+function commitFeedUpdate(next,live){
+ const prevIds=new Set(data.fixtures.map(f=>f.id)),nextIds=new Set(next.fixtures.map(f=>f.id)),changed=prevIds.size!==nextIds.size;
+ if(changed){
+  const selection=team,pickById=new Map(data.fixtures.map((f,i)=>[f.id,picks[i]]));
+  initialize(next,selection);picks=next.fixtures.map(f=>pickById.get(f.id)||null);
+  tableMode='modal'; // Future routes are re-evaluated after each final result.
+ }
+ const liveNew=new Map(live.filter(x=>nextIds.has(x.id)).map(x=>[x.id,x]));
+ const oldKey=JSON.stringify([...liveOverlay.values()].map(x=>[x.id,x.score]));
+ const newKey=JSON.stringify([...liveNew.values()].map(x=>[x.id,x.score]));
+ liveOverlay=liveNew;
+ if(changed||oldKey!==newKey){sim=null;renderAll();if(!busy)runSimulation(2000)}
+ else renderFeedState();
+ return changed||oldKey!==newKey;
+}
+function datesForPolling(){
+ const d=new Date(),day=Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());
+ const dates=[-1,0,1].map(k=>new Date(day+k*86400000).toISOString().slice(0,10));
+ for(const f of data.fixtures){if(!f.date)continue;const v=new Date(f.date+'T00:00:00Z');if(Math.abs(v-day)<2*86400000)dates.push(new Date(v).toISOString().slice(0,10))}
+ // Ensure UTC midnight matches are queried on their UTC date as well.
+ return [...new Set(dates)].sort().slice(0,5);
+}
+async function fetchLiveFromAPI(dateUTC){
+ const q=new URLSearchParams({sport:'football',date:dateUTC,competition:'categoria-primera-a',limit:'200'});
+ const res=await fetch(PROVIDER+'?'+q.toString(),{cache:'no-store',signal:AbortSignal.timeout(12000)});
+ if(!res.ok)throw Error('HTTP '+res.status);return normalizeProviderRows(await res.json(),dateUTC);
+}
+async function refreshCachedFeed(){
+ if(data.meta.id==='demo')return;
+ try{
+  const res=await fetch('./live.json?rev='+Math.floor(Date.now()/60000),{cache:'no-store',signal:AbortSignal.timeout(6000)});
+  if(!res.ok)return;
+  const payload=await res.json();
+  if(payload.baseVersion!==SNAPSHOT.meta.version||!Array.isArray(payload.matches))return;
+  const rows=payload.matches.flatMap(o=>{
+   const f=data.fixtures.find(x=>x.id===o.id),fromBase=SNAPSHOT.fixtures.find(x=>x.id===o.id);if(!f||!fromBase)return [];
+   return [{home:f.home,away:f.away,status:o.status,score:o.score,minute:o.minute??null,dateUTC:o.utcDate,source:'SportScore (respaldo)'}];
+  });
+  const result=newStateFromFeed(data,rows);
+  if(result.done.length||result.live.length)commitFeedUpdate(result.data,result.live);
+  const ageMinutes=payload.updatedAt?(Date.now()-new Date(payload.updatedAt).getTime())/60000:Infinity;
+  const status=payload.staleReference||ageMinutes>30?'stale':'ok';
+  if(feedState.status==='starting'||feedState.status==='error'||feedState.status==='stale')feedState={status,lastCheck:payload.updatedAt||null,source:'SportScore (respaldo)',message:ageMinutes>30?'El respaldo periódico está desactualizado; no se confirma frescura en vivo.':'Copia periódica del proveedor, no feed oficial; comprueba la hora de la última actualización.'};
+  renderFeedState();
+ }catch(e){/* The cached feed is optional; the verified cut remains usable. */}
+}
+let querying=false;
+async function refreshLive(){
+ if(querying||data.meta.id==='demo')return;
+ querying=true;$('refresh-live').disabled=true;
+ try{
+  const days=datesForPolling();
+  const responses=await Promise.allSettled(days.map(fetchLiveFromAPI));
+  const rows=responses.flatMap(x=>x.status==='fulfilled'?x.value:[]);
+  if(!responses.some(x=>x.status==='fulfilled'))throw Error('No se pudo consultar la API en ninguna fecha');
+  const health=providerHealth(rows);
+  // Source can lag. We never overwrite the verified cut with a stale upstream table.
+  const baseSnapshot=data;const result=newStateFromFeed(baseSnapshot,rows);
+  const modified=commitFeedUpdate(result.data,result.live);
+  feedState={status:health.ok?'ok':'stale',message:health.ok?(result.done.length?`${result.done.length} resultados finales nuevos incorporados. El pronóstico se recalculó para todos los equipos.`:`No hay nuevos finales confirmados. ${result.live.length} encuentros en juego observados. Se consulta cada minuto.`):health.reason+' No se atribuye frescura en vivo a esta respuesta.',lastCheck:new Date().toISOString(),source:'SportScore'};
+  renderFeedState();
+ }catch(err){feedState={status:'error',lastCheck:new Date().toISOString(),message:'Error consultando SportScore: '+String(err.message||err).slice(0,160)+'. Se conserva el último corte verificado.',source:'SportScore'};renderFeedState();await refreshCachedFeed()}
+ finally{querying=false;$('refresh-live').disabled=false}
+}
+
 attachEvents();initialize(window.MATCHLAB_INITIAL_DATA,'DIM');
+if(window.MATCHLAB_API_AUTO!==true){$('certify-fixed').disabled=true;$('certify-fixed').title='La certificación dinámica requiere un backend; los certificados precomputados se muestran arriba.';$('certify-fixed').textContent='Certificación dinámica: requiere servidor';} 
 if(window.MATCHLAB_API_AUTO===true){fetch('/api/state',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject('Sin estado')).then(d=>initialize(d,'DIM')).catch(()=>{$('competition-info').textContent+=' · No se pudo cargar el estado del servidor.'})}
-window.MatchLabTest={getData:()=>data,getPicks:()=>picks,select:(id)=>{team=id;renderAll()},preset:setPreset,choose,table:standings,probabilities:()=>probs,run:runSimulation,sim:()=>sim,setScore,scoreFromOutcome,encodeRoute,loadRoute,validate};
+document.getElementById("refresh-live").addEventListener("click",async()=>{await refreshLive();await refreshCachedFeed()});setInterval(()=>{if(!document.hidden)refreshLive()},60000);setInterval(()=>{if(!document.hidden)refreshCachedFeed()},120000);refreshCachedFeed();refreshLive();runSimulation(2000);
+window.MatchLabTest={refreshLive,normalizeProviderRows,newStateFromFeed,providerHealth,modalTable,expectedTable,liveOverlay:()=>liveOverlay,feedState:()=>feedState,feedCommit:commitFeedUpdate,getData:()=>data,getPicks:()=>picks,select:(id)=>{team=id;renderAll()},preset:setPreset,choose,table:standings,probabilities:()=>probs,run:runSimulation,sim:()=>sim,setScore,scoreFromOutcome,encodeRoute,loadRoute,validate};
 </script></body></html>
