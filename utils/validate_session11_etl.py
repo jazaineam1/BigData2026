@@ -82,6 +82,11 @@ def laboratorio_real():
             info_escala = espacio["resultado_escala"]["verified"]
             assert info_escala["ok"] and info_escala["rows"] == 174 and info_escala["sources"] == 102, info_escala
             print("S11 ESCALA REAL: 32 fotos + 40 imágenes UCI + 30 voces distintas = 102 RAW; 174 derivados; particiones verificadas")
+            if os.environ.get("S11_CI_MEDIO") == "1":
+                ampliado=espacio["core"].ejecutar_escala_s11(espacio["RAIZ"],modo="medio",tamano_lote=64)
+                assert ampliado["verified"]["ok"] and ampliado["verified"]["sources"]==332
+                assert ampliado["verified"]["rows"]==564
+                print("S11 MEDIO REAL: 32 fotografías + 200 manuscritos + 100 voces = 332 fuentes; 564 derivados verificados")
             print("S11 E2E REAL: 32 imágenes y 10 WAV originales, 42 derivados, Parquet/JSONL, QA 9/9, ZIP OK")
         finally:
             os.chdir(previo)
