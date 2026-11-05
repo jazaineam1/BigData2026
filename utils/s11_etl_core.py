@@ -264,7 +264,7 @@ def transformar_imagenes(raiz: Path, entradas: list[dict], lado: int = 320,
                        "derived_sha256": sha256(datos),
                        "profile": etiqueta, "metrics": metrica})
     if verbose:
-    print(f"T · IMÁGENES: {len(salida)} derivadas · perfil {perfil} / {lado} px · {perf_counter()-t0:.2f} s")
+        print(f"T · IMÁGENES: {len(salida)} derivadas · perfil {perfil} / {lado} px · {perf_counter()-t0:.2f} s")
     return salida
 
 
@@ -324,7 +324,7 @@ def transformar_audios(raiz: Path, entradas: list[dict],
                        "derived_sha256": sha256(datos),
                        "profile": etiqueta, "metrics": metrica})
     if verbose:
-    print(f"T · AUDIO: {len(salida)} WAV PCM16 mono {tasa_final} Hz · ganancia {ganancia} · {perf_counter()-t0:.2f} s")
+        print(f"T · AUDIO: {len(salida)} WAV PCM16 mono {tasa_final} Hz · ganancia {ganancia} · {perf_counter()-t0:.2f} s")
     return salida
 
 
