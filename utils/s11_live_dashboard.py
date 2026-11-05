@@ -129,7 +129,7 @@ class LiveMonitor:
                 self.progress.bar_style = "success" if evt.get("state") == "finished" else "danger"
 
     def start(self, engine, root, images, audios, *, workers=2, batch_size=32,
-              label="monitor", inject_once_at=None):
+              label="monitor", inject_once_at=None, core=None):
         """La ejecución ocurre EN SEGUNDO PLANO dentro de la sesión, no en un servidor.
 
         Este método retorna de inmediato y permite que botones de Jupyter
@@ -143,7 +143,7 @@ class LiveMonitor:
         from functools import partial
         kwargs = dict(workers=workers, batch_size=batch_size, label=label,
                       on_event=self.on_event, cancel_event=self.cancel_event,
-                      pause_event=self.pause_event, inject_once_at=inject_once_at)
+                      pause_event=self.pause_event, inject_once_at=inject_once_at, core=core)
         if getattr(engine, "__name__", "").endswith("s11_etl_live"):
             self.future = self.executor.submit(
                 engine.run_live, root, images, audios, **kwargs
