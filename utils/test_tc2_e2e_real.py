@@ -76,6 +76,10 @@ def main():
                 names=set(f.namelist())
                 assert "explorador.html" in names and "E5/audios.json" in names
                 assert len([x for x in names if re.fullmatch(r"E5/audio/voz_\d\d\.wav",x)])==10
+            # El docente recupera exactamente el mismo puntaje desde el ZIP extraído.
+            import calificar_tc2_zip as grader
+            recalc=grader.corregir(z,env["HUELLA"])
+            assert recalc["puntaje"]==97
             print("TC2 E2E REAL: OK, 200 documentos, E5 384, 10 voces licenciadas, imagen, RRF, HTML, ZIP, score 97/100.")
         finally:
             os.chdir(old)
