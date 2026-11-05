@@ -199,7 +199,7 @@ def obtener_voces(out,source=None):
         audios.append({"n":i,"archivo":str(pcm.name),"original":original.name,
            "fuente_url":URL_VOCES,"source_record_id":str(r["path"]),
            "source_original_sha256":digest,"sha256":sha(pcm),
-           "license":"CC BY 4.0","source_kind":"MINDS14_es_ES",
+           "license":"CC BY 4.0","source_kind":"MINDS14_es_ES","source_dataset_sha256":SHA_VOCES,
            "intent_class":int(r["intent_class"]),
            "transcripcion_referencia":str(r["transcription"]),
            "medidas":metricas_voz(pcm)})
@@ -270,7 +270,11 @@ def validar(carpeta,docs,intencion):
         a=e.get("atlas",{})
         remoto=bool(a.get("ping") and a.get("indice_queryable") and a.get("query_ejecutada") and len(a.get("resultados",[]))>0 and a.get("motor")=="MongoDB Atlas Vector Search")
         contrato=bool(a.get("indice_path")=="embedding" and a.get("indice_dimensiones")==384 and a.get("pipeline_limit")==5 and a.get("sistema") in ("Atlas real","Ruta local declarada"))
-        ok("E2.3",contrato and (remoto or a.get("sistema")=="Ruta local declarada"),"Evidencia remota declarada "+str(remoto)+"; contrato local, si aplica. Verificación docente necesaria.")
+        ok("E2.3",contrato and remoto,"Atlas declarado real = "+str(remoto)+"; validación remota definitiva pendiente de auditoría docente.")
+        if contrato and a.get("sistema")=="Ruta local declarada" and not remoto:
+            checks["E2.3"]["puntos"]=3
+            checks["E2.3"]["ok"]=False
+            checks["E2.3"]["detalle"]="3/6 por contrato vectorial local, no por ejecución remota de Atlas."
         varia=e.get("experimento",{}); k=varia.get("k")
         ok("E2.4",k in (3,8) and varia.get("ranking")==coseno(docs,x,q2,int(k)) if k in (3,8) else False,"Top-k alterado, mismo vector.")
     except Exception as err:
@@ -305,7 +309,8 @@ def validar(carpeta,docs,intencion):
         bueno=len(voces)==10 and len({v.get("source_record_id") for v in voces})==10 and len({v.get("intent_class") for v in voces})==10
         for v in voces:
             p=carpeta/"E5/audio"/v["archivo"]
-            bueno=bueno and p.exists() and sha(p)==v["sha256"] and v.get("license")=="CC BY 4.0" and v.get("source_kind")=="MINDS14_es_ES"
+            original=carpeta/"E5/audio"/v["original"]
+            bueno=bueno and p.exists() and original.exists() and sha(p)==v["sha256"] and sha(original)==v.get("source_original_sha256") and v.get("license")=="CC BY 4.0" and v.get("source_kind")=="MINDS14_es_ES" and v.get("source_dataset_sha256")==SHA_VOCES
         ok("E5.1",bueno,"Diez voces humanas distintas, procedencia y huellas.")
         a1=a["comparacion"];v=voces[int(a1["posicion"])-1];ruta=carpeta/"E5/audio"/v["archivo"]
         m512=metricas_voz(ruta,512);m1024=metricas_voz(ruta,1024)
@@ -321,5 +326,5 @@ def validar(carpeta,docs,intencion):
     except Exception as err:
         for item in ("E6.1","E6.2"):ok(item,False,str(err))
     total=sum(v["puntos"] for v in checks.values())
-    return {"schema":SCHEMA,"puntaje":total,"nota_provisional":round(1+4*total/100,2),
+    return {"schema":SCHEMA,"puntaje":total,"nota_provisional":math.floor((1+4*total/100)*10+0.5+1e-9)/10,
             "controles":checks,"pendiente_revision_docente":"E2.3: confirmar Atlas con auditoría o aplicar contingencia documentada"}
