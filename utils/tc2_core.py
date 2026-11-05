@@ -122,7 +122,7 @@ def inspeccion_imagen(path):
     im=Image.open(path).convert("RGB");a=np.asarray(im)
     y=(.2126*a[:,:,0]+.7152*a[:,:,1]+.0722*a[:,:,2])
     hist,bins=np.histogram(y,bins=16,range=(0,256))
-    pixel=a[120,50].tolist()
+    pixel=a[min(im.height-1,120),min(im.width-1,50)].tolist()
     return {"ancho":im.width,"alto":im.height,"pixel_rgb":pixel,
       "pixel_luminancia":round(.2126*pixel[0]+.7152*pixel[1]+.0722*pixel[2],3),
       "histograma":hist.tolist(),"suma_histograma":int(hist.sum()),"luminancia_media":round(float(y.mean()),3)}
@@ -289,7 +289,7 @@ def validar(carpeta,docs,intencion):
         ok("E3.1",r.get("bm25")==a and r.get("e5")==b,"Precision@5 y Recall@5 sobre juicios independientes.")
         ok("E3.2",r.get("rrf")==fusion and r.get("metricas_rrf")==medidas(fusion,intencion["relevantes"]),"RRF calculado desde posiciones.")
         de=r.get("decision",{})
-        ok("E3.3",de.get("elegido") in ("BM25","E5","RRF") and de.get("descartado") in ("BM25","E5","RRF") and de.get("descartado")!=de.get("elegido") and de.get("limite") in ("Solo cubre los juicios etiquetados","No demuestra irregularidades") and de.get("precision_observada") in (a["precision_at_5"],b["precision_at_5"],medidas(fusion,intencion["relevantes"])["precision_at_5"]),"Elegir, descartar y usar métrica real.")
+        ok("E3.3",de.get("elegido") in ("BM25","E5","RRF") and de.get("descartado") in ("BM25","E5","RRF") and de.get("descartado")!=de.get("elegido") and de.get("limite") in ("Solo cubre los juicios etiquetados","No demuestra irregularidades") and de.get("precision_observada")=={"BM25":a,"E5":b,"RRF":medidas(fusion,intencion["relevantes"])}[de.get("elegido", "BM25")]["precision_at_5"],"Elegir, descartar y usar métrica real.")
     except Exception as err:
         for item in ("E3.1","E3.2","E3.3"):ok(item,False,str(err))
     try:
