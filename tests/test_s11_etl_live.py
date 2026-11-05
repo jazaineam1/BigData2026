@@ -116,6 +116,30 @@ class TestS11Live(unittest.TestCase):
             self.assertIn("comparacion.csv", z.namelist())
             self.assertNotIn("raw", "\n".join(z.namelist()))
 
+    def test_pausar_admision_real_y_reanudar_sin_perder_tareas(self):
+        from concurrent.futures import ThreadPoolExecutor
+        pause = Event()
+        paused_seen = Event()
+        events = []
+        def callback(evt):
+            events.append(evt)
+            if evt["state"] == "queued" and evt["source_index"] == 0:
+                pause.set()
+            if evt["state"] == "paused":
+                paused_seen.set()
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            future = pool.submit(live.run_live, self.root, self.images, self.audios,
+                                 workers=1, batch_size=8, label="pause",
+                                 core=core, pause_event=pause, on_event=callback)
+            self.assertTrue(paused_seen.wait(timeout=10), "No se publicó la pausa")
+            self.assertFalse(future.done(), "La ejecución terminó mientras estaba pausada")
+            pause.clear()
+            result = future.result(timeout=50)
+        self.assertEqual(result["status"], "complete")
+        self.assertEqual(result["verified"]["rows"], 11)
+        self.assertTrue(any(x["state"] == "resumed" for x in events))
+        self.assertEqual(events[-1]["state"], "finished")
+
     def test_pause_se_puede_reanudar_y_el_dashboard_refleja_eventos(self):
         from utils.s11_live_dashboard import LiveMonitor
         panel = LiveMonitor(sources=7)
