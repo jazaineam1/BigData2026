@@ -10,6 +10,8 @@ on:
       - '.github/workflows/tc2-qa.yml'
       - 'utils/test_tc2_e2e_real.py'
       - 'utils/calificar_tc2_zip.py'
+      - 'tests/tc2-guide.visual.spec.js'
+      - 'playwright.tc2.config.cjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -63,3 +65,17 @@ jobs:
           MPLBACKEND: Agg
           HF_HUB_DISABLE_TELEMETRY: '1'
         run: python utils/test_tc2_e2e_real.py
+  navegador:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.tc2.config.cjs
