@@ -71,6 +71,10 @@ def laboratorio_real():
                     codigo = codigo.replace(
                         "LIMITE_ELEGIDO = 0 #@param",
                         "LIMITE_ELEGIDO = 2 #@param")
+                if celda["id"]=="s11-escala-lotes":
+                    # La prueba E2E ejercita la ampliación aunque para el alumno esté desactivada.
+                    codigo = codigo.replace("ACTIVAR_ESCALA = False #@param",
+                                            "ACTIVAR_ESCALA = True #@param")
                 if celda["id"]=="s11-empaquetar":
                     codigo = codigo.replace("DESCARGAR_ZIP=False #@param", "DESCARGAR_ZIP=False #@param")
                 print(f"\n>>> S11 · {celda['id']}",flush=True)
