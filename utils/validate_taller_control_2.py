@@ -73,7 +73,7 @@ def run():
         verify(0.69<m512["rms"]<0.72 and m512["resolucion_hz"]==31.25 and m1024["resolucion_hz"]==15.625,"RMS y resolución FFT")
         manifest=c.validar(t,doc,sample)
         verify(len(manifest["controles"])==18 and manifest["puntaje"]==0,"Evaluador falla cerrado si faltan archivos")
-        htmlfile=c.hacer_html(t,doc,ranks,cs,rrf,meta,[{"n":1,"source_record_id":"ejemplo","archivo":"demo.wav","medidas":m512}],{"modelo":"BM25"})
+        htmlfile=c.hacer_html(t,doc,ranks,cs,c.fusion_rrf(ranks,cs,60,5),meta,[{"n":1,"source_record_id":"ejemplo","archivo":"demo.wav","medidas":m512}],{"modelo":"BM25"})
         text=htmlfile.read_text(encoding="utf-8")
         verify("MINDS14" in text and "sin vínculo" in text and "<audio" in text,"Explorador separa procedencias")
     # Separa inequívocamente material aprendido de contenido antes del TC1.
