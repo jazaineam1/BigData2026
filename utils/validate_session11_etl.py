@@ -97,6 +97,15 @@ def laboratorio_real():
                 assert ampliado["verified"]["ok"] and ampliado["verified"]["sources"]==332
                 assert ampliado["verified"]["rows"]==564
                 print("S11 MEDIO REAL: 32 fotografías + 200 manuscritos + 100 voces = 332 fuentes; 564 derivados verificados")
+                imagenes_med=espacio["core"].extraer_imagenes(espacio["RAIZ"],max_imagenes=32)
+                imagenes_med+=espacio["core"].extraer_imagenes_digitos(espacio["RAIZ"],200)
+                voces_med=espacio["core"].extraer_audios(espacio["RAIZ"],max_audios=100)
+                threads_med=espacio["motor_live"].run_live(
+                    espacio["RAIZ"],imagenes_med,voces_med,workers=4,batch_size=64,
+                    label="qa_medio_threads",core=espacio["core"])
+                assert threads_med["verified"]["ok"] and threads_med["verified"]["rows"]==564
+                assert threads_med["manifest"]["sources"]==332
+                print("S11 THREADS MEDIO REAL: 332 fuentes con 4 threads, 564 derivados, SHA válido")
             print("S11 E2E REAL: 32 imágenes y 10 WAV originales, 42 derivados, Parquet/JSONL, QA 9/9, ZIP OK")
         finally:
             os.chdir(previo)
