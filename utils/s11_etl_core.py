@@ -468,8 +468,10 @@ def extraer_imagenes_digitos(raiz: Path, max_imagenes: int = 200) -> list[dict]:
     if len(datos.images) != 1797:
         raise ValueError("La colección de dígitos cambió: revisar fuente")
     raiz = Path(raiz)
-    salida = []
-    for i in range(max_imagenes):
+    salida, vistos = [], set()
+    for i in range(len(datos.images)):
+        if len(salida) == max_imagenes:
+            break
         raw8 = np.asarray(datos.images[i], dtype=np.float64)
         if raw8.shape != (8, 8) or not np.isfinite(raw8).all():
             raise ValueError("Muestra de escritura inválida")
@@ -479,6 +481,10 @@ def extraer_imagenes_digitos(raiz: Path, max_imagenes: int = 200) -> list[dict]:
         contenido = salida_png.getvalue()
         ruta = raiz / "raw" / "imagenes_digitos" / f"uci_test_{i:04d}.png"
         esperado = sha256(contenido)
+        if esperado in vistos:
+            # Dos muestras iguales por bytes son un solo activo de ETL; se documenta la deduplicación.
+            continue
+        vistos.add(esperado)
         guardar_sin_sobrescribir(ruta, contenido, esperado)
         salida.append({
             "original_path": ruta.relative_to(raiz).as_posix(),
@@ -493,7 +499,9 @@ def extraer_imagenes_digitos(raiz: Path, max_imagenes: int = 200) -> list[dict]:
             "digit_reference": int(datos.target[i]),
             "input_encoding": "PNG 8x8 reconstruido desde matriz UCI 0-16",
         })
-    print(f"E · DÍGITOS UCI: {len(salida)} imágenes independientes de trazos manuscritos; NO son noticias")
+    if len(salida) != max_imagenes:
+        raise ValueError(f"Solo hay {len(salida)} imágenes únicas; se solicitaron {max_imagenes}")
+    print(f"E · DÍGITOS UCI: {len(salida)} imágenes originales normalizadas y únicas; NO son noticias")
     return salida
 
 
