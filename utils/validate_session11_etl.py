@@ -73,6 +73,12 @@ def laboratorio_real():
             verificar=espacio["core"].verificar(espacio["RAIZ"])
             assert verificar["ok"] and verificar["filas"]==42,verificar
             assert espacio["ARCHIVO_FINAL"].exists()
+            assert espacio["REPORTE_ESCALA"].is_file()
+            import zipfile
+            with zipfile.ZipFile(espacio["REPORTE_ESCALA"]) as report:
+                assert report.testzip() is None
+                assert "escala_manifest.json" in report.namelist()
+                assert "comparaciones_s11.csv" in report.namelist()
             info_escala = espacio["resultado_escala"]["verified"]
             assert info_escala["ok"] and info_escala["rows"] == 174 and info_escala["sources"] == 102, info_escala
             print("S11 ESCALA REAL: 32 fotos + 40 imágenes UCI + 30 voces distintas = 102 RAW; 174 derivados; particiones verificadas")
