@@ -88,3 +88,21 @@ test('la portada y el registro de curso abren S11 en un clic',async({page})=>{
   await page.goto('/lms/data/course.json');
   await expect(page.locator('body')).toContainText('s11-etl-audio-imagenes.html');
 });
+
+test('S11 escala: los lotes cambian particiones previstas, no simulan tiempos reales',async({page})=>{
+ await page.goto(route+'#s27');
+ await expect(page.locator('#scaleTheory')).toContainText('102 RAW distintos');
+ await expect(page.locator('#scaleTheory')).toContainText('174 derivados');
+ await page.locator('#scaleMode').selectOption('medio');
+ await expect(page.locator('#scaleTheory')).toContainText('332 RAW distintos');
+ await expect(page.locator('#scaleTheory')).toContainText('564 derivados');
+ await page.locator('#scaleBatch').fill('0');
+ await page.locator('#scaleBatch').dispatchEvent('input');
+ await expect(page.locator('#scaleBatchText')).toHaveText('8');
+ await expect(page.locator('#scaleTheory')).toContainText('42 particiones');
+ await page.locator('#scaleMode').selectOption('reto');
+ await expect(page.locator('#scaleTheory')).toContainText('1432 RAW distintos');
+ await expect(page.locator('#scaleTheory')).toContainText('2464 derivados');
+ await expect(page.locator('#s27')).toContainText('NO permite concluir');
+ await expect(page.locator('#s27')).toContainText('un solo worker');
+});
