@@ -1,0 +1,59 @@
+name: S11 · ETL de imágenes y audio (QA)
+on:
+  pull_request:
+    paths:
+      - 'Cuadernos/11_ETL_Audio_Imagenes.ipynb'
+      - 'Presentaciones/s11-etl-audio-imagenes.html'
+      - 'utils/s11_etl_audio_imagenes.py'
+      - 'utils/build_s11_etl_audio_imagenes.py'
+      - 'utils/validate_s11_etl_audio_imagenes.py'
+      - 'tests/s11-etl.visual.spec.js'
+      - 'playwright.s11-etl.config.cjs'
+      - '.github/workflows/s11-etl-qa.yml'
+      - 'lms/data/course.json'
+  push:
+    branches: [main]
+    paths:
+      - 'Cuadernos/11_ETL_Audio_Imagenes.ipynb'
+      - 'Presentaciones/s11-etl-audio-imagenes.html'
+      - 'utils/s11_etl_audio_imagenes.py'
+      - 'utils/build_s11_etl_audio_imagenes.py'
+      - 'utils/validate_s11_etl_audio_imagenes.py'
+      - 'tests/s11-etl.visual.spec.js'
+      - '.github/workflows/s11-etl-qa.yml'
+permissions:
+  contents: read
+jobs:
+  e2e-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: python -m pip install "pillow>=10,<13" "numpy>=1.26,<3" "pandas>=2.2,<3" "pyarrow>=17" "soundfile>=0.12,<1" "matplotlib>=3.8" "ipython>=8"
+      - name: Comprobar reproducibilidad del generador
+        run: |
+          cp Cuadernos/11_ETL_Audio_Imagenes.ipynb /tmp/s11-before.ipynb
+          python utils/build_s11_etl_audio_imagenes.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          assert json.loads(Path('/tmp/s11-before.ipynb').read_text()) == json.loads(Path('Cuadernos/11_ETL_Audio_Imagenes.ipynb').read_text())
+          print('S11 GENERADOR SINCRONIZADO')
+          PY
+      - name: Ejecutar extracción, transformación, carga, corrupción e idempotencia sintéticas
+        run: python -m utils.validate_s11_etl_audio_imagenes
+  navegador:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.s11-etl.config.cjs
