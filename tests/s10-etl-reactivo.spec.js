@@ -56,3 +56,27 @@ for(const width of [390,1366]){
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2)).toBe(true);
  });
 }
+
+test('integración con la presentación: enlace de S10 abre ETL propio sin tercer recurso LMS',async({page})=>{
+  await page.goto('/Presentaciones/s10-imagenes-audio.html#s23');
+  await expect(page.locator('.slide')).toHaveCount(23);
+  await page.locator('#s10EtlLaunch').click();
+  await expect(page).toHaveURL(/\/assets\/s10\/etl-reactivo\.html/);
+  await expect(page.locator('h1')).toContainText('imágenes y audios');
+});
+
+test('integridad negativa: ZIP manipulado es rechazado por CRC o SHA',async({page})=>{
+  const fs=require('node:fs/promises');
+  await page.goto(route);
+  await page.locator('#demo').click();
+  await expect(page.locator('#status')).toContainText('L: 2 filas');
+  const pending=page.waitForEvent('download');
+  await page.locator('#save').click();
+  const download=await pending;
+  const bytes=Buffer.from(await fs.readFile(await download.path()));
+  const offset=bytes.indexOf(Buffer.from('RIFF'));
+  expect(offset).toBeGreaterThan(0);
+  bytes[offset+50]=bytes[offset+50]^1;
+  await page.locator('#importZip').setInputFiles({name:'manipulado.zip',mimeType:'application/zip',buffer:bytes});
+  await expect(page.locator('#verifyStatus')).toContainText('PAQUETE RECHAZADO');
+});
