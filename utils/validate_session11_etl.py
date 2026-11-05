@@ -25,17 +25,18 @@ NOTEBOOK = ROOT / "Cuadernos" / "11_ETL_Audio_Imagenes.ipynb"
 def estructura():
     subprocess.check_call([sys.executable,str(ROOT/"utils"/"build_session11_etl_audio_imagenes.py"),"--check"])
     nb = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
-    assert len(nb["cells"]) == 25, "La lección S11 espera 25 celdas"
+    assert len(nb["cells"]) == 29, "La lección S11 espera 29 celdas"
     ids = [x["id"] for x in nb["cells"]]
     for id in ("s11-preparar","s11-cargar-motor","s11-elegir","s11-extraer-imagenes",
                "s11-extraer-audios","s11-transformar-imagenes","s11-transformar-audios",
-               "s11-cargar","s11-calidad","s11-escala","s11-empaquetar","s11-autocomprobar"):
+               "s11-cargar","s11-calidad","s11-escala","s11-escala-lotes","s11-escala-comparar","s11-empaquetar","s11-autocomprobar"):
         assert id in ids
     for c in nb["cells"]:
         if c["cell_type"] == "code":
             codigo = "".join(c["source"])
             compile(codigo, f"<S11:{c['id']}>", "exec")
             assert c["outputs"] == []
+    assert ids.index("s11-escala") < ids.index("s11-escala-lotes") < ids.index("s11-escala-comparar") < ids.index("s11-empaquetar")
     assert ids.index("s11-extraer-imagenes") < ids.index("s11-extraer-audios")
     print("VALIDACIÓN S11: estructura, contrato, orden de tutorial y sintaxis OK")
 
@@ -72,6 +73,9 @@ def laboratorio_real():
             verificar=espacio["core"].verificar(espacio["RAIZ"])
             assert verificar["ok"] and verificar["filas"]==42,verificar
             assert espacio["ARCHIVO_FINAL"].exists()
+            info_escala = espacio["resultado_escala"]["verified"]
+            assert info_escala["ok"] and info_escala["rows"] == 174 and info_escala["sources"] == 102, info_escala
+            print("S11 ESCALA REAL: 32 fotos + 40 imágenes UCI + 30 voces distintas = 102 RAW; 174 derivados; particiones verificadas")
             print("S11 E2E REAL: 32 imágenes y 10 WAV originales, 42 derivados, Parquet/JSONL, QA 9/9, ZIP OK")
         finally:
             os.chdir(previo)
