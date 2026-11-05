@@ -176,7 +176,7 @@ jobs:
               && grep -q 'bigdata-s10-etl-reactivo/v2' <<<"$s10_etl" \
               && grep -q 'audioGain' <<<"$s10_etl" \
               && grep -q 's10-audio-raw' <<<"$s10_new_nb" \
-              && grep -q 's11-etl-audio-imagenes' <<<"$s11" \
+              && grep -q 'L · CATÁLOGO: 42 filas' <<<"$s11" \
               && grep -q 's11-extraer-imagenes' <<<"$s11_nb" \
               && [ "$image_status" = "200" ] \
               && [ -n "$realtime_sdk" ]; then
