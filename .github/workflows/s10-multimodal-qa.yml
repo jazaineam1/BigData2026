@@ -4,6 +4,8 @@ on:
     paths:
       - 'Cuadernos/10_Imagenes_Audio.ipynb'
       - 'Presentaciones/s10-imagenes-audio.html'
+      - 'assets/s10/etl-reactivo.html'
+      - 'tests/s10-etl-reactivo.spec.js'
       - 'utils/validate_s10_multimodal.py'
       - 'tests/s10-multimodal.visual.spec.js'
       - 'playwright.s10-multimodal.config.cjs'
