@@ -270,7 +270,7 @@ async function save(){
 async function loadZip(file){
  if(!file)return;
  try{
-  if(file.size>60*1024*1024)throw Error('ZIP mayor de 60 MiB');
+  if(file.size>120*1024*1024)throw Error('ZIP mayor de 120 MiB');
   var files=zipRead(new Uint8Array(await file.arrayBuffer())),mbytes=files.get('manifest.json');
   if(!mbytes)throw Error('Falta manifest.json');
   var manifest=JSON.parse(decoder.decode(mbytes));
