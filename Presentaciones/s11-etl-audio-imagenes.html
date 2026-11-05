@@ -125,10 +125,10 @@ manifest_s11.json Inventario y hashes SHA-256</pre>
 <p><b>Clasificador:</b> programa que propone categorías para toda una imagen. <b>Detector:</b> intenta ubicar objetos dentro de ella. No son lo mismo. MobileNet puede proponer categorías generales, pero no prueba qué afirma la noticia.</p>
 <p><b>Hazlo:</b> si dispones de tiempo, activa 10C y compara las sugerencias con tu observación. <b>Salida:</b> categorías candidatas o aviso de biblioteca no disponible.</p></div>
 <div class="tile"><h3>4 · Entregar una ficha (10D)</h3>
-<p><b>Ficha:</b> registro JSON con la fuente de la noticia, crédito de imagen, observación propia, OCR y SHA-256. <b>Procedencia:</b> ruta que permite rastrear de dónde viene la información.</p>
-<p><b>Hazlo:</b> escribe una frase comprobable de lo que realmente ves; ejecuta 10D y verifica el archivo. <b>Salida:</b> <code>MINI RETO ENTREGADO</code>.</p></div>
+<p><b>Ficha:</b> registro JSON con fuente, crédito, tres decisiones cerradas (categoría visual, alternativa descartada y límite), OCR y SHA-256. <b>Procedencia:</b> ruta que permite rastrear de dónde viene la información.</p>
+<p><b>Hazlo:</b> mira la foto y selecciona una categoría visible, otra alternativa distinta y un límite. No hay respuesta correcta preseleccionada ni campo de prosa libre. Ejecuta 10D y verifica el archivo. <b>Salida:</b> <code>MINI RETO ENTREGADO</code>.</p></div>
 </div>
-<p class="note"><b>Criterio de éxito:</b> otra persona puede encontrar la noticia, recuperar la foto y verificar su SHA. <b>Límite:</b> ni OCR ni una clasificación de imagen demuestran un delito, un contrato o un vínculo con las voces de MINDS-14. Si OCR no encuentra texto, regístralo como resultado válido.</p>
+<p class="note"><b>Criterio de éxito:</b> otra persona puede encontrar la noticia, recuperar la foto, comprobar su SHA y revisar tus tres decisiones. Si OCR devuelve <code>None</code>, el motor no estaba disponible; si devuelve <code>''</code>, sí se ejecutó pero no reconoció texto. Ni OCR ni la clasificación demuestran un delito, contrato o vínculo con MINDS-14.</p>
 <p><a class="btn" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/11_ETL_Audio_Imagenes.ipynb" target="_blank" rel="noopener">Abrir Colab y ejecutar 10–10D</a></p>
 </section><section id="s30" class="slide" aria-labelledby="h30">
 <div class="kicker">Laboratorio integrador · la noticia también se escucha</div>
@@ -143,10 +143,10 @@ manifest_s11.json Inventario y hashes SHA-256</pre>
 <p><b>Hazlo:</b> activa <code>ACTIVAR_ASR</code> para obtener una transcripción real sin servicios de pago. Si falta modelo o conexión, el ejercicio continúa usando un texto de práctica marcado como tal. <b>No confundir RMS con ASR.</b></p></div>
 <div class="tile"><h3>3 · Encontrar datos en el texto (11C)</h3>
 <p><b>Entidad:</b> nombre de institución o persona, como la SIC. <b>Cantidad:</b> una magnitud como «más de cincuenta compañías», que <b>no</b> significa 50 exactas. <b>Regex:</b> patrón de caracteres para buscar menciones. <b>Evidencia:</b> palabras originales que respaldan un candidato.</p>
-<p><b>Hazlo:</b> revisa las tablas de entidades, números y temas. Busca una frase del audio que puedas escuchar para comprobar el resultado. <b>Salida:</b> <code>EVIDENCIAS VERIFICADAS</code>.</p></div>
+<p><b>Hazlo:</b> revisa entidades, cantidades y temas. Si ejecutaste ASR real, cada mención localizada incluye un intervalo de segundos <code>audio_interval_s</code> para volver a escuchar el segmento: es aproximado, no un alineamiento palabra por palabra. El texto de práctica no tiene tiempos. <b>Salida:</b> <code>EVIDENCIAS VERIFICADAS</code>.</p></div>
 <div class="tile"><h3>4 · Entregar sin inventar relaciones (11D)</h3>
 <p><b>Ficha:</b> JSON con procedencia, códec, SHA, candidatos y fragmentos textuales de respaldo. La noticia y foto están vinculadas por <code>article_id</code>; <b>un audio no se asocia solo porque el archivo tiene un número parecido</b>. Las voces de <b>MINDS-14</b> son de servicios financieros y no pertenecen a las noticias de El Tiempo.</p>
-<p><b>Hazlo:</b> ejecuta 11D y reabre la ficha. <b>Salida:</b> <code>EXPEDIENTE MULTIMODAL CREADO</code>. Termina con el paso <b>12</b>: un ZIP con informes JSON, manifiesto y SHA, sin redistribuir medios editoriales.</p></div>
+<p><b>Hazlo:</b> ejecuta 11D, reabre la ficha y termina el paso <b>12</b>. El ZIP exige <b>tres informes JSON</b> (noticia/foto, audio, bandeja) y manifiesto SHA: si falta 10D, se detiene en vez de producir una entrega incompleta. No redistribuye medios editoriales.</p></div>
 </div>
 <p class="note"><b>Mini reto:</b> selecciona una institución, una cantidad y un tema del audio. Verifica cada mención en el texto y, cuando haya voz disponible, escúchala. Distingue <b>texto ASR real</b>, <b>transcripción aportada</b> y <b>paráfrasis de práctica</b>. Las cifras y entidades son candidatos, no hechos ni contratos certificados.</p>
 <p><a class="btn" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/11_ETL_Audio_Imagenes.ipynb" target="_blank" rel="noopener">Abrir el laboratorio de código visible · pasos 11A–11D</a></p>
