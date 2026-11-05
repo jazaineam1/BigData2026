@@ -69,9 +69,30 @@ def guardar_sin_sobrescribir(ruta: Path, contenido: bytes, esperado: str) -> Non
             raise ValueError(f"Archivo modificado: {ruta}. No se sobrescribe")
         return
     ruta.parent.mkdir(parents=True, exist_ok=True)
-    ruta.write_bytes(contenido)
-    if sha256(ruta) != esperado:
-        raise ValueError("Escritura no verificable")
+    # Escritura atómica: un fallo/cancelación no deja un archivo medio escrito.
+    # No alteramos originales existentes; una huella incorrecta exige investigación.
+    import os
+    import tempfile
+    with tempfile.NamedTemporaryFile(mode="wb", dir=ruta.parent, prefix=".s11-", delete=False) as temp:
+        provisional = Path(temp.name)
+        try:
+            temp.write(contenido)
+            temp.flush()
+            os.fsync(temp.fileno())
+        except BaseException:
+            temp.close()
+            provisional.unlink(missing_ok=True)
+            raise
+    try:
+        if ruta.exists():
+            if sha256(ruta) != esperado:
+                raise ValueError("El archivo destino cambió durante la ejecución")
+        else:
+            provisional.replace(ruta)
+        if sha256(ruta) != esperado:
+            raise ValueError("Escritura no verificable")
+    finally:
+        provisional.unlink(missing_ok=True)
 
 
 def extraer_imagenes(raiz: Path, max_imagenes: int = 32) -> list[dict]:
@@ -192,7 +213,7 @@ def extraer_audios(raiz: Path, max_audios: int = 10) -> list[dict]:
 
 
 def transformar_imagenes(raiz: Path, entradas: list[dict], lado: int = 320,
-                         perfil: str = "grises") -> list[dict]:
+                         perfil: str = "grises", verbose: bool = True) -> list[dict]:
     import numpy as np
     from PIL import Image, ImageEnhance, ImageFilter, ImageOps, UnidentifiedImageError
     if lado not in (160, 320, 640) or perfil not in ("grises", "contraste", "bordes"):
@@ -242,12 +263,14 @@ def transformar_imagenes(raiz: Path, entradas: list[dict], lado: int = 320,
                        "derived_path": ruta_der.relative_to(raiz).as_posix(),
                        "derived_sha256": sha256(datos),
                        "profile": etiqueta, "metrics": metrica})
-    print(f"T · IMÁGENES: {len(salida)} derivadas · perfil {perfil} / {lado} px · {perf_counter()-t0:.2f} s")
+    if verbose:
+        print(f"T · IMÁGENES: {len(salida)} derivadas · perfil {perfil} / {lado} px · {perf_counter()-t0:.2f} s")
     return salida
 
 
 def transformar_audios(raiz: Path, entradas: list[dict],
-                       ganancia: float = 1.0, tasa_final: int = 16000) -> list[dict]:
+                       ganancia: float = 1.0, tasa_final: int = 16000,
+                       verbose: bool = True) -> list[dict]:
     import numpy as np
     import soundfile as sf
     from scipy.signal import resample_poly
@@ -300,7 +323,8 @@ def transformar_audios(raiz: Path, entradas: list[dict],
                        "derived_path": ruta_der.relative_to(raiz).as_posix(),
                        "derived_sha256": sha256(datos),
                        "profile": etiqueta, "metrics": metrica})
-    print(f"T · AUDIO: {len(salida)} WAV PCM16 mono {tasa_final} Hz · ganancia {ganancia} · {perf_counter()-t0:.2f} s")
+    if verbose:
+        print(f"T · AUDIO: {len(salida)} WAV PCM16 mono {tasa_final} Hz · ganancia {ganancia} · {perf_counter()-t0:.2f} s")
     return salida
 
 

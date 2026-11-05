@@ -106,3 +106,36 @@ test('S11 escala: los lotes cambian particiones previstas, no simulan tiempos re
  await expect(page.locator('#s27')).toContainText('NO permite concluir');
  await expect(page.locator('#s27')).toContainText('un solo worker');
 });
+
+test('S11 contiene E2E integrada: procesa dos archivos y avanza con métricas reales',async({page})=>{
+ await page.goto(route+'#s18');
+ const frame=page.frameLocator('#s11LiveFrame');
+ await expect(frame.locator('#liveMonitor')).toBeVisible();
+ await frame.locator('#demo').click();
+ await expect(frame.locator('#liveText')).toHaveText('2/2');
+ await expect(frame.locator('#liveProgress')).toHaveJSProperty('value',2);
+ await expect(frame.locator('#liveRows tr')).toHaveCount(2);
+ await expect(frame.locator('#liveKPIs')).toContainText('Fuentes/s:');
+ await expect(frame.locator('#status')).toContainText('L: 2 filas');
+ await expect(frame.locator('#save')).toBeEnabled();
+ await expect(frame.locator('#liveRows')).toContainText('SHA-256 OK');
+});
+
+test('S11 E2E permite modificar el audio y recuperar ZIP con huellas',async({page})=>{
+ await page.goto('/assets/s11/etl-live.html');
+ await page.locator('#demo').click();
+ await expect(page.locator('#liveText')).toHaveText('2/2');
+ await page.locator('#audioGain').fill('0');
+ await page.locator('#audioGain').dispatchEvent('input');
+ await expect(page.locator('#liveText')).toHaveText('2/2');
+ await expect(page.locator('#cards')).toContainText('RMS 0;');
+ const pending=page.waitForEvent('download');
+ await page.locator('#save').click();
+ const dl=await pending;
+ expect(dl.suggestedFilename()).toMatch(/\.zip$/);
+ const fs=require('node:fs/promises');
+ const buffer=await fs.readFile(await dl.path());
+ await page.locator('#importZip').setInputFiles({name:'s11-prueba.zip',mimeType:'application/zip',buffer});
+ await expect(page.locator('#verifyStatus')).toContainText('PAQUETE VERIFICADO');
+ await expect(page.locator('#liveText')).toHaveText('2/2');
+});
