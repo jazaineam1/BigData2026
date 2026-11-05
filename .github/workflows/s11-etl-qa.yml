@@ -6,6 +6,10 @@ on:
       - 'Cuadernos/11_ETL_Audio_Imagenes.ipynb'
       - 'Presentaciones/s11-etl-audio-imagenes.html'
       - 'utils/s11_etl_core.py'
+      - 'tests/test_s11_etl_live.py'
+      - 'assets/s11/etl-live.html'
+      - 'utils/s11_live_dashboard.py'
+      - 'utils/s11_etl_live.py'
       - 'utils/s11_lesson_cells.json'
       - 'utils/build_session11_etl_audio_imagenes.py'
       - 'utils/validate_session11_etl.py'
@@ -21,6 +25,10 @@ on:
       - 'Cuadernos/11_ETL_Audio_Imagenes.ipynb'
       - 'Presentaciones/s11-etl-audio-imagenes.html'
       - 'utils/s11_etl_core.py'
+      - 'tests/test_s11_etl_live.py'
+      - 'assets/s11/etl-live.html'
+      - 'utils/s11_live_dashboard.py'
+      - 'utils/s11_etl_live.py'
       - 'utils/s11_lesson_cells.json'
       - 'utils/build_session11_etl_audio_imagenes.py'
       - 'utils/validate_session11_etl.py'
@@ -40,11 +48,11 @@ jobs:
         with:
           python-version: '3.12'
       - name: Instalar bibliotecas necesarias
-        run: python -m pip install "pillow>=10,<13" "numpy>=1.26,<3" "pandas>=2.2,<3" "pyarrow>=17,<24" "soundfile>=0.12,<1" "scipy>=1.13,<2" "matplotlib>=3.8,<4" "ipython>=8" "scikit-learn>=1.5,<2"
+        run: python -m pip install "pillow>=10,<13" "numpy>=1.26,<3" "pandas>=2.2,<3" "pyarrow>=17,<24" "soundfile>=0.12,<1" "scipy>=1.13,<2" "matplotlib>=3.8,<4" "ipython>=8" "ipywidgets>=8,<9" "scikit-learn>=1.5,<2"
       - name: Generador, estructura y sintaxis del cuaderno
         run: python utils/validate_session11_etl.py
       - name: Lote sintético integral sin red, idempotencia, ZIP y controles negativos
-        run: python -m unittest discover -s tests -p test_s11_etl.py -v
+        run: python -m unittest discover -s tests -p 'test_s11_etl*.py' -v
   navegador:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -68,7 +76,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Bibliotecas de laboratorio reproducible
-        run: python -m pip install "pillow>=10,<13" "numpy>=1.26,<3" "pandas>=2.2,<3" "pyarrow>=17,<24" "soundfile>=0.12,<1" "scipy>=1.13,<2" "matplotlib>=3.8,<4" "ipython>=8" "scikit-learn>=1.5,<2"
+        run: python -m pip install "pillow>=10,<13" "numpy>=1.26,<3" "pandas>=2.2,<3" "pyarrow>=17,<24" "soundfile>=0.12,<1" "scipy>=1.13,<2" "matplotlib>=3.8,<4" "ipython>=8" "ipywidgets>=8,<9" "scikit-learn>=1.5,<2"
       - name: Ejecución limpia de cuaderno con 32 WEBP y 10 voces MINDS-14 auténticas
         env:
           MPLBACKEND: Agg
