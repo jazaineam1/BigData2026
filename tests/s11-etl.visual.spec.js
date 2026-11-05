@@ -4,10 +4,10 @@ const route='/Presentaciones/s11-etl-audio-imagenes.html';
 test('S11: historia, 28 diapositivas, enlace directo a Colab y sin video',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(route+'#s1');
-  await expect(page.locator('.slide')).toHaveCount(28);
+  await expect(page.locator('.slide')).toHaveCount(30);
   await expect(page.locator('#s1')).toBeVisible();
   await expect(page.locator('#s1 h1')).toContainText('Laura');
-  await expect(page.locator('#count')).toHaveText('1 / 28');
+  await expect(page.locator('#count')).toHaveText('1 / 30');
   await expect(page.locator('a[href*="11_ETL_Audio_Imagenes.ipynb"]')).not.toHaveCount(0);
   await expect(page.locator('#s1')).toContainText('no trabajaremos video');
   await page.locator('#next').click();
@@ -159,4 +159,25 @@ test('S11 E2E procesa completo un WAV de 65 s sin corte en 60 segundos',async({p
   await expect(page.locator('#cards')).toContainText('Audio 65 s');
   await expect(page.locator('#cards')).not.toContainText('Audio de más de 60 s');
   await expect(page.locator('#liveRows')).toContainText('SHA-256 OK');
+});
+
+test('S11: diapositiva 29 enseña el mini reto y sus límites sin inventar relaciones',async({page})=>{
+ await page.goto(route+'#s29');
+ await expect(page.locator('#s29')).toBeVisible();
+ await expect(page.locator('#s29')).toContainText('Mini reto');
+ await expect(page.locator('#s29')).toContainText('article_id');
+ await expect(page.locator('#s29')).toContainText('OCR');
+ await expect(page.locator('#s29')).toContainText('MINDS-14');
+ await expect(page.locator('#count')).toContainText('29');
+});
+
+test('S11: diapositiva 30 guía audio de noticia, ASR, evidencias y separación de fuentes',async({page})=>{
+ await page.goto(route+'#s30');
+ await expect(page.locator('#s30')).toBeVisible();
+ await expect(page.locator('#s30')).toContainText('3530042.wav');
+ await expect(page.locator('#s30')).toContainText('MP3');
+ await expect(page.locator('#s30')).toContainText('ASR');
+ await expect(page.locator('#s30')).toContainText('más de cincuenta compañías');
+ await expect(page.locator('#s30')).toContainText('MINDS');
+ await expect(page.locator('#count')).toContainText('30');
 });
