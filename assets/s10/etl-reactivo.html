@@ -204,8 +204,25 @@ function render(){
  for(var i=0;i<state.rows.length;i++){
   var r=state.rows[i],item=r.item,t=r.transformed,row=r.row,card=document.createElement('article');card.className='asset';
   card.appendChild(textEl('span',item.kind==='image'?'IMAGEN':'AUDIO','pill'));card.appendChild(textEl('h3',item.name));
-  if(item.kind==='image'){var im=document.createElement('img');im.src=t.preview;im.alt='Resultado transformado de '+item.name+'; '+row.descripcion_tecnica;card.appendChild(im)}
-  else{var canvas=document.createElement('canvas');canvas.width=480;canvas.height=110;canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Forma de onda de '+item.name);card.appendChild(canvas);drawWave(canvas,t.wave);var audio=document.createElement('audio');audio.controls=true;var u=URL.createObjectURL(new Blob([t.bytes],{type:'audio/wav'}));state.urls.push(u);audio.src=u;card.appendChild(audio)}
+  if(item.kind==='image'){
+   card.appendChild(textEl('p','ORIGINAL · sin modificar','meta'));
+   var sourceUrl=URL.createObjectURL(new Blob([item.raw],{type:item.mime}));state.urls.push(sourceUrl);
+   var sourceImage=document.createElement('img');sourceImage.src=sourceUrl;sourceImage.alt='Imagen RAW original '+item.name;card.appendChild(sourceImage);
+   card.appendChild(textEl('p','DERIVADO · perfil actual','meta'));
+   var im=document.createElement('img');im.src=t.preview;im.alt='Resultado transformado de '+item.name+'; '+row.descripcion_tecnica;card.appendChild(im);
+   var hist=document.createElement('canvas');hist.width=400;hist.height=120;hist.setAttribute('role','img');hist.setAttribute('aria-label','Histograma de 8 bandas: '+t.metrics.histograma_8.join(', '));card.appendChild(hist);
+   var hg=hist.getContext('2d'),counts=t.metrics.histograma_8,maximum=Math.max(1,...counts);
+   hg.fillStyle='#f4f9fc';hg.fillRect(0,0,hist.width,hist.height);hg.fillStyle='#087477';
+   for(var band=0;band<8;band++){var bh=Math.round(91*counts[band]/maximum);hg.fillRect(14+band*48,102-bh,31,bh)}
+   hg.fillStyle='#243d53';hg.font='12px system-ui';hg.fillText('Luminancia: 0 → 255',14,116);
+  }else{
+   card.appendChild(textEl('p','ORIGINAL · escuchar','meta'));
+   var sourceAudio=document.createElement('audio');sourceAudio.controls=true;
+   var originalUrl=URL.createObjectURL(new Blob([item.raw],{type:item.mime}));state.urls.push(originalUrl);sourceAudio.src=originalUrl;card.appendChild(sourceAudio);
+   card.appendChild(textEl('p','DERIVADO · WAV PCM16 mono 16 kHz','meta'));
+   var canvas=document.createElement('canvas');canvas.width=480;canvas.height=110;canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Forma de onda de '+item.name);card.appendChild(canvas);drawWave(canvas,t.wave);
+   var audio=document.createElement('audio');audio.controls=true;var u=URL.createObjectURL(new Blob([t.bytes],{type:'audio/wav'}));state.urls.push(u);audio.src=u;card.appendChild(audio);
+  }
   card.appendChild(textEl('p',row.descripcion_tecnica));
   card.appendChild(textEl('p','RAW '+fmt(row.bytes_original)+' bytes → derivado '+fmt(row.bytes_derivado)+' bytes.','meta'));
   card.appendChild(textEl('p','Cómo se lee: '+(item.kind==='image'?'el histograma cuenta píxeles en 8 intervalos de luminancia.':'el RMS mide amplitud eficaz, no contenido hablado.'),'meta'));
