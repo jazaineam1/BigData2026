@@ -160,3 +160,13 @@ test('S11 E2E procesa completo un WAV de 65 s sin corte en 60 segundos',async({p
   await expect(page.locator('#cards')).not.toContainText('Audio de más de 60 s');
   await expect(page.locator('#liveRows')).toContainText('SHA-256 OK');
 });
+
+test('S11: diapositiva 29 enseña el mini reto y sus límites sin inventar relaciones',async({page})=>{
+ await page.goto(route+'#s29');
+ await expect(page.locator('#s29')).toBeVisible();
+ await expect(page.locator('#s29')).toContainText('Mini reto');
+ await expect(page.locator('#s29')).toContainText('article_id');
+ await expect(page.locator('#s29')).toContainText('OCR');
+ await expect(page.locator('#s29')).toContainText('MINDS-14');
+ await expect(page.locator('#count')).toContainText('29');
+});
