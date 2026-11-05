@@ -14,6 +14,7 @@ on:
       - 'utils/build_session11_etl_audio_imagenes.py'
       - 'utils/validate_session11_etl.py'
       - 'tests/test_s11_etl.py'
+      - 'tests/test_s11_etl_motor_cache.py'
       - 'tests/s11-etl.visual.spec.js'
       - 'playwright.s11.config.cjs'
       - 'lms/data/course.json'
@@ -33,6 +34,7 @@ on:
       - 'utils/build_session11_etl_audio_imagenes.py'
       - 'utils/validate_session11_etl.py'
       - 'tests/test_s11_etl.py'
+      - 'tests/test_s11_etl_motor_cache.py'
       - 'tests/s11-etl.visual.spec.js'
       - 'playwright.s11.config.cjs'
 permissions:
