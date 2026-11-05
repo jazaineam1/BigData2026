@@ -147,7 +147,7 @@ class TestS11EtL(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Ganancia"):
                 core.transformar_audios(Path(tmp), [], 9.0)
             with self.assertRaisesRegex(ValueError, "max_audios"):
-                core.extraer_audios(Path(tmp), 15)
+                core.extraer_audios(Path(tmp), 401)
             with self.assertRaisesRegex(ValueError, "max_imagenes"):
                 core.extraer_imagenes(Path(tmp), 0)
 
