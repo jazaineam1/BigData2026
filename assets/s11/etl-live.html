@@ -363,7 +363,7 @@ async function save(){
   var manifest={schema:'bigdata-s10-etl-reactivo/v2',case_id:'laura_compras_claras_s10',relation_policy:'no_asociar_archivos_con_articulos_o_contratos_sin_evidencia',generado_en:new Date().toISOString(),procesamiento:'navegador_local',cantidad:rows.length,parametros:o,registros:rows,limites:['no_reconocimiento_semantico','sin_transcripcion_ASR','sin_entrega_automatica_LMS']};
   entries.push({name:'manifest.json',bytes:utf(JSON.stringify(manifest,null,2))});
   var data=zipBuild(entries),url=URL.createObjectURL(new Blob([data],{type:'application/zip'})),link=document.createElement('a');
-  link.href=url;link.download='S10_ETL_evidencia_'+new Date().toISOString().slice(0,10)+'.zip';document.body.appendChild(link);link.click();link.remove();setTimeout(function(){URL.revokeObjectURL(url)},3000);
+  link.href=url;link.download='S11_ETL_Live_evidencia_'+new Date().toISOString().slice(0,10)+'.zip';document.body.appendChild(link);link.click();link.remove();setTimeout(function(){URL.revokeObjectURL(url)},3000);
   $('verifyStatus').textContent='ZIP generado: '+rows.length+' originales y derivados + catálogo JSONL + manifiesto. Reábrelo para comprobar los hashes.';
  }catch(e){$('verifyStatus').textContent='Error al guardar: '+e.message}
  finally{$('save').disabled=false}
