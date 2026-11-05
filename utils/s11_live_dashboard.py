@@ -104,6 +104,8 @@ class LiveMonitor:
             )
             self.rates.value = (
                 f"<b>{evt.get('derivatives_per_second', 0):.2f}</b> derivados/s · "
+                f"<b>{evt.get('mib_per_second', 0):.3f}</b> MiB/s · "
+                f"<b>{evt.get('peak_process_rss_mb') or 0:.1f}</b> MiB RSS pico del proceso · "
                 f"<b>{evt.get('sources_per_second', 0):.2f}</b> fuentes/s · "
                 f"<b>{int(evt.get('workers', 1))}</b> threads · "
                 f"<b>{evt.get('inflight', 0)}</b> tareas enviadas/en vuelo · "
