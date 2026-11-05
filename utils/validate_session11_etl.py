@@ -25,7 +25,7 @@ NOTEBOOK = ROOT / "Cuadernos" / "11_ETL_Audio_Imagenes.ipynb"
 def estructura():
     subprocess.check_call([sys.executable,str(ROOT/"utils"/"build_session11_etl_audio_imagenes.py"),"--check"])
     nb = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
-    assert len(nb["cells"]) == 54, "La lección S11 espera 54 celdas"
+    assert len(nb["cells"]) == 63, "La lección S11 espera 63 celdas"
     ids = [x["id"] for x in nb["cells"]]
     for id in ("s11-preparar","s11-cargar-motor","s11-elegir","s11-extraer-imagenes",
                "s11-extraer-audios","s11-transformar-imagenes","s11-transformar-audios",
@@ -40,6 +40,9 @@ def estructura():
     assert ids.index("s11-formatos-practica") < ids.index("s11-calidad"), "Formatos antes de control QA"
     assert ids.index("s11-threads-codigo") < ids.index("s11-live-f-benchmark")
     assert ids.index("s11-audio-largo") < ids.index("s11-cargar")
+    assert ids.index("s11-autocomprobar") < ids.index("s11-reto-fuente") < ids.index("s11-reto-ficha")
+    assert "OCR" in next(x["source"] for x in CELDAS if x["id"]=="s11-reto-ocr-guia")
+    assert "article_id" in next(x["source"] for x in CELDAS if x["id"]=="s11-reto-fuente")
     assert ids.index("s11-escala") < ids.index("s11-escala-lotes") < ids.index("s11-escala-comparar") < ids.index("s11-empaquetar")
     assert ids.index("s11-extraer-imagenes") < ids.index("s11-extraer-audios")
     print("VALIDACIÓN S11: estructura, contrato, orden de tutorial y sintaxis OK")
