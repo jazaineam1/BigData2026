@@ -107,6 +107,7 @@ jobs:
           test -f _site/Presentaciones/s10-etl-multimedia.html
           test -f _site/Cuadernos/10_ETL_Multimedia.ipynb
           test -f _site/Presentaciones/s10-imagenes-audio.html
+          test -f _site/assets/s10/etl-reactivo.html
           test -f _site/Cuadernos/10_Imagenes_Audio.ipynb
           touch _site/.nojekyll
 
@@ -139,6 +140,7 @@ jobs:
             s10="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/s10-etl-multimedia.html?v=${GITHUB_SHA}" || true)"
             s10_nb="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Cuadernos/10_ETL_Multimedia.ipynb?v=${GITHUB_SHA}" || true)"
             s10_new="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/s10-imagenes-audio.html?v=${GITHUB_SHA}" || true)"
+            s10_etl="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}assets/s10/etl-reactivo.html?v=${GITHUB_SHA}" || true)"
             s10_new_nb="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Cuadernos/10_Imagenes_Audio.ipynb?v=${GITHUB_SHA}" || true)"
             image_status="$(curl -fsS -o /dev/null -w '%{http_code}' "${PAGE_URL}Datos/s10_imagenes_reales/raw/7a71615869df5c19563b4f8d.webp?v=${GITHUB_SHA}" || true)"
             open_wall="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/s09-muro-publico.html?v=${GITHUB_SHA}" || true)"
@@ -158,6 +160,9 @@ jobs:
               && grep -q 'data-step="preparar"' <<<"$s10" \
               && grep -q 's10-producto' <<<"$s10_nb" \
               && grep -q '¿Cómo analizar imágenes y audio como datos?' <<<"$s10_new" \
+              && grep -q 's10EtlLaunch' <<<"$s10_new" \
+              && grep -q 'bigdata-s10-etl-reactivo/v2' <<<"$s10_etl" \
+              && grep -q 'audioGain' <<<"$s10_etl" \
               && grep -q 's10-audio-raw' <<<"$s10_new_nb" \
               && [ "$image_status" = "200" ] \
               && [ -n "$realtime_sdk" ]; then
