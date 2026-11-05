@@ -9,6 +9,7 @@ on:
       - 'assets/tutoriales/tc2-paso-a-paso.html'
       - '.github/workflows/tc2-qa.yml'
       - 'utils/test_tc2_e2e_real.py'
+      - 'utils/calificar_tc2_zip.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +24,7 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install 'numpy>=1.26' 'pandas>=2.2' 'pillow>=10' 'soundfile>=0.12'
       - run: python utils/validate_taller_control_2.py
+      - run: python utils/calificar_tc2_zip.py --self-test
   audio-real:
     runs-on: ubuntu-latest
     timeout-minutes: 18
