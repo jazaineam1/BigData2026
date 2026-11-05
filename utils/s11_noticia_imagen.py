@@ -121,15 +121,42 @@ def buscar_noticia_por_imagen(imagen: dict, noticias: list[dict]) -> dict:
             "not_related_to_MINDS14": True}
 
 
-def guardar_ficha(raiz: Path, noticia: dict, observacion_visual: str,
+CATEGORIAS_VISUALES = (
+    "personas", "edificacion", "vehiculos", "texto_visible",
+    "paisaje", "otros_objetos", "no_determinado",
+)
+LIMITES_VISUALES = (
+    "la_foto_no_demuestra_la_noticia",
+    "no_permita_identificar_personas",
+    "no_corrobora_las_cifras",
+)
+
+
+def validar_evidencia_visual(evidencia: dict) -> dict:
+    """Rechaza texto libre: dos decisiones distintas y un límite verificable."""
+    campos = {"categoria_principal", "alternativa_descartada", "limite"}
+    if not isinstance(evidencia, dict) or set(evidencia) != campos:
+        raise ValueError("La evidencia visual debe contener tres decisiones cerradas")
+    categoria = evidencia["categoria_principal"]
+    alternativa = evidencia["alternativa_descartada"]
+    limite = evidencia["limite"]
+    if categoria not in CATEGORIAS_VISUALES or alternativa not in CATEGORIAS_VISUALES:
+        raise ValueError("Categoría visual fuera de las opciones admitidas")
+    if categoria == alternativa:
+        raise ValueError("La alternativa descartada debe ser distinta de la categoría elegida")
+    if limite not in LIMITES_VISUALES:
+        raise ValueError("Límite visual fuera de las opciones admitidas")
+    return dict(evidencia)
+
+
+def guardar_ficha(raiz: Path, noticia: dict, evidencia_visual: dict,
                  ocr_texto: str, ocr_fuente: str) -> Path:
     """Producto del estudiante; conserva una cita breve, no todo el artículo."""
     raiz = Path(raiz)
     imagen = raiz / noticia["image_original_path"]
     if not imagen.is_file() or sha256(imagen.read_bytes()).hexdigest() != noticia["image_original_sha256"]:
         raise ValueError("El RAW de la foto no coincide con su SHA-256")
-    if len(observacion_visual.strip()) < 12:
-        raise ValueError("Observa y describe al menos algo concreto de la fotografía")
+    evidencia_visual = validar_evidencia_visual(evidencia_visual)
     if ocr_fuente not in ("imagen_real", "no_disponible"):
         raise ValueError("Fuente de OCR inválida")
     ficha = {
@@ -140,7 +167,7 @@ def guardar_ficha(raiz: Path, noticia: dict, observacion_visual: str,
         "image_original_path": noticia["image_original_path"],
         "image_sha256": noticia["image_original_sha256"],
         "image_credit": noticia["image_credit"],
-        "observacion_visual_del_estudiante": observacion_visual.strip(),
+        "evidencia_visual_estructurada": evidencia_visual,
         "ocr_texto_en_imagen": ocr_texto[:1000],
         "ocr_fuente": ocr_fuente,
         "palabras_frecuentes": noticia["palabras_frecuentes"],
