@@ -28,10 +28,11 @@ test('ejemplo autónomo: E/T/L, resultado reactivo, ZIP y relectura con hashes',
 
 test('imagen propia: archivo subido, derivado y descripción sin inferencia semántica',async({page})=>{
   await page.goto(route);
-  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR6kAAAAASUVORK5CYII=','base64');
+  const dataUrl=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=120;c.height=80;const g=c.getContext('2d');g.fillStyle='#28786c';g.fillRect(0,0,120,80);g.fillStyle='#ffffff';g.fillRect(20,20,40,30);return c.toDataURL('image/png')});
+  const png=Buffer.from(dataUrl.split(',')[1],'base64');
   await page.locator('#files').setInputFiles({name:'mi_imagen.png',mimeType:'image/png',buffer:png});
-  await expect(page.locator('#catalogBody tr')).toHaveCount(1);
   await expect(page.locator('#catalogBody')).toContainText('mi_imagen.png');
+  await expect(page.locator('#catalogBody tr')).toHaveCount(1);
   await expect(page.locator('.asset')).toContainText('No identifica objetos');
   await page.locator('#gray').check();
   await expect(page.locator('#manifestPreview')).toContainText('"gris": true');
