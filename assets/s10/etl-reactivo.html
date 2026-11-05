@@ -121,7 +121,7 @@ async function addFiles(files,source){
    var raw=new Uint8Array(await f.arrayBuffer());
    if(raw.length===0)throw Error('Archivo vacío');
    var sha=await digest(raw);
-   if(state.items.some(function(x){return x.rawSha===sha&&x.kind===kind})){failures.push(f.name+': archivo idéntico omitido por SHA-256');continue}
+   if(state.items.some(function(x){return x.rawSha===sha&&x.kind===kind})){failures.push(f.name+': duplicado omitido (mismo SHA-256)');continue}
    state.items.push({id:'a'+String(state.items.length+1).padStart(3,'0'),name:f.name,kind:kind,mime:f.type||(kind==='image'?'image/png':'audio/wav'),source:source,raw:raw,rawSha:sha});
    accepted++;
   }catch(e){failures.push(f.name+': '+e.message)}
@@ -310,7 +310,7 @@ async function loadZip(file){
   var files=zipRead(new Uint8Array(await file.arrayBuffer())),mbytes=files.get('manifest.json');
   if(!mbytes)throw Error('Falta manifest.json');
   var manifest=JSON.parse(decoder.decode(mbytes));
-  if(manifest.schema!=='bigdata-s10-etl-reactivo/v1'||!Array.isArray(manifest.registros)||manifest.registros.length<1||manifest.registros.length>6)throw Error('Manifiesto no compatible');
+  if(manifest.schema!=='bigdata-s10-etl-reactivo/v2'||!Array.isArray(manifest.registros)||manifest.registros.length<1||manifest.registros.length>6)throw Error('Manifiesto no compatible');
   var cats=files.get('catalogo.jsonl');if(!cats)throw Error('Falta catalogo.jsonl');
   var parsed=decoder.decode(cats).trim().split('\n').map(function(s){return JSON.parse(s)});
   if(JSON.stringify(parsed)!==JSON.stringify(manifest.registros))throw Error('Catálogo y manifiesto no coinciden');
