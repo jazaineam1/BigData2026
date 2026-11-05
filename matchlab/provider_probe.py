@@ -1,18 +1,8 @@
-import json, urllib.request, urllib.parse, datetime
-base="https://sportscore.com/api/v1/"
-for endpoint,args in [
-    ("search/",{"q":"Categoria Primera A","sport":"football","limit":20}),
-    ("fixtures/",{"sport":"football","date":"2026-11-04","limit":200}),
-    ("fixtures/",{"sport":"football","date":"2026-11-06","limit":200}),
-    ("standings/",{"sport":"football","slug":"categoria-primera-a"}),
-]:
-    url=base+endpoint+"?"+urllib.parse.urlencode(args)
-    try:
-        req=urllib.request.Request(url,headers={"User-Agent":"MatchLab/4.1 (+https://github.com/jazaineam1/BigData2026)"})
-        with urllib.request.urlopen(req,timeout=20) as r:
-            x=json.load(r)
-        print(endpoint, args.get("date"),"kind",type(x).__name__,"keys",list(x.keys()) if isinstance(x,dict) else "list","count",len(x) if isinstance(x,list) else "dict")
-        raw=json.dumps(x,ensure_ascii=False)
-        print("sample",raw[:2300])
-    except Exception as exc:
-        print(endpoint,args.get("date"),"ERROR",repr(exc))
+import json,urllib.request,urllib.parse
+for date in ['2026-11-04','2026-11-05','2026-11-06','2026-11-07','2026-11-08','2026-11-09','2026-11-12']:
+  args=urllib.parse.urlencode({'sport':'football','date':date,'competition':'categoria-primera-a','limit':200})
+  req=urllib.request.Request('https://sportscore.com/api/v1/fixtures/?'+args,headers={'User-Agent':'MatchLab/4.1 (+https://github.com/jazaineam1/BigData2026)'})
+  try:
+    with urllib.request.urlopen(req,timeout=20) as res: data=json.load(res)
+    print(date,'count',data.get('count'),'fixtures',[(m.get('home'),m.get('away'),m.get('home_score'),m.get('away_score'),m.get('status'),m.get('time')) for m in data.get('matches',[])[:30]])
+  except Exception as exc:print(date,'ERROR',repr(exc))
