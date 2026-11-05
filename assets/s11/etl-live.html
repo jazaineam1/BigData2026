@@ -105,7 +105,7 @@ table{width:100%;border-collapse:collapse;font-size:.87rem}th,td{text-align:left
 (function(){
 'use strict';
 var $=function(id){return document.getElementById(id)};
-var state={items:[],rows:[],ready:false,run:0,urls:[],liveStart:0,liveDone:0,liveErrors:0,liveBusy:false};
+var state={items:[],rows:[],ready:false,run:0,urls:[],liveStart:0,liveDone:0,liveErrors:0,liveBytes:0,liveBusy:false};
 var encoder=new TextEncoder(),decoder=new TextDecoder();
 var LIMIT_COUNT=6,LIMIT_BYTES=8*1024*1024;
 function status(s,error){$('status').textContent=s;$('status').dataset.error=error?'true':'false'}
@@ -191,7 +191,7 @@ async function transformAudio(item,o){
  return {bytes:writeWav(out,sr),mime:'audio/wav',extension:'wav',metrics:m,description:'Audio '+m.duracion_seg+' s desde '+m.inicio_seg+' s; ganancia '+m.ganancia_pct+' %; RMS '+m.rms+'; '+m.cruces_cero_por_seg+' cruces por cero/s. No hay transcripción.',wave:out};
 }
 function liveSetup(){
- state.liveStart=performance.now();state.liveDone=0;state.liveErrors=0;state.liveBusy=true;
+ state.liveStart=performance.now();state.liveDone=0;state.liveErrors=0;state.liveBytes=0;state.liveBusy=true;
  $('cancelLive').disabled=false;$('liveProgress').max=Math.max(1,state.items.length);$('liveProgress').value=0;
  $('liveText').textContent='0/'+state.items.length;
  var body=$('liveRows');body.replaceChildren();
@@ -206,7 +206,8 @@ function liveUpdate(){
  var elapsed=(performance.now()-state.liveStart)/1000;
  $('liveProgress').value=state.liveDone;$('liveText').textContent=state.liveDone+'/'+state.items.length;
  $('liveKPIs').textContent='Tiempo real: '+elapsed.toFixed(2)+' s · Fuentes/s: '+
- (state.liveDone/Math.max(.001,elapsed)).toFixed(2)+' · Derivados correctos: '+
+ (state.liveDone/Math.max(.001,elapsed)).toFixed(2)+' · MiB/s: '+
+ (state.liveBytes/1048576/Math.max(.001,elapsed)).toFixed(3)+' · Derivados correctos: '+
  (state.liveDone-state.liveErrors)+' · Errores: '+state.liveErrors;
 }
 function liveStage(index,stage,elapsed,message){
@@ -257,6 +258,7 @@ async function process(){
     parametros:pars,metricas:r.metrics,status:'ok',descripcion_tecnica:r.description,clase_contenido_elegida:item.kind==='image'?o.imagen_tipo_elegido:'no_aplica',limite_elegido:o.limite_elegido};
    if(token!==state.run)return;
    result.push({item:item,transformed:r,row:row});
+   state.liveBytes+=item.raw.length+r.bytes.length;
    state.liveDone++;liveStage(i,'L · Cargado / SHA-256 OK',(performance.now()-started)/1000,'Verificado');
   }catch(e){
    if(token!==state.run)return;
