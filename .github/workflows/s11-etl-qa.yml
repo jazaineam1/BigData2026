@@ -73,4 +73,5 @@ jobs:
         env:
           MPLBACKEND: Agg
           HF_HUB_DISABLE_TELEMETRY: '1'
+          S11_CI_MEDIO: '1'
         run: python utils/validate_session11_etl.py --real
