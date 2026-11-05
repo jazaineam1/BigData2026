@@ -61,18 +61,30 @@ class NoticiasFotosTest(unittest.TestCase):
                       "original_sha256":hashlib.sha256(body).hexdigest(),"credit":"Cortesía",
                       "source_url":"https://example.com"}
             article=news.buscar_noticia_por_imagen(original,fixture_corpus())
-            path=news.guardar_ficha(root,article,
-                "Se aprecia texto de ejemplo en una fotografía de prueba",
-                "Prueba OCR","imagen_real")
+            evidencia={
+                "categoria_principal":"no_determinado",
+                "alternativa_descartada":"personas",
+                "limite":"la_foto_no_demuestra_la_noticia",
+            }
+            path=news.guardar_ficha(root,article,evidencia,"Prueba OCR","imagen_real")
             doc=json.loads(path.read_text())
             self.assertEqual(doc["article_id"],"3562373")
             self.assertLessEqual(len(doc["fragmento_breve"]),220)
             self.assertNotIn("texto_lectura",doc)
             self.assertTrue(doc["no_asociar_audios_MINDS14"])
+            self.assertEqual(doc["evidencia_visual_estructurada"],evidencia)
+            self.assertNotIn("observacion_visual_del_estudiante",doc)
+            for invalido in (
+                "Texto libre que no debe aceptarse",
+                {**evidencia,"categoria_principal":"sin_seleccionar"},
+                {**evidencia,"alternativa_descartada":"no_determinado"},
+                {**evidencia,"limite":"explicación abierta"},
+            ):
+                with self.assertRaises(ValueError):
+                    news.guardar_ficha(root,article,invalido,"","no_disponible")
             ruta.write_bytes(b"manipulado")
             with self.assertRaisesRegex(ValueError,"SHA-256"):
-                news.guardar_ficha(root,article,"Una observación visual de prueba",
-                                    "","no_disponible")
+                news.guardar_ficha(root,article,evidencia,"","no_disponible")
 
 
 if __name__=="__main__":
