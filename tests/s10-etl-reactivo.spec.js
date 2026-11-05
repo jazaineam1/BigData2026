@@ -120,3 +120,24 @@ test('el mismo archivo RAW se deduplica aunque se suba dos veces',async({page})=
   await expect(page.locator('#status')).toContainText('duplicado');
   await expect(page.locator('#catalogBody tr')).toHaveCount(1);
 });
+
+test('audio reactivo: ventana, inicio y ganancia alteran datos y conservan RAW',async({page})=>{
+  await page.goto(route);
+  await page.locator('#demo').click();
+  await expect(page.locator('#catalogBody')).toContainText('senal_demo.wav');
+  const first=JSON.parse(await page.locator('#manifestPreview').innerText());
+  const sha=first.primer_registro.original_sha256;
+  await page.locator('#audioWindow').selectOption('1');
+  await page.locator('#audioOffset').fill('50');
+  await page.locator('#audioOffset').dispatchEvent('input');
+  await expect(page.locator('#status')).toContainText('L: 2 filas');
+  await page.locator('#audioGain').fill('0');
+  await page.locator('#audioGain').dispatchEvent('input');
+  await expect(page.locator('#manifestPreview')).toContainText('"audio_ganancia_pct": 0');
+  await expect(page.locator('#cards')).toContainText('ganancia 0 %; RMS 0;');
+  const last=JSON.parse(await page.locator('#manifestPreview').innerText());
+  expect(last.primer_registro.original_sha256).toBe(sha);
+  await page.locator('#audioGain').fill('100');
+  await page.locator('#audioGain').dispatchEvent('input');
+  await expect(page.locator('#cards')).toContainText('ganancia 100 %');
+});
