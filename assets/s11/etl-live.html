@@ -45,7 +45,7 @@ table{width:100%;border-collapse:collapse;font-size:.87rem}th,td{text-align:left
 </section>
 <section class="panel" id="guia">
 <h2>Un caso completo: seis decisiones sin instalaciones</h2>
-<details open><summary>1 · ¿Qué tiene Laura? Prepara tu entrada</summary><p><b>Haz esto ahora:</b> pulsa «Crear ejemplo» para probar sin archivos, o sube una fotografía/diagrama y un WAV o MP3 propios. Se admiten hasta 6 archivos de 8 MiB cada uno; audios de hasta 60 segundos. <b>Debe verse:</b> una fila por archivo con SHA-256. <b>Si falla:</b> usa el ejemplo incluido. <b>Interpretación:</b> el hash identifica los bytes, no su significado.</p></details>
+<details open><summary>1 · ¿Qué tiene Laura? Prepara tu entrada</summary><p><b>Haz esto ahora:</b> pulsa «Crear ejemplo» para probar sin archivos, o sube una fotografía/diagrama y un WAV o MP3 propios. Se admiten hasta 6 archivos: imágenes de hasta 8 MiB y audios de hasta 128 MiB según la memoria del navegador. **No se corta el audio en el primer minuto.** Se muestra el avance de la transformación completa; para archivos muy grandes o códecs no compatibles usa la ruta por bloques en Colab. <b>Debe verse:</b> una fila por archivo con SHA-256. <b>Si falla:</b> usa el ejemplo incluido. <b>Interpretación:</b> el hash identifica los bytes, no su significado.</p></details>
 <details><summary>2 · ¿De dónde vino? Extrae el original</summary><p>Comprueba nombre, tipo, tamaño y origen de cada archivo. Revisa la vista previa. El navegador conserva una copia inmutable del original en memoria. <b>No concluyas:</b> que una fotografía demuestra hechos de un contrato o que un audio pertenece a una noticia.</p></details>
 <details><summary>3 · ¿Qué cambió? Transforma un parámetro</summary><p>En imágenes, cambia «Lado máximo» de 320 a 160 y compara dimensiones e histograma. Después prueba brillo, contraste, gris o umbral. En audios se genera WAV PCM16 mono de 16 kHz: cambia la ventana a 1 segundo, ajusta el inicio y pon ganancia en 0 % para medir silencio; devuelve la ganancia a 100 % para comparar RMS, pico y cruces por cero. <b>Debe verse:</b> el resultado se actualiza sin volver a subir archivos. <b>Atención:</b> una característica acústica no es una transcripción.</p></details>
 <details><summary>4 · ¿Cómo se recuperará? Carga el catálogo</summary><p>Busca una fila por activo, modalidad, perfil, nombre de archivo, tamaño y huellas del original y derivado. <b>Debe verse:</b> «E», «T» y «L» con igual cantidad de activos correctos. El catálogo es consultable, pero el procesamiento sigue en memoria hasta exportarlo. Su contrato <code>s10-asset-v2</code> será reutilizado en Colab.</p></details>
@@ -70,6 +70,28 @@ table{width:100%;border-collapse:collapse;font-size:.87rem}th,td{text-align:left
  <div style="overflow-x:auto"><table style="width:100%;margin-top:12px"><thead><tr><th>Original</th><th>Etapa</th><th>Duración</th><th>Validación</th></tr></thead><tbody id="liveRows"></tbody></table></div>
  <p class="help">Los estados son medidos en este navegador, fuente por fuente. La comparación de threads (1, 2, 4) se hace y se verifica en Python con el mismo criterio de hashes.</p>
 </div>
+</section>
+<section class="panel" id="codigo-y-formatos">
+<h2>El código y los formatos del ETL de Laura</h2>
+<p><b>Por qué:</b> Laura necesita saber exactamente qué se ejecutó, no solo pulsar «transformar». La herramienta procesa localmente; Colab muestra el código Python completo y el ETL por bloques para audios largos.</p>
+<details><summary>Ver código esencial: audio por bloques (Python/Colab)</summary>
+<pre><code>import soundfile as sf
+# Fragmentos de 10 segundos; el RAW original no se modifica.
+with sf.SoundFile(ruta_wav) as entrada:
+    for bloque in entrada.blocks(blocksize=entrada.samplerate * 10):
+        transformar_bloque(bloque)  # explicado paso a paso en S11
+        guardar_derivado_verificado()
+</code></pre>
+<p><b>Cómo se lee:</b> <code>blocks</code> avanza por el archivo completo, sin imponer un minuto. El ejemplo anterior es un esquema didáctico, no código ejecutable sin definir esas funciones; el cuaderno tiene la implementación real.</p></details>
+<details><summary>¿Qué son JSON, JSONL y Parquet?</summary>
+<p><b>JSON:</b> un documento con objetos o listas. <b>JSONL:</b> una fila JSON independiente por línea, fácil de anexar y leer secuencialmente. <b>Parquet:</b> archivo binario columnar para consultar columnas y conservar tipos. Aquí descargamos <code>catalogo.jsonl</code>; en Colab puedes convertirlo a Parquet y reabrirlo.</p>
+<pre><code>JSON:  [{"modality":"image"},{"modality":"audio"}]
+JSONL: {"modality":"image"}
+       {"modality":"audio"}
+</code></pre></details>
+<details><summary>¿Qué contiene cada carpeta del ZIP?</summary>
+<p><code>raw/</code>: originales; <code>derived/</code>: copias transformadas; <code>catalogo.jsonl</code>: una fila por activo; <code>manifest.json</code>: índices y huellas SHA-256. No se conserva información secreta en un navegador público.</p></details>
+<p><b>Prueba autónoma:</b> sube una imagen y un audio largo, observa la etapa T y descarga el ZIP. En el cuaderno ejecuta 6B para comparar formatos y 6C para recuperar los archivos sin repetir el ETL.</p>
 </section>
 <section class="panel" id="transformacion">
 <h2>T · Transformar: ¿qué cambió y qué permanece?</h2>
@@ -107,7 +129,7 @@ table{width:100%;border-collapse:collapse;font-size:.87rem}th,td{text-align:left
 var $=function(id){return document.getElementById(id)};
 var state={items:[],rows:[],ready:false,run:0,urls:[],liveStart:0,liveDone:0,liveErrors:0,liveBytes:0,liveBusy:false};
 var encoder=new TextEncoder(),decoder=new TextDecoder();
-var LIMIT_COUNT=6,LIMIT_BYTES=8*1024*1024;
+var LIMIT_COUNT=6,LIMIT_IMAGE_BYTES=8*1024*1024,LIMIT_AUDIO_BYTES=128*1024*1024;
 function status(s,error){$('status').textContent=s;$('status').dataset.error=error?'true':'false'}
 function textEl(tag,content,klass){var e=document.createElement(tag);e.textContent=content;if(klass)e.className=klass;return e}
 function fmt(n){return Number(n).toLocaleString('es-CO')}
@@ -131,7 +153,7 @@ async function addFiles(files,source){
  for(var i=0;i<list.length;i++){
   var f=list[i],kind=mimeOf(f);
   if(!kind){failures.push(f.name+': no es imagen ni audio compatible');continue}
-  if(f.size>LIMIT_BYTES){failures.push(f.name+': supera 8 MiB');continue}
+  if(f.size>(kind==='audio'?LIMIT_AUDIO_BYTES:LIMIT_IMAGE_BYTES)){failures.push(f.name+': tamaño superior al recomendado para procesar en memoria ('+(kind==='audio'?'128':'8')+' MiB). Usa Colab por bloques si tu archivo es mayor.');continue}
   try{
    var raw=new Uint8Array(await f.arrayBuffer());
    if(raw.length===0)throw Error('Archivo vacío');
@@ -169,18 +191,19 @@ async function transformImage(item,o){
  var desc='Imagen '+canvas.width+'×'+canvas.height+' px; luminancia '+m.luminancia_media+'/255; '+m.porcentaje_oscuros+' % de píxeles oscuros. No identifica objetos.';
  return {bytes:out,mime:'image/png',extension:'png',metrics:Object.assign({ancho:canvas.width,alto:canvas.height},m),description:desc,preview:canvas.toDataURL('image/png')};
 }
-async function transformAudio(item,o){
+async function transformAudio(item,o,onProgress){
  var AudioCtx=window.AudioContext||window.webkitAudioContext;
  if(!AudioCtx)throw Error('El navegador no ofrece Web Audio');
  var ac=new AudioCtx(),decoded;
  try{decoded=await ac.decodeAudioData(item.raw.buffer.slice(0))}finally{await ac.close()}
- if(decoded.duration>60)throw Error('Audio de más de 60 s; elige una muestra corta');
+ if(!Number.isFinite(decoded.duration)||decoded.duration<=0)throw Error('Archivo sin audio decodificable');
  var sr=16000,offset=decoded.duration*(o.audio_inicio_pct/100);
  var seconds=o.audio_ventana==='all'?decoded.duration:Math.min(+o.audio_ventana,decoded.duration);
  var windowDuration=Math.min(seconds,decoded.duration-offset);
  var n=Math.max(1,Math.round(windowDuration*sr)),out=new Float32Array(n),chs=[];
  for(var c=0;c<decoded.numberOfChannels;c++)chs.push(decoded.getChannelData(c));
  for(var i=0;i<n;i++){
+  if(i>0 && i%160000===0){if(onProgress)onProgress(i,n);await nextFrame()}
   var pos=(offset+i/sr)*decoded.sampleRate,j=Math.min(Math.floor(pos),decoded.length-1),k=Math.min(j+1,decoded.length-1),v=0;
   for(var ch=0;ch<chs.length;ch++)v+=(chs[ch][j]*(1-(pos-j))+chs[ch][k]*(pos-j))/chs.length;
   out[i]=Math.max(-1,Math.min(1,v*(o.audio_ganancia_pct/100)));
@@ -238,7 +261,7 @@ async function process(){
   await nextFrame();
   if(token!==state.run)return;
   try{
-   var r=item.kind==='image'?await transformImage(item,o):await transformAudio(item,o);
+   var r=item.kind==='image'?await transformImage(item,o):await transformAudio(item,o,function(hechas,totales){liveStage(i,'T · Audio completo',null,fmt(hechas)+' / '+fmt(totales)+' muestras convertidas; '+Math.round(100*hechas/totales)+' %')});
    r.derivedSha=await digest(r.bytes);
    var pars=item.kind==='image'?{lado_maximo:o.lado_maximo,brillo_pct:o.brillo_pct,contraste_pct:o.contraste_pct,gris:o.gris,umbral_activo:o.umbral_activo,umbral:o.umbral}:{frecuencia_hz:16000,canales:1,pcm_bits:16,inicio_pct:o.audio_inicio_pct,ventana:o.audio_ventana,ganancia_pct:o.audio_ganancia_pct};
    var profile=item.kind==='image'?('imagen_'+o.lado_maximo+(o.gris?'_gris':'')+(o.umbral_activo?'_bin':'')+'_'+o.brillo_pct+'_'+o.contraste_pct):('audio_pcm16_mono_16000_'+o.audio_ventana+'_'+o.audio_inicio_pct+'_'+o.audio_ganancia_pct);
