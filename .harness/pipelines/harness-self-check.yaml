@@ -1,0 +1,10 @@
+{
+  "id": "harness-self-check",
+  "description": "Deterministic V1 self-check; no model/provider is required.",
+  "base_ref": "HEAD",
+  "tasks": [
+    {"id": "validate", "type": "command", "gates": ["harness_validate"]},
+    {"id": "unit", "type": "command", "gates": ["harness_unit"]},
+    {"id": "security", "type": "command", "depends_on": ["validate", "unit"], "gates": ["repo_hygiene", "secrets"]}
+  ]
+}

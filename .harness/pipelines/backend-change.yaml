@@ -1,0 +1,13 @@
+{
+  "id": "backend-change",
+  "description": "Backend/SQL lane with independent security and QA review.",
+  "base_ref": "HEAD",
+  "tasks": [
+    {"id": "requirements", "type": "agent", "role": "requirements", "mode": "read", "objective": "Extract backend requirements, invariants and production boundaries."},
+    {"id": "backend", "type": "agent", "role": "backend", "mode": "write", "depends_on": ["requirements"], "locks": ["backend"], "scope": ["infraestructura/lms/**", "tests/**", "utils/validate_lms_*.py"], "objective": "Implement the backend change in an isolated branch. Do not deploy or apply production migrations.", "gates": ["secrets"], "commit": true},
+    {"id": "integrate", "type": "integrate", "depends_on": ["backend"], "locks": ["integration"]},
+    {"id": "qa-review", "type": "agent", "role": "qa", "mode": "read", "workspace_from": "integrate", "depends_on": ["integrate"], "objective": "Review correctness, regression coverage and API/database compatibility."},
+    {"id": "security-review", "type": "agent", "role": "security", "mode": "read", "workspace_from": "integrate", "depends_on": ["integrate"], "objective": "Review auth, service-role use, RLS assumptions, secrets and production blast radius."},
+    {"id": "final-gates", "type": "command", "workspace_from": "integrate", "depends_on": ["qa-review", "security-review"], "gates": ["repo_hygiene", "secrets", "no_open_student"]}
+  ]
+}

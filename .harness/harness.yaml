@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "runtime": {
+    "python": ">=3.11",
+    "runs_dir": ".agent-runs",
+    "worktrees_dir": ".agent-worktrees",
+    "locks_dir": ".agent-locks",
+    "max_concurrency": 3,
+    "agent_timeout_seconds": 1800
+  },
+  "providers": {
+    "dry_run": {
+      "kind": "dry_run"
+    },
+    "openai": {
+      "kind": "env_command",
+      "env": "HARNESS_OPENAI_CMD",
+      "pass_env": [
+        "OPENAI_API_KEY"
+      ]
+    },
+    "claude": {
+      "kind": "env_command",
+      "env": "HARNESS_CLAUDE_CMD",
+      "pass_env": [
+        "ANTHROPIC_API_KEY"
+      ]
+    },
+    "gemini": {
+      "kind": "env_command",
+      "env": "HARNESS_GEMINI_CMD",
+      "pass_env": [
+        "GEMINI_API_KEY",
+        "GOOGLE_API_KEY"
+      ]
+    }
+  },
+  "roles": {
+    "orchestrator": {
+      "provider": "openai",
+      "instructions": ".harness/roles/orchestrator.md"
+    },
+    "requirements": {
+      "provider": "openai",
+      "instructions": ".harness/roles/requirements.md"
+    },
+    "researcher": {
+      "provider": "gemini",
+      "instructions": ".harness/roles/researcher.md"
+    },
+    "pedagogy": {
+      "provider": "claude",
+      "instructions": ".harness/roles/pedagogy.md"
+    },
+    "frontend": {
+      "provider": "openai",
+      "instructions": ".harness/roles/frontend.md"
+    },
+    "backend": {
+      "provider": "openai",
+      "instructions": ".harness/roles/backend.md"
+    },
+    "qa": {
+      "provider": "openai",
+      "instructions": ".harness/roles/qa.md"
+    },
+    "accessibility": {
+      "provider": "claude",
+      "instructions": ".harness/roles/accessibility.md"
+    },
+    "security": {
+      "provider": "claude",
+      "instructions": ".harness/roles/security.md"
+    },
+    "integrator": {
+      "provider": "dry_run",
+      "instructions": ".harness/roles/integrator.md"
+    },
+    "worker": {
+      "provider": "openai",
+      "instructions": ".harness/roles/worker.md"
+    }
+  },
+  "default_invariants": [
+    "AGENTS.md is authoritative unless the current user instruction explicitly overrides it",
+    "no student PII, credentials, private teacher material or production secrets",
+    "no open-ended student academic answers unless explicitly authorized",
+    "course.json remains the course/session source of truth",
+    "generated notebooks are changed through their generator when one exists",
+    "do not claim validation that was not actually executed",
+    "do not deploy, merge to main, rotate credentials, force push or mutate production"
+  ]
+}

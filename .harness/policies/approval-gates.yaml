@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "L0": {"description": "read, inspect and run non-mutating checks"},
+    "L1": {"description": "write only inside isolated local worktrees; no commit/integration"},
+    "L2": {"description": "create local branches/commits and integrate candidate branches; never merge main"},
+    "L3": {"description": "external or destructive action. The V1 harness never executes these automatically."}
+  },
+  "never_automatic": [
+    "merge or push to main",
+    "production database migration",
+    "Edge Function deployment",
+    "credential rotation",
+    "force push or history rewrite",
+    "delete remote branches or production data"
+  ]
+}
