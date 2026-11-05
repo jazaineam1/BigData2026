@@ -1,77 +1,65 @@
-# PDA: fuente de guía del curso
+# PDA 2026-2 · guía de verificación curricular (Big Data)
 
-Resumen operativo del **Plan de Desarrollo de la Asignatura (PDA)** de Big Data, para alinear el material con lo que la institución declara del curso. El documento original está en [`PDA_2024-01_BIGDATA (1).pdf`](PDA_2024-01_BIGDATA%20%281%29.pdf).
+**Documento de referencia:** [PDA_2026-02_BIGDATA.pdf](../PDA_2026-02_BIGDATA.pdf), 5 páginas, Universidad Central, asignatura Big Data, código 64491093, 3 créditos, período 2026-2.
 
-> **Versión.** El PDF que hay en el repo es el **PDA 2023-I** (así lo dice su primera página y sus metadatos de febrero de 2023), aunque el archivo se llame `2024-01`. Un archivo `PDA_2026-02_BIGDATA.pdf` entregado después resultó **idéntico byte a byte** (mismo SHA-256), es decir, tampoco es un PDA de 2026. Mientras no se suba el PDA vigente, esta guía describe el 2023-I y las diferencias con el curso 2026-2S se listan abajo. Cuando exista el vigente, se reemplaza este archivo y se conserva el anterior como historia.
+**Advertencia institucional:** el PDF identifica al docente Wilman Javier Rincón Bautista y el **grupo 1**. Este repositorio desarrolla el **grupo 2**; antes de modificar definitivamente ponderaciones o fechas de evaluación, confirmar que la coordinación usa ese mismo PDA para el grupo. La guía anterior interpretaba un PDF de 2023-I: era histórico y **no** describe correctamente el documento 2026. El archivo histórico está en [docs/PDA_2024-01_BIGDATA (1).pdf](PDA_2024-01_BIGDATA%20%281%29.pdf).
 
-## Cómo se usa
+## Finalidad
 
-- **Toda evaluación se traza al PDA:** puedes señalar qué porcentaje y qué producción del PDA respalda cada entrega. Si una entrega no cabe en ninguna, es una decisión que se documenta, no una omisión.
-- **La finalidad manda sobre la herramienta:** el PDA pide decisiones en entornos distribuidos, no dominar un producto (ver `AGENTS.md` §1).
-- **Lo que este archivo no sabe:** el calendario y las fechas 2026-2S viven en `lms/data/course.json`, no aquí.
+Preparar datos de varios formatos y procedencias, gestionarlos mediante tecnologías adecuadas y obtener información de valor para decisiones organizacionales, por lotes o en tiempo real. Big Data no se reduce al tamaño de un archivo; se requiere justificar el diseño y, cuando aplique, evidenciar procesamiento distribuido.
 
-## Datos del espacio formativo
-
-| Campo | Valor en el PDA |
-|---|---|
-| Programa | Maestría en Analítica de Datos · Facultad de Ingeniería y Ciencias Básicas · Universidad Central |
-| Espacio formativo | Big Data · código 64491093 · 3 créditos |
-| Naturaleza | Teórico-práctica |
-| Prerrequisito | Métodos Estadísticos para Analítica de Datos (sin co-requisitos) |
-| Dispositivos pedagógicos | Clase expositiva o dialógica · estudio de caso · laboratorio en centro de cómputo |
-
-## Finalidad y problema general
-
-Con datos que vienen de sensores, redes sociales, simulación y nuevas técnicas de adquisición, hacen falta algoritmos y tecnologías de administración de datos que permitan **extraer e interpretar** información. El curso trata técnicas de análisis y gestión de datos para **tomar decisiones en entornos distribuidos**, la inteligencia empresarial y el descubrimiento científico, con **aprendizaje basado en problemas** que integra Analítica I y II y Bases de Datos.
-
-Abordar Big Data **más allá del volumen**: explotar los datos para diseñar productos y servicios a partir de información sobre el entorno, los usuarios, la competencia y el contexto. Recogida la información, hay que tener la infraestructura para procesarla y obtener indicadores útiles en ejecución **por lotes o en tiempo real**.
-
-## Ruta de sesiones del PDA 2023-I
-
-| Sesión | Tema | Producción del estudiante |
-|---|---|---|
-| 1 | Presentación; datos y analítica; qué es Big Data; datos estructurados, semi y no estructurados | Lectura (Erl, cap. 1) |
-| 2 | Arquitectura empresarial; procesos de negocio; ciclo de vida de la analítica | Lectura (caps. 2–3) |
-| 3 | Casos de uso; inteligencia de negocios tradicional y con Big Data | Presentación de casos del entorno laboral |
-| 4 | OLTP y OLAP; Data Marts, Warehouses y Lakes; ETL | Lectura (cap. 4) |
-| 5 | Implementación de ETL con herramientas de flujos de trabajo | **Quiz** (sistemas de análisis y ETL) |
-| 6 | **Primer taller de evaluación** | Taller 1: herramientas para procesos ETL |
-| 7 | Sistemas de archivos distribuidos, clusters, replicación y fragmentación | Lectura (cap. 5) |
-| 8 | Procesamiento paralelo y distribuido; Hadoop; batch con Map-Reduce | **Quiz** (almacenamiento) · lectura (cap. 6) |
-| 9 | Implementación de Map-Reduce | Práctica |
-| 10 | **Segundo taller de evaluación** | Taller 2: procesamiento batch con Map-Reduce |
-| 11–12 | NoSQL: grafos, columnares y documentales (partes 1 y 2) | Lectura (cap. 7) · práctica · proyecto |
-| 13 | Elasticsearch | Proyecto |
-| 14 | PySpark | Proyecto |
-| 15 | Dask | Proyecto |
-| 16 | **Evaluación del proyecto final** | Proyecto de integración |
-
-## Evaluación (lo que el PDA fija)
+## Evaluación establecida en el PDF 2026-2
 
 | Componente | Peso |
-|---|---|
-| Primer taller (teórico y práctico) | 25 % |
-| Segundo taller (teórico y práctico) | 25 % |
-| Presentaciones y quizzes | 10 % |
-| Proyecto de integración de conceptos | 40 % |
+|---|---:|
+| Primer taller práctico (NoSQL) | 20 % |
+| Segundo taller práctico (ETL) | 20 % |
+| Quices | 20 % |
+| Laboratorio en casa | 10 % |
+| Proyecto final de integración | 30 % |
+| **Total** | **100 %** |
 
-Notas de 0,0 a 5,0 en múltiplos de 0,1. La asignatura se pierde con **20 % de fallas o más**.
+El documento expresa aprobación con al menos el 70 % acumulado. **No usar** los porcentajes 25/25/10/40 del PDA anterior para describir el de 2026.
 
-## Bibliografía
+## Ruta literal del PDA 2026-2
 
-- **Texto guía:** Khattak, Buhler y Erl (2016), *Big Data Fundamentals: Concepts, Drivers & Techniques*, Pearson.
-- **Complementaria (selección):** Rajaraman, Leskovec y Ullman, *Mining of Massive Datasets* (2011); Ryza et al., *Advanced Analytics with Spark* (2015); Pentreath, *Machine Learning with Spark* (2015); White, *Hadoop: The Definitive Guide* (2012); Dollimore, Kindberg y Coulouris, *Distributed Systems: Concepts and Design*; Erl, Mahmood y Puttini, *Cloud Computing: Concepts, Technology & Architecture* (2013). La lista completa está en el PDF.
-
-## Diferencias a reconciliar con el curso 2026-2S
-
-Son diferencias observables entre el PDA 2023-I y `lms/data/course.json`; **no se resuelven aquí**, se llevan al docente.
-
-| Tema | PDA 2023-I | Curso 2026-2S (`course.json`) |
+| Sesión | Fecha en el documento | Temas y producto esperado |
 |---|---|---|
-| Talleres de evaluación | Sesión 6 (ETL) y sesión 10 (Map-Reduce) | Un taller de control en la sesión 8 (pipeline SECOP, API, concurrencia y NoSQL) |
-| Hadoop / Map-Reduce | Sesiones 8–10 | No aparece entre las sesiones 1–9 visibles |
-| Búsqueda | Elasticsearch en la sesión 13 | Búsqueda (BM25, semántica y vectorial) en las sesiones 7 y 9 |
-| Peso de evaluación | 25 / 25 / 10 / 40 | Por confirmar en el libreto docente (`.local-docente/`) |
-| Sesiones 10–16 | Definidas | En borrador (`draft`) |
+| 1 | 06-ago | Fundamentos, datos estructurados/no estructurados y características Big Data |
+| 2 | 13-ago | BI, ciclo analítico, SQL/NoSQL |
+| 3 | 20-ago | MongoDB documental y quiz |
+| 4 | 27-ago | MongoDB práctica, inicio Cassandra |
+| 5 | 03-sep | Cassandra práctica, inicio grafos |
+| 6 | 10-sep | Neo4j práctica e introducción Elasticsearch |
+| 7 | 17-sep | Elasticsearch y BM25; quiz NoSQL |
+| 8 | 24-sep | Primer taller evaluativo MongoDB/Cassandra/Neo4j |
+| 9 | 01-oct | Bases vectoriales, búsqueda semántica y Colab |
+| 10 | 15-oct | ETL con imágenes; práctica en VS Code y laboratorio semántico |
+| 11 | 22-oct | ETL con audio y video; práctica en VS Code |
+| 12 | 29-oct | Segundo taller evaluativo sobre ETL |
+| 13 | 05-nov | Archivos distribuidos, clústeres, MapReduce, Dask |
+| 14 | 12-nov | PySpark en Colab |
+| 15 | 19-nov | Spark/Databricks |
+| 16 | 26-nov | Sustentación final |
 
-**Decisión pendiente para el docente:** confirmar si el PDA vigente de 2026 mantiene los porcentajes 25/25/10/40 y la lista de temas, y subirlo para reemplazar este resumen.
+*Nota documental:* el PDA contiene formulaciones inconsistentes de horas de clase/autónomas (3 créditos × 48 horas y 16 sesiones × 3 horas), por lo cual las horas deben conciliarse con coordinación, no inferirse de la guía.
+
+## Correspondencia con la implementación del grupo 2
+
+- **S01–S09:** hay materiales de ingestión, arquitectura, NoSQL, búsqueda lexical y vectorial, y un primer taller sobre SECOP. Las fechas del LMS no son las fechas del PDF del grupo 1.
+- **S10:** presentación y cuaderno multimedia ya publicados; ETL reactivo con originales, derivados, JSONL/Parquet y verificación. El PDF pide específicamente imágenes y ejercicio en VS Code; la experiencia actual prioriza navegador/Colab.
+- **S11 (decisión expresa del docente):** **ETL integral de imágenes y audio, SIN video**. Recursos de estudiante: `Presentaciones/s11-etl-audio-imagenes.html` y `Cuadernos/11_ETL_Audio_Imagenes.ipynb`. Contiene 32 imágenes del snapshot del curso, 10 voces humanas reales MINDS-14 (licenciadas), 42 transformaciones, catálogo, manifiesto, recuperación y ZIP. Se puede ejecutar en Colab o VS Code. **Adaptación parcial, no cumplimiento literal del componente de video del PDA de grupo 1.**
+- **S12:** el segundo taller evaluativo de ETL, ponderado al 20 % en el PDA de referencia, requiere actividad y rúbrica propias; la sesión 11 es formativa y no debe contarse automáticamente como Taller 2.
+- **S13–S15:** Dask/MapReduce, PySpark y Databricks deben tener sus propias evidencias operativas. Scripts históricos en el repositorio no equivalen a sesiones publicadas.
+- **S16:** sustentación del proyecto integrador.
+
+## Criterio de cumplimiento
+
+Para cada tema: **(a)** el PDA lo solicita, **(b)** hay recurso estudiantil y escenario ejecutable, **(c)** se produce un artefacto con procedencia, **(d)** se ha comprobado una ejecución limpia, **(e)** la evaluación —si existe— se enlaza a la rúbrica y al peso correspondiente.
+
+No confundir: archivo presente en Git = clase impartida = aprendizaje demostrado = calificación registrada. Son evidencias distintas.
+
+## Bibliografía central
+
+Khattak, Buhler y Erl (2016), *Big Data Fundamentals: Concepts, Drivers & Techniques*. El PDF institucional incluye además Rajaraman/Leskovec/Ullman, Ryza y White, entre otras referencias.
+

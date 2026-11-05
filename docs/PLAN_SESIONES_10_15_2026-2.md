@@ -1,4 +1,10 @@
-# Ruta docente S10–S15 · Big Data 2026-2S
+# Ruta de sesiones S10–S15 · Big Data 2026-2S
+
+> **Corrección vigente de S11 (5-nov-2026):** la sesión 11 es el **ETL integral de imágenes y audio; no incluye video**, por decisión del docente. Su material canónico es `Presentaciones/s11-etl-audio-imagenes.html` + `Cuadernos/11_ETL_Audio_Imagenes.ipynb`. El laboratorio adquiere 32 imágenes del snapshot del curso y diez voces MINDS-14 reales (fuente distinta), transforma cada modalidad, carga 42 filas en Parquet/JSONL y valida reejecución, hashes, corrupción y ZIP. La adaptación no equivale al taller 2 evaluativo.
+>
+> **Diferencia con el PDA 2026-2:** el programa formal pide audio **y video** en S11. La decisión de excluir video debe quedar consignada como adaptación curricular, sin declarar cumplimiento literal de ese punto.
+>
+> **Atención:** el esquema de S11–S15 que aparece a continuación fue un bosquejo anterior y **no determina la ejecución ni el calendario**. El programa 2026-2 vigente orienta posteriormente a segundo taller ETL, Dask/MapReduce, PySpark, Databricks y sustentación; verificar la calendarización del grupo antes de publicar esas sesiones.
 
 ## Decisión de secuencia
 
@@ -115,7 +121,7 @@ Además de sintaxis y contratos pedagógicos, S10 tiene QA visual Playwright en 
 
 ---
 
-# S11 · De pandas a cómputo distribuido: particiones, Dask y el costo del shuffle
+# Propuesta anterior para S11 (no vigente) · Dask y cómputo distribuido
 
 **Fecha:** 22 de octubre de 2026  
 **Sesión que absorbe la pérdida de calendario.**

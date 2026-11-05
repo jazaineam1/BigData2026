@@ -1,5 +1,5 @@
 {
-  "version": 15,
+  "version": 16,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
@@ -114,8 +114,16 @@
     },
     {
       "n": 11,
-      "title": "Sesión 11 · por publicar",
-      "status": "draft"
+      "title": "¿Cómo convertir un lote de imágenes y audios en evidencia recuperable?",
+      "status": "visible",
+      "starts_at": "2026-11-05T18:00:00-05:00",
+      "class_date": "2026-11-05",
+      "class_kind": "learning",
+      "tracked": true,
+      "entry": {
+        "url": "/BigData2026/Presentaciones/s11-etl-audio-imagenes.html#s1",
+        "label": "Abrir laboratorio integral S11"
+      }
     },
     {
       "n": 12,
