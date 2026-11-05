@@ -132,7 +132,7 @@ test('S11 E2E permite modificar el audio y recuperar ZIP con huellas',async({pag
  const pending=page.waitForEvent('download');
  await page.locator('#save').click();
  const dl=await pending;
- expect(dl.suggestedFilename()).toMatch(/\.zip$/);
+ expect(dl.suggestedFilename()).toMatch(/^S11_ETL_Live_evidencia_.*\.zip$/);
  const fs=require('node:fs/promises');
  const buffer=await fs.readFile(await dl.path());
  await page.locator('#importZip').setInputFiles({name:'s11-prueba.zip',mimeType:'application/zip',buffer});
