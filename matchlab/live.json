@@ -5,6 +5,12 @@
   "staleReference": false,
   "matches": [
     {
+      "id": "18-AME-CAL",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-08"
+    },
+    {
       "id": "18-CHI-INT",
       "status": "upcoming",
       "score": null,
@@ -17,6 +23,12 @@
       "utcDate": "2026-11-07"
     },
     {
+      "id": "18-JAG-BUC",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-08"
+    },
+    {
       "id": "18-NAL-PER",
       "status": "upcoming",
       "score": null,
@@ -27,9 +39,21 @@
       "status": "upcoming",
       "score": null,
       "utcDate": "2026-11-07"
+    },
+    {
+      "id": "18-SFE-PAS",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-08"
+    },
+    {
+      "id": "18-TOL-MIL",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-08"
     }
   ],
   "note": "La fuente puede atrasarse. Solo resultados con estado terminado; no es autoridad oficial.",
   "source": "https://sportscore.com/",
-  "updatedAt": "2026-11-05T07:29:44.646810+00:00"
+  "updatedAt": "2026-11-06T03:23:01.751817+00:00"
 }
