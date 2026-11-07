@@ -119,8 +119,23 @@
     },
     {
       "n": 12,
-      "title": "Sesión 12 · por publicar",
-      "status": "draft"
+      "title": "Taller de Control 2 · Búsqueda y ETL multimedia",
+      "status": "visible",
+      "tracked": true,
+      "starts_at": "2026-11-12T18:00:00-05:00",
+      "class_date": "2026-11-12",
+      "class_kind": "assessment_workshop",
+      "entry": {
+        "url": "/BigData2026/lms/session-12.html",
+        "label": "Abrir Taller 2"
+      },
+      "assessment": {
+        "name": "Taller de Control 2",
+        "weight_percent": 20,
+        "points": 100,
+        "due_at": "2026-11-14T23:59:59-05:00",
+        "submission": "GitHub existente del equipo, rama taller/tc2-etl, PR y correo"
+      }
     },
     {
       "n": 13,
