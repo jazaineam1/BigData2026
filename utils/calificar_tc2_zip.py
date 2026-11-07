@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Califica independientemente un ZIP TC2 sin confiar en el manifest del estudiante.
-Uso: python utils/calificar_tc2_zip.py TC2_pareja.zip [--manifest-sha SHA256]
+Uso: python utils/calificar_tc2_zip.py TC2_pareja.zip [--manifest-sha SHA256] [--audit-media]
 El contacto institucional, fecha, identidad y procedencia se verifican fuera de esta CLI.
 """
 import argparse,hashlib,json,re,sys,tempfile,zipfile
@@ -36,7 +36,7 @@ def extraer_seguro(archivo,carpeta):
                     escritura.write(b)
     return carpeta
 
-def corregir(archivo,hash_manifest=None):
+def corregir(archivo,hash_manifest=None,audit_media=False):
     with tempfile.TemporaryDirectory(prefix="tc2-docente-") as tmp:
         trabajo=extraer_seguro(archivo,tmp)
         identidad=c.leer(Path(trabajo)/"identidad.json")
@@ -56,13 +56,23 @@ def corregir(archivo,hash_manifest=None):
         if declarado.get("pareja")!=identidad.get("pareja"):
             raise ValueError("Pareja incompatible entre manifest e identidad")
         propio=c.validar(trabajo,c.corpus_lista(ROOT/"Datos"),tema)
+        if audit_media:
+            from tc2_media_audit import auditar,aplicar_auditoria
+            result=auditar(trabajo,n_audios=10)
+            propio=aplicar_auditoria(propio,result)
+            print("AUDITORÍA OCR:",("CONCORDANTE" if result["ocr"]["aprobado"] else "REVISAR"),
+                  "· WHISPER:",("CONCORDANTE" if result["asr"]["aprobado"] else "REVISAR"))
+            if not result["aprobado"]:
+                print("AVISO: re-inferencia discordante; la nota se mantiene PROVISIONAL hasta revisión humana.")
+        else:
+            print("AUDITORÍA MEDIA NO EJECUTADA: los metadatos y SHA del ZIP no demuestran inferencia propia.")
         print("TC2 · Calificación independiente, equipo:",identidad["pareja"])
         print("Intención asignada:",tema["id"],"· SHA manifest:",digest)
         print("Declarado:",declarado.get("reporte",{}).get("puntaje"),
               "· recalculado:",propio["puntaje"],"puntos; nota provisional:",propio["nota_provisional"],"/5")
         for cod,row in propio["controles"].items():
             print(("✓" if row["ok"] else "·"),cod,str(row["puntos"])+"/"+str(row["maximo"]),row["detalle"])
-        print("REVISIÓN MANUAL PENDIENTE: autenticidad Atlas remoto/contingencia; permisos Drive, identidad y plazo.")
+        print("REVISIÓN MANUAL PENDIENTE: Atlas remoto/contingencia, identidad, acceso GitHub privado, commit y plazo.")
         return propio
 
 def autoprobacion():
@@ -82,7 +92,8 @@ if __name__=="__main__":
     parser.add_argument("zip",nargs="?")
     parser.add_argument("--manifest-sha")
     parser.add_argument("--self-test",action="store_true")
+    parser.add_argument("--audit-media",action="store_true",help="Recalcular OCR y Whisper en CPU (requiere paquetes y modelos)")
     args=parser.parse_args()
     if args.self_test:autoprobacion()
-    elif args.zip:corregir(args.zip,args.manifest_sha)
+    elif args.zip:corregir(args.zip,args.manifest_sha,audit_media=args.audit_media)
     else:parser.error("indica un ZIP o --self-test")
