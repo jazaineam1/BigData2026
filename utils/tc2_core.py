@@ -253,7 +253,13 @@ def validar(carpeta,docs,intencion):
     try:
         bm=lee("E1/bm25.json");q=intencion
         expected1=bm25(docs,q["literal"],10); expected2=bm25(docs,q["parafrasis"],10)
-        ok("E1.1",bm.get("tokens_literal")==tokens(q["literal"]) and bm.get("analizador")=="normalizado_simple","Tokens observados y analizador.")
+        lab1=lee("E1/laboratorio_bm25.json") if (carpeta/"E1/laboratorio_bm25.json").exists() else {}
+        termino=tokens(q["literal"])[0]
+        df_real=sum(1 for d in docs if termino in set(tokens(texto(d))))
+        idf_real=math.log(1+(len(docs)-df_real+.5)/(df_real+.5))
+        e1_lab_ok=lab1.get("termino")==termino and lab1.get("df")==df_real and lab1.get("n")==len(docs) and near(lab1.get("idf"),idf_real,1e-7)
+        ok("E1.1",bm.get("tokens_literal")==tokens(q["literal"]) and bm.get("analizador")=="normalizado_simple" and e1_lab_ok,
+           "Tokenización, frecuencia documental e IDF verificados; completa el ejercicio si falta.")
         ok("E1.2",bm.get("literal")==expected1 and bm.get("parafrasis")==expected2,"Dos rankings BM25 local verificables.")
         cambio=bm.get("cambio",{});original=q["literal"];nuevo=cambio.get("consulta","")
         ok("E1.3",nuevo!=original and len(tokens(nuevo))>0 and cambio.get("ranking")==bm25(docs,nuevo,10) and bool(cambio.get("prediccion")),"Consulta modificada y ranking correcto.")
@@ -264,9 +270,15 @@ def validar(carpeta,docs,intencion):
         e=lee("E2/semantica.json")
         x=np.load(carpeta/"E2/embeddings.npy",allow_pickle=False);q1=np.load(carpeta/"E2/query_literal.npy",allow_pickle=False);q2=np.load(carpeta/"E2/query_parafrasis.npy",allow_pickle=False)
         shape_ok=x.shape==(len(docs),384) and q1.shape==(384,) and q2.shape==(384,) and np.isfinite(x).all() and np.isfinite(q1).all()
-        ok("E2.1",shape_ok and e.get("modelo")==MODELO and e.get("prefijos")==["passage:","query:"],"N×384, modelo y prefijos.")
+        pref=lee("E2/experimento_prefijos.json") if (carpeta/"E2/experimento_prefijos.json").exists() else {}
+        experimento_prefijos_ok=all(isinstance(pref.get(k),(int,float)) and -1<=pref.get(k)<=1 for k in ("query_vs_passage","query_vs_sin_prefijo"))
+        ok("E2.1",shape_ok and e.get("modelo")==MODELO and e.get("prefijos")==["passage:","query:"] and experimento_prefijos_ok,
+           "N×384 y comparación real de prefijos guardada.")
         want1=coseno(docs,x,q1,10);want2=coseno(docs,x,q2,10)
-        ok("E2.2",e.get("literal")==want1 and e.get("parafrasis")==want2,"Top-k coseno recomputado.")
+        lab2=lee("E2/laboratorio_coseno.json") if (carpeta/"E2/laboratorio_coseno.json").exists() else {}
+        lab_cos_ok=lab2.get("formula")=="producto_punto_dividido_por_normas" and near(lab2.get("cos_ab"),1.0,1e-6) and near(lab2.get("cos_ac"),0.0,1e-6)
+        ok("E2.2",e.get("literal")==want1 and e.get("parafrasis")==want2 and lab_cos_ok,
+           "Top-k coseno y función completada de dos dimensiones.")
         a=e.get("atlas",{})
         remoto=bool(a.get("ping") and a.get("indice_queryable") and a.get("query_ejecutada") and len(a.get("resultados",[]))>0 and a.get("motor")=="MongoDB Atlas Vector Search")
         contrato=bool(a.get("indice_path")=="embedding" and a.get("indice_dimensiones")==384 and a.get("pipeline_limit")==5 and a.get("sistema") in ("Atlas real","Ruta local declarada"))
@@ -276,7 +288,13 @@ def validar(carpeta,docs,intencion):
             checks["E2.3"]["ok"]=False
             checks["E2.3"]["detalle"]="3/6 por contrato vectorial local, no por ejecución remota de Atlas."
         varia=e.get("experimento",{}); k=varia.get("k")
-        ok("E2.4",k in (3,8) and varia.get("ranking")==coseno(docs,x,q2,int(k)) if k in (3,8) else False,"Top-k alterado, mismo vector.")
+        fil=lee("E2/experimento_filtro.json") if (carpeta/"E2/experimento_filtro.json").exists() else {}
+        id_lider=e.get("parafrasis",[{}])[0].get("id_proceso")
+        entidad_real=next((d["entidad"] for d in docs if d["id_proceso"]==id_lider),None)
+        indices=[i for i,d in enumerate(docs) if d["entidad"]==entidad_real] if entidad_real else []
+        fil_ok=bool(indices) and fil.get("entidad")==entidad_real and fil.get("candidatos")==len(indices) and fil.get("ranking")==coseno([docs[i] for i in indices],x[indices],q2,min(5,len(indices)))
+        k_ok=k in (3,8) and varia.get("ranking")==coseno(docs,x,q2,int(k)) if k in (3,8) else False
+        ok("E2.4",k_ok and fil_ok,"Cambio Top-k y filtro de candidatos real, sobre E5.")
     except Exception as err:
         for item in ("E2.1","E2.2","E2.3","E2.4"):ok(item,False,str(err))
         e={}
@@ -286,8 +304,15 @@ def validar(carpeta,docs,intencion):
         ranking_sem=e.get("parafrasis",[])
         fusion=fusion_rrf(ranking_lex,ranking_sem,60,10)
         a=medidas(ranking_lex,intencion["relevantes"]);b=medidas(ranking_sem,intencion["relevantes"])
-        ok("E3.1",r.get("bm25")==a and r.get("e5")==b,"Precision@5 y Recall@5 sobre juicios independientes.")
-        ok("E3.2",r.get("rrf")==fusion and r.get("metricas_rrf")==medidas(fusion,intencion["relevantes"]),"RRF calculado desde posiciones.")
+        labp=lee("E3/laboratorio_precision.json") if (carpeta/"E3/laboratorio_precision.json").exists() else {}
+        ids_bm=[t["id_proceso"] for t in ranking_lex[:5]]
+        labp_ok=labp.get("top5")==ids_bm and labp.get("positivos_totales")==len(intencion["relevantes"]) and near(labp.get("precision_manual"),a["precision_at_5"],1e-4)
+        ok("E3.1",r.get("bm25")==a and r.get("e5")==b and labp_ok,
+           "Precision@5 manual y Recall@5 contrastados con juicios externos.")
+        labr=lee("E3/laboratorio_rrf.json") if (carpeta/"E3/laboratorio_rrf.json").exists() else {}
+        labr_ok=labr.get("pos_bm25")==1 and labr.get("pos_e5")==3 and labr.get("k")==60 and near(labr.get("score"),1/61+1/63,1e-8)
+        ok("E3.2",r.get("rrf")==fusion and r.get("metricas_rrf")==medidas(fusion,intencion["relevantes"]) and labr_ok,
+           "RRF manual y fusión completa correctos.")
         de=r.get("decision",{})
         ok("E3.3",de.get("elegido") in ("BM25","E5","RRF") and de.get("descartado") in ("BM25","E5","RRF") and de.get("descartado")!=de.get("elegido") and de.get("limite") in ("Solo cubre los juicios etiquetados","No demuestra irregularidades") and de.get("precision_observada")=={"BM25":a,"E5":b,"RRF":medidas(fusion,intencion["relevantes"])}[de.get("elegido", "BM25")]["precision_at_5"],"Elegir, descartar y usar métrica real.")
     except Exception as err:
@@ -296,7 +321,10 @@ def validar(carpeta,docs,intencion):
         meta=lee("E4/imagen.json")
         orig=carpeta/"E4/ranking.png"
         m=inspeccion_imagen(orig)
-        ok("E4.1",meta.get("inspeccion")==m and m["suma_histograma"]==m["ancho"]*m["alto"],"RGB, luminancia e histograma.")
+        lumi=lee("E4/laboratorio_luminancia.json") if (carpeta/"E4/laboratorio_luminancia.json").exists() else {}
+        lumi_ok=lumi.get("rgb_rojo")==[255,0,0] and lumi.get("rgb_verde")==[0,255,0] and near(lumi.get("luminancia_rojo"),54.213,.002) and near(lumi.get("luminancia_verde"),182.376,.002)
+        ok("E4.1",meta.get("inspeccion")==m and m["suma_histograma"]==m["ancho"]*m["alto"] and lumi_ok,
+           "RGB, fórmula propia de luminancia y 16 bins del histograma.")
         files=all((carpeta/f"E4/perfil_{n}.png").exists() for n in (160,640))
         both=meta.get("perfiles",{})
         a=inspeccion_imagen(carpeta/"E4/perfil_160.png");b=inspeccion_imagen(carpeta/"E4/perfil_640.png")
@@ -314,7 +342,10 @@ def validar(carpeta,docs,intencion):
         ok("E5.1",bueno,"Diez voces humanas distintas, procedencia y huellas.")
         a1=a["comparacion"];v=voces[int(a1["posicion"])-1];ruta=carpeta/"E5/audio"/v["archivo"]
         m512=metricas_voz(ruta,512);m1024=metricas_voz(ruta,1024)
-        ok("E5.2",a1.get("ventana_512")==m512 and a1.get("ventana_1024")==m1024 and m512["resolucion_hz"]>m1024["resolucion_hz"],"RMS, pico y resolución espectral.")
+        lab_rms=lee("E5/laboratorio_rms.json") if (carpeta/"E5/laboratorio_rms.json").exists() else {}
+        lab_rms_ok=lab_rms.get("muestras")==[1,-1,0,0] and near(lab_rms.get("rms_manual"),math.sqrt(.5),1e-6) and lab_rms.get("media_simple")==0.0
+        ok("E5.2",a1.get("ventana_512")==m512 and a1.get("ventana_1024")==m1024 and m512["resolucion_hz"]>m1024["resolucion_hz"] and lab_rms_ok,
+           "RMS de cuatro muestras implementado y FFT 512/1024 medido en WAV real.")
         ok("E5.3",a1.get("limite")=="RMS y FFT no transcriben palabras" and a1.get("referencia_no_asr") is True and 1<=int(a1.get("posicion",0))<=10,"Distinción entre señal y transcripción.")
     except Exception as err:
         for item in ("E5.1","E5.2","E5.3"):ok(item,False,str(err))
