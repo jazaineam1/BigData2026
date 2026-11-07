@@ -29,7 +29,7 @@ def run():
             try:ast.parse("".join(x["source"]))
             except SyntaxError as e:errors.append(f"Celda {index} sintaxis: {e}")
     full="\n".join(source)
-    for term in ("PREDICCION_INICIAL","RANK_BM_LITERAL","RANK_SEM_PARAFRASIS","METRICAS_RRF","INSPECCION","AUDIOS","core.validar(","manifest_tc2.json","jzaineam@ucentral.edu.co","No son audios de noticias"):
+    for term in ("PREDICCION_INICIAL","RANK_BM_LITERAL","RANK_SEM_PARAFRASIS","METRICAS_RRF","INSPECCION","AUDIOS","core.validar(","manifest_tc2.json","GitHub","No son audios de noticias"):
         verify(term.casefold() in full.casefold(),f"Enunciado/celda debe contener: {term}")
     verify(len(c.RUBRICA)==21 and sum(x[2] for x in c.RUBRICA)==100,"21 controles/100 puntos")
     found=[s for s in source if "CORE_SOURCE = " in s]
@@ -77,7 +77,7 @@ def run():
         m512=c.metricas_voz(w,512);m1024=c.metricas_voz(w,1024)
         verify(0.69<m512["rms"]<0.72 and m512["resolucion_hz"]==31.25 and m1024["resolucion_hz"]==15.625,"RMS y resolución FFT")
         manifest=c.validar(t,doc,sample)
-        verify(len(manifest["controles"])==18 and manifest["puntaje"]==0,"Evaluador falla cerrado si faltan archivos")
+        verify(len(manifest["controles"])==21 and manifest["puntaje"]==0,"Evaluador falla cerrado si faltan archivos")
         htmlfile=c.hacer_html(t,doc,ranks,cs,c.fusion_rrf(ranks,cs,60,5),meta,[{"n":1,"source_record_id":"ejemplo","archivo":"demo.wav","medidas":m512}],{"modelo":"BM25"})
         text=htmlfile.read_text(encoding="utf-8")
         verify("MINDS14" in text and "sin vínculo" in text and "<audio" in text,"Explorador separa procedencias")
