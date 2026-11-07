@@ -166,6 +166,19 @@ def run():
            "S12 debe ser visible con peso 20%, fecha y enlace.")
     portada=(ROOT/"index.html").read_text(encoding="utf-8")
     guia=(ROOT/"assets/tutoriales/tc2-paso-a-paso.html").read_text(encoding="utf-8")
+    # Evitar que una próxima edición restablezca la fecha errónea en recursos estudiantiles.
+    from datetime import datetime, timedelta
+    vencimiento=datetime.fromisoformat(s12["assessment"]["due_at"])
+    verify(vencimiento.weekday()==6 and vencimiento.utcoffset()==timedelta(hours=-5),
+           "El cierre debe ser domingo 15, a las 23:59:59 en Colombia (UTC-5).")
+    verify("domingo 15 de noviembre de 2026" in full and
+           "domingo 15 de noviembre de 2026" in portada and
+           "domingo 15 de noviembre de 2026" in guia,
+           "Fecha y día de la semana deben coincidir en notebook, portada y guía.")
+    anterior=("14 de noviembre de 2026","sábado 14","14/11/2026","2026-11-14T23:59:59-05:00")
+    verify(not any(p in contenido for contenido in (full,portada,guia) for p in anterior),
+           "Ningún material para estudiantes puede conservar la fecha anterior.")
+
     verify("Taller_Control_2.ipynb" in portada and 'data-n="12"' in portada and
            "tc2-paso-a-paso.html" in portada and
            "lms/session-12.html" not in portada,"Portada ofrece dos recursos sin página especial S12.")
