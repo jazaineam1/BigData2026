@@ -621,7 +621,7 @@ def validar(carpeta,docs,intencion):
         manual_asr=lee("E5/asr_manual.json")
         pos=manual_asr.get("voz")
         manual_ok=(manual_asr.get("ejemplo")=="Pago, pago y saldo" and
-                   set(manual_asr.get("terminos_ejemplo",[]))=={"pago","saldo" ,"y"} and
+                   set(manual_asr.get("terminos_ejemplo",[]))=={"pago","saldo"} and
                    isinstance(pos,int) and 1<=pos<=10 and
                    manual_asr.get("terminos_prediccion")==sorted(set(tokens(trans[pos-1]["transcripcion_asr"]))))
         ok("E5.5",info_ok and manual_ok,"WER recalculado, extracción estructurada y función manual comprobadas.")
