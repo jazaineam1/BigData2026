@@ -12,6 +12,11 @@ on:
       - 'utils/calificar_tc2_zip.py'
       - 'tests/tc2-guide.visual.spec.js'
       - 'playwright.tc2.config.cjs'
+      - 'index.html'
+      - 'lms/data/course.json'
+      - 'lms/session-12.html'
+      - 'docs/PLAN_TALLER_CONTROL_2_HASTA_S10_2026-2S.md'
+      - 'utils/scan_secrets_pii.py'
   workflow_dispatch:
 permissions:
   contents: read
