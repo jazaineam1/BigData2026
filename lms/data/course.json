@@ -141,7 +141,7 @@
         "name": "Taller de Control 2 · ETL enriquecido OCR/ASR",
         "weight_percent": 20,
         "points": 100,
-        "due_at": "2026-11-14T23:59:59-05:00",
+        "due_at": "2026-11-15T23:59:59-05:00",
         "submission": "GitHub existente del equipo, rama taller/tc2-etl, PR y correo"
       }
     },
