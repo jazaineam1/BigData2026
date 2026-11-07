@@ -106,6 +106,24 @@ def run():
         fault=c.verificar_fallo(t)
         verify(fault["detected"] and fault["restored"] and fault["source_intact"],"Corrupción y restauración de derivado")
     verify("14 de noviembre de 2026" in full and "E6/catalogo.parquet" in full and "GitHub" in full,"Fecha, catálogo y GitHub visibles")
+    # Validar que la página institucional realmente publique S12 y ofrezca dos recursos.
+    portal=json.loads((ROOT/"lms/data/course.json").read_text(encoding="utf-8"))
+    s12=next((x for x in portal["sessions"] if x["n"]==12),None)
+    verify(s12 is not None and s12.get("status")=="visible" and
+           s12.get("assessment",{}).get("weight_percent")==20 and
+           s12.get("assessment",{}).get("due_at")=="2026-11-14T23:59:59-05:00" and
+           s12.get("entry",{}).get("url")=="/BigData2026/lms/session-12.html",
+           "S12 debe ser visible con peso 20%, fecha y enlace.")
+    pagina=(ROOT/"lms/session-12.html").read_text(encoding="utf-8")
+    portada=(ROOT/"index.html").read_text(encoding="utf-8")
+    guia=(ROOT/"assets/tutoriales/tc2-paso-a-paso.html").read_text(encoding="utf-8")
+    verify("Taller de Control 2" in pagina and "100 puntos" in pagina and
+           "14 de noviembre de 2026" in pagina and "cuaderno" in pagina.lower() and
+           "tc2-paso-a-paso.html" in pagina,"Landing del TC2 enlaza los dos recursos.")
+    verify('data-n="12"' in portada and 'href="lms/session-12.html"' in portada,
+           "Portada contiene una tarjeta de TC2 visible.")
+    verify(guia.count('type="checkbox"')==35 and "GitHub" in guia and
+           "14 de noviembre de 2026" in guia,"Guía tiene 35 comprobaciones y entrega GitHub.")
     # Separa inequívocamente material aprendido de contenido antes del TC1.
     for forbidden in ("Cassandra query-first — 15 puntos","Neo4j / contexto relacional — 15 puntos","Adquisición SECOP — 25 puntos"):
         verify(forbidden not in full,"No repetir TC1: "+forbidden)
