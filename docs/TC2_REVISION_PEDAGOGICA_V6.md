@@ -2,7 +2,7 @@
 
 **Universidad Central · Maestría en Analítica de Datos · 2026-2S**
 **Documento de control de calidad público:** contiene criterios, no soluciones individuales.
-**Entrega estudiantil sin cambios:** sábado 14 de noviembre de 2026, 23:59:59, Bogotá.
+**Fecha de entrega corregida el 7 de noviembre de 2026:** domingo 15 de noviembre de 2026, 23:59:59, hora de Bogotá. La rectificación sustituye el sábado 14 informado inicialmente; no altera la rúbrica ni los productos exigidos.
 **Ponderación del PDA 2026-2 de referencia:** segundo taller ETL, 20 % (verificar adopción formal del PDA del grupo 2).
 
 ## Dictamen y comparación con el TC1
