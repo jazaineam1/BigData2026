@@ -8,8 +8,8 @@
 </style></head><body><main>
 <p><a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_2.ipynb">Abrir el cuaderno TC2 en Colab</a></p>
 <h1>TC2 · Checklist de la experiencia de Laura</h1>
-<div class="note" role="status"><strong>TC2 · 100 puntos · 20 % de la asignatura.</strong> Alcance S07/S09/S10: 35 puntos búsqueda léxica/semántica y 65 puntos ETL multimodal y catálogo. <strong>Entrega 14 de noviembre de 2026, 23:59:59, Bogotá</strong>. Usa el GitHub que tu equipo ya creó, con un PR y notificación por correo.</div>
-<p class="intro">Solo dos recursos: este mapa y el cuaderno completo (100 celdas). Aprendes los conceptos nuevos de S07, S09 y S10, sin repetir el TC1. Marca cada paso solo cuando veas la evidencia en Colab: <strong>estas casillas no generan nota</strong>.</p>
+<div class="note" role="status"><strong>TC2 · 100 puntos · 20 % de la asignatura.</strong> Alcance S07/S09/S10: 35 puntos búsqueda léxica/semántica y 65 puntos ETL: imágenes con OCR Tesseract, diez voces con ASR Whisper, WER y catálogo enriquecido. <strong>Entrega 14 de noviembre de 2026, 23:59:59, Bogotá</strong>. Usa el GitHub que tu equipo ya creó, con un PR y notificación por correo.</div>
+<p class="intro">Solo dos recursos: este mapa y el cuaderno completo con OCR y Whisper. El reconocimiento ejecuta bibliotecas y modelo tiny gratuitos, descargados inicialmente por Colab. Aprendes los conceptos nuevos de S07, S09 y S10, sin repetir el TC1. Marca cada paso solo cuando veas la evidencia en Colab: <strong>estas casillas no generan nota</strong>.</p>
 <div class="bar" role="region" aria-label="Avance orientativo"><div class="track"><div class="fill" id="fill"></div></div><p id="status" aria-live="polite">0 pasos comprobados</p></div>
 <div class="note"><b>Antes de empezar:</b> guarda copia del notebook en Drive, conecta CPU y anota tu pareja. Puedes trabajar solo. No necesitas Cassandra, Aura, API de pago ni descargar SECOP. **Plazo:** sábado 14 de noviembre de 2026, hasta las <b>11:59 p. m. de Bogotá</b>. Guarda la copia de trabajo en Drive, pero la <b>entrega final es en GitHub privado</b> y se notifica por correo institucional. El PDA de referencia 2026-2 asigna al Taller 2 un <b>20 %</b> del curso.</div>
 
@@ -50,9 +50,12 @@
 
 <h2>E4 · Imagen creada desde tu propio ranking — 20 puntos</h2><section class="card">
 <div class="row"><input id="m0" type="checkbox"><label for="m0"><b>COMPLETA:</b> función <code>luminancia_rgb</code>; comparé el rojo y el verde y guardé su cálculo.</label></div>
-<div class="row"><input id="m1" type="checkbox"><label for="m1">Generé <code>ranking.png</code> con mi Top-5 y comprobé RGB, luminancia y suma de bins.</label></div>
+<div class="row"><input id="m1" type="checkbox"><label for="m1">Generé <code>ranking.png</code> con mi Top-5, cinco códigos visibles para OCR, y comprobé RGB, luminancia y suma de bins.</label></div>
 <div class="row"><input id="m2" type="checkbox"><label for="m2">Comparé imágenes de 160 y 640 px. <span class="hint">Me fijé en legibilidad y dimensiones, no solo en bytes.</span></label></div>
 <div class="row"><input id="m3" type="checkbox"><label for="m3">Seleccioné el perfil que deja leer etiquetas y guardé <code>E4/imagen.json</code>.</label></div>
+<div class="row"><input id="m4" type="checkbox"><label for="m4">Completé <code>ids_desde_texto</code> y su prueba manual; no copié IDs del ranking como predicción.</label></div>
+<div class="row"><input id="m5" type="checkbox"><label for="m5">Instalé Tesseract español y ejecuté OCR auténtico en los tres PNG, guardando <code>E4/ocr.json</code>.</label></div>
+<div class="row"><input id="m6" type="checkbox"><label for="m6">Comparé cobertura de IDs y texto bruto reconocido en los perfiles 960, 640 y 160 px; expliqué errores sin borrarlos.</label></div>
 </section>
 
 <h2>E5 · Voces humanas reales — 20 puntos</h2><section class="card">
@@ -62,18 +65,21 @@
 <div class="row"><input id="a4" type="checkbox"><label for="a4">Comparé la referencia humana del WAV con sus métricas; expliqué por qué RMS/FFT no son ASR.</label></div>
 <div class="row"><input id="a3" type="checkbox"><label for="a3">Elegí el límite correcto y marqué si la transcripción es solo referencia humana; guardé <code>E5/audios.json</code>.</label></div>
 <p class="hint">Si no se pueden descargar los audios: conserva E1–E4 y reintenta E5 cuando haya conexión. Nunca marques como lograda una ejecución ausente.</p>
+<div class="row"><input id="a5" type="checkbox"><label for="a5">Instalé <code>faster-whisper</code>, ejecuté Whisper tiny real en diez WAV y guardé <code>E5/asr.json</code>.</label></div>
+<div class="row"><input id="a6" type="checkbox"><label for="a6">Comparé hipótesis con referencias MINDS14 mediante <b>WER</b> y conservé segmentos con tiempos, sin reemplazar errores.</label></div>
+<div class="row"><input id="a7" type="checkbox"><label for="a7">Completé <code>palabras_clave_propias</code> y guardé <code>E5/asr_manual.json</code>; interpreté temas y cifras como reglas heurísticas.</label></div>
 </section>
 
 <h2>E6 · Catálogo ETL, calidad y demostración — 25 puntos</h2><section class="card">
 <div class="row"><input id="f0" type="checkbox"><label for="f0">Construí un catálogo de 13 activos (3 imágenes y 10 audios), con <code>source_kind</code>, <code>source_record_id</code> y rutas comprobables.</label></div>
-<div class="row"><input id="f5" type="checkbox"><label for="f5">Exporté <code>E6/catalogo.jsonl</code> y <code>E6/catalogo.parquet</code>; volví a abrirlos y consulté activos por tipo de medio.</label></div>
+<div class="row"><input id="f5" type="checkbox"><label for="f5">Exporté <code>E6/catalogo.jsonl</code> y <code>E6/catalogo.parquet</code> con textos OCR/ASR, volví a abrirlos y consulté por tipo y palabras reconocidas.</label></div>
 <div class="row"><input id="f6" type="checkbox"><label for="f6">Reejecuté el catálogo y comprobé que las 13 filas y la huella JSONL no cambiaron.</label></div>
 <div class="row"><input id="f7" type="checkbox"><label for="f7">Detecté corrupción de una COPIA del PNG y comprobé restauración; el original permaneció intacto.</label></div>
-<div class="row"><input id="f1" type="checkbox"><label for="f1">Elegí mi defensa estructurada y generé <code>explorador.html</code> con rankings, imagen y diez audios de procedencia separada.</label></div>
-<div class="row"><input id="f2" type="checkbox"><label for="f2">Ejecuté COMPRUEBA, vi los 18 controles y entendí cada ✗ sin ocultar errores.</label></div>
+<div class="row"><input id="f1" type="checkbox"><label for="f1">Elegí mi defensa y generé <code>explorador.html</code> con rankings, OCR, transcripciones Whisper, WER y fuentes separadas.</label></div>
+<div class="row"><input id="f2" type="checkbox"><label for="f2">Ejecuté COMPRUEBA, vi los 24 controles y entendí cada ✗ sin ocultar errores.</label></div>
 <div class="row"><input id="f4" type="checkbox"><label for="f4">Usé el <b>repositorio YA EXISTENTE</b> del equipo, comprobé que sea <b>PRIVATE</b> (por nombres/códigos dentro del ZIP y cuaderno), concedí acceso a <code>jazaineam1</code>, subí los tres archivos y notifiqué con SHA antes del cierre.</label></div>
 <div class="row"><input id="f3" type="checkbox"><label for="f3">Generé ZIP y manifest, copié su SHA y descargué el notebook ejecutado.</label></div>
-<p class="hint">El corrector revisa 21 controles; E2.3 identifica si hubo Atlas remoto o una ruta local. Una ejecución local no acredita Atlas.</p>
+<p class="hint">El corrector revisa 24 controles; E2.3 identifica si hubo Atlas remoto o una ruta local. Una ejecución local no acredita Atlas.</p>
 </section>
 
 <h2>Entrega final · GitHub privado + correo</h2>
