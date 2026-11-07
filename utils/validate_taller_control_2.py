@@ -109,7 +109,7 @@ def run():
         htmlfile=c.hacer_html(t,doc,ranks,cs,c.fusion_rrf(ranks,cs,60,5),meta,[{"n":1,"source_record_id":"ejemplo","archivo":"demo.wav","medidas":m512}],{"modelo":"BM25"})
         text=htmlfile.read_text(encoding="utf-8")
         verify("MINDS14" in text and "sin vínculo" in text and "<audio" in text,"Explorador separa procedencias")
-    verify("14 de noviembre de 2026" in full and "GitHub" in full and "23:59:59" in full,"Fecha y GitHub visibles")
+    verify("15 de noviembre de 2026" in full and "GitHub" in full and "23:59:59" in full,"Fecha y GitHub visibles")
     # Comprobar un ETL real sin inventar asociaciones.
     with tempfile.TemporaryDirectory() as tf:
         t=Path(tf); (t/"E4").mkdir(); (t/"E5/audio").mkdir(parents=True)
@@ -155,23 +155,36 @@ def run():
         verify(initial==c.sha(t/"E6/catalogo.jsonl"),"Idempotencia de catálogo")
         fault=c.verificar_fallo(t)
         verify(fault["detected"] and fault["restored"] and fault["source_intact"],"Corrupción y restauración de derivado")
-    verify("14 de noviembre de 2026" in full and "E6/catalogo.parquet" in full and "GitHub" in full,"Fecha, catálogo y GitHub visibles")
+    verify("15 de noviembre de 2026" in full and "E6/catalogo.parquet" in full and "GitHub" in full,"Fecha, catálogo y GitHub visibles")
     # Validar que la página institucional realmente publique S12 y ofrezca dos recursos.
     portal=json.loads((ROOT/"lms/data/course.json").read_text(encoding="utf-8"))
     s12=next((x for x in portal["sessions"] if x["n"]==12),None)
     verify(s12 is not None and s12.get("status")=="visible" and
            s12.get("assessment",{}).get("weight_percent")==20 and
-           s12.get("assessment",{}).get("due_at")=="2026-11-14T23:59:59-05:00" and
+           s12.get("assessment",{}).get("due_at")=="2026-11-15T23:59:59-05:00" and
            "Taller_Control_2.ipynb" in s12.get("entry",{}).get("url",""),
            "S12 debe ser visible con peso 20%, fecha y enlace.")
     portada=(ROOT/"index.html").read_text(encoding="utf-8")
     guia=(ROOT/"assets/tutoriales/tc2-paso-a-paso.html").read_text(encoding="utf-8")
+    # Evitar que una próxima edición restablezca la fecha errónea en recursos estudiantiles.
+    from datetime import datetime, timedelta
+    vencimiento=datetime.fromisoformat(s12["assessment"]["due_at"])
+    verify(vencimiento.weekday()==6 and vencimiento.utcoffset()==timedelta(hours=-5),
+           "El cierre debe ser domingo 15, a las 23:59:59 en Colombia (UTC-5).")
+    verify("domingo 15 de noviembre de 2026" in full and
+           "domingo 15 de noviembre de 2026" in portada and
+           "domingo 15 de noviembre de 2026" in guia,
+           "Fecha y día de la semana deben coincidir en notebook, portada y guía.")
+    anterior=("14 de noviembre de 2026","sábado 14","14/11/2026","2026-11-14T23:59:59-05:00")
+    verify(not any(p in contenido for contenido in (full,portada,guia) for p in anterior),
+           "Ningún material para estudiantes puede conservar la fecha anterior.")
+
     verify("Taller_Control_2.ipynb" in portada and 'data-n="12"' in portada and
            "tc2-paso-a-paso.html" in portada and
            "lms/session-12.html" not in portada,"Portada ofrece dos recursos sin página especial S12.")
     verify(not (ROOT/"lms/session-12.html").exists(),"LMS usa el módulo universal, sin página S12 específica.")
     verify(guia.count('type="checkbox"')==41 and "GitHub" in guia and
-           "14 de noviembre de 2026" in guia and guia.count("<details>")>=8 and
+           "15 de noviembre de 2026" in guia and guia.count("<details>")>=8 and
            "NameError" in guia and "Whisper" in guia and "Tesseract" in guia,
            "Guía completa con 41 comprobaciones, ejemplos y rescates.")
     # Separa inequívocamente material aprendido de contenido antes del TC1.

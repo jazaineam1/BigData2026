@@ -7,9 +7,9 @@
 
 El TC2 del PDA de referencia 2026-2 evalúa **implementación de procesos ETL** y corresponde al **20 %** de la asignatura. El PDF conocido pertenece al grupo 1, por lo que cualquier ajuste administrativo específico del grupo 2 requiere comprobación docente. Para este grupo el profesor estableció un corte de contenidos **hasta la sesión 10**; se integran BM25/S07, búsqueda semántica/E5/Atlas/S09 e imagen y audio/S10. La sesión 10 ofrece fundamentos de ASR y WER y una extensión opcional de Whisper; **este TC2 convierte OCR y ASR en laboratorios guiados y puntuables**, tal como solicitó el docente. No exige video, Spark, Dask ni contenidos posteriores.
 
-**Fecha límite fijada:** sábado **14 de noviembre de 2026, 23:59:59, hora de Bogotá UTC−5**. Entrega mediante repositorio **preexistente y privado** del equipo, rama y PR propio, más correo institucional; no crear un nuevo repo.
+**Fecha límite fijada:** sábado **15 de noviembre de 2026, 23:59:59, hora de Bogotá UTC−5**. Entrega mediante repositorio **preexistente y privado** del equipo, rama y PR propio, más correo institucional; no crear un nuevo repo.
 
-**Estado de publicación:** esta versión V5 requiere ejecución de GitHub Actions y revisión antes de fusionar a main. No afirmar que está disponible en Pages hasta observar un despliegue exitoso del commit fusionado.
+**Estado:** antecedente de la implementación V5, posteriormente mejorada mediante V6. La corrección del plazo al domingo 15 de noviembre de 2026 prevalece sobre referencias históricas a la fecha anterior.
 
 ## Historia de Laura · cuatro actos y un producto
 
@@ -69,7 +69,7 @@ Los controles E4.4 y E5.4 exigen **inferencia ejecutada verdaderamente**. La rep
 1. Trabajar en el **repositorio ya creado por cada pareja**, convertirlo a **privado** si estaba público, porque el cuaderno/ZIP contienen códigos y nombres; mantener acceso de lectura del docente.
 2. Crear rama \`taller/tc2-etl\` y carpeta \`talleres/TC2/\`; subir \`TC2_<PAREJA>.ipynb\` ejecutado, \`TC2_<PAREJA>.zip\`, \`manifest_tc2.json\` a esa carpeta. No subir contraseñas, tokens, claimUrl o URI Atlas.
 3. Abrir PR en el propio repo del equipo (no en el docente). Notificar por correo institucional a los mismos destinatarios de TC1 con enlace al repo y al commit, integrantes y SHA del manifiesto.
-4. Commit y correo deben estar enviados antes de las **23:59:59 del sábado 14-11-2026**, hora Bogotá. Drive es respaldo de trabajo, no destino final.
+4. Commit y correo deben estar enviados antes de las **23:59:59 del domingo 15-11-2026**, hora Bogotá. Drive es respaldo de trabajo, no destino final.
 
 ## Control técnico antes de publicar
 

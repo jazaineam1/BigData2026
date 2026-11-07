@@ -7,8 +7,9 @@ for(const width of [390,768,1366]){
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.goto(url);
    await expect(page.locator('h1')).toContainText('TC2');
-   await expect(page.locator('body')).toContainText('14 de noviembre de 2026');
+   await expect(page.locator('body')).toContainText('15 de noviembre de 2026');
    await expect(page.locator('body')).toContainText('GitHub');
+   await expect(page.locator('body')).not.toContainText('14 de noviembre de 2026');
    await expect(page.locator('body')).toContainText('Whisper');
    await expect(page.locator('body')).toContainText('Tesseract');
    await expect(page.locator('input[type=checkbox]')).toHaveCount(41);
