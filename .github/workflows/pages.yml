@@ -18,6 +18,7 @@ on:
       - Cuadernos/10_ETL_Multimedia.ipynb
       - Cuadernos/10_Imagenes_Audio.ipynb
       - Cuadernos/11_ETL_Audio_Imagenes.ipynb
+      - Cuadernos/Taller_Control_2.ipynb
       - utils/validate_static_links.py
       - .github/workflows/pages.yml
   workflow_dispatch:
@@ -81,6 +82,7 @@ jobs:
           cp Cuadernos/10_ETL_Multimedia.ipynb _site/Cuadernos/
           cp Cuadernos/10_Imagenes_Audio.ipynb _site/Cuadernos/
           cp Cuadernos/11_ETL_Audio_Imagenes.ipynb _site/Cuadernos/
+          cp Cuadernos/Taller_Control_2.ipynb _site/Cuadernos/
           test -f _site/lms/portal.html
           test -f _site/lms/account.html
           test -f _site/lms/session-08.html
@@ -117,6 +119,8 @@ jobs:
           test -f _site/Presentaciones/s11-etl-audio-imagenes.html
           test -f _site/assets/s11/etl-live.html
           test -f _site/Cuadernos/11_ETL_Audio_Imagenes.ipynb
+          test -f _site/Cuadernos/Taller_Control_2.ipynb
+          test -f _site/assets/tutoriales/tc2-paso-a-paso.html
           touch _site/.nojekyll
 
       - name: Validar enlaces locales del artefacto
@@ -153,6 +157,9 @@ jobs:
             s11="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/s11-etl-audio-imagenes.html?v=${GITHUB_SHA}" || true)"
             s11_live="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}assets/s11/etl-live.html?v=${GITHUB_SHA}" || true)"
             s11_nb="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Cuadernos/11_ETL_Audio_Imagenes.ipynb?v=${GITHUB_SHA}" || true)"
+            tc2_nb="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Cuadernos/Taller_Control_2.ipynb?v=${GITHUB_SHA}" || true)"
+            tc2_guide="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}assets/tutoriales/tc2-paso-a-paso.html?v=${GITHUB_SHA}" || true)"
+            tc2_course="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/data/course.json?v=${GITHUB_SHA}" || true)"
             image_status="$(curl -fsS -o /dev/null -w '%{http_code}' "${PAGE_URL}Datos/s10_imagenes_reales/raw/7a71615869df5c19563b4f8d.webp?v=${GITHUB_SHA}" || true)"
             open_wall="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/s09-muro-publico.html?v=${GITHUB_SHA}" || true)"
             matchlab="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}matchlab/?v=${GITHUB_SHA}" || true)"
@@ -184,6 +191,10 @@ jobs:
               && grep -q 'MiB/s' <<<"$s11_live" \
               && grep -q 's11-live-f-benchmark' <<<"$s11_nb" \
               && grep -q 's11-extraer-imagenes' <<<"$s11_nb" \
+              && grep -q 'Taller de Control 2' <<<"$html" \
+              && grep -q 'Taller de Control 2' <<<"$tc2_nb" \
+              && grep -q '14 de noviembre de 2026' <<<"$tc2_guide" \
+              && grep -q 'Taller de Control 2' <<<"$tc2_course" \
               && [ "$image_status" = "200" ] \
               && [ -n "$realtime_sdk" ]; then
               ok=1
