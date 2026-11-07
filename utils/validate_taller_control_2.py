@@ -24,14 +24,20 @@ def run():
     verify(sum(x["cell_type"]=="markdown" for x in cells)>=57,"Al menos 57 celdas de explicación")
     for ejercicio in ("frecuencia_documental_equipo","coseno_mini","precision_cinco","rrf_dos_posiciones","luminancia_rgb","rms_manual"):
         verify(any(("def "+ejercicio+"(") in "".join(x["source"]) for x in cells),"COMPLETA debe existir: "+ejercicio)
+    for fn in ("ids_desde_texto","palabras_clave_propias"):
+        verify(any(("def "+fn+"(") in text for text in source),"Función nueva de OCR/ASR COMPLETA: "+fn)
+    verify(len(cells)>=110,"Historia OCR/ASR tan profunda como TC1")
+    verify(any("core.ejecutar_ocr(" in x for x in source),"El notebook EJECUTA OCR de verdad")
+    verify(any("core.ejecutar_asr(" in x for x in source),"El notebook EJECUTA ASR de verdad")
+    verify(any("core.consultar_texto(" in x for x in source),"El notebook consulta texto enriquecido")
     for index,x in enumerate(cells):
         if x["cell_type"]=="code":
             try:ast.parse("".join(x["source"]))
             except SyntaxError as e:errors.append(f"Celda {index} sintaxis: {e}")
     full="\n".join(source)
-    for term in ("PREDICCION_INICIAL","RANK_BM_LITERAL","RANK_SEM_PARAFRASIS","METRICAS_RRF","INSPECCION","AUDIOS","core.validar(","manifest_tc2.json","GitHub","No son audios de noticias"):
+    for term in ("PREDICCION_INICIAL","RANK_BM_LITERAL","RANK_SEM_PARAFRASIS","METRICAS_RRF","INSPECCION","AUDIOS","core.validar(","manifest_tc2.json","GitHub","no son audios"):
         verify(term.casefold() in full.casefold(),f"Enunciado/celda debe contener: {term}")
-    verify(len(c.RUBRICA)==21 and sum(x[2] for x in c.RUBRICA)==100,"21 controles/100 puntos")
+    verify(len(c.RUBRICA)==24 and sum(x[2] for x in c.RUBRICA)==100,"24 controles/100 puntos")
     found=[s for s in source if "CORE_SOURCE = " in s]
     verify(len(found)==1,"Motor embebido una sola vez")
     if found:
@@ -66,7 +72,7 @@ def run():
     with tempfile.TemporaryDirectory() as td:
         t=Path(td);i=t/"E4/ranking.png"
         c.csv_image(ranks,doc,i);meta=c.inspeccion_imagen(i)
-        verify(meta["suma_histograma"]==960*520 and len(meta["histograma"])==16,"Imagen real/histograma 16 bins")
+        verify(meta["suma_histograma"]==960*540 and len(meta["histograma"])==16,"Imagen real/histograma 16 bins")
         p=c.perfil_imagen(i,t/"160.png",160,.85)
         verify(p["ancho"]<=160 and c.sha(t/"160.png")==p["sha256"],"Pillow: perfil y SHA")
         small=c.inspeccion_imagen(t/"160.png")
@@ -77,7 +83,7 @@ def run():
         m512=c.metricas_voz(w,512);m1024=c.metricas_voz(w,1024)
         verify(0.69<m512["rms"]<0.72 and m512["resolucion_hz"]==31.25 and m1024["resolucion_hz"]==15.625,"RMS y resolución FFT")
         manifest=c.validar(t,doc,sample)
-        verify(len(manifest["controles"])==21 and manifest["puntaje"]==0,"Evaluador falla cerrado si faltan archivos")
+        verify(len(manifest["controles"])==24 and manifest["puntaje"]==0,"Evaluador falla cerrado si faltan archivos")
         htmlfile=c.hacer_html(t,doc,ranks,cs,c.fusion_rrf(ranks,cs,60,5),meta,[{"n":1,"source_record_id":"ejemplo","archivo":"demo.wav","medidas":m512}],{"modelo":"BM25"})
         text=htmlfile.read_text(encoding="utf-8")
         verify("MINDS14" in text and "sin vínculo" in text and "<audio" in text,"Explorador separa procedencias")
@@ -95,11 +101,33 @@ def run():
             sf.write(pcm,np.sin(np.linspace(0,2*np.pi*440,16000)),16000)
             raw.write_bytes(pcm.read_bytes())
             audios.append({"n":i,"archivo":pcm.name,"original":raw.name,"source_record_id":"prueba-"+str(i),"sha256":c.sha(pcm),"medidas":c.metricas_voz(pcm)})
+        # Este bloque comprueba sólo el contrato de catálogo; NO simula una
+        # ejecución real de OCR ni Whisper. Eso lo prueba E2E con modelos descargados.
+        ocr={"schema":"tc2-ocr-v1","source_kind":"SECOP_ranking_generado",
+             "motor":"tesseract","idioma":"spa",
+             "ids_esperados":[v["id_proceso"] for v in ranks[:5]],"resultados":[]}
+        for nombre in ("ranking.png","perfil_160.png","perfil_640.png"):
+            p=t/"E4"/nombre
+            ocr["resultados"].append({"archivo":"E4/"+nombre,"sha256_imagen":c.sha(p),
+                "texto_ocr":"TOP 5 RESULTADOS SECOP CO1.REQ.12345678",
+                "ids_secop_verificados":[],"cobertura_ids":0})
+        c.escribir(t/"E4/ocr.json",ocr)
+        asr={"schema":"tc2-asr-v1","engine":"faster-whisper","modelo":"tiny",
+             "source_kind":"MINDS14_es_ES","audios":[]}
+        for i,v in enumerate(audios,1):
+            asr["audios"].append({"n":i,"source_record_id":v["source_record_id"],
+             "sha256_audio":v["sha256"],"transcripcion_asr":"pago de cuenta",
+             "transcripcion_referencia":"pago de cuenta","wer":0.0,
+             "informacion":c.extraer_info_voz("pago de cuenta")})
+        c.escribir(t/"E5/asr.json",asr)
         c.escribir(t/"E5/audios.json",{"audios":audios})
         items=c.construir_catalogo(t,sample)
         meta=c.guardar_catalogo(t,items)
         verify(meta["cantidad"]==13 and len(c.reabrir_catalogo(t))==13,"Catálogo real JSONL+Parquet")
         verify(len(c.consultar_catalogo(items,"audio"))==10 and len(c.consultar_catalogo(items,"image"))==3,"Consulta por tipo")
+        verify(len(c.consultar_texto(items,"pago"))==10,"Consulta textual de enriquecimiento")
+        verify(abs(c.wer_palabras("pago de cuenta","pago la cuenta")-1/3)<1e-6,"WER distancia por sustitución")
+        verify(c.extraer_ids_secop("CO1.REQ.12345678")==["CO1.REQ.12345678"],"Regex SECOP cotejable")
         initial=c.sha(t/"E6/catalogo.jsonl")
         c.guardar_catalogo(t,c.construir_catalogo(t,sample))
         verify(initial==c.sha(t/"E6/catalogo.jsonl"),"Idempotencia de catálogo")
@@ -120,8 +148,8 @@ def run():
            "tc2-paso-a-paso.html" in portada and
            "lms/session-12.html" not in portada,"Portada ofrece dos recursos sin página especial S12.")
     verify(not (ROOT/"lms/session-12.html").exists(),"LMS usa el módulo universal, sin página S12 específica.")
-    verify(guia.count('type="checkbox"')==35 and "GitHub" in guia and
-           "14 de noviembre de 2026" in guia,"Guía tiene 35 comprobaciones y entrega GitHub.")
+    verify(guia.count('type="checkbox"')==41 and "GitHub" in guia and
+           "14 de noviembre de 2026" in guia,"Guía tiene 41 comprobaciones de OCR/ASR y entrega GitHub.")
     # Separa inequívocamente material aprendido de contenido antes del TC1.
     for forbidden in ("Cassandra query-first — 15 puntos","Neo4j / contexto relacional — 15 puntos","Adquisición SECOP — 25 puntos"):
         verify(forbidden not in full,"No repetir TC1: "+forbidden)
@@ -129,7 +157,7 @@ def run():
         print("TC2 QA: FAIL")
         for e in errors:print(" -",e)
         return 1
-    print("TC2 QA OFFLINE: OK · 200 documentos, 5 intenciones, 21 controles / 100, 100 celdas, BM25, RRF, coseno, PNG, FFT, exportación.")
+    print("TC2 QA OFFLINE: OK · 200 documentos, 5 intenciones, 24 controles / 100, 111 celdas, OCR+ASR, BM25, E5, RRF y ETL.")
     print("NO VERIFICADO POR ESTA PRUEBA: descarga MINDS14, encoder real E5, Atlas real, Drive/Colab autenticado y GitHub Pages.")
     return 0
 if __name__=="__main__":raise SystemExit(run())
