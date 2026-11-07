@@ -111,7 +111,7 @@ Los ejercicios de código son requisitos de los respectivos controles; no son ma
 - **Acceso del docente:** invitar como colaborador al usuario GitHub `jazaineam1` (cuenta propietaria del repositorio del curso; confirmar si prefiere otra cuenta). El docente debe poder acceder antes de revisar.
 - **Tres archivos en la raíz:** `TC2_<PAREJA_ID>.ipynb` ejecutado, `TC2_<PAREJA_ID>.zip` con E1–E6/HTML/audios, y `manifest_tc2.json` con puntuación y huella.
 - **Subida desde web:** GitHub `Add file → Upload files → Commit changes`, comprobar que los tres archivos aparezcan. No exigir terminal ni GitHub Classroom.
-- **Notificación como TC1:** enviar correo institucional a `jzaineam@ucentral.edu.co`, con copia al compañero, enlace completo del repositorio PRIVADO, integrantes, códigos y SHA-256 del manifest. No adjuntar ZIP.
+- **Notificación como TC1:** enviar correo institucional a el correo institucional del docente indicado en el TC1 y en la guía del TC2, con copia al compañero, enlace completo del repositorio PRIVADO, integrantes, códigos y SHA-256 del manifest. No adjuntar ZIP.
 - **Cierre válido:** los tres archivos cargados, invitación enviada y correo de notificación **antes** del cierre. Tras corrección, nuevo commit y respuesta al mismo hilo con huella nueva. Cambios posteriores no sustituyen la entrega puntual.
 - **Privacidad:** el notebook/ZIP pueden contener nombres y códigos del equipo y audios de terceros con atribución; nunca publicarlos. No incluir URI de MongoDB, claves, tokens ni enlaces de reclamación. El Drive de Colab es SOLO respaldo de trabajo, no canal de entrega.
 
