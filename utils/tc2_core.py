@@ -7,17 +7,21 @@ import base64, collections, hashlib, html, io, json, math, re, shutil, unicodeda
 from pathlib import Path
 import numpy as np
 
-SCHEMA = "tc2-v2-integrado"
+SCHEMA = "tc2-v3-ocr-asr"
 MODELO = "intfloat/multilingual-e5-small"
 RUBRICA = [
  ("E1.1","Tokens y DF/IDF",3),("E1.2","BM25 dos rankings",4),("E1.3","Variación léxica",3),
  ("E2.1","E5 384 dimensiones",4),("E2.2","Coseno y Top-k",5),("E2.3","Atlas real o ruta local",4),("E2.4","Filtro y candidatos",2),
  ("E3.1","Precision/Recall@5",4),("E3.2","RRF manual e híbrido",4),("E3.3","Decisión y límite",2),
- ("E4.1","RGB, luminancia e histograma",7),("E4.2","Transformación de imagen",8),("E4.3","Legibilidad y pérdida",5),
- ("E5.1","Diez audios reales",6),("E5.2","RMS, FFT y espectrograma",8),("E5.3","Interpretación de audio",6),
- ("E6.1","Catálogo con procedencia",6),("E6.2","Reimportación y consultas",6),
- ("E6.3","Idempotencia",5),("E6.4","Corrupción y recuperación",5),("E6.5","Explorador y defensa",3)]
-assert len(RUBRICA)==21 and sum(r[2] for r in RUBRICA)==100
+ ("E4.1","RGB, luminancia e histograma",5),("E4.2","Transformación de imagen",5),
+ ("E4.3","Legibilidad y pérdida",4),("E4.4","OCR real, códigos y evidencia",6),
+ ("E5.1","Diez audios reales",5),("E5.2","RMS, FFT y espectrograma",5),
+ ("E5.3","Interpretación de audio",2),("E5.4","ASR Whisper real sobre diez voces",6),
+ ("E5.5","WER, segmentos y extracción estructurada",2),
+ ("E6.1","Catálogo enriquecido y procedencia",6),("E6.2","Reimportación, consultas y texto extraído",6),
+ ("E6.3","Idempotencia",4),("E6.4","Corrupción y recuperación",4),("E6.5","Explorador y defensa",5)]
+assert len(RUBRICA)==24 and sum(r[2] for r in RUBRICA)==100
+
 URL_VOCES = "https://huggingface.co/datasets/PolyAI/minds14/resolve/main/es-ES/train-00000-of-00001.parquet"
 SHA_VOCES = "989bf2f90676a5eb5852fe785a03b1d9b97763e0febbd0fd0a3f489afd83badf"
 
@@ -97,19 +101,28 @@ def fusion_rrf(a,b,k0=60,top=10):
     return [{"id_proceso":i,"score":round(v,10)} for i,v in sorted(puntos.items(),key=lambda x:(-x[1],x[0]))[:top]]
 
 def csv_image(ranking,docs,path):
-    """PNG académico derivado del Top-5 verdadero; no implica fotos de contratos."""
+    """Imagen auténtica del ranking del estudiante, letras grandes e IDs para OCR."""
     from PIL import Image,ImageDraw,ImageFont
     lookup={d["id_proceso"]:d for d in docs};rs=ranking[:5]
-    im=Image.new("RGB",(960,520),"#f5f9ff");d=ImageDraw.Draw(im)
-    d.text((36,24),"Top 5 del buscador — imagen generada en el TC2",fill="#172c50")
-    maxi=max((float(x["score"]) for x in rs),default=1)
+    im=Image.new("RGB",(960,540),"#ffffff");drawer=ImageDraw.Draw(im)
+    try:
+        titlefont=ImageFont.truetype("DejaVuSans-Bold.ttf",24)
+        idfont=ImageFont.truetype("DejaVuSans-Bold.ttf",20)
+        bodyfont=ImageFont.truetype("DejaVuSans.ttf",15)
+    except OSError:
+        titlefont=ImageFont.load_default();idfont=titlefont;bodyfont=titlefont
+    drawer.text((28,18),"TOP 5 - RESULTADOS SECOP",font=titlefont,fill="#122238")
+    drawer.text((28,58),"Imagen generada desde el ranking del equipo: transcribir y comprobar IDs",font=bodyfont,fill="#193d5c")
+    maxi=max((abs(float(x["score"])) for x in rs),default=1)
     for n,r in enumerate(rs):
-        y=90+n*76;title=lookup[r["id_proceso"]]["nombre_proceso"][:67]
-        d.text((40,y),str(n+1)+". "+title,fill="#14253f")
-        w=int(820*float(r["score"])/max(maxi,1e-9))
-        d.rectangle((40,y+24,40+max(w,0),y+41),fill="#1d608f")
-        d.text((870,y+23),f'{r["score"]:.3f}',fill="#152c4f")
-    d.text((35,485),"Imagen derivada de resultados SECOP; no es fotografia ni prueba de irregularidad",fill="#263d57")
+        y=102+n*85
+        proc=lookup[r["id_proceso"]]
+        drawer.text((32,y),str(n+1)+"  "+proc["id_proceso"],font=idfont,fill="#0b192b")
+        drawer.text((40,y+30),proc["nombre_proceso"][:73],font=bodyfont,fill="#1b3852")
+        barwidth=int(740*abs(float(r["score"]))/max(maxi,1e-8))
+        drawer.rectangle((40,y+56,40+max(barwidth,0),y+65),fill="#166999")
+        drawer.text((796,y+53),f'{r["score"]:.3f}',font=bodyfont,fill="#153651")
+    drawer.text((25,519),"Gráfico docente: no es fotografía, OCR no demuestra veracidad contractual",font=bodyfont,fill="#384f65")
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True);im.save(path)
     return path
 
@@ -201,32 +214,160 @@ def obtener_voces(out,source=None):
            "medidas":metricas_voz(pcm)})
     return audios
 
+def normalizar_palabras(s):
+    """Normalización de evaluación WER; conserva palabras de una letra."""
+    return re.findall(r"[a-z0-9]+",normalizar(s),flags=re.U)
+
+def wer_palabras(referencia,prediccion):
+    """Distancia Levenshtein por palabras / longitud de referencia; puede ser >1."""
+    a,b=normalizar_palabras(referencia),normalizar_palabras(prediccion)
+    if not a:return None
+    prev=list(range(len(b)+1))
+    for i,word in enumerate(a,1):
+        cur=[i]+[0]*len(b)
+        for j,other in enumerate(b,1):
+            cur[j]=min(prev[j]+1,cur[j-1]+1,prev[j-1]+int(word!=other))
+        prev=cur
+    return round(prev[-1]/len(a),6)
+
+def extraer_ids_secop(s):
+    """Sólo identificadores que aparecen en texto OCR; nunca inventar un ID."""
+    t=str(s).upper()
+    t=re.sub(r"\s+"," ",t)
+    patron=r"CO[1I]\s*[.\- ]*\s*REQ\s*[.\- ]*\s*(\d{7,10})"
+    return sorted({"CO1.REQ."+m for m in re.findall(patron,t)})
+
+def extraer_cifras(s):
+    return sorted(set(re.findall(r"(?<!\w)\d+(?:[.,]\d+)*(?!\w)",str(s))))[:25]
+
+def extraer_info_voz(texto):
+    """Heurística reproducible; etiquetas inferidas, no entidades verificadas."""
+    t=normalizar(texto)
+    catalogo={"cuenta":["cuenta","saldo","transferencia"],
+      "tarjeta":["tarjeta","credito","debito"],
+      "credito":["prestamo","credito","hipoteca"],
+      "pagos":["pago","pagar","factura"],
+      "seguridad":["contrasena","bloquear","fraude"]}
+    temas=sorted(k for k,palabras in catalogo.items() if any(re.search(r"\b"+re.escape(v)+r"\b",t) for v in palabras))
+    return {"temas_heuristicos":temas or ["sin_clasificar"],
+       "numeros_mencionados":extraer_cifras(texto),
+       "metodo":"reglas_lexicas_deterministas","requiere_revision_humana":True}
+
+def ejecutar_ocr(carpeta,ranking):
+    """Tesseract de verdad sobre 3 PNG; guarda texto y procedencia por archivo."""
+    from PIL import Image
+    import pytesseract
+    from pytesseract import Output
+    idiomas=pytesseract.get_languages(config="")
+    if "spa" not in idiomas:
+        raise RuntimeError("Instala el paquete del sistema tesseract-ocr-spa antes de ejecutar E4 OCR")
+    carpeta=Path(carpeta);esperados=[x["id_proceso"] for x in ranking[:5]]
+    results=[]
+    for nombre in ("ranking.png","perfil_160.png","perfil_640.png"):
+        p=carpeta/"E4"/nombre
+        with Image.open(p) as image:
+            rgb=image.convert("RGB")
+            data=pytesseract.image_to_data(rgb,lang="spa",config="--psm 6",
+                      output_type=Output.DICT)
+        tokens_validos=[]
+        conf=[]
+        for token,c in zip(data["text"],data["conf"]):
+            try: score=float(c)
+            except (ValueError,TypeError):score=-1
+            if str(token).strip() and score>=0:
+                tokens_validos.append(str(token).strip())
+                conf.append(score)
+        texto_ocr=" ".join(tokens_validos)
+        ids_detectados=extraer_ids_secop(texto_ocr)
+        resultados_esperados=[ident for ident in esperados if ident in ids_detectados]
+        results.append({"archivo":"E4/"+nombre,"sha256_imagen":sha(p),
+           "motor":"tesseract","idioma":"spa","psm":6,
+           "texto_ocr":texto_ocr,"ids_ocr":ids_detectados,"ids_secop_verificados":resultados_esperados,
+           "cifras":extraer_cifras(texto_ocr),
+           "confianza_media":round(sum(conf)/len(conf),3) if conf else None,
+           "cobertura_ids":round(len(resultados_esperados)/max(len(esperados),1),4),
+           "tokens_ocr":len(tokens_validos)})
+    out={"schema":"tc2-ocr-v1","source_kind":"SECOP_ranking_generado",
+         "motor":"tesseract","idioma":"spa","ids_esperados":esperados,
+         "resultados":results,
+         "nota":"Los IDs se comparan con ranking real; texto OCR es hipótesis, no hechos verificados."}
+    escribir(carpeta/"E4/ocr.json",out)
+    return out
+
+def ejecutar_asr(carpeta,voces,modelo="tiny"):
+    """Whisper real local sobre diez WAV MINDS14; no reutiliza referencia como predicción."""
+    from faster_whisper import WhisperModel
+    if modelo!="tiny":raise ValueError("El TC2 se prueba con Whisper tiny multilingüe CPU")
+    carpeta=Path(carpeta)
+    engine=WhisperModel(modelo,device="cpu",compute_type="int8",cpu_threads=2,num_workers=1)
+    salida=[]
+    if len(voces)!=10:raise ValueError("Faltan voces de origen")
+    for audio in voces:
+        p=carpeta/"E5/audio"/audio["archivo"]
+        if sha(p)!=audio["sha256"]:raise ValueError("WAV alterado: "+str(p))
+        chunks,info=engine.transcribe(str(p),language="es",beam_size=1,
+                    vad_filter=False,condition_on_previous_text=False)
+        segmentos=[{"inicio_s":round(float(c.start),3),
+                    "fin_s":round(float(c.end),3),
+                    "texto":str(c.text).strip()} for c in chunks]
+        prediccion=" ".join(c["texto"] for c in segmentos).strip()
+        referencia=str(audio["transcripcion_referencia"])
+        salida.append({"n":int(audio["n"]),"archivo":audio["archivo"],
+            "source_kind":"MINDS14_es_ES","source_record_id":audio["source_record_id"],
+            "sha256_audio":audio["sha256"],"engine":"faster-whisper",
+            "modelo":modelo,"language":"es","compute_type":"int8",
+            "transcripcion_asr":prediccion,
+            "transcripcion_referencia":referencia,
+            "segmentos":segmentos,
+            "wer":wer_palabras(referencia,prediccion),
+            "informacion":extraer_info_voz(prediccion)})
+    resultado={"schema":"tc2-asr-v1","engine":"faster-whisper","modelo":modelo,
+      "source_kind":"MINDS14_es_ES","licencia":"CC BY 4.0",
+      "audios":salida,"limitacion":"Predicciones Whisper; no son transcripciones humanas ni noticias de El Tiempo."}
+    escribir(carpeta/"E5/asr.json",resultado)
+    return resultado
+
 def construir_catalogo(carpeta,intencion):
-    """Activos reales y derivados tipados, con linaje sin asociaciones inventadas."""
+    """Linaje multimodal + textos OCR/ASR de archivos reales."""
     carpeta=Path(carpeta)
     audios=leer(carpeta/"E5/audios.json")["audios"]
+    ocr=leer(carpeta/"E4/ocr.json")
+    asr=leer(carpeta/"E5/asr.json")
+    por_imagen={Path(row["archivo"]).name:row for row in ocr["resultados"]}
+    por_audio={int(row["n"]):row for row in asr["audios"]}
+    if len(por_imagen)!=3 or len(por_audio)!=10:raise ValueError("Faltan OCR o ASR de activos")
     filas=[]
     for nombre in ("ranking.png","perfil_160.png","perfil_640.png"):
         ruta="E4/"+nombre;p=carpeta/ruta
         from PIL import Image
         with Image.open(p) as im: width,height=im.size
+        lectura=por_imagen[nombre]
+        if sha(p)!=lectura["sha256_imagen"]:raise ValueError("OCR no corresponde a la imagen")
         filas.append({"asset_id":"imagen_"+nombre.replace(".","_"),
           "source_kind":"SECOP_ranking_generado","source_record_id":intencion["id"],
           "media_type":"image/png","license":"Imagen generada en taller a partir de resultados SECOP",
           "raw_path":"E4/ranking.png","derived_path":ruta,
           "sha256":sha(p),"width":int(width),"height":int(height),
-          "duration_s":None,"rms":None})
+          "duration_s":None,"rms":None,
+          "extracted_text":lectura["texto_ocr"],"text_origin":"ocr_tesseract_spa",
+          "reference_text":"","wer":None,
+          "extracted_info_json":json.dumps({"ids_secop":lectura["ids_secop_verificados"],
+             "cobertura_ids":lectura["cobertura_ids"]},ensure_ascii=False,sort_keys=True)})
     if len(audios)!=10:raise ValueError("Se exigen 10 audios reales")
     for a in audios:
-        ruta="E5/audio/"+a["archivo"]
-        p=carpeta/ruta
+        ruta="E5/audio/"+a["archivo"];p=carpeta/ruta
         if sha(p)!=a["sha256"]:raise ValueError("Audio alterado: "+ruta)
+        rec=por_audio[int(a["n"])]
+        if rec["sha256_audio"]!=a["sha256"]:raise ValueError("ASR no corresponde al WAV")
         filas.append({"asset_id":"audio_"+str(a["n"]).zfill(2),
           "source_kind":"MINDS14_es_ES","source_record_id":a["source_record_id"],
           "media_type":"audio/wav","license":"CC BY 4.0",
           "raw_path":"E5/audio/"+a["original"],"derived_path":ruta,
           "sha256":sha(p),"width":None,"height":None,
-          "duration_s":float(a["medidas"]["duracion_s"]),"rms":float(a["medidas"]["rms"])})
+          "duration_s":float(a["medidas"]["duracion_s"]),"rms":float(a["medidas"]["rms"]),
+          "extracted_text":rec["transcripcion_asr"],"text_origin":"asr_whisper_tiny",
+          "reference_text":rec["transcripcion_referencia"],"wer":rec["wer"],
+          "extracted_info_json":json.dumps(rec["informacion"],ensure_ascii=False,sort_keys=True)})
     if len(filas)!=13 or len({f["asset_id"] for f in filas})!=13:raise ValueError("Catálogo duplicado")
     return filas
 
@@ -295,11 +436,23 @@ def hacer_html(carpeta,docs,bm,sem,rrf,datoimg,audios,decisiones):
         meta=leer(carpeta/"E6/catalogo_meta.json")
         resumen="<section><h2>Catálogo ETL verificado</h2><p>"+str(meta["cantidad"])+" activos, "+str(meta["imagenes"])+" imágenes y "+str(meta["audios"])+" audios. Exportaciones JSONL y Parquet disponibles en E6.</p></section>"
         page=page.replace("</main></html>",resumen+"</main></html>")
+    # Exporta una ficha verificable con textos producidos por modelos reales, no etiquetas de referencia.
+    if (carpeta/"E4/ocr.json").exists() and (carpeta/"E5/asr.json").exists():
+        ocr=leer(carpeta/"E4/ocr.json")["resultados"]
+        asr=leer(carpeta/"E5/asr.json")["audios"]
+        tabla_ocr="".join("<tr><td>"+html.escape(Path(o["archivo"]).name)+"</td><td>"+html.escape(o["texto_ocr"][:500])+
+               "</td><td>"+html.escape(str(o["ids_secop_verificados"]))+"</td></tr>" for o in ocr)
+        tabla_asr="".join("<tr><td>"+str(a["n"])+"</td><td>"+html.escape(a["transcripcion_asr"][:500])+
+               "</td><td>"+html.escape(str(a["wer"]))+"</td><td>"+html.escape(str(a["informacion"]["temas_heuristicos"]))+"</td></tr>"
+               for a in asr)
+        pagina_ocr="<section><h2>OCR Tesseract · texto extraído de imágenes</h2><table><thead><tr><th>Imagen</th><th>Texto predicho</th><th>IDs cotejados</th></tr></thead><tbody>"+tabla_ocr+"</tbody></table><p>Un ID reconocido no verifica la veracidad del expediente. El perfil 160 px puede perder texto.</p></section>"
+        pagina_asr="<section><h2>ASR Whisper tiny · 10 audios transcritos realmente</h2><table><thead><tr><th>Voz</th><th>Predicción ASR</th><th>WER</th><th>Temas heurísticos</th></tr></thead><tbody>"+tabla_asr+"</tbody></table><p>WER compara predicciones con referencias humanas de MINDS14; los temas son reglas léxicas, no veredictos.</p></section>"
+        page=page.replace("</main></html>",pagina_ocr+pagina_asr+"</main></html>")
     ruta=carpeta/"explorador.html";ruta.write_text(page,encoding="utf-8")
     return ruta
 
 def empaquetar(carpeta,manifest):
-    """Archivo para Drive, evitando cachés, secretos y fuentes externas pesadas."""
+    """ZIP de evidencias para GitHub privado, sin secretos ni parquet original de 39MB."""
     import zipfile
     carpeta=Path(carpeta)
     no_ext={".env",".pem",".key"}
@@ -404,8 +557,23 @@ def validar(carpeta,docs,intencion):
         a=inspeccion_imagen(carpeta/"E4/perfil_160.png");b=inspeccion_imagen(carpeta/"E4/perfil_640.png")
         ok("E4.2",files and a["ancho"]<b["ancho"] and both.get("160",{}).get("sha256")==sha(carpeta/"E4/perfil_160.png") and both.get("640",{}).get("sha256")==sha(carpeta/"E4/perfil_640.png"),"Perfiles generados con diferencia observable.")
         ok("E4.3",meta.get("preferido")=="640" and meta.get("limite")=="Reducir puede volver ilegibles las etiquetas" and b["ancho"]>=480,"Perfil útil por legibilidad.")
+        ocr=lee("E4/ocr.json")
+        image_files=("ranking.png","perfil_160.png","perfil_640.png")
+        check_ocr=ocr.get("schema")=="tc2-ocr-v1" and ocr.get("motor")=="tesseract" and ocr.get("idioma")=="spa"
+        if check_ocr:
+            registros={Path(r["archivo"]).name:r for r in ocr["resultados"]}
+            check_ocr=(len(registros)==3 and
+                ocr.get("ids_esperados")==[x["id_proceso"] for x in fusion_rrf(
+                    lee("E1/bm25.json")["parafrasis"],lee("E2/semantica.json")["parafrasis"],60,10)[:5]]
+                and all(registros[n]["sha256_imagen"]==sha(carpeta/"E4"/n) and
+                    registros[n].get("motor")=="tesseract" and registros[n].get("idioma")=="spa" and
+                    isinstance(registros[n].get("texto_ocr"),str) and
+                    registros[n].get("tokens_ocr",0)>0 and
+                    registros[n].get("ids_ocr")==extraer_ids_secop(registros[n]["texto_ocr"])
+                    for n in image_files))
+        ok("E4.4",check_ocr,"OCR Tesseract español ejecutado en tres perfiles; IDs cotejados con ranking.")
     except Exception as err:
-        for item in ("E4.1","E4.2","E4.3"):ok(item,False,str(err))
+        for item in ("E4.1","E4.2","E4.3","E4.4"):ok(item,False,str(err))
     try:
         a=lee("E5/audios.json"); voces=a["audios"]
         bueno=len(voces)==10 and len({v.get("source_record_id") for v in voces})==10 and len({v.get("intent_class") for v in voces})==10
@@ -421,14 +589,34 @@ def validar(carpeta,docs,intencion):
         ok("E5.2",a1.get("ventana_512")==m512 and a1.get("ventana_1024")==m1024 and m512["resolucion_hz"]>m1024["resolucion_hz"] and lab_rms_ok,
            "RMS de cuatro muestras implementado y FFT 512/1024 medido en WAV real.")
         ok("E5.3",a1.get("limite")=="RMS y FFT no transcriben palabras" and a1.get("referencia_no_asr") is True and 1<=int(a1.get("posicion",0))<=10,"Distinción entre señal y transcripción.")
+        pred=lee("E5/asr.json")
+        trans=pred.get("audios",[])
+        pred_ok=(pred.get("schema")=="tc2-asr-v1" and pred.get("engine")=="faster-whisper" and
+                 pred.get("modelo")=="tiny" and len(trans)==10 and
+                 len({item.get("source_record_id") for item in trans})==10)
+        if pred_ok:
+            pred_ok=all(v["source_record_id"]==r.get("source_record_id") and
+                 v["sha256"]==r.get("sha256_audio") and
+                 r.get("engine")=="faster-whisper" and r.get("modelo")=="tiny" and
+                 r.get("language")=="es" and isinstance(r.get("transcripcion_asr"),str) and
+                 isinstance(r.get("segmentos"),list) and
+                 r.get("transcripcion_referencia")==v.get("transcripcion_referencia")
+                 for v,r in zip(voces,trans))
+        ok("E5.4",pred_ok and sum(bool(x["transcripcion_asr"].strip()) for x in trans)>=8 if pred_ok else False,
+           "ASR real Whisper tiny ejecutado en los 10 WAV; >=8 hipótesis no vacías.")
+        info_ok=pred_ok and all(r.get("wer")==wer_palabras(r["transcripcion_referencia"],r["transcripcion_asr"]) and
+              r.get("informacion")==extraer_info_voz(r["transcripcion_asr"]) for r in trans)
+        ok("E5.5",info_ok,"WER recomputado, cifras y temas extraídos de hipótesis ASR reales.")
     except Exception as err:
-        for item in ("E5.1","E5.2","E5.3"):ok(item,False,str(err))
+        for item in ("E5.1","E5.2","E5.3","E5.4","E5.5"):ok(item,False,str(err))
     try:
         filas=construir_catalogo(carpeta,intencion)
         meta=lee("E6/catalogo_meta.json")
         ok("E6.1",len(filas)==13 and meta.get("cantidad")==13 and meta.get("imagenes")==3 and meta.get("audios")==10 and
            meta.get("jsonl_sha256")==sha(carpeta/"E6/catalogo.jsonl") and
-           all(f["sha256"]==sha(carpeta/f["derived_path"]) for f in filas),"Catálogo con 3 imágenes, 10 audios, fuente y huellas.")
+           all(f["sha256"]==sha(carpeta/f["derived_path"]) for f in filas) and
+           sum(f["text_origin"]=="ocr_tesseract_spa" for f in filas)==3 and
+           sum(f["text_origin"]=="asr_whisper_tiny" for f in filas)==10,"Catálogo con 3 imágenes, 10 audios, fuente y huellas.")
         reabierto=reabrir_catalogo(carpeta)
         consult=lee("E6/consultas.json")
         ok("E6.2",reabierto==filas and consult.get("imagenes")==consultar_catalogo(reabierto,"image") and
@@ -444,7 +632,8 @@ def validar(carpeta,docs,intencion):
         page=(carpeta/"explorador.html").read_text(encoding="utf-8")
         ok("E6.5","BM25 léxico" in page and "E5 semántico" in page and
            "Diez voces reales autorizadas" in page and "sin vínculo" in page and
-           "Catálogo ETL verificado" in page and "<audio" in page and
+           "Catálogo ETL verificado" in page and "OCR Tesseract" in page and
+           "ASR Whisper" in page and "<audio" in page and
            report.get("modelo") in ("BM25","E5","RRF") and
            report.get("audio_no_implica")=="Transcripción ni intención" and
            report.get("imagen_no_implica")=="Contenido semántico del contrato",
