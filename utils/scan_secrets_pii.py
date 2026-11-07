@@ -120,6 +120,8 @@ KNOWN = [
      "superficie S08: informa el correo institucional del docente para la entrega"),
     ("utils/validate_lms_s08.py", "correo (posible dato personal)",
      "QA verifica que S08 muestre el canal institucional correcto"),
+    ("assets/tutoriales/tc2-paso-a-paso.html", "correo (posible dato personal)",
+     "el correo institucional del docente es el canal oficial de entrega del TC2"),
     ("utils/tc1_contrato.py", "correo (posible dato personal)",
      "contrato del TC1: correo institucional del docente como canal oficial de entrega"),
     ("assets/tutoriales/s08-secoppipeline.html", "correo (posible dato personal)",
