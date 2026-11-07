@@ -193,7 +193,7 @@ jobs:
               && grep -q 's11-extraer-imagenes' <<<"$s11_nb" \
               && grep -q 'Taller de Control 2' <<<"$html" \
               && grep -q 'Taller de Control 2' <<<"$tc2_nb" \
-              && grep -q '14 de noviembre de 2026' <<<"$tc2_guide" \
+              && grep -q '15 de noviembre de 2026' <<<"$tc2_guide" \
               && grep -q 'Taller de Control 2' <<<"$tc2_course" \
               && [ "$image_status" = "200" ] \
               && [ -n "$realtime_sdk" ]; then
