@@ -14,7 +14,7 @@ on:
       - 'playwright.tc2.config.cjs'
       - 'index.html'
       - 'lms/data/course.json'
-      - 'lms/session-12.html'
+      - 'lms/session.html'
       - 'docs/PLAN_TALLER_CONTROL_2_HASTA_S10_2026-2S.md'
       - 'utils/scan_secrets_pii.py'
   workflow_dispatch:
