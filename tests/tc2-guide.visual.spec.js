@@ -7,7 +7,9 @@ for(const width of [390,768,1366]){
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.goto(url);
    await expect(page.locator('h1')).toContainText('TC2');
-   await expect(page.locator('input[type=checkbox]')).toHaveCount(20);
+   await expect(page.locator('body')).toContainText('14 de noviembre de 2026');
+   await expect(page.locator('body')).toContainText('GitHub');
+   await expect(page.locator('input[type=checkbox]')).toHaveCount(31);
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBeTruthy();
    await expect(page.getByRole('link',{name:/Abrir el cuaderno TC2 en Colab/})).toHaveAttribute('href',/Taller_Control_2\.ipynb/);
    expect(errors).toEqual([]);
@@ -16,15 +18,15 @@ for(const width of [390,768,1366]){
 test('TC2 checklist local conserva estado tras recargar y reinicia sin tocar notas',async({page})=>{
  await page.goto(url);
  const boxes=page.locator('input[type=checkbox]');
- await expect(page.locator('#status')).toContainText('0 de 20');
+ await expect(page.locator('#status')).toContainText('0 de 31');
  await boxes.nth(0).check();
  await boxes.nth(3).check();
- await expect(page.locator('#status')).toContainText('2 de 20');
+ await expect(page.locator('#status')).toContainText('2 de 31');
  await page.reload();
  await expect(boxes.nth(0)).toBeChecked();
  await expect(boxes.nth(3)).toBeChecked();
  await page.locator('#clear').click();
- await expect(page.locator('#status')).toContainText('0 de 20');
+ await expect(page.locator('#status')).toContainText('0 de 31');
  await expect(boxes.nth(0)).not.toBeChecked();
  expect(await page.evaluate(()=>localStorage.getItem('bigdata-tc2-checklist-v1'))).toBeNull();
 });
