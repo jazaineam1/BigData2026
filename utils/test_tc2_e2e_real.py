@@ -82,23 +82,23 @@ def main():
             assert len(nb["cells"])>=81, "TC2 debe alcanzar el nivel de desarrollo del TC1"
             report=env["INFORME"]
             print("Puntaje final real, sin Atlas:",report["puntaje"])
-            if report["puntaje"]!=97:
+            if report["puntaje"]!=98:
                 for cod,val in report["controles"].items():
                     if val["puntos"]!=val["maximo"]:print("PARCIAL:",cod,val)
-                raise AssertionError("97/100 esperados: 3 puntos de Atlas no asignables por ejecución local.")
+                raise AssertionError("98/100 esperados: 2 puntos de Atlas no asignables por ejecución local.")
             z=env["ZIP"];manifest=env["MANIFEST_EXTERNO"]
             assert z.exists() and z.stat().st_size>100_000
             assert manifest.exists()
             import zipfile
             with zipfile.ZipFile(z) as f:
                 names=set(f.namelist())
-                assert "explorador.html" in names and "E5/audios.json" in names
+                assert "explorador.html" in names and "E5/audios.json" in names and "E6/catalogo.jsonl" in names and "E6/catalogo.parquet" in names and "E6/recuperacion.json" in names
                 assert len([x for x in names if re.fullmatch(r"E5/audio/voz_\d\d\.wav",x)])==10
             # El docente recupera exactamente el mismo puntaje desde el ZIP extraído.
             import calificar_tc2_zip as grader
             recalc=grader.corregir(z,env["HUELLA"])
-            assert recalc["puntaje"]==97
-            print("TC2 E2E REAL: OK, 200 documentos, E5 384, 10 voces licenciadas, imagen, RRF, HTML, ZIP, score 97/100.")
+            assert recalc["puntaje"]==98
+            print("TC2 E2E REAL: OK, 200 documentos, E5 384, 10 voces licenciadas, imagen, RRF, HTML, ZIP, score 98/100.")
         finally:
             os.chdir(old)
 if __name__=="__main__":main()
