@@ -123,6 +123,8 @@ def main():
                 raise AssertionError("98/100 esperados: 2 puntos de Atlas no asignables por ejecución local.")
             z=env["ZIP"];manifest=env["MANIFEST_EXTERNO"]
             assert z.exists() and z.stat().st_size>100_000
+            print("ZIP DE ENTREGA:",z.stat().st_size,"bytes")
+            assert z.stat().st_size<=25_000_000, "GitHub Upload files limita el tamaño del archivo; dividir la entrega o usar git CLI"
             assert manifest.exists()
             import zipfile
             with zipfile.ZipFile(z) as f:
