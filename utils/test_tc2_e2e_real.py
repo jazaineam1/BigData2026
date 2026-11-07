@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Prueba completa del TC2 en Python CPU, con E5 real y diez voces MINDS14.
 No equivale a comprobar autenticación de Google Colab/Drive ni conexión Atlas remota.
+Ejecuta además re-inferencia independiente de OCR/Whisper desde el ZIP docente.
 """
 from __future__ import annotations
 import ast,json,os,re,sys,tempfile,time,traceback
@@ -42,24 +43,51 @@ def replace_params(source):
             source=source[:match.start()]+key+" = "+val+" #@param (prueba real TC2)"+source[match.end():]
             changed.append(key)
     return source,changed
-SOLUCIONES = {
- "frecuencia_documental_equipo": '    return sum(1 for documento in coleccion if termino in set(core.tokens(core.texto(documento))))',
- "coseno_mini": '    return float(np.dot(a,b)/(np.linalg.norm(a)*np.linalg.norm(b)))',
- "precision_cinco": '    return sum(ident in relevantes for ident in ids[:5])/5',
- "rrf_dos_posiciones": '    return 1/(60+posicion_bm25)+1/(60+posicion_e5)',
- "luminancia_rgb": '    return 0.2126*rgb[0]+0.7152*rgb[1]+0.0722*rgb[2]',
- "rms_manual": '    return float(np.sqrt(np.mean(np.square(muestras))))',
- "ids_desde_texto": '    return re.findall(r"CO1\.REQ\.\d{7,10}",str(texto).upper())',
- "palabras_clave_propias": '    return sorted(set(core.tokens(texto)))',
-}
+def referencia_ci(nombre, argumentos):
+    """Oráculo de prueba de integración, no una solución ejecutable del estudiante.
+
+    Un notebook publicado no tiene esta función. La calificación efectiva se basa
+    en resultados propios y en la auditoría del ZIP. Las pruebas públicas permiten
+    inspeccionar criterios: ocultar respuestas en un repositorio abierto no es seguridad.
+    """
+    import numpy as np
+    import tc2_core as core  # esta prueba vive en utils/
+    if nombre=="frecuencia_documental_equipo":
+        return len([d for d in argumentos["coleccion"]
+                    if argumentos["termino"] in core.tokens(core.texto(d))])
+    if nombre=="coseno_mini":
+        a=np.asarray(argumentos["a"]);b=np.asarray(argumentos["b"])
+        return float((a*b).sum()/(np.linalg.norm(a)*np.linalg.norm(b)))
+    if nombre=="precision_cinco":
+        return len(set(argumentos["ids"][:5]) & set(argumentos["relevantes"]))/5
+    if nombre=="rrf_dos_posiciones":
+        return sum(1/(60+argumentos[k]) for k in ("posicion_bm25","posicion_e5"))
+    if nombre=="luminancia_rgb":
+        return float(np.asarray(argumentos["rgb"])@np.asarray([.2126,.7152,.0722]))
+    if nombre=="rms_manual":
+        return float(np.linalg.norm(argumentos["muestras"])/np.sqrt(len(argumentos["muestras"])))
+    if nombre=="ids_desde_texto":
+        return re.findall(r"CO1\.REQ\.\d{7,10}",str(argumentos["texto"]).upper())
+    if nombre=="palabras_clave_propias":
+        return sorted(set(core.tokens(argumentos["texto"])))
+    raise ValueError("Ejercicio de CI no registrado: "+nombre)
+
+
+FUNCIONES_CI=(
+    "frecuencia_documental_equipo","coseno_mini","precision_cinco",
+    "rrf_dos_posiciones","luminancia_rgb","rms_manual",
+    "ids_desde_texto","palabras_clave_propias"
+)
 def completar_ejercicios_de_prueba(source):
-    """La prueba completa huecos sin modificar el cuaderno distribuido."""
-    for fn,solution in SOLUCIONES.items():
-        if ("def "+fn+"(") not in source: continue
-        pattern = r'(?m)^    raise NotImplementedError\([^\n]*\)$'
-        source,count=re.subn(pattern,lambda _:solution,source,count=1)
-        if count!=1: raise AssertionError("No se pudo resolver el hueco: "+fn)
+    """Sustituye un hueco por un adaptador exclusivo de CI, nunca por una respuesta lista para pegar."""
+    for nombre in FUNCIONES_CI:
+        if "def "+nombre+"(" not in source:continue
+        if "    return ____" not in source:raise AssertionError("El ejercicio exige un solo hueco: "+nombre)
+        source=source.replace("    return ____",
+            '    return __referencia_ci__("'+nombre+'", locals())',1)
     return source
+
+
 def main():
     os.environ["MPLBACKEND"]="Agg"
     os.environ["HF_HUB_DISABLE_TELEMETRY"]="1"
@@ -67,7 +95,8 @@ def main():
     codes=[(i,"".join(c["source"])) for i,c in enumerate(nb["cells"]) if c["cell_type"]=="code"]
     with tempfile.TemporaryDirectory(prefix="tc2-e2e-") as d:
         old=os.getcwd();os.chdir(d)
-        env={"__name__":"__main__","__file__":str(NB)}
+        env={"__name__":"__main__","__file__":str(NB),
+             "__referencia_ci__":referencia_ci}
         used=set()
         try:
             for i,source in codes:
@@ -102,8 +131,9 @@ def main():
                 assert len([x for x in names if re.fullmatch(r"E5/audio/voz_\d\d\.wav",x)])==10
             # El docente recupera exactamente el mismo puntaje desde el ZIP extraído.
             import calificar_tc2_zip as grader
-            recalc=grader.corregir(z,env["HUELLA"])
-            assert recalc["puntaje"]==98
+            recalc=grader.corregir(z,env["HUELLA"],audit_media=True)
+            assert recalc["auditoria_media"]["aprobado"], "Re-inferencia docente debe concordar"
+            assert recalc["puntaje"]==98, "Auditoría independiente debe preservar 98/100"
             # Evidencias realmente generadas por OCR/ASR, no referencias copiadas.
             ocr=env["OCR_REAL"];asr=env["ASR_REAL"]
             assert ocr["motor"]=="tesseract" and len(ocr["resultados"])==3
