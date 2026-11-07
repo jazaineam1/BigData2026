@@ -49,6 +49,8 @@ SOLUCIONES = {
  "rrf_dos_posiciones": '    return 1/(60+posicion_bm25)+1/(60+posicion_e5)',
  "luminancia_rgb": '    return 0.2126*rgb[0]+0.7152*rgb[1]+0.0722*rgb[2]',
  "rms_manual": '    return float(np.sqrt(np.mean(np.square(muestras))))',
+ "ids_desde_texto": '    return re.findall(r"CO1\.REQ\.\d{7,10}",str(texto).upper())',
+ "palabras_clave_propias": '    return sorted(set(core.tokens(texto)))',
 }
 def completar_ejercicios_de_prueba(source):
     """La prueba completa huecos sin modificar el cuaderno distribuido."""
@@ -79,7 +81,7 @@ def main():
                     raise RuntimeError(f"Falló celda ejecutable {i}: {type(e).__name__}: {e}") from e
                 print("Celda",i,"OK ·",round(time.monotonic()-started,2),"s",flush=True)
             if set(PARAMS)-used:raise AssertionError("Parámetros no aplicados: "+repr(set(PARAMS)-used))
-            assert len(nb["cells"])>=81, "TC2 debe alcanzar el nivel de desarrollo del TC1"
+            assert len(nb["cells"])>=110, "TC2 debe incluir historia y talleres OCR/ASR completos"
             report=env["INFORME"]
             print("Puntaje final real, sin Atlas:",report["puntaje"])
             if report["puntaje"]!=98:
@@ -92,13 +94,23 @@ def main():
             import zipfile
             with zipfile.ZipFile(z) as f:
                 names=set(f.namelist())
-                assert "explorador.html" in names and "E5/audios.json" in names and "E6/catalogo.jsonl" in names and "E6/catalogo.parquet" in names and "E6/recuperacion.json" in names
+                assert {"explorador.html","E4/ocr.json","E4/ocr_manual.json","E5/audios.json","E5/asr.json","E5/asr_manual.json","E6/catalogo.jsonl","E6/catalogo.parquet","E6/recuperacion.json"}<=names
                 assert len([x for x in names if re.fullmatch(r"E5/audio/voz_\d\d\.wav",x)])==10
             # El docente recupera exactamente el mismo puntaje desde el ZIP extraído.
             import calificar_tc2_zip as grader
             recalc=grader.corregir(z,env["HUELLA"])
             assert recalc["puntaje"]==98
-            print("TC2 E2E REAL: OK, 200 documentos, E5 384, 10 voces licenciadas, imagen, RRF, HTML, ZIP, score 98/100.")
+            # Evidencias realmente generadas por OCR/ASR, no referencias copiadas.
+            ocr=env["OCR_REAL"];asr=env["ASR_REAL"]
+            assert ocr["motor"]=="tesseract" and len(ocr["resultados"])==3
+            assert all(row["tokens_ocr"]>0 for row in ocr["resultados"])
+            assert asr["engine"]=="faster-whisper" and len(asr["audios"])==10
+            assert sum(bool(row["transcripcion_asr"].strip()) for row in asr["audios"])>=8
+            assert all(row["wer"]==env["core"].wer_palabras(row["transcripcion_referencia"],row["transcripcion_asr"])
+                       for row in asr["audios"])
+            assert len(env["LEIDO_CATALOGO"])==13 and all("extracted_text" in row for row in env["LEIDO_CATALOGO"])
+            assert len(env["RESULTADOS_CONSULTA"]["coincidencias_texto"])>0
+            print("TC2 E2E REAL: OK, 200 documentos, E5 384, OCR Tesseract 3 PNG, ASR Whisper 10 voces reales, WER, catálogo, ZIP, score 98/100.")
         finally:
             os.chdir(old)
 if __name__=="__main__":main()
