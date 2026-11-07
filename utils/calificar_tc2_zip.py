@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Califica independientemente un ZIP TC2 sin confiar en el manifest del estudiante.
-Uso: python utils/calificar_tc2_zip.py TC2_pareja.zip [--manifest-sha SHA256]
+Uso: python utils/calificar_tc2_zip.py TC2_pareja.zip [--manifest-sha SHA256] [--audit-media] [--atlas-contingencia-confirmada]
 El contacto institucional, fecha, identidad y procedencia se verifican fuera de esta CLI.
 """
 import argparse,hashlib,json,re,sys,tempfile,zipfile
@@ -36,7 +36,7 @@ def extraer_seguro(archivo,carpeta):
                     escritura.write(b)
     return carpeta
 
-def corregir(archivo,hash_manifest=None):
+def corregir(archivo,hash_manifest=None,audit_media=False,atlas_contingencia_confirmada=False):
     with tempfile.TemporaryDirectory(prefix="tc2-docente-") as tmp:
         trabajo=extraer_seguro(archivo,tmp)
         identidad=c.leer(Path(trabajo)/"identidad.json")
@@ -56,13 +56,38 @@ def corregir(archivo,hash_manifest=None):
         if declarado.get("pareja")!=identidad.get("pareja"):
             raise ValueError("Pareja incompatible entre manifest e identidad")
         propio=c.validar(trabajo,c.corpus_lista(ROOT/"Datos"),tema)
+        if atlas_contingencia_confirmada:
+            evidencia=c.leer(Path(trabajo)/"E2/semantica.json").get("atlas",{})
+            local_ok=(evidencia.get("sistema")=="Ruta local declarada" and
+                      evidencia.get("error_tipo") and
+                      propio["controles"]["E2.3"]["puntos"]==2)
+            if not local_ok:
+                raise ValueError("Contingencia Atlas sin error documentado o con condiciones no verificables")
+            # Esta opción es exclusiva del DOCENTE después de revisar indisponibilidad externa.
+            fila=propio["controles"]["E2.3"]
+            fila.update({"puntos":4,"ok":True,"nivel":"equivalencia_docente",
+                         "detalle":"4/4 por contingencia verificada y aprobada por el docente; NO implica consulta Atlas real."})
+            propio["puntaje"]=sum(v["puntos"] for v in propio["controles"].values())
+            import math
+            propio["nota_provisional"]=math.floor((1+4*propio["puntaje"]/100)*10+0.5+1e-9)/10
+            print("EXCEPCIÓN DOCENTE: se acreditó contingencia de servicio; la ruta sigue declarada como local.")
+        if audit_media:
+            from tc2_media_audit import auditar,aplicar_auditoria
+            result=auditar(trabajo,n_audios=10)
+            propio=aplicar_auditoria(propio,result)
+            print("AUDITORÍA OCR:",("CONCORDANTE" if result["ocr"]["aprobado"] else "REVISAR"),
+                  "· WHISPER:",("CONCORDANTE" if result["asr"]["aprobado"] else "REVISAR"))
+            if not result["aprobado"]:
+                print("AVISO: re-inferencia discordante; la nota se mantiene PROVISIONAL hasta revisión humana.")
+        else:
+            print("AUDITORÍA MEDIA NO EJECUTADA: los metadatos y SHA del ZIP no demuestran inferencia propia.")
         print("TC2 · Calificación independiente, equipo:",identidad["pareja"])
         print("Intención asignada:",tema["id"],"· SHA manifest:",digest)
         print("Declarado:",declarado.get("reporte",{}).get("puntaje"),
               "· recalculado:",propio["puntaje"],"puntos; nota provisional:",propio["nota_provisional"],"/5")
         for cod,row in propio["controles"].items():
             print(("✓" if row["ok"] else "·"),cod,str(row["puntos"])+"/"+str(row["maximo"]),row["detalle"])
-        print("REVISIÓN MANUAL PENDIENTE: autenticidad Atlas remoto/contingencia; permisos Drive, identidad y plazo.")
+        print("REVISIÓN MANUAL PENDIENTE: Atlas remoto/contingencia, identidad, acceso GitHub privado, commit y plazo.")
         return propio
 
 def autoprobacion():
@@ -82,7 +107,9 @@ if __name__=="__main__":
     parser.add_argument("zip",nargs="?")
     parser.add_argument("--manifest-sha")
     parser.add_argument("--self-test",action="store_true")
+    parser.add_argument("--audit-media",action="store_true",help="Recalcular OCR y Whisper en CPU (requiere paquetes y modelos)")
+    parser.add_argument("--atlas-contingencia-confirmada",action="store_true",help="Sólo docente: acreditar 2 puntos por incidencia real revisada; jamás fingir Atlas")
     args=parser.parse_args()
     if args.self_test:autoprobacion()
-    elif args.zip:corregir(args.zip,args.manifest_sha)
+    elif args.zip:corregir(args.zip,args.manifest_sha,audit_media=args.audit_media,atlas_contingencia_confirmada=args.atlas_contingencia_confirmada)
     else:parser.error("indica un ZIP o --self-test")

@@ -50,3 +50,14 @@ test('TC2 funciona con modo oscuro sin desbordes',async({page})=>{
  const bg=await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor);
  expect(bg).not.toBe('rgba(0, 0, 0, 0)');
 });
+
+test('TC2 ejemplos pedagógicos y recuperación accesibles por teclado',async({page})=>{
+ await page.goto(url);
+ const details=page.locator('details');
+ await expect(details).toHaveCount(8);
+ await details.first().locator('summary').focus();
+ await page.keyboard.press('Enter');
+ await expect(details.first()).toHaveAttribute('open','');
+ await expect(details.first()).toContainText('recuperación');
+ await expect(page.locator('body')).toContainText('Qué NO permite concluir');
+});

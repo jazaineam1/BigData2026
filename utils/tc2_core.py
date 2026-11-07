@@ -480,9 +480,13 @@ def validar(carpeta,docs,intencion):
     """Recalcula controles desde archivos, no confía en el puntaje del manifest."""
     carpeta=Path(carpeta);checks={}
     def lee(r):return leer(carpeta/r)
-    def ok(item,cond,detalle):
-        puntos=next(p for c,_,p in RUBRICA if c==item)
-        checks[item]={"maximo":puntos,"puntos":puntos if bool(cond) else 0,"ok":bool(cond),"detalle":str(detalle)[:260]}
+    def ok(item,cond,detalle,parcial_si=False,puntos_parciales=0):
+        """Niveles observables 0/parcial/completo, nunca por impresión subjetiva."""
+        maximo=next(p for c,_,p in RUBRICA if c==item)
+        puntos=maximo if bool(cond) else (min(int(puntos_parciales),maximo-1) if bool(parcial_si) else 0)
+        checks[item]={"maximo":maximo,"puntos":puntos,"ok":puntos==maximo,
+                      "nivel":"completo" if puntos==maximo else ("parcial" if puntos else "sin_evidencia"),
+                      "detalle":str(detalle)[:260]}
     def near(a,b,tol=1e-4):
         try:return abs(float(a)-float(b))<=tol
         except (TypeError,ValueError):return False
@@ -494,8 +498,10 @@ def validar(carpeta,docs,intencion):
         df_real=sum(1 for d in docs if termino in set(tokens(texto(d))))
         idf_real=math.log(1+(len(docs)-df_real+.5)/(df_real+.5))
         e1_lab_ok=lab1.get("termino")==termino and lab1.get("df")==df_real and lab1.get("n")==len(docs) and near(lab1.get("idf"),idf_real,1e-7)
-        ok("E1.1",bm.get("tokens_literal")==tokens(q["literal"]) and bm.get("analizador")=="normalizado_simple" and e1_lab_ok,
-           "Tokenización, frecuencia documental e IDF verificados; completa el ejercicio si falta.")
+        tokens_ok=bm.get("tokens_literal")==tokens(q["literal"]) and bm.get("analizador")=="normalizado_simple"
+        ok("E1.1",tokens_ok and e1_lab_ok,
+           "Completo: tokens y DF/IDF propios; parcial 2/3: tokenización válida pero falta el cálculo manual.",
+           parcial_si=tokens_ok,puntos_parciales=2)
         ok("E1.2",bm.get("literal")==expected1 and bm.get("parafrasis")==expected2,"Dos rankings BM25 local verificables.")
         cambio=bm.get("cambio",{});original=q["literal"];nuevo=cambio.get("consulta","")
         ok("E1.3",nuevo!=original and len(tokens(nuevo))>0 and cambio.get("ranking")==bm25(docs,nuevo,10) and bool(cambio.get("prediccion")),"Consulta modificada y ranking correcto.")
@@ -513,8 +519,10 @@ def validar(carpeta,docs,intencion):
         want1=coseno(docs,x,q1,10);want2=coseno(docs,x,q2,10)
         lab2=lee("E2/laboratorio_coseno.json") if (carpeta/"E2/laboratorio_coseno.json").exists() else {}
         lab_cos_ok=lab2.get("formula")=="producto_punto_dividido_por_normas" and near(lab2.get("cos_ab"),1.0,1e-6) and near(lab2.get("cos_ac"),0.0,1e-6)
-        ok("E2.2",e.get("literal")==want1 and e.get("parafrasis")==want2 and lab_cos_ok,
-           "Top-k coseno y función completada de dos dimensiones.")
+        ranking_ok=e.get("literal")==want1 and e.get("parafrasis")==want2
+        ok("E2.2",ranking_ok and lab_cos_ok,
+           "Completo: ranking y coseno manual; parcial 3/5: Top-k bien calculado, ejercicio manual pendiente.",
+           parcial_si=ranking_ok,puntos_parciales=3)
         a=e.get("atlas",{})
         remoto=bool(a.get("ping") and a.get("indice_queryable") and a.get("query_ejecutada") and len(a.get("resultados",[]))>0 and a.get("motor")=="MongoDB Atlas Vector Search")
         contrato=bool(a.get("indice_path")=="embedding" and a.get("indice_dimensiones")==384 and a.get("pipeline_limit")==5 and a.get("sistema") in ("Atlas real","Ruta local declarada"))
@@ -522,7 +530,8 @@ def validar(carpeta,docs,intencion):
         if contrato and a.get("sistema")=="Ruta local declarada" and not remoto:
             checks["E2.3"]["puntos"]=2
             checks["E2.3"]["ok"]=False
-            checks["E2.3"]["detalle"]="2/4 por contrato vectorial local, no por Atlas remoto."
+            checks["E2.3"]["nivel"]="parcial"
+            checks["E2.3"]["detalle"]="2/4: contingencia local reproducible, sin afirmar consulta remota. La indisponibilidad acreditada se revisa con el docente."
         varia=e.get("experimento",{}); k=varia.get("k")
         fil=lee("E2/experimento_filtro.json") if (carpeta/"E2/experimento_filtro.json").exists() else {}
         id_lider=e.get("parafrasis",[{}])[0].get("id_proceso")
@@ -543,12 +552,16 @@ def validar(carpeta,docs,intencion):
         labp=lee("E3/laboratorio_precision.json") if (carpeta/"E3/laboratorio_precision.json").exists() else {}
         ids_bm=[t["id_proceso"] for t in ranking_lex[:5]]
         labp_ok=labp.get("top5")==ids_bm and labp.get("positivos_totales")==len(intencion["relevantes"]) and near(labp.get("precision_manual"),a["precision_at_5"],1e-4)
-        ok("E3.1",r.get("bm25")==a and r.get("e5")==b and labp_ok,
-           "Precision@5 manual y Recall@5 contrastados con juicios externos.")
+        metrica_ok=r.get("bm25")==a and r.get("e5")==b
+        ok("E3.1",metrica_ok and labp_ok,
+           "Completo: métricas más precisión manual; parcial 2/4: evaluación correcta sin función propia.",
+           parcial_si=metrica_ok,puntos_parciales=2)
         labr=lee("E3/laboratorio_rrf.json") if (carpeta/"E3/laboratorio_rrf.json").exists() else {}
         labr_ok=labr.get("pos_bm25")==1 and labr.get("pos_e5")==3 and labr.get("k")==60 and near(labr.get("score"),1/61+1/63,1e-8)
-        ok("E3.2",r.get("rrf")==fusion and r.get("metricas_rrf")==medidas(fusion,intencion["relevantes"]) and labr_ok,
-           "RRF manual y fusión completa correctos.")
+        fusion_ok=r.get("rrf")==fusion and r.get("metricas_rrf")==medidas(fusion,intencion["relevantes"])
+        ok("E3.2",fusion_ok and labr_ok,
+           "Completo: RRF correcto y ejemplo propio; parcial 2/4: fusión correcta sin ejercicio manual.",
+           parcial_si=fusion_ok,puntos_parciales=2)
         de=r.get("decision",{})
         ok("E3.3",de.get("elegido") in ("BM25","E5","RRF") and de.get("descartado") in ("BM25","E5","RRF") and de.get("descartado")!=de.get("elegido") and de.get("limite") in ("Solo cubre los juicios etiquetados","No demuestra irregularidades") and de.get("precision_observada")=={"BM25":a,"E5":b,"RRF":medidas(fusion,intencion["relevantes"])}[de.get("elegido", "BM25")]["precision_at_5"],"Elegir, descartar y usar métrica real.")
     except Exception as err:
@@ -586,7 +599,9 @@ def validar(carpeta,docs,intencion):
         manual_ocr=lee("E4/ocr_manual.json")
         manual_ok=(manual_ocr.get("ejemplo")=="Expediente CO1.REQ.12345678 en la imagen" and
                    manual_ocr.get("ids_detectados")==["CO1.REQ.12345678"])
-        ok("E4.4",check_ocr and manual_ok,"OCR español ejecutado y extractor manual de IDs verificado.")
+        ok("E4.4",check_ocr and manual_ok,
+           "Completo: tres imágenes OCR con trazas y extractor; parcial 4/6: OCR íntegro sin ejercicio propio.",
+           parcial_si=check_ocr,puntos_parciales=4)
     except Exception as err:
         for item in ("E4.1","E4.2","E4.3","E4.4"):ok(item,False,str(err))
     try:
@@ -617,8 +632,10 @@ def validar(carpeta,docs,intencion):
                  isinstance(r.get("segmentos"),list) and
                  r.get("transcripcion_referencia")==v.get("transcripcion_referencia")
                  for v,r in zip(voces,trans))
-        ok("E5.4",pred_ok and sum(bool(x["transcripcion_asr"].strip()) for x in trans)>=8 if pred_ok else False,
-           "ASR real Whisper tiny ejecutado en los 10 WAV; >=8 hipótesis no vacías.")
+        audios_con_texto=sum(bool(x.get("transcripcion_asr","").strip()) for x in trans) if pred_ok else 0
+        ok("E5.4",pred_ok and audios_con_texto>=8,
+           "Completo: 10 registros trazables y >=8 hipótesis; parcial 3/6: registros trazables, 1-7 hipótesis con texto.",
+           parcial_si=pred_ok and 1<=audios_con_texto<8,puntos_parciales=3)
         info_ok=pred_ok and all(r.get("wer")==wer_palabras(r["transcripcion_referencia"],r["transcripcion_asr"]) and
               r.get("informacion")==extraer_info_voz(r["transcripcion_asr"]) for r in trans)
         manual_asr=lee("E5/asr_manual.json")
@@ -627,7 +644,9 @@ def validar(carpeta,docs,intencion):
                    set(manual_asr.get("terminos_ejemplo",[]))=={"pago","saldo"} and
                    isinstance(pos,int) and 1<=pos<=10 and
                    manual_asr.get("terminos_prediccion")==sorted(set(tokens(trans[pos-1]["transcripcion_asr"]))))
-        ok("E5.5",info_ok and manual_ok,"WER recalculado, extracción estructurada y función manual comprobadas.")
+        ok("E5.5",info_ok and manual_ok,
+           "Completo: WER y extracción propia; parcial 1/2: WER/temas correctos, función propia pendiente.",
+           parcial_si=info_ok,puntos_parciales=1)
     except Exception as err:
         for item in ("E5.1","E5.2","E5.3","E5.4","E5.5"):ok(item,False,str(err))
     try:
@@ -640,10 +659,11 @@ def validar(carpeta,docs,intencion):
            sum(f["text_origin"]=="asr_whisper_tiny" for f in filas)==10,"Catálogo con 3 imágenes, 10 audios, fuente y huellas.")
         reabierto=reabrir_catalogo(carpeta)
         consult=lee("E6/consultas.json")
-        ok("E6.2",reabierto==filas and consult.get("imagenes")==consultar_catalogo(reabierto,"image") and
-           consult.get("audios")==consultar_catalogo(reabierto,"audio") and
-           consult.get("coincidencias_texto")==consultar_texto(reabierto,consult.get("consulta_textual","")),
-           "JSONL y Parquet, consultas por modalidad y texto extraído recomputables.")
+        basico=reabierto==filas and consult.get("imagenes")==consultar_catalogo(reabierto,"image") and consult.get("audios")==consultar_catalogo(reabierto,"audio")
+        texto_buscable=(consult.get("coincidencias_texto")==consultar_texto(reabierto,consult.get("consulta_textual","")))
+        ok("E6.2",basico and texto_buscable,
+           "Completo: relectura y consulta textual; parcial 3/6: JSONL/Parquet y modalidades correctas.",
+           parcial_si=basico,puntos_parciales=3)
         idem=lee("E6/idempotencia.json")
         ok("E6.3",idem.get("primera")==idem.get("segunda")==sha(carpeta/"E6/catalogo.jsonl") and
            idem.get("filas_primera")==idem.get("filas_segunda")==13 and
@@ -653,14 +673,16 @@ def validar(carpeta,docs,intencion):
            "Copia corrupta detectada y restaurada; original intacto.")
         report=lee("E6/defensa.json")
         page=(carpeta/"explorador.html").read_text(encoding="utf-8")
-        ok("E6.5","BM25 léxico" in page and "E5 semántico" in page and
+        producto_ok=("BM25 léxico" in page and "E5 semántico" in page and
            "Diez voces reales autorizadas" in page and "sin vínculo" in page and
            "Catálogo ETL verificado" in page and "OCR Tesseract" in page and
-           "ASR Whisper" in page and "<audio" in page and
-           report.get("modelo") in ("BM25","E5","RRF") and
+           "ASR Whisper" in page and "<audio" in page)
+        defensa_ok=(report.get("modelo") in ("BM25","E5","RRF") and
            report.get("audio_no_implica")=="Transcripción ni intención" and
-           report.get("imagen_no_implica")=="Contenido semántico del contrato",
-           "Producto con procedencias y defensa.")
+           report.get("imagen_no_implica")=="Contenido semántico del contrato")
+        ok("E6.5",producto_ok and defensa_ok,
+           "Completo: explorador y defensa estructurada; parcial 3/5: explorador correcto sin defensa completa.",
+           parcial_si=producto_ok,puntos_parciales=3)
     except Exception as err:
         for item in ("E6.1","E6.2","E6.3","E6.4","E6.5"):ok(item,False,str(err))
     total=sum(v["puntos"] for v in checks.values())
