@@ -112,16 +112,14 @@ def run():
     verify(s12 is not None and s12.get("status")=="visible" and
            s12.get("assessment",{}).get("weight_percent")==20 and
            s12.get("assessment",{}).get("due_at")=="2026-11-14T23:59:59-05:00" and
-           s12.get("entry",{}).get("url")=="/BigData2026/lms/session-12.html",
+           "Taller_Control_2.ipynb" in s12.get("entry",{}).get("url",""),
            "S12 debe ser visible con peso 20%, fecha y enlace.")
-    pagina=(ROOT/"lms/session-12.html").read_text(encoding="utf-8")
     portada=(ROOT/"index.html").read_text(encoding="utf-8")
     guia=(ROOT/"assets/tutoriales/tc2-paso-a-paso.html").read_text(encoding="utf-8")
-    verify("Taller de Control 2" in pagina and "100 puntos" in pagina and
-           "14 de noviembre de 2026" in pagina and "cuaderno" in pagina.lower() and
-           "tc2-paso-a-paso.html" in pagina,"Landing del TC2 enlaza los dos recursos.")
-    verify('data-n="12"' in portada and 'href="lms/session-12.html"' in portada,
-           "Portada contiene una tarjeta de TC2 visible.")
+    verify("Taller_Control_2.ipynb" in portada and 'data-n="12"' in portada and
+           "tc2-paso-a-paso.html" in portada and
+           "lms/session-12.html" not in portada,"Portada ofrece dos recursos sin página especial S12.")
+    verify(not (ROOT/"lms/session-12.html").exists(),"LMS usa el módulo universal, sin página S12 específica.")
     verify(guia.count('type="checkbox"')==35 and "GitHub" in guia and
            "14 de noviembre de 2026" in guia,"Guía tiene 35 comprobaciones y entrega GitHub.")
     # Separa inequívocamente material aprendido de contenido antes del TC1.
