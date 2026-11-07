@@ -577,9 +577,12 @@ def validar(carpeta,docs,intencion):
                 and all(registros[n]["sha256_imagen"]==sha(carpeta/"E4"/n) and
                     registros[n].get("motor")=="tesseract" and registros[n].get("idioma")=="spa" and
                     isinstance(registros[n].get("texto_ocr"),str) and
-                    registros[n].get("tokens_ocr",0)>0 and
-                    registros[n].get("ids_ocr")==extraer_ids_secop(registros[n]["texto_ocr"])
-                    for n in image_files))
+                    isinstance(registros[n].get("tokens_ocr"),int) and registros[n]["tokens_ocr"]>=0 and
+                    registros[n].get("ids_ocr")==extraer_ids_secop(registros[n]["texto_ocr"]) and
+                    abs(float(registros[n]["cobertura_ids"])-len(registros[n]["ids_secop_verificados"])/5)<1e-6
+                    for n in image_files) and
+                registros["ranking.png"]["tokens_ocr"]>0 and
+                registros["perfil_640.png"]["tokens_ocr"]>0)
         manual_ocr=lee("E4/ocr_manual.json")
         manual_ok=(manual_ocr.get("ejemplo")=="Expediente CO1.REQ.12345678 en la imagen" and
                    manual_ocr.get("ids_detectados")==["CO1.REQ.12345678"])
