@@ -1,6 +1,6 @@
 # Taller de Control 2 · Revisión contra PDA 2026-2 y repositorio estudiantil existente
 
-**Estado:** corrección curricular del PR #145, **no publicar el cuaderno previo de BM25/E5 como Taller 2** hasta sustituir su centro evaluativo. Documento basado en el PDA institucional `PDA_2026-02_BIGDATA.pdf` (5 páginas) y `docs/PDA_guia.md`, junto al TC1 V9.
+**Estado:** implementación integrada TC2 V4 en PR #145. El cuaderno y corrector incorporan 21 controles, 35 puntos de búsqueda y 65 de ETL. Publicación efectiva en GitHub Pages y LMS tras fusionar y verificar el PR. Documento basado en el PDA institucional `PDA_2026-02_BIGDATA.pdf` (5 páginas) y `docs/PDA_guia.md`, junto al TC1 V9.
 
 ## 1. Resolución de los dos errores
 
@@ -32,7 +32,7 @@ Se reutilizan datos ya preparados de TC1 o del material formativo para no volver
 | **E6 · Carga, catálogo y producto integrado** | S10: carga de catálogo multimodal JSONL/Parquet con referencias y derivaciones; relectura y consultas; integridad/duplicados; reejecución y fallo controlado; explorador offline y decisiones con límites | **25** |
 | **TOTAL** | **35 puntos de búsqueda/evaluación + 65 puntos de ETL e integración** | **100** |
 
-**Desglose objetivo de controles observables** (requiere codificación y pruebas antes de ser oficial): E1 = 3+4+3; E2 = 4+5+6; E3 = 4+4+2; E4 = 7+8+5; E5 = 6+8+6; E6 = 6+6+5+5+3. Los puntos corresponden a los archivos y parámetros reales de cada pareja, no a preguntas memorísticas o al simple hecho de ejecutar. No otorgar puntaje remoto Atlas por operaciones NumPy locales.
+**Desglose implementado de controles observables:** E1 = 3+4+3; E2 = 4+5+4+2; E3 = 4+4+2; E4 = 7+8+5; E5 = 6+8+6; E6 = 6+6+5+5+3. Los puntos corresponden a los archivos y parámetros reales de cada pareja, no a preguntas memorísticas o al simple hecho de ejecutar. No otorgar puntaje remoto Atlas por operaciones NumPy locales.
 
 **OCR y ASR:** experimentos guiados de S10, si se usan, deben declarar si hubo OCR/ASR verdaderamente ejecutado o si el texto vino de una anotación existente. No añadir obligatoriedad de modelos o descargas no enseñados hasta el cierre de S10; no calificar precisión de transcripción sin referencia fiable.
 
@@ -68,13 +68,13 @@ Se reutilizan datos ya preparados de TC1 o del material formativo para no volver
 
 ## 6. Acciones técnicas para completar antes de publicar
 
-- [ ] Reconstruir `Cuadernos/Taller_Control_2.ipynb` como un taller **integrado**: BM25 + E5 + RRF (35 puntos), ETL imagen + audio + catálogo/consulta (65 puntos). Reutilizar partes verificadas del prototipo sin conservar su rúbrica desbalanceada.
+- [ ] Implementado: `Cuadernos/Taller_Control_2.ipynb` de 100 celdas y rúbrica 21 controles: BM25 + E5 + RRF (35), ETL imagen + audio + catálogo/consulta (65).
 - [ ] Reutilizar únicamente competencias ya enseñadas y comprobadas hasta S10 de `Cuadernos/10_Imagenes_Audio.ipynb`; tomar ejemplos técnicos de S11 solo si no introducen obligaciones nuevas.
-- [ ] Adaptar `utils/tc2_core.py` y `utils/validate_taller_control_2.py`: puntos 10/15/10/20/20/25, verificaciones de archivos reales y consulta de catálogo; recalcular ranking/transformaciones/catálogo, probar fallos de transformación y evitar repetir controles SECOP de TC1.
-- [ ] Modificar `assets/tutoriales/tc2-paso-a-paso.html`: usar repositorio existente, fecha/hora, PR propio, sin crear otro.
-- [ ] Validar end-to-end con datos licenciados, notebook de estudiante limpio y calificador de ZIP externo; probar GitHub en modo público anonimizante y privado restringido.
+- [ ] Implementado: `utils/tc2_core.py` y `utils/validate_taller_control_2.py`: 10/15/10/20/20/25; JSONL/Parquet, consultas, idempotencia, falla/recuperación y corrección desde ZIP.
+- [ ] Implementado: `assets/tutoriales/tc2-paso-a-paso.html` con 35 pasos, repositorio existente y plazo.
+- [ ] Validación end-to-end automatizada para CPU, diez audios licenciados y ZIP; complementada con revisión humana de permisos GitHub de la cohorte y prueba de Atlas remoto.
 - [ ] Conciliar el PDA del **grupo 1** con el plan aprobado para **grupo 2** antes de publicar la calificación institucional del 20 %.
-- [ ] Fusionar PR y abrir la actividad en LMS sólo cuando los criterios anteriores estén satisfechos.
+- [ ] Fusionar PR y activar sesión 12 en el LMS, portada y landing `lms/session-12.html`, con acceso al notebook principal y guía.
 
 ## 7. Fuentes
 
