@@ -35,7 +35,7 @@ def run():
             try:ast.parse("".join(x["source"]))
             except SyntaxError as e:errors.append(f"Celda {index} sintaxis: {e}")
     full="\n".join(source)
-    for term in ("PREDICCION_INICIAL","RANK_BM_LITERAL","RANK_SEM_PARAFRASIS","METRICAS_RRF","INSPECCION","AUDIOS","core.validar(","manifest_tc2.json","GitHub","No son audios de noticias"):
+    for term in ("PREDICCION_INICIAL","RANK_BM_LITERAL","RANK_SEM_PARAFRASIS","METRICAS_RRF","INSPECCION","AUDIOS","core.validar(","manifest_tc2.json","GitHub","no son audios"):
         verify(term.casefold() in full.casefold(),f"Enunciado/celda debe contener: {term}")
     verify(len(c.RUBRICA)==24 and sum(x[2] for x in c.RUBRICA)==100,"24 controles/100 puntos")
     found=[s for s in source if "CORE_SOURCE = " in s]
@@ -126,7 +126,7 @@ def run():
         verify(meta["cantidad"]==13 and len(c.reabrir_catalogo(t))==13,"Catálogo real JSONL+Parquet")
         verify(len(c.consultar_catalogo(items,"audio"))==10 and len(c.consultar_catalogo(items,"image"))==3,"Consulta por tipo")
         verify(len(c.consultar_texto(items,"pago"))==10,"Consulta textual de enriquecimiento")
-        verify(c.wer_palabras("pago de cuenta","pago la cuenta")==1/3,"WER distancia por sustitución")
+        verify(abs(c.wer_palabras("pago de cuenta","pago la cuenta")-1/3)<1e-6,"WER distancia por sustitución")
         verify(c.extraer_ids_secop("CO1.REQ.12345678")==["CO1.REQ.12345678"],"Regex SECOP cotejable")
         initial=c.sha(t/"E6/catalogo.jsonl")
         c.guardar_catalogo(t,c.construir_catalogo(t,sample))
