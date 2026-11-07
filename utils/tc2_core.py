@@ -397,6 +397,15 @@ def consultar_catalogo(filas,clase):
     if clase not in ("image","audio"):raise ValueError("Clase no admitida")
     return sorted(f["asset_id"] for f in filas if f["media_type"].startswith(clase+"/"))
 
+def consultar_texto(filas,consulta):
+    """Busca texto derivado real; nunca junta fuentes distintas por coincidencia de palabra."""
+    q=normalizar(consulta).strip()
+    if len(q)<2:raise ValueError("Consulta textual debe tener al menos dos caracteres")
+    return [{"asset_id":f["asset_id"],"source_kind":f["source_kind"],
+             "source_record_id":f["source_record_id"],"text_origin":f["text_origin"],
+             "fragmento":f["extracted_text"][:220]}
+            for f in filas if q in normalizar(f.get("extracted_text",""))]
+
 def verificar_fallo(carpeta):
     """Corrompe copia aislada: nunca el archivo de la actividad."""
     import tempfile
@@ -571,7 +580,10 @@ def validar(carpeta,docs,intencion):
                     registros[n].get("tokens_ocr",0)>0 and
                     registros[n].get("ids_ocr")==extraer_ids_secop(registros[n]["texto_ocr"])
                     for n in image_files))
-        ok("E4.4",check_ocr,"OCR Tesseract español ejecutado en tres perfiles; IDs cotejados con ranking.")
+        manual_ocr=lee("E4/ocr_manual.json")
+        manual_ok=(manual_ocr.get("ejemplo")=="Expediente CO1.REQ.12345678 en la imagen" and
+                   manual_ocr.get("ids_detectados")==["CO1.REQ.12345678"])
+        ok("E4.4",check_ocr and manual_ok,"OCR español ejecutado y extractor manual de IDs verificado.")
     except Exception as err:
         for item in ("E4.1","E4.2","E4.3","E4.4"):ok(item,False,str(err))
     try:
@@ -606,7 +618,13 @@ def validar(carpeta,docs,intencion):
            "ASR real Whisper tiny ejecutado en los 10 WAV; >=8 hipótesis no vacías.")
         info_ok=pred_ok and all(r.get("wer")==wer_palabras(r["transcripcion_referencia"],r["transcripcion_asr"]) and
               r.get("informacion")==extraer_info_voz(r["transcripcion_asr"]) for r in trans)
-        ok("E5.5",info_ok,"WER recomputado, cifras y temas extraídos de hipótesis ASR reales.")
+        manual_asr=lee("E5/asr_manual.json")
+        pos=manual_asr.get("voz")
+        manual_ok=(manual_asr.get("ejemplo")=="Pago, pago y saldo" and
+                   set(manual_asr.get("terminos_ejemplo",[]))=={"pago","saldo" ,"y"} and
+                   isinstance(pos,int) and 1<=pos<=10 and
+                   manual_asr.get("terminos_prediccion")==sorted(set(tokens(trans[pos-1]["transcripcion_asr"]))))
+        ok("E5.5",info_ok and manual_ok,"WER recalculado, extracción estructurada y función manual comprobadas.")
     except Exception as err:
         for item in ("E5.1","E5.2","E5.3","E5.4","E5.5"):ok(item,False,str(err))
     try:
@@ -620,7 +638,9 @@ def validar(carpeta,docs,intencion):
         reabierto=reabrir_catalogo(carpeta)
         consult=lee("E6/consultas.json")
         ok("E6.2",reabierto==filas and consult.get("imagenes")==consultar_catalogo(reabierto,"image") and
-           consult.get("audios")==consultar_catalogo(reabierto,"audio"),"Relectura real JSONL y Parquet y consultas reproducibles.")
+           consult.get("audios")==consultar_catalogo(reabierto,"audio") and
+           consult.get("coincidencias_texto")==consultar_texto(reabierto,consult.get("consulta_textual","")),
+           "JSONL y Parquet, consultas por modalidad y texto extraído recomputables.")
         idem=lee("E6/idempotencia.json")
         ok("E6.3",idem.get("primera")==idem.get("segunda")==sha(carpeta/"E6/catalogo.jsonl") and
            idem.get("filas_primera")==idem.get("filas_segunda")==13 and
