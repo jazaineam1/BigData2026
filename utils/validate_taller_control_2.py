@@ -148,8 +148,8 @@ def run():
            "tc2-paso-a-paso.html" in portada and
            "lms/session-12.html" not in portada,"Portada ofrece dos recursos sin página especial S12.")
     verify(not (ROOT/"lms/session-12.html").exists(),"LMS usa el módulo universal, sin página S12 específica.")
-    verify(guia.count('type="checkbox"')==35 and "GitHub" in guia and
-           "14 de noviembre de 2026" in guia,"Guía tiene 35 comprobaciones y entrega GitHub.")
+    verify(guia.count('type="checkbox"')==41 and "GitHub" in guia and
+           "14 de noviembre de 2026" in guia,"Guía tiene 41 comprobaciones de OCR/ASR y entrega GitHub.")
     # Separa inequívocamente material aprendido de contenido antes del TC1.
     for forbidden in ("Cassandra query-first — 15 puntos","Neo4j / contexto relacional — 15 puntos","Adquisición SECOP — 25 puntos"):
         verify(forbidden not in full,"No repetir TC1: "+forbidden)
