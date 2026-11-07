@@ -7,21 +7,17 @@ import base64, collections, hashlib, html, io, json, math, re, shutil, unicodeda
 from pathlib import Path
 import numpy as np
 
-SCHEMA = "tc2-v1"
+SCHEMA = "tc2-v2-integrado"
 MODELO = "intfloat/multilingual-e5-small"
 RUBRICA = [
- ("E1.1","BM25: tokens y mecanismo",6),("E1.2","BM25: rankings literal y paráfrasis",8),
- ("E1.3","BM25: modificar una palabra y comprobar",6),
- ("E2.1","E5: vectores 384 y prefijos",7),("E2.2","Similitud coseno y top 5",8),
- ("E2.3","Atlas vectorial real o contrato local",6),("E2.4","Experimento con candidatos o filtro",4),
- ("E3.1","Precision y Recall con juicios externos",6),("E3.2","RRF calculado por posiciones",5),
- ("E3.3","Elección con alternativa y límite",4),
- ("E4.1","RGB, luminancia e histograma",6),("E4.2","Dos transformaciones medibles",8),
- ("E4.3","Perfil que conserva legibilidad",6),
- ("E5.1","Diez voces humanas licenciadas",5),("E5.2","RMS y FFT en dos ventanas",6),
- ("E5.3","Interpretación acústica y límite",4),
- ("E6.1","Explorador de dos orígenes",3),("E6.2","Decisiones ancladas al resultado",2)]
-assert len(RUBRICA)==18 and sum(r[2] for r in RUBRICA)==100
+ ("E1.1","Tokens y DF/IDF",3),("E1.2","BM25 dos rankings",4),("E1.3","Variación léxica",3),
+ ("E2.1","E5 384 dimensiones",4),("E2.2","Coseno y Top-k",5),("E2.3","Atlas real o ruta local",4),("E2.4","Filtro y candidatos",2),
+ ("E3.1","Precision/Recall@5",4),("E3.2","RRF manual e híbrido",4),("E3.3","Decisión y límite",2),
+ ("E4.1","RGB, luminancia e histograma",7),("E4.2","Transformación de imagen",8),("E4.3","Legibilidad y pérdida",5),
+ ("E5.1","Diez audios reales",6),("E5.2","RMS, FFT y espectrograma",8),("E5.3","Interpretación de audio",6),
+ ("E6.1","Catálogo con procedencia",6),("E6.2","Reimportación y consultas",6),
+ ("E6.3","Idempotencia",5),("E6.4","Corrupción y recuperación",5),("E6.5","Explorador y defensa",3)]
+assert len(RUBRICA)==21 and sum(r[2] for r in RUBRICA)==100
 URL_VOCES = "https://huggingface.co/datasets/PolyAI/minds14/resolve/main/es-ES/train-00000-of-00001.parquet"
 SHA_VOCES = "989bf2f90676a5eb5852fe785a03b1d9b97763e0febbd0fd0a3f489afd83badf"
 
@@ -205,6 +201,80 @@ def obtener_voces(out,source=None):
            "medidas":metricas_voz(pcm)})
     return audios
 
+def construir_catalogo(carpeta,intencion):
+    """Activos reales y derivados tipados, con linaje sin asociaciones inventadas."""
+    carpeta=Path(carpeta)
+    audios=leer(carpeta/"E5/audios.json")["audios"]
+    filas=[]
+    for nombre in ("ranking.png","perfil_160.png","perfil_640.png"):
+        ruta="E4/"+nombre;p=carpeta/ruta
+        from PIL import Image
+        with Image.open(p) as im: width,height=im.size
+        filas.append({"asset_id":"imagen_"+nombre.replace(".","_"),
+          "source_kind":"SECOP_ranking_generado","source_record_id":intencion["id"],
+          "media_type":"image/png","license":"Imagen generada en taller a partir de resultados SECOP",
+          "raw_path":"E4/ranking.png","derived_path":ruta,
+          "sha256":sha(p),"width":int(width),"height":int(height),
+          "duration_s":None,"rms":None})
+    if len(audios)!=10:raise ValueError("Se exigen 10 audios reales")
+    for a in audios:
+        ruta="E5/audio/"+a["archivo"]
+        p=carpeta/ruta
+        if sha(p)!=a["sha256"]:raise ValueError("Audio alterado: "+ruta)
+        filas.append({"asset_id":"audio_"+str(a["n"]).zfill(2),
+          "source_kind":"MINDS14_es_ES","source_record_id":a["source_record_id"],
+          "media_type":"audio/wav","license":"CC BY 4.0",
+          "raw_path":"E5/audio/"+a["original"],"derived_path":ruta,
+          "sha256":sha(p),"width":None,"height":None,
+          "duration_s":float(a["medidas"]["duracion_s"]),"rms":float(a["medidas"]["rms"])})
+    if len(filas)!=13 or len({f["asset_id"] for f in filas})!=13:raise ValueError("Catálogo duplicado")
+    return filas
+
+def guardar_catalogo(carpeta,filas):
+    import pandas as pd
+    carpeta=Path(carpeta);out=carpeta/"E6";out.mkdir(parents=True,exist_ok=True)
+    contenido="\n".join(json.dumps(f,sort_keys=True,ensure_ascii=False,allow_nan=False) for f in filas)+"\n"
+    (out/"catalogo.jsonl").write_text(contenido,encoding="utf-8")
+    pd.DataFrame(filas).to_parquet(out/"catalogo.parquet",index=False)
+    return {"cantidad":len(filas),"imagenes":sum(f["media_type"]=="image/png" for f in filas),
+       "audios":sum(f["media_type"]=="audio/wav" for f in filas),
+       "jsonl_sha256":sha(out/"catalogo.jsonl"),"parquet_sha256":sha(out/"catalogo.parquet")}
+
+def reabrir_catalogo(carpeta):
+    import pandas as pd
+    carpeta=Path(carpeta);out=carpeta/"E6"
+    lineas=[json.loads(v) for v in (out/"catalogo.jsonl").read_text(encoding="utf-8").splitlines() if v.strip()]
+    tabla=pd.read_parquet(out/"catalogo.parquet")
+    rec=[]
+    for row in tabla.to_dict("records"):
+        clean={k:(None if v is None or (isinstance(v,float) and math.isnan(v)) else v) for k,v in row.items()}
+        rec.append(clean)
+    if rec!=lineas:raise ValueError("JSONL y Parquet no coinciden tras releerlos")
+    return lineas
+
+def consultar_catalogo(filas,clase):
+    if clase not in ("image","audio"):raise ValueError("Clase no admitida")
+    return sorted(f["asset_id"] for f in filas if f["media_type"].startswith(clase+"/"))
+
+def verificar_fallo(carpeta):
+    """Corrompe copia aislada: nunca el archivo de la actividad."""
+    import tempfile
+    carpeta=Path(carpeta);original=carpeta/"E4/perfil_160.png"
+    huella=sha(original)
+    with tempfile.TemporaryDirectory(prefix="tc2-corrupt-") as tmp:
+        p=Path(tmp)/"copia.png"
+        shutil.copy2(original,p)
+        b=bytearray(p.read_bytes())
+        if len(b)<90:raise ValueError("PNG demasiado corto")
+        b[-40] ^= 1
+        p.write_bytes(b)
+        corrupto=sha(p)
+        shutil.copy2(original,p)
+        restaurado=sha(p)==huella
+    return {"path":"E4/perfil_160.png","original_sha":huella,
+      "corrupted_sha":corrupto,"detected":corrupto!=huella,
+      "restored":restaurado,"source_intact":sha(original)==huella}
+
 def hacer_html(carpeta,docs,bm,sem,rrf,datoimg,audios,decisiones):
     """Explorador offline: filtra resultados YA calculados; no recalcula embeddings en navegador."""
     carpeta=Path(carpeta);lookup={d["id_proceso"]:d for d in docs}
@@ -221,6 +291,10 @@ def hacer_html(carpeta,docs,bm,sem,rrf,datoimg,audios,decisiones):
       " · duración "+str(a["medidas"]["duracion_s"])+" s · centroide "+str(a["medidas"]["centroide_hz"])+" Hz</p></article>" for a in audios)
     style="""body{font:16px/1.5 system-ui;margin:0;background:#f3f7fc;color:#182c44}main{max-width:1150px;margin:auto;padding:20px}header{background:#132f56;color:white;padding:25px}section,article{background:white;border:1px solid #d9e2ed;border-radius:12px;padding:16px;margin:14px 0;overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid #dbe2ea;padding:8px;text-align:left}a{color:#145c9e}img{max-width:100%;height:auto}audio{width:100%;max-width:400px}p{max-width:90ch}@media(prefers-color-scheme:dark){body{background:#101b2a;color:#e8f0fa}section,article{background:#1c2e45;border-color:#405574}a{color:#a3caff}th,td{border-color:#3e5066}}"""
     page="<!doctype html><html lang='es'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>TC2 · Explorador de Laura</title><style>"+style+"</style><header><h1>Explorador de Evidencias · TC2</h1><p>SECOP: búsqueda sobre texto contractual · MINDS14: audios financieros distintos, sin vínculo documental con SECOP</p></header><main><h2>Resultados de búsqueda</h2>"+tabla("BM25 léxico",bm)+tabla("E5 semántico",sem)+tabla("RRF híbrido",rrf)+"<h2>Imagen derivada del ranking</h2><section><img alt='Visualización del Top 5 generado en el taller, no fotografía de contratos' src='E4/ranking.png'><p>El histograma y la reducción representan píxeles; no describen el contenido semántico de un documento.</p><img alt='Versión de tamaño reducido' src='E4/perfil_160.png'><img alt='Versión legible' src='E4/perfil_640.png'></section><h2>Diez voces reales autorizadas</h2>"+voces+"<section><h2>Decisiones y límites</h2><pre>"+html.escape(json.dumps(decisiones,ensure_ascii=False,indent=2))+"</pre><p>Los audios no pertenecen a las noticias ni a los contratos SECOP. Una FFT no transcribe palabras.</p></section></main></html>"
+    if (carpeta/"E6/catalogo_meta.json").exists():
+        meta=leer(carpeta/"E6/catalogo_meta.json")
+        resumen="<section><h2>Catálogo ETL verificado</h2><p>"+str(meta["cantidad"])+" activos, "+str(meta["imagenes"])+" imágenes y "+str(meta["audios"])+" audios. Exportaciones JSONL y Parquet disponibles en E6.</p></section>"
+        page=page.replace("</main></html>",resumen+"</main></html>")
     ruta=carpeta/"explorador.html";ruta.write_text(page,encoding="utf-8")
     return ruta
 
@@ -284,9 +358,9 @@ def validar(carpeta,docs,intencion):
         contrato=bool(a.get("indice_path")=="embedding" and a.get("indice_dimensiones")==384 and a.get("pipeline_limit")==5 and a.get("sistema") in ("Atlas real","Ruta local declarada"))
         ok("E2.3",contrato and remoto,"Atlas declarado real = "+str(remoto)+"; validación remota definitiva pendiente de auditoría docente.")
         if contrato and a.get("sistema")=="Ruta local declarada" and not remoto:
-            checks["E2.3"]["puntos"]=3
+            checks["E2.3"]["puntos"]=2
             checks["E2.3"]["ok"]=False
-            checks["E2.3"]["detalle"]="3/6 por contrato vectorial local, no por ejecución remota de Atlas."
+            checks["E2.3"]["detalle"]="2/4 por contrato vectorial local, no por Atlas remoto."
         varia=e.get("experimento",{}); k=varia.get("k")
         fil=lee("E2/experimento_filtro.json") if (carpeta/"E2/experimento_filtro.json").exists() else {}
         id_lider=e.get("parafrasis",[{}])[0].get("id_proceso")
@@ -350,12 +424,33 @@ def validar(carpeta,docs,intencion):
     except Exception as err:
         for item in ("E5.1","E5.2","E5.3"):ok(item,False,str(err))
     try:
-        report=leer(carpeta/"E6/defensa.json")
+        filas=construir_catalogo(carpeta,intencion)
+        meta=lee("E6/catalogo_meta.json")
+        ok("E6.1",len(filas)==13 and meta.get("cantidad")==13 and meta.get("imagenes")==3 and meta.get("audios")==10 and
+           meta.get("jsonl_sha256")==sha(carpeta/"E6/catalogo.jsonl") and
+           all(f["sha256"]==sha(carpeta/f["derived_path"]) for f in filas),"Catálogo con 3 imágenes, 10 audios, fuente y huellas.")
+        reabierto=reabrir_catalogo(carpeta)
+        consult=lee("E6/consultas.json")
+        ok("E6.2",reabierto==filas and consult.get("imagenes")==consultar_catalogo(reabierto,"image") and
+           consult.get("audios")==consultar_catalogo(reabierto,"audio"),"Relectura real JSONL y Parquet y consultas reproducibles.")
+        idem=lee("E6/idempotencia.json")
+        ok("E6.3",idem.get("primera")==idem.get("segunda")==sha(carpeta/"E6/catalogo.jsonl") and
+           idem.get("filas_primera")==idem.get("filas_segunda")==13 and
+           len(set(f["asset_id"] for f in reabierto))==13,"Reejecutar no duplica ni modifica catálogo.")
+        rec=lee("E6/recuperacion.json");expected=verificar_fallo(carpeta)
+        ok("E6.4",rec==expected and rec.get("detected") and rec.get("restored") and rec.get("source_intact"),
+           "Copia corrupta detectada y restaurada; original intacto.")
+        report=lee("E6/defensa.json")
         page=(carpeta/"explorador.html").read_text(encoding="utf-8")
-        ok("E6.1","BM25 léxico" in page and "E5 semántico" in page and "Diez voces reales autorizadas" in page and "sin vínculo" in page and "<audio" in page,"Explorador HTML con orígenes separados.")
-        ok("E6.2",report.get("modelo") in ("BM25","E5","RRF") and report.get("audio_no_implica")=="Transcripción ni intención" and report.get("imagen_no_implica")=="Contenido semántico del contrato","Defensa de los tres mecanismos.")
+        ok("E6.5","BM25 léxico" in page and "E5 semántico" in page and
+           "Diez voces reales autorizadas" in page and "sin vínculo" in page and
+           "Catálogo ETL verificado" in page and "<audio" in page and
+           report.get("modelo") in ("BM25","E5","RRF") and
+           report.get("audio_no_implica")=="Transcripción ni intención" and
+           report.get("imagen_no_implica")=="Contenido semántico del contrato",
+           "Producto con procedencias y defensa.")
     except Exception as err:
-        for item in ("E6.1","E6.2"):ok(item,False,str(err))
+        for item in ("E6.1","E6.2","E6.3","E6.4","E6.5"):ok(item,False,str(err))
     total=sum(v["puntos"] for v in checks.values())
     return {"schema":SCHEMA,"puntaje":total,"nota_provisional":math.floor((1+4*total/100)*10+0.5+1e-9)/10,
             "controles":checks,"pendiente_revision_docente":"E2.3: confirmar Atlas con auditoría o aplicar contingencia documentada"}
