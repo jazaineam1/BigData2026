@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TC2 · Checklist de la experiencia</title>
+<style>
+:root{color-scheme:light dark;--bg:#f6f9fd;--paper:#fff;--fg:#14273e;--muted:#44556a;--line:#c8d5e2;--link:#154a89;--accent:#146a82;--focus:#d97706;--check:#12573c}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1928;--paper:#18283f;--fg:#ebf3fc;--muted:#c0d0e1;--line:#53667d;--link:#a5ccff;--accent:#6ac6db;--focus:#ffc471;--check:#9cebbf}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:960px;margin:auto;padding:20px 16px 64px}a{color:var(--link);text-underline-offset:3px}h1{font-size:clamp(1.6rem,3vw,2.25rem);line-height:1.2}h2{font-size:1.25rem;margin:1.7em 0 .5em}h3{font-size:1rem}.intro{max-width:78ch;color:var(--muted)}.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;margin:12px 0}.card b{color:var(--fg)}.bar{position:sticky;top:0;padding:12px;background:var(--bg);border-bottom:1px solid var(--line);z-index:2}.track{background:var(--line);border-radius:999px;height:11px;overflow:hidden}.fill{background:var(--accent);height:100%;width:0;transition:width .2s}.row{display:flex;align-items:start;gap:12px;margin:9px 0}.row label{cursor:pointer;flex:1}.row input{width:22px;height:22px;accent-color:var(--accent);flex:none;margin-top:3px}.row input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}button{border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--fg);padding:8px 12px;font:inherit;cursor:pointer}.hint{color:var(--muted);font-size:.94rem}.note{border-left:5px solid var(--accent);padding:12px;background:var(--paper)}code{font-size:.9em;overflow-wrap:anywhere}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}@media(max-width:640px){.grid{grid-template-columns:1fr}.card{padding:14px}}@media(prefers-reduced-motion:reduce){.fill{transition:none}}
+</style></head><body><main>
+<p><a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/plan/tc2-hasta-s10-20261105/Cuadernos/Taller_Control_2.ipynb">Abrir el cuaderno TC2 en Colab</a></p>
+<h1>TC2 · Checklist de la experiencia de Laura</h1>
+<div class="note" role="status"><strong>Taller 2 · Publicado para la cohorte 2026-2S</strong>. PDA de referencia: 20 % del curso. Actividad integrada hasta S10: 35 puntos búsqueda y relevancia; 65 puntos ETL de imágenes, audio y catálogo. Entrega: <b>14 de noviembre de 2026, 23:59:59 Bogotá</b>, en el GitHub EXISTENTE de tu equipo.</div>
+<p class="intro">Solo dos recursos: este mapa y el cuaderno completo (100 celdas). Aprendes los conceptos nuevos de S07, S09 y S10, sin repetir el TC1. Marca cada paso solo cuando veas la evidencia en Colab: <strong>estas casillas no generan nota</strong>.</p>
+<div class="bar" role="region" aria-label="Avance orientativo"><div class="track"><div class="fill" id="fill"></div></div><p id="status" aria-live="polite">0 pasos comprobados</p></div>
+<div class="note"><b>Antes de empezar:</b> guarda copia del notebook en Drive, conecta CPU y anota tu pareja. Puedes trabajar solo. No necesitas Cassandra, Aura, API de pago ni descargar SECOP. **Plazo:** sábado 14 de noviembre de 2026, hasta las <b>11:59 p. m. de Bogotá</b>. Guarda la copia de trabajo en Drive, pero la <b>entrega final es en GitHub privado</b> y se notifica por correo institucional. El PDA de referencia 2026-2 asigna al Taller 2 un <b>20 %</b> del curso.</div>
+
+<h2>Inicio · Predicción (formativo)</h2><section class="card" data-section="inicio">
+<div class="row"><input id="i1" type="checkbox"><label for="i1">Abrí Colab, guardé una copia en Drive, ejecuté Preparar y puse mi identidad. <span class="hint">Debe aparecer «TC2 · Motor autónomo listo», corpus de 200 y mi tema asignado.</span></label></div>
+<div class="row"><input id="i2" type="checkbox"><label for="i2">Elegí mi predicción inicial antes de buscar. <span class="hint">Debe existir <code>prediccion.json</code>, aunque mi predicción pueda ser equivocada.</span></label></div>
+</section>
+
+<h2>E1 · Búsqueda léxica BM25 — 10 puntos</h2><section class="card">
+<p><b>Pregunta de Laura:</b> ¿por qué dos formas de pedir lo mismo no traen el mismo orden?</p>
+<div class="row"><input id="b1" type="checkbox"><label for="b1">Vi los tokens reales de mi consulta y las dos listas Top-5. <span class="hint">Analizador local: no confundir con Elasticsearch remoto.</span></label></div>
+<div class="row"><input id="b0" type="checkbox"><label for="b0"><b>COMPLETA:</b> función <code>frecuencia_documental_equipo</code>; verifiqué mi término, DF e IDF en <code>E1/laboratorio_bm25.json</code>. <span class="hint">No es la frecuencia total: cuenta documentos distintos.</span></label></div>
+<div class="row"><input id="b2" type="checkbox"><label for="b2">Elegí una palabra adicional y predije su efecto. <span class="hint">Comparé el primer resultado antes y después; un orden sin cambio también es un dato.</span></label></div>
+<div class="row"><input id="b4" type="checkbox"><label for="b4">Comparé los cinco IDs antes y después de cambiar una palabra y expliqué por qué el orden puede variar.</label></div>
+<div class="row"><input id="b3" type="checkbox"><label for="b3">Guardé <code>E1/bm25.json</code> y vi «CHECKPOINT E1».</label></div>
+<p class="hint">Si el paso falla: ejecuta E1.1–E1.2 primero. El tokenizador excluye palabras de una letra; eso no es error.</p>
+</section>
+
+<h2>E2 · Recuperación por significado — 15 puntos</h2><section class="card">
+<p><b>Pregunta:</b> ¿qué pasa cuando el contrato no incluye las mismas palabras de la consulta?</p>
+<div class="row"><input id="s0" type="checkbox"><label for="s0"><b>COMPLETA:</b> función <code>coseno_mini</code> usando producto punto y normas. Vi 1 y 0 en el ejemplo de dos dimensiones.</label></div>
+<div class="row"><input id="s1" type="checkbox"><label for="s1">Ejecuté E5 real; apareció una matriz <code>(200, 384)</code> y un Top-5 de NumPy local.</label></div>
+<div class="row"><input id="s4" type="checkbox"><label for="s4">Experimenté con prefijos <code>query:</code>, <code>passage:</code> y sin prefijo; guardé <code>E2/experimento_prefijos.json</code>.</label></div>
+<div class="row"><input id="s2" type="checkbox"><label for="s2">Intenté Atlas temporal o declaré expresamente que usé la ruta local. <span class="hint">Ping no es consulta; NumPy no es Atlas. En ruta local E2.3 recibe crédito parcial, no una conexión fingida.</span></label></div>
+<div class="row"><input id="s5" type="checkbox"><label for="s5">Apliqué un filtro real por entidad. Comprobé universo de candidatos y <code>E2/experimento_filtro.json</code>.</label></div>
+<div class="row"><input id="s3" type="checkbox"><label for="s3">Cambié Top-k a 3 u 8, comparé IDs y guardé <code>E2/semantica.json</code>.</label></div>
+<p class="hint">Si Atlas da 429/timeout, el resto del taller continúa. El docente revisará la contingencia; no incluyas URI, claves ni enlace de reclamo.</p>
+</section>
+
+<h2>E3 · Pertinencia y ranking híbrido — 10 puntos</h2><section class="card">
+<div class="row"><input id="r0" type="checkbox"><label for="r0"><b>COMPLETA:</b> función <code>precision_cinco</code> y archivo <code>E3/laboratorio_precision.json</code>. <span class="hint">Divide por cinco, no por el número total de positivos.</span></label></div>
+<div class="row"><input id="r1" type="checkbox"><label for="r1">Comparé Precision@5 y Recall@5 con juicios de relevancia de MI intención.</label></div>
+<div class="row"><input id="r2" type="checkbox"><label for="r2">Construí RRF sumando <code>1/(60+posición)</code>, no mezclando scores.</label></div>
+<div class="row"><input id="r4" type="checkbox"><label for="r4"><b>COMPLETA:</b> función <code>rrf_dos_posiciones</code> y contrasté <code>1/61 + 1/63</code>.</label></div>
+<div class="row"><input id="r3" type="checkbox"><label for="r3">Elegí motor, alternativa descartada y límite concreto; vi «CHECKPOINT E3».</label></div>
+<p class="hint">Si parece que RRF «gana», comprueba los juicios. El score de BM25 y el coseno no son directamente comparables.</p>
+</section>
+
+<h2>E4 · Imagen creada desde tu propio ranking — 20 puntos</h2><section class="card">
+<div class="row"><input id="m0" type="checkbox"><label for="m0"><b>COMPLETA:</b> función <code>luminancia_rgb</code>; comparé el rojo y el verde y guardé su cálculo.</label></div>
+<div class="row"><input id="m1" type="checkbox"><label for="m1">Generé <code>ranking.png</code> con mi Top-5 y comprobé RGB, luminancia y suma de bins.</label></div>
+<div class="row"><input id="m2" type="checkbox"><label for="m2">Comparé imágenes de 160 y 640 px. <span class="hint">Me fijé en legibilidad y dimensiones, no solo en bytes.</span></label></div>
+<div class="row"><input id="m3" type="checkbox"><label for="m3">Seleccioné el perfil que deja leer etiquetas y guardé <code>E4/imagen.json</code>.</label></div>
+</section>
+
+<h2>E5 · Voces humanas reales — 20 puntos</h2><section class="card">
+<div class="row"><input id="a0" type="checkbox"><label for="a0"><b>COMPLETA:</b> función <code>rms_manual</code> sobre cuatro muestras y comprobé que el promedio simple puede ser cero.</label></div>
+<div class="row"><input id="a1" type="checkbox"><label for="a1">Se descargaron exactamente diez WAV MINDS14 es-ES con licencia CC BY 4.0; no se sustituyeron por audio sintético.</label></div>
+<div class="row"><input id="a2" type="checkbox"><label for="a2">Escuché un WAV, miré forma de onda y espectrograma, comparé ventanas 512 y 1024.</label></div>
+<div class="row"><input id="a4" type="checkbox"><label for="a4">Comparé la referencia humana del WAV con sus métricas; expliqué por qué RMS/FFT no son ASR.</label></div>
+<div class="row"><input id="a3" type="checkbox"><label for="a3">Elegí el límite correcto y marqué si la transcripción es solo referencia humana; guardé <code>E5/audios.json</code>.</label></div>
+<p class="hint">Si no se pueden descargar los audios: conserva E1–E4 y reintenta E5 cuando haya conexión. Nunca marques como lograda una ejecución ausente.</p>
+</section>
+
+<h2>E6 · Catálogo ETL, calidad y demostración — 25 puntos</h2><section class="card">
+<div class="row"><input id="f0" type="checkbox"><label for="f0">Construí un catálogo de 13 activos (3 imágenes y 10 audios), con <code>source_kind</code>, <code>source_record_id</code> y rutas comprobables.</label></div>
+<div class="row"><input id="f5" type="checkbox"><label for="f5">Exporté <code>E6/catalogo.jsonl</code> y <code>E6/catalogo.parquet</code>; volví a abrirlos y consulté activos por tipo de medio.</label></div>
+<div class="row"><input id="f6" type="checkbox"><label for="f6">Reejecuté el catálogo y comprobé que las 13 filas y la huella JSONL no cambiaron.</label></div>
+<div class="row"><input id="f7" type="checkbox"><label for="f7">Detecté corrupción de una COPIA del PNG y comprobé restauración; el original permaneció intacto.</label></div>
+<div class="row"><input id="f1" type="checkbox"><label for="f1">Elegí mi defensa estructurada y generé <code>explorador.html</code> con rankings, imagen y diez audios de procedencia separada.</label></div>
+<div class="row"><input id="f2" type="checkbox"><label for="f2">Ejecuté COMPRUEBA, vi los 18 controles y entendí cada ✗ sin ocultar errores.</label></div>
+<div class="row"><input id="f4" type="checkbox"><label for="f4">Creé un <b>repositorio PRIVATE</b> en mi cuenta GitHub, invité a <code>jazaineam1</code>, subí los tres archivos y notifiqué por correo con SHA antes del cierre.</label></div>
+<div class="row"><input id="f3" type="checkbox"><label for="f3">Generé ZIP y manifest, copié su SHA y descargué el notebook ejecutado.</label></div>
+<p class="hint">La verificación automática es provisional; E2.3 requiere revisión docente de ejecución remota o contingencia.</p>
+</section>
+
+<h2>Entrega final · GitHub privado + correo</h2>
+<div class="note"><b>Cierre exacto:</b> sábado <strong>14 de noviembre de 2026, 23:59:59 hora Bogotá (UTC−5)</strong>. Se interpreta como el final del sábado. Para quedar a tiempo, sube el último commit y envía el correo antes del cierre.</div>
+<div class="grid">
+<div class="card"><b>1. Repositorio GitHub PRIVADO</b><p>En el repositorio existente de la pareja: <strong>abre el repositorio que ya generó tu equipo durante el curso; no crees otro.</strong> Crea la rama <code>taller/tc2-etl</code>. Abre un Pull Request en tu mismo repositorio. Si el repositorio es público, no publiques identidad, contraseñas ni evidencias privadas: solicita la vía de acceso restringida ya acordada. Si es privado, verifica el acceso del docente.</p></div>
+<div class="card"><b>2. Tres archivos en talleres/TC2/</b><p><code>TC2_PAREJA.ipynb</code> (ejecutado y con salidas)<br><code>TC2_PAREJA.zip</code> (E1–E6, imagen, diez voces reales, explorador)<br><code>manifest_tc2.json</code> (rúbrica y huella)</p><p>Usa <b>Add file → Upload files → Commit changes</b> en la rama TC2 del repositorio existente y abre un PR. No incluyas claves ni cadenas de conexión.</p></div>
+<div class="card"><b>3. Correo institucional (como TC1)</b><p>Un integrante escribe a <code>jzaineam@ucentral.edu.co</code>, con copia al compañero, asunto generado por el cuaderno, enlace al PR o commit del repositorio existente, integrantes y SHA-256 del manifest. No adjuntes ZIP pesados; el docente accede desde el repositorio privado.</p></div>
+<div class="card"><b>4. Comprueba que quedó entregado</b><p>Abre los tres archivos en el repositorio, verifica permisos adecuados, PR/commit trazable, acceso del docente y correo enviado antes de las 23:59:59. La revisión de la nota se recalcula desde el ZIP; marcar esta guía nunca envía una calificación.</p></div>
+</div>
+<p class="hint">La entrega es individual o por pareja, una sola cuenta GitHub por equipo. Drive puede usarse para guardar una copia de trabajo, <b>pero no reemplaza la entrega en GitHub</b>. El peso del TC2 es <b>20 %</b> según el PDA 2026-2 del grupo 1; pendiente la correspondencia administrativa con el grupo 2.</p>
+<button type="button" id="clear">Reiniciar únicamente mis casillas de esta página</button>
+<p class="hint">Tus marcas se guardan en este navegador. No se envían respuestas ni notas al servidor y no sustituyen el manifest del notebook.</p>
+</main><script>
+(function(){
+'use strict';
+const key='bigdata-tc2-checklist-v1';
+const boxes=[...document.querySelectorAll('input[type=checkbox]')];
+let stored={};try{stored=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){}
+for(const box of boxes){box.checked=Boolean(stored[box.id]);box.addEventListener('change',()=>{stored[box.id]=box.checked;try{localStorage.setItem(key,JSON.stringify(stored))}catch(e){}update()})}
+function update(){let n=boxes.filter(x=>x.checked).length;document.getElementById('fill').style.width=(100*n/boxes.length)+'%';document.getElementById('status').textContent=n+' de '+boxes.length+' pasos comprobados. Es ayuda personal, no calificación.'}
+document.getElementById('clear').addEventListener('click',()=>{stored={};boxes.forEach(b=>b.checked=false);try{localStorage.removeItem(key)}catch(e){}update()});
+update();
+})();
+</script></body></html>
