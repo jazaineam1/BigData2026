@@ -134,8 +134,8 @@
       "class_date": "2026-11-12",
       "class_kind": "assessment_workshop",
       "entry": {
-        "url": "/BigData2026/lms/session-12.html",
-        "label": "Abrir Taller 2"
+        "url": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_2.ipynb",
+        "label": "Abrir Taller 2 en Colab"
       },
       "assessment": {
         "name": "Taller de Control 2",
