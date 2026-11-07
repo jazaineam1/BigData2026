@@ -27,6 +27,28 @@ def run():
     for fn in ("ids_desde_texto","palabras_clave_propias"):
         verify(any(("def "+fn+"(") in text for text in source),"Función nueva de OCR/ASR COMPLETA: "+fn)
     verify(len(cells)>=110,"Historia OCR/ASR tan profunda como TC1")
+    # El TC1 exige un único hueco en una sola línea y mapa sin relojes.
+    funciones=("frecuencia_documental_equipo","coseno_mini","precision_cinco","rrf_dos_posiciones",
+               "luminancia_rgb","rms_manual","ids_desde_texto","palabras_clave_propias")
+    for fn in funciones:
+        candidatas=[q for q in source if q.lstrip().startswith(("# E","#@title")) and
+                    "def "+fn+"(" in q and "return ____" in q]
+        verify(len(candidatas)==1 and candidatas[0].count("return ____")==1,
+               "Una sola línea COMPLETA por ejercicio: "+fn)
+    verify("Tiempo orientativo" not in source[2] and "45–60" not in source[2],
+           "Mapa de estudiante sin minutos, conforme a AGENTS")
+    for etapa in ("E1","E2","E3","E4","E5","E6"):
+        seccion=[q for q in source if "### Checkpoint "+etapa in q]
+        verify(len(seccion)==1 and all(x in seccion[0] for x in
+               ("**Cómo se lee:**","**Qué nos dice:**","**Qué NO permite concluir todavía:**","**Qué error común:**")),
+               "Interpretación de cuatro rótulos en checkpoint "+etapa)
+    pruebas=(ROOT/"utils/test_tc2_e2e_real.py").read_text(encoding="utf-8")
+    verify("SOLUCIONES =" not in pruebas,"No publicar tabla de ocho respuestas listas para pegar")
+    verify("audit_media=True" in pruebas and (ROOT/"utils/tc2_media_audit.py").exists(),
+           "E2E debe verificar re-inferencia docente independiente")
+    verify("puntos_parciales=" in (ROOT/"utils/tc2_core.py").read_text(encoding="utf-8"),
+           "Niveles de crédito parcial observables")
+
     verify(any("core.ejecutar_ocr(" in x for x in source),"El notebook EJECUTA OCR de verdad")
     verify(any("core.ejecutar_asr(" in x for x in source),"El notebook EJECUTA ASR de verdad")
     verify(any("core.consultar_texto(" in x for x in source),"El notebook consulta texto enriquecido")
@@ -149,7 +171,9 @@ def run():
            "lms/session-12.html" not in portada,"Portada ofrece dos recursos sin página especial S12.")
     verify(not (ROOT/"lms/session-12.html").exists(),"LMS usa el módulo universal, sin página S12 específica.")
     verify(guia.count('type="checkbox"')==41 and "GitHub" in guia and
-           "14 de noviembre de 2026" in guia,"Guía tiene 41 comprobaciones de OCR/ASR y entrega GitHub.")
+           "14 de noviembre de 2026" in guia and guia.count("<details>")>=8 and
+           "NameError" in guia and "Whisper" in guia and "Tesseract" in guia,
+           "Guía completa con 41 comprobaciones, ejemplos y rescates.")
     # Separa inequívocamente material aprendido de contenido antes del TC1.
     for forbidden in ("Cassandra query-first — 15 puntos","Neo4j / contexto relacional — 15 puntos","Adquisición SECOP — 25 puntos"):
         verify(forbidden not in full,"No repetir TC1: "+forbidden)
