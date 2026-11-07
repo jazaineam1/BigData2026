@@ -1,86 +1,87 @@
-# Taller de Control 2 · Revisión contra PDA 2026-2 y repositorio estudiantil existente
+# Taller de Control 2 · Compras Claras: evidencia que se lee, se escucha y se consulta
 
-**Estado:** implementación integrada TC2 V4 en PR #145. El cuaderno y corrector incorporan 21 controles, 35 puntos de búsqueda y 65 de ETL. Publicación efectiva en GitHub Pages y LMS tras fusionar y verificar el PR. Documento basado en el PDA institucional `PDA_2026-02_BIGDATA.pdf` (5 páginas) y `docs/PDA_guia.md`, junto al TC1 V9.
+**Universidad Central · Maestría en Analítica de Datos · 2026-2S**  
+**Edición V5 · 6 de noviembre de 2026 · Rama de desarrollo OCR/ASR**
 
-## 1. Resolución de los dos errores
+## Estado y referencia académica
 
-1. **Peso real:** el PDA 2026-2 establece **Taller 1 = 20 %, Taller 2 = 20 %, quices = 20 %, laboratorio en casa = 10 %, proyecto final = 30 %**. El dato antiguo de 25 % procede de otra versión del PDA y se descarta para diseñar TC2. El PDF está firmado para **grupo 1**, no para el grupo 2; comprobar aplicabilidad administrativa del mismo PDA, pero no inventar otra distribución.
-2. **Tema real:** sesión 10 = ETL con imágenes; sesión 11 = ETL con audio y video; sesión 12 = **segundo taller: implementación de procesos de ETL**. El taller propuesto anteriormente distribuye 60/100 puntos entre BM25, E5 y RRF, por lo que **no cumple la centralidad ETL**. Su código puede sobrevivir como herramienta de recuperación opcional, pero no como núcleo evaluativo.
-3. **Restricción docente vigente:** hasta **lo trabajado en la sesión 10 del grupo 2**. Ese material incluyó imágenes y audio. **No evaluar video, Dask, Spark ni Airflow como requisitos del TC2**. Video pertenece a S11 del PDA del grupo 1; explicitar que se trata de una adaptación y no de cumplimiento literal de toda la secuencia.
-4. **Entrega:** los estudiantes **ya poseen repositorios GitHub de trabajo**. Nunca obligar a crear un segundo repositorio. Usar el **mismo repositorio GitHub de la pareja/proyecto**, una rama `taller/tc2-etl`, carpeta `talleres/TC2/` y un Pull Request hacia su propia rama principal. Si una pareja ya usa otra ruta/convención, conservarla siempre que identifique claramente la entrega, el commit y los tres artefactos. Compartir el enlace del PR/commit y la huella por correo institucional, como TC1. Se ha localizado `jazaineam1/BigData2026-Verificacion-S3` como repositorio **docente privado de práctica**: no asumir que es el repositorio privado de todas las parejas ni forzar subir entregas allí.
-5. **Plazo definido por el profesor:** sábado **14 de noviembre de 2026 a las 23:59:59 hora de Bogotá (UTC−5)**, final del día 14. Es una fecha de entrega administrativa, distinta de las fechas programadas en el PDA grupo 1.
+El TC2 del PDA de referencia 2026-2 evalúa **implementación de procesos ETL** y corresponde al **20 %** de la asignatura. El PDF conocido pertenece al grupo 1, por lo que cualquier ajuste administrativo específico del grupo 2 requiere comprobación docente. Para este grupo el profesor estableció un corte de contenidos **hasta la sesión 10**; se integran BM25/S07, búsqueda semántica/E5/Atlas/S09 e imagen y audio/S10. La sesión 10 ofrece fundamentos de ASR y WER y una extensión opcional de Whisper; **este TC2 convierte OCR y ASR en laboratorios guiados y puntuables**, tal como solicitó el docente. No exige video, Spark, Dask ni contenidos posteriores.
 
-## 2. Alcance integral y correspondencia con el PDA
+**Fecha límite fijada:** sábado **14 de noviembre de 2026, 23:59:59, hora de Bogotá UTC−5**. Entrega mediante repositorio **preexistente y privado** del equipo, rama y PR propio, más correo institucional; no crear un nuevo repo.
 
-**Corrección de alcance:** El PDA 2026-2 denomina al TC2 «Implementación de procesos ETL» y le asigna un peso del 20 % sobre la asignatura. Eso **no impide integrar y evaluar los aprendizajes nuevos de S07 y S09** dentro de un sistema ETL y de consulta: BM25, embeddings E5, búsqueda vectorial, comparación de rankings y RRF se estudiaron después del bloque NoSQL cubierto por TC1. Excluirlos por completo deja capacidades nuevas sin evaluar.
+**Estado de publicación:** esta versión V5 requiere ejecución de GitHub Actions y revisión antes de fusionar a main. No afirmar que está disponible en Pages hasta observar un despliegue exitoso del commit fusionado.
 
-**Restricción temporal acordada:** el corte de evaluación sigue siendo **hasta la S10 REAL del grupo 2**; S10 ya trabajó imágenes, audio, RMS/FFT, ejemplos de transcripción y catálogo. Aunque S11 aparezca posteriormente publicada en el LMS, **no cobrar sus actividades nuevas**, ni video del PDA de grupo 1, ni Dask, Spark o Databricks.
+## Historia de Laura · cuatro actos y un producto
 
-**Hilo conductor:** Laura recibe documentos SECOP con texto recuperable, activos de imagen del laboratorio S10 y diez voces humanas autorizadas. Primero comprueba cómo y por qué recupera registros por palabras y significado; luego aplica ETL verdadero sobre imágenes y señales de audio; finalmente carga el catálogo tipado y construye un explorador consultable para una decisión humana. **No inventar vínculos** entre contratos SECOP, fotografías de otras fuentes y voces MINDS14; la procedencia es una clave explícita, no una suposición.
+**Acto I · Encontrar.** Laura dispone de 200 expedientes SECOP preparados (TC1 ya evaluó su adquisición). Recupera por palabras con BM25 y por significado con E5, compara literal/paráfrasis y ranking RRF, contrasta Precision@5/Recall@5 contra cinco intenciones con juicios externos.
 
-Se reutilizan datos ya preparados de TC1 o del material formativo para no volver a evaluar extracción SECOP, modelado MongoDB documental, Cassandra, Neo4j, ingesta concurrente ni transacciones. El ETL de **datos no estructurados** sí es nuevo y puntuable, incluyendo transformaciones verificables, esquema, carga, recuperación e idempotencia sobre derivados multimedia.
+**Acto II · Leer.** Un gráfico PNG generado desde el Top-5 RRF propio contiene los identificadores visibles de cinco expedientes. El estudiante inspecciona RGB, luminancia, histograma y dos transformaciones (160/640 px); luego **Tesseract OCR español** extrae de verdad texto de los tres PNG. Implementa su función de regex para identificar códigos CO1.REQ.*, coteja contra IDs de origen y reporta cobertura y pérdidas de legibilidad. No se permite copiar el ranking como resultado de OCR.
 
-## 3. Rúbrica objetivo integrada: 100 puntos / aporte del TC2 al curso 20 %
+**Acto III · Escuchar.** Diez grabaciones MINDS14 es-ES CC BY 4.0, registradas con source_record_id, licencia y SHA. Decodifica, calcula RMS/FFT, forma de onda y espectrograma; ejecuta **Whisper tiny mediante faster-whisper en CPU INT8** sobre las diez voces. Conserva para cada audio una hipótesis real, segmentos temporales, la referencia humana distinta del dataset, **WER** por palabras y temas/cifras por reglas transparentes. Implementa su función de extracción manual; no se atribuyen los audios a SECOP ni a noticias de El Tiempo.
 
-| Etapa | Tema nuevo y evidencia esperada | Puntos |
+**Acto IV · Verificar.** Con **13 activos** (3 imágenes + 10 WAV) el estudiante construye un catálogo enriquecido con asset_id, source_kind, source_record_id, original, derivado, licencia, sha256, extracted_text, text_origin, reference_text, wer y extracted_info_json. Escribe JSONL y Parquet, reabre ambos, consulta por tipo y por término extraído, verifica idempotencia, corrompe/restaura una **copia** del PNG y genera un explorador offline con rankings, OCR, ASR, WER y límites explícitos.
+
+## Rúbrica definitiva propuesta (24 controles · 100 puntos)
+
+| Control | Evidencia evaluada | Puntos |
 |---|---|---:|
-| **E1 · Búsqueda léxica** | S07: tokenización y DF/IDF observados, BM25 y dos rankings reproducibles (literal/paráfrasis), cambio de palabra interpretado | **10** |
-| **E2 · Semántica y búsqueda vectorial** | S09: embeddings E5 reales con prefijos, coseno y Top-k; Atlas solo si hay consulta remota verificable, caso contrario ruta local explícita con crédito proporcional | **15** |
-| **E3 · Recuperación híbrida y evaluación** | S09: Precision@5, Recall@5 con juicios externos; RRF calculado por posiciones; decisión y alternativa descartada sustentadas en los resultados propios | **10** |
-| **E4 · ETL de imágenes** | S10: fuente y formato verificables, lectura de una imagen REAL del material autorizado, RGB/luminancia, transformación y dos perfiles, histograma, legibilidad y limitaciones de extracción de contenido | **20** |
-| **E5 · ETL de audio** | S10: diez WAV reales MINDS14 es-ES, decodificación, metadatos, RMS, FFT y espectrograma, prueba de ventana 512/1024, diferenciación entre rasgos acústicos, texto de referencia y ASR real | **20** |
-| **E6 · Carga, catálogo y producto integrado** | S10: carga de catálogo multimodal JSONL/Parquet con referencias y derivaciones; relectura y consultas; integridad/duplicados; reejecución y fallo controlado; explorador offline y decisiones con límites | **25** |
-| **TOTAL** | **35 puntos de búsqueda/evaluación + 65 puntos de ETL e integración** | **100** |
+| E1.1 | Tokens, frecuencia documental, DF/IDF | 3 |
+| E1.2 | Dos rankings BM25 | 4 |
+| E1.3 | Cambio de palabra y predicción | 3 |
+| E2.1 | Embeddings E5 reales, prefijos, 384 dimensiones | 4 |
+| E2.2 | Coseno manual y Top-10 E5 | 5 |
+| E2.3 | Atlas remoto verificado o crédito parcial local declarado | 4 |
+| E2.4 | Top-k y filtro por entidad | 2 |
+| E3.1 | Precision@5 y Recall@5 reales, más función manual | 4 |
+| E3.2 | RRF por rangos, función manual | 4 |
+| E3.3 | Motor elegido, alternativa y límite | 2 |
+| E4.1 | RGB, luminancia e histograma | 5 |
+| E4.2 | Dos perfiles reales de imagen | 5 |
+| E4.3 | Legibilidad y pérdida por reducción | 4 |
+| E4.4 | Tesseract español en tres imágenes, función de códigos y evidencia | 6 |
+| E5.1 | Diez WAV humanos, fuente y licencia | 5 |
+| E5.2 | RMS manual, FFT y espectrograma | 5 |
+| E5.3 | Diferencia de acústica y lenguaje | 2 |
+| E5.4 | Whisper tiny real sobre diez audios, segmentos | 6 |
+| E5.5 | WER y temas/cifras, función propia | 2 |
+| E6.1 | Catálogo de 13 activos enriquecidos | 6 |
+| E6.2 | Exportación/relectura y consultas por tipo/texto | 6 |
+| E6.3 | Idempotencia, 13 registros y SHA estable | 4 |
+| E6.4 | Corrupción y restauración verificable | 4 |
+| E6.5 | Explorador offline y defensa de decisiones | 5 |
+| **Total** | **35 búsqueda + 65 ETL multimedia/integración** | **100** |
 
-**Desglose implementado de controles observables:** E1 = 3+4+3; E2 = 4+5+4+2; E3 = 4+4+2; E4 = 7+8+5; E5 = 6+8+6; E6 = 6+6+5+5+3. Los puntos corresponden a los archivos y parámetros reales de cada pareja, no a preguntas memorísticas o al simple hecho de ejecutar. No otorgar puntaje remoto Atlas por operaciones NumPy locales.
+Los controles E4.4 y E5.4 exigen **inferencia ejecutada verdaderamente**. La reproducción de una referencia humana no cuenta como ejecución de ASR. Un WER alto, OCR sin todos los códigos o un reconocimiento imperfecto **no deben esconderse**: se califica el proceso, las evidencias y sus interpretaciones. El corrector recalcúla la documentación y puede requerir revisión manual del docente; la prueba E2E instala Tesseract y Whisper para verificar la ruta real.
 
-**OCR y ASR:** experimentos guiados de S10, si se usan, deben declarar si hubo OCR/ASR verdaderamente ejecutado o si el texto vino de una anotación existente. No añadir obligatoriedad de modelos o descargas no enseñados hasta el cierre de S10; no calificar precisión de transcripción sin referencia fiable.
+## Ruta visible, ocho funciones COMPLETA y herramientas
 
-## 4. Cómo será una experiencia completa, no seis tareas sueltas
+- **Notebook:** \`Cuadernos/Taller_Control_2.ipynb\`, dos recursos del estudiante junto a la guía.
+- **Guía:** \`assets/tutoriales/tc2-paso-a-paso.html\`, 41 verificaciones, teclado y móvil.
+- **Motor:** \`utils/tc2_core.py\`, mismo código embebido en el notebook.
+- **Corrector de ZIP:** \`utils/calificar_tc2_zip.py\` y manifest de controles.
+- **Datos:** \`Datos/tc2_corpus_2026.json\`, \`Datos/tc2_juicios_2026.json\`, MINDS14 es-ES con SHA fijado.
+- **Ocho funciones del estudiante:** frecuencia_documental_equipo, coseno_mini, precision_cinco, rrf_dos_posiciones, luminancia_rgb, rms_manual, **ids_desde_texto**, **palabras_clave_propias**.
+- **Modelos sin servicio de pago:** \`pytesseract\` + \`tesseract-ocr-spa\`, \`faster-whisper\` + Whisper \`tiny\` CPU/INT8. La instalación y descarga de pesos necesitan red y tiempo.
+- **Salida:** \`E4/ocr.json\`, \`E4/ocr_manual.json\`, \`E5/asr.json\`, \`E5/asr_manual.json\`, \`E6/catalogo.jsonl\`, \`E6/catalogo.parquet\`, \`E6/consultas.json\`, \`explorador.html\`, \`manifest_tc2.json\`.
 
-**Producto integrador:** «Explorador de Evidencias Multimodal» generado desde **el mismo expediente reproducible**. Incluye rankings lexical/semántico/híbrido, activos visuales realmente transformados, diez señales de voz realmente decodificadas y un catálogo donde se consulten ruta, fuente, tipo, derivado y métricas. Ningún ID multimedia se equipara con un ID SECOP sin vínculo declarado.
+## Entrega GitHub (mismo repositorio creado en el curso)
 
-| Secuencia | Pregunta profesional de Laura | Acción autónoma que realiza el estudiante | Evidencia que alimenta la próxima etapa |
-|---|---|---|---|
-| E1 | ¿Qué encuentro cuando coincide el vocabulario? | Modifica una consulta, implementa DF/IDF, contrasta Top-5 BM25 | Resultados léxicos tipados con IDs |
-| E2 | ¿Y cuando cambia la forma de decir lo mismo? | Implementa coseno, ejecuta E5 y prueba Top-k / filtro | Resultados vectoriales y estado Atlas/local honesto |
-| E3 | ¿Qué motor ayuda más en esta intención? | Implementa Precision@5 y RRF, compara tres rankings | Selección y evidencia de búsqueda |
-| E4 | ¿Qué información técnica puedo conservar de una imagen? | Decodifica imagen autorizada, implementa luminancia, transforma y observa pérdidas | Original, derivado e inventario visual |
-| E5 | ¿Qué puedo medir de una grabación sin suponer palabras? | Implementa RMS y manipula FFT de voces reales | Original, derivado y medidas de audio |
-| E6 | ¿Puede otra persona reabrir y verificar lo producido? | Une catálogos por **tipo y procedencia**, reabre, consulta, provoca fallo seguro y genera explorador | Manifest, notebook y ZIP comprobables |
+1. Trabajar en el **repositorio ya creado por cada pareja**, convertirlo a **privado** si estaba público, porque el cuaderno/ZIP contienen códigos y nombres; mantener acceso de lectura del docente.
+2. Crear rama \`taller/tc2-etl\` y carpeta \`talleres/TC2/\`; subir \`TC2_<PAREJA>.ipynb\` ejecutado, \`TC2_<PAREJA>.zip\`, \`manifest_tc2.json\` a esa carpeta. No subir contraseñas, tokens, claimUrl o URI Atlas.
+3. Abrir PR en el propio repo del equipo (no en el docente). Notificar por correo institucional a los mismos destinatarios de TC1 con enlace al repo y al commit, integrantes y SHA del manifiesto.
+4. Commit y correo deben estar enviados antes de las **23:59:59 del sábado 14-11-2026**, hora Bogotá. Drive es respaldo de trabajo, no destino final.
 
-**Anatomía al nivel del TC1:** problema, objetivo y rúbrica al inicio; una ruta de 6 etapas; ejemplo manual pequeño y luego ejemplo auténtico; seis celdas COMO MÍNIMO donde completar una función; interpretación inmediata tras cada salida (cómo se lee, qué demuestra, qué no permite concluir, error común); checkpoints con evidencia concreta; errores controlados y recuperación; cierre con decisión estructurada, alternativa descartada y límite. **No fijar un número artificial de celdas**: comparar aprendizaje y trabajo efectivo con las 81 celdas de TC1.
+## Control técnico antes de publicar
 
-**Previsión de materiales:** un cuaderno ejecutable (Colab CPU) y una guía vinculada a la actividad; conservar el número de recursos definido en `AGENTS.md`. Las soluciones y la preparación del docente no se publican junto con la entrega.
+- [ ] Contrato académico, estructura de 24 controles y motor embebido exacto.
+- [ ] Pruebas unitarias/QA offline: BM25, coseno, WER, extracción y catálogo JSONL/Parquet. Los resultados simulados usados en QA offline **no** equivalen a modelos ejecutados.
+- [ ] E2E real Colab-equivalente en CPU: E5, OCR Tesseract español sobre 3 PNG y Whisper tiny sobre 10 WAV, ZIP y recalificación externa equivalente (98/100 si la ruta Atlas se declara local).
+- [ ] Licencias/hashes de voces reales, Playwright móvil/desktop, accesibilidad y escáner de seguridad.
+- [ ] Compatibilidad con LMS V5: módulo universal; no introducir \`lms/session-12.html\`.
+- [ ] Fusionar PR y verificar workflow de GitHub Pages + enlaces Colab/guía.
 
-## 5. Repositorio existente de los estudiantes: instrucciones correctas
+## Advertencias de interpretación
 
-**No pedir «New repository».** El estudiante entra a su repositorio que ya creó durante el curso. Si el repositorio es un fork público del material docente, **no publicar ahí** sus nombres, códigos ni archivos privados: usar una ruta privada aprobada del mismo proyecto o garantizar que los artefactos publicados sean anonimizados. No crear repositorios adicionales por defecto.
+**Fuente ≠ predicción ≠ referencia ≠ verdad comprobada.** Un PNG producido desde el ranking no representa una foto de un contrato. Tesseract lee símbolos estimados; el cotejo contra el ranking no es un sello de veracidad legal. Whisper procesa grabaciones auténticas pero puede alucinar palabras; WER compara frente a una sola referencia humana del mismo registro, no mide generalización. Las reglas de temas y cifras pueden fallar si la transcripción falla. No se extraen ni descargan automáticamente audios editoriales de El Tiempo, y **no se inventa relación entre MINDS14 y SECOP**.
 
-1. Abrir **el repositorio existente de su pareja** y comprobar el nombre, propietario y permisos.
-2. Crear rama `taller/tc2-etl` desde su trabajo previo, sin borrar los hitos del proyecto.
-3. Agregar `talleres/TC2/TC2_<PAREJA>.ipynb`, `talleres/TC2/TC2_<PAREJA>.zip` y `talleres/TC2/manifest_tc2.json`. Evitar secretos/PII en repos públicos.
-4. Registrar los cambios con **commit** verificable y abrir **PR en su propio repositorio** desde la rama TC2 a `main`; no modificar la rama `main` del docente.
-5. Enviar desde correo institucional el enlace al repositorio ya creado y al PR/commit, integrantes y SHA-256 del manifest. Si el repositorio es privado, comprobar que el docente tiene acceso (cuenta GitHub institucional por confirmar, no inventar cuál).
-6. Considerar entregado antes de las **23:59:59 de Bogotá del 14-11-2026** cuando están presentes los archivos, el commit y el correo; los archivos y el enlace se revisan en el estado del commit de cierre.
-
-**Alerta de operación:** el archivo ZIP de 10 WAV puede superar límites de carga desde la web si se incluyen fuentes grandes. Mantener sólo el material autorizado y necesario; ofrecer Git/LFS si procede, pero no exigir compras ni cuentas adicionales.
-
-## 6. Acciones técnicas para completar antes de publicar
-
-- [ ] Implementado: `Cuadernos/Taller_Control_2.ipynb` de 100 celdas y rúbrica 21 controles: BM25 + E5 + RRF (35), ETL imagen + audio + catálogo/consulta (65).
-- [ ] Reutilizar únicamente competencias ya enseñadas y comprobadas hasta S10 de `Cuadernos/10_Imagenes_Audio.ipynb`; tomar ejemplos técnicos de S11 solo si no introducen obligaciones nuevas.
-- [ ] Implementado: `utils/tc2_core.py` y `utils/validate_taller_control_2.py`: 10/15/10/20/20/25; JSONL/Parquet, consultas, idempotencia, falla/recuperación y corrección desde ZIP.
-- [ ] Implementado: `assets/tutoriales/tc2-paso-a-paso.html` con 35 pasos, repositorio existente y plazo.
-- [ ] Validación end-to-end automatizada para CPU, diez audios licenciados y ZIP; complementada con revisión humana de permisos GitHub de la cohorte y prueba de Atlas remoto.
-- [ ] Conciliar el PDA del **grupo 1** con el plan aprobado para **grupo 2** antes de publicar la calificación institucional del 20 %.
-- [ ] Fusionar PR y activar sesión 12 en el LMS, portada y landing `lms/session-12.html`, con acceso al notebook principal y guía.
-
-## 7. Fuentes
-
-- PDA auténtico: `PDA_2026-02_BIGDATA.pdf` p. 1–5: método evaluativo y S10–S12.
-- Guía actualizada: `docs/PDA_guia.md` (corrige el error histórico de 2023).
-- Primer taller: `Cuadernos/Taller_Control_1.ipynb` (V9).
-- Ruta docente de GitHub: `infraestructura/git-ejemplo/README.md`.
-- Laboratorio multimedia ya existente: `Cuadernos/11_ETL_Audio_Imagenes.ipynb`.
-- Repositorio docente de práctica: `jazaineam1/BigData2026-Verificacion-S3` (privado; no confundir con las copias/repositorios de estudiantes).
+El proceso ETL se evalúa como sistema integrado de **extraer → transformar/enriquecer → cargar → reabrir/consultar → verificar**, no como mera ejecución de herramientas aisladas.
