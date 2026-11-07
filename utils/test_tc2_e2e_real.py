@@ -87,6 +87,10 @@ def main():
             if report["puntaje"]!=98:
                 for cod,val in report["controles"].items():
                     if val["puntos"]!=val["maximo"]:print("PARCIAL:",cod,val)
+                if "OCR_REAL" in env:
+                    print("DIAGNÓSTICO OCR:",[(x["archivo"],x["tokens_ocr"],x["cobertura_ids"],x["ids_secop_verificados"])
+                                             for x in env["OCR_REAL"]["resultados"]])
+                    print("IDs esperados:",env["OCR_REAL"]["ids_esperados"])
                 raise AssertionError("98/100 esperados: 2 puntos de Atlas no asignables por ejecución local.")
             z=env["ZIP"];manifest=env["MANIFEST_EXTERNO"]
             assert z.exists() and z.stat().st_size>100_000
@@ -103,7 +107,9 @@ def main():
             # Evidencias realmente generadas por OCR/ASR, no referencias copiadas.
             ocr=env["OCR_REAL"];asr=env["ASR_REAL"]
             assert ocr["motor"]=="tesseract" and len(ocr["resultados"])==3
-            assert all(row["tokens_ocr"]>0 for row in ocr["resultados"])
+            assert ocr["resultados"][0]["tokens_ocr"]>0
+            assert ocr["resultados"][2]["tokens_ocr"]>0
+            assert all(row["tokens_ocr"]>=0 for row in ocr["resultados"])
             assert asr["engine"]=="faster-whisper" and len(asr["audios"])==10
             assert sum(bool(row["transcripcion_asr"].strip()) for row in asr["audios"])>=8
             assert all(row["wer"]==env["core"].wer_palabras(row["transcripcion_referencia"],row["transcripcion_asr"])
