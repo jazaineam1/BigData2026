@@ -10,39 +10,48 @@
 4. **Entrega:** los estudiantes **ya poseen repositorios GitHub de trabajo**. Nunca obligar a crear un segundo repositorio. Usar el **mismo repositorio GitHub de la pareja/proyecto**, una rama `taller/tc2-etl`, carpeta `talleres/TC2/` y un Pull Request hacia su propia rama principal. Si una pareja ya usa otra ruta/convención, conservarla siempre que identifique claramente la entrega, el commit y los tres artefactos. Compartir el enlace del PR/commit y la huella por correo institucional, como TC1. Se ha localizado `jazaineam1/BigData2026-Verificacion-S3` como repositorio **docente privado de práctica**: no asumir que es el repositorio privado de todas las parejas ni forzar subir entregas allí.
 5. **Plazo definido por el profesor:** sábado **14 de noviembre de 2026 a las 23:59:59 hora de Bogotá (UTC−5)**, final del día 14. Es una fecha de entrega administrativa, distinta de las fechas programadas en el PDA grupo 1.
 
-## 2. Competencia evaluable
+## 2. Alcance integral y correspondencia con el PDA
 
-**Laura recibe un conjunto heterogéneo de imágenes y audios auténticos**, y debe construir una línea ETL trazable desde la fuente hasta un catálogo consultable que permita interpretar los datos sin atribuciones falsas.
+**Corrección de alcance:** El PDA 2026-2 denomina al TC2 «Implementación de procesos ETL» y le asigna un peso del 20 % sobre la asignatura. Eso **no impide integrar y evaluar los aprendizajes nuevos de S07 y S09** dentro de un sistema ETL y de consulta: BM25, embeddings E5, búsqueda vectorial, comparación de rankings y RRF se estudiaron después del bloque NoSQL cubierto por TC1. Excluirlos por completo deja capacidades nuevas sin evaluar.
 
-La práctica usa **fuentes y datos ya preparados**: imágenes del material S10 con permiso de uso o imágenes generadas/autorizadas, diez voces auténticas MINDS14 es-ES CC BY 4.0 y sus metadatos. No exigir descargar SECOP ni crear bases de datos convencionales, porque eso ya se evaluó en TC1. La relación imagen→registro debe existir en el manifiesto, no suponerse. Las voces MINDS14 no pertenecen a SECOP ni a noticias de El Tiempo.
+**Restricción temporal acordada:** el corte de evaluación sigue siendo **hasta la S10 REAL del grupo 2**; S10 ya trabajó imágenes, audio, RMS/FFT, ejemplos de transcripción y catálogo. Aunque S11 aparezca posteriormente publicada en el LMS, **no cobrar sus actividades nuevas**, ni video del PDA de grupo 1, ni Dask, Spark o Databricks.
 
-**Mapa del producto:** extraer bytes y metadatos → inspeccionar formato real → transformar imágenes y audio → registrar medidas → cargar un catálogo multimedia (JSONL/Parquet, eventualmente servicio gratuito si el curso lo ha enseñado) → reabrir y consultar por identificador → probar una corrupción y recuperación → paquete y defensa de decisiones con resultados propios.
+**Hilo conductor:** Laura recibe documentos SECOP con texto recuperable, activos de imagen del laboratorio S10 y diez voces humanas autorizadas. Primero comprueba cómo y por qué recupera registros por palabras y significado; luego aplica ETL verdadero sobre imágenes y señales de audio; finalmente carga el catálogo tipado y construye un explorador consultable para una decisión humana. **No inventar vínculos** entre contratos SECOP, fotografías de otras fuentes y voces MINDS14; la procedencia es una clave explícita, no una suposición.
 
-## 3. Rúbrica corregida: 100 puntos (aporte del TC2 a la asignatura = 20 %)
+Se reutilizan datos ya preparados de TC1 o del material formativo para no volver a evaluar extracción SECOP, modelado MongoDB documental, Cassandra, Neo4j, ingesta concurrente ni transacciones. El ETL de **datos no estructurados** sí es nuevo y puntuable, incluyendo transformaciones verificables, esquema, carga, recuperación e idempotencia sobre derivados multimedia.
 
-| Etapa | Qué demuestra | Controles de puntuación | Puntos |
-|---|---|---|---:|
-| E1 · Extraer | Identificación de 2 fuentes distintas, archivo real vs extensión y procedencia explícita; sin volver a calificar ingesta SECOP | Fuente y licencias 5, inspección de bytes y decodificación 5, selección de activos verificables 5 | **15** |
-| E2 · Transformar imágenes | RGB y luminancia, dos transformaciones con efecto comprobable, histograma interpretado, recuperación visual de información necesaria | Lectura de señal 8, transformación reproducible 10, contraste de legibilidad y límites 7 | **25** |
-| E3 · Transformar audio | Decodificación real, forma de onda, duración y RMS, FFT/espectrograma, una variación de ventana y contraste con transcripción de referencia | Decodificación/códec 7, rasgos calculados en 10 WAV 10, experimento e interpretación 8 | **25** |
-| E4 · Cargar y consultar | Un **catálogo único** con tipos de activo y procedencia; volver a cargarlo y responder una pregunta con sus registros (no solo serializar un JSON) | Estructura y carga 7, relectura e integridad referencial 5, consulta reproducible 3 | **15** |
-| E5 · Calidad y recuperación | Reejecución idempotente de multimedia, detección de transformaciones erróneas y recuperación ante una falla controlada (no volver a calificar descargas SECOP) | Idempotencia 6, prueba negativa 5, restauración verificada 4 | **15** |
-| E6 · Decisión final | Selección de un perfil y un límite concreto con números/IDs del equipo; evidencia versionada | Defensa estructurada y trazabilidad del resultado 5 | **5** |
-| **Total** | **Sólo ETL multimodal aprendido hasta S10** | | **100** |
+## 3. Rúbrica objetivo integrada: 100 puntos / aporte del TC2 al curso 20 %
 
-**No calificar BM25, E5, Atlas remoto ni RRF** en el TC2: ya son logros de S07/S09 y pueden ser recursos de consulta final sin puntuación específica. Tampoco puntuar la simple creación del repositorio, la firma SHA o el ZIP como competencias nuevas: son requisitos de trazabilidad de entrega.
+| Etapa | Tema nuevo y evidencia esperada | Puntos |
+|---|---|---:|
+| **E1 · Búsqueda léxica** | S07: tokenización y DF/IDF observados, BM25 y dos rankings reproducibles (literal/paráfrasis), cambio de palabra interpretado | **10** |
+| **E2 · Semántica y búsqueda vectorial** | S09: embeddings E5 reales con prefijos, coseno y Top-k; Atlas solo si hay consulta remota verificable, caso contrario ruta local explícita con crédito proporcional | **15** |
+| **E3 · Recuperación híbrida y evaluación** | S09: Precision@5, Recall@5 con juicios externos; RRF calculado por posiciones; decisión y alternativa descartada sustentadas en los resultados propios | **10** |
+| **E4 · ETL de imágenes** | S10: fuente y formato verificables, lectura de una imagen REAL del material autorizado, RGB/luminancia, transformación y dos perfiles, histograma, legibilidad y limitaciones de extracción de contenido | **20** |
+| **E5 · ETL de audio** | S10: diez WAV reales MINDS14 es-ES, decodificación, metadatos, RMS, FFT y espectrograma, prueba de ventana 512/1024, diferenciación entre rasgos acústicos, texto de referencia y ASR real | **20** |
+| **E6 · Carga, catálogo y producto integrado** | S10: carga de catálogo multimodal JSONL/Parquet con referencias y derivaciones; relectura y consultas; integridad/duplicados; reejecución y fallo controlado; explorador offline y decisiones con límites | **25** |
+| **TOTAL** | **35 puntos de búsqueda/evaluación + 65 puntos de ETL e integración** | **100** |
 
-## 4. Diseño de experiencia de aprendizaje a la profundidad del TC1
+**Desglose objetivo de controles observables** (requiere codificación y pruebas antes de ser oficial): E1 = 3+4+3; E2 = 4+5+6; E3 = 4+4+2; E4 = 7+8+5; E5 = 6+8+6; E6 = 6+6+5+5+3. Los puntos corresponden a los archivos y parámetros reales de cada pareja, no a preguntas memorísticas o al simple hecho de ejecutar. No otorgar puntaje remoto Atlas por operaciones NumPy locales.
 
-Objetivo editorial: **seis etapas encadenadas** con portada, problema de Laura, mapa, definiciones contextualizadas, mini ejemplo manual, ejemplo aplicado, una celda `COMPLETA` por habilidad central, predicción antes de ejecutar, dos perfiles/alternativas, resultado visible, cuatro rótulos («Cómo se lee», «Qué nos dice», «Qué NO permite concluir todavía», «Qué error común»), checkpoint por etapa, recuperación de errores y entrega. No forzar 91 celdas; igualar profundidad y trabajo real, no longitud artificial.
+**OCR y ASR:** experimentos guiados de S10, si se usan, deben declarar si hubo OCR/ASR verdaderamente ejecutado o si el texto vino de una anotación existente. No añadir obligatoriedad de modelos o descargas no enseñados hasta el cierre de S10; no calificar precisión de transcripción sin referencia fiable.
 
-**Prácticas de cada etapa:**
-- E1: detectar un archivo cuyo sufijo no coincida con bytes reales; no penalizar al estudiante por detectar una anomalía.
-- E2: trabajar con una imagen autorizada, elegir perfil de tamaño y brillo, medir tamaño y legibilidad; indicar qué dato haría falta para afirmar que una fotografía contiene cierta información.
-- E3: usar diez WAV licenciados, cambiar una ventana FFT de 512 a 1024 en el mismo audio y contrastar RMS/espectrograma con referencia de texto. No afirmar transcripción ASR sin ejecutarlo.
-- E4: registrar `asset_id`, `source_kind`, `source_record_id`, `media_type`, `license`, `original`, `derived`, medidas y estado; reabrir JSONL/Parquet y resolver consultas de forma reproducible.
-- E5: reejecutar sin duplicar catálogos ni modificar originales, provocar un error seguro sobre derivado y reconstruirlo.
-- E6: seleccionar una decisión fundada por números propios y una alternativa descartada, y un límite verificable; crear expediente final.
+## 4. Cómo será una experiencia completa, no seis tareas sueltas
+
+**Producto integrador:** «Explorador de Evidencias Multimodal» generado desde **el mismo expediente reproducible**. Incluye rankings lexical/semántico/híbrido, activos visuales realmente transformados, diez señales de voz realmente decodificadas y un catálogo donde se consulten ruta, fuente, tipo, derivado y métricas. Ningún ID multimedia se equipara con un ID SECOP sin vínculo declarado.
+
+| Secuencia | Pregunta profesional de Laura | Acción autónoma que realiza el estudiante | Evidencia que alimenta la próxima etapa |
+|---|---|---|---|
+| E1 | ¿Qué encuentro cuando coincide el vocabulario? | Modifica una consulta, implementa DF/IDF, contrasta Top-5 BM25 | Resultados léxicos tipados con IDs |
+| E2 | ¿Y cuando cambia la forma de decir lo mismo? | Implementa coseno, ejecuta E5 y prueba Top-k / filtro | Resultados vectoriales y estado Atlas/local honesto |
+| E3 | ¿Qué motor ayuda más en esta intención? | Implementa Precision@5 y RRF, compara tres rankings | Selección y evidencia de búsqueda |
+| E4 | ¿Qué información técnica puedo conservar de una imagen? | Decodifica imagen autorizada, implementa luminancia, transforma y observa pérdidas | Original, derivado e inventario visual |
+| E5 | ¿Qué puedo medir de una grabación sin suponer palabras? | Implementa RMS y manipula FFT de voces reales | Original, derivado y medidas de audio |
+| E6 | ¿Puede otra persona reabrir y verificar lo producido? | Une catálogos por **tipo y procedencia**, reabre, consulta, provoca fallo seguro y genera explorador | Manifest, notebook y ZIP comprobables |
+
+**Anatomía al nivel del TC1:** problema, objetivo y rúbrica al inicio; una ruta de 6 etapas; ejemplo manual pequeño y luego ejemplo auténtico; seis celdas COMO MÍNIMO donde completar una función; interpretación inmediata tras cada salida (cómo se lee, qué demuestra, qué no permite concluir, error común); checkpoints con evidencia concreta; errores controlados y recuperación; cierre con decisión estructurada, alternativa descartada y límite. **No fijar un número artificial de celdas**: comparar aprendizaje y trabajo efectivo con las 81 celdas de TC1.
+
+**Previsión de materiales:** un cuaderno ejecutable (Colab CPU) y una guía vinculada a la actividad; conservar el número de recursos definido en `AGENTS.md`. Las soluciones y la preparación del docente no se publican junto con la entrega.
 
 ## 5. Repositorio existente de los estudiantes: instrucciones correctas
 
@@ -59,9 +68,9 @@ Objetivo editorial: **seis etapas encadenadas** con portada, problema de Laura, 
 
 ## 6. Acciones técnicas para completar antes de publicar
 
-- [ ] Sustituir `Cuadernos/Taller_Control_2.ipynb` que evalúa BM25/E5 por un cuaderno cuyo flujo **sea ETL** y cuyos puntos sigan la tabla anterior; dejar el documento previo como borrador/no aprobado.
-- [ ] Reutilizar las funciones de imagen/audio y los contratos del cuaderno `11_ETL_Audio_Imagenes.ipynb` **sólo** para capacidades efectivamente enseñadas hasta S10.
-- [ ] Adaptar `utils/tc2_core.py` y `utils/validate_taller_control_2.py`: puntos 15/25/25/15/15/5, verificaciones de archivos reales y consulta de catálogo; simular fallos de transformación, no de SECOP.
+- [ ] Reconstruir `Cuadernos/Taller_Control_2.ipynb` como un taller **integrado**: BM25 + E5 + RRF (35 puntos), ETL imagen + audio + catálogo/consulta (65 puntos). Reutilizar partes verificadas del prototipo sin conservar su rúbrica desbalanceada.
+- [ ] Reutilizar únicamente competencias ya enseñadas y comprobadas hasta S10 de `Cuadernos/10_Imagenes_Audio.ipynb`; tomar ejemplos técnicos de S11 solo si no introducen obligaciones nuevas.
+- [ ] Adaptar `utils/tc2_core.py` y `utils/validate_taller_control_2.py`: puntos 10/15/10/20/20/25, verificaciones de archivos reales y consulta de catálogo; recalcular ranking/transformaciones/catálogo, probar fallos de transformación y evitar repetir controles SECOP de TC1.
 - [ ] Modificar `assets/tutoriales/tc2-paso-a-paso.html`: usar repositorio existente, fecha/hora, PR propio, sin crear otro.
 - [ ] Validar end-to-end con datos licenciados, notebook de estudiante limpio y calificador de ZIP externo; probar GitHub en modo público anonimizante y privado restringido.
 - [ ] Conciliar el PDA del **grupo 1** con el plan aprobado para **grupo 2** antes de publicar la calificación institucional del 20 %.
