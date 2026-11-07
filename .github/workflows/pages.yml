@@ -194,6 +194,11 @@ jobs:
               && grep -q 'Taller de Control 2' <<<"$html" \
               && grep -q 'Taller de Control 2' <<<"$tc2_nb" \
               && grep -q '15 de noviembre de 2026' <<<"$tc2_guide" \
+              && grep -q 'domingo 15 de noviembre de 2026' <<<"$html" \
+              && grep -q '2026-11-15T23:59:59-05:00' <<<"$tc2_course" \
+              && ! grep -q '14 de noviembre de 2026' <<<"$html" \
+              && ! grep -q '14 de noviembre de 2026' <<<"$tc2_guide" \
+              && ! grep -q '2026-11-14T23:59:59-05:00' <<<"$tc2_course" \
               && grep -q 'Taller de Control 2' <<<"$tc2_course" \
               && [ "$image_status" = "200" ] \
               && [ -n "$realtime_sdk" ]; then
