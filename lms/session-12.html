@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#142153">
+<title>Taller de Control 2 · Big Data 2026-2S</title>
+<style>
+:root{--navy:#142153;--cyan:#0b7e84;--pale:#eef6f9;--ink:#192638;--muted:#46586c;--line:#d1dce8;--bg:#f6f8fb;--paper:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:var(--navy);color:white;padding:15px clamp(16px,4vw,44px)}
+header a{color:#d2f6ff;text-decoration:none;font-weight:700}
+main{max-width:1120px;margin:auto;padding:22px 16px 70px}
+.hero{background:linear-gradient(115deg,#142153,#15486c);color:#fff;padding:clamp(20px,4vw,36px);border-radius:18px}
+.ey{font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:#9de1e8;font-weight:850}
+h1{font-size:clamp(1.8rem,3.5vw,3rem);line-height:1.16;margin:7px 0 16px}
+h2{font-size:1.42rem;line-height:1.25}h3{font-size:1.06rem}
+p{max-width:95ch}.lead{font-size:1.15rem;max-width:72ch}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.chip{border:1px solid #86abbf;border-radius:9px;padding:6px 10px;font-size:.89rem}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:850;border:2px solid transparent}
+.btn.primary{color:#102f52;background:#b0eff3}.btn.secondary{border-color:#b0eff3;color:#fff}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:20px}
+.card{background:var(--paper);padding:20px;border:1px solid var(--line);border-radius:15px}
+.card strong{color:var(--navy)}.muted{color:var(--muted)}
+table{border-collapse:collapse;width:100%;background:var(--paper);border-radius:14px;overflow:hidden}
+th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line)}
+th{background:#e8eef5;color:#142153}td:last-child,th:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:750}
+.note{border-left:5px solid var(--cyan);background:var(--paper);padding:14px 18px;border-radius:0 10px 10px 0}
+.step{display:grid;grid-template-columns:36px 1fr;gap:11px;margin:12px 0;align-items:start}
+.num{background:#dfedf6;border-radius:10px;display:grid;place-items:center;min-height:36px;font-weight:850;color:#153b63}
+code{font-size:.91em;overflow-wrap:anywhere}
+footer{text-align:center;color:var(--muted);font-size:.88rem;padding:30px 18px}
+a{color:#0a5b78}a:focus-visible{outline:3px solid #efad4a;outline-offset:3px}
+@media(max-width:740px){.cards{grid-template-columns:1fr}table{font-size:.86rem}td,th{padding:9px 6px}.actions .btn{width:100%}}
+@media(prefers-color-scheme:dark){:root{--bg:#101928;--paper:#1c2a3e;--ink:#eef3fa;--muted:#c6d3e4;--line:#42536d}.card strong{color:#c9e2ff}th{background:#263e5b;color:white}.note{background:#1c2a3e}.num{background:#284d6b;color:#eaf5ff}a{color:#a8e8ff}}
+</style></head><body>
+<header><a href="portal.html">Universidad Central · Aula Big Data 2026-2S</a></header>
+<main>
+<section class="hero">
+<div class="ey">Sesión 12 · Segundo taller práctico · Evaluación</div>
+<h1>Compras Claras 2: del buscador al ETL multimodal</h1>
+<p class="lead">Una experiencia integral: recupera documentos con BM25 y búsqueda semántica, compara relevancia, transforma imágenes y diez audios reales, carga un catálogo y demuestra calidad y recuperación ante fallos.</p>
+<div class="badges"><span class="chip">20 % de la asignatura</span><span class="chip">100 puntos</span><span class="chip">21 controles</span><span class="chip">Individual o parejas</span></div>
+<p><strong>Entrega máxima: sábado 14 de noviembre de 2026, 11:59 p. m. (Bogotá, UTC−5).</strong></p>
+<div class="actions">
+<a class="btn primary" href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/Taller_Control_2.ipynb" target="_blank" rel="noopener">Abrir cuaderno del Taller 2 en Colab</a>
+<a class="btn secondary" href="../assets/tutoriales/tc2-paso-a-paso.html">Checklist y pasos de entrega</a>
+</div>
+</section>
+<div class="cards">
+<section class="card"><strong>1. Un solo caso</strong><p>Laura ya cuenta con los expedientes del TC1. Ahora necesita encontrar documentos, evaluar resultados y procesar activos multimedia.</p></section>
+<section class="card"><strong>2. Aprender haciendo</strong><p>Predicciones, seis funciones de Python para completar, experimentos con parámetros, checkpoints y corrección reproducible.</p></section>
+<section class="card"><strong>3. Entrega en GitHub existente</strong><p>Usa el repositorio creado durante el curso, una rama TC2 y un Pull Request. No crees un repositorio nuevo.</p></section>
+</div>
+<h2>Qué se evaluará</h2>
+<table aria-label="Rúbrica por etapas"><thead><tr><th>Etapa</th><th>Competencia nueva</th><th>Puntos</th></tr></thead><tbody>
+<tr><td>E1</td><td>BM25, tokenización y ranking léxico</td><td>10</td></tr>
+<tr><td>E2</td><td>Embeddings E5, similitud y búsqueda vectorial</td><td>15</td></tr>
+<tr><td>E3</td><td>Precision@5, Recall@5 y RRF</td><td>10</td></tr>
+<tr><td>E4</td><td>Transformación de imágenes y análisis visual</td><td>20</td></tr>
+<tr><td>E5</td><td>Decodificación y análisis de diez WAV reales</td><td>20</td></tr>
+<tr><td>E6</td><td>Catálogo JSONL/Parquet, consultas, idempotencia y recuperación</td><td>25</td></tr>
+<tr><th colspan="2">Total</th><th>100</th></tr>
+</tbody></table>
+<p class="muted">Se evalúan aprendizajes nuevos hasta S10. No se repiten MongoDB documental, Cassandra, Neo4j ni adquisición concurrente de SECOP del TC1. El PDA 2026-2 establece el taller ETL como 20 % de la nota.</p>
+<h2>Cómo entregar en el repositorio que ya tienes</h2>
+<div class="step"><span class="num">1</span><div><strong>Abre el GitHub existente de tu equipo.</strong> Conserva el proyecto previo y crea una rama <code>taller/tc2-etl</code>. Comprueba que el docente puede consultar el repositorio. Si es público, no publiques códigos de estudiante, datos privados ni secretos.</div></div>
+<div class="step"><span class="num">2</span><div><strong>Resuelve y valida el cuaderno.</strong> En la última celda calcula la rúbrica de 21 controles y genera el ZIP y el manifiesto. Descarga tu copia de Colab <em>ejecutada</em>.</div></div>
+<div class="step"><span class="num">3</span><div><strong>Sube tres archivos</strong> a <code>talleres/TC2/</code> del repositorio existente: <code>TC2_PAREJA.ipynb</code>, <code>TC2_PAREJA.zip</code> y <code>manifest_tc2.json</code>. Realiza un commit y abre un Pull Request en tu propio repositorio.</div></div>
+<div class="step"><span class="num">4</span><div><strong>Notifica por correo institucional</strong> al mismo docente y canal del TC1, con copia a tu pareja. Indica enlace a PR/commit, integrantes y huella SHA-256 del manifest. El commit y el correo deben quedar dentro del plazo.</div></div>
+<div class="note"><strong>Integridad y procedencia.</strong> El gráfico de imagen se genera desde un ranking SECOP real; los WAV proceden de PolyAI/MINDS14 es-ES bajo licencia CC BY 4.0. Son fuentes diferentes: el taller NO afirma que esos audios pertenezcan a procesos SECOP o a noticias de El Tiempo. La operación local de NumPy tampoco se presentará como una consulta remota a Atlas.</div>
+<h2>¿Dónde están los resultados y el corrector?</h2>
+<p>La autoevaluación escribe <code>manifest_tc2.json</code> y el docente puede recalcular todos los puntos desde el ZIP, sin acceder a tus variables en memoria. Si un servicio falla, conserva la evidencia verdadera y continúa con la ruta local indicada; no falsifiques el estado remoto.</p>
+</main><footer>Universidad Central · Maestría en Analítica de Datos · Big Data 2026-2S</footer>
+</body></html>
