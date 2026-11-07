@@ -17,10 +17,13 @@ def run():
     nb=json.loads((ROOT/"Cuadernos/Taller_Control_2.ipynb").read_text(encoding="utf-8"))
     cells=nb["cells"];source=["".join(x["source"]) for x in cells]
     verify(nb.get("nbformat")==4 and nb.get("nbformat_minor",0)>=5,"nbformat 4.5")
-    verify(len(cells)>=35,"Mínimo 35 celdas de aprendizaje")
+    verify(len(cells)>=81,"Al menos 81 celdas, profundidad comparable al TC1")
     verify(all(x.get("id") for x in cells),"IDs de celdas")
     verify(all(not x.get("outputs") for x in cells if x["cell_type"]=="code"),"Notebook sin salidas preejecutadas")
-    verify(sum(x["cell_type"]=="code" for x in cells)>=16,"Celdas ejecutables")
+    verify(sum(x["cell_type"]=="code" for x in cells)>=32,"Al menos 32 celdas ejecutables")
+    verify(sum(x["cell_type"]=="markdown" for x in cells)>=50,"Al menos 50 celdas de explicación")
+    for ejercicio in ("frecuencia_documental_equipo","coseno_mini","precision_cinco","rrf_dos_posiciones","luminancia_rgb","rms_manual"):
+        verify(any(("def "+ejercicio+"(") in "".join(x["source"]) for x in cells),"COMPLETA debe existir: "+ejercicio)
     for index,x in enumerate(cells):
         if x["cell_type"]=="code":
             try:ast.parse("".join(x["source"]))
@@ -78,6 +81,7 @@ def run():
         htmlfile=c.hacer_html(t,doc,ranks,cs,c.fusion_rrf(ranks,cs,60,5),meta,[{"n":1,"source_record_id":"ejemplo","archivo":"demo.wav","medidas":m512}],{"modelo":"BM25"})
         text=htmlfile.read_text(encoding="utf-8")
         verify("MINDS14" in text and "sin vínculo" in text and "<audio" in text,"Explorador separa procedencias")
+    verify("14 de noviembre de 2026" in full and "GitHub" in full and "23:59:59" in full,"Fecha y entrega privada en GitHub visibles")
     # Separa inequívocamente material aprendido de contenido antes del TC1.
     for forbidden in ("Cassandra query-first — 15 puntos","Neo4j / contexto relacional — 15 puntos","Adquisición SECOP — 25 puntos"):
         verify(forbidden not in full,"No repetir TC1: "+forbidden)
@@ -85,7 +89,7 @@ def run():
         print("TC2 QA: FAIL")
         for e in errors:print(" -",e)
         return 1
-    print("TC2 QA OFFLINE: OK · 200 documentos, 5 intenciones, 18 controles / 100, 36 celdas, BM25, RRF, coseno, PNG, FFT, exportación.")
+    print("TC2 QA OFFLINE: OK · 200 documentos, 5 intenciones, 18 controles / 100, 91 celdas, BM25, RRF, coseno, PNG, FFT, exportación.")
     print("NO VERIFICADO POR ESTA PRUEBA: descarga MINDS14, encoder real E5, Atlas real, Drive/Colab autenticado y GitHub Pages.")
     return 0
 if __name__=="__main__":raise SystemExit(run())
