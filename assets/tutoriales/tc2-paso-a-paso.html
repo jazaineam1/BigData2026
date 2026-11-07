@@ -8,17 +8,17 @@
 </style></head><body><main>
 <p><a href="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/plan/tc2-hasta-s10-20261105/Cuadernos/Taller_Control_2.ipynb">Abrir el cuaderno TC2 en Colab</a></p>
 <h1>TC2 · Checklist de la experiencia de Laura</h1>
-<div class="note" role="status"><strong>REVISIÓN CURRICULAR · NO USAR PARA ENTREGAS TODAVÍA.</strong> El PDA 2026-2 asigna al Taller 2 <strong>20 %</strong> y exige ETL como eje. Esta guía sigue describiendo un prototipo previo con exceso de BM25/E5. El plan actualizado integra <strong>35 puntos de búsqueda y 65 de ETL multimedia/catálogo</strong>; la guía y el cuaderno aún no reflejan esa rúbrica. La publicación oficial se anunciará por el LMS.</div>
-<p class="intro">Solo dos recursos: este mapa y el cuaderno ampliado (91 celdas). Aprendes los conceptos nuevos de S07, S09 y S10 sin repetir el TC1. Marca cada paso solo cuando veas la evidencia en Colab: <strong>estas casillas no generan nota</strong>.</p>
+<div class="note" role="status"><strong>Taller 2 · Publicado para la cohorte 2026-2S</strong>. PDA de referencia: 20 % del curso. Actividad integrada hasta S10: 35 puntos búsqueda y relevancia; 65 puntos ETL de imágenes, audio y catálogo. Entrega: <b>14 de noviembre de 2026, 23:59:59 Bogotá</b>, en el GitHub EXISTENTE de tu equipo.</div>
+<p class="intro">Solo dos recursos: este mapa y el cuaderno completo (100 celdas). Aprendes los conceptos nuevos de S07, S09 y S10, sin repetir el TC1. Marca cada paso solo cuando veas la evidencia en Colab: <strong>estas casillas no generan nota</strong>.</p>
 <div class="bar" role="region" aria-label="Avance orientativo"><div class="track"><div class="fill" id="fill"></div></div><p id="status" aria-live="polite">0 pasos comprobados</p></div>
-<div class="note"><b>Antes de empezar:</b> guarda copia del notebook en Drive, conecta CPU y anota tu pareja. Puedes trabajar solo. No necesitas Cassandra, Aura, API de pago ni descargar SECOP. **Plazo:** sábado 14 de noviembre de 2026, hasta las <b>11:59 p. m. de Bogotá</b>. Guarda la copia de trabajo en Drive, pero la <b>entrega final es en GitHub privado</b> y se notifica por correo institucional. El PDA de referencia 2026-2 asigna al Taller 2 un <b>20 %</b>; su aplicación administrativa al grupo 2 debe validarse.</div>
+<div class="note"><b>Antes de empezar:</b> guarda copia del notebook en Drive, conecta CPU y anota tu pareja. Puedes trabajar solo. No necesitas Cassandra, Aura, API de pago ni descargar SECOP. **Plazo:** sábado 14 de noviembre de 2026, hasta las <b>11:59 p. m. de Bogotá</b>. Guarda la copia de trabajo en Drive, pero la <b>entrega final es en GitHub privado</b> y se notifica por correo institucional. El PDA de referencia 2026-2 asigna al Taller 2 un <b>20 %</b> del curso.</div>
 
 <h2>Inicio · Predicción (formativo)</h2><section class="card" data-section="inicio">
 <div class="row"><input id="i1" type="checkbox"><label for="i1">Abrí Colab, guardé una copia en Drive, ejecuté Preparar y puse mi identidad. <span class="hint">Debe aparecer «TC2 · Motor autónomo listo», corpus de 200 y mi tema asignado.</span></label></div>
 <div class="row"><input id="i2" type="checkbox"><label for="i2">Elegí mi predicción inicial antes de buscar. <span class="hint">Debe existir <code>prediccion.json</code>, aunque mi predicción pueda ser equivocada.</span></label></div>
 </section>
 
-<h2>E1 · Búsqueda léxica BM25 — 20 puntos</h2><section class="card">
+<h2>E1 · Búsqueda léxica BM25 — 10 puntos</h2><section class="card">
 <p><b>Pregunta de Laura:</b> ¿por qué dos formas de pedir lo mismo no traen el mismo orden?</p>
 <div class="row"><input id="b1" type="checkbox"><label for="b1">Vi los tokens reales de mi consulta y las dos listas Top-5. <span class="hint">Analizador local: no confundir con Elasticsearch remoto.</span></label></div>
 <div class="row"><input id="b0" type="checkbox"><label for="b0"><b>COMPLETA:</b> función <code>frecuencia_documental_equipo</code>; verifiqué mi término, DF e IDF en <code>E1/laboratorio_bm25.json</code>. <span class="hint">No es la frecuencia total: cuenta documentos distintos.</span></label></div>
@@ -28,7 +28,7 @@
 <p class="hint">Si el paso falla: ejecuta E1.1–E1.2 primero. El tokenizador excluye palabras de una letra; eso no es error.</p>
 </section>
 
-<h2>E2 · Recuperación por significado — 25 puntos</h2><section class="card">
+<h2>E2 · Recuperación por significado — 15 puntos</h2><section class="card">
 <p><b>Pregunta:</b> ¿qué pasa cuando el contrato no incluye las mismas palabras de la consulta?</p>
 <div class="row"><input id="s0" type="checkbox"><label for="s0"><b>COMPLETA:</b> función <code>coseno_mini</code> usando producto punto y normas. Vi 1 y 0 en el ejemplo de dos dimensiones.</label></div>
 <div class="row"><input id="s1" type="checkbox"><label for="s1">Ejecuté E5 real; apareció una matriz <code>(200, 384)</code> y un Top-5 de NumPy local.</label></div>
@@ -39,7 +39,7 @@
 <p class="hint">Si Atlas da 429/timeout, el resto del taller continúa. El docente revisará la contingencia; no incluyas URI, claves ni enlace de reclamo.</p>
 </section>
 
-<h2>E3 · Pertinencia y ranking híbrido — 15 puntos</h2><section class="card">
+<h2>E3 · Pertinencia y ranking híbrido — 10 puntos</h2><section class="card">
 <div class="row"><input id="r0" type="checkbox"><label for="r0"><b>COMPLETA:</b> función <code>precision_cinco</code> y archivo <code>E3/laboratorio_precision.json</code>. <span class="hint">Divide por cinco, no por el número total de positivos.</span></label></div>
 <div class="row"><input id="r1" type="checkbox"><label for="r1">Comparé Precision@5 y Recall@5 con juicios de relevancia de MI intención.</label></div>
 <div class="row"><input id="r2" type="checkbox"><label for="r2">Construí RRF sumando <code>1/(60+posición)</code>, no mezclando scores.</label></div>
@@ -55,7 +55,7 @@
 <div class="row"><input id="m3" type="checkbox"><label for="m3">Seleccioné el perfil que deja leer etiquetas y guardé <code>E4/imagen.json</code>.</label></div>
 </section>
 
-<h2>E5 · Voces humanas reales — 15 puntos</h2><section class="card">
+<h2>E5 · Voces humanas reales — 20 puntos</h2><section class="card">
 <div class="row"><input id="a0" type="checkbox"><label for="a0"><b>COMPLETA:</b> función <code>rms_manual</code> sobre cuatro muestras y comprobé que el promedio simple puede ser cero.</label></div>
 <div class="row"><input id="a1" type="checkbox"><label for="a1">Se descargaron exactamente diez WAV MINDS14 es-ES con licencia CC BY 4.0; no se sustituyeron por audio sintético.</label></div>
 <div class="row"><input id="a2" type="checkbox"><label for="a2">Escuché un WAV, miré forma de onda y espectrograma, comparé ventanas 512 y 1024.</label></div>
@@ -64,7 +64,11 @@
 <p class="hint">Si no se pueden descargar los audios: conserva E1–E4 y reintenta E5 cuando haya conexión. Nunca marques como lograda una ejecución ausente.</p>
 </section>
 
-<h2>E6 · Demostración final — 5 puntos</h2><section class="card">
+<h2>E6 · Catálogo ETL, calidad y demostración — 25 puntos</h2><section class="card">
+<div class="row"><input id="f0" type="checkbox"><label for="f0">Construí un catálogo de 13 activos (3 imágenes y 10 audios), con <code>source_kind</code>, <code>source_record_id</code> y rutas comprobables.</label></div>
+<div class="row"><input id="f5" type="checkbox"><label for="f5">Exporté <code>E6/catalogo.jsonl</code> y <code>E6/catalogo.parquet</code>; volví a abrirlos y consulté activos por tipo de medio.</label></div>
+<div class="row"><input id="f6" type="checkbox"><label for="f6">Reejecuté el catálogo y comprobé que las 13 filas y la huella JSONL no cambiaron.</label></div>
+<div class="row"><input id="f7" type="checkbox"><label for="f7">Detecté corrupción de una COPIA del PNG y comprobé restauración; el original permaneció intacto.</label></div>
 <div class="row"><input id="f1" type="checkbox"><label for="f1">Elegí mi defensa estructurada y generé <code>explorador.html</code> con rankings, imagen y diez audios de procedencia separada.</label></div>
 <div class="row"><input id="f2" type="checkbox"><label for="f2">Ejecuté COMPRUEBA, vi los 18 controles y entendí cada ✗ sin ocultar errores.</label></div>
 <div class="row"><input id="f4" type="checkbox"><label for="f4">Creé un <b>repositorio PRIVATE</b> en mi cuenta GitHub, invité a <code>jazaineam1</code>, subí los tres archivos y notifiqué por correo con SHA antes del cierre.</label></div>
