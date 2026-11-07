@@ -5,6 +5,12 @@
   "staleReference": false,
   "matches": [
     {
+      "id": "18-ALI-LLA",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-09"
+    },
+    {
       "id": "18-AME-CAL",
       "status": "upcoming",
       "score": null,
@@ -27,6 +33,12 @@
       "status": "upcoming",
       "score": null,
       "utcDate": "2026-11-08"
+    },
+    {
+      "id": "18-JUN-CUC",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-09"
     },
     {
       "id": "18-NAL-PER",
@@ -55,5 +67,5 @@
   ],
   "note": "La fuente puede atrasarse. Solo resultados con estado terminado; no es autoridad oficial.",
   "source": "https://sportscore.com/",
-  "updatedAt": "2026-11-06T03:23:01.751817+00:00"
+  "updatedAt": "2026-11-07T02:20:10.711254+00:00"
 }
