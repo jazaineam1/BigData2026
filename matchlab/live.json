@@ -12,8 +12,11 @@
     },
     {
       "id": "18-AME-CAL",
-      "status": "upcoming",
-      "score": null,
+      "status": "finished",
+      "score": [
+        0,
+        0
+      ],
       "utcDate": "2026-11-08"
     },
     {
@@ -48,10 +51,10 @@
     },
     {
       "id": "18-NAL-PER",
-      "status": "live",
+      "status": "finished",
       "score": [
-        2,
-        2
+        4,
+        3
       ],
       "utcDate": "2026-11-07"
     },
@@ -79,5 +82,5 @@
   ],
   "note": "La fuente puede atrasarse. Solo resultados con estado terminado; no es autoridad oficial.",
   "source": "https://sportscore.com/",
-  "updatedAt": "2026-11-08T06:44:54.219977+00:00"
+  "updatedAt": "2026-11-08T21:31:49.401483+00:00"
 }
