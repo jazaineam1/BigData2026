@@ -48,15 +48,18 @@
     },
     {
       "id": "18-NAL-PER",
-      "status": "upcoming",
-      "score": null,
+      "status": "live",
+      "score": [
+        2,
+        2
+      ],
       "utcDate": "2026-11-07"
     },
     {
       "id": "18-ONC-AGU",
-      "status": "live",
+      "status": "finished",
       "score": [
-        0,
+        1,
         0
       ],
       "utcDate": "2026-11-07"
@@ -76,5 +79,5 @@
   ],
   "note": "La fuente puede atrasarse. Solo resultados con estado terminado; no es autoridad oficial.",
   "source": "https://sportscore.com/",
-  "updatedAt": "2026-11-08T00:43:10.212599+00:00"
+  "updatedAt": "2026-11-08T06:44:54.219977+00:00"
 }
