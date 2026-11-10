@@ -347,7 +347,21 @@ No se asigna automáticamente nota ni se altera la rúbrica oficial del Taller 2
 - **Derechos:** conservamos archivos aportados localmente; no descargamos masivamente material editorial sin autorización.
 - **Pruebas:** las unitarias simulan Whisper y Ollama donde no corresponde descargar modelos, y ejecutan OCR real de imagen/PDF. Una prueba integral sobre Codespaces con modelos descargados requiere comprobación por separado.
 
-## 12. Pruebas y recuperación
+## 12. Comprobación guiada antes de entregar
+
+La herramienta incluye el [comprobador probar_todo.sh](./probar_todo.sh), que distingue claramente lo ensayado de lo que requiere descargar modelos.
+
+~~~bash
+# Sin descargar Whisper ni Ollama: prueba Tesseract, PDF, TXT, hashes, Parquet e índice simulado.
+bash probar_todo.sh --ligero
+
+# Prueba de extremo a extremo en tu Codespace: ejecuta Whisper real y Ollama.
+bash probar_todo.sh --completo
+~~~
+
+El segundo modo **descarga modelos a tu Codespace y consume recursos de cómputo**. No se ejecuta automáticamente para evitar costos inesperados. El mensaje final confirma los pasos ejecutados: si hay error, revisa la primera etapa que falló antes de continuar. No se simulan resultados de Whisper u Ollama en el modo completo.
+
+## 13. Pruebas y recuperación
 
 Ejecuta:
 
