@@ -74,6 +74,13 @@ def crear_proyecto(raiz: Path) -> None:
         "embeddings": {"modelo": "embeddinggemma-2:270m", "ollama_url": "http://127.0.0.1:11434/api/embed", "lote": 8},
         "limites": {"archivos_maximos": 30, "paginas_pdf": 3, "caracteres_por_fragmento": 700}
     })
+    escribir_json(raiz / "metadatos.example.json", {
+        "entradas/imagenes/ejemplo.png": {
+            "nombre": "fuente_original_verificada",
+            "credito": "autor_real",
+            "licencia": "condicion_de_uso_verificada"
+        }
+    })
     print(f"Proyecto creado: {raiz}\n1. Copia archivos autorizados en entradas/\n2. Edita config.json\n3. Ejecuta plan y procesar.")
 
 def inventario(raiz: Path, cfg: dict) -> list[Path]:
@@ -147,12 +154,19 @@ def ejecutar(raiz: Path, cfg: dict) -> None:
     out = raiz / "salidas"
     out.mkdir(parents=True, exist_ok=True)
     asr_model = None
+    meta_path = raiz / "metadatos.json"
+    metadatos = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+    if not isinstance(metadatos, dict):
+        raise ValueError("metadatos.json debe contener un objeto: ruta -> fuente/crédito/licencia")
     filas, errores = [], []
     for p in files:
         tipo = ("imagen" if p.suffix.lower() in IMAGE_EXT else
                 "audio" if p.suffix.lower() in AUDIO_EXT else
                 "pdf" if p.suffix.lower() in PDF_EXT else "texto")
         rel = p.relative_to(raiz).as_posix()
+        datos_fuente = {**cfg["fuente"], **metadatos.get(rel, {})}
+        if not isinstance(metadatos.get(rel, {}), dict):
+            raise ValueError(f"Metadatos inválidos para {rel}")
         try:
             texto, segments, paginas = "", [], None
             if tipo == "imagen" and cfg["ocr"]["activo"]:
@@ -170,9 +184,9 @@ def ejecutar(raiz: Path, cfg: dict) -> None:
             filas.append({
                 "asset_id": hashlib.sha256(rel.encode()).hexdigest()[:16],
                 "path": rel, "tipo": tipo, "size_bytes": p.stat().st_size,
-                "sha256": sha256(p), "source_name": cfg["fuente"]["nombre"],
-                "credit": cfg["fuente"].get("credito"),
-                "license": cfg["fuente"].get("licencia"),
+                "sha256": sha256(p), "source_name": datos_fuente["nombre"],
+                "credit": datos_fuente.get("credito"),
+                "license": datos_fuente.get("licencia"),
                 "text_origin": "tesseract" if tipo in ("pdf", "imagen") else
                                "whisper" if tipo == "audio" else "texto_usuario",
                 "extracted_text": texto, "segments": segments, "pages_processed": paginas
