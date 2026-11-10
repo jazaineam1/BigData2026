@@ -31,6 +31,20 @@ Un conjunto de archivos original y derivado con SHA-256, texto OCR, texto ASR se
 | Indexar | ¿Cómo buscar por significado? | Vectores y metadatos |
 | Auditar | ¿Qué no puedo afirmar? | Contraste con el original y límites |
 
+## Interfaz de usuario disponible en Codespaces
+
+El mismo motor `proyecto.py` puede ejecutarse con una **interfaz web local** opcional: [app.py](./app.py), construida con Streamlit. Permite cargar imágenes, audio, PDF o TXT; definir algunos parámetros; procesar OCR/ASR; indexar y buscar con Ollama; inspeccionar los originales y descargar el catálogo. No sustituye el código: cada acción llama las funciones de `proyecto.py`.
+
+En la terminal de Codespaces, desde `Laboratorios/S11_Codespaces`:
+
+~~~bash
+streamlit run app.py --server.address 0.0.0.0 --server.port 8501
+~~~
+
+Abre el enlace del **puerto 8501** que muestra Codespaces. **Mantén su visibilidad privada**, pues los datos permanecen dentro del Codespace y no deben exponerse públicamente. El panel no envía archivos a una API externa; Ollama se consulta en `localhost`. Para abrirlo basta un navegador, pero iniciar la máquina y ejecutar modelos consume cuota de Codespaces.
+
+**La interfaz es opcional.** El tutorial también enseña a ejecutar los comandos directamente, y los estudiantes deben revisar/modificar las funciones en `proyecto.py`, no depender de botones.
+
 ## Cómo convertir el ejemplo en un proyecto independiente
 
 El laboratorio `lab.py` es la ruta **introductoria**: primero una imagen y un audio, para entender qué hace cada herramienta. La ruta **transferible** ya está implementada en [proyecto.py](./proyecto.py): lee **carpetas completas** de imágenes, PDF, audios y textos aportados por cada estudiante; acepta parámetros desde `config.json`; guarda JSONL, Parquet, índices y errores; verifica integridad; permite recuperar por significado.
