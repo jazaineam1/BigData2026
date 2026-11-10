@@ -3,3 +3,6 @@ pytesseract>=0.3.13,<0.4
 faster-whisper>=1.1,<2
 numpy>=1.26,<3
 requests>=2.31,<3
+pandas>=2.2,<3
+pyarrow>=16,<25
+soundfile>=0.12,<1
