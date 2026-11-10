@@ -33,12 +33,12 @@ jobs:
       - name: Comprobar sintaxis y sincronización del cuaderno original
         run: |
           bash -n Laboratorios/S11_Codespaces/probar_todo.sh
-          python -m py_compile Laboratorios/S11_Codespaces/lab.py Laboratorios/S11_Codespaces/test_lab.py Laboratorios/S11_Codespaces/proyecto.py Laboratorios/S11_Codespaces/test_proyecto.py Laboratorios/S11_Codespaces/app.py
+          python -m py_compile Laboratorios/S11_Codespaces/lab.py Laboratorios/S11_Codespaces/test_lab.py Laboratorios/S11_Codespaces/proyecto.py Laboratorios/S11_Codespaces/test_proyecto.py Laboratorios/S11_Codespaces/app.py Laboratorios/S11_Codespaces/test_app.py
           python utils/build_session11_etl_audio_imagenes.py --check
       - name: Comprobar generación local + OCR español con prueba reproducible
         run: |
           cd Laboratorios/S11_Codespaces
-          python -m unittest -v test_lab test_proyecto
+          python -m unittest -v test_lab test_proyecto test_app
       - name: Explicar alcance de la prueba
         run: |
           echo "Verificado: sintaxis, notebook sincronizado, archivo/hash, OCR imagen/PDF, transferencia y simulaciones"
