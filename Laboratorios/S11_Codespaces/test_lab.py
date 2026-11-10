@@ -34,5 +34,38 @@ class LaboratorioS11(unittest.TestCase):
             finally:
                 lab.OUT = anterior
 
+    def test_extraer_e_indexar_con_voces_y_ocr_simulados(self):
+        """Prueba estructura y ranking con vectores deterministas, sin red ni modelos."""
+        from unittest.mock import patch
+        anterior = lab.OUT
+        with tempfile.TemporaryDirectory(prefix="s11-codespace-unidad-") as raiz:
+            try:
+                lab.OUT = Path(raiz)
+                lab.guardar_json("ocr.json", {
+                    "texto_extraido": "FECHA: 10-11-2026\nCONTRATOS: 12\nVALOR: 320 MILLONES",
+                    "fuente": "/ejemplo/afiche.png", "sha256": "a" * 64
+                })
+                lab.guardar_json("asr.json", {
+                    "transcripcion": "Se registraron cinco requerimientos de información.",
+                    "segmentos": [{"inicio_s": 0.0, "fin_s": 3.5,
+                                  "texto": "Se registraron cinco requerimientos de información."}],
+                    "fuente": "/ejemplo/voz.wav", "sha256": "b" * 64
+                })
+                lab.extraer()
+                info = lab.cargar_json("extraccion.json")
+                self.assertTrue(info["audio"]["auditoria_fragmentos"]["ok"])
+                self.assertEqual(info["imagen"]["fecha_candidata"], ["10-11-2026"])
+                self.assertIn("12", info["imagen"]["cifras_candidatas"])
+                def fake_embed(items, model):
+                    return [[1.0] * 768 for _ in items]
+                with patch.object(lab, "incrustar", side_effect=fake_embed):
+                    lab.indexar()
+                    indice = lab.cargar_json("indice.json")
+                    self.assertEqual(indice["dimension"], 768)
+                    self.assertGreaterEqual(len(indice["documentos"]), 4)
+                    lab.buscar("¿cuántos contratos?")
+            finally:
+                lab.OUT = anterior
+
 if __name__ == "__main__":
     unittest.main()
