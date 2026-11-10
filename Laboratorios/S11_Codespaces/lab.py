@@ -27,7 +27,11 @@ def guardar_json(nombre: str, data: dict) -> Path:
     OUT.mkdir(parents=True, exist_ok=True)
     p = OUT / nombre
     p.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Guardado: {p.relative_to(BASE)}")
+    try:
+        visible = p.relative_to(BASE)
+    except ValueError:
+        visible = p
+    print(f"Guardado: {visible}")
     return p
 
 def cargar_json(nombre: str) -> dict:
