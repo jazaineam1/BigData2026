@@ -1,0 +1,5 @@
+Pillow>=10,<13
+pytesseract>=0.3.13,<0.4
+faster-whisper>=1.1,<2
+numpy>=1.26,<3
+requests>=2.31,<3
