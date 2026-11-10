@@ -46,6 +46,29 @@ Para hacer la primera prueba sin aportar un PDF, coloca este TXT:
 **Qué NO permite concluir:** si OCR o ASR pueden reconocer el contenido.  
 **Error común:** comenzar descargando modelos sin comprobar qué fuentes se leerán.
 
+## 2B. Un proyecto puede tener fuentes distintas
+
+El archivo `config.json` define un origen y una licencia **predeterminados**, pero un proyecto real puede mezclar archivos con créditos diferentes. Para esos casos, al ejecutar `iniciar` se crea una plantilla `metadatos.example.json`.
+
+Copia la plantilla a `metadatos.json`, cambia las rutas y documenta cada fuente. Por ejemplo:
+
+~~~json
+{
+  "entradas/imagenes/afiche.png": {
+    "nombre": "equipo_de_comunicaciones",
+    "credito": "Autora del afiche",
+    "licencia": "uso_autorizado_para_curso"
+  },
+  "entradas/audios/reunion.wav": {
+    "nombre": "simulacion_grabada",
+    "credito": "participantes_con_consentimiento",
+    "licencia": "solo_uso_local"
+  }
+}
+~~~
+
+Estas etiquetas son **ejemplos ficticios**: no demuestran por sí mismas autorización ni permiten redistribución. Cada registro del catálogo conservará sus campos **source_name, credit y license**. Un archivo sin entrada específica usa los valores de `config.json`; **no** infieras que dos archivos se relacionan porque se guardaron en la misma carpeta.
+
 ## 3. ¿Qué código se ejecuta y qué significa?
 
 ### Función 1: recepción de datos
