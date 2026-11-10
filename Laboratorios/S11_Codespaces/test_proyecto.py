@@ -95,6 +95,22 @@ class TransferenciaS11(unittest.TestCase):
         self.assertEqual(fila["extracted_text"], "Factura registrada.")
         self.assertTrue(proyecto.auditar(self.raiz))
 
+    def test_procedencia_por_archivo_independiente(self):
+        f1 = self.raiz / "entradas/textos/acta.txt"
+        f2 = self.raiz / "entradas/textos/orden.txt"
+        f1.write_text("Acta de ejemplo", encoding="utf-8")
+        f2.write_text("Orden de compra", encoding="utf-8")
+        proyecto.escribir_json(self.raiz / "metadatos.json", {
+            "entradas/textos/acta.txt": {"nombre": "comite_pruebas", "credito": "autor A", "licencia": "uso_propietario"},
+            "entradas/textos/orden.txt": {"nombre": "departamento_pruebas", "credito": "autor B", "licencia": "uso_autorizado"}
+        })
+        proyecto.ejecutar(self.raiz, self.cfg)
+        registros = {r["path"]: r for r in proyecto.leer_filas(self.raiz)}
+        self.assertNotEqual(registros["entradas/textos/acta.txt"]["source_name"],
+                            registros["entradas/textos/orden.txt"]["source_name"])
+        self.assertEqual(registros["entradas/textos/orden.txt"]["credit"], "autor B")
+        self.assertTrue(proyecto.auditar(self.raiz))
+
     def test_limites_errores_y_config(self):
         f = self.raiz / "entradas/textos/a.txt"
         f.write_text("texto", encoding="utf-8")
