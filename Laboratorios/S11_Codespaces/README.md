@@ -31,6 +31,35 @@ Un conjunto de archivos original y derivado con SHA-256, texto OCR, texto ASR se
 | Indexar | ¿Cómo buscar por significado? | Vectores y metadatos |
 | Auditar | ¿Qué no puedo afirmar? | Contraste con el original y límites |
 
+## Cómo convertir el ejemplo en un proyecto independiente
+
+El laboratorio `lab.py` es la ruta **introductoria**: primero una imagen y un audio, para entender qué hace cada herramienta. La ruta **transferible** ya está implementada en [proyecto.py](./proyecto.py): lee **carpetas completas** de imágenes, PDF, audios y textos aportados por cada estudiante; acepta parámetros desde `config.json`; guarda JSONL, Parquet, índices y errores; verifica integridad; permite recuperar por significado.
+
+**[Manual completo para comprender y modificar cada función](./GUIA_REUTILIZACION.md)**. Incluye parámetros, ejemplos de código sustituible, uso de otros formatos, proyecto propio, pruebas y un mini-reto con evidencias reales. No es necesario seguir trabajando con las noticias de Compras Claras.
+
+### Ruta corta: ejecución de otro proyecto
+
+~~~bash
+cd Laboratorios/S11_Codespaces
+python proyecto.py iniciar --destino proyectos/ejemplo_nuevo
+printf 'El contrato 18 tiene valor 320000 COP\n' > proyectos/ejemplo_nuevo/entradas/textos/prueba.txt
+python proyecto.py plan --config proyectos/ejemplo_nuevo/config.json
+python proyecto.py procesar --config proyectos/ejemplo_nuevo/config.json
+bash iniciar_ollama.sh
+python proyecto.py indexar --config proyectos/ejemplo_nuevo/config.json
+python proyecto.py buscar --config proyectos/ejemplo_nuevo/config.json --consulta "¿Qué contrato tiene un valor?"
+python proyecto.py auditar --config proyectos/ejemplo_nuevo/config.json
+~~~
+
+La ruta procesa solo el TXT de demostración; para activar OCR y ASR coloca archivos **propios o autorizados** en entradas/imagenes, entradas/documentos o entradas/audios. El proyecto generado no requiere modificar rutas del código ni repetir el caso editorial. **Los datos dentro de proyectos/ están excluidos de Git** para evitar publicar por error archivos de los estudiantes.
+
+### Cómo comprobar que se entendió
+
+1. Reconocer qué función transforma píxeles en texto, cuál transforma voz en palabras y cuál convierte texto en vectores.
+2. Cambiar un parámetro y observar el antes/después de una misma fuente.
+3. Cambiar de corpus sin tocar el código de las fuentes editoriales.
+4. Reconocer un error, verificar la procedencia y auditar que los bytes originales no cambiaron.
+
 ## Paso 1. Crear Codespace de S11
 
 1. Abre [el repositorio](https://github.com/jazaineam1/BigData2026).
