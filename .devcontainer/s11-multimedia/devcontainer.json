@@ -1,6 +1,8 @@
 {
   "name": "S11 · OCR, voz y EmbeddingGemma 2",
-  "build": { "dockerfile": "Dockerfile" },
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
   "workspaceFolder": "/workspaces/BigData2026",
   "postCreateCommand": "python -m pip install -r Laboratorios/S11_Codespaces/requirements.txt",
   "customizations": {
@@ -12,5 +14,18 @@
       ]
     }
   },
-  "hostRequirements": {"cpus": 2, "memory": "8gb"}
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "8gb"
+  },
+  "forwardPorts": [
+    8501
+  ],
+  "portsAttributes": {
+    "8501": {
+      "label": "S11 · Laboratorio multimedia",
+      "onAutoForward": "notify",
+      "visibility": "private"
+    }
+  }
 }
