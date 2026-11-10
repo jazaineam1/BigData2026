@@ -47,7 +47,7 @@ Ejecuta:
     tesseract --list-langs
     python lab.py --help
 
-**Debe verse:** Python 3.11, idioma spa y comandos preparar, fuentes-repo, ocr, asr, indexar, buscar e imagen.
+**Debe verse:** Python 3.11, idioma spa y comandos preparar, fuentes-repo, ocr, asr, extraer, indexar, buscar e imagen.
 
 **Si no:** espera a que termine la instalación del contenedor. Si escogiste Airflow, crea un Codespace nuevo con el perfil S11 o reconstruye el contenedor con la configuración correcta. Puedes instalar las dependencias desde esta carpeta con:
 
@@ -155,6 +155,17 @@ Este comando verifica y prepara las fuentes; **no ejecuta automáticamente 42 OC
 
 **Licencia:** MINDS-14 es CC BY 4.0 con atribución a PolyAI. Las fotografías tienen derechos editoriales: conservar referencia y crédito no autoriza redistribuirlas. No subas medios editoriales al repositorio público.
 
+## Paso 5B. Extraer información estructurada con el módulo original S11
+
+Después de obtener un OCR y una transcripción (de la simulación o de los archivos autorizados), ejecuta:
+
+    python lab.py extraer
+    cat salidas/extraccion.json
+
+El programa reutiliza [s11_audio_noticia.py](../../utils/s11_audio_noticia.py) para detectar **posibles entidades, cantidades y temas** dentro del texto ASR, conservar fragmentos de evidencia y auditar que los fragmentos correspondan al texto de origen. Del OCR extrae **cifras y fechas candidatas** usando expresiones regulares. Para la voz, cuando hay información temporal, la ficha retiene el intervalo de audio.
+
+**No son hechos certificados:** una regla puede encontrar un número equivocado si el OCR o Whisper falló. La palabra «candidato» es parte del resultado, no una excusa para omitir la verificación manual. Este paso conecta la extracción de información con el catálogo ETL que ya existe.
+
 ## Paso 6. Instalar y usar EmbeddingGemma 2
 
 **No es Gemma 2 generativo.** EmbeddingGemma 2 es un modelo de **representaciones vectoriales**. La familia tiene codificadores modulares: **270m** de solo texto, **440m** texto/imagen, **570m** texto/audio y **740m** multimodal completo a nivel de arquitectura. Para la práctica en Codespaces empezamos con **embeddinggemma-2:270m** bajo Ollama.
@@ -191,7 +202,7 @@ El documento es lo que queremos recuperar y la consulta es nuestra pregunta; est
     python lab.py buscar --consulta "¿Cuál era el valor informado?"
     python lab.py buscar --consulta "¿Qué dijo la voz sobre contratos?"
 
-El índice JSON contiene **texto OCR/ASR + fuente + hash + modelo + vector**. Las búsquedas calculan similitud coseno y muestran resultados ordenados y fragmentos para verificar.
+El índice JSON contiene **cada línea OCR y cada segmento ASR**, junto con **texto + fuente + hash + modelo + vector**. Los segmentos conservan su marca temporal para volver al audio. Las búsquedas calculan similitud coseno y muestran resultados ordenados y fragmentos para verificar.
 
 **Cómo se lee:** compara el primer y segundo resultado para cada pregunta.  
 **Qué nos dice:** prioriza documentos semánticamente cercanos.  
@@ -219,7 +230,7 @@ El estudiante debe producir evidencia obtenida en su ejecución, no responder co
 4. Realiza dos búsquedas diferentes y observa si cambia el primer resultado.
 5. Comprueba que **fuente y hash** viajan con el texto hasta el ranking, y que no se afirma correspondencia de fuentes distintas.
 
-**Producto de la recuperación:** origen.json, ocr.json, asr.json, indice.json y las trazas de búsqueda. **Producto de la S11 original:** catálogo de 42 transformaciones en JSONL/Parquet, manifiesto verificable, relectura, pruebas de corrupción y ZIP.
+**Producto de la recuperación:** origen.json, ocr.json, asr.json, extraccion.json, indice.json y las trazas de búsqueda. **Producto de la S11 original:** catálogo de 42 transformaciones en JSONL/Parquet, manifiesto verificable, relectura, pruebas de corrupción y ZIP.
 
 ## Problemas típicos
 
