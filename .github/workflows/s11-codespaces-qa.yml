@@ -25,20 +25,20 @@ jobs:
       - name: Instalar Tesseract (español) y motor de voz sintética
         run: |
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr tesseract-ocr-spa espeak-ng ffmpeg fonts-dejavu-core
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-spa espeak-ng ffmpeg poppler-utils fonts-dejavu-core
       - name: Instalar dependencias del laboratorio
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r Laboratorios/S11_Codespaces/requirements.txt
       - name: Comprobar sintaxis y sincronización del cuaderno original
         run: |
-          python -m py_compile Laboratorios/S11_Codespaces/lab.py Laboratorios/S11_Codespaces/test_lab.py
+          python -m py_compile Laboratorios/S11_Codespaces/lab.py Laboratorios/S11_Codespaces/test_lab.py Laboratorios/S11_Codespaces/proyecto.py Laboratorios/S11_Codespaces/test_proyecto.py
           python utils/build_session11_etl_audio_imagenes.py --check
       - name: Comprobar generación local + OCR español con prueba reproducible
         run: |
           cd Laboratorios/S11_Codespaces
-          python -m unittest -v test_lab
+          python -m unittest -v test_lab test_proyecto
       - name: Explicar alcance de la prueba
         run: |
-          echo "Verificado: sintaxis, notebook sincronizado, archivo/hash y OCR Tesseract real"
-          echo "Pendiente de ejecución en Codespaces: inferencia Whisper, Ollama y descarga de fuentes"
+          echo "Verificado: sintaxis, notebook sincronizado, archivo/hash, OCR imagen/PDF, transferencia y simulaciones"
+          echo "Pendiente de ejecución en Codespaces: inferencia Whisper y Ollama reales. ASR aquí usa doble de prueba."
