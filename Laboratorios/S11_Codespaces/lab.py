@@ -176,20 +176,35 @@ def coseno(a: list[float], b: list[float]) -> float:
     return numerator / (norma_a * norma_b) if norma_a and norma_b else 0.0
 
 def indexar() -> None:
+    """Indexa fragmentos y conserva la fuente: una línea OCR o un segmento ASR."""
     imagen, voz = cargar_json("ocr.json"), cargar_json("asr.json")
-    docs = [
-        {"id": "foto_ocr", "titulo": "Texto extraído de una imagen",
-         "texto": imagen["texto_extraido"], "fuente": imagen["fuente"], "sha256": imagen["sha256"]},
-        {"id": "voz_asr", "titulo": "Transcripción de una grabación",
-         "texto": voz["transcripcion"], "fuente": voz["fuente"], "sha256": voz["sha256"]},
-    ]
+    docs = []
+    for n, linea in enumerate(imagen["texto_extraido"].splitlines(), 1):
+        if not linea.strip():
+            continue
+        docs.append({
+            "id": f"foto_ocr_linea_{n}", "titulo": f"OCR línea {n}",
+            "texto": linea.strip(), "modalidad": "imagen",
+            "fuente": imagen["fuente"], "sha256": imagen["sha256"]
+        })
+    for n, segmento in enumerate(voz["segmentos"], 1):
+        if not segmento["texto"].strip():
+            continue
+        docs.append({
+            "id": f"voz_asr_segmento_{n}", "titulo": f"Voz segmento {n}",
+            "texto": segmento["texto"].strip(), "modalidad": "audio",
+            "inicio_s": segmento["inicio_s"], "fin_s": segmento["fin_s"],
+            "fuente": voz["fuente"], "sha256": voz["sha256"]
+        })
+    if not docs:
+        raise ValueError("OCR y ASR vacíos: verifica los archivos antes de indexar.")
     entradas = [f"title: {d['titulo']} | text: {d['texto']}" for d in docs]
     vectores = incrustar(entradas, MODELO_TEXTO)
     for doc, v in zip(docs, vectores):
         doc["embedding"] = v
     guardar_json("indice.json", {
         "modelo": MODELO_TEXTO, "dimension": len(vectores[0]), "documentos": docs,
-        "nota": "Índice JSON didáctico. Producción requiere seguridad y vector DB."
+        "nota": "Índice JSON didáctico por fragmentos; no es una base vectorial productiva."
     })
     print(f"Indexadas {len(docs)} evidencias de {len(vectores[0])} dimensiones.")
 
