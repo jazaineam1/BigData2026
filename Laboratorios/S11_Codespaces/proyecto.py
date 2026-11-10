@@ -184,11 +184,14 @@ def ejecutar(raiz: Path, cfg: dict) -> None:
     with (out / "catalogo.jsonl").open("w", encoding="utf-8") as f:
         for item in filas:
             f.write(json.dumps(item, ensure_ascii=False, allow_nan=False) + "\n")
-    # Parquet muestra formato columnar; JSONL es la fuente completa, incluso segmentos.
-    import pandas as pd
+    # Parquet con PyArrow directo: evita registrar dos veces pandas.period en CI.
+    # JSONL conserva segmentos temporales y se considera el registro canónico.
+    import pyarrow as pa
+    import pyarrow.parquet as pq
     resumen = [{k: v for k, v in item.items() if k != "segments"} for item in filas]
     if resumen:
-        pd.DataFrame(resumen).to_parquet(out / "catalogo.parquet", index=False)
+        tabla = pa.Table.from_pylist(resumen)
+        pq.write_table(tabla, out / "catalogo.parquet")
     elif (out / "catalogo.parquet").exists():
         (out / "catalogo.parquet").unlink()
     escribir_json(out / "errores.json", {"errores": errores, "cantidad": len(errores)})
