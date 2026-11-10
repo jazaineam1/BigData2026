@@ -164,9 +164,12 @@ def ejecutar(raiz: Path, cfg: dict) -> None:
                 "audio" if p.suffix.lower() in AUDIO_EXT else
                 "pdf" if p.suffix.lower() in PDF_EXT else "texto")
         rel = p.relative_to(raiz).as_posix()
-        datos_fuente = {**cfg["fuente"], **metadatos.get(rel, {})}
-        if not isinstance(metadatos.get(rel, {}), dict):
+        metadata_archivo = metadatos.get(rel, {})
+        if not isinstance(metadata_archivo, dict):
             raise ValueError(f"Metadatos inválidos para {rel}")
+        datos_fuente = {**cfg["fuente"], **metadata_archivo}
+        if not datos_fuente.get("nombre"):
+            raise ValueError(f"Nombre de fuente vacío para {rel}")
         try:
             texto, segments, paginas = "", [], None
             if tipo == "imagen" and cfg["ocr"]["activo"]:
