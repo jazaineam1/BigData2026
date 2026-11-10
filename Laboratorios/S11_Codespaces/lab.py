@@ -173,6 +173,33 @@ def imagen_semantica(consulta: str, archivo: Path | None) -> None:
     print(f"Similitud imagen-consulta: {coseno(vec_imagen, vec_q):.4f}")
     print("Imagen sin OCR: comparar significado visual, NO exactitud de cifras.")
 
+def fuentes_repo(imagenes: int, audios: int) -> None:
+    """Usa el motor de S11 y los dos corpus auditados ya presentes en el curso."""
+    import sys
+    raiz_repo = BASE.parents[1]
+    if str(raiz_repo) not in sys.path:
+        sys.path.insert(0, str(raiz_repo))
+    from utils import s11_etl_core as core
+    raiz = OUT / "fuentes_repositorio"
+    entradas_img = core.extraer_imagenes(raiz, max_imagenes=imagenes)
+    entradas_voz = core.extraer_audios(raiz, max_audios=audios)
+    entradas = entradas_img + entradas_voz
+    guardar_json("fuentes_repo.json", {
+        "schema": "s11-repositorio-ocr-asr-v1",
+        "registros": entradas,
+        "imagenes": imagenes,
+        "audios": audios,
+        "advertencias": [
+            "Fotografías editoriales: no redistribuir; respetar créditos y fuente.",
+            "MINDS-14 son audios bancarios independientes, no audios de noticias.",
+            "No unir article_id y source_record_id sin documentación explícita."
+        ]
+    })
+    print("\nFuentes listas. Ejecuta uno de los comandos siguientes:")
+    print(f"python lab.py ocr --archivo {raiz / entradas_img[0]['original_path']}")
+    print(f"python lab.py asr --archivo {raiz / entradas_voz[0]['original_path']}")
+    print("Después ejecuta: python lab.py indexar y python lab.py buscar --consulta 'tu consulta'.")
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest="accion", required=True)
@@ -180,6 +207,9 @@ def main() -> None:
     for nombre in ("ocr", "asr"):
         cmd = sub.add_parser(nombre)
         cmd.add_argument("--archivo", type=Path)
+    fuentes = sub.add_parser("fuentes-repo")
+    fuentes.add_argument("--imagenes", type=int, default=2, choices=range(1, 33), metavar="1..32")
+    fuentes.add_argument("--audios", type=int, default=2, choices=range(1, 11), metavar="1..10")
     sub.add_parser("indexar")
     bus = sub.add_parser("buscar")
     bus.add_argument("--consulta", required=True)
@@ -191,6 +221,7 @@ def main() -> None:
         if a.accion == "preparar": preparar()
         elif a.accion == "ocr": ocr(a.archivo)
         elif a.accion == "asr": asr(a.archivo)
+        elif a.accion == "fuentes-repo": fuentes_repo(a.imagenes, a.audios)
         elif a.accion == "indexar": indexar()
         elif a.accion == "buscar": buscar(a.consulta)
         elif a.accion == "imagen": imagen_semantica(a.consulta, a.archivo)
