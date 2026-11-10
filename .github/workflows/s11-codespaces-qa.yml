@@ -1,0 +1,44 @@
+name: S11 Codespaces OCR/ASR/embeddings - smoke
+on:
+  pull_request:
+    paths:
+      - "Laboratorios/S11_Codespaces/**"
+      - ".devcontainer/s11-multimedia/**"
+      - "utils/s11_lesson_cells.json"
+      - "Cuadernos/11_ETL_Audio_Imagenes.ipynb"
+      - ".github/workflows/s11-codespaces-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-ocr:
+    name: Código, cuaderno y OCR real
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar Tesseract (español) y motor de voz sintética
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-spa espeak-ng ffmpeg fonts-dejavu-core
+      - name: Instalar dependencias del laboratorio
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r Laboratorios/S11_Codespaces/requirements.txt
+      - name: Comprobar sintaxis y sincronización del cuaderno original
+        run: |
+          python -m py_compile Laboratorios/S11_Codespaces/lab.py Laboratorios/S11_Codespaces/test_lab.py
+          python utils/build_session11_etl_audio_imagenes.py --check
+      - name: Comprobar generación local + OCR español con prueba reproducible
+        run: |
+          cd Laboratorios/S11_Codespaces
+          python -m unittest -v test_lab
+      - name: Explicar alcance de la prueba
+        run: |
+          echo "Verificado: sintaxis, notebook sincronizado, archivo/hash y OCR Tesseract real"
+          echo "Pendiente de ejecución en Codespaces: inferencia Whisper, Ollama y descarga de fuentes"
