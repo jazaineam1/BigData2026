@@ -108,6 +108,47 @@ def asr(archivo: Path | None) -> None:
     })
     print("TRANSCRIPCIÓN:\n", texto or "[sin voz recuperada]")
 
+def extraer() -> None:
+    """Extrae candidatos verificables de OCR y ASR; reutiliza el motor del S11 original."""
+    import re
+    import sys
+    raiz_repo = BASE.parents[1]
+    if str(raiz_repo) not in sys.path:
+        sys.path.insert(0, str(raiz_repo))
+    from utils import s11_audio_noticia
+    imagen, voz = cargar_json("ocr.json"), cargar_json("asr.json")
+    segmentos = [
+        {"start_s": v["inicio_s"], "end_s": v["fin_s"], "text": v["texto"]}
+        for v in voz["segmentos"]
+    ]
+    texto_audio = voz["transcripcion"]
+    if texto_audio.strip():
+        info = s11_audio_noticia.extraer_informacion(
+            texto_audio, origen="asr", segmentos=segmentos
+        )
+        auditoria = s11_audio_noticia.verificar_candidatos(texto_audio, info)
+        if not auditoria["ok"]:
+            raise ValueError("Las citas extraídas no coinciden con el texto ASR.")
+    else:
+        info, auditoria = {"candidatos": [], "advertencia": "ASR vacío"}, {"ok": True}
+    texto_ocr = imagen["texto_extraido"]
+    fechas = sorted(set(re.findall(r"\\b\\d{2}[-/]\\d{2}[-/]\\d{4}\\b", texto_ocr)))
+    numeros = sorted(set(re.findall(r"\\b\\d+(?:[.,]\\d+)?\\b", texto_ocr)))
+    guardar_json("extraccion.json", {
+        "schema": "s11-evidencias-ocr-asr-v1",
+        "imagen": {
+            "fuente": imagen["fuente"], "sha256": imagen["sha256"],
+            "texto_ocr": texto_ocr,
+            "fecha_candidata": fechas, "cifras_candidatas": numeros
+        },
+        "audio": {
+            "fuente": voz["fuente"], "sha256": voz["sha256"],
+            "analisis": info, "auditoria_fragmentos": auditoria
+        },
+        "limitacion": "Regex detecta menciones; no valida un contrato, relación o noticia."
+    })
+    print("Extracción estructurada generada: coteja cada candidata con su fuente.")
+
 def incrustar(inputs: list[str | dict], modelo: str) -> list[list[float]]:
     import requests
     try:
@@ -210,6 +251,7 @@ def main() -> None:
     fuentes = sub.add_parser("fuentes-repo")
     fuentes.add_argument("--imagenes", type=int, default=2, choices=range(1, 33), metavar="1..32")
     fuentes.add_argument("--audios", type=int, default=2, choices=range(1, 11), metavar="1..10")
+    sub.add_parser("extraer")
     sub.add_parser("indexar")
     bus = sub.add_parser("buscar")
     bus.add_argument("--consulta", required=True)
@@ -222,6 +264,7 @@ def main() -> None:
         elif a.accion == "ocr": ocr(a.archivo)
         elif a.accion == "asr": asr(a.archivo)
         elif a.accion == "fuentes-repo": fuentes_repo(a.imagenes, a.audios)
+        elif a.accion == "extraer": extraer()
         elif a.accion == "indexar": indexar()
         elif a.accion == "buscar": buscar(a.consulta)
         elif a.accion == "imagen": imagen_semantica(a.consulta, a.archivo)
