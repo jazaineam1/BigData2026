@@ -4,10 +4,10 @@ const route='/Presentaciones/s11-etl-audio-imagenes.html';
 test('S11: historia, 28 diapositivas, enlace directo a Colab y sin video',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(route+'#s1');
-  await expect(page.locator('.slide')).toHaveCount(30);
+  await expect(page.locator('.slide')).toHaveCount(31);
   await expect(page.locator('#s1')).toBeVisible();
   await expect(page.locator('#s1 h1')).toContainText('Laura');
-  await expect(page.locator('#count')).toHaveText('1 / 30');
+  await expect(page.locator('#count')).toHaveText('1 / 31');
   await expect(page.locator('a[href*="11_ETL_Audio_Imagenes.ipynb"]')).not.toHaveCount(0);
   await expect(page.locator('#s1')).toContainText('no trabajaremos video');
   await page.locator('#next').click();
