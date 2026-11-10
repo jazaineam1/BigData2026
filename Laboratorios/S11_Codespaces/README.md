@@ -60,6 +60,10 @@ La ruta procesa solo el TXT de demostración; para activar OCR y ASR coloca arch
 3. Cambiar de corpus sin tocar el código de las fuentes editoriales.
 4. Reconocer un error, verificar la procedencia y auditar que los bytes originales no cambiaron.
 
+### Verificar que la instalación y los modelos funcionan
+
+Al abrir Codespaces, desde Laboratorios/S11_Codespaces ejecuta `bash probar_todo.sh --ligero` para comprobar sintaxis, OCR real, Parquet e integridad con datos simulados. Si tienes recursos disponibles, `bash probar_todo.sh --completo` realiza también transcripción e inferencia real en Ollama. **El modo completo no se ha validado desde esta conversación en una máquina Codespaces real** y debe pasar antes de publicar la actividad a todo el grupo.
+
 ## Paso 1. Crear Codespace de S11
 
 1. Abre [el repositorio](https://github.com/jazaineam1/BigData2026).
