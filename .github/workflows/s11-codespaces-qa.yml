@@ -70,3 +70,34 @@ jobs:
       - name: Alcance
         run: |
           echo "Motores reales probados en Linux GitHub Actions. La apertura gráfica del Codespace necesita comprobación interactiva."
+
+  codespaces-container-smoke:
+    name: Contenedor Codespaces · build + Streamlit HTTP
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir el Dockerfile exacto del perfil S11
+        run: docker build --tag s11-codespace-smoke -f .devcontainer/s11-multimedia/Dockerfile .devcontainer/s11-multimedia
+      - name: Arrancar el panel con las mismas dependencias del Codespace
+        run: |
+          docker run -d --name s11-ui-test -p 127.0.0.1:8501:8501 \
+            -v "$PWD:/workspaces/BigData2026" -w /workspaces/BigData2026/Laboratorios/S11_Codespaces \
+            s11-codespace-smoke bash -lc \
+            'python -m pip install -r requirements.txt && streamlit run app.py --server.address 0.0.0.0 --server.port 8501 --server.headless true'
+          for intento in $(seq 1 150); do
+            if curl -fsS --max-time 2 http://127.0.0.1:8501/_stcore/health >/dev/null; then
+              echo "Panel Streamlit responde desde el contenedor Codespaces"; exit 0
+            fi
+            sleep 3
+          done
+          docker logs --tail 120 s11-ui-test
+          exit 1
+      - name: Comprobar Tesseract, español y dependencias desde el contenedor
+        run: |
+          docker exec s11-ui-test tesseract --list-langs | grep -x spa
+          docker exec s11-ui-test python -c "import streamlit,pytesseract,faster_whisper,pyarrow; print('Dependencias de Codespaces: OK')"
+          curl -fsS http://127.0.0.1:8501/_stcore/health
+      - name: Diagnóstico de arranque
+        if: always()
+        run: docker logs --tail 90 s11-ui-test 2>/dev/null || true
