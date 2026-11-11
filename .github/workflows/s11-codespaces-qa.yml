@@ -43,3 +43,30 @@ jobs:
         run: |
           echo "Verificado: sintaxis, notebook sincronizado, archivo/hash, OCR imagen/PDF, transferencia y simulaciones"
           echo "Pendiente de ejecución en Codespaces: inferencia Whisper y Ollama reales. ASR aquí usa doble de prueba."
+
+  real-inference-cpu:
+    name: Inferencia REAL · Whisper tiny + EmbeddingGemma 2
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar herramientas del sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa ffmpeg espeak-ng poppler-utils fonts-dejavu-core
+      - name: Dependencias de inferencia
+        run: python -m pip install -r Laboratorios/S11_Codespaces/requirements.txt
+      - name: OCR + Whisper + Ollama con modelos reales y fuentes sintéticas
+        run: |
+          cd Laboratorios/S11_Codespaces
+          bash probar_todo.sh --completo
+      - name: Verificar artefactos de motores verdaderos
+        run: |
+          cd Laboratorios/S11_Codespaces
+          python -c 'import json,pathlib; p=pathlib.Path("salidas"); a=json.loads((p/"asr.json").read_text()); i=json.loads((p/"indice.json").read_text()); o=json.loads((p/"ocr.json").read_text()); assert a["modelo"].startswith("faster-whisper") and a["transcripcion"].strip() and a["segmentos"]; assert "CONTRATOS" in o["texto_extraido"].upper(); assert i["modelo"]=="embeddinggemma-2:270m" and i["dimension"]==768 and i["documentos"]; print("ASR:",len(a["segmentos"]),"segmentos; embeddings:",len(i["documentos"]),"x",i["dimension"])'
+      - name: Alcance
+        run: |
+          echo "Motores reales probados en Linux GitHub Actions. La apertura gráfica del Codespace necesita comprobación interactiva."
