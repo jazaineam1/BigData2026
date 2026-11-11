@@ -25,7 +25,7 @@ NOTEBOOK = ROOT / "Cuadernos" / "11_ETL_Audio_Imagenes.ipynb"
 def estructura():
     subprocess.check_call([sys.executable,str(ROOT/"utils"/"build_session11_etl_audio_imagenes.py"),"--check"])
     nb = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
-    assert len(nb["cells"]) == 73, "La lección S11 espera 73 celdas"
+    assert len(nb["cells"]) == 74, "La lección S11 espera 74 celdas (incluida recuperación Codespaces)"
     ids = [x["id"] for x in nb["cells"]]
     for id in ("s11-preparar","s11-cargar-motor","s11-elegir","s11-extraer-imagenes",
                "s11-extraer-audios","s11-transformar-imagenes","s11-transformar-audios",
