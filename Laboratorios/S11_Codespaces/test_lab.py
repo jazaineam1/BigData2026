@@ -7,6 +7,28 @@ from pathlib import Path
 import lab
 
 class LaboratorioS11(unittest.TestCase):
+    def test_wer_referencia_conocida_y_origen_coincidente(self):
+        from unittest.mock import patch
+        anterior = lab.OUT
+        with tempfile.TemporaryDirectory(prefix="s11-wer-") as raiz:
+            try:
+                lab.OUT = Path(raiz)
+                lab.preparar()
+                origen = lab.cargar_json("origen.json")
+                wav = lab.OUT / "voz_simulada.wav"
+                lab.guardar_json("asr.json", {
+                    "sha256": lab.hash_sha256(wav),
+                    "transcripcion": origen["referencia_asr"],
+                })
+                lab.evaluar_asr()
+                self.assertEqual(lab.cargar_json("evaluacion_asr.json")["wer"], 0)
+                lab.guardar_json("asr.json", {"sha256": "x" * 64,
+                                           "transcripcion": "No corresponde"})
+                with self.assertRaisesRegex(ValueError, "no corresponde"):
+                    lab.evaluar_asr()
+            finally:
+                lab.OUT = anterior
+
     def test_coseno_matematico(self):
         self.assertAlmostEqual(lab.coseno([1, 0], [1, 0]), 1)
         self.assertAlmostEqual(lab.coseno([1, 0], [0, 1]), 0)
