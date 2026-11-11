@@ -1,0 +1,64 @@
+name: S11 · inferencia real en CPU (Whisper + EmbeddingGemma)
+on:
+  pull_request:
+    paths:
+      - 'Laboratorios/S11_Codespaces/**'
+      - '.github/workflows/s11-inference-real.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s11-real-inference-pr
+  cancel-in-progress: true
+
+jobs:
+  whisper-ollama-real:
+    name: OCR, Whisper y Ollama reales, sin mocks
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Preparar dependencias de sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            tesseract-ocr tesseract-ocr-spa ffmpeg espeak-ng fonts-dejavu-core poppler-utils
+      - name: Instalar dependencias Python
+        run: |
+          python -m pip install -r Laboratorios/S11_Codespaces/requirements.txt
+      - name: Ejecutar recorrido real sin fuentes periodísticas
+        run: |
+          cd Laboratorios/S11_Codespaces
+          bash probar_todo.sh --completo
+      - name: Verificar que no se usaron respuestas simuladas
+        run: |
+          cd Laboratorios/S11_Codespaces
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          out=Path("salidas")
+          asr=json.loads((out/"asr.json").read_text(encoding="utf-8"))
+          ocr=json.loads((out/"ocr.json").read_text(encoding="utf-8"))
+          idx=json.loads((out/"indice.json").read_text(encoding="utf-8"))
+          search=json.loads((out/"ultima_busqueda.json").read_text(encoding="utf-8")) if (out/"ultima_busqueda.json").exists() else None
+          assert asr["modelo"].startswith("faster-whisper"), asr.get("modelo")
+          assert asr["transcripcion"].strip(), "Whisper generó transcripción vacía"
+          assert asr["segmentos"], "No hay segmentos de voz"
+          assert "CONTRATOS" in ocr["texto_extraido"].upper(), "OCR no extrajo texto"
+          assert idx["modelo"] == "embeddinggemma-2:270m", "Modelo incorrecto"
+          assert idx["dimension"] == 768, "Dimensión inesperada de EmbeddingGemma"
+          assert idx["documentos"], "Índice sin evidencias"
+          assert any(x["embedding"] and len(x["embedding"])==768 for x in idx["documentos"])
+          print("VALIDACIÓN REAL: OCR/ASR y EmbeddingGemma 2 correctos")
+          print("ASR segmentos:",len(asr["segmentos"]),"texto:",asr["transcripcion"][:120])
+          print("Embeddings dimensiones:",idx["dimension"],"fragmentos:",len(idx["documentos"]))
+          PY
+      - name: Señalar límites de la verificación
+        run: |
+          echo 'Esta ejecución prueba motores reales en Linux GitHub Actions, no una sesión de Codespaces interactiva.'
+          echo 'El panel Streamlit se prueba por separado en el workflow de QA.'
