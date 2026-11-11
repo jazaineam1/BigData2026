@@ -41,7 +41,7 @@ with st.sidebar:
     st.divider()
     st.markdown("**Código que puedes estudiar y modificar**")
     st.code("proyecto.py\nlab.py\nconfig.json", language=None)
-    st.markdown("[Tutorial paso a paso y código reutilizable](https://github.com/jazaineam1/BigData2026/blob/feat/s11-codespaces-multimodal/Laboratorios/S11_Codespaces/GUIA_REUTILIZACION.md)")
+    st.markdown("[Tutorial paso a paso y código reutilizable](https://github.com/jazaineam1/BigData2026/blob/main/Laboratorios/S11_Codespaces/GUIA_REUTILIZACION.md)")
     st.caption("La interfaz es una alternativa a ejecutar los mismos comandos desde la terminal.")
 
 if not valido:
