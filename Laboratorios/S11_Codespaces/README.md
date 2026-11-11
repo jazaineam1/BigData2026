@@ -178,6 +178,22 @@ El recorte **no representa un límite de 60 segundos de Whisper**.
 **Qué NO permite concluir:** que todos los nombres, números y citas estén bien reconocidos.  
 **Error común:** confundir RMS y espectro con lenguaje hablado.
 
+### Medir la calidad: el sistema puede funcionar y aun así equivocarse
+
+Cuando hayas transcrito la voz simulada con `python lab.py asr`, ejecuta:
+
+~~~bash
+python lab.py evaluar-asr
+cat salidas/evaluacion_asr.json
+~~~
+
+El programa compara la **transcripción producida por Whisper** con la **frase original conocida** que se usó para sintetizar esta voz. Calcula una tasa WER real mediante distancia de edición a nivel de palabras, no la inventa. Al comparar ignoramos mayúsculas y puntuación; aun así, el acento artificial puede inducir errores grandes. La ejecución real de GitHub Actions produjo sustituciones en palabras y cifras con Whisper tiny, lo que demuestra por qué `ASR terminó` no significa `ASR acertó`.
+
+**Cómo se lee:** `wer` es proporción de errores de palabras respecto de las palabras de referencia; puede exceder 1 si hay muchas inserciones.
+**Qué nos dice:** exactitud de esta grabación sintética concreta frente a su referencia.
+**Qué NO permite concluir:** la calidad de Whisper para todos los audios en español; faltan muestras diversas y referencias humanas verificadas.
+**Error común:** calcular WER sobre un audio real sin referencia o usar la similitud semántica para validar una cifra que Whisper reconoció mal.
+
 ## Paso 5. Conectar con los activos REALES del repositorio
 
 Usamos el **mismo motor de S11** que verifica las 32 imágenes del snapshot docente y la colección MINDS-14 español. No utilizamos scraping de noticias, ni juntamos un audio bancario a una imagen editorial.
