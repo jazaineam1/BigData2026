@@ -63,6 +63,7 @@ def preparar() -> None:
     guardar_json("origen.json", {
         "tipo": "simulacion_pedagogica",
         "aviso": "Frases e importes inventados; no corresponden a noticias reales.",
+        "referencia_asr": frase,
         "archivos": [
             {"archivo": png.name, "sha256": hash_sha256(png), "generador": "Pillow"},
             {"archivo": wav.name, "sha256": hash_sha256(wav), "generador": "espeak-ng"}
@@ -111,6 +112,43 @@ def asr(archivo: Path | None) -> None:
         "limite": "Sin referencia humana no se conoce WER; comprobar palabras contra audio."
     })
     print("TRANSCRIPCIÓN:\n", texto or "[sin voz recuperada]")
+
+def evaluar_asr() -> None:
+    """WER frente a la frase humana conocida, SOLO para la voz sintética inicial."""
+    import re
+    origen, voz = cargar_json("origen.json"), cargar_json("asr.json")
+    referencia = origen.get("referencia_asr")
+    if not referencia:
+        raise ValueError("No hay referencia conocida: no es válido calcular WER sin ella.")
+    wav = OUT / "voz_simulada.wav"
+    if not wav.is_file() or voz["sha256"] != hash_sha256(wav):
+        raise ValueError("La transcripción no corresponde a la voz sintética de esta referencia.")
+    def palabras(x: str) -> list[str]:
+        return re.findall(r"\w+", x.lower(), flags=re.UNICODE)
+    ref, hip = palabras(referencia), palabras(voz["transcripcion"])
+    if not ref:
+        raise ValueError("La referencia está vacía")
+    # Distancia de edición de Levenshtein a nivel de palabras.
+    previa = list(range(len(hip) + 1))
+    for i, x in enumerate(ref, 1):
+        actual = [i]
+        for j, y in enumerate(hip, 1):
+            actual.append(min(actual[-1] + 1, previa[j] + 1,
+                              previa[j - 1] + int(x != y)))
+        previa = actual
+    wer = previa[-1] / len(ref)
+    guardar_json("evaluacion_asr.json", {
+        "n_palabras_referencia": len(ref),
+        "n_palabras_hipotesis": len(hip),
+        "errores_edicion_minimos": previa[-1],
+        "wer": round(wer, 4),
+        "referencia": referencia,
+        "hipotesis": voz["transcripcion"],
+        "alcance": "Voz sintética con referencia conocida; no extrapolar a audios reales."
+    })
+    print(f"WER del ejemplo sintético: {wer:.2%} ({previa[-1]} errores de edición / {len(ref)} palabras)")
+    print("Compara las cifras y nombres, no solo el número de palabras.")
+
 
 def extraer() -> None:
     """Extrae candidatos verificables de OCR y ASR; reutiliza el motor del S11 original."""
@@ -271,6 +309,7 @@ def main() -> None:
     fuentes.add_argument("--imagenes", type=int, default=2, choices=range(1, 33), metavar="1..32")
     fuentes.add_argument("--audios", type=int, default=2, choices=range(1, 11), metavar="1..10")
     sub.add_parser("extraer")
+    sub.add_parser("evaluar-asr")
     sub.add_parser("indexar")
     bus = sub.add_parser("buscar")
     bus.add_argument("--consulta", required=True)
@@ -284,6 +323,7 @@ def main() -> None:
         elif a.accion == "asr": asr(a.archivo)
         elif a.accion == "fuentes-repo": fuentes_repo(a.imagenes, a.audios)
         elif a.accion == "extraer": extraer()
+        elif a.accion == "evaluar-asr": evaluar_asr()
         elif a.accion == "indexar": indexar()
         elif a.accion == "buscar": buscar(a.consulta)
         elif a.accion == "imagen": imagen_semantica(a.consulta, a.archivo)
