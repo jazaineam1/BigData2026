@@ -28,6 +28,7 @@ if [[ "$MODO" == "--ligero" ]]; then
 fi
 echo "[3] Ejecutando Whisper real, no sustituto de prueba"
 python lab.py asr
+python lab.py evaluar-asr
 python lab.py extraer
 echo "[4] Preparando Ollama y EmbeddingGemma 2 local"
 bash iniciar_ollama.sh
