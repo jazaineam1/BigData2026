@@ -103,7 +103,7 @@ def execute(sample_max=26000):
             mode_all.update(frame["modalidad_de_contratacion"].tolist())
             # Conserva la cadena UNSPSC de ocho dígitos SIN el prefijo V1.
             codes=frame["codigo_principal_de_categoria"].astype(str).str.strip()
-            extracted=codes.str.extract(r"^(?:V[0-9]+\\.)?([0-9]{8})$",expand=False)
+            extracted=codes.str.extract(r"^(?:V[0-9]+\.)?([0-9]{8})$",expand=False)
             unspsc_segments.update(extracted.dropna().str[:2].tolist())
             unspsc_invalid.update(codes[extracted.isna()].tolist())
             for idv, pricev, modev, codev in zip(
