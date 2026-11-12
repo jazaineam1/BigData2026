@@ -1,4 +1,4 @@
-"""QA de la ruta ACTIVA S11: 16 diapositivas, guía y rama de aprendizaje."""
+"""QA de la ruta ACTIVA S11: 24 diapositivas, guía y rama de aprendizaje."""
 from __future__ import annotations
 import unittest
 from html.parser import HTMLParser
@@ -32,14 +32,16 @@ class RecursosS11(unittest.TestCase):
         html = SLIDES.read_text(encoding="utf-8")
         p = Links()
         p.feed(html)
-        self.assertEqual(p.slides, 16)
-        self.assertTrue(all(f"s{i}" in p.ids for i in range(1, 17)))
+        self.assertEqual(p.slides, 24)
+        self.assertTrue(all(f"s{i}" in p.ids for i in range(1, 25)))
         self.assertTrue({"next", "prev"} <= p.buttons)
         self.assertIn('addEventListener("keydown"', html)
         self.assertIn("s11-estudiantes/01_laboratorio.ipynb", html)
         self.assertIn("embeddinggemma-2:440m", html)
         self.assertIn("pytesseract", html)
         self.assertIn("WhisperModel", html)
+        self.assertIn("HTTP 400", html)
+        self.assertIn("PSM 7", html)
         self.assertNotIn("python lab.py preparar", html)
 
     def test_tutorial_ocho_pasos(self):
@@ -54,7 +56,7 @@ class RecursosS11(unittest.TestCase):
         html = HOME.read_text(encoding="utf-8")
         self.assertIn("s11-videoclase-ocr-asr-embeddings.html", html)
         self.assertIn("s11-ocr-asr-paso-a-paso.html", html)
-        self.assertIn("Python desde cero", html)
+        self.assertIn("Cuaderno único", html)
 
     def test_enlaces_locales(self):
         for pagina in (SLIDES, TUTORIAL):
