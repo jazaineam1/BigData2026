@@ -19,7 +19,7 @@ from ocr_documental import (PSM_EXPLICACION, candidatos_ocr, pdf_paginas,
                             detalle_ocr, dibujar_cajas_ocr)
 
 from fuentes import (ROOT, AUDIO_MANIFEST, inventario, preparar_audios, sha256,
-                     construir_indice_visual, buscar_indice_visual)
+                     construir_indice_visual, buscar_indice_visual, seleccionar_fotos_muestra)
 
 st.set_page_config(page_title="S11 · Visor de fuentes", page_icon="📚", layout="wide")
 st.title("📚 S11 · Documentos, imágenes y audios")
@@ -438,6 +438,11 @@ if item["clase"] == "imagen":
             "Cantidad de fotos (1 para entender, 4 u 8 para clase, 62 para ampliación)",
             options=[1, 4, 8, 62], value=4, key="limite_indice_s11"
         )
+        fotos_ejemplo = seleccionar_fotos_muestra(fotos_visibles, LIMITE)
+        st.caption("Muestra reproducible (" + str(len(fotos_ejemplo)) + "): " +
+                   ", ".join(p.name for p in fotos_ejemplo[:8]) +
+                   (" y más..." if len(fotos_ejemplo) > 8 else "") +
+                   ". Para las viviendas y el logotipo usa al menos 4.")
         if st.button("Crear o reutilizar índice de fotografías seleccionadas",
                      type="secondary", use_container_width=True):
             try:
