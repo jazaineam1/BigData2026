@@ -1,0 +1,69 @@
+name: S13 TFIDF benchmark real 1k 10k 20k Dask
+on:
+  pull_request:
+    paths:
+      - "Laboratorios/S13_Codespaces/benchmark_unspsc_tfidf_dask.py"
+      - "Laboratorios/S13_Codespaces/medir_embeddinggemma2.py"
+      - "Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py"
+      - "Laboratorios/S13_Codespaces/test_benchmark_unspsc_tfidf_dask.py"
+      - "Laboratorios/S13_Codespaces/GUIA_BENCHMARK_TFIDF_EMBEDDINGGEMMA.md"
+      - ".github/workflows/s13-tfidf-benchmark-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  tfidf-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar las mismas bibliotecas de Codespaces
+        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+      - name: Pruebas unitarias de etiquetas, fuga y corte temporal
+        run: |
+          cd Laboratorios/S13_Codespaces
+          python -m unittest -v test_benchmark_unspsc_tfidf_dask
+      - name: Verificar sintaxis de benchmark y calibrador EmbeddingGemma
+        run: |
+          python -m py_compile Laboratorios/S13_Codespaces/benchmark_unspsc_tfidf_dask.py
+          python -m py_compile Laboratorios/S13_Codespaces/medir_embeddinggemma2.py
+          python -m py_compile Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py
+      - name: Medir TF-IDF local y con Dask, entrenar XGBoost realmente distribuido
+        run: |
+          python Laboratorios/S13_Codespaces/benchmark_unspsc_tfidf_dask.py --sizes 1000 10000 20000 --workers 2 --rondas 20 --svd-dim 32
+      - name: Validar que se usaron 20k procesos reales, no sintéticos
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          dir=Path("Laboratorios/S13_Codespaces/salidas/benchmark_unspsc")
+          m=json.loads((dir/"benchmark.json").read_text(encoding="utf-8"))
+          assert [x["n"] for x in m["resultados"]] == [1000,10000,20000]
+          assert m["fuentes"]["filas_muestreadas"] == 20000
+          assert m["fuentes"]["filas_elegibles"] >= 20000
+          assert m["fuentes"]["descartes"]["filas_leidas"] >= 20000
+          assert m["equipo"]["workers_en_un_solo_runner"] == 2
+          assert m["equipo"]["dask_nodos_fisicos"] == 1
+          for r in m["resultados"]:
+              assert r["train"] == int(r["n"]*.8)
+              assert r["test"] == r["n"]-r["train"]
+              assert r["vocabulario"] >= 100
+              assert r["particiones_xgb_train"] > 1
+              assert r["segundos_tfidf_local"] > 0
+              assert r["segundos_tfidf_dask"] > 0
+              for model in r["metricas"].values():
+                  assert 0<=model["f1_macro"]<=1
+                  assert 0<=model["balanced_accuracy"]<=1
+          print("BENCHMARK VALIDADO:",[(r["n"],r["metricas"]) for r in m["resultados"]])
+          PY
+      - name: Conservar mediciones verificables como artefacto
+        uses: actions/upload-artifact@v6
+        with:
+          name: s13-tfidf-dask-1k-10k-20k-metricas
+          path: Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/
+          retention-days: 14
+          if-no-files-found: error

@@ -51,6 +51,6 @@ test('S13: ampliación de 26 mil procesos SECOP y entrenamiento de un solo XGBoo
   await page.goto(URL + '#s38');
   await expect(page.locator('#s38')).toContainText('dxgb.train');
   await page.goto(URL + '#s39');
-  await expect(page.locator('#s39')).toContainText('8502');
-  await expect(page.locator('#s39')).toContainText('SECOP');
+  await expect(page.locator('#s39')).toContainText('embeddinggemma-2:270m');
+  await expect(page.locator('#s39')).toContainText('UNSPSC');
 });
