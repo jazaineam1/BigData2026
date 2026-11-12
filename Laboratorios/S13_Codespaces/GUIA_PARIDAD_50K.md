@@ -25,6 +25,52 @@
 
 **Métricas:** tiempo de lectura, creación de clúster, ajuste vocabulario, transformación TF-IDF, entrenamiento LinearSVC, SVD, entrenamiento XGBoost local y Dask. Se registra F1 macro y balanced accuracy. Todo está en los JSON generados: sin cifras ficticias.
 
+## Resultados reales verificados · GitHub Actions
+
+**Prueba:** https://github.com/jazaineam1/BigData2026/actions/runs/43164041074  
+**Entorno:** GitHub Actions Ubuntu, 4 núcleos lógicos, Python 3.11.18, dos workers Dask en una sola máquina. Se analizaron **300.000 filas**, se encontraron **287.682 fichas elegibles** y se muestrearon **50.000 fichas únicas**. Lectura y selección **79,913 s**; inicio del clúster **1,556 s**.
+
+### Mismo LinearSVC, mismos datos y TF-IDF idénticos
+
+| Procesos | Train / Test | Pipeline local (s) | Pipeline con Dask (s) | F1 macro idéntica |
+|---:|---:|---:|---:|---:|
+| 1.000 | 800 / 200 | **0,14112** | 0,30601 | 0,50408 |
+| 10.000 | 8.000 / 2.000 | 1,46924 | **1,31748** | 0,55683 |
+| 20.000 | 16.000 / 4.000 | 2,99225 | **2,66186** | 0,58361 |
+| 50.000 | 40.000 / 10.000 | 8,14228 | **7,05756** | 0,58605 |
+
+El tiempo de pipeline se calcula como **vocabulario TF-IDF + transformación train/test + fit LinearSVC**. No incluye predicción ni descarga, lectura o deduplicación de la fuente, ni arranque del clúster. En 50.000, el ahorro **1,085 s** no compensa por sí solo el arranque **1,556 s**.
+
+**Paridad confirmada:** matrices TF-IDF iguales, mismos pesos LinearSVC dentro de tolerancias numéricas y predicciones idénticas en los cuatro tamaños. En ambas rutas el `LinearSVC.fit()` corre **localmente**; Dask sólo transforma.
+
+### Mismo XGBoost, mismos datos, misma configuración
+
+| Procesos | Fit XGBoost local (s) | Fit XGBoost Dask (s) | F1 macro local | F1 macro Dask | Predicciones coincidentes |
+|---:|---:|---:|---:|---:|---:|
+| 1.000 | **0,24466** | 0,90697 | 0,36080 | 0,36080 | 100 % |
+| 10.000 | **0,42151** | 0,87320 | 0,41720 | 0,41710 | 96,65 % |
+| 20.000 | **0,48047** | 1,05095 | 0,44777 | 0,44901 | 97,75 % |
+| 50.000 | **0,75781** | 1,40522 | 0,44039 | 0,43724 | 98 % |
+
+**Misma matriz SVD de 32 características**, mismas etiquetas y 30 rondas `multi:softprob`, `hist`, profundidad 4, tasa 0,15, sin muestreo y semilla 42. Local usa dos hilos y Dask dos workers de un hilo. Los tiempos XGBoost son **sólo `train`**, no incluyen preparar matrices TF-IDF/SVD, construir DMatrix ni predicción.
+
+**Interpretación correcta:** para estos datos y equipo el entrenamiento XGBoost local fue más rápido; que las predicciones no sean bit a bit idénticas no significa que se usó otro modelo. XGBoost documenta variabilidad por histogramas aproximados y orden de reducciones distribuidas. La comparación está controlada, aunque no es una repetición estadística: los tiempos son **una ejecución por tamaño**, no un intervalo de confianza.
+
+### EmbeddingGemma 2: piloto realmente ejecutado con el mismo modelo
+
+**Prueba:** https://github.com/jazaineam1/BigData2026/actions/runs/43164041012
+
+Ollama `embeddinggemma-2:270m`, misma entrada SECOP, 16 textos × lotes de 4:
+- Inferencia secuencial **1,636 s**.
+- Inferencia repartida por dos workers Dask contra **el mismo Ollama** **1,716 s**.
+- Crear el clúster **1,094 s** adicionales.
+- Embeddings de 768 dimensiones **exactamente iguales**, diferencia máxima 0.
+
+La proyección lineal al **mismo runner** es aproximadamente 1,42 horas para 50.000 secuencialmente y 1,49 horas con Dask, **NO medición de 50.000 inferencias**. Cambiar hardware, longitud de textos y lotes cambia radicalmente el tiempo. El modelo en Ollama se midió en el runner, no en el HP del docente.
+
+**Próxima prueba de calidad:** el clasificador EmbeddingGemma → LinearSVC usa la misma muestra de 50.000 y el mismo corte de 1.000, 10.000, 20.000 o 50.000 del TF-IDF, con idénticos hiperparámetros de LinearSVC. No se debe publicar una F1 hasta ejecutarlo con el modelo real. Este script ya acepta `--n 50000` y cachea vectores para reiniciar; la corrida completa no se ha efectuado.
+
+
 ## Ejecutar los cuatro tamaños
 
 Dentro del Codespace S13:
