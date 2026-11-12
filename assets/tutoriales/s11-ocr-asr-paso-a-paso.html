@@ -15,7 +15,8 @@ texto = pytesseract.image_to_string(
     print(psm, pytesseract.image_to_string(
         pagina, lang="spa", config=f"--psm {psm}"
     )[:100])</code></pre></div></div></section>
-<section class="card" id="paso05"><div class="num">05</div><div><h2>Busca imágenes por significado</h2><p>Instala Ollama y el modelo embeddinggemma-2:440m, que admite imagen y texto. Construye la llamada HTTP a /api/embed usando base64. Compara vectores con coseno y cambia la pregunta.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>ollama pull embeddinggemma-2:440m
+<section class="card" id="paso05"><div class="num">05</div><div><h2>Busca imágenes por significado</h2><p>El Codespace nuevo ya trae Ollama instalado y arrancado sin systemd. Ejecuta bash preparar_embeddinggemma.sh para descargar el modelo embeddinggemma-2:440m y comprobar 768 dimensiones. Si el comando ollama no existe, sincroniza s11-estudiantes y reconstruye el contenedor. Construye la llamada HTTP a /api/embed usando Base64. Compara vectores con coseno y cambia la pregunta.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>ollama --version
+bash preparar_embeddinggemma.sh
 curl http://127.0.0.1:11434/api/tags</code></pre></div></div></section>
 <section class="card" id="paso06"><div class="num">06</div><div><h2>Escucha y transcribe voz humana</h2><p>Descarga con control SHA el Parquet real PolyAI MINDS-14 es-ES, CC BY 4.0. Escucha una voz y escribe la transcripción con Whisper tiny. Contrasta contra la referencia del corpus.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>from faster_whisper import WhisperModel
 modelo = WhisperModel("tiny", device="cpu", compute_type="int8")
