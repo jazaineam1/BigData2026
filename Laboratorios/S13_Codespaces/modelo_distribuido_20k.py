@@ -362,7 +362,7 @@ def ejecutar(objetivo=OBJETIVO, rondas=70, workers=2):
                           procedencia["archivos_fuente"]},
         "metricas": metricas,
         "errores_modelo_factor_3": int(
-            revision["requiere_revision_estadistica"].sum()
+            revision["error_modelo_factor_alto"].sum()
         ),
         "advertencia": (
             "SECOP II: fichas de procesos, NO 26000 PDF. "
@@ -377,7 +377,7 @@ def ejecutar(objetivo=OBJETIVO, rondas=70, workers=2):
     print(json.dumps({
         "procesos": len(datos), "entrenamiento": len(train), "workers": workers,
         "metricas": metricas, "errores_modelo_factor_3":
-        int(revision["requiere_revision_estadistica"].sum()),
+        int(revision["error_modelo_factor_alto"].sum()),
         "carpeta": str(SALIDAS.relative_to(ROOT)),
     }, ensure_ascii=False, indent=2))
     return procedencia
