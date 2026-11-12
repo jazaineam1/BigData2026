@@ -43,9 +43,9 @@ pendiente = particiones.groupby(
  "modalidad_de_contratacion"
 ).size()
 resultado = pendiente.compute()   # cálculo real
-pd.testing.assert_series_equal(
- resumen.sort_index(), resultado.sort_index()
-)</code></pre><p class="key">Primero igualdad de respuesta; después tiempos y costos.</p></section>
+# Comparar el significado, no el tipo interno del índice
+assert {str(k): int(v) for k,v in resumen.items()} == \
+       {str(k): int(v) for k,v in resultado.items()}</code></pre><p class="key">Primero igualdad de respuesta; después tiempos y costos.</p></section>
 <section class="slide" id="s22" aria-labelledby="title22" aria-hidden="true"><div class="kicker">22 · Ejecución diferida</div><h1 id="title22">¿Por qué `compute()` importa?</h1><div class="pipeline"><div><b>Lectura</b><small>DataFrame</small></div><span>→</span><div><b>Plan</b><small>transformaciones diferidas</small></div><span>→</span><div><b>Scheduler</b><small>organiza tareas</small></div><span>→</span><div><b>compute()</b><small>resultado</small></div></div><div class="grid two"><div class="panel"><h3>Antes de compute()</h3><p>Dask construye una representación del trabajo necesario.</p></div><div class="panel"><h3>Después de compute()</h3><p>Materializa una salida de pandas, por ejemplo una serie de conteos.</p></div></div><p class="note">El costo de coordinar tareas puede superar el costo de contar mil registros.</p></section>
 <section class="slide" id="s23" aria-labelledby="title23" aria-hidden="true"><div class="kicker">23 · Workers reales</div><h1 id="title23">Dask Distributed dentro del Codespace</h1><pre><code>from dask.distributed import Client
 cliente = Client(
