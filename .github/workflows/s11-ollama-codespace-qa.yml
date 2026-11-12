@@ -1,10 +1,7 @@
 name: S11 · Ollama instalado en Codespaces (QA real)
+# Cost policy: heavyweight environment or model tests are manual only.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/s11-ollama-codespace-qa.yml"
 
 permissions:
   contents: read
