@@ -1,7 +1,21 @@
 name: S13 Codespaces Dask y modelos - QA
-# Heavy integration validation: explicit manual execution only.
+# PR: solo validación ligera. Ejecución integral: manual y aprobación explícita.
 on:
+  pull_request:
+    paths:
+      - 'Presentaciones/s13-de-una-maquina-a-un-cluster.html'
+      - 'Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb'
+      - 'Laboratorios/S13_Codespaces/**'
+      - 'utils/validate_s13_distribuido.py'
+      - '.devcontainer/s13-distribuido/**'
+      - '.github/workflows/s13-codespaces-qa.yml'
   workflow_dispatch:
+    inputs:
+      run_heavy:
+        description: 'Ejecutar integración completa (consume runner; NO 50k/Ollama)'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -17,12 +31,13 @@ jobs:
           python utils/validate_s13_distribuido.py
           python -m py_compile Laboratorios/S13_Codespaces/app_tfidf_unspsc.py
           python -m py_compile Laboratorios/S13_Codespaces/dask_cuando_si.py
+          python -m py_compile Laboratorios/S13_Codespaces/verificar_entorno.py
           python -m unittest discover -s Laboratorios/S13_Codespaces -p 'test_dask_cuando_si.py' -v
           python - <<'PY'
           import json
           from pathlib import Path
           n=json.loads(Path('Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb').read_text())
-          assert 75<=len(n['cells'])<=95
+          assert 55<=len(n['cells'])<=75
           for c in n['cells']:
               if c['cell_type']=='code':
                   compile(''.join(c['source']),'celda_s13','exec')
@@ -32,7 +47,7 @@ jobs:
           print('QA ligero: estructura, rúbrica, decisiones y sintaxis Python OK')
           PY
   s13-reproducible:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && inputs.run_heavy == true
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

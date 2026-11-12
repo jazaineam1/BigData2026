@@ -1,12 +1,12 @@
 const { test, expect } = require('@playwright/test');
 const URL = '/Presentaciones/s13-de-una-maquina-a-un-cluster.html';
 
-test('S13 32 pantallas navegables y documentación Dask', async ({page}) => {
+test('S13 24 pantallas navegables y documentación Dask', async ({page}) => {
   const errors=[]; page.on('pageerror',e=>errors.push(e.message));
   await page.goto(URL+'#s1');
-  await expect(page.locator('.slide')).toHaveCount(32);
+  await expect(page.locator('.slide')).toHaveCount(24);
   await page.locator('#next').click(); await expect(page.locator('#s2')).toBeVisible();
-  await page.goto(URL+'#s32');await expect(page.locator('#s32')).toContainText('PySpark');
+  await page.goto(URL+'#s24');await expect(page.locator('#s24')).toContainText('PySpark');
   expect(errors).toEqual([]);
 });
 
@@ -64,9 +64,9 @@ test('S13 Dask diferido y costo completo en calculadora', async ({page}) => {
 });
 
 test('S13 TF-IDF enseña el objetivo y una tabla real con L2', async ({page}) => {
+  await page.goto(URL+'#s13');
+  await expect(page.locator('#s13')).toContainText('¿Por qué convertimos las palabras');
   await page.goto(URL+'#s14');
-  await expect(page.locator('#s14')).toContainText('¿Por qué convertimos las palabras');
-  await page.goto(URL+'#s15');
   await page.locator('#tfidfToyRun').click();
   await expect(page.locator('#tfidfToyTable table')).toBeVisible();
   await expect(page.locator('#tfidfToyTable th')).toHaveCount(6);
@@ -80,48 +80,42 @@ test('S13 TF-IDF enseña el objetivo y una tabla real con L2', async ({page}) =>
   await expect(page.locator('#tfidfToyTable')).not.toContainText('NaN');
 });
 
-test('S13 búsqueda y ngramas son configurables', async ({page}) => {
-  await page.goto(URL+'#s16');
-  await page.locator('#ngramRun').click();
-  await expect(page.locator('#ngramOut')).toContainText('Términos:');
-  await page.goto(URL+'#s17');
+test('S13 búsqueda por coseno usa el mismo corpus', async ({page}) => {
+  await page.goto(URL+'#s15');
   await page.locator('#cosRun').click();
   await expect(page.locator('#cosOut')).toContainText('Documento');
 });
 
 test('S13 explica caso útil y simulador 2 y 4 workers', async ({page}) => {
+  await page.goto(URL+'#s17');
+  await expect(page.locator('#s17')).toContainText('dask_cuando_si.py');
   await page.goto(URL+'#s20');
-  await expect(page.locator('#s20')).toContainText('dask_cuando_si.py');
-  await page.goto(URL+'#s25');
   await page.locator('#nWorkersSim').selectOption('4');
   await page.locator('#scenarioWorkers').click();
   await expect(page.locator('#scenarioOut')).toContainText('2 tandas');
   await expect(page.locator('#scenarioOut')).toContainText('SIMULACIÓN');
-  await expect(page.locator('#s25')).toContainText('Dask real');
+  await expect(page.locator('#s20')).toContainText('Dask real');
 });
 
-test('S13 cronómetros y hardware quedan correctamente explicados', async ({page}) => {
-  await page.goto(URL+'#s23');
-  await expect(page.locator('#s23')).toContainText('4 vCPU');
-  await expect(page.locator('#s23')).toContainText('Dask, 0,3712 s');
-  await page.goto(URL+'#s24');
-  await expect(page.locator('#s24')).toContainText('Local ganó por 0,6649 s');
-  await page.goto(URL+'#s28');
-  await expect(page.locator('#s28')).toContainText('consulta nueva');
+test('S13 explica los dos modos de Dask y el costo de arranque', async ({page}) => {
+  await page.goto(URL+'#s20');
+  await expect(page.locator('#s20')).toContainText('--modo texto');
+  await page.goto(URL+'#s19');
+  await expect(page.locator('#s19')).toContainText('clúster');
 });
 
-test('S13 no menciona el equipo personal como equipo de estudiantes', async ({page}) => {
+test('S13 no atribuye equipos personales a estudiantes', async ({page}) => {
   await page.goto(URL+'#s5');
   const html=await page.locator('main').innerText();
   expect(html).not.toMatch(/HP del estudiante|tu HP/i);
-  await page.goto(URL+'#s30');
+  await page.goto(URL+'#s22');
   await page.locator('#labCheckRun').click();
   await expect(page.locator('#labFeedback')).toContainText('pasos marcados');
 });
 
 test('S13 pantalla móvil con tabla TF-IDF sin desborde global',async ({page})=>{
   await page.setViewportSize({width:390,height:844});
-  await page.goto(URL+'#s15');
+  await page.goto(URL+'#s14');
   await page.locator('#tfidfToyRun').click();
   await expect(page.locator('#tfidfToyTable table')).toBeVisible();
   const dims=await page.evaluate(()=>({a:document.documentElement.scrollWidth,b:innerWidth}));
@@ -132,15 +126,26 @@ test('S13 pantalla móvil con tabla TF-IDF sin desborde global',async ({page})=>
 test('S13 los ejemplos con workers protegen la creación de procesos', async ({page}) => {
   await page.goto(URL+'#s9');
   await expect(page.locator('#s9')).toContainText('if __name__ == "__main__"');
-  await page.goto(URL+'#s20');
-  await expect(page.locator('#s20')).toContainText('if __name__ == "__main__"');
+  await page.goto(URL+'#s17');
+  await expect(page.locator('#s17')).toContainText('if __name__ == "__main__"');
 });
 
 test('S13 puedo iniciar Streamlit desde la presentación sin otra guía', async ({page}) => {
   await page.goto(URL+'#s8');
   await expect(page.locator('#s8')).toContainText('streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py');
   await expect(page.locator('#s8')).toContainText('8503');
-  await page.goto(URL+'#s21');
-  await expect(page.locator('#s21')).toContainText('PORTS');
-  await expect(page.locator('#s21')).toContainText('Private');
+  await page.goto(URL+'#s18');
+  await expect(page.locator('#s18')).toContainText('PORTS');
+  await expect(page.locator('#s18')).toContainText('Private');
+});
+
+
+test('S13 sincroniza el ejemplo de TF-IDF y el caso de texto real', async ({page}) => {
+  await page.goto(URL+'#s13');
+  await expect(page.locator('#s13')).toContainText('infraestructura computadores');
+  await page.goto(URL+'#s14');
+  await page.locator('#tfidfToyRun').click();
+  await expect(page.locator('#tfidfToyTable')).toContainText('1,6931');
+  await page.goto(URL+'#s20');
+  await expect(page.locator('#s20')).toContainText('--modo texto');
 });

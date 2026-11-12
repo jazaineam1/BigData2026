@@ -13,6 +13,8 @@ import hashlib
 import json
 import os
 import time
+import re
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -69,17 +71,29 @@ def procesar_lote(tarea: dict) -> dict:
     palabras = sum(len(x.split()) for x in textos)
     contenido = "\n".join(textos).encode("utf-8")
     huella = hashlib.sha256(contenido).hexdigest()
+    frecuencias = {}
     if tarea["modo"] == "espera":
         time.sleep(tarea["espera"])
-    else:
+    elif tarea["modo"] == "cpu":
         huella = hashlib.pbkdf2_hmac("sha256", contenido, b"s13", tarea["iteraciones"]).hex()
+    elif tarea["modo"] == "texto":
+        # Transformación REAL de documentos SECOP: contar vocabulario del lote.
+        contador = Counter(
+            palabra for titulo in textos
+            for palabra in re.findall(r"[^\\W_]+", titulo.casefold(), flags=re.UNICODE)
+        )
+        frecuencias = dict(sorted(contador.items()))
+    else:
+        raise ValueError("Modo de procesamiento no reconocido")
     try:
         from distributed import get_worker
         trabajador = get_worker().address
     except (ValueError, ImportError):
         trabajador = "secuencial"
     return {"id": tarea["id"], "registros": len(textos), "palabras": palabras,
-            "sha256": huella, "worker": trabajador}
+            "sha256": huella, "worker": trabajador,
+            "terminos_distintos": len(frecuencias),
+            "frecuencias": frecuencias}
 
 
 def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
@@ -111,7 +125,8 @@ def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
                 time.sleep(mantener_tablero_segundos)  # Fuera del cronómetro.
 
     def firma(rows: list[dict]) -> list[tuple]:
-        return [(r["id"], r["registros"], r["palabras"], r["sha256"])
+        return [(r["id"], r["registros"], r["palabras"], r["sha256"],
+                 tuple(sorted(r["frecuencias"].items())))
                 for r in sorted(rows, key=lambda x: x["id"])]
 
     if firma(secuencial) != firma(paralelos):
@@ -120,7 +135,9 @@ def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
         "caso": trabajos[0]["modo"],
         "descripcion": (
             "espera de servicio EXTERNO SIMULADA, no OCR/ASR real"
-            if trabajos[0]["modo"] == "espera" else "cálculo CPU sintético PBKDF2"
+            if trabajos[0]["modo"] == "espera" else
+            "conteo REAL de términos sobre títulos SECOP" if trabajos[0]["modo"] == "texto"
+            else "cálculo CPU sintético PBKDF2"
         ),
         "tareas": len(trabajos),
         "workers": workers,
@@ -128,6 +145,8 @@ def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
         "cpus_logicas_disponibles": cpus_disponibles(),
         "filas_procesadas": sum(x["registros"] for x in paralelos),
         "palabras_procesadas": sum(x["palabras"] for x in paralelos),
+        "terminos_distintos_por_lote": [x["terminos_distintos"] for x in paralelos],
+        "tareas_por_worker": dict(Counter(x["worker"] for x in paralelos)),
         "workers_reales": [{"direccion": addr,
                             "hilos": data["nthreads"],
                             "limite_memoria_bytes": data["memory_limit"]}
@@ -136,6 +155,7 @@ def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
         "segundos_arranque_y_espera_workers": round(t_inicio, 4),
         "segundos_dask_cluster_caliente": round(t_dask_caliente, 4),
         "segundos_dask_total_incluido_arranque": round(t_total, 4),
+        "alcance_tiempos": "El total Dask incluye arranque, transferencia y cómputo; excluye lectura CSV, escritura JSON y cierre del clúster.",
         "aceleracion_cluster_caliente": round(t_local / t_dask_caliente, 3),
         "aceleracion_extremo_a_extremo": round(t_local / t_total, 3),
         "resultados_identicos": True,
@@ -152,8 +172,8 @@ def main() -> None:
     parser.add_argument("--tareas", type=int, default=8,
                         help="Número de lotes independientes del CSV pequeño.")
     parser.add_argument("--espera", type=float, default=0.60,
-                        help="Segundos de espera externa simulada por lote.")
-    parser.add_argument("--modo", choices=["espera", "cpu"], default="espera")
+                        help="Solo modo espera: segundos de espera externa simulada por lote.")
+    parser.add_argument("--modo", choices=["espera", "texto", "cpu"], default="espera")
     parser.add_argument("--iteraciones", type=int, default=300000,
                         help="Carga sintética si --modo cpu; no es modelo de IA.")
     parser.add_argument("--tablero", action="store_true",
