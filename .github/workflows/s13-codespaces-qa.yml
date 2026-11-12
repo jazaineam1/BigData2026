@@ -16,9 +16,31 @@ permissions:
   contents: read
 
 jobs:
-  s13-reproducible:
+  s13-ligero:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Estructura del cuaderno, diapositivas, LMS y Codespaces (sin instalar dependencias)
+        run: |
+          python utils/validate_s13_distribuido.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          n=json.loads(Path('Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb').read_text())
+          assert len(n['cells'])>=85
+          for c in n['cells']:
+              if c['cell_type']=='code':
+                  compile(''.join(c['source']),'celda_s13','exec')
+          t='\n'.join(''.join(c['source']) for c in n['cells'])
+          assert 'OPCIONES_ARQUITECTURA' in t and 'OPCIONES_LIMITE' in t
+          assert 'Rúbrica observable de práctica' in t
+          print('QA ligero: estructura, rúbrica, decisiones y sintaxis Python OK')
+          PY
+  s13-reproducible:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
