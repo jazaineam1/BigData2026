@@ -81,7 +81,7 @@ test('S11: las 24 diapositivas contienen explicación sustantiva y casos concret
    return {number:i+1,cards:cards.length,paragraphs:paragraphs.map(p=>p.length),
      subtitle:subtitles.length,hasQuestion:!!slide.querySelector('.question span'),
      hasVisual:!!slide.querySelector('.visual .vtitle'),
-     words:(subtitles+' '+paragraphs.join(' ')).split(/\\s+/).filter(Boolean).length};
+     words:(subtitles+' '+paragraphs.join(' ')).split(/\s+/).filter(Boolean).length};
  }));
  for(const screen of audit){
    expect(screen.cards,'Diapositiva '+screen.number).toBe(3);
