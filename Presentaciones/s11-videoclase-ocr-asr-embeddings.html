@@ -57,8 +57,8 @@ respuesta = requests.post(
           "input":{"image":b64}}, timeout=240
 )
 respuesta.raise_for_status()
-vector = respuesta.json()["embeddings"][0]
-print(len(vector))</pre><div class="tile"><h2>¿Qué sucede?</h2><p>Los bytes de la imagen se codifican en Base64 para JSON. Ollama los envía al codificador visual y devuelve <strong>768 números</strong>.</p><p class="muted">Instala el modelo 440m. El 270m es solo texto.</p></div></div></section>
+vector_imagen = respuesta.json()["embeddings"][0]
+print(len(vector_imagen))</pre><div class="tile"><h2>¿Qué sucede?</h2><p>Los bytes de la imagen se codifican en Base64 para JSON. Ollama los envía al codificador visual y devuelve <strong>768 números</strong>.</p><p class="muted">Instala el modelo 440m. El 270m es solo texto.</p></div></div></section>
 <section class="slide" id="s12" aria-label="De la pregunta al ranking por coseno" aria-hidden="true"><p class="kicker">12 · BÚSQUEDA</p><h1>De la pregunta al ranking por coseno</h1><div class="grid two"><pre>pregunta = "viviendas en una ladera"
 consulta = vector("task: search result | query: " + pregunta)
 
