@@ -48,7 +48,7 @@ def main():
     assert "modelo_distribuido_20k.py" in text
     assert "ACTIVAR_MODELO_26K" in text
     assert "xgboost.dask" in text
-    assert "26.000" in html
+    assert "50.000" in html
     assert "id=\"s39\"" in html
     assert config["portsAttributes"]["8502"]["visibility"] == "private"
     index = read("index.html")
