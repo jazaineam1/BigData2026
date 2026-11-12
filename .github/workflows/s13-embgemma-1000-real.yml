@@ -1,17 +1,12 @@
 name: S13 EmbeddingGemma2 CPU 1000 inferencias reales
 on:
-  pull_request:
-    paths:
-      - "Laboratorios/S13_Codespaces/comparar_1000_embeddings_reales.py"
-      - "Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py"
-      - ".github/workflows/s13-embgemma-1000-real.yml"
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   embgemma-1000:
     runs-on: ubuntu-latest
-    timeout-minutes: 95
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
