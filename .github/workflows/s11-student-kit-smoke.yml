@@ -66,6 +66,9 @@ jobs:
           assert "ollama-linux-" in docker and ".tar.zst" in docker and "zstd" in docker
           assert "curl -fsSL https://ollama.com/install.sh" not in docker
           assert Path("iniciar_ollama.sh").exists()
+          # En Codespaces hay /workspaces; en GitHub Actions el helper usa HOME.
+          assert '[[ -d /workspaces/BigData2026 ]]' in Path("iniciar_ollama.sh").read_text()
+          assert 'OLLAMA_MODELS="$HOME/.ollama/models"' in Path("iniciar_ollama.sh").read_text()
           assert Path("preparar_embeddinggemma.sh").exists()
           archivos = list(Path(".").glob("*.ipynb"))
           assert [p.name for p in archivos] == ["01_laboratorio.ipynb"], archivos
