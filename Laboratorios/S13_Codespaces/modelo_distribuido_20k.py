@@ -120,7 +120,7 @@ def crear_variables(tabla: pd.DataFrame) -> pd.DataFrame:
     # CORRECTOS son 80; eliminar TODOS los no dígitos daba 18 (ERROR grave).
     codigos = df["codigo_principal_de_categoria"].astype(str).str.strip()
     segmento = codigos.str.extract(
-        r"^(?:V[0-9]+\\.)?([0-9]{8})$", expand=False
+        r"^(?:V[0-9]+\.)?([0-9]{8})$", expand=False
     )
     df["categoria_sector"] = segmento.str[:2].fillna("Sin categoria")
     for columna in CATEGORICAS:
