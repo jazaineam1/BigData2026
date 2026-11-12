@@ -220,10 +220,12 @@ def ejecutar(sizes=TAMANOS, workers=2, repeticiones=3, rondas=20,
                     }
                     start=time.perf_counter()
                     booster_local=xgb.train(params,dl,num_boost_round=rondas)
+                    txgb_local=time.perf_counter()-start
+                    # La predicción se realiza fuera del intervalo: ambos
+                    # relojes ahora miden exclusivamente el entrenamiento.
                     pred_xgb_local=le.inverse_transform(
                         np.argmax(booster_local.predict(dt),axis=1)
                     )
-                    txgb_local=time.perf_counter()-start
                     pred_idx,txgb,parts=entrenar_xgb_distribuido(
                         client,ztr,ynum,zte,le.classes_,rondas
                     )
@@ -247,7 +249,7 @@ def ejecutar(sizes=TAMANOS, workers=2, repeticiones=3, rondas=20,
                     "segundos_transformacion_dask_mediana":seg_dask,
                     "segundos_fit_predict_linearsvc":round(t_clf,4),
                     "segundos_svd":round(t_svd,4) if t_svd is not None else None,
-                    "segundos_xgboost_local_fit_predict":round(txgb_local,4) if txgb_local is not None else None,
+                    "segundos_xgboost_local_fit":round(txgb_local,4) if txgb_local is not None else None,
                     "segundos_xgboost_dask_fit":round(txgb,4) if txgb is not None else None,
                     "metricas":metricas,
                     "f1_por_clase":classification_report(

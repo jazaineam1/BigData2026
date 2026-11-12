@@ -1,9 +1,5 @@
 name: S13 50k TFIDF mismo modelo 2 vs 4 CPU workers
 on:
-  pull_request:
-    paths:
-      - "Laboratorios/S13_Codespaces/medir_workers_50k.py"
-      - ".github/workflows/s13-50k-workers-qa.yml"
   workflow_dispatch:
 permissions:
   contents: read

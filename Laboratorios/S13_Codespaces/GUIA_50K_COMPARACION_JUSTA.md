@@ -15,7 +15,16 @@ Este nuevo benchmark **reemplaza las comparaciones previas como evidencia de esc
 | 20.000 | 1,5667 | 0,9170 | 0,56585 |
 | 50.000 | 3,0996 | 1,7655 | 0,57385 |
 
-A 50.000, XGBoost sobre los mismos 32 ejes TF-IDF/SVD y los mismos parámetros tardó **0,4488 s local**, **0,9337 s Dask** en su entrenamiento. No mezclar estos tiempos con el tiempo de TF-IDF o LinearSVC. <https://github.com/jazaineam1/BigData2026/actions/runs/43167104999>
+**Auditoría metodológica y nueva medición verificada (12 de noviembre):** el benchmark antiguo (0,4488 s local y 0,9337 s Dask) medía *fit + predict* en local y solo *fit* en Dask: por tanto **no es una comparación válida**. Se corrigió el cronómetro y [la nueva ejecución 43175326562](https://github.com/jazaineam1/BigData2026/actions/runs/43175326562) pasó las pruebas de fuente, mismo test, cuatro tamaños y tiempos de solo entrenamiento.
+
+| Train | XGBoost local: solo fit (s) | XGBoost Dask: solo fit (s) |
+|---:|---:|---:|
+| 1.000 | 0,1164 | 0,8890 |
+| 10.000 | 0,2238 | 0,7349 |
+| 20.000 | 0,3092 | 0,9171 |
+| 50.000 | **0,5816** | **1,2465** |
+
+La ejecución conservó el mismo test temporal de 10.000 IDs (SHA-256: `80be083a7ada228546297769e895c389fd3202115f339c2347ccb418d4a0cbd2`). En ese runner **XGBoost local entrenó más rápido**. Estas cifras excluyen crear la matriz DMatrix, arrancar el clúster, preprocesar, predecir y guardar. Para comparar pipelines completos hace falta medirlos completos, en condiciones repetidas.
 
 **EmbeddingGemma 2:** se generaron los **1.000 embeddings reales**, no un piloto extrapolado. Mismo test 200, mismo train 800, mismo LinearSVC. TF-IDF obtuvo F1 macro **0,45134** y vectorizó en **0,111 s**; EmbeddingGemma 2 obtuvo F1 macro **0,47586** y generó vectores en **119,898 s**. Esta prueba es diferente de la comparación con test fijo de 10.000; no se deben cruzar sus F1. <https://github.com/jazaineam1/BigData2026/actions/runs/43167105003>
 
