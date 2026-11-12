@@ -1,6 +1,6 @@
 # Recuperación de S11 · OCR, transcripción y EmbeddingGemma 2
 
-**Para la videoclase de máximo 60 minutos:** empieza con el [libreto operativo y verificaciones independientes](./VIDEOCLASE_60MIN.md) y la [presentación breve de 13 pantallas](../../Presentaciones/s11-videoclase-ocr-asr-embeddings.html). Para el alumnado, la ruta corta es [Guía del estudiante: ejecutar y verificar](./GUIA_ESTUDIANTE.md). La ruta usa primero `lab.py` y, solo al final, `proyecto.py`; este README queda como referencia completa.
+**Para la videoclase de máximo 60 minutos:** empieza con el [libreto operativo y verificaciones independientes](./VIDEOCLASE_60MIN.md) y la [presentación breve de 13 pantallas](../../Presentaciones/s11-videoclase-ocr-asr-embeddings.html). Para el alumnado, la ruta corta es [Guía interactiva del estudiante: ocho pasos](../../assets/tutoriales/s11-ocr-asr-paso-a-paso.html) y [Guía Markdown reproducible](./GUIA_ESTUDIANTE.md). La ruta usa primero `lab.py` y, solo al final, `proyecto.py`; este README queda como referencia completa.
 
 
 **Big Data 2026-2S — Universidad Central**  
