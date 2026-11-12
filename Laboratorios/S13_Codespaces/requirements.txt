@@ -1,0 +1,7 @@
+pandas>=2.2,<3
+numpy>=1.26,<3
+"dask[dataframe,distributed]>=2025.1,<2027"
+pyarrow>=17,<25
+scikit-learn>=1.5,<2
+bokeh>=3.4,<5
+ipykernel>=6,<8
