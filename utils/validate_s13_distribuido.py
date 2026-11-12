@@ -34,6 +34,17 @@ def main():
     assert c13["status"] == "visible"
     assert "s13-de-una-maquina" in c13["entry"]["url"]
     assert c12["assessment"]["due_at"] == "2026-11-15T23:59:59-05:00"
+    # Detecta errores de sintaxis en la interacción ANTES de ejecutar Playwright.
+    import shutil
+    import subprocess
+    import tempfile
+    script = re.search(r"<script>([\\s\\S]*?)</script>", html)
+    assert script, "Falta script interactivo"
+    if shutil.which("node"):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".js", encoding="utf-8") as temporal:
+            temporal.write(script.group(1))
+            temporal.flush()
+            subprocess.run(["node", "--check", temporal.name], check=True)
     index = read("index.html")
     assert index.count('data-n="13"') == 1
     assert index.count('data-session="13"') == 1
