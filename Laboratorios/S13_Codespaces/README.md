@@ -69,3 +69,14 @@ Los archivos creados van a `Laboratorios/S13_Codespaces/salidas/`, excluida de G
 - 1.000 procesos de `Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv`: 59 columnas, sí incluye descripción y modalidad.
 - La muestra de entrenamiento y las dos clases frecuentes no representan el universo SECOP; clasificar modalidad **no prueba irregularidades**.
 - Dask puede ser más lento que pandas en datos pequeños; no presentar tiempos medidos en un Codespace como ventaja universal.
+
+## Profundización · 20.800 procesos de entrenamiento XGBoost distribuidos
+
+El cuaderno S13 contiene una **ampliación opcional** sobre 26.000 fichas SECOP, con 20.800 procesos para entrenamiento y 5.200 para evaluación temporal. El programa real es [modelo_distribuido_20k.py](./modelo_distribuido_20k.py); la guía [GUIA_MODELO_20K.md](./GUIA_MODELO_20K.md) explica fuente, instalación, XGBoost distribuido verdadero y métricas. No son 26.000 PDF.
+
+```bash
+python Laboratorios/S13_Codespaces/modelo_distribuido_20k.py --rondas 30
+streamlit run Laboratorios/S13_Codespaces/app_modelo_20k.py --server.port 8502
+```
+
+Codespaces → PORTS 8502 **PRIVATE**. Ninguna discrepancia predicha constituye prueba de fraude. El cuaderno y la presentación originales siguen siendo los dos recursos estudiantiles de la sesión.
