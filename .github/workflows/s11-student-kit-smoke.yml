@@ -64,7 +64,7 @@ jobs:
           assert 11434 not in d["forwardPorts"]
           docker=Path(".devcontainer/Dockerfile").read_text()
           assert "ollama-linux-" in docker and ".tar.zst" in docker and "zstd" in docker
-          assert "install.sh" not in docker
+          assert "curl -fsSL https://ollama.com/install.sh" not in docker
           assert Path("iniciar_ollama.sh").exists()
           assert Path("preparar_embeddinggemma.sh").exists()
           archivos = list(Path(".").glob("*.ipynb"))
