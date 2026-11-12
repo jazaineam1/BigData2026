@@ -1,19 +1,12 @@
 name: S13 50k misma prueba TFIDF XGBoost Dask
 on:
-  pull_request:
-    paths:
-      - "Laboratorios/S13_Codespaces/benchmark_50k_test_fijo.py"
-      - "Laboratorios/S13_Codespaces/benchmark_embeddinggemma2_50k.py"
-      - "Laboratorios/S13_Codespaces/test_benchmark_50k.py"
-      - "Laboratorios/S13_Codespaces/GUIA_50K_COMPARACION_JUSTA.md"
-      - ".github/workflows/s13-50k-comparacion-qa.yml"
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   entrenamiento-50k:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -64,40 +57,3 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
-  embgemma2-real-cpu:
-    runs-on: ubuntu-latest
-    timeout-minutes: 28
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Instalar dependencias de ciencia de datos
-        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
-      - name: Instalar Ollama CPU para medir modelo auténtico
-        run: |
-          curl -fsSL https://ollama.com/install.sh -o /tmp/s13-ollama-install.sh
-          sh /tmp/s13-ollama-install.sh
-          ollama --version
-          nohup ollama serve >/tmp/s13-ollama.log 2>&1 &
-          for i in $(seq 1 60); do
-            if curl -fsS http://127.0.0.1:11434/api/tags >/dev/null; then exit 0; fi
-            sleep 2
-          done
-          cat /tmp/s13-ollama.log
-          exit 1
-      - name: Descargar la etiqueta real y específica EmbeddingGemma 2 texto
-        run: ollama pull embeddinggemma-2:270m
-      - name: Medir inferencia CPU sobre fichas SECOP reales del test fijo
-        env:
-          OLLAMA_NUM_PARALLEL: "1"
-        run: |
-          python Laboratorios/S13_Codespaces/benchmark_embeddinggemma2_50k.py --modo piloto --n-piloto 24 --batch 4 --model embeddinggemma-2:270m
-      - uses: actions/upload-artifact@v6
-        if: always()
-        with:
-          name: s13-embeddinggemma2-piloto-cpu-real
-          path: Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma2_piloto_real.json
-          retention-days: 14
-          if-no-files-found: ignore
