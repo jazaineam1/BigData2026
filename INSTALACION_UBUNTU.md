@@ -86,6 +86,7 @@ Estos comandos son para **Ubuntu local**. En **Codespaces**, el programa está d
 
 - **PSM 3:** diseño automático, útil al empezar con un documento completo con varios bloques.
 - **PSM 6:** supone un bloque uniforme de texto, útil en una zona recortada.
+- **PSM 7:** considera el recorte una **única línea**, útil para aislar la palabra VALLE del logotipo.
 - **PSM 11:** intenta encontrar texto disperso, útil en letreros; puede mezclar columnas de tablas.
 
 Ejemplo con la primera página del PDF elegido para S11:
@@ -98,6 +99,39 @@ pagina = Image.open("datos/raw/actas/secop_acta_728704921_pagina1.png")
 texto = pytesseract.image_to_string(pagina, lang="spa", config="--psm 3")
 print(texto)
 ~~~
+
+### Ejemplo fotográfico: logotipo de la Lotería del Valle
+
+En `datos/raw/fotos/eltiempo_023.webp` puedes leer el mensaje «Lotería del VALLE». Para reconocer las letras artísticas primero **recorta la palabra VALLE**, después compara `--psm 6`, `--psm 7` y `--psm 11`. El visor contiene controles para seleccionar región, tamaño y contraste. En el cuaderno puedes modificar `ZONA_VALLE`, `FACTOR` y `USAR_CONTRASTE` para reproducir el procedimiento en Python.
+
+La escala y el contraste pueden mejorar o empeorar la lectura; una confianza alta de Tesseract no sustituye la comprobación con la imagen.
+
+### Diagnosticar la llamada a EmbeddingGemma
+
+Para generar vectores de imágenes, la API recibe un objeto con bytes de imagen codificados en Base64. Es útil normalizar WebP/JPG a JPEG RGB **en memoria** y probar primero una sola imagen. Si Ollama rechaza una petición HTTP, debes mostrar `respuesta.status_code` y `respuesta.text` para conocer el mensaje concreto del servidor. **No cambies a un modelo solo textual para evitar el problema**.
+
+~~~python
+from PIL import Image, ImageOps
+from io import BytesIO
+import base64, requests
+
+with Image.open("datos/raw/fotos/eltiempo_023.webp") as f:
+    foto = ImageOps.exif_transpose(f).convert("RGB")
+    foto.thumbnail((768, 768))
+    tmp = BytesIO()
+    foto.save(tmp, format="JPEG", quality=85)
+imagen64 = base64.b64encode(tmp.getvalue()).decode("ascii")
+r = requests.post(
+    "http://127.0.0.1:11434/api/embed",
+    json={"model": "embeddinggemma-2:440m", "input": {"image": imagen64}},
+    timeout=240,
+)
+if not r.ok:
+    raise RuntimeError(f"HTTP {r.status_code}: {r.text[:1500]}")
+print("Dimensiones:", len(r.json()["embeddings"][0]))
+~~~
+
+**Interpretación:** si obtienes 768 dimensiones puedes continuar; si aparece HTTP 400, la línea del error ahora incluye el motivo comunicado por Ollama. El archivo fuente no se altera durante la conversión.
 
 El archivo PDF original está en `datos/raw/actas_pdf/secop_acta_728704921.pdf`. En la primera página aparecen **ACTA DE INICIO, CONTRATO 006-2026, VALOR DEL CONTRATO, DURACIÓN y FORMA DE PAGO**. Debes comprobar cada respuesta del OCR contra los píxeles, especialmente cuando se mezclan columnas.
 
