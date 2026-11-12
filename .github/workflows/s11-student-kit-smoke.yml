@@ -1,10 +1,7 @@
 name: S11 · Corpus y visor de 122 fuentes (QA)
+# Cost policy: heavyweight environment or model tests are manual only.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/s11-student-kit-smoke.yml"
 
 permissions:
   contents: read
