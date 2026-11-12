@@ -2,14 +2,14 @@
 # Inicio idempotente de Ollama sin systemd; solo escucha dentro de Codespaces.
 set -euo pipefail
 export OLLAMA_HOST=127.0.0.1:11434
-# La carpeta de modelos está en /workspaces: permanece tras reconstruir el contenedor.
+# La carpeta de modelos se guarda en el espacio de trabajo, excluida de Git.
 export OLLAMA_MODELS="${OLLAMA_MODELS:-/workspaces/BigData2026/.cache/ollama/models}"
 mkdir -p "$OLLAMA_MODELS"
 
 if ! command -v ollama >/dev/null 2>&1; then
   echo "ERROR: Ollama no está instalado en ESTE contenedor." >&2
-  echo "Actualiza s11-estudiantes y ejecuta Codespaces: Rebuild Container." >&2
-  echo "Consulta INSTALACION_UBUNTU.md para el arreglo sin reconstruir." >&2
+  echo "Comprueba la configuración .devcontainer/Dockerfile del Codespace." >&2
+  echo "Consulta la guía INSTALACION_UBUNTU.md." >&2
   exit 1
 fi
 
