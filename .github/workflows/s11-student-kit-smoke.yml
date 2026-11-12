@@ -116,7 +116,7 @@ jobs:
           curl -fsS http://127.0.0.1:11434/api/tags >/dev/null
           ollama pull embeddinggemma-2:440m
           ollama list
-      - name: EJECUCIÓN REAL del cuaderno: OCR + 440m + MINDS-14 + Whisper + catálogo
+      - name: "EJECUCIÓN REAL del cuaderno: OCR + 440m + MINDS-14 + Whisper + catálogo"
         env:
           PYTHONUNBUFFERED: "1"
           HF_HUB_DISABLE_TELEMETRY: "1"
