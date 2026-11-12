@@ -73,6 +73,8 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: s13-embeddinggemma2-mismo-modelo-piloto
-          path: |\n            Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embeddinggemma_paridad_piloto.json\n            Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma_1000.json
+          path: |
+            Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embeddinggemma_paridad_piloto.json
+            Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma_1000.json
           retention-days: 14
           if-no-files-found: error
