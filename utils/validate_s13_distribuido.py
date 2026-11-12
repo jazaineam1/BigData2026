@@ -22,9 +22,9 @@ def main():
         assert needed in text, f"Falta material pedagógico: {needed}"
     html = read("Presentaciones/s13-de-una-maquina-a-un-cluster.html")
     slides = re.findall(r'<section class="slide(?: active)?" id="s(\d+)"', html)
-    assert len(slides) == 60
-    assert slides == [str(i) for i in range(1, 61)]
-    for required in ("id=\"decisionBox\"", "id=\"hdfsGrid\"", "id=\"quizFinal\"", "S12", "Codespaces"):
+    assert len(slides) == 32
+    assert slides == [str(i) for i in range(1, 33)]
+    for required in ("id=\"decisionBox\"", "id=\"hdfsGrid\"", "id=\"quizPrompt\"", "id=\"tfidfToyRun\"", "id=\"cosRun\"", "id=\"mapRun\"", "id=\"costRun\"", "id=\"f1Run\"", "S12", "Codespaces"):
         assert required in html, f"Falta en presentación: {required}"
     config = json.loads(read(".devcontainer/s13-distribuido/devcontainer.json"))
     assert "S13" in config["name"]
@@ -50,15 +50,15 @@ def main():
     assert "modelo_distribuido_20k.py" in text
     assert "ACTIVAR_MODELO_26K" in text
     assert "xgboost.dask" in text
-    assert "26.000" in html
-    assert "id=\"s39\"" in html
+    assert "50.000" in html
+    assert "id=\"s32\"" in html
     assert config["portsAttributes"]["8502"]["visibility"] == "private"
     index = read("index.html")
     assert index.count('data-n="13"') == 1
     assert index.count('data-session="13"') == 1
     assert 'href="Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1"' in index
     assert not any("____" in "".join(c["source"]) for c in cells if c["cell_type"] == "code")
-    print("S13 QA estático: OK · 60 diapositivas ·", len(cells), "celdas · Codespaces · LMS")
+    print("S13 QA estático: OK · 32 diapositivas ·", len(cells), "celdas · Codespaces · LMS")
 
 if __name__ == "__main__":
     main()
