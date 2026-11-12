@@ -5,3 +5,6 @@ __pycache__/
 outputs/
 datos/minds14_es-ES.parquet
 datos/raw/voz_minds14.wav
+datos/raw/audios/
+datos/derived/audios/
+datos/manifiestos/audios_minds14.json
