@@ -72,7 +72,7 @@ def vectorizador():
 
 def tfidf_paralelo(client, vec, textos):
     """Tiempo visible de envio de vocabulario, transformacion y recoleccion."""
-    futuro = client.scatter(vec, broadcast=True)
+    futuro = client.scatter(vec, broadcast=True, hash=False)  # key único: sin borrar dependencias de ejecuciones anteriores
     piezas = chunks_lista(textos, CHUNK)
     trabajos = [
         client.submit(transformar_bloque, futuro, chunk, pure=False)
