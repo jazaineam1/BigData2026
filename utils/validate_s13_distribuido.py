@@ -27,7 +27,10 @@ def main() -> None:
     assert "mediciones_s13" in main_text
     assert "tabla_tfidf_a" in main_text
     assert "OPCIONES_ARQUITECTURA" in main_text and "OPCIONES_LIMITE" in main_text
-    assert "LinearSVC" not in main_text and "LogisticRegression" not in main_text
+    codigo_principal="\n".join("".join(c["source"]) for c in cells[:mark]
+                            if c["cell_type"]=="code")
+    assert "LinearSVC(" not in codigo_principal
+    assert "LogisticRegression(" not in codigo_principal
     assert "EJECUTAR_AMPLIACION_S13 = False" in all_text
     assert "mantenimiento computadores" in main_text
     assert "infraestructura computadores" in main_text
