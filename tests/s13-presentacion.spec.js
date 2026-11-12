@@ -119,7 +119,7 @@ test('S13: pantalla móvil sin desborde horizontal y controles utilizables', asy
 
 test('S13: MapReduce rechaza vacíos en vez de inventar ceros', async ({ page }) => {
   await page.goto(URL+'#s7');
-  await page.locator('#mapInput').fill('100,120,\\n10,20');
+  await page.locator('#mapInput').fill('100,120,\n10,20');
   await page.locator('#mapRun').click();
   await expect(page.locator('#mapOut')).toContainText('observación vacía');
 });
@@ -130,10 +130,12 @@ test('S13: palabra constructor funciona en TF-IDF, ngramas y coseno', async ({ p
   await page.locator('#tfidfToyRun').click();
   await expect(page.locator('#tfidfToyOutput')).toContainText('constructor');
   await expect(page.locator('#tfidfToyOutput')).not.toContainText('NaN');
-  await page.goto(URL+'#s16');
+  await page.locator('#next').click();
+  await expect(page.locator('#s16')).toBeVisible();
   await page.locator('#ngramRun').click();
   await expect(page.locator('#ngramOut')).toContainText('constructor');
-  await page.goto(URL+'#s17');
+  await page.locator('#next').click();
+  await expect(page.locator('#s17')).toBeVisible();
   await page.locator('#cosQuery').fill('constructor');
   await page.locator('#cosRun').click();
   await expect(page.locator('#cosOut')).toContainText('Documento A');
