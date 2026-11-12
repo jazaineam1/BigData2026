@@ -63,6 +63,20 @@ En esta pantalla tienes cuatro selecciones de fuentes:
 
 **Antes de usar los audios:** en la barra lateral pulsa **Preparar / comprobar las 30 voces**. El visor descarga un Parquet oficial (~39 MB), verifica SHA-256 y guarda WAV de fuente y derivados PCM16. Los audios no se alojan como binarios en GitHub. También puedes crearlos con las celdas del cuaderno.
 
+
+### Herramienta adicional del mismo visor: búsqueda visual, sin ejecutar trabajo pesado automáticamente
+
+Cuando hayas entendido el OCR, selecciona una fotografía y despliega **«Búsqueda visual: pregunta por las 62 fotografías»**. Esta función permite realizar el experimento de recuperación por significado de manera transparente:
+
+1. Comprueba que Ollama está listo con `bash preparar_embeddinggemma.sh`. Solo prepara un modelo.
+2. Selecciona **1 fotografía** para comprender qué hace el vector; después usa **4 u 8** en la demostración.
+3. Pulsa **Crear o reutilizar índice**. Se envían las imágenes con la API `input: [entrada]` y se guardan en `outputs/visor_vectores_440m.json`.
+4. Escribe una consulta como «lotería», «viviendas en una ladera» o «medicamentos» y pulsa **Buscar por significado**.
+5. Examina los candidatos y sus valores de **similitud coseno**, abre las fotos originales y señala al menos un acierto y una limitación.
+6. Para la práctica autónoma selecciona **62 fotos** solamente si tienes motivos y recursos. Si ya se indexaron y los bytes no cambiaron, la caché evita volver a ejecutar el modelo.
+
+**Importante:** esta búsqueda es **opcional y bajo demanda**. El visor no descarga ni indexa todo al iniciarse. La actividad de aprendizaje sigue dentro de **01_laboratorio.ipynb**, donde se escriben la petición HTTP, el bucle, el cálculo coseno y la comprobación de SHA.
+
 **Total: 122 fuentes** = 62 fotografías + 30 actas + 30 voces. Las 30 vistas PNG de actas no son otros 30 documentos. No presupongas que una foto, un acta y un audio corresponden al mismo acontecimiento.
 
 **Importante:** el visor **no es una página pública de GitHub Pages**; se abre desde tu Codespace privado. No publiques el puerto 8501 ni capturas completas de actas con datos personales.
@@ -75,7 +89,7 @@ Haz doble clic en `01_laboratorio.ipynb`. Lee el texto de una sección, **explic
 |---|---|---|
 | Leer archivos | `Path`, `Image.open`, `display` | Foto original, formato y resolución |
 | OCR de acta | `pytesseract.image_to_string(..., lang="spa")` | Valores contra página SECOP |
-| OCR y PSM | `--psm 6`, `--psm 11`, `--psm 3` | Efecto sobre columnas y texto disperso |
+| OCR y PSM | `--psm 3`, `--psm 6`, `--psm 7`, `--psm 11` | Página, bloque, línea y texto disperso; comparación con original |
 | OCR de fotos | Bucle sobre cuatro fotos | Letreros vs escenas sin caracteres |
 | Embeddings visuales | HTTP `/api/embed` + Base64 | Vector de 768 dimensiones y ranking |
 | Whisper | `WhisperModel("tiny", ...)` | Audio, segmentos, referencia y WER |
