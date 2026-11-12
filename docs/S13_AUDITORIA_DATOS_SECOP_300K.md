@@ -25,6 +25,12 @@ El ejercicio anterior demuestra que XGBoost puede entrenar un modelo entre dos t
 
 **Interpretación rigurosa:** «cero», «no informado», «no aplica», «fase aún no alcanzada» y «error de registro» NO son sinónimos. El archivo CSV no permite distinguir esas razones para todos los registros.
 
+## Códigos UNSPSC auditados para un clasificador alternativo
+
+Se encontraron **297.551 registros con códigos de categoría de formato válido** y **2.449 `UNSPECIFIED`**. Los segmentos con mayor frecuencia son 80 (160.407), 85 (29.235), 93 (11.992), 81 (10.322) y 72 (10.118). Un clasificador sería factible, pero debe evaluarse con F1 macro por el desequilibrio.
+
+En los **6.419 IDs repetidos** no encontramos discrepancias en los tres campos auditados (precio base, modalidad, categoría UNSPSC). Eso **no demuestra igualdad de todas las columnas** y no hace innecesaria la deduplicación.
+
 ## Un error detectado en nuestro propio modelo
 
 Los códigos de categoría llegan como `V1.80111600`: el prefijo `V1.` corresponde a la versión, y el código UNSPSC son ocho dígitos: `80111600`. Extraer los primeros dos dígitos después de eliminar todo lo no numérico daba «18»; el segmento correcto es **80**. También aparecen valores `UNSPECIFIED`, que no deben transformarse en números válidos.
