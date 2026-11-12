@@ -2,8 +2,15 @@
 # Inicio idempotente de Ollama sin systemd; solo escucha dentro de Codespaces.
 set -euo pipefail
 export OLLAMA_HOST=127.0.0.1:11434
-# La carpeta de modelos se guarda en el espacio de trabajo, excluida de Git.
-export OLLAMA_MODELS="${OLLAMA_MODELS:-/workspaces/BigData2026/.cache/ollama/models}"
+# Codespaces conserva los pesos en /workspaces; fuera de él (CI, Ubuntu)
+# usamos el home del usuario en vez de intentar crear /workspaces sin permisos.
+if [[ -n "${OLLAMA_MODELS:-}" ]]; then
+  export OLLAMA_MODELS
+elif [[ -d /workspaces/BigData2026 ]]; then
+  export OLLAMA_MODELS="/workspaces/BigData2026/.cache/ollama/models"
+else
+  export OLLAMA_MODELS="$HOME/.ollama/models"
+fi
 mkdir -p "$OLLAMA_MODELS"
 
 if ! command -v ollama >/dev/null 2>&1; then
