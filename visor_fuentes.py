@@ -1,6 +1,6 @@
 """Visor privado de documentos/fotos/audios para Codespaces S11.
 
-Abre cada PDF, su vista PNG, las 62 fotografías y los 10 WAV autorizados.
+Abre cada PDF, su vista PNG, las 62 fotografías y los 30 WAV autorizados.
 Aprende el procesamiento escribiendo Python en 01_laboratorio.ipynb.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ st.info("Cada acta tiene PDF original y primera página PNG. "
         "Las voces MINDS-14 NO corresponden a noticias de El Tiempo ni a las actas SECOP.")
 
 items = inventario()
-grupos = ["Actas SECOP (30)", "El Tiempo (30)", "Fotografías con ficha (32)", "Voces MINDS-14 (10)"]
+grupos = ["Actas SECOP (30)", "El Tiempo (30)", "Fotografías con ficha (32)", "Voces MINDS-14 (30)"]
 totales = [sum(x["grupo"] == grupo for x in items) for grupo in grupos]
 for col, grupo, n in zip(st.columns(4), grupos, totales):
     col.metric(grupo, n)
@@ -30,10 +30,10 @@ with st.sidebar:
     grupo = st.radio("Colección", grupos)
     buscar = st.text_input("Buscar por número, nombre o artículo", placeholder="Ej. 728490281, 006")
     st.divider()
-    st.subheader("Diez audios reales")
+    st.subheader("Treinta audios reales")
     st.caption("MINDS-14 en español; CC BY 4.0. "
                "La primera descarga trae ~39 MB de Hugging Face y verifica el SHA-256.")
-    if st.button("Preparar / comprobar las 10 voces", use_container_width=True):
+    if st.button("Preparar / comprobar las 30 voces", use_container_width=True):
         try:
             with st.spinner("Descargando, verificando y convirtiendo..."):
                 n = preparar_audios()
@@ -47,7 +47,7 @@ with st.sidebar:
 candidatos = [x for x in items if x["grupo"] == grupo
               and buscar.casefold() in (x["nombre"] + " " + x.get("noticia", "")).casefold()]
 if not candidatos:
-    st.warning("Sin resultados. Si elegiste voces, primero prepara los 10 WAV en la barra lateral.")
+    st.warning("Sin resultados. Si elegiste voces, primero prepara los 30 WAV en la barra lateral.")
     st.stop()
 
 opciones = [x["nombre"] for x in candidatos]
