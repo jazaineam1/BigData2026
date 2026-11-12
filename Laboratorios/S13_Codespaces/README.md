@@ -70,6 +70,10 @@ Los archivos creados van a `Laboratorios/S13_Codespaces/salidas/`, excluida de G
 - La muestra de entrenamiento y las dos clases frecuentes no representan el universo SECOP; clasificar modalidad **no prueba irregularidades**.
 - Dask puede ser más lento que pandas en datos pequeños; no presentar tiempos medidos en un Codespace como ventaja universal.
 
+## Advertencia de calidad de datos
+
+**No interpretamos los ceros de SECOP como ausencia de competencia.** Consulta la [auditoría sobre 300.000 filas](../../docs/S13_AUDITORIA_DATOS_SECOP_300K.md). Este modelo de precio es una demostración de entrenamiento distribuido, NO sirve para declarar sobrecostos. Los códigos UNSPSC `V1.80111600` deben leerse como segmento 80 (no 18). Los archivos de modelos entrenados antes de esa corrección no deben usarse.
+
 ## Profundización · 20.800 procesos de entrenamiento XGBoost distribuidos
 
 El cuaderno S13 contiene una **ampliación opcional** sobre 26.000 fichas SECOP, con 20.800 procesos para entrenamiento y 5.200 para evaluación temporal. El programa real es [modelo_distribuido_20k.py](./modelo_distribuido_20k.py); la guía [GUIA_MODELO_20K.md](./GUIA_MODELO_20K.md) explica fuente, instalación, XGBoost distribuido verdadero y métricas. No son 26.000 PDF.
