@@ -132,3 +132,11 @@ GitHub permite máquinas de distintos tamaños según cuenta/cuota. En `https://
 
 **Guía docente no obligatoria para estudiantes:** [libreto integral de 180 minutos](../../docs/S13_GUIA_DOCENTE_TFIDF_DASK_EMBEDDINGGEMMA.md). Referencia técnica: [mismo test hasta 50k](GUIA_50K_COMPARACION_JUSTA.md).
 
+
+### Resultado medido de una máquina de 4 CPU lógicas
+
+Se verificó local vs Dask 2 vs Dask 4 workers con el **mismo vocabulario, los mismos 50.000+10.000 textos, las mismas matrices y tres repeticiones**: 1,8497 s local; 1,1595 s Dask 2; 1,0259 s Dask 4. Arrancar Dask costó 1,346–1,459 s y no está incluido en esos tiempos de transformación. [Ejecución y artefacto comprobables](https://github.com/jazaineam1/BigData2026/actions/runs/43172013462). Cuatro workers son cuatro procesos en una VM, no cuatro equipos.
+
+```bash
+python Laboratorios/S13_Codespaces/medir_workers_50k.py --reps 3
+```

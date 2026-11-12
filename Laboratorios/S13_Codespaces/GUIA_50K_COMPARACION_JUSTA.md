@@ -100,3 +100,23 @@ La primera ejecución debe generar hasta **60.000 embeddings** y podría ser cos
 - [EmbeddingGemma 2 en Ollama: etiqueta 270m](https://ollama.com/library/embeddinggemma-2/tags)
 - [XGBoost con Dask](https://xgboost.readthedocs.io/en/stable/tutorials/dask.html)
 
+
+## Prueba completada de 4 CPU lógicas: exactamente el mismo trabajo
+
+En GitHub Actions, [ejecución 43172013462](https://github.com/jazaineam1/BigData2026/actions/runs/43172013462), comprobamos la igualdad exacta de las matrices TF-IDF en **50.000 train + 10.000 test**. Un solo vocabulario aprendido previamente, mismos textos, misma máquina con 4 CPU lógicas, tres repeticiones por método:
+
+| Motor / trabajadores | Mediana sólo de transformación | Arranque de clúster |
+|---|---:|---:|
+| scikit-learn local | **1,8497 s** | No aplica |
+| Dask 2 procesos | **1,1595 s** | 1,3460 s |
+| Dask 4 procesos | **1,0259 s** | 1,4587 s |
+
+**Cómo se lee:** Dask 4 ganó sólo la transformación, ahorrando 0,1336 segundos frente a Dask 2.  
+**Qué nos dice:** algunos textos se transforman más rápido en paralelo cuando hay CPU disponible.  
+**Qué NO permite concluir:** que Dask gane el tiempo de extremo a extremo; aquí no se incluyó leer/limpiar 300.000 registros, aprender vocabulario ni iniciar el clúster.  
+**Error común:** creer que cuatro procesos Dask equivalen a cuatro máquinas o que la mejora pequeña compensa pagar una máquina más grande.
+
+```bash
+# Sólo para una máquina que reporte cuatro CPU lógicas:
+python Laboratorios/S13_Codespaces/medir_workers_50k.py --reps 3
+```

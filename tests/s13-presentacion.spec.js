@@ -52,7 +52,7 @@ test('S13: ampliación de 26 mil procesos SECOP y entrenamiento de un solo XGBoo
   await expect(page.locator('#s38')).toContainText('dxgb.train');
   await page.goto(URL + '#s39');
   await expect(page.locator('#s39')).toContainText('embeddinggemma-2:270m');
-  await expect(page.locator('#s39')).toContainText('UNSPSC');
+  await expect(page.locator('#s39')).toContainText('LinearSVC');
 });
 
 test('S13: calculadora de TF-IDF reacciona al contenido editado', async ({page}) => {
@@ -67,8 +67,8 @@ test('S13: calculadora de TF-IDF reacciona al contenido editado', async ({page})
 test('S13: 1k real EmbeddingGemma, 50k fijo y herramientas', async ({page}) => {
   await page.goto(URL+'#s51');
   await expect(page.locator('#s51')).toContainText('50.000');
+  await page.goto(URL+'#s56');
+  await expect(page.locator('#s56')).toContainText('0,47586');
   await page.goto(URL+'#s57');
-  await expect(page.locator('#s57')).toContainText('0,47586');
-  await page.goto(URL+'#s58');
-  await expect(page.locator('#s58')).toContainText('8503');
+  await expect(page.locator('#s57')).toContainText('8503');
 });
