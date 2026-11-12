@@ -17,6 +17,8 @@
 
 **Limitaciones:** segmentación de 5 códigos + resto y evaluación temporal son una tarea pedagógica. El segmento 80 aparece con frecuencia muy superior al resto, por eso `accuracy` sola engaña. Algunas descripciones contienen códigos explícitos, que intentamos enmascarar; falta inspección humana de fuga, clase y calidad de títulos. Son 20.000 **fichas**, no 20.000 PDF.
 
+> **Nueva comparación controlada, ya ejecutada con 50.000 procesos:** [Paridad 50K — mismo LinearSVC y mismo XGBoost local vs Dask](./GUIA_PARIDAD_50K.md). La tabla anterior de 1k/10k/20k empleaba un reservorio tomado de 20k; la nueva muestra se obtuvo de 50k y sus F1 no se pueden comparar como si fueran el mismo conjunto de prueba. Para comparar tiempo entre motores, utiliza el diseño nuevo, que mantiene el mismo modelo y las mismas entradas.
+
 ## Resultados reales verificados en GitHub Actions (12 de noviembre de 2026)
 
 La prueba automatizada pasó con **300.000 filas inspeccionadas, 287.682 fichas elegibles y 20.000 fichas únicas muestreadas**. Se utilizaron dos workers Dask sobre **un solo runner de 4 CPU lógicas**. [Prueba verificable](https://github.com/jazaineam1/BigData2026/actions/runs/43159998957).
