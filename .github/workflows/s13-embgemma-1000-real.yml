@@ -1,0 +1,62 @@
+name: S13 EmbeddingGemma2 CPU 1000 inferencias reales
+on:
+  pull_request:
+    paths:
+      - "Laboratorios/S13_Codespaces/comparar_1000_embeddings_reales.py"
+      - "Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py"
+      - ".github/workflows/s13-embgemma-1000-real.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  embgemma-1000:
+    runs-on: ubuntu-latest
+    timeout-minutes: 95
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Preparar dependencias equivalentes a Codespaces
+        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+      - name: Ollama CPU real, sin sustituir por simulaciones
+        run: |
+          curl -fsSL https://ollama.com/install.sh -o /tmp/ollama-install.sh
+          sh /tmp/ollama-install.sh
+          nohup ollama serve >/tmp/ollama-s13.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:11434/api/tags >/dev/null; then break; fi
+            sleep 2
+          done
+          ollama pull embeddinggemma-2:270m
+          ollama list
+      - name: Ejecutar exactamente 1000 inferencias y evaluar TF-IDF contra Gemma
+        env:
+          OLLAMA_NUM_PARALLEL: "1"
+          OPENBLAS_NUM_THREADS: "1"
+        run: |
+          python -u Laboratorios/S13_Codespaces/comparar_1000_embeddings_reales.py --batch 8
+      - name: Aceptar solo resultados realmente medidos 1000 de 1000
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma_vs_tfidf_1000_real.json")
+          a=json.loads(p.read_text())
+          assert a["n_total"]==1000 and a["train"]==800 and a["test"]==200
+          assert a["no_estimaciones"] is True
+          assert a["embeddinggemma2"]["cache"]["solicitados"]==1000
+          assert a["embeddinggemma2"]["cache"]["nuevos"]==1000
+          assert a["embeddinggemma2"]["features"]==768
+          assert a["misma_muestra_y_clasificador"]
+          print(a["tfidf"],a["embeddinggemma2"])
+          PY
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: s13-embgemma-2-1000-inferencias-cpu-resultados
+          path: |
+            Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma_vs_tfidf_1000_real.json
+            Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma_1000_cache.sqlite3
+          if-no-files-found: ignore
+          retention-days: 14

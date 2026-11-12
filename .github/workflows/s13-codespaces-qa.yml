@@ -32,6 +32,17 @@ jobs:
           python -m pip install nbclient nbformat
       - name: Verificar Codespaces y datasets
         run: python Laboratorios/S13_Codespaces/verificar_entorno.py
+      - name: Validar sintaxis y panel interactivo TF-IDF UNSPSC en el mismo perfil
+        run: |
+          python -m py_compile Laboratorios/S13_Codespaces/app_tfidf_unspsc.py
+          python -m py_compile Laboratorios/S13_Codespaces/cv_dask_mismo_modelo.py
+          python - <<'PY'
+          from streamlit.testing.v1 import AppTest
+          a=AppTest.from_file("Laboratorios/S13_Codespaces/app_tfidf_unspsc.py").run(timeout=120)
+          assert not a.exception, [str(x) for x in a.exception]
+          assert len(a.tabs)==5, len(a.tabs)
+          print("Panel S13: cinco estaciones reales, carga SECOP, TF-IDF y clasificación")
+          PY
       - name: Probar motor y resultados verificables
         run: |
           cd Laboratorios/S13_Codespaces

@@ -85,17 +85,58 @@ streamlit run Laboratorios/S13_Codespaces/app_modelo_20k.py --server.port 8502
 
 Codespaces → PORTS 8502 **PRIVATE**. Ninguna discrepancia predicha constituye prueba de fraude. El cuaderno y la presentación originales siguen siendo los dos recursos estudiantiles de la sesión.
 
-## Benchmark científico · 50.000 procesos, mismo modelo local y distribuido
+## La nueva historia principal de S13: TF-IDF, 50.000 procesos y EmbeddingGemma 2
 
-**[Guía y resultados medidos](./GUIA_PARIDAD_50K.md)** · [Código reproducible](./benchmark_paridad_50k.py).
+**Atención: esta es la práctica central recomendada.** El antiguo módulo de regresión exploratoria de precios se mantiene sólo para mostrar capacidades de XGBoost, NO para estimar sobrecostos. Los ceros de SECOP no constituyen etiquetas válidas. Consulta la [auditoría de 300.000 registros](../../docs/S13_AUDITORIA_DATOS_SECOP_300K.md).
 
-Ya se compararon 1.000, 10.000, 20.000 y 50.000 procesos SECOP reales usando **un solo algoritmo LinearSVC** contra sí mismo (TF-IDF local/Dask con matrices y predicciones idénticas) y XGBoost frente a XGBoost distribuido (iguales datos, 32 componentes SVD, clases y rondas). No compares velocidad de LinearSVC y XGBoost: son modelos diferentes.
+**Recursos estudiantiles (máximo dos):** la [presentación S13 de 60 diapositivas](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1), con calculadora interactiva de TF-IDF en #44, y el [cuaderno S13 de 82 celdas](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). No necesitas volver a S12.
+
+### Estación A: herramienta visual de cinco módulos (puerto 8503 privado)
 
 ```bash
-python Laboratorios/S13_Codespaces/benchmark_paridad_50k.py --sizes 1000 10000 20000 50000 --workers 2 --rondas 30
-ollama pull embeddinggemma-2:270m
-python Laboratorios/S13_Codespaces/benchmark_embeddinggemma_paridad.py --n 16 --batch 4
-python Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py --n 50000 --batch 8
+python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py --server.address 0.0.0.0 --server.port 8503
 ```
 
-La última instrucción es una **corrida potencialmente larga**, no completada en CI. Los tiempos EmbeddingGemma para 50.000 son extrapolaciones de un piloto de 16, no medidas directas. El código almacena vectores SQLite para recuperarse de interrupciones.
+Abre `PORTS → 8503 → Open in Browser`. Módulos: explorar SECOP, TF-IDF a mano, buscar por coseno, entrenar LinearSVC, revisar resultados Dask. El código es visible y editable, no una API misteriosa.
+
+### Estación B: benchmark justo, mismo test para 1k, 10k, 20k y 50k
+
+```bash
+python Laboratorios/S13_Codespaces/benchmark_50k_test_fijo.py --sizes 1000 10000 20000 50000 --workers 2 --repeticiones 3 --rondas 20
+```
+
+Se preservan **10.000 procesos de evaluación fijos** para los cuatro tamaños, una semilla y los parámetros de TF-IDF/LinearSVC. La calidad y tiempo se separan. En una máquina de GitHub Actions con cuatro CPU lógicas, para 50k la transformación de TF-IDF tardó 3,0996 s local vs 1,7655 s Dask, pero su ganancia fue sólo sobre la transformación, no sobre el total.
+
+### Estación C: cuándo NO usar Dask; evaluación cruzada con mismo modelo
+
+```bash
+python Laboratorios/S13_Codespaces/cv_dask_mismo_modelo.py --sizes 1000 10000 20000 50000 --cv 3 --workers 2
+```
+
+Los mismos tres folds son ejecutados secuencialmente, con `joblib` local en dos procesos y con Dask en dos workers. Sus puntuaciones deben ser **idénticas**. La prueba de 50k dio 9,66 s secuencial, 7,30 s joblib y 42,77 s Dask: aquí Dask **no gana**. Explica serialización de datos, costo de scheduler y el principio de no adoptar infraestructura por moda.
+
+### Estación D: EmbeddingGemma 2 realmente medido en 1.000 procesos
+
+```bash
+# Sólo donde corre Ollama (puede ser HP o un Codespace):
+ollama pull embeddinggemma-2:270m
+python Laboratorios/S13_Codespaces/comparar_1000_embeddings_reales.py --batch 8
+```
+
+GitHub Actions ya hizo las **1.000 inferencias reales**: 800 train, 200 test; TF-IDF F1 macro 0,45134 en 0,111 s de vectorización; EmbeddingGemma 2 F1 macro 0,47586 en 119,898 s. **No significa que esos sean los tiempos de tu HP**. Los pesos de Gemma no se reentrenan; sólo se usa su vector como entrada para el mismo LinearSVC. La caché SQLite impide desperdiciar inferencias ya realizadas.
+
+### ¿Cómo elegir más CPU en Codespaces?
+
+GitHub permite máquinas de distintos tamaños según cuenta/cuota. En `https://github.com/codespaces`, abre `...` en tu Codespace → **Change machine type** → selecciona 4-core si está disponible. También `Ctrl+Shift+P → Codespaces: Change Machine Type` en VS Code. No fuerces 4 workers Dask en 2 CPU y no prometas reducción lineal de tiempos. **Cuatro workers dentro de un Codespace siguen siendo una única VM**. Revisa cuota/costo y apaga el entorno al finalizar.
+
+**Guía docente no obligatoria para estudiantes:** [libreto integral de 180 minutos](../../docs/S13_GUIA_DOCENTE_TFIDF_DASK_EMBEDDINGGEMMA.md). Referencia técnica: [mismo test hasta 50k](GUIA_50K_COMPARACION_JUSTA.md).
+
+
+### Resultado medido de una máquina de 4 CPU lógicas
+
+Se verificó local vs Dask 2 vs Dask 4 workers con el **mismo vocabulario, los mismos 50.000+10.000 textos, las mismas matrices y tres repeticiones**: 1,8497 s local; 1,1595 s Dask 2; 1,0259 s Dask 4. Arrancar Dask costó 1,346–1,459 s y no está incluido en esos tiempos de transformación. [Ejecución y artefacto comprobables](https://github.com/jazaineam1/BigData2026/actions/runs/43172013462). Cuatro workers son cuatro procesos en una VM, no cuatro equipos.
+
+```bash
+python Laboratorios/S13_Codespaces/medir_workers_50k.py --reps 3
+```
