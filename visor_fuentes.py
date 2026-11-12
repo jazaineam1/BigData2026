@@ -18,7 +18,8 @@ from ocr_documental import (PSM_EXPLICACION, candidatos_ocr, pdf_paginas,
                             recorte_logo_valle, preparar_region_ocr,
                             detalle_ocr, dibujar_cajas_ocr)
 
-from fuentes import ROOT, AUDIO_MANIFEST, inventario, preparar_audios, sha256
+from fuentes import (ROOT, AUDIO_MANIFEST, inventario, preparar_audios, sha256,
+                     construir_indice_visual, buscar_indice_visual)
 
 st.set_page_config(page_title="S11 · Visor de fuentes", page_icon="📚", layout="wide")
 st.title("📚 S11 · Documentos, imágenes y audios")
@@ -420,6 +421,74 @@ if item["clase"] in ("imagen", "pdf"):
                            "El archivo PNG del ejemplo corresponde solo a la primera.")
             st.write("**Tu turno:** cambia el recorte, la escala y el PSM; "
                      "explica por qué modificaste cada línea.")
+
+
+if item["clase"] == "imagen":
+    st.divider()
+    with st.expander("🔎 Búsqueda visual: pregunta por las 62 fotografías", expanded=False):
+        st.markdown("**Para qué sirve:** EmbeddingGemma 2:440m representa fotografías "
+                    "y preguntas como vectores de 768 dimensiones. "
+                    "La similitud coseno ordena **candidatos**, no confirma noticias.")
+        st.write("**Aprender sin gastar cómputo innecesario:** el visor no calcula ni "
+                 "descarga modelos por sí solo. Tú seleccionas cuántas fotos indexar; "
+                 "una caché reutiliza los vectores si no cambiaron los bytes originales.")
+        st.code("bash preparar_embeddinggemma.sh", language="bash")
+        fotos_visibles = [x["original"] for x in items if x["clase"] == "imagen"]
+        LIMITE = st.select_slider(
+            "Cantidad de fotos (1 para entender, 4 u 8 para clase, 62 para ampliación)",
+            options=[1, 4, 8, 62], value=4, key="limite_indice_s11"
+        )
+        if st.button("Crear o reutilizar índice de fotografías seleccionadas",
+                     type="secondary", use_container_width=True):
+            try:
+                with st.spinner("Indexando fotos faltantes y guardando caché SHA-256..."):
+                    resumen_indice = construir_indice_visual(fotos_visibles, LIMITE)
+                st.session_state["visual_index_summary"] = resumen_indice
+                st.success("Índice listo: " +
+                           str(resumen_indice["seleccionadas"]) + " fotos; " +
+                           str(resumen_indice["calculadas"]) + " calculadas y " +
+                           str(resumen_indice["reutilizadas"]) + " reutilizadas.")
+            except Exception as exc:
+                st.error(f"No se pudo construir el índice: {exc}")
+        if "visual_index_summary" in st.session_state:
+            datos_indice = st.session_state["visual_index_summary"]
+            st.caption(f"Último trabajo: {datos_indice['seleccionadas']} fotos; "
+                       f"{datos_indice['reutilizadas']} recuperadas de caché.")
+        consulta_visual = st.text_input(
+            "Escribe una pregunta que dependa de objetos o escenas",
+            value="viviendas en una ladera",
+            key="pregunta_visual_s11",
+            help="Ejemplos: lotería, viviendas, taquillas, medicamentos. "
+                 "No se utiliza OCR para esta pregunta."
+        )
+        if st.button("Buscar por significado en las fotos indexadas",
+                     use_container_width=True):
+            try:
+                with st.spinner("Calculando vector de consulta y ordenando resultados..."):
+                    sugerencias = buscar_indice_visual(
+                        consulta_visual, fotos_visibles, limite=LIMITE, top_k=6)
+                st.session_state["resultado_visual"] = sugerencias
+            except Exception as exc:
+                st.error(f"No se pudo completar la búsqueda: {exc}")
+        resultados_visuales = st.session_state.get("resultado_visual", [])
+        if resultados_visuales:
+            st.caption("Son similitudes geométricas de vectores, NO probabilidades de verdad.")
+            st.dataframe(pd.DataFrame([
+                {"archivo": r["archivo"], "similitud coseno": r["similitud"]}
+                for r in resultados_visuales
+            ]), hide_index=True, use_container_width=True)
+            columnas = st.columns(3)
+            for indice, encontrado in enumerate(resultados_visuales):
+                with columnas[indice % 3]:
+                    st.image(str(encontrado["ruta"]), use_container_width=True,
+                             caption=f"{encontrado['ruta'].name} · coseno {encontrado['similitud']:.3f}")
+            st.markdown("**Verificación independiente:** abre el archivo candidato con "
+                        "el selector superior, comprueba qué muestra y decide "
+                        "si responde a la pregunta. Después escribe la llamada "
+                        "a Ollama y el cálculo coseno en el único cuaderno.")
+        else:
+            st.caption("Primero indexa al menos una foto y ejecuta una consulta. "
+                       "Los rankings no se fabrican antes de la inferencia.")
 
 st.divider()
 st.markdown("**Para aprender Python:** abre el cuaderno 01_laboratorio.ipynb y escribe "
