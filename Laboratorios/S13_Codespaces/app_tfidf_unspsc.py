@@ -1,6 +1,6 @@
 """S13 · Laboratorio interactivo: TF-IDF y datos SECOP reales.
 
-Cinco módulos para aprender, CAMBIAR código, comprobar y transferir.
+Siete módulos: TF-IDF, búsquedas, Dask realmente ejecutado, costos y transferencia.
 Ningún campo de precio es objetivo, ninguna discrepancia es alerta de fraude.
 Uso: streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py --server.port 8503
 """
@@ -10,6 +10,8 @@ import json
 import math
 import re
 import hashlib
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -244,9 +246,53 @@ metricas=client.gather(trabajos)""",language="python")
                 st.json(payload,expanded=False)
         else:
             st.caption(f"Pendiente de ejecutar: {name}")
-    st.markdown("**Codespaces:** perfil S13, elegir máquina de 2 o 4 CPU según "
-                "disponibilidad/cuota. El proceso Dask corre en una sola VM; "
-                "para distribuir físicamente necesitas workers en otras máquinas.")
+    st.markdown(
+        "**En clase:** ejecuta el caso de ocho lotes SECOP con una espera externa "
+        "SIMULADA por lote. Dask Distributed usa procesos reales, sin servicios "
+        "externos, Ollama ni 50.000 registros. La simulación representa esperar "
+        "una API (OCR/ASR), NO hace OCR real."
+    )
+    st.code(
+        "nproc\n"
+        "lscpu | head -25\n"
+        "free -h\n"
+        "python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2",
+        language="bash",
+    )
+    n_demo=st.selectbox(
+        "Workers a utilizar (procesos de 1 hilo)",
+        [1, 2, 4], index=1,
+        help="Si creas más workers que CPU habilitadas puedes perder rendimiento.",
+    )
+    if st.button("Ejecutar la demostración ligera de Dask", key="demo_real_dask"):
+        programa=Path(__file__).resolve().parent/"dask_cuando_si.py"
+        try:
+            result=subprocess.run(
+                [sys.executable, str(programa), "--workers", str(n_demo)],
+                cwd=ROOT, capture_output=True, text=True, timeout=120,
+            )
+            if result.returncode:
+                st.error("Falló la ejecución. Revisa la salida; no se inventan tiempos.")
+                st.code(result.stderr[-2000:] or result.stdout[-2000:])
+            else:
+                st.success("Dask ejecutó tareas reales y validó que los resultados coinciden.")
+                salida=Path(__file__).resolve().parent/"salidas/dask_demostracion_s13.json"
+                valores=json.loads(salida.read_text(encoding="utf-8"))
+                st.json(valores, expanded=True)
+                st.caption("Los tiempos vienen de ESTE Codespace. Espera simulada, "
+                           "Dask real, no OCR y no extrapolación a otros equipos.")
+                st.download_button(
+                    "Guardar evidencia JSON",
+                    data=json.dumps(valores, ensure_ascii=False, indent=2),
+                    file_name="dask_s13_ejecucion.json", mime="application/json",
+                )
+        except subprocess.TimeoutExpired:
+            st.error("La ejecución superó el límite de 120 s; revisa recursos y workers.")
+    st.markdown(
+        "**Nota:** Dask caliente = workers ya disponibles; Dask total = incluye "
+        "iniciar el scheduler y los procesos. Si gana solo caliente, hay una "
+        "ventaja de concurrencia reutilizable, no necesariamente de primera ejecución."
+    )
 
 
 with tabs[5]:
