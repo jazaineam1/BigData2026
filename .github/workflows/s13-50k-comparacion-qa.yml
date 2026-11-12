@@ -50,7 +50,7 @@ jobs:
               assert r["segundos_transformacion_dask_mediana"]>0
               assert len(r["segundos_transformacion_local_repeticiones"])==3
               assert len(r["segundos_transformacion_dask_repeticiones"])==3
-              assert r["segundos_xgboost_local_fit_predict"]>=0
+              assert r["segundos_xgboost_local_fit"]>=0
               assert r["segundos_xgboost_dask_fit"]>=0
               for nombre,indicadores in r["metricas"].items():
                   assert 0<=indicadores["f1_macro"]<=1, (nombre,indicadores)
