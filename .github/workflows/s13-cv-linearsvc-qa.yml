@@ -1,9 +1,5 @@
 name: S13 laboratorio real CV Dask y 50k procesos
 on:
-  pull_request:
-    paths:
-      - "Laboratorios/S13_Codespaces/cv_dask_mismo_modelo.py"
-      - ".github/workflows/s13-cv-linearsvc-qa.yml"
   workflow_dispatch:
 permissions:
   contents: read
