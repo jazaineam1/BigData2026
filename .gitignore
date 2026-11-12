@@ -8,3 +8,4 @@ datos/raw/voz_minds14.wav
 datos/raw/audios/
 datos/derived/audios/
 datos/manifiestos/audios_minds14.json
+.cache/
