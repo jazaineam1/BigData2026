@@ -215,7 +215,10 @@ def entrenar_xgboost_distribuido(client: Client, X_train, y_train,
     booster = resultado["booster"]
     # Predicciones distribuidas a partir de chunks del conjunto de prueba.
     dtest_X, _ = crear_dask_arrays(X_test, np.zeros(len(X_test), dtype="float32"))
-    pred_log = np.asarray(dxgb.predict(client, booster, dtest_X).compute())
+    # En la inferencia se conserva el MISMO esquema que en el entrenamiento.
+    # Dask Array por si solo no transporta nombres de columnas de XGBoost.
+    dtest = dxgb.DaskDMatrix(client, dtest_X, feature_names=nombres)
+    pred_log = np.asarray(dxgb.predict(client, booster, dtest).compute())
     return booster, pred_log, segundos, int(dX.npartitions)
 
 
