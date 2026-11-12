@@ -11,7 +11,7 @@ permissions:
 jobs:
   inferencia-ollama-real:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -52,10 +52,27 @@ jobs:
           assert set(m["proyecciones_no_mediciones"])=={"1000","10000","20000","50000"}
           print("PILOTO EMBEDDINGGEMMA REAL:",m)
           PY
+      - name: Entrenar realmente LinearSVC sobre 1000 embeddings SECOP del mismo split que TF-IDF
+        run: |
+          python Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py --n 1000 --batch 8 --model embeddinggemma-2:270m
+      - name: Verificar F1 sobre 1000 sin inventar etiquetas
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma_1000.json")
+          m=json.loads(p.read_text(encoding="utf-8"))
+          assert m["n"]==1000 and m["train"]==800 and m["test"]==200
+          assert m["modelo"]=="embeddinggemma-2:270m"
+          assert m["dimensiones"]==768
+          assert 0<=m["metrica_embeddings_linearsvc"]["f1_macro"]<=1
+          assert m["tiempos_ollama"]["nuevos"]>0
+          print("F1 embeddinggemma 1000:",m["metrica_embeddings_linearsvc"])
+          PY
       - name: Guardar mediciones de modelo original como artefacto
         uses: actions/upload-artifact@v6
         with:
           name: s13-embeddinggemma2-mismo-modelo-piloto
-          path: Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embeddinggemma_paridad_piloto.json
+          path: |\n            Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embeddinggemma_paridad_piloto.json\n            Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma_1000.json
           retention-days: 14
           if-no-files-found: error
