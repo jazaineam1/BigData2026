@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -77,7 +78,8 @@ data=cargar()
 tabs=st.tabs([
     "1 · Explorar SECOP","2 · Construir TF-IDF",
     "3 · Buscar documentos","4 · Entrenar clasificador",
-    "5 · Dask y mediciones",
+    "5 · Dask y mediciones","6 · Decidir con costos",
+    "7 · Evidencia reutilizable",
 ])
 
 with tabs[0]:
@@ -179,7 +181,14 @@ with tabs[3]:
     corte=int(len(valid)*.8)
     tr,te=valid.iloc[:corte],valid.iloc[corte:]
     if len(tr)>20 and len(te)>5:
-        v=TfidfVectorizer(max_features=3000,ngram_range=(1,2),
+        ngramas=st.selectbox(
+            "Representación (misma división temporal para comparar)",
+            options=[(1,1),(1,2)],index=1,
+            format_func=lambda x: "Unigramas" if x==(1,1)
+            else "Unigramas y bigramas",
+            help="Modifica una sola decisión sin ver ni cambiar el test.",
+        )
+        v=TfidfVectorizer(max_features=3000,ngram_range=ngramas,
                           min_df=2,strip_accents="unicode")
         xt=v.fit_transform(tr["texto"])
         xte=v.transform(te["texto"])
@@ -191,9 +200,13 @@ with tabs[3]:
         a,b,c=st.columns(3)
         a.metric("Train",len(tr));b.metric("Test posterior",len(te))
         c.metric("F1 macro",f"{macro:.3f}")
-        st.dataframe(pd.DataFrame(classification_report(
+        reporte=classification_report(
             te["clase"],pred,labels=list(ETIQUETAS),
-            output_dict=True,zero_division=0)).T,use_container_width=True)
+            output_dict=True,zero_division=0)
+        st.dataframe(pd.DataFrame(reporte).T,use_container_width=True)
+        st.bar_chart(pd.Series({
+            x:reporte[x]["f1-score"] for x in ETIQUETAS
+        }).rename("F1 por segmento"),y_label="F1 por clase")
         st.caption("F1 macro promedia las categorías por igual; una clase muy "
                    "frecuente no domina la evaluación. Este panel usa sólo "
                    "una muestra pequeña y NO reemplaza el benchmark de 50.000.")
@@ -234,3 +247,93 @@ metricas=client.gather(trabajos)""",language="python")
     st.markdown("**Codespaces:** perfil S13, elegir máquina de 2 o 4 CPU según "
                 "disponibilidad/cuota. El proceso Dask corre en una sola VM; "
                 "para distribuir físicamente necesitas workers en otras máquinas.")
+
+
+with tabs[5]:
+    st.subheader("Simulador de decisión: el clúster también cuesta")
+    st.markdown(
+        "**Speedup (aceleración)** = tiempo local dividido por tiempo distribuido. "
+        "El total distribuido suma el arranque del clúster una sola vez "
+        "si lo reutilizas durante varias ejecuciones. Este simulador usa "
+        "**supuestos editables**, no reemplaza un benchmark extremo a extremo."
+    )
+    a,b,c=st.columns(3)
+    t_local=a.number_input("Local por transformación (s)",min_value=0.001,
+                           value=3.9234,step=0.1,format="%.4f")
+    t_dask=b.number_input("Dask por transformación (s)",min_value=0.001,
+                          value=3.5522,step=0.1,format="%.4f")
+    t_inicio=c.number_input("Arranque del clúster (s)",min_value=0.0,
+                            value=1.35,step=0.05)
+    n_reps=st.slider("Número de transformaciones similares (hipótesis)",
+                     min_value=1,max_value=30,value=1)
+    total_local=t_local*n_reps
+    total_dask=t_inicio+t_dask*n_reps
+    c1,c2,c3=st.columns(3)
+    c1.metric("Local total",f"{total_local:.3f} s")
+    c2.metric("Dask total",f"{total_dask:.3f} s")
+    c3.metric("Aceleración total",f"{total_local/total_dask:.2f}x")
+    if t_local>t_dask:
+        umbral=int(math.floor(t_inicio/(t_local-t_dask)))+1
+        st.info(f"Con estos supuestos, se amortiza al repetir aproximadamente {umbral} veces.")
+    else:
+        st.warning("Con estos supuestos, Dask no recupera el costo inicial.")
+    st.markdown(
+        "**Interpretación:** compara trabajos idénticos y registra CPU, workers, "
+        "RAM y caché. El overhead puede variar con tamaño, hardware y red. "
+        "Dos workers dentro de Codespaces no son dos servidores."
+    )
+    st.code("""# Ajusta con tus medidas, no con una estimación ajena
+total_local = t_local * n_reps
+total_dask = t_inicio + t_dask * n_reps
+speedup = total_local / total_dask
+""",language="python")
+
+with tabs[6]:
+    st.subheader("Reto de transferencia: evidencia estructurada")
+    st.markdown(
+        "Escoge una arquitectura y un límite **después de ejecutar tu cuaderno**. "
+        "No se acepta una respuesta académica abierta; la evidencia formal "
+        "es el código y la traza del estudiante. El JSON descargado es "
+        "una ayuda para guardar tu decisión, no una calificación."
+    )
+    opciones_motor={
+        "Aún no seleccionar":None,
+        "1 · Mantener TF-IDF local":1,
+        "2 · Distribuir TF-IDF con Dask 2 workers":2,
+        "3 · Medir pipeline completo antes de decidir":3,
+    }
+    opciones_limite={
+        "Aún no seleccionar":None,
+        "1 · El experimento excluyó arranque del clúster":1,
+        "2 · La muestra no representa todo SECOP":2,
+        "3 · UNSPSC puede estar mal declarado y hay desbalance":3,
+        "4 · Los tiempos son de otro hardware":4,
+    }
+    seleccion_motor=st.selectbox("Arquitectura",list(opciones_motor))
+    seleccion_limite=st.selectbox("Límite verificable",list(opciones_limite))
+    st.markdown(
+        "**Criterios formativos (10 puntos):** código/commit (2), "
+        "tabla TF-DF-IDF (2), F1 por clase (2), tiempos comparables (2), "
+        "elección y límite estructurados (2). No modifica el PDA."
+    )
+    if (opciones_motor[seleccion_motor] is not None
+            and opciones_limite[seleccion_limite] is not None):
+        ids="\\n".join(data["id_del_proceso"].astype(str))
+        evidencia={
+            "sesion":13,
+            "muestra_sha256_ids":hashlib.sha256(ids.encode("utf-8")).hexdigest(),
+            "arquitectura_codigo":opciones_motor[seleccion_motor],
+            "arquitectura":seleccion_motor,
+            "limite_codigo":opciones_limite[seleccion_limite],
+            "limite":seleccion_limite,
+            "protocolo":"muestra pequeña SECOP; decisiones requieren comprobar ejecución propia",
+        }
+        st.json(evidencia,expanded=False)
+        st.download_button(
+            "Descargar mi decisión estructurada (JSON)",
+            data=json.dumps(evidencia,ensure_ascii=False,indent=2),
+            file_name="s13_decision_estructurada.json",
+            mime="application/json",
+        )
+    else:
+        st.info("Faltan las dos decisiones; no se inventa una respuesta ni se exporta evidencia incompleta.")
