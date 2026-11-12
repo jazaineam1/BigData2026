@@ -33,3 +33,9 @@ Los WAV se extraen en ejecución dentro de la carpeta ignorada `datos/raw`. El a
 ## Separación de modalidades
 
 No unas una fotografía con un audio porque ambos estén dentro del mismo proyecto. Necesitas IDs documentales compartidos, metadatos y un vínculo verificable. Los embeddings solo ayudan a recuperar candidatos similares, no a justificar una relación causal ni histórica.
+
+## Corpus ampliado para S11
+
+El kit actual conserva **62 fotografías originales** de dos conjuntos (30 de El Tiempo sin crédito individual contrastado y 32 del inventario con ficha), **30 actas SECOP** con PDF completo y la primera página PNG, y permite preparar **10 voces reales** de una grabación por cada intención distinta de MINDS-14 es-ES. Los WAV no se agregan como archivos binarios al repositorio: se descargan desde su fuente con comprobación SHA-256 y se guardan en directorios ignorados por Git.
+
+La aplicación **visor_fuentes.py** permite examinar visualmente cada archivo, y el cuaderno **02_lotes_102_fuentes.ipynb** permite analizarlos con código Python escrito por estudiantes. Las vistas PNG no representan documentos extra: el inventario documental es de 30 actas.
