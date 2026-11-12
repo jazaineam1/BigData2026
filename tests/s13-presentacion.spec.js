@@ -86,7 +86,7 @@ test('S13: fuga, F1 y análisis medido 50k', async ({ page }) => {
   await page.goto(URL + '#s23');
   await page.locator('#benchmarkRun').click();
   await expect(page.locator('#benchmarkOut')).toContainText('50.000 train');
-  await expect(page.locator('#benchmarkOut')).toContainText('no incluye');
+  await expect(page.locator('#benchmarkOut')).toContainText('No incluye');
 });
 
 test('S13: decisiones, checklist y enlaces coherentes', async ({ page }) => {
