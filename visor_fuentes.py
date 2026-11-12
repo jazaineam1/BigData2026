@@ -6,6 +6,7 @@ Aprende el procesamiento escribiendo Python en 01_laboratorio.ipynb.
 from __future__ import annotations
 
 import time
+import json
 from pathlib import Path
 
 import streamlit as st
@@ -385,6 +386,30 @@ if item["clase"] in ("imagen", "pdf"):
             else:
                 st.info("Cuando no hay letras útiles, cambia a búsqueda "
                         "visual por embeddings para encontrar escenas.")
+            # Ficha portable: cada candidato mantiene documento, página, región,
+            # parámetros y hash; no convierte una lectura probable en verdad.
+            ficha_evidencia = {
+                "fuente": str(original.relative_to(ROOT)),
+                "sha256_fuente": sha256(original),
+                "pagina": pagina_actual,
+                "region_px": list(caja),
+                "parametros": {
+                    "psm": psm, "escala": escala,
+                    "tratamiento": tratamiento, "margen": margen
+                },
+                "motor": "Tesseract OCR (idioma spa)",
+                "candidatos": candidatos_ocr(resultado["texto"])
+                if item["clase"] == "pdf" else [],
+                "revision_humana": "PENDIENTE: abrir el original y comprobar cada lectura",
+                "advertencia": "No compartir campos personales sin revisión y autorización."
+            }
+            st.download_button(
+                "Descargar ficha de evidencia (JSON, revisión privada)",
+                data=json.dumps(ficha_evidencia, ensure_ascii=False, indent=2).encode("utf-8"),
+                file_name=f"{original.stem}_evidencia.json",
+                mime="application/json",
+                key=f"ficha_{original.name}_{pagina_actual}"
+            )
         with tab_python:
             st.write("Abre el único cuaderno 01_laboratorio.ipynb y "
                      "prueba estas operaciones por tu cuenta.")
