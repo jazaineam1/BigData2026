@@ -39,5 +39,56 @@ class VisorFuentesTest(unittest.TestCase):
             self.assertTrue(item["original"].is_file())
 
 
+
+class OCRDocumentalTest(unittest.TestCase):
+    def test_psm_explica_tres_opciones(self):
+        from ocr_documental import PSM_EXPLICACION
+        self.assertEqual(set(PSM_EXPLICACION), {3, 6, 11})
+        self.assertIn("columnas", PSM_EXPLICACION[3][1])
+        self.assertIn("bloque", PSM_EXPLICACION[6][1])
+        self.assertIn("dispersos", PSM_EXPLICACION[11][1])
+
+    def test_pdf_seleccion_y_pagina_dos_real(self):
+        import io
+        from PIL import Image
+        from ocr_documental import pdf_paginas, renderizar_pagina, texto_integrado_pdf
+        archivo = ROOT / "datos/raw/actas_pdf/secop_acta_728704921.pdf"
+        self.assertTrue(archivo.is_file())
+        self.assertGreaterEqual(pdf_paginas(archivo), 2)
+        png = renderizar_pagina(str(archivo), 2, 130)
+        self.assertTrue(png.startswith(b"\x89PNG\r\n\x1a\n"))
+        with Image.open(io.BytesIO(png)) as imagen:
+            imagen.verify()
+        self.assertIsInstance(texto_integrado_pdf(archivo, 1), str)
+
+    def test_candidatos_con_evidencia_sin_inventar(self):
+        from ocr_documental import candidatos_ocr, referencia_doc_728704921
+        muestra = (
+            "ACTA DE INICIO\nNo. DE CONTRATO: 006 - 2026\n"
+            "VALOR DEL CONTRATO: CATORCE MILLONES ($14.760.000,00)\n"
+            "DURACION DEL CONTRATO: SEIS (06) MESES\n"
+            "FORMA DE PAGO: SEIS (06) PAGOS PARCIALES ($2.460.000,00)\n"
+        )
+        filas = {x["Campo"]: x for x in candidatos_ocr(muestra)}
+        self.assertIn("14.760.000", filas["Valor del contrato"]["Lectura candidata"])
+        self.assertIn("2.460.000", filas["Forma de pago"]["Lectura candidata"])
+        self.assertIn("006", filas["Número de contrato"]["Lectura candidata"])
+        self.assertEqual(filas["Tipo documental"]["Lectura candidata"],
+                         "Acta de inicio (texto detectado)")
+        ausentes = {x["Campo"]: x for x in candidatos_ocr("texto sin etiquetas")}
+        self.assertEqual(ausentes["Valor del contrato"]["Lectura candidata"], "No detectado")
+        pdf = ROOT / "datos/raw/actas_pdf/secop_acta_728704921.pdf"
+        referencia = referencia_doc_728704921(pdf, 1)
+        self.assertEqual(referencia["Valor del contrato"], "$14.760.000 COP")
+        self.assertIsNone(referencia_doc_728704921(pdf, 2))
+
+    def test_ocr_real_primera_pagina_no_vacia(self):
+        import pytesseract
+        from PIL import Image
+        path = ROOT / "datos/raw/actas/secop_acta_728704921_pagina1.png"
+        with Image.open(path) as imagen:
+            texto = pytesseract.image_to_string(imagen, lang="spa", config="--psm 3")
+        self.assertGreater(len(texto), 500)
+
 if __name__ == "__main__":
     unittest.main()
