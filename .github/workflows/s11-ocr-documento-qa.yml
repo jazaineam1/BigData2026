@@ -1,0 +1,38 @@
+name: S11 · OCR documental SECOP (prueba rápida)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/s11-ocr-documento-qa.yml"
+permissions:
+  contents: read
+jobs:
+  verificar-acta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Descargar entorno real de estudiantes
+        uses: actions/checkout@v4
+        with:
+          ref: s11-estudiantes
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar OCR español y utilidades PDF
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa poppler-utils
+          python -m pip install "Pillow>=10,<13" "pytesseract>=0.3.13,<0.4"
+      - name: Validar sintaxis y pruebas reales de primera y segunda página
+        run: |
+          python -m py_compile fuentes.py visor_fuentes.py ocr_documental.py test_visor.py
+          python -m unittest -v test_visor
+          python - <<'PY'
+          from pathlib import Path
+          from ocr_documental import pdf_paginas, referencia_doc_728704921
+          pdf=Path("datos/raw/actas_pdf/secop_acta_728704921.pdf")
+          assert pdf_paginas(pdf)>=2
+          assert referencia_doc_728704921(pdf,1)["Contrato"]=="006-2026"
+          print("OK: PDF completo, navegación de páginas y cotejo documental")
+          PY
