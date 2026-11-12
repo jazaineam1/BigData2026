@@ -21,7 +21,7 @@ PSM_EXPLICACION = {
         "Tesseract trata el contenido como un único bloque. "
         "Pruébalo cuando recortes una zona con un párrafo o una tabla simple."),
     11: ("11 — Texto disperso: encuentra fragmentos aislados",
-         "Busca palabras donde aparezcan sin reconstruir bien su orden de lectura. "
+         "Busca textos dispersos donde aparezcan sin reconstruir bien su orden de lectura. "
          "Puede servir para letreros y fotos, pero mezclar columnas en un acta."),
 }
 
