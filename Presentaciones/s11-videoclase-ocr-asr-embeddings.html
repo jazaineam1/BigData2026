@@ -112,7 +112,7 @@ if not respuesta.ok:
         f"{respuesta.text[:1200]}"
     )
 vector = respuesta.json()["embeddings"][0]
-print(len(vector))  # Esperado: 768</pre><div class="tile"><h2>Comprueba una imagen primero</h2><p><strong>HTTP 400</strong> significa que el servidor rechazó la solicitud. No basta para determinar si fue formato, versión, modelo o entrada.</p><p>En el Codespace, el cambio comprobado fue <code>"input": [entrada]</code>. Envíalo como lista tanto para una imagen como para texto. Mantén el mensaje del servidor para diagnosticar otros errores.</p><p class="note">En el cuaderno: prueba 1 → 4 → 8 → 62 imágenes. No ejecutes todo el lote antes de comprobar un archivo.</p></div></div></section>
+print(len(vector))  # Esperado: 768</pre><div class="tile"><h2>Comprueba una imagen primero</h2><p><strong>HTTP 400</strong> significa que el servidor rechazó la solicitud. No basta para determinar si fue formato, versión, modelo o entrada.</p><p>Usa <code>"input": [entrada]</code> para mantener un formato uniforme. Envíalo como lista tanto para una imagen como para texto. Mantén el mensaje del servidor para diagnosticar otros errores.</p><p class="note">En el cuaderno: prueba 1 → 4 → 8 → 62 imágenes. No ejecutes todo el lote antes de comprobar un archivo.</p></div></div></section>
 <section class="slide" id="s18" aria-label="De la pregunta al ranking por coseno" aria-hidden="true"><p class="kicker">18 · BÚSQUEDA</p><h1>De la pregunta al ranking por coseno</h1><div class="grid two"><pre>pregunta = "viviendas en una ladera"
 # vector(...) prepara el JSON con "input": [entrada]
 consulta = vector("task: search result | query: " + pregunta)
