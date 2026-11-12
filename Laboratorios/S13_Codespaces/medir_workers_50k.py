@@ -27,7 +27,7 @@ def transformar_dask(client, vec, textos):
 
 
 def medir(reps=3):
-    pool,test,orden,meta=generar_conjuntos()
+    if (os.cpu_count() or 0)<4:\n        raise RuntimeError("Benchmark 4 workers exige Codespace/runner de al menos 4 CPU lógicas.")\n    pool,test,orden,meta=generar_conjuntos()
     train=pool.iloc[orden[:50000]]
     x=train.texto.tolist()+test.texto.tolist()
     vec=vectorizador()
