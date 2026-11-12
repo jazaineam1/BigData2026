@@ -1,0 +1,59 @@
+name: S11 · Ollama instalado en Codespaces (QA real)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/s11-ollama-codespace-qa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  docker-ollama:
+    name: Construir devcontainer e iniciar API de Ollama
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: s11-estudiantes
+      - name: Validar configuración, comandos y scripts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path(".devcontainer/devcontainer.json").read_text())
+          assert x["postStartCommand"]=="bash iniciar_ollama.sh; bash abrir_visor.sh"
+          assert 8501 in x["forwardPorts"] and 11434 not in x["forwardPorts"]
+          assert x["containerEnv"]["OLLAMA_HOST"]=="127.0.0.1:11434"
+          assert x["containerEnv"]["OLLAMA_MODELS"].startswith("/workspaces/")
+          for p in ("iniciar_ollama.sh","preparar_embeddinggemma.sh"):
+              assert Path(p).is_file()
+          PY
+          bash -n iniciar_ollama.sh preparar_embeddinggemma.sh
+      - name: Construir la imagen REAL de Codespaces con el paquete oficial .tar.zst
+        run: |
+          docker build --progress=plain --tag s11-ollama-codespace \
+            --file .devcontainer/Dockerfile .devcontainer
+      - name: Arrancar Ollama dentro del contenedor SIN systemd
+        run: |
+          docker run --rm --name s11-ollama-check \
+            --env OLLAMA_HOST=127.0.0.1:11434 \
+            s11-ollama-codespace bash -ceu '
+              command -v ollama
+              test -x /usr/bin/ollama
+              ollama serve >/tmp/ollama-s11.log 2>&1 &
+              pid=$!
+              trap "kill $pid 2>/dev/null || true" EXIT
+              for n in $(seq 1 45); do
+                if curl -fsS --max-time 2 http://127.0.0.1:11434/api/tags > /tmp/tags.json; then
+                  python3 -c "import json; data=json.load(open(\"/tmp/tags.json\")); assert \"models\" in data"
+                  echo "OK: Ollama instalado y API activa sin systemd"
+                  exit 0
+                fi
+                sleep 2
+              done
+              tail -n 80 /tmp/ollama-s11.log
+              exit 1
+            '
