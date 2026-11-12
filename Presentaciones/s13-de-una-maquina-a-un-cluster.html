@@ -25,7 +25,10 @@ print(conteo.sort_index())</code></pre><p><strong>groupby:</strong> agrupa filas
 d = dd.from_pandas(a, npartitions=4)
 pendiente = d.groupby('modalidad_de_contratacion').size()
 conteo_dask = pendiente.compute().sort_index()
-pd.testing.assert_series_equal(conteo, conteo_dask)</code></pre><p><strong>npartitions:</strong> número de fragmentos lógicos. <strong>compute:</strong> dispara las tareas diferidas y devuelve resultado a memoria local.</p><p><b>Prueba crucial:</b> el <code>assert</code> certifica el mismo resultado, no que Dask sea más rápido.</p></article></div><aside class="interpret"><b>Interpretar</b><p>Cómo se lee: mismo conteo por modalidad. Qué nos dice: motores equivalentes para esta agregación. Qué NO permite concluir: ventaja universal de tiempo. Error: confundir API similar con ejecución idéntica.</p></aside></section>
+# Normaliza tipos de índice: Arrow string en Dask y object en pandas.
+def como_conteos(s):
+    return {str(clave): int(valor) for clave, valor in s.items()}
+assert como_conteos(conteo) == como_conteos(conteo_dask)</code></pre><p><strong>npartitions:</strong> número de fragmentos lógicos. <strong>compute:</strong> dispara las tareas diferidas y devuelve resultado a memoria local.</p><p><b>Prueba crucial:</b> el <code>assert</code> certifica el mismo resultado, no que Dask sea más rápido.</p></article></div><aside class="interpret"><b>Interpretar</b><p>Cómo se lee: mismo conteo por modalidad. Qué nos dice: motores equivalentes para esta agregación. Qué NO permite concluir: ventaja universal de tiempo. Error: confundir API similar con ejecución idéntica.</p></aside></section>
 <section class="slide" id="s11" aria-hidden="true"><div class="kicker">S13 · 11 · Ejecución diferida</div><h1>Dask: crear un grafo no equivale a ejecutar</h1><div class="cols"><article class="panel "><h2>La idea en tres pasos</h2><ol><li><b>Construir:</b> describe operaciones (<code>read → filter → groupby → sum</code>).</li><li><b>Planificar:</b> un scheduler identifica dependencias y workers libres.</li><li><b>Materializar:</b> <code>compute()</code> o <code>persist()</code> inicia el trabajo y espera o conserva resultados.</li></ol><p><strong>Persistencia:</strong> <code>persist()</code> busca mantener resultados distribuidos, útiles cuando se reutilizan varias veces. No debe confundirse con escribir Parquet a disco.</p></article><article class="panel "><h2>Herramienta 6 · Grafo vivo de tareas</h2><div class="step-graph" id="lazyGraph"><div class="nodebox">Leer cuatro particiones</div><span>→</span><div class="nodebox">Filtrar</div><span>→</span><div class="nodebox">Agrupar</div><span>→</span><div class="nodebox">Reducir</div></div><div class="choices"><button type="button" id="lazyBuild">Construir grafo</button><button type="button" id="lazyCompute">compute()</button><button type="button" id="lazyReset">Restablecer</button></div><div id="lazyOut" class="output" aria-live="polite">Grafo descrito, todavía no se ha ejecutado.</div><p class="micro">Simulación conceptual. En Codespaces, el tablero Dask 8787 muestra tareas, workers y tiempos reales.</p></article></div><aside class="interpret"><b>Qué NO hace</b><p><code>compute()</code> no convierte automáticamente un cálculo de dos segundos en Big Data; distribuir introduce transferencias, serialización y coordinación.</p></aside></section>
 <section class="slide" id="s12" aria-hidden="true"><div class="kicker">S13 · 12 · Costo de coordinar</div><h1>¿Cuándo el paralelismo compensa?</h1><div class="cols"><article class="panel "><h2>Modelo mental: ganancia y costo</h2><p>Una operación local requiere <strong>T<sub>L</sub></strong>. Distribuir en workers cuesta <strong>T<sub>arranque</sub> + T<sub>envío</sub> + T<sub>cómputo</sub> + T<sub>reunión</sub></strong>. Aun con workers rápidos, el costo fijo puede dominar trabajos pequeños.</p><p><strong>Speedup</strong> (aceleración) = tiempo local ÷ tiempo distribuido. Mayor que 1 favorece distribuido; menor que 1 indica que perdió.</p><div class="tip">Ejecutar 4 workers en una VM de 2 CPU suele generar competencia por CPU/RAM, no cuatro veces la potencia.</div></article><article class="panel "><h2>Herramienta 7 · Calculadora de amortización</h2><label>Tiempo local (s) <input type="number" id="costLocal" value="3.92" min="0.01" step=".1"></label><label>Transformación distribuida (s) <input type="number" id="costDask" value="3.55" min="0.01" step=".1"></label><label>Arranque + coordinación adicional (s) <input type="number" id="costStart" value="1.35" min="0" step=".05"></label><label>Operaciones repetidas <input type="number" id="costRepeat" value="1" min="1" max="10000" step="1"></label><button type="button" id="costRun">Calcular equilibrio</button><div id="costOut" class="output" aria-live="polite">Escenario ilustrativo, ajustable. No es benchmark del HP.</div><p class="micro">La fórmula supone que los tiempos por operación son constantes y el clúster se abre una vez. No incluye variaciones de carga ni red: úsala para razonar, no para predecir facturación.</p></article></div><aside class="interpret"><b>Pregunta</b><p>Si el ahorro por ejecución es 0,37 s y arrancar cuesta 1,35 s, ¿cuántas operaciones repetidas amortizan ese arranque?</p></aside></section>
 <section class="slide" id="s13" aria-hidden="true"><div class="kicker">S13 · 13 · Plantear el modelo</div><h1>Entradas, objetivo y separación temporal</h1><div class="cols"><article class="panel "><h2>Qué aprende realmente LinearSVC</h2><p><strong>Clasificación supervisada:</strong> dado un texto de entrada <em>X</em> y una categoría administrativa conocida <em>y</em>, aprende una frontera que ayuda a predecir el segmento de un proceso nuevo.</p><div class="table-wrap"><table><thead><tr><th>Objeto</th><th>Ejemplo</th><th>Riesgo</th></tr></thead><tbody><tr><td>X</td><td>Título y descripción limpia</td><td>Contener el código UNSPSC literal</td></tr><tr><td>y</td><td>80 / 85 / 93 / 81 / 72 / OTRAS</td><td>Clases desbalanceadas o etiqueta incorrecta</td></tr><tr><td>Train</td><td>Procesos de fechas anteriores</td><td>Aprender vocabulario solo aquí</td></tr><tr><td>Test</td><td>10.000 procesos posteriores</td><td>Contaminarlo al ajustar el modelo</td></tr></tbody></table></div></article><article class="panel "><h2>Diseño de validación interpretable</h2><p><strong>Corte temporal:</strong> entrenamos con procesos antiguos y evaluamos con posteriores para aproximar un escenario de producción. El test conserva exactamente los mismos IDs en las cuatro comparaciones (1k, 10k, 20k, 50k).</p><pre><code>train = procesos_antiguos.iloc[indices_train]
@@ -163,7 +166,9 @@ print(len(vector))  # 768 dimensiones</code></pre><p>Si Ollama está en tu HP, <
     if(raw.length<2||raw.length>20){out('mapOut','Utiliza entre 2 y 20 lotes, uno por línea.');return;}
     const parts=[];
     for(const line of raw){
-      const a=line.split(',').map(x=>Number(x.trim()));
+      const fields=line.split(',').map(x=>x.trim());
+      if(fields.some(x=>x.length===0)){out('mapOut','Hay una observación vacía: quita la coma sobrante o completa el número; no se imputa cero.');return;}
+      const a=fields.map(Number);
       if(!a.length||a.length>300||a.some(x=>!Number.isFinite(x))){out('mapOut','Cada lote debe contener entre 1 y 300 números válidos separados por comas.');return;}
       parts.push({sum:a.reduce((u,v)=>u+v,0),n:a.length});
     }
@@ -214,11 +219,11 @@ print(len(vector))  # 768 dimensiones</code></pre><p>Si Ollama está en tu HP, <
   function corpusInfo(){
     const tokens=docs().map(tokenize);
     const terms=[...new Set(tokens.flat())].sort((a,b)=>a.localeCompare(b,'es'));
-    const df={};terms.forEach(t=>df[t]=tokens.filter(doc=>doc.includes(t)).length);
+    const df=Object.create(null);terms.forEach(t=>df[t]=tokens.filter(doc=>doc.includes(t)).length);
     return {tokens,terms,df};
   }
   const vector=(tokens,terms,df,N)=>{
-    const counts={};tokens.forEach(t=>counts[t]=(counts[t]||0)+1);
+    const counts=Object.create(null);tokens.forEach(t=>counts[t]=(counts[t]||0)+1);
     const weights=terms.map(t=>(counts[t]||0)*idf(N,df[t]));
     const norm=Math.hypot(...weights);
     return {counts,weights:weights.map(x=>norm?x/norm:0),norm};
@@ -239,7 +244,7 @@ print(len(vector))  # 768 dimensiones</code></pre><p>Si Ollama está en tu HP, <
       const words=[...t];if(nMax===2)for(let i=0;i<t.length-1;i++)words.push(t[i]+' '+t[i+1]);
       return new Set(words);
     });
-    const freq={};sets.forEach(s=>s.forEach(w=>freq[w]=(freq[w]||0)+1));
+    const freq=Object.create(null);sets.forEach(s=>s.forEach(w=>freq[w]=(freq[w]||0)+1));
     const found=Object.keys(freq).filter(k=>freq[k]>=minDf).sort();
     out('ngramOut','Ejemplo de un corpus de 3 documentos; ngram_range=(1,'+nMax+'), min_df='+minDf+'.\nTérminos: '+found.length+'\n'
       +(found.join(' · ')||'El umbral eliminó todos los términos.')
