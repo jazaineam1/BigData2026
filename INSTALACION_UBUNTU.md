@@ -1,163 +1,146 @@
-# Instalación explicada herramienta por herramienta
+# Instalación de las herramientas de S11
 
-**Entorno recomendado para estudiantes:** GitHub Codespaces, sin instalar Linux en su computador. Cada paso de esta página también sirve para reproducir el proceso en Ubuntu/Debian si se desea. **No hace falta ejecutar nuevamente `apt install` dentro de un Codespace correctamente construido**: primero verifica que la herramienta ya está.
+Esta guía explica qué aporta cada herramienta y cómo verificarla. El entorno de **GitHub Codespaces** incluye las herramientas indicadas por Dockerfile y requirements.txt. También puedes repetir la instalación en tu propio Ubuntu.
 
-## 1. Cómo preparar Linux en Codespaces
+## 1. Herramientas del Codespace
 
-Abre el archivo `.devcontainer/Dockerfile` de este kit. Las órdenes `apt-get install` instalan programas de sistema:
-- `tesseract-ocr` y `tesseract-ocr-spa` → programa OCR e idioma español.
-- `ffmpeg` y `poppler-utils` → leer/convertir audio y PDF.
-- `fonts-dejavu-core` → fuentes estándar del sistema.
-- `curl` y `zstd` → descargar/descomprimir el paquete oficial de Ollama **durante la construcción del contenedor**, sin `systemd`.
+| Herramienta | Función | Comprobación |
+|---|---|---|
+| Python 3.11 | Ejecutar el cuaderno | `python --version` |
+| Tesseract + español | Reconocer caracteres en imágenes | `tesseract --list-langs` |
+| Pillow y pytesseract | Abrir imágenes y llamar Tesseract desde Python | `python -c "import PIL,pytesseract"` |
+| Poppler | Inspeccionar PDF, renderizar páginas y leer texto seleccionable | `pdfinfo -v` |
+| FFmpeg y Faster-Whisper | Preparar y transcribir voz | `ffmpeg -version` |
+| Ollama | Ejecutar localmente modelos de embeddings | `ollama --version` |
+| pandas / PyArrow | JSONL, Parquet y tablas | `python -c "import pandas,pyarrow"` |
+| Streamlit | Visor web privado de documentos | Puerto 8501 |
 
-**Compruébalo en la terminal:**
+El archivo **.devcontainer/Dockerfile** instala programas del sistema, **requirements.txt** define las bibliotecas Python y **.devcontainer/devcontainer.json** configura el entorno.
+
+En Codespaces:
 
 ~~~bash
+pwd
 python --version
-tesseract --version
 tesseract --list-langs
-ffprobe -version | head -1
-pdftoppm -v
+command -v pdfinfo
+command -v pdftoppm
+ollama --version
+python -c "import PIL,pytesseract,pandas,streamlit; print('Listo')"
 ~~~
 
-En una instalación Ubuntu propia, los mismos paquetes se instalan con:
+La lista de idiomas debe incluir `spa`. No necesitas instalar Ubuntu en tu computador para usar Codespaces.
+
+## 2. Preparar EmbeddingGemma 2 en Codespaces
+
+Ollama se ejecuta como servicio local dentro del Codespace. El modelo multimodal que usaremos es **embeddinggemma-2:440m**, compatible con imágenes y texto.
+
+~~~bash
+bash preparar_embeddinggemma.sh
+~~~
+
+El script comprueba Ollama, descarga el modelo y realiza una solicitud de prueba a la API para verificar un vector de 768 dimensiones. Comprueba también:
+
+~~~bash
+ollama list
+curl -fsS http://127.0.0.1:11434/api/tags
+~~~
+
+**Diferencia clave:** Ollama ejecuta el servicio; EmbeddingGemma transforma texto e imágenes en vectores. El modelo 270m solo funciona con texto. Los modelos se guardan en la carpeta local de caché del espacio de trabajo, excluida del repositorio Git.
+
+## 3. Instalación independiente en Ubuntu
+
+Para Ubuntu local, abre una terminal:
 
 ~~~bash
 sudo apt update
-sudo apt install -y python3 python3-venv python3-pip
-sudo apt install -y tesseract-ocr tesseract-ocr-spa ffmpeg poppler-utils
+sudo apt install -y python3 python3-venv python3-pip \
+  tesseract-ocr tesseract-ocr-spa ffmpeg poppler-utils
 ~~~
 
-**Explicación docente:** el ejecutable Tesseract no es lo mismo que el paquete Python `pytesseract`: el segundo solo hace la llamada al primero.
-
-## 2. Bibliotecas Python: para qué sirve cada una
-
-El contenedor ejecuta `python -m pip install -r requirements.txt`. Para hacerlo manualmente en Ubuntu, desde una copia del kit:
+Desde una copia del kit:
 
 ~~~bash
 python3 -m venv .venv
 source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ~~~
 
-| Paquete | Qué muestra el video |
-|---|---|
-| Pillow | Abrir PNG, JPG y WEBP; inspeccionar tamaño |
-| pytesseract | Una llamada de Python al motor Tesseract |
-| pandas + PyArrow | Tablas, JSONL y Parquet |
-| requests | Enviar JSON a la API local de Ollama |
-| faster-whisper | Ejecutar Whisper tiny para ASR |
-| ipykernel + Jupyter | Escribir, ejecutar y modificar celdas |
-
-**Verifica:** `python -c "import pytesseract,pandas,pyarrow,requests,faster_whisper; print('OK')"`.
-
-## 3. Ollama dentro de Codespaces: ya instalado, sin systemd
-
-**La ruta correcta para los estudiantes ha cambiado.** El archivo `.devcontainer/Dockerfile` descarga y extrae el paquete oficial `ollama-linux-amd64.tar.zst` (o ARM64). **No ejecutes otra vez `https://ollama.com/install.sh` dentro del Codespace**: este contenedor no necesita ni debe configurar servicios `systemd`. El servidor se inicia en segundo plano mediante `iniciar_ollama.sh` al arrancar el Codespace, sin abrir el puerto a Internet.
-
-**Primero, en un Codespace NUEVO de la rama `s11-estudiantes`:**
+Para instalar Ollama en Ubuntu sigue su documentación oficial en https://ollama.com/download/linux:
 
 ~~~bash
-command -v ollama
+curl -fsSL https://ollama.com/install.sh -o /tmp/ollama-install.sh
+sh /tmp/ollama-install.sh
 ollama --version
-bash iniciar_ollama.sh
-curl -fsS http://127.0.0.1:11434/api/tags
+ollama pull embeddinggemma-2:440m
 ~~~
 
-**Resultado esperado:** `command -v ollama` muestra `/usr/bin/ollama`, la API responde un JSON con la lista de modelos. Si la lista está vacía es normal: Ollama ya está instalado, pero todavía no descargaste el modelo.
+Estos comandos son para **Ubuntu local**. En **Codespaces**, el programa está definido en Dockerfile; prepara el modelo con `bash preparar_embeddinggemma.sh`.
 
-**Segundo, prepara el modelo visual y verifica sus 768 dimensiones:**
+## 4. Comprender OCR y PSM
 
-~~~bash
-bash preparar_embeddinggemma.sh
+**OCR** significa reconocimiento óptico de caracteres: transforma píxeles en letras y números probables. **Tesseract** es el motor OCR; **pytesseract** es la interfaz de Python.
+
+**PSM** significa *Page Segmentation Mode* (modo de segmentación de página). Es una instrucción sobre cómo organizar los bloques de texto, **no** una medida de confianza:
+
+- **PSM 3:** diseño automático, útil al empezar con un documento completo con varios bloques.
+- **PSM 6:** supone un bloque uniforme de texto, útil en una zona recortada.
+- **PSM 11:** intenta encontrar texto disperso, útil en letreros; puede mezclar columnas de tablas.
+
+Ejemplo con la primera página del PDF elegido para S11:
+
+~~~python
+from PIL import Image
+import pytesseract
+
+pagina = Image.open("datos/raw/actas/secop_acta_728704921_pagina1.png")
+texto = pytesseract.image_to_string(pagina, lang="spa", config="--psm 3")
+print(texto)
 ~~~
 
-Este comando ejecuta cuatro operaciones legibles: comprueba Ollama, muestra el espacio libre, descarga `embeddinggemma-2:440m` y hace una petición real a `/api/embed`. **El modelo 440m admite texto e imágenes; el 270m solo texto.** Al terminar verás `OK: Ollama local + embeddinggemma-2:440m + 768 dimensiones.` No uses `ollama embed`: el laboratorio invoca la **API** de Ollama desde Python.
+El archivo PDF original está en `datos/raw/actas_pdf/secop_acta_728704921.pdf`. En la primera página aparecen **ACTA DE INICIO, CONTRATO 006-2026, VALOR DEL CONTRATO, DURACIÓN y FORMA DE PAGO**. Debes comprobar cada respuesta del OCR contra los píxeles, especialmente cuando se mezclan columnas.
 
-### Si tu Codespace existía antes de la corrección
+Poppler aporta tres utilidades distintas: `pdfinfo` cuenta páginas, `pdftoppm` genera una imagen de la página elegida y `pdftotext` busca texto seleccionable dentro del PDF. Ninguna de ellas es un modelo de reconocimiento visual.
 
-El contenedor abierto antes de esta actualización **NO se transforma automáticamente** al recibir cambios del Dockerfile. Haz lo siguiente:
+## 5. Transcripción con Faster-Whisper
 
-1. Comprueba que estás en la rama `s11-estudiantes`, no en `main`. Conserva primero cualquier cambio sin guardar.
-2. En la terminal, sincroniza el repositorio:
-
-   ~~~bash
-   git branch --show-current
-   git pull --ff-only origin s11-estudiantes
-   ~~~
-
-3. Pulsa **Ctrl+Shift+P → Codespaces: Rebuild Container → Rebuild**. Esto reconstruye el entorno con Ollama incluido. GitHub documenta que los archivos de `/workspaces` se conservan tras reconstruir el contenedor; los modelos se guardan en `/workspaces/BigData2026/.cache/ollama/models`, excluido de Git.
-4. Después ejecuta:
-
-   ~~~bash
-   ollama --version
-   bash iniciar_ollama.sh
-   bash preparar_embeddinggemma.sh
-   ~~~
-
-### Alternativa para arreglar un contenedor antiguo SIN reconstruir
-
-Si necesitas continuar con el contenedor viejo, estos comandos **instalan el paquete manual oficial** y evitan `systemd`. Requieren `sudo`, conexión y espacio libre en Codespaces:
-
-~~~bash
-sudo apt-get update
-sudo apt-get install -y zstd
-ARQ="$(dpkg --print-architecture)"
-curl -fL --retry 3 "https://ollama.com/download/ollama-linux-${ARQ}.tar.zst" -o /tmp/ollama-linux.tar.zst
-sudo tar --zstd -xf /tmp/ollama-linux.tar.zst -C /usr
-command -v ollama
-ollama --version
-bash iniciar_ollama.sh
-bash preparar_embeddinggemma.sh
-~~~
-
-Si la descarga está incompleta, `tar` informará del error: no se considera instalado hasta ver `ollama --version`, una respuesta de `/api/tags` y el vector comprobado. No uses `less` en una secuencia de comandos de instalación: **`less archivo` abre un visor interactivo que se cierra pulsando `q`** y bloquea los comandos siguientes hasta entonces.
-
-### Instalación en Ubuntu fuera de Codespaces
-
-En un Ubuntu local, la guía **oficial** permite `curl -fsSL https://ollama.com/install.sh | sh`; ese instalador sí puede configurar el servicio del sistema. También es válida la extracción manual oficial. Revisa primero [las instrucciones oficiales para Linux](https://github.com/ollama/ollama/blob/main/docs/linux.mdx). En Codespaces usamos el método manual dentro del contenedor para no depender de servicios `systemd`.
-
-**Seguridad y persistencia:** el servidor usa `127.0.0.1:11434` (no lo publiques). Los pesos del modelo se almacenan en `.cache/ollama/models` dentro de `/workspaces` y `.gitignore` evita subirlos al repositorio. El modelo se descarga solo una vez por almacenamiento persistente, salvo que borres la caché.
-
-## 4. Whisper: transcripción de audio REAL
-
-Instalaste `faster-whisper` con pip. La primera vez que escribas:
+Faster-Whisper permite reconocimiento automático del habla (ASR) en CPU. El modelo `tiny` es útil para experimentar con varias voces:
 
 ~~~python
 from faster_whisper import WhisperModel
+
 modelo = WhisperModel("tiny", device="cpu", compute_type="int8")
+segmentos, info = modelo.transcribe(
+    "datos/derived/audios/voz_01.wav", language="es"
+)
+for s in segmentos:
+    print(s.start, s.end, s.text)
 ~~~
 
-se descargarán pesos de Whisper tiny. Esto no es una transcripción: es **cargar el modelo**. Luego debes escribir `modelo.transcribe(ruta_audio, language="es")` y recorrer sus segmentos.
+Primero prepara las voces humanas autorizadas de MINDS-14 con el botón del visor. Compara la predicción de Whisper con la transcripción humana del **mismo** audio antes de calcular WER, la tasa de error de palabras.
 
-**Verificación:** escucha el WAV real del corpus MINDS-14, compara con su texto humano y calcula WER. **No inventes WER** si no hay referencia humana.
+## 6. Visor documental Streamlit
 
-## 5. Interfaz para abrir y visualizar documentos
-
-Además del cuaderno, puedes instalar Streamlit con soporte para PDF y la biblioteca de audio SoundFile:
+En Codespaces:
 
 ~~~bash
-python -m pip install "streamlit[pdf]>=1.56,<2" "soundfile>=0.12,<1"
-streamlit run visor_fuentes.py --server.address 0.0.0.0 --server.port 8501
+bash abrir_visor.sh
 ~~~
 
-**Streamlit** crea una interfaz local: permite escoger un documento y mostrar un PDF con st.pdf, fotografías con st.image y audio con st.audio. Requiere el complemento streamlit-pdf para st.pdf. El puerto **8501 debe ser privado** dentro de Codespaces; nunca lo expongas a Internet para archivos con datos personales.
+Abre **Puertos → 8501 → Abrir vista previa** y conserva la visibilidad **Private**. El visor permite elegir un PDF completo, seleccionar su página, comparar el texto OCR con la página y abrir fotografías o audios.
 
-La programación del ejercicio se desarrolla en **01_laboratorio.ipynb** (FASE 1: herramientas; FASE 2: ampliación a 122 fuentes): no se aprende OCR mirando el visor si no escribes y explicas la llamada a Tesseract, los bucles y las comprobaciones.
+## 7. Comprobaciones habituales
 
-## 6. Problemas recurrentes
-
-| Síntoma | Primer control |
+| Situación | Verificación |
 |---|---|
-| Falta `spa` | Instala/verifica `tesseract-ocr-spa` |
-| `TesseractNotFoundError` | Existe el paquete Python, pero falta ejecutable |
-| `ModuleNotFoundError` | Falta ejecutar pip en el kernel seleccionado |
-| `Connection refused` | Ejecuta `bash iniciar_ollama.sh` y revisa `/tmp/s11-ollama.log` |
-| `ollama: command not found` | Actualiza la rama y reconstruye el Codespace; o usa instalación manual con `zstd` |\n| `model not found` | Ejecuta `bash preparar_embeddinggemma.sh`; comprueba `ollama list` |
-| Whisper demora | Modelo tiny necesita descarga; CPU sin GPU |
-| WER extraño | Comprueba que comparaste audio con la referencia del mismo registro |
-| OCR de foto vacío | Quizá no hay texto legible; usa búsqueda visual |
+| No aparece idioma español | `tesseract --list-langs` debe incluir `spa` |
+| Falta un paquete Python | `python -m pip install -r requirements.txt` |
+| Visor no responde | `bash abrir_visor.sh` y puerto privado 8501 |
+| Ollama no responde | `bash iniciar_ollama.sh` y puerto local 11434 |
+| Modelo 440m no está en la lista | `bash preparar_embeddinggemma.sh` y `ollama list` |
+| El OCR no detecta un valor | Revisa la página y compara PSM 3, 6 y 11 |
+| Whisper tarda | Procesa primero pocas voces en CPU |
+| JSONL y Parquet difieren | Reabre los archivos y compara datos y hashes |
 
-El puerto 11434 es **local** dentro del Codespace. No lo expongas públicamente. Detén el Codespace al acabar para evitar consumir cuota.
-
-**Fuentes oficiales:** https://tesseract-ocr.github.io/ · https://github.com/SYSTRAN/faster-whisper · https://ollama.com/library/embeddinggemma-2:440m · https://github.com/ollama/ollama/blob/main/docs/api.md.
+**Fuentes oficiales:** [Tesseract](https://tesseract-ocr.github.io/) · [Poppler](https://poppler.freedesktop.org/) · [Faster-Whisper](https://github.com/SYSTRAN/faster-whisper) · [Ollama](https://ollama.com/download/linux).
