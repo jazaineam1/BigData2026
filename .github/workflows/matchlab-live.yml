@@ -1,7 +1,7 @@
-name: MatchLab - marcadores programados
+name: MatchLab - marcadores programados (ahorro: cada hora)
 on:
   schedule:
-    - cron: '*/10 0-5,18-23 5-15 11 *'
+    - cron: '0 0-5,18-23 5-15 11 *'
   workflow_dispatch:
   push:
     branches: [main]
