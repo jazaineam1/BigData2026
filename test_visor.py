@@ -41,12 +41,13 @@ class VisorFuentesTest(unittest.TestCase):
 
 
 class OCRDocumentalTest(unittest.TestCase):
-    def test_psm_explica_tres_opciones(self):
+    def test_psm_explicado_para_pagina_bloque_linea_y_dispersion(self):
         from ocr_documental import PSM_EXPLICACION
-        self.assertEqual(set(PSM_EXPLICACION), {3, 6, 11})
+        self.assertEqual(set(PSM_EXPLICACION), {3, 6, 7, 11})
         self.assertIn("columnas", PSM_EXPLICACION[3][1])
         self.assertIn("bloque", PSM_EXPLICACION[6][1])
         self.assertIn("dispersos", PSM_EXPLICACION[11][1])
+        self.assertIn("línea", PSM_EXPLICACION[7][1])
 
     def test_pdf_seleccion_y_pagina_dos_real(self):
         import io
@@ -89,6 +90,85 @@ class OCRDocumentalTest(unittest.TestCase):
         with Image.open(path) as imagen:
             texto = pytesseract.image_to_string(imagen, lang="spa", config="--psm 3")
         self.assertGreater(len(texto), 500)
+
+
+class EmbeddingsFormatoTest(unittest.TestCase):
+    """Prueba que LOS DOS BLOQUES del único cuaderno manden input=[entrada]."""
+
+    def _funciones(self, cell_id, funcion):
+        import ast
+        import requests
+        nb = json.loads((ROOT / "01_laboratorio.ipynb").read_text(encoding="utf-8"))
+        code = next("".join(c["source"]) for c in nb["cells"] if c["id"] == cell_id)
+        arbol = ast.parse(code)
+        funcion_ast = next(x for x in arbol.body if isinstance(x, ast.FunctionDef)
+                           and x.name == funcion)
+        scope = {
+            "requests": requests, "MODELO": "embeddinggemma-2:440m",
+            "API": "http://127.0.0.1:11434/api/embed",
+        }
+        exec(compile(ast.Module(body=[funcion_ast], type_ignores=[]),
+                     f"{cell_id}.py", "exec"), scope)
+        return scope[funcion], code
+
+    def test_objeto_imagen_y_texto_via_lista(self):
+        from unittest.mock import MagicMock, patch
+        for id, nombre in [("s11-vision-vectores", "vector"),
+                           ("lote-embeddings", "embedding")]:
+            with self.subTest(celda=id):
+                f, codigo = self._funciones(id, nombre)
+                self.assertIn('"input": [entrada]', codigo)
+                with patch("requests.post") as post:
+                    respuesta = MagicMock()
+                    respuesta.ok = True
+                    respuesta.json.return_value = {"embeddings": [[0.0]*768]}
+                    post.return_value = respuesta
+                    self.assertEqual(len(f({"image": "WEBP_BASE64"}, "foto.webp")), 768)
+                    self.assertEqual(post.call_args.kwargs["json"]["input"],
+                                     [{"image": "WEBP_BASE64"}])
+                    self.assertEqual(len(f("viviendas en una ladera", "consulta")), 768)
+                    self.assertEqual(post.call_args.kwargs["json"]["input"],
+                                     ["viviendas en una ladera"])
+
+    def test_http_400_muestra_cuerpo_del_servidor(self):
+        from unittest.mock import MagicMock, patch
+        for id, nombre in [("s11-vision-vectores", "vector"),
+                           ("lote-embeddings", "embedding")]:
+            with self.subTest(celda=id):
+                f, _ = self._funciones(id, nombre)
+                with patch("requests.post") as post:
+                    respuesta = MagicMock()
+                    respuesta.ok = False
+                    respuesta.status_code = 400
+                    respuesta.text = '{"error":"invalid input"}'
+                    post.return_value = respuesta
+                    with self.assertRaisesRegex(RuntimeError, "invalid input"):
+                        f({"image": "FAKE"}, "foto.webp")
+
+    def test_bytes_originales_por_defecto(self):
+        import ast
+        import base64
+        from PIL import Image, ImageOps
+        from io import BytesIO
+        imagen = ROOT / "datos/raw/fotos/eltiempo_023.webp"
+        nb = json.loads((ROOT / "01_laboratorio.ipynb").read_text(encoding="utf-8"))
+        for id, fn in [("s11-vision-vectores", "preparar_imagen_base64"),
+                       ("lote-embeddings", "imagen_para_modelo")]:
+            with self.subTest(celda=id):
+                code = next("".join(c["source"]) for c in nb["cells"] if c["id"] == id)
+                arbol = ast.parse(code)
+                f = next(x for x in arbol.body if isinstance(x, ast.FunctionDef) and x.name == fn)
+                scope = {"base64": base64, "Image": Image, "ImageOps": ImageOps,
+                         "BytesIO": BytesIO, "NORMALIZAR_JPEG": False,
+                         "MAX_LADO": 768}
+                exec(compile(ast.Module(body=[f], type_ignores=[]), "<image>", "exec"), scope)
+                assert base64.b64decode(scope[fn](imagen)) == imagen.read_bytes()
+
+    def test_preparacion_revisa_texto_e_imagen(self):
+        script = (ROOT / "preparar_embeddinggemma.sh").read_text(encoding="utf-8")
+        self.assertIn('"input": [entrada]', script)
+        self.assertIn('foto = Path("datos/raw/fotos/eltiempo_023.webp")', script)
+        self.assertIn('incrustar("Una fotografía', script)
 
 if __name__ == "__main__":
     unittest.main()
