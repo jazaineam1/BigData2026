@@ -56,7 +56,13 @@ jobs:
           assert len(tabla)==26000 and tabla["id_del_proceso"].is_unique
           revision=pd.read_csv(d/"procesos_revision.csv")
           assert len(revision)==m["prueba"]
-          assert "no prueba de fraude" in revision["advertencia"].iloc[0].lower()
+          assert "no es alerta" in revision["advertencia"].iloc[0].lower()
+          assert "prueba de fraude" in revision["advertencia"].iloc[0].lower()
+          assert "error_modelo_factor_alto" in revision.columns
+          assert m["filas_analizadas"] == 300000
+          assert m["precios_cero_sin_imputar"] == 11392
+          assert m["metodo_muestreo"].startswith("reservorio")
+          assert m["universo_elegible_unico"] >= 26000
           for name in ["xgboost_variables.json","xgboost_variables_y_texto.json"]:
               booster=xgb.Booster()
               booster.load_model(d/name)

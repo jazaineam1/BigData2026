@@ -1,5 +1,7 @@
 # Extensión S13 · Inteligencia de presupuestos SECOP con entrenamiento realmente distribuido
 
+> **AVISO DE REVISIÓN CIENTÍFICA (noviembre de 2026).** Este experimento demuestra entrenamiento distribuido, pero **NO valida un precio justo o una alerta contractual**. La auditoría de 300.000 filas encontró 11.392 precios base cero, 298.726 ceros en el contador de ofertas y 6.419 IDs repetidos. Además, se corrigió la extracción de códigos UNSPSC, pues `V1.80111600` se interpretaba incorrectamente como segmento 18 (correcto: 80). **Las métricas anteriores a esta corrección no son comparables.** Revisa [la auditoría completa](../../docs/S13_AUDITORIA_DATOS_SECOP_300K.md). Para el siguiente laboratorio recomiendo clasificar códigos UNSPSC desde el texto, no tasar contratos.
+
 **Caso:** Laura en Compras Claras recibe más de 20.000 fichas de procesos SECOP. Quiere anticipar un **rango de presupuesto de referencia** y encontrar **discrepancias estadísticas** que merecen verificación humana. La discrepancia **no prueba corrupción, fraude, precios irregulares ni sobrecostos**.
 
 La fuente contiene *registros tabulares de procesos publicados*, no 26.000 PDFs OCR. Ya está en el repositorio: `Cuadernos/datos/secop_chunks/secop_chunk_*.csv`. **No se descarga masivamente SECOP durante la videoclase**.
@@ -28,7 +30,7 @@ Si falta XGBoost, dentro del propio Codespace:
 python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
 ```
 
-**Ejecución real (26.000 fichas únicas; 20.800 de entrenamiento):**
+**Ejecución exploratoria (26.000 fichas únicas elegidas mediante muestreo de reservorio reproducible sobre el universo elegible; 20.800 de entrenamiento):**
 
 ```bash
 python Laboratorios/S13_Codespaces/modelo_distribuido_20k.py
@@ -40,13 +42,13 @@ La versión de prueba en Codespaces/GitHub Actions, con menos árboles para ahor
 python Laboratorios/S13_Codespaces/modelo_distribuido_20k.py --rondas 30
 ```
 
-El script imprime número de procesos, cantidad de trabajadores, variables, tiempos y métricas. **Panel posterior al entrenamiento (visibilidad Codespaces: PRIVATE):**
+El script imprime número de procesos, cantidad de trabajadores, variables, tiempos y métricas. No imputa ceros; registra su cantidad y elimina el tratamiento como alerta de contrato. Tiene fines formativos, no operativos. **Panel posterior al entrenamiento (visibilidad Codespaces: PRIVATE):**
 
 ```bash
 streamlit run Laboratorios/S13_Codespaces/app_modelo_20k.py --server.address 0.0.0.0 --server.port 8502
 ```
 
-En la pestaña **PORTS** abre el puerto **8502** y filtra los procesos por modalidad y factor de discrepancia. La aplicación presenta las predicciones **sobre el conjunto de prueba**, permite abrir el proceso SECOP original y recalca que las discrepancias no son juicios de legalidad.
+En la pestaña **PORTS** abre el puerto **8502** y filtra errores del modelo en la prueba temporal por modalidad y factor de diferencia. La aplicación presenta las predicciones **sobre el conjunto de prueba**, permite abrir el proceso SECOP original y recalca que las discrepancias no son juicios de legalidad.
 
 El puerto **8787** muestra el Dask Dashboard; mantenerlo **PRIVATE** en Codespaces. **Dos trabajadores en un Codespace son un único equipo físico**, aunque el entrenamiento XGBoost use comunicación distribuida entre workers.
 

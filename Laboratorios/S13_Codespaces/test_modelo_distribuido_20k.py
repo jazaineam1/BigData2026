@@ -29,6 +29,19 @@ class Modelo26kTests(unittest.TestCase):
                             "precio_objetivo" not in n and
                             "adjudicacion" not in n for n in nombres))
 
+    def test_unspsc_parse_version_prefix(self):
+        tabla, _ = cargar_procesos(objetivo=100)
+        tabla = tabla.copy()
+        tabla.loc[tabla.index[0], "codigo_principal_de_categoria"] = "V1.80111600"
+        tabla.loc[tabla.index[1], "codigo_principal_de_categoria"] = "V1.85101600"
+        tabla.loc[tabla.index[2], "codigo_principal_de_categoria"] = "UNSPECIFIED"
+        modificada = crear_variables(tabla)
+        self.assertEqual(modificada["categoria_sector"].iloc[0], "80")
+        self.assertEqual(modificada["categoria_sector"].iloc[1], "85")
+        self.assertEqual(modificada["categoria_sector"].iloc[2], "Sin categoria")
+        # Debe distinguir 80 de 18: la version V1. NO es parte del UNSPSC.
+        self.assertNotEqual(modificada["categoria_sector"].iloc[0], "18")
+
     def test_metrica_factor_dos(self):
         y=np.log1p(np.array([100., 200., 300.]))
         m=evaluar(y,y)

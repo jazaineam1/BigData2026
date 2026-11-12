@@ -15,6 +15,7 @@ import hashlib
 import json
 import math
 import os
+import random
 import time
 from pathlib import Path
 
@@ -53,14 +54,27 @@ TEXTO = "descripci_n_del_procedimiento"
 
 
 def cargar_procesos(objetivo: int = OBJETIVO):
-    """Lee SOLO lo necesario de los CSV ya presentes; no reetiqueta procesos."""
+    """Muestrea todo el universo elegible; ceros registrados, nunca imputados.
+
+    El cero del precio puede ser un valor legítimo o ausencia de valor según
+    modalidad y fase; el modelo NO lo interpreta como precio cero observado.
+    """
     if not FUENTES:
-        raise FileNotFoundError("Faltan los CSV SECOP versionados del repositorio.")
-    encontrados = []
+        raise FileNotFoundError("Faltan los CSV SECOP versionados.")
+    if objetivo < 1:
+        raise ValueError("Objetivo debe ser positivo")
+    reservorio = []
+    rng = random.Random(42)
     vistos = set()
     usados = []
-    descartes = {"precio_invalido": 0, "fecha_invalida": 0,
-                 "descripcion_vacia": 0, "id_duplicado": 0}
+    elegibles = 0
+    filas_analizadas = 0
+    descartes = {
+        "precio_cero": 0, "precio_negativo": 0,
+        "precio_no_numerico": 0, "precio_superior_1e13": 0,
+        "fecha_invalida": 0, "descripcion_vacia": 0,
+        "id_duplicado_o_vacio": 0,
+    }
     for ruta in FUENTES:
         usados.append(ruta)
         for fragmento in pd.read_csv(
@@ -68,58 +82,72 @@ def cargar_procesos(objetivo: int = OBJETIVO):
             chunksize=5000, encoding="utf-8", encoding_errors="replace",
             on_bad_lines="error",
         ):
+            filas_analizadas += len(fragmento)
             precio = pd.to_numeric(fragmento["precio_base"], errors="coerce")
-            valido_precio = precio.gt(0) & precio.le(1e13) & np.isfinite(precio)
             fechas = pd.to_datetime(
                 fragmento["fecha_de_publicacion_del"], errors="coerce",
                 format="mixed",
             )
-            valido_fecha = fechas.notna()
-            valido_texto = fragmento[TEXTO].str.strip().ne("")
-            descartes["precio_invalido"] += int((~valido_precio).sum())
-            descartes["fecha_invalida"] += int((~valido_fecha).sum())
-            descartes["descripcion_vacia"] += int((~valido_texto).sum())
-            buenas = fragmento.loc[valido_precio & valido_fecha & valido_texto].copy()
-            buenas["precio_objetivo"] = precio.loc[buenas.index].astype(float)
-            buenas["fecha"] = fechas.loc[buenas.index]
+            texto_ok = fragmento[TEXTO].str.strip().ne("")
+            descartes["precio_cero"] += int(precio.eq(0).sum())
+            descartes["precio_negativo"] += int(precio.lt(0).sum())
+            descartes["precio_no_numerico"] += int(precio.isna().sum())
+            descartes["precio_superior_1e13"] += int(precio.gt(1e13).sum())
+            descartes["fecha_invalida"] += int(fechas.isna().sum())
+            descartes["descripcion_vacia"] += int((~texto_ok).sum())
+            valido = precio.gt(0) & precio.le(1e13) & np.isfinite(precio)
+            valido &= fechas.notna() & texto_ok
+            buenas = fragmento.loc[valido].copy()
+            buenas["precio_objetivo"] = precio.loc[valido].astype(float)
+            buenas["fecha"] = fechas.loc[valido]
             for fila in buenas.to_dict(orient="records"):
                 clave = str(fila["id_del_proceso"]).strip()
                 if not clave or clave in vistos:
-                    descartes["id_duplicado"] += 1
+                    descartes["id_duplicado_o_vacio"] += 1
                     continue
                 vistos.add(clave)
-                encontrados.append(fila)
-                if len(encontrados) >= objetivo:
-                    break
-            if len(encontrados) >= objetivo:
-                break
-        if len(encontrados) >= objetivo:
-            break
-    if len(encontrados) < objetivo:
+                elegibles += 1
+                if len(reservorio) < objetivo:
+                    reservorio.append(fila)
+                else:
+                    indice = rng.randrange(elegibles)
+                    if indice < objetivo:
+                        reservorio[indice] = fila
+    if len(reservorio) < objetivo:
         raise RuntimeError(
-            f"No hay {objetivo:,} fichas validas; encontradas: {len(encontrados):,}. "
-            "No se deben inventar ni duplicar."
+            f"No hay {objetivo:,} fichas validas unicas; "
+            f"encontradas: {len(reservorio):,}. No inventar datos."
         )
-    datos = pd.DataFrame(encontrados).sort_values(
+    datos = pd.DataFrame(reservorio).sort_values(
         ["fecha", "id_del_proceso"], kind="stable"
     ).reset_index(drop=True)
-    assert datos["id_del_proceso"].is_unique
-    assert len(datos) == objetivo
-    return datos, {"archivos_fuente": [str(p.relative_to(ROOT)) for p in usados],
-                   "descartes_revisar": descartes, "fichas_validas": len(datos)}
-
+    assert len(datos) == objetivo and datos["id_del_proceso"].is_unique
+    return datos, {
+        "archivos_fuente": [str(p.relative_to(ROOT)) for p in usados],
+        "filas_analizadas": filas_analizadas,
+        "universo_elegible_unico": elegibles,
+        "semilla_muestreo": 42,
+        "metodo_muestreo": "reservorio reproducible sobre TODO el universo elegible",
+        "precios_cero_sin_imputar": descartes["precio_cero"],
+        "descartes_revisar": descartes,
+        "fichas_validas": len(datos),
+        "limitacion": "Muestra de fichas publicadas, no precio justo de mercado.",
+    }
 
 def crear_variables(tabla: pd.DataFrame) -> pd.DataFrame:
-    """Solo atributos de preparacion/publicacion: no resultados de adjudicacion."""
+    """Variables para REGRESIÓN EXPLORATORIA, NO estimación de precio justo."""
     df = tabla.copy()
     duracion = pd.to_numeric(df["duracion"], errors="coerce")
     df["duracion_log"] = np.log1p(duracion.clip(lower=0, upper=100000))
     df["mes_publicacion"] = pd.to_datetime(df["fecha"]).dt.month.astype(float)
     df["longitud_descripcion"] = df[TEXTO].str.len().clip(0, 3000).astype(float)
-    df["categoria_sector"] = (
-        df["codigo_principal_de_categoria"].astype(str)
-        .str.replace(r"[^0-9]", "", regex=True).str[:2].replace("", "sin_codigo")
+    # Códigos UNSPSC vienen como V1.80111600. Los primeros 2 dígitos
+    # CORRECTOS son 80; eliminar TODOS los no dígitos daba 18 (ERROR grave).
+    codigos = df["codigo_principal_de_categoria"].astype(str).str.strip()
+    segmento = codigos.str.extract(
+        r"^(?:V[0-9]+\.)?([0-9]{8})$", expand=False
     )
+    df["categoria_sector"] = segmento.str[:2].fillna("Sin categoria")
     for columna in CATEGORICAS:
         df[columna] = df[columna].replace("", "No informado").astype(str)
     return df
@@ -246,7 +274,7 @@ def huella(ruta: Path) -> str:
 
 
 def guardar_revision(test, pred_log, destino: Path):
-    """Lista de discrepancias para REVISION ESTADISTICA, no acusaciones."""
+    """Errores del modelo en prueba; no una lista de casos contractual anómalos."""
     pred = np.expm1(np.clip(pred_log, 0, math.log1p(1e13)))
     real = test["precio_objetivo"].to_numpy()
     discrepancia = np.maximum(real / np.maximum(pred, 1),
@@ -257,9 +285,9 @@ def guardar_revision(test, pred_log, destino: Path):
     ]].copy()
     revision["precio_estimado_cop"] = np.round(pred, 2)
     revision["factor_discrepancia"] = np.round(discrepancia, 2)
-    revision["requiere_revision_estadistica"] = discrepancia >= 3
+    revision["error_modelo_factor_alto"] = discrepancia >= 3
     revision["advertencia"] = (
-        "Discrepancia estadistica, no prueba de fraude ni sobrecosto"
+        "Error de prediccion del modelo experimental; NO es alerta ni prueba de fraude o sobrecosto"
     )
     revision.to_csv(destino, index=False)
     return revision
@@ -282,7 +310,6 @@ def ejecutar(objetivo=OBJETIVO, rondas=70, workers=2):
 
     control = DummyRegressor(strategy="median").fit(Xtr, ytr)
     metricas = {"mediana_control": evaluar(yte, control.predict(Xte))}
-    inicio_fit = time.perf_counter()
     print(f"Proceso de entrenamiento: {len(train):,} fichas. Prueba temporal: {len(test):,}.")
     print(f"Datos estructurados: {Xtr.shape[1]} variables; texto: {Ttr.shape[1]} ejes no neuronales.")
     with LocalCluster(n_workers=workers, threads_per_worker=1, processes=True,
@@ -334,12 +361,12 @@ def ejecutar(objetivo=OBJETIVO, rondas=70, workers=2):
                           for p in FUENTES if str(p.relative_to(ROOT)) in
                           procedencia["archivos_fuente"]},
         "metricas": metricas,
-        "candidatos_revision_factor_3": int(
-            revision["requiere_revision_estadistica"].sum()
+        "errores_modelo_factor_3": int(
+            revision["error_modelo_factor_alto"].sum()
         ),
         "advertencia": (
             "SECOP II: fichas de procesos, NO 26000 PDF. "
-            "El precio estimado y el residual no demuestran irregularidades. "
+            "Regresion experimental con cobertura y sesgo de datos no validados. El residual no es una alerta y no demuestra irregularidades. "
             "Dos workers en un solo Codespace, no un cluster multinodo."
         ),
     })
@@ -349,8 +376,8 @@ def ejecutar(objetivo=OBJETIVO, rondas=70, workers=2):
     )
     print(json.dumps({
         "procesos": len(datos), "entrenamiento": len(train), "workers": workers,
-        "metricas": metricas, "revision_factor_3":
-        int(revision["requiere_revision_estadistica"].sum()),
+        "metricas": metricas, "errores_modelo_factor_3":
+        int(revision["error_modelo_factor_alto"].sum()),
         "carpeta": str(SALIDAS.relative_to(ROOT)),
     }, ensure_ascii=False, indent=2))
     return procedencia
