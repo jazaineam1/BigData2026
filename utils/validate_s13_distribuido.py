@@ -13,10 +13,11 @@ def main():
     nb = json.loads(read("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb"))
     assert nb["nbformat"] == 4
     cells = nb["cells"]
-    assert len(cells) >= 84
+    assert len(cells) >= 87
     assert sum(c["cell_type"] == "code" for c in cells) >= 15
     text = "\n".join("".join(c["source"]) for c in cells)
     assert "Rúbrica observable de práctica" in text, "Falta rúbrica S13"
+    assert "OPCIONES_ARQUITECTURA" in text and "OPCIONES_LIMITE" in text, "Faltan opciones cerradas de respuesta"
     for needed in ("MapReduce", "Codespaces", "HDFS", "Dask", "TF-IDF", "Parquet", "F1 macro"):
         assert needed in text, f"Falta material pedagógico: {needed}"
     html = read("Presentaciones/s13-de-una-maquina-a-un-cluster.html")
