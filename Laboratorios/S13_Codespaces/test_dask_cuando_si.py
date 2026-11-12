@@ -15,6 +15,15 @@ class PruebaS13Dask(unittest.TestCase):
         for campo in ("id", "registros", "palabras", "sha256"):
             self.assertEqual(a[campo], b[campo])
         self.assertEqual(a["palabras"], 3)
+    def test_transformacion_real_textos(self):
+        tareas = crear_trabajos(8, 0.0, "texto", 1000)
+        resultados = [procesar_lote(t) for t in tareas]
+        self.assertEqual(sum(r["registros"] for r in resultados), 1000)
+        self.assertGreater(sum(r["terminos_distintos"] for r in resultados), 0)
+        self.assertTrue(all(r["frecuencias"] for r in resultados))
+        self.assertEqual(procesar_lote(tareas[0])["frecuencias"],
+                         resultados[0]["frecuencias"])
+
     def test_cuota_cgroup_v2(self):
         self.assertEqual(cuota_cpu_cgroup('400000 100000'), 4)
         self.assertEqual(cuota_cpu_cgroup('150000 100000'), 1)

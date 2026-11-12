@@ -2,6 +2,9 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+import os
+import subprocess
+import json
 
 import dask
 import dask.dataframe as dd
@@ -22,4 +25,22 @@ print("pandas:", pd.__version__, "| Dask:", dask.__version__)
 print("PyArrow:", pyarrow.__version__, "| scikit-learn:", sklearn.__version__)
 print("Datos disponibles:", CSV.relative_to(ROOT), "y", CORPUS.relative_to(ROOT))
 print("Dask mínimo: OK | No es una prueba de clúster físico")
-print("LISTO PARA S13")
+if __name__ == "__main__":
+    # Smoke real de procesos con 2 lotes, sin espera ni modelos.
+    script = ROOT / "Laboratorios/S13_Codespaces/dask_cuando_si.py"
+    p = subprocess.run(
+        [sys.executable, str(script), "--workers", "1",
+         "--tareas", "2", "--modo", "texto"],
+        cwd=ROOT, capture_output=True, text=True, timeout=90,
+    )
+    if p.returncode:
+        raise RuntimeError("No se pudo crear un worker Dask:\\n" + p.stderr[-1800:])
+    data = next((s.split("RESULTADO_S13_DASK=", 1)[1]
+                 for s in p.stdout.splitlines()
+                 if s.startswith("RESULTADO_S13_DASK=")), None)
+    assert data, "Falta evidencia de ejecución del worker"
+    result = json.loads(data)
+    assert result["resultados_identicos"] and len(result["workers_reales"]) == 1
+    assert result["terminos_distintos_por_lote"], "No se procesaron términos"
+    print("Worker real Dask: OK | textos SECOP verificados")
+    print("LISTO PARA S13")

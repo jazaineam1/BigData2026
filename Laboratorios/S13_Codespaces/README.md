@@ -94,10 +94,13 @@ python -c "import os; print(len(os.sched_getaffinity(0)))"
 - Una máquina con cuatro CPU lógicas puede ejecutar 1 worker × 4 hilos, 2 workers × 2 hilos, 4 workers × 1 hilo o más. Con 8 workers de un hilo habría sobresuscripción. El número de workers **no equivale a número de computadores físicos**.
 - Para Python puro suelen funcionar bien workers separados de un hilo; para NumPy/algoritmos nativos pueden aprovecharse varios hilos.
 
-### 2. Demostración breve que ejecuta Dask real
+### 2. Dos demostraciones con Dask real
+
+La primera muestra concurrencia bajo una **espera simulada**. La segunda cuenta de verdad los términos de las fichas SECOP, sin ninguna espera artificial, sobre los mismos lotes.
 
 ```bash
 python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2
+python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2 --modo texto
 # Opcional si hay al menos cuatro CPU lógicas y la cuota lo permite:
 python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 4
 ```
@@ -113,11 +116,11 @@ Al finalizar crea `Laboratorios/S13_Codespaces/salidas/dask_demostracion_s13.jso
 | `segundos_secuencial` | Ocho lotes uno después del otro |
 | `segundos_arranque_y_espera_workers` | Iniciar scheduler y workers |
 | `segundos_dask_cluster_caliente` | Procesar lotes con trabajadores ya abiertos |
-| `segundos_dask_total_incluido_arranque` | Desde iniciar Dask hasta obtener respuesta |
+| `segundos_dask_total_incluido_arranque` | Desde iniciar Dask hasta reunir resultados; excluye lectura CSV y escritura JSON |
 | `resultados_identicos` | Comprobación de igualdad secuencial/distribuido |
 | `ganador_caliente` y `ganador_total` | Ganador en **dos mediciones diferentes** |
 
-No hay tiempos predefinidos: el código mide los segundos de cada Codespace. Para comparar el papel de la CPU con funciones de cálculo sintético, de forma opcional:
+No hay tiempos predefinidos: el código mide los segundos de cada Codespace. El modo **texto** sí procesa datos SECOP y puede perder frente a la ejecución secuencial por coordinación. El modo **espera** representa una API, no realiza OCR real. Para comparar el papel de la CPU con funciones de cálculo sintético, de forma opcional:
 
 ```bash
 python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2 --modo cpu
@@ -145,7 +148,7 @@ Abrir `PORTS → 8503 → Private → Open in Browser`. La pestaña **Dask** per
 
 **Objetivo:** convertir palabras de fichas SECOP en números para búsqueda o clasificación. TF(A) = veces que aparece la palabra en documento A; DF = documentos del corpus donde aparece; IDF = importancia inversa por frecuencia; TF×IDF = peso de la palabra; L2(A) = peso normalizado del vector A para calcular coseno.
 
-En el corpus A «mantenimiento computadores», B «infraestructura computadores», C «hospital mantenimiento»:
+El mismo corpus de la presentación, cuaderno y Streamlit es A «mantenimiento computadores», B «infraestructura computadores», C «hospital mantenimiento»:
 - DF de `hospital` = 1, IDF = 1,6931; en A, TF=0, peso=0.
 - DF de `computadores` = 2, IDF = 1,2877; en A, TF=1 y L2=0,7071.
 - La tabla interactiva de la presentación muestra estas columnas como tabla legible y cambia si editas los textos.
@@ -161,3 +164,8 @@ El análisis histórico interno de 50.000 train + 10.000 test utilizó un **test
 Para aplicar Dask a documentos de otro proyecto, sustituye dentro de `procesar_lote` la espera simulada por una función real de OCR, transcripción, ETL o extracción de características. Hazlo únicamente si se dispone de modelos, permisos y capacidad suficientes. Debes mantener la verificación de resultados y los cronómetros separados.
 
 **Fuentes técnicas:** [Dask Best Practices](https://docs.dask.org/en/stable/best-practices.html) · [Dask Distributed Efficiency](https://distributed.dask.org/en/stable/efficiency.html) · [Especificaciones de runners GitHub Actions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job).
+
+
+### Dependencias
+
+`requirements.txt` instala únicamente el laboratorio principal. Los paquetes de investigación (incluido XGBoost) están separados en `requirements-investigacion.txt` y **no se requieren** para la clase ni se instalan automáticamente con Codespaces. Nunca se ejecutan 50.000 registros por defecto.

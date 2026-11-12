@@ -118,9 +118,9 @@ with tabs[1]:
         "los documentos recibe menos peso que una palabra específica.")
     ejemplo=st.text_area(
         "Escribe entre 2 y 8 documentos. Sepáralos con una línea en blanco.",
-        value="La entidad contrata mantenimiento de computadores.\n\n"
-              "La entidad contrata mantenimiento de carreteras.\n\n"
-              "Un hospital compra computadores para urgencias.",
+        value="mantenimiento computadores\n\n"
+              "infraestructura computadores\n\n"
+              "hospital mantenimiento",
         height=155)
     textos=[s.strip() for s in ejemplo.split("\n\n") if s.strip()][:8]
     if len(textos)<2:
@@ -248,6 +248,17 @@ metricas=client.gather(trabajos)""",language="python")
         else:
             st.caption(f"Pendiente de ejecutar: {name}")
     st.markdown(
+        "**Dos pruebas sobre el mismo CSV:** la demostración de **espera simulada** "
+        "permite observar concurrencia como en una API externa; la opción "
+        "**texto real** cuenta términos de títulos SECOP sin tiempos de espera. "
+        "La segunda puede ser más lenta con Dask: es una observación válida."
+    )
+    modo_demo=st.radio(
+        "Procesamiento que se ejecutará",
+        ["espera", "texto"], horizontal=True,
+        format_func=lambda x: "Espera de API simulada" if x=="espera" else "Conteo real de palabras SECOP",
+    )
+    st.markdown(
         "**En clase:** ejecuta el caso de ocho lotes SECOP con una espera externa "
         "SIMULADA por lote. Dask Distributed usa procesos reales, sin servicios "
         "externos, Ollama ni 50.000 registros. La simulación representa esperar "
@@ -275,7 +286,7 @@ metricas=client.gather(trabajos)""",language="python")
         programa=Path(__file__).resolve().parent/"dask_cuando_si.py"
         try:
             result=subprocess.run(
-                [sys.executable, str(programa), "--workers", str(n_demo)],
+                [sys.executable, str(programa), "--workers", str(n_demo), "--modo", modo_demo],
                 cwd=ROOT, capture_output=True, text=True, timeout=120,
             )
             if result.returncode:
@@ -307,7 +318,7 @@ metricas=client.gather(trabajos)""",language="python")
         c1,c2,c3=st.columns(3)
         c1.metric("Secuencial",f"{valores['segundos_secuencial']:.3f} s")
         c2.metric("Dask caliente",f"{valores['segundos_dask_cluster_caliente']:.3f} s")
-        c3.metric("Dask total",f"{valores['segundos_dask_total_incluido_arranque']:.3f} s")
+        c3.metric("Dask + arranque",f"{valores['segundos_dask_total_incluido_arranque']:.3f} s")
         st.write(
             "Ganador del trabajo:",valores["ganador_caliente"],
             "· ganador incluyendo arranque:",valores["ganador_total"],

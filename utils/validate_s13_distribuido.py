@@ -13,7 +13,7 @@ def main():
     nb = json.loads(read("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb"))
     assert nb["nbformat"] == 4
     cells = nb["cells"]
-    assert 75 <= len(cells) <= 95, f'Cantidad inesperada de celdas: {len(cells)}'
+    assert 55 <= len(cells) <= 75, f'Cantidad inesperada de celdas: {len(cells)}'
     assert sum(c["cell_type"] == "code" for c in cells) >= 15
     text = "\n".join("".join(c["source"]) for c in cells)
     assert "Rúbrica observable de práctica" in text, "Falta rúbrica S13"
@@ -22,13 +22,16 @@ def main():
     assert "EJECUTAR_50K_AHORA =" not in text, "No incluir controles de 50k en el cuaderno central"
     assert "ACTIVAR_MODELO_26K =" not in text, "No incluir entrenamiento costoso como actividad"
     assert "s13_A_f1_ngramas.png" in text and "s13_B_f1_por_clase.png" in text, "Faltan figuras de la práctica"
+    assert "prueba_texto" in text, "Falta transformación textual real"
+    assert "LogisticRegression(" not in text, "Clasificación supervisada duplicada; conservar UNSPSC"
+    assert "infraestructura computadores" in text, "Minicorpus TF-IDF no sincronizado"
     assert "OPCIONES_ARQUITECTURA" in text and "OPCIONES_LIMITE" in text, "Faltan opciones cerradas de respuesta"
     for needed in ("MapReduce", "Codespaces", "HDFS", "Dask", "TF-IDF", "Parquet", "F1 macro"):
         assert needed in text, f"Falta material pedagógico: {needed}"
     html = read("Presentaciones/s13-de-una-maquina-a-un-cluster.html")
     slides = re.findall(r'<section class="slide(?: active)?" id="s(\d+)"', html)
-    assert len(slides) == 32
-    assert slides == [str(i) for i in range(1, 33)]
+    assert len(slides) == 24
+    assert slides == [str(i) for i in range(1, 25)]
     for required in ("id=\"decisionBox\"", "id=\"hdfsGrid\"", "id=\"quizPrompt\"", "id=\"tfidfToyRun\"", "id=\"tfidfToyTable\"", "id=\"cosRun\"", "id=\"mapRun\"", "id=\"costRun\"", "id=\"workerRun\"", "id=\"scenarioWorkers\"", "S12", "Codespaces"):
         assert required in html, f"Falta en presentación: {required}"
     config = json.loads(read(".devcontainer/s13-distribuido/devcontainer.json"))
@@ -56,19 +59,20 @@ def main():
     assert not (ROOT / "docs/S13_PLAN_MEJORA_DASK.md").exists(), "Los planes del docente no se publican"
     assert "dask_cuando_si.py" in html
     assert "CPU lógicas" in html
-    assert "50.000" in html
+    assert "dask_cuando_si.py" in html
+    assert "--modo texto" in html
     assert not re.search(r"(?i)(?:hp del estudiante|tu hp|en mi hp|mi portátil hp)", html), "No atribuir equipo personal a estudiantes"
     assert "streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py" in html
     assert "streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py" in text
     assert html.count('if __name__ == "__main__":') >= 2
-    assert "id=\"s32\"" in html
+    assert "id=\"s24\"" in html
     assert config["portsAttributes"]["8502"]["visibility"] == "private"
     index = read("index.html")
     assert index.count('data-n="13"') == 1
     assert index.count('data-session="13"') == 1
     assert 'href="Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1"' in index
     assert not any("____" in "".join(c["source"]) for c in cells if c["cell_type"] == "code")
-    print("S13 QA estático: OK · 32 diapositivas ·", len(cells), "celdas · Codespaces · LMS")
+    print("S13 QA estático: OK · 24 diapositivas ·", len(cells), "celdas · Codespaces · LMS")
 
 if __name__ == "__main__":
     main()
