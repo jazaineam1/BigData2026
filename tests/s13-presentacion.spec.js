@@ -5,6 +5,7 @@ test('S13 24 pantallas navegables y documentación Dask', async ({page}) => {
   const errors=[]; page.on('pageerror',e=>errors.push(e.message));
   await page.goto(URL+'#s1');
   await expect(page.locator('.slide')).toHaveCount(24);
+  await expect(page.locator('#counter')).toHaveText('1 / 24');
   await page.locator('#next').click(); await expect(page.locator('#s2')).toBeVisible();
   await page.goto(URL+'#s24');await expect(page.locator('#s24')).toContainText('PySpark');
   expect(errors).toEqual([]);
@@ -148,4 +149,16 @@ test('S13 sincroniza el ejemplo de TF-IDF y el caso de texto real', async ({page
   await expect(page.locator('#tfidfToyTable')).toContainText('1,6931');
   await page.goto(URL+'#s20');
   await expect(page.locator('#s20')).toContainText('--modo texto');
+});
+
+
+test('S13 permite saltar a cinco unidades desde el selector de navegación', async ({page})=>{
+  await page.goto(URL+'#s1');
+  await expect(page.locator('#unitJump option')).toHaveCount(5);
+  await page.locator('#unitJump').selectOption('12');
+  await expect(page.locator('#s13')).toBeVisible();
+  await expect(page.locator('#s13')).toContainText('TF-IDF');
+  await page.locator('#unitJump').selectOption('20');
+  await expect(page.locator('#s21')).toBeVisible();
+  await expect(page.locator('#counter')).toHaveText('21 / 24');
 });

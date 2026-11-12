@@ -41,7 +41,33 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Instalar Chromium
         run: npx playwright install --with-deps chromium
+      - name: Comprobar si el cambio se limita a S13
+        id: alcance
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          git diff --name-only FETCH_HEAD HEAD > /tmp/archivos_pr.txt
+          exclusivo=1
+          hallado=0
+          while IFS= read -r archivo; do
+            case "$archivo" in
+              Presentaciones/s13-de-una-maquina-a-un-cluster.html|Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb|Laboratorios/S13_Codespaces/*|utils/validate_s13_distribuido.py|tests/s13-presentacion.spec.js|.devcontainer/s13-distribuido/*)
+                hallado=1 ;;
+              .github/workflows/lms-visual-qa.yml)
+                : ;;
+              *)
+                exclusivo=0 ;;
+            esac
+          done < /tmp/archivos_pr.txt
+          if [[ "$exclusivo" == "1" && "$hallado" == "1" ]]; then
+            echo "s13=true" >> "$GITHUB_OUTPUT"
+            echo "Solo S13: ejecutar pruebas visuales de la sesión, no LMS global."
+          else
+            echo "s13=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Preparar SDK Realtime local
+        if: steps.alcance.outputs.s13 != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -62,8 +88,14 @@ jobs:
           done
           cat /tmp/lms-http.log
           exit 1
-      - name: Ejecutar QA visual
-        run: npm run test:visual
+      - name: Ejecutar QA visual proporcional al cambio
+        shell: bash
+        run: |
+          if [[ "${{ steps.alcance.outputs.s13 }}" == "true" ]]; then
+            npx playwright test tests/s13-presentacion.spec.js
+          else
+            npm run test:visual
+          fi
       - name: Subir evidencia si falla
         if: failure()
         uses: actions/upload-artifact@v6

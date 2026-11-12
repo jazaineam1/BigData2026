@@ -172,55 +172,58 @@ similitud=cosine_similarity(q,X).ravel()
 orden=similitud.argsort()[::-1][:10]""",language="python")
 
 with tabs[3]:
-    st.subheader("Un clasificador real: descripción → segmento UNSPSC")
-    st.markdown("Primero se separan procesos por fecha; **después** se ajusta el "
-                "vocabulario con entrenamiento. Jamás con prueba.")
-    valid=data[(data["texto"].str.len()>=20) &
-               (data["segmento"]!="NO IDENTIFICADO")].sort_values(
-                   ["fecha","id_del_proceso"]).copy()
-    valid["clase"]=valid["segmento"].where(
-        valid["segmento"].isin(["80","85","93","81","72"]),"OTRAS")
-    valid=valid[valid["fecha"].notna()]
-    corte=int(len(valid)*.8)
-    tr,te=valid.iloc[:corte],valid.iloc[corte:]
-    if len(tr)>20 and len(te)>5:
-        ngramas=st.selectbox(
-            "Representación (misma división temporal para comparar)",
-            options=[(1,1),(1,2)],index=1,
-            format_func=lambda x: "Unigramas" if x==(1,1)
-            else "Unigramas y bigramas",
-            help="Modifica una sola decisión sin ver ni cambiar el test.",
-        )
-        v=TfidfVectorizer(max_features=3000,ngram_range=ngramas,
-                          min_df=2,strip_accents="unicode")
-        xt=v.fit_transform(tr["texto"])
-        xte=v.transform(te["texto"])
-        clf=LinearSVC(class_weight="balanced",random_state=42)
-        clf.fit(xt,tr["clase"])
-        pred=clf.predict(xte)
-        macro=f1_score(te["clase"],pred,labels=list(ETIQUETAS),
-                       average="macro",zero_division=0)
-        a,b,c=st.columns(3)
-        a.metric("Train",len(tr));b.metric("Test posterior",len(te))
-        c.metric("F1 macro",f"{macro:.3f}")
-        reporte=classification_report(
-            te["clase"],pred,labels=list(ETIQUETAS),
-            output_dict=True,zero_division=0)
-        st.dataframe(pd.DataFrame(reporte).T,use_container_width=True)
-        st.bar_chart(pd.Series({
-            x:reporte[x]["f1-score"] for x in ETIQUETAS
-        }).rename("F1 por segmento"),y_label="F1 por clase")
-        st.caption("F1 macro promedia las categorías por igual; una clase muy "
-                   "frecuente no domina la evaluación. Este panel usa sólo "
-                   "una muestra pequeña y NO reemplaza el benchmark de 50.000.")
-    with st.expander("Cambia el modelo y observa cómo afecta a F1"):
-        st.code("""v=TfidfVectorizer(max_features=3000,ngram_range=(1,2))
-X_train=v.fit_transform(textos_train)  # aprender el vocabulario
-X_test=v.transform(textos_test)       # NO ajustar otra vez
-modelo=LinearSVC(class_weight="balanced",random_state=42)
-modelo.fit(X_train,etiquetas_train)
-pred=modelo.predict(X_test)
-f1_macro=f1_score(etiquetas_test,pred,average="macro")""",language="python")
+    st.subheader("Ampliación opcional · TF-IDF + LinearSVC")
+    st.markdown("El propósito central de S13 es repartir trabajo con Dask. Esta clasificación de segmentos UNSPSC se activa sólo cuando quieras estudiarla; no se entrena al abrir el panel.")
+    if st.toggle("Activar clasificación opcional", value=False, key="s13_clasificacion_opcional"):
+        st.subheader("Un clasificador real: descripción → segmento UNSPSC")
+        st.markdown("Primero se separan procesos por fecha; **después** se ajusta el "
+                    "vocabulario con entrenamiento. Jamás con prueba.")
+        valid=data[(data["texto"].str.len()>=20) &
+                   (data["segmento"]!="NO IDENTIFICADO")].sort_values(
+                       ["fecha","id_del_proceso"]).copy()
+        valid["clase"]=valid["segmento"].where(
+            valid["segmento"].isin(["80","85","93","81","72"]),"OTRAS")
+        valid=valid[valid["fecha"].notna()]
+        corte=int(len(valid)*.8)
+        tr,te=valid.iloc[:corte],valid.iloc[corte:]
+        if len(tr)>20 and len(te)>5:
+            ngramas=st.selectbox(
+                "Representación (misma división temporal para comparar)",
+                options=[(1,1),(1,2)],index=1,
+                format_func=lambda x: "Unigramas" if x==(1,1)
+                else "Unigramas y bigramas",
+                help="Modifica una sola decisión sin ver ni cambiar el test.",
+            )
+            v=TfidfVectorizer(max_features=3000,ngram_range=ngramas,
+                              min_df=2,strip_accents="unicode")
+            xt=v.fit_transform(tr["texto"])
+            xte=v.transform(te["texto"])
+            clf=LinearSVC(class_weight="balanced",random_state=42)
+            clf.fit(xt,tr["clase"])
+            pred=clf.predict(xte)
+            macro=f1_score(te["clase"],pred,labels=list(ETIQUETAS),
+                           average="macro",zero_division=0)
+            a,b,c=st.columns(3)
+            a.metric("Train",len(tr));b.metric("Test posterior",len(te))
+            c.metric("F1 macro",f"{macro:.3f}")
+            reporte=classification_report(
+                te["clase"],pred,labels=list(ETIQUETAS),
+                output_dict=True,zero_division=0)
+            st.dataframe(pd.DataFrame(reporte).T,use_container_width=True)
+            st.bar_chart(pd.Series({
+                x:reporte[x]["f1-score"] for x in ETIQUETAS
+            }).rename("F1 por segmento"),y_label="F1 por clase")
+            st.caption("F1 macro promedia las categorías por igual; una clase muy "
+                       "frecuente no domina la evaluación. Este panel usa sólo "
+                       "una muestra pequeña y NO reemplaza el benchmark de 50.000.")
+        with st.expander("Cambia el modelo y observa cómo afecta a F1"):
+            st.code("""v=TfidfVectorizer(max_features=3000,ngram_range=(1,2))
+    X_train=v.fit_transform(textos_train)  # aprender el vocabulario
+    X_test=v.transform(textos_test)       # NO ajustar otra vez
+    modelo=LinearSVC(class_weight="balanced",random_state=42)
+    modelo.fit(X_train,etiquetas_train)
+    pred=modelo.predict(X_test)
+    f1_macro=f1_score(etiquetas_test,pred,average="macro")""",language="python")
 
 with tabs[4]:
     st.subheader("Dask no es un algoritmo: es un planificador")
@@ -282,6 +285,9 @@ metricas=client.gather(trabajos)""",language="python")
     )
     if n_demo > cpus_disponibles():
         st.warning("Sobresuscripción: se eligieron más workers que CPU disponibles; puede empeorar.")
+    st.markdown("**Ruta principal:** ejecuta primero **Texto real**, después **Espera simulada**; en ambos casos Dask coordina procesos reales. La espera no hace OCR.")
+    st.code("python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2 --modo texto\n"
+            "python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2 --modo espera",language="bash")
     if st.button("Ejecutar la demostración ligera de Dask", key="demo_real_dask"):
         programa=Path(__file__).resolve().parent/"dask_cuando_si.py"
         try:
@@ -305,6 +311,8 @@ metricas=client.gather(trabajos)""",language="python")
                         st.error("La salida secuencial y distribuida no coincide.")
                     else:
                         st.session_state["s13_ultimo_dask"]=valores
+                        almacen=st.session_state.setdefault("s13_modos_ejecutados",{})
+                        almacen[modo_demo]=valores
                         st.success("Dask ejecutó tareas y produjo los mismos resultados.")
         except subprocess.TimeoutExpired:
             st.error("El programa superó 120 s; revisa CPU, procesos y RAM.")
@@ -329,6 +337,34 @@ metricas=client.gather(trabajos)""",language="python")
             data=json.dumps(valores,ensure_ascii=False,indent=2),
             file_name="s13_dask_ejecutado.json",
             mime="application/json", key="descargar_dask_real",
+        )
+    comparados=st.session_state.get("s13_modos_ejecutados",{})
+    if comparados:
+        filas=[{
+            "Caso":modo,
+            "Workers":dato["workers"],
+            "Secuencial (s)":dato["segundos_secuencial"],
+            "Dask caliente (s)":dato["segundos_dask_cluster_caliente"],
+            "Dask con arranque (s)":dato["segundos_dask_total_incluido_arranque"],
+            "Tareas verificadas":dato["resultados_identicos"],
+            "Ganador con clúster listo":dato["ganador_caliente"],
+            "Ganador con arranque":dato["ganador_total"],
+        } for modo,dato in comparados.items()]
+        st.markdown("**Comparación de tus ejecuciones en este Codespace:**")
+        st.dataframe(pd.DataFrame(filas),hide_index=True,use_container_width=True)
+        if "texto" in comparados:
+            st.write("**Frecuencias reales calculadas por lote:**")
+            st.write("Vocabulario por tarea:",comparados["texto"].get("terminos_distintos_por_lote",[]))
+            st.write("Tareas ejecutadas por worker:",comparados["texto"].get("tareas_por_worker",{}))
+        if len(comparados)<2:
+            st.caption("Para comparar los dos escenarios falta ejecutar el otro modo.")
+        else:
+            st.success("Ambos modos ejecutados. Comparar solo fases equivalentes.")
+        st.download_button(
+            "Descargar comparación de ambos modos",
+            data=json.dumps(comparados,ensure_ascii=False,indent=2),
+            file_name="s13_dask_modos_codespace.json",
+            mime="application/json",key="s13_descargar_comparacion",
         )
     st.markdown(
         "**Nota:** Dask caliente = workers ya disponibles; Dask total = incluye "
