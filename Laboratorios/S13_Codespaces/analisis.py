@@ -168,8 +168,14 @@ def experimentos_distribuidos(tabla, n_workers=2):
     with Client(processes=False, n_workers=n_workers, threads_per_worker=1,
                 dashboard_address=":8787") as client:
         trabajadores = len(client.scheduler_info()["workers"])
-        futuros = client.map(evaluar_parametro, opciones,
-                             x_train=x_train, y_train=y_train, pure=False)
+        # Se comparten explícitamente los mismos ejemplos de entrenamiento.
+        # Evita construir tareas accidentales desde kwargs que son Series.
+        datos_futuro = client.scatter(x_train, broadcast=True)
+        etiquetas_futuro = client.scatter(y_train, broadcast=True)
+        futuros = [
+            client.submit(evaluar_parametro, c, datos_futuro, etiquetas_futuro, pure=False)
+            for c in opciones
+        ]
         resultados = client.gather(futuros)
     ganador = max(resultados, key=lambda r: r["f1_cv"])
     modelo = nuevo_modelo(ganador["C"])
