@@ -1,13 +1,6 @@
 name: S13 TFIDF benchmark real 1k 10k 20k Dask
+# Cost policy: heavy benchmark only by explicit manual dispatch.
 on:
-  pull_request:
-    paths:
-      - "Laboratorios/S13_Codespaces/benchmark_unspsc_tfidf_dask.py"
-      - "Laboratorios/S13_Codespaces/medir_embeddinggemma2.py"
-      - "Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py"
-      - "Laboratorios/S13_Codespaces/test_benchmark_unspsc_tfidf_dask.py"
-      - "Laboratorios/S13_Codespaces/GUIA_BENCHMARK_TFIDF_EMBEDDINGGEMMA.md"
-      - ".github/workflows/s13-tfidf-benchmark-qa.yml"
   workflow_dispatch:
 permissions:
   contents: read
