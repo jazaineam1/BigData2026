@@ -1,6 +1,33 @@
 {
-  "name": "Airflow Lab",
-  "dockerComposeFile": "../Airflow/docker-compose.yaml",
-  "service": "airflow-webserver",
-  "workspaceFolder": "/opt/airflow"
+  "name": "S11 · OCR y ASR",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "workspaceFolder": "/workspaces/BigData2026",
+  "postCreateCommand": "python -m pip install -r requirements.txt",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python"
+      ],
+      "settings": {
+        "files.exclude": {
+          "**/__pycache__": true
+        }
+      }
+    }
+  },
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "8gb"
+  },
+  "forwardPorts": [
+    8501
+  ],
+  "portsAttributes": {
+    "8501": {
+      "label": "S11 · Panel local",
+      "visibility": "private"
+    }
+  }
 }
