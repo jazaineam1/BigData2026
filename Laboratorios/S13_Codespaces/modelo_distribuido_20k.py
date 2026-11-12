@@ -15,6 +15,7 @@ import hashlib
 import json
 import math
 import os
+import random
 import time
 from pathlib import Path
 
@@ -53,14 +54,27 @@ TEXTO = "descripci_n_del_procedimiento"
 
 
 def cargar_procesos(objetivo: int = OBJETIVO):
-    """Lee SOLO lo necesario de los CSV ya presentes; no reetiqueta procesos."""
+    """Muestrea todo el universo elegible; ceros registrados, nunca imputados.
+
+    El cero del precio puede ser un valor legítimo o ausencia de valor según
+    modalidad y fase; el modelo NO lo interpreta como precio cero observado.
+    """
     if not FUENTES:
-        raise FileNotFoundError("Faltan los CSV SECOP versionados del repositorio.")
-    encontrados = []
+        raise FileNotFoundError("Faltan los CSV SECOP versionados.")
+    if objetivo < 1:
+        raise ValueError("Objetivo debe ser positivo")
+    reservorio = []
+    rng = random.Random(42)
     vistos = set()
     usados = []
-    descartes = {"precio_invalido": 0, "fecha_invalida": 0,
-                 "descripcion_vacia": 0, "id_duplicado": 0}
+    elegibles = 0
+    filas_analizadas = 0
+    descartes = {
+        "precio_cero": 0, "precio_negativo": 0,
+        "precio_no_numerico": 0, "precio_superior_1e13": 0,
+        "fecha_invalida": 0, "descripcion_vacia": 0,
+        "id_duplicado_o_vacio": 0,
+    }
     for ruta in FUENTES:
         usados.append(ruta)
         for fragmento in pd.read_csv(
@@ -68,46 +82,57 @@ def cargar_procesos(objetivo: int = OBJETIVO):
             chunksize=5000, encoding="utf-8", encoding_errors="replace",
             on_bad_lines="error",
         ):
+            filas_analizadas += len(fragmento)
             precio = pd.to_numeric(fragmento["precio_base"], errors="coerce")
-            valido_precio = precio.gt(0) & precio.le(1e13) & np.isfinite(precio)
             fechas = pd.to_datetime(
                 fragmento["fecha_de_publicacion_del"], errors="coerce",
                 format="mixed",
             )
-            valido_fecha = fechas.notna()
-            valido_texto = fragmento[TEXTO].str.strip().ne("")
-            descartes["precio_invalido"] += int((~valido_precio).sum())
-            descartes["fecha_invalida"] += int((~valido_fecha).sum())
-            descartes["descripcion_vacia"] += int((~valido_texto).sum())
-            buenas = fragmento.loc[valido_precio & valido_fecha & valido_texto].copy()
-            buenas["precio_objetivo"] = precio.loc[buenas.index].astype(float)
-            buenas["fecha"] = fechas.loc[buenas.index]
+            texto_ok = fragmento[TEXTO].str.strip().ne("")
+            descartes["precio_cero"] += int(precio.eq(0).sum())
+            descartes["precio_negativo"] += int(precio.lt(0).sum())
+            descartes["precio_no_numerico"] += int(precio.isna().sum())
+            descartes["precio_superior_1e13"] += int(precio.gt(1e13).sum())
+            descartes["fecha_invalida"] += int(fechas.isna().sum())
+            descartes["descripcion_vacia"] += int((~texto_ok).sum())
+            valido = precio.gt(0) & precio.le(1e13) & np.isfinite(precio)
+            valido &= fechas.notna() & texto_ok
+            buenas = fragmento.loc[valido].copy()
+            buenas["precio_objetivo"] = precio.loc[valido].astype(float)
+            buenas["fecha"] = fechas.loc[valido]
             for fila in buenas.to_dict(orient="records"):
                 clave = str(fila["id_del_proceso"]).strip()
                 if not clave or clave in vistos:
-                    descartes["id_duplicado"] += 1
+                    descartes["id_duplicado_o_vacio"] += 1
                     continue
                 vistos.add(clave)
-                encontrados.append(fila)
-                if len(encontrados) >= objetivo:
-                    break
-            if len(encontrados) >= objetivo:
-                break
-        if len(encontrados) >= objetivo:
-            break
-    if len(encontrados) < objetivo:
+                elegibles += 1
+                if len(reservorio) < objetivo:
+                    reservorio.append(fila)
+                else:
+                    indice = rng.randrange(elegibles)
+                    if indice < objetivo:
+                        reservorio[indice] = fila
+    if len(reservorio) < objetivo:
         raise RuntimeError(
-            f"No hay {objetivo:,} fichas validas; encontradas: {len(encontrados):,}. "
-            "No se deben inventar ni duplicar."
+            f"No hay {objetivo:,} fichas validas unicas; "
+            f"encontradas: {len(reservorio):,}. No inventar datos."
         )
-    datos = pd.DataFrame(encontrados).sort_values(
+    datos = pd.DataFrame(reservorio).sort_values(
         ["fecha", "id_del_proceso"], kind="stable"
     ).reset_index(drop=True)
-    assert datos["id_del_proceso"].is_unique
-    assert len(datos) == objetivo
-    return datos, {"archivos_fuente": [str(p.relative_to(ROOT)) for p in usados],
-                   "descartes_revisar": descartes, "fichas_validas": len(datos)}
-
+    assert len(datos) == objetivo and datos["id_del_proceso"].is_unique
+    return datos, {
+        "archivos_fuente": [str(p.relative_to(ROOT)) for p in usados],
+        "filas_analizadas": filas_analizadas,
+        "universo_elegible_unico": elegibles,
+        "semilla_muestreo": 42,
+        "metodo_muestreo": "reservorio reproducible sobre TODO el universo elegible",
+        "precios_cero_sin_imputar": descartes["precio_cero"],
+        "descartes_revisar": descartes,
+        "fichas_validas": len(datos),
+        "limitacion": "Muestra de fichas publicadas, no precio justo de mercado.",
+    }
 
 def crear_variables(tabla: pd.DataFrame) -> pd.DataFrame:
     """Variables para REGRESIÓN EXPLORATORIA, NO estimación de precio justo."""
