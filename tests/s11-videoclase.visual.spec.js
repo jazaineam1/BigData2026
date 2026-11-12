@@ -71,10 +71,32 @@ test('S11: experimentos de selección, PSM, coseno, WER y lote',async({page})=>{
  await expect(page.locator('#nOut')).toContainText('NO una estimación');
 });
 
+
+test('S11: las 24 diapositivas contienen explicación sustantiva y casos concretos', async({page})=>{
+ await page.goto(route+'#s1');
+ const audit=await page.locator('section.slide').evaluateAll(slides=>slides.map((slide,i)=>{
+   const cards=[...slide.querySelectorAll('.card')];
+   const paragraphs=cards.map(c=>c.querySelector('p')?.textContent?.trim()||'');
+   const subtitles=slide.querySelector('.slide-sub')?.textContent?.trim()||'';
+   return {number:i+1,cards:cards.length,paragraphs:paragraphs.map(p=>p.length),
+     subtitle:subtitles.length,hasQuestion:!!slide.querySelector('.question span'),
+     hasVisual:!!slide.querySelector('.visual .vtitle'),
+     words:(subtitles+' '+paragraphs.join(' ')).split(/\s+/).filter(Boolean).length};
+ }));
+ for(const screen of audit){
+   expect(screen.cards,'Diapositiva '+screen.number).toBe(3);
+   expect(screen.hasQuestion,'Comprobación en '+screen.number).toBe(true);
+   expect(screen.hasVisual,'Visual en '+screen.number).toBe(true);
+   expect(screen.subtitle,'Subtítulo en '+screen.number).toBeGreaterThan(75);
+   expect(Math.min(...screen.paragraphs),'Tarjetas escuetas en '+screen.number).toBeGreaterThan(155);
+   expect(screen.words,'Explicación insuficiente en '+screen.number).toBeGreaterThan(95);
+ }
+});
+
 test('S11: la presentación deriva el desarrollo de Python al cuaderno',async({page})=>{
  await page.goto(route+'#s1');
  await expect(page.locator('section.slide .question a')).toHaveCount(24);
- await expect(page.locator('#s1')).toContainText('cuaderno');
+ await expect(page.locator('#s1')).toContainText(/cuaderno/i);
  await expect(page.locator('section.slide pre')).toHaveCount(1);
  await expect(page.locator('section.slide')).toHaveCount(24);
 });
