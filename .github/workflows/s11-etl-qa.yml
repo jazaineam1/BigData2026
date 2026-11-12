@@ -1,3 +1,4 @@
+# Los cambios de portada de otras sesiones se verifican en lms-visual-qa.yml; no ejecutar ETL/OCR por index.html.
 name: S11 · ETL integral de imágenes y audio (QA)
 
 on:
@@ -22,7 +23,6 @@ on:
       - 'tests/s11-etl.visual.spec.js'
       - 'playwright.s11.config.cjs'
       - 'lms/data/course.json'
-      - 'index.html'
       - '.github/workflows/s11-etl-qa.yml'
   push:
     branches: [main]

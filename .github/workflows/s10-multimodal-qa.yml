@@ -1,3 +1,4 @@
+# Los cambios de portada de otras sesiones se verifican en lms-visual-qa.yml; no ejecutar ETL/OCR por index.html.
 name: S10 · Imágenes y audio (QA)
 on:
   pull_request:
@@ -11,7 +12,6 @@ on:
       - 'utils/validate_s10_multimodal.py'
       - 'tests/s10-multimodal.visual.spec.js'
       - 'playwright.s10-multimodal.config.cjs'
-      - 'index.html'
       - 'lms/data/course.json'
       - 'infraestructura/lms/s10-multimedia-seed.sql'
       - '.github/workflows/s10-multimodal-qa.yml'

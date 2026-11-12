@@ -1,3 +1,4 @@
+# Los cambios de portada de otras sesiones se verifican en lms-visual-qa.yml; no ejecutar ETL/OCR por index.html.
 name: S11 Codespaces OCR/ASR/embeddings - smoke
 on:
   pull_request:
@@ -8,7 +9,6 @@ on:
       - "Cuadernos/11_ETL_Audio_Imagenes.ipynb"
       - "Presentaciones/s11-videoclase-ocr-asr-embeddings.html"
       - "Presentaciones/s11-etl-audio-imagenes.html"
-      - "index.html"
       - ".github/workflows/s11-codespaces-qa.yml"
   workflow_dispatch:
 

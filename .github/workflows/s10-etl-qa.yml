@@ -1,3 +1,4 @@
+# Los cambios de portada de otras sesiones se verifican en lms-visual-qa.yml; no ejecutar ETL/OCR por index.html.
 name: S10 ETL de imágenes
 on:
   pull_request:
@@ -13,7 +14,6 @@ on:
       - 'infraestructura/lms/s10-multimedia-seed.sql'
       - 'infraestructura/lms/functions/bigdata-session/index.ts'
       - '.github/workflows/s10-etl-qa.yml'
-      - 'index.html'
       - 'lms/data/course.json'
 permissions:
   contents: read
