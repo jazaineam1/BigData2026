@@ -7,8 +7,8 @@ import streamlit as st
 
 BASE = Path(__file__).resolve().parent / "salidas" / "modelo_20k"
 st.set_page_config(page_title="Compras Claras | ML distribuido", layout="wide")
-st.title("Compras Claras · Laboratorio de presupuestos")
-st.caption("SECOP II · Entrenamiento XGBoost con Dask · Revisión estadística, nunca juicio sobre legalidad")
+st.title("Compras Claras · Experimento de predicción (no un tasador de contratos)")
+st.caption("SECOP II · XGBoost con Dask · Errores de predicción, no evaluación del precio justo")
 
 manifest_path = BASE / "manifiesto.json"
 pred_path = BASE / "procesos_revision.csv"
@@ -35,8 +35,11 @@ m3.metric("Prueba temporal", f'{manifest["prueba"]:,}')
 m4.metric("Workers Dask", manifest["workers"])
 
 st.warning(
-    "Estas son discrepancias entre un modelo estadístico y los precios base publicados. "
-    "NO constituyen evidencia de sobrecosto, delito, fraude ni irregularidad."
+    "MODELO EXPERIMENTAL: la auditoría de SECOP detectó miles de precios base cero, "
+    "contadores de ofertas prácticamente siempre cero y registros duplicados. "
+    "El modelo ignora los precios base cero, pero NO hemos demostrado su aplicabilidad "
+    "a presupuestos comparables. Los residuos son ERRORES DEL MODELO, no alertas "
+    "contractuales ni prueba de fraude o sobrecosto."
 )
 
 st.subheader("¿Ayudaron las variables y el texto?")
@@ -50,18 +53,18 @@ for nombre, valores in manifest["metricas"].items():
     })
 st.dataframe(pd.DataFrame(filas), hide_index=True, use_container_width=True)
 
-st.subheader("Explorar los procesos del conjunto de prueba")
+st.subheader("Analizar errores del modelo en el conjunto de prueba")
 col1, col2, col3 = st.columns([2, 1, 1])
 modalidades = sorted(datos["modalidad_de_contratacion"].fillna("").unique())
 opcion = col1.selectbox("Modalidad", ["Todas"] + modalidades)
 umbral = col2.slider("Factor mínimo de discrepancia", 1.0, 10.0, 2.0, 0.5)
-solo_revisar = col3.checkbox("Solo factor ≥3", value=False)
+solo_revisar = col3.checkbox("Sólo errores del modelo ≥×3", value=False)
 filtrado = datos.copy()
 if opcion != "Todas":
     filtrado = filtrado[filtrado["modalidad_de_contratacion"] == opcion]
 filtrado = filtrado[filtrado["factor_discrepancia"] >= umbral]
 if solo_revisar:
-    filtrado = filtrado[filtrado["requiere_revision_estadistica"] == True]
+    filtrado = filtrado[filtrado["error_modelo_factor_alto"] == True]
 filtrado = filtrado.sort_values("factor_discrepancia", ascending=False)
 st.write(f"**{len(filtrado):,} procesos** del conjunto de prueba cumplen el filtro.")
 
@@ -77,8 +80,8 @@ if not filtrado.empty:
                      y="log10_precio_estimado", height=340,
                      use_container_width=True)
     st.caption(
-        "Cada punto es un proceso de prueba. Ejes logarítmicos base 10: "
-        "estar cerca de la diagonal indica proximidad de magnitud."
+        "Cada punto es una observación de prueba. Ejes logarítmicos base 10. "
+        "Una gran separación de la diagonal es error del modelo, no una acusación."
     )
     columnas = [
         "id_del_proceso", "entidad", "modalidad_de_contratacion",
@@ -109,7 +112,7 @@ if not filtrado.empty:
     a, b, c = st.columns(3)
     a.metric("Precio base SECOP", f'COP ${ficha["precio_objetivo"]:,.0f}')
     b.metric("Estimación modelo", f'COP ${ficha["precio_estimado_cop"]:,.0f}')
-    c.metric("Diferencia de magnitud", f'{ficha["factor_discrepancia"]:,.2f} ×')
+    c.metric("Factor de error de predicción", f'{ficha["factor_discrepancia"]:,.2f} ×')
     if isinstance(ficha["urlproceso"], str) and ficha["urlproceso"].startswith("https://"):
         st.link_button("Ver fuente original en SECOP", ficha["urlproceso"])
 else:
@@ -117,7 +120,7 @@ else:
 
 with st.expander("Transparencia y límites"):
     st.write(
-        "La predicción usa características publicadas de los procesos. "
+         "La predicción usa características publicadas de los procesos. "
         "No conoce calidad del bien, cantidades, contexto de mercado, decisiones "
         "legales ni ejecución real. Son fichas SECOP, no PDF. "
         "El conjunto de prueba es posterior al periodo de entrenamiento."
