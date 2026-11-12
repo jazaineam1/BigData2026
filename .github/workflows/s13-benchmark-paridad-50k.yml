@@ -1,12 +1,6 @@
 name: S13 benchmark paridad local vs Dask 50k
+# Cost policy: heavy benchmark only by explicit manual dispatch.
 on:
-  pull_request:
-    paths:
-      - "Laboratorios/S13_Codespaces/benchmark_paridad_50k.py"
-      - "Laboratorios/S13_Codespaces/benchmark_embeddinggemma_paridad.py"
-      - "Laboratorios/S13_Codespaces/test_paridad_50k.py"
-      - "Laboratorios/S13_Codespaces/GUIA_PARIDAD_50K.md"
-      - ".github/workflows/s13-benchmark-paridad-50k.yml"
   workflow_dispatch:
 permissions:
   contents: read
