@@ -28,6 +28,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import (balanced_accuracy_score, classification_report,
                              confusion_matrix, f1_score)
 from sklearn.svm import LinearSVC
+import xgboost as xgb
 
 from benchmark_unspsc_tfidf_dask import (ETIQUETAS, SALIDA, FUENTES, leer_muestra,
                                          transformar_bloque, chunks_lista,
@@ -129,6 +130,8 @@ def ejecutar(sizes=TAMANOS, workers=2, repeticiones=3, rondas=20,
         "classes":list(ETIQUETAS),"max_features":MAX_TERMS,
         "ngram_range":[1,2],"min_df":2,"max_df":0.98,
         "class_weight":"balanced","svc_random_state":42,
+        "xgboost_params_identicos_except_threads":True,
+        "xgboost_threads_local":2,"xgboost_threads_por_worker":1,
         "rondas_xgboost":rondas,"svd_dim":32,
         "repeticiones_transformacion":repeticiones,
         "advertencia":"Test FIJO, pero vocabulario ajustado por tamano de train; "
@@ -184,7 +187,9 @@ def ejecutar(sizes=TAMANOS, workers=2, repeticiones=3, rondas=20,
                 t_clf=time.perf_counter()-start
                 assert np.array_equal(pred_svc,classifier.predict(dxte))
                 pred_xgb=None
+                pred_xgb_local=None
                 txgb=None
+                txgb_local=None
                 t_svd=None
                 if con_xgboost:
                     from sklearn.decomposition import TruncatedSVD
@@ -196,6 +201,23 @@ def ejecutar(sizes=TAMANOS, workers=2, repeticiones=3, rondas=20,
                     t_svd=time.perf_counter()-start
                     le=LabelEncoder().fit(ETIQUETAS)
                     ynum=le.transform(ytr)
+                    # Control comparable: MISMO XGBoost, mismos datos SVD,
+                    # semillas, arboles, rondas e hiperparametros.
+                    # 2 threads locales vs 2 workers x 1 thread distribuido.
+                    nombres_svd=[f"svd_{i:02d}" for i in range(ztr.shape[1])]
+                    dl=xgb.DMatrix(ztr,label=ynum,feature_names=nombres_svd)
+                    dt=xgb.DMatrix(zte,feature_names=nombres_svd)
+                    params={
+                        "objective":"multi:softprob","num_class":len(le.classes_),
+                        "tree_method":"hist","max_depth":4,"eta":0.15,
+                        "nthread":2,"seed":42,
+                    }
+                    start=time.perf_counter()
+                    booster_local=xgb.train(params,dl,num_boost_round=rondas)
+                    pred_xgb_local=le.inverse_transform(
+                        np.argmax(booster_local.predict(dt),axis=1)
+                    )
+                    txgb_local=time.perf_counter()-start
                     pred_idx,txgb,parts=entrenar_xgb_distribuido(
                         client,ztr,ynum,zte,le.classes_,rondas
                     )
@@ -205,6 +227,7 @@ def ejecutar(sizes=TAMANOS, workers=2, repeticiones=3, rondas=20,
                     "tfidf_linearsvc":calidad(yte,pred_svc),
                 }
                 if pred_xgb is not None:
+                    metricas["tfidf_svd_xgboost_local"]=calidad(yte,pred_xgb_local)
                     metricas["tfidf_svd_xgboost_dask"]=calidad(yte,pred_xgb)
                 res={
                     "n_train":n,"n_test_fijo":len(test),
@@ -218,6 +241,7 @@ def ejecutar(sizes=TAMANOS, workers=2, repeticiones=3, rondas=20,
                     "segundos_transformacion_dask_mediana":seg_dask,
                     "segundos_fit_predict_linearsvc":round(t_clf,4),
                     "segundos_svd":round(t_svd,4) if t_svd is not None else None,
+                    "segundos_xgboost_local_fit_predict":round(txgb_local,4) if txgb_local is not None else None,
                     "segundos_xgboost_dask_fit":round(txgb,4) if txgb is not None else None,
                     "metricas":metricas,
                     "f1_por_clase":classification_report(
@@ -236,7 +260,8 @@ def ejecutar(sizes=TAMANOS, workers=2, repeticiones=3, rondas=20,
                     "train":n,"test":len(test),"local":seg_local,"dask":seg_dask,
                     "f1_svc":metricas["tfidf_linearsvc"]["f1_macro"],
                     "f1_xgb":metricas.get("tfidf_svd_xgboost_dask",{}).get("f1_macro"),
-                    "tiempo_xgb":round(txgb,4) if txgb is not None else None,
+                    "tiempo_xgb_local":round(txgb_local,4) if txgb_local is not None else None,
+                    "tiempo_xgb_dask":round(txgb,4) if txgb is not None else None,
                 }),flush=True)
     datos["equipo"]["segundos_total"]=round(time.perf_counter()-t0,3)
     archivo=SALIDA/"benchmark_50k_test_fijo.json"
