@@ -81,13 +81,15 @@ Haz doble clic en `01_laboratorio.ipynb`. Lee el texto de una sección, **explic
 | Whisper | `WhisperModel("tiny", ...)` | Audio, segmentos, referencia y WER |
 | Catálogo ETL | Diccionarios, JSONL, Parquet y SHA-256 | Procedencia, integridad y lectura posterior |
 
-**Ollama forma parte del Codespace de práctica.** Para iniciar el servidor y descargar el modelo visual 440m, ejecuta **un único comando**:
+**Ollama forma parte del Codespace de práctica.** En esta versión del laboratorio toda solicitud a `/api/embed` usa `input` como lista, incluso para una sola fotografía: `{"model": MODELO, "input": [{"image": imagen64}]}`. Para una pregunta: `{"model": MODELO, "input": ["viviendas en una ladera"]}`.
+
+ Para iniciar el servidor y descargar el modelo visual 440m, ejecuta **un único comando**:
 
 ~~~bash
 bash preparar_embeddinggemma.sh
 ~~~
 
-La preparación comprueba el servicio, descarga `embeddinggemma-2:440m`, consulta la API local y confirma los **768 valores** del vector. Puedes estudiar las instrucciones de instalación del entorno en `INSTALACION_UBUNTU.md`.
+La preparación comprueba el servicio, descarga `embeddinggemma-2:440m`, consulta la API local y confirma los **768 valores** del vector. Comprueba tanto una **consulta de texto** como una **fotografía real** usando `{"input": [entrada]}`; el resultado de cada elemento se recupera en `embeddings[0]`. Puedes estudiar las instrucciones de instalación del entorno en `INSTALACION_UBUNTU.md`.
 
 Para replicar el laboratorio en Ubuntu propio, consulta `INSTALACION_UBUNTU.md`. Para analizar **imágenes** usa el modelo **440m**; el modelo 270m se limita a texto.
 
