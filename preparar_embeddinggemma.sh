@@ -15,22 +15,41 @@ ollama pull embeddinggemma-2:440m
 
 echo "[4/4] Comprobando API y vector de 768 dimensiones..."
 python - <<'PY'
+import base64
 import json
+from pathlib import Path
 from urllib.request import Request, urlopen
 
-req = Request(
-    "http://127.0.0.1:11434/api/embed",
-    data=json.dumps({"model": "embeddinggemma-2:440m",
-                     "input": "Una fotografía de viviendas en una ladera."}).encode(),
-    headers={"Content-Type": "application/json"},
-    method="POST",
-)
-with urlopen(req, timeout=240) as response:
-    data = json.load(response)
-vectors = data.get("embeddings", [])
-if len(vectors) != 1 or len(vectors[0]) != 768:
-    raise RuntimeError("La API respondió, pero no produjo un vector de 768 valores.")
-print("OK: Ollama local + embeddinggemma-2:440m + 768 dimensiones.")
+URL = "http://127.0.0.1:11434/api/embed"
+MODELO = "embeddinggemma-2:440m"
+
+def incrustar(entrada, nombre):
+    # Una imagen o pregunta es UN elemento de la lista input.
+    payload = {"model": MODELO, "input": [entrada]}
+    req = Request(
+        URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlopen(req, timeout=240) as response:
+            result = json.load(response)
+    except Exception as error:
+        detalle = error.read().decode("utf-8", errors="replace") if hasattr(error, "read") else str(error)
+        raise RuntimeError(f"La API no aceptó {nombre}: {detalle[:1500]}") from error
+    vectors = result.get("embeddings", [])
+    if len(vectors) != 1 or len(vectors[0]) != 768:
+        raise RuntimeError(f"{nombre}: se esperaba un vector de 768 valores")
+    print(f"OK {nombre}: {len(vectors[0])} dimensiones")
+
+incrustar("Una fotografía de viviendas en una ladera.", "texto")
+foto = Path("datos/raw/fotos/eltiempo_023.webp")
+if not foto.is_file():
+    raise FileNotFoundError(f"No existe la foto de prueba: {foto}")
+b64 = base64.b64encode(foto.read_bytes()).decode("ascii")
+incrustar({"image": b64}, foto.name)
+print("OK: Ollama local + embeddinggemma-2:440m + texto e imagen, 768 dimensiones.")
 PY
 ollama list
 echo "Listo. Regresa a 01_laboratorio.ipynb y ejecuta la celda de imágenes."
