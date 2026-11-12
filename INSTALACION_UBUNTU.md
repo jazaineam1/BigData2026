@@ -8,7 +8,7 @@ Abre el archivo `.devcontainer/Dockerfile` de este kit. Las órdenes `apt-get in
 - `tesseract-ocr` y `tesseract-ocr-spa` → programa OCR e idioma español.
 - `ffmpeg` y `poppler-utils` → leer/convertir audio y PDF.
 - `fonts-dejavu-core` → fuentes estándar del sistema.
-- `curl` → descargar instalador oficial de Ollama.
+- `curl` y `zstd` → descargar/descomprimir el paquete oficial de Ollama **durante la construcción del contenedor**, sin `systemd`.
 
 **Compruébalo en la terminal:**
 
@@ -51,29 +51,73 @@ python -m pip install -r requirements.txt
 
 **Verifica:** `python -c "import pytesseract,pandas,pyarrow,requests,faster_whisper; print('OK')"`.
 
-## 3. Ollama y EmbeddingGemma 2:440m (visión)
+## 3. Ollama dentro de Codespaces: ya instalado, sin systemd
 
-A diferencia de Tesseract, Ollama **no está preinstalado** en el contenedor S11. Explica cada acción y su seguridad:
+**La ruta correcta para los estudiantes ha cambiado.** El archivo `.devcontainer/Dockerfile` descarga y extrae el paquete oficial `ollama-linux-amd64.tar.zst` (o ARM64). **No ejecutes otra vez `https://ollama.com/install.sh` dentro del Codespace**: este contenedor no necesita ni debe configurar servicios `systemd`. El servidor se inicia en segundo plano mediante `iniciar_ollama.sh` al arrancar el Codespace, sin abrir el puerto a Internet.
 
-1. Abre el sitio oficial: https://ollama.com/download/linux.
-2. Descarga el instalador a un archivo temporal para poder examinarlo.
-3. Ejecuta la instalación oficial dentro del Codespace.
-4. Inicia el servicio local; descarga el modelo correcto y consulta la API.
+**Primero, en un Codespace NUEVO de la rama `s11-estudiantes`:**
 
 ~~~bash
-curl -fsSL https://ollama.com/install.sh -o /tmp/ollama-install.sh
-less /tmp/ollama-install.sh
-sh /tmp/ollama-install.sh
+command -v ollama
 ollama --version
-nohup ollama serve >/tmp/s11-ollama.log 2>&1 &
-ollama pull embeddinggemma-2:440m
-ollama list
+bash iniciar_ollama.sh
 curl -fsS http://127.0.0.1:11434/api/tags
 ~~~
 
-Si el servicio se inicia automáticamente, la línea `nohup` puede ser innecesaria. El modelo 440m admite **texto e imágenes**; el 270m **solo texto**. La primera instalación y descarga puede requerir más de los 60 minutos de la videoclase: muestra los comandos reales, pero descarga previamente para la grabación.
+**Resultado esperado:** `command -v ollama` muestra `/usr/bin/ollama`, la API responde un JSON con la lista de modelos. Si la lista está vacía es normal: Ollama ya está instalado, pero todavía no descargaste el modelo.
 
-**Comprobación mínima:** la API `/api/tags` responde, el modelo está en la lista y una llamada `/api/embed` devuelve un vector de 768 valores.
+**Segundo, prepara el modelo visual y verifica sus 768 dimensiones:**
+
+~~~bash
+bash preparar_embeddinggemma.sh
+~~~
+
+Este comando ejecuta cuatro operaciones legibles: comprueba Ollama, muestra el espacio libre, descarga `embeddinggemma-2:440m` y hace una petición real a `/api/embed`. **El modelo 440m admite texto e imágenes; el 270m solo texto.** Al terminar verás `OK: Ollama local + embeddinggemma-2:440m + 768 dimensiones.` No uses `ollama embed`: el laboratorio invoca la **API** de Ollama desde Python.
+
+### Si tu Codespace existía antes de la corrección
+
+El contenedor abierto antes de esta actualización **NO se transforma automáticamente** al recibir cambios del Dockerfile. Haz lo siguiente:
+
+1. Comprueba que estás en la rama `s11-estudiantes`, no en `main`. Conserva primero cualquier cambio sin guardar.
+2. En la terminal, sincroniza el repositorio:
+
+   ~~~bash
+   git branch --show-current
+   git pull --ff-only origin s11-estudiantes
+   ~~~
+
+3. Pulsa **Ctrl+Shift+P → Codespaces: Rebuild Container → Rebuild**. Esto reconstruye el entorno con Ollama incluido. GitHub documenta que los archivos de `/workspaces` se conservan tras reconstruir el contenedor; los modelos se guardan en `/workspaces/BigData2026/.cache/ollama/models`, excluido de Git.
+4. Después ejecuta:
+
+   ~~~bash
+   ollama --version
+   bash iniciar_ollama.sh
+   bash preparar_embeddinggemma.sh
+   ~~~
+
+### Alternativa para arreglar un contenedor antiguo SIN reconstruir
+
+Si necesitas continuar con el contenedor viejo, estos comandos **instalan el paquete manual oficial** y evitan `systemd`. Requieren `sudo`, conexión y espacio libre en Codespaces:
+
+~~~bash
+sudo apt-get update
+sudo apt-get install -y zstd
+ARQ="$(dpkg --print-architecture)"
+curl -fL --retry 3 "https://ollama.com/download/ollama-linux-${ARQ}.tar.zst" -o /tmp/ollama-linux.tar.zst
+sudo tar --zstd -xf /tmp/ollama-linux.tar.zst -C /usr
+command -v ollama
+ollama --version
+bash iniciar_ollama.sh
+bash preparar_embeddinggemma.sh
+~~~
+
+Si la descarga está incompleta, `tar` informará del error: no se considera instalado hasta ver `ollama --version`, una respuesta de `/api/tags` y el vector comprobado. No uses `less` en una secuencia de comandos de instalación: **`less archivo` abre un visor interactivo que se cierra pulsando `q`** y bloquea los comandos siguientes hasta entonces.
+
+### Instalación en Ubuntu fuera de Codespaces
+
+En un Ubuntu local, la guía **oficial** permite `curl -fsSL https://ollama.com/install.sh | sh`; ese instalador sí puede configurar el servicio del sistema. También es válida la extracción manual oficial. Revisa primero [las instrucciones oficiales para Linux](https://github.com/ollama/ollama/blob/main/docs/linux.mdx). En Codespaces usamos el método manual dentro del contenedor para no depender de servicios `systemd`.
+
+**Seguridad y persistencia:** el servidor usa `127.0.0.1:11434` (no lo publiques). Los pesos del modelo se almacenan en `.cache/ollama/models` dentro de `/workspaces` y `.gitignore` evita subirlos al repositorio. El modelo se descarga solo una vez por almacenamiento persistente, salvo que borres la caché.
 
 ## 4. Whisper: transcripción de audio REAL
 
@@ -108,8 +152,8 @@ La programación del ejercicio se desarrolla en **01_laboratorio.ipynb** (FASE 1
 | Falta `spa` | Instala/verifica `tesseract-ocr-spa` |
 | `TesseractNotFoundError` | Existe el paquete Python, pero falta ejecutable |
 | `ModuleNotFoundError` | Falta ejecutar pip en el kernel seleccionado |
-| `Connection refused` | Ollama no está iniciado; inspecciona `/tmp/s11-ollama.log` |
-| `model not found` | Descarga `embeddinggemma-2:440m` |
+| `Connection refused` | Ejecuta `bash iniciar_ollama.sh` y revisa `/tmp/s11-ollama.log` |
+| `ollama: command not found` | Actualiza la rama y reconstruye el Codespace; o usa instalación manual con `zstd` |\n| `model not found` | Ejecuta `bash preparar_embeddinggemma.sh`; comprueba `ollama list` |
 | Whisper demora | Modelo tiny necesita descarga; CPU sin GPU |
 | WER extraño | Comprueba que comparaste audio con la referencia del mismo registro |
 | OCR de foto vacío | Quizá no hay texto legible; usa búsqueda visual |
