@@ -2,6 +2,7 @@
 """S13 · Dask en acción. Demo pequeña: mismas tareas secuenciales y con workers reales.
 
 Modo espera: latencia externa SIMULADA (análoga a OCR/ASR por archivo), no hace OCR.
+Modo datos: procesamiento real de términos y frecuencias de un CSV pequeño.
 Modo cpu: carga CPU reproducible de PBKDF2; es sintética, no representa un modelo IA.
 Nunca procesa 50.000 documentos y no debe ejecutarse automáticamente en Actions.
 """
@@ -11,6 +12,8 @@ import argparse
 import csv
 import hashlib
 import json
+import re
+from collections import Counter
 import os
 import time
 from pathlib import Path
@@ -66,12 +69,14 @@ def crear_trabajos(cantidad: int, espera: float, modo: str, iteraciones: int) ->
 def procesar_lote(tarea: dict) -> dict:
     """Trabajo independiente. La espera imita I/O remoto; no es OCR real."""
     textos = tarea["textos"]
-    palabras = sum(len(x.split()) for x in textos)
+    tokens = [re.findall(r"(?u)\b\w+\b", str(x).lower()) for x in textos]
+    palabras = sum(len(fila) for fila in tokens)
+    terminos = Counter(termino for fila in tokens for termino in fila)
     contenido = "\n".join(textos).encode("utf-8")
     huella = hashlib.sha256(contenido).hexdigest()
     if tarea["modo"] == "espera":
         time.sleep(tarea["espera"])
-    else:
+    elif tarea["modo"] == "cpu":
         huella = hashlib.pbkdf2_hmac("sha256", contenido, b"s13", tarea["iteraciones"]).hex()
     try:
         from distributed import get_worker
@@ -79,7 +84,8 @@ def procesar_lote(tarea: dict) -> dict:
     except (ValueError, ImportError):
         trabajador = "secuencial"
     return {"id": tarea["id"], "registros": len(textos), "palabras": palabras,
-            "sha256": huella, "worker": trabajador}
+            "frecuencias": dict(sorted(terminos.items())), "sha256": huella,
+            "worker": trabajador}
 
 
 def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
@@ -111,16 +117,23 @@ def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
                 time.sleep(mantener_tablero_segundos)  # Fuera del cronómetro.
 
     def firma(rows: list[dict]) -> list[tuple]:
-        return [(r["id"], r["registros"], r["palabras"], r["sha256"])
+        return [(r["id"], r["registros"], r["palabras"], r["sha256"], r["frecuencias"])
                 for r in sorted(rows, key=lambda x: x["id"])]
 
     if firma(secuencial) != firma(paralelos):
         raise AssertionError("Los motores produjeron resultados distintos.")
+    vocab=Counter()
+    for fila in paralelos:
+        vocab.update(fila["frecuencias"])
+    assert sum(vocab.values()) == sum(x["palabras"] for x in paralelos)
     return {
         "caso": trabajos[0]["modo"],
         "descripcion": (
             "espera de servicio EXTERNO SIMULADA, no OCR/ASR real"
-            if trabajos[0]["modo"] == "espera" else "cálculo CPU sintético PBKDF2"
+            if trabajos[0]["modo"] == "espera" else (
+                "conteo real de términos SECOP por partición"
+                if trabajos[0]["modo"] == "datos" else "cálculo CPU sintético PBKDF2"
+            )
         ),
         "tareas": len(trabajos),
         "workers": workers,
@@ -128,6 +141,9 @@ def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
         "cpus_logicas_disponibles": cpus_disponibles(),
         "filas_procesadas": sum(x["registros"] for x in paralelos),
         "palabras_procesadas": sum(x["palabras"] for x in paralelos),
+        "vocabulario_unico": len(vocab),
+        "top_terminos": [{"termino": t, "apariciones": int(n)}
+                        for t,n in sorted(vocab.items(), key=lambda par:(-par[1], par[0]))[:10]],
         "workers_reales": [{"direccion": addr,
                             "hilos": data["nthreads"],
                             "limite_memoria_bytes": data["memory_limit"]}
@@ -153,7 +169,7 @@ def main() -> None:
                         help="Número de lotes independientes del CSV pequeño.")
     parser.add_argument("--espera", type=float, default=0.60,
                         help="Segundos de espera externa simulada por lote.")
-    parser.add_argument("--modo", choices=["espera", "cpu"], default="espera")
+    parser.add_argument("--modo", choices=["espera", "datos", "cpu"], default="espera")
     parser.add_argument("--iteraciones", type=int, default=300000,
                         help="Carga sintética si --modo cpu; no es modelo de IA.")
     parser.add_argument("--tablero", action="store_true",
@@ -178,13 +194,22 @@ def main() -> None:
     if args.workers > disponibles:
         print("ADVERTENCIA: hay más workers que CPU lógicas; puede empeorar el tiempo.")
 
+    inicio_entrada=time.perf_counter()
     datos = crear_trabajos(args.tareas, args.espera, args.modo, args.iteraciones)
+    segundos_entrada=time.perf_counter()-inicio_entrada
     resultado = ejecutar(datos, args.workers, args.tablero,
                          args.mantener_tablero_segundos)
+    resultado["segundos_preparacion_entrada"]=round(segundos_entrada,4)
+    resultado["segundos_secuencial_con_preparacion"]=round(
+        segundos_entrada+resultado["segundos_secuencial"],4)
+    resultado["segundos_dask_con_preparacion_y_arranque"]=round(
+        segundos_entrada+resultado["segundos_dask_total_incluido_arranque"],4)
+    resultado["alcance_cronometro"]="Sin serializar JSON al disco ni cerrar el proceso; las fases de lectura/arranque/tareas se reportan separadas."
     SALIDA.parent.mkdir(parents=True, exist_ok=True)
     SALIDA.write_text(json.dumps(resultado, ensure_ascii=False, indent=2), encoding="utf-8")
     print("\nRESULTADO_S13_DASK="+json.dumps(resultado, ensure_ascii=False))
     print(f"JSON: {SALIDA}")
+    print(f"Vocabulario real: {resultado['vocabulario_unico']} términos; top: {resultado['top_terminos'][:3]}")
     print(f"Ganador de la TAREA (clúster ya abierto): {resultado['ganador_caliente']}")
     print(f"Ganador INCLUYENDO arranque: {resultado['ganador_total']}")
     print("Si pierdes con Dask, identifica sobrecarga y cambia tareas/workers; no manipules tiempos.")

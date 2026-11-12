@@ -1,0 +1,2 @@
+# Sólo para ampliaciones docentes; NO se instala en el perfil Codespaces S13.
+xgboost>=3.1,<4

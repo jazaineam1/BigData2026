@@ -15,6 +15,25 @@ class PruebaS13Dask(unittest.TestCase):
         for campo in ("id", "registros", "palabras", "sha256"):
             self.assertEqual(a[campo], b[campo])
         self.assertEqual(a["palabras"], 3)
+    def test_transformacion_real_de_titulos(self):
+        trabajo={"id":0,"textos":["mantenimiento computadores",
+                                  "hospital mantenimiento"],
+                 "modo":"datos","espera":0.0,"iteraciones":1000}
+        salida=procesar_lote(trabajo)
+        self.assertEqual(salida["registros"],2)
+        self.assertEqual(salida["palabras"],4)
+        self.assertEqual(salida["frecuencias"]["mantenimiento"],2)
+        self.assertEqual(salida["frecuencias"]["hospital"],1)
+        self.assertEqual(sum(salida["frecuencias"].values()),salida["palabras"])
+
+    def test_modos_mismo_trabajo_sin_esperas(self):
+        base={"id":0,"textos":["hospital computadores"],"espera":0,
+              "iteraciones":1000}
+        real=procesar_lote({**base,"modo":"datos"})
+        sim=procesar_lote({**base,"modo":"espera"})
+        for clave in ("registros","palabras","frecuencias","sha256"):
+            self.assertEqual(real[clave],sim[clave])
+
     def test_cuota_cgroup_v2(self):
         self.assertEqual(cuota_cpu_cgroup('400000 100000'), 4)
         self.assertEqual(cuota_cpu_cgroup('150000 100000'), 1)

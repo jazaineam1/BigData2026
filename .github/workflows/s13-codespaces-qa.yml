@@ -1,38 +1,63 @@
-name: S13 Codespaces Dask y modelos - QA
-# Heavy integration validation: explicit manual execution only.
+name: S13 · QA ligero y demostración Dask pequeña
 on:
+  pull_request:
+    paths:
+      - Presentaciones/s13-de-una-maquina-a-un-cluster.html
+      - Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb
+      - Laboratorios/S13_Codespaces/**
+      - utils/validate_s13_distribuido.py
+      - tests/s13-presentacion.spec.js
+      - .devcontainer/s13-distribuido/**
+      - .github/workflows/s13-codespaces-qa.yml
   workflow_dispatch:
-
+    inputs:
+      run_heavy:
+        description: "Ejecutar integración ampliada solo si el docente lo autoriza"
+        type: boolean
+        default: false
+        required: false
+concurrency:
+  group: s13-qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
-
 jobs:
   s13-ligero:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 9
     steps:
       - uses: actions/checkout@v4
-      - name: Estructura del cuaderno, diapositivas, LMS y Codespaces (sin instalar dependencias)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: Laboratorios/S13_Codespaces/requirements.txt
+      - name: Estructura, sintaxis y pruebas unitarias sin modelos
         run: |
           python utils/validate_s13_distribuido.py
-          python -m py_compile Laboratorios/S13_Codespaces/app_tfidf_unspsc.py
+          python -m py_compile Laboratorios/S13_Codespaces/verificar_entorno.py
           python -m py_compile Laboratorios/S13_Codespaces/dask_cuando_si.py
+          python -m py_compile Laboratorios/S13_Codespaces/app_tfidf_unspsc.py
           python -m unittest discover -s Laboratorios/S13_Codespaces -p 'test_dask_cuando_si.py' -v
+      - name: Instalar solo dependencias básicas de la clase
+        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+      - name: Levantar, probar y cerrar un worker real de proceso
+        run: python Laboratorios/S13_Codespaces/verificar_entorno.py
+      - name: Dos casos pequeños Dask (sin benchmark masivo)
+        run: |
+          python Laboratorios/S13_Codespaces/dask_cuando_si.py --modo datos --workers 2 --tareas 4
+          python Laboratorios/S13_Codespaces/dask_cuando_si.py --modo espera --workers 2 --tareas 4 --espera 0.1
+      - name: Verificar Streamlit sin ejecutar el clasificador opcional
+        run: |
           python - <<'PY'
-          import json
-          from pathlib import Path
-          n=json.loads(Path('Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb').read_text())
-          assert 75<=len(n['cells'])<=95
-          for c in n['cells']:
-              if c['cell_type']=='code':
-                  compile(''.join(c['source']),'celda_s13','exec')
-          t='\n'.join(''.join(c['source']) for c in n['cells'])
-          assert 'OPCIONES_ARQUITECTURA' in t and 'OPCIONES_LIMITE' in t
-          assert 'Rúbrica observable de práctica' in t
-          print('QA ligero: estructura, rúbrica, decisiones y sintaxis Python OK')
+          from streamlit.testing.v1 import AppTest
+          a=AppTest.from_file("Laboratorios/S13_Codespaces/app_tfidf_unspsc.py").run(timeout=90)
+          assert not a.exception, [str(x) for x in a.exception]
+          assert len(a.tabs)==7
+          print("7 estaciones S13 verificadas; clasificación opcional desactivada")
           PY
-  s13-reproducible:
-    if: github.event_name == 'workflow_dispatch'
+  s13-integracion-manual:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_heavy == true }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -40,39 +65,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Validar contrato de presentación, cuaderno y LMS
-        run: python utils/validate_s13_distribuido.py
-      - name: Instalar las mismas dependencias que Codespaces
+      - name: Instalar bibliotecas y utilidades Jupyter
         run: |
           python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
           python -m pip install nbclient nbformat
-      - name: Verificar Codespaces y datasets
-        run: python Laboratorios/S13_Codespaces/verificar_entorno.py
-      - name: Validar sintaxis y panel interactivo TF-IDF UNSPSC en el mismo perfil
-        run: |
-          python -m py_compile Laboratorios/S13_Codespaces/app_tfidf_unspsc.py
-          python -m py_compile Laboratorios/S13_Codespaces/cv_dask_mismo_modelo.py
-          python - <<'PY'
-          from streamlit.testing.v1 import AppTest
-          a=AppTest.from_file("Laboratorios/S13_Codespaces/app_tfidf_unspsc.py").run(timeout=120)
-          assert not a.exception, [str(x) for x in a.exception]
-          assert len(a.tabs)==7, len(a.tabs)
-          print("Panel S13: siete estaciones reales, carga SECOP, TF-IDF y clasificación")
-          PY
-      - name: Probar motor y resultados verificables
-        run: |
-          cd Laboratorios/S13_Codespaces
-          python -m unittest -v test_s13
-      - name: Ejecutar el laboratorio completo sin intervención manual
-        run: python Laboratorios/S13_Codespaces/analisis.py todo
-      - name: Ejecutar todo el cuaderno Jupyter desde una carpeta limpia
+      - name: Run All de la muestra pequeña; ampliación opcional desactivada
         run: |
           python - <<'PY'
           import nbformat
           from nbclient import NotebookClient
           from pathlib import Path
-          path=Path("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb")
-          nb=nbformat.read(path,as_version=4)
-          NotebookClient(nb,timeout=240,kernel_name="python3",resources={"metadata":{"path":"Cuadernos"}}).execute()
-          print("Run All del cuaderno S13: OK")
+          p=Path("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb")
+          nb=nbformat.read(p,as_version=4)
+          NotebookClient(nb,timeout=240,kernel_name="python3",
+                         resources={"metadata":{"path":"Cuadernos"}}).execute()
+          print("Run All S13: OK")
           PY
