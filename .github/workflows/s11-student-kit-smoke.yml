@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   student-kit:
-    name: PDFs y fotos, cuadernos, OCR y visor privado
+    name: PDF, 62 fotos, un cuaderno y visor privado
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -29,7 +29,7 @@ jobs:
           visibles={x.name for x in Path(".").iterdir() if x.name!=".git"}
           esperados={".devcontainer",".gitignore","README.md","INSTALACION_UBUNTU.md",
                      "FUENTES.md","requirements.txt","01_laboratorio.ipynb",
-                     "02_lotes_122_fuentes.ipynb","datos","fuentes.py","visor_fuentes.py","test_visor.py","abrir_visor.sh"}
+                     "datos","fuentes.py","visor_fuentes.py","test_visor.py","abrir_visor.sh"}
           assert visibles==esperados,visibles^esperados
           root=Path("datos/raw")
           for sub,count in [("fotos",30),("fotos_catalogadas",32),("actas",30),("actas_pdf",30)]:
@@ -46,7 +46,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa ffmpeg poppler-utils
           python -m pip install -r requirements.txt
           tesseract --list-langs | grep -x spa
-      - name: Sintaxis de ambos cuadernos y visor
+      - name: Un cuaderno de dos fases, sintaxis y visor
         run: |
           bash -n abrir_visor.sh
           python -m py_compile fuentes.py visor_fuentes.py test_visor.py
@@ -58,14 +58,17 @@ jobs:
           d=json.loads(Path(".devcontainer/devcontainer.json").read_text())
           assert 8501 in d["forwardPorts"] and d["portsAttributes"]["8501"]["visibility"]=="private"
           assert d["postStartCommand"]=="bash abrir_visor.sh"
-          for nombre,cantidad in [("01_laboratorio.ipynb",11),("02_lotes_122_fuentes.ipynb",10)]:
-              nb=nbformat.read(nombre,as_version=4)
-              nbformat.validate(nb)
-              codigo=[c for c in nb.cells if c.cell_type=="code"]
-              assert len(codigo)>=cantidad,(nombre,len(codigo))
-              for c in codigo:
-                  compile(c.source,c.id,"exec")
-              print("Notebook OK:",nombre,len(codigo),"celdas de Python")
+          archivos = list(Path(".").glob("*.ipynb"))
+          assert [p.name for p in archivos] == ["01_laboratorio.ipynb"], archivos
+          nb=nbformat.read("01_laboratorio.ipynb",as_version=4)
+          nbformat.validate(nb)
+          ids={c.id for c in nb.cells}
+          assert {"s11-abrir-imagen","s11-ocr-acta","fase2-lotes","lote-inventario","lote-auditar"} <= ids
+          codigo=[c for c in nb.cells if c.cell_type=="code"]
+          assert len(codigo)>=20,len(codigo)
+          for c in codigo:
+              compile(c.source,c.id,"exec")
+          print("ÚNICO cuaderno OK: 2 fases y",len(codigo),"celdas de Python")
           PY
           python -m unittest -v test_visor
       - name: Ejecutar OCR REAL en fotos y páginas SECOP
@@ -81,14 +84,12 @@ jobs:
                   "s11-abrir-imagen","s11-ocr-acta","s11-ocr-parametros","s11-ocr-fotos"
               }:
                   exec(compile(c.source,c.id,"exec"),scope)
-          nb=nbformat.read("02_lotes_122_fuentes.ipynb",as_version=4)
-          scope={"__name__":"__main__"}
           for c in nb.cells:
               if c.cell_type=="code" and c.id in {"lote-inventario","lote-actas","lote-fotos"}:
                   exec(compile(c.source,c.id,"exec"),scope)
           assert len(scope["tabla_actas"])==5
           assert len(scope["tabla_fotos"])==8
-          print("OCR REAL OK: actas y fotos, dos cuadernos")
+          print("OCR REAL OK: actas y fotos, un cuaderno de dos fases")
           PY
       - name: Iniciar el visor y comprobar la respuesta HTTP
         run: |
@@ -105,7 +106,7 @@ jobs:
           exit 1
 
   real-models:
-    name: Modelo visual 440m, 30 WAV reales, Whisper y ETL 102
+    name: Modelo visual 440m, 30 WAV reales, Whisper y ETL 122
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
@@ -133,7 +134,7 @@ jobs:
           done
           curl -fsS http://127.0.0.1:11434/api/tags >/dev/null
           ollama pull embeddinggemma-2:440m
-      - name: "Ejecución REAL: imagen, diez WAV humanos, Whisper, WER y catálogo"
+      - name: "Ejecución REAL: imagen, 30 WAV humanos, Whisper, WER y catálogo"
         env:
           PYTHONUNBUFFERED: "1"
           HF_HUB_DISABLE_TELEMETRY: "1"
@@ -142,7 +143,7 @@ jobs:
           python - <<'PY'
           import math
           import nbformat
-          nb=nbformat.read("02_lotes_122_fuentes.ipynb",as_version=4)
+          nb=nbformat.read("01_laboratorio.ipynb",as_version=4)
           ids={
               "lote-inventario","lote-actas","lote-fotos",
               "lote-embeddings","lote-busqueda",
@@ -163,5 +164,5 @@ jobs:
           items=inventario()
           assert len(items)==122
           assert all(math.isfinite(x) for x in env["tabla_wer"].wer)
-          print("INTEGRACIÓN REAL OK: 122 fuentes, 30 PDF, 62 fotos, 10 voces y 440m",flush=True)
+          print("INTEGRACIÓN REAL OK: 122 fuentes, 30 PDF, 62 fotos, 30 voces y 440m",flush=True)
           PY
