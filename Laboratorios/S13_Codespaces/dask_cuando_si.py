@@ -20,9 +20,30 @@ FUENTE = ROOT / "Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv"
 SALIDA = Path(__file__).resolve().parent / "salidas" / "dask_demostracion_s13.json"
 
 
+def cuota_cpu_cgroup(contenido: str) -> int | None:
+    """Convierte cpu.max de cgroups v2 en CPU completas conservadoras."""
+    partes = contenido.strip().split()
+    if len(partes) != 2 or partes[0] == "max":
+        return None
+    try:
+        cuota, periodo = (int(x) for x in partes)
+    except ValueError:
+        return None
+    return max(1, cuota // periodo) if cuota > 0 and periodo > 0 else None
+
+
 def cpus_disponibles() -> int:
-    """Respeta afinidad Linux/contendor cuando existe; son CPU lógicas, NO núcleos físicos."""
-    return len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else (os.cpu_count() or 1)
+    """Límite orientativo: afinidad y cuota cgroup (no núcleos físicos)."""
+    afinidad = (
+        len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity")
+        else (os.cpu_count() or 1)
+    )
+    ruta = Path("/sys/fs/cgroup/cpu.max")
+    if ruta.is_file():
+        cuota = cuota_cpu_cgroup(ruta.read_text(encoding="utf-8"))
+        if cuota is not None:
+            return max(1, min(afinidad, cuota))
+    return max(1, afinidad)
 
 
 def crear_trabajos(cantidad: int, espera: float, modo: str, iteraciones: int) -> list[dict]:
@@ -61,7 +82,8 @@ def procesar_lote(tarea: dict) -> dict:
             "sha256": huella, "worker": trabajador}
 
 
-def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False) -> dict:
+def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
+            mantener_tablero_segundos: int = 0) -> dict:
     from distributed import Client, LocalCluster
     inicio_local = time.perf_counter()
     secuencial = [procesar_lote(t) for t in trabajos]
@@ -80,6 +102,13 @@ def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False) -> dict:
             paralelos = client.gather(client.map(procesar_lote, trabajos, pure=False))
             t_dask_caliente = time.perf_counter() - inicio_trabajo
             t_total = time.perf_counter() - inicio_cluster
+            if mantener_tablero_segundos:
+                print(
+                    f"Panel Dask en Codespaces: PORTS → 8787 → Private; "
+                    f"disponible {mantener_tablero_segundos} s tras las tareas.",
+                    flush=True,
+                )
+                time.sleep(mantener_tablero_segundos)  # Fuera del cronómetro.
 
     def firma(rows: list[dict]) -> list[tuple]:
         return [(r["id"], r["registros"], r["palabras"], r["sha256"])
@@ -128,7 +157,9 @@ def main() -> None:
     parser.add_argument("--iteraciones", type=int, default=300000,
                         help="Carga sintética si --modo cpu; no es modelo de IA.")
     parser.add_argument("--tablero", action="store_true",
-                        help="Abre puerto 8787 si está disponible (mantener PRIVATE).")
+                        help="Panel Dask en puerto 8787 PRIVATE mientras corre el script.")
+    parser.add_argument("--mantener-tablero-segundos", type=int, default=0,
+                        help="Retener el panel tras terminar, sin contaminar cronómetros (0–60).")
     args = parser.parse_args()
 
     if args.workers not in (1, 2, 4):
@@ -137,6 +168,10 @@ def main() -> None:
         parser.error("Usa entre 2 y 16 tareas para mantener la prueba ligera.")
     if not 0 <= args.espera <= 1.0 or not 1000 <= args.iteraciones <= 1000000:
         parser.error("Parámetros fuera de los límites de seguridad de la clase.")
+    if not 0 <= args.mantener_tablero_segundos <= 60:
+        parser.error("El panel puede mantenerse entre 0 y 60 segundos.")
+    if args.mantener_tablero_segundos and not args.tablero:
+        parser.error("--mantener-tablero-segundos requiere --tablero.")
 
     disponibles = cpus_disponibles()
     print(f"CPU lógicas habilitadas: {disponibles}; workers: {args.workers} × 1 hilo")
@@ -144,7 +179,8 @@ def main() -> None:
         print("ADVERTENCIA: hay más workers que CPU lógicas; puede empeorar el tiempo.")
 
     datos = crear_trabajos(args.tareas, args.espera, args.modo, args.iteraciones)
-    resultado = ejecutar(datos, args.workers, args.tablero)
+    resultado = ejecutar(datos, args.workers, args.tablero,
+                         args.mantener_tablero_segundos)
     SALIDA.parent.mkdir(parents=True, exist_ok=True)
     SALIDA.write_text(json.dumps(resultado, ensure_ascii=False, indent=2), encoding="utf-8")
     print("\nRESULTADO_S13_DASK="+json.dumps(resultado, ensure_ascii=False))

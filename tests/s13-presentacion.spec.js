@@ -127,3 +127,20 @@ test('S13 pantalla móvil con tabla TF-IDF sin desborde global',async ({page})=>
   const dims=await page.evaluate(()=>({a:document.documentElement.scrollWidth,b:innerWidth}));
   expect(dims.a).toBeLessThanOrEqual(dims.b+4);
 });
+
+
+test('S13 los ejemplos con workers protegen la creación de procesos', async ({page}) => {
+  await page.goto(URL+'#s9');
+  await expect(page.locator('#s9')).toContainText('if __name__ == "__main__"');
+  await page.goto(URL+'#s20');
+  await expect(page.locator('#s20')).toContainText('if __name__ == "__main__"');
+});
+
+test('S13 puedo iniciar Streamlit desde la presentación sin otra guía', async ({page}) => {
+  await page.goto(URL+'#s8');
+  await expect(page.locator('#s8')).toContainText('streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py');
+  await expect(page.locator('#s8')).toContainText('8503');
+  await page.goto(URL+'#s21');
+  await expect(page.locator('#s21')).toContainText('PORTS');
+  await expect(page.locator('#s21')).toContainText('Private');
+});
