@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import subprocess
 import sys
 import tempfile
@@ -147,6 +148,37 @@ def _asr(p: Path, cfg: dict, modelo) -> tuple[str, list[dict]]:
               "texto": s.text.strip()} for s in segmentos if s.text.strip()]
     return " ".join(x["texto"] for x in filas), filas
 
+
+def extraer_candidatos(fila: dict) -> list[dict]:
+    """Extrae patrones verificables del TEXTO, nunca certifica hechos del mundo."""
+    texto = fila.get("extracted_text", "")
+    tipos = (
+        ("fecha", r"\b\d{1,2}[-/]\d{1,2}[-/]\d{4}\b"),
+        ("referencia", r"\b(?:pedido|factura|contrato|orden)\s*(?:n[º°o]\.?|número|#|:)?\s*[A-Z]*\d+\b"),
+        ("numero", r"\b\d+(?:[.,]\d+)?\b"),
+    )
+    encontrados, intervalos = [], []
+    for tipo, expresion in tipos:
+        for match in re.finditer(expresion, texto, flags=re.IGNORECASE):
+            if any(match.start() < fin and match.end() > ini for ini, fin in intervalos):
+                continue  # No duplicar los números contenidos en fechas o referencias.
+            intervalos.append(match.span())
+            item = {
+                "path": fila["path"], "sha256": fila["sha256"],
+                "source_name": fila["source_name"], "tipo": tipo,
+                "valor": match.group(), "evidencia": match.group(),
+                "origen_texto": fila["text_origin"]
+            }
+            for segmento in fila.get("segments", []):
+                if match.group().casefold() in segmento["texto"].casefold():
+                    item["inicio_s"] = segmento["inicio_s"]
+                    item["fin_s"] = segmento["fin_s"]
+                    break
+            encontrados.append(item)
+            if len(encontrados) >= 200:
+                return encontrados
+    return encontrados
+
 def ejecutar(raiz: Path, cfg: dict) -> None:
     files = inventario(raiz, cfg)
     if not files:
@@ -201,6 +233,13 @@ def ejecutar(raiz: Path, cfg: dict) -> None:
     with (out / "catalogo.jsonl").open("w", encoding="utf-8") as f:
         for item in filas:
             f.write(json.dumps(item, ensure_ascii=False, allow_nan=False) + "\n")
+    # Extracción de información reutilizable con fragmentos rastreables al texto.
+    # No se inventan entidades ni relaciones entre archivos independientes.
+    candidatos = [dato for fila in filas for dato in extraer_candidatos(fila)]
+    with (out / "candidatos.jsonl").open("w", encoding="utf-8") as f:
+        for dato in candidatos:
+            f.write(json.dumps(dato, ensure_ascii=False, allow_nan=False) + "\n")
+    print(f"Candidatos encontrados: {len(candidatos)} (verificar contra cada fuente)")
     # Parquet con PyArrow directo: evita registrar dos veces pandas.period en CI.
     # JSONL conserva segmentos temporales y se considera el registro canónico.
     import pyarrow as pa
@@ -218,6 +257,7 @@ def ejecutar(raiz: Path, cfg: dict) -> None:
         "generado_utc": datetime.now(timezone.utc).isoformat(),
         "archivos": [{"path": x["path"], "sha256": x["sha256"]} for x in filas],
         "sha256_catalogo": sha256(out / "catalogo.jsonl"),
+        "sha256_candidatos": sha256(out / "candidatos.jsonl"),
         "nota": "Los contenidos procesados son hipótesis y no certificaciones de hechos."
     })
     print(f"\nResultado: {len(filas)} OK, {len(errores)} con error. Salidas: {out}")
@@ -336,6 +376,10 @@ def auditar(raiz: Path) -> bool:
             errores.append(fila["path"])
     if sha256(raiz / "salidas" / "catalogo.jsonl") != m["sha256_catalogo"]:
         errores.append("salidas/catalogo.jsonl")
+    if m.get("sha256_candidatos"):
+        p_candidatos = raiz / "salidas" / "candidatos.jsonl"
+        if not p_candidatos.is_file() or sha256(p_candidatos) != m["sha256_candidatos"]:
+            errores.append("salidas/candidatos.jsonl")
     if errores:
         print("Integridad NO validada:", errores)
         return False

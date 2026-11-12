@@ -1,5 +1,8 @@
 # Recuperación de S11 · OCR, transcripción y EmbeddingGemma 2
 
+**Para la videoclase de máximo 60 minutos:** empieza con el [libreto operativo y verificaciones independientes](./VIDEOCLASE_60MIN.md) y la [presentación breve de 13 pantallas](../../Presentaciones/s11-videoclase-ocr-asr-embeddings.html). Para el alumnado, la ruta corta es [Guía interactiva del estudiante: ocho pasos](../../assets/tutoriales/s11-ocr-asr-paso-a-paso.html) y [Guía Markdown reproducible](./GUIA_ESTUDIANTE.md). La ruta usa primero `lab.py` y, solo al final, `proyecto.py`; este README queda como referencia completa.
+
+
 **Big Data 2026-2S — Universidad Central**  
 **Caso transversal:** Laura / Compras Claras  
 **Modalidad:** GitHub Codespaces, Python y Ollama local; sin GPU ni servicios comerciales obligatorios.
@@ -12,6 +15,7 @@ La clase anterior quedó sin cubrir OCR ni transcripción. Aquí se enseñan amb
 - [Cuaderno original S11 para Colab](../../Cuadernos/11_ETL_Audio_Imagenes.ipynb)
 - [Motor ETL que verifica fuentes, RAW y derivados](../../utils/s11_etl_core.py)
 - [Lector OCR y evaluación ASR del Taller 2](../../utils/tc2_core.py)
+- [Verificador externo de calidad e integridad](./verificar_independiente.py)
 - [Extracción de información en audios](../../utils/s11_audio_noticia.py)
 - [Licencia, identidad y trazabilidad de las voces](../../Datos/s10_audio_reales/README.md)
 
@@ -47,7 +51,7 @@ Abre el enlace del **puerto 8501** que muestra Codespaces. **Mantén su visibili
 
 ## Cómo convertir el ejemplo en un proyecto independiente
 
-El laboratorio `lab.py` es la ruta **introductoria**: primero una imagen y un audio, para entender qué hace cada herramienta. La ruta **transferible** ya está implementada en [proyecto.py](./proyecto.py): lee **carpetas completas** de imágenes, PDF, audios y textos aportados por cada estudiante; acepta parámetros desde `config.json`; guarda JSONL, Parquet, índices y errores; verifica integridad; permite recuperar por significado.
+El laboratorio `lab.py` es la ruta **introductoria**: primero una imagen y un audio, para entender qué hace cada herramienta. La ruta **transferible** ya está implementada en [proyecto.py](./proyecto.py): lee **carpetas completas** de imágenes, PDF, audios y textos aportados por cada estudiante; acepta parámetros desde `config.json`; guarda JSONL, Parquet, candidatos estructurados en `candidatos.jsonl`, índices y errores; verifica integridad; permite recuperar por significado.
 
 **[Manual completo para comprender y modificar cada función](./GUIA_REUTILIZACION.md)**. Incluye parámetros, ejemplos de código sustituible, uso de otros formatos, proyecto propio, pruebas y un mini-reto con evidencias reales. No es necesario seguir trabajando con las noticias de Compras Claras.
 
@@ -78,10 +82,26 @@ La ruta procesa solo el TXT de demostración; para activar OCR y ASR coloca arch
 
 Al abrir Codespaces, desde Laboratorios/S11_Codespaces ejecuta `bash probar_todo.sh --ligero` para comprobar sintaxis, OCR real, Parquet e integridad con datos simulados. Si tienes recursos disponibles, `bash probar_todo.sh --completo` realiza también transcripción e inferencia real en Ollama. **El modo completo no se ha validado desde esta conversación en una máquina Codespaces real** y debe pasar antes de publicar la actividad a todo el grupo.
 
+### Comprobación independiente y ficha de extracción
+
+Después de OCR, ASR e indexación del ejemplo, ejecuta:
+
+~~~bash
+python verificar_independiente.py --caso lab --modelo
+~~~
+
+El motor genérico genera también `salidas/candidatos.jsonl` con fechas, cifras y referencias detectadas, con ruta, fuente y hash. Para auditar sin ejecutar las funciones del motor:
+
+~~~bash
+python verificar_independiente.py --proyecto proyectos/mi_reto
+~~~
+
+Estas comprobaciones no reemplazan el contraste humano de imagen/audio.
+
 ## Paso 1. Crear Codespace de S11
 
 1. Abre [el repositorio](https://github.com/jazaineam1/BigData2026).
-2. Escoge la rama que contiene este laboratorio. Durante revisión es **feat/s11-codespaces-multimodal**; cuando se integre será **main**.
+2. Escoge la rama que contiene este laboratorio. La versión integrada de este laboratorio está en **main**; si revisas una mejora abierta en un pull request, selecciona su rama.
 3. Pulsa **Code → Codespaces → … → New with options**.
 4. En **Dev container configuration**, selecciona **S11 · OCR, voz y EmbeddingGemma 2**. Su archivo está en la carpeta .devcontainer/s11-multimedia. **No es el perfil Airflow Lab** que también existe.
 5. Usa 2 CPU y 8 GB si tu cuenta lo permite. La memoria y el tiempo de máquina dependen de tu cuota de GitHub.

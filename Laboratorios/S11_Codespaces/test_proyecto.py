@@ -33,6 +33,11 @@ class TransferenciaS11(unittest.TestCase):
         self.assertEqual(filas[0]["tipo"], "texto")
         self.assertEqual(filas[0]["sha256"], proyecto.sha256(archivo))
         self.assertTrue((self.raiz / "salidas/catalogo.parquet").is_file())
+        candidatos = [json.loads(s) for s in
+                      (self.raiz / "salidas/candidatos.jsonl").read_text().splitlines()]
+        self.assertTrue(any(c["valor"] == "320000" for c in candidatos))
+        self.assertTrue(all(c["evidencia"] in filas[0]["extracted_text"] for c in candidatos))
+        self.assertTrue(all(c["path"] == filas[0]["path"] for c in candidatos))
         self.assertTrue(proyecto.auditar(self.raiz))
         with patch.object(proyecto, "_embed", side_effect=lambda xs, cfg: [[1.] * 768 for _ in xs]):
             proyecto.indexar(self.raiz, self.cfg)
@@ -54,6 +59,16 @@ class TransferenciaS11(unittest.TestCase):
                 proyecto.ejecutar(self.raiz, self.cfg)
                 proyecto.buscar(self.raiz, self.cfg, "contratos", 3)
             emb.assert_not_called()
+
+    def test_candidatos_fechas_y_referencias_no_duplicados(self):
+        fila = {"path": "entradas/textos/acta.txt", "sha256": "a"*64,
+                "source_name": "ejemplo", "text_origin": "texto_usuario",
+                "extracted_text": "Pedido A17 del 15-11-2026 por 320000 COP.",
+                "segments": []}
+        datos = proyecto.extraer_candidatos(fila)
+        self.assertEqual(len([c for c in datos if c["tipo"] == "fecha"]), 1)
+        self.assertTrue(any(c["tipo"] == "referencia" and "A17" in c["valor"] for c in datos))
+        self.assertEqual(len([c for c in datos if c["valor"] == "320000"]), 1)
 
     def test_ocr_imagen_y_pdf_reales(self):
         from PIL import Image, ImageDraw, ImageFont

@@ -22,6 +22,7 @@ printf 'Documento simulado de ejemplo: valor de 320 mil pesos.\n' > "$TMP/proyec
 python proyecto.py plan --config "$TMP/proyecto/config.json"
 python proyecto.py procesar --config "$TMP/proyecto/config.json"
 python proyecto.py auditar --config "$TMP/proyecto/config.json"
+python verificar_independiente.py --proyecto "$TMP/proyecto"
 if [[ "$MODO" == "--ligero" ]]; then
   echo "OK modo ligero: OCR real, catálogo, Parquet, auditoría y pruebas; Whisper/Ollama no probados."
   exit 0
@@ -34,6 +35,7 @@ echo "[4] Preparando Ollama y EmbeddingGemma 2 local"
 bash iniciar_ollama.sh
 python lab.py indexar
 python lab.py buscar --consulta "¿Cuál es el valor mencionado?"
+python verificar_independiente.py --caso lab --modelo
 echo "[5] Indexando el proyecto transferible con embeddings reales"
 python proyecto.py indexar --config "$TMP/proyecto/config.json"
 python proyecto.py buscar --config "$TMP/proyecto/config.json" --consulta "¿Qué documento menciona un valor?"
