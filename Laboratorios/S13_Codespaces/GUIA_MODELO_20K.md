@@ -40,7 +40,15 @@ La versión de prueba en Codespaces/GitHub Actions, con menos árboles para ahor
 python Laboratorios/S13_Codespaces/modelo_distribuido_20k.py --rondas 30
 ```
 
-El script imprime número de procesos, cantidad de trabajadores, variables, tiempos y métricas. El puerto **8787** muestra el Dask Dashboard; mantenerlo **PRIVATE** en Codespaces. **Dos trabajadores en un Codespace son un único equipo físico**, aunque el entrenamiento XGBoost use comunicación distribuida entre workers.
+El script imprime número de procesos, cantidad de trabajadores, variables, tiempos y métricas. **Panel posterior al entrenamiento (visibilidad Codespaces: PRIVATE):**
+
+```bash
+streamlit run Laboratorios/S13_Codespaces/app_modelo_20k.py --server.address 0.0.0.0 --server.port 8502
+```
+
+En la pestaña **PORTS** abre el puerto **8502** y filtra los procesos por modalidad y factor de discrepancia. La aplicación presenta las predicciones **sobre el conjunto de prueba**, permite abrir el proceso SECOP original y recalca que las discrepancias no son juicios de legalidad.
+
+El puerto **8787** muestra el Dask Dashboard; mantenerlo **PRIVATE** en Codespaces. **Dos trabajadores en un Codespace son un único equipo físico**, aunque el entrenamiento XGBoost use comunicación distribuida entre workers.
 
 ## 2. ¿Qué aprende el alumno herramienta por herramienta?
 
