@@ -1,0 +1,50 @@
+name: S13 · Auditoria cero y sesgo SECOP
+on:
+  pull_request:
+    paths:
+      - "Laboratorios/S13_Codespaces/auditar_ceros_secop.py"
+      - "Laboratorios/S13_Codespaces/modelo_distribuido_20k.py"
+      - "Laboratorios/S13_Codespaces/GUIA_MODELO_20K.md"
+      - ".github/workflows/s13-auditoria-cero.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  auditoria:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar solo pandas y numpy
+        run: python -m pip install "numpy>=1.26,<3" "pandas>=2.2,<3"
+      - name: Analizar TODOS los CSV del repositorio, sin entrenar un modelo
+        run: python Laboratorios/S13_Codespaces/auditar_ceros_secop.py > /tmp/auditoria-s13.log
+      - name: Mostrar cifras de auditoria
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("Laboratorios/S13_Codespaces/salidas/auditoria_ceros_secop.json")
+          m=json.loads(p.read_text(encoding="utf-8"))
+          print("FILAS",m["filas_totales"])
+          print("IDs duplicados",m["ids_duplicados"])
+          print("PRECIO",m["precio_base"])
+          print("OFERTAS",m["conteo_respuestas_a_ofertas"])
+          print("RESPUESTAS",m["respuestas_al_procedimiento"])
+          print("Pistas monetarias",m["descripcion_pista_precio"])
+          print("AÑOS universo",m["distribucion_poblacion"]["anios"])
+          print("AÑOS primeros 26000",m["seleccion_vieja"]["anios"])
+          print("MODALIDADES universo",m["distribucion_poblacion"]["modalidades"])
+          print("MODALIDADES primeros 26000",m["seleccion_vieja"]["modalidades"])
+          assert m["filas_totales"] >= 26000
+          assert m["seleccion_vieja"]["n_elegidos"] == 26000
+          PY
+      - uses: actions/upload-artifact@v6
+        with:
+          name: s13-auditoria-calidad-cero-secop
+          path: Laboratorios/S13_Codespaces/salidas/auditoria_ceros_secop.json
+          retention-days: 14
+          if-no-files-found: error
