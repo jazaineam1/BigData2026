@@ -1,155 +1,104 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>S11 · De datos multimedia a evidencia consultable · Videoclase 60 minutos</title>
-<style>
-:root{color-scheme:dark;--bg:#091522;--card:#13283b;--line:#345168;--ink:#f4f9fc;--muted:#bdd1df;--mint:#68e5ca;--orange:#ffca85;--blue:#a5d1ff}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 8%,#17415a 0,transparent 32%),var(--bg);font:clamp(16px,1.65vw,22px)/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
-a{color:var(--mint)}.shell{max-width:1250px;margin:auto;padding:clamp(18px,3.8vw,54px);min-height:90vh;display:flex;flex-direction:column}
-.top{display:flex;gap:12px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:13px;font-size:.67em;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
-.brand{font-weight:800;color:var(--mint)}.slide{display:none;flex:1;padding:clamp(28px,5vw,65px) 0}.slide.active{display:block;animation:enter .18s ease-out}@keyframes enter{from{opacity:.55;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.kicker{font-size:.72em;text-transform:uppercase;letter-spacing:.16em;font-weight:800;color:var(--mint);margin:0 0 10px}
-h1{font-size:clamp(2rem,4.7vw,4.15rem);line-height:1.07;letter-spacing:-.04em;margin:0 0 24px;max-width:1150px}h2{font-size:1.15em;color:var(--orange);margin:0 0 12px}
-.lead{font-size:clamp(1.08rem,2.1vw,1.68rem);max-width:900px;color:var(--muted);line-height:1.48}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:24px 0}.triple{grid-template-columns:repeat(3,minmax(0,1fr))}
-.tile{background:linear-gradient(135deg,rgba(24,54,76,.94),rgba(17,35,52,.96));border:1px solid var(--line);border-radius:18px;padding:22px;min-width:0}
-.tile h2{margin-top:0}.tile p,.tile li{margin:.5em 0}.chain{display:flex;flex-wrap:wrap;gap:10px;margin:30px 0}.step{border:1px solid var(--line);border-radius:14px;padding:15px 18px;background:var(--card);font-weight:750}.step b{color:var(--mint);font-size:.84em}
-code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.76em}code{color:var(--blue)}pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:19px;background:#06121d;border:1px solid #345169;border-radius:13px;line-height:1.7;margin:12px 0}
-.tip{border-left:5px solid var(--mint);padding:12px 18px;background:#102b33;color:#e2fff6;border-radius:0 12px 12px 0;margin:28px 0}
-.warn{border-left-color:var(--orange);background:#31271e;color:#ffead0}.tag{display:inline-block;border:1px solid #386f6c;border-radius:50px;padding:5px 12px;color:var(--mint);font-size:.72em;font-weight:750;letter-spacing:.04em;margin:4px}
-.controls{display:flex;gap:12px;align-items:center;border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:.73em}.controls button{cursor:pointer;background:#23445c;color:white;border:1px solid #4d7794;padding:9px 17px;border-radius:9px;font:inherit;font-weight:700}.controls button:hover,.controls button:focus{background:#37637e}.controls button:disabled{opacity:.3;cursor:default}.progress{height:5px;background:#284354;border-radius:30px;overflow:hidden}.bar{height:100%;width:0;background:var(--mint);transition:width .15s}.spacer{flex:1}
-.small{color:var(--muted);font-size:.79em}.highlight{color:var(--mint)}.hero{margin:42px 0;font-size:1.08em}.time{font-size:.75em;color:var(--orange);font-weight:800}strong{color:white}
-@media(max-width:820px){.grid,.triple{grid-template-columns:1fr}.shell{min-height:96vh}.slide{padding:27px 0}.top{font-size:.58em}.tile{padding:17px}.step{width:100%}}
-@media print{body{background:white;color:black}.shell{max-width:100%;min-height:0;display:block}.slide,.slide.active{display:block;page-break-after:always;border-bottom:1px solid #888}.tile{background:white;color:black}.controls,.progress{display:none}h1{color:#111}p,code,pre,.lead{color:#222}}
-</style>
-</head>
-<body>
-<main class="shell">
-<header class="top"><span class="brand">BIG DATA · SESIÓN 11</span><span>UNIVERSIDAD CENTRAL · VIDEOCLASE 60 MIN</span><span>OCR · ASR · ETL · EMBEDDINGS</span></header>
-<div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>S11 · OCR, búsqueda visual y ASR · Python desde cero</title><style>
+:root{--navy:#0b1f32;--panel:#122a40;--line:#2c455a;--cyan:#9ce6dc;--txt:#f0f7fa;--muted:#b6cbd7}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--navy);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+header{position:fixed;left:24px;right:24px;top:16px;z-index:5;display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:var(--muted)}
+header strong{color:var(--cyan)}main{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:76px 32px 90px}.slide{display:none;max-width:1180px;width:100%;min-height:500px}.slide.active{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:.15;transform:translateY(10px)}to{opacity:1;transform:none}}.kicker{font-weight:800;color:var(--cyan);letter-spacing:.12em;font-size:.78rem;text-transform:uppercase}
+h1{font-size:clamp(2.05rem,5vw,4.5rem);line-height:1.11;letter-spacing:-.04em;margin:16px 0 20px}h2{font-size:clamp(1.1rem,2vw,1.55rem);margin:.35rem 0 10px;line-height:1.25}
+.lead{font-size:1.35rem;color:var(--muted);max-width:850px;line-height:1.5}p{font-size:1.04rem;line-height:1.6;color:var(--muted)}strong{color:var(--txt)}
+.grid{display:grid;gap:18px;margin-top:28px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;min-width:0}.tile img{width:100%;height:220px;object-fit:cover;border-radius:10px;margin-bottom:8px}.tile p{font-size:1rem;margin:8px 0}.metric{font-size:1.4rem;font-weight:800;color:var(--cyan);margin:20px 0}
+.note{background:#174352;border-left:4px solid var(--cyan);border-radius:5px;padding:13px 18px;color:#e2f3f2;margin-top:20px}.muted{color:var(--muted);font-size:.9rem}
+pre{background:#071520;color:#d7eff5;border:1px solid #294558;border-radius:12px;padding:22px;white-space:pre-wrap;overflow-wrap:anywhere;font:clamp(.8rem,1.3vw,1.01rem)/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}code{font-family:ui-monospace,monospace;color:#a0e6dc}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}.actions a{display:inline-flex;padding:12px 16px;text-decoration:none;color:#092238;background:var(--cyan);border-radius:9px;font-weight:750}a{color:#9ce6dc}.docket{border-radius:10px;background:linear-gradient(135deg,#e2edfb,#9fcbd6);color:#133149;padding:30px 15px;font-size:1.9rem;font-weight:900;min-height:220px}.docket span,.docket strong{display:block;font-size:1rem;color:#205576;margin:10px 0}.docket.voice{background:linear-gradient(135deg,#f0dcff,#b5c2f7)}
+footer{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:12px 24px 20px;background:linear-gradient(transparent,#0b1f32 20%)}footer button{background:#23455d;color:white;border:1px solid #44728a;border-radius:10px;padding:9px 14px;cursor:pointer}footer button:disabled{opacity:.35}footer span{font-variant-numeric:tabular-nums}progress{flex:1;height:7px;accent-color:#9ce6dc}
+@media(max-width:780px){header{position:static;margin:15px}main{display:block;padding:25px 16px 120px}.grid.two,.grid.three{grid-template-columns:1fr}.slide{min-height:unset}.tile img{height:200px}footer{padding:12px}pre{font-size:.78rem}}
+@media(prefers-reduced-motion:reduce){.slide.active{animation:none}}
+</style></head><body><header><strong>Universidad Central · Big Data</strong><span>Sesión 11 · Investigación multimedia con Python</span></header><main>
+<section class="slide active" id="s1" aria-label="De una fuente multimedia a una respuesta con evidencia" aria-hidden="false"><p class="kicker">01 · EL PROBLEMA</p><h1>De una fuente multimedia a una respuesta con evidencia</h1><h1>¿Qué dice el documento?<br>¿Qué muestra la fotografía?<br>¿Qué pronuncia la voz?</h1><p class="lead">S11 · OCR, análisis visual, transcripción y ETL con Python construido en clase.</p><div class="actions"><a href="https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/01_laboratorio.ipynb" target="_blank" rel="noopener">Abrir cuaderno editable</a><a href="https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes" target="_blank" rel="noopener">Abrir Codespace del estudiante</a></div><p class="note">No vamos a ejecutar un programa que ya contenga todas las respuestas. Cada etapa son pocas líneas de Python que tú puedes cambiar.</p></section>
+<section class="slide" id="s2" aria-label="Laura necesita investigar, no simplemente ejecutar" aria-hidden="true"><p class="kicker">02 · EL CASO</p><h1>Laura necesita investigar, no simplemente ejecutar</h1><div class="grid two"><div class="tile"><h2>Documentos SECOP</h2><p>¿Cuánto aparece como total, descuentos y neto a pagar?</p><div class="metric">2.200.000 − 154.000 = 2.046.000</div><p class="muted">Cifras observadas en una primera página. El OCR debe verificarlas.</p></div><div class="tile"><h2>Fotografías y audio</h2><p>¿Qué palabras hay en un aviso? ¿Qué imagen muestra viviendas en una ladera? ¿Qué dice una voz humana?</p><p class="muted">Tres preguntas diferentes, no un único motor.</p></div></div></section>
+<section class="slide" id="s3" aria-label="Tres colecciones distintas, tres procedencias" aria-hidden="true"><p class="kicker">03 · FUENTES</p><h1>Tres colecciones distintas, tres procedencias</h1><div class="grid three"><div class="tile"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/S10_Eltiempo_fotos/raw/eltiempo_006.webp" alt="Fotografía de taquillas con letreros"/><h2>El Tiempo</h2><p>Cuatro fotografías para pruebas de texto visible y escenas. Crédito por archivo aún pendiente de curaduría.</p></div><div class="tile"><div class="docket">SECOP<br><span>Acta escaneada</span><strong>Tabla, fecha y valor</strong></div><h2>Actas</h2><p>Dos primeras páginas. Evitar mostrar nombres y datos de cuenta en capturas.</p></div><div class="tile"><div class="docket voice">VOZ<br><span>PolyAI · MINDS-14</span><strong>es-ES · CC BY 4.0</strong></div><h2>Audio</h2><p>Habla bancaria real; no corresponde a las noticias.</p></div></div></section>
+<section class="slide" id="s4" aria-label="Codespaces mínimo: solo lo necesario" aria-hidden="true"><p class="kicker">04 · ENTORNO</p><h1>Codespaces mínimo: solo lo necesario</h1><h2>Abre la rama <em>s11-estudiantes</em></h2><p>En GitHub: selecciona la rama, luego Code → Codespaces → Create codespace. Abre <strong>01_laboratorio.ipynb</strong> y el kernel Python 3.</p><pre>python --version
+tesseract --list-langs
+python -c "import pytesseract,pandas,requests; print('OK')"</pre><p class="note">Explica de dónde salen las herramientas: <strong>.devcontainer/Dockerfile</strong> instala los programas de Linux; <strong>requirements.txt</strong> instala las bibliotecas Python. No se requiere Ubuntu local.</p><a href="https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/INSTALACION_UBUNTU.md" target="_blank" rel="noopener">Guía para instalar herramienta por herramienta</a></section>
+<section class="slide" id="s5" aria-label="¿Qué instala cada pieza y por qué?" aria-hidden="true"><p class="kicker">05 · HERRAMIENTAS</p><h1>¿Qué instala cada pieza y por qué?</h1><div class="grid three"><div class="tile"><h2>Tesseract</h2><p>Motor OCR ejecutable del sistema. Necesita el idioma español (<strong>spa</strong>).</p><code>tesseract --list-langs</code></div><div class="tile"><h2>pytesseract</h2><p>Puente desde Python hacia Tesseract; <strong>no</strong> lo reemplaza.</p><code>import pytesseract</code></div><div class="tile"><h2>Faster-Whisper</h2><p>Transcribe voz, permite CPU e INT8. El modelo se descarga al primer uso.</p><code>WhisperModel("tiny")</code></div><div class="tile"><h2>Ollama</h2><p>Servidor local con API. Descargaremos <strong>embeddinggemma-2:440m</strong>.</p><code>ollama pull ...</code></div><div class="tile"><h2>Pillow</h2><p>Abre imágenes. No interpreta por sí solo objetos o situaciones.</p><code>Image.open(ruta)</code></div><div class="tile"><h2>pandas / PyArrow</h2><p>Guardan tablas legibles y Parquet. No extraen voz ni caracteres.</p><code>to_parquet(...)</code></div></div></section>
+<section class="slide" id="s6" aria-label="Escribir cuatro líneas para abrir una fotografía" aria-hidden="true"><p class="kicker">06 · PYTHON</p><h1>Escribir cuatro líneas para abrir una fotografía</h1><div class="grid two"><pre>from pathlib import Path
+from PIL import Image
+from IPython.display import display
 
-<section class="slide active" aria-labelledby="s1">
-<p class="kicker">Recuperación S11 · 00–04 min</p>
-<h1 id="s1">De datos multimedia a <span class="highlight">evidencia consultable</span></h1>
-<p class="lead">No basta con reconocer letras o palabras. Necesitamos reconstruir <strong>de dónde salió cada afirmación</strong>, cómo la transformamos y cómo comprobarla.</p>
-<div class="hero"><span class="tag">OCR</span><span class="tag">ASR</span><span class="tag">Extracción</span><span class="tag">ETL</span><span class="tag">Embeddings</span></div>
-<div class="tip"><strong>Pregunta inicial:</strong> ¿que una IA encuentre una cifra significa que la cifra es verdadera?</div>
-<p class="small">Caso didáctico de datos inventados. Se utilizarán archivos sintéticos para no presentar información ficticia como noticia.</p>
-</section>
+ruta = Path("datos/raw/fotos/eltiempo_006.webp")
+imagen = Image.open(ruta)
+print(imagen.size)
+display(imagen)</pre><div class="tile"><h2>Qué explicas</h2><p><strong>Path:</strong> ruta a los bytes. <strong>Image.open:</strong> decodifica píxeles. <strong>size:</strong> ancho y alto. <strong>display:</strong> muestra el original.</p><p class="note">Cambia la ruta por <code>eltiempo_009.webp</code>. ¿La imagen muestra letras o una escena?</p></div></div></section>
+<section class="slide" id="s7" aria-label="Reconocer letras no significa validar cantidades" aria-hidden="true"><p class="kicker">07 · OCR SECOP</p><h1>Reconocer letras no significa validar cantidades</h1><div class="grid two"><pre>import pytesseract
+from PIL import Image
 
-<section class="slide" aria-labelledby="s2">
-<p class="kicker">01 · El problema · 00–04 min</p><h1 id="s2">Tenemos una imagen y una voz. ¿Cómo buscamos lo que dicen?</h1>
-<div class="grid">
-<div class="tile"><h2>Imagen de ejemplo</h2><p>Una lámina ficticia contiene una entidad, un número de contratos, un valor y una fecha.</p><p class="time">¿Qué caracteres se ven?</p></div>
-<div class="tile"><h2>Audio sintético</h2><p>Una voz generada por computadora pronuncia una frase ficticia relacionada con el caso.</p><p class="time">¿Qué palabras se dijeron y en qué momento?</p></div>
-</div><div class="tip warn"><strong>Importante:</strong> las voces reales MINDS-14 del repositorio no son audios de las fotografías de noticias. Nunca inventar esa relación.</div>
-</section>
+pagina = Image.open("datos/raw/actas/secop_acta_728490281_pagina1.png")
+texto = pytesseract.image_to_string(
+    pagina, lang="spa", config="--psm 6"
+)
+print(len(texto.splitlines()))</pre><div class="tile"><h2>Acta original</h2><p>Abre la primera página, encuentra con tus ojos:</p><p><strong>Total:</strong> 2.200.000<br><strong>Descuentos:</strong> 154.000<br><strong>Neto:</strong> 2.046.000</p><p class="muted">No difundas datos personales de la página. Contrasta el OCR y muestra cualquier error.</p></div></div></section>
+<section class="slide" id="s8" aria-label="Cambia PSM y demuestra por qué importa" aria-hidden="true"><p class="kicker">08 · EXPERIMENTO</p><h1>Cambia PSM y demuestra por qué importa</h1><div class="grid two"><pre>for psm in [6, 11, 3]:
+    texto = pytesseract.image_to_string(
+        pagina, lang="spa", config=f"--psm {psm}"
+    )
+    print(psm, len(texto.splitlines()))
 
-<section class="slide" aria-labelledby="s3">
-<p class="kicker">02 · La arquitectura · 04–09 min</p><h1 id="s3">Seis transformaciones, una fuente trazable</h1>
-<div class="chain"><div class="step"><b>1</b> Archivo RAW</div><div class="step"><b>2</b> OCR / ASR</div><div class="step"><b>3</b> Candidatos</div><div class="step"><b>4</b> Catálogo</div><div class="step"><b>5</b> Vector</div><div class="step"><b>6</b> Búsqueda + fuente</div></div>
-<div class="grid triple">
-<div class="tile"><h2>Tesseract</h2><p>Lee letras en imágenes.</p></div><div class="tile"><h2>Whisper</h2><p>Reconoce palabras en audio.</p></div><div class="tile"><h2>EmbeddingGemma 2</h2><p>Codifica texto como vector para buscar.</p></div>
-</div>
-<div class="tip">Cada herramienta <strong>resuelve un problema diferente</strong>. Ninguna verifica por sí sola la verdad de la información.</div>
-</section>
+print(2200000 - 154000 == 2046000)</pre><div class="tile"><h2>PSM: segmentación</h2><p><strong>6:</strong> bloque uniforme.<br><strong>11:</strong> texto disperso.<br><strong>3:</strong> segmentación automática.</p><p class="note">La aritmética correcta no garantiza que el OCR leyó la cifra correcta. Debemos volver a la fuente.</p></div></div></section>
+<section class="slide" id="s9" aria-label="Letrero legible vs. fotografía sin letras" aria-hidden="true"><p class="kicker">09 · FOTOGRAFÍAS</p><h1>Letrero legible vs. fotografía sin letras</h1><div class="grid two"><div class="tile"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/S10_Eltiempo_fotos/raw/eltiempo_023.webp" alt="Fotografía de un anuncio de lotería y una persona"/><h2>OCR: letras del anuncio</h2><p>Prueba PSM 11. ¿Aparecen las palabras del logo?</p></div><div class="tile"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/S10_Eltiempo_fotos/raw/eltiempo_009.webp" alt="Viviendas en una ladera"/><h2>No es una tarea OCR</h2><p>Preguntar por casas o ladera requiere análisis visual, no extraer texto inexistente.</p></div></div></section>
+<section class="slide" id="s10" aria-label="Elige el motor según lo que deseas conocer" aria-hidden="true"><p class="kicker">10 · PREGUNTAS</p><h1>Elige el motor según lo que deseas conocer</h1><div class="grid three"><div class="tile"><h2>¿Qué dice un cartel?</h2><p>OCR con Tesseract</p><strong>Píxeles → caracteres</strong></div><div class="tile"><h2>¿Qué imagen tiene casas?</h2><p>EmbeddingGemma 2:440m</p><strong>Imagen + pregunta → vectores</strong></div><div class="tile"><h2>¿Qué palabras se dijeron?</h2><p>Faster-Whisper</p><strong>Audio → segmentos</strong></div></div><p class="note">La herramienta equivocada puede producir una salida técnicamente válida pero inútil para la pregunta.</p></section>
+<section class="slide" id="s11" aria-label="Crear vectores de imágenes sin código oculto" aria-hidden="true"><p class="kicker">11 · VISIÓN</p><h1>Crear vectores de imágenes sin código oculto</h1><div class="grid two"><pre>import base64, requests
 
-<section class="slide" aria-labelledby="s4">
-<p class="kicker">03 · Entorno · 04–09 min</p><h1 id="s4">Linux listo en el navegador</h1>
-<div class="grid">
-<div class="tile"><h2>Codespaces</h2><p>Computadora remota de desarrollo, con Python, Tesseract y librerías instaladas.</p><pre>cd Laboratorios/S11_Codespaces
-python lab.py --help
-tesseract --list-langs</pre></div>
-<div class="tile"><h2>Qué no mostramos</h2><p>Ni la instalación completa de modelos durante la grabación ni cientos de líneas de código.</p><p>La preparación previa y el costo de cómputo se explican con transparencia.</p></div>
-</div><p class="small">La preparación de herramientas puede hacerse también en un Ubuntu propio. Consulta la guía de instalación del kit estudiantil.</p>
-</section>
+ruta = "datos/raw/fotos/eltiempo_009.webp"
+b64 = base64.b64encode(open(ruta,"rb").read()).decode()
+respuesta = requests.post(
+    "http://127.0.0.1:11434/api/embed",
+    json={"model":"embeddinggemma-2:440m",
+          "input":{"image":b64}}, timeout=240
+)
+respuesta.raise_for_status()
+vector = respuesta.json()["embeddings"][0]
+print(len(vector))</pre><div class="tile"><h2>¿Qué sucede?</h2><p>Los bytes de la imagen se codifican en Base64 para JSON. Ollama los envía al codificador visual y devuelve <strong>768 números</strong>.</p><p class="muted">Instala el modelo 440m. El 270m es solo texto.</p></div></div></section>
+<section class="slide" id="s12" aria-label="De la pregunta al ranking por coseno" aria-hidden="true"><p class="kicker">12 · BÚSQUEDA</p><h1>De la pregunta al ranking por coseno</h1><div class="grid two"><pre>pregunta = "viviendas en una ladera"
+consulta = vector("task: search result | query: " + pregunta)
 
-<section class="slide" aria-labelledby="s5">
-<p class="kicker">04 · OCR · 09–18 min</p><h1 id="s5">De píxeles a <span class="highlight">texto probable</span></h1>
-<div class="grid"><div class="tile"><h2>Ejecuta</h2><pre>python lab.py preparar
-python lab.py ocr
-cat salidas/ocr.json</pre><p>Abre el afiche y observa la cifra original.</p></div><div class="tile"><h2>Entiende el código</h2><pre>texto = pytesseract.image_to_string(
-    imagen, lang="spa", config="--psm 6"
-)</pre><p><code>spa</code>: español. <code>psm 6</code>: bloque de texto.</p></div></div>
-<div class="tip"><strong>Verifica sin el programa:</strong> ejecuta <code>tesseract salidas/afiche_simulado.png stdout -l spa --psm 6</code> y compara con la imagen original.</div>
-</section>
+# Para comparar dos vectores:
+coseno = producto_punto / (norma_a * norma_b)
 
-<section class="slide" aria-labelledby="s6">
-<p class="kicker">05 · ASR · 18–29 min</p><h1 id="s6">De sonido a palabras <span class="highlight">con segundos</span></h1>
-<div class="grid"><div class="tile"><h2>Ejecuta</h2><pre>python lab.py asr
-cat salidas/asr.json
-python lab.py evaluar-asr</pre><p>Reproduce el WAV original y escucha una cifra.</p></div><div class="tile"><h2>Entiende</h2><pre>segmentos, info = modelo.transcribe(
-    ruta_audio, language="es", beam_size=1
-)</pre><p>Whisper tiny trabaja en CPU. Registra inicio, fin y texto.</p></div></div>
-<div class="tip warn"><strong>Error útil:</strong> que Whisper termine no significa que todos los nombres y cantidades sean correctos. Contrasta escuchando el WAV.</div>
-</section>
+# En el cuaderno escribimos la función
+# y ordenamos las cuatro fotografías.</pre><div class="tile"><h2>¿Qué preguntas harás?</h2><p>«Medicación», «taquillas», «lotería», «viviendas».</p><p class="note">Un coseno alto indica proximidad en este índice. No representa probabilidad de que una noticia sea verdadera.</p></div></div></section>
+<section class="slide" id="s13" aria-label="De una grabación licenciada a una señal" aria-hidden="true"><p class="kicker">13 · AUDIO REAL</p><h1>De una grabación licenciada a una señal</h1><div class="grid two"><div class="tile"><h2>MINDS-14 · es-ES</h2><p>El cuaderno recupera un Parquet de ~39 MB desde Hugging Face, verifica su SHA-256 y selecciona una grabación humana.</p><p><strong>Crédito:</strong> PolyAI, MINDS-14, CC BY 4.0.</p><p class="note">No corresponde a El Tiempo ni a SECOP. Escucha antes de ejecutar ASR.</p></div><div class="tile"><h2>¿Qué diferencia hay?</h2><p><strong>Contenedor WAV:</strong> organiza bytes del audio.</p><p><strong>Códec:</strong> define cómo se codificó la señal, por ejemplo G.711.</p><p><strong>Señal:</strong> onda decodificada que analiza el modelo.</p></div></div></section>
+<section class="slide" id="s14" aria-label="Escribir la transcripción y revisar errores" aria-hidden="true"><p class="kicker">14 · WHISPER</p><h1>Escribir la transcripción y revisar errores</h1><div class="grid two"><pre>from faster_whisper import WhisperModel
 
-<section class="slide" aria-labelledby="s7">
-<p class="kicker">06 · Calidad · 18–29 min</p><h1 id="s7">¿Cómo sabemos si se equivocó?</h1>
-<div class="grid"><div class="tile"><h2>OCR</h2><p>¿La imagen decía 12 y el OCR recuperó 12?</p><p>Comparación humana con los píxeles.</p></div>
-<div class="tile"><h2>ASR</h2><p>WER = errores de palabras / palabras de referencia.</p><p>Solo se calcula si existe una referencia válida para ese audio.</p></div></div>
-<div class="tip"><strong>Regla:</strong> una métrica de calidad no sustituye al archivo original. Para confirmar una cifra, hay que volver a escuchar o mirar.</div>
-</section>
+modelo = WhisperModel(
+    "tiny", device="cpu", compute_type="int8"
+)
+segmentos, info = modelo.transcribe(
+    str(wav), language="es"
+)
+for s in segmentos:
+    print(s.start, s.end, s.text)</pre><div class="tile"><h2>Qué explicas</h2><p><strong>ASR:</strong> reconocimiento automático del habla.</p><p><strong>Segmentos:</strong> texto con tiempos de inicio y fin.</p><p><strong>WER:</strong> errores de palabra frente a referencia humana del mismo audio.</p><p class="note">Que Whisper termine no significa que reconoció todas las palabras correctamente.</p></div></div></section>
+<section class="slide" id="s15" aria-label="Construye un catálogo, no una pantalla de resultados" aria-hidden="true"><p class="kicker">15 · ETL</p><h1>Construye un catálogo, no una pantalla de resultados</h1><div class="grid two"><pre>import json, pandas as pd
 
-<section class="slide" aria-labelledby="s8">
-<p class="kicker">07 · Extracción · 29–36 min</p><h1 id="s8">Del texto a candidatos estructurados</h1>
-<div class="grid"><div class="tile"><h2>Ejecuta</h2><pre>python lab.py extraer
-cat salidas/extraccion.json</pre></div><div class="tile"><h2>Conserva siempre</h2><p>Valor / texto de origen / archivo / hash / segundos, cuando sea audio.</p></div></div>
-<div class="tip">Una fecha detectada por una expresión regular es una <strong>candidata</strong>. La regla no demuestra que el hecho ocurrió.</div>
-</section>
+registro = {
+  "archivo": str(ruta),
+  "modalidad": "foto",
+  "sha256": sha256(ruta),
+  "texto_corto": "OCR si es legible"
+}
 
-<section class="slide" aria-labelledby="s9">
-<p class="kicker">08 · ETL · 36–41 min</p><h1 id="s9">Guardar para poder repetir y auditar</h1>
-<div class="grid triple"><div class="tile"><h2>RAW</h2><p>Bytes originales sin sobrescribir.</p></div><div class="tile"><h2>Derivados</h2><p>Texto OCR o ASR inferido por herramientas.</p></div><div class="tile"><h2>Catálogo</h2><p>Ruta, tipo, fuente, transformación, hash y texto.</p></div></div>
-<div class="tip"><strong>JSON:</strong> objeto estructurado. <strong>JSONL:</strong> un registro por línea. <strong>Parquet:</strong> tabla columnar. <strong>SHA-256:</strong> detecta diferencias de bytes, no certifica autenticidad.</div>
-</section>
-
-<section class="slide" aria-labelledby="s10">
-<p class="kicker">09 · Embeddings · 41–51 min</p><h1 id="s10">Buscar por significado, no por caracteres exactos</h1>
-<div class="grid"><div class="tile"><h2>Ejecuta</h2><pre>python lab.py indexar
-python lab.py buscar --consulta \
- "¿Cuántos contratos había?"</pre><p>Modelo usado: <strong>embeddinggemma-2:270m</strong>.</p></div><div class="tile"><h2>Comprueba</h2><p>El modelo devuelve vectores de <strong>768 dimensiones</strong> y un ranking de textos con su fuente.</p><p>Una similitud alta NO es una probabilidad de verdad.</p></div></div>
-<div class="tip warn"><strong>Distinción:</strong> Whisper transcribe, EmbeddingGemma codifica y el coseno ordena. Ninguno redacta una conclusión comprobada automáticamente.</div>
-</section>
-
-<section class="slide" aria-labelledby="s11">
-<p class="kicker">10 · Reutilización · 51–57 min</p><h1 id="s11">Nuevo proyecto, mismo motor</h1>
-<pre>python proyecto.py iniciar --destino proyectos/otro_caso
-printf 'ACTA DEMO: pedido A17.\n' > proyectos/otro_caso/entradas/textos/acta.txt
-python proyecto.py plan --config proyectos/otro_caso/config.json
-python proyecto.py procesar --config proyectos/otro_caso/config.json
-python proyecto.py indexar --config proyectos/otro_caso/config.json
-python proyecto.py buscar --config proyectos/otro_caso/config.json --consulta "¿Qué pedido?"
-</pre>
-<div class="tip"><strong>Compruébalo:</strong> abre el nuevo <code>catalogo.jsonl</code> y <code>candidatos.jsonl</code>, y ejecuta <code>python verificar_independiente.py --proyecto proyectos/otro_caso</code>. Después intenta con imagen y audio autorizados.</div>
-</section>
-
-<section class="slide" aria-labelledby="s12">
-<p class="kicker">11 · Verificación independiente · 57–60 min</p><h1 id="s12">Cinco pruebas, cinco límites</h1>
-<div class="grid">
-<div class="tile"><h2>1 · Archivo</h2><p><code>sha256sum</code> contra inventario.</p><h2>2 · OCR</h2><p>CLI Tesseract y comparación visual.</p><h2>3 · ASR</h2><p>Escuchar el audio y revisar segundos.</p></div>
-<div class="tile"><h2>4 · Vector</h2><p>API directa, 768 dimensiones, fuente.</p><h2>5 · Transferencia</h2><p>Otro corpus, catálogo reabierto y auditoría.</p></div></div>
-<div class="tip">Pregunta de cierre: <strong>¿Qué puedes afirmar de una fuente sin sobreinterpretar el resultado de la IA?</strong></div>
-</section>
-
-<section class="slide" aria-labelledby="s13">
-<p class="kicker">12 · El reto y cierre · 57–60 min</p><h1 id="s13">No copies el ejemplo: <span class="highlight">transfiérelo</span></h1>
-<p class="lead">Aporta dos archivos autorizados de modalidades distintas, cambia un solo parámetro, compara el antes y después y explica cómo verificaste una evidencia.</p>
-<div class="grid"><div class="tile"><h2>Producto</h2><p>Ruta · herramienta · salida · límite · prueba contra la fuente.</p></div><div class="tile"><h2>Lectura adicional</h2><p><a href="../assets/tutoriales/s11-ocr-asr-paso-a-paso.html">Guía práctica del estudiante</a></p><p><a href="https://github.com/jazaineam1/BigData2026/blob/main/Laboratorios/S11_Codespaces/GUIA_REUTILIZACION.md">Manual para adaptar el código</a></p></div></div>
-<div class="tip">Objetivo cumplido si puedes <strong>explicar</strong>, <strong>repetir</strong>, <strong>cuestionar</strong> y <strong>reutilizar</strong> el pipeline.</div>
-</section>
-
-<footer class="controls" aria-label="Controles de presentación"><button id="prev" type="button">Anterior</button><button id="next" type="button">Siguiente</button><span id="counter" aria-live="polite"></span><span class="spacer"></span><span>Teclas ← → · Inicio · Fin</span></footer>
-</main>
-<script>
-(function(){
-  const slides=Array.from(document.querySelectorAll(".slide")),counter=document.getElementById("counter"),bar=document.getElementById("bar"),prev=document.getElementById("prev"),next=document.getElementById("next");
-  let index=0;
-  function go(n){index=Math.min(Math.max(n,0),slides.length-1);slides.forEach((s,i)=>s.classList.toggle("active",i===index));counter.textContent=(index+1)+" / "+slides.length;bar.style.width=((index+1)/slides.length*100)+"%";prev.disabled=index===0;next.disabled=index===slides.length-1;location.hash="s"+(index+1);}
-  prev.addEventListener("click",()=>go(index-1));next.addEventListener("click",()=>go(index+1));
-  window.addEventListener("keydown",e=>{if(["ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();go(index+1)}else if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();go(index-1)}else if(e.key==="Home"){go(0)}else if(e.key==="End"){go(slides.length-1)}});
-  const initial=Number((location.hash||"").replace("#s",""));go(Number.isInteger(initial)&&initial>=1&&initial<=slides.length?initial-1:0);
-})();
-</script>
-</body></html>
+with open("outputs/catalogo.jsonl","w") as f:
+    f.write(json.dumps(registro) + "\n")
+pd.DataFrame([registro]).to_parquet(
+    "outputs/catalogo.parquet"
+)</pre><div class="tile"><h2>E · T · L</h2><p><strong>Extraer:</strong> leer la fuente.</p><p><strong>Transformar:</strong> crear una fila comparable y auditable.</p><p><strong>Cargar:</strong> JSONL y Parquet.</p><p class="note">Conserva fuente y hash. No publiques datos personales extraídos de actas.</p></div></div></section>
+<section class="slide" id="s16" aria-label="Demuestra aprendizaje modificando el código" aria-hidden="true"><p class="kicker">16 · RETO</p><h1>Demuestra aprendizaje modificando el código</h1><h2>Tu respuesta debe incluir la fuente y el límite</h2><div class="grid two"><div class="tile"><h2>Elige tu pregunta</h2><p>Otra acta SECOP, otro letrero, otra consulta visual o una segunda voz MINDS-14.</p><h2>Cambia al menos tres líneas</h2><p>Ruta, PSM, descripción, archivo o fragmentación.</p></div><div class="tile"><h2>Registra la evidencia</h2><p>Pregunta | archivo | herramienta | resultado | comprobación | error.</p><p class="note">No se evalúa una captura de un comando que funciona. Se evalúa la explicación y el cambio reproducible.</p></div></div><div class="actions"><a href="https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/01_laboratorio.ipynb" target="_blank" rel="noopener">Abrir el cuaderno de la sesión</a><a href="https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/INSTALACION_UBUNTU.md" target="_blank" rel="noopener">Ver instalación completa</a></div></section>
+</main><footer><button id="prev" aria-label="Diapositiva anterior">Anterior</button><span id="count">1 / 16</span><progress value="1" max="16" id="bar"></progress><button id="next" aria-label="Diapositiva siguiente">Siguiente</button></footer><script>
+const slides=Array.from(document.querySelectorAll(".slide"));let current=0;
+function show(n){current=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,i)=>{s.classList.toggle("active",i===current);s.setAttribute("aria-hidden",String(i!==current))});document.getElementById("count").textContent=(current+1)+" / "+slides.length;document.getElementById("bar").value=current+1;document.getElementById("prev").disabled=current===0;document.getElementById("next").disabled=current===slides.length-1;history.replaceState(null,"","#s"+(current+1))}
+document.getElementById("prev").onclick=()=>show(current-1);
+document.getElementById("next").onclick=()=>show(current+1);
+document.addEventListener("keydown",e=>{if(["INPUT","TEXTAREA","BUTTON"].includes(document.activeElement?.tagName))return;if(e.key==="ArrowRight"||e.key==="PageDown")show(current+1);if(e.key==="ArrowLeft"||e.key==="PageUp")show(current-1)});
+window.addEventListener("hashchange",()=>{const match=location.hash.match(/^#s(\d+)$/);if(match)show(Number(match[1])-1)});
+const match=location.hash.match(/^#s(\d+)$/);show(match?Number(match[1])-1:0);
+</script></body></html>
