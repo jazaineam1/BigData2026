@@ -1,0 +1,80 @@
+name: S13 EmbeddingGemma2 270m pilot same backend local vs Dask
+on:
+  pull_request:
+    paths:
+      - "Laboratorios/S13_Codespaces/benchmark_embeddinggemma_paridad.py"
+      - "Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py"
+      - ".github/workflows/s13-embeddinggemma-pilot.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inferencia-ollama-real:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar las mismas dependencias de Codespaces
+        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+      - name: Descargar e iniciar Ollama CPU en Docker
+        run: |
+          docker run -d --name s13-ollama -p 11434:11434 ollama/ollama:latest
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:11434/api/tags > /dev/null; then
+              echo "Ollama disponible"; exit 0
+            fi
+            sleep 2
+          done
+          docker logs s13-ollama
+          exit 1
+      - name: Descargar realmente EmbeddingGemma2 270m
+        run: docker exec s13-ollama ollama pull embeddinggemma-2:270m
+      - name: Comparar la MISMA inferencia Ollama secuencial y con Dask sobre 16 procesos SECOP
+        run: |
+          python Laboratorios/S13_Codespaces/benchmark_embeddinggemma_paridad.py --n 16 --batch 4 --model embeddinggemma-2:270m
+      - name: Validar tiempos y vectores reales
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          p=Path("Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embeddinggemma_paridad_piloto.json")
+          m=json.loads(p.read_text(encoding="utf-8"))
+          assert m["n_medido"]==16
+          assert m["batch"]==4
+          assert m["modelo"]=="embeddinggemma-2:270m"
+          assert m["dimensiones"]==768
+          assert m["local_y_dask_mismos_vectores"]
+          assert m["tiempo_inferencia_secuencial_s"]>0
+          assert m["tiempo_inferencia_dask_s"]>0
+          assert set(m["proyecciones_no_mediciones"])=={"1000","10000","20000","50000"}
+          print("PILOTO EMBEDDINGGEMMA REAL:",m)
+          PY
+      - name: Entrenar realmente LinearSVC sobre 1000 embeddings SECOP del mismo split que TF-IDF
+        run: |
+          python Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py --n 1000 --batch 8 --model embeddinggemma-2:270m
+      - name: Verificar F1 sobre 1000 sin inventar etiquetas
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma_1000.json")
+          m=json.loads(p.read_text(encoding="utf-8"))
+          assert m["n"]==1000 and m["train"]==800 and m["test"]==200
+          assert m["modelo"]=="embeddinggemma-2:270m"
+          assert m["dimensiones"]==768
+          assert 0<=m["metrica_embeddings_linearsvc"]["f1_macro"]<=1
+          assert m["tiempos_ollama"]["nuevos"]>0
+          print("F1 embeddinggemma 1000:",m["metrica_embeddings_linearsvc"])
+          PY
+      - name: Guardar mediciones de modelo original como artefacto
+        uses: actions/upload-artifact@v6
+        with:
+          name: s13-embeddinggemma2-mismo-modelo-piloto
+          path: |
+            Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embeddinggemma_paridad_piloto.json
+            Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma_1000.json
+          retention-days: 14
+          if-no-files-found: error

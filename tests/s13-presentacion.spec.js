@@ -47,10 +47,12 @@ test('S13: tutorial legible y sin desborde horizontal en móvil', async ({ page 
 
 test('S13: ampliación de 26 mil procesos SECOP y entrenamiento de un solo XGBoost', async ({page}) => {
   await page.goto(URL + '#s36');
-  await expect(page.locator('#s36')).toContainText('26.000');
+  await expect(page.locator('#s36')).toContainText('50.000');
   await page.goto(URL + '#s38');
   await expect(page.locator('#s38')).toContainText('dxgb.train');
+  await expect(page.locator('#s38')).toContainText('0,758 s');
   await page.goto(URL + '#s39');
   await expect(page.locator('#s39')).toContainText('embeddinggemma-2:270m');
   await expect(page.locator('#s39')).toContainText('UNSPSC');
+  await expect(page.locator('#s39')).toContainText('1,636 s');
 });

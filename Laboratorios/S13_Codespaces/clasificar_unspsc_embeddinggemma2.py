@@ -24,6 +24,7 @@ from sklearn.svm import LinearSVC
 from benchmark_unspsc_tfidf_dask import (
     SALIDA, ETIQUETAS, leer_muestra, seleccion_n,
 )
+from benchmark_paridad_50k import svm
 
 DB = SALIDA / "cache_embeddinggemma2.sqlite3"
 
@@ -108,16 +109,16 @@ def extraer_con_cache(textos, model, endpoint, batch_size, db_path=DB):
 
 
 def entrenar(n, model, endpoint, batch_size):
-    if n not in (1000,10000,20000):
-        raise ValueError("n debe ser 1000, 10000 o 20000.")
+    if n not in (1000,10000,20000,50000):
+        raise ValueError("n debe ser 1000, 10000, 20000 o 50000.")
     t0=time.perf_counter()
-    tabla,_=leer_muestra(20000)
+    tabla,_=leer_muestra(50000)
     train,test=seleccion_n(tabla,n)
     texts=train.texto.tolist()+test.texto.tolist()
     vecs, tiempos=extraer_con_cache(texts, model, endpoint, batch_size)
     transformador=Normalizer(copy=True)
     z=transformador.fit_transform(vecs)
-    clf=LinearSVC(class_weight="balanced",random_state=42)
+    clf=svm()
     clf.fit(z[:len(train)],train.etiqueta.tolist())
     pred=clf.predict(z[len(train):])
     y=test.etiqueta.tolist()
