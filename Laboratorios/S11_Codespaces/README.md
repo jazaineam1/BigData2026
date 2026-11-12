@@ -1,5 +1,8 @@
 # Recuperación de S11 · OCR, transcripción y EmbeddingGemma 2
 
+**Para la videoclase de máximo 60 minutos:** empieza con el [libreto operativo y verificaciones independientes](./VIDEOCLASE_60MIN.md) y la [presentación breve de 13 pantallas](../../Presentaciones/s11-videoclase-ocr-asr-embeddings.html). La ruta usa primero `lab.py` y, solo al final, `proyecto.py`; este README queda como referencia completa.
+
+
 **Big Data 2026-2S — Universidad Central**  
 **Caso transversal:** Laura / Compras Claras  
 **Modalidad:** GitHub Codespaces, Python y Ollama local; sin GPU ni servicios comerciales obligatorios.
@@ -81,7 +84,7 @@ Al abrir Codespaces, desde Laboratorios/S11_Codespaces ejecuta `bash probar_todo
 ## Paso 1. Crear Codespace de S11
 
 1. Abre [el repositorio](https://github.com/jazaineam1/BigData2026).
-2. Escoge la rama que contiene este laboratorio. Durante revisión es **feat/s11-codespaces-multimodal**; cuando se integre será **main**.
+2. Escoge la rama que contiene este laboratorio. La versión integrada de este laboratorio está en **main**; si revisas una mejora abierta en un pull request, selecciona su rama.
 3. Pulsa **Code → Codespaces → … → New with options**.
 4. En **Dev container configuration**, selecciona **S11 · OCR, voz y EmbeddingGemma 2**. Su archivo está en la carpeta .devcontainer/s11-multimedia. **No es el perfil Airflow Lab** que también existe.
 5. Usa 2 CPU y 8 GB si tu cuenta lo permite. La memoria y el tiempo de máquina dependen de tu cuota de GitHub.
