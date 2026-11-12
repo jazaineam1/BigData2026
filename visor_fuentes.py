@@ -10,6 +10,11 @@ from pathlib import Path
 
 import streamlit as st
 from PIL import Image, ImageOps
+import io
+import pandas as pd
+from ocr_documental import (PSM_EXPLICACION, candidatos_ocr, pdf_paginas,
+                            renderizar_pagina, referencia_doc_728704921,
+                            texto_integrado_pdf)
 
 from fuentes import ROOT, AUDIO_MANIFEST, inventario, preparar_audios, sha256
 
@@ -27,39 +32,13 @@ for col, grupo, n in zip(st.columns(4), grupos, totales):
 
 with st.sidebar:
     st.header("Seleccionar fuente")
-    st.subheader("Estado de Ollama")
-    import shutil
-    from urllib.request import urlopen
-    import json
-    if shutil.which("ollama") is None:
-        st.error("Ollama no está instalado en este contenedor.")
-        st.code("git pull --ff-only origin s11-estudiantes", language="bash")
-        st.caption("Después: Ctrl+Shift+P → Codespaces: Rebuild Container")
-    else:
-        try:
-            with urlopen("http://127.0.0.1:11434/api/tags", timeout=2) as respuesta:
-                modelos = json.load(respuesta).get("models", [])
-            if any(m.get("name", "") == "embeddinggemma-2:440m" for m in modelos):
-                st.success("Ollama activo y modelo 440m listo")
-            else:
-                st.info("Ollama activo. Falta descargar el modelo visual 440m.")
-                st.code("bash preparar_embeddinggemma.sh", language="bash")
-        except Exception:
-            st.warning("Ollama instalado, pero el servidor no responde.")
-            st.code("bash iniciar_ollama.sh", language="bash")
-            if st.button("Intentar iniciar Ollama", use_container_width=True):
-                import subprocess
-                try:
-                    salida = subprocess.run(
-                        ["bash", str(ROOT / "iniciar_ollama.sh")],
-                        capture_output=True, text=True, timeout=60, check=True)
-                    st.success(salida.stdout or "Servidor iniciado")
-                    st.rerun()
-                except Exception as exc:
-                    st.error(f"No se pudo iniciar: {exc}")
-    st.divider()
-    grupo = st.radio("Colección", grupos)
-    buscar = st.text_input("Buscar por número, nombre o artículo", placeholder="Ej. 728490281, 006")
+    grupo = st.radio("Colección", grupos, index=0)
+    buscar = st.text_input("Filtrar por número o nombre",
+                           placeholder="Ej.: 728704921, eltiempo_006")
+    with st.expander("Preparación de búsqueda visual (Ollama)"):
+        st.caption("Ollama ejecuta EmbeddingGemma 2. Para leer caracteres de un PDF "
+                   "se utiliza Tesseract, no este modelo.")
+        st.code("bash iniciar_ollama.sh\nbash preparar_embeddinggemma.sh", language="bash")
     st.divider()
     st.subheader("Treinta audios reales")
     st.caption("MINDS-14 en español; CC BY 4.0. "
@@ -83,7 +62,7 @@ if not candidatos:
 
 opciones = [x["nombre"] for x in candidatos]
 if "doc_selected" not in st.session_state or st.session_state.doc_selected not in opciones:
-    st.session_state.doc_selected = opciones[0]
+    st.session_state.doc_selected = ("secop_acta_728704921" if "secop_acta_728704921" in opciones else opciones[0])
 
 
 def navegar(salto):
@@ -124,16 +103,53 @@ with st.expander("Origen, tamaño e integridad SHA-256"):
                    "No publiques capturas completas ni texto OCR con datos personales.")
 
 if item["clase"] == "pdf":
-    st.markdown("#### PDF original completo junto a su primera página")
+    st.markdown("### 1 · Comprender el PDF original")
+    st.write("Un PDF puede tener varias páginas y contener texto seleccionable o páginas "
+             "escaneadas. OCR se aplica sobre la imagen de una página, sin modificar el PDF.")
+    try:
+        paginas = pdf_paginas(str(original))
+        pagina = st.selectbox("Selecciona la página que deseas analizar",
+                              list(range(1, paginas + 1)),
+                              format_func=lambda x: f"Página {x} de {paginas}")
+        if pagina == 1:
+            with Image.open(item["preview"]) as original_png:
+                pagina_imagen = original_png.convert("RGB")
+        else:
+            pagina_imagen = Image.open(
+                io.BytesIO(renderizar_pagina(str(original), pagina, 170))
+            ).convert("RGB")
+    except Exception as exc:
+        st.error(f"No fue posible abrir esta página: {exc}")
+        st.stop()
     col_pdf, col_png = st.columns(2)
     with col_pdf:
-        st.pdf(original, height=650)
+        st.markdown("**PDF completo (puedes desplazarte por sus páginas)**")
+        st.pdf(original, height=620)
         st.download_button("Guardar PDF original", original.read_bytes(),
                            original.name, mime="application/pdf")
     with col_png:
-        st.image(item["preview"], caption="Primera página del documento", use_container_width=True)
-        st.download_button("Guardar PNG de primera página", item["preview"].read_bytes(),
-                           item["preview"].name, mime="image/png")
+        st.markdown(f"**Página {pagina}: imagen que se entregará a Tesseract**")
+        st.image(pagina_imagen, caption=f"Página {pagina} de {paginas} — sin modificar",
+                 use_container_width=True)
+        st.caption("Si cambias de página, también cambia el OCR que se ejecutará.")
+    media_original = pagina_imagen
+    if original.name == "secop_acta_728704921.pdf" and pagina == 1:
+        st.info("Caso de investigación: acta de inicio, contrato 006-2026. "
+                "Encuentra VALOR DEL CONTRATO, DURACIÓN y FORMA DE PAGO. "
+                "Comprueba las cifras en la imagen, no solo en el texto de la máquina.")
+    with st.expander("¿El PDF ya tiene texto seleccionable? Compruébalo"):
+        st.write("pdftotext extrae letras almacenadas en el PDF, si existen. "
+                 "No es OCR ni interpreta imágenes.")
+        if st.button("Revisar capa de texto del PDF", key=f"capatexto_{original.name}_{pagina}"):
+            try:
+                capa = texto_integrado_pdf(original, pagina)
+                if capa:
+                    st.text_area("Texto seleccionado desde el propio PDF", capa, height=210)
+                else:
+                    st.info("Esta página no tiene texto seleccionable recuperable: "
+                            "utiliza el OCR sobre la imagen.")
+            except Exception as exc:
+                st.warning(f"No se pudo comprobar la capa de texto: {exc}")
 elif item["clase"] == "imagen":
     st.image(original, caption=elegido, use_container_width=True)
     with Image.open(original) as img:
