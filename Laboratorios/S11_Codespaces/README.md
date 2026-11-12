@@ -1,6 +1,9 @@
 # Recuperación de S11 · OCR, transcripción y EmbeddingGemma 2
 
-**Para la práctica de recuperación de S11:** comienza con la [presentación de 13 pantallas](../../Presentaciones/s11-videoclase-ocr-asr-embeddings.html). Para el alumnado, la ruta corta es [Guía interactiva del estudiante: ocho pasos](../../assets/tutoriales/s11-ocr-asr-paso-a-paso.html) y [Guía Markdown reproducible](./GUIA_ESTUDIANTE.md). La ruta usa primero `lab.py` y, solo al final, `proyecto.py`; este README queda como referencia completa.
+> **Ruta estudiantil ACTUAL (S11):** [cuaderno de Python desde cero](https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/01_laboratorio.ipynb) y [rama Codespaces mínima](https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes). El estudiante escribe OCR, vectores y ASR en 11 celdas editables usando 4 fotografías reales, 2 actas SECOP y voz MINDS-14 autorizada. Este directorio antiguo de main se conserva únicamente por compatibilidad histórica y pruebas previas. **No se debe presentar lab.py como el ejercicio activo.**
+
+
+**Para la práctica de recuperación de S11:** comienza con la [presentación actualizada de 16 pantallas](../../Presentaciones/s11-videoclase-ocr-asr-embeddings.html). Para el alumnado, la ruta corta es [Guía interactiva del estudiante: ocho pasos](../../assets/tutoriales/s11-ocr-asr-paso-a-paso.html) y [Guía Markdown reproducible](./GUIA_ESTUDIANTE.md). La ruta anterior que usaba `lab.py` y `proyecto.py` se conserva como **archivo histórico**, no como actividad estudiantil actual.
 
 
 **Big Data 2026-2S — Universidad Central**  
