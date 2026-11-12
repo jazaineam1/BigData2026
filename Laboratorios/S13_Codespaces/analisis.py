@@ -99,7 +99,11 @@ def comparar_pandas_dask(tabla, npartitions=4):
     calculado = diferido.compute().sort_index()
     t_dask = time.perf_counter() - t0
 
-    pd.testing.assert_series_equal(referencia, calculado)
+    # Pandas puede usar índice object y Dask StringDtype(pyarrow).
+    # La corrección analítica se decide por claves y cantidades, no por el dtype del índice.
+    valores_pandas = {str(k): int(v) for k, v in referencia.items()}
+    valores_dask = {str(k): int(v) for k, v in calculado.items()}
+    assert valores_pandas == valores_dask, "Los conteos por modalidad no coinciden"
     return {
         "filas": len(tabla),
         "particiones": ddf.npartitions,
