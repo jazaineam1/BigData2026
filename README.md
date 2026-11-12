@@ -14,6 +14,25 @@
 
 **No hay un segundo cuaderno, una segunda presentación ni Airflow en este kit.** Los archivos `INSTALACION_UBUNTU.md` y `FUENTES.md` son documentación de consulta, no pasos que debas ir ejecutando paralelamente.
 
+## Un único contrato didáctico reproducible
+
+El archivo [`configuracion_s11.json`](./configuracion_s11.json) es el contrato compartido
+del cuaderno y del visor: selecciona **la misma muestra ordenada** de 006
+(letreros), 009 (viviendas), 023 (Lotería del Valle), 001 y cuatro ampliaciones.
+Al seleccionar 4 u 8 fotos, ambas interfaces priorizan esos casos; las restantes
+se agregan al procesar las 62. No dependas de las primeras ocho rutas ordenadas.
+
+**Pregunta contractual única:** en el PDF `secop_acta_728704921.pdf`,
+identifica **valor del contrato, duración y forma de pago**, y contrasta
+contra la imagen. Las salidas OCR son candidatos, no hechos certificados.
+Para procedencia y privacidad, consulta [`FUENTES.md`](./FUENTES.md).
+
+**Presupuesto recomendado para el video:** 1 acta, 4 fotos para comparar OCR,
+1 imagen para primera inferencia y 1 voz humana. Ampliar a 8/30/62
+requiere acción voluntaria y comprobar cuota/tiempo; **nunca ejecutes todo
+para simplemente demostrar que el entorno abrió**. Detén el Codespace
+al terminar la actividad para evitar consumir recursos inactivos.
+
 ## Paso 1 · Crear el Codespace correcto
 
 1. Abre **https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes**. Comprueba que el selector de rama muestra **s11-estudiantes**, NO `main`.
