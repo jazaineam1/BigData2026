@@ -149,9 +149,9 @@ def transformar_bloque(vectorizador, textos):
     return vectorizador.transform(textos)
 
 
-def transformar_dask(client, vectorizador, textos, chunk_size=1000):
+def transformar_dask(client, vec_futuro, textos, chunk_size=1000):
+    """El Future del vectorizador permanece vivo en el llamador."""
     partes = chunks_lista(textos, chunk_size)
-    vec_futuro = client.scatter(vectorizador, broadcast=True)
     tareas = [
         client.submit(transformar_bloque, vec_futuro, bloque, pure=False)
         for bloque in partes
@@ -171,13 +171,15 @@ def puntuar(verdad, prediccion):
 def entrenar_xgb_distribuido(client, x_train, y_train, x_test, clases, rondas):
     from xgboost import dask as dxgb
     dim = x_train.shape[1]
+    # Incluso con 800 documentos, un modelo se reparte en >1 partición.
+    chunk_filas = max(100, min(1000, int(np.ceil(len(x_train) / 4))))
     nombres = [f"svd_{j:02d}" for j in range(dim)]
     datos = da.from_array(
         np.ascontiguousarray(x_train, dtype="float32"),
-        chunks=(1000, dim),
+        chunks=(chunk_filas, dim),
     )
     labels = da.from_array(
-        np.asarray(y_train, dtype="float32"), chunks=(1000,),
+        np.asarray(y_train, dtype="float32"), chunks=(chunk_filas,),
     )
     matriz = dxgb.DaskDMatrix(client, datos, labels, feature_names=nombres)
     start = time.perf_counter()
@@ -249,8 +251,9 @@ def ejecutar(sizes, workers=2, rondas=25, svd_dim=32):
                 t_local = time.perf_counter()-t0
 
                 t0 = time.perf_counter()
-                xtr_dask = transformar_dask(client, vec, texts_tr, chunk_size=1000)
-                xte_dask = transformar_dask(client, vec, texts_te, chunk_size=1000)
+                vec_futuro = client.scatter(vec, broadcast=True)
+                xtr_dask = transformar_dask(client, vec_futuro, texts_tr, chunk_size=1000)
+                xte_dask = transformar_dask(client, vec_futuro, texts_te, chunk_size=1000)
                 t_dask = time.perf_counter()-t0
 
                 if xtr_local.shape != xtr_dask.shape:
