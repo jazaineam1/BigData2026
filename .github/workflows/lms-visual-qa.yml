@@ -10,6 +10,7 @@ on:
       - Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb
       - utils/build_session9_notebook.py
       - Presentaciones/s10-etl-multimedia.html
+      - Presentaciones/s13-de-una-maquina-a-un-cluster.html
       - Cuadernos/10_ETL_Multimedia.ipynb
       - utils/build_session10_multimedia.py
       - utils/validate_session10.py
