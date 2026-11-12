@@ -82,17 +82,14 @@ print(pytesseract.image_to_string(
     procesada, lang="spa", config="--psm 7"
 ))</pre><div class="tile"><h2>Variable controlada</h2><p>Conserva la misma región y PSM 7. Cambia únicamente escala; luego prueba contraste.</p><p><strong>LANCZOS</strong> interpola píxeles, no inventa detalles.</p><p><strong>Confianza OCR</strong> no equivale a tasa de aciertos.</p><p class="note">Si empeora, esa observación también es un resultado: documenta qué transformación produjo el error.</p></div></div></section>
 <section class="slide" id="s14" aria-label="Elige el motor según lo que deseas conocer" aria-hidden="true"><p class="kicker">14 · PREGUNTAS</p><h1>Elige el motor según lo que deseas conocer</h1><div class="grid three"><div class="tile"><h2>¿Qué dice un cartel?</h2><p>OCR con Tesseract</p><strong>Píxeles → caracteres</strong></div><div class="tile"><h2>¿Qué imagen tiene casas?</h2><p>EmbeddingGemma 2:440m</p><strong>Imagen + pregunta → vectores</strong></div><div class="tile"><h2>¿Qué palabras se dijeron?</h2><p>Faster-Whisper</p><strong>Audio → segmentos</strong></div></div><p class="note">La herramienta equivocada puede producir una salida técnicamente válida pero inútil para la pregunta.</p></section>
-<section class="slide" id="s15" aria-label="De WebP a JPEG RGB antes del embedding" aria-hidden="true"><p class="kicker">15 · API</p><h1>De WebP a JPEG RGB antes del embedding</h1><div class="grid two"><pre>from PIL import Image, ImageOps
-from io import BytesIO
+<section class="slide" id="s15" aria-label="Base64 original y conversión JPEG opcional" aria-hidden="true"><p class="kicker">15 · API</p><h1>Base64 de la fotografía original; JPEG es opcional</h1><div class="grid two"><pre>from pathlib import Path
 import base64
 
-with Image.open(ruta) as fuente:
-    img = ImageOps.exif_transpose(fuente).convert("RGB")
-    img.thumbnail((768, 768))
-    memoria = BytesIO()
-    img.save(memoria, format="JPEG", quality=85)
-entrada = base64.b64encode(
-    memoria.getvalue()).decode("ascii")</pre><div class="tile"><h2>Por qué se hace</h2><p>Una carpeta contiene WebP y JPEG distintos. Esta transformación produce un <strong>formato uniforme</strong> de entrada sin modificar los archivos.</p><p><strong>Base64</strong> convierte bytes a texto seguro para JSON.</p><p class="note">Ajusta el límite 768→512 y mide tiempo, peso y recuperación. Este paso no es OCR.</p></div></div></section>
+ruta = Path("datos/raw/fotos/eltiempo_023.webp")
+# Bytes originales: fue el método probado en Codespaces.
+b64 = base64.b64encode(
+    ruta.read_bytes()).decode("ascii")
+entrada = {"image": b64}</pre><div class="tile"><h2>Por qué se hace</h2><p>Pillow puede convertir WebP a JPEG RGB para comparar tamaños y rendimiento, pero no es un requisito para el arreglo que funcionó. Primero prueba los <strong>bytes originales</strong>.</p><p><strong>Base64</strong> convierte bytes a texto seguro para JSON.</p><p class="note">En el cuaderno, <code>NORMALIZAR_JPEG = False</code> usa el archivo original; con <code>True</code> estudias una transformación alternativa. Este paso no es OCR.</p></div></div></section>
 <section class="slide" id="s16" aria-label="Crear vectores de imágenes sin código oculto" aria-hidden="true"><p class="kicker">16 · VISIÓN</p><h1>Crear vectores de imágenes sin código oculto</h1><div class="grid two"><pre>import base64, requests
 
 ruta = "datos/raw/fotos/eltiempo_009.webp"
@@ -100,22 +97,24 @@ b64 = base64.b64encode(open(ruta,"rb").read()).decode()
 respuesta = requests.post(
     "http://127.0.0.1:11434/api/embed",
     json={"model":"embeddinggemma-2:440m",
-          "input":{"image":b64}}, timeout=240
+          "input":[{"image":b64}]}, timeout=240
 )
-respuesta.raise_for_status()
+if not respuesta.ok:
+    raise RuntimeError(respuesta.text[:1000])
 vector_imagen = respuesta.json()["embeddings"][0]
-print(len(vector_imagen))</pre><div class="tile"><h2>¿Qué sucede?</h2><p>Los bytes de la imagen se codifican en Base64 para JSON. Ollama los envía al codificador visual y devuelve <strong>768 números</strong>.</p><p class="muted">Antes de ejecutar esta celda: <code>bash preparar_embeddinggemma.sh</code>. El 440m admite imagen y texto; el 270m solo texto.</p></div></div></section>
+print(len(vector_imagen))</pre><div class="tile"><h2>¿Qué sucede?</h2><p>Los bytes se codifican en Base64. <strong>La imagen se coloca dentro de una lista</strong>: <code>"input": [{"image": b64}]</code>. Ollama devuelve una lista de vectores y <code>embeddings[0]</code> selecciona el primero (768 números).</p><p class="muted">Antes de ejecutar esta celda: <code>bash preparar_embeddinggemma.sh</code>. El 440m admite imagen y texto; el 270m solo texto.</p></div></div></section>
 <section class="slide" id="s17" aria-label="HTTP 400: lee el mensaje, no solo la excepción" aria-hidden="true"><p class="kicker">17 · DEPURACIÓN</p><h1>HTTP 400: lee el mensaje, no solo la excepción</h1><div class="grid two"><pre>respuesta = requests.post(
     API, json={"model": MODELO,
-               "input": {"image": entrada}}, timeout=240)
+               "input": [{"image": entrada}]}, timeout=240)
 if not respuesta.ok:
     raise RuntimeError(
         f"HTTP {respuesta.status_code}: "
         f"{respuesta.text[:1200]}"
     )
 vector = respuesta.json()["embeddings"][0]
-print(len(vector))  # Esperado: 768</pre><div class="tile"><h2>Comprueba una imagen primero</h2><p><strong>HTTP 400</strong> significa que el servidor rechazó la solicitud. No basta para determinar si fue formato, versión, modelo o entrada.</p><p>La respuesta detallada permite identificar qué ocurrió y sobre cuál archivo.</p><p class="note">En el cuaderno: prueba 1 → 4 → 8 → 62 imágenes. No ejecutes todo el lote antes de comprobar un archivo.</p></div></div></section>
+print(len(vector))  # Esperado: 768</pre><div class="tile"><h2>Comprueba una imagen primero</h2><p><strong>HTTP 400</strong> significa que el servidor rechazó la solicitud. No basta para determinar si fue formato, versión, modelo o entrada.</p><p>En el Codespace, el cambio comprobado fue <code>"input": [entrada]</code>. Envíalo como lista tanto para una imagen como para texto. Mantén el mensaje del servidor para diagnosticar otros errores.</p><p class="note">En el cuaderno: prueba 1 → 4 → 8 → 62 imágenes. No ejecutes todo el lote antes de comprobar un archivo.</p></div></div></section>
 <section class="slide" id="s18" aria-label="De la pregunta al ranking por coseno" aria-hidden="true"><p class="kicker">18 · BÚSQUEDA</p><h1>De la pregunta al ranking por coseno</h1><div class="grid two"><pre>pregunta = "viviendas en una ladera"
+# vector(...) prepara el JSON con "input": [entrada]
 consulta = vector("task: search result | query: " + pregunta)
 
 # Para comparar dos vectores:
