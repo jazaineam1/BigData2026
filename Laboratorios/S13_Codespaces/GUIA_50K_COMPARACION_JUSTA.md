@@ -15,7 +15,7 @@ Este nuevo benchmark **reemplaza las comparaciones previas como evidencia de esc
 | 20.000 | 1,5667 | 0,9170 | 0,56585 |
 | 50.000 | 3,0996 | 1,7655 | 0,57385 |
 
-A 50.000, XGBoost sobre los mismos 32 ejes TF-IDF/SVD y los mismos parámetros tardó **0,4488 s local**, **0,9337 s Dask** en su entrenamiento. No mezclar estos tiempos con el tiempo de TF-IDF o LinearSVC. <https://github.com/jazaineam1/BigData2026/actions/runs/43167104999>
+**Advertencia de auditoría (12 de noviembre):** la ejecución histórica reportó **0,4488 s local** y **0,9337 s Dask**, pero esos valores **NO son comparables**: el reloj local incluía predicción y el de Dask no. El cronómetro fue corregido en una nueva revisión para medir exclusivamente `fit` en ambos casos. Hasta volver a ejecutar el benchmark y publicar su artefacto, **no usar esos dos números para afirmar qué arquitectura entrenó más rápido**. Los tiempos de transformación TF-IDF sí son otra medición, distinta del entrenamiento. <https://github.com/jazaineam1/BigData2026/actions/runs/43167104999>
 
 **EmbeddingGemma 2:** se generaron los **1.000 embeddings reales**, no un piloto extrapolado. Mismo test 200, mismo train 800, mismo LinearSVC. TF-IDF obtuvo F1 macro **0,45134** y vectorizó en **0,111 s**; EmbeddingGemma 2 obtuvo F1 macro **0,47586** y generó vectores en **119,898 s**. Esta prueba es diferente de la comparación con test fijo de 10.000; no se deben cruzar sus F1. <https://github.com/jazaineam1/BigData2026/actions/runs/43167105003>
 
