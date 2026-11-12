@@ -11,7 +11,7 @@ import subprocess
 from functools import lru_cache
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageOps, ImageEnhance, ImageFilter, ImageDraw
 
 PSM_EXPLICACION = {
     3: ("3 — Automático: detecta columnas y bloques",
@@ -127,3 +127,87 @@ def referencia_doc_728704921(pdf: str | Path, pagina: int) -> dict[str, str] | N
         "Forma de pago": "6 pagos parciales de $2.460.000 COP",
         "Control aritmético": "6 × 2.460.000 = 14.760.000",
     }
+
+
+# En fotografías publicitarias conviene comparar el original con un recorte.
+# Estas transformaciones se aplican a copias en memoria; nunca cambian el archivo fuente.
+def recortar_por_porcentaje(imagen: Image.Image, horizontal: tuple[int,int],
+                           vertical: tuple[int,int]) -> Image.Image:
+    if not (0 <= horizontal[0] < horizontal[1] <= 100
+            and 0 <= vertical[0] < vertical[1] <= 100):
+        raise ValueError("Los porcentajes deben estar ordenados de 0 a 100.")
+    w, h = imagen.size
+    limites = (int(w * horizontal[0]/100), int(h * vertical[0]/100),
+               int(w * horizontal[1]/100), int(h * vertical[1]/100))
+    return imagen.crop(limites)
+
+
+# Sobre la imagen del laboratorio (1200×675), este recorte aisla la palabra VALLE.
+# Al escalar proporciones, la imagen sigue funcionando si se exporta en otra resolución.
+LOGO_VALLE_BOUNDS = (175/1200, 240/675, 540/1200, 375/675)
+
+
+def recorte_logo_valle(imagen: Image.Image, zona: str) -> Image.Image:
+    w, h = imagen.size
+    areas = {
+        "Logotipo completo": (145/1200, 125/675, 565/1200, 545/675),
+        "Palabra VALLE": LOGO_VALLE_BOUNDS,
+        "Eslogan": (205/1200, 363/675, 482/1200, 451/675),
+    }
+    if zona not in areas:
+        raise ValueError(f"Zona de logotipo no reconocida: {zona}")
+    x0, y0, x1, y1 = areas[zona]
+    return imagen.crop((round(w*x0), round(h*y0),
+                        round(w*x1), round(h*y1)))
+
+
+def preparar_region_ocr(img: Image.Image, escala: int = 1,
+                        tratamiento: str = "Sin cambios") -> Image.Image:
+    """Devuelve copia de píxeles; la imagen original se mantiene intacta."""
+    if escala not in (1, 2, 3):
+        raise ValueError("Escala OCR no válida")
+    copia = img.convert("RGB")
+    if escala > 1:
+        copia = copia.resize((copia.width*escala, copia.height*escala),
+                             Image.Resampling.LANCZOS)
+    if tratamiento == "Contraste y nitidez":
+        copia = ImageOps.autocontrast(ImageOps.grayscale(copia))
+        copia = copia.filter(ImageFilter.UnsharpMask(radius=1, percent=130, threshold=2))
+    elif tratamiento == "Blanco y negro":
+        gray = ImageOps.autocontrast(ImageOps.grayscale(copia))
+        copia = gray.point(lambda v: 255 if v >= 150 else 0)
+    elif tratamiento != "Sin cambios":
+        raise ValueError("Tratamiento OCR no reconocido")
+    # Un margen blanco ayuda a no cortar caracteres que tocan los bordes.
+    return ImageOps.expand(copia, border=12, fill="white")
+
+
+def detalle_ocr(datos: dict) -> tuple[list[dict],float|None]:
+    """Tesseract image_to_data: palabras, cuadros y confianza interna (no exactitud)."""
+    filas = []
+    for i, palabra in enumerate(datos.get("text", [])):
+        palabra = palabra.strip()
+        try:
+            conf = float(datos["conf"][i])
+        except (ValueError, TypeError):
+            continue
+        if not palabra or conf < 0:
+            continue
+        filas.append({
+            "Palabra": palabra,
+            "Confianza interna": round(conf, 1),
+            "x": int(datos["left"][i]), "y": int(datos["top"][i]),
+            "ancho": int(datos["width"][i]), "alto": int(datos["height"][i])
+        })
+    promedio = round(sum(f["Confianza interna"] for f in filas)/len(filas), 1) if filas else None
+    return filas, promedio
+
+
+def dibujar_cajas_ocr(img: Image.Image, filas: list[dict]) -> Image.Image:
+    salida = img.convert("RGB").copy()
+    lapiz = ImageDraw.Draw(salida)
+    for fila in filas:
+        x, y = fila["x"], fila["y"]
+        w, h = fila["ancho"], fila["alto"]
+        lapiz.rectangle((x, y, x+w, y+h), outline=(12, 168, 88), width=2)
+    return salida
