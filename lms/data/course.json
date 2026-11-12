@@ -1,5 +1,5 @@
 {
-  "version": 16,
+  "version": 17,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
@@ -147,8 +147,17 @@
     },
     {
       "n": 13,
-      "title": "Sesión 13 · por publicar",
-      "status": "draft"
+      "title": "¿Cuándo basta pandas y cuándo necesitamos distribuir datos y modelos?",
+      "status": "visible",
+      "tracked": true,
+      "formative": true,
+      "starts_at": "2026-11-19T18:00:00-05:00",
+      "class_date": "2026-11-19",
+      "class_kind": "learning",
+      "entry": {
+        "url": "/BigData2026/Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1",
+        "label": "Abrir sesión 13 · presentación y tutorial"
+      }
     },
     {
       "n": 14,

@@ -1,0 +1,51 @@
+name: S13 Codespaces Dask y modelos - QA
+on:
+  pull_request:
+    paths:
+      - ".devcontainer/s13-distribuido/**"
+      - "Laboratorios/S13_Codespaces/**"
+      - "Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb"
+      - "Presentaciones/s13-de-una-maquina-a-un-cluster.html"
+      - "utils/validate_s13_distribuido.py"
+      - "index.html"
+      - "lms/data/course.json"
+      - ".github/workflows/s13-codespaces-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  s13-reproducible:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validar contrato de presentación, cuaderno y LMS
+        run: python utils/validate_s13_distribuido.py
+      - name: Instalar las mismas dependencias que Codespaces
+        run: |
+          python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+          python -m pip install nbclient nbformat
+      - name: Verificar Codespaces y datasets
+        run: python Laboratorios/S13_Codespaces/verificar_entorno.py
+      - name: Probar motor y resultados verificables
+        run: |
+          cd Laboratorios/S13_Codespaces
+          python -m unittest -v test_s13
+      - name: Ejecutar el laboratorio completo sin intervención manual
+        run: python Laboratorios/S13_Codespaces/analisis.py todo
+      - name: Ejecutar todo el cuaderno Jupyter desde una carpeta limpia
+        run: |
+          python - <<'PY'
+          import nbformat
+          from nbclient import NotebookClient
+          from pathlib import Path
+          path=Path("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb")
+          nb=nbformat.read(path,as_version=4)
+          NotebookClient(nb,timeout=240,kernel_name="python3",resources={"metadata":{"path":"Cuadernos"}}).execute()
+          print("Run All del cuaderno S13: OK")
+          PY

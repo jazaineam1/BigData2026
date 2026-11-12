@@ -1,0 +1,25 @@
+{
+  "name": "S13 · Dask, MapReduce y modelos SECOP",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bookworm",
+  "workspaceFolder": "/workspaces/BigData2026",
+  "postCreateCommand": "python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt && python Laboratorios/S13_Codespaces/verificar_entorno.py",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter"
+      ]
+    }
+  },
+  "forwardPorts": [
+    8787
+  ],
+  "portsAttributes": {
+    "8787": {
+      "label": "S13 · Panel Dask (privado)",
+      "onAutoForward": "notify",
+      "visibility": "private"
+    }
+  }
+}
