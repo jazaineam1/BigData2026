@@ -9,8 +9,8 @@
 1. Abre [rama s11-estudiantes](https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes).
 2. Comprueba que la rama seleccionada dice **s11-estudiantes**, nunca main.
 3. Pulsa **Code → Codespaces → Create codespace on s11-estudiantes**. Este kit tiene un solo contenedor.
-4. El explorador debe mostrar `01_laboratorio.ipynb`, `datos/raw`, `INSTALACION_UBUNTU.md`, `requirements.txt`, y poco más.
-5. Haz clic en `01_laboratorio.ipynb`. Selecciona el kernel **Python 3**. Lee cada sección, escribe o modifica las líneas y ejecuta **una celda a la vez**.
+4. El explorador debe mostrar `01_laboratorio.ipynb`, `02_lotes_102_fuentes.ipynb`, `visor_fuentes.py`, `datos/raw`, `INSTALACION_UBUNTU.md`, `requirements.txt`, y poco más.
+5. Abre **01_laboratorio.ipynb** para aprender OCR, búsqueda visual y Whisper con pocos ejemplos. Después abre **02_lotes_102_fuentes.ipynb** para ampliar a 102 fuentes y comparar tiempos, errores y resultados. Selecciona el kernel **Python 3** y modifica las celdas una a una.
 
 **No necesitas Ubuntu local.** Codespaces es Linux en el navegador. Para comprender cómo se prepara el entorno, abre el [tutorial de instalación](./INSTALACION_UBUNTU.md): también se puede realizar en un Ubuntu propio cuando sea apropiado.
 
@@ -48,6 +48,14 @@ Abre el panel **Puertos / Ports**, localiza 8501 y selecciona **Abrir vista prev
 | `datos/raw/audios` + `datos/derived/audios` | 10 WAV humanos PolyAI MINDS-14 es-ES, CC BY 4.0 | ¿Qué dice y qué errores tiene la transcripción? |
 
 La grabación es bancaria y **no pertenece a las noticias**. Los documentos SECOP pueden mostrar datos personales: al compartir capturas o exportar resultados, minimízalos. Las imágenes periodísticas conservan los derechos de sus titulares; los créditos por archivo del subconjunto de 30 todavía requieren curaduría (no inventes licencias).
+
+## Ruta de dos cuadernos
+
+**01_laboratorio.ipynb (fundamentos, para el video):** escribes cómo abrir imágenes, OCR de un acta, vectores de cuatro fotografías y ASR de una voz.
+
+**02_lotes_102_fuentes.ipynb (investigación por lotes):** escribes bucles sobre 30 actas, 62 fotografías, una selección de 10 voces, búsqueda vectorial y un catálogo JSONL/Parquet de 102 filas. Empieza con N_ACTAS=5, N_FOTOS=8, N_VISION=8 y N_ASR=3; después modifica esas cifras a 30, 62, 62 y 10 y explica qué cambió.
+
+**visor_fuentes.py (vista, no solución):** muestra una fuente a la vez con anterior/siguiente, cada PDF y su PNG, imágenes periodísticas y un reproductor de audios reales. El visor no sustituye escribir y justificar el código de los dos cuadernos.
 
 ## 3. Mapa de la sesión (60 minutos)
 
