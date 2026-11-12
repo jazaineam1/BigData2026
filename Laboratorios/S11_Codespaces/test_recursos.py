@@ -41,6 +41,7 @@ class RecursosS11(unittest.TestCase):
         self.assertIn("pytesseract", html)
         self.assertIn("WhisperModel", html)
         self.assertIn("HTTP 400", html)
+        self.assertIn('"input":[{"image":b64}]', html)
         self.assertIn("PSM 7", html)
         self.assertNotIn("python lab.py preparar", html)
 
