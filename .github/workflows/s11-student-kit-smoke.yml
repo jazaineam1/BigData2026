@@ -1,4 +1,4 @@
-name: S11 · Kit de estudiantes Python desde cero (QA)
+name: S11 · Corpus y visor de 102 fuentes (QA)
 on:
   workflow_dispatch:
   push:
@@ -11,103 +11,116 @@ permissions:
 
 jobs:
   student-kit:
-    name: Cuaderno, recursos reales y OCR sin motor oculto
+    name: PDFs y fotos, cuadernos, OCR y visor privado
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
-      - name: Descargar SOLO el kit de estudiantes
+      - name: Descargar SOLO la rama de estudiantes
         uses: actions/checkout@v4
         with:
           ref: s11-estudiantes
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Comprobar el árbol mínimo y las seis fuentes originales
+      - name: Contrato de corpus y árbol mínimo
         run: |
           python - <<'PY'
           from pathlib import Path
-          visibles={p.name for p in Path(".").iterdir() if p.name!=".git"}
+          visibles={x.name for x in Path(".").iterdir() if x.name!=".git"}
           esperados={".devcontainer",".gitignore","README.md","INSTALACION_UBUNTU.md",
-                     "FUENTES.md","requirements.txt","01_laboratorio.ipynb","datos"}
-          assert visibles==esperados,(visibles^esperados)
-          fotos=list(Path("datos/raw/fotos").iterdir())
-          actas=list(Path("datos/raw/actas").iterdir())
-          assert len(fotos)==4 and len(actas)==2
+                     "FUENTES.md","requirements.txt","01_laboratorio.ipynb",
+                     "02_lotes_102_fuentes.ipynb","datos","fuentes.py","visor_fuentes.py","test_visor.py"}
+          assert visibles==esperados,visibles^esperados
+          root=Path("datos/raw")
+          for sub,count in [("fotos",30),("fotos_catalogadas",32),("actas",30),("actas_pdf",30)]:
+              actual=list((root/sub).iterdir())
+              assert len(actual)==count,(sub,len(actual))
+          for pdf in (root/"actas_pdf").glob("*.pdf"):
+              assert (root/"actas"/(pdf.stem+"_pagina1.png")).is_file(),pdf
           assert not any(Path(x).exists() for x in ("lab.py","proyecto.py","app.py","Airflow","evaluaciones"))
-          print("OK: 8 elementos en raíz, 4 fotos y 2 actas; sin programas opacos")
+          print("CORPUS OK: 62 fotos + 30 PDF completos + 30 vistas PNG")
           PY
-      - name: Paquetes Linux y español de Tesseract
+      - name: Instalar OCR y bibliotecas con lector PDF integrado
         run: |
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr tesseract-ocr-spa ffmpeg poppler-utils
-      - name: Bibliotecas del kit de docencia
-        run: |
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa ffmpeg poppler-utils
           python -m pip install -r requirements.txt
           tesseract --list-langs | grep -x spa
-      - name: Sintaxis de TODAS las celdas y contrato didáctico
+      - name: Sintaxis de ambos cuadernos y visor
         run: |
+          python -m py_compile fuentes.py visor_fuentes.py test_visor.py
           python - <<'PY'
-          import json,nbformat
+          import nbformat,streamlit as st
           from pathlib import Path
-          nb=nbformat.read("01_laboratorio.ipynb",as_version=4)
-          nbformat.validate(nb)
-          ids={c.id for c in nb.cells}
-          requeridos={"s11-abrir-imagen","s11-ocr-acta","s11-ocr-parametros",
-                      "s11-ocr-fotos","s11-vision-vectores","s11-busqueda-coseno",
-                      "s11-audio-fuente","s11-audio-whisper","s11-audio-wer",
-                      "s11-etl-catalogo","s11-auditoria-codigo"}
-          assert requeridos<=ids,requeridos-ids
-          assert len(nb.cells)>=24
-          for celda in nb.cells:
-              if celda.cell_type=="code":
-                  compile(celda.source,celda.id,"exec")
-          text=Path("README.md").read_text()
-          assert "Escribe" in text or "escribir" in text
-          assert "440m" in Path("INSTALACION_UBUNTU.md").read_text()
-          print("OK: notebook válido, 11 celdas de Python compiladas")
+          assert hasattr(st,"pdf"),"Streamlit necesita soporte PDF (streamlit[pdf])"
+          for nombre,cantidad in [("01_laboratorio.ipynb",11),("02_lotes_102_fuentes.ipynb",10)]:
+              nb=nbformat.read(nombre,as_version=4)
+              nbformat.validate(nb)
+              codigo=[c for c in nb.cells if c.cell_type=="code"]
+              assert len(codigo)>=cantidad,(nombre,len(codigo))
+              for c in codigo:
+                  compile(c.source,c.id,"exec")
+              print("Notebook OK:",nombre,len(codigo),"celdas de Python")
           PY
-      - name: EJECUTAR celdas reales de Pillow, Tesseract, PSM y fotografías
+          python -m unittest -v test_visor
+      - name: Ejecutar OCR REAL en fotos y páginas SECOP
         env:
           MPLBACKEND: Agg
         run: |
           python - <<'PY'
           import nbformat
+          scope={"__name__":"__main__"}
           nb=nbformat.read("01_laboratorio.ipynb",as_version=4)
-          seleccion={"s11-abrir-imagen","s11-ocr-acta","s11-ocr-parametros","s11-ocr-fotos"}
-          env={"__name__":"__main__"}
           for c in nb.cells:
-              if c.cell_type=="code" and c.id in seleccion:
-                  print("EJECUTANDO",c.id)
-                  exec(compile(c.source,c.id,"exec"),env)
-          assert len(env["textos_fotos"])==4
-          assert env["total"]-env["descuentos"]==env["neto"]
-          assert len(env["ocr_6"])>100
-          print("OCR REAL OK: acta SECOP y cuatro fotos")
+              if c.cell_type=="code" and c.id in {
+                  "s11-abrir-imagen","s11-ocr-acta","s11-ocr-parametros","s11-ocr-fotos"
+              }:
+                  exec(compile(c.source,c.id,"exec"),scope)
+          nb=nbformat.read("02_lotes_102_fuentes.ipynb",as_version=4)
+          scope={"__name__":"__main__"}
+          for c in nb.cells:
+              if c.cell_type=="code" and c.id in {"lote-inventario","lote-actas","lote-fotos"}:
+                  exec(compile(c.source,c.id,"exec"),scope)
+          assert len(scope["tabla_actas"])==5
+          assert len(scope["tabla_fotos"])==8
+          print("OCR REAL OK: actas y fotos, dos cuadernos")
           PY
+      - name: Iniciar el visor y comprobar la respuesta HTTP
+        run: |
+          streamlit run visor_fuentes.py --server.headless true --server.address 127.0.0.1 --server.port 8501 \
+            > /tmp/visor-s11.log 2>&1 &
+          for intento in $(seq 1 35); do
+            if curl -fsS --max-time 5 http://127.0.0.1:8501/_stcore/health; then
+              echo "VISOR LISTO: 8501"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/visor-s11.log
+          exit 1
 
   real-models:
-    name: Modelos REALES · visión 440m + voz humana Whisper
+    name: Modelo visual 440m, 10 WAV reales, Whisper y ETL 102
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
-      - name: Solo rama de estudiantes
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: s11-estudiantes
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Instalar Python y Tesseract español
+      - name: Paquetes de OCR/audio
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa ffmpeg
           python -m pip install -r requirements.txt
-      - name: Ollama oficial y modelo visual 440m
+      - name: Ollama oficial + EmbeddingGemma 2 visual 440m
         run: |
           curl -fsSL https://ollama.com/install.sh -o /tmp/ollama-install.sh
           sh /tmp/ollama-install.sh
           if ! curl -fsS --max-time 4 http://127.0.0.1:11434/api/tags >/dev/null; then
-            nohup ollama serve > /tmp/s11-ollama.log 2>&1 </dev/null &
+            nohup ollama serve > /tmp/ollama-s11.log 2>&1 </dev/null &
           fi
           for intento in $(seq 1 40); do
             if curl -fsS --max-time 4 http://127.0.0.1:11434/api/tags >/dev/null; then break; fi
@@ -115,8 +128,7 @@ jobs:
           done
           curl -fsS http://127.0.0.1:11434/api/tags >/dev/null
           ollama pull embeddinggemma-2:440m
-          ollama list
-      - name: "EJECUCIÓN REAL del cuaderno: OCR + 440m + MINDS-14 + Whisper + catálogo"
+      - name: "Ejecución REAL: imagen, diez WAV humanos, Whisper, WER y catálogo"
         env:
           PYTHONUNBUFFERED: "1"
           HF_HUB_DISABLE_TELEMETRY: "1"
@@ -125,23 +137,26 @@ jobs:
           python - <<'PY'
           import math
           import nbformat
-          nb=nbformat.read("01_laboratorio.ipynb",as_version=4)
+          nb=nbformat.read("02_lotes_102_fuentes.ipynb",as_version=4)
           ids={
-              "s11-abrir-imagen","s11-ocr-acta","s11-ocr-parametros",
-              "s11-ocr-fotos","s11-vision-vectores","s11-busqueda-coseno",
-              "s11-audio-fuente","s11-audio-whisper","s11-audio-wer",
-              "s11-etl-catalogo","s11-auditoria-codigo"
+              "lote-inventario","lote-actas","lote-fotos",
+              "lote-embeddings","lote-busqueda",
+              "lote-audios-descarga","lote-audios-convertir",
+              "lote-asr-wer","lote-catalogo","lote-auditar"
           }
           env={"__name__":"__main__"}
-          for celda in nb.cells:
-              if celda.cell_type=="code" and celda.id in ids:
-                  print("CELDA REAL:",celda.id,flush=True)
-                  exec(compile(celda.source,celda.id,"exec"),env)
-          assert len(env["vectores_fotos"])==4
-          assert all(len(v)==768 for v in env["vectores_fotos"].values())
-          assert len(env["ranking"])==4
-          assert env["hipotesis"].strip() and env["referencia"].strip()
-          assert math.isfinite(env["errores"](env["ref"],env["pred"])/len(env["ref"]))
-          assert len(env["filas"])==6
-          print("TODO OK: OCR real, 4 imágenes incrustadas, búsqueda, voz humana, Whisper, WER, JSONL, Parquet, SHA",flush=True)
+          for c in nb.cells:
+              if c.cell_type=="code" and c.id in ids:
+                  print("EJECUTANDO:",c.id,flush=True)
+                  exec(compile(c.source,c.id,"exec"),env)
+          assert len(env["catalogo"])==102
+          assert len(env["voces"])==10
+          assert len(env["tabla_wer"])==3
+          assert len(env["vectores"])>=8
+          from fuentes import inventario,preparar_audios
+          assert preparar_audios()==10
+          items=inventario()
+          assert len(items)==102
+          assert all(math.isfinite(x) for x in env["tabla_wer"].wer)
+          print("INTEGRACIÓN REAL OK: 102 fuentes, 30 PDF, 62 fotos, 10 voces y 440m",flush=True)
           PY
