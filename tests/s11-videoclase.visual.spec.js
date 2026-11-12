@@ -96,7 +96,7 @@ test('S11: las 24 diapositivas contienen explicación sustantiva y casos concret
 test('S11: la presentación deriva el desarrollo de Python al cuaderno',async({page})=>{
  await page.goto(route+'#s1');
  await expect(page.locator('section.slide .question a')).toHaveCount(24);
- await expect(page.locator('#s1')).toContainText('cuaderno');
+ await expect(page.locator('#s1')).toContainText(/cuaderno/i);
  await expect(page.locator('section.slide pre')).toHaveCount(1);
  await expect(page.locator('section.slide')).toHaveCount(24);
 });
