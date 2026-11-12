@@ -56,10 +56,18 @@ class RecursosS11(unittest.TestCase):
                 # Excluir enlaces de navegación generados por JavaScript.
                 self.assertTrue(destino.is_file(), f"Enlace roto en {pagina.name}: {href}")
 
+    def test_tutorial_interactivo(self):
+        ruta = ROOT / "assets/tutoriales/s11-ocr-asr-paso-a-paso.html"
+        texto = ruta.read_text(encoding="utf-8")
+        self.assertEqual(texto.count('id="paso'), 8)
+        self.assertIn('data-check="6"', texto)
+        self.assertIn('navigator.clipboard.writeText', texto)
+        self.assertIn('localStorage.setItem', texto)
+
     def test_dos_recursos_formativos_para_s11(self):
         home = HOME.read_text(encoding="utf-8")
         self.assertIn("s11-videoclase-ocr-asr-embeddings.html", home)
-        self.assertIn("GUIA_ESTUDIANTE.md", home)
+        self.assertIn("s11-ocr-asr-paso-a-paso.html", home)
         guia = (ROOT / "Laboratorios/S11_Codespaces/GUIA_ESTUDIANTE.md").read_text()
         for comando in ("python lab.py ocr", "python lab.py asr",
                         "python lab.py extraer", "python lab.py indexar",
