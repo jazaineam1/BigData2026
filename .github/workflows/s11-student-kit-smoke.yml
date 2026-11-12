@@ -29,7 +29,7 @@ jobs:
           visibles={x.name for x in Path(".").iterdir() if x.name!=".git"}
           esperados={".devcontainer",".gitignore","README.md","INSTALACION_UBUNTU.md",
                      "FUENTES.md","requirements.txt","01_laboratorio.ipynb",
-                     "datos","fuentes.py","visor_fuentes.py","test_visor.py","abrir_visor.sh",
+                     "datos","fuentes.py","visor_fuentes.py","ocr_documental.py","test_visor.py","abrir_visor.sh",
                      "iniciar_ollama.sh","preparar_embeddinggemma.sh"}
           assert visibles==esperados,visibles^esperados
           root=Path("datos/raw")
@@ -50,7 +50,7 @@ jobs:
       - name: Un cuaderno de dos fases, sintaxis y visor
         run: |
           bash -n abrir_visor.sh iniciar_ollama.sh preparar_embeddinggemma.sh
-          python -m py_compile fuentes.py visor_fuentes.py test_visor.py
+          python -m py_compile fuentes.py visor_fuentes.py ocr_documental.py test_visor.py
           python - <<'PY'
           import nbformat,streamlit as st
           from pathlib import Path
