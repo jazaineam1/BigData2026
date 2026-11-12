@@ -168,10 +168,13 @@ def ejecutar(sizes=TAMANOS, workers=2, repeticiones=3, rondas=20,
                 (xtr,xte),muestras_loc,seg_local=medir(
                     lambda:(v.transform(textos),v.transform(texto_test)),
                     repeticiones)
+                # Mantener el Future en este ámbito durante TODAS las
+                # repeticiones y transformaciones (evita lost dependencies).
+                vectorizador_remoto=client.scatter(v,broadcast=True)
                 (dxtr,dxte),muestras_dask,seg_dask=medir(
                     lambda:(
-                        tfidf_paralelo(client,v,textos),
-                        tfidf_paralelo(client,v,texto_test)
+                        tfidf_paralelo(client,vectorizador_remoto,textos),
+                        tfidf_paralelo(client,vectorizador_remoto,texto_test)
                     ),repeticiones)
                 assert xtr.shape==dxtr.shape and xte.shape==dxte.shape
                 dif1=xtr-dxtr
