@@ -26,15 +26,15 @@ class VisorFuentesTest(unittest.TestCase):
         foto = fotos[0]["original"]
         self.assertEqual(len(sha256(foto)), 64)
 
-    def test_10_voces_cuando_estan_preparadas(self):
+    def test_30_voces_cuando_estan_preparadas(self):
         from fuentes import AUDIO_MANIFEST
         if not AUDIO_MANIFEST.exists():
             self.skipTest("Audio de HF se descarga en integración; no requiere red en test local")
         data = json.loads(AUDIO_MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(len(data["audios"]), 10)
-        self.assertEqual(len({x["intencion"] for x in data["audios"]}), 10)
-        audios = [x for x in inventario() if x["grupo"] == "Voces MINDS-14 (10)"]
-        self.assertEqual(len(audios), 10)
+        self.assertEqual(len(data["audios"]), 30)
+        self.assertEqual(len({x["registro"] for x in data["audios"]}), 30)
+        audios = [x for x in inventario() if x["grupo"] == "Voces MINDS-14 (30)"]
+        self.assertEqual(len(audios), 30)
         for item in audios:
             self.assertTrue(item["original"].is_file())
 
