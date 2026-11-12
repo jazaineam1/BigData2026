@@ -39,7 +39,7 @@ Ollama se ejecuta como servicio local dentro del Codespace. El modelo multimodal
 bash preparar_embeddinggemma.sh
 ~~~
 
-El script comprueba Ollama, descarga el modelo y realiza una solicitud de prueba a la API para verificar un vector de 768 dimensiones. Comprueba también:
+El script comprueba Ollama, descarga el modelo y hace **dos pruebas reales**: una consulta de texto y una fotografía WebP. En ambas usa `input` como lista (`[entrada]`) y verifica un vector de 768 dimensiones. Comprueba también:
 
 ~~~bash
 ollama list
@@ -108,22 +108,17 @@ La escala y el contraste pueden mejorar o empeorar la lectura; una confianza alt
 
 ### Diagnosticar la llamada a EmbeddingGemma
 
-Para generar vectores de imágenes, la API recibe un objeto con bytes de imagen codificados en Base64. Es útil normalizar WebP/JPG a JPEG RGB **en memoria** y probar primero una sola imagen. Si Ollama rechaza una petición HTTP, debes mostrar `respuesta.status_code` y `respuesta.text` para conocer el mensaje concreto del servidor. **No cambies a un modelo solo textual para evitar el problema**.
+Para generar vectores de imágenes, la API recibe `input` **como lista**. Tu caso probado en Codespaces utiliza los **bytes originales** WebP en Base64 y `"input": [{"image": imagen64}]`. La conversión a JPEG RGB en memoria es opcional, no es necesaria para corregir ese error. Prueba siempre una imagen antes del lote. Si Ollama rechaza una petición HTTP, debes mostrar `respuesta.status_code` y `respuesta.text` para conocer el mensaje concreto del servidor. **No cambies a un modelo solo textual para evitar el problema**.
 
 ~~~python
-from PIL import Image, ImageOps
-from io import BytesIO
+from pathlib import Path
 import base64, requests
 
-with Image.open("datos/raw/fotos/eltiempo_023.webp") as f:
-    foto = ImageOps.exif_transpose(f).convert("RGB")
-    foto.thumbnail((768, 768))
-    tmp = BytesIO()
-    foto.save(tmp, format="JPEG", quality=85)
-imagen64 = base64.b64encode(tmp.getvalue()).decode("ascii")
+ruta = Path("datos/raw/fotos/eltiempo_023.webp")
+imagen64 = base64.b64encode(ruta.read_bytes()).decode("ascii")
 r = requests.post(
     "http://127.0.0.1:11434/api/embed",
-    json={"model": "embeddinggemma-2:440m", "input": {"image": imagen64}},
+    json={"model": "embeddinggemma-2:440m", "input": [{"image": imagen64}]},
     timeout=240,
 )
 if not r.ok:
@@ -131,7 +126,7 @@ if not r.ok:
 print("Dimensiones:", len(r.json()["embeddings"][0]))
 ~~~
 
-**Interpretación:** si obtienes 768 dimensiones puedes continuar; si aparece HTTP 400, la línea del error ahora incluye el motivo comunicado por Ollama. El archivo fuente no se altera durante la conversión.
+**Interpretación:** `input` contiene **una lista de entradas**, por eso `embeddings` devuelve una lista de vectores y tomamos `embeddings[0]`. Si obtienes 768 dimensiones puedes continuar; si aparece HTTP 400, la línea del error ahora incluye el motivo comunicado por Ollama. El archivo fuente no se altera durante la conversión.
 
 El archivo PDF original está en `datos/raw/actas_pdf/secop_acta_728704921.pdf`. En la primera página aparecen **ACTA DE INICIO, CONTRATO 006-2026, VALOR DEL CONTRATO, DURACIÓN y FORMA DE PAGO**. Debes comprobar cada respuesta del OCR contra los píxeles, especialmente cuando se mezclan columnas.
 
