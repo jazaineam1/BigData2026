@@ -4,6 +4,8 @@
 
 No instalar software en el computador personal. Al elegir el Codespace con ese perfil se instalan las dependencias. El perfil raíz del repositorio pertenece a **Airflow**: en `Code → Codespaces → ... → New with options` se debe escoger **S13**, no el perfil predeterminado.
 
+**Ruta principal del cuaderno:** los dos modos de Dask, MapReduce, TF-IDF, similitud coseno, Parquet y decisión estructurada. El bloque de **clasificación por UNSPSC y gráficos F1 es una ampliación opcional** y empieza desactivado (`EJECUTAR_AMPLIACION_S13 = False`); un Run All no entrena ese clasificador.
+
 ## Primeros pasos
 
 1. Desde la [portada del curso](../../index.html) abre la presentación de S13 y sigue el tutorial embebido.
