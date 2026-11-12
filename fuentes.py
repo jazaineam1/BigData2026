@@ -1,4 +1,4 @@
-"""Fuente de datos del visor S11: inventario y descarga verificada de diez voces."""
+"""Fuente de datos del visor S11: inventario y descarga verificada de treinta voces."""
 from __future__ import annotations
 import hashlib
 import io
