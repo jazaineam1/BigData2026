@@ -3,7 +3,7 @@ import unittest
 from analisis import (
     leer_corpus, leer_etiquetados, preparar_clasificacion,
     contraste_mapreduce, comparar_pandas_dask, entrenar_y_evaluar,
-    escribir_resultados, recuperacion_demostrativa, tarea_con_fallo,
+    escribir_resultados, recuperacion_demostrativa, tarea_con_fallo, experimentos_distribuidos,
 )
 
 class Sesion13Tests(unittest.TestCase):
@@ -36,6 +36,12 @@ class Sesion13Tests(unittest.TestCase):
         self.assertGreaterEqual(salida["f1_macro"], 0.0)
         self.assertLessEqual(salida["f1_macro"], 1.0)
         self.assertGreater(salida["entrenamiento"], salida["prueba"])
+
+    def test_experimentos_distribuidos(self):
+        resultado = experimentos_distribuidos(self.tabla, n_workers=2)
+        self.assertEqual(resultado["workers_en_un_codespace"], 2)
+        self.assertEqual(len(resultado["configuraciones"]), 3)
+        self.assertGreaterEqual(resultado["f1_prueba_final"], 0.0)
 
     def test_parquet_releible(self):
         salida = escribir_resultados(self.tabla)
