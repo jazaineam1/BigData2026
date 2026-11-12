@@ -36,7 +36,7 @@ def probar_entorno() -> None:
     # Este bloque comprueba procesos reales, no sólo un scheduler por hilos.
     # La protección __main__ es obligatoria al usar multiprocessing/spawn.
     with LocalCluster(n_workers=1, threads_per_worker=1, processes=True,
-                      dashboard_address=None, silence_logs="error") as cluster:
+                      dashboard_address=None) as cluster:
         with Client(cluster) as client:
             assert len(client.scheduler_info()["workers"]) == 1
             futuro = client.submit(sum, [10, 20, 30], pure=False)
