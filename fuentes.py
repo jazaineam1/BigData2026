@@ -54,7 +54,7 @@ def inventario():
         for row in info["audios"]:
             original = ROOT / row["pcm16"]
             if original.is_file() and original.resolve().is_relative_to(ROOT):
-                result.append(dict(grupo="Voces MINDS-14 (10)", nombre=original.name,
+                result.append(dict(grupo="Voces MINDS-14 (30)", nombre=original.name,
                                    original=original, preview=original, clase="audio",
                                    credito="PolyAI MINDS-14 es-ES; CC BY 4.0",
                                    url=URL, noticia=row["registro"],
@@ -63,7 +63,7 @@ def inventario():
 
 
 def preparar_audios():
-    """Verifica un Parquet con voces humanas reales y selecciona diez intenciones distintas."""
+    """Verifica un Parquet con voces humanas reales y selecciona treinta voces por rondas de intención."""
     from urllib.request import Request, urlopen
     import numpy as np
     import pandas as pd
@@ -90,18 +90,14 @@ def preparar_audios():
         raise ValueError("El SHA-256 del Parquet MINDS-14 no coincide con la fuente auditada")
 
     data = pd.read_parquet(PARQUET, columns=["audio", "path", "transcription", "intent_class"])
-    data = data.sort_values("path", kind="stable")
-    rows = []
-    seen = set()
-    for _, row in data.iterrows():
-        category = int(row["intent_class"])
-        if category not in seen:
-            rows.append(row)
-            seen.add(category)
-        if len(rows) == 10:
-            break
-    if len(rows) != 10:
-        raise ValueError("Se encontraron menos de 10 categorías distintas")
+    # Muestreo reproducible por rondas: cada intención aporta una voz
+    # antes de tomar la segunda de cualquiera de ellas.
+    data = data.sort_values("path", kind="stable").copy()
+    data["ronda"] = data.groupby("intent_class").cumcount()
+    escogidas = data.sort_values(["ronda", "intent_class", "path"], kind="stable").head(30)
+    rows = [fila for _, fila in escogidas.iterrows()]
+    if len(rows) != 30 or len({str(x["path"]) for x in rows}) != 30:
+        raise ValueError("No fue posible seleccionar 30 grabaciones distintas")
 
     original_dir = ROOT / "datos/raw/audios"
     processed_dir = ROOT / "datos/derived/audios"
