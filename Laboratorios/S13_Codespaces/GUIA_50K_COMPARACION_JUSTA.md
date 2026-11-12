@@ -4,6 +4,31 @@
 
 Este nuevo benchmark **reemplaza las comparaciones previas como evidencia de escalado**: antes cada tamaño tenía un conjunto de prueba diferente. No era válido afirmar que una subida de F1 se debía exclusivamente a más entrenamiento.
 
+## Resultados que YA se midieron (GitHub Actions, 12 de noviembre 2026)
+
+**Método:** test temporal de 10.000 IDs idénticos, entrenamientos anidados, mismo TfidfVectorizer, mismo LinearSVC e hiperparámetros. TF-IDF local y Dask se ejecutaron tres veces por tamaño, reportando mediana. Dos workers Dask dentro de un runner con cuatro CPU lógicas.
+
+| Train | TF-IDF local (s) | TF-IDF Dask (s) | F1 macro LinealSVC mismo test |
+|---:|---:|---:|---:|
+| 1.000 | 0,5773 | 0,4028 | 0,48914 |
+| 10.000 | 1,0469 | 0,6435 | 0,55635 |
+| 20.000 | 1,5667 | 0,9170 | 0,56585 |
+| 50.000 | 3,0996 | 1,7655 | 0,57385 |
+
+A 50.000, XGBoost sobre los mismos 32 ejes TF-IDF/SVD y los mismos parámetros tardó **0,4488 s local**, **0,9337 s Dask** en su entrenamiento. No mezclar estos tiempos con el tiempo de TF-IDF o LinearSVC. <https://github.com/jazaineam1/BigData2026/actions/runs/43167104999>
+
+**EmbeddingGemma 2:** se generaron los **1.000 embeddings reales**, no un piloto extrapolado. Mismo test 200, mismo train 800, mismo LinearSVC. TF-IDF obtuvo F1 macro **0,45134** y vectorizó en **0,111 s**; EmbeddingGemma 2 obtuvo F1 macro **0,47586** y generó vectores en **119,898 s**. Esta prueba es diferente de la comparación con test fijo de 10.000; no se deben cruzar sus F1. <https://github.com/jazaineam1/BigData2026/actions/runs/43167105003>
+
+**Validación cruzada idéntica:** tres folds y el mismo TF-IDF + LinearSVC:
+| Entrenamiento | Secuencial | joblib 2 procesos | Dask 2 workers |
+|---:|---:|---:|---:|
+| 1.000 | 0,2757 s | 0,8906 s | 0,4585 s |
+| 10.000 | 1,7595 s | 1,0624 s | 6,1408 s |
+| 20.000 | 3,2329 s | 2,2706 s | 13,7370 s |
+| 50.000 | 9,6596 s | 7,2979 s | 42,7739 s |
+
+Los folds produjeron las mismas puntuaciones con los tres motores. **Dask perdió en ese entorno**, lo cual descarta la idea de prometer mejoras automáticas. Un clúster físico, datos persistidos y cálculos más costosos podrían cambiar el resultado, pero eso requiere una prueba nueva, no una afirmación. <https://github.com/jazaineam1/BigData2026/actions/runs/43167597500>
+
 ## Protocolo reproducible
 
 - **Origen idéntico:** tres archivos `secop_chunk_*.csv` versionados en el repositorio, 300.000 registros crudos. Selección reproducible de 60.000 IDs únicos con UNSPSC válido, fecha, título/descripción suficientes; códigos numéricos se eliminan del texto. No descargar ni generar contratos artificiales.
