@@ -48,6 +48,7 @@ jobs:
           echo "En este job, ASR solo usa doble de prueba. El job siguiente realiza inferencia Whisper/Ollama real."
 
   real-inference-cpu:
+    if: github.event_name == 'workflow_dispatch'
     name: Inferencia REAL · Whisper tiny + EmbeddingGemma 2
     runs-on: ubuntu-latest
     timeout-minutes: 45
