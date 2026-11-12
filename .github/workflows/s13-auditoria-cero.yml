@@ -1,12 +1,8 @@
 name: S13 · Auditoria cero y sesgo SECOP
+# Heavy integration validation: explicit manual execution only.
 on:
-  pull_request:
-    paths:
-      - "Laboratorios/S13_Codespaces/auditar_ceros_secop.py"
-      - "Laboratorios/S13_Codespaces/modelo_distribuido_20k.py"
-      - "Laboratorios/S13_Codespaces/GUIA_MODELO_20K.md"
-      - ".github/workflows/s13-auditoria-cero.yml"
   workflow_dispatch:
+
 permissions:
   contents: read
 jobs:
