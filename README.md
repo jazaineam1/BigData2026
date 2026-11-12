@@ -81,7 +81,7 @@ Haz doble clic en `01_laboratorio.ipynb`. Lee el texto de una sección, **explic
 | Whisper | `WhisperModel("tiny", ...)` | Audio, segmentos, referencia y WER |
 | Catálogo ETL | Diccionarios, JSONL, Parquet y SHA-256 | Procedencia, integridad y lectura posterior |
 
-**Ollama está instalado en el Codespace correcto.** Para iniciar el servidor y descargar el modelo visual 440m, ejecuta **un único comando**:
+**Ollama forma parte del Codespace de práctica.** Para iniciar el servidor y descargar el modelo visual 440m, ejecuta **un único comando**:
 
 ~~~bash
 bash preparar_embeddinggemma.sh
@@ -138,7 +138,9 @@ Debes demostrar: un valor SECOP comparado con el PNG; OCR de un letrero; una con
 | Visor no aparece | `bash abrir_visor.sh`; estado de puerto 8501 y pestaña Ports |
 | PDF no se ve | Revisa soporte Streamlit PDF; también puede descargarse el original |
 | No hay audios | Pulsa preparar voces; revisa red, HF y SHA-256; no inventes sustitutos |
-| No se identifica el ejecutable Ollama | Comprueba Dockerfile y vuelve a crear el entorno del Codespace desde la configuración |\n| Ollama no responde | `bash iniciar_ollama.sh`; revisa `/tmp/s11-ollama.log` y `127.0.0.1:11434` |\n| Modelo 440m no aparece | `bash preparar_embeddinggemma.sh`, luego `ollama list` |
+| No se identifica el ejecutable Ollama | Comprueba Dockerfile y vuelve a crear el entorno del Codespace desde la configuración |
+| Ollama no responde | `bash iniciar_ollama.sh`; revisa `/tmp/s11-ollama.log` y `127.0.0.1:11434` |
+| Modelo 440m no aparece | `bash preparar_embeddinggemma.sh`, luego `ollama list` |
 | Error por memoria o lentitud | Reduce `N_VISION` o `N_ASR`, conserva la caché y reintenta |
 | `NameError` | Ejecuta las celdas anteriores en orden y verifica las variables |
 | OCR se ejecuta pero se equivoca | Compara píxeles/PSM; no transformes un error en un supuesto acierto |
