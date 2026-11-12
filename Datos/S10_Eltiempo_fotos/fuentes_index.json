@@ -1,0 +1,306 @@
+{
+  "descripcion": "Índice técnico de 30 pares; faltan créditos y URL por imagen",
+  "version": 1,
+  "pares": [
+    {
+      "id": "001",
+      "original": "raw/eltiempo_001.jpg",
+      "derivado_para_ocr": "derived/ocr/eltiempo_001_ocr.png",
+      "git_sha1_original": "84c65ccc3696cb636e92ce9870be67bdeee0d35b",
+      "git_sha1_derivado": "9a155412681c5fec22d8f6ec1ecc1b78b8f602a6",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "002",
+      "original": "raw/eltiempo_002.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_002_ocr.png",
+      "git_sha1_original": "1d0923de7a81572f7236fcd744c12e56f206a8bc",
+      "git_sha1_derivado": "b7d98af09136f0302304fcde3883bfacaf036288",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "003",
+      "original": "raw/eltiempo_003.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_003_ocr.png",
+      "git_sha1_original": "95ce6b12bc4412b8a403d5ce63ba2079ccfb6685",
+      "git_sha1_derivado": "ff301ee2492b16f22486a939b7959c2444ec3795",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "004",
+      "original": "raw/eltiempo_004.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_004_ocr.png",
+      "git_sha1_original": "5e571bee3db1eca9ff2a0340f1cd69c797e4242a",
+      "git_sha1_derivado": "fd36b923f31115a337bfa012d8effa3e1d312414",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "005",
+      "original": "raw/eltiempo_005.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_005_ocr.png",
+      "git_sha1_original": "b4ef589a2ece1438557717d80fa0fa335b64f8a8",
+      "git_sha1_derivado": "2d5f804d9f6b7c1adedac1641ce83ca7bb3366a9",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "006",
+      "original": "raw/eltiempo_006.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_006_ocr.png",
+      "git_sha1_original": "a6c950f2201713846684a69d77c8d5e92604d89e",
+      "git_sha1_derivado": "0434f630a1f5880d771aa8316ae4d55c609ed4aa",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "007",
+      "original": "raw/eltiempo_007.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_007_ocr.png",
+      "git_sha1_original": "1b0bc67505cd64d78d95f5c0bf8bbdc7f5f15fa1",
+      "git_sha1_derivado": "d09c5c23f8228919312159c969d96ec64c2a3fab",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "008",
+      "original": "raw/eltiempo_008.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_008_ocr.png",
+      "git_sha1_original": "764e13e506933e5650f7a7951d7038a707f26018",
+      "git_sha1_derivado": "34a77a81b25cef4ce4d9bcb32a212a43e5f71a57",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "009",
+      "original": "raw/eltiempo_009.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_009_ocr.png",
+      "git_sha1_original": "fd3f99f02a5648cd8b5458e9e27a3ef73f4c980d",
+      "git_sha1_derivado": "b27bac6278d94177f79711ca52f97d924350180a",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "010",
+      "original": "raw/eltiempo_010.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_010_ocr.png",
+      "git_sha1_original": "5230699f5eb60875731ab0808470754c407b7b46",
+      "git_sha1_derivado": "0b60653cffb443aa88513766fbec25109031c124",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "011",
+      "original": "raw/eltiempo_011.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_011_ocr.png",
+      "git_sha1_original": "65afa788f886ae57f4c0397ec5712e88e8f4d226",
+      "git_sha1_derivado": "f4e448d50615b0335a78b4649d0b764b56fecbd0",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "012",
+      "original": "raw/eltiempo_012.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_012_ocr.png",
+      "git_sha1_original": "aa569b7941772a1c0f32114a3990a04ca298de12",
+      "git_sha1_derivado": "deae1806f9aff71fcaa2558d27dce95deccd0985",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "013",
+      "original": "raw/eltiempo_013.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_013_ocr.png",
+      "git_sha1_original": "6dfdfcad6245466df422529cd73fedaaec16383f",
+      "git_sha1_derivado": "92ae6f78946e68017a3da4ce73362df8963298c7",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "014",
+      "original": "raw/eltiempo_014.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_014_ocr.png",
+      "git_sha1_original": "d34f6002bfac031a0e0bfe3e7b043d3fc70e1651",
+      "git_sha1_derivado": "3758330a7dc86278f592a3d3db137a16e0cacb9c",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "015",
+      "original": "raw/eltiempo_015.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_015_ocr.png",
+      "git_sha1_original": "dc5dac3106c5588566c7b5afb96fd49986284550",
+      "git_sha1_derivado": "7fc4749e87a62ab27b0967d804aca9b3a94f403d",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "016",
+      "original": "raw/eltiempo_016.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_016_ocr.png",
+      "git_sha1_original": "f10c2e156bf2e90e11a4d193c55b6b3b9c08cdf9",
+      "git_sha1_derivado": "38a9b66276d1a66f2c39a3371a04a7f0ee771953",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "017",
+      "original": "raw/eltiempo_017.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_017_ocr.png",
+      "git_sha1_original": "8917bc697ddef6a81e957dc7d478269ac4606049",
+      "git_sha1_derivado": "d51000bc50cc421f28d347525badf1822488e3b3",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "018",
+      "original": "raw/eltiempo_018.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_018_ocr.png",
+      "git_sha1_original": "8f053d70e0f1692f853e3bec9f3f201e08da90b6",
+      "git_sha1_derivado": "fcb530c27b02036ceb83f7c7fae2543116deef68",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "019",
+      "original": "raw/eltiempo_019.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_019_ocr.png",
+      "git_sha1_original": "883975a3f2fbff111422671ce737c142d330fbef",
+      "git_sha1_derivado": "10e30b7672de036293abac0875d7e4428d9c3db4",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "020",
+      "original": "raw/eltiempo_020.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_020_ocr.png",
+      "git_sha1_original": "8d5861439c495a1880721c0a51701fb00c7b8dd8",
+      "git_sha1_derivado": "10dee14beceb90dca8ff085d0b36d6a81c48b76f",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "021",
+      "original": "raw/eltiempo_021.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_021_ocr.png",
+      "git_sha1_original": "bfce43fd2bc80a93df1b6a85a308b5f624acce1e",
+      "git_sha1_derivado": "378c3066b2db47d307bb25ba055716eadf0cf57f",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "022",
+      "original": "raw/eltiempo_022.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_022_ocr.png",
+      "git_sha1_original": "88166bde3be5f00d7aa79609cfe78321a1d4e2b8",
+      "git_sha1_derivado": "19d630aac1bddfdfa88549b8b8293d909e9aafea",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "023",
+      "original": "raw/eltiempo_023.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_023_ocr.png",
+      "git_sha1_original": "2e0efaef1bcc0252a66143cef9867eeb880f632d",
+      "git_sha1_derivado": "3eb24fdb09be22b318dfd7c51570f83f98344d90",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "024",
+      "original": "raw/eltiempo_024.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_024_ocr.png",
+      "git_sha1_original": "6fed0ad12526dc41fb68dcc78f67fade71d710f3",
+      "git_sha1_derivado": "8b1c96d84ca6c6e316bff0d9319d199b2a951bd6",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "025",
+      "original": "raw/eltiempo_025.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_025_ocr.png",
+      "git_sha1_original": "ae333d2a4875ff52dd7cbc43b381ca1a9755186e",
+      "git_sha1_derivado": "be140b4f434d07b1d6b23f8e461cbfced32c499c",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "026",
+      "original": "raw/eltiempo_026.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_026_ocr.png",
+      "git_sha1_original": "777c330838d41377620fb34e875dd33cccd2635e",
+      "git_sha1_derivado": "f59631f389f01a9d856eee0edfddb2965cdd6c7e",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "027",
+      "original": "raw/eltiempo_027.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_027_ocr.png",
+      "git_sha1_original": "bb5c530d47d1ae251bac893865e67cb149c01a88",
+      "git_sha1_derivado": "e480a91257273e5521e757b4b0a4741dc4892b4b",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "028",
+      "original": "raw/eltiempo_028.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_028_ocr.png",
+      "git_sha1_original": "befe6a6b97da64df5295f2a650550614f2ce9faa",
+      "git_sha1_derivado": "54729864d05e4e2d4ce34d98313742692649c1b7",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "029",
+      "original": "raw/eltiempo_029.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_029_ocr.png",
+      "git_sha1_original": "c602cf285f59733895dca376379dadf8223f4307",
+      "git_sha1_derivado": "f374b52401bf1358656ed8fe748f2aecc325a396",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    },
+    {
+      "id": "030",
+      "original": "raw/eltiempo_030.webp",
+      "derivado_para_ocr": "derived/ocr/eltiempo_030_ocr.png",
+      "git_sha1_original": "9b199ada9f4e7bc5b39c5c494f25de6807441e87",
+      "git_sha1_derivado": "6081d39b0d4b6167b61aa366c3c7c47b6bd18356",
+      "fuente_url": null,
+      "credito": null,
+      "noticia_id": null
+    }
+  ]
+}
