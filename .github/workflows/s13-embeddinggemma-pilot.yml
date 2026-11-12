@@ -1,10 +1,6 @@
 name: S13 EmbeddingGemma2 270m pilot same backend local vs Dask
+# Cost policy: heavy benchmark only by explicit manual dispatch.
 on:
-  pull_request:
-    paths:
-      - "Laboratorios/S13_Codespaces/benchmark_embeddinggemma_paridad.py"
-      - "Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py"
-      - ".github/workflows/s13-embeddinggemma-pilot.yml"
   workflow_dispatch:
 permissions:
   contents: read
