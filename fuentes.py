@@ -151,3 +151,107 @@ def preparar_audios():
         "source_url": URL, "sha256_parquet": SHA_PARQUET, "audios": records
     }, indent=2, ensure_ascii=False), encoding="utf-8")
     return len(records)
+
+
+# Búsqueda visual docente opcional: no indexa nada al abrir Streamlit.
+# La operación pesada solo se ejecuta después de pulsar el botón.
+MODELO_VISUAL = "embeddinggemma-2:440m"
+API_OLLAMA = "http://127.0.0.1:11434/api/embed"
+CACHE_VISUAL = ROOT / "outputs/visor_vectores_440m.json"
+
+def _embed(entrada):
+    """API de Ollama con input=[entrada], compatible con imagen y texto."""
+    import requests
+    respuesta = requests.post(
+        API_OLLAMA, json={"model": MODELO_VISUAL, "input": [entrada]},
+        timeout=240
+    )
+    if not respuesta.ok:
+        raise RuntimeError(
+            f"Ollama HTTP {respuesta.status_code}: {respuesta.text[:1200]}")
+    vectores = respuesta.json().get("embeddings", [])
+    if len(vectores) != 1 or len(vectores[0]) != 768:
+        raise RuntimeError("Respuesta de embedding: se esperaban 768 dimensiones")
+    return vectores[0]
+
+
+def _cargar_cache_visual():
+    if not CACHE_VISUAL.exists():
+        return {}
+    import json
+    try:
+        data = json.loads(CACHE_VISUAL.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (ValueError, OSError):
+        raise RuntimeError("Caché visual ilegible: revisa outputs/visor_vectores_440m.json")
+
+
+def _guardar_cache_visual(data):
+    """Guardado atómico; evita un JSON incompleto si se interrumpe la inferencia."""
+    import os
+    CACHE_VISUAL.parent.mkdir(parents=True, exist_ok=True)
+    temporal = CACHE_VISUAL.with_suffix(".part")
+    temporal.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    os.replace(temporal, CACHE_VISUAL)
+
+
+def construir_indice_visual(fotos, limite=8):
+    """Indexa solo las N fotos solicitadas, con caché por hash y modelo."""
+    import base64
+    if limite not in (1, 4, 8, 62):
+        raise ValueError("Solo 1, 4, 8 o 62 fotos por ejecución explícita")
+    seleccion = list(fotos)[:limite]
+    if not seleccion:
+        raise ValueError("No hay fotografías para indexar")
+    cache = _cargar_cache_visual()
+    calculadas = 0
+    for ruta in seleccion:
+        ruta = Path(ruta)
+        if not ruta.is_file() or not ruta.resolve().is_relative_to(ROOT):
+            raise ValueError("La foto debe existir dentro del corpus de S11")
+        relative = str(ruta.relative_to(ROOT))
+        firma = f"{MODELO_VISUAL}|RAW|{sha256(ruta)}"
+        existente = cache.get(relative)
+        if isinstance(existente, dict) and existente.get("firma") == firma:
+            if len(existente.get("vector", [])) == 768:
+                continue
+        base64_imagen = base64.b64encode(ruta.read_bytes()).decode("ascii")
+        vector = _embed({"image": base64_imagen})
+        cache[relative] = {"firma": firma, "vector": vector}
+        _guardar_cache_visual(cache)
+        calculadas += 1
+    return {"seleccionadas": len(seleccion), "calculadas": calculadas,
+            "reutilizadas": len(seleccion)-calculadas}
+
+
+def buscar_indice_visual(pregunta, fotos, limite=8, top_k=6):
+    """Ordena solo fotos del lote vigente, sin mezclar cachés de otras fuentes."""
+    import math
+    if not pregunta.strip() or len(pregunta) > 300:
+        raise ValueError("Escribe una consulta concreta de hasta 300 caracteres")
+    cache = _cargar_cache_visual()
+    seleccion = list(fotos)[:limite]
+    if not seleccion:
+        return []
+    consulta = _embed("task: search result | query: " + pregunta.strip())
+    resultados = []
+    norma_consulta = math.sqrt(sum(v*v for v in consulta))
+    if norma_consulta == 0:
+        raise ValueError("Consulta produjo un vector sin norma")
+    for ruta in seleccion:
+        ruta = Path(ruta)
+        clave = str(ruta.relative_to(ROOT))
+        firma = f"{MODELO_VISUAL}|RAW|{sha256(ruta)}"
+        fila = cache.get(clave)
+        if not isinstance(fila, dict) or fila.get("firma") != firma:
+            continue
+        vec = fila.get("vector", [])
+        if len(vec) != 768:
+            continue
+        norma = math.sqrt(sum(x*x for x in vec))
+        if norma <= 0:
+            continue
+        similitud = sum(x*y for x, y in zip(consulta, vec))/(norma_consulta*norma)
+        resultados.append({"archivo": clave, "similitud": round(similitud, 4),
+                           "ruta": ruta})
+    return sorted(resultados, key=lambda x: x["similitud"], reverse=True)[:top_k]
