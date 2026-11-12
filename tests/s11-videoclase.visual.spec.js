@@ -1,54 +1,80 @@
 const {test,expect}=require('@playwright/test');
 const route='/Presentaciones/s11-videoclase-ocr-asr-embeddings.html';
-
-test('S11 vigente: 24 módulos accesibles y navegación estable',async({page})=>{
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(route+'#s1');
-  await expect(page.locator('section.slide')).toHaveCount(24);
-  await expect(page.locator('section.slide.active')).toHaveCount(1);
-  await expect(page.locator('#count')).toContainText('1 / 24');
-  await page.locator('#next').click();
-  await expect(page.locator('#count')).toContainText('2 / 24');
-  await page.goto(route+'#s24');
-  await expect(page.locator('#s24')).toBeVisible();
-  await expect(page.locator('#next')).toBeDisabled();
-  expect(errors).toEqual([]);
+test('S11: navegación e índice de 24 pantallas',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(route+'#s1');
+ await expect(page.locator('section.slide')).toHaveCount(24);
+ await expect(page.locator('section.slide.active')).toHaveCount(1);
+ await expect(page.locator('#count')).toHaveText('1 / 24');
+ await expect(page.locator('#prev')).toBeDisabled();
+ await page.locator('#next').click();
+ await expect(page.locator('#count')).toHaveText('2 / 24');
+ await page.locator('#index').click();
+ await expect(page.locator('#outline')).toBeVisible();
+ await expect(page.locator('#links button')).toHaveCount(24);
+ await page.locator('#links button').last().click();
+ await expect(page.locator('#s24')).toBeVisible();
+ await expect(page.locator('#next')).toBeDisabled();
+ await expect(page.locator('#s24 .question a')).toHaveAttribute('href',/01_laboratorio\.ipynb/);
+ expect(errors).toEqual([]);
 });
 
-test('S11 lectura íntegra: elimina límites y desplazamientos internos',async({page})=>{
+for(const size of [{width:1366,height:768},{width:1280,height:720},{width:1920,height:1080},{width:390,height:844}]){
+ test('S11: 24 diapositivas completas sin scroll ni recortes '+size.width+'x'+size.height,async({page})=>{
+  await page.setViewportSize(size);
   await page.goto(route+'#s1');
-  const toggle=page.locator('#s11ReadingToggle');
-  await expect(page.locator('body')).toHaveClass(/reading-mode/);
-  const module=page.locator('#s1 .lesson-module').first();
-  expect(await module.evaluate(el=>getComputedStyle(el).maxHeight)).toBe('none');
-  expect(await module.evaluate(el=>getComputedStyle(el).overflowY)).toBe('visible');
-  await toggle.click();
-  await expect(page.locator('body')).not.toHaveClass(/reading-mode/);
-  await expect(toggle).toHaveAttribute('aria-pressed','false');
-  await toggle.click();
-  await expect(page.locator('body')).toHaveClass(/reading-mode/);
-});
-
-test('S11 autoevaluación: retroalimentación específica y no nota oficial',async({page})=>{
-  await page.goto(route+'#s1');
-  await page.locator('#s11QuizOpen').click();
-  await expect(page.locator('#s11QuizDialog')).toBeVisible();
-  await page.locator('#s11Q1').selectOption('ocr');
-  await page.locator('#s11Q2').selectOption('rank');
-  await page.locator('#s11Q3').selectOption('bytes');
-  await page.locator('#s11QuizCheck').click();
-  await expect(page.locator('#s11QuizFeedback')).toContainText('3 de 3 correctas');
-  await expect(page.locator('#s11QuizFeedback')).toContainText('SHА-256'.replace('А','A'));
-  await page.locator('#s11QuizClose').click();
-  await expect(page.locator('#s11QuizDialog')).not.toBeVisible();
-});
-
-for(const width of [390,768,1366]){
-  test('S11 presentación vigente, adaptación '+width,async({page})=>{
-    await page.setViewportSize({width,height:800});
-    await page.goto(route+'#s14');
-    await expect(page.locator('#s14')).toBeVisible();
-    const result=await page.evaluate(()=>({body:document.documentElement.scrollWidth,screen:window.innerWidth}));
-    expect(result.body).toBeLessThanOrEqual(result.screen+2);
-  });
+  const failures=[];
+  for(let i=1;i<=24;i++){
+    const metrics=await page.evaluate(n=>{
+      const slide=document.getElementById('s'+n), main=document.querySelector('main');
+      const sr=slide.getBoundingClientRect(),mr=main.getBoundingClientRect();
+      const affected=[slide,...slide.querySelectorAll('.card,.visual,.question')].filter(el=>getComputedStyle(el).display!=='none');
+      const overflows=affected.filter(el=>el.scrollHeight>el.clientHeight+2 || el.scrollWidth>el.clientWidth+2)
+        .map(el=>({part:el.className,scrollH:el.scrollHeight,clientH:el.clientHeight,scrollW:el.scrollWidth,clientW:el.clientWidth}));
+      const rect=el=>{let r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right}};
+      return {active:slide.classList.contains('active'),slide:rect(slide),main:rect(main),
+        overflows,docH:document.documentElement.scrollHeight,docW:document.documentElement.scrollWidth,
+        viewportW:innerWidth,viewportH:innerHeight,
+        cards:slide.querySelectorAll('.card').length,
+        footer:rect(document.querySelector('footer')),header:rect(document.querySelector('header'))};
+    },i);
+    const fits=metrics.active && metrics.cards===3 &&
+      metrics.docH<=size.height+1 && metrics.docW<=size.width+1 &&
+      metrics.overflows.length===0 &&
+      metrics.slide.top>=metrics.main.top-2 &&
+      metrics.slide.bottom<=metrics.main.bottom+2 &&
+      metrics.header.bottom<=metrics.slide.top &&
+      metrics.slide.bottom<=metrics.footer.top;
+    if(!fits)failures.push({slide:i,metrics});
+    if(i<24)await page.locator('#next').click();
+  }
+  expect(failures).toEqual([]);
+ });
 }
+
+test('S11: experimentos de selección, PSM, coseno, WER y lote',async({page})=>{
+ await page.goto(route+'#s5');
+ await page.locator('#method').selectOption('vision');
+ await expect(page.locator('#methodOut')).toContainText('EmbeddingGemma');
+ await page.goto(route+'#s8');
+ await page.locator('#psmMode').selectOption('6');
+ await expect(page.locator('#psmOut')).toContainText('bloque');
+ await page.goto(route+'#s16');
+ await page.locator('#cosine').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}))});
+ await expect(page.locator('#cosineOut')).toContainText('1.000');
+ await page.goto(route+'#s20');
+ await expect(page.locator('#werOut')).toContainText('33.3%');
+ await page.locator('#werHyp').fill('valor del contrato');
+ await expect(page.locator('#werOut')).toContainText('0.0%');
+ await page.goto(route+'#s23');
+ await page.locator('#nImages').selectOption('62');
+ await expect(page.locator('#nOut')).toContainText('NO una estimación');
+});
+
+test('S11: la presentación deriva el desarrollo de Python al cuaderno',async({page})=>{
+ await page.goto(route+'#s1');
+ await expect(page.locator('section.slide .question a')).toHaveCount(24);
+ await expect(page.locator('#s1')).toContainText('cuaderno');
+ await expect(page.locator('section.slide pre')).toHaveCount(1);
+ await expect(page.locator('section.slide')).toHaveCount(24);
+});
