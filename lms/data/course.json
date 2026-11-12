@@ -114,15 +114,15 @@
     },
     {
       "n": 11,
-      "title": "¿Cómo convertir un lote de imágenes y audios en evidencia recuperable?",
+      "title": "De fuentes multimedia a evidencia consultable: OCR, búsqueda visual, voz y ETL",
       "status": "visible",
       "starts_at": "2026-11-05T18:00:00-05:00",
       "class_date": "2026-11-05",
       "class_kind": "learning",
       "tracked": true,
       "entry": {
-        "url": "/BigData2026/Presentaciones/s11-etl-audio-imagenes.html#s1",
-        "label": "Abrir laboratorio integral S11"
+        "url": "/BigData2026/Presentaciones/s11-videoclase-ocr-asr-embeddings.html#s1",
+        "label": "Abrir presentación integral S11"
       }
     },
     {

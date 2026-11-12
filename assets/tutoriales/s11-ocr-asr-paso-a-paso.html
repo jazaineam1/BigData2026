@@ -1,51 +1,9 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>S11 · Guía de Python desde cero</title><style>
-*{box-sizing:border-box}body{font:17px/1.65 system-ui,-apple-system,Segoe UI,sans-serif;color:#182c3c;background:#f6f9fb;margin:0}header{background:linear-gradient(110deg,#0c2b40,#16607e);color:white;padding:55px 22px}header .shell{max-width:1000px;margin:auto}h1{font-size:clamp(2.1rem,5vw,4rem);line-height:1.14;letter-spacing:-.04em;max-width:800px;margin:10px 0}.sub{font-size:1.24rem;color:#d0ebf3;max-width:750px}h2{font-size:1.45rem;line-height:1.3;margin:0}main{max-width:1000px;margin:auto;padding:25px 20px 80px}nav{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px}nav a,.actions a{display:inline-flex;padding:9px 15px;background:#d8f5ee;border-radius:9px;color:#0c4c52;text-decoration:none;font-weight:750}nav a{background:#e8f2f6}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:23px}.actions a{background:#bcf4ea}.card{display:grid;grid-template-columns:55px 1fr;gap:14px;padding:24px;margin:18px 0;background:white;border:1px solid #d6e2ea;border-radius:16px;box-shadow:0 10px 24px #123b5010;scroll-margin-top:15px}.num{font-size:1.2rem;font-weight:900;color:#0a6b80}.card p{margin:10px 0;color:#466173}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0c2737;color:#ddf2f4;border-radius:12px;padding:17px 20px;font-size:.88rem;line-height:1.6}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.command{position:relative}.command button{position:absolute;top:8px;right:8px;border:1px solid #7bc0c9;border-radius:8px;color:white;background:#25566c;padding:5px 9px;cursor:pointer}.note{background:#e7f6f3;border-left:5px solid #178477;padding:18px 20px;margin:18px 0}.warn{background:#fff6e9;border-left-color:#c67c28}a{color:#0a6a86}footer{margin-top:30px;color:#586f7a;font-size:.9rem}@media(max-width:550px){.card{grid-template-columns:1fr}.num{font-size:.85rem}pre{font-size:.77rem}}
-</style></head><body><header><div class="shell"><strong>Universidad Central · Big Data · S11</strong><h1>Aprende a investigar con Python: OCR, visión y voz</h1><p class="sub">Abre fuentes reales. Escribe el código paso a paso. Cambia los parámetros, descubre errores y recupera la evidencia.</p><div class="actions"><a href="https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/01_laboratorio.ipynb" target="_blank" rel="noopener">Abrir cuaderno único</a><a href="https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes" target="_blank" rel="noopener">Abrir rama de Codespaces</a><a href="https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/README.md" target="_blank" rel="noopener">Instrucciones completas para replicar</a></div></div></header><main><div class="note"><strong>El propósito no es ejecutar lab.py.</strong> La ruta activa es un solo cuaderno: 01_laboratorio.ipynb. FASE 1: fundamentos con código; FASE 2: bucles para 122 fuentes (62 fotos, 30 actas y 30 voces). El visor privado abre cada PDF, PNG, foto y WAV. Debes escribir, modificar y justificar, no limitarte a ejecutar un programa ajeno.</div><nav aria-label="Pasos"><a href="#paso01">01</a><a href="#paso02">02</a><a href="#paso03">03</a><a href="#paso04">04</a><a href="#paso05">05</a><a href="#paso06">06</a><a href="#paso07">07</a><a href="#paso08">08</a></nav><section class="card" id="paso01"><div class="num">01</div><div><h2>Entra al Codespace correcto</h2><p>Selecciona s11-estudiantes antes de pulsar Code → Codespaces. Abre 01_laboratorio.ipynb, selecciona el kernel Python 3. Se muestran 62 fotografías, 30 PDF con sus primeras páginas PNG y treinta voces reales al prepararlas. El único archivo de trabajo es 01_laboratorio.ipynb. El visor se inicia automáticamente en el puerto privado 8501. El repositorio main continúa siendo público.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>python --version
-tesseract --list-langs</code></pre></div></div></section>
-<section class="card" id="paso02"><div class="num">02</div><div><h2>Aprende a abrir fotografías</h2><p>Escribe Path e Image.open. Observa tamaño y formato y muestra una foto real. Cambia el nombre del archivo para demostrar que el procedimiento sirve para otra fuente.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>from pathlib import Path
-from PIL import Image
-ruta = Path("datos/raw/fotos/eltiempo_006.webp")
-imagen = Image.open(ruta)
-print(imagen.size)</code></pre></div></div></section>
-<section class="card" id="paso03"><div class="num">03</div><div><h2>Crea OCR sobre un acta SECOP</h2><p>Abre el PDF secop_acta_728704921.pdf y su primera página PNG. Es un acta de inicio, contrato 006-2026: busca el valor $14.760.000, seis meses y seis pagos de $2.460.000. Primero ejecuta OCR completo, después compara las etiquetas con la imagen. Evita publicar identificaciones personales.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>from PIL import Image
-import pytesseract
-pagina = Image.open("datos/raw/actas/secop_acta_728704921_pagina1.png")
-texto = pytesseract.image_to_string(pagina, lang="spa", config="--psm 3")
-print(texto)</code></pre></div></div></section>
-<section class="card" id="paso04"><div class="num">04</div><div><h2>Detecta cuándo OCR no es adecuado</h2><p>PSM significa modo de segmentación: 3 detecta el diseño de página, 6 supone un bloque y 11 busca palabras dispersas. Compara los tres en el mismo PDF, y luego haz OCR a una foto con letreros. Una imagen sin texto requiere análisis visual, no OCR.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>for psm in [3, 6, 11]:
-    print(psm, pytesseract.image_to_string(
-        pagina, lang="spa", config=f"--psm {psm}"
-    )[:100])</code></pre></div></div></section>
-<section class="card" id="paso05"><div class="num">05</div><div><h2>Busca imágenes por significado</h2><p>El Codespace nuevo ya trae Ollama instalado y arrancado sin systemd. Ejecuta bash preparar_embeddinggemma.sh para descargar el modelo embeddinggemma-2:440m y comprobar 768 dimensiones. Si el comando ollama no existe, sincroniza s11-estudiantes y reconstruye el contenedor. Construye la llamada HTTP a /api/embed usando Base64: la petición debe llevar input como una LISTA (input=[entrada]), incluso para una sola imagen. Recupera embeddings[0], compara los vectores con coseno y cambia la pregunta.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>ollama --version
-bash preparar_embeddinggemma.sh
-curl http://127.0.0.1:11434/api/tags</code></pre></div>
-<p><strong>Ahora escribe tú la petición en Python:</strong> conserva los bytes originales de la fotografía, codifícalos con Base64 y envía un objeto dentro de <code>input</code> como lista. Cambia el nombre de archivo y repite.</p>
-<div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar ejemplo Python">Copiar</button><pre><code>import requests, base64
-from pathlib import Path
-ruta = Path("datos/raw/fotos/eltiempo_023.webp")  # EDITA AQUÍ
-imagen64 = base64.b64encode(ruta.read_bytes()).decode("ascii")
-respuesta = requests.post(
-    "http://127.0.0.1:11434/api/embed",
-    json={"model": "embeddinggemma-2:440m",
-          "input": [{"image": imagen64}]},
-    timeout=240
-)
-if not respuesta.ok:
-    raise RuntimeError(f"HTTP {respuesta.status_code}: {respuesta.text}")
-vector = respuesta.json()["embeddings"][0]
-print("Dimensiones:", len(vector))  # Esperado: 768</code></pre></div>
-<p><strong>Explica el experimento:</strong> Base64 representa los bytes en texto; los corchetes indican que <code>input</code> recibe una lista; <code>embeddings[0]</code> recupera el primer vector. La similitud coseno mide cercanía entre vectores, no demuestra que una noticia sea cierta.</p>
-</div></section>
-<section class="card" id="paso06"><div class="num">06</div><div><h2>Escucha y transcribe voz humana</h2><p>Descarga con control SHA el Parquet real PolyAI MINDS-14 es-ES, CC BY 4.0. Escucha una voz y escribe la transcripción con Whisper tiny. Contrasta contra la referencia del corpus.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>from faster_whisper import WhisperModel
-modelo = WhisperModel("tiny", device="cpu", compute_type="int8")
-segmentos, info = modelo.transcribe(str(wav), language="es")</code></pre></div></div></section>
-<section class="card" id="paso07"><div class="num">07</div><div><h2>Construye el catálogo ETL</h2><p>Escribe bucles y diccionarios de Python. Guarda un JSONL por líneas y un Parquet por columnas, siempre con el origen y SHA-256. No mezcles las actas, las fotografías y los audios como si fueran un único evento.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>registro = {
-    "archivo": str(ruta),
-    "modalidad": "fotografia",
-    "sha256": sha256(ruta)
-}</code></pre></div></div></section>
-<section class="card" id="paso08"><div class="num">08</div><div><h2>Demuestra que aprendiste</h2><p><strong>En el mismo cuaderno</strong>, baja a FASE 2. Cambia N_ACTAS=5 → 30, N_FOTOS=8 → 62, N_VISION=8 → 62 o N_ASR=3 → 30. Registra qué cambió, cuánto tardó, cuál fue el resultado, cómo lo verificaste y qué limitación descubriste. El visor permite abrir cualquier fuente.</p></div></section>
-<div class="note warn"><strong>Protección de fuentes:</strong> los documentos SECOP pueden contener datos personales, las fotografías de El Tiempo conservan derechos de sus autores y las voces MINDS-14 son un corpus bancario independiente con licencia CC BY 4.0. Nunca inventes relaciones entre fuentes.</div>
-<div class="actions"><a href="https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/INSTALACION_UBUNTU.md" target="_blank" rel="noopener">Aprender a instalar cada herramienta</a><a href="../../Presentaciones/s11-videoclase-ocr-asr-embeddings.html#s1">Presentación de la clase</a><a href="https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/01_laboratorio.ipynb" target="_blank" rel="noopener">Empezar práctica</a></div><footer>Material complementario de aprendizaje de S11. El video del docente no se encuentra en este repositorio.</footer></main><script>
-function copyCode(btn){const txt=btn.parentElement.querySelector("pre").innerText;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>{btn.textContent="Copiado";setTimeout(()=>btn.textContent="Copiar",1500)},()=>{btn.textContent="Selecciona el texto"})}else{btn.textContent="Selecciona el texto"}}
-</script></body></html>
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="0;url=../../Presentaciones/s11-videoclase-ocr-asr-embeddings.html#s1">
+<title>S11 · Guía integrada en la presentación</title></head>
+<body><h1>La guía S11 está dentro de la presentación integral.</h1>
+<p>La sesión usa una sola presentación y un solo cuaderno. El visor vive en Codespaces.</p>
+<p><a href="../../Presentaciones/s11-videoclase-ocr-asr-embeddings.html#s1">Abrir la presentación de S11</a></p>
+<script>location.replace('../../Presentaciones/s11-videoclase-ocr-asr-embeddings.html#s1')</script>
+</body></html>

@@ -1,4 +1,4 @@
-"""QA de la ruta ACTIVA S11: 24 diapositivas, guía y rama de aprendizaje."""
+"""QA ligero de la S11: presentación integral, entrada al LMS y cuaderno único."""
 from __future__ import annotations
 import unittest
 from html.parser import HTMLParser
@@ -32,8 +32,8 @@ class RecursosS11(unittest.TestCase):
         html = SLIDES.read_text(encoding="utf-8")
         p = Links()
         p.feed(html)
-        self.assertEqual(p.slides, 24)
-        self.assertTrue(all(f"s{i}" in p.ids for i in range(1, 25)))
+        self.assertEqual(p.slides, 63)
+        self.assertTrue(all(f"s{i}" in p.ids for i in range(1, 64)))
         self.assertTrue({"next", "prev"} <= p.buttons)
         self.assertIn('addEventListener("keydown"', html)
         self.assertIn("s11-estudiantes/01_laboratorio.ipynb", html)
@@ -43,21 +43,30 @@ class RecursosS11(unittest.TestCase):
         self.assertIn("HTTP 400", html)
         self.assertIn('"input":[{"image":b64}]', html)
         self.assertIn("PSM 7", html)
+        self.assertIn('id="toolQuestion"', html)
+        self.assertIn('id="werReference"', html)
+        self.assertIn('id="cosB"', html)
+        self.assertIn('id="timeMeasured"', html)
+        self.assertIn("JSONL", html)
+        self.assertIn("Parquet", html)
+        self.assertIn("122 fuentes", html)
         self.assertNotIn("python lab.py preparar", html)
 
-    def test_tutorial_ocho_pasos(self):
+    def test_tutorial_antiguo_redirige_a_presentacion_unica(self):
         html = TUTORIAL.read_text(encoding="utf-8")
-        for n in range(1, 9):
-            self.assertIn(f'id="paso{n:02d}"', html)
-        self.assertIn("01_laboratorio.ipynb", html)
-        self.assertIn("navigator.clipboard.writeText", html)
-        self.assertNotIn("python lab.py preparar", html)
+        self.assertIn("s11-videoclase-ocr-asr-embeddings.html#s1", html)
+        self.assertIn("http-equiv=\"refresh\"", html)
+        self.assertNotIn('id="paso05"', html)
 
-    def test_lms_incluye_ambos_recursos(self):
+    def test_lms_s11_con_unica_presentacion_y_cuaderno(self):
+        import json
         html = HOME.read_text(encoding="utf-8")
         self.assertIn("s11-videoclase-ocr-asr-embeddings.html", html)
-        self.assertIn("s11-ocr-asr-paso-a-paso.html", html)
         self.assertIn("Cuaderno único", html)
+        course = json.loads((ROOT / "lms/data/course.json").read_text(encoding="utf-8"))
+        session = next(s for s in course["sessions"] if s["n"] == 11)
+        self.assertIn("s11-videoclase-ocr-asr-embeddings.html", session["entry"]["url"])
+        self.assertIn("presentación", session["entry"]["label"].lower())
 
     def test_enlaces_locales(self):
         for pagina in (SLIDES, TUTORIAL):
