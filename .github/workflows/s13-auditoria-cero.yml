@@ -31,6 +31,8 @@ jobs:
           m=json.loads(p.read_text(encoding="utf-8"))
           print("FILAS",m["filas_totales"])
           print("IDs duplicados",m["ids_duplicados"])
+          print("CONFLICTOS DE ID",m["ids_duplicados_conflictos"])
+          print("SEGMENTOS UNSPSC",m["codigos_unspsc"])
           print("PRECIO",m["precio_base"])
           print("OFERTAS",m["conteo_respuestas_a_ofertas"])
           print("RESPUESTAS",m["respuestas_al_procedimiento"])
