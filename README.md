@@ -6,7 +6,7 @@
 
 ## Los tres elementos de esta clase
 
-**Modo presentación:** el enlace abre por defecto la **ruta de clase de 60 minutos (40 pantallas principales)**. Usa el botón **«Modo completo · 63»** para acceder a todas las ampliaciones, diagramas, preguntas y ejercicios. Ambos modos son **la misma presentación**, no materiales adicionales.
+**Modo presentación:** el enlace abre por defecto **24 módulos densos e interactivos**. Cada módulo integra definiciones, código, interpretación, controles, errores y ejemplos. El índice permite saltar entre módulos sin recorrer pantallas vacías; los laboratorios auténticos siguen en el cuaderno y el visor.
 
 1. **[Presentación S11](https://jazaineam1.github.io/BigData2026/Presentaciones/s11-videoclase-ocr-asr-embeddings.html#s1)**: explica cada pregunta, instalación, idea de código y comprobación; úsala mientras sigues el video.
 2. **[01_laboratorio.ipynb](./01_laboratorio.ipynb)**: **único cuaderno**. FASE 1: construyes y compruebas OCR, búsqueda visual y ASR; FASE 2: amplías los bucles a lotes de 122 fuentes y generas JSONL/Parquet.
