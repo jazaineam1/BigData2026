@@ -139,6 +139,8 @@ def verificar_proyecto(raiz: Path):
     print(f"OK · CATÁLOGO: {len(filas)} registros; fuentes y manifiesto válidos")
     candidatos_path = salidas / "candidatos.jsonl"
     if candidatos_path.exists():
+        if manifiesto.get("sha256_candidatos"):
+            comprobar_fuente(candidatos_path, manifiesto["sha256_candidatos"])
         candidatos = [json.loads(s) for s in candidatos_path.read_text(encoding="utf-8").splitlines() if s.strip()]
         textos = {f["path"]: f["extracted_text"] for f in filas}
         for candidato in candidatos:
