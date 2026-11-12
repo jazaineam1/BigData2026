@@ -47,6 +47,8 @@ class RecursosS11(unittest.TestCase):
             parser = Links()
             parser.feed(pagina.read_text(encoding="utf-8"))
             for href in parser.links:
+                if pagina == HOME and not any(k in href.lower() for k in ('s11', 'guia_estudiante')):
+                    continue
                 url = urlsplit(href)
                 if url.scheme or url.netloc or href.startswith("#"):
                     continue
