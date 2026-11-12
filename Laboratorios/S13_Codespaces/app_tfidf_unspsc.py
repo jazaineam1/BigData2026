@@ -318,7 +318,7 @@ with tabs[6]:
     )
     if (opciones_motor[seleccion_motor] is not None
             and opciones_limite[seleccion_limite] is not None):
-        ids="\\n".join(data["id_del_proceso"].astype(str))
+        ids="\n".join(data["id_del_proceso"].astype(str))
         evidencia={
             "sesion":13,
             "muestra_sha256_ids":hashlib.sha256(ids.encode("utf-8")).hexdigest(),
