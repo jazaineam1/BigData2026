@@ -189,8 +189,9 @@ class BusquedaVisualLigeraTest(unittest.TestCase):
             return vector
 
         def guardar(datos):
+            snapshot = dict(datos)
             cache.clear()
-            cache.update(datos)
+            cache.update(snapshot)
 
         with patch("fuentes._cargar_cache_visual", side_effect=lambda: cache), \
              patch("fuentes._guardar_cache_visual", side_effect=guardar), \
