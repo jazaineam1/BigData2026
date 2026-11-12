@@ -86,3 +86,10 @@ jobs:
           done
           tail -100 /tmp/s13-panel.log
           exit 1
+      - name: Publicar modelos SECOP entrenados como artefacto de GitHub Actions
+        uses: actions/upload-artifact@v6
+        with:
+          name: s13-xgboost-secoppresupuesto-26k
+          path: Laboratorios/S13_Codespaces/salidas/modelo_20k/
+          retention-days: 14
+          if-no-files-found: error
