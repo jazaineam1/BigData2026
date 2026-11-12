@@ -89,7 +89,7 @@ Codespaces → PORTS 8502 **PRIVATE**. Ninguna discrepancia predicha constituye 
 
 **Atención: esta es la práctica central recomendada.** El antiguo módulo de regresión exploratoria de precios se mantiene sólo para mostrar capacidades de XGBoost, NO para estimar sobrecostos. Los ceros de SECOP no constituyen etiquetas válidas. Consulta la [auditoría de 300.000 registros](../../docs/S13_AUDITORIA_DATOS_SECOP_300K.md).
 
-**Recursos estudiantiles (máximo dos):** la [presentación S13 de 60 diapositivas](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1), con calculadora interactiva de TF-IDF en #44, y el [cuaderno S13 de 84 celdas](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). No necesitas volver a S12.
+**Recursos estudiantiles (máximo dos):** la [presentación S13 de 60 diapositivas](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1), con calculadora interactiva de TF-IDF en #44, y el [cuaderno S13 de 87 celdas](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). No necesitas volver a S12.
 
 ### Estación A: herramienta visual de cinco módulos (puerto 8503 privado)
 
