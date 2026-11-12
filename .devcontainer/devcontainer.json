@@ -33,5 +33,6 @@
       "visibility": "private",
       "onAutoForward": "notify"
     }
-  }
+  },
+  "postStartCommand": "bash abrir_visor.sh"
 }
