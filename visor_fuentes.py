@@ -42,7 +42,7 @@ with st.sidebar:
         except Exception as exc:
             st.error(f"No se pudieron preparar: {exc}")
     if AUDIO_MANIFEST.is_file():
-        st.success("Las diez voces ya están preparadas")
+        st.success("Las treinta voces ya están preparadas")
 
 candidatos = [x for x in items if x["grupo"] == grupo
               and buscar.casefold() in (x["nombre"] + " " + x.get("noticia", "")).casefold()]
