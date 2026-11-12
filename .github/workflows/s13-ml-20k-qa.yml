@@ -1,16 +1,6 @@
 name: S13 26k SECOP - XGBoost Dask distributed real
+# Cost policy: heavy benchmark only by explicit manual dispatch.
 on:
-  pull_request:
-    paths:
-      - "Laboratorios/S13_Codespaces/modelo_distribuido_20k.py"
-      - "Laboratorios/S13_Codespaces/test_modelo_distribuido_20k.py"
-      - "Laboratorios/S13_Codespaces/app_modelo_20k.py"
-      - ".devcontainer/s13-distribuido/devcontainer.json"
-      - "Laboratorios/S13_Codespaces/requirements.txt"
-      - "Laboratorios/S13_Codespaces/GUIA_MODELO_20K.md"
-      - ".github/workflows/s13-ml-20k-qa.yml"
-      - "Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb"
-      - "Presentaciones/s13-de-una-maquina-a-un-cluster.html"
   workflow_dispatch:
 permissions:
   contents: read
