@@ -1,14 +1,9 @@
-name: MatchLab - marcadores programados (ahorro: cada hora)
+name: MatchLab - marcadores programados (solo horario o manual)
 on:
+  # Evita ejecuciones fallidas en cada push de otras sesiones; mantiene horario y manual.
   schedule:
     - cron: '0 0-5,18-23 5-15 11 *'
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'matchlab/live_sync.py'
-      - 'matchlab/data/colombia-2026-ii.json'
-      - '.github/workflows/matchlab-live.yml'
 
 permissions:
   contents: write

@@ -44,6 +44,9 @@ class RecursosS11(unittest.TestCase):
         self.assertIn('"input":[{"image":b64}]', html)
         self.assertIn("PSM 7", html)
         self.assertIn('id="toolQuestion"', html)
+        self.assertIn('id="routeButton"', html)
+        self.assertIn('id="outlineDialog"', html)
+        self.assertEqual(html.count('data-route="ampliacion"'), 24)  # 23 slides + CSS
         self.assertIn('id="werReference"', html)
         self.assertIn('id="cosB"', html)
         self.assertIn('id="timeMeasured"', html)
