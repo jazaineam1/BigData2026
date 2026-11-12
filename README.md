@@ -1,92 +1,148 @@
-# S11 · Laboratorio de investigación multimedia (estudiantes)
+# S11 · Una presentación + un cuaderno + un Codespace
 
-**Universidad Central · Big Data**. Este Codespace es un kit de clase **reducido**: aquí no están Airflow, otros cursos, exámenes, respuestas docentes ni los motores extensos que hacen el trabajo por ti.
+**Universidad Central · Big Data · versión para estudiantes**
 
-**Objetivo:** aprender a escribir Python, no ejecutar un programa ya construido. Vas a investigar **actas SECOP, 62 fotografías reales de dos conjuntos de El Tiempo y treinta voces humanas licenciadas**. OCR extrae letras; EmbeddingGemma 2 permite recuperar fotos por significado; Whisper transcribe voz. Ninguno certifica la verdad de una afirmación.
+**Objetivo:** escribir Python, entender qué hace cada herramienta y pasar de ejemplos pequeños a **122 fuentes** sin ejecutar programas que resuelvan todo por ti.
 
-## 1. Abrir el Codespace correcto
+## Los tres elementos de esta clase
 
-1. Abre [rama s11-estudiantes](https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes).
-2. Comprueba que la rama seleccionada dice **s11-estudiantes**, nunca main.
-3. Pulsa **Code → Codespaces → Create codespace on s11-estudiantes**. Este kit tiene un solo contenedor.
-4. El explorador debe mostrar `01_laboratorio.ipynb`, `02_lotes_122_fuentes.ipynb`, `visor_fuentes.py`, `datos/raw`, `INSTALACION_UBUNTU.md`, `requirements.txt`, y poco más.
-5. Abre **01_laboratorio.ipynb** para aprender OCR, búsqueda visual y Whisper con pocos ejemplos. Después abre **02_lotes_122_fuentes.ipynb** para ampliar a 122 fuentes y comparar tiempos, errores y resultados. Selecciona el kernel **Python 3** y modifica las celdas una a una.
+1. **[Presentación S11](https://jazaineam1.github.io/BigData2026/Presentaciones/s11-videoclase-ocr-asr-embeddings.html#s1)**: explica cada pregunta, instalación, idea de código y comprobación; úsala mientras sigues el video.
+2. **[01_laboratorio.ipynb](./01_laboratorio.ipynb)**: **único cuaderno**. FASE 1: construyes y compruebas OCR, búsqueda visual y ASR; FASE 2: amplías los bucles a lotes de 122 fuentes y generas JSONL/Parquet.
+3. **Codespace S11 + visor privado**: ofrece Python, Tesseract, Jupyter y un visor para abrir **cada PDF completo, PNG, foto y WAV**, sin abandonar el navegador. El visor es una ayuda de inspección y no sustituye escribir el código.
 
-**No necesitas Ubuntu local.** Codespaces es Linux en el navegador. Para comprender cómo se prepara el entorno, abre el [tutorial de instalación](./INSTALACION_UBUNTU.md): también se puede realizar en un Ubuntu propio cuando sea apropiado.
+**No hay un segundo cuaderno, una segunda presentación ni Airflow en este kit.** Los archivos \`INSTALACION_UBUNTU.md\` y \`FUENTES.md\` son documentación de consulta, no pasos que debas ir ejecutando paralelamente.
 
+## Paso 1 · Crear el Codespace correcto
 
-## Visor: abre CADA documento, fotografía y audio en una sola pantalla
+1. Abre **https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes**. Comprueba que el selector de rama muestra **s11-estudiantes**, NO \`main\`.
+2. Haz clic en **Code → Codespaces → Create codespace on s11-estudiantes**. Si se ofrece una configuración, selecciona **S11 · OCR, visión y voz (aprende Python)**.
+3. Espera a que aparezca VS Code y se complete la instalación indicada por \`postCreateCommand\`. No cambies de rama dentro del Codespace.
+4. En el explorador abre **01_laboratorio.ipynb**. Arriba a la derecha elige **Select Kernel → Python 3** del Codespace.
+5. Abre **Terminal → New Terminal** y comprueba:
 
-La herramienta visual se llama visor_fuentes.py. Es complementaria al cuaderno: permite abrir los **30 PDF SECOP completos**, comparar cada PDF con su **primera página PNG**, recorrer las **62 fotografías originales** y escuchar **30 voces reales**.
+~~~bash
+pwd
+python --version
+tesseract --list-langs
+python -c "from PIL import Image; import pytesseract,pandas,pyarrow,requests,faster_whisper,streamlit; print('Python OK')"
+~~~
 
-En la terminal del Codespace:
+**Resultado:** la ruta termina en \`/workspaces/BigData2026\`, aparece \`spa\` en Tesseract y se imprime \`Python OK\`. Si no es así, consulta «Solución de problemas», al final.
+
+**Qué aprendiste:** Codespaces es Linux remoto. \`.devcontainer/Dockerfile\` instala programas del sistema; \`requirements.txt\` instala bibliotecas Python; \`.devcontainer/devcontainer.json\` coordina la instalación. En Ubuntu propio se puede replicar siguiendo \`INSTALACION_UBUNTU.md\`.
+
+## Paso 2 · Abrir y recorrer TODAS las fuentes en el visor
+
+El visor se inicia automáticamente con \`abrir_visor.sh\`. Si no ves la vista previa:
+
+~~~bash
+bash abrir_visor.sh
+curl -fsS http://127.0.0.1:8501/_stcore/health
+~~~
+
+En VS Code abre **Ports / Puertos**, elige **8501 → Open Preview / Abrir vista previa**. Confirma **Visibility: Private**. También puedes ejecutar manualmente:
 
 ~~~bash
 streamlit run visor_fuentes.py --server.address 0.0.0.0 --server.port 8501
 ~~~
 
-Abre el panel **Puertos / Ports**, localiza 8501 y selecciona **Abrir vista previa** (o abrir en el navegador). Mantén su visibilidad **Private**. Dentro del visor puedes filtrar por nombre o número de acta, usar Anterior/Siguiente, abrir el PDF y su página juntos, aplicar OCR al archivo visible y cambiar PSM. Las voces se preparan pulsando el botón **Preparar / comprobar las 30 voces**: se recupera el Parquet MINDS-14, se verifica su SHA-256 y se crea una copia PCM16 para reproducción. También se puede transcribir una voz seleccionada con Whisper.
+En esta pantalla tienes cuatro selecciones de fuentes:
 
-**Importante:** el visor es para **observar fuentes y contrastar predicciones**. La actividad de aprendizaje permanece en 01_laboratorio.ipynb, donde escribirás Python y procesarás lotes completos. Esta interfaz no sustituye ese código.
-
-### Qué material contiene el kit ampliado
-
-- 30 fotografías El Tiempo en datos/raw/fotos.
-- 32 fotografías con ficha en datos/raw/fotos_catalogadas.
-- 30 PDF SECOP completos en datos/raw/actas_pdf.
-- 30 vistas PNG de primera página en datos/raw/actas.
-- 30 voces humanas MINDS-14 descargables y verificables desde la herramienta.
-
-**Total para investigar: 62 fotografías + 30 actas distintas + 30 audios = 122 fuentes.** Las 30 vistas PNG son derivados de las actas y no deben contabilizarse como otros treinta documentos. Los 30 audios se obtienen al ejecutar el botón o el código de preparación, no vienen incluidos como bytes en Git.
-
-## 2. Los archivos disponibles son reales
-
-| Carpeta | Archivos | Pregunta |
+| Colección del visor | Qué se puede abrir | Para qué la usamos |
 |---|---|---|
-| `datos/raw/actas` + `datos/raw/actas_pdf` | 30 actas completas PDF y sus PNG de primera página | ¿Cuál es el total, descuento y neto a pagar? |
-| `datos/raw/fotos` + `datos/raw/fotos_catalogadas` | 62 fotografías de dos conjuntos de El Tiempo | ¿Qué letreros reconoce OCR? ¿Qué imagen contiene viviendas? |
-| `datos/raw/audios` + `datos/derived/audios` | 30 WAV humanos PolyAI MINDS-14 es-ES, CC BY 4.0 | ¿Qué dice y qué errores tiene la transcripción? |
+| El Tiempo (30) | Cada una de las 30 fotografías originales | OCR de letreros, análisis visual |
+| Fotografías con ficha (32) | Cada fotografía, con crédito y URL cuando existen | Búsqueda visual y atribución |
+| Actas SECOP (30) | **30 PDF completos**, junto a **30 PNG de primera página** | OCR de tablas, importes y referencias |
+| Voces MINDS-14 (30) | 30 WAV humanos y referencia de transcripción | ASR, escucha, WER |
 
-La grabación es bancaria y **no pertenece a las noticias**. Los documentos SECOP pueden mostrar datos personales: al compartir capturas o exportar resultados, minimízalos. Las imágenes periodísticas conservan los derechos de sus titulares; los créditos por archivo del subconjunto de 30 todavía requieren curaduría (no inventes licencias).
+**Antes de usar los audios:** en la barra lateral pulsa **Preparar / comprobar las 30 voces**. El visor descarga un Parquet oficial (~39 MB), verifica SHA-256 y guarda WAV de fuente y derivados PCM16. Los audios no se alojan como binarios en GitHub. También puedes crearlos con las celdas del cuaderno.
 
-## Ruta de dos cuadernos
+**Total: 122 fuentes** = 62 fotografías + 30 actas + 30 voces. Las 30 vistas PNG de actas no son otros 30 documentos. No presupongas que una foto, un acta y un audio corresponden al mismo acontecimiento.
 
-**01_laboratorio.ipynb (fundamentos, para el video):** escribes cómo abrir imágenes, OCR de un acta, vectores de cuatro fotografías y ASR de una voz.
+**Importante:** el visor **no es una página pública de GitHub Pages**; se abre desde tu Codespace privado. No publiques el puerto 8501 ni capturas completas de actas con datos personales.
 
-**02_lotes_122_fuentes.ipynb (investigación por lotes):** escribes bucles sobre 30 actas, 62 fotografías, una selección de 30 voces, búsqueda vectorial y un catálogo JSONL/Parquet de 122 filas. Empieza con N_ACTAS=5, N_FOTOS=8, N_VISION=8 y N_ASR=3; después modifica esas cifras a 30, 62, 62 y 30 y explica qué cambió.
+## Paso 3 · Ejecutar el ÚNICO cuaderno (FASE 1: aprender)
 
-**visor_fuentes.py (vista, no solución):** muestra una fuente a la vez con anterior/siguiente, cada PDF y su PNG, imágenes periodísticas y un reproductor de audios reales. El visor no sustituye escribir y justificar el código de los dos cuadernos.
+Haz doble clic en \`01_laboratorio.ipynb\`. Lee el texto de una sección, **explica las líneas de su celda** y ejecuta con **Shift + Enter**. No ejecutes «Run All» sin entenderlo: hay descargas y procesos CPU que necesitan tiempo.
 
-## 3. Mapa de la sesión (60 minutos)
+| Tema | Qué escribes en Python | Qué compruebas |
+|---|---|---|
+| Leer archivos | \`Path\`, \`Image.open\`, \`display\` | Foto original, formato y resolución |
+| OCR de acta | \`pytesseract.image_to_string(..., lang="spa")\` | Valores contra página SECOP |
+| OCR y PSM | \`--psm 6\`, \`--psm 11\`, \`--psm 3\` | Efecto sobre columnas y texto disperso |
+| OCR de fotos | Bucle sobre cuatro fotos | Letreros vs escenas sin caracteres |
+| Embeddings visuales | HTTP \`/api/embed\` + Base64 | Vector de 768 dimensiones y ranking |
+| Whisper | \`WhisperModel("tiny", ...)\` | Audio, segmentos, referencia y WER |
+| Catálogo ETL | Diccionarios, JSONL, Parquet y SHA-256 | Procedencia, integridad y lectura posterior |
 
-| Tiempo | Aprendizaje que tú construyes |
-|---|---|
-| 00–06 | `Path` y Pillow: abrir y observar imágenes; explicar bytes/píxeles |
-| 06–18 | Tesseract: OCR de un acta y comparar PSM 6, 11, 3 |
-| 18–25 | OCR en letreros, contraste con fotos sin texto |
-| 25–35 | Ollama + EmbeddingGemma 2 **440m**: vectores de imágenes y consulta por coseno |
-| 35–44 | Audio MINDS-14 + Whisper tiny: escuchar, transcribir, cotejar WER |
-| 44–54 | Bucles, diccionarios, JSONL, Parquet y SHA-256 |
-| 54–60 | Tu reto: cambia fuente, parámetro y consulta; explica un error |
-
-## 4. Qué comprobar antes de iniciar
-
-En la terminal del Codespace:
+Para Ollama abre \`INSTALACION_UBUNTU.md\` y verifica:
 
 ~~~bash
-python --version
-tesseract --list-langs
-python -c "from PIL import Image; import pytesseract,pandas,pyarrow,requests,faster_whisper; print('Python listo')"
+ollama --version
+ollama pull embeddinggemma-2:440m
+ollama list
+curl -fsS http://127.0.0.1:11434/api/tags
 ~~~
 
-Debe aparecer `spa`. Para preparar Ollama (solo cuando llegues al bloque de búsqueda visual) sigue `INSTALACION_UBUNTU.md` y descarga el modelo visual **embeddinggemma-2:440m**; no confundas el de texto **270m** con uno que pueda interpretar imágenes.
+Si Ollama no está instalado, realiza antes su instalación oficial como indica la guía. Usa **440m para imágenes y texto**; 270m es de texto. Es recomendable hacer las descargas iniciales **antes de la grabación** y mostrar qué comandos se utilizaron.
 
-**Un estudiante aprende cuando:** (1) puede explicar qué hace cada línea, (2) modifica algo y predice qué pasará, (3) compara el resultado contra la fuente, y (4) transfiere el mismo procedimiento a una imagen o documento diferente. No entregues un simple pantallazo de una celda que se ejecutó.
+## Paso 4 · SIN CAMBIAR DE CUADERNO, pasar a FASE 2
 
-## 5. Explorador mínimo y privacidad
+Baja a la sección titulada **«FASE 2 · Las mismas funciones, ahora sobre 122 fuentes»** dentro de **01_laboratorio.ipynb**.
 
-Los originales se guardan en `datos/raw`. Las salidas se generan en `outputs/`, que está ignorada por Git. No subas transcripciones completas de datos personales ni WAV de terceros sin autorización.
+Escribe los bucles y comienza con muestras manejables:
 
-**Advertencia:** la rama s11-estudiantes contiene solo estos materiales de clase, pero eso NO hace privados los demás archivos del repositorio público. El aislamiento real de material reservado requiere un repositorio privado independiente.
+| Parámetro de las celdas | Durante la explicación | Para la práctica completa |
+|---|---:|---:|
+| \`N_ACTAS\` | 5 | 30 |
+| \`N_FOTOS\` | 8 | 62 |
+| \`N_VISION\` | 8 | 62 |
+| \`N_ASR\` | 3 | 30 |
 
-Más sobre licencias y fuentes: [FUENTES.md](./FUENTES.md).
+Las celdas realizan inventario, OCR documental, OCR fotográfico, embeddings con caché por SHA, ranking por coseno, descarga y conversión de WAV, WER con referencia y catálogo ETL. **El procesamiento completo de 62 embeddings visuales y 30 voces puede exceder los 60 minutos**; la videoclase enseña el procedimiento con una muestra, y el alumno amplía los parámetros posteriormente.
+
+**Resultado del catálogo:** \`outputs/catalogo_122.jsonl\` y \`outputs/catalogo_122.parquet\` con **122 filas**. La auditoría reabre ambos y comprueba de nuevo los hashes de originales. Otros resultados incluyen métricas de OCR y \`outputs/vectores_440m.json\`.
+
+**La práctica no exige 122 transcripciones completas dentro del video:** separa los indicadores que se obtienen de cada fuente de las inferencias que realizas por lotes.
+
+## Paso 5 · Evidencia de aprendizaje
+
+Escribe una tabla o breve explicación con estas columnas:
+
+\`pregunta | archivo y fuente | motor elegido | código o parámetro que cambié | resultado | cómo lo verifiqué | límite/error\`
+
+Debes demostrar: un valor SECOP comparado con el PNG; OCR de un letrero; una consulta visual cambiada; una voz escuchada y comparada con su referencia; una fila del catálogo con SHA-256 verificado. **No basta con mostrar «ejecución exitosa».**
+
+## Preguntas de clase
+
+- ¿Por qué Tesseract no puede responder qué objetos aparecen en una foto sin palabras?
+- ¿Qué significa PSM y por qué una tabla puede leerse peor con otro valor?
+- ¿Qué función cumple Base64 en una llamada HTTP para embeddings?
+- ¿Qué mide realmente la similitud coseno y qué **no** demuestra?
+- ¿Cómo se calcula WER si existe referencia humana, y qué ocurre si no existe?
+- ¿Por qué JSONL, Parquet y SHA-256 cumplen funciones diferentes?
+- ¿Cómo cambia el tiempo de procesamiento al pasar de 5 a 30 actas o de 8 a 62 fotos?
+
+## Solución de problemas
+
+| Problema | Qué revisar |
+|---|---|
+| Aparecen Airflow o otros cursos | Estás en \`main\` u otro Codespace; selecciona \`s11-estudiantes\` |
+| Falta \`spa\` | Comprueba \`tesseract-ocr-spa\` en el Dockerfile; reconstruye contenedor |
+| No carga el kernel | Verifica \`ipykernel\` y selecciona el Python del Codespace |
+| Visor no aparece | \`bash abrir_visor.sh\`; estado de puerto 8501 y pestaña Ports |
+| PDF no se ve | Revisa soporte Streamlit PDF; también puede descargarse el original |
+| No hay audios | Pulsa preparar voces; revisa red, HF y SHA-256; no inventes sustitutos |
+| Ollama no responde | Revisa \`ollama serve\`, 11434, \`ollama list\` y versión 440m |
+| Error por memoria o lentitud | Reduce \`N_VISION\` o \`N_ASR\`, conserva la caché y reintenta |
+| \`NameError\` | Ejecuta las celdas anteriores en orden y verifica las variables |
+| OCR se ejecuta pero se equivoca | Compara píxeles/PSM; no transformes un error en un supuesto acierto |
+
+## Fuente, licencia y privacidad
+
+- Las fotos de El Tiempo **no tienen todas créditos y permisos confirmados por archivo**. Consulta \`FUENTES.md\` antes de redistribuir.
+- Las actas SECOP pueden contener identificaciones personales; evita publicar sus salidas OCR completas o capturas sensibles.
+- Las voces reales proceden de **PolyAI MINDS-14 es-ES, CC BY 4.0**; son audios bancarios y **no corresponden a las fotos periodísticas**.
+- Esta rama mínima no vuelve privados los archivos que ya existan en otras ramas públicas del repositorio.
+
+**El libreto de narración del profesor es de uso privado y no forma parte del Codespace estudiantil.**
