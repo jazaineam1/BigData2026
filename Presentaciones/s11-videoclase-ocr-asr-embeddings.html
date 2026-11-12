@@ -106,8 +106,35 @@ main{align-items:flex-start;padding:67px 12px 75px;min-height:100dvh}
 @media(min-width:1450px){.lesson-module{max-height:470px}}
 @media(max-width:1000px){.slide{max-height:none;min-height:calc(100dvh - 155px)}.lesson-body,.gadget-grid{grid-template-columns:1fr}.lesson-module,.lesson-module:nth-child(3):last-child,.lesson-module:nth-child(4):last-child{max-height:none;grid-column:auto}.teaching-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.slide{padding:18px 13px}.teaching-grid{grid-template-columns:1fr}.slide h1{font-size:1.7rem}.lesson-module .grid.two,.lesson-module .grid.three{grid-template-columns:1fr}.lesson-module .grid.three>.tile:last-child{grid-column:auto}}
-</style></head><body><header><strong>Universidad Central · Big Data</strong><span>S11 · 24 módulos completos e interactivos</span><nav class="deck-actions" aria-label="Navegación de la presentación"><button id="outlineButton" type="button">Índice</button><button id="fullscreenButton" type="button">Pantalla completa</button></nav></header>
-<dialog id="outlineDialog" aria-label="Índice de la presentación"><div class="outline-title"><strong>Sesión 11 · 63 pantallas</strong><button id="closeOutline" type="button" aria-label="Cerrar índice">Cerrar</button></div><div id="outlineLinks" class="outline-links"></div></dialog><main>
+
+/* S11: lectura completa sin doble desplazamiento; proyección compacta opcional. */
+body.reading-mode main{min-height:0;padding-bottom:125px}
+body.reading-mode .slide{max-height:none!important;overflow:visible!important;min-height:0;scrollbar-width:auto}
+body.reading-mode .lesson-module,body.reading-mode .lesson-module:nth-child(3):last-child,
+body.reading-mode .lesson-module:nth-child(4):last-child{max-height:none!important;overflow:visible!important}
+body.reading-mode .lesson-body{align-items:stretch}
+#s11ReadingToggle[aria-pressed="true"]{border-color:#9ce6dc;background:#0a5260}
+#s11QuizDialog{max-width:min(94vw,650px);width:650px;border-radius:16px;border:1px solid #63879b;background:#102d43;color:#e8f5f9;padding:24px;max-height:88vh;overflow:auto}
+#s11QuizDialog::backdrop{background:#031625bd}
+#s11QuizDialog label{font-size:1rem;color:#e8f5f9;margin:16px 0 6px}
+#s11QuizDialog select{display:block;width:100%;padding:10px;color:#143347;background:#fff;border-radius:8px}
+#s11QuizDialog button{border:1px solid #5796a9;background:#17445b;color:#fff;padding:9px 12px;border-radius:8px;cursor:pointer}
+#s11QuizFeedback{background:#174352;color:#e7f5f4;padding:12px;border-radius:8px}
+#s11QuizDialog .quiz-intro{color:#d3e2eb}
+@media(max-width:780px){header{flex-wrap:wrap;gap:8px}.deck-actions{flex-wrap:wrap}body.reading-mode main{padding-bottom:100px}}
+</style></head><body><header><strong>Universidad Central · Big Data</strong><span>S11 · 24 módulos completos e interactivos</span><nav class="deck-actions" aria-label="Navegación de la presentación"><button id="outlineButton" type="button">Índice</button><button id="fullscreenButton" type="button">Pantalla completa</button><button id="s11ReadingToggle" type="button" aria-pressed="false" title="Cambiar entre lectura sin paneles recortados y proyección compacta">Lectura completa</button><button id="s11QuizOpen" type="button">Autoevaluación</button></nav></header>
+<dialog id="outlineDialog" aria-label="Índice de la presentación"><div class="outline-title"><strong>Sesión 11 · 24 módulos / 63 bloques originales</strong><button id="closeOutline" type="button" aria-label="Cerrar índice">Cerrar</button></div><div id="outlineLinks" class="outline-links"></div></dialog><dialog id="s11QuizDialog" aria-label="Autoevaluación conceptual de S11">
+  <div class="outline-title"><strong>Comprueba lo aprendido · S11</strong><button id="s11QuizClose" type="button">Cerrar</button></div>
+  <p class="quiz-intro">Tres decisiones sobre herramientas y evidencias. Actividad de práctica, no nota oficial.</p>
+  <label for="s11Q1">1. ¿Qué motor lee las cifras de una página escaneada?</label>
+  <select id="s11Q1"><option value="">Elige una respuesta</option><option value="embedding">EmbeddingGemma</option><option value="ocr">Tesseract OCR</option><option value="asr">Whisper ASR</option></select>
+  <label for="s11Q2">2. Una foto aparece primera por similitud coseno. ¿Qué demuestra?</label>
+  <select id="s11Q2"><option value="">Elige una respuesta</option><option value="proof">Es una prueba de autenticidad de la escena</option><option value="rank">Es un candidato relevante que debo verificar</option></select>
+  <label for="s11Q3">3. ¿Qué garantiza SHA-256 al comparar el original con la copia?</label>
+  <select id="s11Q3"><option value="">Elige una respuesta</option><option value="truth">Que el contenido es verdadero y legal</option><option value="bytes">Que los bytes coinciden si sus hashes son iguales</option></select>
+  <button id="s11QuizCheck" type="button">Comprobar mis respuestas</button>
+  <p id="s11QuizFeedback" role="status" aria-live="polite">Responde las tres preguntas para obtener retroalimentación.</p>
+</dialog><main>
 <section class="slide active" id="s1" aria-hidden="false"><p class="kicker">S11 · Laboratorio 01 de 24 · Evidencia</p><h1>El caso, objetivos y ruta de 60 minutos</h1><div class="lesson-body"><article class="lesson-module" data-original="1"><h3>De fuentes multimedia a evidencia consultable</h3><p class="lead">¿Qué dice el documento? ¿Qué muestra la fotografía? ¿Qué pronuncia la voz?</p><p class="lead">S11 · OCR, búsqueda visual, transcripción y ETL construido en Python.</p><p class="note">De un ejemplo pequeño a 122 fuentes: 62 fotografías, 30 actas SECOP y 30 voces reales licenciadas. Los 30 PNG son vistas de los 30 PDF.</p><div class="actions"><a href="https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/01_laboratorio.ipynb" target="_blank" rel="noopener">Abrir cuaderno editable</a><a href="https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes" target="_blank" rel="noopener">Abrir Codespace del estudiante</a></div><p class="note">No vamos a ejecutar un programa que ya contenga todas las respuestas. Cada etapa son pocas líneas de Python que tú puedes cambiar.</p></article><article class="lesson-module" data-original="2"><h3>Al terminar podrás explicar y reproducir cada operación</h3><div class="grid three"><div class="tile"><h2>Comprender</h2><p>Explicar la diferencia entre píxeles, texto OCR, voz transcrita y vectores.</p><p>Elegir entre Tesseract, Whisper y EmbeddingGemma según la pregunta.</p></div><div class="tile"><h2>Programar</h2><p>Escribir y modificar Python: abrir archivos, recortar, transcribir, generar embeddings y crear registros.</p><p>Comprender parámetros antes de ampliar lotes.</p></div><div class="tile"><h2>Verificar</h2><p>Comparar contra PDF, fotografía y audio originales; registrar procedencia, SHA-256, error y límites.</p><p>Auditar equivalencia JSONL-Parquet.</p></div></div><div class="note"><strong>Producto evaluable:</strong> una pregunta, una fuente, código modificado, salida real y comprobación independiente. Ejecutar sin comprender no demuestra aprendizaje.</div></article><article class="lesson-module" data-original="3"><h3>Sesenta minutos: del primer archivo al caso transferible</h3><div class="timeline"><div><strong>00–06</strong><span>Fuentes, rutas y entorno</span></div><div><strong>06–18</strong><span>PDF SECOP y OCR contextual</span></div><div><strong>18–25</strong><span>Logotipo VALLE y PSM</span></div><div><strong>25–35</strong><span>Embedding visual y ranking</span></div><div><strong>35–44</strong><span>WAV, Whisper y WER</span></div><div><strong>44–54</strong><span>ETL, Parquet e integridad</span></div><div><strong>54–60</strong><span>Reto y transferencia</span></div></div><p class="note">En clase enseña 1–8 ejemplos. El procesamiento de 62 imágenes y 30 audios queda como práctica autónoma parametrizada en el <strong>mismo cuaderno</strong>, no como espera de procesamiento durante el video.</p></article></div><div class="teaching-grid"><div><b>DEFINICIÓN</b><span>Resultado asociado a una fuente localizable y a una transformación repetible, no solo un número que aparece en pantalla.</span></div><div><b>EDITA AQUÍ</b><span>Selecciona una pregunta real.</span></div><div><b>OBSERVA</b><span>Elige OCR, imagen o audio según la necesidad.</span></div><div><b>VERIFICA</b><span>Vuelve a la fuente original.</span></div></div><p class="pitfall"><strong>ERROR QUE DEBES EVITAR:</strong> Un programa que terminó no demuestra exactitud.</p></section>
 <section class="slide" id="s2" aria-hidden="true"><p class="kicker">S11 · Laboratorio 02 de 24 · Dato candidato</p><h1>Un acta, una predicción y una verificación</h1><div class="lesson-body"><article class="lesson-module" data-original="4"><h3>Laura necesita investigar, no simplemente ejecutar</h3><div class="grid two"><div class="tile"><h2>Documentos SECOP</h2><p>¿Qué valor, duración y forma de pago figuran en un acta de inicio?</p><div class="metric">6 × $2.460.000 = $14.760.000</div><p class="muted">Acta SECOP 728704921 · contrato 006-2026. Son referencias observadas visualmente, no datos fabricados por OCR.</p></div><div class="tile"><h2>Fotografías y audio</h2><p>¿Qué palabras hay en un aviso? ¿Qué imagen muestra viviendas en una ladera? ¿Qué dice una voz humana?</p><p class="muted">Tres preguntas diferentes, no un único motor.</p></div></div></article><article class="lesson-module" data-original="5"><h3>La fuente manda: separar observación, predicción e interpretación</h3><div class="flow-steps"><div><b>1 · PDF original</b><small>Acta SECOP 728704921</small></div><span>→</span><div><b>2 · Imagen de página</b><small>PNG para el OCR</small></div><span>→</span><div><b>3 · Texto probable</b><small>Tesseract puede equivocarse</small></div><span>→</span><div><b>4 · Candidato</b><small>Importe asociado a etiqueta</small></div><span>→</span><div><b>5 · Cotejo</b><small>Verificación visual</small></div></div><div class="grid two"><div class="tile"><h2>Lo observable</h2><p>Contrato <strong>006-2026</strong>; valor visible <strong>$14.760.000</strong>; seis pagos de <strong>$2.460.000</strong>.</p></div><div class="tile"><h2>Lo que NO sabemos solo con OCR</h2><p>Si las cifras reconocidas son correctas, si se cumplió el contrato o si el documento respalda una afirmación externa.</p></div></div></article></div><div class="teaching-grid"><div><b>DEFINICIÓN</b><span>Texto o importe que el algoritmo propone y todavía necesita un cotejo contra el documento.</span></div><div><b>EDITA AQUÍ</b><span>Cambia la etiqueta o el fragmento OCR.</span></div><div><b>OBSERVA</b><span>Dónde el motor localizó cifras y etiquetas.</span></div><div><b>VERIFICA</b><span>Página original del acta 728704921.</span></div></div><p class="pitfall"><strong>ERROR QUE DEBES EVITAR:</strong> Asociar la primera cifra a VALOR DEL CONTRATO.</p></section>
 <section class="slide" id="s3" aria-hidden="true"><p class="kicker">S11 · Laboratorio 03 de 24 · RAW y derivado</p><h1>Corpus de 122 fuentes y procedencia</h1><div class="lesson-body"><article class="lesson-module" data-original="6"><h3>Tres colecciones distintas, tres procedencias</h3><div class="grid three"><div class="tile"><img src="https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/S10_Eltiempo_fotos/raw/eltiempo_006.webp" alt="Fotografía de taquillas con letreros"/><h2>El Tiempo</h2><p>62 fotografías: 30 de El Tiempo con créditos individuales pendientes de curaduría y 32 de otro conjunto con fichas registradas. Empezamos con cuatro.</p></div><div class="tile"><div class="docket">SECOP<br><span>Acta escaneada</span><strong>Tabla, fecha y valor</strong></div><h2>Actas</h2><p>30 PDF completos con sus 30 vistas PNG de primera página. Evitar mostrar nombres y datos de cuenta en capturas.</p></div><div class="tile"><div class="docket voice">VOZ<br><span>PolyAI · MINDS-14</span><strong>es-ES · CC BY 4.0</strong></div><h2>Audio</h2><p>30 grabaciones humanas licenciadas, de intenciones bancarias diferentes. No corresponden a las noticias.</p></div></div></article><article class="lesson-module" data-original="7"><h3>122 fuentes, pero no 122 historias relacionadas</h3><div class="grid three"><div class="tile"><div class="big-stat">62</div><h2>Fotografías</h2><p>30 de El Tiempo + 32 con ficha. Son registros de imagen; revisa si hay duplicados por SHA.</p></div><div class="tile"><div class="big-stat">30</div><h2>Actas SECOP</h2><p>30 documentos PDF completos y 30 vistas PNG de página 1. <strong>PNG ≠ nueva acta.</strong></p></div><div class="tile"><div class="big-stat">30</div><h2>Voces MINDS-14</h2><p>Audios bancarios españoles, fuente PolyAI es-ES CC BY 4.0; sus WAV PCM16 son derivados.</p></div></div><p class="note"><strong>Advertencia investigativa:</strong> compartir catálogo no establece una relación noticia–contrato–audio. Para un vínculo necesitas evidencia de procedencia.</p></article><article class="lesson-module" data-original="8"><h3>Originales y derivados: cómo no duplicar el corpus</h3><div class="grid two"><div class="tile"><h2>Un documento, dos representaciones</h2><pre>datos/raw/actas_pdf/ACTA.pdf
@@ -515,4 +542,41 @@ get("s11HashGo")?.addEventListener("click",async()=>{
  }catch(e){set("s11HashOut","No se pudo calcular SHA-256: "+e.message);}
 });
 })();
-</script></body></html>
+</script><script>
+(()=> {
+  "use strict";
+  const btn=document.getElementById("s11ReadingToggle");
+  let reading=true;
+  try { reading=localStorage.getItem("s11-reading-mode")!=="compact"; }
+  catch (_) { /* Permitir modo privado sin almacenamiento */ }
+  function applyMode(){
+    document.body.classList.toggle("reading-mode",reading);
+    btn.setAttribute("aria-pressed",String(reading));
+    btn.textContent=reading?"Modo proyección":"Lectura completa";
+    btn.title=reading?"Mostrar los 24 módulos en diseño compacto":"Mostrar todo el contenido de cada módulo sin paneles recortados";
+  }
+  btn.addEventListener("click",()=>{
+    reading=!reading;applyMode();
+    try{localStorage.setItem("s11-reading-mode",reading?"reading":"compact")}catch(_){}
+  });
+  applyMode();
+  const quiz=document.getElementById("s11QuizDialog");
+  document.getElementById("s11QuizOpen").addEventListener("click",()=>quiz.showModal());
+  document.getElementById("s11QuizClose").addEventListener("click",()=>quiz.close());
+  document.getElementById("s11QuizCheck").addEventListener("click",()=>{
+    const answers=[["s11Q1","ocr","OCR reconoce caracteres: ni embeddings ni ASR leen un PDF escaneado."],
+      ["s11Q2","rank","El coseno ordena candidatos; verifica siempre la fuente."],
+      ["s11Q3","bytes","SHA-256 compara bytes, no demuestra verdad, autenticidad ni permiso de uso."]];
+    let correct=0,filled=0;const details=[];
+    answers.forEach(([id,value,explanation],i)=>{
+      const selected=document.getElementById(id).value;
+      if(selected)filled++;
+      if(selected===value)correct++;
+      details.push((i+1)+". "+(selected===value?"Correcta":"Revisar")+": "+explanation);
+    });
+    const message=filled===3?correct+" de 3 correctas. ":"Responde las tres para completar. ";
+    document.getElementById("s11QuizFeedback").textContent=message+details.join(" ");
+  });
+})();
+</script>
+</body></html>
