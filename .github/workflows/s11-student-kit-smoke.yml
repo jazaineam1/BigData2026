@@ -1,0 +1,60 @@
+name: S11 · Kit mínimo del estudiante (QA)
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/s11-student-kit-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  student-kit:
+    name: Rama de estudiantes, OCR real y verificación
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout del kit de estudiantes, no del repo principal
+        uses: actions/checkout@v4
+        with:
+          ref: s11-estudiantes
+      - name: Probar que el Codespace solo contiene los archivos necesarios
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          visibles = {p.name for p in Path(".").iterdir() if p.name != ".git"}
+          requeridos = {".devcontainer", ".gitignore", "README.md", "INSTALACION_UBUNTU.md",
+                        "requirements.txt", "lab.py", "proyecto.py", "app.py",
+                        "verificar_independiente.py", "iniciar_ollama.sh"}
+          assert visibles == requeridos, f"Archivos sobrantes o faltantes: {visibles ^ requeridos}"
+          assert sorted(p.name for p in Path(".devcontainer").iterdir()) == ["Dockerfile", "devcontainer.json"]
+          print("Kit mínimo OK:",len(visibles),"elementos de raíz, sin otros cursos.")
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Dependencias de sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            tesseract-ocr tesseract-ocr-spa ffmpeg poppler-utils espeak-ng fonts-dejavu-core
+      - name: Python y sintaxis
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m py_compile lab.py proyecto.py app.py verificar_independiente.py
+          tesseract --list-langs | grep -x spa
+      - name: OCR real, datos sintéticos y auditoría de integridad
+        run: |
+          python lab.py preparar
+          python lab.py ocr
+          python verificar_independiente.py --caso lab
+      - name: Transferencia de imagen y texto sin API externa
+        run: |
+          python proyecto.py iniciar --destino proyectos/qa
+          cp salidas/afiche_simulado.png proyectos/qa/entradas/imagenes/
+          printf 'Caso DEMO: contrato 17 por 320000 pesos.\n' > proyectos/qa/entradas/textos/caso.txt
+          python proyecto.py plan --config proyectos/qa/config.json
+          python proyecto.py procesar --config proyectos/qa/config.json
+          python proyecto.py auditar --config proyectos/qa/config.json
+          python verificar_independiente.py --proyecto proyectos/qa
