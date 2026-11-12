@@ -3,7 +3,8 @@ on:
   pull_request:
     paths:
       - "Laboratorios/S13_Codespaces/benchmark_unspsc_tfidf_dask.py"
-      - "Laboratorios/S13_Codespaces/medir_embeddinggemma2.py"\n      - "Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py"
+      - "Laboratorios/S13_Codespaces/medir_embeddinggemma2.py"
+      - "Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py"
       - "Laboratorios/S13_Codespaces/test_benchmark_unspsc_tfidf_dask.py"
       - "Laboratorios/S13_Codespaces/GUIA_BENCHMARK_TFIDF_EMBEDDINGGEMMA.md"
       - ".github/workflows/s13-tfidf-benchmark-qa.yml"
@@ -29,7 +30,8 @@ jobs:
       - name: Verificar sintaxis de benchmark y calibrador EmbeddingGemma
         run: |
           python -m py_compile Laboratorios/S13_Codespaces/benchmark_unspsc_tfidf_dask.py
-          python -m py_compile Laboratorios/S13_Codespaces/medir_embeddinggemma2.py\n          python -m py_compile Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py
+          python -m py_compile Laboratorios/S13_Codespaces/medir_embeddinggemma2.py
+          python -m py_compile Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py
       - name: Medir TF-IDF local y con Dask, entrenar XGBoost realmente distribuido
         run: |
           python Laboratorios/S13_Codespaces/benchmark_unspsc_tfidf_dask.py --sizes 1000 10000 20000 --workers 2 --rondas 20 --svd-dim 32
