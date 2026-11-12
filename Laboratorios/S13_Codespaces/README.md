@@ -84,3 +84,18 @@ streamlit run Laboratorios/S13_Codespaces/app_modelo_20k.py --server.port 8502
 ```
 
 Codespaces → PORTS 8502 **PRIVATE**. Ninguna discrepancia predicha constituye prueba de fraude. El cuaderno y la presentación originales siguen siendo los dos recursos estudiantiles de la sesión.
+
+## Benchmark científico · 50.000 procesos, mismo modelo local y distribuido
+
+**[Guía y resultados medidos](./GUIA_PARIDAD_50K.md)** · [Código reproducible](./benchmark_paridad_50k.py).
+
+Ya se compararon 1.000, 10.000, 20.000 y 50.000 procesos SECOP reales usando **un solo algoritmo LinearSVC** contra sí mismo (TF-IDF local/Dask con matrices y predicciones idénticas) y XGBoost frente a XGBoost distribuido (iguales datos, 32 componentes SVD, clases y rondas). No compares velocidad de LinearSVC y XGBoost: son modelos diferentes.
+
+```bash
+python Laboratorios/S13_Codespaces/benchmark_paridad_50k.py --sizes 1000 10000 20000 50000 --workers 2 --rondas 30
+ollama pull embeddinggemma-2:270m
+python Laboratorios/S13_Codespaces/benchmark_embeddinggemma_paridad.py --n 16 --batch 4
+python Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py --n 50000 --batch 8
+```
+
+La última instrucción es una **corrida potencialmente larga**, no completada en CI. Los tiempos EmbeddingGemma para 50.000 son extrapolaciones de un piloto de 16, no medidas directas. El código almacena vectores SQLite para recuperarse de interrupciones.
