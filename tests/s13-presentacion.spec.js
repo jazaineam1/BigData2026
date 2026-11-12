@@ -41,6 +41,16 @@ test('S13: tutorial legible y sin desborde horizontal en móvil', async ({ page 
     pantalla: window.innerWidth,
   }));
   expect(anchura.contenido).toBeLessThanOrEqual(anchura.pantalla + 4);
+  await page.goto(URL + '#s40');
+  await expect(page.locator('#s40')).toContainText('PySpark');
+});
+
+test('S13: ampliación de 26 mil procesos SECOP y entrenamiento de un solo XGBoost', async ({page}) => {
   await page.goto(URL + '#s36');
-  await expect(page.locator('#s36')).toContainText('PySpark');
+  await expect(page.locator('#s36')).toContainText('26.000');
+  await page.goto(URL + '#s38');
+  await expect(page.locator('#s38')).toContainText('dxgb.train');
+  await page.goto(URL + '#s39');
+  await expect(page.locator('#s39')).toContainText('8502');
+  await expect(page.locator('#s39')).toContainText('SECOP');
 });
