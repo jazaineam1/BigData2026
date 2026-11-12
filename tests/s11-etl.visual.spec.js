@@ -86,7 +86,7 @@ test('la portada y el registro de curso abren S11 en un clic',async({page})=>{
   await expect(page).toHaveURL(/s11-videoclase-ocr-asr-embeddings.html/);
   await expect(page.locator('#s1')).toBeVisible();
   await page.goto('/lms/data/course.json');
-  await expect(page.locator('body')).toContainText('s11-videoclase-ocr-asr-embeddings.html');
+  await expect(page.locator('#s1 h1')).toContainText('De archivos a evidencia verificable');
 });
 
 test('S11 escala: los lotes cambian particiones previstas, no simulan tiempos reales',async({page})=>{
