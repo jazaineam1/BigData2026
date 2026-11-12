@@ -24,6 +24,14 @@
     "cpus": 2,
     "memory": "8gb"
   },
-  "forwardPorts": [],
-  "portsAttributes": {}
+  "forwardPorts": [
+    8501
+  ],
+  "portsAttributes": {
+    "8501": {
+      "label": "S11 · Visor privado de documentos",
+      "visibility": "private",
+      "onAutoForward": "notify"
+    }
+  }
 }
