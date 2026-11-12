@@ -64,6 +64,17 @@ jobs:
           print("Entrenamiento distribuido validado:",m["entrenamiento"],
                 "train, workers:",m["workers"],"metricas:",m["metricas"])
           PY
+      - name: Probar interfaz con predicciones verdaderas (Streamlit AppTest)
+        run: |
+          python - <<'PY'
+          from streamlit.testing.v1 import AppTest
+          a=AppTest.from_file(
+              "Laboratorios/S13_Codespaces/app_modelo_20k.py"
+          ).run(timeout=120)
+          assert not a.exception, [str(x) for x in a.exception]
+          assert len(a.metric) >= 4
+          print("Panel SECOP renderiza con modelos reales:",len(a.metric),"indicadores")
+          PY
       - name: Verificar panel de investigacion con resultados reales (HTTP)
         run: |
           python -m streamlit run Laboratorios/S13_Codespaces/app_modelo_20k.py --server.headless true --server.address 127.0.0.1 --server.port 8502 > /tmp/s13-panel.log 2>&1 &
