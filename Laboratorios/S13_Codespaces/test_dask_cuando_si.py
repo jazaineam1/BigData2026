@@ -1,6 +1,6 @@
 """Pruebas ligeras del laboratorio Dask. NO levanta clúster ni espera 0,6 s."""
 import unittest
-from dask_cuando_si import cpus_disponibles, crear_trabajos, procesar_lote
+from dask_cuando_si import cpus_disponibles, cuota_cpu_cgroup, crear_trabajos, procesar_lote
 
 class PruebaS13Dask(unittest.TestCase):
     def test_lotes_secop_igual_total(self):
@@ -15,6 +15,12 @@ class PruebaS13Dask(unittest.TestCase):
         for campo in ("id", "registros", "palabras", "sha256"):
             self.assertEqual(a[campo], b[campo])
         self.assertEqual(a["palabras"], 3)
+    def test_cuota_cgroup_v2(self):
+        self.assertEqual(cuota_cpu_cgroup('400000 100000'), 4)
+        self.assertEqual(cuota_cpu_cgroup('150000 100000'), 1)
+        self.assertIsNone(cuota_cpu_cgroup('max 100000'))
+        self.assertIsNone(cuota_cpu_cgroup('datos no validos'))
+
     def test_cpu_logicas(self):
         self.assertGreaterEqual(cpus_disponibles(), 1)
 

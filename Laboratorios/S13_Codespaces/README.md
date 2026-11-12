@@ -125,6 +125,14 @@ python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2 --modo cpu
 
 Esa modalidad utiliza PBKDF2 con carga moderada; **no** es un modelo de IA ni un benchmark representativo de OCR. Una ganancia no está garantizada y no se obliga a ejecutarla.
 
+### Visualizar el scheduler sin contaminar los tiempos
+
+```bash
+python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2 --tablero --mantener-tablero-segundos 30
+```
+
+Abre **PORTS → 8787 → Private → Open in Browser** mientras el programa conserva el clúster. Los 30 segundos de observación no se suman a los cronómetros. Cuando termina, el panel se cierra deliberadamente.
+
 ### 3. Herramienta gráfica en Codespaces
 
 ```bash

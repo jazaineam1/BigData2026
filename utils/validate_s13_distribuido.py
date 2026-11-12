@@ -13,11 +13,14 @@ def main():
     nb = json.loads(read("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb"))
     assert nb["nbformat"] == 4
     cells = nb["cells"]
-    assert len(cells) >= 96
+    assert 75 <= len(cells) <= 95, f'Cantidad inesperada de celdas: {len(cells)}'
     assert sum(c["cell_type"] == "code" for c in cells) >= 15
     text = "\n".join("".join(c["source"]) for c in cells)
     assert "Rúbrica observable de práctica" in text, "Falta rúbrica S13"
     assert "DEMO_DASK_EN_RUN_ALL" in text and "dask_cuando_si.py" in text, "Falta demostración reproducible"
+    assert "WORKERS_DEMO_S13" in text, "Workers configurables en una sola variable"
+    assert "EJECUTAR_50K_AHORA =" not in text, "No incluir controles de 50k en el cuaderno central"
+    assert "ACTIVAR_MODELO_26K =" not in text, "No incluir entrenamiento costoso como actividad"
     assert "s13_A_f1_ngramas.png" in text and "s13_B_f1_por_clase.png" in text, "Faltan figuras de la práctica"
     assert "OPCIONES_ARQUITECTURA" in text and "OPCIONES_LIMITE" in text, "Faltan opciones cerradas de respuesta"
     for needed in ("MapReduce", "Codespaces", "HDFS", "Dask", "TF-IDF", "Parquet", "F1 macro"):
@@ -49,13 +52,15 @@ def main():
             temporal.write(script.group(1))
             temporal.flush()
             subprocess.run(["node", "--check", temporal.name], check=True)
-    assert "modelo_distribuido_20k.py" in text
-    assert "ACTIVAR_MODELO_26K" in text
-    assert "xgboost.dask" in text
+    assert "dask_cuando_si.py" in text
+    assert not (ROOT / "docs/S13_PLAN_MEJORA_DASK.md").exists(), "Los planes del docente no se publican"
     assert "dask_cuando_si.py" in html
     assert "CPU lógicas" in html
     assert "50.000" in html
-    assert "HP" not in html, "No publicar referencias al equipo personal en la sesión"
+    assert not re.search(r"(?i)(?:hp del estudiante|tu hp|en mi hp|mi portátil hp)", html), "No atribuir equipo personal a estudiantes"
+    assert "streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py" in html
+    assert "streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py" in text
+    assert html.count('if __name__ == "__main__":') >= 2
     assert "id=\"s32\"" in html
     assert config["portsAttributes"]["8502"]["visibility"] == "private"
     index = read("index.html")

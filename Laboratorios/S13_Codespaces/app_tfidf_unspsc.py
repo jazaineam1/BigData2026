@@ -23,6 +23,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.svm import LinearSVC
 
 from benchmark_unspsc_tfidf_dask import ETIQUETAS, CODIGO, texto_limpio
+from dask_cuando_si import cpus_disponibles
 
 ROOT=Path(__file__).resolve().parents[2]
 CSV=ROOT/"Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv"
@@ -264,6 +265,12 @@ metricas=client.gather(trabajos)""",language="python")
         [1, 2, 4], index=1,
         help="Si creas más workers que CPU habilitadas puedes perder rendimiento.",
     )
+    st.caption(
+        f"CPU habilitadas estimadas (afinidad y cuota cgroups): {cpus_disponibles()}. "
+        "Los workers son procesos dentro de una misma VM."
+    )
+    if n_demo > cpus_disponibles():
+        st.warning("Sobresuscripción: se eligieron más workers que CPU disponibles; puede empeorar.")
     if st.button("Ejecutar la demostración ligera de Dask", key="demo_real_dask"):
         programa=Path(__file__).resolve().parent/"dask_cuando_si.py"
         try:
@@ -272,22 +279,46 @@ metricas=client.gather(trabajos)""",language="python")
                 cwd=ROOT, capture_output=True, text=True, timeout=120,
             )
             if result.returncode:
-                st.error("Falló la ejecución. Revisa la salida; no se inventan tiempos.")
-                st.code(result.stderr[-2000:] or result.stdout[-2000:])
+                st.error("Falló Dask; no se presentan tiempos inventados.")
+                st.code(result.stderr[-2400:] or result.stdout[-2400:])
             else:
-                st.success("Dask ejecutó tareas reales y validó que los resultados coinciden.")
-                salida=Path(__file__).resolve().parent/"salidas/dask_demostracion_s13.json"
-                valores=json.loads(salida.read_text(encoding="utf-8"))
-                st.json(valores, expanded=True)
-                st.caption("Los tiempos vienen de ESTE Codespace. Espera simulada, "
-                           "Dask real, no OCR y no extrapolación a otros equipos.")
-                st.download_button(
-                    "Guardar evidencia JSON",
-                    data=json.dumps(valores, ensure_ascii=False, indent=2),
-                    file_name="dask_s13_ejecucion.json", mime="application/json",
-                )
+                prefijo="RESULTADO_S13_DASK="
+                linea=next((x[len(prefijo):] for x in result.stdout.splitlines()
+                            if x.startswith(prefijo)),None)
+                if linea is None:
+                    st.error("La ejecución terminó sin JSON verificable. Consulta la salida.")
+                    st.code(result.stdout[-2400:])
+                else:
+                    valores=json.loads(linea)
+                    if not valores["resultados_identicos"]:
+                        st.error("La salida secuencial y distribuida no coincide.")
+                    else:
+                        st.session_state["s13_ultimo_dask"]=valores
+                        st.success("Dask ejecutó tareas y produjo los mismos resultados.")
         except subprocess.TimeoutExpired:
-            st.error("La ejecución superó el límite de 120 s; revisa recursos y workers.")
+            st.error("El programa superó 120 s; revisa CPU, procesos y RAM.")
+    if "s13_ultimo_dask" in st.session_state:
+        valores=st.session_state["s13_ultimo_dask"]
+        st.markdown(
+            f"**Última ejecución comprobada:** {valores['workers']} workers, "
+            f"{valores['tareas']} tareas y {valores['filas_procesadas']} títulos. "
+            "Los datos se tomaron del Codespace en esta ejecución, no de GitHub Actions."
+        )
+        c1,c2,c3=st.columns(3)
+        c1.metric("Secuencial",f"{valores['segundos_secuencial']:.3f} s")
+        c2.metric("Dask caliente",f"{valores['segundos_dask_cluster_caliente']:.3f} s")
+        c3.metric("Dask total",f"{valores['segundos_dask_total_incluido_arranque']:.3f} s")
+        st.write(
+            "Ganador del trabajo:",valores["ganador_caliente"],
+            "· ganador incluyendo arranque:",valores["ganador_total"],
+        )
+        st.json(valores,expanded=False)
+        st.download_button(
+            "Descargar JSON real de mi ejecución",
+            data=json.dumps(valores,ensure_ascii=False,indent=2),
+            file_name="s13_dask_ejecutado.json",
+            mime="application/json", key="descargar_dask_real",
+        )
     st.markdown(
         "**Nota:** Dask caliente = workers ya disponibles; Dask total = incluye "
         "iniciar el scheduler y los procesos. Si gana solo caliente, hay una "
