@@ -108,7 +108,7 @@ La escala y el contraste pueden mejorar o empeorar la lectura; una confianza alt
 
 ### Diagnosticar la llamada a EmbeddingGemma
 
-Para generar vectores de imágenes, la API recibe `input` **como lista**. Tu caso probado en Codespaces utiliza los **bytes originales** WebP en Base64 y `"input": [{"image": imagen64}]`. La conversión a JPEG RGB en memoria es opcional, no es necesaria para corregir ese error. Prueba siempre una imagen antes del lote. Si Ollama rechaza una petición HTTP, debes mostrar `respuesta.status_code` y `respuesta.text` para conocer el mensaje concreto del servidor. **No cambies a un modelo solo textual para evitar el problema**.
+Para generar vectores de imágenes, la API recibe `input` **como lista**. Para la práctica se utilizan los **bytes originales** WebP en Base64 y `"input": [{"image": imagen64}]`. La conversión a JPEG RGB en memoria es una transformación opcional que puede compararse con los bytes originales. Prueba siempre una imagen antes del lote. Si Ollama rechaza una petición HTTP, debes mostrar `respuesta.status_code` y `respuesta.text` para conocer el mensaje concreto del servidor. **No cambies a un modelo solo textual para evitar el problema**.
 
 ~~~python
 from pathlib import Path
