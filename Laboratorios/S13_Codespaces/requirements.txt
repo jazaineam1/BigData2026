@@ -8,3 +8,4 @@ ipykernel>=6,<8
 matplotlib>=3.8,<4
 xgboost>=3.1,<4
 joblib>=1.4,<2
+streamlit>=1.45,<2
