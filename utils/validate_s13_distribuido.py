@@ -45,6 +45,12 @@ def main():
             temporal.write(script.group(1))
             temporal.flush()
             subprocess.run(["node", "--check", temporal.name], check=True)
+    assert "modelo_distribuido_20k.py" in text
+    assert "ACTIVAR_MODELO_26K" in text
+    assert "xgboost.dask" in text
+    assert "26.000" in html
+    assert "id=\"s39\"" in html
+    assert config["portsAttributes"]["8502"]["visibility"] == "private"
     index = read("index.html")
     assert index.count('data-n="13"') == 1
     assert index.count('data-session="13"') == 1
