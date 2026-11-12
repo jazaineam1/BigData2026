@@ -79,7 +79,20 @@ jobs:
               compile(c.source,c.id,"exec")
           print("ÚNICO cuaderno OK: 2 fases y",len(codigo),"celdas de Python")
           PY
+          # Incluye contrato API input=[entrada] con prueba simulada de imagen,
+          # consulta de texto, HTTP 400 y bytes WebP originales.
           python -m unittest -v test_visor
+          python - <<'PY'
+          import nbformat
+          nb=nbformat.read("01_laboratorio.ipynb",as_version=4)
+          codigo={c.id:c.source for c in nb.cells if c.cell_type=="code"}
+          for id in ("s11-vision-vectores","lote-embeddings"):
+              code=codigo[id]
+              assert '"input": [entrada]' in code,id
+              assert "NORMALIZAR_JPEG = False" in code,id
+              assert "respuesta.text" in code or "r.text" in code,id
+          print("CONTRATO /api/embed OK: una entrada en una lista, en ambas fases")
+          PY
       - name: Ejecutar OCR REAL en fotos y páginas SECOP
         env:
           MPLBACKEND: Agg
