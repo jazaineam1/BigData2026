@@ -170,5 +170,57 @@ class EmbeddingsFormatoTest(unittest.TestCase):
         self.assertIn('foto = Path("datos/raw/fotos/eltiempo_023.webp")', script)
         self.assertIn('incrustar("Una fotografía', script)
 
+
+class BusquedaVisualLigeraTest(unittest.TestCase):
+    """Sólo mocks: nunca descarga pesos ni ejecuta inferencia en las pruebas."""
+
+    def test_indice_con_cache_y_busqueda_texto_con_lista(self):
+        from unittest.mock import patch
+        from fuentes import ROOT, construir_indice_visual, buscar_indice_visual
+        fotos = sorted((ROOT/"datos/raw/fotos").glob("eltiempo_*"))[:1]
+        self.assertEqual(len(fotos), 1)
+        cache = {}
+        entradas = []
+
+        def falso_embedding(entrada):
+            entradas.append(entrada)
+            vector = [0.0]*768
+            vector[0] = 1.0
+            return vector
+
+        def guardar(datos):
+            cache.clear()
+            cache.update(datos)
+
+        with patch("fuentes._cargar_cache_visual", side_effect=lambda: cache), \
+             patch("fuentes._guardar_cache_visual", side_effect=guardar), \
+             patch("fuentes._embed", side_effect=falso_embedding):
+            primera = construir_indice_visual(fotos, limite=1)
+            segunda = construir_indice_visual(fotos, limite=1)
+            self.assertEqual(primera["calculadas"], 1)
+            self.assertEqual(segunda["calculadas"], 0)
+            resultado = buscar_indice_visual("lotería", fotos, limite=1)
+            self.assertEqual(len(resultado), 1)
+            self.assertEqual(resultado[0]["similitud"], 1.0)
+            self.assertEqual(len(entradas), 2)  # imagen 1 vez y consulta 1 vez
+            self.assertIsInstance(entradas[0], dict)
+            self.assertIn("image", entradas[0])
+            self.assertIsInstance(entradas[1], str)
+
+    def test_formato_api_imagen_y_texto(self):
+        from unittest.mock import patch, MagicMock
+        from fuentes import _embed
+        with patch("requests.post") as post:
+            rsp = MagicMock()
+            rsp.ok = True
+            rsp.json.return_value = {"embeddings": [[0.0]*768]}
+            post.return_value = rsp
+            self.assertEqual(len(_embed({"image": "ABC"})), 768)
+            self.assertEqual(post.call_args.kwargs["json"]["input"],
+                             [{"image": "ABC"}])
+            self.assertEqual(len(_embed("viviendas")), 768)
+            self.assertEqual(post.call_args.kwargs["json"]["input"],
+                             ["viviendas"])
+
 if __name__ == "__main__":
     unittest.main()
