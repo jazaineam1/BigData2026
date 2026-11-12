@@ -27,6 +27,37 @@ for col, grupo, n in zip(st.columns(4), grupos, totales):
 
 with st.sidebar:
     st.header("Seleccionar fuente")
+    st.subheader("Estado de Ollama")
+    import shutil
+    from urllib.request import urlopen
+    import json
+    if shutil.which("ollama") is None:
+        st.error("Ollama no está instalado en este contenedor.")
+        st.code("git pull --ff-only origin s11-estudiantes", language="bash")
+        st.caption("Después: Ctrl+Shift+P → Codespaces: Rebuild Container")
+    else:
+        try:
+            with urlopen("http://127.0.0.1:11434/api/tags", timeout=2) as respuesta:
+                modelos = json.load(respuesta).get("models", [])
+            if any(m.get("name", "") == "embeddinggemma-2:440m" for m in modelos):
+                st.success("Ollama activo y modelo 440m listo")
+            else:
+                st.info("Ollama activo. Falta descargar el modelo visual 440m.")
+                st.code("bash preparar_embeddinggemma.sh", language="bash")
+        except Exception:
+            st.warning("Ollama instalado, pero el servidor no responde.")
+            st.code("bash iniciar_ollama.sh", language="bash")
+            if st.button("Intentar iniciar Ollama", use_container_width=True):
+                import subprocess
+                try:
+                    salida = subprocess.run(
+                        ["bash", str(ROOT / "iniciar_ollama.sh")],
+                        capture_output=True, text=True, timeout=60, check=True)
+                    st.success(salida.stdout or "Servidor iniciado")
+                    st.rerun()
+                except Exception as exc:
+                    st.error(f"No se pudo iniciar: {exc}")
+    st.divider()
     grupo = st.radio("Colección", grupos)
     buscar = st.text_input("Buscar por número, nombre o artículo", placeholder="Ej. 728490281, 006")
     st.divider()
