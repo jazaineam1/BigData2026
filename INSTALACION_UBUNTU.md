@@ -88,7 +88,20 @@ se descargarán pesos de Whisper tiny. Esto no es una transcripción: es **carga
 
 **Verificación:** escucha el WAV real del corpus MINDS-14, compara con su texto humano y calcula WER. **No inventes WER** si no hay referencia humana.
 
-## 5. Problemas recurrentes
+## 5. Interfaz para abrir y visualizar documentos
+
+Además del cuaderno, puedes instalar Streamlit con soporte para PDF y la biblioteca de audio SoundFile:
+
+~~~bash
+python -m pip install "streamlit[pdf]>=1.56,<2" "soundfile>=0.12,<1"
+streamlit run visor_fuentes.py --server.address 0.0.0.0 --server.port 8501
+~~~
+
+**Streamlit** crea una interfaz local: permite escoger un documento y mostrar un PDF con st.pdf, fotografías con st.image y audio con st.audio. Requiere el complemento streamlit-pdf para st.pdf. El puerto **8501 debe ser privado** dentro de Codespaces; nunca lo expongas a Internet para archivos con datos personales.
+
+La programación del ejercicio sigue en el cuaderno: no se aprende OCR mirando una interfaz si no escribes y explicas la llamada a Tesseract.
+
+## 6. Problemas recurrentes
 
 | Síntoma | Primer control |
 |---|---|
