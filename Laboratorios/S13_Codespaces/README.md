@@ -89,7 +89,7 @@ Codespaces → PORTS 8502 **PRIVATE**. Ninguna discrepancia predicha constituye 
 
 **Atención: esta es la práctica central recomendada.** El antiguo módulo de regresión exploratoria de precios se mantiene sólo para mostrar capacidades de XGBoost, NO para estimar sobrecostos. Los ceros de SECOP no constituyen etiquetas válidas. Consulta la [auditoría de 300.000 registros](../../docs/S13_AUDITORIA_DATOS_SECOP_300K.md).
 
-**Recursos estudiantiles (máximo dos):** la [presentación S13 de 60 diapositivas](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1), con calculadora interactiva de TF-IDF en #44, y el [cuaderno S13 de 82 celdas](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). No necesitas volver a S12.
+**Recursos estudiantiles (máximo dos):** la [presentación S13 de 60 diapositivas](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1), con calculadora interactiva de TF-IDF en #44, y el [cuaderno S13 de 84 celdas](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). No necesitas volver a S12.
 
 ### Estación A: herramienta visual de cinco módulos (puerto 8503 privado)
 
@@ -130,7 +130,7 @@ GitHub Actions ya hizo las **1.000 inferencias reales**: 800 train, 200 test; TF
 
 GitHub permite máquinas de distintos tamaños según cuenta/cuota. En `https://github.com/codespaces`, abre `...` en tu Codespace → **Change machine type** → selecciona 4-core si está disponible. También `Ctrl+Shift+P → Codespaces: Change Machine Type` en VS Code. No fuerces 4 workers Dask en 2 CPU y no prometas reducción lineal de tiempos. **Cuatro workers dentro de un Codespace siguen siendo una única VM**. Revisa cuota/costo y apaga el entorno al finalizar.
 
-**Guía docente no obligatoria para estudiantes:** [libreto integral de 180 minutos](../../docs/S13_GUIA_DOCENTE_TFIDF_DASK_EMBEDDINGGEMMA.md). Referencia técnica: [mismo test hasta 50k](GUIA_50K_COMPARACION_JUSTA.md).
+**Referencia técnica:** [mismo test hasta 50k](GUIA_50K_COMPARACION_JUSTA.md).
 
 
 ### Resultado medido de una máquina de 4 CPU lógicas
