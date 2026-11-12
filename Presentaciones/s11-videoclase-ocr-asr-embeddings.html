@@ -40,7 +40,19 @@ footer{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;ga
 @media(max-width:1000px){.slide .timeline{grid-template-columns:repeat(3,minmax(0,1fr))}.flow-steps>div{flex:1 0 42%}.flow-steps>span{display:none}}
 @media(max-width:640px){.slide .timeline{grid-template-columns:repeat(2,minmax(0,1fr))}.flow-steps>div{flex:1 0 100%}.scheme text{font-size:16px}}
 @media print{header,footer,#tocButton,#tocDialog{display:none!important}main{display:block;padding:0!important}.slide{display:block!important;page-break-after:always;break-after:page;max-width:none;min-height:auto!important;padding:1cm!important;animation:none!important}body{background:white!important;color:#182c3c!important}.tile{break-inside:avoid}}
-</style></head><body><header><strong>Universidad Central · Big Data</strong><span>Sesión 11 · Investigación multimedia con Python</span></header><main>
+
+.deck-actions{display:flex;gap:9px;margin-left:auto}
+.deck-actions button,.outline-title button{border:1px solid #51859e;background:#16394f;color:#e8faff;border-radius:9px;padding:8px 12px;cursor:pointer;font:inherit}
+#outlineDialog{max-width:min(96vw,1050px);max-height:87vh;width:920px;border:1px solid #63879b;border-radius:16px;padding:18px;background:#102d43;color:#e8f5f9;box-shadow:0 18px 70px #000b;overflow:auto}
+#outlineDialog::backdrop{background:#021420bb}
+.outline-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.outline-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.outline-links button{display:block;width:100%;text-align:left;border:1px solid #355a72;background:#153d59;color:#e3f4f9;border-radius:9px;padding:10px 11px;font:inherit;cursor:pointer;line-height:1.3}
+.outline-links button:hover,.deck-actions button:hover{background:#1c5574}
+.outline-links small{color:#8edfd7;font-weight:700;margin-right:9px}
+@media(max-width:700px){.outline-links{grid-template-columns:1fr}header{display:flex;flex-wrap:wrap;gap:8px}.deck-actions{margin-left:0}}
+</style></head><body><header><strong>Universidad Central · Big Data</strong><span>Sesión 11 · Investigación multimedia con Python</span><nav class="deck-actions" aria-label="Navegación de la presentación"><button id="outlineButton" type="button">Índice</button><button id="fullscreenButton" type="button">Pantalla completa</button></nav></header>
+<dialog id="outlineDialog" aria-label="Índice de la presentación"><div class="outline-title"><strong>Sesión 11 · 63 pantallas</strong><button id="closeOutline" type="button" aria-label="Cerrar índice">Cerrar</button></div><div id="outlineLinks" class="outline-links"></div></dialog><main>
 <section class="slide active" id="s1" aria-label="De una fuente multimedia a una respuesta con evidencia" aria-hidden="false"><p class="kicker">01 · EL PROBLEMA</p><h1>De fuentes multimedia a evidencia consultable</h1><p class="lead">¿Qué dice el documento? ¿Qué muestra la fotografía? ¿Qué pronuncia la voz?</p><p class="lead">S11 · OCR, búsqueda visual, transcripción y ETL construido en Python.</p><p class="note">De un ejemplo pequeño a 122 fuentes: 62 fotografías, 30 actas SECOP y 30 voces reales licenciadas. Los 30 PNG son vistas de los 30 PDF.</p><div class="actions"><a href="https://github.com/jazaineam1/BigData2026/blob/s11-estudiantes/01_laboratorio.ipynb" target="_blank" rel="noopener">Abrir cuaderno editable</a><a href="https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes" target="_blank" rel="noopener">Abrir Codespace del estudiante</a></div><p class="note">No vamos a ejecutar un programa que ya contenga todas las respuestas. Cada etapa son pocas líneas de Python que tú puedes cambiar.</p></section>
 <section class="slide" id="s2" aria-hidden="true"><p class="kicker">02 · PROPÓSITO</p><h1>Al terminar podrás explicar y reproducir cada operación</h1><div class="grid three"><div class="tile"><h2>Comprender</h2><p>Explicar la diferencia entre píxeles, texto OCR, voz transcrita y vectores.</p><p>Elegir entre Tesseract, Whisper y EmbeddingGemma según la pregunta.</p></div><div class="tile"><h2>Programar</h2><p>Escribir y modificar Python: abrir archivos, recortar, transcribir, generar embeddings y crear registros.</p><p>Comprender parámetros antes de ampliar lotes.</p></div><div class="tile"><h2>Verificar</h2><p>Comparar contra PDF, fotografía y audio originales; registrar procedencia, SHA-256, error y límites.</p><p>Auditar equivalencia JSONL-Parquet.</p></div></div><div class="note"><strong>Producto evaluable:</strong> una pregunta, una fuente, código modificado, salida real y comprobación independiente. Ejecutar sin comprender no demuestra aprendizaje.</div></section>
 <section class="slide" id="s3" aria-hidden="true"><p class="kicker">03 · MAPA · 60 MIN</p><h1>Sesenta minutos: del primer archivo al caso transferible</h1><div class="timeline"><div><strong>00–06</strong><span>Fuentes, rutas y entorno</span></div><div><strong>06–18</strong><span>PDF SECOP y OCR contextual</span></div><div><strong>18–25</strong><span>Logotipo VALLE y PSM</span></div><div><strong>25–35</strong><span>Embedding visual y ranking</span></div><div><strong>35–44</strong><span>WAV, Whisper y WER</span></div><div><strong>44–54</strong><span>ETL, Parquet e integridad</span></div><div><strong>54–60</strong><span>Reto y transferencia</span></div></div><p class="note">En clase enseña 1–8 ejemplos. El procesamiento de 62 imágenes y 30 audios queda como práctica autónoma parametrizada en el <strong>mismo cuaderno</strong>, no como espera de procesamiento durante el video.</p></section>
@@ -374,5 +386,25 @@ const match=location.hash.match(/^#s(\d+)$/);show(match?Number(match[1])-1:0);
  if(!Number.isFinite(t)||!Number.isFinite(n)||t<0||n<1){tout.textContent="Introduce valores positivos y válidos.";return;}
  const total=t*n;tout.textContent="Proyección secuencial: "+total.toFixed(1)+" s ("+(total/60).toFixed(1)+" min). NO es medición de este lote.";}
  [time,amount].forEach(el=>el?.addEventListener("input",computeTime));computeTime();
+})();
+</script>
+<script>
+(()=> {
+ const btn=document.getElementById("outlineButton"),dialog=document.getElementById("outlineDialog");
+ const list=document.getElementById("outlineLinks"),close=document.getElementById("closeOutline");
+ document.querySelectorAll("section.slide").forEach((slide,index)=>{
+  const title=slide.querySelector("h1")?.textContent?.trim()||"Tema";
+  const item=document.createElement("button");item.type="button";
+  const small=document.createElement("small");small.textContent=String(index+1).padStart(2,"0");
+  item.appendChild(small);item.append(document.createTextNode(title));
+  item.addEventListener("click",()=>{show(index);dialog.close()});list.appendChild(item);
+ });
+ btn?.addEventListener("click",()=>dialog.showModal());
+ close?.addEventListener("click",()=>dialog.close());
+ const fs=document.getElementById("fullscreenButton");
+ fs?.addEventListener("click",async()=>{
+  try{if(document.fullscreenElement)await document.exitFullscreen();
+  else await document.documentElement.requestFullscreen()}catch(e){fs.title="La pantalla completa no está disponible en este navegador";}
+ });
 })();
 </script></body></html>
