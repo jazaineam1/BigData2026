@@ -4,6 +4,8 @@ on:
     paths:
       - "Laboratorios/S13_Codespaces/modelo_distribuido_20k.py"
       - "Laboratorios/S13_Codespaces/test_modelo_distribuido_20k.py"
+      - "Laboratorios/S13_Codespaces/app_modelo_20k.py"
+      - ".devcontainer/s13-distribuido/devcontainer.json"
       - "Laboratorios/S13_Codespaces/requirements.txt"
       - "Laboratorios/S13_Codespaces/GUIA_MODELO_20K.md"
       - ".github/workflows/s13-ml-20k-qa.yml"
@@ -27,6 +29,8 @@ jobs:
         run: |
           cd Laboratorios/S13_Codespaces
           python -m unittest -v test_modelo_distribuido_20k
+      - name: Verificar sintaxis de la aplicacion de investigacion
+        run: python -m py_compile Laboratorios/S13_Codespaces/app_modelo_20k.py
       - name: Entrenar DOS modelos XGBoost reales entre DOS workers sobre al menos 20.000 fichas
         run: |
           python Laboratorios/S13_Codespaces/modelo_distribuido_20k.py --registros 26000 --rondas 30 --workers 2
@@ -60,3 +64,14 @@ jobs:
           print("Entrenamiento distribuido validado:",m["entrenamiento"],
                 "train, workers:",m["workers"],"metricas:",m["metricas"])
           PY
+      - name: Verificar panel de investigacion con resultados reales (HTTP)
+        run: |
+          python -m streamlit run Laboratorios/S13_Codespaces/app_modelo_20k.py --server.headless true --server.address 127.0.0.1 --server.port 8502 > /tmp/s13-panel.log 2>&1 &
+          for i in $(seq 1 40); do
+            if curl -fsS --max-time 2 http://127.0.0.1:8502/_stcore/health; then
+              echo "Panel Streamlit S13: HTTP OK"; exit 0
+            fi
+            sleep 1
+          done
+          tail -100 /tmp/s13-panel.log
+          exit 1
