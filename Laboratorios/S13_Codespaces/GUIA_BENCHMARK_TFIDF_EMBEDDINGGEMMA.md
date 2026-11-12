@@ -17,6 +17,20 @@
 
 **Limitaciones:** segmentación de 5 códigos + resto y evaluación temporal son una tarea pedagógica. El segmento 80 aparece con frecuencia muy superior al resto, por eso `accuracy` sola engaña. Algunas descripciones contienen códigos explícitos, que intentamos enmascarar; falta inspección humana de fuga, clase y calidad de títulos. Son 20.000 **fichas**, no 20.000 PDF.
 
+## Resultados reales verificados en GitHub Actions (12 de noviembre de 2026)
+
+La prueba automatizada pasó con **300.000 filas inspeccionadas, 287.682 fichas elegibles y 20.000 fichas únicas muestreadas**. Se utilizaron dos workers Dask sobre **un solo runner de 4 CPU lógicas**. [Prueba verificable](https://github.com/jazaineam1/BigData2026/actions/runs/43159998957).
+
+| Procesos (80 % train, 20 % test) | TF-IDF transform local | TF-IDF transform Dask | F1 macro TF-IDF + LinearSVC | F1 macro TF-IDF/SVD + XGBoost Dask |
+|---:|---:|---:|---:|---:|
+| 1.000 | 0,042 s | 0,115 s | **0,4513** | 0,3851 |
+| 10.000 | 0,417 s | 0,329 s | **0,5594** | 0,3960 |
+| 20.000 | 0,892 s | 0,688 s | **0,5653** | 0,4088 |
+
+**Costos que esa tabla NO incluye:** creación del clúster Dask **1,454 s**, aprendizaje del vocabulario TF-IDF **0,133 / 0,474 / 0,969 s** (respectivamente), lectura y filtrado de los 300.000 registros, codificación SVD, entrenamiento y validación. Los tiempos son de operaciones aisladas en una ejecución, sin intervalos de confianza, no tiempos de extremo a extremo ni benchmarks del HP.
+
+**Interpretación:** para 1.000 filas, Dask pierde por coordinación; para 10.000 y 20.000 transformó aproximadamente 21–23 % más rápido, pero ahorró menos de un cuarto de segundo, lo cual no compensa instalar/abrir el clúster si no existe ya. Los **F1 entre tamaños no representan una curva de aprendizaje con test fijo**, pues cada subconjunto tuvo una prueba temporal distinta. Un clasificador local sencillo superó a la variante con SVD y XGBoost distribuido; más workers o más complejidad no garantizan mejor calidad.
+
 ## 1 · Medición reproducible TF-IDF
 
 En GitHub Codespaces con perfil **S13**, terminal del repositorio:
