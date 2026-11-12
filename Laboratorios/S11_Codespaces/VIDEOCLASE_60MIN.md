@@ -196,7 +196,7 @@ python proyecto.py indexar --config proyectos/otro_caso/config.json
 python proyecto.py buscar --config proyectos/otro_caso/config.json --consulta "¿Qué pedido se entrega?"
 python proyecto.py auditar --config proyectos/otro_caso/config.json
 ~~~
-**Muestre:** el nuevo `config.json`, `catalogo.jsonl` y `ultima_busqueda.json`. La fuente ahora es TXT (para ahorrar tiempo), pero el mismo motor admite imágenes, PDF y audio autorizados. En un segundo intento el estudiante debe colocar un archivo propio en `entradas/imagenes/` o `entradas/audios/` y repetir; ese intento es la verdadera evidencia de transferencia.
+**Muestre:** el nuevo `config.json`, `catalogo.jsonl`, `candidatos.jsonl` y `ultima_busqueda.json`. Ningún candidato queda atribuido a otro archivo. La fuente ahora es TXT (para ahorrar tiempo), pero el mismo motor admite imágenes, PDF y audio autorizados. En un segundo intento el estudiante debe colocar un archivo propio en `entradas/imagenes/` o `entradas/audios/` y repetir; ese intento es la verdadera evidencia de transferencia.
 
 **Verificación independiente del catálogo (fuera del motor):**
 ~~~bash
@@ -220,7 +220,7 @@ Mostrar que la interfaz llama las funciones del mismo `proyecto.py`, sin iniciar
 - **OCR:** la CLI `tesseract` contra `ocr.json` **y** inspección de la imagen original.
 - **ASR:** audio reproducido contra el texto inferido; `evaluar-asr` solo si existe referencia válida.
 - **Índice:** llamada HTTP directa a Ollama, longitud de 768 y lectura de fragmentos con fuente/hash.
-- **Transferencia:** proyecto nuevo con otro TXT o un archivo autorizado, conteo del JSONL y auditoría.
+- **Transferencia:** proyecto nuevo con otro TXT o un archivo autorizado, conteo del JSONL y auditoría; ejecutar `python verificar_independiente.py --proyecto proyectos/otro_caso`.
 
 ## Criterios mínimos de aceptación antes de publicar la grabación
 
