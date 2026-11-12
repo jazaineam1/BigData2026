@@ -2,7 +2,7 @@
 
 **Universidad Central · Big Data**. Este Codespace es un kit de clase **reducido**: aquí no están Airflow, otros cursos, exámenes, respuestas docentes ni los motores extensos que hacen el trabajo por ti.
 
-**Objetivo:** aprender a escribir Python, no ejecutar un programa ya construido. Vas a investigar **actas SECOP, cuatro fotografías reales de El Tiempo y una voz humana con licencia**. OCR extrae letras; EmbeddingGemma 2 permite recuperar fotos por significado; Whisper transcribe voz. Ninguno certifica la verdad de una afirmación.
+**Objetivo:** aprender a escribir Python, no ejecutar un programa ya construido. Vas a investigar **actas SECOP, 62 fotografías reales de dos conjuntos de El Tiempo y diez voces humanas licenciadas**. OCR extrae letras; EmbeddingGemma 2 permite recuperar fotos por significado; Whisper transcribe voz. Ninguno certifica la verdad de una afirmación.
 
 ## 1. Abrir el Codespace correcto
 
@@ -14,13 +14,38 @@
 
 **No necesitas Ubuntu local.** Codespaces es Linux en el navegador. Para comprender cómo se prepara el entorno, abre el [tutorial de instalación](./INSTALACION_UBUNTU.md): también se puede realizar en un Ubuntu propio cuando sea apropiado.
 
+
+## Visor: abre CADA documento, fotografía y audio en una sola pantalla
+
+La herramienta visual se llama visor_fuentes.py. Es complementaria al cuaderno: permite abrir los **30 PDF SECOP completos**, comparar cada PDF con su **primera página PNG**, recorrer las **62 fotografías originales** y escuchar **10 voces reales**.
+
+En la terminal del Codespace:
+
+~~~bash
+streamlit run visor_fuentes.py --server.address 0.0.0.0 --server.port 8501
+~~~
+
+Abre el panel **Puertos / Ports**, localiza 8501 y selecciona **Abrir vista previa** (o abrir en el navegador). Mantén su visibilidad **Private**. Dentro del visor puedes filtrar por nombre o número de acta, usar Anterior/Siguiente, abrir el PDF y su página juntos, aplicar OCR al archivo visible y cambiar PSM. Las voces se preparan pulsando el botón **Preparar / comprobar las 10 voces**: se recupera el Parquet MINDS-14, se verifica su SHA-256 y se crea una copia PCM16 para reproducción. También se puede transcribir una voz seleccionada con Whisper.
+
+**Importante:** el visor es para **observar fuentes y contrastar predicciones**. La actividad de aprendizaje permanece en 01_laboratorio.ipynb, donde escribirás Python y procesarás lotes completos. Esta interfaz no sustituye ese código.
+
+### Qué material contiene el kit ampliado
+
+- 30 fotografías El Tiempo en datos/raw/fotos.
+- 32 fotografías con ficha en datos/raw/fotos_catalogadas.
+- 30 PDF SECOP completos en datos/raw/actas_pdf.
+- 30 vistas PNG de primera página en datos/raw/actas.
+- 10 voces humanas MINDS-14 descargables y verificables desde la herramienta.
+
+**Total para investigar: 62 fotografías + 30 actas distintas + 10 audios = 102 fuentes.** Las 30 vistas PNG son derivados de las actas y no deben contabilizarse como otros treinta documentos. Los 10 audios se obtienen al ejecutar el botón o el código de preparación, no vienen incluidos como bytes en Git.
+
 ## 2. Los archivos disponibles son reales
 
 | Carpeta | Archivos | Pregunta |
 |---|---|---|
-| `datos/raw/actas` | Dos primeras páginas de actas SECOP | ¿Cuál es el total, descuento y neto a pagar? |
-| `datos/raw/fotos` | Cuatro imágenes de El Tiempo | ¿Qué letreros reconoce OCR? ¿Qué imagen contiene viviendas? |
-| `datos/raw/` al ejecutar | WAV de voz humana PolyAI MINDS-14 es-ES, CC BY 4.0 | ¿Qué dice y qué errores tiene la transcripción? |
+| `datos/raw/actas` + `datos/raw/actas_pdf` | 30 actas completas PDF y sus PNG de primera página | ¿Cuál es el total, descuento y neto a pagar? |
+| `datos/raw/fotos` + `datos/raw/fotos_catalogadas` | 62 fotografías de dos conjuntos de El Tiempo | ¿Qué letreros reconoce OCR? ¿Qué imagen contiene viviendas? |
+| `datos/raw/audios` + `datos/derived/audios` | 10 WAV humanos PolyAI MINDS-14 es-ES, CC BY 4.0 | ¿Qué dice y qué errores tiene la transcripción? |
 
 La grabación es bancaria y **no pertenece a las noticias**. Los documentos SECOP pueden mostrar datos personales: al compartir capturas o exportar resultados, minimízalos. Las imágenes periodísticas conservan los derechos de sus titulares; los créditos por archivo del subconjunto de 30 todavía requieren curaduría (no inventes licencias).
 
@@ -54,6 +79,6 @@ Debe aparecer `spa`. Para preparar Ollama (solo cuando llegues al bloque de bús
 
 Los originales se guardan en `datos/raw`. Las salidas se generan en `outputs/`, que está ignorada por Git. No subas transcripciones completas de datos personales ni WAV de terceros sin autorización.
 
-**Advertencia:** la rama s11-estudiantes contiene solo estos archivos, pero eso NO hace privados los demás archivos del repositorio público. El aislamiento real de material reservado requiere un repositorio privado independiente.
+**Advertencia:** la rama s11-estudiantes contiene solo estos materiales de clase, pero eso NO hace privados los demás archivos del repositorio público. El aislamiento real de material reservado requiere un repositorio privado independiente.
 
 Más sobre licencias y fuentes: [FUENTES.md](./FUENTES.md).
