@@ -182,35 +182,131 @@ else:
 
 if item["clase"] in ("imagen", "pdf"):
     st.divider()
-    st.subheader("Experimentar con OCR en ESTE archivo")
-    st.caption("Abre la imagen antes de preguntar si tiene texto. "
-               "Tesseract reconoce caracteres; no explica lo que ocurre en una escena.")
-    psm = st.selectbox("PSM: segmentación de página", [6, 11, 3], index=1)
-    transformar = st.checkbox("Ver imagen en grises y con contraste", value=False)
-    with Image.open(item["preview"]) as img:
-        media = img.convert("RGB")
+    st.markdown("### 2 · ¿Qué hace OCR y qué significa PSM?")
+    st.write("**OCR** (reconocimiento óptico de caracteres) intenta convertir píxeles "
+             "en letras y cifras. **Tesseract** es el programa de OCR; **pytesseract** "
+             "es la biblioteca Python que lo llama. OCR no interpreta por sí solo "
+             "un contrato ni confirma si sus cifras son correctas.")
+    st.write("**PSM** significa Page Segmentation Mode (modo de segmentación de página). "
+             "Le indica a Tesseract cómo organizar columnas y bloques antes de leer.")
+    psm = st.selectbox("Cómo quieres que Tesseract interprete esta imagen",
+                       [3, 6, 11], format_func=lambda n: PSM_EXPLICACION[n][0],
+                       index=0 if item["clase"] == "pdf" else 2)
+    st.info(PSM_EXPLICACION[psm][1])
+    with st.expander("¿Cuándo conviene usar cada PSM?"):
+        for n in [3, 6, 11]:
+            st.markdown(f"**{PSM_EXPLICACION[n][0]}:** {PSM_EXPLICACION[n][1]}")
+        st.caption("Para una página completa con tabla empieza en 3. Para un recorte "
+                   "con un bloque de texto prueba 6. Para letreros dispersos prueba 11. "
+                   "Compara, porque ningún modo garantiza una lectura correcta.")
+
+    transformar = st.checkbox("Crear una copia temporal en escala de grises y con contraste",
+                              help="El original no cambia; una transformación también puede empeorar el OCR.")
+    if item["clase"] == "pdf":
+        media = media_original.copy()
+        pagina_actual = pagina
+    else:
+        with Image.open(item["preview"]) as foto_img:
+            media = foto_img.convert("RGB")
+        pagina_actual = 1
     if transformar:
         media = ImageOps.autocontrast(ImageOps.grayscale(media))
-        st.image(media, caption="Transformación temporal; se conserva el original",
+        st.image(media, caption="Copia transformada, sin alterar la fuente",
                  use_container_width=True)
-    if st.button("Aplicar Tesseract OCR a este archivo"):
+
+    st.markdown("### 3 · Reconocer la página y examinar el texto COMPLETO")
+    st.write("Primero observa toda la salida de Tesseract. Después identifica campos "
+             "y comprueba cada candidato en la página, sin confundirlos con verdades verificadas.")
+    clave = (str(original), pagina_actual, psm, transformar)
+    if "resultados_ocr" not in st.session_state:
+        st.session_state["resultados_ocr"] = {}
+    if st.button("Leer esta página con Tesseract OCR",
+                 type="primary", use_container_width=True):
         import pytesseract
         try:
-            start = time.perf_counter()
-            with st.spinner("Reconociendo los caracteres..."):
-                leido = pytesseract.image_to_string(media, lang="spa", config=f"--psm {psm}")
-            st.caption(f"{len(leido)} caracteres; {time.perf_counter()-start:.2f} s")
-            if item["clase"] == "pdf":
-                lineas = [s for s in leido.splitlines()
-                          if any(q in s.upper() for q in ("TOTAL", "DESCUENTO", "PAGAR", "VALOR"))]
-                st.text_area("Solo líneas relacionadas con valores; confirmar en la página",
-                             "\n".join(lineas) or "Sin coincidencias", height=170)
-                if st.checkbox("Mostrar texto OCR completo (puede contener datos personales)"):
-                    st.text_area("OCR completo — NO publicar", leido, height=230)
-            else:
-                st.text_area("Texto OCR — ¿es correcto?", leido, height=220)
+            inicial = time.perf_counter()
+            with st.spinner(f"Reconociendo página {pagina_actual} con PSM {psm}..."):
+                lectura = pytesseract.image_to_string(
+                    media, lang="spa", config=f"--psm {psm}")
+            st.session_state["resultados_ocr"][clave] = {
+                "texto": lectura, "segundos": time.perf_counter() - inicial}
         except Exception as exc:
-            st.error(f"No se pudo ejecutar OCR: {exc}")
+            st.error(f"Tesseract no pudo reconocer esta página: {exc}")
+    resultado = st.session_state["resultados_ocr"].get(clave)
+    if resultado is None:
+        st.caption("Todavía no se ejecutó OCR con la configuración seleccionada.")
+    else:
+        lectura = resultado["texto"]
+        metricas = st.columns(3)
+        metricas[0].metric("Caracteres", len(lectura))
+        metricas[1].metric("Líneas", len(lectura.splitlines()))
+        metricas[2].metric("Tiempo", f"{resultado['segundos']:.1f} s")
+        st.caption("Estas métricas indican cantidad de texto y tiempo; NO exactitud.")
+
+        tab_texto, tab_campos, tab_codigo = st.tabs([
+            "Texto OCR completo", "Campos del documento", "Python para reproducir"
+        ])
+        with tab_texto:
+            st.write("Se muestra **toda** la transcripción OCR de la página, no solo "
+                     "las líneas que contengan TOTAL o PAGAR. "
+                     "El orden puede ser distinto al de las columnas del PDF.")
+            if lectura.strip():
+                st.text_area("Texto reconocido automáticamente", value=lectura, height=450)
+                st.download_button("Guardar TXT para revisión privada",
+                                   lectura.encode("utf-8"),
+                                   file_name=f"{original.stem}_pagina{pagina_actual}_ocr.txt",
+                                   mime="text/plain")
+            else:
+                st.warning("No se reconoció texto. Revisa la imagen y prueba otro PSM.")
+            st.warning("El OCR puede contener identificaciones de personas. "
+                       "Evita publicar esta transcripción sin revisarla.")
+        with tab_campos:
+            if item["clase"] == "pdf":
+                st.write("El programa busca etiquetas como VALOR DEL CONTRATO, DURACIÓN "
+                         "y FORMA DE PAGO. Muestra **lecturas candidatas** junto a fragmentos "
+                         "del OCR; si una etiqueta no aparece, lo indica expresamente.")
+                st.dataframe(pd.DataFrame(candidatos_ocr(lectura)),
+                             use_container_width=True, hide_index=True)
+                referencia = referencia_doc_728704921(original, pagina_actual)
+                if referencia:
+                    st.markdown("#### Comparación con la primera página original")
+                    st.write("La siguiente ficha proviene de una **lectura visual de la fuente**. "
+                             "NO es texto creado ni corregido silenciosamente por OCR.")
+                    st.table(pd.DataFrame([
+                        {"Campo observado": nombre, "Referencia visual": valor}
+                        for nombre, valor in referencia.items()
+                    ]))
+                    st.write("**Pregunta de investigación:** ¿puedes encontrar los valores "
+                             "$14.760.000 y $2.460.000 en la salida OCR? "
+                             "¿Reconoció seis pagos? ¿Qué información aparece en la imagen "
+                             "pero no en el texto automático?")
+                st.caption("Una cifra aislada no es necesariamente el valor del contrato: "
+                           "se necesita su etiqueta, contexto y cotejo con el PDF.")
+            else:
+                st.info("Para una fotografía, verifica palabras y letreros en la pestaña "
+                        "del texto completo. Para escenas y objetos, usa embeddings visuales.")
+        with tab_codigo:
+            st.write("Abre el cuaderno único 01_laboratorio.ipynb. Estas líneas son "
+                     "el núcleo del reconocimiento que vas a escribir y modificar:")
+            if item["clase"] == "pdf":
+                ruta_ejemplo = str(item["preview"].relative_to(ROOT))
+                st.code("from PIL import Image\n"
+                        "import pytesseract\n"
+                        f"imagen = Image.open({ruta_ejemplo!r})\n"
+                        f"texto = pytesseract.image_to_string(imagen, lang='spa', config='--psm {psm}')\n"
+                        "print(texto)\n", language="python")
+                st.caption("El ejemplo de arriba usa el PNG de la PRIMERA página; "
+                           "para otras páginas primero hay que convertir esa página del PDF.")
+            else:
+                ruta_ejemplo = str(original.relative_to(ROOT))
+                st.code("from PIL import Image\n"
+                        "import pytesseract\n"
+                        f"imagen = Image.open({ruta_ejemplo!r})\n"
+                        f"texto = pytesseract.image_to_string(imagen, lang='spa', config='--psm {psm}')\n"
+                        "print(texto)\n", language="python")
+            st.write("Cambia el documento, prueba PSM 3, 6 y 11, identifica una diferencia "
+                     "y justifica por qué ocurre. El visor ayuda a observar; "
+                     "el cuaderno enseña a programar.")
 
 st.divider()
 st.markdown("**Para aprender Python:** abre el cuaderno 01_laboratorio.ipynb y escribe "
