@@ -171,6 +171,30 @@ class EmbeddingsFormatoTest(unittest.TestCase):
         self.assertIn('incrustar("Una fotografía', script)
 
 
+class MuestraCanonicaTest(unittest.TestCase):
+    """Misma submuestra, sin inferencia ni descargas de modelos."""
+
+    def test_orden_1_4_8_62_compatible_con_cuaderno(self):
+        from fuentes import seleccionar_fotos_muestra, CONFIG_S11
+        fotos = sorted((ROOT / "datos/raw/fotos").glob("eltiempo_*"))
+        fichas = sorted((ROOT / "datos/raw/fotos_catalogadas").glob("*.webp"))
+        self.assertEqual(len(fotos) + len(fichas), 62)
+        for n in (1, 4, 8, 62):
+            muestra = seleccionar_fotos_muestra(fotos + fichas, n)
+            self.assertEqual(len(muestra), n)
+            self.assertEqual(len({str(p) for p in muestra}), n)
+            self.assertEqual([p.name for p in muestra[:min(n, 8)]],
+                             CONFIG_S11["muestras_fotografias"][:min(n, 8)])
+        self.assertEqual(CONFIG_S11["campos_caso"],
+                         ["VALOR DEL CONTRATO", "DURACIÓN", "FORMA DE PAGO"])
+
+    def test_no_duplica_rutas_ni_dispara_inferencia(self):
+        from fuentes import seleccionar_fotos_muestra
+        foto = ROOT / "datos/raw/fotos/eltiempo_006.webp"
+        with self.assertRaisesRegex(ValueError, "duplicadas"):
+            seleccionar_fotos_muestra([foto, foto], 1)
+
+
 class BusquedaVisualLigeraTest(unittest.TestCase):
     """Sólo mocks: nunca descarga pesos ni ejecuta inferencia en las pruebas."""
 

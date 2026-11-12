@@ -6,6 +6,7 @@ Aprende el procesamiento escribiendo Python en 01_laboratorio.ipynb.
 from __future__ import annotations
 
 import time
+import json
 from pathlib import Path
 
 import streamlit as st
@@ -19,7 +20,7 @@ from ocr_documental import (PSM_EXPLICACION, candidatos_ocr, pdf_paginas,
                             detalle_ocr, dibujar_cajas_ocr)
 
 from fuentes import (ROOT, AUDIO_MANIFEST, inventario, preparar_audios, sha256,
-                     construir_indice_visual, buscar_indice_visual)
+                     construir_indice_visual, buscar_indice_visual, seleccionar_fotos_muestra)
 
 st.set_page_config(page_title="S11 · Visor de fuentes", page_icon="📚", layout="wide")
 st.title("📚 S11 · Documentos, imágenes y audios")
@@ -385,6 +386,30 @@ if item["clase"] in ("imagen", "pdf"):
             else:
                 st.info("Cuando no hay letras útiles, cambia a búsqueda "
                         "visual por embeddings para encontrar escenas.")
+            # Ficha portable: cada candidato mantiene documento, página, región,
+            # parámetros y hash; no convierte una lectura probable en verdad.
+            ficha_evidencia = {
+                "fuente": str(original.relative_to(ROOT)),
+                "sha256_fuente": sha256(original),
+                "pagina": pagina_actual,
+                "region_px": list(caja),
+                "parametros": {
+                    "psm": psm, "escala": escala,
+                    "tratamiento": tratamiento, "margen": margen
+                },
+                "motor": "Tesseract OCR (idioma spa)",
+                "candidatos": candidatos_ocr(resultado["texto"])
+                if item["clase"] == "pdf" else [],
+                "revision_humana": "PENDIENTE: abrir el original y comprobar cada lectura",
+                "advertencia": "No compartir campos personales sin revisión y autorización."
+            }
+            st.download_button(
+                "Descargar ficha de evidencia (JSON, revisión privada)",
+                data=json.dumps(ficha_evidencia, ensure_ascii=False, indent=2).encode("utf-8"),
+                file_name=f"{original.stem}_evidencia.json",
+                mime="application/json",
+                key=f"ficha_{original.name}_{pagina_actual}"
+            )
         with tab_python:
             st.write("Abre el único cuaderno 01_laboratorio.ipynb y "
                      "prueba estas operaciones por tu cuenta.")
@@ -438,6 +463,11 @@ if item["clase"] == "imagen":
             "Cantidad de fotos (1 para entender, 4 u 8 para clase, 62 para ampliación)",
             options=[1, 4, 8, 62], value=4, key="limite_indice_s11"
         )
+        fotos_ejemplo = seleccionar_fotos_muestra(fotos_visibles, LIMITE)
+        st.caption("Muestra reproducible (" + str(len(fotos_ejemplo)) + "): " +
+                   ", ".join(p.name for p in fotos_ejemplo[:8]) +
+                   (" y más..." if len(fotos_ejemplo) > 8 else "") +
+                   ". Para las viviendas y el logotipo usa al menos 4.")
         if st.button("Crear o reutilizar índice de fotografías seleccionadas",
                      type="secondary", use_container_width=True):
             try:

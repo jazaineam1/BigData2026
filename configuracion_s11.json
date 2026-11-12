@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "modelo_visual": "embeddinggemma-2:440m",
+  "acta_caso": "secop_acta_728704921.pdf",
+  "campos_caso": [
+    "VALOR DEL CONTRATO",
+    "DURACIÓN",
+    "FORMA DE PAGO"
+  ],
+  "muestras_fotografias": [
+    "eltiempo_006.webp",
+    "eltiempo_009.webp",
+    "eltiempo_023.webp",
+    "eltiempo_001.jpg",
+    "eltiempo_002.webp",
+    "eltiempo_003.webp",
+    "eltiempo_004.webp",
+    "eltiempo_005.webp"
+  ],
+  "limites_demostracion": {
+    "actas": 1,
+    "fotos": 4,
+    "audios": 1
+  },
+  "modos_visual": [
+    1,
+    4,
+    8,
+    62
+  ],
+  "advertencia": "Las fotos, documentos SECOP y voces MINDS-14 no deben vincularse sin metadatos verificables."
+}

@@ -7,6 +7,27 @@ import wave
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+CONFIG_S11 = json.loads((ROOT / "configuracion_s11.json").read_text(encoding="utf-8"))
+
+
+def seleccionar_fotos_muestra(fotos, limite=8):
+    """Mismo orden didáctico en visor y cuaderno; después, resto del corpus.
+
+    La lista de entrada puede ser una submuestra de pruebas: nunca se inventan rutas.
+    """
+    if limite not in CONFIG_S11["modos_visual"]:
+        raise ValueError("Elige 1, 4, 8 o 62 fotografías")
+    rutas = [Path(f) for f in fotos]
+    if len(set(map(str, rutas))) != len(rutas):
+        raise ValueError("El inventario contiene rutas duplicadas")
+    por_nombre = {p.name: p for p in rutas}
+    if len(por_nombre) != len(rutas):
+        raise ValueError("Hay nombres de fotografías duplicados")
+    prioridad = [por_nombre[n] for n in CONFIG_S11["muestras_fotografias"]
+                 if n in por_nombre]
+    restantes = [p for p in rutas if p not in prioridad]
+    return (prioridad + restantes)[:limite]
+
 AUDIO_MANIFEST = ROOT / "datos/manifiestos/audios_minds14.json"
 PARQUET = ROOT / "datos/minds14_es-ES.parquet"
 URL = "https://huggingface.co/datasets/PolyAI/minds14/resolve/main/es-ES/train-00000-of-00001.parquet"
@@ -155,7 +176,7 @@ def preparar_audios():
 
 # Búsqueda visual docente opcional: no indexa nada al abrir Streamlit.
 # La operación pesada solo se ejecuta después de pulsar el botón.
-MODELO_VISUAL = "embeddinggemma-2:440m"
+MODELO_VISUAL = CONFIG_S11["modelo_visual"]
 API_OLLAMA = "http://127.0.0.1:11434/api/embed"
 CACHE_VISUAL = ROOT / "outputs/visor_vectores_440m.json"
 
@@ -200,7 +221,7 @@ def construir_indice_visual(fotos, limite=8):
     import base64
     if limite not in (1, 4, 8, 62):
         raise ValueError("Solo 1, 4, 8 o 62 fotos por ejecución explícita")
-    seleccion = list(fotos)[:limite]
+    seleccion = seleccionar_fotos_muestra(fotos, limite)
     if not seleccion:
         raise ValueError("No hay fotografías para indexar")
     cache = _cargar_cache_visual()
@@ -230,7 +251,7 @@ def buscar_indice_visual(pregunta, fotos, limite=8, top_k=6):
     if not pregunta.strip() or len(pregunta) > 300:
         raise ValueError("Escribe una consulta concreta de hasta 300 caracteres")
     cache = _cargar_cache_visual()
-    seleccion = list(fotos)[:limite]
+    seleccion = seleccionar_fotos_muestra(fotos, limite)
     if not seleccion:
         return []
     consulta = _embed("task: search result | query: " + pregunta.strip())
