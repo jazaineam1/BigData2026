@@ -68,7 +68,22 @@ Ollama `embeddinggemma-2:270m`, misma entrada SECOP, 16 textos × lotes de 4:
 
 La proyección lineal al **mismo runner** es aproximadamente 1,42 horas para 50.000 secuencialmente y 1,49 horas con Dask, **NO medición de 50.000 inferencias**. Cambiar hardware, longitud de textos y lotes cambia radicalmente el tiempo. El modelo en Ollama se midió en el runner, no en el HP del docente.
 
-**Próxima prueba de calidad:** el clasificador EmbeddingGemma → LinearSVC usa la misma muestra de 50.000 y el mismo corte de 1.000, 10.000, 20.000 o 50.000 del TF-IDF, con idénticos hiperparámetros de LinearSVC. No se debe publicar una F1 hasta ejecutarlo con el modelo real. Este script ya acepta `--n 50000` y cachea vectores para reiniciar; la corrida completa no se ha efectuado.
+### Prueba adicional real de calidad de EmbeddingGemma (1.000)
+
+**Prueba validada:** https://github.com/jazaineam1/BigData2026/actions/runs/43164629322
+
+Con los **mismos 1.000 procesos seleccionados desde el reservorio de 50.000**, 800 entrenamiento y 200 prueba temporal, **idéntico LinearSVC**:
+- TF-IDF + LinearSVC: F1 macro **0,50408**.
+- EmbeddingGemma 2 (270m, 768 dimensiones) + el mismo LinearSVC: F1 macro **0,51090**, balanced accuracy **0,5515**.
+- Mejora F1 **+0,00682** (0,682 puntos porcentuales) sobre este único conjunto de prueba.
+- Generar **1.000 embeddings reales** por Ollama tardó **124,528 s**, una tasa medida de **8,03 textos/s**, en lotes de 8.
+- Pipeline EmbeddingGemma completo **176,67 s**, incluyendo **lectura y selección de los 300.000 registros**; no compararlo sin ajustar con el pipeline TF-IDF de 0,141 s que excluye lectura de datos.
+
+Con la tasa de 1.000 textos, **50.000 / 8,03 ≈ 6.227 s ≈ 1 h 44 min** de inferencia en ese runner **si la tasa se mantiene**, sin considerar preparación ni cambios por CPU/memoria. Esta extrapolación difiere de la obtenida con 16 textos y lotes de 4: es una razón adicional para medir más de una longitud/lote. **NO se han procesado 50.000 embeddings reales en CI**; el script acepta `--n 50000` y cachea cada vector en SQLite para continuar un proceso largo.
+
+**Decisión experimental:** la ganancia de F1 (+0,00682) es pequeña; antes de extraer 50k embeddings, validar varios cortes temporales, F1 por categoría y la posible fuga del código UNSPSC en el texto. Una sola prueba de 200 expedientes no prueba que EmbeddingGemma sea mejor.
+
+
 
 
 ## Ejecutar los cuatro tamaños
