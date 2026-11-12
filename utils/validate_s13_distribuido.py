@@ -38,7 +38,7 @@ def main():
     import shutil
     import subprocess
     import tempfile
-    script = re.search(r"<script>([\\s\\S]*?)</script>", html)
+    script = re.search(r"<script>(.*?)</script>", html, re.DOTALL)
     assert script, "Falta script interactivo"
     if shutil.which("node"):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".js", encoding="utf-8") as temporal:
