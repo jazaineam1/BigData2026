@@ -60,7 +60,7 @@ test('S11: experimentos de selección, PSM, coseno, WER y lote',async({page})=>{
  await page.locator('#psmMode').selectOption('6');
  await expect(page.locator('#psmOut')).toContainText('bloque');
  await page.goto(route+'#s16');
- await page.locator('#cosine').fill('0');
+ await page.locator('#cosine').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}))});
  await expect(page.locator('#cosineOut')).toContainText('1.000');
  await page.goto(route+'#s20');
  await expect(page.locator('#werOut')).toContainText('33.3%');
