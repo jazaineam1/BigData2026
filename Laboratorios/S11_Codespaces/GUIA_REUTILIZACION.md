@@ -207,7 +207,9 @@ Después ejecuta OCR/ASR y crea catálogo:
 
     python proyecto.py procesar --config proyectos/facturas_demo/config.json
 
-**Salida esperada:** salidas/catalogo.jsonl, catalogo.parquet, errores.json y manifest.json. Si una fuente está dañada, el programa sigue con las demás, registra el problema y termina con error para indicar que el lote quedó **parcial**.
+**Salida esperada:** salidas/catalogo.jsonl, candidatos.jsonl, catalogo.parquet, errores.json y manifest.json. Si una fuente está dañada, el programa sigue con las demás, registra el problema y termina con error para indicar que el lote quedó **parcial**.
+
+**Extracción reutilizable:** `extraer_candidatos` detecta fechas, cifras y referencias en el texto, conservando archivo, fuente, SHA-256 y, en los audios, segundos cuando corresponden. Los candidatos son hipótesis, no hechos certificados.
 
 **Interpretación obligatoria:**
 - **Cómo se lee:** una línea JSONL por archivo exitoso; el campo extracted_text conserva texto; segments conserva tiempos si es audio.
@@ -360,6 +362,15 @@ bash probar_todo.sh --completo
 ~~~
 
 El segundo modo **descarga modelos a tu Codespace y consume recursos de cómputo**. No se ejecuta automáticamente para evitar costos inesperados. El mensaje final confirma los pasos ejecutados: si hay error, revisa la primera etapa que falló antes de continuar. No se simulan resultados de Whisper u Ollama en el modo completo.
+
+## Auditoría adicional sin ejecutar el motor
+
+~~~bash
+python verificar_independiente.py --caso lab --modelo
+python verificar_independiente.py --proyecto proyectos/facturas_demo
+~~~
+
+El verificador lee originales, hashes, catálogo, candidatos e índice, invoca la CLI Tesseract y puede consultar Ollama por HTTP. El reconocimiento correcto de letras y palabras exige contrastar las fuentes visual y auditiva.
 
 ## 13. Pruebas y recuperación
 
