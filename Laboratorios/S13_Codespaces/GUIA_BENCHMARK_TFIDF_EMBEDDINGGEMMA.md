@@ -73,6 +73,20 @@ La memoria de 20.000 × 768 embeddings float32 es aproximadamente **58,6 MiB** s
 
 Dask puede repartir una lista de textos entre **servidores de inferencia independientes** con suficiente CPU/GPU y modelos cargados. **Dos workers en el mismo HP llamando al único Ollama del HP NO garantizan acelerar**: la CPU sigue siendo la misma. En Codespaces el modelo debe estar instalado **en el Codespace o en un servicio accesible**: instalarlo en el HP no hace que aparezca en los workers remotos.
 
+## 2B · Evaluar realmente EmbeddingGemma como clasificador (opcional en HP o Codespace con Ollama)
+
+La medición de velocidad anterior no evalúa **calidad**. Para compararla con TF-IDF usa el mismo conjunto SECOP, el mismo corte temporal y un clasificador LinearSVC con embeddings congelados:
+
+```bash
+# Requiere que Ollama se ejecute en ESTA máquina:
+ollama pull embeddinggemma-2:270m
+python Laboratorios/S13_Codespaces/clasificar_unspsc_embeddinggemma2.py --n 1000 --batch 4
+```
+
+También acepta `--n 10000` o `--n 20000`. Guarda cada vector en SQLite bajo `salidas/benchmark_unspsc/`, identificado por hash de modelo+texto; si se interrumpe, reanuda sin repetir los lotes terminados. Los resultados se guardan como `embgemma_1000.json`.
+
+**Esto es inferencia de embeddings y entrenamiento de LinearSVC, NO ajuste de pesos de EmbeddingGemma**. Si Ollama está en el HP, la GPU de GitHub Actions no se usa. No confundas el costo de generar vectores la primera vez con el costo de reentrenar sobre vectores en caché.
+
 ## 3 · ¿Tiene sentido realmente?
 
 **1.000:** TF-IDF/LinearSVC suele ser la primera opción; Dask añade overhead. EmbeddingGemma sólo si necesita semántica o prueba de transferencia que demuestre mejora.
