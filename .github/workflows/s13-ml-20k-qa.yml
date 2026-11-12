@@ -1,0 +1,62 @@
+name: S13 26k SECOP - XGBoost Dask distributed real
+on:
+  pull_request:
+    paths:
+      - "Laboratorios/S13_Codespaces/modelo_distribuido_20k.py"
+      - "Laboratorios/S13_Codespaces/test_modelo_distribuido_20k.py"
+      - "Laboratorios/S13_Codespaces/requirements.txt"
+      - "Laboratorios/S13_Codespaces/GUIA_MODELO_20K.md"
+      - ".github/workflows/s13-ml-20k-qa.yml"
+      - "Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb"
+      - "Presentaciones/s13-de-una-maquina-a-un-cluster.html"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  entrenamiento-real:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar bibliotecas de la configuracion Codespaces
+        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+      - name: Validar importaciones y ejemplos pequenos
+        run: |
+          cd Laboratorios/S13_Codespaces
+          python -m unittest -v test_modelo_distribuido_20k
+      - name: Entrenar DOS modelos XGBoost reales entre DOS workers sobre al menos 20.000 fichas
+        run: |
+          python Laboratorios/S13_Codespaces/modelo_distribuido_20k.py --registros 26000 --rondas 30 --workers 2
+      - name: Verificar outputs materiales y metadatos reales
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+          import xgboost as xgb
+          d=Path("Laboratorios/S13_Codespaces/salidas/modelo_20k")
+          m=json.loads((d/"manifiesto.json").read_text(encoding="utf-8"))
+          assert m["observaciones_unicas"] == 26000, m
+          assert m["entrenamiento"] >= 20000
+          assert m["prueba"] >= 5000
+          assert m["workers"] == 2 and m["nodos_fisicos"] == 1
+          assert len(m["fuentes_sha256"]) >= 1
+          assert len(m["metricas"]) == 3
+          for label in m["metricas"]:
+              assert m["metricas"][label]["mae_log"] >= 0
+              assert 0 <= m["metricas"][label]["porcentaje_dentro_factor_2"] <= 100
+          tabla=pd.read_parquet(d/"muestra_26k.parquet")
+          assert len(tabla)==26000 and tabla["id_del_proceso"].is_unique
+          revision=pd.read_csv(d/"procesos_revision.csv")
+          assert len(revision)==m["prueba"]
+          assert "no prueba de fraude" in revision["advertencia"].iloc[0].lower()
+          for name in ["xgboost_variables.json","xgboost_variables_y_texto.json"]:
+              booster=xgb.Booster()
+              booster.load_model(d/name)
+              assert booster.num_boosted_rounds()==30
+          print("Entrenamiento distribuido validado:",m["entrenamiento"],
+                "train, workers:",m["workers"],"metricas:",m["metricas"])
+          PY
