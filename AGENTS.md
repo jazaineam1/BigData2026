@@ -366,3 +366,21 @@ Fuerte, porque depende de la ejecución y la decisión de esa persona:
 ## Prepublicación obligatoria
 
 Antes de cada cambio al sitio, presentación, cuaderno o LMS: desarrollar en una rama, reproducir localmente las verificaciones relevantes y abrir un pull request; no usar `main` para probar. Los workflows de QA del LMS y de la sesión se ejecutan antes de integrar la rama, no por cada push a `main`. Si una prueba falla, detener la publicación, revisar logs, reproducir y corregir en el entorno de trabajo antes de otro push. No desactivar pruebas ni publicar si la validación es inconclusa. Mantener activas la higiene de secretos y la publicación de Pages. Esta regla no reemplaza la protección de ramas de GitHub, que debe activarse para impedir técnicamente los pushes directos.
+
+
+---
+
+## Política permanente: presupuesto y pruebas mínimas en GitHub Actions
+
+**Prioridad de proyecto: evitar consumo innecesario.** No se usarán los runners de GitHub Actions como laboratorio de benchmarking, entrenamiento o inferencia a gran escala. Una solicitud de cambio no autoriza gastar cómputo automáticamente.
+
+- En cada PR, ejecutar únicamente validaciones estáticas, sintaxis, tests unitarios pequeños y comprobaciones indispensables de publicación. Usar filtros de rutas, `concurrency.cancel-in-progress: true` cuando proceda y `timeout-minutes` breve. Evitar multiplicar workflows que validan lo mismo.
+- Entrenamientos reales, Dask distribuido, modelos de Ollama/EmbeddingGemma, Whisper, OCR masivo, instalaciones Docker, descarga de pesos, pruebas de 1.000/10.000/20.000/50.000 observaciones y pruebas extremo a extremo prolongadas: **solo `workflow_dispatch`**, nunca por cada push o PR. Preferir ejecutarlos localmente o en Codespaces abierto deliberadamente y cerrar el entorno al terminar.
+- Un benchmark se ejecuta una sola vez por combinación de código, modelo, datos y hardware relevante; conservar reporte, semilla, métricas, tiempos y versión para que no haya que repetirlo sin motivo.
+- Antes de añadir un workflow, estimar duración por job, frecuencia, datos/descargas y posibles costos. Justificar por escrito por qué no basta con una prueba corta; ninguna validación costosa se incorpora automáticamente por defecto.
+- Conservar siempre la publicación de GitHub Pages y la seguridad básica de secretos/PII. No eliminar controles críticos para ahorrar unos segundos; optimizarlos.
+- No programar sondeos cada pocos minutos salvo necesidad demostrada. Preferir ventanas limitadas, frecuencia horaria o eventos; sin actualizaciones, no crear commits ni artefactos.
+- Configurar en la cuenta un presupuesto/alerta y opción de detener consumo al alcanzar el límite; el presupuesto de GitHub se configura fuera del repositorio.
+- Si un usuario solicita pruebas exhaustivas, realizarlas de manera puntual y documentada, evitando que queden configuradas para repetirse en la integración continua.
+
+**Criterio de aceptación:** cambiar una diapositiva, un cuaderno o documentación no debe descargar un modelo ni reentrenar sobre miles de registros; la evidencia de tests costosos ya medidos debe reutilizarse. Consulta `.github/workflows/` antes de introducir nuevas automatizaciones.
