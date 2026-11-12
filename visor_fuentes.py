@@ -270,7 +270,14 @@ if item["clase"] in ("imagen", "pdf"):
         help="Prueba y compara. Subir contraste o borrar colores puede mejorar o "
              "empeorar la lectura.", key=f"tratamiento_{original.name}_{zona}"
     )
-    procesada = preparar_region_ocr(roi, escala=escala, tratamiento=tratamiento)
+    margen = 12 if st.checkbox(
+        "Añadir margen blanco de 12 píxeles (experimento opcional)",
+        value=False,
+        help="Puede ayudar a regiones muy ajustadas, pero también empeorar el logotipo. "
+             "Por defecto conservamos el recorte exacto."
+    ) else 0
+    procesada = preparar_region_ocr(
+        roi, escala=escala, tratamiento=tratamiento, margen=margen)
     izq, der = st.columns(2)
     with izq:
         st.image(roi, caption=f"Original seleccionado: {roi.width}×{roi.height} píxeles",
@@ -283,7 +290,7 @@ if item["clase"] in ("imagen", "pdf"):
 
     st.subheader("3 · Ejecuta y compara los resultados completos")
     pagina_actual = pagina if item["clase"] == "pdf" else 1
-    clave = (str(original), pagina_actual, caja, psm, escala, tratamiento)
+    clave = (str(original), pagina_actual, caja, psm, escala, tratamiento, margen)
     if "resultados_ocr" not in st.session_state:
         st.session_state["resultados_ocr"] = {}
     if st.button("Comparar OCR original y OCR del experimento",
@@ -402,7 +409,7 @@ if item["clase"] in ("imagen", "pdf"):
                     "region = region.point(lambda v: 255 if v >= 150 else 0)"
                 ])
             pasos.extend([
-                "region = ImageOps.expand(region, border=12, fill='white')",
+                f"region = ImageOps.expand(region, border={margen}, fill='white')",
                 f"texto = pytesseract.image_to_string(region, lang='spa', config='--psm {psm}')",
                 "print(texto)  # No limites la salida con [:130]"
             ])
