@@ -2,6 +2,9 @@
 # Inicio idempotente de Ollama sin systemd; solo escucha dentro de Codespaces.
 set -euo pipefail
 export OLLAMA_HOST=127.0.0.1:11434
+# La carpeta de modelos está en /workspaces: permanece tras reconstruir el contenedor.
+export OLLAMA_MODELS="${OLLAMA_MODELS:-/workspaces/BigData2026/.cache/ollama/models}"
+mkdir -p "$OLLAMA_MODELS"
 
 if ! command -v ollama >/dev/null 2>&1; then
   echo "ERROR: Ollama no está instalado en ESTE contenedor." >&2
@@ -19,7 +22,7 @@ if pgrep -f '[o]llama serve' >/dev/null 2>&1; then
   echo "Ya existe un proceso ollama serve; comprobando API..."
 else
   echo "Iniciando Ollama sin systemd..."
-  nohup env OLLAMA_HOST=127.0.0.1:11434 ollama serve \
+  nohup env OLLAMA_HOST=127.0.0.1:11434 OLLAMA_MODELS="$OLLAMA_MODELS" ollama serve \
     > /tmp/s11-ollama.log 2>&1 </dev/null &
 fi
 
