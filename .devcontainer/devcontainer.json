@@ -1,5 +1,5 @@
 {
-  "name": "S11 · OCR y ASR",
+  "name": "S11 · OCR, visión y voz (aprende Python)",
   "build": {
     "dockerfile": "Dockerfile"
   },
@@ -8,11 +8,14 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-python.python"
+        "ms-python.python",
+        "ms-toolsai.jupyter"
       ],
       "settings": {
         "files.exclude": {
-          "**/__pycache__": true
+          "**/__pycache__": true,
+          "**/.ipynb_checkpoints": true,
+          "**/.venv": true
         }
       }
     }
@@ -21,13 +24,6 @@
     "cpus": 2,
     "memory": "8gb"
   },
-  "forwardPorts": [
-    8501
-  ],
-  "portsAttributes": {
-    "8501": {
-      "label": "S11 · Panel local",
-      "visibility": "private"
-    }
-  }
+  "forwardPorts": [],
+  "portsAttributes": {}
 }

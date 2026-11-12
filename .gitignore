@@ -1,6 +1,7 @@
 .venv/
 __pycache__/
 *.pyc
-salidas/
-proyectos/
-.streamlit/secrets.toml
+.ipynb_checkpoints/
+outputs/
+datos/minds14_es-ES.parquet
+datos/raw/voz_minds14.wav
