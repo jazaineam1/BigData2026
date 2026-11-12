@@ -10,6 +10,7 @@ on:
       - Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb
       - utils/build_session9_notebook.py
       - Presentaciones/s10-etl-multimedia.html
+      - Presentaciones/s11-videoclase-ocr-asr-embeddings.html
       - Presentaciones/s13-de-una-maquina-a-un-cluster.html
       - Cuadernos/10_ETL_Multimedia.ipynb
       - utils/build_session10_multimedia.py
@@ -41,7 +42,7 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Instalar Chromium
         run: npx playwright install --with-deps chromium
-      - name: Comprobar si el cambio se limita a S13
+      - name: Comprobar si el cambio se limita a S11 o S13
         id: alcance
         shell: bash
         run: |
@@ -50,6 +51,8 @@ jobs:
           git diff --name-only FETCH_HEAD HEAD > /tmp/archivos_pr.txt
           exclusivo=1
           hallado=0
+          exclusivo_s11=1
+          hallado_s11=0
           while IFS= read -r archivo; do
             case "$archivo" in
               Presentaciones/s13-de-una-maquina-a-un-cluster.html|Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb|Laboratorios/S13_Codespaces/*|utils/validate_s13_distribuido.py|tests/s13-presentacion.spec.js|.devcontainer/s13-distribuido/*)
@@ -59,6 +62,14 @@ jobs:
               *)
                 exclusivo=0 ;;
             esac
+            case "$archivo" in
+              Presentaciones/s11-*|Cuadernos/11_*|Laboratorios/S11_Codespaces/*|utils/s11_*|tests/s11-*|playwright.s11.config.cjs|.github/workflows/s11-*)
+                hallado_s11=1 ;;
+              .github/workflows/lms-visual-qa.yml)
+                : ;;
+              *)
+                exclusivo_s11=0 ;;
+            esac
           done < /tmp/archivos_pr.txt
           if [[ "$exclusivo" == "1" && "$hallado" == "1" ]]; then
             echo "s13=true" >> "$GITHUB_OUTPUT"
@@ -66,8 +77,14 @@ jobs:
           else
             echo "s13=false" >> "$GITHUB_OUTPUT"
           fi
+          if [[ "$exclusivo_s11" == "1" && "$hallado_s11" == "1" ]]; then
+            echo "s11=true" >> "$GITHUB_OUTPUT"
+            echo "Solo S11: validar presentación actual sin repetir QA legado."
+          else
+            echo "s11=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Preparar SDK Realtime local
-        if: steps.alcance.outputs.s13 != 'true'
+        if: steps.alcance.outputs.s13 != 'true' && steps.alcance.outputs.s11 != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -93,6 +110,8 @@ jobs:
         run: |
           if [[ "${{ steps.alcance.outputs.s13 }}" == "true" ]]; then
             npx playwright test tests/s13-presentacion.spec.js
+          elif [[ "${{ steps.alcance.outputs.s11 }}" == "true" ]]; then
+            npx playwright test tests/s11-videoclase.visual.spec.js
           else
             npm run test:visual
           fi

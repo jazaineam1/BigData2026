@@ -6,9 +6,6 @@ on:
       - ".devcontainer/s11-multimedia/**"
       - "utils/s11_lesson_cells.json"
       - "Cuadernos/11_ETL_Audio_Imagenes.ipynb"
-      - "Presentaciones/s11-videoclase-ocr-asr-embeddings.html"
-      - "Presentaciones/s11-etl-audio-imagenes.html"
-      - "index.html"
       - ".github/workflows/s11-codespaces-qa.yml"
   workflow_dispatch:
 
@@ -16,7 +13,29 @@ permissions:
   contents: read
 
 jobs:
+  static-s11:
+    name: Sintaxis ligera sin instalar OCR, Whisper ni Ollama
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Comprobar Python, cuaderno y JSON sin instalar paquetes
+        run: |
+          python3 -m compileall -q Laboratorios/S11_Codespaces utils/s11_audio_noticia.py utils/s11_etl_core.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          nb=json.loads(Path("Cuadernos/11_ETL_Audio_Imagenes.ipynb").read_text(encoding="utf-8"))
+          assert nb["cells"]
+          for i,cell in enumerate(nb["cells"]):
+              if cell["cell_type"]=="code":
+                  source="".join(cell["source"]) if isinstance(cell["source"],list) else cell["source"]
+                  compile(source,f"cell-{i}","exec")
+          print("Notebook syntax OK; modelos no ejecutados")
+          PY
   static-and-ocr:
+    if: github.event_name == 'workflow_dispatch'
     name: Código, cuaderno y OCR real
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -98,7 +117,8 @@ jobs:
           echo "Motores reales probados en GitHub Actions + 2 modalidades transferidas. La apertura gráfica del Codespace necesita comprobación interactiva."
 
   codespaces-container-smoke:
-    name: Contenedor Codespaces · build + Streamlit HTTP
+    if: github.event_name == 'workflow_dispatch'
+    name: Contenedor Codespaces · build + Streamlit HTTP (solo manual)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

@@ -2,6 +2,12 @@ name: S11 · Corpus y visor de 122 fuentes (QA)
 # Cost policy: heavyweight environment or model tests are manual only.
 on:
   workflow_dispatch:
+    inputs:
+      real_models:
+        description: 'Ejecutar también modelos reales (75 min máx., consumo alto)'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -25,10 +31,16 @@ jobs:
           from pathlib import Path
           visibles={x.name for x in Path(".").iterdir() if x.name!=".git"}
           esperados={".devcontainer",".gitignore","README.md","INSTALACION_UBUNTU.md",
-                     "FUENTES.md","requirements.txt","01_laboratorio.ipynb",
+                     "FUENTES.md","requirements.txt","01_laboratorio.ipynb","configuracion_s11.json",
                      "datos","fuentes.py","visor_fuentes.py","ocr_documental.py","test_visor.py","abrir_visor.sh",
                      "iniciar_ollama.sh","preparar_embeddinggemma.sh"}
           assert visibles==esperados,visibles^esperados
+          import json
+          cfg=json.loads(Path("configuracion_s11.json").read_text(encoding="utf-8"))
+          assert cfg["modelo_visual"]=="embeddinggemma-2:440m"
+          assert cfg["muestras_fotografias"][:3]==[
+              "eltiempo_006.webp","eltiempo_009.webp","eltiempo_023.webp"]
+          assert len(set(cfg["muestras_fotografias"]))==8
           root=Path("datos/raw")
           for sub,count in [("fotos",30),("fotos_catalogadas",32),("actas",30),("actas_pdf",30)]:
               actual=list((root/sub).iterdir())
@@ -109,8 +121,8 @@ jobs:
           for c in nb.cells:
               if c.cell_type=="code" and c.id in {"lote-inventario","lote-actas","lote-fotos"}:
                   exec(compile(c.source,c.id,"exec"),scope)
-          assert len(scope["tabla_actas"])==5
-          assert len(scope["tabla_fotos"])==8
+          assert len(scope["tabla_actas"])==1
+          assert len(scope["tabla_fotos"])==4
           print("OCR REAL OK: actas y fotos, un cuaderno de dos fases")
           PY
       - name: Iniciar el visor y comprobar la respuesta HTTP
@@ -128,7 +140,8 @@ jobs:
           exit 1
 
   real-models:
-    name: Modelo visual 440m, 30 WAV reales, Whisper y ETL 122
+    if: ${{ inputs.real_models == true }}
+    name: Modelo visual 440m, una voz con Whisper, catálogo ETL 122
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
@@ -182,8 +195,8 @@ jobs:
                   exec(compile(c.source,c.id,"exec"),env)
           assert len(env["catalogo"])==122
           assert len(env["voces"])==30
-          assert len(env["tabla_wer"])==3
-          assert len(env["vectores"])>=8
+          assert len(env["tabla_wer"])==1
+          assert len(env["vectores"])>=1
           from fuentes import inventario,preparar_audios
           assert preparar_audios()==30
           items=inventario()

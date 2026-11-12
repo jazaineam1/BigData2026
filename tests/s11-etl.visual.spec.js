@@ -80,13 +80,13 @@ for(const width of [390,1366]){
 
 test('la portada y el registro de curso abren S11 en un clic',async({page})=>{
   await page.goto('/index.html');
-  const link=page.locator('article.session[data-n="11"] a[href*="s11-etl-audio-imagenes.html"]');
+  const link=page.locator('article.session[data-n="11"] a[href*="s11-videoclase-ocr-asr-embeddings.html"]');
   await expect(link).toBeVisible();
   await link.click();
-  await expect(page).toHaveURL(/s11-etl-audio-imagenes.html/);
+  await expect(page).toHaveURL(/s11-videoclase-ocr-asr-embeddings.html/);
   await expect(page.locator('#s1')).toBeVisible();
   await page.goto('/lms/data/course.json');
-  await expect(page.locator('body')).toContainText('s11-etl-audio-imagenes.html');
+  await expect(page.locator('body')).toContainText('s11-videoclase-ocr-asr-embeddings.html');
 });
 
 test('S11 escala: los lotes cambian particiones previstas, no simulan tiempos reales',async({page})=>{

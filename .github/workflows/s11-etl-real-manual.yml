@@ -1,0 +1,33 @@
+name: S11 · OCR y ASR reales (solo manual, consumo controlado)
+# No se ejecuta por push, pull_request o schedule.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s11-etl-real-manual
+  cancel-in-progress: false
+
+jobs:
+  datos-reales:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Bibliotecas de laboratorio reproducible
+        run: python -m pip install "pillow>=10,<13" "numpy>=1.26,<3" "pandas>=2.2,<3" "pyarrow>=17,<24" "soundfile>=0.12,<1" "scipy>=1.13,<2" "matplotlib>=3.8,<4" "ipython>=8" "ipywidgets>=8,<9" "scikit-learn>=1.5,<2"
+      - name: Instalar OCR Tesseract en español
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-spa
+      - name: Ejecución limpia de cuaderno, OCR y ASR auténticos sobre MINDS-14
+        env:
+          MPLBACKEND: Agg
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          S11_CI_MEDIO: '1'
+          S11_CI_FAST: '1'
+          S11_CI_ASR: '1'
+        run: python utils/validate_session11_etl.py --real
