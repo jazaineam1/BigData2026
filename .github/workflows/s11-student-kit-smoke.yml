@@ -29,7 +29,8 @@ jobs:
           visibles={x.name for x in Path(".").iterdir() if x.name!=".git"}
           esperados={".devcontainer",".gitignore","README.md","INSTALACION_UBUNTU.md",
                      "FUENTES.md","requirements.txt","01_laboratorio.ipynb",
-                     "datos","fuentes.py","visor_fuentes.py","test_visor.py","abrir_visor.sh"}
+                     "datos","fuentes.py","visor_fuentes.py","test_visor.py","abrir_visor.sh",
+                     "iniciar_ollama.sh","preparar_embeddinggemma.sh"}
           assert visibles==esperados,visibles^esperados
           root=Path("datos/raw")
           for sub,count in [("fotos",30),("fotos_catalogadas",32),("actas",30),("actas_pdf",30)]:
@@ -48,7 +49,7 @@ jobs:
           tesseract --list-langs | grep -x spa
       - name: Un cuaderno de dos fases, sintaxis y visor
         run: |
-          bash -n abrir_visor.sh
+          bash -n abrir_visor.sh iniciar_ollama.sh preparar_embeddinggemma.sh
           python -m py_compile fuentes.py visor_fuentes.py test_visor.py
           python - <<'PY'
           import nbformat,streamlit as st
@@ -57,7 +58,15 @@ jobs:
           import json
           d=json.loads(Path(".devcontainer/devcontainer.json").read_text())
           assert 8501 in d["forwardPorts"] and d["portsAttributes"]["8501"]["visibility"]=="private"
-          assert d["postStartCommand"]=="bash abrir_visor.sh"
+          assert d["postStartCommand"]=="bash iniciar_ollama.sh; bash abrir_visor.sh"
+          assert d["containerEnv"]["OLLAMA_HOST"]=="127.0.0.1:11434"
+          assert d["containerEnv"]["OLLAMA_MODELS"].startswith("/workspaces/")
+          assert 11434 not in d["forwardPorts"]
+          docker=Path(".devcontainer/Dockerfile").read_text()
+          assert "ollama-linux-" in docker and ".tar.zst" in docker and "zstd" in docker
+          assert "install.sh" not in docker
+          assert Path("iniciar_ollama.sh").exists()
+          assert Path("preparar_embeddinggemma.sh").exists()
           archivos = list(Path(".").glob("*.ipynb"))
           assert [p.name for p in archivos] == ["01_laboratorio.ipynb"], archivos
           nb=nbformat.read("01_laboratorio.ipynb",as_version=4)
