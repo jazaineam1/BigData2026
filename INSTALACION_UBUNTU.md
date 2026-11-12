@@ -99,7 +99,7 @@ streamlit run visor_fuentes.py --server.address 0.0.0.0 --server.port 8501
 
 **Streamlit** crea una interfaz local: permite escoger un documento y mostrar un PDF con st.pdf, fotografías con st.image y audio con st.audio. Requiere el complemento streamlit-pdf para st.pdf. El puerto **8501 debe ser privado** dentro de Codespaces; nunca lo expongas a Internet para archivos con datos personales.
 
-La programación del ejercicio se desarrolla en **01_laboratorio.ipynb** y **02_lotes_102_fuentes.ipynb**: no se aprende OCR mirando el visor si no escribes y explicas la llamada a Tesseract, los bucles y las comprobaciones.
+La programación del ejercicio se desarrolla en **01_laboratorio.ipynb** y **02_lotes_122_fuentes.ipynb**: no se aprende OCR mirando el visor si no escribes y explicas la llamada a Tesseract, los bucles y las comprobaciones.
 
 ## 6. Problemas recurrentes
 
