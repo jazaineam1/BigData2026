@@ -156,6 +156,9 @@ jobs:
           done
           curl -fsS http://127.0.0.1:11434/api/tags >/dev/null
           ollama pull embeddinggemma-2:440m
+          # Validación E2E con exactamente la misma forma de peticiones
+          # que escriben estudiantes: input=[entrada] para imagen y texto.
+          bash preparar_embeddinggemma.sh
       - name: "Ejecución REAL: imagen, 30 WAV humanos, Whisper, WER y catálogo"
         env:
           PYTHONUNBUFFERED: "1"
