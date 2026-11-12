@@ -14,11 +14,17 @@
   },
   "forwardPorts": [
     8787,
-    8502
+    8502,
+    8503
   ],
   "portsAttributes": {
     "8502": {
       "label": "S13 · Presupuestos SECOP",
+      "onAutoForward": "notify",
+      "visibility": "private"
+    },
+    "8503": {
+      "label": "S13 · Laboratorio interactivo TF-IDF UNSPSC",
       "onAutoForward": "notify",
       "visibility": "private"
     },
