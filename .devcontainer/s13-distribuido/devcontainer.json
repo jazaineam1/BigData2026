@@ -13,9 +13,15 @@
     }
   },
   "forwardPorts": [
-    8787
+    8787,
+    8502
   ],
   "portsAttributes": {
+    "8502": {
+      "label": "S13 · Presupuestos SECOP",
+      "onAutoForward": "notify",
+      "visibility": "private"
+    },
     "8787": {
       "label": "S13 · Panel Dask (privado)",
       "onAutoForward": "notify",

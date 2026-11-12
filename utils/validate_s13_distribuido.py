@@ -20,8 +20,8 @@ def main():
         assert needed in text, f"Falta material pedagógico: {needed}"
     html = read("Presentaciones/s13-de-una-maquina-a-un-cluster.html")
     slides = re.findall(r'<section class="slide(?: active)?" id="s(\d+)"', html)
-    assert len(slides) == 36
-    assert slides == [str(i) for i in range(1, 37)]
+    assert len(slides) == 40
+    assert slides == [str(i) for i in range(1, 41)]
     for required in ("id=\"decisionBox\"", "id=\"hdfsGrid\"", "id=\"quizFinal\"", "S12", "Codespaces"):
         assert required in html, f"Falta en presentación: {required}"
     config = json.loads(read(".devcontainer/s13-distribuido/devcontainer.json"))
@@ -45,12 +45,18 @@ def main():
             temporal.write(script.group(1))
             temporal.flush()
             subprocess.run(["node", "--check", temporal.name], check=True)
+    assert "modelo_distribuido_20k.py" in text
+    assert "ACTIVAR_MODELO_26K" in text
+    assert "xgboost.dask" in text
+    assert "26.000" in html
+    assert "id=\"s39\"" in html
+    assert config["portsAttributes"]["8502"]["visibility"] == "private"
     index = read("index.html")
     assert index.count('data-n="13"') == 1
     assert index.count('data-session="13"') == 1
     assert 'href="Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1"' in index
     assert not any("____" in "".join(c["source"]) for c in cells if c["cell_type"] == "code")
-    print("S13 QA estático: OK · 36 diapositivas ·", len(cells), "celdas · Codespaces · LMS")
+    print("S13 QA estático: OK · 40 diapositivas ·", len(cells), "celdas · Codespaces · LMS")
 
 if __name__ == "__main__":
     main()
