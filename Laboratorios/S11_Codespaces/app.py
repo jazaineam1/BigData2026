@@ -7,6 +7,9 @@ from __future__ import annotations
 
 import json
 import re
+import io
+from contextlib import redirect_stdout
+import verificar_independiente as verificador
 from pathlib import Path
 
 import streamlit as st
@@ -152,6 +155,18 @@ with tabs[1]:
                     st.dataframe(fila.get("segments", []))
         except Exception as ex:
             st.error(str(ex))
+    candidatos_path = raiz / "salidas" / "candidatos.jsonl"
+    if candidatos_path.is_file():
+        candidatos = [json.loads(s) for s in candidatos_path.read_text(encoding="utf-8").splitlines() if s.strip()]
+        st.subheader("Información candidata: comprueba cada valor en el original")
+        st.caption("Una cifra encontrada en texto OCR/ASR no demuestra la realidad del dato.")
+        if candidatos:
+            st.dataframe([{"valor": d["valor"], "clase": d["tipo"],
+                           "archivo": d["path"], "evidencia": d["evidencia"],
+                           "segundo_inicial": d.get("inicio_s", "—")}
+                          for d in candidatos[:200]], use_container_width=True)
+        else:
+            st.info("No se encontraron fechas, referencias o números explícitos.")
     errores = raiz / "salidas" / "errores.json"
     if errores.exists():
         data = json.loads(errores.read_text(encoding="utf-8"))
@@ -195,6 +210,15 @@ with tabs[3]:
                 st.error("Al menos un archivo difiere: consulta la terminal.")
         except Exception as ex:
             st.error(str(ex))
+    if st.button("Verificación independiente (sin usar el motor de procesamiento)"):
+        registro = io.StringIO()
+        try:
+            with redirect_stdout(registro):
+                verificador.verificar_proyecto(raiz)
+            st.success("Comprobaciones técnicas independientes completas")
+            st.code(registro.getvalue())
+        except (AssertionError, OSError, ValueError, KeyError) as ex:
+            st.error(f"Comprobación independiente falló: {ex}")
     st.caption("Un hash igual no certifica autoría, licencia ni verdad de una noticia.")
     for archivo in ("catalogo.jsonl", "catalogo.parquet", "manifest.json", "errores.json", "ultima_busqueda.json"):
         ruta = raiz / "salidas" / archivo
@@ -221,4 +245,5 @@ un parámetro (por ejemplo psm=6 a 11); compara texto y ranking; registra como
 evidencia las rutas, los hashes y la decisión que tomaste. La respuesta no es
 «copié el comando»: es «cambié una decisión y vi el efecto».
 """)
+    st.markdown("[Ruta de 15 minutos para estudiantes](https://github.com/jazaineam1/BigData2026/blob/main/Laboratorios/S11_Codespaces/GUIA_ESTUDIANTE.md)")
     st.info("Guía completa disponible en el archivo GUIA_REUTILIZACION.md del repositorio.")
