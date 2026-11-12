@@ -88,4 +88,217 @@ print(len(vector))  # 768 dimensiones</code></pre><p>Si Ollama está en tu HP, <
 <section class="slide" id="s29" aria-hidden="true"><div class="kicker">S13 · 29 · Transferibilidad</div><h1>Cómo convertir este laboratorio en tu propio proyecto</h1><div class="cols"><article class="panel "><h2>Arquitectura reutilizable: origen → evidencia</h2><ol><li><b>Fuente:</b> identifica archivo o API y registra procedencia/licencia.</li><li><b>Auditoría:</b> valida IDs, fechas, vacíos, códigos y duplicados.</li><li><b>Objetivo:</b> define etiqueta conocida, excluye fuga y justifica qué representa.</li><li><b>Transformación:</b> produce TF-IDF, parámetros y vocabulario.</li><li><b>Modelo:</b> baseline, clasificador, split y métricas por clase.</li><li><b>Infraestructura:</b> local primero, Dask solo si hay evidencia de ahorro o capacidad.</li><li><b>Salida:</b> Parquet y manifiesto reproducible, sin publicar credenciales.</li></ol></article><article class="panel "><h2>Archivos que puedes abrir y adaptar</h2><div class="table-wrap"><table><thead><tr><th>Archivo</th><th>Qué modificar</th></tr></thead><tbody><tr><td>analisis.py</td><td>Lectura, normalización, conteos, exportación</td></tr><tr><td>app_tfidf_unspsc.py</td><td>Interfaz Streamlit y exploración de fichas</td></tr><tr><td>benchmark_50k_test_fijo.py</td><td>Diseño del test, tamaño y medición</td></tr><tr><td>cv_dask_mismo_modelo.py</td><td>Mismos folds en local, joblib y Dask</td></tr><tr><td>comparar_1000_embeddings_reales.py</td><td>Inferencia Ollama con caché (opcional)</td></tr></tbody></table></div><p>Antes de cambiar rutas, ejecuta <code>verificar_entorno.py</code>, inspecciona nombres reales de columnas y prueba en 20 filas. No extrapoles performance desde muestras mínimas.</p></article></div><aside class="interpret"><b>Producto profesional</b><p>Una herramienta es reutilizable cuando fuente, esquema, objetivo, métricas y límites se pueden sustituir sin alterar el protocolo de validación.</p></aside></section>
 <section class="slide" id="s30" aria-hidden="true"><div class="kicker">S13 · 30 · Práctica guiada</div><h1>Reto de laboratorio: cada acción deja evidencia</h1><div class="cols"><article class="panel "><h2>Checklist reproducible — pasos del cuaderno</h2><div class="checklist" id="labChecks"><label><input type="checkbox">Cambié una palabra en el minicorpus y guardé tabla DF/IDF</label><label><input type="checkbox">Probé dos configuraciones de n-gramas sin tocar test</label><label><input type="checkbox">Revisé F1 macro y una clase minoritaria</label><label><input type="checkbox">Distinguí TF-IDF local y Dask en el mismo trabajo</label><label><input type="checkbox">Escogí una arquitectura y un límite entre opciones cerradas</label><label><input type="checkbox">Guardé Parquet, manifiesto y commit propio</label></div><button id="labCheckRun" type="button">Revisar avance de práctica</button><div id="labFeedback" class="output" aria-live="polite">Checklist personal; el progreso del navegador no es calificación ni evidencia oficial.</div></article><article class="panel "><h2>Resultado esperado y solución si falla</h2><p><b>Si TF-IDF da dimensiones diferentes:</b> verifica que comparas matrices con el mismo vocabulario; <code>fit</code> solo en train.</p><p><b>Si aparece <code>NameError</code>:</b> ejecuta primero la celda de rutas y datos del cuaderno, no actives los anexos pesados.</p><p><b>Si Dask parece más lento:</b> comprueba cuánto tardó iniciar y serializar; perder es un resultado legítimo.</p><p><b>Si Ollama falla:</b> no es requisito de la práctica central; usa la evidencia medida y comprueba el comando únicamente si hay un servidor disponible.</p><div class="tip">Las salidas de esta presentación son práctica de autocontrol. Para entregar evidencia usa tu propio cuaderno y commit; no pegues respuestas de otro estudiante.</div></article></div><aside class="interpret"><b>Aprender haciendo</b><p>El objetivo no es ejecutar 87 celdas ciegamente: identifica cada decisión, comprueba la salida y entiende los errores antes de avanzar.</p></aside></section>
 <section class="slide" id="s31" aria-hidden="true"><div class="kicker">S13 · 31 · Decisión estructurada</div><h1>Tu arquitectura debe justificarse con datos</h1><div class="cols"><article class="panel "><h2>Herramienta 15 · Evaluación de escenarios</h2><p id="quizPrompt"><b>Escenario 1:</b> 200 procesos, memoria suficiente y un conteo por modalidad. ¿Qué eliges primero?</p><div class="choices"><button type="button" data-quiz-choice="local">pandas / local</button><button type="button" data-quiz-choice="dask">Dask 2 workers</button><button type="button" data-quiz-choice="spark">Spark distribuido</button></div><div id="quizResponse" class="output" aria-live="polite">Selecciona la herramienta y justifica la alternativa descartada.</div><button id="quizNext" type="button">Siguiente decisión</button><p class="micro">Autocomprobación sin nota; los distractores representan confusiones reales: más herramientas no equivalen a más capacidad requerida.</p></article><article class="panel "><h2>Rúbrica observable y opciones del cuaderno</h2><div class="table-wrap"><table><thead><tr><th>Criterio</th><th>Evidencia que sí cuenta</th></tr></thead><tbody><tr><td>Ejecución / traza</td><td>Código ejecutado y commit</td></tr><tr><td>TF, DF, IDF</td><td>Tabla reproducible antes y después</td></tr><tr><td>Clasificación</td><td>F1 macro y tabla por segmento</td></tr><tr><td>Rendimiento</td><td>Comparar la misma operación y workers</td></tr><tr><td>Decisión y límite</td><td>Códigos cerrados y explicación de la medición</td></tr></tbody></table></div><p>La celda final registra <code>ARQUITECTURA</code> (1 local; 2 Dask 2; 3 medir más) y <code>LIMITE</code> (1 costo de arranque; 2 muestra; 3 etiqueta; 4 hardware). Produce <code>decision_s13.json</code> al completar ambas decisiones.</p><p class="micro">Esta rúbrica es formativa; cualquier nota oficial debe trazarse al PDA vigente.</p></article></div><aside class="interpret"><b>Qué no sirve</b><p>Una respuesta escrita por IA sin ejecución ni traza no demuestra competencia. La decisión debe venir de tus salidas, no de frases generales.</p></aside></section>
-<section class="slide" id="s32" aria-hidden="true"><div class="kicker">S13 · 32 · Cierre y transferencia</div><h1>De la medición de hoy a PySpark en S14</h1><div class="cols"><article class="panel "><h2>Mapa de lo construido</h2><ol><li>Datos SECOP reales: procedencia, deduplicación, UNSPSC y límites.</li><li>HDFS, MapReduce, partición y scheduler distinguidos de forma operativa.</li><li>TF-IDF calculado a mano y con scikit-learn; búsqueda por coseno.</li><li>Clasificación LinearSVC con baseline, F1 macro y errores por clase.</li><li>Dask frente a local y XGBoost con tiempos equivalentes; embeddings como alternativa costosa.</li><li>Decisión estructurada, Parquet y manifiesto de la fuente.</li></ol><p><b>S14 · PySpark:</b> leerá el Parquet sin cambiar el significado de las columnas; comparará otra arquitectura para resolver un problema ya entendido.</p></article><article class="panel "><h2>Tarjeta de consulta para otros proyectos</h2><div class="table-wrap"><table><thead><tr><th>Si necesitas…</th><th>Empieza por…</th></tr></thead><tbody><tr><td>Contar/agrupar tablas que caben en RAM</td><td>pandas + referencia de corrección</td></tr><tr><td>Consultar muchos Parquet mediante SQL</td><td>DuckDB local</td></tr><tr><td>Repartir tareas Python independientes</td><td>Dask y medición de overhead</td></tr><tr><td>ETL distribuido sobre plataforma existente</td><td>Spark / PySpark</td></tr><tr><td>Buscar por términos exactos</td><td>TF-IDF + coseno</td></tr><tr><td>Capturar semántica sin términos comunes</td><td>Embeddings, tras medir calidad/costo</td></tr></tbody></table></div><p><strong>Recursos obligatorios (dos):</strong> esta presentación con herramientas integradas y el cuaderno ejecutable. Los scripts y el panel Streamlit viven dentro de Codespaces.</p><div class="choices"><a class="btnlink" href="https://github.com/jazaineam1/BigData2026/blob/main/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb" target="_blank" rel="noopener">Abrir cuaderno</a><a class="btnlink" href="https://github.com/jazaineam1/BigData2026" target="_blank" rel="noopener">Abrir Codespaces</a></div></article></div><aside class="interpret"><b>Idea para llevar</b><p>No distribuyas porque un ejemplo muestra flechas y servidores: distribuye cuando la capacidad o las mediciones del trabajo completo lo justifican.</p></aside></section></main><nav class="footer"><button id="prev" type="button">← Anterior</button><span class="counter" id="counter">1 / 32</span><span class="bar" aria-hidden="true"><span class="fill" id="fill" style="display:block"></span></span><span class="hint">← → navegar · desplaza si hay contenido largo</span><button id="next" type="button">Siguiente →</button></nav><!-- S13_JS --></body></html>
+<section class="slide" id="s32" aria-hidden="true"><div class="kicker">S13 · 32 · Cierre y transferencia</div><h1>De la medición de hoy a PySpark en S14</h1><div class="cols"><article class="panel "><h2>Mapa de lo construido</h2><ol><li>Datos SECOP reales: procedencia, deduplicación, UNSPSC y límites.</li><li>HDFS, MapReduce, partición y scheduler distinguidos de forma operativa.</li><li>TF-IDF calculado a mano y con scikit-learn; búsqueda por coseno.</li><li>Clasificación LinearSVC con baseline, F1 macro y errores por clase.</li><li>Dask frente a local y XGBoost con tiempos equivalentes; embeddings como alternativa costosa.</li><li>Decisión estructurada, Parquet y manifiesto de la fuente.</li></ol><p><b>S14 · PySpark:</b> leerá el Parquet sin cambiar el significado de las columnas; comparará otra arquitectura para resolver un problema ya entendido.</p></article><article class="panel "><h2>Tarjeta de consulta para otros proyectos</h2><div class="table-wrap"><table><thead><tr><th>Si necesitas…</th><th>Empieza por…</th></tr></thead><tbody><tr><td>Contar/agrupar tablas que caben en RAM</td><td>pandas + referencia de corrección</td></tr><tr><td>Consultar muchos Parquet mediante SQL</td><td>DuckDB local</td></tr><tr><td>Repartir tareas Python independientes</td><td>Dask y medición de overhead</td></tr><tr><td>ETL distribuido sobre plataforma existente</td><td>Spark / PySpark</td></tr><tr><td>Buscar por términos exactos</td><td>TF-IDF + coseno</td></tr><tr><td>Capturar semántica sin términos comunes</td><td>Embeddings, tras medir calidad/costo</td></tr></tbody></table></div><p><strong>Recursos obligatorios (dos):</strong> esta presentación con herramientas integradas y el cuaderno ejecutable. Los scripts y el panel Streamlit viven dentro de Codespaces.</p><div class="choices"><a class="btnlink" href="https://github.com/jazaineam1/BigData2026/blob/main/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb" target="_blank" rel="noopener">Abrir cuaderno</a><a class="btnlink" href="https://github.com/jazaineam1/BigData2026" target="_blank" rel="noopener">Abrir Codespaces</a></div></article></div><aside class="interpret"><b>Idea para llevar</b><p>No distribuyas porque un ejemplo muestra flechas y servidores: distribuye cuando la capacidad o las mediciones del trabajo completo lo justifican.</p></aside></section></main><nav class="footer"><button id="prev" type="button">← Anterior</button><span class="counter" id="counter">1 / 32</span><span class="bar" aria-hidden="true"><span class="fill" id="fill" style="display:block"></span></span><span class="hint">← → navegar · desplaza si hay contenido largo</span><button id="next" type="button">Siguiente →</button></nav><script>
+(() => {
+  'use strict';
+  const byId = id => document.getElementById(id);
+  const on = (id, event, handler) => { const x = byId(id); if(x) x.addEventListener(event, handler); };
+  const out = (id, value) => { const x=byId(id); if(x) x.textContent=value; };
+  const fmt = (n,d=4) => Number(n).toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d});
+  const slides=[...document.querySelectorAll('.slide')];
+  let active=0;
+  function go(i) {
+    active=Math.max(0,Math.min(slides.length-1,i));
+    slides.forEach((s,k)=>{s.classList.toggle('active',k===active);s.setAttribute('aria-hidden',k===active?'false':'true');});
+    byId('counter').textContent=(active+1)+' / '+slides.length;
+    byId('fill').style.width=(100*(active+1)/slides.length)+'%';
+    byId('prev').disabled=active===0;
+    byId('next').disabled=active===slides.length-1;
+    const labels=['Caso y herramientas','Distribución y entornos','TF-IDF y clasificación','Experimentación y evidencia'];
+    byId('phase').textContent=labels[active<8?0:active<13?1:active<21?2:3];
+    if(location.hash!=='#s'+(active+1)) history.replaceState(null,'','#s'+(active+1));
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+  on('prev','click',()=>go(active-1));on('next','click',()=>go(active+1));
+  window.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;
+    if(['ArrowRight','PageDown'].includes(e.key)){e.preventDefault();go(active+1);}
+    if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(active-1);}
+  });
+  window.addEventListener('hashchange',()=>{const n=Number((location.hash.match(/^#s(\d+)$/)||[])[1]);if(n>0)go(n-1);});
+  const start=Number((location.hash.match(/^#s(\d+)$/)||[])[1]);go(start>0?start-1:0);
+
+  // H1: permitir distinguir prefijo de version, codigo y segmento.
+  on('unspscRun','click',()=>{
+    const v=byId('unspscInput').value.trim();
+    const match=v.match(/^(?:V\d+\.)?(\d{8})$/i);
+    out('unspscOut',match
+      ? 'Código válido: '+match[1]+' · segmento '+match[1].slice(0,2)+' · la versión NO es parte del segmento.\nCómo se lee: se toman los dos dígitos iniciales del código de ocho cifras.'
+      : 'Código no válido para este ejemplo: usa ocho dígitos (ej. 80111600) o versión V1. + ocho dígitos. No inventes etiqueta.');
+  });
+
+  // H2: seleccion razonada de motores por escenario.
+  const cases=[
+    {q:'200 expedientes para contar cuántos registros hay por entidad.',ok:'pandas',why:'Caben en RAM y se requiere una agregación sencilla. Dask añadiría coordinación sin necesidad.'},
+    {q:'Consulta SQL analítica repetida sobre archivos CSV/Parquet sin infraestructura de clúster.',ok:'duckdb',why:'DuckDB permite SQL analítico local eficiente; no obliga a administrar workers.'},
+    {q:'Miles de cálculos Python independientes y suficientemente costosos que pueden ejecutarse en CPU libres.',ok:'dask',why:'Dask reparte tareas independientes. Mide el costo de enviar datos y arrancar el scheduler.'},
+    {q:'ETL de cientos de millones de filas sobre una plataforma de datos distribuida que ya está operativa.',ok:'spark',why:'Spark puede explotar infraestructura distribuida existente; valida memoria, operaciones y costos antes de elegir.'}
+  ];
+  let scenario=0;
+  const renderScenario=()=>{out('caseText','Escenario '+(scenario+1)+' / '+cases.length+': '+cases[scenario].q);out('decisionFeedback','Escoge la primera opción razonable y nombra la alternativa descartada.');};
+  document.querySelectorAll('[data-answer]').forEach(b=>b.addEventListener('click',()=>{
+    const c=cases[scenario],correct=b.dataset.answer===c.ok;
+    out('decisionFeedback',(correct?'✓ Elección defendible. ':'△ Revisa: empezaría por '+c.ok+'. ')+c.why);
+  }));
+  on('nextScenario','click',()=>{scenario=(scenario+1)%cases.length;renderScenario();});renderScenario();
+
+  // H3: réplica no es un worker.
+  let failed=false;
+  function drawHdfs(){
+    document.querySelectorAll('#hdfsGrid [data-nodes]').forEach((node,i)=>{
+      const base=node.dataset.nodes.split(',');
+      const now=failed?base.filter(x=>x!=='2'):base;
+      node.innerHTML=['A','B','C'][i]+'<br><small>nodos '+(now.length?now.join(' · '):'NINGUNO')+'</small>';
+    });
+    out('hdfsFeedback',failed
+      ? 'Nodo 2 desconectado: A queda en 1, B en 3, C conserva 1 y 3. Esta simulación mantiene todos los bloques.'
+      : 'Tres bloques, dos copias iniciales por bloque. Si cae un nodo, consulta las réplicas.');
+  }
+  on('failNode','click',()=>{failed=true;drawHdfs();});
+  on('restoreNode','click',()=>{failed=false;drawHdfs();});drawHdfs();
+
+  // H4: media global con sumas y pesos, nunca media de medias.
+  on('mapRun','click',()=>{
+    const raw=byId('mapInput').value.trim().split('\n').filter(x=>x.trim());
+    if(raw.length<2||raw.length>20){out('mapOut','Utiliza entre 2 y 20 lotes, uno por línea.');return;}
+    const parts=[];
+    for(const line of raw){
+      const a=line.split(',').map(x=>Number(x.trim()));
+      if(!a.length||a.length>300||a.some(x=>!Number.isFinite(x))){out('mapOut','Cada lote debe contener entre 1 y 300 números válidos separados por comas.');return;}
+      parts.push({sum:a.reduce((u,v)=>u+v,0),n:a.length});
+    }
+    const total=parts.reduce((a,v)=>a+v.sum,0),n=parts.reduce((a,v)=>a+v.n,0);
+    const mean=total/n, naive=parts.reduce((a,v)=>a+v.sum/v.n,0)/parts.length;
+    out('mapOut',parts.map((x,i)=>'Map lote '+(i+1)+': suma='+fmt(x.sum,2)+' · n='+x.n+' · media='+fmt(x.sum/x.n,3)).join('\n')
+      +'\nReduce global: suma='+fmt(total,2)+' · n='+n
+      +'\nMedia global ponderada='+fmt(mean,4)+' · Media INGENUA de medias='+fmt(naive,4)
+      +'\nDiferencia absoluta='+fmt(Math.abs(mean-naive),4)+'.');
+  });
+
+  // H5: checklist local, sin pretender backend evaluativo.
+  function checkList(boxId,outputId){
+    const labels=[...document.querySelectorAll('#'+boxId+' input[type=checkbox]')];
+    const count=labels.filter(x=>x.checked).length;
+    out(outputId,count+' de '+labels.length+' pasos marcados. '
+      +(count===labels.length?'Lista completa según tu propia revisión. Comprueba que el puerto es privado.':'Completa los pasos faltantes y valida las salidas reales de Codespaces.')
+      +' Este estado no constituye evidencia ni nota.');
+  }
+  on('setupCheckRun','click',()=>checkList('setupChecks','setupFeedback'));
+  on('labCheckRun','click',()=>checkList('labChecks','labFeedback'));
+
+  // H6: grafo conceptual; execution real ocurre dentro de Codespaces.
+  let graph='new';
+  const lazy=()=>{document.querySelectorAll('#lazyGraph .nodebox').forEach(x=>x.style.background=graph==='computed'?'#d3f2df':graph==='built'?'#fff2d9':'#edf2fa');
+    out('lazyOut',graph==='computed'?'compute() solicita tareas al scheduler; resultados materializados. Simulación visual, no midió CPU.'
+      :graph==='built'?'Grafo preparado: tareas y dependencias descritas; no hubo ejecución.'
+      :'Estado inicial. Construye el grafo y luego ejecuta compute().');};
+  on('lazyBuild','click',()=>{graph='built';lazy();});
+  on('lazyCompute','click',()=>{graph='computed';lazy();});
+  on('lazyReset','click',()=>{graph='new';lazy();});
+
+  // H7: calculadora de amortizacion de operaciones hipotéticas.
+  on('costRun','click',()=>{
+    const L=Number(byId('costLocal').value),D=Number(byId('costDask').value),F=Number(byId('costStart').value),N=Number(byId('costRepeat').value);
+    if(!(L>0&&D>0&&F>=0&&N>=1&&Number.isInteger(N))){out('costOut','Revisa: local/distribuido deben ser positivos; arranque no negativo; repeticiones un entero ≥1.');return;}
+    const local=L*N,distributed=F+D*N;
+    const breakeven=L>D?Math.floor(F/(L-D))+1:null;
+    out('costOut','Para '+N+' operaciones (hipótesis): local '+fmt(local,3)+' s, distribuido con un arranque '+fmt(distributed,3)+' s.\n'
+      +(distributed<local?'✓ Distribuido gana según este modelo.':distributed===local?'Empate en este modelo.':'Local gana según este modelo.')
+      +'\nAceleración extremo a extremo: '+fmt(local/distributed,2)+'×. '
+      +(breakeven?'Si el resto se mantiene constante, se compensa a partir de ~'+breakeven+' operaciones.':'Con estos tiempos por operación no se recupera el arranque.'));
+  });
+
+  const tokenize=t=>(t.toLocaleLowerCase('es').match(/[\p{L}\p{N}]+/gu)||[]);
+  const docs=()=>[1,2,3].map(i=>byId('tfDoc'+i).value);
+  const idf=(n,df)=>Math.log((1+n)/(1+df))+1;
+  function corpusInfo(){
+    const tokens=docs().map(tokenize);
+    const terms=[...new Set(tokens.flat())].sort((a,b)=>a.localeCompare(b,'es'));
+    const df={};terms.forEach(t=>df[t]=tokens.filter(doc=>doc.includes(t)).length);
+    return {tokens,terms,df};
+  }
+  const vector=(tokens,terms,df,N)=>{
+    const counts={};tokens.forEach(t=>counts[t]=(counts[t]||0)+1);
+    const weights=terms.map(t=>(counts[t]||0)*idf(N,df[t]));
+    const norm=Math.hypot(...weights);
+    return {counts,weights:weights.map(x=>norm?x/norm:0),norm};
+  };
+  // H8: toy TF-IDF con pesos y L2.
+  on('tfidfToyRun','click',()=>{
+    const {tokens,terms,df}=corpusInfo();
+    if(terms.length>60){out('tfidfToyOutput','Limita el minicorpus a 60 términos diferentes para ver la tabla completa.');return;}
+    const v=vector(tokens[0],terms,df,3);
+    out('tfidfToyOutput','TÉRMINO | DF | IDF | TF(A) | TF×IDF(A) | L2(A)\n'
+      +terms.map((t,i)=>[t,df[t],fmt(idf(3,df[t])),v.counts[t]||0,fmt((v.counts[t]||0)*idf(3,df[t])),fmt(v.weights[i])].join(' | ')).join('\n')
+      +'\n\nNorma L2 de A antes de normalizar: '+fmt(v.norm)+'; después: '+fmt(Math.hypot(...v.weights))+' (si hay tokens).');
+  });
+  // H9: n-gramas en tres textos (sin dependencia server).
+  on('ngramRun','click',()=>{
+    const {tokens}=corpusInfo(),nMax=Number(byId('ngramOpt').value),minDf=Number(byId('dfOpt').value);
+    const sets=tokens.map(t=>{
+      const words=[...t];if(nMax===2)for(let i=0;i<t.length-1;i++)words.push(t[i]+' '+t[i+1]);
+      return new Set(words);
+    });
+    const freq={};sets.forEach(s=>s.forEach(w=>freq[w]=(freq[w]||0)+1));
+    const found=Object.keys(freq).filter(k=>freq[k]>=minDf).sort();
+    out('ngramOut','Ejemplo de un corpus de 3 documentos; ngram_range=(1,'+nMax+'), min_df='+minDf+'.\nTérminos: '+found.length+'\n'
+      +(found.join(' · ')||'El umbral eliminó todos los términos.')
+      +'\nAl cambiar parámetros cambia el vocabulario; no compares una matriz nueva con una representación anterior.');
+  });
+  // H10: misma IDF aprendida en corpus, consulta con transform.
+  on('cosRun','click',()=>{
+    const {tokens,terms,df}=corpusInfo(),query=tokenize(byId('cosQuery').value);
+    const q=vector(query,terms,df,3).weights;
+    const rows=tokens.map((t,i)=>{
+      const v=vector(t,terms,df,3).weights;
+      return {id:['A','B','C'][i],score:v.reduce((acc,x,k)=>acc+x*q[k],0),text:docs()[i]};
+    }).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
+    out('cosOut',rows.map((r,i)=>(i+1)+'. Documento '+r.id+': cos='+fmt(r.score,4)+' · '+r.text).join('\n')
+      +'\nLos términos ausentes del vocabulario no contribuyen. Coseno ≠ probabilidad.');
+  });
+  // H11: fugas.
+  on('leakCorrect','click',()=>out('leakOut','Correcto: transform(test) usa vocabulario fijado en train; «resonancia» queda fuera del espacio si no apareció en train. La evaluación no aprende del futuro.'));
+  on('leakWrong','click',()=>out('leakOut','Fuga: fit_transform(train + test) aprende vocabulario y estadísticas IDF usando la prueba; ya no es evaluación independiente. Divide primero y ajusta sólo con train.'));
+  // H12: métricas.
+  on('f1Run','click',()=>{
+    const tp=Number(byId('f1tp').value),fp=Number(byId('f1fp').value),fn=Number(byId('f1fn').value);
+    if([tp,fp,fn].some(v=>!Number.isInteger(v)||v<0)){out('f1Out','Introduce conteos enteros no negativos.');return;}
+    const precision=tp+fp?tp/(tp+fp):0,recall=tp+fn?tp/(tp+fn):0;
+    const f1=precision+recall?2*precision*recall/(precision+recall):0;
+    out('f1Out','Precisión='+fmt(precision,4)+' · Recall='+fmt(recall,4)+' · F1 clase='+fmt(f1,4)
+      +'\nPara F1 macro, calcula F1 para todas las clases y promedia sin ponderar por frecuencia.');
+  });
+  // H13: resultados medidos; no extrapolar.
+  const bench=[
+    {n:1000,l:0.7152,d:0.6884,f:0.48914},
+    {n:10000,l:1.3007,d:1.1961,f:0.55558},
+    {n:20000,l:1.9618,d:1.7694,f:0.56637},
+    {n:50000,l:3.9234,d:3.5522,f:0.57383}
+  ];
+  on('benchmarkRun','click',()=>{
+    const r=bench[Number(byId('benchmarkSize').value)];
+    out('benchmarkOut',r.n.toLocaleString('es-CO')+' train + 10.000 test: ahorro de transformación '+fmt(r.l-r.d,4)
+      +' s; aceleración '+fmt(r.l/r.d,3)+'×; F1 macro SVC '+fmt(r.f,5)+'.\n'
+      +'No incluye leer archivos, crear el clúster, fit del vocabulario ni entrenamiento del clasificador.');
+  });
+  // H14: tradeoff calidad/costo.
+  const gains={
+    latency:'Con la latencia CPU como prioridad, TF-IDF es punto de partida: 0,111 s vs 119,898 s al vectorizar 1.000 textos en la prueba publicada. No equivale a latencia de tu HP.',
+    quality:'Si el impacto de calidad lo justifica, EmbeddingGemma 2 mejoró F1 macro de 0,45134 a 0,47586 en este split. Revisa clases con F1=0 y costo operativo antes de adoptar.',
+    reuse:'Si procesas una vez y haces muchas consultas, caché de embeddings puede amortizar costo. No cambia la calidad y su primera generación sigue siendo cara.'
+  };
+  on('gainRun','click',()=>out('gainOut',gains[byId('gainImportance').value]+' Estos datos usan 800 train/200 test; no cruzarlos con el benchmark 50k.'));
+  // H15: prueba de decisiones.
+  const quiz=[
+    {q:'200 procesos, memoria suficiente y un conteo por modalidad. ¿Qué eliges primero?',ok:'local',why:'pandas basta: el costo de iniciar un scheduler no tiene beneficio conocido.'},
+    {q:'Tres folds independientes sobre textos grandes; dos CPU disponibles y envío de datos costoso. ¿Qué se compara primero?',ok:'dask',why:'Dask es una opción para coordinar folds; compárala contra joblib y ejecución secuencial con los mismos folds.'},
+    {q:'Muchos Parquet en infraestructura Spark existente, con un ETL que excede memoria de una sola máquina. ¿Por dónde empezarías?',ok:'spark',why:'Spark puede aprovechar el entorno distribuido existente; medir extremo a extremo y validar procedencia.'}
+  ];
+  let qi=0;function drawQuiz(){out('quizPrompt','Escenario '+(qi+1)+' / '+quiz.length+': '+quiz[qi].q);out('quizResponse','Elige y revisa la alternativa descartada.');}
+  document.querySelectorAll('[data-quiz-choice]').forEach(b=>b.addEventListener('click',()=>{
+    out('quizResponse',(b.dataset.quizChoice===quiz[qi].ok?'✓ Elección razonable. ':'△ Alternativa a considerar: '+quiz[qi].ok+'. ')
+      +quiz[qi].why+' No hay nota ni envío de texto libre.');
+  }));
+  on('quizNext','click',()=>{qi=(qi+1)%quiz.length;drawQuiz();});drawQuiz();
+})();
+</script></body></html>
