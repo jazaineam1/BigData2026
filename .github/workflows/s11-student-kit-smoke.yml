@@ -1,7 +1,8 @@
-name: S11 · Kit mínimo del estudiante (QA)
+name: S11 · Kit de estudiantes Python desde cero (QA)
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - ".github/workflows/s11-student-kit-smoke.yml"
 
@@ -10,51 +11,76 @@ permissions:
 
 jobs:
   student-kit:
-    name: Rama de estudiantes, OCR real y verificación
+    name: Cuaderno, recursos reales y OCR sin motor oculto
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
-      - name: Checkout del kit de estudiantes, no del repo principal
+      - name: Descargar SOLO el kit de estudiantes
         uses: actions/checkout@v4
         with:
           ref: s11-estudiantes
-      - name: Probar que el Codespace solo contiene los archivos necesarios
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          visibles = {p.name for p in Path(".").iterdir() if p.name != ".git"}
-          requeridos = {".devcontainer", ".gitignore", "README.md", "INSTALACION_UBUNTU.md",
-                        "requirements.txt", "lab.py", "proyecto.py", "app.py",
-                        "verificar_independiente.py", "iniciar_ollama.sh"}
-          assert visibles == requeridos, f"Archivos sobrantes o faltantes: {visibles ^ requeridos}"
-          assert sorted(p.name for p in Path(".devcontainer").iterdir()) == ["Dockerfile", "devcontainer.json"]
-          print("Kit mínimo OK:",len(visibles),"elementos de raíz, sin otros cursos.")
-          PY
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Dependencias de sistema
+      - name: Comprobar el árbol mínimo y las seis fuentes originales
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          visibles={p.name for p in Path(".").iterdir() if p.name!=".git"}
+          esperados={".devcontainer",".gitignore","README.md","INSTALACION_UBUNTU.md",
+                     "FUENTES.md","requirements.txt","01_laboratorio.ipynb","datos"}
+          assert visibles==esperados,(visibles^esperados)
+          fotos=list(Path("datos/raw/fotos").iterdir())
+          actas=list(Path("datos/raw/actas").iterdir())
+          assert len(fotos)==4 and len(actas)==2
+          assert not any(Path(x).exists() for x in ("lab.py","proyecto.py","app.py","Airflow","evaluaciones"))
+          print("OK: 8 elementos en raíz, 4 fotos y 2 actas; sin programas opacos")
+          PY
+      - name: Paquetes Linux y español de Tesseract
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            tesseract-ocr tesseract-ocr-spa ffmpeg poppler-utils espeak-ng fonts-dejavu-core
-      - name: Python y sintaxis
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-spa ffmpeg poppler-utils
+      - name: Bibliotecas del kit de docencia
         run: |
-          python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-          python -m py_compile lab.py proyecto.py app.py verificar_independiente.py
           tesseract --list-langs | grep -x spa
-      - name: OCR real, datos sintéticos y auditoría de integridad
+      - name: Sintaxis de TODAS las celdas y contrato didáctico
         run: |
-          python lab.py preparar
-          python lab.py ocr
-          python verificar_independiente.py --caso lab
-      - name: Transferencia de imagen y texto sin API externa
+          python - <<'PY'
+          import json,nbformat
+          from pathlib import Path
+          nb=nbformat.read("01_laboratorio.ipynb",as_version=4)
+          nbformat.validate(nb)
+          ids={c.id for c in nb.cells}
+          requeridos={"s11-abrir-imagen","s11-ocr-acta","s11-ocr-parametros",
+                      "s11-ocr-fotos","s11-vision-vectores","s11-busqueda-coseno",
+                      "s11-audio-fuente","s11-audio-whisper","s11-audio-wer",
+                      "s11-etl-catalogo","s11-auditoria-codigo"}
+          assert requeridos<=ids,requeridos-ids
+          assert len(nb.cells)>=24
+          for celda in nb.cells:
+              if celda.cell_type=="code":
+                  compile(celda.source,celda.id,"exec")
+          text=Path("README.md").read_text()
+          assert "Escribe" in text or "escribir" in text
+          assert "440m" in Path("INSTALACION_UBUNTU.md").read_text()
+          print("OK: notebook válido, 11 celdas de Python compiladas")
+          PY
+      - name: EJECUTAR celdas reales de Pillow, Tesseract, PSM y fotografías
+        env:
+          MPLBACKEND: Agg
         run: |
-          python proyecto.py iniciar --destino proyectos/qa
-          cp salidas/afiche_simulado.png proyectos/qa/entradas/imagenes/
-          printf 'Caso DEMO: contrato 17 por 320000 pesos.\n' > proyectos/qa/entradas/textos/caso.txt
-          python proyecto.py plan --config proyectos/qa/config.json
-          python proyecto.py procesar --config proyectos/qa/config.json
-          python proyecto.py auditar --config proyectos/qa/config.json
-          python verificar_independiente.py --proyecto proyectos/qa
+          python - <<'PY'
+          import nbformat
+          nb=nbformat.read("01_laboratorio.ipynb",as_version=4)
+          seleccion={"s11-abrir-imagen","s11-ocr-acta","s11-ocr-parametros","s11-ocr-fotos"}
+          env={"__name__":"__main__"}
+          for c in nb.cells:
+              if c.cell_type=="code" and c.id in seleccion:
+                  print("EJECUTANDO",c.id)
+                  exec(compile(c.source,c.id,"exec"),env)
+          assert len(env["textos_fotos"])==4
+          assert env["total"]-env["descuentos"]==env["neto"]
+          assert len(env["ocr_6"])>100
+          print("OCR REAL OK: acta SECOP y cuatro fotos")
+          PY
