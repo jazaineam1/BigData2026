@@ -7,11 +7,12 @@ from PIL import Image
 ruta = Path("datos/raw/fotos/eltiempo_006.webp")
 imagen = Image.open(ruta)
 print(imagen.size)</code></pre></div></div></section>
-<section class="card" id="paso03"><div class="num">03</div><div><h2>Crea OCR sobre un acta SECOP</h2><p>Inspecciona visualmente el total, descuento y neto de la primera página. Escribe una llamada a Tesseract desde Python. No publiques nombres ni cuentas.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>import pytesseract
-texto = pytesseract.image_to_string(
-    pagina, lang="spa", config="--psm 6"
-)</code></pre></div></div></section>
-<section class="card" id="paso04"><div class="num">04</div><div><h2>Detecta cuándo OCR no es adecuado</h2><p>Aplica Tesseract a una imagen con letreros y a otra con viviendas sin texto. Cambia PSM de 6 a 11. Explica por qué extraer letras no equivale a interpretar una escena.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>for psm in [6, 11]:
+<section class="card" id="paso03"><div class="num">03</div><div><h2>Crea OCR sobre un acta SECOP</h2><p>Abre el PDF secop_acta_728704921.pdf y su primera página PNG. Es un acta de inicio, contrato 006-2026: busca el valor $14.760.000, seis meses y seis pagos de $2.460.000. Primero ejecuta OCR completo, después compara las etiquetas con la imagen. Evita publicar identificaciones personales.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>from PIL import Image
+import pytesseract
+pagina = Image.open("datos/raw/actas/secop_acta_728704921_pagina1.png")
+texto = pytesseract.image_to_string(pagina, lang="spa", config="--psm 3")
+print(texto)</code></pre></div></div></section>
+<section class="card" id="paso04"><div class="num">04</div><div><h2>Detecta cuándo OCR no es adecuado</h2><p>PSM significa modo de segmentación: 3 detecta el diseño de página, 6 supone un bloque y 11 busca palabras dispersas. Compara los tres en el mismo PDF, y luego haz OCR a una foto con letreros. Una imagen sin texto requiere análisis visual, no OCR.</p><div class="command"><button type="button" onclick="copyCode(this)" aria-label="Copiar comando">Copiar</button><pre><code>for psm in [3, 6, 11]:
     print(psm, pytesseract.image_to_string(
         pagina, lang="spa", config=f"--psm {psm}"
     )[:100])</code></pre></div></div></section>
