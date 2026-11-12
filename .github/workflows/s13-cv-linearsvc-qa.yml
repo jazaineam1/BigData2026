@@ -1,0 +1,43 @@
+name: S13 laboratorio real CV Dask y 50k procesos
+on:
+  pull_request:
+    paths:
+      - "Laboratorios/S13_Codespaces/cv_dask_mismo_modelo.py"
+      - ".github/workflows/s13-cv-linearsvc-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validacion-cruzada:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar los requisitos de Codespaces
+        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+      - name: Modelo idéntico y folds iguales, local vs Dask en los cuatro tamaños
+        run: |
+          python Laboratorios/S13_Codespaces/cv_dask_mismo_modelo.py --sizes 1000 10000 20000 50000 --cv 3 --workers 2
+      - name: Comprobar identidad de predicciones en CV
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          j=json.loads(Path("Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/cv_linearsvc_local_vs_dask.json").read_text())
+          assert [r["train"] for r in j["resultados"]]==[1000,10000,20000,50000]
+          assert all(r["mismos_folds"] and len(r["scores"])==3 for r in j["resultados"])
+          assert j["workers"]==2 and j["modelo_constante"] is True
+          print("Modelo y los mismos 3 folds: probado en 4 tamaños")
+          PY
+      - uses: actions/upload-artifact@v6
+        with:
+          name: s13-cv-1k-10k-20k-50k-mismo-modelo
+          path: Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/cv_linearsvc_local_vs_dask.json
+          retention-days: 14

@@ -1,0 +1,103 @@
+name: S13 50k misma prueba TFIDF XGBoost Dask
+on:
+  pull_request:
+    paths:
+      - "Laboratorios/S13_Codespaces/benchmark_50k_test_fijo.py"
+      - "Laboratorios/S13_Codespaces/benchmark_embeddinggemma2_50k.py"
+      - "Laboratorios/S13_Codespaces/test_benchmark_50k.py"
+      - "Laboratorios/S13_Codespaces/GUIA_50K_COMPARACION_JUSTA.md"
+      - ".github/workflows/s13-50k-comparacion-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  entrenamiento-50k:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Dependencias Codespaces
+        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+      - name: Tests de protocolo fijo e importación
+        run: |
+          python -m py_compile Laboratorios/S13_Codespaces/benchmark_50k_test_fijo.py
+          python -m py_compile Laboratorios/S13_Codespaces/benchmark_embeddinggemma2_50k.py
+          cd Laboratorios/S13_Codespaces
+          python -m unittest -v test_benchmark_50k
+      - name: Ejecutar mismas cuatro muestras mismo modelo y test
+        env:
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "2"
+          MKL_NUM_THREADS: "1"
+        run: |
+          python Laboratorios/S13_Codespaces/benchmark_50k_test_fijo.py --sizes 1000 10000 20000 50000 --workers 2 --repeticiones 3 --rondas 20
+      - name: Validar cuatro grupos y el mismo test compartido
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path("Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/benchmark_50k_test_fijo.json").read_text())
+          assert x["diseño"]["n_test_fijo"]==10000
+          assert x["diseño"]["entrenamientos_anidados"] is True
+          assert [r["n_train"] for r in x["resultados"]]==[1000,10000,20000,50000]
+          assert len(set(r["test_sha256_ids"] for r in x["resultados"]))==1
+          for r in x["resultados"]:
+              assert r["n_test_fijo"]==10000
+              assert r["segundos_transformacion_local_mediana"]>0
+              assert r["segundos_transformacion_dask_mediana"]>0
+              assert len(r["segundos_transformacion_local_repeticiones"])==3
+              assert len(r["segundos_transformacion_dask_repeticiones"])==3
+              assert r["segundos_xgboost_local_fit_predict"]>=0
+              assert r["segundos_xgboost_dask_fit"]>=0
+              for nombre,indicadores in r["metricas"].items():
+                  assert 0<=indicadores["f1_macro"]<=1, (nombre,indicadores)
+                  assert 0<=indicadores["balanced_accuracy"]<=1
+          print("QA aprobado: 50k real, test fijo único, hyperparámetros locales/distribuidos iguales")
+          PY
+      - uses: actions/upload-artifact@v6
+        with:
+          name: s13-comparacion-justa-1k-10k-20k-50k
+          path: Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/*.json
+          retention-days: 14
+          if-no-files-found: error
+
+  embgemma2-real-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar dependencias de ciencia de datos
+        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+      - name: Instalar Ollama CPU para medir modelo auténtico
+        run: |
+          curl -fsSL https://ollama.com/install.sh -o /tmp/s13-ollama-install.sh
+          sh /tmp/s13-ollama-install.sh
+          ollama --version
+          nohup ollama serve >/tmp/s13-ollama.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:11434/api/tags >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/s13-ollama.log
+          exit 1
+      - name: Descargar la etiqueta real y específica EmbeddingGemma 2 texto
+        run: ollama pull embeddinggemma-2:270m
+      - name: Medir inferencia CPU sobre fichas SECOP reales del test fijo
+        env:
+          OLLAMA_NUM_PARALLEL: "1"
+        run: |
+          python Laboratorios/S13_Codespaces/benchmark_embeddinggemma2_50k.py --modo piloto --n-piloto 24 --batch 4 --model embeddinggemma-2:270m
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: s13-embeddinggemma2-piloto-cpu-real
+          path: Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/embgemma2_piloto_real.json
+          retention-days: 14
+          if-no-files-found: ignore
