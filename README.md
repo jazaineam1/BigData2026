@@ -8,15 +8,15 @@
 
 1. **[Presentación S11](https://jazaineam1.github.io/BigData2026/Presentaciones/s11-videoclase-ocr-asr-embeddings.html#s1)**: explica cada pregunta, instalación, idea de código y comprobación; úsala mientras sigues el video.
 2. **[01_laboratorio.ipynb](./01_laboratorio.ipynb)**: **único cuaderno**. FASE 1: construyes y compruebas OCR, búsqueda visual y ASR; FASE 2: amplías los bucles a lotes de 122 fuentes y generas JSONL/Parquet.
-3. **Codespace S11 + visor privado**: ofrece Python, Tesseract, Jupyter y un visor para abrir **cada PDF completo, PNG, foto y WAV**, sin abandonar el navegador. El visor es una ayuda de inspección y no sustituye escribir el código.
+3. **Codespace S11 + visor privado**: ofrece Python, Tesseract, **Ollama instalado automáticamente sin systemd**, Jupyter y un visor para abrir **cada PDF completo, PNG, foto y WAV**, sin abandonar el navegador. El visor es una ayuda de inspección y no sustituye escribir el código.
 
-**No hay un segundo cuaderno, una segunda presentación ni Airflow en este kit.** Los archivos \`INSTALACION_UBUNTU.md\` y \`FUENTES.md\` son documentación de consulta, no pasos que debas ir ejecutando paralelamente.
+**No hay un segundo cuaderno, una segunda presentación ni Airflow en este kit.** Los archivos `INSTALACION_UBUNTU.md` y `FUENTES.md` son documentación de consulta, no pasos que debas ir ejecutando paralelamente.
 
 ## Paso 1 · Crear el Codespace correcto
 
-1. Abre **https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes**. Comprueba que el selector de rama muestra **s11-estudiantes**, NO \`main\`.
+1. Abre **https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes**. Comprueba que el selector de rama muestra **s11-estudiantes**, NO `main`.
 2. Haz clic en **Code → Codespaces → Create codespace on s11-estudiantes**. Si se ofrece una configuración, selecciona **S11 · OCR, visión y voz (aprende Python)**.
-3. Espera a que aparezca VS Code y se complete la instalación indicada por \`postCreateCommand\`. No cambies de rama dentro del Codespace.
+3. Espera a que aparezca VS Code y se complete la instalación indicada por `postCreateCommand`. **Ollama se instala al construir el contenedor**; no necesitas `curl ... install.sh`. Si el Codespace es antiguo, ejecuta **Ctrl+Shift+P → Codespaces: Rebuild Container** después de sincronizar la rama. No cambies de rama dentro del Codespace.
 4. En el explorador abre **01_laboratorio.ipynb**. Arriba a la derecha elige **Select Kernel → Python 3** del Codespace.
 5. Abre **Terminal → New Terminal** y comprueba:
 
@@ -24,16 +24,20 @@
 pwd
 python --version
 tesseract --list-langs
+command -v ollama
+ollama --version
+bash iniciar_ollama.sh
+curl -fsS http://127.0.0.1:11434/api/tags
 python -c "from PIL import Image; import pytesseract,pandas,pyarrow,requests,faster_whisper,streamlit; print('Python OK')"
 ~~~
 
-**Resultado:** la ruta termina en \`/workspaces/BigData2026\`, aparece \`spa\` en Tesseract y se imprime \`Python OK\`. Si no es así, consulta «Solución de problemas», al final.
+**Resultado:** la ruta termina en `/workspaces/BigData2026`, aparece `spa` en Tesseract, `command -v ollama` devuelve `/usr/bin/ollama`, la API responde JSON y se imprime `Python OK`. Si no es así, consulta «Solución de problemas», al final.
 
-**Qué aprendiste:** Codespaces es Linux remoto. \`.devcontainer/Dockerfile\` instala programas del sistema; \`requirements.txt\` instala bibliotecas Python; \`.devcontainer/devcontainer.json\` coordina la instalación. En Ubuntu propio se puede replicar siguiendo \`INSTALACION_UBUNTU.md\`.
+**Qué aprendiste:** Codespaces es Linux remoto. `.devcontainer/Dockerfile` instala programas del sistema; `requirements.txt` instala bibliotecas Python; `.devcontainer/devcontainer.json` coordina la instalación. En Ubuntu propio se puede replicar siguiendo `INSTALACION_UBUNTU.md`.
 
 ## Paso 2 · Abrir y recorrer TODAS las fuentes en el visor
 
-El visor se inicia automáticamente con \`abrir_visor.sh\`. Si no ves la vista previa:
+El visor se inicia automáticamente con `abrir_visor.sh`. Si no ves la vista previa:
 
 ~~~bash
 bash abrir_visor.sh
@@ -63,28 +67,27 @@ En esta pantalla tienes cuatro selecciones de fuentes:
 
 ## Paso 3 · Ejecutar el ÚNICO cuaderno (FASE 1: aprender)
 
-Haz doble clic en \`01_laboratorio.ipynb\`. Lee el texto de una sección, **explica las líneas de su celda** y ejecuta con **Shift + Enter**. No ejecutes «Run All» sin entenderlo: hay descargas y procesos CPU que necesitan tiempo.
+Haz doble clic en `01_laboratorio.ipynb`. Lee el texto de una sección, **explica las líneas de su celda** y ejecuta con **Shift + Enter**. No ejecutes «Run All» sin entenderlo: hay descargas y procesos CPU que necesitan tiempo.
 
 | Tema | Qué escribes en Python | Qué compruebas |
 |---|---|---|
-| Leer archivos | \`Path\`, \`Image.open\`, \`display\` | Foto original, formato y resolución |
-| OCR de acta | \`pytesseract.image_to_string(..., lang="spa")\` | Valores contra página SECOP |
-| OCR y PSM | \`--psm 6\`, \`--psm 11\`, \`--psm 3\` | Efecto sobre columnas y texto disperso |
+| Leer archivos | `Path`, `Image.open`, `display` | Foto original, formato y resolución |
+| OCR de acta | `pytesseract.image_to_string(..., lang="spa")` | Valores contra página SECOP |
+| OCR y PSM | `--psm 6`, `--psm 11`, `--psm 3` | Efecto sobre columnas y texto disperso |
 | OCR de fotos | Bucle sobre cuatro fotos | Letreros vs escenas sin caracteres |
-| Embeddings visuales | HTTP \`/api/embed\` + Base64 | Vector de 768 dimensiones y ranking |
-| Whisper | \`WhisperModel("tiny", ...)\` | Audio, segmentos, referencia y WER |
+| Embeddings visuales | HTTP `/api/embed` + Base64 | Vector de 768 dimensiones y ranking |
+| Whisper | `WhisperModel("tiny", ...)` | Audio, segmentos, referencia y WER |
 | Catálogo ETL | Diccionarios, JSONL, Parquet y SHA-256 | Procedencia, integridad y lectura posterior |
 
-Para Ollama abre \`INSTALACION_UBUNTU.md\` y verifica:
+**Ollama está instalado en el Codespace correcto.** Para iniciar el servidor y descargar el modelo visual 440m, ejecuta **un único comando**:
 
 ~~~bash
-ollama --version
-ollama pull embeddinggemma-2:440m
-ollama list
-curl -fsS http://127.0.0.1:11434/api/tags
+bash preparar_embeddinggemma.sh
 ~~~
 
-Si Ollama no está instalado, realiza antes su instalación oficial como indica la guía. Usa **440m para imágenes y texto**; 270m es de texto. Es recomendable hacer las descargas iniciales **antes de la grabación** y mostrar qué comandos se utilizaron.
+La preparación comprueba la instalación, inicia Ollama sin systemd, descarga `embeddinggemma-2:440m`, verifica la API local y confirma los **768 valores** del vector. No utilices `less /tmp/ollama-install.sh` ni vuelvas a ejecutar el instalador de sistema en Codespaces.
+
+Si `ollama` no existe porque abriste un Codespace creado antes de esta corrección, sincroniza la rama `s11-estudiantes` y usa **Ctrl+Shift+P → Codespaces: Rebuild Container → Rebuild**. Si no puedes reconstruir, `INSTALACION_UBUNTU.md` contiene una instalación manual alternativa con el paquete oficial `.tar.zst`. Para imágenes usa **440m**, no el modelo de texto 270m.
 
 ## Paso 4 · SIN CAMBIAR DE CUADERNO, pasar a FASE 2
 
@@ -94,14 +97,14 @@ Escribe los bucles y comienza con muestras manejables:
 
 | Parámetro de las celdas | Durante la explicación | Para la práctica completa |
 |---|---:|---:|
-| \`N_ACTAS\` | 5 | 30 |
-| \`N_FOTOS\` | 8 | 62 |
-| \`N_VISION\` | 8 | 62 |
-| \`N_ASR\` | 3 | 30 |
+| `N_ACTAS` | 5 | 30 |
+| `N_FOTOS` | 8 | 62 |
+| `N_VISION` | 8 | 62 |
+| `N_ASR` | 3 | 30 |
 
 Las celdas realizan inventario, OCR documental, OCR fotográfico, embeddings con caché por SHA, ranking por coseno, descarga y conversión de WAV, WER con referencia y catálogo ETL. **El procesamiento completo de 62 embeddings visuales y 30 voces puede exceder los 60 minutos**; la videoclase enseña el procedimiento con una muestra, y el alumno amplía los parámetros posteriormente.
 
-**Resultado del catálogo:** \`outputs/catalogo_122.jsonl\` y \`outputs/catalogo_122.parquet\` con **122 filas**. La auditoría reabre ambos y comprueba de nuevo los hashes de originales. Otros resultados incluyen métricas de OCR y \`outputs/vectores_440m.json\`.
+**Resultado del catálogo:** `outputs/catalogo_122.jsonl` y `outputs/catalogo_122.parquet` con **122 filas**. La auditoría reabre ambos y comprueba de nuevo los hashes de originales. Otros resultados incluyen métricas de OCR y `outputs/vectores_440m.json`.
 
 **La práctica no exige 122 transcripciones completas dentro del video:** separa los indicadores que se obtienen de cada fuente de las inferencias que realizas por lotes.
 
@@ -109,7 +112,7 @@ Las celdas realizan inventario, OCR documental, OCR fotográfico, embeddings con
 
 Escribe una tabla o breve explicación con estas columnas:
 
-\`pregunta | archivo y fuente | motor elegido | código o parámetro que cambié | resultado | cómo lo verifiqué | límite/error\`
+`pregunta | archivo y fuente | motor elegido | código o parámetro que cambié | resultado | cómo lo verifiqué | límite/error`
 
 Debes demostrar: un valor SECOP comparado con el PNG; OCR de un letrero; una consulta visual cambiada; una voz escuchada y comparada con su referencia; una fila del catálogo con SHA-256 verificado. **No basta con mostrar «ejecución exitosa».**
 
@@ -127,20 +130,20 @@ Debes demostrar: un valor SECOP comparado con el PNG; OCR de un letrero; una con
 
 | Problema | Qué revisar |
 |---|---|
-| Aparecen Airflow o otros cursos | Estás en \`main\` u otro Codespace; selecciona \`s11-estudiantes\` |
-| Falta \`spa\` | Comprueba \`tesseract-ocr-spa\` en el Dockerfile; reconstruye contenedor |
-| No carga el kernel | Verifica \`ipykernel\` y selecciona el Python del Codespace |
-| Visor no aparece | \`bash abrir_visor.sh\`; estado de puerto 8501 y pestaña Ports |
+| Aparecen Airflow o otros cursos | Estás en `main` u otro Codespace; selecciona `s11-estudiantes` |
+| Falta `spa` | Comprueba `tesseract-ocr-spa` en el Dockerfile; reconstruye contenedor |
+| No carga el kernel | Verifica `ipykernel` y selecciona el Python del Codespace |
+| Visor no aparece | `bash abrir_visor.sh`; estado de puerto 8501 y pestaña Ports |
 | PDF no se ve | Revisa soporte Streamlit PDF; también puede descargarse el original |
 | No hay audios | Pulsa preparar voces; revisa red, HF y SHA-256; no inventes sustitutos |
-| Ollama no responde | Revisa \`ollama serve\`, 11434, \`ollama list\` y versión 440m |
-| Error por memoria o lentitud | Reduce \`N_VISION\` o \`N_ASR\`, conserva la caché y reintenta |
-| \`NameError\` | Ejecuta las celdas anteriores en orden y verifica las variables |
+| `ollama: command not found` | Sincroniza la rama y reconstruye Codespace; consulta `INSTALACION_UBUNTU.md` si no puedes |\n| Ollama no responde | `bash iniciar_ollama.sh`; revisa `/tmp/s11-ollama.log` y `127.0.0.1:11434` |\n| Modelo 440m no aparece | `bash preparar_embeddinggemma.sh`, luego `ollama list` |
+| Error por memoria o lentitud | Reduce `N_VISION` o `N_ASR`, conserva la caché y reintenta |
+| `NameError` | Ejecuta las celdas anteriores en orden y verifica las variables |
 | OCR se ejecuta pero se equivoca | Compara píxeles/PSM; no transformes un error en un supuesto acierto |
 
 ## Fuente, licencia y privacidad
 
-- Las fotos de El Tiempo **no tienen todas créditos y permisos confirmados por archivo**. Consulta \`FUENTES.md\` antes de redistribuir.
+- Las fotos de El Tiempo **no tienen todas créditos y permisos confirmados por archivo**. Consulta `FUENTES.md` antes de redistribuir.
 - Las actas SECOP pueden contener identificaciones personales; evita publicar sus salidas OCR completas o capturas sensibles.
 - Las voces reales proceden de **PolyAI MINDS-14 es-ES, CC BY 4.0**; son audios bancarios y **no corresponden a las fotos periodísticas**.
 - Esta rama mínima no vuelve privados los archivos que ya existan en otras ramas públicas del repositorio.
