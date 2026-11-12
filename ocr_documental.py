@@ -20,6 +20,9 @@ PSM_EXPLICACION = {
     6: ("6 — Bloque uniforme: asume una región de texto",
         "Tesseract trata el contenido como un único bloque. "
         "Pruébalo cuando recortes una zona con un párrafo o una tabla simple."),
+    7: ("7 — Una sola línea de texto",
+        "Tesseract presupone una única línea, por ejemplo la palabra VALLE "
+        "aislada de un logotipo. No conviene aplicarlo a un PDF entero."),
     11: ("11 — Texto disperso: encuentra fragmentos aislados",
          "Busca textos dispersos donde aparezcan sin reconstruir bien su orden de lectura. "
          "Puede servir para letreros y fotos, pero mezclar columnas en un acta."),
@@ -162,7 +165,8 @@ def recorte_logo_valle(imagen: Image.Image, zona: str) -> Image.Image:
 
 
 def preparar_region_ocr(img: Image.Image, escala: int = 1,
-                        tratamiento: str = "Sin cambios") -> Image.Image:
+                        tratamiento: str = "Sin cambios",
+                        margen: int = 0) -> Image.Image:
     """Devuelve copia de píxeles; la imagen original se mantiene intacta."""
     if escala not in (1, 2, 3):
         raise ValueError("Escala OCR no válida")
@@ -178,8 +182,10 @@ def preparar_region_ocr(img: Image.Image, escala: int = 1,
         copia = gray.point(lambda v: 255 if v >= 150 else 0)
     elif tratamiento != "Sin cambios":
         raise ValueError("Tratamiento OCR no reconocido")
-    # Un margen blanco ayuda a no cortar caracteres que tocan los bordes.
-    return ImageOps.expand(copia, border=12, fill="white")
+    # El borde no mejora todas las imágenes: en el logotipo puede perjudicar.
+    if margen not in (0, 8, 12, 20):
+        raise ValueError("Margen OCR no válido")
+    return ImageOps.expand(copia, border=margen, fill="white") if margen else copia
 
 
 def detalle_ocr(datos: dict) -> tuple[list[dict],float|None]:
