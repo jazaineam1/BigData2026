@@ -245,5 +245,5 @@ un parámetro (por ejemplo psm=6 a 11); compara texto y ranking; registra como
 evidencia las rutas, los hashes y la decisión que tomaste. La respuesta no es
 «copié el comando»: es «cambié una decisión y vi el efecto».
 """)
-    st.markdown("[Ruta de 15 minutos para estudiantes](https://github.com/jazaineam1/BigData2026/blob/main/Laboratorios/S11_Codespaces/GUIA_ESTUDIANTE.md)")
+    st.markdown("[Ruta de 15 minutos para estudiantes](https://jazaineam1.github.io/BigData2026/assets/tutoriales/s11-ocr-asr-paso-a-paso.html)")
     st.info("Guía completa disponible en el archivo GUIA_REUTILIZACION.md del repositorio.")
