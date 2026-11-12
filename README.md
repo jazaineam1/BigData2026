@@ -8,7 +8,7 @@
 
 1. **[Presentación S11](https://jazaineam1.github.io/BigData2026/Presentaciones/s11-videoclase-ocr-asr-embeddings.html#s1)**: explica cada pregunta, instalación, idea de código y comprobación; úsala mientras sigues el video.
 2. **[01_laboratorio.ipynb](./01_laboratorio.ipynb)**: **único cuaderno**. FASE 1: construyes y compruebas OCR, búsqueda visual y ASR; FASE 2: amplías los bucles a lotes de 122 fuentes y generas JSONL/Parquet.
-3. **Codespace S11 + visor privado**: ofrece Python, Tesseract, **Ollama instalado automáticamente sin systemd**, Jupyter y un visor para abrir **cada PDF completo, PNG, foto y WAV**, sin abandonar el navegador. El visor es una ayuda de inspección y no sustituye escribir el código.
+3. **Codespace S11 + visor privado**: ofrece Python, Tesseract, **Ollama integrado en el entorno**, Jupyter y un visor para abrir **cada PDF completo, PNG, foto y WAV**, sin abandonar el navegador. El visor es una ayuda de inspección y no sustituye escribir el código.
 
 **No hay un segundo cuaderno, una segunda presentación ni Airflow en este kit.** Los archivos `INSTALACION_UBUNTU.md` y `FUENTES.md` son documentación de consulta, no pasos que debas ir ejecutando paralelamente.
 
@@ -16,7 +16,7 @@
 
 1. Abre **https://github.com/jazaineam1/BigData2026/tree/s11-estudiantes**. Comprueba que el selector de rama muestra **s11-estudiantes**, NO `main`.
 2. Haz clic en **Code → Codespaces → Create codespace on s11-estudiantes**. Si se ofrece una configuración, selecciona **S11 · OCR, visión y voz (aprende Python)**.
-3. Espera a que aparezca VS Code y se complete la instalación indicada por `postCreateCommand`. **Ollama se instala al construir el contenedor**; no necesitas `curl ... install.sh`. Si el Codespace es antiguo, ejecuta **Ctrl+Shift+P → Codespaces: Rebuild Container** después de sincronizar la rama. No cambies de rama dentro del Codespace.
+3. Espera a que aparezca VS Code y se complete la instalación indicada por `postCreateCommand`. **El Codespace instala Ollama y las bibliotecas a partir de su configuración**; comprueba sus versiones en la terminal. No cambies de rama dentro del Codespace.
 4. En el explorador abre **01_laboratorio.ipynb**. Arriba a la derecha elige **Select Kernel → Python 3** del Codespace.
 5. Abre **Terminal → New Terminal** y comprueba:
 
@@ -49,6 +49,8 @@ En VS Code abre **Ports / Puertos**, elige **8501 → Open Preview / Abrir vista
 ~~~bash
 streamlit run visor_fuentes.py --server.address 0.0.0.0 --server.port 8501
 ~~~
+
+**Documento recomendado para comenzar:** elige **Actas SECOP (30)** y busca **728704921**. Abre la página 1 de su PDF, donde aparecen el contrato **006-2026**, el valor **$14.760.000**, el plazo de **6 meses** y la forma de pago en **6 cuotas de $2.460.000**. Selecciona **PSM 3** para detectar el diseño completo, ejecuta OCR y compara el texto íntegro con la referencia visual. Prueba luego PSM 6 y PSM 11; si cambian las lecturas, explica por qué.
 
 En esta pantalla tienes cuatro selecciones de fuentes:
 
@@ -85,9 +87,9 @@ Haz doble clic en `01_laboratorio.ipynb`. Lee el texto de una sección, **explic
 bash preparar_embeddinggemma.sh
 ~~~
 
-La preparación comprueba la instalación, inicia Ollama sin systemd, descarga `embeddinggemma-2:440m`, verifica la API local y confirma los **768 valores** del vector. No utilices `less /tmp/ollama-install.sh` ni vuelvas a ejecutar el instalador de sistema en Codespaces.
+La preparación comprueba el servicio, descarga `embeddinggemma-2:440m`, consulta la API local y confirma los **768 valores** del vector. Puedes estudiar las instrucciones de instalación del entorno en `INSTALACION_UBUNTU.md`.
 
-Si `ollama` no existe porque abriste un Codespace creado antes de esta corrección, sincroniza la rama `s11-estudiantes` y usa **Ctrl+Shift+P → Codespaces: Rebuild Container → Rebuild**. Si no puedes reconstruir, `INSTALACION_UBUNTU.md` contiene una instalación manual alternativa con el paquete oficial `.tar.zst`. Para imágenes usa **440m**, no el modelo de texto 270m.
+Para replicar el laboratorio en Ubuntu propio, consulta `INSTALACION_UBUNTU.md`. Para analizar **imágenes** usa el modelo **440m**; el modelo 270m se limita a texto.
 
 ## Paso 4 · SIN CAMBIAR DE CUADERNO, pasar a FASE 2
 
@@ -136,7 +138,7 @@ Debes demostrar: un valor SECOP comparado con el PNG; OCR de un letrero; una con
 | Visor no aparece | `bash abrir_visor.sh`; estado de puerto 8501 y pestaña Ports |
 | PDF no se ve | Revisa soporte Streamlit PDF; también puede descargarse el original |
 | No hay audios | Pulsa preparar voces; revisa red, HF y SHA-256; no inventes sustitutos |
-| `ollama: command not found` | Sincroniza la rama y reconstruye Codespace; consulta `INSTALACION_UBUNTU.md` si no puedes |\n| Ollama no responde | `bash iniciar_ollama.sh`; revisa `/tmp/s11-ollama.log` y `127.0.0.1:11434` |\n| Modelo 440m no aparece | `bash preparar_embeddinggemma.sh`, luego `ollama list` |
+| No se identifica el ejecutable Ollama | Comprueba Dockerfile y vuelve a crear el entorno del Codespace desde la configuración |\n| Ollama no responde | `bash iniciar_ollama.sh`; revisa `/tmp/s11-ollama.log` y `127.0.0.1:11434` |\n| Modelo 440m no aparece | `bash preparar_embeddinggemma.sh`, luego `ollama list` |
 | Error por memoria o lentitud | Reduce `N_VISION` o `N_ASR`, conserva la caché y reintenta |
 | `NameError` | Ejecuta las celdas anteriores en orden y verifica las variables |
 | OCR se ejecuta pero se equivoca | Compara píxeles/PSM; no transformes un error en un supuesto acierto |
