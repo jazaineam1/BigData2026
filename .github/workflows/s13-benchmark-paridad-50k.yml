@@ -1,0 +1,65 @@
+name: S13 benchmark paridad local vs Dask 50k
+on:
+  pull_request:
+    paths:
+      - "Laboratorios/S13_Codespaces/benchmark_paridad_50k.py"
+      - "Laboratorios/S13_Codespaces/benchmark_embeddinggemma_paridad.py"
+      - "Laboratorios/S13_Codespaces/test_paridad_50k.py"
+      - "Laboratorios/S13_Codespaces/GUIA_PARIDAD_50K.md"
+      - ".github/workflows/s13-benchmark-paridad-50k.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  benchmark-paridad-50000:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar dependencias exactas de Codespaces
+        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+      - name: Probar invariantes de paridad
+        run: |
+          cd Laboratorios/S13_Codespaces
+          python -m unittest -v test_paridad_50k
+      - name: Verificar sintaxis de scripts y benchmark EmbeddingGemma
+        run: |
+          python -m py_compile Laboratorios/S13_Codespaces/benchmark_paridad_50k.py
+          python -m py_compile Laboratorios/S13_Codespaces/benchmark_embeddinggemma_paridad.py
+      - name: Medir misma TF-IDF LinearSVC y misma XGBoost local vs Dask para 1k 10k 20k 50k
+        run: |
+          python Laboratorios/S13_Codespaces/benchmark_paridad_50k.py --sizes 1000 10000 20000 50000 --workers 2 --rondas 30
+      - name: Verificar 50 mil procesos reales, mismo modelo, predicciones idénticas SVM
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/paridad_50k_resumen.json")
+          d=json.loads(p.read_text(encoding="utf-8"))
+          assert d["sizes"]==[1000,10000,20000,50000]
+          assert d["origen"]["filas_muestreadas"]==50000
+          assert d["origen"]["filas_elegibles"]>=50000
+          assert d["origen"]["descartes"]["filas_leidas"]==300000
+          assert d["equipo"]["workers"]==2
+          for r in d["resultados"]:
+              assert r["tfidf_igualdad_matrices"]
+              assert r["tfidf_svm_predicciones_iguales"]
+              assert r["metricas"]["tfidf_svm_local"]==r["metricas"]["tfidf_svm_dask_transform"]
+              assert r["rondas_ambos"]==[30,30]
+              assert r["particiones_dask_xgb"]>=2
+              assert r["train"]==int(r["n"]*0.8)
+              assert r["test"]==r["n"]-r["train"]
+              assert 0<=r["acuerdo_xgb_predicciones_porcentaje"]<=100
+              assert r["vocabulario"]>=100
+          print("Paridad local/Dask verificada 1k 10k 20k 50k")
+          PY
+      - name: Conservar mediciones y verificaciones
+        uses: actions/upload-artifact@v6
+        with:
+          name: s13-paridad-mismo-modelo-1000-10000-20000-50000
+          path: Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/paridad_*
+          retention-days: 14
+          if-no-files-found: error
