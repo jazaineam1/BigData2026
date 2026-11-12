@@ -10,6 +10,7 @@ La auditoría NO etiqueta fraude, sobrecostos ni información faltante a partir 
 from __future__ import annotations
 import argparse
 import json
+import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -25,7 +26,7 @@ COLS=[
   "respuestas_al_procedimiento","proveedores_unicos_con","estado_del_procedimiento",
   "fase","modalidad_de_contratacion","adjudicado","valor_total_adjudicacion",
   "fecha_de_publicacion_del","descripci_n_del_procedimiento",
-  "tipo_de_contrato","unidad_de_duracion",
+  "tipo_de_contrato","unidad_de_duracion","codigo_principal_de_categoria",
 ]
 
 def summary_counter(c, top=18):
@@ -49,6 +50,8 @@ def execute(sample_max=26000):
     dates_parse_fail=0
     price_sample_by_class=defaultdict(list)
     descriptions_money_hint=Counter()
+    unspsc_segments=Counter(); unspsc_invalid=Counter()
+    first_id_details={}; dupe_conflicts=Counter()
     for file in FILES:
         for frame in pd.read_csv(
             file,usecols=COLS,dtype=str,keep_default_na=False,
@@ -98,11 +101,27 @@ def execute(sample_max=26000):
             years=frame["fecha_de_publicacion_del"].str[:4]
             years_all.update(years.tolist())
             mode_all.update(frame["modalidad_de_contratacion"].tolist())
-            for idv in frame["id_del_proceso"].astype(str):
+            # Conserva la cadena UNSPSC de ocho dígitos SIN el prefijo V1.
+            codes=frame["codigo_principal_de_categoria"].astype(str).str.strip()
+            extracted=codes.str.extract(r"^(?:V[0-9]+\\.)?([0-9]{8})$",expand=False)
+            unspsc_segments.update(extracted.dropna().str[:2].tolist())
+            unspsc_invalid.update(codes[extracted.isna()].tolist())
+            for idv, pricev, modev, codev in zip(
+                frame["id_del_proceso"].astype(str),price_raw,
+                frame["modalidad_de_contratacion"],codes,
+            ):
                 k=idv.strip()
-                if not k: blank_ids+=1
-                elif k in all_ids: dupe_all+=1
-                else: all_ids.add(k)
+                if not k:
+                    blank_ids+=1
+                elif k in all_ids:
+                    dupe_all+=1
+                    p0,m0,c0=first_id_details[k]
+                    if p0!=pricev: dupe_conflicts["precio_base_distinto"]+=1
+                    if m0!=modev: dupe_conflicts["modalidad_distinta"]+=1
+                    if c0!=codev: dupe_conflicts["codigo_unspsc_distinto"]+=1
+                else:
+                    all_ids.add(k)
+                    first_id_details[k]=(pricev,modev,codev)
             desc=frame["descripci_n_del_procedimiento"].str.strip()
             # Esto sólo indica "texto con cifra" y posible fuga, no prueba que revele precio base.
             has_millions=desc.str.contains(
@@ -137,6 +156,14 @@ def execute(sample_max=26000):
         "ids_unicos_no_vacios":len(all_ids),
         "ids_duplicados":dupe_all,
         "ids_vacios":blank_ids,
+        "ids_duplicados_conflictos":dict(dupe_conflicts),
+        "codigos_unspsc":{
+            "validos":sum(unspsc_segments.values()),
+            "invalidos":sum(unspsc_invalid.values()),
+            "segmentos":summary_counter(unspsc_segments,25),
+            "invalidos_ejemplos":summary_counter(unspsc_invalid,15),
+            "ejemplo_correcto":"V1.80111600 → 80 (no 18)",
+        },
         "precio_base":{
             **dict(prices),
             "porcentaje_cero":rates(prices["numerico_cero"],n),
