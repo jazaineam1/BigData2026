@@ -121,7 +121,7 @@ def nuevo_modelo(c=1.0):
     """El vectorizador aprende sólo con entrenamiento: evita fuga por TF-IDF."""
     return make_pipeline(
         TfidfVectorizer(max_features=1500, min_df=2),
-        LogisticRegression(C=c, max_iter=500, n_jobs=1),
+        LogisticRegression(C=c, max_iter=500),
     )
 
 
