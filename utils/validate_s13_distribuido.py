@@ -13,7 +13,8 @@ def main():
     nb = json.loads(read("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb"))
     assert nb["nbformat"] == 4
     cells = nb["cells"]
-    assert len(cells) >= 40
+    assert len(cells) >= 84
+    assert "Rúbrica observable de práctica" in text or any("Rúbrica observable de práctica" in "".join(c["source"]) for c in cells)
     assert sum(c["cell_type"] == "code" for c in cells) >= 15
     text = "\n".join("".join(c["source"]) for c in cells)
     for needed in ("MapReduce", "Codespaces", "HDFS", "Dask", "TF-IDF", "Parquet", "F1 macro"):
