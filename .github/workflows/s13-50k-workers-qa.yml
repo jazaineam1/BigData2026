@@ -1,0 +1,45 @@
+name: S13 50k TFIDF mismo modelo 2 vs 4 CPU workers
+on:
+  pull_request:
+    paths:
+      - "Laboratorios/S13_Codespaces/medir_workers_50k.py"
+      - ".github/workflows/s13-50k-workers-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cuatro-cores:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar dependencias Codespaces
+        run: python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+      - name: Medir 4 CPU lógicas, transformaciones idénticas local vs 2 vs 4 workers
+        run: python Laboratorios/S13_Codespaces/medir_workers_50k.py --reps 3
+      - name: Verificar identidad de trabajo y repeticiones
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path("Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/workers_2_vs_4_50k.json").read_text())
+          assert a["n_train"]==50000 and a["n_test"]==10000
+          assert a["misma_matriz"] and a["mismo_modelo_vectorizador"]
+          assert [r["workers"] for r in a["dask"]]==[2,4]
+          assert len(a["local"]["repeticiones"])==3
+          assert all(len(r["repeticiones"])==3 for r in a["dask"])
+          assert a["cpu_logicos"]>=4
+          print("Modelos y matrices idénticos; 4 CPU lógicas comprobadas")
+          PY
+      - uses: actions/upload-artifact@v6
+        with:
+          name: s13-50k-mismo-tfidf-2-4-workers
+          path: Laboratorios/S13_Codespaces/salidas/benchmark_unspsc/workers_2_vs_4_50k.json
+          retention-days: 14
