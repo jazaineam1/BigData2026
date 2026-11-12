@@ -33,6 +33,7 @@ ALLOWLIST = {
     ("lms/gradebook.html", "instructions"): "docente: instrucciones de la tarea que crea",
     ("lms/wall.html", "data-review-feedback"): "docente: revisión de evidencia",
     ("Presentaciones/s09-de-palabras-a-significado.html", "caseQ"): "herramienta: consulta de ejemplo precargada",
+    ("Presentaciones/s13-de-una-maquina-a-un-cluster.html", "mapInput"): "herramienta: lotes numericos para calcular MapReduce, sin envio ni evaluacion de prosa",
     ("Presentaciones/s09-de-palabras-a-significado.html", "embedText"): "herramienta: texto para el demo de embeddings",
     ("Presentaciones/s09-de-palabras-a-significado.html", "chunkText"): "herramienta: texto para el demo de chunking",
     ("Presentaciones/s07-del-vecindario-al-texto.html", "tokText"): "herramienta: texto para el demo de tokenizer",

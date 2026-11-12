@@ -13,18 +13,19 @@ def main():
     nb = json.loads(read("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb"))
     assert nb["nbformat"] == 4
     cells = nb["cells"]
-    assert len(cells) >= 87
+    assert len(cells) >= 91
     assert sum(c["cell_type"] == "code" for c in cells) >= 15
     text = "\n".join("".join(c["source"]) for c in cells)
     assert "Rúbrica observable de práctica" in text, "Falta rúbrica S13"
+    assert "s13_A_f1_ngramas.png" in text and "s13_B_f1_por_clase.png" in text, "Faltan figuras de la práctica"
     assert "OPCIONES_ARQUITECTURA" in text and "OPCIONES_LIMITE" in text, "Faltan opciones cerradas de respuesta"
     for needed in ("MapReduce", "Codespaces", "HDFS", "Dask", "TF-IDF", "Parquet", "F1 macro"):
         assert needed in text, f"Falta material pedagógico: {needed}"
     html = read("Presentaciones/s13-de-una-maquina-a-un-cluster.html")
     slides = re.findall(r'<section class="slide(?: active)?" id="s(\d+)"', html)
-    assert len(slides) == 60
-    assert slides == [str(i) for i in range(1, 61)]
-    for required in ("id=\"decisionBox\"", "id=\"hdfsGrid\"", "id=\"quizFinal\"", "S12", "Codespaces"):
+    assert len(slides) == 32
+    assert slides == [str(i) for i in range(1, 33)]
+    for required in ("id=\"decisionBox\"", "id=\"hdfsGrid\"", "id=\"quizPrompt\"", "id=\"tfidfToyRun\"", "id=\"cosRun\"", "id=\"mapRun\"", "id=\"costRun\"", "id=\"f1Run\"", "S12", "Codespaces"):
         assert required in html, f"Falta en presentación: {required}"
     config = json.loads(read(".devcontainer/s13-distribuido/devcontainer.json"))
     assert "S13" in config["name"]
@@ -50,15 +51,15 @@ def main():
     assert "modelo_distribuido_20k.py" in text
     assert "ACTIVAR_MODELO_26K" in text
     assert "xgboost.dask" in text
-    assert "26.000" in html
-    assert "id=\"s39\"" in html
+    assert "50.000" in html
+    assert "id=\"s32\"" in html
     assert config["portsAttributes"]["8502"]["visibility"] == "private"
     index = read("index.html")
     assert index.count('data-n="13"') == 1
     assert index.count('data-session="13"') == 1
     assert 'href="Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1"' in index
     assert not any("____" in "".join(c["source"]) for c in cells if c["cell_type"] == "code")
-    print("S13 QA estático: OK · 60 diapositivas ·", len(cells), "celdas · Codespaces · LMS")
+    print("S13 QA estático: OK · 32 diapositivas ·", len(cells), "celdas · Codespaces · LMS")
 
 if __name__ == "__main__":
     main()
