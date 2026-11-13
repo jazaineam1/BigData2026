@@ -4,6 +4,8 @@ Repositorio del curso de **Big Data** de la Maestría en Analítica de Datos (Un
 
 **Sitio del curso:** https://jazaineam1.github.io/BigData2026/ · el estudiante entra siempre por `index.html`.
 
+**Sesión 11:** si copiaste el workspace desde `main` y no ves el notebook de Jupyter, entra a [S11 · Empezar aquí](S11_EMPEZAR_AQUI.md). El cuaderno raíz está en la rama `s11-estudiantes`.
+
 > Este repositorio es **público**. No contiene datos de estudiantes, credenciales ni material docente privado (ver [Seguridad](#seguridad-y-datos-personales)).
 
 ## Qué hay aquí
