@@ -112,9 +112,21 @@ with st.expander("🔎 Consulta unificada: fotos + contratos OCR + audio (eviden
                         "Recuperación visual: mirar imagen original")
                 path_mm = ROOT / rec["fuente"]
                 if path_mm.is_file() and rec["modalidad"] == "imagen":
-                    st.image(str(path_mm), width=360)
+                    st.image(str(path_mm), width=360,
+                             caption="Imagen ORIGINAL: comprueba visualmente el candidato")
+                if path_mm.is_file() and rec["modalidad"] == "contrato":
+                    try:
+                        pagina_mm = int(rec.get("pagina") or 1)
+                        st.image(renderizar_pagina(str(path_mm), pagina_mm, dpi=130),
+                                 caption=f"Página {pagina_mm} del PDF ORIGINAL · contrastar OCR",
+                                 use_container_width=True)
+                    except Exception as err:
+                        st.info(f"No se pudo mostrar la página del PDF: {err}. "
+                                "Ábrelo desde la colección SECOP del visor.")
                 if path_mm.is_file() and rec["modalidad"] == "audio":
                     st.audio(str(path_mm))
+                    if rec.get("derivado"):
+                        st.caption("Fuente WAV original y derivado PCM16 identificados por SHA.")
                 if texto_completo_mm:
                     st.text_area("Texto completo extraído (puede contener errores)",
                                  rec["texto"] or "(No se extrajo texto: revisar original)",
