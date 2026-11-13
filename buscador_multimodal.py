@@ -176,13 +176,27 @@ def preparar(*, n_fotos: int = 4, n_actas: int = 1, n_audios: int = 1,
     if hacer_asr and audios[:n_audios]:
         from faster_whisper import WhisperModel
         whisper = WhisperModel("tiny", device="cpu", compute_type="int8", cpu_threads=2)
+    # El inventario ofrece el PCM16 para reproducir, pero la fuente de voz
+    # original está identificada separadamente en el manifiesto.
+    from fuentes import AUDIO_MANIFEST
+    audio_info = {}
+    if AUDIO_MANIFEST.exists():
+        for fila in json.loads(AUDIO_MANIFEST.read_text(encoding="utf-8"))["audios"]:
+            audio_info[Path(fila["pcm16"]).name] = fila
     for x in audios[:n_audios]:
-        path = x["original"]
+        path = x["original"]  # derivado PCM16 de trabajo
+        fila = audio_info.get(path.name, {})
+        fuente_real = root / fila["fuente"] if fila.get("fuente") else path
+        if not fuente_real.is_file():
+            raise FileNotFoundError(f"Falta la voz original: {fuente_real}")
         segs = transcribir_voz(path, whisper) if hacer_asr else []
         raw_text = " ".join(z["texto"] for z in segs)
         ref = x.get("referencia", "")
         records.append({"id": "audio:" + path.name, "modalidad": "audio",
-                        "fuente": str(path.relative_to(root)), "sha256": huella(path),
+                        "fuente": str(fuente_real.relative_to(root)),
+                        "sha256": huella(fuente_real),
+                        "derivado": str(path.relative_to(root)),
+                        "sha256_derivado": huella(path),
                         "credito": x["credito"], "url_fuente": x.get("url", ""),
                         "pagina": None, "texto": raw_text if hacer_asr else ref,
                         "origen_texto": "whisper_tiny_asr" if hacer_asr else "referencia_humana_no_asr",
