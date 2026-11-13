@@ -156,8 +156,10 @@ mismo 01_laboratorio.ipynb. También está disponible la sección
 **Precisión conceptual:** el embedding no inventa ni transcribe ni describe la
 fotografía entera. Primero obtenemos las **lecturas del OCR, texto integrado
 del PDF, referencia humana o transcripción Whisper**. Las dividimos en
-fragmentos indexables. EmbeddingGemma 2:440m representa esos textos y las
-fotografías, calcula el ranking y devuelve, **junto al candidato**, su
+fragmentos indexables. EmbeddingGemma 2:440m representa esos textos,
+las fotografías y **las vistas PNG de páginas de contrato disponibles**
+(en paralelo al OCR, con un vector visual independiente). Calcula el ranking
+y devuelve, **junto al candidato**, su
 **texto extraído completo disponible** y su PDF/página o audio/segmento
 original para verificarlo. Sin texto OCR no existe texto de imagen que
 pueda recuperarse; siempre puede abrirse la imagen fuente.
