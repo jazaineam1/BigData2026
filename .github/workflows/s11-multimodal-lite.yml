@@ -1,0 +1,28 @@
+name: S11 multimodal - contratos ligeros
+on:
+  pull_request:
+    branches: [s11-estudiantes]
+    paths:
+      - 'buscador_multimodal.py'
+      - '01_laboratorio.ipynb'
+      - 'visor_fuentes.py'
+      - 'test_buscador_multimodal.py'
+      - '.devcontainer/devcontainer.json'
+      - '.vscode/**'
+      - '.github/workflows/s11-multimodal-lite.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: s11-multimodal-lite
+  cancel-in-progress: true
+jobs:
+  validacion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sintaxis y contratos sin instalaciones ni modelos
+        run: |
+          python3 -m compileall -q buscador_multimodal.py visor_fuentes.py verificar_s11.py
+          python3 -m unittest -v test_buscador_multimodal
