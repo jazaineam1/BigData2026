@@ -162,10 +162,17 @@ def preparar(*, n_fotos: int = 4, n_actas: int = 1, n_audios: int = 1,
     for x in docs[:n_actas]:
         path = x["original"]
         for page in extraer_pdf(path, paginas, hacer_ocr):
+            # Vista visual disponible de la primera página, si existe.
+            # Los PNG derivados no se cuentan como nuevos contratos.
+            preview = root / "datos/raw/actas" / (
+                path.stem + "_pagina" + str(page["pagina"]) + ".png")
+            vista = str(preview.relative_to(root)) if preview.is_file() else ""
+            sha_vista = huella(preview) if preview.is_file() else ""
             records.append({"id": "contrato:" + path.name + ":p" + str(page["pagina"]),
                             "modalidad": "contrato", "fuente": str(path.relative_to(root)),
                             "sha256": huella(path), "credito": x["credito"], "url_fuente": x.get("url", ""),
                             "pagina": page["pagina"], "total_paginas": page["total_paginas"],
+                            "vista": vista, "sha256_vista": sha_vista,
                             "texto": page["texto"], "origen_texto": page["metodo"],
                             "ocr_pendiente": page["pendiente"], "segmentos": [],
                             "referencia_humana": ""})
@@ -226,6 +233,13 @@ def crear_indice(records: list[dict], *, n_max: int = 12) -> dict:
         if r["modalidad"] == "imagen":
             key = "imagen|" + MODELO + "|" + r["sha256"]
             needed.append((key, r["id"], "imagen", source, None))
+        elif r["modalidad"] == "contrato" and r.get("vista"):
+            # Visión DOCUMENTAL: vector de PNG de página, además de OCR.
+            vista = ROOT / r["vista"]
+            if not vista.is_file() or huella(vista) != r.get("sha256_vista"):
+                raise ValueError("Vista PNG ausente o modificada: " + r["vista"])
+            key = "imagen_documento|" + MODELO + "|" + r["sha256_vista"]
+            needed.append((key, r["id"], "imagen_documento", vista, None))
         for i, frag in enumerate(trozos(r["texto"])):
             key = "texto|" + MODELO + "|" + hashlib.sha256(frag.encode("utf-8")).hexdigest()
             needed.append((key, r["id"], "texto", source, frag))
@@ -236,7 +250,8 @@ def crear_indice(records: list[dict], *, n_max: int = 12) -> dict:
                          "Sube --max-vectores conscientemente o reduce la muestra.")
     for i, (key, rid, mode, path, frag) in enumerate(todo, 1):
         print(f"Inferencia {i}/{len(todo)}: {mode}, {rid}")
-        entrada = {"image": base64.b64encode(path.read_bytes()).decode("ascii")} if mode == "imagen" else frag
+        entrada = ({"image": base64.b64encode(path.read_bytes()).decode("ascii")}
+                   if mode in ("imagen", "imagen_documento") else frag)
         cache[key] = incrustar(entrada)
         guardar_json(INDICE, index)
     # No devolver resultados antiguos que no corresponden al catálogo actual.
