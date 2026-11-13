@@ -56,6 +56,27 @@ class ConsultaMultimodalTest(unittest.TestCase):
                 self.assertIn("Lotería del Valle",out.getvalue())
                 self.assertIn(rec["sha256"],out.getvalue())
 
+    def test_pagina_contrato_indexa_png_y_ocr_por_separado(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            pdf=root/"contrato.pdf"; pdf.write_bytes(b"PDF de prueba")
+            png=root/"pagina.png"; png.write_bytes(b"PNG de prueba")
+            rec={"id":"contrato:contrato.pdf:p1", "modalidad":"contrato",
+                 "fuente":pdf.name, "sha256":mm.huella(pdf),
+                 "pagina":1, "vista":png.name, "sha256_vista":mm.huella(png),
+                 "texto":"VALOR DEL CONTRATO: monto a verificar en PDF",
+                 "origen_texto":"tesseract_ocr_psm3","credito":"Prueba"}
+            vector=[1.0]+[0.0]*767
+            with patch.object(mm,"ROOT",root), patch.object(mm,"INDICE",root/"indice.json"),patch.object(mm,"incrustar",return_value=vector) as emb:
+                idx=mm.crear_indice([rec],n_max=2)
+                self.assertEqual({r["canal"] for r in idx["entradas"]},
+                                 {"imagen_documento","texto"})
+                self.assertEqual(emb.call_count,2)
+                self.assertTrue(isinstance(emb.call_args_list[0].args[0],dict))
+                hits=mm.buscar("contrato",[rec],idx,k=1)
+                self.assertEqual(hits[0]["registro"]["pagina"],1)
+                self.assertEqual(hits[0]["registro"]["vista"],png.name)
+
     def test_limite_no_inicia_modelo(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);photo=root/"foto.webp";photo.write_bytes(b"test")
