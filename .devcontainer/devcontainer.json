@@ -9,14 +9,20 @@
     "vscode": {
       "extensions": [
         "ms-python.python",
-        "ms-toolsai.jupyter"
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-renderers"
       ],
       "settings": {
         "files.exclude": {
           "**/__pycache__": true,
           "**/.ipynb_checkpoints": true,
           "**/.venv": true
-        }
+        },
+        "workbench.editorAssociations": {
+          "*.ipynb": "jupyter-notebook"
+        },
+        "workbench.editor.enablePreview": false,
+        "notebook.lineNumbers": "on"
       }
     }
   },
