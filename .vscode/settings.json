@@ -1,0 +1,8 @@
+{
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook"
+  },
+  "workbench.editor.enablePreview": false,
+  "notebook.lineNumbers": "on",
+  "editor.wordWrap": "on"
+}
