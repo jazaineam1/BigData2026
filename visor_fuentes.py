@@ -28,6 +28,109 @@ st.caption("Explora todos los originales sin salir de esta herramienta. Después
 st.info("Cada acta tiene PDF original y primera página PNG. "
         "Las voces MINDS-14 NO corresponden a noticias de El Tiempo ni a las actas SECOP.")
 
+# Índice multimodal: no genera ni descarga modelos al abrir el visor.
+# Las acciones preparan, indexan y consultan en pasos explícitos separados.
+with st.expander("🔎 Consulta unificada: fotos + contratos OCR + audio (evidencia completa)",
+                 expanded=False):
+    st.markdown(
+        "**Cómo funciona:** Tesseract o el texto integrado del PDF aportan contenido "
+        "documental; Whisper o la referencia humana aportan texto de voz; "
+        "EmbeddingGemma 2 relaciona esos textos con fotografías y preguntas. "
+        "**Un embedding recupera candidatos, no redacta datos del archivo ni "
+        "certifica la autenticidad.**"
+    )
+    from buscador_multimodal import (
+        CATALOGO as CATALOGO_MM, INDICE as INDICE_MM, leer_json as leer_mm,
+        preparar as preparar_mm, crear_indice as indexar_mm, buscar as consultar_mm
+    )
+    fm, am, vm = st.columns(3)
+    with fm:
+        n_fotos_mm = st.select_slider("Fotos para la muestra", [1, 4, 8, 62], value=4)
+    with am:
+        n_actas_mm = st.select_slider("Contratos", [1, 5, 30], value=1)
+    with vm:
+        n_audio_mm = st.select_slider("Voces preparadas", [0, 1, 3, 30], value=1)
+    opt_ocr = st.checkbox("Aplicar OCR a contratos escaneados y fotografías",
+                          value=True, key="mm_ocr")
+    opt_asr = st.checkbox("Ejecutar Whisper CPU (más lento, solo por decisión propia)",
+                          value=False, key="mm_asr")
+    all_pages = st.checkbox("Analizar todas las páginas de los contratos seleccionados",
+                            value=False, key="mm_allpages")
+    st.caption("La preparación no calcula embeddings. Selecciona muestras pequeñas para "
+               "evitar costos. Si no preparaste las voces, primero usa el botón de audio "
+               "en la barra lateral.")
+    if st.button("1. Preparar evidencias y procedencia", key="mm_preparar"):
+        try:
+            with st.spinner("Extrayendo el texto seleccionado; conservando originales..."):
+                registros_mm = preparar_mm(n_fotos=n_fotos_mm, n_actas=n_actas_mm,
+                    n_audios=n_audio_mm, paginas=0 if all_pages else 1,
+                    hacer_ocr=opt_ocr, hacer_asr=opt_asr)
+            st.success(f"{len(registros_mm)} registros originales/páginas listos en catálogo.")
+        except Exception as exc:
+            st.error(f"No se pudieron preparar las fuentes: {exc}")
+    st.divider()
+    max_mm = st.number_input("Límite de vectores nuevos por ejecución", min_value=1,
+                              max_value=3000, value=16, step=1, key="mm_max")
+    if st.button("2. Indexar fragmentos y fotos con EmbeddingGemma", key="mm_index"):
+        try:
+            with st.spinner("Calculando solo los vectores faltantes (caché SHA/modelo)..."):
+                mm_data = leer_mm(CATALOGO_MM)["registros"]
+                indice_mm = indexar_mm(mm_data, n_max=int(max_mm))
+            st.success(f"{len(indice_mm['entradas'])} entradas indexadas.")
+        except Exception as exc:
+            st.error(f"Error de indexación: {exc}. Prepara Ollama en la terminal.")
+    st.divider()
+    consulta_unificada = st.text_input("3. Pregunta sobre cualquiera de las fuentes",
+        value="valor del contrato y forma de pago", key="mm_question")
+    limite_resultados_mm = st.select_slider("Cantidad de resultados", [1, 3, 5, 10],
+                                           value=5, key="mm_k")
+    texto_completo_mm = st.checkbox("Mostrar toda la extracción OCR / ASR disponible",
+                                   value=True, key="mm_full")
+    if st.button("Buscar en todas las modalidades indexadas", key="mm_buscar"):
+        try:
+            with st.spinner("Una llamada al embedding de consulta, buscando candidatos..."):
+                mm_hits = consultar_mm(consulta_unificada,
+                    leer_mm(CATALOGO_MM)["registros"], leer_mm(INDICE_MM),
+                    k=limite_resultados_mm)
+            st.session_state["mm_hits"] = mm_hits
+            st.session_state["mm_query"] = consulta_unificada
+        except Exception as exc:
+            st.error(f"Consulta no ejecutada: {exc}")
+    if st.session_state.get("mm_hits"):
+        st.warning("Resultados por similitud, no respuestas certificadas. "
+                   "Contrasta texto/imagen/audio con la fuente antes de citar.")
+        for i, hit in enumerate(st.session_state["mm_hits"], 1):
+            rec = hit["registro"]
+            with st.container(border=True):
+                st.markdown(f"**{i}. {rec['modalidad'].upper()} · "
+                            f"{hit['puntaje_coseno']:.3f} coseno · {rec['fuente']}**")
+                st.caption(f"Método: {rec['origen_texto']} · Página: "
+                           f"{rec.get('pagina') or 'N/A'} · Canal: {hit['canal']} · "
+                           f"SHA-256: {rec['sha256'][:18]}…")
+                st.write("**Fragmento que motivó la recuperación:**")
+                st.text(hit["fragmento"][:900] or
+                        "Recuperación visual: mirar imagen original")
+                path_mm = ROOT / rec["fuente"]
+                if path_mm.is_file() and rec["modalidad"] == "imagen":
+                    st.image(str(path_mm), width=360)
+                if path_mm.is_file() and rec["modalidad"] == "audio":
+                    st.audio(str(path_mm))
+                if texto_completo_mm:
+                    st.text_area("Texto completo extraído (puede contener errores)",
+                                 rec["texto"] or "(No se extrajo texto: revisar original)",
+                                 height=180, key=f"mm_full_{i}_{rec['id']}")
+                    if rec.get("segmentos"):
+                        st.dataframe(pd.DataFrame(rec["segmentos"]), hide_index=True)
+                    if rec.get("referencia_humana"):
+                        st.caption("Referencia humana (NO es ASR si no se ejecutó Whisper): "
+                                   + rec["referencia_humana"])
+                st.caption("Crédito: " + rec["credito"] + " · Documento/captura privada. "
+                           "El PDF original se abre en la colección SECOP del visor.")
+                st.download_button("Exportar ficha verificable JSON",
+                    json.dumps(rec, ensure_ascii=False, indent=2).encode("utf-8"),
+                    file_name="evidencia_" + str(i) + ".json",
+                    mime="application/json", key=f"mm_descargar_{i}_{rec['id']}")
+
 items = inventario()
 grupos = ["Actas SECOP (30)", "El Tiempo (30)", "Fotografías con ficha (32)", "Voces MINDS-14 (30)"]
 totales = [sum(x["grupo"] == grupo for x in items) for grupo in grupos]
