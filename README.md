@@ -136,10 +136,10 @@ Escribe los bucles y comienza con muestras manejables:
 
 | Parámetro de las celdas | Durante la explicación | Para la práctica completa |
 |---|---:|---:|
-| `N_ACTAS` | 5 | 30 |
-| `N_FOTOS` | 8 | 62 |
-| `N_VISION` | 8 | 62 |
-| `N_ASR` | 3 | 30 |
+| `N_ACTAS` | 1 | 30 |
+| `N_FOTOS` | 4 | 62 |
+| `N_VISION` | 1 | 62 |
+| `N_ASR` | 1 | 30 |
 
 Las celdas realizan inventario, OCR documental, OCR fotográfico, embeddings con caché por SHA, ranking por coseno, descarga y conversión de WAV, WER con referencia y catálogo ETL. **El procesamiento completo de 62 embeddings visuales y 30 voces puede exceder los 60 minutos**; la videoclase enseña el procedimiento con una muestra, y el alumno amplía los parámetros posteriormente.
 
@@ -147,7 +147,57 @@ Las celdas realizan inventario, OCR documental, OCR fotográfico, embeddings con
 
 **La práctica no exige 122 transcripciones completas dentro del video:** separa los indicadores que se obtienen de cada fuente de las inferencias que realizas por lotes.
 
-## Paso 5 · Evidencia de aprendizaje
+## Paso 5 · Consulta multimodal de evidencia completa (OCR, PDF, imagen y voz)
+
+**Nuevo laboratorio:** las ocho celdas del bloque **9 · Buscador unificado** al final del
+mismo 01_laboratorio.ipynb. También está disponible la sección
+«Consulta unificada» al principio del visor Streamlit.
+
+**Precisión conceptual:** el embedding no inventa ni transcribe ni describe la
+fotografía entera. Primero obtenemos las **lecturas del OCR, texto integrado
+del PDF, referencia humana o transcripción Whisper**. Las dividimos en
+fragmentos indexables. EmbeddingGemma 2:440m representa esos textos y las
+fotografías, calcula el ranking y devuelve, **junto al candidato**, su
+**texto extraído completo disponible** y su PDF/página o audio/segmento
+original para verificarlo. Sin texto OCR no existe texto de imagen que
+pueda recuperarse; siempre puede abrirse la imagen fuente.
+
+**Operaciones independientes y deliberadas (terminal):**
+
+~~~bash
+# 1. Preparar los textos y procedencia. 1 contrato, 4 fotos, 1 voz si existe:
+python buscador_multimodal.py preparar --fotos 4 --actas 1 --audios 1 --ocr
+
+# 2. Preparar el modelo solo la primera vez:
+bash preparar_embeddinggemma.sh
+
+# 3. Indexar con límite explícito de nuevas inferencias (modifica si es necesario):
+python buscador_multimodal.py indexar --max-vectores 16
+
+# 4. Recuperar texto OCR completo con fuente, página y SHA:
+python buscador_multimodal.py buscar "valor del contrato y forma de pago" --completo
+
+# 5. Recuperar fotografía y cualquier OCR de letrero disponible:
+python buscador_multimodal.py buscar "viviendas en una ladera" --completo
+~~~
+
+Para recuperar **todas las páginas** de un contrato, cambia la preparación a
+--paginas 0. Para obtener **ASR real**, prepara primero las voces de MINDS-14 y
+repite --asr conscientemente; sin --asr se indexa la **referencia humana** con
+el método «referencia_humana_no_asr», nunca se le llama «Whisper».
+
+Archivos de salida privados: outputs/evidencias_multimodales.json y
+outputs/indice_evidencias_440m.json. No publiques OCR con datos personales.
+
+**Instrucciones de acceso para Jdonny y demás estudiantes:**
+[GUIA_ACCESO_ESTUDIANTES.md](./GUIA_ACCESO_ESTUDIANTES.md).
+Comprueba primero **git branch --show-current**, porque el cuaderno raíz
+**no existe en main**. Si el .ipynb abre JSON, usa **Reopen Editor With →
+Jupyter Notebook**. Si un archivo .md no muestra vista previa,
+usa **Ctrl+Shift+V** o **Ctrl+K, luego V**. Diagnóstico ligero:
+python verificar_s11.py.
+
+## Paso 6 · Evidencia de aprendizaje
 
 Escribe una tabla o breve explicación con estas columnas:
 
@@ -166,6 +216,9 @@ Debes demostrar: un valor SECOP comparado con el PNG; OCR de un letrero; una con
 - ¿Cómo cambia el tiempo de procesamiento al pasar de 5 a 30 actas o de 8 a 62 fotos?
 
 ## Solución de problemas
+
+Si falta el notebook, se abre como JSON o no aparece la previsualización Markdown, lee primero [GUIA_ACCESO_ESTUDIANTES.md](./GUIA_ACCESO_ESTUDIANTES.md), que diferencia rama, fork, kernel, confianza y vista previa.
+
 
 | Problema | Qué revisar |
 |---|---|
