@@ -5,82 +5,67 @@
   "staleReference": false,
   "matches": [
     {
-      "id": "18-ALI-LLA",
+      "id": "19-AGU-DIM",
       "status": "upcoming",
       "score": null,
-      "utcDate": "2026-11-09"
+      "utcDate": "2026-11-14"
     },
     {
-      "id": "18-AME-CAL",
+      "id": "19-BUC-FOR",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-14"
+    },
+    {
+      "id": "19-CAL-TOL",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-14"
+    },
+    {
+      "id": "19-CUC-JAG",
+      "status": "upcoming",
+      "score": null,
+      "utcDate": "2026-11-14"
+    },
+    {
+      "id": "19-INT-SFE",
+      "status": "live",
+      "score": [
+        0,
+        2
+      ],
+      "utcDate": "2026-11-14"
+    },
+    {
+      "id": "19-LLA-CHI",
       "status": "finished",
       "score": [
         0,
         0
       ],
-      "utcDate": "2026-11-08"
+      "utcDate": "2026-11-13"
     },
     {
-      "id": "18-CHI-INT",
-      "status": "finished",
-      "score": [
-        2,
-        1
-      ],
-      "utcDate": "2026-11-06"
-    },
-    {
-      "id": "18-FOR-DIM",
-      "status": "finished",
-      "score": [
-        0,
-        3
-      ],
-      "utcDate": "2026-11-07"
-    },
-    {
-      "id": "18-JAG-BUC",
+      "id": "19-MIL-ALI",
       "status": "upcoming",
       "score": null,
-      "utcDate": "2026-11-08"
+      "utcDate": "2026-11-14"
     },
     {
-      "id": "18-JUN-CUC",
+      "id": "19-NAL-ONC",
       "status": "upcoming",
       "score": null,
-      "utcDate": "2026-11-09"
+      "utcDate": "2026-11-14"
     },
     {
-      "id": "18-NAL-PER",
-      "status": "finished",
-      "score": [
-        4,
-        3
-      ],
-      "utcDate": "2026-11-07"
-    },
-    {
-      "id": "18-ONC-AGU",
-      "status": "finished",
-      "score": [
-        1,
-        0
-      ],
-      "utcDate": "2026-11-07"
-    },
-    {
-      "id": "18-SFE-PAS",
+      "id": "19-PER-AME",
       "status": "upcoming",
       "score": null,
-      "utcDate": "2026-11-08"
-    },
-    {
-      "id": "18-TOL-MIL",
-      "status": "upcoming",
-      "score": null,
-      "utcDate": "2026-11-08"
+      "utcDate": "2026-11-14"
     }
   ],
   "note": "La fuente puede atrasarse. Solo resultados con estado terminado; no es autoridad oficial.",
   "source": "https://sportscore.com/",
-  "updatedAt": "2026-11-08T21:31:49.401483+00:00"
+  "updatedAt": "2026-11-14T02:55:19.861921+00:00"
 }
