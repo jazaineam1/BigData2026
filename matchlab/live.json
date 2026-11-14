@@ -30,7 +30,7 @@
     },
     {
       "id": "19-INT-SFE",
-      "status": "live",
+      "status": "finished",
       "score": [
         0,
         2
@@ -67,5 +67,5 @@
   ],
   "note": "La fuente puede atrasarse. Solo resultados con estado terminado; no es autoridad oficial.",
   "source": "https://sportscore.com/",
-  "updatedAt": "2026-11-14T02:55:19.861921+00:00"
+  "updatedAt": "2026-11-14T21:46:30.900044+00:00"
 }
