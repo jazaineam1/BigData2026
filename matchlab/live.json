@@ -6,26 +6,38 @@
   "matches": [
     {
       "id": "19-AGU-DIM",
-      "status": "upcoming",
-      "score": null,
+      "status": "finished",
+      "score": [
+        0,
+        1
+      ],
       "utcDate": "2026-11-14"
     },
     {
       "id": "19-BUC-FOR",
-      "status": "upcoming",
-      "score": null,
+      "status": "finished",
+      "score": [
+        1,
+        0
+      ],
       "utcDate": "2026-11-14"
     },
     {
       "id": "19-CAL-TOL",
-      "status": "upcoming",
-      "score": null,
+      "status": "finished",
+      "score": [
+        2,
+        2
+      ],
       "utcDate": "2026-11-14"
     },
     {
       "id": "19-CUC-JAG",
-      "status": "upcoming",
-      "score": null,
+      "status": "finished",
+      "score": [
+        2,
+        0
+      ],
       "utcDate": "2026-11-14"
     },
     {
@@ -38,34 +50,34 @@
       "utcDate": "2026-11-14"
     },
     {
-      "id": "19-LLA-CHI",
+      "id": "19-MIL-ALI",
       "status": "finished",
       "score": [
-        0,
+        2,
         0
       ],
-      "utcDate": "2026-11-13"
-    },
-    {
-      "id": "19-MIL-ALI",
-      "status": "upcoming",
-      "score": null,
       "utcDate": "2026-11-14"
     },
     {
       "id": "19-NAL-ONC",
-      "status": "upcoming",
-      "score": null,
+      "status": "finished",
+      "score": [
+        1,
+        1
+      ],
       "utcDate": "2026-11-14"
     },
     {
       "id": "19-PER-AME",
-      "status": "upcoming",
-      "score": null,
+      "status": "finished",
+      "score": [
+        0,
+        2
+      ],
       "utcDate": "2026-11-14"
     }
   ],
   "note": "La fuente puede atrasarse. Solo resultados con estado terminado; no es autoridad oficial.",
   "source": "https://sportscore.com/",
-  "updatedAt": "2026-11-14T21:46:30.900044+00:00"
+  "updatedAt": "2026-11-15T01:25:23.998469+00:00"
 }
