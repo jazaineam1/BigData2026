@@ -3,81 +3,8 @@
   "competition": "categoria-primera-a",
   "baseVersion": "4.0.0",
   "staleReference": false,
-  "matches": [
-    {
-      "id": "19-AGU-DIM",
-      "status": "finished",
-      "score": [
-        0,
-        1
-      ],
-      "utcDate": "2026-11-14"
-    },
-    {
-      "id": "19-BUC-FOR",
-      "status": "finished",
-      "score": [
-        1,
-        0
-      ],
-      "utcDate": "2026-11-14"
-    },
-    {
-      "id": "19-CAL-TOL",
-      "status": "finished",
-      "score": [
-        2,
-        2
-      ],
-      "utcDate": "2026-11-14"
-    },
-    {
-      "id": "19-CUC-JAG",
-      "status": "finished",
-      "score": [
-        2,
-        0
-      ],
-      "utcDate": "2026-11-14"
-    },
-    {
-      "id": "19-INT-SFE",
-      "status": "finished",
-      "score": [
-        0,
-        2
-      ],
-      "utcDate": "2026-11-14"
-    },
-    {
-      "id": "19-MIL-ALI",
-      "status": "finished",
-      "score": [
-        2,
-        0
-      ],
-      "utcDate": "2026-11-14"
-    },
-    {
-      "id": "19-NAL-ONC",
-      "status": "finished",
-      "score": [
-        1,
-        1
-      ],
-      "utcDate": "2026-11-14"
-    },
-    {
-      "id": "19-PER-AME",
-      "status": "finished",
-      "score": [
-        0,
-        2
-      ],
-      "utcDate": "2026-11-14"
-    }
-  ],
+  "matches": [],
   "note": "La fuente puede atrasarse. Solo resultados con estado terminado; no es autoridad oficial.",
   "source": "https://sportscore.com/",
-  "updatedAt": "2026-11-15T01:25:23.998469+00:00"
+  "updatedAt": "2026-11-16T02:28:55.141373+00:00"
 }
