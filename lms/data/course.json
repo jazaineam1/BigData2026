@@ -161,18 +161,18 @@
     },
     {
       "n": 14,
-      "title": "De Dask a Spark: ¿cómo procesa Laura los datos SECOP?",
+      "title": "¿Cómo construir un pipeline con Spark y Databricks?",
       "status": "visible",
       "formative": true,
       "class_kind": "learning",
       "entry": {
         "url": "/BigData2026/Presentaciones/s14-de-dask-a-spark.html#s1",
-        "label": "Abrir S14 · presentación y tutorial"
+        "label": "Abrir sesión Spark + Databricks · presentación y laboratorio"
       }
     },
     {
       "n": 15,
-      "title": "Sesión 15 · por publicar",
+      "title": "Integración y preparación del proyecto final · por programar",
       "status": "draft"
     },
     {
