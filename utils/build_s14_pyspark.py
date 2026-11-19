@@ -83,7 +83,7 @@ BLOQUES = [
   ],
   [
     "code",
-    "# 6 · Equivalencia explícita PySpark ↔ Spark SQL\ndf.createOrReplaceTempView(\"s14_ventanas\")\nsql = spark.sql(\"\"\"\nSELECT SUBSTRING(mes,1,4) anio, COUNT(*) ventanas,\nSUM(procesos_unicos) procesos_unicos, SUM(emparejados) emparejados,\nSUM(emparejados)/SUM(procesos_unicos) cobertura_ponderada\nFROM s14_ventanas GROUP BY SUBSTRING(mes,1,4) ORDER BY anio\n\"\"\")\na = [(r.anio,int(r.ventanas),round(float(r.cobertura_ponderada),9)) for r in resumen.collect()]\nb = [(r.anio,int(r.ventanas),round(float(r.cobertura_ponderada),9)) for r in sql.collect()]\nassert a == b, (a,b)\nprint(\"Paridad PySpark/SQL: OK\", a)"
+    "# 6 · Equivalencia explícita PySpark ↔ Spark SQL\ndf.createOrReplaceTempView(\"s14_ventanas\")\nsql = spark.sql('''\nSELECT SUBSTRING(mes,1,4) anio, COUNT(*) ventanas,\nSUM(procesos_unicos) procesos_unicos, SUM(emparejados) emparejados,\nSUM(emparejados)/SUM(procesos_unicos) cobertura_ponderada\nFROM s14_ventanas GROUP BY SUBSTRING(mes,1,4) ORDER BY anio\n''')\na = [(r.anio,int(r.ventanas),round(float(r.cobertura_ponderada),9)) for r in resumen.collect()]\nb = [(r.anio,int(r.ventanas),round(float(r.cobertura_ponderada),9)) for r in sql.collect()]\nassert a == b, (a,b)\nprint(\"Paridad PySpark/SQL: OK\", a)"
   ],
   [
     "markdown",
