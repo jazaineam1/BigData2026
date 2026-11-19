@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from make_notebook import md, code, build, save, validate
 
-BLOQUES =[
+BLOQUES = [
   [
     "markdown",
     "# S14 · ¿Cómo pasa Laura de Dask a Spark y Databricks?\n**Universidad Central · Maestría en Analítica de Datos · Big Data 2026-2S**\n\n[Presentación interactiva y tutorial](../Presentaciones/s14-de-dask-a-spark.html#s1) | [Abrir en Google Colab](https://colab.research.google.com/github/jazaineam1/BigData2026/blob/main/Cuadernos/14_PySpark_Compras_Claras.ipynb)\n\n**Caso transversal:** Compras Claras debe consolidar resultados de 30 ventanas de extracción SECOP. Usaremos **datos agregados reales**, no contratos individuales, y construiremos una misma consulta en PySpark y Spark SQL.\n\n**Producto:** expediente JSON con fuente, parámetros, resultado contrastado y límite de interpretación. **Ruta principal:** Colab con Spark local; **ruta alternativa:** Databricks Free Edition con serverless. Sin claves ni tarjeta de crédito exigidas por esta práctica."
