@@ -50,7 +50,7 @@ El documento expresa aprobación con al menos el 70 % acumulado. **No usar** los
 - **S10:** presentación y cuaderno multimedia ya publicados; ETL reactivo con originales, derivados, JSONL/Parquet y verificación. El PDF pide específicamente imágenes y ejercicio en VS Code; la experiencia actual prioriza navegador/Colab.
 - **S11 (decisión expresa del docente):** **ETL integral de imágenes y audio, SIN video**. Recursos de estudiante: `Presentaciones/s11-etl-audio-imagenes.html` y `Cuadernos/11_ETL_Audio_Imagenes.ipynb`. Contiene 32 imágenes del snapshot del curso, 10 voces humanas reales MINDS-14 (licenciadas), 42 transformaciones, catálogo, manifiesto, recuperación y ZIP. Se puede ejecutar en Colab o VS Code. **Adaptación parcial, no cumplimiento literal del componente de video del PDA de grupo 1.**
 - **S12:** el segundo taller evaluativo de ETL, ponderado al 20 % en el PDA de referencia, requiere actividad y rúbrica propias; la sesión 11 es formativa y no debe contarse automáticamente como Taller 2.
-- **S13–S15:** Dask/MapReduce, PySpark y Databricks deben tener sus propias evidencias operativas. Scripts históricos en el repositorio no equivalen a sesiones publicadas.
+- **S13–S14:** S13 conserva Dask/MapReduce; por decisión expresa del docente, **S14 integra PySpark, Spark SQL y Databricks en una única sesión** con presentación, cuaderno, tabla Delta e historial. Se documenta como una adaptación de la separación original del PDA (PySpark S14 / Databricks S15). La siguiente sesión del grupo se reserva para integración y preparación del proyecto, sin repetir Databricks. Los scripts históricos no equivalen a sesiones impartidas.
 - **S16:** sustentación del proyecto integrador.
 
 ## Criterio de cumplimiento

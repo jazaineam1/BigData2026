@@ -1,0 +1,31 @@
+name: S14 Spark y Databricks - QA ligero
+# Comprobaciones de estructura y sintaxis. Sin pip, Spark, Databricks ni benchmarks.
+on:
+  pull_request:
+    paths:
+      - 'Presentaciones/s14-de-dask-a-spark.html'
+      - 'Cuadernos/14_PySpark_Compras_Claras.ipynb'
+      - 'utils/build_s14_pyspark.py'
+      - 'utils/validate_s14_spark.py'
+      - 'index.html'
+      - 'lms/data/course.json'
+      - '.github/workflows/s14-pyspark-databricks-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s14-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validar-s14:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar generador, sintaxis, presentación y publicación
+        run: |
+          python utils/build_s14_pyspark.py --check
+          python utils/validate_s14_spark.py
