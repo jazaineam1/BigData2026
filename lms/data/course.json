@@ -161,8 +161,14 @@
     },
     {
       "n": 14,
-      "title": "Sesión 14 · por publicar",
-      "status": "draft"
+      "title": "De Dask a Spark: ¿cómo procesa Laura los datos SECOP?",
+      "status": "visible",
+      "formative": true,
+      "class_kind": "learning",
+      "entry": {
+        "url": "/BigData2026/Presentaciones/s14-de-dask-a-spark.html#s1",
+        "label": "Abrir S14 · presentación y tutorial"
+      }
     },
     {
       "n": 15,
