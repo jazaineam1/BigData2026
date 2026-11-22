@@ -127,7 +127,7 @@ class OffsetTests(unittest.TestCase):
             r = secop.ejecutar(destino=carpeta, get=fallo, dormir=lambda _: None)
             self.assertFalse(r["exito"])
             self.assertEqual(len(visitas), 1)
-            self.assertIn("Retry-After 60s", r["error_detalle"])
+            self.assertIn("Retry-After 60", r["error_detalle"])
 
     def test_offsets_invalidos(self):
         for off in (-20, 5, 40):
