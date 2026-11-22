@@ -172,6 +172,8 @@ test('S13: cuatro visualizaciones explican MapReduce, costos, tandas y cronómet
   await expect(page.locator('#mapVisual rect')).toHaveCount(2);
   await expect(page.locator('#mapVisual')).toContainText('n=3');
   await expect(page.locator('#mapVisual')).toContainText('n=2');
+  await expect(page.locator('#mapVisual title')).toHaveCount(1);
+  await expect(page.locator('#mapVisual desc')).toHaveCount(1);
 
   await page.goto(URL+'#s12');
   await page.locator('#costLocal').fill('6');
@@ -182,9 +184,12 @@ test('S13: cuatro visualizaciones explican MapReduce, costos, tandas y cronómet
   await expect(page.locator('#costVisual')).toContainText('12,00 s');
   await expect(page.locator('#costVisual')).toContainText('5,00 s');
   await expect(page.locator('#costOut')).toContainText('Distribuido gana');
+  await expect(page.locator('#costVisual title')).toHaveCount(1);
+  await expect(page.locator('#costVisual desc')).toHaveCount(1);
 
   await page.goto(URL+'#s19');
   await expect(page.locator('#s19 svg rect')).toHaveCount(5);
+  await expect(page.locator('#s19 svg desc')).toHaveCount(1);
   await expect(page.locator('#s19')).toContainText('valores ideales');
 
   await page.goto(URL+'#s20');
@@ -194,6 +199,8 @@ test('S13: cuatro visualizaciones explican MapReduce, costos, tandas y cronómet
   await expect(page.locator('#scenarioVisual rect')).toHaveCount(12);
   await expect(page.locator('#scenarioVisual')).toContainText('4 workers');
   await expect(page.locator('#scenarioOut')).toContainText('3 tandas');
+  await expect(page.locator('#scenarioVisual title')).toHaveCount(1);
+  await expect(page.locator('#scenarioVisual desc')).toHaveCount(1);
   expect(errors).toEqual([]);
 });
 
