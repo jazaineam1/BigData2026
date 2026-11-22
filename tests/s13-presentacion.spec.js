@@ -162,3 +162,51 @@ test('S13 permite saltar a cinco unidades desde el selector de navegación', asy
   await expect(page.locator('#s21')).toBeVisible();
   await expect(page.locator('#counter')).toHaveText('21 / 24');
 });
+
+test('S13: cuatro visualizaciones explican MapReduce, costos, tandas y cronómetros',async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(URL+'#s7');
+  await expect(page.locator('#mapVisual rect')).toHaveCount(3);
+  await page.locator('#mapInput').fill('10,20,30\\n50,60');
+  await page.locator('#mapRun').click();
+  await expect(page.locator('#mapVisual rect')).toHaveCount(2);
+  await expect(page.locator('#mapVisual')).toContainText('n=3');
+  await expect(page.locator('#mapVisual')).toContainText('n=2');
+
+  await page.goto(URL+'#s12');
+  await page.locator('#costLocal').fill('6');
+  await page.locator('#costDask').fill('2');
+  await page.locator('#costStart').fill('1');
+  await page.locator('#costRepeat').fill('2');
+  await page.locator('#costRun').click();
+  await expect(page.locator('#costVisual')).toContainText('12,00 s');
+  await expect(page.locator('#costVisual')).toContainText('5,00 s');
+  await expect(page.locator('#costOut')).toContainText('Distribuido gana');
+
+  await page.goto(URL+'#s19');
+  await expect(page.locator('#s19 svg rect')).toHaveCount(5);
+  await expect(page.locator('#s19')).toContainText('valores ideales');
+
+  await page.goto(URL+'#s20');
+  await page.locator('#nWorkersSim').selectOption('4');
+  await page.locator('#nTasksSim').selectOption('12');
+  await page.locator('#scenarioWorkers').click();
+  await expect(page.locator('#scenarioVisual rect')).toHaveCount(12);
+  await expect(page.locator('#scenarioVisual')).toContainText('4 workers');
+  await expect(page.locator('#scenarioOut')).toContainText('3 tandas');
+  expect(errors).toEqual([]);
+});
+
+test('S13: numeración coherente y flujo de seis pasos sin desborde móvil',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(URL+'#s5');
+  await expect(page.locator('#workersView .wide-node')).toHaveCount(4);
+  await page.goto(URL+'#s21');
+  await expect(page.locator('.edu-step')).toHaveCount(6);
+  const width=await page.evaluate(()=>({document:document.documentElement.scrollWidth,viewport:innerWidth}));
+  expect(width.document).toBeLessThanOrEqual(width.viewport+4);
+  for(let i=13;i<=24;i++){
+    const k=await page.locator('#s'+i+' .kicker').textContent();
+    expect(k).toContain(String(i).padStart(2,'0'));
+  }
+});
