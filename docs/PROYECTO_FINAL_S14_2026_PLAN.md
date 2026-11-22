@@ -42,11 +42,11 @@ El observatorio **funcional sin Codespaces** vale 20 puntos. El estudiante deber
 
 ## 3. Datos y contrato único
 
-- **Única base de entrenamiento calificada:** `Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv` (1.000 filas, 59 columnas; verificar SHA y conteos en ejecución limpia).
+- **Única base de entrenamiento calificada:** `Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv` (1.000 filas, 59 columnas; 830 con las dos modalidades antes de curaduría docente y 810 textos útiles después de retirar 19 marcadores y un duplicado exacto).
 - Columnas de trabajo: `id_del_proceso`, `descripci_n_del_procedimiento`, `modalidad_de_contratacion`. El filtro de clases, deduplicación y exclusión de descripción vacía viene del módulo real S13.
 - **División fija** entrenar/test estratificada, `random_state=42`, exactamente según `separar_muestra` de S13; se exporta con columna `split` para Databricks. No recalcular una nueva división en Spark.
 - `10.000` **NO** se usa como supuesto dato ya existente. Una ampliación a registros adicionales requerirá snapshot real único con fecha, fuente, licencia, SHA y validación previa del profesor. Los estudiantes no multiplican las 1.000 filas.
-- La descarga en vivo de la API oficial SECOP (identificador público `p6dx-8zbt`) es **un experimento de concurrencia independiente del dataset de entrenamiento**. Limitar a dos páginas de 20 filas, con `$order` estable; repetir únicamente 4 solicitudes por pareja (2 seriales + 2 concurrentes). La fuente cambia con el tiempo: una discrepancia no se oculta. Registrar resultado de red y usar snapshot para continuar si el servicio falla.
+- La descarga en vivo de la API oficial SECOP (identificador público `p6dx-8zbt`) es **un experimento de concurrencia independiente del dataset de entrenamiento**. Limitar a dos páginas de 20 filas, ventana histórica enero–febrero 2024 y `$order` estable del TC1; repetir únicamente 4 solicitudes por pareja (2 seriales + 2 concurrentes). La fuente cambia con el tiempo: una discrepancia no se oculta. Registrar resultado de red y usar snapshot para continuar si el servicio falla.
 - La fuente no debe ser atacada desde todos los alumnos simultáneamente. Hacer turnos, usar caché y respetar HTTP 429/`Retry-After`.
 
 ## 4. Recorrido del estudiante — pasos guiados, sin tema a escoger
@@ -170,3 +170,7 @@ La teoría prepara acciones. Un paso tiene siempre **HAZ ESTO**, **DEBE VERSE**,
 ## Auditoría de viabilidad
 
 Antes de asignar, revisar [análisis de viabilidad y presupuesto estudiantil](PROYECTO_FINAL_S14_VIABILIDAD.md). **No publicar este taller en la portada ni el LMS durante revisión**.
+
+
+### Revisión docente OFFSET
+La adquisición E1 reutiliza el contrato TC1: [utils/proyecto_final_offset.py](../utils/proyecto_final_offset.py). Usa `$offset=0/20` y `$limit=20`, ventana `2024-01`, orden total que finaliza en `:id ASC`, hash por página, igualdad de descarga serial y concurrente, captura de 429 y persistencia RAW. La descarga de clase queda separada del snapshot de entrenamiento. [Pruebas offline](../tests/test_proyecto_final_offset.py), sin HTTP real en Actions. La **API parametrizada en vivo aún no ha sido verificada** desde este entorno: nunca declarar éxito sin evidencia HTTP.

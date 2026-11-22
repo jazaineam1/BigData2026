@@ -27,7 +27,7 @@ El Explorer docente de S01–S14 es **guía de estudio**, no sustituye al produc
 
 | Etapa | Viabilidad con recursos gratuitos | Aprende al hacer | Prueba observable | Riesgo y rescate |
 |---|---|---|---|---|
-| E0 entorno | Alta con recurso previo | interpretar cuota, dependencias, ruta de dato | CSV S13 de 1.000 filas y SHA256 | cuota Codespaces agotada → Colab CPU descargando **3 archivos** |
+| E0 entorno | Alta con recurso previo | interpretar cuota, dependencias, ruta de dato | CSV S13 de 1.000 filas y SHA256 | cuota Codespaces agotada → Colab CPU descargando **4 archivos** |
 | E1 API paralela | Media: servicio público variable | paginación, I/O, latencia, concurrencia, equivalencia | 2 páginas, hash, segundos, o error real | 429/red → registrar error y seguir desde snapshot |
 | E2 ETL | Alta | grano de proceso, clases reales, deduplicación, fuga de datos | 2 clases, IDs únicos, split estratificado semilla 42 | falta columna/clase → error explícito, NO datos fabricados |
 | E3 Dask DataFrame | Alta | tareas, particiones, \`compute()\`, verificación | 2 workers y conteos Dask=pandas | overhead > pandas → enseñar por qué |
@@ -52,7 +52,7 @@ Medidas obligatorias:
 - **No ejecutar Actions con modelos, notebooks completos, 50.000 registros, OCR, ASR o benchmarks**; solo validar estructura de archivos.
 - La API SECOP se solicita con **dos páginas × dos métodos = cuatro solicitudes nominales por equipo**, orden estable y reintento acotado. Coordinar para no saturar un servicio externo durante clase.
 
-El repositorio principal público figura con \`size ≈ 383837 KiB\` (~375 MiB) en GitHub API; es un **dato informativo del repositorio, NO una medición del disco ocupado por un Codespace**. En Colab E0 baja la muestra (~1 MB), el corpus 200 expedientes (~0,1 MB) y un módulo Python (~11 KB), y E7 baja el generador auxiliar (~11 KB). Evita clonar todo.
+El repositorio principal público figura con \`size ≈ 383837 KiB\` (~375 MiB) en GitHub API; es un **dato informativo del repositorio, NO una medición del disco ocupado por un Codespace**. En Colab E0 baja la muestra (~1 MB), el corpus 200 expedientes (~0,1 MB) y un módulo Python (~11 KB), más el helper OFFSET (~7 KB), y E7 baja el generador auxiliar (~11 KB). Evita clonar todo.
 
 Fuentes: https://docs.github.com/en/billing/concepts/product-billing/github-codespaces ; https://docs.github.com/en/codespaces/troubleshooting/troubleshooting-included-usage .
 
@@ -119,3 +119,16 @@ No exigir que el estudiante construya una aplicación desde cero, que aprenda un
 **Matiz imprescindible:** el repositorio es **público** y los archivos HTML ya fusionados en main tienen URL directa aunque no estén enlazados en la portada. Un \`robots: noindex\` disuade indexación, **no crea privacidad**; si se quiere inaccesibilidad real, mover la revisión a un repositorio privado autorizado, sin publicarla por GitHub Pages.
 
 Aplicar **una rama de trabajo → una fusión PR → eliminación de rama**, sin acumular ramas temporales. No borrar ramas históricas ajenas a esta auditoría sin comprobar qué trabajo contienen.
+
+
+## Actualización de verificación técnica del OFFSET y de los datos (22-nov-2026)
+
+- Archivo real [snapshot S13](../Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv): CSV leído desde GitHub, 1.000 filas, 59 columnas, 1.000 IDs únicos, sin filas truncadas.
+- Filtrado de modalidades S13: **830 registros (440 directa y 390 régimen especial)**, sin texto vacío.
+- Revisión técnica previa a entrenamiento: 19 valores de descripción marcadora **«No Definido»**; un par de registros con descripción idéntica adicional. El cuaderno E2 retira esas 20 filas **antes del split**: **810 procesos con 810 descripciones distintas**, 435 directa y 375 régimen especial. Esta corrección la proporciona el docente; no es una auditoría adicional para el alumno.
+- División estratificada prevista 80/20 con semilla 42: 648 entrenamiento y 162 prueba, pendiente de validar ejecutando el código completo en el entorno real.
+- Se probó localmente la lógica OFFSET con **7 tests unitarios**, todos satisfactorios: páginas 0/20, última parcial, incompleta, HTTP 429/reintento, cambio entre lecturas, offsets inválidos y fallo persistente. Las respuestas de esos tests son **simuladas**, no la red real.
+- El endpoint base `https://www.datos.gov.co/resource/p6dx-8zbt.json` devuelve JSON por una consulta web pública, pero el acceso a **solicitudes parametrizadas con OFFSET y LIMIT desde este entorno quedó bloqueado**. Es incorrecto declararlas verificadas contra SECOP en vivo.
+- No se ha ejecutado Spark MLlib en Databricks Free ni Dask en Codespaces para esta revisión. La aprobación final depende de un piloto con acceso real; no hacer correr benchmarks pesados en GitHub Actions.
+
+**Condición de publicación:** ninguna; el taller continúa como borrador no publicado en Pages/índice/LMS.
