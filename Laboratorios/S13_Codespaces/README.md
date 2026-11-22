@@ -27,6 +27,20 @@ No instalar software en el computador personal. Al elegir el Codespace con ese p
 
 5. Abre `Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb`, selecciona el kernel de Python del Codespace y ejecuta por secciones.
 
+## Cronograma real de trabajadores Dask
+
+El script `dask_cuando_si.py` registra `traza_tareas` en el JSON. Cada fila
+incluye **lote, worker real, inicio_ms, fin_ms y duración_ms**; los milisegundos
+son relativos a la primera tarea y se miden dentro de la misma VM con reloj
+monotónico. En Streamlit, pestaña 5, se muestran como barras horizontales.
+Esta es evidencia medida, no un esquema ideal de tandas.
+
+La **traza de tarea no incluye** cola del scheduler, transferencia del CSV ni
+arranque del clúster; compara por separado `segundos_secuencial`,
+`segundos_dask_cluster_caliente` y `segundos_dask_total_incluido_arranque`.
+La pestaña 7 solicita CPU, workers, coincidencia de resultados, tiempos y
+TF-IDF, **no F1**: la clasificación UNSPSC permanece como ampliación opcional.
+
 ## Herramientas visuales integradas en la presentación
 
 En las 24 láminas hay diagramas que muestran relaciones reales y se actualizan con entradas del estudiante:

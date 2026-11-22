@@ -1,6 +1,6 @@
 """Pruebas ligeras del laboratorio Dask. NO levanta clúster ni espera 0,6 s."""
 import unittest
-from dask_cuando_si import cpus_disponibles, cuota_cpu_cgroup, crear_trabajos, procesar_lote
+from dask_cuando_si import cpus_disponibles, cuota_cpu_cgroup, crear_trabajos, procesar_lote, construir_traza_tareas
 
 class PruebaS13Dask(unittest.TestCase):
     def test_lotes_secop_igual_total(self):
@@ -23,6 +23,43 @@ class PruebaS13Dask(unittest.TestCase):
         self.assertTrue(all(r["frecuencias"] for r in resultados))
         self.assertEqual(procesar_lote(tareas[0])["frecuencias"],
                          resultados[0]["frecuencias"])
+
+    def test_frecuencias_reales_corresponden_a_palabras_unicode(self):
+        trabajo = {"id": 1, "textos": ["Mantenimiento de computadores",
+                                      "Compra hospital-computadores"],
+                   "modo": "texto", "espera": 0, "iteraciones": 1000}
+        r = procesar_lote(trabajo)
+        self.assertEqual(r["palabras"], 6)
+        self.assertEqual(r["frecuencias"]["computadores"], 2)
+        self.assertEqual(r["frecuencias"]["hospital"], 1)
+        self.assertEqual(sum(r["frecuencias"].values()), r["palabras"])
+        self.assertFalse(any(" " in termino for termino in r["frecuencias"]))
+
+    def test_traza_mide_tareas_reales_sin_arrancar_cluster(self):
+        trabajo = {"id": 0, "textos": ["mantenimiento computadores"],
+                   "modo": "texto", "espera": 0, "iteraciones": 1000}
+        resultado = procesar_lote(trabajo)
+        self.assertGreaterEqual(resultado["fin_monotonico_ns"],
+                                resultado["inicio_monotonico_ns"])
+        traza = construir_traza_tareas([resultado])
+        self.assertEqual(len(traza), 1)
+        self.assertEqual(traza[0]["lote"], 1)
+        self.assertEqual(traza[0]["inicio_ms"], 0)
+        self.assertGreaterEqual(traza[0]["duracion_ms"], 0)
+        self.assertEqual(traza[0]["registros"], 1)
+
+    def test_traza_ordenada_sin_tiempos_inventados(self):
+        muestras = [
+            {"id": 2, "worker": "worker-b", "registros": 1,
+             "inicio_monotonico_ns": 2_000_000, "fin_monotonico_ns": 4_000_000},
+            {"id": 0, "worker": "worker-a", "registros": 2,
+             "inicio_monotonico_ns": 1_000_000, "fin_monotonico_ns": 3_000_000},
+        ]
+        trazas = construir_traza_tareas(muestras)
+        self.assertEqual([x["lote"] for x in trazas], [1, 3])
+        self.assertEqual([x["inicio_ms"] for x in trazas], [0, 1])
+        self.assertEqual([x["duracion_ms"] for x in trazas], [2, 2])
+        self.assertEqual([x["worker"] for x in trazas], ["Worker 1", "Worker 2"])
 
     def test_cuota_cgroup_v2(self):
         self.assertEqual(cuota_cpu_cgroup('400000 100000'), 4)

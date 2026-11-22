@@ -57,6 +57,23 @@ def main():
             subprocess.run(["node", "--check", temporal.name], check=True)
     assert "dask_cuando_si.py" in text
     assert not (ROOT / "docs/S13_PLAN_MEJORA_DASK.md").exists(), "Los planes del docente no se publican"
+    # Validar contrato y flujo de evidencia, no prohibir palabras en explicaciones.
+    codigos_principales = "\\n".join(
+        "".join(c["source"]) for c in cells[:52] if c["cell_type"] == "code"
+    )
+    assert "LogisticRegression(" not in codigos_principales, "No duplicar modelos en la ruta principal"
+    assert "OPCIONES_ARQUITECTURA" in text and "OPCIONES_LIMITE" in text
+    assert 'globals().get("resumen_demo")' in text
+    assert "isinstance(resultado, dict)" in text, "La decisión debe comprobar mediciones reales"
+    script_dask = read("Laboratorios/S13_Codespaces/dask_cuando_si.py")
+    assert "def construir_traza_tareas(" in script_dask and '"traza_tareas":' in script_dask
+    app = read("Laboratorios/S13_Codespaces/app_tfidf_unspsc.py")
+    ultima_pestana = app.split("with tabs[6]:",1)[-1]
+    assert 'if st.toggle("Activar clasificación opcional"' in app
+    assert "len(medidas)<2" in ultima_pestana, "No exportar decisiones sin ambos casos ejecutados"
+    assert '"modos_medidos":medidas' in ultima_pestana, "El JSON debe incluir dos mediciones reales"
+    assert "st.download_button(" in ultima_pestana
+    assert "st.vega_lite_chart(" in app and "traza_tareas" in app, "Falta cronograma real de workers"
     assert "dask_cuando_si.py" in html
     assert "CPU lógicas" in html
     assert "dask_cuando_si.py" in html

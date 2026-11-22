@@ -234,3 +234,21 @@ test('S13: diagnóstico de altura visible en escritorio sin ocultar problemas',a
   }
   console.log('S13_ALTURA_1280x720',JSON.stringify(heights));
 });
+
+
+test('S13: láminas 5 y 20 completas en 1280×720 y 1366×768', async ({page})=>{
+  for (const [width,height] of [[1280,720],[1366,768]]) {
+    await page.setViewportSize({width,height});
+    for(const n of [5,20]){
+      await page.goto(URL+'#s'+n);
+      const v=await page.evaluate(()=>({
+        exceso:document.documentElement.scrollHeight-innerHeight,
+        horizontal:document.documentElement.scrollWidth-innerWidth,
+        inicio:document.querySelector('.slide.active').getBoundingClientRect().top
+      }));
+      console.log('S13_ALTO',width,height,n,v);
+      expect(v.exceso,'Lámina '+n+' no debe requerir desplazamiento en '+width+'×'+height).toBeLessThanOrEqual(16);
+      expect(v.horizontal).toBeLessThanOrEqual(4);
+    }
+  }
+});

@@ -30,10 +30,10 @@ CSV=ROOT/"Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv"
 RESULTS=Path(__file__).resolve().parent/"salidas/benchmark_unspsc"
 
 st.set_page_config(page_title="S13 · Taller interactivo TF-IDF",layout="wide")
-st.title("Laboratorio SECOP · Del texto al dato que aprende un modelo")
-st.caption("Universidad Central · Big Data · S13 · TF-IDF → clasificación UNSPSC → Dask Distributed")
-st.info("La fuente es un registro de proceso SECOP. Los modelos aprenden categorías declaradas, "
-        "no sobrecostos, fraude ni competencia contractual.")
+st.title("S13 · Dask en acción con títulos SECOP")
+st.caption("Universidad Central · Big Data · S13 · Workers Dask → TF-IDF y búsqueda · clasificación opcional")
+st.info("Muestra SECOP preparada para practicar particiones, concurrencia y representación de texto. "
+        "No realizamos depuración administrativa ni interpretaciones jurídicas; la clasificación UNSPSC es opcional.")
 
 @st.cache_data
 def cargar():
@@ -80,7 +80,7 @@ def mini_ejemplo(textos):
 data=cargar()
 tabs=st.tabs([
     "1 · Explorar SECOP","2 · Construir TF-IDF",
-    "3 · Buscar documentos","4 · Entrenar clasificador",
+    "3 · Buscar documentos","4 · Clasificación opcional",
     "5 · Dask y mediciones","6 · Decidir con costos",
     "7 · Evidencia reutilizable",
 ])
@@ -90,7 +90,7 @@ with tabs[0]:
     c1,c2,c3=st.columns(3)
     c1.metric("Filas de la muestra",len(data))
     c2.metric("IDs únicos",data["id_del_proceso"].nunique())
-    c3.metric("UNSPSC no identificados",int((data.segmento=="NO IDENTIFICADO").sum()))
+    c3.metric("Lotes de la práctica Dask",8)
     st.dataframe(data["segmento"].value_counts().rename_axis("Segmento UNSPSC")
                  .reset_index(name="Procesos"),hide_index=True)
     st.markdown(
@@ -226,30 +226,33 @@ with tabs[3]:
     f1_macro=f1_score(etiquetas_test,pred,average="macro")""",language="python")
 
 with tabs[4]:
-    st.subheader("Dask no es un algoritmo: es un planificador")
-    st.markdown("**Caso 1:** vectorizar mil textos. La coordinación puede tardar "
-                "más que el cálculo. **Caso 2:** entrenar 3 folds independientes "
-                "de validación cruzada, sobre textos grandes. Dask puede "
-                "ejecutar varios folds simultáneamente sin cambiar LinearSVC.")
-    st.code("""# Una tarea = entrenar TF-IDF + LinearSVC sobre un fold.
-trabajos=[client.submit(entrenar_un_fold, textos_fut, y_fut,
-                        tr, val, pure=False)
-         for tr,val in folds]
-metricas=client.gather(trabajos)""",language="python")
-    st.markdown("**Comparación justa:** local secuencial, joblib con dos procesos "
-                "y Dask con dos workers reciben exactamente los mismos folds. "
-                "Dask distribuye entrenamientos independientes, NO internamente "
-                "un único modelo LinearSVC.")
-    for name in ["benchmark_50k_test_fijo.json",
-                 "cv_linearsvc_local_vs_dask.json",
-                 "embgemma_vs_tfidf_1000_real.json"]:
-        path=RESULTS/name
-        if path.is_file():
-            payload=json.loads(path.read_text(encoding="utf-8"))
-            with st.expander(f"Resultados realmente medidos: {name}"):
-                st.json(payload,expanded=False)
-        else:
-            st.caption(f"Pendiente de ejecutar: {name}")
+    st.subheader("Dask en acción: ocho lotes SECOP en workers reales")
+    st.markdown(
+        "**Texto real:** procesar títulos SECOP sin esperas artificiales. "
+        "**Espera simulada:** repetir el trabajo y representar 0,6 s de "
+        "latencia externa por lote. Son los mismos ocho lotes de entrada; "
+        "un worker es un proceso en esta misma VM, no un servidor adicional."
+    )
+    with st.expander("Ampliación docente · entrenamiento y benchmarks históricos (no obligatorios)", expanded=False):
+        st.markdown(
+            "Dask también puede repartir entrenamientos independientes, "
+            "como los folds de validación cruzada. Eso no significa entrenar "
+            "internamente un único modelo LinearSVC de forma distribuida. "
+            "Los resultados históricos se obtuvieron en otra VM."
+        )
+        st.code("""# Ejemplo conceptual; no se ejecuta desde el panel.
+futuros=[client.submit(entrenar_un_fold, datos, train, valid, pure=False)
+         for train, valid in folds]
+metricas=client.gather(futuros)""",language="python")
+        for nombre in ["benchmark_50k_test_fijo.json",
+                       "cv_linearsvc_local_vs_dask.json",
+                       "embgemma_vs_tfidf_1000_real.json"]:
+            ruta=RESULTS/nombre
+            if ruta.is_file():
+                st.markdown(f"**Histórico:** `{nombre}`")
+                st.json(json.loads(ruta.read_text(encoding="utf-8")), expanded=False)
+            else:
+                st.caption(f"No disponible: {nombre}")
     st.markdown(
         "**Dos pruebas sobre el mismo CSV:** la demostración de **espera simulada** "
         "permite observar concurrencia como en una API externa; la opción "
@@ -258,15 +261,10 @@ metricas=client.gather(trabajos)""",language="python")
     )
     modo_demo=st.radio(
         "Procesamiento que se ejecutará",
-        ["espera", "texto"], horizontal=True,
+        ["texto", "espera"], horizontal=True,
         format_func=lambda x: "Espera de API simulada" if x=="espera" else "Conteo real de palabras SECOP",
     )
-    st.markdown(
-        "**En clase:** ejecuta el caso de ocho lotes SECOP con una espera externa "
-        "SIMULADA por lote. Dask Distributed usa procesos reales, sin servicios "
-        "externos, Ollama ni 50.000 registros. La simulación representa esperar "
-        "una API (OCR/ASR), NO hace OCR real."
-    )
+    st.caption("Primero ejecuta Texto real; luego Espera simulada. Pulsa el botón una vez por modo. No hay OCR ni servicios externos.")
     st.code(
         "nproc\n"
         "lscpu | head -25\n"
@@ -331,6 +329,43 @@ metricas=client.gather(trabajos)""",language="python")
             "Ganador del trabajo:",valores["ganador_caliente"],
             "· ganador incluyendo arranque:",valores["ganador_total"],
         )
+        # Cronograma de funciones REAL: se mide dentro de cada proceso Dask de una misma VM.
+        traza = valores.get("traza_tareas", [])
+        if len(traza) == valores["tareas"]:
+            st.markdown("#### Cronograma real de tareas por worker")
+            st.caption(
+                "Cada barra es un lote ejecutado por un proceso real. Eje horizontal: "
+                "milisegundos relativos al primer lote. Esta traza NO incluye cola "
+                "del scheduler, transferencia, lectura CSV ni arranque; los "
+                "cronómetros globales de arriba sí permiten observar el arranque."
+            )
+            st.vega_lite_chart(
+                pd.DataFrame(traza),
+                {
+                    "mark": {"type": "bar", "cornerRadiusEnd": 3},
+                    "encoding": {
+                        "x": {"field": "inicio_ms", "type": "quantitative",
+                              "title": "ms desde el inicio de la primera tarea"},
+                        "x2": {"field": "fin_ms"},
+                        "y": {"field": "worker", "type": "nominal",
+                              "title": "Worker real", "sort": "ascending"},
+                        "color": {"field": "worker", "type": "nominal", "legend": None},
+                        "tooltip": [
+                            {"field": "lote", "type": "quantitative", "title": "Lote"},
+                            {"field": "worker", "type": "nominal", "title": "Worker"},
+                            {"field": "inicio_ms", "type": "quantitative", "title": "Inicio (ms)"},
+                            {"field": "fin_ms", "type": "quantitative", "title": "Fin (ms)"},
+                            {"field": "duracion_ms", "type": "quantitative", "title": "Duración (ms)"},
+                            {"field": "registros", "type": "quantitative", "title": "Títulos"},
+                        ],
+                    },
+                },
+                use_container_width=True,
+             )
+            with st.expander("Ver la tabla exacta de tareas y tiempos medidos"):
+                st.dataframe(pd.DataFrame(traza), hide_index=True, use_container_width=True)
+        else:
+            st.warning("Este JSON no contiene la traza por tarea; ejecuta el script actualizado.")
         st.json(valores,expanded=False)
         st.download_button(
             "Descargar JSON real de mi ejecución",
@@ -379,15 +414,25 @@ with tabs[5]:
         "**Speedup (aceleración)** = tiempo local dividido por tiempo distribuido. "
         "El total distribuido suma el arranque del clúster una sola vez "
         "si lo reutilizas durante varias ejecuciones. Este simulador usa "
-        "**supuestos editables**, no reemplaza un benchmark extremo a extremo."
+        "**supuestos ilustrativos y editables**, no mediciones del Codespace. "
+        "Cuando tengas el JSON de tu ejecución, usa sus segundos para sustituirlos."
     )
+    observado=st.session_state.get("s13_modos_ejecutados",{}).get("espera")
+    if observado:
+        st.caption(
+            f"Tu última ejecución de ESPERA: secuencial {observado['segundos_secuencial']:.3f} s; "
+            f"Dask caliente {observado['segundos_dask_cluster_caliente']:.3f} s; "
+            f"arranque {observado['segundos_arranque_y_espera_workers']:.3f} s. "
+            "Los controles siguientes son hipótesis para repetir el trabajo, "
+            "no reemplazan estos tiempos reales."
+        )
     a,b,c=st.columns(3)
     t_local=a.number_input("Local por transformación (s)",min_value=0.001,
-                           value=3.9234,step=0.1,format="%.4f")
+                           value=4.8,step=0.1,format="%.4f")
     t_dask=b.number_input("Dask por transformación (s)",min_value=0.001,
-                          value=3.5522,step=0.1,format="%.4f")
+                          value=2.4,step=0.1,format="%.4f")
     t_inicio=c.number_input("Arranque del clúster (s)",min_value=0.0,
-                            value=1.35,step=0.05)
+                            value=1.2,step=0.05)
     n_reps=st.slider("Número de transformaciones similares (hipótesis)",
                      min_value=1,max_value=30,value=1)
     total_local=t_local*n_reps
@@ -413,35 +458,39 @@ speedup = total_local / total_dask
 """,language="python")
 
 with tabs[6]:
-    st.subheader("Reto de transferencia: evidencia estructurada")
+    st.subheader("Decisión estructurada · Dask y evidencia real")
     st.markdown(
-        "Escoge una arquitectura y un límite **después de ejecutar tu cuaderno**. "
-        "No se acepta una respuesta académica abierta; la evidencia formal "
-        "es el código y la traza del estudiante. El JSON descargado es "
-        "una ayuda para guardar tu decisión, no una calificación."
+        "Elige una arquitectura y un límite después de ejecutar los dos modos "
+        "**texto real** y **espera simulada**. Esta pauta es una autocomprobación "
+        "formativa; no es una evaluación adicional ni modifica el PDA."
     )
     opciones_motor={
         "Aún no seleccionar":None,
-        "1 · Mantener TF-IDF local":1,
-        "2 · Distribuir TF-IDF con Dask 2 workers":2,
-        "3 · Medir pipeline completo antes de decidir":3,
+        "1 · Ejecutar secuencial cuando las tareas son demasiado pequeñas":1,
+        "2 · Dask para lotes independientes con esperas (2 workers medidos)":2,
+        "3 · Comparar 4 workers y arranque antes de decidir":3,
     }
     opciones_limite={
         "Aún no seleccionar":None,
-        "1 · El experimento excluyó arranque del clúster":1,
-        "2 · La muestra no representa todo SECOP":2,
-        "3 · UNSPSC puede estar mal declarado y hay desbalance":3,
-        "4 · Los tiempos son de otro hardware":4,
+        "1 · La aceleración caliente excluye arranque y preparación":1,
+        "2 · La espera OCR/ASR fue simulada, no un servicio real":2,
+        "3 · Workers de una VM comparten CPU y memoria":3,
+        "4 · Los tiempos dependen de los recursos del Codespace usado":4,
     }
-    seleccion_motor=st.selectbox("Arquitectura",list(opciones_motor))
-    seleccion_limite=st.selectbox("Límite verificable",list(opciones_limite))
+    seleccion_motor=st.selectbox("Arquitectura",list(opciones_motor),key="s13_decision_motor")
+    seleccion_limite=st.selectbox("Límite verificable",list(opciones_limite),key="s13_decision_limite")
     st.markdown(
-        "**Criterios formativos (10 puntos):** código/commit (2), "
-        "tabla TF-DF-IDF (2), F1 por clase (2), tiempos comparables (2), "
-        "elección y límite estructurados (2). No modifica el PDA."
+        "**Pauta formativa de cinco evidencias:** CPU y memoria, workers reales, "
+        "igualdad secuencial/Dask, comparación de tiempos incluyendo arranque "
+        "y explicación TF-IDF (DF, IDF, L2). "
+        "La F1 del clasificador es exclusiva de la ampliación opcional."
     )
-    if (opciones_motor[seleccion_motor] is not None
-            and opciones_limite[seleccion_limite] is not None):
+    medidas=st.session_state.get("s13_modos_ejecutados",{})
+    if len(medidas)<2:
+        st.info("Ejecuta los dos modos en la pestaña 5 para descargar la evidencia completa. No inventamos resultados.")
+    elif opciones_motor[seleccion_motor] is None or opciones_limite[seleccion_limite] is None:
+        st.info("Selecciona una arquitectura y un límite a partir de tus mediciones.")
+    else:
         ids="\n".join(data["id_del_proceso"].astype(str))
         evidencia={
             "sesion":13,
@@ -450,14 +499,13 @@ with tabs[6]:
             "arquitectura":seleccion_motor,
             "limite_codigo":opciones_limite[seleccion_limite],
             "limite":seleccion_limite,
-            "protocolo":"muestra pequeña SECOP; decisiones requieren comprobar ejecución propia",
+            "modos_medidos":medidas,
+            "protocolo":"mismos lotes SECOP, 2 modos; cronómetros diferenciados por fase",
         }
         st.json(evidencia,expanded=False)
         st.download_button(
-            "Descargar mi decisión estructurada (JSON)",
+            "Descargar decisión y mediciones propias (JSON)",
             data=json.dumps(evidencia,ensure_ascii=False,indent=2),
-            file_name="s13_decision_estructurada.json",
-            mime="application/json",
+            file_name="s13_decision_con_mediciones.json",
+            mime="application/json",key="s13_decision_evidencia",
         )
-    else:
-        st.info("Faltan las dos decisiones; no se inventa una respuesta ni se exporta evidencia incompleta.")
