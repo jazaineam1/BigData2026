@@ -27,7 +27,7 @@ El Explorer docente de S01–S14 es **guía de estudio**, no sustituye al produc
 
 | Etapa | Viabilidad con recursos gratuitos | Aprende al hacer | Prueba observable | Riesgo y rescate |
 |---|---|---|---|---|
-| E0 entorno | Alta con recurso previo | interpretar cuota, dependencias, ruta de dato | CSV S13 de 1.000 filas y SHA256 | cuota Codespaces agotada → Colab CPU descargando **3 archivos** |
+| E0 entorno | Alta con recurso previo | interpretar cuota, dependencias, ruta de dato | CSV S13 de 1.000 filas y SHA256 | cuota Codespaces agotada → Colab CPU descargando **4 archivos** |
 | E1 API paralela | Media: servicio público variable | paginación, I/O, latencia, concurrencia, equivalencia | 2 páginas, hash, segundos, o error real | 429/red → registrar error y seguir desde snapshot |
 | E2 ETL | Alta | grano de proceso, clases reales, deduplicación, fuga de datos | 2 clases, IDs únicos, split estratificado semilla 42 | falta columna/clase → error explícito, NO datos fabricados |
 | E3 Dask DataFrame | Alta | tareas, particiones, \`compute()\`, verificación | 2 workers y conteos Dask=pandas | overhead > pandas → enseñar por qué |
@@ -52,7 +52,7 @@ Medidas obligatorias:
 - **No ejecutar Actions con modelos, notebooks completos, 50.000 registros, OCR, ASR o benchmarks**; solo validar estructura de archivos.
 - La API SECOP se solicita con **dos páginas × dos métodos = cuatro solicitudes nominales por equipo**, orden estable y reintento acotado. Coordinar para no saturar un servicio externo durante clase.
 
-El repositorio principal público figura con \`size ≈ 383837 KiB\` (~375 MiB) en GitHub API; es un **dato informativo del repositorio, NO una medición del disco ocupado por un Codespace**. En Colab E0 baja la muestra (~1 MB), el corpus 200 expedientes (~0,1 MB) y un módulo Python (~11 KB), y E7 baja el generador auxiliar (~11 KB). Evita clonar todo.
+El repositorio principal público figura con \`size ≈ 383837 KiB\` (~375 MiB) en GitHub API; es un **dato informativo del repositorio, NO una medición del disco ocupado por un Codespace**. En Colab E0 baja la muestra (~1 MB), el corpus 200 expedientes (~0,1 MB) y un módulo Python (~11 KB), más el helper OFFSET (~7 KB), y E7 baja el generador auxiliar (~11 KB). Evita clonar todo.
 
 Fuentes: https://docs.github.com/en/billing/concepts/product-billing/github-codespaces ; https://docs.github.com/en/codespaces/troubleshooting/troubleshooting-included-usage .
 
