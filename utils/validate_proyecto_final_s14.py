@@ -14,10 +14,12 @@ ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOK = ROOT / "Cuadernos/Proyecto_Final_Compras_Claras.ipynb"
 EXPLORER = ROOT / "Presentaciones/proyecto-final-explorer.html"
 PLAN = ROOT / "docs/PROYECTO_FINAL_S14_2026_PLAN.md"
+VIABILIDAD = ROOT / "docs/PROYECTO_FINAL_S14_VIABILIDAD.md"
+GENERADOR = ROOT / "Laboratorios/Proyecto_Final_2026/generar_observatorio.py"
 
 
 def comprobar() -> None:
-    for archivo in (NOTEBOOK, EXPLORER, PLAN):
+    for archivo in (NOTEBOOK, EXPLORER, PLAN, VIABILIDAD, GENERADOR):
         assert archivo.is_file(), f"Falta archivo: {archivo}"
         assert archivo.stat().st_size < 250_000, f"Material excesivo: {archivo}"
 
@@ -53,6 +55,7 @@ def comprobar() -> None:
                   'id="busqueda"', 'id="databricks"', 'localStorage',
                   'aria-live='):
         assert token in html, f"Falta componente HTML: {token}"
+    assert '<meta name="robots" content="noindex,nofollow">' in html
     assert "sintética" in html.lower() and "no es una ejecución dask" in html.lower(), (
         "No confundir simulación con ejecución real")
 
@@ -68,7 +71,19 @@ def comprobar() -> None:
         for m in [re.search(r"\| (\d+) \|", line)]
     ]
     assert sum(puntos) == 100, f"Rúbrica debe sumar 100 (encontrado {sum(puntos)})"
-    print("Proyecto final S14: estructura, ruta, alcance, rúbrica y HTML OK (offline).")
+    # No promocionar material mientras el usuario lo mantiene en revisión.
+    portada = (ROOT / "index.html").read_text(encoding="utf-8")
+    lms = (ROOT / "lms/data/course.json").read_text(encoding="utf-8")
+    for texto_publicacion in ("proyecto-final-explorer.html", "Proyecto_Final_Compras_Claras.ipynb"):
+        assert texto_publicacion not in portada, "El proyecto aún no debe aparecer en portada"
+        assert texto_publicacion not in lms, "El proyecto aún no debe aparecer en LMS"
+    cod_generador = GENERADOR.read_text(encoding="utf-8")
+    for token in ("csv.DictReader", "observatorio.html", "predicciones", "replace", "textContent"):
+        assert token in cod_generador, f"Generador incompleto: {token}"
+    assert "observatorio.html" in codigo and "generar_observatorio" in codigo
+    assert "____" in codigo, "Falta reto de código evaluable"
+    assert "GitHub Free" in VIABILIDAD.read_text(encoding="utf-8")
+    print("Proyecto final S14: ruta, producto offline, cuota, rúbrica y NO publicación OK (offline).")
 
 
 if __name__ == "__main__":
