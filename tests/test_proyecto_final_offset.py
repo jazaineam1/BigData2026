@@ -87,6 +87,48 @@ class OffsetTests(unittest.TestCase):
             self.assertTrue(r["exito"])
             self.assertFalse(r["mismas_filas_y_orden"])
 
+
+    def test_http_400_no_reintentar(self):
+        llamadas = []
+        def fallo(url, params, headers, timeout):
+            llamadas.append(params["$offset"])
+            return Respuesta(400, [])
+        with tempfile.TemporaryDirectory() as carpeta:
+            r = secop.ejecutar(destino=carpeta, get=fallo, dormir=lambda _: None)
+            self.assertFalse(r["exito"])
+            self.assertEqual(len(llamadas), 1)
+
+    def test_json_invalido(self):
+        def fallo(url, params, headers, timeout):
+            return Respuesta(200, {"message": "formato inválido"})
+        with tempfile.TemporaryDirectory() as carpeta:
+            r = secop.ejecutar(destino=carpeta, get=fallo, dormir=lambda _: None)
+            self.assertFalse(r["exito"])
+            self.assertIn("JSON", r["error_detalle"])
+
+    def test_timeout_reintento(self):
+        visitas = {}
+        def fallo(url, params, headers, timeout):
+            offset = params["$offset"]
+            visitas[offset] = visitas.get(offset, 0) + 1
+            if visitas[offset] == 1:
+                raise TimeoutError("timeout controlado")
+            return self.respuesta(url, params, headers, timeout)
+        with tempfile.TemporaryDirectory() as carpeta:
+            r = secop.ejecutar(destino=carpeta, get=fallo, dormir=lambda _: None)
+            self.assertTrue(r["exito"])
+
+    def test_retry_after_largo_respeta_limite(self):
+        visitas = []
+        def fallo(url, params, headers, timeout):
+            visitas.append(params["$offset"])
+            return Respuesta(429, [], {"Retry-After": "60"})
+        with tempfile.TemporaryDirectory() as carpeta:
+            r = secop.ejecutar(destino=carpeta, get=fallo, dormir=lambda _: None)
+            self.assertFalse(r["exito"])
+            self.assertEqual(len(visitas), 1)
+            self.assertIn("Retry-After 60s", r["error_detalle"])
+
     def test_offsets_invalidos(self):
         for off in (-20, 5, 40):
             with self.assertRaises(ValueError):
