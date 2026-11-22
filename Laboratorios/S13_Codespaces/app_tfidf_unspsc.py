@@ -30,10 +30,10 @@ CSV=ROOT/"Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv"
 RESULTS=Path(__file__).resolve().parent/"salidas/benchmark_unspsc"
 
 st.set_page_config(page_title="S13 · Taller interactivo TF-IDF",layout="wide")
-st.title("Laboratorio SECOP · Del texto al dato que aprende un modelo")
-st.caption("Universidad Central · Big Data · S13 · TF-IDF → clasificación UNSPSC → Dask Distributed")
-st.info("La fuente es un registro de proceso SECOP. Los modelos aprenden categorías declaradas, "
-        "no sobrecostos, fraude ni competencia contractual.")
+st.title("S13 · Dask en acción con títulos SECOP")
+st.caption("Universidad Central · Big Data · S13 · Workers Dask → TF-IDF y búsqueda · clasificación opcional")
+st.info("Muestra SECOP preparada para practicar particiones, concurrencia y representación de texto. "
+        "No realizamos depuración administrativa ni interpretaciones jurídicas; la clasificación UNSPSC es opcional.")
 
 @st.cache_data
 def cargar():
@@ -90,7 +90,7 @@ with tabs[0]:
     c1,c2,c3=st.columns(3)
     c1.metric("Filas de la muestra",len(data))
     c2.metric("IDs únicos",data["id_del_proceso"].nunique())
-    c3.metric("UNSPSC no identificados",int((data.segmento=="NO IDENTIFICADO").sum()))
+    c3.metric("Lotes de la práctica Dask",8)
     st.dataframe(data["segmento"].value_counts().rename_axis("Segmento UNSPSC")
                  .reset_index(name="Procesos"),hide_index=True)
     st.markdown(
