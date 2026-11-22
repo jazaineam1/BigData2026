@@ -7,6 +7,8 @@ para poder probar sin red, con respuestas simuladas explícitamente etiquetadas.
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from hashlib import sha256
 from pathlib import Path
 from time import perf_counter, sleep
@@ -60,10 +62,18 @@ def obtener_pagina(offset: int, *, get: Callable, total: int = 40,
                 resp.raise_for_status()
                 raise RuntimeError(f"HTTP {estado} tras dos intentos")
             retry = str(resp.headers.get("Retry-After", "1"))
-            if retry.isdigit() and int(retry) > 3:
+            if retry.isdigit():
+                espera = max(1, int(retry))
+            else:
+                try:
+                    instante = parsedate_to_datetime(retry)
+                    espera = max(0, (instante - datetime.now(timezone.utc)).total_seconds())
+                except (TypeError, ValueError, OverflowError):
+                    espera = 1
+            if espera > 3:
                 raise RuntimeError(
-                    f"HTTP {estado}: Retry-After {retry}s supera límite del taller; reintento cancelado")
-            dormir(max(1, int(retry)) if retry.isdigit() else 1)
+                    f"HTTP {estado}: Retry-After {retry} supera límite del taller; reintento cancelado")
+            dormir(espera)
             continue
         resp.raise_for_status()
         filas = resp.json()
