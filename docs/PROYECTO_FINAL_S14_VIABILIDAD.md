@@ -119,3 +119,16 @@ No exigir que el estudiante construya una aplicación desde cero, que aprenda un
 **Matiz imprescindible:** el repositorio es **público** y los archivos HTML ya fusionados en main tienen URL directa aunque no estén enlazados en la portada. Un \`robots: noindex\` disuade indexación, **no crea privacidad**; si se quiere inaccesibilidad real, mover la revisión a un repositorio privado autorizado, sin publicarla por GitHub Pages.
 
 Aplicar **una rama de trabajo → una fusión PR → eliminación de rama**, sin acumular ramas temporales. No borrar ramas históricas ajenas a esta auditoría sin comprobar qué trabajo contienen.
+
+
+## Actualización de verificación técnica del OFFSET y de los datos (22-nov-2026)
+
+- Archivo real [snapshot S13](../Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv): CSV leído desde GitHub, 1.000 filas, 59 columnas, 1.000 IDs únicos, sin filas truncadas.
+- Filtrado de modalidades S13: **830 registros (440 directa y 390 régimen especial)**, sin texto vacío.
+- Revisión técnica previa a entrenamiento: 19 valores de descripción marcadora **«No Definido»**; un par de registros con descripción idéntica adicional. El cuaderno E2 retira esas 20 filas **antes del split**: **810 procesos con 810 descripciones distintas**, 435 directa y 375 régimen especial. Esta corrección la proporciona el docente; no es una auditoría adicional para el alumno.
+- División estratificada prevista 80/20 con semilla 42: 648 entrenamiento y 162 prueba, pendiente de validar ejecutando el código completo en el entorno real.
+- Se probó localmente la lógica OFFSET con **7 tests unitarios**, todos satisfactorios: páginas 0/20, última parcial, incompleta, HTTP 429/reintento, cambio entre lecturas, offsets inválidos y fallo persistente. Las respuestas de esos tests son **simuladas**, no la red real.
+- El endpoint base `https://www.datos.gov.co/resource/p6dx-8zbt.json` devuelve JSON por una consulta web pública, pero el acceso a **solicitudes parametrizadas con OFFSET y LIMIT desde este entorno quedó bloqueado**. Es incorrecto declararlas verificadas contra SECOP en vivo.
+- No se ha ejecutado Spark MLlib en Databricks Free ni Dask en Codespaces para esta revisión. La aprobación final depende de un piloto con acceso real; no hacer correr benchmarks pesados en GitHub Actions.
+
+**Condición de publicación:** ninguna; el taller continúa como borrador no publicado en Pages/índice/LMS.
