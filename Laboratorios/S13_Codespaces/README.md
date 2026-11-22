@@ -27,13 +27,24 @@ No instalar software en el computador personal. Al elegir el Codespace con ese p
 
 5. Abre `Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb`, selecciona el kernel de Python del Codespace y ejecuta por secciones.
 
+## Herramientas visuales integradas en la presentación
+
+En las 24 láminas hay diagramas que muestran relaciones reales y se actualizan con entradas del estudiante:
+- **MapReduce (lámina 7):** barras según el número de observaciones de cada lote, con sus medias y el reduce global; no confundas barras con tiempos.
+- **Amortización (lámina 12):** dos barras comparan tiempo local con arranque + trabajo Dask sobre los números editados. Es una **hipótesis**, no una medición real.
+- **Cronómetros (lámina 19):** línea de tiempo ilustrativa que separa los 1,2 s de arranque de los 2,4 s de tareas del ejemplo ideal. No reemplaza el JSON real.
+- **Tandas (lámina 20):** reparte hasta 12 tareas entre 1, 2 o 4 workers de una misma VM. No representa nodos nuevos ni garantiza aceleración.
+- **Transferencia (lámina 21):** ruta visual Entrada → Partición → Worker → Recolección → Reintento → Evidencia.
+
+La interfaz Streamlit de la pestaña Dask conserva los dos modos `texto` y `espera` para compararlos en una misma tabla y descargar su JSON. El panel solo muestra tiempos medidos cuando se ejecuta desde Codespaces; las láminas no hacen llamadas a Dask por sí mismas.
+
 ## Herramientas y demostración
 
 - **Python / MapReduce conceptual:** funciones de sumar y contar; nada de Hadoop MapReduce instalado.
 - **HDFS:** simulación de bloques y réplicas; no se afirma haber instalado HDFS.
 - **pandas:** resultados de referencia de un archivo SECOP.
 - **Dask DataFrame:** particionado y operaciones diferidas, comparación con pandas.
-- **scikit-learn:** TF-IDF y regresión logística con división entrenamiento/prueba; la etiqueta es modalidad contractual, NO fraude.
+- **scikit-learn:** TF-IDF, normalización L2 y búsqueda por coseno sobre el minicorpus común. **Ampliación opcional:** LinearSVC predice el segmento UNSPSC declarado; nunca la modalidad contractual ni fraude.
 - **Dask Distributed:** coordina tareas independientes y gestiona fallos; con bibliotecas compatibles (por ejemplo XGBoost-Dask) también puede distribuir un entrenamiento, aunque no siempre conviene por rendimiento.
 - **Parquet:** resultado tabular que se reutilizará en S14/PySpark.
 
