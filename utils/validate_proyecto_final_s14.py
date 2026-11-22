@@ -41,7 +41,6 @@ def comprobar() -> None:
     assert 'max_workers=2' in codigo, "La descarga educativa debe usar dos hilos"
     assert "OFFSETS = [0, 20]" in codigo and "20" in codigo
     assert 'if "dbutils" not in globals():' in codigo, "Separar Codespaces de Databricks"
-    assert "intentar" not in codigo.lower() or True  # no dispara validación pesada
     assert not re.search(r"\b(OPENAI_API_KEY|AWS_SECRET_ACCESS_KEY)\s*=\s*['\"]\w", codigo)
 
     for titulo in ("Cómo se lee", "Qué nos dice", "Qué NO permite concluir", "Qué error común"):
@@ -52,11 +51,9 @@ def comprobar() -> None:
         assert f"S{n:02d} ·" in html, f"Falta ficha S{n:02d}"
     for token in ('id="ruta"', 'id="conceptos"', 'id="dask"',
                   'id="busqueda"', 'id="databricks"', 'localStorage',
-                  'aria-live=', 'datos.gov.co'):
-        # No exigir datos.gov.co dentro de HTML: el experimento vive en notebook.
-        if token != 'datos.gov.co':
-            assert token in html, f"Falta componente HTML: {token}"
-    assert "sintética" in html and "no es una ejecución Dask" in html.lower(), (
+                  'aria-live='):
+        assert token in html, f"Falta componente HTML: {token}"
+    assert "sintética" in html.lower() and "no es una ejecución dask" in html.lower(), (
         "No confundir simulación con ejecución real")
 
     plan = PLAN.read_text(encoding="utf-8")
