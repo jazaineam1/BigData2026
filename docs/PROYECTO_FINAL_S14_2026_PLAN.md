@@ -9,20 +9,23 @@
 
 **Producto único:** un expediente analítico consultable del mismo caso que une: demostración de descarga paralela real y controlada; ETL sobre la muestra SECOP versionada; tareas reales Dask; tres entrenamientos independientes coordinados por Dask; tablas/consultas Spark–Databricks; regresión logística distribuida en Spark MLlib **guiada**; explorador de resultados y manifiesto técnico. El proyecto es integración de lo enseñado, no inventario de servicios.
 
-### Rúbrica preliminar (100 puntos; equivalencia al PDA por confirmar)
+### Rúbrica corregida (100 puntos, para revisión docente)
 
-| Bloque | Puntos | Evidencia observable | Parcial |
-|---|---:|---|---|
-| A. Descarga secuencial y paralela | 10 | dos páginas, misma selección/huella, estado HTTP, tiempos medidos | 5 si conserva solicitud, páginas y falla documentada de red |
-| B. Preparación reproducible | 15 | filas SECOP reales, dos etiquetas, identificador único, `split` estable y CSV exportado | 8 si integra bien pero no exporta |
-| C. Dask datos y workers | 15 | workers observados y conteos Dask = pandas | 8 si obtiene conteos sin evidencia distribuida |
-| D. Dask entrenamientos independientes | 15 | tres `C`, F1 de CV, una evaluación final fuera de CV | 8 si entrena referencia sin repartir tareas |
-| E. Databricks, Delta, Spark SQL | 20 | carga por UI, Bronze/Silver/Gold, consulta SQL, recuentos conciliados | 10 si tablas/consulta sin historial Delta |
-| F. Spark MLlib guiado | 15 | pipeline TF-IDF + regresión logística, predicciones y F1 en test común | 8 si hay predicciones verificables sin persistencia |
-| G. Expediente y defensa | 10 | manifiesto, ruta a resultados, PR, demostración estructurada | 5 si el expediente es incompleto pero comprobable |
-| **Total** | **100** | | |
+El observatorio **funcional sin Codespaces** vale 20 puntos. El estudiante deberá producir sus salidas y justificar una predicción correcta y una errada si existe; ejecutar celdas no basta.
 
-**Puntuación equitativa:** no dar crédito extra por GPU, menores segundos, más workers, tamaño de nube ni pago de un servicio. El alumno puede mostrar dos workers en un único Codespace; **Dask reparte tres fits separados**, no un único `fit`. Spark MLlib sí ajusta un modelo con cómputo Spark sobre particiones. Scikit-learn y Spark utilizan representaciones de texto y optimizadores con diferencias; **no se comparan sus F1 como benchmark de superioridad**, sólo se contrasta el proceso y se verifica que utilizan el mismo conjunto test.
+| Bloque | Puntos | Evidencia observable |
+|---|---:|---|
+| A. Descarga controlada | 8 | dos páginas, hash, tiempos reales o fallo de red demostrado |
+| B. Contrato ETL | 12 | registros fuente, limpieza, IDs únicos, split común, hashes |
+| C. Dask datos y workers | 12 | particiones, dos workers observados, igualdad con pandas |
+| D. Dask entrenamiento | 13 | tres ajustes independientes, CV en train, test reservado |
+| E. Databricks, Spark SQL y Delta | 15 | subida CSV, capas Bronze/Silver/Gold, consulta contrastada |
+| F. Spark MLlib guiado | 15 | pipeline resuelto, predicciones y F1 solo en test |
+| G. Observatorio del estudiante | 20 | HTML offline consultable, filtros, predicciones y CSV descargable |
+| H. Manifiesto, trazas y defensa | 5 | PR del equipo, SHA y explicación de un registro propio |
+| **Total** | **100** | |
+
+**Equidad:** no se pierden puntos por no pagar un servicio o agotar cuotas preexistentes. La actividad bloqueada se documenta con error real y se valida mediante un plan de respaldo docente previamente probado. No inventar ejecuciones remotas.
 
 ## 2. Lo que sí se impartió y lo nuevo que NO puede exigirse sin guía
 
@@ -95,12 +98,16 @@
 4. Calcular F1, matriz de confusión, número de registros y errores de predicción. **Evidencia:** `F_spark_modelo.json`.
 5. **Riesgo:** `pyspark.ml` existe en serverless de Databricks, pero no se ha validado este cuaderno en una cuenta estudiantil Free. Si falla por cuota/plataforma: el docente registra contingencia; ejecutar variante PySpark local probada (si está preparada). No atribuir la falla al estudiante.
 
-### Paso 7 · Explorador y entrega
-1. Abrir el Explorer: consultar definiciones S01–S14, simular reparto de tareas y revisar diferencias entre tecnologías.
-2. Incorporar al expediente CSV y JSON producidos de verdad, sin mostrar métricas simuladas como propias.
-3. Exportar `manifest_final.json` con `sha256`, filas, modelos, rutas de evidencia, decisiones cerradas y límites.
-4. Subir a la carpeta `talleres/Final/` del **mismo repositorio privado del equipo**; abrir PR a su propia rama base; notificar con canal institucional según instrucciones docentes.
-5. Defensa: ejecutar una consulta, mostrar qué tarea se repartió realmente, explicar una tabla Spark y enseñar dónde está el conjunto de prueba. La rúbrica no exige escribir respuestas académicas abiertas en el LMS.
+### Paso 7 · Producto final offline y entrega
+1. Usar el mejor C elegido en E4, ajustar el modelo en `train` y guardar predicciones reales exclusivamente sobre `test`.
+2. Generar `predicciones.csv`, `observatorio.html` con `Laboratorios/Proyecto_Final_2026/generar_observatorio.py`, y el manifiesto.
+3. Abrir el observatorio **sin servidor**. Verificar filtros, búsqueda de descripciones, modalidad real/predicha, F1 y exportación CSV.
+4. Identificar un ID correctamente predicho y otro incorrectamente predicho si existe, ambos provenientes del propio test.
+5. Registrar trazas y evidencia Databricks real si se ejecutó; documentar fallos de cuota. No simular éxito.
+6. Entregar aplicación estática funcional y evidencias mediante PR en el repositorio privado existente.
+7. No publicar en la portada ni el LMS hasta autorización.
+
+**Evidencia:** aplicación funcional, CSV test, SHA, manifiesto y defensa basada en resultados propios.
 
 ## 5. Fichas de interpretación repetibles
 
@@ -158,3 +165,8 @@ La teoría prepara acciones. Un paso tiene siempre **HAZ ESTO**, **DEBE VERSE**,
 - **Calidad:** ejecución limpia del recorrido central y pruebas de navegador / validadores ligeros, con marca explícita de cualquier paso pendiente de test real.
 
 **Limitación al redactar:** no se ha ejecutado aquí el notebook real en Codespaces, la API en vivo, ni Databricks Free con una cuenta estudiantil. Esos resultados deben marcarse pendientes. No afirmar resultados de pilotos todavía no realizados.
+
+
+## Auditoría de viabilidad
+
+Antes de asignar, revisar [análisis de viabilidad y presupuesto estudiantil](PROYECTO_FINAL_S14_VIABILIDAD.md). **No publicar este taller en la portada ni el LMS durante revisión**.
