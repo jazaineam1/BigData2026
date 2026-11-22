@@ -10,7 +10,7 @@
 | Etiquetas del clasificador | conteos sobre 1.000 filas reales | **830 elegibles: 440 directa y 390 régimen especial** | Antes de la curaduría |
 | Riesgo de fuga por texto repetido | normalización/cómputo de descripciones | **19 valores `No Definido` y 1 duplicado adicional** | No trasladar al alumno un trabajo de auditoría docente |
 | Base final diseñada | retirar marcadores y duplicado **antes de dividir** | **810 textos únicos: 435 directa, 375 régimen especial** | Falta ejecutar el split en un kernel estudiantil; tamaño esperado train 648/test 162 |
-| OFFSET y LIMIT | **11 pruebas Python ejecutadas localmente con HTTP simulado** | **11/11 pasan** | Valida lógica, no servicio vivo |
+| OFFSET y LIMIT | **11 pruebas Python ejecutadas localmente con HTTP simulado; repetidas tras corregir manejo de `Retry-After`** | **11/11 pasan** | Valida lógica, no servicio vivo |
 | HTTP real básico | lectura pública de `/resource/p6dx-8zbt.json` | responde JSON en consulta web | NO acredita filtrado parametrizado |
 | HTTP SECOP parametrizado | intento de `$offset`, `$limit`, `$order` mediante herramientas disponibles | **NO VERIFICADO**: URL parametrizada no accesible desde aquí | E1 producirá evidencia HTTP real en Codespaces/Colab |
 | Producto offline | generador Python con 4 registros de prueba + Chromium headless | generó HTML y pasó búsqueda, filtro, detalle, CSV exportable y pantalla 375 px | Dataset sintético **solo de test**, no indicador real de SECOP |
@@ -61,7 +61,7 @@ Ejecutar manualmente cuando se necesite repetir: `python tests/manual_proyecto_f
 - **No ejecutar en Actions:** la descarga SECOP real, Spark, scikit-learn, OCR, ASR, benchmarks de 50.000 o el navegador. Los tests automáticos baratos usan `unittest` sin red.
 - Por equipo, máximo **4 solicitudes iniciales** para E1 (dos métodos × dos páginas); no descargas masivas simultáneas.
 - S13 Codespace ya existente, preferentemente 2 núcleos y autoapagado corto; si cuota agotada, Colab CPU descarga solo los archivos mínimos.
-- Databricks Free serverless restringe Internet/cuotas; un entrenamiento con MLlib no se da por aprobado sin validación directa.
+- Databricks Free serverless restringe Internet/cuotas. **Compatibilidad documental:** el paquete `pyspark.ml` está soportado en serverless con un entorno compatible (versión 4 o superior). No se da por aprobado sin validación real en Free: https://docs.databricks.com/aws/en/machine-learning/train-model/mllib y https://docs.databricks.com/aws/en/release-notes/serverless/environment-version/four .
 
 ## 4. Puertas de salida para anunciarlo a los estudiantes
 
