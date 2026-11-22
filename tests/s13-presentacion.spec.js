@@ -40,7 +40,7 @@ test('S13 MapReduce usa medias ponderadas y rechaza campos vacíos', async ({pag
   await page.goto(URL+'#s7');
   await page.locator('#mapRun').click();
   await expect(page.locator('#mapOut')).toContainText('Media global ponderada');
-  await page.locator('#mapInput').fill('100,120,\n10,20');
+  await page.locator('#mapInput').fill('10,20,30\n50,60');
   await page.locator('#mapRun').click();
   await expect(page.locator('#mapOut')).toContainText('observación vacía');
 });
@@ -202,11 +202,28 @@ test('S13: numeración coherente y flujo de seis pasos sin desborde móvil',asyn
   await page.goto(URL+'#s5');
   await expect(page.locator('#workersView .wide-node')).toHaveCount(4);
   await page.goto(URL+'#s21');
-  await expect(page.locator('.edu-step')).toHaveCount(6);
+  await expect(page.locator('#s21 .edu-step')).toHaveCount(6);
   const width=await page.evaluate(()=>({document:document.documentElement.scrollWidth,viewport:innerWidth}));
   expect(width.document).toBeLessThanOrEqual(width.viewport+4);
   for(let i=13;i<=24;i++){
     const k=await page.locator('#s'+i+' .kicker').textContent();
     expect(k).toContain(String(i).padStart(2,'0'));
   }
+});
+
+test('S13: diagnóstico de altura visible en escritorio sin ocultar problemas',async({page})=>{
+  await page.setViewportSize({width:1280,height:720});
+  const heights=[];
+  for(const n of [1,5,7,12,14,19,20,21]){
+    await page.goto(URL+'#s'+n);
+    const m=await page.evaluate(()=>({
+      scrollHeight:document.documentElement.scrollHeight,
+      viewport:innerHeight,
+      scrollWidth:document.documentElement.scrollWidth,
+      width:innerWidth
+    }));
+    heights.push({slide:n,extraPx:m.scrollHeight-m.viewport});
+    expect(m.scrollWidth).toBeLessThanOrEqual(m.width+4);
+  }
+  console.log('S13_ALTURA_1280x720',JSON.stringify(heights));
 });
