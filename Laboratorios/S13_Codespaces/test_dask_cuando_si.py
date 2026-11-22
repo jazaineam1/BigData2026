@@ -24,6 +24,17 @@ class PruebaS13Dask(unittest.TestCase):
         self.assertEqual(procesar_lote(tareas[0])["frecuencias"],
                          resultados[0]["frecuencias"])
 
+    def test_frecuencias_reales_corresponden_a_palabras_unicode(self):
+        trabajo = {"id": 1, "textos": ["Mantenimiento de computadores",
+                                      "Compra hospital-computadores"],
+                   "modo": "texto", "espera": 0, "iteraciones": 1000}
+        r = procesar_lote(trabajo)
+        self.assertEqual(r["palabras"], 6)
+        self.assertEqual(r["frecuencias"]["computadores"], 2)
+        self.assertEqual(r["frecuencias"]["hospital"], 1)
+        self.assertEqual(sum(r["frecuencias"].values()), r["palabras"])
+        self.assertFalse(any(" " in termino for termino in r["frecuencias"]))
+
     def test_traza_mide_tareas_reales_sin_arrancar_cluster(self):
         trabajo = {"id": 0, "textos": ["mantenimiento computadores"],
                    "modo": "texto", "espera": 0, "iteraciones": 1000}
