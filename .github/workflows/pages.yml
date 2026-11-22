@@ -21,9 +21,11 @@ on:
       - Cuadernos/Taller_Control_2.ipynb
       - utils/validate_static_links.py
       - .github/workflows/pages.yml
+      - Cuadernos/Proyecto_Final_Compras_Claras.ipynb
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
@@ -83,6 +85,7 @@ jobs:
           cp Cuadernos/10_Imagenes_Audio.ipynb _site/Cuadernos/
           cp Cuadernos/11_ETL_Audio_Imagenes.ipynb _site/Cuadernos/
           cp Cuadernos/Taller_Control_2.ipynb _site/Cuadernos/
+          cp Cuadernos/Proyecto_Final_Compras_Claras.ipynb _site/Cuadernos/
           test -f _site/lms/portal.html
           test -f _site/lms/account.html
           test -f _site/lms/session-08.html
@@ -130,6 +133,28 @@ jobs:
         uses: actions/upload-pages-artifact@v5
         with:
           path: _site
+
+      - name: Confirmar disponibilidad del artefacto Pages antes del despliegue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for intento in {1..15}; do
+            count="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" --jq '[.artifacts[] | select(.name == "github-pages" and .expired == false)] | length' || echo 0)"
+            if [[ "$count" == "1" ]]; then
+              echo "Artefacto Pages único y disponible, intento ${intento}/15"
+              exit 0
+            fi
+            if [[ "$count" =~ ^[0-9]+$ ]] && (( count > 1 )); then
+              echo "Error: hay ${count} artefactos github-pages en el mismo run. No reintentes este run; usa una ejecución nueva."
+              exit 1
+            fi
+            echo "Esperando metadatos del artefacto Pages (${count}), intento ${intento}/15"
+            sleep 3
+          done
+          echo "No apareció exactamente un artefacto Pages tras 15 intentos."
+          exit 1
 
       - name: Publicar en GitHub Pages
         id: deployment
