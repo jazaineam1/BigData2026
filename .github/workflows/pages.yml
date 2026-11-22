@@ -21,7 +21,6 @@ on:
       - Cuadernos/Taller_Control_2.ipynb
       - utils/validate_static_links.py
       - .github/workflows/pages.yml
-      - Cuadernos/Proyecto_Final_Compras_Claras.ipynb
   workflow_dispatch:
 
 permissions:
@@ -85,7 +84,6 @@ jobs:
           cp Cuadernos/10_Imagenes_Audio.ipynb _site/Cuadernos/
           cp Cuadernos/11_ETL_Audio_Imagenes.ipynb _site/Cuadernos/
           cp Cuadernos/Taller_Control_2.ipynb _site/Cuadernos/
-          cp Cuadernos/Proyecto_Final_Compras_Claras.ipynb _site/Cuadernos/
           test -f _site/lms/portal.html
           test -f _site/lms/account.html
           test -f _site/lms/session-08.html
