@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOK = ROOT / "Cuadernos/Proyecto_Final_Compras_Claras.ipynb"
-EXPLORER = ROOT / "Presentaciones/proyecto-final-explorer.html"
+EXPLORER = ROOT / "docs/borradores/proyecto-final-explorer.html"
 PLAN = ROOT / "docs/PROYECTO_FINAL_S14_2026_PLAN.md"
 VIABILIDAD = ROOT / "docs/PROYECTO_FINAL_S14_VIABILIDAD.md"
 GENERADOR = ROOT / "Laboratorios/Proyecto_Final_2026/generar_observatorio.py"
@@ -71,7 +71,11 @@ def comprobar() -> None:
         for m in [re.search(r"\| (\d+) \|", line)]
     ]
     assert sum(puntos) == 100, f"Rúbrica debe sumar 100 (encontrado {sum(puntos)})"
-    # No promocionar material mientras el usuario lo mantiene en revisión.
+    # No copiar borradores al sitio mientras el usuario lo mantiene en revisión.
+    assert not (ROOT / "Presentaciones/proyecto-final-explorer.html").exists()
+    pages = (ROOT / ".github/workflows/pages.yml").read_text(encoding="utf-8")
+    assert "Cuadernos/Proyecto_Final_Compras_Claras.ipynb" not in pages, "El cuaderno se publicó en Pages"
+    assert "proyecto-final-explorer.html" not in pages, "Explorer no debe estar en artefacto Pages"
     portada = (ROOT / "index.html").read_text(encoding="utf-8")
     lms = (ROOT / "lms/data/course.json").read_text(encoding="utf-8")
     for texto_publicacion in ("proyecto-final-explorer.html", "Proyecto_Final_Compras_Claras.ipynb"):
