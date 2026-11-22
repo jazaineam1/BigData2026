@@ -6,6 +6,7 @@ no descarga datos y no activa servicios de pago.
 """
 from __future__ import annotations
 
+import ast
 import json
 import re
 from pathlib import Path
@@ -30,6 +31,8 @@ def comprobar() -> None:
     codigos = ["".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "code"]
     textos = ["".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "markdown"]
     codigo = "\n".join(codigos)
+    for n, celda in enumerate(codigos, start=1):
+        ast.parse(celda, filename=f"proyecto_final_codigo_{n}.py")
     texto = "\n".join(textos)
 
     for n in range(8):
