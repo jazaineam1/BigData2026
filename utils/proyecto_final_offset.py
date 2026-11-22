@@ -60,7 +60,10 @@ def obtener_pagina(offset: int, *, get: Callable, total: int = 40,
                 resp.raise_for_status()
                 raise RuntimeError(f"HTTP {estado} tras dos intentos")
             retry = str(resp.headers.get("Retry-After", "1"))
-            dormir(min(3, max(1, int(retry))) if retry.isdigit() else 1)
+            if retry.isdigit() and int(retry) > 3:
+                raise RuntimeError(
+                    f"HTTP {estado}: Retry-After {retry}s supera límite del taller; reintento cancelado")
+            dormir(max(1, int(retry)) if retry.isdigit() else 1)
             continue
         resp.raise_for_status()
         filas = resp.json()
