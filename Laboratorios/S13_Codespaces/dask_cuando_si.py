@@ -2,6 +2,7 @@
 """S13 · Dask en acción. Demo pequeña: mismas tareas secuenciales y con workers reales.
 
 Modo espera: latencia externa SIMULADA (análoga a OCR/ASR por archivo), no hace OCR.
+Cada tarea Dask registra su inicio y fin reales para un cronograma por worker.
 Modo cpu: carga CPU reproducible de PBKDF2; es sintética, no representa un modelo IA.
 Nunca procesa 50.000 documentos y no debe ejecutarse automáticamente en Actions.
 """
@@ -67,6 +68,7 @@ def crear_trabajos(cantidad: int, espera: float, modo: str, iteraciones: int) ->
 
 def procesar_lote(tarea: dict) -> dict:
     """Trabajo independiente. La espera imita I/O remoto; no es OCR real."""
+    inicio_tarea_ns = time.perf_counter_ns()
     textos = tarea["textos"]
     palabras = sum(len(x.split()) for x in textos)
     contenido = "\n".join(textos).encode("utf-8")
@@ -90,10 +92,44 @@ def procesar_lote(tarea: dict) -> dict:
         trabajador = get_worker().address
     except (ValueError, ImportError):
         trabajador = "secuencial"
+    fin_tarea_ns = time.perf_counter_ns()
     return {"id": tarea["id"], "registros": len(textos), "palabras": palabras,
             "sha256": huella, "worker": trabajador,
             "terminos_distintos": len(frecuencias),
-            "frecuencias": frecuencias}
+            "frecuencias": frecuencias,
+            "inicio_monotonico_ns": inicio_tarea_ns,
+            "fin_monotonico_ns": fin_tarea_ns}
+
+
+def construir_traza_tareas(resultados: list[dict]) -> list[dict]:
+    """Cronograma MEDIDO por proceso: válido solo entre procesos de ESTA VM.
+
+    perf_counter_ns comparte reloj monotónico entre procesos locales; en
+    computadores diferentes NO se deben comparar marcas sin sincronización.
+    Los tiempos son los de la función, no incluyen cola ni envío de datos.
+    """
+    if not resultados:
+        return []
+    origen = min(x["inicio_monotonico_ns"] for x in resultados)
+    workers = {direccion: f"Worker {i + 1}" for i, direccion in enumerate(
+        sorted({str(x["worker"]) for x in resultados})
+    )}
+    trazas = []
+    for resultado in sorted(resultados, key=lambda x: (x["inicio_monotonico_ns"], x["id"])):
+        inicio_ns = resultado["inicio_monotonico_ns"]
+        fin_ns = resultado["fin_monotonico_ns"]
+        if fin_ns < inicio_ns:
+            raise AssertionError("Reloj monotónico incoherente en una tarea.")
+        trazas.append({
+            "lote": int(resultado["id"]) + 1,
+            "worker": workers[str(resultado["worker"])],
+            "direccion_worker": str(resultado["worker"]),
+            "inicio_ms": round((inicio_ns - origen) / 1_000_000, 3),
+            "fin_ms": round((fin_ns - origen) / 1_000_000, 3),
+            "duracion_ms": round((fin_ns - inicio_ns) / 1_000_000, 3),
+            "registros": int(resultado["registros"]),
+        })
+    return trazas
 
 
 def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
@@ -147,6 +183,8 @@ def ejecutar(trabajos: list[dict], workers: int, tablero: bool = False,
         "palabras_procesadas": sum(x["palabras"] for x in paralelos),
         "terminos_distintos_por_lote": [x["terminos_distintos"] for x in paralelos],
         "tareas_por_worker": dict(Counter(x["worker"] for x in paralelos)),
+        "traza_tareas": construir_traza_tareas(paralelos),
+        "alcance_traza": "Tiempos reales de la función en workers de UNA VM, relativos a la primera tarea. No incluye cola del scheduler, transferencia ni arranque.",
         "workers_reales": [{"direccion": addr,
                             "hilos": data["nthreads"],
                             "limite_memoria_bytes": data["memory_limit"]}

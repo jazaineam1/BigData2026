@@ -57,6 +57,16 @@ def main():
             subprocess.run(["node", "--check", temporal.name], check=True)
     assert "dask_cuando_si.py" in text
     assert not (ROOT / "docs/S13_PLAN_MEJORA_DASK.md").exists(), "Los planes del docente no se publican"
+    # El objetivo del estudiante es repartir tareas, no entrenar clasificación por modalidad.
+    assert "clasificar una modalidad registrada" not in text
+    script_dask = read("Laboratorios/S13_Codespaces/dask_cuando_si.py")
+    assert "def construir_traza_tareas(" in script_dask and '"traza_tareas":' in script_dask
+    app = read("Laboratorios/S13_Codespaces/app_tfidf_unspsc.py")
+    ultima_pestana = app.split("with tabs[6]:",1)[-1]
+    assert "F1 por clase (2)" not in ultima_pestana, "La F1 es optativa y no puede exigirse en la práctica"
+    assert "Distribuir TF-IDF con Dask" not in ultima_pestana, "No confundir conteos de títulos con TF-IDF distribuido"
+    assert "st.vega_lite_chart(" in app and "traza_tareas" in app, "Falta cronograma real de workers"
+    assert '"modos_medidos"' in text and '"modos_medidos"' in app, "La decisión no conserva las dos mediciones"
     assert "dask_cuando_si.py" in html
     assert "CPU lógicas" in html
     assert "dask_cuando_si.py" in html
