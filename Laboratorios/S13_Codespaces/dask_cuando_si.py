@@ -70,7 +70,10 @@ def procesar_lote(tarea: dict) -> dict:
     """Trabajo independiente. La espera imita I/O remoto; no es OCR real."""
     inicio_tarea_ns = time.perf_counter_ns()
     textos = tarea["textos"]
-    palabras = sum(len(x.split()) for x in textos)
+    tokens_por_titulo = [
+        re.findall(r"(?u)[^\W_]+", titulo.casefold()) for titulo in textos
+    ]
+    palabras = sum(len(tokens) for tokens in tokens_por_titulo)
     contenido = "\n".join(textos).encode("utf-8")
     huella = hashlib.sha256(contenido).hexdigest()
     frecuencias = {}
@@ -81,8 +84,7 @@ def procesar_lote(tarea: dict) -> dict:
     elif tarea["modo"] == "texto":
         # Transformación REAL de documentos SECOP: contar vocabulario del lote.
         contador = Counter(
-            palabra for titulo in textos
-            for palabra in re.findall(r"[^\\W_]+", titulo.casefold(), flags=re.UNICODE)
+            palabra for tokens in tokens_por_titulo for palabra in tokens
         )
         frecuencias = dict(sorted(contador.items()))
     else:
