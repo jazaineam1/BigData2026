@@ -40,7 +40,7 @@ test('S13 MapReduce usa medias ponderadas y rechaza campos vacíos', async ({pag
   await page.goto(URL+'#s7');
   await page.locator('#mapRun').click();
   await expect(page.locator('#mapOut')).toContainText('Media global ponderada');
-  await page.locator('#mapInput').fill('10,20,30\n50,60');
+  await page.locator('#mapInput').fill('100,120,\n10,20');
   await page.locator('#mapRun').click();
   await expect(page.locator('#mapOut')).toContainText('observación vacía');
 });
@@ -167,7 +167,7 @@ test('S13: cuatro visualizaciones explican MapReduce, costos, tandas y cronómet
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(URL+'#s7');
   await expect(page.locator('#mapVisual rect')).toHaveCount(3);
-  await page.locator('#mapInput').fill('10,20,30\\n50,60');
+  await page.locator('#mapInput').fill('10,20,30\n50,60');
   await page.locator('#mapRun').click();
   await expect(page.locator('#mapVisual rect')).toHaveCount(2);
   await expect(page.locator('#mapVisual')).toContainText('n=3');
