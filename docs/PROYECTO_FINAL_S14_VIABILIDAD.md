@@ -132,3 +132,18 @@ Aplicar **una rama de trabajo → una fusión PR → eliminación de rama**, sin
 - No se ha ejecutado Spark MLlib en Databricks Free ni Dask en Codespaces para esta revisión. La aprobación final depende de un piloto con acceso real; no hacer correr benchmarks pesados en GitHub Actions.
 
 **Condición de publicación:** ninguna; el taller continúa como borrador no publicado en Pages/índice/LMS.
+
+
+## Revisión pedagógica implementada · 23-nov-2026
+
+**Sin cambiar el problema ni aumentar las actividades:** en el cuaderno principal se incorporaron siete microintervenciones E1.1–E7.1 de **una expresión Python** por etapa. Están asociadas a la rúbrica existente y generan un `assert` reproducible. La entrega se mantiene como **un observatorio SECOP offline**, no siete informes. La guía Explorer —en `docs/borradores/`, fuera de Pages— fue sincronizada para mostrar qué aprende el estudiante en cada bloque.
+
+**Error real corregido:** E4 tenía comas iniciales en varias líneas que dejaban la celda Python sin sintaxis válida. Ahora organiza la salida de `S13.experimentos_distribuidos` como JSON. Además, el entrenamiento Spark MLlib de E6 explicita `repartition(2)`, obtiene evidencia con `spark_partition_id()` y no utiliza `.rdd`, no soportado en serverless. Dos particiones no equivalen a dos computadores físicos ni prueban aceleración. Referencias: https://docs.databricks.com/aws/en/pyspark/reference/functions/spark_partition_id y https://docs.databricks.com/aws/en/compute/serverless/limitations .
+
+**Pruebas añadidas:** `tests/test_proyecto_final_aprendizaje.py` contiene diez casos ligeros para compilar las celdas, resolver con datos controlados los siete retos, verificar E4 inyectando salidas ficticias **expresamente como prueba**, analizar los conteos reales del CSV SECOP y comprobar que no se publique el material en Pages/LMS. El validador estático `utils/validate_proyecto_final_s14.py` ahora exige siete retos y la corrección de E4.
+
+**Comprobaciones realizadas en esta revisión:** lectura del repositorio y del CSV real (1.000 filas, 830 con las clases y 810 textos curados), 18 controles estructurales satisfactorios, prueba local ligera de scikit-learn con **datos sintéticos** y ensayo local de persistencia JSON de E4 con **dobles de prueba**. Estas pruebas no demuestran que Dask, Spark ni Databricks hayan ejecutado el caso real, ni que el cuaderno completo haya pasado de principio a fin. Las diez pruebas ligeras se añadieron al repositorio; quedan disponibles para ejecutar en un checkout del proyecto, sin Activar Actions pesada.
+
+**Puertas pendientes antes de asignar:** ejecutar E0–E4 con datos reales y Dask en un entorno limpio con cuotas gratuitas; cargar CSV y ejecutar E5–E6 en cuenta Databricks Free; abrir el HTML producido a partir de las predicciones de los 810 registros, y verificar alternativa a cuota agotada. No añadir el taller a la portada ni al LMS.
+
+**Trazabilidad adicional:** un bloque de cierre, posterior a E7.1, recopila las respuestas verificadas en `H_microretos.json` y las inserta en `manifest_final.json`. Exige los cinco retos ejecutables en Codespaces/Colab (E1.1, E2.1, E3.1, E4.1 y E7.1). Las evidencias E5.1/E6.1 quedan como `null` si el equipo no pudo usar Databricks; nunca se consideran ejecutadas automáticamente. Este bloque no abre recursos, no llama a APIs y no vuelve a entrenar modelos. El docente podrá evaluar aprendizaje sin convertir el LMS en un formulario de respuestas libres.

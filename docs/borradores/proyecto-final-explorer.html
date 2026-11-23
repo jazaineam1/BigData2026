@@ -30,14 +30,14 @@
 <script>
 "use strict";
 const steps=[
-["E0 · Preparación","Abrir Codespaces S13, ejecutar verificación de entorno y comprobar que existen los datos reales.","Salida del entorno y archivos originales."],
-["E1 · Descargar","Comparar dos páginas SECOP con solicitudes secuenciales y ThreadPoolExecutor; respetar errores 429.","A_descarga.json con resultados de red."],
-["E2 · Preparar","Filtrar dos modalidades, crear train/test fijo y exportar secop_final.csv.","B_fuente.json y CSV con split."],
-["E3 · Distribuir datos","Comparar los conteos pandas/Dask, inspeccionar workers reales.","C_dask.json, conteos idénticos."],
-["E4 · Entrenar con Dask","Ejecutar tres valores de C en tareas independientes y evaluar una vez sobre test.","D_modelo_dask.json, F1 y C elegido."],
-["E5 · Usar Databricks","Cargar el CSV por interfaz, construir Bronze/Silver/Gold y verificar una consulta Spark SQL.","E_databricks.json, tablas Delta observadas."],
-["E6 · Entrenar Spark MLlib","Ejecutar el pipeline resuelto TF-IDF + logística y medir F1 en el test ya definido.","F_spark_modelo.json con métrica real."],
-["E7 · Entregar","Reunir manifiesto y PR en el repositorio privado preexistente del equipo.","Rutas y evidencias verificables."]
+["E0 · Preparación","Reutilizar Codespaces S13 o Colab CPU, comprobar SHA-256 de los datos y guardar los resultados.","Salida del entorno y archivos originales."],
+["E1 · Descargar","Comparar OFFSET 0/20 del TC1 con descargas secuenciales/paralelas; completar E1.1 sin nuevas llamadas HTTP.","A_descarga.json con resultados de red."],
+["E2 · Preparar","Filtrar dos modalidades, curar los textos, separar train/test y resolver E2.1 contando una clase del test.","B_fuente.json y CSV con split."],
+["E3 · Distribuir datos","Comparar conteos pandas/Dask, observar workers reales y completar E3.1 sin inventar cifras.","C_dask.json, conteos idénticos."],
+["E4 · Entrenar con Dask","Ejecutar 3 valores de C en tareas independientes, elegir por validación cruzada con E4.1 y evaluar test una vez.","D_modelo_dask.json, F1 y C elegido."],
+["E5 · Usar Databricks","Cargar CSV por interfaz, construir Bronze/Silver/Gold y conciliar el recuento Gold con E5.1.","E_databricks.json, tablas Delta observadas."],
+["E6 · Entrenar Spark MLlib","Entrenar Spark MLlib, observar particiones con spark_partition_id(), leer matriz de confusión y resolver E6.1.","F_spark_modelo.json con métrica real."],
+["E7 · Entregar","Producir observatorio.html offline con predicciones reales de test, resolver E7.1 y entregar manifiesto/PR.","Aplicación HTML offline, IDs verificados, manifest_final.json y PR privado."]
 ];
 const key="uc-bigdata-proyecto-final-v1";
 let done={};try{done=JSON.parse(localStorage.getItem(key)||"{}")||{}}catch(_){done={}}

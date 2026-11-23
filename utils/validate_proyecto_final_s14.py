@@ -52,6 +52,22 @@ def comprobar() -> None:
     assert 'if "dbutils" not in globals():' in codigo, "Separar Codespaces de Databricks"
     assert not re.search(r"\b(OPENAI_API_KEY|AWS_SECRET_ACCESS_KEY)\s*=\s*['\"]\w", codigo)
 
+    # Siete microintervenciones que exigen un resultado propio por fase,
+    # sin nuevos modelos, fuentes ni tecnología extra.
+    microretos = ["E1.1", "E2.1", "E3.1", "E4.1", "E5.1", "E6.1", "E7.1"]
+    for reto in microretos:
+        assert any(f"### {reto} ·" in t for t in textos), (
+            f"Falta microejercicio pedagógico {reto}")
+    assert '"H_microretos.json"' in codigo
+    assert "manifiesto[\"microretos\"] = resultados_microretos" in codigo
+    assert codigo.count("= ____") == 7, (
+        "Debe haber exactamente una expresión guiada por E1, E2, E3, E4, E5, E6 y E7.")
+    assert "referencia = S13.entrenar_y_evaluar(tabla_curada)" in codigo
+    assert "resultado_dask = S13.experimentos_distribuidos(tabla_curada, n_workers=2)" in codigo
+    assert not any(line.lstrip().startswith((",assert ", ",resultado_dask=", ",evidencia_d="))
+                   for line in codigo.splitlines()), (
+        "E4 conserva una coma al inicio y romperá el cuaderno.")
+
     for titulo in ("Cómo se lee", "Qué nos dice", "Qué NO permite concluir", "Qué error común"):
         assert texto.count(titulo) >= 7, f"Interpretación insuficiente: {titulo}"
 
