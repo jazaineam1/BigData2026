@@ -24,10 +24,10 @@ def main():
     texto = "\n".join("".join(c["source"]) for c in celdas)
     assert sum(c["cell_type"] == "code" for c in celdas) >= 20
     capitulos = [
-        int(re.match(r"## (\\d+) ·", "".join(c["source"])).group(1))
+        int(re.match(r"## (\d+) ·", "".join(c["source"])).group(1))
         for c in celdas
         if c["cell_type"] == "markdown"
-        and re.match(r"## \\d+ ·", "".join(c["source"]))
+        and re.match(r"## \d+ ·", "".join(c["source"]))
     ]
     assert capitulos == list(range(16)), f"Secciones desordenadas: {capitulos}"
     for requerido in ("MuestraRSS", "pico_por_proceso", "memoria_info",
@@ -76,7 +76,7 @@ def main():
     referencias = ("2eb6f8c8", "72f73a44", "c0f09536", "8c64b782")
     for n, esperado in enumerate(referencias, start=1):
         bloque = re.search(
-            rf'<section class="slide(?: active)?" id="s{n}"[\\s\\S]*?</section>',
+            rf'<section class="slide(?: active)?" id="s{n}"[\s\S]*?</section>',
             presentacion
         )
         assert bloque and fnv_utf16(bloque.group(0)) == esperado, (
