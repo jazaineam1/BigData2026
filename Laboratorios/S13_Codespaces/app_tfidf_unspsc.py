@@ -408,6 +408,74 @@ metricas=client.gather(futuros)""",language="python")
     )
 
 
+
+    with st.expander("Ampliación opcional · K-means: un modelo entrenado con Dask-ML", expanded=False):
+        st.markdown(
+            "**Caso SECOP:** texto real → TF-IDF → SVD de 20 variables "
+            "→ K-means local y Dask-ML con los mismos centroides iniciales. "
+            "Se comparan fases equivalentes; ARI mide acuerdo de grupos, "
+            "no calidad semántica. No ejecuta DBSCAN ni 50.000 registros."
+        )
+        st.code(
+            "python Laboratorios/S13_Codespaces/kmeans_dask_s13.py --n 250 --workers 2\n"
+            "python Laboratorios/S13_Codespaces/kmeans_dask_s13.py --n 1000 --workers 2",
+            language="bash",
+        )
+        n_kmeans=st.selectbox(
+            "Muestra ligera SECOP", [250, 1000], index=0, key="s13_kmeans_n"
+        )
+        w_kmeans=st.selectbox(
+            "Workers para K-means (un hilo por proceso)", [1, 2], index=1,
+            key="s13_kmeans_workers",
+        )
+        if w_kmeans>cpus_disponibles():
+            st.warning("Más workers que CPU efectivas: puede ser más lento.")
+        if st.button("Entrenar K-means local y Dask (voluntario)",
+                     key="s13_kmeans_run"):
+            programa=Path(__file__).resolve().parent/"kmeans_dask_s13.py"
+            try:
+                res=subprocess.run(
+                    [sys.executable, str(programa),
+                     "--n", str(n_kmeans), "--workers", str(w_kmeans)],
+                    cwd=ROOT, capture_output=True, text=True, timeout=240,
+                )
+                if res.returncode:
+                    st.error("El laboratorio K-means no finalizó; no se inventan métricas.")
+                    st.code(res.stderr[-2600:] or res.stdout[-1200:])
+                else:
+                    ruta=Path(__file__).resolve().parent/"salidas/kmeans_s13.json"
+                    datos_kmeans=json.loads(ruta.read_text(encoding="utf-8"))
+                    st.session_state["s13_kmeans_ejecucion"]=datos_kmeans
+                    st.success("Modelo local y modelo Dask-ML entrenados sobre los mismos vectores.")
+            except (subprocess.TimeoutExpired, OSError, ValueError) as exc:
+                st.error(f"No se completó el laboratorio opcional: {exc}")
+        if "s13_kmeans_ejecucion" in st.session_state:
+            m=st.session_state["s13_kmeans_ejecucion"]
+            tiempos=m["tiempos_segundos"]
+            a,b,c=st.columns(3)
+            a.metric("Local total",f"{tiempos['pipeline_local_sin_guardado']:.3f} s")
+            b.metric("Dask total",f"{tiempos['pipeline_dask_sin_guardado']:.3f} s")
+            c.metric("Acuerdo ARI",f"{m['ari_acuerdo_de_grupos']:.3f}")
+            st.caption(
+                "Tiempos totales: incluyen lectura+TF-IDF+SVD; el de Dask incluye "
+                "arranque, persistencia, fit y predicción. No se incluyen escritura del JSON. "
+                "Con una matriz pequeña puede ser mejor la ejecución local."
+            )
+            st.dataframe(pd.DataFrame([
+                {"Fase":nombre,"Segundos":valor} for nombre,valor in tiempos.items()
+            ]),hide_index=True,use_container_width=True)
+            st.write("Tareas observadas durante entrenamiento por worker:",
+                     m["tareas_entrenamiento_por_worker"])
+            st.write("Workers presentes:",m["workers_reales"])
+            st.bar_chart(pd.DataFrame(m["grupos_dask"])[["grupo","cantidad"]].set_index("grupo"))
+            st.json(m["grupos_dask"],expanded=False)
+            st.download_button(
+                "Descargar JSON de K-means medido",
+                data=json.dumps(m,ensure_ascii=False,indent=2),
+                file_name="s13_kmeans_real.json",
+                mime="application/json", key="s13_kmeans_download",
+            )
+
 with tabs[5]:
     st.subheader("Simulador de decisión: el clúster también cuesta")
     st.markdown(
