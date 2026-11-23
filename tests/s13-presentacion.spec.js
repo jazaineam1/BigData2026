@@ -142,7 +142,7 @@ test('S13: numeración coherente y flujo de seis pasos sin desborde móvil',asyn
 test('S13: diagnóstico de altura visible en escritorio sin ocultar problemas',async({page})=>{
   await page.setViewportSize({width:1280,height:720});
   const heights=[];
-  for(const n of [1,5,7,12,14,19,20,21]){
+  for(let n=1;n<=24;n++){
     await page.goto(URL+'#s'+n);
     const m=await page.evaluate(()=>({
       scrollHeight:document.documentElement.scrollHeight,
