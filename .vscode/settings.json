@@ -5,11 +5,11 @@
     "**/Datos": true,
     "**/Laboratorios": true,
     "**/Cuadernos/datos": true,
+    "**/Presentaciones": true,
     "**/.gitignore": true
   },
   "workbench.startupEditor": "readme",
   "python.defaultInterpreterPath": "/usr/local/bin/python",
-  "jupyter.askForKernelRestart": false,
   "files.watcherExclude": {
     "**/.git/objects/**": true
   }

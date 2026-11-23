@@ -1,0 +1,553 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>S13 · Dask y K-means clásico en un cuaderno · Big Data UC</title><meta name="theme-color" content="#122253"><style>:root{--bg:#f6f7fb;--white:#fff;--navy:#122253;--ink:#172238;--muted:#48546a;--line:#cfd7e4;--teal:#087f81;--orange:#da5d12;--red:#ae312b;--code:#10203a;--good:#0f7250}*{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:#e9eef6;color:var(--ink);font:16px/1.44 system-ui,"Segoe UI",Arial,sans-serif}a{color:#065c76}button,input,textarea,select{font:inherit}button{cursor:pointer;border:1px solid #436787;border-radius:9px;padding:8px 11px;background:#153968;color:white;font-weight:650}button:hover{background:#295a83}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #e67e32;outline-offset:2px}header{height:50px;display:flex;align-items:center;gap:16px;background:var(--navy);color:white;padding:5px 22px;position:sticky;top:0;z-index:50}header a{color:white;font-size:13px;white-space:nowrap}header .brand{font-weight:850;letter-spacing:.07em;font-size:14px}.grow{flex:1}header .phase{background:#284777;color:#f3f7ff;padding:5px 12px;border-radius:100px;font-size:12px}.deck{max-width:1480px;margin:0 auto;background:var(--bg);min-height:calc(100dvh - 110px)}.slide{display:none;min-height:calc(100dvh - 110px);padding:20px 26px 26px;overflow-x:hidden}.slide.active{display:block}.kicker{font-size:12px;color:var(--teal);font-weight:900;letter-spacing:.1em;text-transform:uppercase}.slide h1{font-size:clamp(27px,2.7vw,39px);line-height:1.12;margin:5px 0 16px;color:var(--navy);letter-spacing:-.022em}.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}.cols.thirds{grid-template-columns:repeat(3,minmax(0,1fr))}.panel{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:15px 19px;min-width:0;box-shadow:0 3px 11px #09204712}.panel h2{font-size:19px;line-height:1.2;margin:0 0 10px;color:var(--navy)}.panel h3{font-size:16px;margin:12px 0 5px;color:var(--teal)}.panel p{margin:8px 0}.panel ul,.panel ol{padding-left:24px;margin:7px 0}.panel li{margin:5px 0}.panel dl{margin:0}.panel dt{margin-top:8px;color:var(--navy)}.panel dd{margin:2px 0 6px 14px;color:var(--muted)}.micro{color:var(--muted);font-size:14px}.tip{background:#eff8f8;border-left:4px solid var(--teal);padding:10px 12px;border-radius:6px;margin-top:12px;font-size:14px}.interpret{display:flex;gap:14px;align-items:baseline;margin-top:13px;padding:10px 15px;background:#e4f3ef;border-left:5px solid var(--teal);border-radius:8px;font-size:14px;min-height:40px}.interpret b{min-width:110px;color:#085d56}.interpret p{margin:0}.table-wrap{overflow-x:auto;max-width:100%}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:8px;border-bottom:1px solid #d9e0ea;vertical-align:top;text-align:left}th{color:#10235a;background:#e7edf9}tbody tr:nth-child(even){background:#f7f9fc}pre{background:var(--code);color:#eef6ff;border-radius:9px;padding:12px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0;font:13px/1.5 ui-monospace,Consolas,monospace}code{font-family:ui-monospace,Consolas,monospace;font-size:.9em}.panel code:not(pre code){color:#143458;background:#e8eff8;border-radius:3px;padding:1px 4px}.equation{font:700 20px/1.4 ui-monospace,Consolas,monospace;text-align:center;color:#103d63;background:#e7f3f7;padding:11px 7px;margin:12px 0;border-radius:8px}.panel input:not([type=checkbox]),.panel textarea,.panel select{display:block;width:100%;background:white;color:var(--ink);border:1px solid #a6b5c7;border-radius:8px;padding:8px;margin:4px 0 10px}.panel label{display:block;font-weight:700;font-size:14px;color:#203a59}.panel button{margin:6px 6px 6px 0}.choices{display:flex;gap:8px;flex-wrap:wrap}.output{background:#edf6f8;border:1px solid #afcdd2;border-radius:8px;color:#0a3e53;min-height:46px;padding:10px;margin:9px 0;white-space:pre-wrap;overflow-wrap:anywhere}.pre-output{font:13px/1.45 ui-monospace,monospace;max-height:320px;overflow:auto}.diagram,.step-graph{display:grid;gap:6px;margin:10px 0}.wide-node,.nodebox{padding:11px;border:1px solid #9ab3c9;background:#edf2fa;color:#15375b;font-weight:800;border-radius:9px;text-align:center}.wide-node small{font-weight:400}.connector{text-align:center;color:var(--orange)}.wide-node.schedule{background:#e9f5ee}.mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.step-graph{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap}.nodebox{font-size:13px;flex:1}.example-list{display:grid;gap:6px}.example-list>div{background:#e7eef8;padding:9px;border-radius:7px}.checklist{display:grid;gap:8px}.checklist label{display:flex;gap:10px;align-items:flex-start;font-weight:500}.checklist input{margin-top:5px;accent-color:var(--teal)}.btnlink{display:inline-block;border-radius:9px;padding:9px 14px;background:#143d69;color:white;text-decoration:none;font-weight:750}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#4d5c70}.legend span{background:#edf3fb;padding:4px 8px;border-radius:15px}.risk{color:var(--red);font-weight:800}.ok{color:var(--good);font-weight:800}.muted{color:var(--muted)}.footer{position:sticky;bottom:0;z-index:20;background:#122253;color:white;min-height:60px;display:flex;align-items:center;gap:12px;padding:10px 22px}.footer button{border:1px solid #7896b9;background:#284878}.footer button:disabled{opacity:.4;cursor:not-allowed}.footer .bar{height:7px;background:#486282;border-radius:100px;flex:1;overflow:hidden}.footer .fill{height:100%;background:#62d3c6;width:3%}.footer .counter{font-variant-numeric:tabular-nums;font-weight:900;min-width:70px;text-align:center}.footer .hint{font-size:12px}.slide details{background:#f1f6fb;border:1px solid #dbe5ef;border-radius:9px;padding:8px;margin:8px 0}.slide summary{cursor:pointer;font-weight:700;color:var(--navy)}@media(min-width:1250px) and (min-height:720px){.panel{padding:18px 23px}.slide{padding:24px 38px 30px}.cols{gap:20px}.slide h1{margin-bottom:18px}}@media(max-width:850px){header .phase,header a:nth-of-type(3),.footer .hint{display:none}.slide{padding:14px 13px 20px}.slide h1{font-size:26px}.cols,.cols.thirds{grid-template-columns:1fr}.panel{padding:15px}.interpret{display:block}.interpret b{display:block;margin-bottom:4px}.footer{padding:7px 8px;gap:7px}.footer button{font-size:13px;padding:7px 8px}header{gap:8px;padding:5px 9px}.output{font-size:14px}}@media print{header,.footer{display:none}.slide{display:block!important;break-after:page;min-height:0}.deck{max-width:none}}.unit-jump{border:1px solid #a9b9ce;border-radius:7px;background:#f6fbff;color:#19385c;font-size:12px;padding:6px;max-width:210px}
+@media(max-width:850px){.unit-jump{max-width:112px;font-size:11px;padding:4px}.footer .hint{display:none}}
+
+.edu-viz{display:block;max-width:100%;width:100%;height:auto;max-height:142px;border:1px solid #c5d9e8;border-radius:10px;background:#f4f9fd;margin:9px 0}
+.edu-visual-title{font-size:13px;color:#14375c;font-weight:800;margin:10px 0 4px}
+.edu-viz-note{font-size:12px;color:#465b70;margin:3px 0 6px}
+.edu-viz text{font-family:system-ui,"Segoe UI",Arial,sans-serif}
+@media(max-width:850px){.edu-viz{max-height:124px}.edu-visual-title{font-size:12px}}
+.edu-pipeline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:6px 0}
+.edu-step{border:1px solid #b7cbdb;border-top:4px solid #138c90;border-radius:9px;background:#f0f7fb;padding:9px;min-width:0}
+.edu-step strong{display:block;font-size:13px;color:#124363}
+.edu-step span{display:block;font-size:12px;color:#354d61;line-height:1.35;margin-top:4px}
+@media(max-width:720px){.edu-pipeline{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.edu-compact-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px;row-gap:2px}
+.edu-compact-fields label{min-width:0}
+@media(min-width:900px) and (max-height:790px){
+.slide{padding:12px 20px 16px}
+.slide h1{font-size:clamp(26px,2.3vw,33px);margin:4px 0 10px}
+.panel{padding:12px 16px}
+.panel h2{font-size:17px;margin-bottom:7px}
+.panel p{margin:5px 0;font-size:14px;line-height:1.36}
+.panel li{margin:3px 0;font-size:14px;line-height:1.35}
+.panel pre{padding:8px;font-size:12px;line-height:1.4}
+.panel label{font-size:13px}
+.panel input:not([type=checkbox]),.panel textarea,.panel select{padding:6px;margin:3px 0 7px}
+.edu-viz{max-height:118px;margin:5px 0}
+.edu-visual-title{margin:6px 0 3px}
+.edu-viz-note{margin:2px 0}
+.interpret{margin-top:9px;padding:7px 11px}
+}
+.edu-details{border:1px solid #c5d7e5;border-radius:8px;padding:7px 9px;margin:8px 0;background:#f5f9fd}
+.edu-details summary{cursor:pointer;font-weight:700;color:#17385c;font-size:13px}
+.edu-details[open] summary{margin-bottom:8px}
+
+/* S13 720p: diagramas compactos y legibles, sin ocultar conceptos ni controles. */
+@media(min-width:900px) and (max-height:790px){
+ #s5 h1,#s20 h1{font-size:29px;line-height:1.08;margin:3px 0 8px}
+ #s5 .panel,#s20 .panel{padding:9px 12px}
+ #s5 .panel h2,#s20 .panel h2{font-size:16px;margin:0 0 5px}
+ #s5 .panel p,#s20 .panel p{font-size:13px;line-height:1.3;margin:4px 0}
+ #s5 .panel label,#s20 .panel label{font-size:12px}
+ #s5 .panel button,#s20 .panel button{padding:5px 9px;margin:3px 5px 3px 0}
+ #s5 .panel select,#s20 .panel select{padding:5px;margin:3px 0 5px}
+ #s5 .output,#s20 .output{min-height:36px;padding:6px;margin:5px 0;font-size:13px}
+ #s5 .interpret,#s20 .interpret{padding:5px 8px;margin-top:5px;min-height:0;font-size:12px;line-height:1.25}
+ #s5 .edu-details,#s20 .edu-details{padding:5px 8px;margin:5px 0}
+ #s5 .diagram{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);align-items:center;gap:4px;margin:5px 0}
+ #s5 .diagram> .wide-node:first-child{grid-column:1;grid-row:1}
+ #s5 .diagram> .connector{grid-column:2;grid-row:1;line-height:1;font-size:11px;overflow:hidden}
+ #s5 .diagram> .schedule{grid-column:3;grid-row:1}
+ #s5 .diagram> #workersView{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+ #s5 .diagram .wide-node{padding:5px 3px;border-radius:6px;font-size:11px;line-height:1.25}
+ #s20 pre{font-size:11px;line-height:1.25;padding:6px;margin:4px 0}
+ #s20 .edu-pipeline{gap:5px;margin:4px 0}
+ #s20 .edu-step{padding:5px}
+ #s20 .edu-step strong{font-size:12px}
+ #s20 .edu-step span{font-size:11px;line-height:1.2}
+ #s20 .edu-viz{max-height:94px;margin:4px 0}
+ #s20 .edu-visual-title{margin:5px 0 2px;font-size:12px}
+ #s20 .edu-viz-note{font-size:11px;line-height:1.2;margin:1px}
+}
+
+/* S13 visuales de arquitectura y aprendizaje automático: sólo clases s13- */
+.s13-viz{display:block;width:100%;height:auto;max-height:275px;margin:10px auto;background:linear-gradient(150deg,#f5f9ff,#eaf5f6);border:1px solid #b6cfdb;border-radius:14px}
+.s13-result{margin:8px 0;padding:10px 13px;border:1px solid #b6d2d9;border-left:4px solid #128e91;border-radius:9px;background:#f1f9fa;color:#183b50;font-size:14px;line-height:1.4;white-space:pre-wrap}
+.s13-microdefs{display:grid;gap:7px;margin:10px 0}.s13-microdefs>div{display:grid;grid-template-columns:120px 1fr;gap:7px;padding:7px;border-bottom:1px solid #d4e0ec;font-size:13px}.s13-microdefs b{color:#0d6687}
+.s13-model-list{display:grid;gap:8px}.s13-model-list>div{border:1px solid #c7dbe4;background:linear-gradient(100deg,#f7fcfe,#ffffff);border-radius:10px;padding:9px 11px;display:grid;grid-template-columns:auto 1fr;column-gap:8px}.s13-model-list strong{grid-column:1/-1;color:#123e61}.s13-model-list span{grid-column:1/-1;font-size:13px}.s13-tag{grid-column:1/-1;justify-self:start;margin-top:4px;background:#d8f4e8;color:#126245;border-radius:25px;padding:2px 8px;font-size:11px;font-style:normal;font-weight:700}.s13-tag.neutral{background:#e6edf6;color:#47566c}
+.s13-pipeline{display:grid;gap:7px;margin-top:12px}.s13-step{padding:8px 10px;background:#f5f9fc;border:1px solid #d3e2ef;border-radius:9px;display:grid;grid-template-columns:30px 1fr;align-items:center;column-gap:8px}.s13-step>span{grid-row:span 2;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:#126c90;color:white;font-weight:800}.s13-step small{color:#586477;font-size:12px}
+.s13-number{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.s13-number>div{display:grid;text-align:center;padding:10px 4px;border:1px solid #c8dce8;border-radius:10px;background:#f3f8fc}.s13-number b{font-size:23px;color:#146a8a}.s13-number span{font-size:11px;color:#45586e}
+.s13-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.s13-fields label{font-weight:650;font-size:12px}.s13-fields select{width:100%;min-width:0;margin-top:4px}
+.s13-memory-numbers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:9px 0}.s13-memory-numbers>div{border:1px solid #d8e1ed;padding:6px 5px;border-radius:8px;text-align:center;background:#f9fbff}.s13-memory-numbers span{display:block;color:#4b6276;font-size:11px}.s13-memory-numbers strong{display:block;font-size:16px;color:#12395b}
+.s13-memgraph{padding:9px;border:1px solid #cddbe7;border-radius:10px;background:#f7fafc}.s13-memline{display:flex;justify-content:space-between;font-size:13px;gap:7px}.s13-track{margin-top:7px;height:16px;border-radius:8px;background:linear-gradient(90deg,#e4f2f1,#f9e0db);overflow:hidden}.s13-track div{height:100%;width:0%;background:#139b8a;transition:width .25s}
+.s13-threshold{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-top:10px}.s13-threshold>div{display:grid;grid-template-columns:9px 39px 1fr;gap:4px;align-items:center;font-size:11px}.s13-threshold i{width:8px;height:21px;border-radius:5px}.s13-threshold span{color:#4d5669}
+.s13-demand-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.s13-demand-grid>div{border:1px solid #d3dfed;background:#f6faff;border-radius:9px;padding:9px;display:grid;gap:3px}.s13-demand-grid b{font-size:17px;color:#105d80}.s13-demand-grid span{font-size:13px}.s13-demand-grid small{font-size:11px;color:#596579}
+@media(max-width:650px){.s13-viz{max-height:230px}.s13-microdefs>div{grid-template-columns:95px 1fr}.s13-demand-grid{grid-template-columns:1fr}.s13-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Evita desplazamiento vertical en los esquemas de MapReduce y de tiempos */
+@media (min-width:1100px) and (max-height:760px) {
+  #s7 h1,#s19 h1{font-size:29px;line-height:1.08;margin-bottom:7px}
+  #s7 .panel,#s19 .panel{padding:10px 14px;font-size:14px;line-height:1.27}
+  #s7 .panel h2,#s19 .panel h2{font-size:16px;margin:0 0 5px}
+  #s7 .panel p,#s19 .panel p{margin:4px 0}
+  #s7 .panel li,#s19 .panel li{margin:2px 0}
+  #s7 .panel pre,#s19 .panel pre{padding:7px;margin:5px 0}
+  #s7 .panel table th,#s7 .panel table td,
+  #s19 .panel table th,#s19 .panel table td{padding:4px 6px;font-size:12px}
+  #s19 .edu-viz{max-height:108px;margin:3px auto}
+  #s7 .interpret,#s19 .interpret{padding:7px 12px;font-size:13px;line-height:1.2}
+  #s7 .interpret p,#s19 .interpret p{margin:3px 0}
+}
+
+/* Ajuste final a proyectores 1280×720: no oculta contenido; reduce espacios sobrantes. */
+@media (min-width:1100px) and (max-height:760px) {
+  #s7 .edu-viz{max-height:94px;margin:2px auto}
+  #s7 .panel p{margin:3px 0}
+  #s9 h1,#s24 h1{font-size:28px;line-height:1.08;margin:3px 0 7px}
+  #s9 .panel,#s24 .panel{padding:10px 13px;font-size:13px;line-height:1.25}
+  #s9 .panel h2,#s24 .panel h2{font-size:16px;margin:1px 0 6px}
+  #s9 .panel h3,#s24 .panel h3{font-size:14px;margin:5px 0 3px}
+  #s9 .panel p,#s24 .panel p{margin:4px 0}
+  #s9 .s13-viz{max-height:196px;margin:5px auto}
+  #s9 .s13-microdefs{gap:3px;margin:5px 0}
+  #s9 .s13-microdefs>div{padding:4px 3px;font-size:12px}
+  #s9 pre{padding:7px;margin:4px 0;font-size:12px}
+  #s12 .edu-viz{max-height:96px;margin:3px auto}
+  #s12 .panel p{margin:4px 0}
+  #s13 .s13-model-list{gap:5px}
+  #s13 .s13-model-list>div{padding:6px 8px}
+  #s13 .s13-pipeline{gap:5px;margin:6px 0}
+  #s13 .s13-step{padding:6px 8px}
+  #s14 .s13-viz{max-height:200px;margin:4px auto}
+  #s14 .s13-number{margin:5px 0}
+  #s14 .panel p{margin:4px 0}
+  #s24 .panel li{margin:2px 0}
+  #s24 .panel table th,#s24 .panel table td{padding:3px 5px;font-size:12px}
+  #s24 .panel .choices{margin:5px 0;gap:5px}
+  #s24 .interpret{padding:7px 12px;font-size:12px}
+}
+</style></head><body><header><span class="brand">BIG DATA · UC · S13</span><a href="../index.html">Curso</a><a href="https://github.com/jazaineam1/BigData2026/blob/main/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb" target="_blank" rel="noopener">Cuaderno ejecutable</a><a href="https://github.com/jazaineam1/BigData2026" target="_blank" rel="noopener">Codespaces</a><span class="grow"></span><span class="phase" id="phase">Caso: Compras Claras</span></header><main class="deck" id="deck"><section class="slide active" id="s1" aria-hidden="false"><div class="kicker">S13 · 01 · Decisión profesional</div><h1>¿Qué cambia cuando repartimos un trabajo entre workers?</h1>
+<div class="cols">
+<article class="panel"><h2>Laura necesita procesar títulos SECOP</h2>
+<p>Una función recibe un título, cuenta sus términos y calcula una huella SHA-256. Disponemos de una muestra preparada de hasta 1.000 títulos y queremos repartirla en <strong>ocho lotes independientes</strong>, sin cambiar la respuesta.</p>
+<div class="edu-pipeline" role="group" aria-label="Entrada, reparto y resultado de datos SECOP">
+<div class="edu-step"><strong>1 · CSV SECOP</strong><span>Títulos reales de la muestra versionada</span></div>
+<div class="edu-step"><strong>2 · 8 lotes</strong><span>Scheduler asigna trabajos a procesos worker</span></div>
+<div class="edu-step"><strong>3 · JSON / Parquet</strong><span>Frecuencias, huellas y tiempos comprobables</span></div>
+</div>
+<p><strong>Pregunta:</strong> ¿es mejor ejecutar los ocho lotes seguidos o enviarlos a varios workers dentro de la misma VM?</p>
+</article>
+<article class="panel"><h2>Dos experimentos para responder</h2>
+<div class="table-wrap"><table><thead><tr><th>Modo</th><th>Trabajo que sí ocurre</th><th>Aprendizaje</th></tr></thead><tbody>
+<tr><td><strong>Texto real</strong></td><td>Tokenizar y contar términos SECOP</td><td>La coordinación puede costar más que el cálculo</td></tr>
+<tr><td><strong>Espera simulada</strong></td><td>Conteos y 0,6 s de espera por tarea</td><td>Cómo se superponen esperas independientes</td></tr>
+</tbody></table></div>
+<p><strong>Tu resultado:</strong> mismos conteos secuencial/Dask, direcciones reales de workers y tiempos separados de arranque y ejecución.</p>
+<p class="micro">No se requiere entrenar clasificadores, descargar modelos, evaluar fraude ni volver a ejecutar 50.000 registros.</p>
+<a class="btnlink" href="https://github.com/jazaineam1/BigData2026/blob/main/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb" target="_blank" rel="noopener">Abrir cuaderno ejecutable</a>
+</article></div>
+<aside class="interpret"><b>Pregunta de entrada</b><p>¿Podemos demostrar una mejora sin conocer el tiempo de la tarea, el número real de workers y el costo de iniciar Dask? Hoy lo comprobaremos en Codespaces.</p></aside></section>
+<section class="slide" id="s2" aria-hidden="true"><div class="kicker">S13 · 02 · Historia continua</div><h1>La sesión 13 enseña a distribuir un trabajo, no a auditar SECOP</h1><div class="cols"><article class="panel"><h2>De S12 a S14 con el mismo caso</h2><p><strong>S12:</strong> imágenes y audio producen información que debe transformarse y organizarse. <strong>S13:</strong> Dask recibe tareas independientes, las reparte a workers y mide cuándo conviene ejecutarlas concurrentemente. <strong>S14:</strong> PySpark trabaja con particiones y Parquet en otra arquitectura distribuida.</p><p>Utilizaremos una muestra pequeña de títulos SECOP ya preparada. No haremos durante la clase la auditoría administrativa de 300.000 fichas ni revisaremos la calidad de las etiquetas como ejercicio de evaluación.</p><h2>Producto reproducible</h2><p>Un programa de Dask que produce los mismos resultados que la ejecución secuencial, registra los procesos worker y mide el costo de iniciar el clúster y de ejecutar tareas.</p></article><article class="panel"><h2>Cuatro preguntas que responderemos</h2><ol><li>¿Qué diferencia hay entre CPU lógica, núcleo, proceso, worker, hilo y partición?</li><li>¿Cómo puede un único Codespace ejecutar 1, 2 o 4 workers?</li><li>¿Qué ocurre si 8 trabajos independientes se procesan con diferentes workers?</li><li>¿Cuándo vale la pena Dask y cuándo es suficiente una función local?</li></ol><p><strong>Herramientas:</strong> comandos del Codespace, MapReduce, Dask Distributed y un cuaderno con modelos clásicos.</p></article></div><aside class="interpret"><b>Regla de la clase</b><p>No se repiten las pruebas de 50.000 registros: son material técnico del docente. El alumno aprende a ejecutar y comprender las herramientas con una demostración pequeña.</p></aside></section>
+<section class="slide" id="s3" aria-hidden="true"><div class="kicker">S13 · 03 · Aplicación distribuida</div><h1>¿Qué trabajo repartiríamos entre varios workers?</h1><div class="cols"><article class="panel"><h2>Casos pertinentes para Big Data</h2><p>Un worker no es una persona ni un computador nuevo: es un proceso que ejecuta tareas asignadas por Dask. En una oficina de noticias o contratación aparecen muchos trabajos independientes:</p><div class="table-wrap"><table><thead><tr><th>Caso</th><th>Unidad de trabajo</th><th>Beneficio potencial</th></tr></thead><tbody><tr><td>Audios</td><td>Transcribir cada audio</td><td>Varios archivos en paralelo</td></tr><tr><td>Imágenes</td><td>OCR de cada imagen</td><td>Workers ocupados con distintos lotes</td></tr><tr><td>Textos</td><td>Contar términos por particiones</td><td>Distribuir la transformación</td></tr><tr><td>Datos grandes</td><td>Leer y agregar particiones Parquet</td><td>Evitar cargar todo en un proceso</td></tr></tbody></table></div><p><strong>Objetivo:</strong> veremos una ejecución real de Dask sobre lotes pequeños, y después identificaremos cuándo escala.</p></article><article class="panel"><h2>Elige qué distribuir</h2><label for="casoDask">Tipo de tarea</label><select id="casoDask"><option value="ocr">12 imágenes para OCR</option><option value="audio">8 audios para transcripción</option><option value="textos">8 lotes de textos SECOP</option><option value="parquet">200 archivos Parquet</option></select><button id="casoRun" type="button">Mostrar estrategia Dask</button><div class="output" id="casoOut" aria-live="polite">Selecciona un caso y observa cómo se divide el trabajo.</div><p>La ejecución de clase usa el tercer caso con una <strong>espera externa simulada</strong>, para aprender a medir Dask sin instalar modelos ni servicios de pago. No presenta la simulación como OCR real.</p></article></div><aside class="interpret"><b>Resultado esperado</b><p>Debemos observar tareas repartidas entre workers y comparar los tiempos del mismo trabajo secuencial y paralelo. Los chequeos internos de calidad de datos corresponden a la preparación del docente, no al objetivo de esta clase.</p></aside></section>
+<section class="slide" id="s4" aria-hidden="true"><div class="kicker">S13 · 04 · Elegir motor</div><h1>No todo problema necesita Spark ni Dask</h1><div class="cols"><article class="panel "><h2>Definiciones operativas, no marcas</h2><dl><dt><strong>pandas</strong></dt><dd>Tablas en memoria de un proceso; simple para inspección y limpieza moderada.</dd><dt><strong>DuckDB</strong></dt><dd>Motor SQL analítico local que consulta CSV/Parquet y optimiza operaciones.</dd><dt><strong>Dask</strong></dt><dd>Particiona tablas o coordina tareas Python con un scheduler y workers.</dd><dt><strong>Spark</strong></dt><dd>Motor distribuido diseñado para ETL y procesamiento tolerante a fallos a gran escala.</dd></dl><p>La memoria útil, el tipo de transformación y el costo de desplegar importan tanto como el número de filas.</p></article><article class="panel "><h2>Herramienta 2 · Selector con retroalimentación</h2><div id="decisionBox" class="interactive"><p id="caseText"><b>Escenario:</b> contar registros de 200 expedientes.</p><div class="choices"><button data-answer="pandas" type="button">pandas</button><button data-answer="duckdb" type="button">DuckDB</button><button data-answer="dask" type="button">Dask</button><button data-answer="spark" type="button">Spark</button></div><div class="output" id="decisionFeedback" aria-live="polite">Elige y compara la alternativa descartada.</div><button type="button" id="nextScenario">Otro escenario</button></div><p class="micro">No existe una herramienta ganadora universal. El motor recomendado depende del tamaño, la operación, la memoria y las restricciones operativas.</p></article></div><aside class="interpret"><b>Pregúntate</b><p>¿Por qué una tabla de 200 filas en pandas suele ser mejor que iniciar Spark? Debes nombrar el costo de coordinación y lo que no necesitas distribuir.</p></aside></section>
+<section class="slide" id="s5" aria-hidden="true"><div class="kicker">S13 · 05 · CPU y ejecución</div><h1>¿Cómo configurar workers en una VM de cuatro CPU lógicas?</h1><div class="cols"><article class="panel"><h2>Núcleo, CPU lógica, proceso, worker e hilo</h2><p><b>Núcleo físico:</b> unidad de cómputo del procesador. <b>CPU lógica o vCPU:</b> unidad que el sistema puede planificar; cuatro vCPU no siempre equivalen a cuatro núcleos físicos.</p><p><b>Worker:</b> proceso de Dask que ejecuta tareas. <b>Hilo:</b> unidad de ejecución dentro de ese worker. <b>Scheduler:</b> asigna tareas. <b>Partición:</b> fragmento de datos. <b>Nodo:</b> máquina física o virtual; una misma VM puede contener muchos workers.</p><details class="edu-details"><summary>Ver configuraciones posibles: 1×4, 2×2, 4×1 y 8×1</summary><div class="table-wrap"><table><thead><tr><th>Ejemplo con 4 vCPU</th><th>Configuración</th><th>¿Qué significa?</th></tr></thead><tbody><tr><td>1 worker</td><td>1 proceso × 4 hilos</td><td>Un proceso con cuatro hilos; depende del GIL y la tarea</td></tr><tr><td>2 workers</td><td>2 procesos × 2 hilos</td><td>Dos procesos y hasta cuatro hilos</td></tr><tr><td>4 workers</td><td>4 procesos × 1 hilo</td><td>Cuatro procesos independientes</td></tr><tr><td>8 workers</td><td>8 procesos × 1 hilo</td><td>Posible, pero excede las 4 vCPU: compiten por CPU y RAM</td></tr></tbody></table></div></details><p><b>No existe un límite fijo de workers igual a núcleos.</b> Puedes crear más workers, pero su velocidad puede empeorar. Para Python puro suele ser útil usar procesos; para NumPy, los hilos pueden aprovechar código nativo.</p></article><article class="panel"><h2>Herramienta · Configura los workers</h2><label for="workerConfig">Elegir procesos × hilos</label><select id="workerConfig"><option value="1x4">1 worker × 4 hilos</option><option value="2x2">2 workers × 2 hilos</option><option value="4x1" selected>4 workers × 1 hilo</option><option value="8x1">8 workers × 1 hilo (sobresuscripción)</option></select><button id="workerRun" type="button">Ver arquitectura</button><div id="workerOut" class="output" aria-live="polite">Una VM, scheduler y workers: el número de workers NO crea nuevas CPU.</div><div class="diagram"><div class="wide-node">Ejemplo: UNA máquina Codespaces · 4 CPU lógicas (comprueba tu caso)</div><div class="connector">↓ planificador central</div><div class="wide-node schedule">Scheduler Dask</div><div id="workersView" class="mini-grid"><div class="wide-node">Worker 1 · 1 hilo</div><div class="wide-node">Worker 2 · 1 hilo</div><div class="wide-node">Worker 3 · 1 hilo</div><div class="wide-node">Worker 4 · 1 hilo</div></div></div><p>Ejemplo real: <code>LocalCluster(n_workers=4, threads_per_worker=1, processes=True)</code>. El <b>número disponible de CPU</b> se revisa con comandos en la lámina 9.</p></article></div><aside class="interpret"><b>Cómo se distribuye</b><p>Si llegan ocho tareas independientes y hay cuatro workers de un hilo, el scheduler puede entregar una tarea a cada worker y repartir las cuatro siguientes cuando se liberen. La duración depende de recursos, no solo del número de rectángulos.</p></aside></section>
+<section class="slide" id="s6" aria-hidden="true"><div class="kicker">S13 · 06 · Almacenamiento distribuido</div><h1>HDFS: entender la recuperación sin instalar Hadoop</h1><div class="cols"><article class="panel "><h2>Concepto, ejemplo y limitación</h2><p><strong>HDFS</strong> (Hadoop Distributed File System) reparte archivos en bloques y almacena copias según un factor de replicación. Si un nodo deja de estar disponible, otro puede servir los bloques que conserva.</p><p><b>Ejemplo manual:</b> archivo = bloques A, B y C. Réplicas de A en nodos 1 y 2; B en 2 y 3; C en 1 y 3.</p><p><b>Qué NO demuestra:</b> esta maqueta no ejecuta HDFS, no mide replicación real ni explica todos los mecanismos de coherencia.</p></article><article class="panel "><h2>Herramienta 3 · Simulador de fallo</h2><div id="hdfsGrid" class="mini-grid"><div class="wide-node" data-nodes="1,2">A<br>1 · 2</div><div class="wide-node" data-nodes="2,3">B<br>2 · 3</div><div class="wide-node" data-nodes="1,3">C<br>1 · 3</div></div><div class="choices"><button type="button" id="failNode">Desconectar nodo 2</button><button type="button" id="restoreNode">Restaurar nodo 2</button></div><div id="hdfsFeedback" class="output" aria-live="polite">Tres bloques con dos copias cada uno. Desconecta un nodo.</div><p class="micro">La pérdida de una ubicación no implica necesariamente pérdida del bloque. Una réplica no equivale a distribuir entrenamiento.</p></article></div><aside class="interpret"><b>Pregunta</b><p>¿Qué pasa si todos los nodos que almacenan un mismo bloque fallan? La redundancia reduce riesgo, pero no lo elimina.</p></aside></section>
+<section class="slide" id="s7" aria-hidden="true"><div class="kicker">S13 · 07 · MapReduce</div><h1>Un promedio de promedios puede ser falso</h1><div class="cols"><article class="panel "><h2>Motivo, fórmula y recorrido</h2><p><strong>Map</strong> transforma cada lote en estadísticas parciales; <strong>Shuffle</strong> reúne por clave; <strong>Reduce</strong> combina sumas y cantidades. Para una media global no basta promediar las medias de cada lote: sus tamaños son distintos.</p><div class="equation">media = (Σ suma parcial) / (Σ número de casos)</div><pre><code>def map_lote(valores):
+    return sum(valores), len(valores)
+parciales = [map_lote(x) for x in lotes]
+media = sum(s for s,n in parciales) / sum(n for s,n in parciales)</code></pre><p class="micro">Este cálculo es reproducible con Python. Un framework distribuido automatiza partición, envío y combinación, no corrige una fórmula equivocada.</p><p class="edu-visual-title">Visualiza el tamaño de los lotes y su media</p><svg class="edu-viz" id="mapVisual" viewBox="0 0 620 145" role="img" aria-label="Tamaños de lotes y su media calculados con la entrada del estudiante"><title>MapReduce: cada lote produce suma y cantidad; Reduce combina ponderando</title></svg><p class="edu-viz-note">Las barras muestran registros por lote, no son barras de rendimiento. Se actualizan al calcular.</p></article><article class="panel "><h2>Herramienta 4 · Calculadora de agregación</h2><label for="mapInput">Tres lotes, uno por línea (números separados por coma)</label><textarea id="mapInput" rows="3">100,120
+10,12,11,9,8
+1,1,1,1,1,1,1,1,1,1</textarea><button type="button" id="mapRun">Mapear y reducir</button><div id="mapOut" class="output" aria-live="polite">Cambia los tamaños y calcula el promedio correcto.</div><p class="micro">Observa la <strong>media global ponderada</strong> y la <strong>media ingenua de medias</strong>; si coinciden, prueba lotes con tamaños desiguales.</p></article></div><aside class="interpret"><b>Error frecuente</b><p>No confundir <code>groupby().mean()</code> calculado sobre todas las filas con una media de promedios parciales sin ponderación.</p></aside></section>
+<section class="slide" id="s8" aria-hidden="true"><div class="kicker">S13 · 08 · Preparación del laboratorio</div><h1>Codespaces paso a paso: abrir la máquina correcta</h1><div class="cols"><article class="panel "><h2>Guía operativa completa</h2><ol><li>Entra al <a href="https://github.com/jazaineam1/BigData2026" target="_blank" rel="noopener">repositorio BigData2026</a>.</li><li>Selecciona <b>Code → Codespaces → ... → New with options</b>.</li><li>Escoge el perfil <b>S13 · Dask, MapReduce y modelos SECOP</b>; no uses el predeterminado de Airflow.</li><li>Espera a que el entorno ejecute <code>postCreateCommand</code>. El perfil instala dependencias y verifica archivos.</li><li>En la terminal abre el cuaderno <code>Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb</code> y selecciona kernel Python 3.11.</li></ol><p>Todo el modelo se ejecuta dentro del cuaderno. No necesitas configurar aplicaciones ni puertos.</p><p><strong>Qué hace Codespaces:</strong> ejecuta VS Code y un contenedor Linux remoto. No depende de que instales Dask en el portátil.</p></article><article class="panel "><h2>Herramienta 5 · Checklist de montaje</h2><div class="checklist" id="setupChecks"><label><input type="checkbox">Seleccioné el perfil S13, no Airflow</label><label><input type="checkbox">Terminal abierta en raíz del repositorio</label><label><input type="checkbox">Python 3.11 y dependencias accesibles</label><label><input type="checkbox">CSV SECOP y cuaderno presentes</label><label><input type="checkbox">Abrí el cuaderno con kernel Python</label></div><button type="button" id="setupCheckRun">Comprobar mis pasos</button><div id="setupFeedback" class="output" aria-live="polite">El checklist es una ayuda local, no una evidencia oficial.</div><p class="micro">Si tu cuenta no permite 4 CPU, usa 2 CPU y no actives el benchmark grande.</p></article></div><aside class="interpret"><b>Errores típicos</b><p>Abrir el perfil equivocado, ejecutar el cuaderno sin kernel o usar un puerto público por descuido. Los pasos son repetibles y no requieren claves externas.</p></aside></section>
+<section class="slide" id="s9" aria-hidden="true"><div class="kicker">S13 · 09 · Arquitectura visual</div><h1>Clúster: una máquina o varias, ¿qué cambia?</h1><div class="cols"><article class="panel"><h2>Un clúster no es necesariamente un conjunto de computadores</h2><p>Un <b>clúster de cómputo Dask</b> está formado por un <b>scheduler</b> (organiza tareas), uno o más <b>workers</b> (las ejecutan) y recursos como CPU y RAM. Un <b>nodo</b> es una máquina física o virtual.</p><div class="s13-microdefs"><div><b>LocalCluster</b><span>Scheduler y workers en el mismo Codespace. Comparten CPU y memoria.</span></div><div><b>Multinodo</b><span>Workers en máquinas distintas: cada nodo aporta sus propios recursos y hay comunicación de red.</span></div><div><b>Clúster K-means</b><span>No es infraestructura: es un grupo de puntos aprendidos por el modelo.</span></div></div><h3>Identifica los recursos reales</h3><pre><code>nproc       # CPU lógicas visibles
+free -h     # RAM informada por Linux
+cat /sys/fs/cgroup/memory.max  # cuota si existe</code></pre><p class="micro">La cuota de CPU y los límites del contenedor pueden ser menores que los valores del host; el cuaderno los consulta.</p></article><article class="panel"><h2>Alterna la arquitectura</h2><label for="topologiaS13">Tipo de clúster de cómputo</label><select id="topologiaS13"><option value="local">Local: una VM, 2 workers</option><option value="multi">Multinodo: dos VM, 2 workers</option></select><svg id="topologiaViz" class="s13-viz" viewBox="0 0 620 270" role="img" aria-label="Diagrama de clúster local o multinodo"><title>Scheduler, workers y recursos</title></svg><div id="topologiaResultado" class="s13-result" aria-live="polite">Se verá la diferencia entre compartir memoria y sumar recursos de nodos.</div><p class="micro"><b>En S13 ejecutamos de verdad la opción local</b> mediante <code>LocalCluster(...)</code>. La opción multinodo es una comparación conceptual, no infraestructura creada en Codespaces.</p></article></div><aside class="interpret"><b>Conclusión comprobable</b><p>El clúster local permite aprender coordinación, pero dos workers dentro de una VM no significan el doble de RAM ni dos máquinas.</p></aside></section>
+<section class="slide" id="s10" aria-hidden="true"><div class="kicker">S13 · 10 · pandas frente a Dask</div><h1>Misma consulta, dos motores; una referencia verificable</h1><div class="cols"><article class="panel "><h2>pandas: resultado de referencia</h2><pre><code>import pandas as pd
+a = pd.read_csv('Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv')
+a = a.drop_duplicates('id_del_proceso')
+conteo = a.groupby('modalidad_de_contratacion').size()
+print(conteo.sort_index())</code></pre><p><strong>groupby:</strong> agrupa filas con la misma clave. <strong>size:</strong> cuenta registros por grupo, incluyendo valores nulos según configuración del grupo. <strong>sort_index:</strong> ordena claves para compararlas.</p></article><article class="panel "><h2>Dask DataFrame: ejecutar tras construir el grafo</h2><pre><code>import dask.dataframe as dd
+d = dd.from_pandas(a, npartitions=4)
+pendiente = d.groupby('modalidad_de_contratacion').size()
+conteo_dask = pendiente.compute().sort_index()
+# Normaliza tipos de índice: Arrow string en Dask y object en pandas.
+def como_conteos(s):
+    return {str(clave): int(valor) for clave, valor in s.items()}
+assert como_conteos(conteo) == como_conteos(conteo_dask)</code></pre><p><strong>npartitions:</strong> número de fragmentos lógicos. <strong>compute:</strong> dispara las tareas diferidas y devuelve resultado a memoria local.</p><p><b>Prueba crucial:</b> el <code>assert</code> certifica el mismo resultado, no que Dask sea más rápido.</p></article></div><aside class="interpret"><b>Interpretar</b><p>Cómo se lee: mismo conteo por modalidad. Qué nos dice: motores equivalentes para esta agregación. Qué NO permite concluir: ventaja universal de tiempo. Error: confundir API similar con ejecución idéntica.</p></aside></section>
+<section class="slide" id="s11" aria-hidden="true"><div class="kicker">S13 · 11 · Ejecución diferida</div><h1>Dask: crear un grafo no equivale a ejecutar</h1><div class="cols"><article class="panel "><h2>La idea en tres pasos</h2><ol><li><b>Construir:</b> describe operaciones (<code>read → filter → groupby → sum</code>).</li><li><b>Planificar:</b> un scheduler identifica dependencias y workers libres.</li><li><b>Materializar:</b> <code>compute()</code> o <code>persist()</code> inicia el trabajo y espera o conserva resultados.</li></ol><p><strong>Persistencia:</strong> <code>persist()</code> busca mantener resultados distribuidos, útiles cuando se reutilizan varias veces. No debe confundirse con escribir Parquet a disco.</p></article><article class="panel "><h2>Herramienta 6 · Grafo vivo de tareas</h2><div class="step-graph" id="lazyGraph"><div class="nodebox">Leer cuatro particiones</div><span>→</span><div class="nodebox">Filtrar</div><span>→</span><div class="nodebox">Agrupar</div><span>→</span><div class="nodebox">Reducir</div></div><div class="choices"><button type="button" id="lazyBuild">Construir grafo</button><button type="button" id="lazyCompute">compute()</button><button type="button" id="lazyReset">Restablecer</button></div><div id="lazyOut" class="output" aria-live="polite">Grafo descrito, todavía no se ha ejecutado.</div><p class="micro">Simulación conceptual. En Codespaces, el tablero Dask 8787 muestra tareas, workers y tiempos reales.</p></article></div><aside class="interpret"><b>Qué NO hace</b><p><code>compute()</code> no convierte automáticamente un cálculo de dos segundos en Big Data; distribuir introduce transferencias, serialización y coordinación.</p></aside></section>
+<section class="slide" id="s12" aria-hidden="true"><div class="kicker">S13 · 12 · Tiempo y recursos</div><h1>El scheduler también cuesta tiempo: ¿cuándo se recupera?</h1><div class="cols"><article class="panel"><h2>Dos mediciones diferentes</h2><p><b>Tiempo del cálculo (clúster caliente):</b> cuánto tardan las tareas una vez que Dask ya tiene trabajadores listos. <b>Tiempo de primera ejecución:</b> arranque del scheduler y los workers + envío de tareas + cómputo + reunión de resultados.</p><p>Para trabajos cortos, la apertura puede costar más que lo ahorrado. Para un servicio que procesa lotes durante todo el día, el clúster puede quedarse abierto y reutilizarse.</p><div class="equation">Aceleración total = tiempo secuencial / tiempo Dask total</div><p>Mayor que 1 significa que Dask ganó **en la medición específica**. No debemos extrapolar resultados de una VM a otra.</p><p class="edu-visual-title">Comparación de tiempos · hipótesis editable</p><svg class="edu-viz" id="costVisual" viewBox="0 0 620 132" role="img" aria-label="Barras de tiempo local y Dask con arranque más ejecución"><title>Local frente a Dask: el arranque aparece como un tramo distinto</title></svg></article><article class="panel"><h2>Calculadora: ejemplo de ocho servicios independientes</h2><div class="edu-compact-fields"><label>Tiempo secuencial por lote completo (s)<input type="number" id="costLocal" value="4.8" min=".01" step=".1"></label><label>Tiempo Dask por lote completo (s)<input type="number" id="costDask" value="2.4" min=".01" step=".1"></label><label>Arranque inicial (s)<input type="number" id="costStart" value="1.2" min="0" step=".1"></label><label>Lotes repetidos<input type="number" id="costRepeat" value="1" min="1" step="1"></label></div><button id="costRun" type="button">Calcular total y ganador</button><div id="costOut" class="output">Son valores ilustrativos: modifica los tres tiempos usando las mediciones reales del script.</div><p><strong>Atención:</strong> esta calculadora NO ejecuta Dask. El laboratorio de Codespaces sí utiliza workers y registra sus tiempos.</p></article></div><aside class="interpret"><b>Comparación justa</b><p>Mismo lote, misma función, mismos resultados. Si Dask solo gana después de estar abierto, debemos mostrar el ahorro con el clúster caliente y el costo total por separado.</p></aside></section>
+<section class="slide" id="s13" aria-hidden="true"><div class="kicker">S13 · 13 · Modelos que sí distribuye Dask</div><h1>Un entrenamiento distribuido no es entrenar varios modelos</h1><div class="cols"><article class="panel"><h2>Elige el modelo por la pregunta, no por su nombre</h2><div class="s13-model-list"><div><strong>K-means · Dask-ML</strong><span>Varios workers actualizan un solo conjunto de centroides. Ejemplo de esta clase.</span><em class="s13-tag">Entrenamiento distribuido</em></div><div><strong>Regresión / XGBoost</strong><span>Existen implementaciones distribuidas, pero requieren la API específica y recursos adecuados.</span><em class="s13-tag">Entrenamiento distribuido</em></div><div><strong>Validación cruzada</strong><span>Varios modelos independientes pueden ejecutarse a la vez. No es un único ajuste distribuido.</span><em class="s13-tag neutral">Trabajos independientes</em></div><div><strong>DBSCAN estándar</strong><span>No se distribuye al repartir simplemente sus filas entre workers. Requiere otra implementación.</span><em class="s13-tag neutral">No nativo en Dask-ML CPU</em></div></div></article><article class="panel"><h2>Cómo K-means aprovecha MapReduce</h2><div class="s13-pipeline"><div class="s13-step"><span>1</span><b>Partir los datos</b><small>Cada worker recibe puntos numéricos</small></div><div class="s13-step"><span>2</span><b>Asignar</b><small>Buscar el centroide más cercano</small></div><div class="s13-step"><span>3</span><b>Reducir</b><small>Combinar sumas y cantidades por grupo</small></div><div class="s13-step"><span>4</span><b>Actualizar y repetir</b><small>Se comparten centroides nuevos hasta converger</small></div></div><p>El código utiliza <code>dask_ml.cluster.KMeans</code>, no un ciclo que entrene cuatro K-means separados.</p><p class="micro">Entrenar un modelo con varias CPU puede ayudar con tareas costosas, pero no crea capacidad de cómputo nueva en la misma VM.</p></article></div><aside class="interpret"><b>Conclusión comprobable</b><p>K-means es el caso práctico más sencillo para ver un solo modelo entrenado entre workers; la aceleración todavía debe medirse.</p></aside></section>
+<section class="slide" id="s14" aria-hidden="true"><div class="kicker">S13 · 14 · K-means paso a paso</div><h1>Mira cómo cambian los grupos y se mueven los centroides</h1><div class="cols"><article class="panel"><h2>Un algoritmo clásico con números simulados</h2><p>Trabajaremos con <b>1.000 puntos, 2 variables y 4 grupos</b>. Los puntos son simulados y siempre se generan con la misma semilla; no representan contratos SECOP.</p><div class="s13-number"><div><b>1.000</b><span>observaciones</span></div><div><b>2</b><span>variables</span></div><div><b>4</b><span>centroides</span></div></div><h3>Ciclo de entrenamiento</h3><p><b>Asignar:</b> cada punto va al centro más cercano. <b>Actualizar:</b> se recalcula el promedio de cada grupo. <b>Repetir:</b> el proceso continúa hasta estabilizarse.</p><p>Cuando finaliza, cada centroide es un conjunto muy pequeño de valores. El costo grande puede estar en las iteraciones sobre todos los puntos.</p></article><article class="panel"><h2>Experimento visual (ilustración, no entrenamiento de Codespaces)</h2><svg id="kmeansViz" class="s13-viz" viewBox="0 0 620 258" role="img" aria-label="Puntos de cuatro grupos y centroides que se mueven por iteraciones"><title>Iteraciones ilustrativas de K-means</title></svg><div class="row-actions"><button type="button" id="kmeansPaso">Siguiente iteración</button><button type="button" id="kmeansReiniciar" class="secondary">Reiniciar</button></div><div class="s13-result" id="kmeansMensaje" aria-live="polite"></div><p class="micro">La animación calcula asignaciones y medias en el navegador. El cuaderno ejecuta el entrenamiento real con scikit-learn y Dask-ML.</p></article></div><aside class="interpret"><b>Conclusión comprobable</b><p>El tamaño de un modelo guardado y el tiempo requerido para entrenarlo son conceptos diferentes.</p></aside></section>
+<section class="slide" id="s15" aria-hidden="true"><div class="kicker">S13 · 15 · RAM y tamaño del modelo</div><h1>¿Cuánto ocupan los datos, los centroides y el entrenamiento?</h1><div class="cols"><article class="panel"><h2>Calculadora de memoria · cambia las dimensiones</h2><div class="s13-fields"><label>Filas<select id="memFilas"><option value="1000">1.000</option><option value="20000" selected>20.000</option><option value="300000">300.000</option><option value="1000000">1.000.000</option></select></label><label>Variables<select id="memVariables"><option value="2">2</option><option value="20" selected>20</option><option value="100">100</option></select></label><label>Centroides<select id="memCentroides"><option value="4" selected>4</option><option value="8">8</option><option value="20">20</option></select></label><label>Límite RAM por worker (ejemplo)<select id="memLimite"><option value="0.5">0,5 GiB</option><option value="1">1 GiB</option><option value="2" selected>2 GiB</option><option value="4">4 GiB</option></select></label></div><button id="memCalcular" type="button">Calcular tamaño teórico</button><div class="s13-memory-numbers"><div><span>Matriz de datos</span><strong id="memDatos"></strong></div><div><span>Solo centroides</span><strong id="memModelo"></strong></div><div><span>Asignaciones (referencia)</span><strong id="memAsignaciones"></strong></div></div><p class="micro">Cálculo para <code>float64</code> (8 bytes) y etiquetas <code>int32</code> (4 bytes). No incluye copias, bibliotecas, estructuras ni memoria adicional del estimador.</p></article><article class="panel"><h2>La memoria durante el entrenamiento es otra cosa</h2><p><b>Modelo almacenado</b> ≠ <b>datos de entrada</b> ≠ <b>pico de RAM</b>. Las copias temporales, librerías, scheduler y workers añaden memoria.</p><div class="s13-memgraph"><div class="s13-memline"><span>Datos vs límite de un worker</span><b id="memPorcentaje">0 %</b></div><div class="s13-track"><div id="memBarra"></div></div></div><p id="memLectura" class="s13-result"></p><div class="s13-threshold"><div><i style="background:#1eaa88"></i><b>60 %</b><span>Objetivo de descarga para datos gestionados</span></div><div><i style="background:#e3a13b"></i><b>70 %</b><span>Descarga según memoria del proceso</span></div><div><i style="background:#e47737"></i><b>80 %</b><span>Pausa nuevas tareas</span></div><div><i style="background:#ce4348"></i><b>95 %</b><span>El supervisor puede reiniciar el worker</span></div></div><p class="micro">Umbrales predeterminados de Dask, configurables y con distintas bases de medición. <b>No son porcentajes de «memoria del modelo»</b>. El notebook mide RSS real por proceso.</p></article></div><aside class="interpret"><b>Conclusión comprobable</b><p>20.000 × 20 ocupa 3,2 MB solo en la matriz; el consumo real del entrenamiento no se puede deducir de esa cifra.</p></aside></section>
+<section class="slide" id="s16" aria-hidden="true"><div class="kicker">S13 · 16 · Cuándo distribuir</div><h1>CPU, RAM, disco y espera: ¿qué vuelve demandante un trabajo?</h1><div class="cols"><article class="panel"><h2>Una tarea grande puede ser demandante de distintas formas</h2><div class="s13-demand-grid"><div><b>CPU</b><span>Muchos puntos × variables × centroides × iteraciones</span><small>Ejemplo: entrenamiento repetitivo de K-means</small></div><div><b>RAM</b><span>Datos, copias y estructuras superan lo disponible</span><small>Ejemplo: millones de filas con muchas variables</small></div><div><b>Disco / lectura</b><span>Numerosos CSV o Parquet y transformaciones</span><small>Ejemplo: procesar lotes de SECOP</small></div><div><b>Espera externa</b><span>Muchos servicios independientes responden lentamente</span><small>Ejemplo: solicitudes de OCR (simuladas en S13)</small></div></div><p>Más workers pueden reducir espera o repartir cálculos, pero compiten por CPU/RAM en un clúster local; entre nodos aparece además el costo de red.</p></article><article class="panel"><h2>Elige un escenario y observa qué deberías medir</h2><label for="s13Demanda">Carga de trabajo</label><select id="s13Demanda"><option value="pequeno">1.000 puntos × 2 variables</option><option value="cpu">Entrenamiento con muchas iteraciones</option><option value="memoria">Datos mayores que la RAM de un proceso</option><option value="espera">100 archivos esperando un servicio externo</option></select><div id="s13DemandaSalida" class="s13-result" aria-live="polite"></div><div class="s13-pipeline"><div class="s13-step"><span>?</span><b>¿Cabe en memoria?</b><small>Valida RAM efectiva y copias</small></div><div class="s13-step"><span>?</span><b>¿Qué consume tiempo?</b><small>CPU, transferencia, disco o espera</small></div><div class="s13-step"><span>?</span><b>¿Ganó al final?</b><small>Mide desde la preparación hasta la salida</small></div></div></article></div><aside class="interpret"><b>Conclusión comprobable</b><p>No todos los problemas grandes necesitan clúster, ni todos los modelos complejos se distribuyen automáticamente.</p></aside></section><section class="slide" id="s17" aria-hidden="true"><div class="kicker">S13 · 17 · Ejecución</div><h1>Todo el modelo se ejecuta en el cuaderno</h1><div class="cols"><article class="panel"><h2>Dos prácticas conectadas</h2><p>En el cuaderno <code>13_Dask_MapReduce_Compras_Claras.ipynb</code> ejecutas primero los lotes SECOP reales y luego entrenas K-means con números simulados.</p><div class="edu-pipeline"><div class="edu-step"><strong>SECOP real</strong><span>Particiones, conteos y MapReduce</span></div><div class="edu-step"><strong>Puntos simulados</strong><span>1.000 filas y dos variables</span></div><div class="edu-step"><strong>Modelo clásico</strong><span>K-means local y distribuido</span></div></div></article><article class="panel"><h2>Funciones que verás en las celdas</h2><div class="table-wrap"><table><thead><tr><th>Función</th><th>Para qué sirve</th></tr></thead><tbody><tr><td><code>make_blobs()</code></td><td>Genera los números simulados</td></tr><tr><td><code>KMeans.fit()</code></td><td>Entrena grupos localmente</td></tr><tr><td><code>LocalCluster()</code></td><td>Crea procesos workers</td></tr><tr><td><code>client.persist()</code></td><td>Mantiene bloques en los workers</td></tr><tr><td><code>KMeansDask.fit()</code></td><td>Distribuye el ajuste del modelo</td></tr></tbody></table></div><p>El cuaderno incluye código y gráficos completos. No hay que crear otro archivo para el modelo.</p></article></div><aside class="interpret"><b>Idea principal</b><p>Comparar métodos significa ejecutar el mismo problema y medir los costos de cada uno.</p></aside></section>
+<section class="slide" id="s18" aria-hidden="true"><div class="kicker">S13 · 18 · Dos recursos</div><h1>Presentación y un solo cuaderno</h1><div class="cols"><article class="panel"><h2>Recorrido real de las celdas</h2><ol><li>Abre Codespaces y reconoce los recursos del clúster local.</li><li>Entiende HDFS y MapReduce antes de programarlos.</li><li>Compara pandas y Dask; ejecuta los ocho lotes SECOP y guarda Parquet.</li><li>Genera datos numéricos simulados y observa una iteración de K-means.</li><li>Entrena local y con Dask-ML, mide memoria y justifica la arquitectura.</li></ol><p>No hace falta una aplicación adicional ni más cuadernos.</p></article><article class="panel"><h2>Qué debes observar</h2><div class="table-wrap"><table><thead><tr><th>Práctica</th><th>Evidencia</th></tr></thead><tbody><tr><td>Dask con SECOP</td><td>Resultados iguales y tareas reales</td></tr><tr><td>K-means local</td><td>Centroides y tiempos de ajuste y predicción</td></tr><tr><td>K-means distribuido</td><td>Workers, límites de RAM, RSS y tiempos por fase</td></tr><tr><td>Decisión</td><td>Arranque más entrenamiento frente a local</td></tr></tbody></table></div><p><b>Todo se ejecuta en el mismo notebook.</b></p></article></div><aside class="interpret"><b>Idea principal</b><p>La clase se concentra en comprender una herramienta, no en abrir cinco recursos.</p></aside></section>
+<section class="slide" id="s19" aria-hidden="true"><div class="kicker">S13 · 19 · Medir lo mismo</div><h1>Qué mide un cronómetro de Dask y por qué importa</h1><div class="cols"><article class="panel"><h2>Ejemplo: ocho lotes de un mismo CSV pequeño</h2><div class="table-wrap"><table><thead><tr><th>Fase</th><th>Qué hace</th><th>Qué tiempo se mide</th></tr></thead><tbody><tr><td>Preparar</td><td>Leer una muestra y dividir en 8 lotes</td><td>No se confunde con el entrenamiento</td></tr><tr><td>Secuencial</td><td>Procesar los 8 lotes uno tras otro</td><td>Tiempo secuencial completo de las tareas</td></tr><tr><td>Arrancar Dask</td><td>Crear scheduler y workers y esperar disponibilidad</td><td>Tiempo fijo de creación del clúster</td></tr><tr><td>Clúster caliente</td><td>Enviar los 8 lotes, procesar y reunir</td><td>Tiempo Dask con workers ya listos</td></tr><tr><td>Primera ejecución</td><td>Arranque + distribución + ejecución</td><td>Tiempo Dask total</td></tr></tbody></table></div><p><b>Para K-means,</b> comparar <code>fit + predict</code> local contra <code>arranque + persist + fit + predict</code> Dask. El cuaderno registra ambas rutas y toma muestras de RSS por proceso durante el ajuste.</p><p>El script mide cada fase con <code>time.perf_counter()</code>. En el ejemplo de espera simulada, cada tarea conserva los mismos datos y función; el modo de ejecución es lo único que cambia.</p></article><article class="panel"><h2>Dos comparaciones, dos preguntas</h2><p><b>1. ¿Dask paraleliza?</b> Compara tiempo secuencial con Dask de clúster caliente. Para ocho esperas independientes de 0,6 s, el mínimo ideal es ~4,8 s secuencial, ~2,4 s con 2 workers y ~1,2 s con 4, más coordinación.</p><p><b>2. ¿Vale la pena iniciar Dask?</b> Compara tiempo secuencial con el total de la primera ejecución, que incluye construir el clúster. Puede perder aunque el cómputo paralelo haya ganado.</p><div class="tip">Son <strong>valores ideales explicativos</strong> antes de ejecutar, NO tiempos reales del Codespace. El JSON producido en vivo muestra los resultados medidos.</div><p class="edu-visual-title">Una ejecución hipotética · ocho esperas de 0,6 s</p><svg class="edu-viz" viewBox="0 0 620 138" role="img" aria-label="Local 4,8 segundos y Dask dos workers 3,6 segundos hipotéticos con 1,2 de arranque"><title>Ejemplo ideal: secuencial 4,8 segundos, Dask con 1,2 de inicio y 2,4 de trabajo</title><desc>Diagrama conceptual con dos barras. El trabajo secuencial ocupa 4,8 segundos. Dask muestra 1,2 segundos de inicio y 2,4 de tareas, 3,6 en total. No son tiempos medidos en Codespaces.</desc><text x="14" y="31" font-size="15" fill="#14375c" font-weight="700">Local</text><rect x="114" y="15" width="384" height="25" rx="5" fill="#667c9b"/><text x="505" y="33" font-size="14" fill="#163354">4,8 s</text><text x="14" y="75" font-size="15" fill="#14375c" font-weight="700">Dask</text><rect x="114" y="59" width="96" height="25" rx="4" fill="#d9853b"/><rect x="210" y="59" width="192" height="25" rx="4" fill="#149b91"/><text x="412" y="77" font-size="14" fill="#163354">3,6 s</text><rect x="115" y="104" width="14" height="14" rx="2" fill="#d9853b"/><text x="135" y="116" font-size="12" fill="#304760">Arranque: 1,2 s</text><rect x="290" y="104" width="14" height="14" rx="2" fill="#149b91"/><text x="310" y="116" font-size="12" fill="#304760">Tareas: 2,4 s</text></svg></article></div><aside class="interpret"><b>Aprendizaje importante</b><p>Con servicios reales el tiempo de espera no es fijo y hay límites de solicitudes. La simulación permite entender la concurrencia sin consumir servicios OCR o ASR.</p></aside></section>
+<section class="slide" id="s20" aria-hidden="true"><div class="kicker">S13 · 20 · Dos experimentos</div><h1>Dask para tareas y para un modelo clásico</h1><div class="cols"><article class="panel"><h2>Experimento A · SECOP real</h2><p>El cuaderno compara ocho tareas de conteo sobre títulos SECOP con ejecución secuencial y Dask. La espera de 0,6 s en el otro modo es simulada.</p><h2>Experimento B · K-means simulado</h2><p>El cuaderno crea puntos numéricos y entrena el mismo tipo de modelo de agrupación local y con Dask-ML.</p><p><b>Compara:</b> resultados, participación de workers, tiempos de arranque y entrenamiento.</p></article><article class="panel"><h2>Herramienta visual · Predice el reparto</h2><label for="nWorkersSim">Workers en una sola VM</label><select id="nWorkersSim"><option value="1">1</option><option value="2" selected>2</option><option value="4">4</option></select><label for="nTasksSim">Tareas independientes</label><select id="nTasksSim"><option value="4">4</option><option value="8" selected>8</option><option value="12">12</option></select><button id="scenarioWorkers" type="button">Predecir tandas</button><div id="scenarioOut" class="output" aria-live="polite"></div><svg class="edu-viz" id="scenarioVisual" viewBox="0 0 620 172" role="img" aria-label="Tandas ideales"><title>Esquema, no tiempos medidos</title></svg><p class="edu-viz-note">Es una simulación conceptual; los tiempos verdaderos se miden al ejecutar el cuaderno.</p></article></div><aside class="interpret"><b>Idea principal</b><p>Los dos tipos de distribución son diferentes: repartir tareas independientes y entrenar un único modelo compatible.</p></aside></section>
+<section class="slide" id="s21" aria-hidden="true"><div class="kicker">S13 · 21 · Un único laboratorio</div><h1>El cuaderno te muestra datos, memoria, workers y resultados</h1><div class="cols"><article class="panel"><h2>Seis pasos para decidir como científico de datos</h2><div class="edu-pipeline"><div class="edu-step"><strong>1 · Definir</strong><span>Registros, variables, centroides y operaciones</span></div><div class="edu-step"><strong>2 · Dimensionar</strong><span>Bytes de matriz, centroides y cuota del Codespace</span></div><div class="edu-step"><strong>3 · Referencia</strong><span>K-means local y su tiempo completo</span></div><div class="edu-step"><strong>4 · Distribuir</strong><span>Scheduler, workers, tareas y sus límites RAM</span></div><div class="edu-step"><strong>5 · Medir</strong><span>RSS observado, tiempos y acuerdo entre agrupaciones</span></div><div class="edu-step"><strong>6 · Decidir</strong><span>Beneficio real o sobrecarga de coordinación</span></div></div></article><article class="panel"><h2>Un único cuaderno, sin scripts adicionales</h2><p><code>Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb</code></p><div class="s13-number"><div><b>1.000</b><span>filas por defecto</span></div><div><b>2</b><span>variables por defecto</span></div><div><b>2</b><span>workers si hay recursos</span></div></div><p><b>Lo que verás al ejecutarlo:</b> puntos, centroides iniciales, agrupación final, acuerdo entre agrupaciones (ARI), tiempos de cada fase, RAM residente de procesos, memoria lógica del modelo y tareas observadas en los workers.</p><p><b>Parámetros para modificar en el cuaderno:</b> <code>REGISTROS</code> (1.000 → 20.000), <code>VARIABLES</code> (2 → 20) y <code>WORKERS_MODELO</code> (hasta 2 según CPU disponible).</p><p>Amplía a 20.000 filas y 20 variables solo si la prueba inicial funciona; el mismo código explica ambos escenarios.</p></article></div><aside class="interpret"><b>Conclusión comprobable</b><p>El estudiante termina pudiendo justificar una decisión de arquitectura con datos medidos en su propia ejecución.</p></aside></section>
+<section class="slide" id="s22" aria-hidden="true"><div class="kicker">S13 · 22 · Laboratorio guiado</div><h1>Reto: demuestra que Dask sí ejecuta tareas paralelas</h1><div class="cols"><article class="panel"><h2>Checklist de ejecución (no calificación)</h2><div class="checklist" id="labChecks"><label><input type="checkbox">Consulté nproc, lscpu y free -h en Codespaces</label><label><input type="checkbox">Comprendí la diferencia entre worker, proceso, hilo y vCPU</label><label><input type="checkbox">Ejecuté ocho lotes en ambos modos: texto real y espera simulada</label><label><input type="checkbox">Entrené K-means con puntos numéricos simulados</label><label><input type="checkbox">Verifiqué las direcciones de workers disponibles y sus tareas</label><label><input type="checkbox">Comparé tiempo caliente y tiempo con arranque</label></div><button id="labCheckRun" type="button">Ver avance</button><div id="labFeedback" class="output">La lista sirve para orientarse; no envía respuestas ni asigna calificación.</div></article><article class="panel"><h2>Qué tienes que observar y comprender</h2><p><b>1 · Mismo resultado:</b> la suma de palabras y las huellas SHA-256 de los lotes coinciden entre secuencial y Dask.</p><p><b>2 · Dos cargas:</b> primero se cuenta vocabulario real sin espera artificial; luego se mide la concurrencia de ocho tareas con espera simulada. Dask puede ganar en un caso y perder en el otro.</p><p><b>3 · Dos relojes:</b> distingue el tiempo de tareas con el clúster abierto del tiempo total incluyendo arranque.</p><p><b>4 · Modelo:</b> distinguí la matriz de datos, los centroides aprendidos y el RSS observado de cada proceso. K-means trabaja sobre datos numéricos simulados.</p><p>El ejercicio pequeño está pensado para el aprendizaje. El docente conserva por separado las validaciones grandes y los criterios de calidad del dataset.</p></article></div><aside class="interpret"><b>Progreso tangible</b><p>Al terminar conoces una arquitectura, ejecutas Dask Distributed de verdad y produces un archivo con el número de workers y los tiempos observados sin repetir un experimento de 50.000 registros.</p></aside></section>
+<section class="slide" id="s23" aria-hidden="true"><div class="kicker">S13 · 23 · Verificación</div><h1>¿Puedes explicar por qué y cuándo Dask resulta útil?</h1><div class="cols"><article class="panel"><h2>Herramienta · Tres decisiones sobre arquitectura</h2><p id="quizPrompt">Escenario 1: hay 200 expedientes en RAM. ¿Qué motor escogerías?</p><div class="choices"><button data-quiz-choice="local" type="button">pandas/local</button><button data-quiz-choice="dask" type="button">Dask 2 workers</button><button data-quiz-choice="spark" type="button">Spark</button></div><div id="quizResponse" class="output" aria-live="polite">Selecciona una respuesta cerrada y revisa la explicación.</div><button id="quizNext" type="button">Otro escenario</button><p>El cuestionario solo comprueba conceptos; no asigna una nota, no solicita texto libre ni reemplaza la ejecución del cuaderno.</p></article><article class="panel"><h2>La evidencia técnica que debe aparecer</h2><ol><li>Salidas de <code>nproc</code> y <code>free -h</code> en el Codespace.</li><li>Direcciones reales de los workers disponibles en <code>scheduler_info()</code>.</li><li>Ocho tareas del mismo CSV, primero secuenciales y después Dask.</li><li><code>resultados_identicos=True</code> antes de hablar de velocidad.</li><li>Tres tiempos: secuencial, Dask caliente y Dask con arranque.</li><li>K-means local frente a Dask-ML: centroides, acuerdo de grupos, tiempos y memoria RSS observada.</li></ol><p><strong>Conclusión deseada:</strong> elegir local o distribuido según el resultado, la demanda de CPU/RAM y la sobrecarga de coordinación; no suponer un ganador.</p></article></div><aside class="interpret"><b>Transfiere</b><p>Si el mismo patrón se aplica a archivos OCR, audio o Parquet, cambia el trabajo por lote, no la lógica básica del scheduler. No asumas que cuatro workers son cuatro máquinas.</p></aside></section>
+<section class="slide" id="s24" aria-hidden="true"><div class="kicker">S13 · 24 · Conexión con S14</div><h1>Qué hace Dask y qué aprenderemos con PySpark</h1><div class="cols"><article class="panel"><h2>Aprendizajes demostrados</h2><ol><li>Las CPU lógicas son capacidad disponible; los workers son procesos configurables.</li><li>Un mismo Codespace puede tener 1, 2, 4 o más workers sin convertirse en varios computadores.</li><li>Un scheduler Dask envía tareas a workers y puede ejecutarlas simultáneamente.</li><li>MapReduce y K-means muestran cómo dividir operaciones y entrenar modelos clásicos.</li><li>La demostración ejecuta lotes con Dask, comprueba resultados idénticos y mide arranque y trabajo.</li><li>Las decisiones se toman sobre tiempos observados, memoria y cantidad real de tareas.</li></ol></article><article class="panel"><h2>Transferencia: siguiente motor, mismos conceptos</h2><p><strong>S14 · PySpark:</strong> ejecutará transformaciones sobre Parquet y permitirá comparar otro sistema de planificación distribuida, sin cambiar la función objetivo de un pipeline de datos.</p><div class="table-wrap"><table><thead><tr><th>Concepto en S13</th><th>Equivalente a explorar en S14</th></tr></thead><tbody><tr><td>Worker / tarea Dask</td><td>Executor / task Spark</td></tr><tr><td>Dask DataFrame</td><td>Spark DataFrame</td></tr><tr><td>Partición de datos</td><td>Partición de Spark</td></tr><tr><td>Scheduler Dask</td><td>Planificador de Spark</td></tr><tr><td>Parquet</td><td>Parquet</td></tr></tbody></table></div><p><b>Extensión S13:</b> Dask-ML K-means permite distribuir <em>un único entrenamiento</em>; en S14 PySpark MLlib dispone de su propio KMeans. El objetivo no es suponer que distribuir siempre acelera, sino medir cuándo conviene.</p><p><b>Recursos principales:</b> esta presentación interactiva y el cuaderno ejecutable. El cuaderno incluye todos los ejercicios, modelos y gráficas.</p><div class="choices"><a class="btnlink" href="https://github.com/jazaineam1/BigData2026/blob/main/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb" target="_blank" rel="noopener">Cuaderno S13</a></div></article></div><aside class="interpret"><b>Pregunta final</b><p>¿En qué caso tendrías sentido repartir tareas y en cuál preferirías no distribuir? Responde basándote en la función, los recursos y la medición, no en la marca.</p></aside></section>
+
+
+
+
+
+
+
+</main><nav class="footer"><button id="prev" type="button">← Anterior</button><span class="counter" id="counter">1 / 24</span><select id="unitJump" class="unit-jump" aria-label="Ir a una unidad"><option value="0">1 · Arquitectura</option><option value="5">2 · MapReduce</option><option value="12">3 · modelos clásicos</option><option value="15">4 · Dask real</option><option value="20">5 · Transferencia</option></select><span class="bar" aria-hidden="true"><span class="fill" id="fill" style="display:block"></span></span><span class="hint">← → navegar · desplaza si hay contenido largo</span><button id="next" type="button">Siguiente →</button></nav><script>
+(() => {
+  'use strict';
+  const byId = id => document.getElementById(id);
+  const on = (id, event, handler) => { const x = byId(id); if(x) x.addEventListener(event, handler); };
+  const out = (id, value) => { const x=byId(id); if(x) x.textContent=value; };
+  const fmt = (n,d=4) => Number(n).toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+  // Visuales S13: diagramas calculados de entradas locales, nunca benchmarks fingidos.
+  const NS_VIZ='http://www.w3.org/2000/svg';
+  function addViz(svg,tag,attrs={},label=''){
+    const e=document.createElementNS(NS_VIZ,tag);
+    for(const [k,v] of Object.entries(attrs))e.setAttribute(k,String(v));
+    if(label)e.textContent=label;
+    svg.appendChild(e);return e;
+  }
+  function drawMapViz(parts){
+    const svg=byId('mapVisual');if(!svg)return;
+    svg.replaceChildren();
+    addViz(svg,'title',{},'MapReduce: tamaño de cada lote y media parcial');
+    addViz(svg,'desc',{},'El ancho de las barras indica cuántos registros contiene cada lote. Reduce combina todas las sumas y cantidades, no promedia las medias.');
+    const visible=parts.slice(0,4), maxN=Math.max(1,...parts.map(p=>p.n));
+    addViz(svg,'text',{x:12,y:17,'font-size':12,fill:'#425d74'},'MAP → (suma, cantidad) por lote');
+    visible.forEach((p,i)=>{
+      const y=26+i*25,w=Math.max(2,330*p.n/maxN);
+      addViz(svg,'text',{x:12,y:y+14,'font-size':13,fill:'#163a5f'},'Lote '+(i+1));
+      addViz(svg,'rect',{x:94,y:y,width:w,height:17,rx:3,fill:'#258c9a'});
+      addViz(svg,'text',{x:105+w,y:y+14,'font-size':12,fill:'#27475b'},'n='+p.n+' · media '+fmt(p.sum/p.n,1));
+    });
+    if(parts.length>4)addViz(svg,'text',{x:12,y:134,'font-size':12,fill:'#425d74'},'Se muestran 4 de '+parts.length+' lotes; Reduce utiliza todos.');
+    else addViz(svg,'text',{x:12,y:134,'font-size':12,fill:'#425d74'},'REDUCE → Σ sumas / Σ cantidades (no promedio de medias)');
+    svg.setAttribute('aria-label','Tamaño y media de '+parts.length+' lotes MapReduce calculados con la entrada');
+  }
+  function drawCostViz(L,D,F,N){
+    const svg=byId('costVisual');if(!svg)return;
+    svg.replaceChildren();
+    addViz(svg,'title',{},'Costo local y distribuido de un escenario editable');
+    addViz(svg,'desc',{},'Compara barras de tiempo local con Dask. El tramo naranja es el arranque inicial y el verde corresponde a trabajo distribuido; son hipótesis, no tiempos medidos.');
+    const local=L*N,task=D*N,distributed=task+F,max=Math.max(local,distributed,0.000001),scale=355/max;
+    const fmtS=n=>fmt(n,2)+' s';
+    addViz(svg,'text',{x:14,y:35,'font-size':13,fill:'#14375c','font-weight':700},'Local');
+    addViz(svg,'rect',{x:103,y:17,width:Math.max(1,local*scale),height:27,rx:4,fill:'#687f9e'});
+    addViz(svg,'text',{x:469,y:36,'font-size':13,fill:'#14375c'},fmtS(local));
+    addViz(svg,'text',{x:14,y:77,'font-size':13,fill:'#14375c','font-weight':700},'Dask');
+    if(F>0)addViz(svg,'rect',{x:103,y:60,width:Math.max(1,F*scale),height:27,rx:3,fill:'#dc8b42'});
+    addViz(svg,'rect',{x:103+F*scale,y:60,width:Math.max(1,task*scale),height:27,rx:3,fill:'#149b91'});
+    addViz(svg,'text',{x:469,y:79,'font-size':13,fill:'#14375c'},fmtS(distributed));
+    addViz(svg,'rect',{x:104,y:104,width:12,height:12,rx:2,fill:'#dc8b42'});
+    addViz(svg,'text',{x:122,y:114,'font-size':12,fill:'#38516c'},'Inicio: '+fmtS(F));
+    addViz(svg,'rect',{x:291,y:104,width:12,height:12,rx:2,fill:'#149b91'});
+    addViz(svg,'text',{x:309,y:114,'font-size':12,fill:'#38516c'},'Trabajo: '+fmtS(task));
+    svg.setAttribute('aria-label',N+' lotes; local '+fmtS(local)+'; Dask '+fmtS(distributed)+' con inicio y trabajo. Datos de simulación, no medición real');
+  }
+  function drawScenarioViz(workers,tasks){
+    const svg=byId('scenarioVisual');if(!svg)return;
+    svg.replaceChildren();
+    addViz(svg,'title',{},'Tareas repartidas entre workers de una sola máquina');
+    addViz(svg,'desc',{},'Cada fila corresponde a un worker y cada columna a una tanda ideal. Los recuadros numerados representan tareas, no computadores adicionales.');
+    const waves=Math.ceil(tasks/workers),slot=440/waves;
+    addViz(svg,'text',{x:12,y:16,'font-size':12,fill:'#40566a'},'WORKERS →');
+    for(let i=0;i<workers;i++){
+      const y=25+i*30;
+      addViz(svg,'text',{x:12,y:y+16,'font-size':13,fill:'#14375c'},'W'+(i+1));
+      addViz(svg,'line',{x1:62,y1:y+24,x2:601,y2:y+24,stroke:'#cbdae8','stroke-width':1});
+    }
+    for(let t=0;t<tasks;t++){
+      const worker=t%workers,wave=Math.floor(t/workers),y=25+worker*30,x=75+wave*slot;
+      addViz(svg,'rect',{x,y,width:Math.max(16,slot-4),height:23,rx:4,fill:worker%2?'#16647b':'#126a63'});
+      addViz(svg,'text',{x:x+slot/2-2,y:y+16,'text-anchor':'middle','font-size':12,fill:'#ffffff'},String(t+1));
+    }
+    addViz(svg,'text',{x:12,y:166,'font-size':12,fill:'#465a70'},workers+' workers · '+tasks+' tareas · '+waves+' tandas IDEALES · sin medir latencia real');
+    svg.setAttribute('aria-label',tasks+' tareas distribuidas entre '+workers+' workers en '+waves+' tandas ideales, no tiempos medidos');
+  }
+
+  const slides=[...document.querySelectorAll('.slide')];
+  let active=0;
+  function go(i) {
+    active=Math.max(0,Math.min(slides.length-1,i));
+    slides.forEach((s,k)=>{s.classList.toggle('active',k===active);s.setAttribute('aria-hidden',k===active?'false':'true');});
+    byId('counter').textContent=(active+1)+' / '+slides.length;
+    byId('fill').style.width=(100*(active+1)/slides.length)+'%';
+    byId('prev').disabled=active===0;
+    byId('next').disabled=active===slides.length-1;
+    const labels=['Arquitectura y recursos','MapReduce y procesamiento','Modelos clásicos y memoria','Dask distribuido','Transferencia a PySpark'];
+    const positions=[0,5,12,15,20];
+    const unit=active<5?0:active<12?1:active<15?2:active<20?3:4;
+    byId('phase').textContent=labels[unit];
+    byId('unitJump').value=String(positions[unit]);
+    if(location.hash!=='#s'+(active+1)) history.replaceState(null,'','#s'+(active+1));
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+  on('prev','click',()=>go(active-1));on('next','click',()=>go(active+1));
+  on('unitJump','change',()=>go(Number(byId('unitJump').value)));
+
+  window.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;
+    if(['ArrowRight','PageDown'].includes(e.key)){e.preventDefault();go(active+1);}
+    if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(active-1);}
+  });
+  window.addEventListener('hashchange',()=>{const n=Number((location.hash.match(/^#s(\d+)$/)||[])[1]);if(n>0)go(n-1);});
+  const start=Number((location.hash.match(/^#s(\d+)$/)||[])[1]);go(start>0?start-1:0);
+
+  // H1: permitir distinguir prefijo de version, codigo y segmento.
+  on('unspscRun','click',()=>{
+    const v=byId('unspscInput').value.trim();
+    const match=v.match(/^(?:V\d+\.)?(\d{8})$/i);
+    out('unspscOut',match
+      ? 'Código válido: '+match[1]+' · segmento '+match[1].slice(0,2)+' · la versión NO es parte del segmento.\nCómo se lee: se toman los dos dígitos iniciales del código de ocho cifras.'
+      : 'Código no válido para este ejemplo: usa ocho dígitos (ej. 80111600) o versión V1. + ocho dígitos. No inventes etiqueta.');
+  });
+
+  // H2: seleccion razonada de motores por escenario.
+  const cases=[
+    {q:'200 expedientes para contar cuántos registros hay por entidad.',ok:'pandas',why:'Caben en RAM y se requiere una agregación sencilla. Dask añadiría coordinación sin necesidad.'},
+    {q:'Consulta SQL analítica repetida sobre archivos CSV/Parquet sin infraestructura de clúster.',ok:'duckdb',why:'DuckDB permite SQL analítico local eficiente; no obliga a administrar workers.'},
+    {q:'Miles de cálculos Python independientes y suficientemente costosos que pueden ejecutarse en CPU libres.',ok:'dask',why:'Dask reparte tareas independientes. Mide el costo de enviar datos y arrancar el scheduler.'},
+    {q:'ETL de cientos de millones de filas sobre una plataforma de datos distribuida que ya está operativa.',ok:'spark',why:'Spark puede explotar infraestructura distribuida existente; valida memoria, operaciones y costos antes de elegir.'}
+  ];
+  let scenario=0;
+  const renderScenario=()=>{out('caseText','Escenario '+(scenario+1)+' / '+cases.length+': '+cases[scenario].q);out('decisionFeedback','Escoge la primera opción razonable y nombra la alternativa descartada.');};
+  document.querySelectorAll('[data-answer]').forEach(b=>b.addEventListener('click',()=>{
+    const c=cases[scenario],correct=b.dataset.answer===c.ok;
+    out('decisionFeedback',(correct?'✓ Elección defendible. ':'△ Revisa: empezaría por '+c.ok+'. ')+c.why);
+  }));
+  on('nextScenario','click',()=>{scenario=(scenario+1)%cases.length;renderScenario();});renderScenario();
+
+  // Casos distribuidos: el ejemplo del aula ejecuta Dask real en un script aparte.
+  const casosDask={
+    ocr:'Reparte cada imagen en un lote para OCR; procesa en varios workers si hay CPU y memoria. No se ejecuta OCR desde el navegador.',
+    audio:'Reparte audios independientes; cada worker transcribe un archivo si el modelo está instalado. Los límites de GPU/RAM siguen vigentes.',
+    textos:'Ocho lotes de fichas SECOP: ejecuta el script de la lámina 25. La espera simula un servicio externo; Dask real gestiona workers.',
+    parquet:'Dask DataFrame puede leer particiones Parquet en paralelo y agregar sin reunir toda la colección en RAM.'
+  };
+  on('casoRun','click',()=>out('casoOut',casosDask[byId('casoDask').value]));
+  on('workerRun','click',()=>{
+    const [cantidad,hilos]=byId('workerConfig').value.split('x').map(Number);
+    const container=byId('workersView');container.replaceChildren();
+    for(let i=1;i<=cantidad;i++){
+      const node=document.createElement('div');node.className='wide-node';
+      node.textContent='Worker '+i+' · proceso independiente · '+hilos+' hilo(s)';
+      container.appendChild(node);
+    }
+    out('workerOut',cantidad+' procesos × '+hilos+' hilos = '+(cantidad*hilos)+
+      ' hilos de ejecución configurados. Una sola VM de ejemplo con 4 CPU lógicas.'+
+      (cantidad*hilos>4?' Hay sobresuscripción: más hilos que vCPU, sin potencia adicional.':''));
+  });
+  on('scenarioWorkers','click',()=>{
+    const w=Number(byId('nWorkersSim').value),t=Number(byId('nTasksSim').value);
+    const tandas=Math.ceil(t/w);
+    out('scenarioOut',t+' tareas / '+w+' workers de un hilo = '+tandas+
+      ' tandas ideales. Si cada tarea espera 0,6 s, tiempo mínimo ideal ≈ '+fmt(tandas*.6,2)+
+      ' s + coordinación. Secuencial ideal: '+fmt(t*.6,2)+
+      ' s. Es SIMULACIÓN; ejecuta dask_cuando_si.py para medir en Codespaces.');
+    drawScenarioViz(w,t);
+  });
+  // H3: réplica no es un worker.
+  let failed=false;
+  function drawHdfs(){
+    document.querySelectorAll('#hdfsGrid [data-nodes]').forEach((node,i)=>{
+      const base=node.dataset.nodes.split(',');
+      const now=failed?base.filter(x=>x!=='2'):base;
+      node.innerHTML=['A','B','C'][i]+'<br><small>nodos '+(now.length?now.join(' · '):'NINGUNO')+'</small>';
+    });
+    out('hdfsFeedback',failed
+      ? 'Nodo 2 desconectado: A queda en 1, B en 3, C conserva 1 y 3. Esta simulación mantiene todos los bloques.'
+      : 'Tres bloques, dos copias iniciales por bloque. Si cae un nodo, consulta las réplicas.');
+  }
+  on('failNode','click',()=>{failed=true;drawHdfs();});
+  on('restoreNode','click',()=>{failed=false;drawHdfs();});drawHdfs();
+
+  // H4: media global con sumas y pesos, nunca media de medias.
+  on('mapRun','click',()=>{
+    const raw=byId('mapInput').value.trim().split('\n').filter(x=>x.trim());
+    if(raw.length<2||raw.length>20){out('mapOut','Utiliza entre 2 y 20 lotes, uno por línea.');return;}
+    const parts=[];
+    for(const line of raw){
+      const fields=line.split(',').map(x=>x.trim());
+      if(fields.some(x=>x.length===0)){out('mapOut','Hay una observación vacía: quita la coma sobrante o completa el número; no se imputa cero.');return;}
+      const a=fields.map(Number);
+      if(!a.length||a.length>300||a.some(x=>!Number.isFinite(x))){out('mapOut','Cada lote debe contener entre 1 y 300 números válidos separados por comas.');return;}
+      parts.push({sum:a.reduce((u,v)=>u+v,0),n:a.length});
+    }
+    const total=parts.reduce((a,v)=>a+v.sum,0),n=parts.reduce((a,v)=>a+v.n,0);
+    const mean=total/n, naive=parts.reduce((a,v)=>a+v.sum/v.n,0)/parts.length;
+    out('mapOut',parts.map((x,i)=>'Map lote '+(i+1)+': suma='+fmt(x.sum,2)+' · n='+x.n+' · media='+fmt(x.sum/x.n,3)).join('\n')
+      +'\nReduce global: suma='+fmt(total,2)+' · n='+n
+      +'\nMedia global ponderada='+fmt(mean,4)+' · Media INGENUA de medias='+fmt(naive,4)
+      +'\nDiferencia absoluta='+fmt(Math.abs(mean-naive),4)+'.');
+    drawMapViz(parts);
+  });
+
+  // H5: checklist local, sin pretender backend evaluativo.
+  function checkList(boxId,outputId){
+    const labels=[...document.querySelectorAll('#'+boxId+' input[type=checkbox]')];
+    const count=labels.filter(x=>x.checked).length;
+    out(outputId,count+' de '+labels.length+' pasos marcados. '
+      +(count===labels.length?'Lista completa según tu propia revisión. Comprueba que el puerto es privado.':'Completa los pasos faltantes y valida las salidas reales de Codespaces.')
+      +' Este estado no constituye evidencia ni nota.');
+  }
+  on('setupCheckRun','click',()=>checkList('setupChecks','setupFeedback'));
+  on('labCheckRun','click',()=>checkList('labChecks','labFeedback'));
+
+  // H6: grafo conceptual; execution real ocurre dentro de Codespaces.
+  let graph='new';
+  const lazy=()=>{document.querySelectorAll('#lazyGraph .nodebox').forEach(x=>x.style.background=graph==='computed'?'#d3f2df':graph==='built'?'#fff2d9':'#edf2fa');
+    out('lazyOut',graph==='computed'?'compute() solicita tareas al scheduler; resultados materializados. Simulación visual, no midió CPU.'
+      :graph==='built'?'Grafo preparado: tareas y dependencias descritas; no hubo ejecución.'
+      :'Estado inicial. Construye el grafo y luego ejecuta compute().');};
+  on('lazyBuild','click',()=>{graph='built';lazy();});
+  on('lazyCompute','click',()=>{graph='computed';lazy();});
+  on('lazyReset','click',()=>{graph='new';lazy();});
+
+  // H7: calculadora de amortizacion de operaciones hipotéticas.
+  on('costRun','click',()=>{
+    const L=Number(byId('costLocal').value),D=Number(byId('costDask').value),F=Number(byId('costStart').value),N=Number(byId('costRepeat').value);
+    if(!(L>0&&D>0&&F>=0&&N>=1&&Number.isInteger(N))){out('costOut','Revisa: local/distribuido deben ser positivos; arranque no negativo; repeticiones un entero ≥1.');return;}
+    const local=L*N,distributed=F+D*N;
+    const breakeven=L>D?Math.floor(F/(L-D))+1:null;
+    out('costOut','Para '+N+' operaciones (hipótesis): local '+fmt(local,3)+' s, distribuido con un arranque '+fmt(distributed,3)+' s.\n'
+      +(distributed<local?'✓ Distribuido gana según este modelo.':distributed===local?'Empate en este modelo.':'Local gana según este modelo.')
+      +'\nAceleración extremo a extremo: '+fmt(local/distributed,2)+'×. '
+      +(breakeven?'Si el resto se mantiene constante, se compensa a partir de ~'+breakeven+' operaciones.':'Con estos tiempos por operación no se recupera el arranque.'));
+    drawCostViz(L,D,F,N);
+  });
+
+
+  // S13 · Dibujos calculados en el navegador (ninguno equivale a un benchmark).
+  function cuadro(svg,x,y,w,h,color,rx=10,border='#c2d7e5'){
+    addViz(svg,'rect',{x,y,width:w,height:h,rx,fill:color,stroke:border,'stroke-width':1});
+  }
+  function rotulo(svg,x,y,t,size=13,color='#19415e',weight='500'){
+    return addViz(svg,'text',{x,y,'font-size':size,fill:color,'font-weight':weight},t);
+  }
+  function topologia(){
+    const svg=byId('topologiaViz'); if(!svg)return; svg.replaceChildren();
+    const multi=byId('topologiaS13').value==='multi';
+    cuadro(svg,230,8,160,42,'#143f65');rotulo(svg,262,34,'Scheduler Dask',15,'#ffffff','750');
+    if(!multi){
+      cuadro(svg,13,77,594,178,'#ecf4fa');
+      rotulo(svg,34,101,'Una VM · Codespaces · RAM y CPU compartidas',15,'#1d5675','700');
+      rotulo(svg,288,115,'↓ asigna tareas',12);
+      for(let n=0;n<2;n++){
+        cuadro(svg,60+n*285,142,230,56,'#ddf1ec');
+        rotulo(svg,91+n*285,165,'Worker '+(n+1),17,'#196c63','750');
+        rotulo(svg,91+n*285,184,'proceso de la misma VM',12);
+      }
+      rotulo(svg,145,231,'Una sola cuota de CPU y RAM entre ambos workers',13,'#24495d','600');
+      out('topologiaResultado','Clúster local: una máquina con dos procesos worker. Ambos compiten por la misma CPU y memoria disponibles.');
+    }else{
+      rotulo(svg,254,65,'↓ red de comunicación',12);
+      for(let n=0;n<2;n++){
+        cuadro(svg,24+n*313,87,258,156,n?'#eaf3ff':'#eaf9f4');
+        rotulo(svg,51+n*313,114,'Nodo / VM '+(n+1),16,'#175171','750');
+        cuadro(svg,50+n*313,128,206,53,'#fff');
+        rotulo(svg,90+n*313,158,'Worker '+(n+1),15,'#1c6181','700');
+        rotulo(svg,79+n*313,210,'CPU + RAM de este nodo',13,'#41566f');
+      }
+      out('topologiaResultado','Clúster multinodo: cada VM aporta recursos propios, pero intercambiar datos por red tiene costo. Esta vista es conceptual; S13 usa solo una VM.');
+    }
+  }
+  on('topologiaS13','change',topologia);topologia();
+
+  // Simulación didáctica determinista de cuatro grupos numéricos.
+  const kmBases=[[100,75],[270,75],[135,196],[475,178]];
+  const kmPuntos=[];
+  kmBases.forEach((b,g)=>{
+    for(let i=0;i<12;i++){
+      const ang=2*Math.PI*i/12,radio=11+(i%4)*8;
+      kmPuntos.push({x:b[0]+Math.cos(ang)*radio+(i%3)*3,
+                     y:b[1]+Math.sin(ang)*radio+(i%2)*4,g});
+    }
+  });
+  const kmInit=[[66,190],[240,160],[387,73],[530,220]];
+  let kmCentros=kmInit.map(p=>p.slice()), kmIter=0, kmAsignaciones=[];
+  const kmColores=['#238bce','#179977','#dc8133','#a468b3'];
+  function kmAsignar(){
+    return kmPuntos.map(p=>{
+      let mejor=0,dist=Infinity;
+      kmCentros.forEach((c,i)=>{
+        const d=(p.x-c[0])**2+(p.y-c[1])**2;
+        if(d<dist){dist=d;mejor=i;}
+      });return mejor;
+    });
+  }
+  function kmeansDibujar(){
+    const svg=byId('kmeansViz');if(!svg)return;svg.replaceChildren();
+    cuadro(svg,5,5,610,245,'#f7fbfe');
+    for(let i=0;i<4;i++)rotulo(svg,21,31+i*54,'',12);
+    kmPuntos.forEach((p,i)=>addViz(svg,'circle',{
+      cx:p.x,cy:p.y,r:5,fill:kmIter?kmColores[kmAsignaciones[i]]:'#8094ae',
+      'fill-opacity':.8,stroke:'#ffffff','stroke-width':.8
+    }));
+    kmCentros.forEach((c,i)=>{
+      addViz(svg,'circle',{cx:c[0],cy:c[1],r:10,fill:kmColores[i],stroke:'#ffffff','stroke-width':3});
+      rotulo(svg,c[0]+12,c[1]+4,'C'+(i+1),13,'#244766','750');
+    });
+    out('kmeansMensaje',kmIter===0?
+      'Iteración 0: centroides iniciales; los puntos todavía no están asignados.':
+      'Iteración '+kmIter+': asignar puntos, sumar por grupo y actualizar los centroides. Los colores muestran la pertenencia calculada.');
+  }
+  function kmeansPaso(){
+    kmAsignaciones=kmAsignar();
+    const nuevos=kmCentros.map((anterior,k)=>{
+      const grupo=kmPuntos.filter((p,i)=>kmAsignaciones[i]===k);
+      return grupo.length?
+        [grupo.reduce((a,p)=>a+p.x,0)/grupo.length,grupo.reduce((a,p)=>a+p.y,0)/grupo.length]:
+        anterior.slice();
+    });
+    kmCentros=nuevos;kmIter++;kmeansDibujar();
+  }
+  on('kmeansPaso','click',kmeansPaso);
+  on('kmeansReiniciar','click',()=>{
+    kmCentros=kmInit.map(p=>p.slice());kmIter=0;kmAsignaciones=[];kmeansDibujar();
+  });kmeansDibujar();
+
+  function formatearBytes(n){
+    if(n<1024)return fmt(n,0)+' bytes';
+    if(n<1e6)return fmt(n/1000,2)+' kB';
+    if(n<1e9)return fmt(n/1e6,2)+' MB';
+    return fmt(n/1e9,2)+' GB';
+  }
+  function actualizarMemoria(){
+    const filas=Number(byId('memFilas').value);
+    const variables=Number(byId('memVariables').value);
+    const centros=Number(byId('memCentroides').value);
+    const limite=Number(byId('memLimite').value)*(1024**3);
+    const datos=filas*variables*8, modelo=centros*variables*8, etiquetas=filas*4;
+    const pct=100*datos/limite;
+    out('memDatos',formatearBytes(datos));out('memModelo',formatearBytes(modelo));
+    out('memAsignaciones',formatearBytes(etiquetas));
+    out('memPorcentaje',fmt(pct,2)+' %');
+    const barra=byId('memBarra');
+    barra.style.width=Math.max(0,Math.min(100,pct))+'%';
+    barra.style.background=pct>=80?'#cc494e':pct>=60?'#d98733':'#128e91';
+    out('memLectura','La matriz de '+filas.toLocaleString('es-CO')+' × '+variables+
+      ' consume '+formatearBytes(datos)+
+      '. Es '+fmt(pct,2)+' % del ejemplo de límite por worker, pero el uso real de entrenamiento es mayor y se mide en el cuaderno. No significa que todos los datos residan en un único worker.');
+  }
+  ['memFilas','memVariables','memCentroides','memLimite'].forEach(k=>on(k,'change',actualizarMemoria));
+  on('memCalcular','click',actualizarMemoria);actualizarMemoria();
+
+  const escenariosDemanda={
+    pequeno:'Empezar por scikit-learn local. Una matriz pequeña puede terminar antes de iniciar Dask. Medir arranque y entrenamiento.',
+    cpu:'Aumenta el trabajo por iteración: filas × variables × centroides × iteraciones. Si el cálculo domina la coordinación, evaluar Dask-ML o más CPU, pero sin prometer ganancia.',
+    memoria:'Medir RAM del proceso, copias, límites por worker y capacidad real. Distribuir sobre varios nodos puede ampliar memoria agregada; en una sola VM la RAM total NO aumenta.',
+    espera:'Distribuir archivos independientes puede ocultar esperas y mejorar el tiempo completo. Respetar límites del servicio y distinguir espera simulada de transcripción real.'
+  };
+  function cambiarDemanda(){out('s13DemandaSalida',escenariosDemanda[byId('s13Demanda').value]);}
+  on('s13Demanda','change',cambiarDemanda);cambiarDemanda();
+
+  // H15: prueba de decisiones.
+  const quiz=[
+    {q:'200 procesos, memoria suficiente y un conteo por modalidad. ¿Qué eliges primero?',ok:'local',why:'pandas basta: el costo de iniciar un scheduler no tiene beneficio conocido.'},
+    {q:'Tres folds independientes sobre textos grandes; dos CPU disponibles y envío de datos costoso. ¿Qué se compara primero?',ok:'dask',why:'Dask es una opción para coordinar folds; compárala contra joblib y ejecución secuencial con los mismos folds.'},
+    {q:'Muchos Parquet en infraestructura Spark existente, con un ETL que excede memoria de una sola máquina. ¿Por dónde empezarías?',ok:'spark',why:'Spark puede aprovechar el entorno distribuido existente; medir extremo a extremo y validar procedencia.'}
+  ];
+  drawMapViz([{sum:220,n:2},{sum:50,n:5},{sum:10,n:10}]);
+  drawCostViz(4.8,2.4,1.2,1);
+  drawScenarioViz(2,8);
+  let qi=0;function drawQuiz(){out('quizPrompt','Escenario '+(qi+1)+' / '+quiz.length+': '+quiz[qi].q);out('quizResponse','Elige y revisa la alternativa descartada.');}
+  document.querySelectorAll('[data-quiz-choice]').forEach(b=>b.addEventListener('click',()=>{
+    out('quizResponse',(b.dataset.quizChoice===quiz[qi].ok?'✓ Elección razonable. ':'△ Alternativa a considerar: '+quiz[qi].ok+'. ')
+      +quiz[qi].why+' No hay nota ni envío de texto libre.');
+  }));
+  on('quizNext','click',()=>{qi=(qi+1)%quiz.length;drawQuiz();});drawQuiz();
+})();
+</script></body></html>

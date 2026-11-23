@@ -1,34 +1,41 @@
-# S13 · Big Data — Laboratorio limpio
+# Sesión 13 · Un cuaderno, todos los datos
 
-**Este es el espacio exclusivo de la Sesión 13.** Aquí no están los cuadernos de otras sesiones, archivos de investigación ni herramientas adicionales del curso.
+**[Crear el Codespace de S13](https://codespaces.new/jazaineam1/BigData2026/tree/s13-laboratorio)** · [Presentación interactiva](https://jazaineam1.github.io/BigData2026/Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1)
 
-## Comienza aquí
+## Empieza en tres pasos
 
-1. **Crear entorno:** [Abrir S13 en GitHub Codespaces](https://codespaces.new/jazaineam1/BigData2026/tree/s13-laboratorio).
-2. Confirma que la rama es **`s13-laboratorio`**. Este espacio tiene **un solo perfil de Codespaces**, seleccionado por defecto; no elijas Airflow.
-3. Elige una máquina de **2 núcleos** si está disponible y pulsa **Create codespace**.
-4. Espera la instalación automática y el mensaje **`LISTO PARA S13`**.
-5. Si el cuaderno no se abrió automáticamente, haz clic en **Cuadernos → 13_Dask_MapReduce_Compras_Claras.ipynb**.
-6. Selecciona el kernel **Python 3.11**. Ejecuta las celdas de arriba hacia abajo. Al final, responde el reto de arquitectura.
+1. Abre el enlace y confirma que la rama sea **`s13-laboratorio`**. Hay **una sola configuración de Codespaces**, correspondiente a S13; no necesitas elegir entre perfiles.
+2. Crea el Codespace con **2 núcleos** si están disponibles. La instalación automática debe terminar con **`LISTO PARA S13`**.
+3. Abre **Cuadernos → 13_Dask_MapReduce_Compras_Claras.ipynb** y usa el kernel **Python 3.11**. Ejecuta las celdas de arriba abajo y completa el reto final con tus resultados.
 
-**[Presentación de S13](https://jazaineam1.github.io/BigData2026/Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1)** · **[Abrir único cuaderno en GitHub](https://github.com/jazaineam1/BigData2026/blob/s13-laboratorio/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb)**
+El **cuaderno es idéntico, sin recortes ni cambios de celdas, al publicado en `main`**. Contiene todas las demostraciones de Dask, MapReduce, SECOP, Parquet, K-means, memoria y tiempos. **No se eliminó ni redujo ninguna práctica.**
 
-### ¿Por qué no veo las carpetas técnicas?
+### Un detalle sobre las instrucciones originales
 
-El explorador de VS Code las oculta deliberadamente para dejar visible el cuaderno. Los datos SECOP, el verificador y los dos módulos Python que usa el notebook **sí están en este espacio**, con sus rutas originales y sin descargas externas. Puedes verlos desactivando `files.exclude` en Settings si necesitas auditar código.
+El cuaderno original incluye una sección que explica cómo elegir manualmente el perfil S13 en la rama `main`. **En esta rama especial ese paso no aplica:** ya estás en el perfil correcto y puedes comenzar directamente con las comprobaciones y el código del mismo cuaderno. Se conserva ese texto para mantener el cuaderno exactamente igual al original.
 
-### Si la creación falla
+### Datos suficientes, sin saturar la pantalla
 
-Abre **Terminal → New Terminal** y ejecuta:
+- **9 archivos CSV SECOP:** las seis muestras de prueba de 1.000 registros y los tres fragmentos grandes de aproximadamente 100.000 registros cada uno, para unas **300.000 filas en los tres archivos grandes**, con todas las columnas originales.
+- **Corpus complementario de 200 expedientes** y todos los módulos Python imprescindibles.
+- **8 pruebas unitarias ligeras** de la demostración Dask, conservadas para verificar integridad sin iniciar automáticamente entrenamiento ni benchmarks pesados.
+
+**La práctica de inicio del cuaderno utiliza la muestra pequeña real de 1.000 filas** y K-means numérico simulado de 1.000 filas (ampliable a 20.000). Los CSV grandes quedan disponibles si después decides trabajar con mayor volumen. **No se promete que el cuaderno procese automáticamente 300.000 registros:** eso requeriría otro alcance y revisión explícita de recursos.
+
+Los datos y scripts están en la rama, pero sus carpetas se ocultan en el Explorador de VS Code para que el estudiante no se distraiga. La configuración visual **no elimina los archivos**; siguen accesibles desde Python.
+
+### Si no aparece LISTO PARA S13
+
+En **Terminal → New Terminal** ejecuta:
 
 ```bash
 python Laboratorios/S13_Codespaces/verificar_entorno.py
 ```
 
-La última línea debe decir `LISTO PARA S13`. Si hay un módulo ausente, revisa el error de instalación y ejecuta `python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt`. No cambies de perfil ni clones `main`.
+No instales Streamlit, Ollama ni abras otros laboratorios. Al finalizar, detén el Codespace para ahorrar cuota.
 
-### Alcance de la práctica
+## Fuentes y reproducibilidad
 
-Primero SECOP real para tareas y MapReduce; después datos numéricos simulados para K-means local frente a Dask-ML, tiempos y memoria de workers. Son ejemplos deliberadamente pequeños. Ninguna ganancia de velocidad está garantizada.
-
-**Nota:** esta rama de estudiantes está separada de `main`, donde están las diapositivas y el resto del curso. El espacio de trabajo contiene únicamente los archivos necesarios para ejecutar S13. Detén el Codespace al terminar para ahorrar cuota.
+- [Cuaderno S13 original en `main`](https://github.com/jazaineam1/BigData2026/blob/main/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb)
+- [Código del ejercicio dentro de esta rama](https://github.com/jazaineam1/BigData2026/tree/s13-laboratorio)
+- [Documentación de Codespaces](https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository)
