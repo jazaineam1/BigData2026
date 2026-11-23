@@ -252,3 +252,18 @@ test('S13: láminas 5 y 20 completas en 1280×720 y 1366×768', async ({page})=>
     }
   }
 });
+
+test('S13 distingue entrenamiento distribuido de lotes y conserva 24 diapositivas', async ({page}) => {
+  await page.goto(URL+'#s16');
+  await expect(page.locator('#s16')).toContainText('Qué modelos se pueden entrenar directamente');
+  await page.locator('#s16 summary').last().click();
+  await expect(page.locator('#s16')).toContainText('Dask-ML K-means');
+  await expect(page.locator('#s16')).toContainText('DBSCAN');
+  await page.goto(URL+'#s21');
+  await expect(page.locator('#s21')).toContainText('kmeans_dask_s13.py');
+  await page.locator('#s21 summary').last().click();
+  await expect(page.locator('#s21')).toContainText('--n 1000 --workers 2');
+  await page.goto(URL+'#s24');
+  await expect(page.locator('#s24')).toContainText('PySpark');
+  await expect(page.locator('.slide')).toHaveCount(24);
+});
