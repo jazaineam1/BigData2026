@@ -1,219 +1,41 @@
-# S13 · Código que el estudiante puede reutilizar
+# Sesión 13 · Dask con un solo cuaderno
 
-**Plataforma principal:** GitHub Codespaces con el perfil **S13 · Dask, MapReduce y modelos SECOP**.
+**Material para los estudiantes:**
+- [Presentación S13](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1): conceptos y decisiones.
+- [Cuaderno S13](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb): **todas las ejecuciones del laboratorio**, incluido K-means local y distribuido.
 
-No instalar software en el computador personal. Al elegir el Codespace con ese perfil se instalan las dependencias. El perfil raíz del repositorio pertenece a **Airflow**: en `Code → Codespaces → ... → New with options` se debe escoger **S13**, no el perfil predeterminado.
+La sesión usa dos ejemplos claramente diferenciados: **registros SECOP reales** para demostrar MapReduce, pandas/Dask y tareas con workers; y **puntos numéricos simulados** para explicar K-means, un modelo clásico de agrupamiento. No hay que crear ni ejecutar un archivo Python adicional para el modelo.
 
-**Ruta principal del cuaderno:** los dos modos de Dask, MapReduce, TF-IDF, similitud coseno, Parquet y decisión estructurada. El bloque de **clasificación por UNSPSC y gráficos F1 es una ampliación opcional** y empieza desactivado (`EJECUTAR_AMPLIACION_S13 = False`); un Run All no entrena ese clasificador.
+## Abrir el entorno
 
-## Primeros pasos
+1. En GitHub: **Code → Codespaces → ... → New with options**.
+2. Elige **S13 · Dask, MapReduce y modelos SECOP**; no el perfil predeterminado.
+3. Abre `Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb` y selecciona el kernel Python.
+4. Ejecuta las celdas en orden. La instalación del Codespace incluye Dask, Dask-ML y scikit-learn.
 
-1. Desde la [portada del curso](../../index.html) abre la presentación de S13 y sigue el tutorial embebido.
-2. Crea el Codespace con la configuración `.devcontainer/s13-distribuido/devcontainer.json`.
-3. Abre una terminal en VS Code web. Comprueba instalación con:
+Puedes verificar el entorno desde la terminal con `nproc`, `free -h` y `python Laboratorios/S13_Codespaces/verificar_entorno.py`. Esto **no constituye un recurso adicional de estudio**.
 
-   ```bash
-   python --version
-   python -m pip show dask
-   python -m pip show scikit-learn
-   python Laboratorios/S13_Codespaces/verificar_entorno.py
-   ```
+## Modelos y tamaños
 
-4. Si falta un módulo, la instalación reproducible se realiza **dentro del Codespace**, no en el equipo:
+**K-means** agrupa puntos por cercanía a centroides; `sklearn.cluster.KMeans` lo entrena localmente y `dask_ml.cluster.KMeans` distribuye el ajuste de **un único modelo**. El cuaderno permite modificar:
 
-   ```bash
-   python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
-   ```
+| Variable | Prueba inicial | Ampliación voluntaria |
+|---|---:|---:|
+| `REGISTROS` | 1.000 | 20.000 |
+| `VARIABLES` | 2 | 20 |
+| `WORKERS_MODELO` | 2 | Según CPU y memoria disponibles |
 
-5. Abre `Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb`, selecciona el kernel de Python del Codespace y ejecuta por secciones.
+Una matriz `float64` de 20.000 × 20 contiene 400.000 números y ocupa ~3,2 MB **solo en valores**. No significa automáticamente que distribuir sea necesario. En el cuaderno se contrastan tiempos de entrenamiento, arranque del clúster, persistencia y resultados.
 
-## Cronograma real de trabajadores Dask
+Las demás herramientas se **explican, pero no se ejecutan como ejercicios adicionales**: regresiones distribuidas y XGBoost tienen bibliotecas compatibles; ejecutar validaciones independientes no equivale a distribuir un único ajuste; DBSCAN estándar no se convierte en distribuido usando Dask.
 
-El script `dask_cuando_si.py` registra `traza_tareas` en el JSON. Cada fila
-incluye **lote, worker real, inicio_ms, fin_ms y duración_ms**; los milisegundos
-son relativos a la primera tarea y se miden dentro de la misma VM con reloj
-monotónico. En Streamlit, pestaña 5, se muestran como barras horizontales.
-Esta es evidencia medida, no un esquema ideal de tandas.
+## Alcance y recursos
 
-La **traza de tarea no incluye** cola del scheduler, transferencia del CSV ni
-arranque del clúster; compara por separado `segundos_secuencial`,
-`segundos_dask_cluster_caliente` y `segundos_dask_total_incluido_arranque`.
-La pestaña 7 solicita CPU, workers, coincidencia de resultados, tiempos y
-TF-IDF, **no F1**: la clasificación UNSPSC permanece como ampliación opcional.
+- Se mantienen las demostraciones ligeras de los ocho lotes SECOP y su comparación con ejecución secuencial. La espera externa del ejemplo es **simulada**; el reparto de Dask es real.
+- Los puntos de K-means son **simulados con semilla fija**, no etiquetas o predicciones sobre contratación pública.
+- No repetir 50.000 registros, OCR, modelos neuronales ni entrenamientos costosos en GitHub Actions. Las pruebas automáticas se limitan a sintaxis, estructura y visualización.
+- Dos workers dentro del Codespace no son dos computadores; más workers no crean capacidad física adicional.
+- No se promete una aceleración. Si Dask tarda más, se explican los costos de coordinación.
+- El resultado de SECOP se exporta a Parquet y puede reutilizarse en S14/PySpark. Los datos simulados de K-means no se hacen pasar por SECOP.
 
-## Herramientas visuales integradas en la presentación
-
-En las 24 láminas hay diagramas que muestran relaciones reales y se actualizan con entradas del estudiante:
-- **MapReduce (lámina 7):** barras según el número de observaciones de cada lote, con sus medias y el reduce global; no confundas barras con tiempos.
-- **Amortización (lámina 12):** dos barras comparan tiempo local con arranque + trabajo Dask sobre los números editados. Es una **hipótesis**, no una medición real.
-- **Cronómetros (lámina 19):** línea de tiempo ilustrativa que separa los 1,2 s de arranque de los 2,4 s de tareas del ejemplo ideal. No reemplaza el JSON real.
-- **Tandas (lámina 20):** reparte hasta 12 tareas entre 1, 2 o 4 workers de una misma VM. No representa nodos nuevos ni garantiza aceleración.
-- **Transferencia (lámina 21):** ruta visual Entrada → Partición → Worker → Recolección → Reintento → Evidencia.
-
-La interfaz Streamlit de la pestaña Dask conserva los dos modos `texto` y `espera` para compararlos en una misma tabla y descargar su JSON. El panel solo muestra tiempos medidos cuando se ejecuta desde Codespaces; las láminas no hacen llamadas a Dask por sí mismas.
-
-## Herramientas y demostración
-
-- **Python / MapReduce conceptual:** funciones de sumar y contar; nada de Hadoop MapReduce instalado.
-- **HDFS:** simulación de bloques y réplicas; no se afirma haber instalado HDFS.
-- **pandas:** resultados de referencia de un archivo SECOP.
-- **Dask DataFrame:** particionado y operaciones diferidas, comparación con pandas.
-- **scikit-learn:** TF-IDF, normalización L2 y búsqueda por coseno sobre el minicorpus común. **Ampliación opcional:** LinearSVC predice el segmento UNSPSC declarado; nunca la modalidad contractual ni fraude.
-- **Dask Distributed:** coordina tareas independientes y gestiona fallos; con bibliotecas compatibles (por ejemplo XGBoost-Dask) también puede distribuir un entrenamiento, aunque no siempre conviene por rendimiento.
-- **Parquet:** resultado tabular que se reutilizará en S14/PySpark.
-
-## Ejecutar sin abrir Jupyter
-
-```bash
-python Laboratorios/S13_Codespaces/analisis.py mapreduce
-python Laboratorios/S13_Codespaces/analisis.py comparar
-python Laboratorios/S13_Codespaces/analisis.py modelo
-python Laboratorios/S13_Codespaces/analisis.py experimentos
-python Laboratorios/S13_Codespaces/analisis.py fallo
-python Laboratorios/S13_Codespaces/analisis.py exportar
-```
-
-Para ejecutar todo: `python Laboratorios/S13_Codespaces/analisis.py todo`.
-
-**Ruta mínima recomendada:** `python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2` (el programa está autocontenido en el perfil Codespaces S13).
-
-## Pruebas
-
-```bash
-cd Laboratorios/S13_Codespaces
-python -m unittest -v test_s13
-```
-
-El tablero Dask opcional usa el **puerto privado 8787** de Codespaces. Si no se abre, usa `client.scheduler_info()`: el resultado del laboratorio no depende de la interfaz gráfica. Los workers pueden ser procesos con uno o varios hilos; observa su configuración real mediante `client.scheduler_info()`. Permanecen dentro de una misma VM salvo que se conecten otros nodos.
-
-## Transferencia a otros proyectos
-
-El módulo `analisis.py` tiene funciones separadas para lectura, preparación, procesamiento, entrenamiento y exportación. Para adaptar el caso, cambia la ruta del CSV, `COL_TEXTO`, `COL_LABEL` y `CLASES` después de verificar nombres/valores reales. Usa siempre `train_test_split` ANTES de ajustar TF-IDF; nunca selecciones hiperparámetros usando el conjunto de prueba. Prueba cada cambio con una muestra pequeña.
-
-Los archivos creados van a `Laboratorios/S13_Codespaces/salidas/`, excluida de Git. No subas datos personales ni credenciales al repositorio público. Cierra el Codespace al finalizar para ahorrar cuota.
-
-## Fuente preparada y control de experimentos
-
-Los CSV de SECOP que usa el curso están versionados y se suministran preparados para el laboratorio de procesamiento. La validación integral de fuente, etiquetas administrativas y modelos es responsabilidad técnica docente y **no se exige como actividad de clase S13**.
-
-Las ampliaciones de XGBoost, los benchmarks de 50.000 y los 1.000 embeddings neuronales permanecen en los scripts de investigación, pero están **desactivadas en el recorrido central**. No deben iniciarse como pruebas automáticas ni son requisitos para comprender workers y Dask.
-
-## Ruta principal de S13 · Dask en acción, sin pruebas pesadas
-
-**Objetivo:** demostrar mediante tareas realmente ejecutadas por Dask que un mismo computador virtual puede tener uno, dos, cuatro o más trabajadores y que la concurrencia o el paralelismo depende de CPU lógicas, hilos, funciones y memoria. La clase no requiere auditar ceros administrativos, repetir un benchmark de 50.000 fichas, ejecutar OCR real ni descargar modelos.
-
-**Solo dos recursos de estudio:** [presentación interactiva de 24 diapositivas](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1) y [cuaderno S13](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). Los programas ya están dentro de Codespaces.
-
-### 1. Revisar recursos de la máquina virtual
-
-Abre un Codespace con perfil `S13 · Dask, MapReduce y modelos SECOP` y ejecuta:
-
-```bash
-nproc
-lscpu | head -25
-free -h
-cat /proc/self/status | grep Cpus_allowed_list
-python -c "import os; print(len(os.sched_getaffinity(0)))"
-```
-
-- `nproc` y la afinidad indican **CPU lógicas habilitadas al proceso**. En contenedores, `lscpu` puede mostrar características del host y no las cuotas efectivas del contenedor.
-- `free -h` muestra memoria, pero los límites del contenedor pueden ser menores.
-- Una máquina con cuatro CPU lógicas puede ejecutar 1 worker × 4 hilos, 2 workers × 2 hilos, 4 workers × 1 hilo o más. Con 8 workers de un hilo habría sobresuscripción. El número de workers **no equivale a número de computadores físicos**.
-- Para Python puro suelen funcionar bien workers separados de un hilo; para NumPy/algoritmos nativos pueden aprovecharse varios hilos.
-
-### 2. Dos demostraciones con Dask real
-
-La primera muestra concurrencia bajo una **espera simulada**. La segunda cuenta de verdad los términos de las fichas SECOP, sin ninguna espera artificial, sobre los mismos lotes.
-
-```bash
-python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2
-python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2 --modo texto
-# Opcional si hay al menos cuatro CPU lógicas y la cuota lo permite:
-python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 4
-```
-
-El programa lee como máximo 1.000 títulos SECOP y los divide en ocho lotes. Ejecuta conteo y SHA-256, además de **0,6 segundos de espera externa simulada por lote** (equivalente conceptual a esperar llamadas de OCR/ASR). Dask sí crea procesos worker, reparte la función y comprueba igualdad de resultados. **La simulación NO realiza OCR, transcripción ni solicitudes externas.**
-
-Al finalizar crea `Laboratorios/S13_Codespaces/salidas/dask_demostracion_s13.json` con:
-
-| Campo | Significado |
-|---|---|
-| `workers_reales` | Direcciones, hilos y memoria de cada proceso worker |
-| `cpus_logicas_disponibles` | CPU habilitadas al proceso |
-| `segundos_secuencial` | Ocho lotes uno después del otro |
-| `segundos_arranque_y_espera_workers` | Iniciar scheduler y workers |
-| `segundos_dask_cluster_caliente` | Procesar lotes con trabajadores ya abiertos |
-| `segundos_dask_total_incluido_arranque` | Desde iniciar Dask hasta reunir resultados; excluye lectura CSV y escritura JSON |
-| `resultados_identicos` | Comprobación de igualdad secuencial/distribuido |
-| `ganador_caliente` y `ganador_total` | Ganador en **dos mediciones diferentes** |
-
-No hay tiempos predefinidos: el código mide los segundos de cada Codespace. El modo **texto** sí procesa datos SECOP y puede perder frente a la ejecución secuencial por coordinación. El modo **espera** representa una API, no realiza OCR real. Para comparar el papel de la CPU con funciones de cálculo sintético, de forma opcional:
-
-```bash
-python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2 --modo cpu
-```
-
-Esa modalidad utiliza PBKDF2 con carga moderada; **no** es un modelo de IA ni un benchmark representativo de OCR. Una ganancia no está garantizada y no se obliga a ejecutarla.
-
-### Visualizar el scheduler sin contaminar los tiempos
-
-```bash
-python Laboratorios/S13_Codespaces/dask_cuando_si.py --workers 2 --tablero --mantener-tablero-segundos 30
-```
-
-Abre **PORTS → 8787 → Private → Open in Browser** mientras el programa conserva el clúster. Los 30 segundos de observación no se suman a los cronómetros. Cuando termina, el panel se cierra deliberadamente.
-
-### 3. Herramienta gráfica en Codespaces
-
-```bash
-streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py --server.address 0.0.0.0 --server.port 8503
-```
-
-Abrir `PORTS → 8503 → Private → Open in Browser`. La pestaña **Dask** permite lanzar voluntariamente la demostración y consultar los tiempos reales. En la presentación, las simulaciones de reparto son explícitamente teóricas y complementan este script ejecutable.
-
-### 4. TF-IDF como representación útil para Big Data
-
-**Objetivo:** convertir palabras de fichas SECOP en números para búsqueda o clasificación. TF(A) = veces que aparece la palabra en documento A; DF = documentos del corpus donde aparece; IDF = importancia inversa por frecuencia; TF×IDF = peso de la palabra; L2(A) = peso normalizado del vector A para calcular coseno.
-
-El mismo corpus de la presentación, cuaderno y Streamlit es A «mantenimiento computadores», B «infraestructura computadores», C «hospital mantenimiento»:
-- DF de `hospital` = 1, IDF = 1,6931; en A, TF=0, peso=0.
-- DF de `computadores` = 2, IDF = 1,2877; en A, TF=1 y L2=0,7071.
-- La tabla interactiva de la presentación muestra estas columnas como tabla legible y cambia si editas los textos.
-
-### 5. Interpretar, no volver a gastar
-
-El análisis histórico interno de 50.000 train + 10.000 test utilizó un **test fijo de 10.000 registros** para comparar distintos tamaños de entrenamiento; los conjuntos no se mezclaban. Los valores corresponden solo a transformar vectores TF-IDF, o a entrenar XGBoost según el cronómetro declarado, y se obtuvieron en una VM GitHub Actions de referencia pública (4 vCPU, 16 GB RAM). Los segundos cambiarán en otra máquina.
-
-**No repetir la prueba de 50.000 en clase ni en Actions.** Los scripts de investigación `benchmark_50k_test_fijo.py`, `medir_workers_50k.py`, `cv_dask_mismo_modelo.py` y Ollama se conservan solo como herramientas opcionales del proyecto docente. El estudiante aprende con ocho lotes, diagnósticos de workers, MapReduce y TF-IDF. No se publican las validaciones exhaustivas de fuente como tarea estudiantil.
-
-### 6. Adaptar a un caso real
-
-Para aplicar Dask a documentos de otro proyecto, sustituye dentro de `procesar_lote` la espera simulada por una función real de OCR, transcripción, ETL o extracción de características. Hazlo únicamente si se dispone de modelos, permisos y capacidad suficientes. Debes mantener la verificación de resultados y los cronómetros separados.
-
-**Fuentes técnicas:** [Dask Best Practices](https://docs.dask.org/en/stable/best-practices.html) · [Dask Distributed Efficiency](https://distributed.dask.org/en/stable/efficiency.html) · [Especificaciones de runners GitHub Actions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job).
-
-
-### Ampliación opcional: entrenar un K-means realmente distribuido
-
-**No es parte de Run All ni del reto obligatorio.** El nuevo script usa el mismo CSV SECOP versionado sin consultar APIs; prepara títulos/descripciones con TF-IDF + TruncatedSVD (20 variables) y entrena **el mismo K-means conceptual** localmente y con `dask_ml.cluster.KMeans`. Comparte centroides iniciales, `k`, iteraciones y matriz; el ajuste local y el distribuido pueden converger a grupos diferentes y se comparan mediante inercia y ARI. No se emplea DBSCAN.
-
-Dask-ML se instala desde `requirements.txt` durante la creación del Codespace S13. **Ejecución voluntaria** desde la raíz:
-
-```bash
-python Laboratorios/S13_Codespaces/kmeans_dask_s13.py --n 250 --workers 2
-python Laboratorios/S13_Codespaces/kmeans_dask_s13.py --n 1000 --workers 2
-```
-
-La primera prueba se limita a 250 expedientes; la segunda es la ampliación recomendada. Los 10.000 o 20.000 registros requieren habilitación deliberada con `S13_PERMITIR_AMPLIACION=1` y recursos verificados; 50.000 o más no están habilitados. Los valores pueden variar por VM y edición de los archivos. **Una matriz 20.000 × 20 en float64 ocupa ~3,2 MB**, sin contar corpus, TF-IDF, copias y modelo. Esto no requiere distribución por tamaño de matriz. La aceleración no está garantizada.
-
-El script produce `salidas/kmeans_s13.json` (se sobrescribe en la siguiente ejecución) con: identificador SHA-256 de IDs, muestra y parámetros; cantidad y direcciones de workers; tareas observadas durante `fit` por worker; tiempos de lectura+vectorización, ajuste local, arranque, persistencia, ajuste distribuido, predicción y total; inercia, acuerdo ARI y ejemplos de documentos cercanos a cada centroide. **Si la traza solo muestra un worker, no afirmar participación de los dos.** Es un único modelo Dask-ML; los folds paralelos con joblib son varios modelos independientes. No se interpretan los grupos como alertas contractuales.
-
-**Modelos disponibles y límites:** K-means, regresión lineal/logística Dask-ML, XGBoost-Dask y LightGBM-Dask pueden distribuir un entrenamiento con sus API compatibles; `ParallelPostFit` distribuye predicciones y `Incremental` alimenta lotes a un estimador, no entrenamientos simultáneos automáticamente. El `DBSCAN` de scikit-learn no es distribuido al envolverlo en Dask; no hay DBSCAN CPU nativo en Dask-ML. La elección se basa en memoria efectiva, número de variables, costos de cada iteración, coordinación y almacenamiento; no existe un umbral fijo de filas.
-
-**Importante para preparar la clase:** ejecutar una sola vez el ejemplo 250 y después 1.000 en un Codespace nuevo, inspeccionar el JSON y registrar posibles problemas de compatibilidad; el código y los tests estáticos no sustituyen esta prueba integrada. No ejecutar benchmarks de 10k/20k en Actions automáticas.
-
-Fuente: https://ml.dask.org/modules/generated/dask_ml.cluster.KMeans.html
-
-### Dependencias
-
-`requirements.txt` instala únicamente el laboratorio principal. Los paquetes de investigación (incluido XGBoost) están separados en `requirements-investigacion.txt` y **no se requieren** para la clase ni se instalan automáticamente con Codespaces. Nunca se ejecutan 50.000 registros por defecto.
+**Fuentes:** [Dask](https://docs.dask.org/), [Dask-ML K-means](https://ml.dask.org/modules/generated/dask_ml.cluster.KMeans.html), [scikit-learn](https://scikit-learn.org/stable/modules/clustering.html).
