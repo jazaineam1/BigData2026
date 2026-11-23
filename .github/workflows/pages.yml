@@ -68,6 +68,7 @@ jobs:
           cp index.html _site/
           cp -R css js assets _site/
           cp -R Presentaciones _site/
+          test -f _site/Presentaciones/proyecto-final-explorer.html
           mkdir -p _site/Datos/s10_imagenes_reales
           cp -R Datos/s10_imagenes_reales/raw _site/Datos/s10_imagenes_reales/
           test -s _site/Datos/s10_imagenes_reales/raw/7a71615869df5c19563b4f8d.webp

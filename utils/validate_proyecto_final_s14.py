@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOK = ROOT / "Cuadernos/Proyecto_Final_Compras_Claras.ipynb"
-EXPLORER = ROOT / "docs/borradores/proyecto-final-explorer.html"
+EXPLORER = ROOT / "Presentaciones/proyecto-final-explorer.html"
 PLAN = ROOT / "docs/PROYECTO_FINAL_S14_2026_PLAN.md"
 VIABILIDAD = ROOT / "docs/PROYECTO_FINAL_S14_VIABILIDAD.md"
 GENERADOR = ROOT / "Laboratorios/Proyecto_Final_2026/generar_observatorio.py"
@@ -78,7 +78,7 @@ def comprobar() -> None:
                   'id="busqueda"', 'id="databricks"', 'localStorage',
                   'aria-live='):
         assert token in html, f"Falta componente HTML: {token}"
-    assert '<meta name="robots" content="noindex,nofollow">' in html
+    assert '<meta name="robots" content="noindex,nofollow">' not in html
     assert "sintética" in html.lower() and "no es una ejecución dask" in html.lower(), (
         "No confundir simulación con ejecución real")
 
@@ -94,16 +94,21 @@ def comprobar() -> None:
         for m in [re.search(r"\| (\d+) \|", line)]
     ]
     assert sum(puntos) == 100, f"Rúbrica debe sumar 100 (encontrado {sum(puntos)})"
-    # No copiar borradores al sitio mientras el usuario lo mantiene en revisión.
-    assert not (ROOT / "Presentaciones/proyecto-final-explorer.html").exists()
+    # Publicación expresamente autorizada: 1 guía, 1 cuaderno y un acceso LMS.
+    assert EXPLORER.exists() and "BORRADOR DE REVISIÓN DOCENTE" not in html
     pages = (ROOT / ".github/workflows/pages.yml").read_text(encoding="utf-8")
-    assert "Cuadernos/Proyecto_Final_Compras_Claras.ipynb" not in pages, "El cuaderno se publicó en Pages"
-    assert "proyecto-final-explorer.html" not in pages, "Explorer no debe estar en artefacto Pages"
+    assert "cp -R Presentaciones _site/" in pages, "Falta copiar la guía al sitio"
+    assert "test -f _site/Presentaciones/proyecto-final-explorer.html" in pages
     portada = (ROOT / "index.html").read_text(encoding="utf-8")
-    lms = (ROOT / "lms/data/course.json").read_text(encoding="utf-8")
-    for texto_publicacion in ("proyecto-final-explorer.html", "Proyecto_Final_Compras_Claras.ipynb"):
-        assert texto_publicacion not in portada, "El proyecto aún no debe aparecer en portada"
-        assert texto_publicacion not in lms, "El proyecto aún no debe aparecer en LMS"
+    lms_texto = (ROOT / "lms/data/course.json").read_text(encoding="utf-8")
+    assert "Presentaciones/proyecto-final-explorer.html" in portada
+    assert "Proyecto_Final_Compras_Claras.ipynb" in portada
+    assert "Presentaciones/proyecto-final-explorer.html" in lms_texto
+    curso = json.loads(lms_texto)
+    sesion16 = next(s for s in curso["sessions"] if s["n"] == 16)
+    assert sesion16["status"] == "visible" and "proyecto-final-explorer.html" in sesion16["entry"]["url"]
+    # No inventar fechas/ponderación del PDA de otro grupo.
+    assert "due_at" not in sesion16 and "weight_percent" not in sesion16
     cod_generador = GENERADOR.read_text(encoding="utf-8")
     for token in ("csv.DictReader", "observatorio.html", "predicciones", "replace", "textContent"):
         assert token in cod_generador, f"Generador incompleto: {token}"
@@ -112,7 +117,7 @@ def comprobar() -> None:
     assert "GitHub Free" in VIABILIDAD.read_text(encoding="utf-8")
     assert "810" in codigo, "Falta conjunto docente depurado"
     assert "tabla_curada" in codigo and "S13.experimentos_distribuidos(tabla_curada" in codigo
-    print("Proyecto final S14: ruta, producto offline, cuota, rúbrica y NO publicación OK (offline).")
+    print("Proyecto final S14: ruta, producto offline, cuota, rúbrica y PUBLICACIÓN autorizada OK (offline).")
 
 
 if __name__ == "__main__":
