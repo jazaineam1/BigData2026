@@ -262,3 +262,30 @@ test('S13 visuales nuevas se adaptan al móvil sin desplazamiento horizontal',as
     expect(dims.document,'desborde horizontal en s'+n).toBeLessThanOrEqual(dims.viewport+4);
   }
 });
+
+test('S13 perfil Codespaces inequívoco y verificación desde la diapositiva 8',async({page})=>{
+  await page.goto(URL+'#s8');
+  const panel=page.locator('#s8');
+  await expect(panel).toContainText('S13 · Dask, MapReduce y modelos SECOP');
+  await expect(panel).toContainText('Airflow Lab');
+  await expect(panel).toContainText('LISTO PARA S13');
+  await expect(panel).toContainText('Cuadernos');
+  await expect(panel).toContainText('Python 3.11');
+  const create=panel.locator('a[href="https://codespaces.new/jazaineam1/BigData2026/tree/main"]');
+  await expect(create).toHaveCount(1);
+  await expect(panel).toContainText('NO preselecciona el perfil');
+  await panel.locator('#setupChecks input[type="checkbox"]').first().check();
+  await panel.locator('#setupCheckRun').click();
+  await expect(panel.locator('#setupFeedback')).not.toBeEmpty();
+});
+
+test('S13 diapositiva de inicio cabe en formato de proyector 1280 por 720',async({page})=>{
+  await page.setViewportSize({width:1280,height:720});
+  await page.goto(URL+'#s8');
+  const medida=await page.evaluate(()=>({
+    exceso:document.documentElement.scrollHeight-innerHeight,
+    ancho:document.documentElement.scrollWidth-innerWidth
+  }));
+  expect(medida.exceso).toBeLessThanOrEqual(16);
+  expect(medida.ancho).toBeLessThanOrEqual(4);
+});
