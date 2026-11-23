@@ -2,12 +2,32 @@
 
 **Recursos del estudiante:** [presentación interactiva](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1) y [único cuaderno ejecutable](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). No es necesario ejecutar aplicaciones Streamlit, copiar scripts ni crear notebooks nuevos.
 
-## Abrir Codespaces
+## Abrir Codespaces: enlace, perfil exacto y verificación
 
-1. En el repositorio selecciona **Code → Codespaces → New with options**.
-2. Elige el perfil **S13 · Dask, MapReduce y modelos SECOP**.
-3. Al crearse, el entorno instala automáticamente las dependencias y hace una comprobación ligera de un worker Dask y las importaciones de K-means. No entrena modelos grandes.
-4. Abre `Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb`, selecciona Python y ejecuta sus celdas **en orden**.
+**Entrada de GitHub:** [Crear Codespace desde `main`](https://codespaces.new/jazaineam1/BigData2026/tree/main). **Este enlace NO garantiza que quede seleccionado el perfil S13**: hay que elegirlo manualmente antes de crear.
+
+1. Inicia sesión en [BigData2026](https://github.com/jazaineam1/BigData2026), rama **`main`**.
+2. Entra a **Code → Codespaces → ⋯ → New with options**. Si abriste el enlace de creación, revisa allí **Dev container configuration** antes de confirmar.
+3. Selecciona **`S13 · Dask, MapReduce y modelos SECOP`** (archivo [`.devcontainer/s13-distribuido/devcontainer.json`](../../.devcontainer/s13-distribuido/devcontainer.json)). **NO `Airflow Lab`** (es el perfil predeterminado).
+4. **Machine type:** 2 núcleos si está disponible, suficiente para la práctica inicial; 4 opcionales con mayor uso de cuota. **Branch:** `main`.
+5. Pulsa **Create codespace** y espera a que finalice `postCreateCommand`: instala `requirements.txt` y ejecuta `verificar_entorno.py`.
+6. Abre **Terminal → New Terminal**, desde `/workspaces/BigData2026`, y ejecuta:
+
+   ```bash
+   pwd
+   python --version
+   nproc
+   free -h
+   python Laboratorios/S13_Codespaces/verificar_entorno.py
+   ```
+
+7. La última línea del verificador debe ser **`LISTO PARA S13`**. Si falla, primero comprueba perfil, rama y error de instalación. Solo ante una dependencia ausente, en la terminal del Codespace ejecuta `python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt`.
+8. Desde el **Explorador de VS Code web**, abre **`Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb`**, no desde terminal ni solo en el navegador github.com. En la esquina superior derecha usa **Select Kernel → Python Environments → Python 3.11** (o el Python 3.11 del Codespace). Ejecuta las celdas en orden.
+
+**Si ya tenías un Codespace con el perfil Airflow:** comprueba su configuración antes de reutilizarlo. Instalar Dask con `pip` no cambia la configuración predeterminada de Airflow; crea un Codespace S13 cuando sea necesario. No necesitas Ollama, Streamlit ni otro cuaderno.
+
+**Enlaces útiles:** [presentación S13](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1) · [único cuaderno](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb) · [configuración exacta](../../.devcontainer/s13-distribuido/devcontainer.json) · [documentación oficial de creación y perfiles de Codespaces](https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository).
+
 
 ## Qué aprenderás
 
