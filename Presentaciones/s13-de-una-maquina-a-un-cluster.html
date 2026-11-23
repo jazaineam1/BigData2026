@@ -88,6 +88,34 @@
   #s7 .interpret,#s19 .interpret{padding:7px 12px;font-size:13px;line-height:1.2}
   #s7 .interpret p,#s19 .interpret p{margin:3px 0}
 }
+
+/* Ajuste final a proyectores 1280×720: no oculta contenido; reduce espacios sobrantes. */
+@media (min-width:1100px) and (max-height:760px) {
+  #s7 .edu-viz{max-height:94px;margin:2px auto}
+  #s7 .panel p{margin:3px 0}
+  #s9 h1,#s24 h1{font-size:28px;line-height:1.08;margin:3px 0 7px}
+  #s9 .panel,#s24 .panel{padding:10px 13px;font-size:13px;line-height:1.25}
+  #s9 .panel h2,#s24 .panel h2{font-size:16px;margin:1px 0 6px}
+  #s9 .panel h3,#s24 .panel h3{font-size:14px;margin:5px 0 3px}
+  #s9 .panel p,#s24 .panel p{margin:4px 0}
+  #s9 .s13-viz{max-height:196px;margin:5px auto}
+  #s9 .s13-microdefs{gap:3px;margin:5px 0}
+  #s9 .s13-microdefs>div{padding:4px 3px;font-size:12px}
+  #s9 pre{padding:7px;margin:4px 0;font-size:12px}
+  #s12 .edu-viz{max-height:96px;margin:3px auto}
+  #s12 .panel p{margin:4px 0}
+  #s13 .s13-model-list{gap:5px}
+  #s13 .s13-model-list>div{padding:6px 8px}
+  #s13 .s13-pipeline{gap:5px;margin:6px 0}
+  #s13 .s13-step{padding:6px 8px}
+  #s14 .s13-viz{max-height:200px;margin:4px auto}
+  #s14 .s13-number{margin:5px 0}
+  #s14 .panel p{margin:4px 0}
+  #s24 .panel li{margin:2px 0}
+  #s24 .panel table th,#s24 .panel table td{padding:3px 5px;font-size:12px}
+  #s24 .panel .choices{margin:5px 0;gap:5px}
+  #s24 .interpret{padding:7px 12px;font-size:12px}
+}
 </style></head><body><header><span class="brand">BIG DATA · UC · S13</span><a href="../index.html">Curso</a><a href="https://github.com/jazaineam1/BigData2026/blob/main/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb" target="_blank" rel="noopener">Cuaderno ejecutable</a><a href="https://github.com/jazaineam1/BigData2026" target="_blank" rel="noopener">Codespaces</a><span class="grow"></span><span class="phase" id="phase">Caso: Compras Claras</span></header><main class="deck" id="deck"><section class="slide active" id="s1" aria-hidden="false"><div class="kicker">S13 · 01 · Decisión profesional</div><h1>¿Qué cambia cuando repartimos un trabajo entre workers?</h1>
 <div class="cols">
 <article class="panel"><h2>Laura necesita procesar títulos SECOP</h2>
