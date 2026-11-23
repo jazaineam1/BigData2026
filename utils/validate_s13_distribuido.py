@@ -65,6 +65,17 @@ def main():
     assert "OPCIONES_ARQUITECTURA" in text and "OPCIONES_LIMITE" in text
     assert 'globals().get("resumen_demo")' in text
     assert "isinstance(resultado, dict)" in text, "La decisión debe comprobar mediciones reales"
+    kmeans = read("Laboratorios/S13_Codespaces/kmeans_dask_s13.py")
+    import ast
+    ast.parse(kmeans)
+    assert "dask_ml.cluster" in kmeans and "get_task_stream" in kmeans
+    assert "TAMANOS = (250, 1000, 10000, 20000)" in kmeans
+    assert "S13_PERMITIR_AMPLIACION" in kmeans
+    requerimientos = read("Laboratorios/S13_Codespaces/requirements.txt")
+    assert "dask-ml==2025.1.0" in requerimientos
+    assert "EJECUTAR_KMEANS_S13 = False" in text
+    assert "kmeans_dask_s13.py" in text
+    assert "kmeans_dask_s13.py" in html and "Dask-ML K-means" in html
     script_dask = read("Laboratorios/S13_Codespaces/dask_cuando_si.py")
     assert "def construir_traza_tareas(" in script_dask and '"traza_tareas":' in script_dask
     app = read("Laboratorios/S13_Codespaces/app_tfidf_unspsc.py")
@@ -74,6 +85,9 @@ def main():
     assert '"modos_medidos":medidas' in ultima_pestana, "El JSON debe incluir dos mediciones reales"
     assert "st.download_button(" in ultima_pestana
     assert "st.vega_lite_chart(" in app and "traza_tareas" in app, "Falta cronograma real de workers"
+    assert 's13_kmeans_run' in app and 's13_kmeans_ejecucion' in app
+    assert 'n_kmeans=st.selectbox' in app
+
     assert "dask_cuando_si.py" in html
     assert "CPU lógicas" in html
     assert "dask_cuando_si.py" in html
