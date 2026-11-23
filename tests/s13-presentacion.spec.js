@@ -64,47 +64,6 @@ test('S13 Dask diferido y costo completo en calculadora', async ({page}) => {
   await expect(page.locator('#costOut')).toContainText('Aceleración extremo a extremo');
 });
 
-test('S13 TF-IDF enseña el objetivo y una tabla real con L2', async ({page}) => {
-  await page.goto(URL+'#s13');
-  await expect(page.locator('#s13')).toContainText('¿Por qué convertimos las palabras');
-  await page.goto(URL+'#s14');
-  await page.locator('#tfidfToyRun').click();
-  await expect(page.locator('#tfidfToyTable table')).toBeVisible();
-  await expect(page.locator('#tfidfToyTable th')).toHaveCount(6);
-  const hospital=page.locator('#tfidfToyTable tr').filter({has:page.locator('td', {hasText:'hospital'})});
-  await expect(hospital).toContainText('1,6931');
-  await expect(hospital).toContainText('0,0000');
-  await expect(page.locator('#tfidfToyOutput')).toContainText('Norma L2');
-  await page.locator('#tfDoc1').fill('constructor computadores');
-  await page.locator('#tfidfToyRun').click();
-  await expect(page.locator('#tfidfToyTable')).toContainText('constructor');
-  await expect(page.locator('#tfidfToyTable')).not.toContainText('NaN');
-});
-
-test('S13 búsqueda por coseno usa el mismo corpus', async ({page}) => {
-  await page.goto(URL+'#s15');
-  await page.locator('#cosRun').click();
-  await expect(page.locator('#cosOut')).toContainText('Documento');
-});
-
-test('S13 explica caso útil y simulador 2 y 4 workers', async ({page}) => {
-  await page.goto(URL+'#s17');
-  await expect(page.locator('#s17')).toContainText('dask_cuando_si.py');
-  await page.goto(URL+'#s20');
-  await page.locator('#nWorkersSim').selectOption('4');
-  await page.locator('#scenarioWorkers').click();
-  await expect(page.locator('#scenarioOut')).toContainText('2 tandas');
-  await expect(page.locator('#scenarioOut')).toContainText('SIMULACIÓN');
-  await expect(page.locator('#s20')).toContainText('Dask real');
-});
-
-test('S13 explica los dos modos de Dask y el costo de arranque', async ({page}) => {
-  await page.goto(URL+'#s20');
-  await expect(page.locator('#s20')).toContainText('--modo texto');
-  await page.goto(URL+'#s19');
-  await expect(page.locator('#s19')).toContainText('clúster');
-});
-
 test('S13 no atribuye equipos personales a estudiantes', async ({page}) => {
   await page.goto(URL+'#s5');
   const html=await page.locator('main').innerText();
@@ -114,50 +73,12 @@ test('S13 no atribuye equipos personales a estudiantes', async ({page}) => {
   await expect(page.locator('#labFeedback')).toContainText('pasos marcados');
 });
 
-test('S13 pantalla móvil con tabla TF-IDF sin desborde global',async ({page})=>{
-  await page.setViewportSize({width:390,height:844});
-  await page.goto(URL+'#s14');
-  await page.locator('#tfidfToyRun').click();
-  await expect(page.locator('#tfidfToyTable table')).toBeVisible();
-  const dims=await page.evaluate(()=>({a:document.documentElement.scrollWidth,b:innerWidth}));
-  expect(dims.a).toBeLessThanOrEqual(dims.b+4);
-});
-
-
-test('S13 los ejemplos con workers protegen la creación de procesos', async ({page}) => {
-  await page.goto(URL+'#s9');
-  await expect(page.locator('#s9')).toContainText('if __name__ == "__main__"');
-  await page.goto(URL+'#s17');
-  await expect(page.locator('#s17')).toContainText('if __name__ == "__main__"');
-});
-
-test('S13 puedo iniciar Streamlit desde la presentación sin otra guía', async ({page}) => {
-  await page.goto(URL+'#s8');
-  await expect(page.locator('#s8')).toContainText('streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py');
-  await expect(page.locator('#s8')).toContainText('8503');
-  await page.goto(URL+'#s18');
-  await expect(page.locator('#s18')).toContainText('PORTS');
-  await expect(page.locator('#s18')).toContainText('Private');
-});
-
-
-test('S13 sincroniza el ejemplo de TF-IDF y el caso de texto real', async ({page}) => {
-  await page.goto(URL+'#s13');
-  await expect(page.locator('#s13')).toContainText('infraestructura computadores');
-  await page.goto(URL+'#s14');
-  await page.locator('#tfidfToyRun').click();
-  await expect(page.locator('#tfidfToyTable')).toContainText('1,6931');
-  await page.goto(URL+'#s20');
-  await expect(page.locator('#s20')).toContainText('--modo texto');
-});
-
-
 test('S13 permite saltar a cinco unidades desde el selector de navegación', async ({page})=>{
   await page.goto(URL+'#s1');
   await expect(page.locator('#unitJump option')).toHaveCount(5);
   await page.locator('#unitJump').selectOption('12');
   await expect(page.locator('#s13')).toBeVisible();
-  await expect(page.locator('#s13')).toContainText('TF-IDF');
+  await expect(page.locator('#s13')).toContainText('K-means');
   await page.locator('#unitJump').selectOption('20');
   await expect(page.locator('#s21')).toBeVisible();
   await expect(page.locator('#counter')).toHaveText('21 / 24');
@@ -253,17 +174,34 @@ test('S13: láminas 5 y 20 completas en 1280×720 y 1366×768', async ({page})=>
   }
 });
 
-test('S13 distingue entrenamiento distribuido de lotes y conserva 24 diapositivas', async ({page}) => {
-  await page.goto(URL+'#s16');
-  await expect(page.locator('#s16')).toContainText('Qué modelos se pueden entrenar directamente');
-  await page.locator('#s16 summary').last().click();
-  await expect(page.locator('#s16')).toContainText('Dask-ML K-means');
-  await expect(page.locator('#s16')).toContainText('DBSCAN');
-  await page.goto(URL+'#s21');
-  await expect(page.locator('#s21')).toContainText('kmeans_dask_s13.py');
-  await page.locator('#s21 summary').last().click();
-  await expect(page.locator('#s21')).toContainText('--n 1000 --workers 2');
-  await page.goto(URL+'#s24');
-  await expect(page.locator('#s24')).toContainText('PySpark');
-  await expect(page.locator('.slide')).toHaveCount(24);
+test('S13 K-means con datos simulados y limites', async ({page}) => {
+ await page.goto(URL+'#s13');
+ await expect(page.locator('#s13')).toContainText('K-means');
+ await page.goto(URL+'#s14');
+ await expect(page.locator('#s14')).toContainText('1.000 puntos');
+ await expect(page.locator('#s14')).toContainText('simulados');
+ await page.goto(URL+'#s15');
+ await expect(page.locator('#s15')).toContainText('20.000 × 20');
+ await expect(page.locator('#s15')).toContainText('3,2 MB');
+});
+
+test('S13 un cuaderno ejecutable sin scripts de K-means adicionales', async ({page}) => {
+ await page.goto(URL+'#s21');
+ await expect(page.locator('#s21')).toContainText('13_Dask_MapReduce_Compras_Claras.ipynb');
+ await expect(page.locator('#s21')).toContainText('WORKERS_MODELO');
+ await expect(page.locator('#s21')).not.toContainText('kmeans_dask_s13.py');
+ await page.goto(URL+'#s24');
+ await expect(page.locator('#s24')).toContainText('PySpark');
+});
+
+test('S13 navegacion sin herramientas de texto antiguas', async ({page}) => {
+ const errors=[]; page.on('pageerror', e=>errors.push(e.message));
+ await page.goto(URL+'#s14');
+ await expect(page.locator('#tfidfToyRun')).toHaveCount(0);
+ await expect(page.locator('#cosRun')).toHaveCount(0);
+ await expect(page.locator('.slide')).toHaveCount(24);
+ await page.goto(URL+'#s20');
+ await page.locator('#scenarioWorkers').click();
+ await expect(page.locator('#scenarioOut')).toContainText('SIMULACIÓN');
+ expect(errors).toEqual([]);
 });
