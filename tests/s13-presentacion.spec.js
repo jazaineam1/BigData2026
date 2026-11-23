@@ -205,3 +205,60 @@ test('S13 navegacion sin herramientas de texto antiguas', async ({page}) => {
  await expect(page.locator('#scenarioOut')).toContainText('SIMULACIÓN');
  expect(errors).toEqual([]);
 });
+
+
+test('S13 clúster local frente a multinodo con definición explícita',async({page})=>{
+  await page.goto(URL+'#s9');
+  await expect(page.locator('#s9')).toContainText('clúster de cómputo');
+  await expect(page.locator('#topologiaViz')).toBeVisible();
+  await expect(page.locator('#topologiaResultado')).toContainText('Clúster local');
+  await page.locator('#topologiaS13').selectOption('multi');
+  await expect(page.locator('#topologiaResultado')).toContainText('Clúster multinodo');
+  await expect(page.locator('#topologiaViz')).toContainText('Nodo / VM 2');
+  await page.locator('#topologiaS13').selectOption('local');
+  await expect(page.locator('#topologiaViz')).toContainText('Una VM');
+});
+
+test('S13 K-means explica las iteraciones sin ejecutar códigos externos',async({page})=>{
+  await page.goto(URL+'#s14');
+  await expect(page.locator('#kmeansViz circle')).toHaveCount(52);
+  await expect(page.locator('#kmeansMensaje')).toContainText('Iteración 0');
+  await page.locator('#kmeansPaso').click();
+  await expect(page.locator('#kmeansMensaje')).toContainText('Iteración 1');
+  await page.locator('#kmeansPaso').click();
+  await expect(page.locator('#kmeansMensaje')).toContainText('Iteración 2');
+  await page.locator('#kmeansReiniciar').click();
+  await expect(page.locator('#kmeansMensaje')).toContainText('Iteración 0');
+});
+
+test('S13 memoria: 20k por 20 = 3,2 MB y modelo de 640 bytes',async({page})=>{
+  await page.goto(URL+'#s15');
+  await expect(page.locator('#memDatos')).toContainText('3,20 MB');
+  await expect(page.locator('#memModelo')).toContainText('640 bytes');
+  await expect(page.locator('#memLectura')).toContainText('uso real de entrenamiento');
+  await page.locator('#memFilas').selectOption('1000000');
+  await page.locator('#memVariables').selectOption('100');
+  await expect(page.locator('#memDatos')).toContainText('800,00 MB');
+  await page.locator('#memCentroides').selectOption('20');
+  await expect(page.locator('#memModelo')).toContainText('16,00 kB');
+  await expect(page.locator('#s15')).toContainText('95 %');
+});
+
+test('S13 demanda según recursos y diferenciación de clúster',async({page})=>{
+  await page.goto(URL+'#s16');
+  await page.locator('#s13Demanda').selectOption('memoria');
+  await expect(page.locator('#s13DemandaSalida')).toContainText('RAM total NO aumenta');
+  await page.locator('#s13Demanda').selectOption('cpu');
+  await expect(page.locator('#s13DemandaSalida')).toContainText('iteraciones');
+});
+
+test('S13 visuales nuevas se adaptan al móvil sin desplazamiento horizontal',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  for(const n of [9,13,14,15,16,21]){
+    await page.goto(URL+'#s'+n);
+    const dims=await page.evaluate(()=>({
+      document:document.documentElement.scrollWidth,viewport:innerWidth
+    }));
+    expect(dims.document,'desborde horizontal en s'+n).toBeLessThanOrEqual(dims.viewport+4);
+  }
+});
