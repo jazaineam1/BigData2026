@@ -22,7 +22,20 @@ def main():
     assert 45 <= len(celdas) <= 55, f"Cuaderno inesperado: {len(celdas)} celdas"
     codigo = "\n".join("".join(c["source"]) for c in celdas if c["cell_type"] == "code")
     texto = "\n".join("".join(c["source"]) for c in celdas)
-    assert sum(c["cell_type"] == "code" for c in celdas) >= 16
+    assert sum(c["cell_type"] == "code" for c in celdas) >= 20
+    capitulos = [
+        int(re.match(r"## (\d+) ·", "".join(c["source"])).group(1))
+        for c in celdas
+        if c["cell_type"] == "markdown"
+        and re.match(r"## \d+ ·", "".join(c["source"]))
+    ]
+    assert capitulos == list(range(16)), f"Secciones desordenadas: {capitulos}"
+    for requerido in ("MuestraRSS", "pico_por_proceso", "memoria_info",
+                      "tiempo_total_local", "tiempo_total_dask",
+                      "limites_workers", "modelo_distribuido", "centros_iniciales"):
+        if requerido == "memoria_info":
+            requerido = "limite_memoria_bytes"
+        assert requerido in codigo, f"Falta medición K-means: {requerido}"
     for celda in celdas:
         if celda["cell_type"] == "code":
             compile("".join(celda["source"]), "S13_celda", "exec")
@@ -48,6 +61,27 @@ def main():
               'id="scenarioWorkers"', "K-means", "Codespaces"):
         assert x in presentacion, x
     assert not re.search(r"(?i)TF-IDF|tfidfToyRun|kmeans_dask_s13\.py|streamlit run", presentacion)
+    for vista in ("topologiaViz", "kmeansViz", "memBarra", "s13DemandaSalida"):
+        assert f'id="{vista}"' in presentacion, f"Falta visualización: {vista}"
+    assert 'kmeansPaso' in presentacion and 'actualizarMemoria' in presentacion
+    assert '60 %' in presentacion and '95 %' in presentacion
+    # Contrato histórico: las primeras cuatro diapositivas deben permanecer idénticas.
+    def fnv_utf16(cadena):
+        h = 2166136261
+        datos = cadena.encode("utf-16-le")
+        for i in range(0, len(datos), 2):
+            codigo = int.from_bytes(datos[i:i+2], "little")
+            h = ((h ^ codigo) * 16777619) & 0xFFFFFFFF
+        return f"{h:08x}"
+    referencias = ("2eb6f8c8", "72f73a44", "c0f09536", "8c64b782")
+    for n, esperado in enumerate(referencias, start=1):
+        bloque = re.search(
+            rf'<section class="slide(?: active)?" id="s{n}"[\s\S]*?</section>',
+            presentacion
+        )
+        assert bloque and fnv_utf16(bloque.group(0)) == esperado, (
+            f"Se alteró el contenido de la diapositiva {n}"
+        )
     assert 'id="s21"' in presentacion
     assert "REGISTROS" in presentacion and "WORKERS_MODELO" in presentacion
     assert not re.search(r"(?i)(hp del estudiante|tu hp|en mi hp)", presentacion)
@@ -65,6 +99,10 @@ def main():
     assert "S13_Codespaces/requirements.txt" in perfil["postCreateCommand"]
     paquetes = leer("Laboratorios/S13_Codespaces/requirements.txt")
     assert "dask-ml==2025.1.0" in paquetes
+    assert "psutil" in paquetes
+    assert "streamlit" not in paquetes
+    assert set(perfil["forwardPorts"]) == {8787}
+    assert "KMeansDask" in leer("Laboratorios/S13_Codespaces/verificar_entorno.py")
     curso = json.loads(leer("lms/data/course.json"))
     s13 = next(x for x in curso["sessions"] if x["n"] == 13)
     assert s13["status"] == "visible"

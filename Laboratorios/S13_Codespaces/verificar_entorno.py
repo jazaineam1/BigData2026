@@ -12,6 +12,16 @@ import pandas as pd
 import pyarrow
 import sklearn
 from dask.distributed import Client
+from dask_ml.cluster import KMeans as KMeansDask
+from sklearn.datasets import make_blobs
+import psutil
+import inspect
+assert "n_clusters" in inspect.signature(KMeansDask).parameters, "La API K-means de Dask-ML cambió"
+assert hasattr(psutil.Process(), "memory_info"), "psutil no puede medir RSS"
+# Verificar dependencias y forma de entrada sin iniciar otro entrenamiento al abrir Codespaces.
+puntos, _ = make_blobs(n_samples=24, n_features=2, centers=4, random_state=42)
+assert puntos.shape == (24, 2)
+print("Dask-ML KMeans: importación compatible | psutil RSS: OK | muestra numérica: OK")
 
 ROOT = Path(__file__).resolve().parents[2]
 CSV = ROOT / "Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv"

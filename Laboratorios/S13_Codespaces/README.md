@@ -1,41 +1,41 @@
-# Sesión 13 · Dask con un solo cuaderno
+# S13 · De una máquina a un clúster (un solo cuaderno)
 
-**Material para los estudiantes:**
-- [Presentación S13](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1): conceptos y decisiones.
-- [Cuaderno S13](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb): **todas las ejecuciones del laboratorio**, incluido K-means local y distribuido.
+**Recursos del estudiante:** [presentación interactiva](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1) y [único cuaderno ejecutable](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). No es necesario ejecutar aplicaciones Streamlit, copiar scripts ni crear notebooks nuevos.
 
-La sesión usa dos ejemplos claramente diferenciados: **registros SECOP reales** para demostrar MapReduce, pandas/Dask y tareas con workers; y **puntos numéricos simulados** para explicar K-means, un modelo clásico de agrupamiento. No hay que crear ni ejecutar un archivo Python adicional para el modelo.
+## Abrir Codespaces
 
-## Abrir el entorno
+1. En el repositorio selecciona **Code → Codespaces → New with options**.
+2. Elige el perfil **S13 · Dask, MapReduce y modelos SECOP**.
+3. Al crearse, el entorno instala automáticamente las dependencias y hace una comprobación ligera de un worker Dask y las importaciones de K-means. No entrena modelos grandes.
+4. Abre `Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb`, selecciona Python y ejecuta sus celdas **en orden**.
 
-1. En GitHub: **Code → Codespaces → ... → New with options**.
-2. Elige **S13 · Dask, MapReduce y modelos SECOP**; no el perfil predeterminado.
-3. Abre `Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb` y selecciona el kernel Python.
-4. Ejecuta las celdas en orden. La instalación del Codespace incluye Dask, Dask-ML y scikit-learn.
+## Qué aprenderás
 
-Puedes verificar el entorno desde la terminal con `nproc`, `free -h` y `python Laboratorios/S13_Codespaces/verificar_entorno.py`. Esto **no constituye un recurso adicional de estudio**.
+**Clúster de cómputo:** scheduler + workers + recursos. `LocalCluster` mantiene los workers en la misma VM; sus procesos comparten CPU y RAM. En un clúster multinodo cada máquina aporta sus recursos y se comunican por red. Un «clúster» de K-means significa un grupo de datos, no máquinas.
 
-## Modelos y tamaños
+**Dos prácticas:** SECOP real para particiones, MapReduce, Parquet y tareas Dask; puntos numéricos **simulados** para K-means clásico local y distribuido.
 
-**K-means** agrupa puntos por cercanía a centroides; `sklearn.cluster.KMeans` lo entrena localmente y `dask_ml.cluster.KMeans` distribuye el ajuste de **un único modelo**. El cuaderno permite modificar:
+**Una sola comparación:** mismos datos y centroides iniciales para scikit-learn y Dask-ML. Se registran `fit` y predicción local, arranque de Dask, persistencia, `fit` y predicción Dask, trabajadores que ejecutaron tareas y acuerdo de grupos. No se promete que Dask gane.
 
-| Variable | Prueba inicial | Ampliación voluntaria |
+## Memoria: tres números que no debes mezclar
+
+- **Matriz numérica:** `filas × variables × bytes del dato`. Para 20.000 × 20 `float64` = **3,2 MB**.
+- **Centroides:** `grupos × variables × bytes`. Para 4 × 20 `float64` = **640 bytes**; no incluye el resto del estimador.
+- **RAM durante entrenamiento:** Python, datos, copias, resultados temporales y workers. Se toman muestras de **RSS por proceso** con psutil. El máximo observado puede subestimar un pico entre muestras, y sumar RSS de procesos puede contar memoria compartida varias veces.
+
+Las limitaciones de memoria por worker que informa Dask son límites lógicos, no RAM nueva. Los valores de 60, 70, 80 y 95 % corresponden a decisiones de gestión de memoria, no al tamaño del modelo.
+
+## Parámetros del mismo cuaderno
+
+| Parámetro | Valor inicial | Ampliación deliberada |
 |---|---:|---:|
 | `REGISTROS` | 1.000 | 20.000 |
 | `VARIABLES` | 2 | 20 |
-| `WORKERS_MODELO` | 2 | Según CPU y memoria disponibles |
+| `GRUPOS` | 4 | Dejar 4 para comparar |
+| `WORKERS_MODELO` | hasta 2, según CPU efectiva | No exceder los recursos disponibles |
 
-Una matriz `float64` de 20.000 × 20 contiene 400.000 números y ocupa ~3,2 MB **solo en valores**. No significa automáticamente que distribuir sea necesario. En el cuaderno se contrastan tiempos de entrenamiento, arranque del clúster, persistencia y resultados.
+Con dos variables se ven la asignación de puntos, una actualización de centroides y los grupos finales. En 20 dimensiones no se presentan gráficos 2D como si representaran fielmente el problema.
 
-Las demás herramientas se **explican, pero no se ejecutan como ejercicios adicionales**: regresiones distribuidas y XGBoost tienen bibliotecas compatibles; ejecutar validaciones independientes no equivale a distribuir un único ajuste; DBSCAN estándar no se convierte en distribuido usando Dask.
+No ejecutar benchmarks de 50.000 registros ni entrenamientos grandes en GitHub Actions. El flujo automático de PR es estático/visual; la prueba de ejecución completa del cuaderno solo existe como ejecución manual explícita.
 
-## Alcance y recursos
-
-- Se mantienen las demostraciones ligeras de los ocho lotes SECOP y su comparación con ejecución secuencial. La espera externa del ejemplo es **simulada**; el reparto de Dask es real.
-- Los puntos de K-means son **simulados con semilla fija**, no etiquetas o predicciones sobre contratación pública.
-- No repetir 50.000 registros, OCR, modelos neuronales ni entrenamientos costosos en GitHub Actions. Las pruebas automáticas se limitan a sintaxis, estructura y visualización.
-- Dos workers dentro del Codespace no son dos computadores; más workers no crean capacidad física adicional.
-- No se promete una aceleración. Si Dask tarda más, se explican los costos de coordinación.
-- El resultado de SECOP se exporta a Parquet y puede reutilizarse en S14/PySpark. Los datos simulados de K-means no se hacen pasar por SECOP.
-
-**Fuentes:** [Dask](https://docs.dask.org/), [Dask-ML K-means](https://ml.dask.org/modules/generated/dask_ml.cluster.KMeans.html), [scikit-learn](https://scikit-learn.org/stable/modules/clustering.html).
+**Referencias:** [Dask Distributed](https://distributed.dask.org/) · [Worker Memory](https://distributed.dask.org/en/stable/worker-memory.html) · [Dask-ML KMeans](https://ml.dask.org/modules/generated/dask_ml.cluster.KMeans.html).
