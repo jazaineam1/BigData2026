@@ -7,6 +7,7 @@ Las pruebas pandas requieren pandas (ya instalado en el entorno del curso).
 from __future__ import annotations
 
 import ast
+import hashlib
 import csv
 import importlib.util
 import json
@@ -142,6 +143,26 @@ class PruebasAprendizaje(unittest.TestCase):
             self.assertEqual(len(resultados["configuraciones"]), 3)
             self.assertEqual(resultados["mejor_C"], 1.0)
             self.assertEqual(resultados["f1_prueba_final"], .8)
+
+    def test_el_manifiesto_recoge_microrretos_y_respeta_pendientes(self):
+        codigo_cierre = next("".join(c["source"]) for c in cargar_cuaderno()["cells"]
+                            if c["cell_type"] == "code"
+                            and "".join(c["source"]).startswith("# Cierre · una sola traza"))
+        with tempfile.TemporaryDirectory() as temporal:
+            ns = {
+                "offset_segunda_pagina": 20, "n_directa_en_test": 43,
+                "coinciden_los_resultados": True, "C_seleccionado": 1.0,
+                "errores_del_producto": 9,
+                "directorio": Path(temporal), "manifiesto": {"estados": {}},
+                "hashlib": hashlib, "json": json,
+            }
+            exec(codigo_cierre, ns)
+            salida = json.loads((Path(temporal) / "manifest_final.json").read_text())
+            self.assertEqual(salida["microretos"]["E1.1_offset"], 20)
+            self.assertEqual(salida["microretos"]["E7.1_errores_observatorio"], 9)
+            self.assertIsNone(salida["microretos"]["E5.1_registros_Gold"])
+            self.assertIsNone(salida["microretos"]["E6.1_errores_Spark"])
+            self.assertEqual(salida["estados"]["H_microretos.json"]["estado"], "presente")
 
     def test_fuente_1000_y_curaduria_810_con_stdlib(self):
         with DATA.open(newline="", encoding="utf-8") as f:
