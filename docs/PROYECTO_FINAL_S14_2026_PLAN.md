@@ -1,7 +1,7 @@
 # Proyecto final Big Data 2026-2S · Compras Claras
-**Propuesta docente auditable · 22 de noviembre de 2026 · grupo 2 · alcance máximo S14**
+**Propuesta docente auditable · revisión 23 de noviembre de 2026 · grupo 2 · alcance máximo S14**
 
-> **Estado:** diseño implementado parcialmente en una rama de revisión. No equivale a publicación académica, evaluación habilitada ni prueba E2E en Databricks Free. **No fijar fecha de entrega** hasta decisión docente. El PDA 2026-2 en `docs/PDA_guia.md` procede del grupo 1; su ponderación del proyecto final (30 %) queda pendiente de confirmar para el grupo 2.
+> **Estado:** borrador en el repositorio de código, **NO publicado en el sitio ni en el LMS**. No equivale a evaluación habilitada ni a prueba E2E con Databricks Free. **No fijar fecha de entrega** hasta decisión docente. El PDA 2026-2 en `docs/PDA_guia.md` procede del grupo 1; su ponderación del proyecto final (30 %) queda pendiente de confirmar para el grupo 2.
 
 ## 1. Un problema, un flujo, un resultado
 
@@ -20,12 +20,32 @@ El observatorio **funcional sin Codespaces** vale 20 puntos. El estudiante deber
 | C. Dask datos y workers | 12 | particiones, dos workers observados, igualdad con pandas |
 | D. Dask entrenamiento | 13 | tres ajustes independientes, CV en train, test reservado |
 | E. Databricks, Spark SQL y Delta | 15 | subida CSV, capas Bronze/Silver/Gold, consulta contrastada |
-| F. Spark MLlib guiado | 15 | pipeline resuelto, predicciones y F1 solo en test |
+| F. Spark MLlib guiado | 15 | pipeline resuelto, particiones observadas con `spark_partition_id()`, matriz y F1 solo en test |
 | G. Observatorio del estudiante | 20 | HTML offline consultable, filtros, predicciones y CSV descargable |
 | H. Manifiesto, trazas y defensa | 5 | PR del equipo, SHA y explicación de un registro propio |
 | **Total** | **100** | |
 
 **Equidad:** no se pierden puntos por no pagar un servicio o agotar cuotas preexistentes. La actividad bloqueada se documenta con error real y se valida mediante un plan de respaldo docente previamente probado. No inventar ejecuciones remotas.
+
+### Aprender haciendo: una microintervención por etapa, sin aumentar la rúbrica
+
+El cuaderno incorpora **siete microejercicios** de una expresión Python, E1.1 a E7.1. Las comprobaciones (`assert`) muestran si la operación produce el resultado esperado; no equivalen a un examen de definiciones ni sustituyen la defensa del estudiante. **Los 100 puntos y el mismo caso no cambian.**
+
+| Comprobación | El estudiante completa | Evidencia propia | Se valora dentro de |
+|---|---|---|---|
+| E1.1 | segundo `OFFSET` (sin solicitudes HTTP nuevas) | páginas 0/20 | A |
+| E2.1 | cuenta de modalidad en test | número derivado de los 162 registros de prueba | B |
+| E3.1 | comparación de conteos Dask/pandas | igualdad y workers vistos | C |
+| E4.1 | valor `C` de CV, **sin elegirlo por test** | tres puntuaciones F1 CV y ganador | D |
+| E5.1 | suma de la tabla Gold | conciliación de filas Silver/Gold | E |
+| E6.1 | errores fuera de diagonal | matriz de test y particiones observadas | F |
+| E7.1 | cantidad de predicciones incorrectas | identificadores de su test y observatorio | G |
+
+**Progresión didáctica en cada etapa:** leer la necesidad → observar salida real → completar una línea → ejecutar `assert` → interpretar resultado y límite. Los ejercicios que dependen de Databricks muestran «pendiente» fuera de Databricks, sin falsificar resultados.
+
+**Recurso adicional:** ninguno. El Explorer sigue siendo guía/consulta y el cuaderno integra retos, resultados y enlaces. No se crean siete tareas ni siete repositorios independientes.
+
+**Error corregido el 23-nov-2026:** E4 contenía comas indebidas al principio de varias líneas y no compilaba; el código de esta etapa se sustituyó por un bloque Python válido. Se añadió un test ligero de sintaxis para evitar su reaparición.
 
 ## 2. Lo que sí se impartió y lo nuevo que NO puede exigirse sin guía
 
@@ -174,3 +194,7 @@ Antes de asignar, revisar [análisis de viabilidad y presupuesto estudiantil](PR
 
 ### Revisión docente OFFSET
 La adquisición E1 reutiliza el contrato TC1: [utils/proyecto_final_offset.py](../utils/proyecto_final_offset.py). Usa `$offset=0/20` y `$limit=20`, ventana `2024-01`, orden total que finaliza en `:id ASC`, hash por página, igualdad de descarga serial y concurrente, captura de 429 y persistencia RAW. La descarga de clase queda separada del snapshot de entrenamiento. [Pruebas offline](../tests/test_proyecto_final_offset.py), sin HTTP real en Actions. La **API parametrizada en vivo aún no ha sido verificada** desde este entorno: nunca declarar éxito sin evidencia HTTP.
+
+### Control de calidad pedagógico (23-nov-2026)
+
+El test de prueba [`tests/test_proyecto_final_aprendizaje.py`](../tests/test_proyecto_final_aprendizaje.py) comprueba, sin red ni cómputo distribuido, que todas las celdas Python compilen, que E4 conserve su corrección, que existan siete retos de una expresión y que el conjunto real versionado cumpla los recuentos de curaduría esperados. Incluye ejecuciones controladas de retos con valores de prueba; **no debe presentarse como ejecución de Dask o Databricks real**. Ejecutarlo manualmente en el entorno docente, no dentro de Actions pesadas.
