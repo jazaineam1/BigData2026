@@ -58,6 +58,8 @@ def comprobar() -> None:
     for reto in microretos:
         assert any(f"### {reto} ·" in t for t in textos), (
             f"Falta microejercicio pedagógico {reto}")
+    assert '"H_microretos.json"' in codigo
+    assert "manifiesto[\"microretos\"] = resultados_microretos" in codigo
     assert codigo.count("= ____") == 7, (
         "Debe haber exactamente una expresión guiada por E1, E2, E3, E4, E5, E6 y E7.")
     assert "referencia = S13.entrenar_y_evaluar(tabla_curada)" in codigo
