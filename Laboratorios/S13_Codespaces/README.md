@@ -102,7 +102,7 @@ Las ampliaciones de XGBoost, los benchmarks de 50.000 y los 1.000 embeddings neu
 
 **Objetivo:** demostrar mediante tareas realmente ejecutadas por Dask que un mismo computador virtual puede tener uno, dos, cuatro o más trabajadores y que la concurrencia o el paralelismo depende de CPU lógicas, hilos, funciones y memoria. La clase no requiere auditar ceros administrativos, repetir un benchmark de 50.000 fichas, ejecutar OCR real ni descargar modelos.
 
-**Solo dos recursos de estudio:** [presentación interactiva de 32 diapositivas](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1) y [cuaderno S13](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). Los programas ya están dentro de Codespaces.
+**Solo dos recursos de estudio:** [presentación interactiva de 24 diapositivas](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1) y [cuaderno S13](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). Los programas ya están dentro de Codespaces.
 
 ### 1. Revisar recursos de la máquina virtual
 
@@ -192,6 +192,27 @@ Para aplicar Dask a documentos de otro proyecto, sustituye dentro de `procesar_l
 
 **Fuentes técnicas:** [Dask Best Practices](https://docs.dask.org/en/stable/best-practices.html) · [Dask Distributed Efficiency](https://distributed.dask.org/en/stable/efficiency.html) · [Especificaciones de runners GitHub Actions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job).
 
+
+### Ampliación opcional: entrenar un K-means realmente distribuido
+
+**No es parte de Run All ni del reto obligatorio.** El nuevo script usa el mismo CSV SECOP versionado sin consultar APIs; prepara títulos/descripciones con TF-IDF + TruncatedSVD (20 variables) y entrena **el mismo K-means conceptual** localmente y con `dask_ml.cluster.KMeans`. Comparte centroides iniciales, `k`, iteraciones y matriz; el ajuste local y el distribuido pueden converger a grupos diferentes y se comparan mediante inercia y ARI. No se emplea DBSCAN.
+
+Dask-ML se instala desde `requirements.txt` durante la creación del Codespace S13. **Ejecución voluntaria** desde la raíz:
+
+```bash
+python Laboratorios/S13_Codespaces/kmeans_dask_s13.py --n 250 --workers 2
+python Laboratorios/S13_Codespaces/kmeans_dask_s13.py --n 1000 --workers 2
+```
+
+La primera prueba se limita a 250 expedientes; la segunda es la ampliación recomendada. Los 10.000 o 20.000 registros requieren habilitación deliberada con `S13_PERMITIR_AMPLIACION=1` y recursos verificados; 50.000 o más no están habilitados. Los valores pueden variar por VM y edición de los archivos. **Una matriz 20.000 × 20 en float64 ocupa ~3,2 MB**, sin contar corpus, TF-IDF, copias y modelo. Esto no requiere distribución por tamaño de matriz. La aceleración no está garantizada.
+
+El script produce `salidas/kmeans_s13.json` (se sobrescribe en la siguiente ejecución) con: identificador SHA-256 de IDs, muestra y parámetros; cantidad y direcciones de workers; tareas observadas durante `fit` por worker; tiempos de lectura+vectorización, ajuste local, arranque, persistencia, ajuste distribuido, predicción y total; inercia, acuerdo ARI y ejemplos de documentos cercanos a cada centroide. **Si la traza solo muestra un worker, no afirmar participación de los dos.** Es un único modelo Dask-ML; los folds paralelos con joblib son varios modelos independientes. No se interpretan los grupos como alertas contractuales.
+
+**Modelos disponibles y límites:** K-means, regresión lineal/logística Dask-ML, XGBoost-Dask y LightGBM-Dask pueden distribuir un entrenamiento con sus API compatibles; `ParallelPostFit` distribuye predicciones y `Incremental` alimenta lotes a un estimador, no entrenamientos simultáneos automáticamente. El `DBSCAN` de scikit-learn no es distribuido al envolverlo en Dask; no hay DBSCAN CPU nativo en Dask-ML. La elección se basa en memoria efectiva, número de variables, costos de cada iteración, coordinación y almacenamiento; no existe un umbral fijo de filas.
+
+**Importante para preparar la clase:** ejecutar una sola vez el ejemplo 250 y después 1.000 en un Codespace nuevo, inspeccionar el JSON y registrar posibles problemas de compatibilidad; el código y los tests estáticos no sustituyen esta prueba integrada. No ejecutar benchmarks de 10k/20k en Actions automáticas.
+
+Fuente: https://ml.dask.org/modules/generated/dask_ml.cluster.KMeans.html
 
 ### Dependencias
 
