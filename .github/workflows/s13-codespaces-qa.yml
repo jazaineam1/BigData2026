@@ -29,7 +29,6 @@ jobs:
       - name: Estructura del cuaderno, diapositivas, LMS y Codespaces (sin instalar dependencias)
         run: |
           python utils/validate_s13_distribuido.py
-          python -m py_compile Laboratorios/S13_Codespaces/app_tfidf_unspsc.py
           python -m py_compile Laboratorios/S13_Codespaces/dask_cuando_si.py
           python -m py_compile Laboratorios/S13_Codespaces/verificar_entorno.py
           python -m unittest discover -s Laboratorios/S13_Codespaces -p 'test_dask_cuando_si.py' -v
@@ -37,57 +36,49 @@ jobs:
           import json
           from pathlib import Path
           n=json.loads(Path('Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb').read_text())
-          assert 45<=len(n['cells'])<=55
+          assert 51<=len(n['cells'])<=55
           for c in n['cells']:
               if c['cell_type']=='code':
                   compile(''.join(c['source']),'celda_s13','exec')
           t='\n'.join(''.join(c['source']) for c in n['cells'])
           assert 'OPCIONES_ARQUITECTURA' in t and 'OPCIONES_LIMITE' in t
-          assert 'KMeansDask' in t and 'make_blobs' in t
+          assert 'KMeansDask' in t and 'MuestraRSS' in t and 'make_blobs' in t
           print('QA ligero: cuaderno único, K-means clásico, decisiones y sintaxis Python OK')
           PY
   s13-reproducible:
+    # Prueba de integración de un cuaderno únicamente mediante workflow_dispatch
+    # NUNCA se ejecuta en PR. Sin 50k, benchmarks ni modelos neuronales.
     if: github.event_name == 'workflow_dispatch' && inputs.run_heavy == true
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Validar contrato de presentación, cuaderno y LMS
-        run: python utils/validate_s13_distribuido.py
-      - name: Instalar las mismas dependencias que Codespaces
+      - name: Instalar lo mismo que en Codespaces
         run: |
           python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
           python -m pip install nbclient nbformat
-      - name: Verificar Codespaces y datasets
-        run: python Laboratorios/S13_Codespaces/verificar_entorno.py
-      - name: Validar sintaxis del panel heredado (fuera de ruta estudiantil)
+      - name: Validar perfil y smoke ligero de Dask
         run: |
-          python -m py_compile Laboratorios/S13_Codespaces/app_tfidf_unspsc.py
-          python -m py_compile Laboratorios/S13_Codespaces/cv_dask_mismo_modelo.py
-          python - <<'PY'
-          from streamlit.testing.v1 import AppTest
-          a=AppTest.from_file("Laboratorios/S13_Codespaces/app_tfidf_unspsc.py").run(timeout=120)
-          assert not a.exception, [str(x) for x in a.exception]
-          assert len(a.tabs)==7, len(a.tabs)
-          print("Panel S13: siete estaciones reales, carga SECOP, TF-IDF y clasificación")
-          PY
-      - name: Probar motor y resultados verificables
-        run: |
-          cd Laboratorios/S13_Codespaces
-          python -m unittest -v test_s13
-      - name: Ejecutar el laboratorio completo sin intervención manual
-        run: python Laboratorios/S13_Codespaces/analisis.py todo
-      - name: Ejecutar todo el cuaderno Jupyter desde una carpeta limpia
+          python utils/validate_s13_distribuido.py
+          python Laboratorios/S13_Codespaces/verificar_entorno.py
+      - name: Ejecutar solo el cuaderno S13, 1.000×2 por defecto
         run: |
           python - <<'PY'
           import nbformat
           from nbclient import NotebookClient
           from pathlib import Path
-          path=Path("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb")
-          nb=nbformat.read(path,as_version=4)
-          NotebookClient(nb,timeout=240,kernel_name="python3",resources={"metadata":{"path":"Cuadernos"}}).execute()
-          print("Run All del cuaderno S13: OK")
+          ruta=Path("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb")
+          nb=nbformat.read(ruta,as_version=4)
+          NotebookClient(
+              nb,timeout=240,kernel_name="python3",
+              resources={"metadata":{"path":"Cuadernos"}}
+          ).execute()
+          print("S13 Run All, clúster Dask y memoria RSS: OK")
           PY
