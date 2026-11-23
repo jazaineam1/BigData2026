@@ -108,6 +108,22 @@ def main():
     assert s13["status"] == "visible"
     assert "s13-de-una-maquina" in s13["entry"]["url"]
     indice = leer("index.html")
+    # Contrato de incorporación: la creación abre main, pero exige elegir S13 manualmente.
+    enlace = "https://codespaces.new/jazaineam1/BigData2026/tree/main"
+    perfil_exacto = "S13 · Dask, MapReduce y modelos SECOP"
+    guía = leer("Laboratorios/S13_Codespaces/README.md")
+    for contenido in (presentacion, texto, guía):
+        assert enlace in contenido, "Falta el vínculo para entrar al entorno S13"
+        assert perfil_exacto in contenido, "No se nombró el perfil exacto"
+        assert "Airflow Lab" in contenido, "Falta advertencia sobre el perfil equivocado"
+        assert "LISTO PARA S13" in contenido, "Falta la comprobación final del entorno"
+    assert enlace in indice and "Crear Codespace S13" in indice
+    tarjeta = indice[indice.index('data-n="13"'):].split("</article>", 1)[0]
+    assert "TF-IDF" not in tarjeta, "La portada describe un ejercicio retirado"
+    assert "K-means" in tarjeta, "La portada no describe el modelo actual"
+    assert "WORKERS_DEMO_S13 = min(2, max(1, cpus_disponibles()))" in codigo
+    assert "clasificación didáctica" not in texto
+    assert "ampliación opcional del final" not in texto
     assert indice.count('data-n="13"') == 1
     assert 'href="Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1"' in indice
     print(f"S13 validada: 24 láminas, {len(celdas)} celdas, 1 cuaderno y K-means numérico")
