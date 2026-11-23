@@ -2,7 +2,19 @@
 
 **Recursos del estudiante:** [presentación interactiva](../../Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1) y [único cuaderno ejecutable](../../Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb). No es necesario ejecutar aplicaciones Streamlit, copiar scripts ni crear notebooks nuevos.
 
-## Abrir Codespaces
+## Acceso directo para estudiantes — rama exclusiva de S13
+
+[**Crear Codespace S13**](https://codespaces.new/jazaineam1/BigData2026/tree/s13-laboratorio) · [**Cuaderno en la rama del estudiante**](https://github.com/jazaineam1/BigData2026/blob/s13-laboratorio/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb)
+
+1. Abre el enlace y comprueba la rama **`s13-laboratorio`**. Esta rama dispone de **un único perfil predeterminado: S13 · Un solo cuaderno de Dask**; no debes elegir Airflow.
+2. Selecciona **2 núcleos** si están disponibles, crea el Codespace y espera a ver **`LISTO PARA S13`**.
+3. Abre el cuaderno `Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb` con **Python 3.11** y ejecútalo en orden. El reto de decisión final se completa con los resultados propios.
+
+Los nueve CSV SECOP, incluidos tres fragmentos grandes (unos 300.000 registros en total), siguen disponibles. **El cuaderno conserva 55 celdas y sus 22 celdas de código intactas**; únicamente se actualizaron los textos de inicio. En el Explorador las carpetas técnicas se ocultan visualmente.
+
+La configuración manual de perfiles descrita abajo solo aplica a quienes trabajan directamente sobre la rama docente `main`. **Para estudiantes utiliza el enlace de arriba.**
+
+## Configuración docente alternativa en main
 
 1. En el repositorio selecciona **Code → Codespaces → New with options**.
 2. Elige el perfil **S13 · Dask, MapReduce y modelos SECOP**.
