@@ -73,6 +73,21 @@
 .s13-threshold{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-top:10px}.s13-threshold>div{display:grid;grid-template-columns:9px 39px 1fr;gap:4px;align-items:center;font-size:11px}.s13-threshold i{width:8px;height:21px;border-radius:5px}.s13-threshold span{color:#4d5669}
 .s13-demand-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.s13-demand-grid>div{border:1px solid #d3dfed;background:#f6faff;border-radius:9px;padding:9px;display:grid;gap:3px}.s13-demand-grid b{font-size:17px;color:#105d80}.s13-demand-grid span{font-size:13px}.s13-demand-grid small{font-size:11px;color:#596579}
 @media(max-width:650px){.s13-viz{max-height:230px}.s13-microdefs>div{grid-template-columns:95px 1fr}.s13-demand-grid{grid-template-columns:1fr}.s13-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Evita desplazamiento vertical en los esquemas de MapReduce y de tiempos */
+@media (min-width:1100px) and (max-height:760px) {
+  #s7 h1,#s19 h1{font-size:29px;line-height:1.08;margin-bottom:7px}
+  #s7 .panel,#s19 .panel{padding:10px 14px;font-size:14px;line-height:1.27}
+  #s7 .panel h2,#s19 .panel h2{font-size:16px;margin:0 0 5px}
+  #s7 .panel p,#s19 .panel p{margin:4px 0}
+  #s7 .panel li,#s19 .panel li{margin:2px 0}
+  #s7 .panel pre,#s19 .panel pre{padding:7px;margin:5px 0}
+  #s7 .panel table th,#s7 .panel table td,
+  #s19 .panel table th,#s19 .panel table td{padding:4px 6px;font-size:12px}
+  #s19 .edu-viz{max-height:108px;margin:3px auto}
+  #s7 .interpret,#s19 .interpret{padding:7px 12px;font-size:13px;line-height:1.2}
+  #s7 .interpret p,#s19 .interpret p{margin:3px 0}
+}
 </style></head><body><header><span class="brand">BIG DATA · UC · S13</span><a href="../index.html">Curso</a><a href="https://github.com/jazaineam1/BigData2026/blob/main/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb" target="_blank" rel="noopener">Cuaderno ejecutable</a><a href="https://github.com/jazaineam1/BigData2026" target="_blank" rel="noopener">Codespaces</a><span class="grow"></span><span class="phase" id="phase">Caso: Compras Claras</span></header><main class="deck" id="deck"><section class="slide active" id="s1" aria-hidden="false"><div class="kicker">S13 · 01 · Decisión profesional</div><h1>¿Qué cambia cuando repartimos un trabajo entre workers?</h1>
 <div class="cols">
 <article class="panel"><h2>Laura necesita procesar títulos SECOP</h2>
