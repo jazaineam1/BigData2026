@@ -119,8 +119,11 @@ def ejecutar(n=1000, workers=2, k=4, max_iter=12):
         local = LocalKMeans(n_clusters=k, init=centroides.copy(), n_init=1,
                             max_iter=max_iter, algorithm="lloyd", random_state=42)
         local.fit(x)
-        etiquetas_locales = local.labels_.copy()
     t_local = time.perf_counter() - inicio
+    inicio = time.perf_counter()
+    with threadpool_limits(limits=1):
+        etiquetas_locales = local.predict(x)
+    t_predecir_local = time.perf_counter() - inicio
 
     inicio_cluster = time.perf_counter()
     with LocalCluster(n_workers=workers, threads_per_worker=1,
@@ -156,7 +159,7 @@ def ejecutar(n=1000, workers=2, k=4, max_iter=12):
     assert len(etiquetas_locales) == n
     assert np.isfinite(centros_dask).all()
 
-    total_local = t_preparacion + t_local
+    total_local = t_preparacion + t_local + t_predecir_local
     total_dask = t_preparacion + t_arranque + t_persistir + t_entrenar + t_predecir
     resultado = {
         "caso": "Agrupamiento textual SECOP sin etiquetas",
@@ -171,6 +174,7 @@ def ejecutar(n=1000, workers=2, k=4, max_iter=12):
         "tiempos_segundos": {
             "lectura_tfidf_svd_y_centroides": round(t_preparacion, 4),
             "fit_kmeans_local": round(t_local, 4),
+            "prediccion_local": round(t_predecir_local, 4),
             "arranque_workers_dask": round(t_arranque, 4),
             "transferencia_persistencia": round(t_persistir, 4),
             "fit_kmeans_dask": round(t_entrenar, 4),
