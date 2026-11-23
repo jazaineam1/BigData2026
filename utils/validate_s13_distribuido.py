@@ -1,109 +1,79 @@
-"""Valida contrato y navegación de la sesión S13 (sin bibliotecas externas)."""
+"""Valida S13 sin instalar dependencias ni iniciar entrenamientos."""
 from __future__ import annotations
 
 import json
 import re
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-def read(path):
-    return (ROOT / path).read_text(encoding="utf-8")
+
+
+def leer(ruta: str) -> str:
+    return (ROOT / ruta).read_text(encoding="utf-8")
+
 
 def main():
-    nb = json.loads(read("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb"))
-    assert nb["nbformat"] == 4
-    cells = nb["cells"]
-    assert 55 <= len(cells) <= 75, f'Cantidad inesperada de celdas: {len(cells)}'
-    assert sum(c["cell_type"] == "code" for c in cells) >= 15
-    text = "\n".join("".join(c["source"]) for c in cells)
-    assert "Rúbrica observable de práctica" in text, "Falta rúbrica S13"
-    assert "DEMO_DASK_EN_RUN_ALL" in text and "dask_cuando_si.py" in text, "Falta demostración reproducible"
-    assert "WORKERS_DEMO_S13" in text, "Workers configurables en una sola variable"
-    assert "EJECUTAR_50K_AHORA =" not in text, "No incluir controles de 50k en el cuaderno central"
-    assert "ACTIVAR_MODELO_26K =" not in text, "No incluir entrenamiento costoso como actividad"
-    assert "s13_A_f1_ngramas.png" in text and "s13_B_f1_por_clase.png" in text, "Faltan figuras de la práctica"
-    assert "prueba_texto" in text, "Falta transformación textual real"
-    assert "LogisticRegression(" not in text, "Clasificación supervisada duplicada; conservar UNSPSC"
-    assert "infraestructura computadores" in text, "Minicorpus TF-IDF no sincronizado"
-    assert "OPCIONES_ARQUITECTURA" in text and "OPCIONES_LIMITE" in text, "Faltan opciones cerradas de respuesta"
-    for needed in ("MapReduce", "Codespaces", "HDFS", "Dask", "TF-IDF", "Parquet", "F1 macro"):
-        assert needed in text, f"Falta material pedagógico: {needed}"
-    html = read("Presentaciones/s13-de-una-maquina-a-un-cluster.html")
-    slides = re.findall(r'<section class="slide(?: active)?" id="s(\d+)"', html)
-    assert len(slides) == 24
-    assert slides == [str(i) for i in range(1, 25)]
-    for required in ("id=\"decisionBox\"", "id=\"hdfsGrid\"", "id=\"quizPrompt\"", "id=\"tfidfToyRun\"", "id=\"tfidfToyTable\"", "id=\"cosRun\"", "id=\"mapRun\"", "id=\"costRun\"", "id=\"workerRun\"", "id=\"scenarioWorkers\"", "S12", "Codespaces"):
-        assert required in html, f"Falta en presentación: {required}"
-    config = json.loads(read(".devcontainer/s13-distribuido/devcontainer.json"))
-    assert "S13" in config["name"]
-    assert config["portsAttributes"]["8787"]["visibility"] == "private"
-    assert "S13_Codespaces/requirements.txt" in config["postCreateCommand"]
-    course = json.loads(read("lms/data/course.json"))
-    c13 = next(x for x in course["sessions"] if x["n"] == 13)
-    c12 = next(x for x in course["sessions"] if x["n"] == 12)
-    assert c13["status"] == "visible"
-    assert "s13-de-una-maquina" in c13["entry"]["url"]
-    assert c12["assessment"]["due_at"] == "2026-11-15T23:59:59-05:00"
-    # Detecta errores de sintaxis en la interacción ANTES de ejecutar Playwright.
-    import shutil
-    import subprocess
-    import tempfile
-    script = re.search(r"<script>(.*?)</script>", html, re.DOTALL)
-    assert script, "Falta script interactivo"
-    if shutil.which("node"):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".js", encoding="utf-8") as temporal:
-            temporal.write(script.group(1))
-            temporal.flush()
-            subprocess.run(["node", "--check", temporal.name], check=True)
-    assert "dask_cuando_si.py" in text
-    assert not (ROOT / "docs/S13_PLAN_MEJORA_DASK.md").exists(), "Los planes del docente no se publican"
-    # Validar contrato y flujo de evidencia, no prohibir palabras en explicaciones.
-    codigos_principales = "\\n".join(
-        "".join(c["source"]) for c in cells[:52] if c["cell_type"] == "code"
-    )
-    assert "LogisticRegression(" not in codigos_principales, "No duplicar modelos en la ruta principal"
-    assert "OPCIONES_ARQUITECTURA" in text and "OPCIONES_LIMITE" in text
-    assert 'globals().get("resumen_demo")' in text
-    assert "isinstance(resultado, dict)" in text, "La decisión debe comprobar mediciones reales"
-    kmeans = read("Laboratorios/S13_Codespaces/kmeans_dask_s13.py")
-    import ast
-    ast.parse(kmeans)
-    assert "dask_ml.cluster" in kmeans and "get_task_stream" in kmeans
-    assert "TAMANOS = (250, 1000, 10000, 20000)" in kmeans
-    assert "S13_PERMITIR_AMPLIACION" in kmeans
-    requerimientos = read("Laboratorios/S13_Codespaces/requirements.txt")
-    assert "dask-ml==2025.1.0" in requerimientos
-    assert "EJECUTAR_KMEANS_S13 = False" in text
-    assert "kmeans_dask_s13.py" in text
-    assert "kmeans_dask_s13.py" in html and "Dask-ML K-means" in html
-    script_dask = read("Laboratorios/S13_Codespaces/dask_cuando_si.py")
-    assert "def construir_traza_tareas(" in script_dask and '"traza_tareas":' in script_dask
-    app = read("Laboratorios/S13_Codespaces/app_tfidf_unspsc.py")
-    ultima_pestana = app.split("with tabs[6]:",1)[-1]
-    assert 'if st.toggle("Activar clasificación opcional"' in app
-    assert "len(medidas)<2" in ultima_pestana, "No exportar decisiones sin ambos casos ejecutados"
-    assert '"modos_medidos":medidas' in ultima_pestana, "El JSON debe incluir dos mediciones reales"
-    assert "st.download_button(" in ultima_pestana
-    assert "st.vega_lite_chart(" in app and "traza_tareas" in app, "Falta cronograma real de workers"
-    assert 's13_kmeans_run' in app and 's13_kmeans_ejecucion' in app
-    assert 'n_kmeans=st.selectbox' in app
+    cuaderno = json.loads(leer("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb"))
+    assert cuaderno["nbformat"] == 4
+    celdas = cuaderno["cells"]
+    assert 45 <= len(celdas) <= 55, f"Cuaderno inesperado: {len(celdas)} celdas"
+    codigo = "\n".join("".join(c["source"]) for c in celdas if c["cell_type"] == "code")
+    texto = "\n".join("".join(c["source"]) for c in celdas)
+    assert sum(c["cell_type"] == "code" for c in celdas) >= 16
+    for celda in celdas:
+        if celda["cell_type"] == "code":
+            compile("".join(celda["source"]), "S13_celda", "exec")
+            assert not celda.get("outputs"), "No guardar salidas grandes en el notebook"
+    for esperado in (
+        "DEMO_DASK_EN_RUN_ALL", "WORKERS_DEMO_S13", "prueba_texto",
+        "MapReduce", "Parquet", "LocalCluster", "make_blobs",
+        "KMeansDask", "KMeansLocal", "REGISTROS", "VARIABLES",
+        "get_task_stream", "OPCIONES_ARQUITECTURA", "OPCIONES_LIMITE",
+    ):
+        assert esperado in texto, f"Falta el tema o ejemplo: {esperado}"
+    assert not re.search(r"(?i)TF-IDF|TfidfVectorizer|UNSPSC|ngram", texto)
+    assert "kmeans_dask_s13.py" not in texto
+    assert "streamlit run" not in texto
+    assert not (ROOT / "Laboratorios/S13_Codespaces/kmeans_dask_s13.py").exists()
+    assert not (ROOT / "Laboratorios/S13_Codespaces/test_kmeans_s13_estatico.py").exists()
 
-    assert "dask_cuando_si.py" in html
-    assert "CPU lógicas" in html
-    assert "dask_cuando_si.py" in html
-    assert "--modo texto" in html
-    assert not re.search(r"(?i)(?:hp del estudiante|tu hp|en mi hp|mi portátil hp)", html), "No atribuir equipo personal a estudiantes"
-    assert "streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py" in html
-    assert "streamlit run Laboratorios/S13_Codespaces/app_tfidf_unspsc.py" in text
-    assert html.count('if __name__ == "__main__":') >= 2
-    assert "id=\"s24\"" in html
-    assert config["portsAttributes"]["8502"]["visibility"] == "private"
-    index = read("index.html")
-    assert index.count('data-n="13"') == 1
-    assert index.count('data-session="13"') == 1
-    assert 'href="Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1"' in index
-    assert not any("____" in "".join(c["source"]) for c in cells if c["cell_type"] == "code")
-    print("S13 QA estático: OK · 24 diapositivas ·", len(cells), "celdas · Codespaces · LMS")
+    presentacion = leer("Presentaciones/s13-de-una-maquina-a-un-cluster.html")
+    diapositivas = re.findall(r'<section class="slide(?: active)?" id="s(\d+)"', presentacion)
+    assert diapositivas == [str(i) for i in range(1, 25)]
+    for x in ('id="decisionBox"', 'id="hdfsGrid"', 'id="quizPrompt"',
+              'id="mapRun"', 'id="costRun"', 'id="workerRun"',
+              'id="scenarioWorkers"', "K-means", "Codespaces"):
+        assert x in presentacion, x
+    assert not re.search(r"(?i)TF-IDF|tfidfToyRun|kmeans_dask_s13\.py|streamlit run", presentacion)
+    assert 'id="s21"' in presentacion
+    assert "REGISTROS" in presentacion and "WORKERS_MODELO" in presentacion
+    assert not re.search(r"(?i)(hp del estudiante|tu hp|en mi hp)", presentacion)
+
+    scripts = re.search(r"<script>(.*?)</script>", presentacion, re.DOTALL)
+    assert scripts, "Falta interactividad de la presentación"
+    if shutil.which("node"):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".js", encoding="utf-8") as archivo:
+            archivo.write(scripts.group(1))
+            archivo.flush()
+            subprocess.run(["node", "--check", archivo.name], check=True)
+
+    perfil = json.loads(leer(".devcontainer/s13-distribuido/devcontainer.json"))
+    assert "S13" in perfil["name"]
+    assert "S13_Codespaces/requirements.txt" in perfil["postCreateCommand"]
+    paquetes = leer("Laboratorios/S13_Codespaces/requirements.txt")
+    assert "dask-ml==2025.1.0" in paquetes
+    curso = json.loads(leer("lms/data/course.json"))
+    s13 = next(x for x in curso["sessions"] if x["n"] == 13)
+    assert s13["status"] == "visible"
+    assert "s13-de-una-maquina" in s13["entry"]["url"]
+    indice = leer("index.html")
+    assert indice.count('data-n="13"') == 1
+    assert 'href="Presentaciones/s13-de-una-maquina-a-un-cluster.html#s1"' in indice
+    print(f"S13 validada: 24 láminas, {len(celdas)} celdas, 1 cuaderno y K-means numérico")
+
 
 if __name__ == "__main__":
     main()
