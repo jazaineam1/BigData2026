@@ -1,6 +1,20 @@
 {
-  "name": "Airflow Lab",
-  "dockerComposeFile": "../Airflow/docker-compose.yaml",
-  "service": "airflow-webserver",
-  "workspaceFolder": "/opt/airflow"
+  "name": "S13 · Un solo cuaderno de Dask",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bookworm",
+  "workspaceFolder": "/workspaces/BigData2026",
+  "postCreateCommand": "python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt && python Laboratorios/S13_Codespaces/verificar_entorno.py",
+  "postAttachCommand": "bash -lc 'if command -v code >/dev/null 2>&1; then code --reuse-window /workspaces/BigData2026/Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb >/dev/null 2>&1 || true; fi'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter"
+      ],
+      "settings": {
+        "workbench.startupEditor": "readme"
+      }
+    }
+  },
+  "forwardPorts": [],
+  "remoteUser": "vscode"
 }

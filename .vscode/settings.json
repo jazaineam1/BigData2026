@@ -1,7 +1,16 @@
 {
-  "python.envFile": "${workspaceFolder}/databricks.env",
-  "databricks.python.envFile": "${workspaceFolder}/databricks.env",
+  "files.exclude": {
+    "**/.devcontainer": true,
+    "**/.vscode": true,
+    "**/Datos": true,
+    "**/Laboratorios": true,
+    "**/Cuadernos/datos": true,
+    "**/.gitignore": true
+  },
+  "workbench.startupEditor": "readme",
+  "python.defaultInterpreterPath": "/usr/local/bin/python",
   "jupyter.askForKernelRestart": false,
-  "jupyter.interactiveWindow.cellMarker.codeRegex": "^# COMMAND ----------|^# Databricks notebook source|^(#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])",
-  "jupyter.interactiveWindow.cellMarker.default": "# COMMAND ----------"
+  "files.watcherExclude": {
+    "**/.git/objects/**": true
+  }
 }
