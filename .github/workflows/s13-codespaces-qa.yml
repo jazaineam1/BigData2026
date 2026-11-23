@@ -82,3 +82,43 @@ jobs:
           ).execute()
           print("S13 Run All, clúster Dask y memoria RSS: OK")
           PY
+
+  s13-integracion-unica:
+    # Una única prueba ligera de integración del PR #196. Eliminar después de verificar.
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 196
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar perfil S13 y ejecutor de Jupyter
+        run: |
+          python -m pip install -r Laboratorios/S13_Codespaces/requirements.txt
+          python -m pip install nbclient nbformat
+      - name: Verificar importaciones y clúster de una tarea
+        run: python Laboratorios/S13_Codespaces/verificar_entorno.py
+      - name: Run All del único cuaderno — 1.000 puntos y dos variables
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import nbformat
+          from nbclient import NotebookClient
+          ruta = Path("Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb")
+          nb = nbformat.read(ruta, as_version=4)
+          salida = NotebookClient(
+              nb, timeout=120, kernel_name="python3",
+              resources={"metadata": {"path": "Cuadernos"}}
+          ).execute()
+          errores = [(i,o) for i,c in enumerate(salida.cells)
+                     for o in c.get("outputs",[])
+                     if o.get("output_type")=="error"]
+          assert not errores, errores
+          assert len(salida.cells)==53
+          print("S13: cuaderno completo, Dask-ML y muestra RSS: OK")
+          PY
