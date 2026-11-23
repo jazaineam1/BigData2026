@@ -1,5 +1,5 @@
 {
-  "version": 17,
+  "version": 18,
   "course": "bigdata",
   "run": "bigdata-2026-2",
   "title": "Big Data 2026-2S",
@@ -177,8 +177,14 @@
     },
     {
       "n": 16,
-      "title": "Sesión 16 · por publicar",
-      "status": "draft"
+      "title": "Proyecto final de integración · Compras Claras",
+      "status": "visible",
+      "class_kind": "learning",
+      "formative": false,
+      "entry": {
+        "url": "/BigData2026/Presentaciones/proyecto-final-explorer.html",
+        "label": "Abrir proyecto final · guía y cuaderno"
+      }
     }
   ],
   "teacher_tools": [
