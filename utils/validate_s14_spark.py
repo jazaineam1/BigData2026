@@ -55,6 +55,9 @@ def main():
     assert "JobPageDetail2.png" in page and "query-profile-summary-" in page
     assert "SESIÓN 14" in page and "Data Warehouse" in page
     assert "Mapa único de aprendizaje" in txt
+    assert "Dask en S13 · varios modelos" not in page
+    assert "Gradiente global" in page and "pyspark.ml" in page
+    assert "Gradiente global = −1/4" in txt and "probability" in txt
     assert "cpuPerTask" in parser.ids and "spark.task.cpus" in txt
     assert "plan_dask.optimize().pprint()" in txt and "plan_compara.explain" in txt
     assert "Optimizador Dask" in page and "capacidad simultánea" in page

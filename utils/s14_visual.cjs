@@ -26,7 +26,7 @@ const assert = require('node:assert/strict');
   await open(13);for(let i=0;i<4;i++)await page.locator('#dagNext').click();assert.match(await t('dagView'),/Ejecución solicitada/);
   await open(18);for(let i=0;i<3;i++)await page.locator('#medNext').click();assert.match(await t('medExplain'),/4000.*6000/);
   await open(21);await page.locator('#versionNext').click();await page.locator('#versionNext').click();await page.locator('#versionRead').click();assert.match(await t('versionView'),/histórica de versión 1/);
-  await open(22);await page.locator('#trainNext').click();await page.locator('#trainNext').click();assert.match(await t('trainView'),/0.85/);
+  await open(22);assert.doesNotMatch(await page.locator('#s22').innerText(),/Dask en S13/);await page.locator('#trainNext').click();assert.match(await t('trainView'),/0,50/);await page.locator('#trainNext').click();assert.match(await t('trainView'),/−0,25/);await page.locator('#trainNext').click();assert.match(await t('trainView'),/0\.25/);assert.match(await t('trainView'),/56\.2/);assert.equal(await page.locator('#trainNext').isDisabled(),true);await page.locator('#trainReset').click();assert.match(await t('trainView'),/w = 0.00/);
   await open(23);for(let i=0;i<3;i++)await page.locator('#mlNext').click();assert.match(await t('mlView'),/0,575/);
   await open(24);assert.match(await t('matrixView'),/0.6190/);await page.locator('#matrixError').click();assert.doesNotMatch(await t('matrixView'),/0.6190/);
   await page.setViewportSize({width:390,height:844});
