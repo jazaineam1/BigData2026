@@ -55,6 +55,8 @@ def main():
     assert "JobPageDetail2.png" in page and "query-profile-summary-" in page
     assert "SESIÓN 14" in page and "Data Warehouse" in page
     assert "Mapa único de aprendizaje" in txt
+    assert "ico-cpu" in parser.ids and "ico-server" in parser.ids and "ico-database" in parser.ids
+    assert "shuffle-diagram" in page and "branch-line" in page
     assert "archWorkers" in parser.ids and "archExec" in parser.ids and "archParts" in parser.ids
     assert "Qué es realmente un executor" in txt and "skew_rows" in txt and 'explain(mode="extended")' in txt
     assert "Cluster Manager" in page and "Spill (derrame a disco)" in page
