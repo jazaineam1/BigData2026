@@ -27,11 +27,11 @@ const assert = require('node:assert/strict');
   await open(18);for(let i=0;i<3;i++)await page.locator('#medNext').click();assert.match(await t('medExplain'),/4000.*6000/);
   await open(21);await page.locator('#versionNext').click();await page.locator('#versionNext').click();await page.locator('#versionRead').click();assert.match(await t('versionView'),/histórica de versión 1/);
   await open(22);assert.doesNotMatch(await page.locator('#s22').innerText(),/Dask en S13/);await page.locator('#trainNext').click();assert.match(await t('trainView'),/0,50/);await page.locator('#trainNext').click();assert.match(await t('trainView'),/−0,25/);await page.locator('#trainNext').click();assert.match(await t('trainView'),/0\.25/);assert.match(await t('trainView'),/56\.2/);assert.equal(await page.locator('#trainNext').isDisabled(),true);await page.locator('#trainReset').click();assert.match(await t('trainView'),/w = 0.00/);
-  await open(23);for(let i=0;i<3;i++)await page.locator('#mlNext').click();assert.match(await t('mlView'),/0,575/);
+  await open(23);assert.match(await page.locator('#s23').innerText(),/crea y relee automáticamente una tabla Delta/);assert.equal(await page.locator('#mlNext').count(),0);assert.doesNotMatch(await page.locator('#s23').innerText(),/TF-IDF/);
   await open(24);assert.match(await t('matrixView'),/0.6190/);await page.locator('#matrixError').click();assert.doesNotMatch(await t('matrixView'),/0.6190/);
   await page.setViewportSize({width:390,height:844});
   for(let i=1;i<=24;i++){await open(i);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Mobile overflow S'+i)}
-  assert.deepEqual(errors,[]);console.log('S14: 24 pantallas desktop/móvil, 12 simulaciones/controles, sin errores JS. Scroll desktop >35px:',JSON.stringify(overflow));
+  assert.deepEqual(errors,[]);console.log('S14: 24 pantallas desktop/móvil, 11 simulaciones/controles, sin errores JS. Scroll desktop >35px:',JSON.stringify(overflow));
   assert.ok(overflow.length===0,'Diapositivas con scroll excesivo: '+JSON.stringify(overflow));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
