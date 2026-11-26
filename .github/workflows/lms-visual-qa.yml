@@ -12,6 +12,8 @@ on:
       - Presentaciones/s10-etl-multimedia.html
       - Presentaciones/s11-videoclase-ocr-asr-embeddings.html
       - Presentaciones/s13-de-una-maquina-a-un-cluster.html
+      - Presentaciones/s14-de-dask-a-spark.html
+      - utils/s14_visual.cjs
       - Cuadernos/10_ETL_Multimedia.ipynb
       - utils/build_session10_multimedia.py
       - utils/validate_session10.py
@@ -42,13 +44,20 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Instalar Chromium
         run: npx playwright install --with-deps chromium
-      - name: Comprobar si el cambio se limita a S11 o S13
+      - name: Comprobar si el cambio se limita a S11, S13 o S14
         id: alcance
         shell: bash
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
           git diff --name-only FETCH_HEAD HEAD > /tmp/archivos_pr.txt
+          if grep -qx 'Presentaciones/s14-de-dask-a-spark.html' /tmp/archivos_pr.txt && ! grep -Evq '^(Presentaciones/s14-de-dask-a-spark.html|Cuadernos/14_PySpark_Compras_Claras.ipynb|utils/(build_s14_pyspark.py|validate_s14_spark.py|s14_visual.cjs)|.github/workflows/(pages.yml|lms-visual-qa.yml))$' /tmp/archivos_pr.txt; then
+            echo 's14=true' >> "$GITHUB_OUTPUT"
+            echo 's13=false' >> "$GITHUB_OUTPUT"
+            echo 's11=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo 's14=false' >> "$GITHUB_OUTPUT"
           exclusivo=1
           hallado=0
           exclusivo_s11=1
@@ -84,7 +93,7 @@ jobs:
             echo "s11=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Preparar SDK Realtime local
-        if: steps.alcance.outputs.s13 != 'true' && steps.alcance.outputs.s11 != 'true'
+        if: steps.alcance.outputs.s13 != 'true' && steps.alcance.outputs.s11 != 'true' && steps.alcance.outputs.s14 != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -108,7 +117,9 @@ jobs:
       - name: Ejecutar QA visual proporcional al cambio
         shell: bash
         run: |
-          if [[ "${{ steps.alcance.outputs.s13 }}" == "true" ]]; then
+          if [[ "${{ steps.alcance.outputs.s14 }}" == "true" ]]; then
+            node utils/s14_visual.cjs
+          elif [[ "${{ steps.alcance.outputs.s13 }}" == "true" ]]; then
             npx playwright test tests/s13-presentacion.spec.js
           elif [[ "${{ steps.alcance.outputs.s11 }}" == "true" ]]; then
             npx playwright test tests/s11-videoclase.visual.spec.js

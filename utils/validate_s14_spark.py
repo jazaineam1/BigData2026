@@ -46,15 +46,19 @@ def main():
     parser = SlideParser()
     parser.feed(page)
     assert len(parser.ids) >= 24
-    assert "Ruta esencial" in page and "Rows span multiple lines" in page
-    assert "essential=[1,2,3,4,5,8,9,10,11,15,13,14,18,19,22,23,24]" in page
+    assert "Rows span multiple lines" in page and "Índice" in page
+    assert "<select" not in page and "Ruta esencial" not in page and "Ruta completa" not in page
+    assert "Mañana" not in page
     for token in ("# 8A ·", "# 8C ·", "# 11B ·", "# 12B ·", "spark.read.option", "med_bronze.exceptAll", "persistidas_med", "spark.sparkContext.uiWebUrl", "Estimator", "Data Warehouse", "DAG"):
         assert token in txt, f"Falta fundamento o práctica: {token}"
-    assert "medLayer" in parser.ids and "slots14" in parser.ids
     assert "F1 macro" in page and "Environment" in page
+    assert "JobPageDetail2.png" in page and "query-profile-summary-" in page
+    assert "SESIÓN 14" in page and "Data Warehouse" in page
+    assert "Mapa único de aprendizaje" in txt
+    assert "ruta esencial" not in txt.lower() and "ruta completa" not in txt.lower()
     assert len(parser.slide_ids) == 24, f"Diapositivas: {len(parser.slide_ids)}"
     assert parser.slide_ids == [f"s{i}" for i in range(1,25)]
-    for required in ("case", "op", "parts", "calc", "checks", "route", "prev", "next"):
+    for required in ("tocBtn", "dataGB", "ramGB", "compareNext", "archNext", "partitionNext", "taskNext", "shuffleNext", "dagNext", "medNext", "versionNext", "versionRead", "trainNext", "mlNext", "matrixError", "prev", "next"):
         assert required in parser.ids, f"Falta control activo {required}"
     assert any("Cuadernos/14_PySpark_Compras_Claras.ipynb" in u for u in parser.links)
     catalog = json.loads((ROOT / "lms/data/course.json").read_text(encoding="utf-8"))
