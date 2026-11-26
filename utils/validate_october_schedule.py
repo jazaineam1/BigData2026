@@ -9,7 +9,7 @@ sql=(ROOT/"infraestructura/lms/lms-calendar-october-2026.sql").read_text(encodin
 
 sessions={int(x["n"]):x for x in course["sessions"]}
 checks=[
- ("sesión actual declarada S08", course.get("current_tracked_session")==8),
+ ("sesión actual declarada visible y programada", int(course.get("current_tracked_session",0)) in sessions and sessions[int(course["current_tracked_session"])].get("status")=="visible" and bool(sessions[int(course["current_tracked_session"])].get("starts_at"))),
  ("S08 es taller 1 octubre", sessions[8].get("class_date")=="2026-10-01" and sessions[8].get("class_kind")=="assessment_workshop"),
  ("S09 pasa al 8 octubre", sessions[9].get("class_date")=="2026-10-08" and sessions[9].get("starts_at")=="2026-10-08T18:00:00-05:00"),
  ("portal usa starts_at", "Date.parse(String(s.starts_at||''))" in portal and "const past=scheduled.filter" in portal),

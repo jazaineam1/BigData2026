@@ -7,6 +7,11 @@ on:
       - 'Cuadernos/14_PySpark_Compras_Claras.ipynb'
       - 'utils/build_s14_pyspark.py'
       - 'utils/validate_s14_spark.py'
+      - 'Cuadernos/Proyecto_Final_Compras_Claras.ipynb'
+      - 'Presentaciones/proyecto-final-explorer.html'
+      - 'utils/validate_proyecto_final_s14.py'
+      - 'utils/proyecto_final_offset.py'
+      - 'tests/test_proyecto_final_offset.py'
       - 'index.html'
       - 'lms/data/course.json'
       - '.github/workflows/s14-pyspark-databricks-qa.yml'
@@ -29,3 +34,5 @@ jobs:
         run: |
           python utils/build_s14_pyspark.py --check
           python utils/validate_s14_spark.py
+          python utils/validate_proyecto_final_s14.py
+          python -m unittest discover -s tests -p 'test_proyecto_final_offset.py'

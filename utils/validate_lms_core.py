@@ -35,13 +35,18 @@ if s07.exists():
 
 checks=[
     ("16 sesiones declaradas", len(course.get("sessions",[]))==16 and [x.get("n") for x in course.get("sessions",[])]==list(range(1,17))),
-    ("Sesiones 9+ publicadas de forma consecutiva y las posteriores siguen borrador",
+    ("Sesiones de enseñanza 9–15 publicadas de forma consecutiva; proyecto final separado",
         all(any(x.get("n")==n and x.get("status")=="visible" for x in course.get("sessions",[])) for n in (9,10))
         and (lambda recientes: bool(recientes)
              and [x["n"] for x in recientes if x.get("status")=="visible"] == list(range(9, max(x["n"] for x in recientes if x.get("status")=="visible")+1))
              and all(x.get("status")=="draft" for x in recientes if x["n"] > max(y["n"] for y in recientes if y.get("status")=="visible"))
              and all(isinstance(x.get("entry"),dict) and x["entry"].get("url") for x in recientes if x.get("status")=="visible")
-        )([x for x in course.get("sessions",[]) if x.get("n",0)>=9])),
+        )([x for x in course.get("sessions",[]) if 9<=x.get("n",0)<=15])
+        and any(x.get("n")==16 and (x.get("status")=="draft" or (
+            x.get("status")=="visible" and isinstance(x.get("entry"),dict)
+            and "proyecto-final-explorer.html" in x["entry"].get("url","")
+            and "due_at" not in x and "weight_percent" not in x
+        )) for x in course.get("sessions",[]))),
     ("S10 publicada con calendario", any(x.get("n")==10 and x.get("starts_at")=="2026-10-29T18:00:00-05:00" and x.get("class_date")=="2026-10-29" for x in course.get("sessions",[]))),
     ("S07 marcada protegida", any(x.get("n")==7 and x.get("protected") for x in course.get("sessions",[]))),
     ("portal usa API core", "L.core('home')" in portal and "sessions" in portal and "nextActions" in portal and "model.assignments" in portal),

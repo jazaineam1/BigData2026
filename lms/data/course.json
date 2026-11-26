@@ -5,7 +5,7 @@
   "title": "Big Data 2026-2S",
   "institution": "Universidad Central",
   "total_sessions": 16,
-  "current_tracked_session": 8,
+  "current_tracked_session": 14,
   "tracking_policy": "LMS V5: course.json define estructura/visibilidad del curso; Supabase define recursos, actividades, LAB, evaluadores y progreso. Las superficies canónicas son session.html?s=N, progress.html?s=N y wall.html?s=N. El runtime lms-kit.js aporta cola offline, retry e idempotencia sobre bigdata-lms.js. Máximo dos recursos visibles por sesión; la presentación integra explicación, ejemplos y laboratorio.",
   "sessions": [
     {
@@ -161,14 +161,16 @@
     },
     {
       "n": 14,
-      "title": "¿Cómo construir un pipeline con Spark y Databricks?",
+      "title": "¿Cómo procesar y entrenar modelos con Spark y Databricks?",
       "status": "visible",
       "formative": true,
       "class_kind": "learning",
       "entry": {
         "url": "/BigData2026/Presentaciones/s14-de-dask-a-spark.html#s1",
-        "label": "Abrir sesión Spark + Databricks · presentación y laboratorio"
-      }
+        "label": "Abrir Spark + Databricks + MLlib · presentación y laboratorio"
+      },
+      "starts_at": "2026-11-26T18:00:00-05:00",
+      "class_date": "2026-11-26"
     },
     {
       "n": 15,
