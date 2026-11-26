@@ -239,7 +239,7 @@ BLOQUES = [
   ],
   [
     "markdown",
-    "## 15 · Evidencia automática, decisiones cerradas\nEl siguiente expediente guarda la fórmula, los recuentos, el entorno y la procedencia. Elige un motor con un índice de `(pandas, Dask, Spark)` para un **escenario de producción hipotético que sí requiera procesamiento distribuido**. Esta decisión no altera los hechos: 30 filas no requieren Spark.\n\nEste expediente es de ampliación (13B): requiere 9 y 10 además de 11–13. Si estás en la ruta esencial, pasa directamente a la sección 16."
+    "## 15 · Evidencia automática, decisiones cerradas\nEl siguiente expediente guarda la fórmula, los recuentos, el entorno y la procedencia. Elige un motor con un índice de `(pandas, Dask, Spark)` para un **escenario de producción hipotético que sí requiera procesamiento distribuido**. Esta decisión no altera los hechos: 30 filas no requieren Spark.\n\nEste expediente (13B) integra los bloques 9 y 10 con 11–13: ejecútalo después de esos bloques y antes de la sección 16."
   ],
   [
     "code",

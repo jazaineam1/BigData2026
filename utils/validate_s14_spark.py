@@ -55,6 +55,7 @@ def main():
     assert "JobPageDetail2.png" in page and "query-profile-summary-" in page
     assert "SESIÓN 14" in page and "Data Warehouse" in page
     assert "Mapa único de aprendizaje" in txt
+    assert "ruta esencial" not in txt.lower() and "ruta completa" not in txt.lower()
     assert len(parser.slide_ids) == 24, f"Diapositivas: {len(parser.slide_ids)}"
     assert parser.slide_ids == [f"s{i}" for i in range(1,25)]
     for required in ("tocBtn", "dataGB", "ramGB", "compareNext", "archNext", "partitionNext", "taskNext", "shuffleNext", "dagNext", "medNext", "versionNext", "versionRead", "trainNext", "mlNext", "matrixError", "prev", "next"):
