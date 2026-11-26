@@ -47,6 +47,10 @@ def main():
     parser.feed(page)
     assert len(parser.ids) >= 24
     assert "Ruta esencial" in page and "Rows span multiple lines" in page
+    assert "essential=[1,2,3,4,5,8,9,10,11,15,13,14,18,19,22,23,24]" in page
+    for token in ("# 8A ·", "# 8C ·", "# 11B ·", "# 12B ·", "spark.read.option", "med_bronze.exceptAll", "persistidas_med", "spark.sparkContext.uiWebUrl", "Estimator", "Data Warehouse", "DAG"):
+        assert token in txt, f"Falta fundamento o práctica: {token}"
+    assert "medLayer" in parser.ids and "slots14" in parser.ids
     assert "F1 macro" in page and "Environment" in page
     assert len(parser.slide_ids) == 24, f"Diapositivas: {len(parser.slide_ids)}"
     assert parser.slide_ids == [f"s{i}" for i in range(1,25)]
