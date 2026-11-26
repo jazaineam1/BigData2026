@@ -40,14 +40,14 @@ def main():
     for i, c in enumerate(codes, 1):
         ast.parse("".join(c["source"]), filename=f"S14 celda {i}")
     txt = "\n".join("".join(c["source"]) for c in actual["cells"])
-    for required in ("FILAS", "PROCEDENCIA", "spark.sql", "repartition(", "explain(", "Paridad PySpark/SQL", "Paridad Spark/SQL/Python", "INDICE_UMBRAL", "expediente", "Bronze", "FORMATO_FINAL", "DESCRIBE HISTORY", "saveAsTable", "VERSIONES_DELTA"):
+    for required in ("FILAS", "PROCEDENCIA", "spark.sql", "repartition(", "explain(", "Paridad PySpark/SQL", "Paridad Spark/SQL/Python", "INDICE_UMBRAL", "expediente", "Bronze", "FORMATO_FINAL", "DESCRIBE HISTORY", "saveAsTable", "VERSIONES_DELTA", "pipeline_demo.fit(train_demo)", "modelo_demo.transform(test_demo)", "HashingTF", "s14_demo_bienes_servicios.csv"):
         assert required in txt, f"Falta contenido: {required}"
     page = HTML.read_text(encoding="utf-8")
     parser = SlideParser()
     parser.feed(page)
-    assert len(parser.slide_ids) == 21, f"Diapositivas: {len(parser.slide_ids)}"
-    assert parser.slide_ids == [f"s{i}" for i in range(1,22)]
-    for required in ("case", "op", "parts", "calc", "checks", "prev", "next"):
+    assert len(parser.slide_ids) == 24, f"Diapositivas: {len(parser.slide_ids)}"
+    assert parser.slide_ids == [f"s{i}" for i in range(1,25)]
+    for required in ("case", "op", "parts", "calc", "checks", "route", "prev", "next"):
         assert required in parser.ids, f"Falta control activo {required}"
     assert any("Cuadernos/14_PySpark_Compras_Claras.ipynb" in u for u in parser.links)
     catalog = json.loads((ROOT / "lms/data/course.json").read_text(encoding="utf-8"))
@@ -61,7 +61,7 @@ def main():
     assert 'data-n="14"' in index
     assert "Presentaciones/s14-de-dask-a-spark.html#s1" in index
     assert "Cuadernos/14_PySpark_Compras_Claras.ipynb" in index
-    print(f"S14 QA estático OK: {len(cells)} celdas, {len(codes)} códigos, 21 diapositivas, enlaces y curso.")
+    print(f"S14 QA estático OK: {len(cells)} celdas, {len(codes)} códigos, 24 diapositivas, enlaces y curso.")
 
 if __name__ == "__main__":
     main()

@@ -161,13 +161,13 @@
     },
     {
       "n": 14,
-      "title": "¿Cómo construir un pipeline con Spark y Databricks?",
+      "title": "¿Cómo procesar y entrenar modelos con Spark y Databricks?",
       "status": "visible",
       "formative": true,
       "class_kind": "learning",
       "entry": {
         "url": "/BigData2026/Presentaciones/s14-de-dask-a-spark.html#s1",
-        "label": "Abrir sesión Spark + Databricks · presentación y laboratorio"
+        "label": "Abrir Spark + Databricks + MLlib · presentación y laboratorio"
       }
     },
     {
