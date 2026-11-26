@@ -55,6 +55,9 @@ def main():
     assert "JobPageDetail2.png" in page and "query-profile-summary-" in page
     assert "SESIÓN 14" in page and "Data Warehouse" in page
     assert "Mapa único de aprendizaje" in txt
+    assert "mlNext" not in parser.ids and "¿Cómo aprende un clasificador de texto?" not in page
+    assert "CATALOGO_S14" in txt and "s14_textos_ml_" in txt and "entrada_demo.exceptAll(demo)" in txt
+    assert "Databricks desde cero" in page and "Rows span multiple lines" in page
     assert "Dask en S13 · varios modelos" not in page
     assert "Gradiente global" in page and "pyspark.ml" in page
     assert "Gradiente global = −1/4" in txt and "probability" in txt
@@ -64,7 +67,7 @@ def main():
     assert "ruta esencial" not in txt.lower() and "ruta completa" not in txt.lower()
     assert len(parser.slide_ids) == 24, f"Diapositivas: {len(parser.slide_ids)}"
     assert parser.slide_ids == [f"s{i}" for i in range(1,25)]
-    for required in ("tocBtn", "dataGB", "ramGB", "compareNext", "archNext", "partitionNext", "taskNext", "shuffleNext", "dagNext", "medNext", "versionNext", "versionRead", "trainNext", "mlNext", "matrixError", "prev", "next"):
+    for required in ("tocBtn", "dataGB", "ramGB", "compareNext", "archNext", "partitionNext", "taskNext", "shuffleNext", "dagNext", "medNext", "versionNext", "versionRead", "trainNext", "matrixError", "prev", "next"):
         assert required in parser.ids, f"Falta control activo {required}"
     assert any("Cuadernos/14_PySpark_Compras_Claras.ipynb" in u for u in parser.links)
     catalog = json.loads((ROOT / "lms/data/course.json").read_text(encoding="utf-8"))
