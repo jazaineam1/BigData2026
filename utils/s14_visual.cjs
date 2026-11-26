@@ -21,6 +21,7 @@ const assert = require('node:assert/strict');
   await open(10);await page.locator('#partitionNext').click();assert.match(await t('partitionView'),/12\/12/);
   await open(11);for(let i=0;i<3;i++)await page.locator('#taskNext').click();assert.match(await t('taskView'),/Rondas: 3 · pendientes: 0/);
   await page.locator('#slots').fill('3');await page.locator('#taskNext').click();await page.locator('#taskNext').click();assert.match(await t('taskView'),/Rondas: 2 · pendientes: 0/);
+  await page.locator('#slots').fill('4');await page.locator('#cpuPerTask').fill('2');assert.match(await t('capacity'),/2 ranuras/);await page.locator('#taskNext').click();await page.locator('#taskNext').click();await page.locator('#taskNext').click();assert.match(await t('taskView'),/Rondas: 3 · pendientes: 0/);await page.locator('#slots').fill('1');assert.match(await t('capacity'),/0 ranuras/);assert.equal(await page.locator('#taskNext').isDisabled(),true);
   await open(12);await page.locator('#shuffleNext').click();assert.match(await t('shuffleView'),/A=3, B=3, C=3/);
   await open(13);for(let i=0;i<4;i++)await page.locator('#dagNext').click();assert.match(await t('dagView'),/Ejecución solicitada/);
   await open(18);for(let i=0;i<3;i++)await page.locator('#medNext').click();assert.match(await t('medExplain'),/4000.*6000/);

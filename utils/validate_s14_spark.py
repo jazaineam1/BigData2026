@@ -55,6 +55,9 @@ def main():
     assert "JobPageDetail2.png" in page and "query-profile-summary-" in page
     assert "SESIÓN 14" in page and "Data Warehouse" in page
     assert "Mapa único de aprendizaje" in txt
+    assert "cpuPerTask" in parser.ids and "spark.task.cpus" in txt
+    assert "plan_dask.optimize().pprint()" in txt and "plan_compara.explain" in txt
+    assert "Optimizador Dask" in page and "capacidad simultánea" in page
     assert "ruta esencial" not in txt.lower() and "ruta completa" not in txt.lower()
     assert len(parser.slide_ids) == 24, f"Diapositivas: {len(parser.slide_ids)}"
     assert parser.slide_ids == [f"s{i}" for i in range(1,25)]
