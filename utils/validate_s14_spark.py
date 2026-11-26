@@ -40,11 +40,14 @@ def main():
     for i, c in enumerate(codes, 1):
         ast.parse("".join(c["source"]), filename=f"S14 celda {i}")
     txt = "\n".join("".join(c["source"]) for c in actual["cells"])
-    for required in ("FILAS", "PROCEDENCIA", "spark.sql", "repartition(", "explain(", "Paridad PySpark/SQL", "Paridad Spark/SQL/Python", "INDICE_UMBRAL", "expediente", "Bronze", "FORMATO_FINAL", "DESCRIBE HISTORY", "saveAsTable", "VERSIONES_DELTA", "pipeline_demo.fit(train_demo)", "modelo_demo.transform(test_demo)", "HashingTF", "s14_demo_bienes_servicios.csv"):
+    for required in ("FILAS", "PROCEDENCIA", "spark.sql", "repartition(", "explain(", "Paridad PySpark/SQL", "Paridad Spark/SQL/Python", "INDICE_UMBRAL", "expediente", "Bronze", "FORMATO_FINAL", "DESCRIBE HISTORY", "saveAsTable", "VERSIONES_DELTA", "pipeline_demo.fit(train_demo)", "modelo_demo.transform(test_demo)", "HashingTF", "s14_demo_bienes_servicios.csv", "f1_macro_demo", "f1_por_soporte", "F.broadcast(dimension_ejemplo)", "pred_demo.select", "13B ·"):
         assert required in txt, f"Falta contenido: {required}"
     page = HTML.read_text(encoding="utf-8")
     parser = SlideParser()
     parser.feed(page)
+    assert len(parser.ids) >= 24
+    assert "Ruta esencial" in page and "Rows span multiple lines" in page
+    assert "F1 macro" in page and "Environment" in page
     assert len(parser.slide_ids) == 24, f"Diapositivas: {len(parser.slide_ids)}"
     assert parser.slide_ids == [f"s{i}" for i in range(1,25)]
     for required in ("case", "op", "parts", "calc", "checks", "route", "prev", "next"):

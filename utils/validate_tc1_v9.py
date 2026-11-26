@@ -141,7 +141,10 @@ s08 = leer("lms/session-08.html")
 falla("Este TC1 no se entrega en el LMS." in s08 and '<div style="display:none" aria-hidden="true">' in s08,
       "la página S08 del LMS debe decir que no se entrega allí y no mostrar el formulario")
 index = leer("index.html")
-tarjeta = index[index.find('data-session="8"'):index.find('data-session="9"')]
+# La portada actual usa article.session[data-n]; mantener la comprobación sobre la tarjeta real.
+tarjeta_match = re.search(r'<article\b[^>]*\bdata-n="8"[^>]*>.*?</article>', index, re.S)
+falla(tarjeta_match is not None, "no existe la tarjeta S08 en la portada")
+tarjeta = tarjeta_match.group(0) if tarjeta_match else ""
 falla(all(x in tarjeta for x in ("Atlas", "Astra", "Aura", "Drive")), "la tarjeta S08 del índice no describe el TC1 V9")
 # Una sola fecha de entrega en todas las superficies que ve el estudiante.
 dia = C.FECHA_LIMITE.split(" de ")[0]
