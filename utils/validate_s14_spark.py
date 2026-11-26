@@ -55,6 +55,9 @@ def main():
     assert "JobPageDetail2.png" in page and "query-profile-summary-" in page
     assert "SESIÓN 14" in page and "Data Warehouse" in page
     assert "Mapa único de aprendizaje" in txt
+    assert "archWorkers" in parser.ids and "archExec" in parser.ids and "archParts" in parser.ids
+    assert "Qué es realmente un executor" in txt and "skew_rows" in txt and 'explain(mode="extended")' in txt
+    assert "Cluster Manager" in page and "Spill (derrame a disco)" in page
     assert "mlNext" not in parser.ids and "¿Cómo aprende un clasificador de texto?" not in page
     assert "CATALOGO_S14" in txt and "s14_textos_ml_" in txt and "entrada_demo.exceptAll(demo)" in txt
     assert "Databricks desde cero" in page and "Rows span multiple lines" in page
