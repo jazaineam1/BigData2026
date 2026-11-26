@@ -140,20 +140,29 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for intento in {1..15}; do
+          # La lista de artefactos puede aparecer antes de que el servicio de Pages
+          # la vea. Exige varias lecturas consecutivas antes del despliegue.
+          estable=0
+          for intento in {1..20}; do
             count="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" --jq '[.artifacts[] | select(.name == "github-pages" and .expired == false)] | length' || echo 0)"
             if [[ "$count" == "1" ]]; then
-              echo "Artefacto Pages único y disponible, intento ${intento}/15"
-              exit 0
+              estable=$((estable+1))
+              echo "Artefacto Pages único, comprobación consecutiva ${estable}/3"
+              if (( estable >= 3 )); then
+                sleep 5
+                exit 0
+              fi
+            else
+              estable=0
             fi
             if [[ "$count" =~ ^[0-9]+$ ]] && (( count > 1 )); then
               echo "Error: hay ${count} artefactos github-pages en el mismo run. No reintentes este run; usa una ejecución nueva."
               exit 1
             fi
-            echo "Esperando metadatos del artefacto Pages (${count}), intento ${intento}/15"
+            echo "Esperando metadatos del artefacto Pages (${count}), intento ${intento}/20"
             sleep 3
           done
-          echo "No apareció exactamente un artefacto Pages tras 15 intentos."
+          echo "No apareció exactamente un artefacto Pages tras 20 intentos."
           exit 1
 
       - name: Publicar en GitHub Pages
