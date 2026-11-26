@@ -69,6 +69,7 @@ jobs:
           cp -R css js assets _site/
           cp -R Presentaciones _site/
           test -f _site/Presentaciones/proyecto-final-explorer.html
+          test -f _site/Presentaciones/s14-de-dask-a-spark.html
           mkdir -p _site/Datos/s10_imagenes_reales
           cp -R Datos/s10_imagenes_reales/raw _site/Datos/s10_imagenes_reales/
           test -s _site/Datos/s10_imagenes_reales/raw/7a71615869df5c19563b4f8d.webp
@@ -184,6 +185,8 @@ jobs:
             tc2_nb="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Cuadernos/Taller_Control_2.ipynb?v=${GITHUB_SHA}" || true)"
             tc2_guide="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}assets/tutoriales/tc2-paso-a-paso.html?v=${GITHUB_SHA}" || true)"
             tc2_course="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}lms/data/course.json?v=${GITHUB_SHA}" || true)"
+            s14="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/s14-de-dask-a-spark.html?v=${GITHUB_SHA}" || true)"
+            proyecto="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/proyecto-final-explorer.html?v=${GITHUB_SHA}" || true)"
             image_status="$(curl -fsS -o /dev/null -w '%{http_code}' "${PAGE_URL}Datos/s10_imagenes_reales/raw/7a71615869df5c19563b4f8d.webp?v=${GITHUB_SHA}" || true)"
             open_wall="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}Presentaciones/s09-muro-publico.html?v=${GITHUB_SHA}" || true)"
             matchlab="$(curl -fsS -H 'Cache-Control: no-cache' "${PAGE_URL}matchlab/?v=${GITHUB_SHA}" || true)"
@@ -224,6 +227,10 @@ jobs:
               && ! grep -q '14 de noviembre de 2026' <<<"$tc2_guide" \
               && ! grep -q '2026-11-14T23:59:59-05:00' <<<"$tc2_course" \
               && grep -q 'Taller de Control 2' <<<"$tc2_course" \
+              && grep -q 'Ruta esencial' <<<"$s14" \
+              && grep -q 'F1 macro' <<<"$s14" \
+              && grep -q 'Rows span multiple lines' <<<"$proyecto" \
+              && grep -q '2026-11-26T18:00:00-05:00' <<<"$tc2_course" \
               && [ "$image_status" = "200" ] \
               && [ -n "$realtime_sdk" ]; then
               ok=1
