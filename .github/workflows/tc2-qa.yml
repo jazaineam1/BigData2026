@@ -39,6 +39,8 @@ jobs:
         run: python utils/validate_lms_contract_v5.py
       - run: python utils/calificar_tc2_zip.py --self-test
   audio-real:
+    # Descarga de voces reales: únicamente bajo solicitud manual docente.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
@@ -62,6 +64,8 @@ jobs:
               print('TC2 AUDIO REAL OK · 10 voces verificadas, SHA, CC BY 4.0')
           PY
   e2e-modelo-real:
+    # Modelos y OCR reales: no consumir cuota de Actions en cambios de portada/LMS.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
