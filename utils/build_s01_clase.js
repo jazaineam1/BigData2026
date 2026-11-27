@@ -1,0 +1,10 @@
+"use strict";
+const fs=require("node:fs"),path=require("node:path"),C=require("../assets/pedagogia/compras.js");
+const root=path.resolve(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p),"utf8");
+const safe=x=>JSON.stringify(x).replace(/</g,"\\u003c").replace(/\u2028/g,"\\u2028").replace(/\u2029/g,"\\u2029");
+const cfg=JSON.parse(read("assets/pedagogia/rutas.json")),slides=JSON.parse(read("assets/pedagogia/s01-clase.json")),source=C.setup(JSON.parse(read("Datos/tc2_corpus_2026.json")),JSON.parse(read("Datos/s10_imagenes_reales/inputs.json")));
+const config={routes:cfg.routes.map(r=>({id:r.id,mission:r.mission}))},colab="https://colab.research.google.com/github/jazaineam1/BigData2026/blob/"+cfg.routes[0].ref+"/sesion1_introducci_n.ipynb";
+const values={CSS:read("assets/pedagogia/s01-clase.css"),ENGINE:read("assets/pedagogia/compras.js"),UI:read("assets/pedagogia/s01-clase.js"),DATA:"const slides="+safe(slides)+",source="+safe(source)+",config="+safe(config)+",colab="+safe(colab)+";"};
+const page=read("assets/pedagogia/s01-template.html").replace(/__S01_(CSS|ENGINE|DATA|UI)__/g,(_,k)=>values[k]);
+const target=path.join(root,"Presentaciones/s01-fundamentos-adquisicion.html");
+if(process.argv.includes("--check")){if(fs.readFileSync(target,"utf8")!==page)throw Error("S01 desactualizada");console.log("OK S01");}else fs.writeFileSync(target,page);

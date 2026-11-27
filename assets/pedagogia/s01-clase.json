@@ -174,7 +174,7 @@
     9,
     "15 · Capacidad real en Python",
     "Medir, no adivinar",
-    "El cuaderno original lee 546.212 filas de ICFES según su referencia histórica. Verifica la salida de tu ejecución, no copies la cifra. Cambiar chunksize modifica el máximo de filas por bloque, pero no debería cambiar el resultado. El puente S01-B usa además CSV sintético acotado y mide tiempo y memoria de DataFrame.",
+    "El cuaderno original lee 546.212 filas de ICFES según su referencia histórica. Verifica la salida de tu ejecución, no copies la cifra. Cambiar chunksize modifica el máximo de filas por bloque, pero no debería cambiar el resultado. El puente S01-B usa además CSV sintético acotado y mide tiempo y memoria de DataFrame. En una prueba local realizada durante esta revisión, 100.000 filas ocuparon 1.600.132 bytes de DataFrame; con bloques de 1.000, el mayor bloque ocupó 16.132 bytes. La suma fue 4.999.545 en ambos casos. Reproduce el cálculo con tus propios tiempos.",
     "Ejecuta S01-B con 10.000 y 100.000 filas; cambia chunksize a 500 y 5.000. Conserva suma, conteo, bytes y tiempos.",
     "No comparar tiempos de redes distintas como si fueran un benchmark controlado. memory_usage no es pico RSS.",
     "code",

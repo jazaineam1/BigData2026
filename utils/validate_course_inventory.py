@@ -17,7 +17,8 @@ for r in cfg["routes"]:
         assert r["nb"] in tracked, r["nb"]
     first=re.search(r'<div class="session-actions">(.*?)</div>',cards[r["id"]],re.S)
     assert first and len(re.findall(r'<a\b',first.group(1)))==2, r["id"]
-    assert "compras-claras.html?s="+r["id"] in first.group(1)
+    expected = "s01-fundamentos-adquisicion.html" if r["id"]=="01" else "compras-claras.html?s="+r["id"]
+    assert expected in first.group(1), r["id"]
     assert len(r["steps"])==4
     if r.get("original"):
         assert (ROOT/"Presentaciones"/r["original"]).is_file(), r["original"]
