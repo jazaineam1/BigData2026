@@ -82,7 +82,9 @@
             "cell": 13,
             "concept": "Volumen es cantidad; velocidad es ritmo de llegada; variedad son estructuras; veracidad es calidad; valor es la decisión. La nube no elimina estas restricciones.",
             "task": "Identifica cuál V limita una descarga diaria y una consulta urgente.",
-            "evidence": "Una V dominante y una decisión justificada."
+            "evidence": "Una V dominante y una decisión justificada.",
+            "excerpt": "# Pregunta 1 de 10 — Diagnóstico del problema\npregunta_interactiva(\n    numero=1,\n    tema='Diagnóstico del problema',\n    contexto='La empresa procesa 1 millón de eventos por minuto, pero recibe 3 millones.',\n    pregunta='¿Cuál es la primera dificultad que debe resolver?',\n    opciones=['La variedad, porque todos los eventos son diferentes', 'La velocidad, porque la llegada supera la capacidad de proceso', 'El valor, porque ningún evento sirve para decidir', 'La visualización, porque todavía no existe un tablero'],\n    correcta=1,\n    retro_correcta='Correcto. La cola aumenta en 2 millones de eventos por minuto: la capacidad no alcanza el ritmo de llegada. Un tablero no corrige ese cuello de botella.',\n    retro_incorrecta='La opción es tentadora porque Big Data tiene varias dimensiones, pero aquí la evidencia cuantitativa compara 3 millones recibidos con 1 millón procesado. Eso identifica un problema de velocidad y capacidad.',\n)",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -91,7 +93,9 @@
             "cell": 32,
             "concept": "CSV organiza filas; JSON permite objetos anidados; XML usa etiquetas. Un agregado cambia el grano de fila individual a grupo.",
             "task": "Filtra empleados y cambia el umbral; compara JSON y tabla.",
-            "evidence": "Conteos de entrada y salida."
+            "evidence": "Conteos de entrada y salida.",
+            "excerpt": "mayores_de_30 = empleados[empleados[\"Edad\"] > 30]\nsalario_promedio = (\n    empleados.groupby(\"Departamento\", as_index=False)[\"Salario\"]\n    .mean()\n    .sort_values(\"Salario\", ascending=False)\n)\n\ndisplay(mayores_de_30)\ndisplay(salario_promedio.style.format({\"Salario\": \"{:,.2f}\"}))",
+            "excerptTruncated": false
           },
           {
             "minutes": 30,
@@ -100,7 +104,9 @@
             "cell": 63,
             "concept": "HTTP 200 indica respuesta, no cobertura. Orden, límite e identidad determinan una muestra repetible; un contrato no es un proceso.",
             "task": "Ejecuta la consulta oficial y compara límites pequeños.",
-            "evidence": "Filas, columnas, fuente y grano."
+            "evidence": "Filas, columnas, fuente y grano.",
+            "excerpt": "url_secop = \"https://www.datos.gov.co/resource/rpmr-utcd.json\"\nparametros = {\n    \"$limit\": 500,\n    \"$select\": \"nombre_de_la_entidad,nit_de_la_entidad,departamento_entidad,valor_contrato\",\n    \"$where\": \"departamento_entidad is not null AND valor_contrato is not null\",\n}\n\nrespuesta = requests.get(url_secop, params=parametros, timeout=30)\nrespuesta.raise_for_status()",
+            "excerptTruncated": false
           },
           {
             "minutes": 45,
@@ -109,7 +115,9 @@
             "cell": 38,
             "concept": "Leer por bloques acota la entrada en memoria. Suma y conteo se combinan; promediar medias sin pesos puede fallar.",
             "task": "Cambia chunksize, conserva total y compara el cálculo de memoria del explorador.",
-            "evidence": "Conteos equivalentes y costo declarado."
+            "evidence": "Conteos equivalentes y costo declarado.",
+            "excerpt": "for numero, fragmento in enumerate(pd.read_csv(url_icfes, encoding=\"latin-1\", chunksize=100_000), start=1):\n    puntaje = pd.to_numeric(fragmento[\"PUNT_GLOBAL\"], errors=\"coerce\")\n    filas_por_fragmento.append(len(fragmento))\n    suma_puntaje += puntaje.sum()\n    puntajes_validos += puntaje.notna().sum()\n    print(f\"Fragmento {numero}: {len(fragmento):,} filas\")\n\ntotal_filas = sum(filas_por_fragmento)\npromedio_global = suma_puntaje / puntajes_validos\nprint(f\"Total procesado: {total_filas:,} filas\")\nprint(f\"Promedio PUNT_GLOBAL: {promedio_global:.2f}\")",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -118,11 +126,15 @@
             "cell": 72,
             "concept": "Un manifiesto conserva fuente, esquema, identidad y cobertura. La muestra no acredita representatividad.",
             "task": "Completa reto y confirma una escala de 40/80/120 procesos en el producto.",
-            "evidence": "RAW portable y evidencia real separados."
+            "evidence": "RAW portable y evidencia real separados.",
+            "excerpt": "# Espacio de trabajo del estudiante\n# 1. Define tu pregunta profesional.\npregunta_profesional = \"\"\n\n# 2. Identifica la unidad de observación.\nunidad_observacion = \"\"\n\n# 3. Selecciona variables y construye un resumen reproducible.\nvariables_seleccionadas = []\n\n# Escribe aquí tu código de ingesta, validación y resumen.",
+            "excerptTruncated": false
           }
         ],
         "breakAfter": 2,
-        "breakMinutes": 10
+        "breakMinutes": 10,
+        "notebookCells": 77,
+        "codeCells": 30
       }
     },
     {
@@ -205,7 +217,9 @@
             "cell": 8,
             "concept": "Un indicador cuantifica una situación; una decisión determina una acción. El requisito debe declarar quién, cuándo y para qué.",
             "task": "Relaciona una decisión con un indicador y una fuente.",
-            "evidence": "Requisito verificable."
+            "evidence": "Requisito verificable.",
+            "excerpt": "#@title Activar pregunta 1 — Decisión e indicador { display-mode: \"form\" }\n# Pregunta 1 de 7 — Decisión e indicador\npregunta_interactiva(\n    numero=1,\n    tema='Decisión e indicador',\n    contexto='El director propone medir el éxito por la cantidad de tecnologías instaladas.',\n    pregunta='¿Qué indicador responde mejor al problema de Laura?',\n    opciones=['Número de servicios tecnológicos activados.', 'Cantidad de columnas descargadas.', 'Tiempo entre la actualización del registro y su primera revisión.', 'Número de gráficos producidos.'],\n    correcta=2,\n    retro_opciones=['Cuenta infraestructura, pero no demuestra que Laura reciba evidencia a tiempo.', 'Más columnas pueden aumentar trabajo y confusión; no miden la mejora del proceso.', 'Este indicador corresponde a la demora observada y permite comparar la situación actual con la propuesta.', 'Un gráfico es un medio de comunicación; el valor aparece cuando apoya una revisión oportuna.'],\n)",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -214,7 +228,9 @@
             "cell": 11,
             "concept": "AS-IS describe situación actual; TO-BE el proceso objetivo. Una compuerta condiciona caminos y el retrabajo tiene costo.",
             "task": "Cambia una condición del flujo y comprueba qué actividad desaparece.",
-            "evidence": "Proceso antes/después."
+            "evidence": "Proceso antes/después.",
+            "excerpt": "#@title Activar pregunta 2 — Proceso, compuerta y retrabajo { display-mode: \"form\" }\n# Pregunta 2 de 7 — Proceso, compuerta y retrabajo\npregunta_interactiva(\n    numero=2,\n    tema='Proceso, compuerta y retrabajo',\n    contexto='La tarea valida fechas y produce dos resultados: información suficiente o información incompleta.',\n    pregunta='¿Cómo debe representarse la decisión posterior?',\n    opciones=['La tarea almacena los archivos y termina el proceso.', 'Una compuerta dirige: suficiente continúa; incompleta regresa para corrección.', 'Un gráfico reemplaza la decisión y elimina la revisión.', 'El SLA decide automáticamente si existe irregularidad.'],\n    correcta=1,\n    retro_opciones=['La tarea realiza la validación, pero no muestra las dos rutas ni el retrabajo.', 'La compuerta hace explícita la regla y permite ver que la ruta incompleta produce espera y corrección.', 'Una visualización comunica resultados; no representa ni ejecuta el flujo del proceso.', 'El SLA fija un tiempo esperado y no permite concluir irregularidad ni reemplazar el juicio humano.'],\n)",
+            "excerptTruncated": false
           },
           {
             "minutes": 30,
@@ -223,7 +239,9 @@
             "cell": 18,
             "concept": "Ingesta, almacenamiento, cómputo y servicio son responsabilidades. Lotes favorecen periodicidad; eventos reducen demora con complejidad.",
             "task": "Compara límite de 5 y 120 segundos en el simulador.",
-            "evidence": "Alternativa descartada; tiempos son supuestos."
+            "evidence": "Alternativa descartada; tiempos son supuestos.",
+            "excerpt": "#@title Activar pregunta 5 — Trazabilidad arquitectónica { display-mode: \"form\" }\n# Pregunta 5 de 7 — Trazabilidad arquitectónica\npregunta_interactiva(\n    numero=5,\n    tema='Trazabilidad arquitectónica',\n    contexto='El equipo propone una herramienta popular, pero no puede relacionarla con una decisión del proceso.',\n    pregunta='¿Qué debe hacer antes de incluirla en la arquitectura?',\n    opciones=['Instalarla y buscar después un problema.', 'Explicar qué necesidad, dato, función e indicador justifican su existencia.', 'Reemplazar el proceso por una lista de productos.', 'Ocultar el costo para no limitar el diseño.'],\n    correcta=1,\n    retro_opciones=['La tecnología quedaría sin un resultado verificable y añadiría complejidad innecesaria.', 'La cadena de trazabilidad permite comprobar que cada componente responde al objetivo empresarial.', 'Los productos no muestran quién trabaja, qué decide ni qué datos necesita.', 'El costo es una condición real de la arquitectura y puede cambiar una alternativa técnicamente posible.'],\n)",
+            "excerptTruncated": false
           },
           {
             "minutes": 45,
@@ -245,7 +263,9 @@
           }
         ],
         "breakAfter": 2,
-        "breakMinutes": 10
+        "breakMinutes": 10,
+        "notebookCells": 41,
+        "codeCells": 9
       }
     },
     {
@@ -328,7 +348,9 @@
             "cell": 11,
             "concept": "Un artículo puede contener listas y campos variables; aplanar puede perder cardinalidad o contexto.",
             "task": "Compara noticia y fila SECOP.",
-            "evidence": "Grano y estructura."
+            "evidence": "Grano y estructura.",
+            "excerpt": "# Traemos las noticias ya recolectadas y las miramos SIN base de datos todavía.\nimport urllib.request, json\nfrom collections import Counter\n\nURL_NOTICIAS = \"https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/noticias_contratacion_2026.json\"\n\nwith urllib.request.urlopen(URL_NOTICIAS) as r:\n    noticias = json.loads(r.read().decode(\"utf-8\"))\n\nprint(\"Noticias:\", len(noticias))\nfechas = sorted(n[\"publicado\"][:10] for n in noticias)\nprint(\"Van desde\", fechas[0], \"hasta\", fechas[-1])\n\n# 1) ¿Todas las noticias tienen los mismos campos?\npresencia = Counter(k for n in noticias for k in n)\nprint()\nprint(\"Presencia de cada campo (cuántas noticias lo traen):\")\nfor campo, veces in presencia.most_common():\n    marca = \"\" if veces == len(noticias) else \"   <-- NO está en todas\"\n    print(f\"  {campo:14s} {veces:4d}/{len(noticias)}{marca}\")\n\n# 2) ¿Cuántas etiquetas trae cada noticia?\nn_etiquetas = [len(n[\"etiquetas\"]) for n in noticias]\nn_imagenes = [len(n[\"imagenes\"]) for n in noticias]\nprint()\nprint(f\"Etiquetas por noticia: mínimo {min(n_etiquetas)}, máximo {max(n_etiquetas)}\")\nprint(f\"Imágenes por noticia:  mínimo {min(n_imagenes)}, máximo {max(n_imagenes)}\")\n",
+            "excerptTruncated": true
           },
           {
             "minutes": 25,
@@ -337,7 +359,9 @@
             "cell": 17,
             "concept": "JSON representa objetos; BSON añade tipos binarios. Replicar copia datos, fragmentar los reparte. CAP analiza restricciones durante particiones de red.",
             "task": "Localiza campos anidados e identidad; distingue campo ausente de nulo.",
-            "evidence": "Documento inspeccionado."
+            "evidence": "Documento inspeccionado.",
+            "excerpt": "# Miramos UNA noticia completa, con su estructura a la vista.\nfrom pprint import pprint\n\nn = noticias[0]\n\nprint(\"CAMPOS DE PRIMER NIVEL\")\nfor campo, valor in n.items():\n    if isinstance(valor, list):\n        print(f\"  {campo:12s} -> lista con {len(valor)} elementos\")\n    elif isinstance(valor, dict):\n        print(f\"  {campo:12s} -> objeto anidado\")\n    else:\n        print(f\"  {campo:12s} -> {str(valor)[:60]}\")\n\nprint()\nprint(\"DENTRO DEL ARREGLO 'etiquetas' (primeras 2):\")\npprint(n[\"etiquetas\"][:2])\n\nprint()\nprint(\"DENTRO DEL ARREGLO 'cuerpo' (un bloque de cada tipo que trae esta noticia):\")\nvistos = set()\nfor b in n[\"cuerpo\"]:\n    if b.get(\"tipo\") not in vistos:\n        vistos.add(b.get(\"tipo\"))\n        print(\"  \", str(b.get(\"tipo\")), \"-> claves:\", [k for k in b if k != \"tipo\"])",
+            "excerptTruncated": false
           },
           {
             "minutes": 30,
@@ -346,7 +370,9 @@
             "cell": 40,
             "concept": "find filtra, proyección selecciona campos y limit acota resultados. Un cursor no es una lista; $gt compara.",
             "task": "Carga noticias en motor declarado y cambia operador y umbral.",
-            "evidence": "Filtro y resultados propios."
+            "evidence": "Filtro y resultados propios.",
+            "excerpt": "# ── TEMA 1, sobre las noticias ─────────────────────────────────────────\n# count_documents cuenta sin traer nada: util cuando solo quieres el numero.\nprint(\"Noticias de mas de 800 palabras:\", coleccion.count_documents({\"n_palabras\": {\"$gt\": 800}}))\n\nfor n in coleccion.find({\"n_palabras\": {\"$gt\": 800}}, {\"titulo\": 1, \"n_palabras\": 1, \"_id\": 0}).limit(5):\n    print(n[\"n_palabras\"], \"|\", n[\"titulo\"][:64])",
+            "excerptTruncated": false
           },
           {
             "minutes": 45,
@@ -355,7 +381,9 @@
             "cell": 76,
             "concept": "Un índice reduce candidatos a cambio de almacenamiento y escrituras; una agregación transforma por etapas. Coincidir por entidad no acredita el mismo contrato.",
             "task": "Agrupa noticias; ejecuta explain controlado del bloque final si hay MongoDB real; contrasta la bandeja.",
-            "evidence": "Conteos y documentos examinados; motor declarado."
+            "evidence": "Conteos y documentos examinados; motor declarado.",
+            "excerpt": "# ── 7. Lo mismo sobre las noticias: cuantas hay por seccion ────────────\nresultado = coleccion.aggregate([\n    {\"$group\": {\"_id\": \"$seccion\", \"cuantas\": {\"$sum\": 1}}},\n    {\"$sort\": {\"cuantas\": -1}},\n    {\"$limit\": 5},\n])\n\nfor fila in resultado:\n    print(f\"{fila['_id'][:34]:34s} {fila['cuantas']:4d}\")",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -364,11 +392,15 @@
             "cell": 82,
             "concept": "La ficha conserva identidad, fuente y campos de consulta. Los apéndices son profundización, no prerrequisito.",
             "task": "Modifica tres consultas y confirma expediente del producto.",
-            "evidence": "Expedientes y evidencia de consultas."
+            "evidence": "Expedientes y evidencia de consultas.",
+            "excerpt": "# 3.1 — COMPLÉTALA TÚ. Solo cambia el valor de SECCION.\n\n# ── Primero, una pista: que secciones existen y cuantas noticias tiene cada una.\n#    (Esto es una agregacion; la explicamos a fondo en el Paso 5. Por ahora\n#     solo lee el resultado: nombre de la seccion y su conteo.)\nprint(\"Las 10 secciones con mas noticias:\")\nfor fila in coleccion.aggregate([\n    {\"$group\": {\"_id\": \"$seccion\", \"n\": {\"$sum\": 1}}},   # cuenta por seccion\n    {\"$sort\":  {\"n\": -1}},                                # de mayor a menor\n    {\"$limit\": 10},                                        # solo las 10 primeras\n]):\n    print(f\"   {fila['_id']:38s} {fila['n']:4d} noticias\")\n\n\n# ── Ahora TU consulta. Elige una seccion de la lista de arriba.\nSECCION = \"salud\"      # <--- CAMBIA ESTO\n\nprint()\nprint(f\"Noticias de la seccion '{SECCION}':\")\n\nresultado = coleccion.find(\n    {\"seccion\": SECCION},        # FILTRO:     solo las de esa seccion\n    {\"titulo\": 1, \"_id\": 0},     # PROYECCION: solo el titulo, sin el _id\n).limit(10)                      # y como mucho 10 resultados\n\nfor n in resultado:\n    print(\"  -\", n[\"titulo\"][:78])",
+            "excerptTruncated": false
           }
         ],
         "breakAfter": 2,
-        "breakMinutes": 10
+        "breakMinutes": 10,
+        "notebookCells": 130,
+        "codeCells": 54
       }
     },
     {
@@ -451,7 +483,9 @@
             "cell": 6,
             "concept": "MongoDB es el motor; Atlas administra infraestructura. Persistencia no equivale a disponibilidad; ping no demuestra recuperación.",
             "task": "Predice qué sucede al cerrar Colab.",
-            "evidence": "Hipótesis comprobable."
+            "evidence": "Hipótesis comprobable.",
+            "excerpt": "# Reactivar en menos de 10 minutos: los mismos controles de la sesion 3.\nimport json, urllib.request\n\nwith urllib.request.urlopen(\"https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/noticias_contratacion_2026.json\") as r:\n    noticias = json.loads(r.read().decode(\"utf-8\"))\n\nlargas = sum(1 for n in noticias if (n.get(\"n_palabras\") or 0) > 800)\n\nprint(\"Noticias                    :\", len(noticias))\nprint(\"Con mas de 800 palabras      :\", largas)\nassert len(noticias) == 987 and largas == 189, \"estos dos numeros deben coincidir con la sesion 3\"\nprint(\"Coincide con la sesion 3. Seguimos.\")",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -469,7 +503,9 @@
             "cell": 19,
             "concept": "Una vista guarda un pipeline lógico; no implica copia materializada.",
             "task": "Crea vista en Atlas y recupera su resultado.",
-            "evidence": "Conteos y vista."
+            "evidence": "Conteos y vista.",
+            "excerpt": "# Sacar de Atlas la vista que YA construiste en la interfaz -- no se vuelve a\n# calcular aqui, solo se trae para poder cruzarla con SECOP. Si estas en modo\n# de respaldo, la reconstruimos localmente con la MISMA regla que usaste en Atlas.\nimport json, urllib.request\n\nif \"menciones_clasificadas\" in db.list_collection_names():\n    menciones = list(db[\"menciones_clasificadas\"].find({}, {\"_id\": 0}))\nelse:\n    with urllib.request.urlopen(\"https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/entidades_en_noticias_2026.json\") as r:\n        entidades = json.loads(r.read().decode(\"utf-8\"))\n    for e in entidades:\n        n = e.get(\"noticias\", 0)\n        e[\"nivel_menciones\"] = \"alta\" if n >= 20 else \"media\" if n >= 5 else \"baja\"\n    menciones = entidades\n\nfrom collections import Counter\nniveles = Counter(m[\"nivel_menciones\"] for m in menciones)\nprint(\"Entidades por nivel de mencion:\", dict(niveles))\nassert dict(niveles) == {\"baja\": 111, \"media\": 25, \"alta\": 6}, \"deberia coincidir con Atlas\"",
+            "excerptTruncated": false
           },
           {
             "minutes": 45,
@@ -478,7 +514,9 @@
             "cell": 21,
             "concept": "Nulo no es cero. Priorizar mediante regla transparente no significa detectar fraude.",
             "task": "Ejecuta filtros y abre el primer enlace SECOP.",
-            "evidence": "Embudo y candidatos."
+            "evidence": "Embudo y candidatos.",
+            "excerpt": "# La regla de priorizacion, en cuatro pasos explicitos. Nada de esto es un\n# modelo: es una regla que cualquiera puede leer y discutir.\nentidades_en_prensa = {m[\"entidad\"] for m in menciones}\n\n# 1) coincidencia EXACTA de entidad con la vista de noticias\npaso1 = secop[secop[\"entidad\"].isin(entidades_en_prensa)]\nprint(\"1) entidad coincide con prensa :\", len(paso1))\n\n# 2) modalidad que contiene 'directa'\npaso2 = paso1[paso1[\"modalidad_de_contratacion\"].str.contains(\"directa\", case=False, na=False)]\n\n# 3) respuestas NUMERICAS iguales a cero; los faltantes quedan EXCLUIDOS\n#    (fillna(0) los convertiria en \"cero\", que no es lo mismo que \"no se sabe\")\nrespuestas = pd.to_numeric(paso2[\"respuestas_al_procedimiento\"], errors=\"coerce\")\npaso3 = paso2[respuestas.eq(0)]\n\n# 4) orden: precio_base descendente, id_del_proceso ascendente como desempate\ncandidatos = paso3.sort_values(\n    [\"precio_base\", \"id_del_proceso\"], ascending=[False, True]\n).reset_index(drop=True)\n\nprint(\"2) + modalidad directa          :\", len(paso2))\nprint(\"3) + cero respuestas (sin NaN)  :\", len(paso3))\nprint()\nprint(\"Candidatos finales               :\", len(candidatos))\nassert len(paso1) == 163 and len(candidatos) == 77, \"la regla deberia dar 163 -> 77\"",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -487,11 +525,15 @@
             "cell": 31,
             "concept": "La consulta operacional requiere un patrón estable; Cassandra aparecerá por esa necesidad.",
             "task": "Guarda CSV y recupera bandeja; compara límite de filas.",
-            "evidence": "Bandeja y pregunta S05."
+            "evidence": "Bandeja y pregunta S05.",
+            "excerpt": "# CQL — la tabla se modela por como se va a preguntar, no por como se guarda la entidad.\ncql_crear_tabla = '''\nCREATE TABLE compras_claras.prioridades_por_corte_departamento (\n    corte date,\n    departamento text,\n    valor_base bigint,\n    id_proceso text,\n    entidad text,\n    objeto text,\n    modalidad text,\n    respuestas int,\n    noticias_entidad int,\n    nivel_menciones text,\n    estado_revision text,\n    url_secop text,\n    criterio text,\n    PRIMARY KEY ((corte, departamento), valor_base, id_proceso)\n) WITH CLUSTERING ORDER BY (\n    valor_base DESC,\n    id_proceso ASC\n);\n'''\nprint(cql_crear_tabla)",
+            "excerptTruncated": false
           }
         ],
         "breakAfter": 2,
-        "breakMinutes": 10
+        "breakMinutes": 10,
+        "notebookCells": 39,
+        "codeCells": 21
       }
     },
     {
@@ -574,7 +616,9 @@
             "cell": 15,
             "concept": "Una vista de Atlas puede ser entrada de otro modelo sin volver a descargar el universo.",
             "task": "Recupera vista o respaldo explícito.",
-            "evidence": "Esquema y fuente."
+            "evidence": "Esquema y fuente.",
+            "excerpt": "import json, urllib.request\nfrom collections import Counter\n\nvista_real = False\n\nif db is not None:\n    nombres = db.list_collection_names()\n    if \"menciones_clasificadas\" in nombres:\n        menciones = list(db[\"menciones_clasificadas\"].find({}, {\"_id\": 0}))\n        vista_real = True\n    else:\n        print(\"La vista no aparece en Atlas. Activo respaldo con la MISMA regla.\")\n\nif not vista_real:\n    with urllib.request.urlopen(\"https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/entidades_en_noticias_2026.json\") as r:\n        menciones = json.loads(r.read().decode(\"utf-8\"))\n    for e in menciones:\n        n = e.get(\"noticias\", 0)\n        e[\"nivel_menciones\"] = \"alta\" if n >= 20 else \"media\" if n >= 5 else \"baja\"\n\nniveles = Counter(m[\"nivel_menciones\"] for m in menciones)\nprint(\"Fuente:\", \"vista real de Atlas\" if vista_real else \"respaldo reproducible\")\nprint(\"Entidades:\", len(menciones))\nprint(\"Niveles:\", dict(niveles))\n\nassert len(menciones) == 142\nassert dict(niveles) == {\"baja\": 111, \"media\": 25, \"alta\": 6}",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -583,7 +627,9 @@
             "cell": 21,
             "concept": "Una hipótesis puede refutarse; desconocido no es cero.",
             "task": "Reproduce filtros y observa excluidos.",
-            "evidence": "Embudo y límite."
+            "evidence": "Embudo y límite.",
+            "excerpt": "import pandas as pd\n\nsecop = pd.read_csv(\n    \"https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Cuadernos/datos/secop_chunks/prueba_chunk_0000000.csv\",\n    low_memory=False,\n)\nprint(\"Procesos SECOP:\", len(secop))\nassert len(secop) == 1000\n\ncontexto_menciones = pd.DataFrame(menciones)[[\"entidad\", \"noticias\", \"nivel_menciones\"]].copy()\nassert contexto_menciones[\"entidad\"].is_unique\ncontexto_menciones = contexto_menciones.rename(columns={\"noticias\": \"noticias_entidad\"})\n\nentidades_en_prensa = set(contexto_menciones[\"entidad\"])\npaso1 = secop[secop[\"entidad\"].isin(entidades_en_prensa)]\npaso2 = paso1[\n    paso1[\"modalidad_de_contratacion\"].str.contains(\"directa\", case=False, na=False)\n]\nrespuestas = pd.to_numeric(paso2[\"respuestas_al_procedimiento\"], errors=\"coerce\")\npaso3 = paso2[respuestas.eq(0)]\n\ncandidatos = (\n    paso3\n    .merge(contexto_menciones, on=\"entidad\", how=\"left\", validate=\"many_to_one\")\n    .sort_values([\"precio_base\", \"id_del_proceso\"], ascending=[False, True])\n    .reset_index(drop=True)\n)\n",
+            "excerptTruncated": true
           },
           {
             "minutes": 30,
@@ -592,7 +638,9 @@
             "cell": 41,
             "concept": "La clave de partición localiza grupos; clustering ordena filas dentro de ellos. Una clave dominante puede concentrar carga.",
             "task": "Diseña corte/departamento y compara clave alternativa.",
-            "evidence": "Contrato de consulta."
+            "evidence": "Contrato de consulta.",
+            "excerpt": "# ✏️ MODIFICA · aquí tu elección sí cambia la evidencia individual.\nconteo_departamentos = candidatos[\"departamento_entidad\"].dropna().astype(str).value_counts()\nopciones_departamento = conteo_departamentos.index.tolist()\n\nprint(\"Elige un departamento para tu evidencia individual:\")\nfor i, d in enumerate(opciones_departamento, start=1):\n    print(f\"{i:>2}. {d} ({conteo_departamentos[d]} candidatos)\")\n\nseleccion = int(input(\"Número de departamento: \").strip())\nif not 1 <= seleccion <= len(opciones_departamento):\n    raise ValueError(\"El número no corresponde a la lista mostrada.\")\n\ndepartamento_elegido = opciones_departamento[seleccion - 1]\ntop5_esperado_pd = (\n    candidatos[candidatos[\"departamento_entidad\"].astype(str) == departamento_elegido]\n    .sort_values([\"precio_base\", \"id_del_proceso\"], ascending=[False, True])\n    .head(5)\n)\nids_esperados_pd = top5_esperado_pd[\"id_del_proceso\"].astype(str).tolist()\n\nprint(\"Departamento elegido:\", departamento_elegido)\nprint(\"IDs esperados por pandas:\", ids_esperados_pd)",
+            "excerptTruncated": false
           },
           {
             "minutes": 45,
@@ -601,7 +649,9 @@
             "cell": 60,
             "concept": "INSERT actualiza por clave completa; UPDATE y DELETE requieren acceso adecuado. Comparar IDs con pandas evita validación circular.",
             "task": "Ejecuta dos consultas en Astra si hay acceso; contrasta IDs.",
-            "evidence": "Resultados CQL y referencia."
+            "evidence": "Resultados CQL y referencia.",
+            "excerpt": "# 🧠 ENTIENDE · verifica que pandas y Cassandra respondan la misma pregunta.\nif \"departamento_elegido\" not in globals() or \"ids_esperados_pd\" not in globals():\n    raise RuntimeError(\"Ejecuta primero Contrato de resultado.\")\n\ntop5_propio = list(session.execute(consulta, (CORTE_CLASE, departamento_elegido)))\nids_cql = [str(f.id_proceso) for f in top5_propio]\ncoinciden_cql_pd = ids_cql == ids_esperados_pd\n\nprint(\"Departamento     :\", departamento_elegido)\nprint(\"Esperado pandas :\", ids_esperados_pd)\nprint(\"Devuelto CQL    :\", ids_cql)\nprint(\"¿Coinciden?     :\", \"SÍ\" if coinciden_cql_pd else \"NO\")\n\nif not coinciden_cql_pd:\n    raise AssertionError(\"Revisa corte, departamento, carga y orden: los dos resultados no coinciden.\")",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -610,11 +660,15 @@
             "cell": 71,
             "concept": "El diseño sirve una pregunta; otra pregunta puede exigir otra tabla.",
             "task": "Exporta ancla y compara concentración de grupos.",
-            "evidence": "Ancla S06."
+            "evidence": "Ancla S06.",
+            "excerpt": "import json\n\nif \"top5_esperado_pd\" in globals() and len(top5_esperado_pd):\n    opciones_ancla = top5_esperado_pd.reset_index(drop=True)\n    print(\"Elige el proceso que quieres llevar a S6:\")\n    for i, fila in opciones_ancla.iterrows():\n        print(\n            f\"{i+1:>2}. {fila['id_del_proceso']} | {fila['entidad']} | \"\n            f\"$ {float(fila['precio_base']):,.0f}\"\n        )\n    seleccion_ancla = int(input(\"Número de proceso para S6: \").strip())\n    if not 1 <= seleccion_ancla <= len(opciones_ancla):\n        raise ValueError(\"El número debe corresponder a uno de los procesos mostrados.\")\n    fila_ancla = opciones_ancla.iloc[seleccion_ancla - 1]\n    origen_eleccion_s06 = \"selección propia dentro del top pandas S05\"\nelse:\n    fila_ancla = candidatos.iloc[0]\n    seleccion_ancla = 1\n    origen_eleccion_s06 = \"respaldo: primer candidato de la bandeja S05\"\n    print(\"No existe top individual en memoria; se usa el primer candidato como respaldo.\")\n\nancla_s06 = {\n    \"id_proceso\": str(fila_ancla[\"id_del_proceso\"]),\n    \"referencia\": str(fila_ancla.get(\"referencia_del_proceso\", \"\")),\n    \"entidad\": str(fila_ancla[\"entidad\"]),\n    \"nit_entidad\": str(fila_ancla.get(\"nit_entidad\", \"\")),\n    \"departamento\": str(fila_ancla.get(\"departamento_entidad\", \"\")),\n    \"valor_base\": int(float(fila_ancla[\"precio_base\"])),",
+            "excerptTruncated": true
           }
         ],
         "breakAfter": 2,
-        "breakMinutes": 10
+        "breakMinutes": 10,
+        "notebookCells": 82,
+        "codeCells": 26
       }
     },
     {
@@ -697,7 +751,9 @@
             "cell": 8,
             "concept": "Entidad, proceso y proveedor tienen identidades distintas. No unir por coincidencia de nombre.",
             "task": "Recupera ancla S05 o muestra autorizada.",
-            "evidence": "Identidad y fuente."
+            "evidence": "Identidad y fuente.",
+            "excerpt": "#@title Elegir ejemplo del curso o mi JSON de S5 { display-mode: \"form\" }\nfrom pathlib import Path\nimport json\nUSAR_MI_ANCLA_S5 = False  #@param {type:\"boolean\"}\narchivo_s5 = Path(\"s05_ancla_s06.json\")\nif USAR_MI_ANCLA_S5 and not archivo_s5.is_file():\n    try:\n        from google.colab import files\n        print(\"Selecciona s05_ancla_s06.json\")\n        subidos = files.upload()\n        if \"s05_ancla_s06.json\" not in subidos:\n            raise ValueError(\"Debes seleccionar s05_ancla_s06.json o desactivar USAR_MI_ANCLA_S5.\")\n        archivo_s5.write_bytes(subidos[\"s05_ancla_s06.json\"])\n    except ImportError:\n        raise FileNotFoundError(\"Copia s05_ancla_s06.json junto al cuaderno o usa el ejemplo del curso.\")\nif USAR_MI_ANCLA_S5:\n    ancla_original = json.loads(archivo_s5.read_text(encoding=\"utf-8-sig\"))\n    faltantes = [k for k in [\"id_proceso\", \"entidad\", \"nit_entidad\"] if not str(ancla_original.get(k, \"\")).strip()]\n    if faltantes:\n        raise ValueError(f\"El JSON no contiene estos campos obligatorios: {faltantes}\")\n    origen_ancla = \"archivo propio S5\"\nelse:\n    ancla_original = dict(manifest[\"ancla_pedagogica\"])\n    origen_ancla = \"ejemplo versionado del curso\"\nprint(\"✅ Punto de partida listo\")\nprint(\"Proceso:\", ancla_original[\"id_proceso\"])\nprint(\"Entidad:\", ancla_original[\"entidad\"])\nprint(\"NIT:\", ancla_original[\"nit_entidad\"])",
+            "excerptTruncated": true
           },
           {
             "minutes": 25,
@@ -706,7 +762,9 @@
             "cell": 16,
             "concept": "Nodo representa entidad; relación un hecho; MATCH busca patrones; DISTINCT evita caminos repetidos; MERGE protege identidad con restricciones adecuadas.",
             "task": "Construye y consulta patrón mínimo.",
-            "evidence": "Patrón y conteos."
+            "evidence": "Patrón y conteos.",
+            "excerpt": "# Ejemplo guiado: la respuesta ya está escrita para que observes la sintaxis.\nRELACION_PROCESO_PROVEEDOR = \"ADJUDICADO_A\"\npatron_estudiante = f\"(p:Proceso)-[:{RELACION_PROCESO_PROVEEDOR}]->(v:Proveedor)\"\nprint(\"✅ Patrón:\", patron_estudiante)\nprint(\"Se lee: el Proceso p fue ADJUDICADO_A el Proveedor v.\")",
+            "excerptTruncated": false
           },
           {
             "minutes": 30,
@@ -715,7 +773,9 @@
             "cell": 48,
             "concept": "UNWIND convierte lista a filas; constraints protegen claves. Repetir carga debe preservar nodos y relaciones.",
             "task": "Carga extracto y comprueba repetición.",
-            "evidence": "Conteos antes/después."
+            "evidence": "Conteos antes/después.",
+            "excerpt": "if modo_neo4j:\n    consulta_tamano = '''\n    MATCH (n) WHERE n:Entidad OR n:Proceso OR n:Proveedor\n    WITH count(n) AS nodos\n    MATCH ()-[r:PUBLICA|ADJUDICADO_A]->()\n    RETURN nodos, count(r) AS relaciones\n    '''\n    antes_carga = driver.execute_query(consulta_tamano).records[0].data()\n    driver.execute_query(query_base, filas=rows)\n    driver.execute_query(query_proveedor, filas=rows_proveedor)\n    despues_carga = driver.execute_query(consulta_tamano).records[0].data()\n    carga_repetida = antes_carga == despues_carga\n    assert carga_repetida, \"La carga repetida alteró los conteos. Revisa IDs y restricciones.\"\n    print(\"Carga repetida sin crecimiento:\", carga_repetida, \"|\", despues_carga)\nelse:\n    carga_repetida = None\n    print(\"Idempotencia en Neo4j: PENDIENTE.\")",
+            "excerptTruncated": false
           },
           {
             "minutes": 45,
@@ -724,7 +784,9 @@
             "cell": 94,
             "concept": "Grado mide conexiones inmediatas; un puente conecta entidades. Conectividad no es irregularidad.",
             "task": "Cambia proveedor y contrasta Neo4j con pandas.",
-            "evidence": "Vecindario e IDs."
+            "evidence": "Vecindario e IDs.",
+            "excerpt": "#@title Verificar otras entidades { display-mode: \"form\" }\nOPERADOR_EXCLUSION = \"<>\"  # significa \"diferente de\"  # sustituye por el operador distinto de de Cypher\nif OPERADOR_EXCLUSION != \"<>\":\n    raise ValueError(\"Necesitamos excluir la entidad ancla, no seleccionarla.\")\nconsulta_otras = f'''\nMATCH (otra:Entidad)-[:PUBLICA]->(:Proceso)-[:ADJUDICADO_A]->(v:Proveedor {{nit:$proveedor}})\nWHERE otra.nit {OPERADOR_EXCLUSION} $ancla\nRETURN count(DISTINCT otra) AS otras_entidades\n'''\nif modo_neo4j:\n    otras_entidades = int(driver.execute_query(consulta_otras, proveedor=str(proveedor_elegido[\"nit_proveedor\"]), ancla=nit_deseado).records[0][\"otras_entidades\"])\nelse:\n    otras_entidades = int(vecindario_df.loc[vecindario_df[\"nit_entidad\"].ne(nit_deseado), \"nit_entidad\"].nunique())\nesperadas_otras = int(proveedor_elegido[\"entidades_conectadas\"]) - 1\nassert otras_entidades == esperadas_otras\nprint(\"Otras entidades:\", otras_entidades, \"| esperado:\", esperadas_otras)\nrazon_exploracion = f\"Exploro {proveedor_elegido['proveedor']} porque conecta {int(proveedor_elegido['entidades_conectadas'])} entidades en el extracto. Esta conectividad describe estructura; no demuestra irregularidad.\"\nprint(\"Ejemplo de interpretación:\", razon_exploracion)",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -733,11 +795,15 @@
             "cell": 104,
             "concept": "Los caminos deben conservar hechos verificables y límites; apéndices A1–A10 son ampliaciones.",
             "task": "Guarda ficha y selecciona un expediente para búsqueda.",
-            "evidence": "Contexto S07."
+            "evidence": "Contexto S07.",
+            "excerpt": "#@title Guardar ficha y archivo para S7 { display-mode: \"form\" }\nexport = vecindario_df.merge(\n    datos[[\"id_proceso\", \"descripcion\", \"modalidad\", \"url_secop\"]].drop_duplicates(\"id_proceso\"),\n    left_on=\"proceso\", right_on=\"id_proceso\", how=\"left\", validate=\"many_to_one\"\n)\nassert export[\"id_proceso\"].notna().all(), \"Hay procesos sin correspondencia en el extracto.\"\nexport[\"nit_proveedor_explorado\"] = str(proveedor_elegido[\"nit_proveedor\"])\nexport[\"motor_ejecucion\"] = \"Neo4j\" if modo_neo4j else \"pandas; Neo4j pendiente\"\nexport.to_json(\"s06_contexto_procesos.jsonl\", orient=\"records\", lines=True, force_ascii=False)\n\nhito = f'''# Hito S06 — Ficha relacional de revisión\n\n- Autor: {autor}\n- Fecha UTC: {fecha_ejecucion}\n- SHA256 del extracto: {huella_datos}\n- Carga repetida: {carga_repetida if carga_repetida is not None else \"PENDIENTE\"}\n- Consulta propia: {procesos_propios} procesos; motor {\"Neo4j\" if modo_neo4j else \"pandas; Cypher pendiente\"}\n- Motor: {\"Neo4j\" if modo_neo4j else \"pandas; Neo4j pendiente\"}\n- Origen del ancla: {origen_ancla}\n- Proceso elegido en S5: {ancla_original.get(\"id_proceso\", \"\")}\n- Proceso/entidad usados para el grafo: {ancla_trabajo.get(\"id_proceso\", \"\")} — {ancla_trabajo.get(\"entidad\", \"\")}\n- Noticias / nivel: {ancla_trabajo.get(\"noticias_entidad\", \"\")} / {ancla_trabajo.get(\"nivel_menciones\", \"\")}\n- Respaldo pedagógico: {uso_respaldo_s06}\n- H1 (S5): 0/77 → refutada literalmente\n- H2-R (S6), desenlace pandas: {desenlace_h2r_pd}\n- H2-R (S6), desenlace Neo4j: {desenlace_h2r_neo}\n- pandas == Neo4j: {coinciden if coinciden is not None else \"PENDIENTE\"}\n- Proveedor que determina H2-R: {proveedor_h2r[\"nit_proveedor\"]} — {proveedor_h2r[\"proveedor\"]}",
+            "excerptTruncated": true
           }
         ],
         "breakAfter": 2,
-        "breakMinutes": 10
+        "breakMinutes": 10,
+        "notebookCells": 119,
+        "codeCells": 40
       }
     },
     {
@@ -820,7 +886,9 @@
             "cell": 10,
             "concept": "Un buscador tokeniza y puntúa; contains busca cadenas. Recuperar no es clasificar.",
             "task": "Cambia la consulta literal.",
-            "evidence": "Candidatos base."
+            "evidence": "Candidatos base.",
+            "excerpt": "consulta = 'mantenimiento aeronaves'\nmask = corpus['texto_busqueda'].str.lower().str.contains('mantenimiento', na=False)\nprint('Coincidencias literales con mantenimiento:', int(mask.sum()))\ndisplay(corpus.loc[mask, ['id_proceso','nombre_proceso','entidad']].head(10))",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -829,7 +897,9 @@
             "cell": 18,
             "concept": "DF cuenta documentos que contienen término; IDF pondera rareza; BM25 satura frecuencia y normaliza longitud.",
             "task": "Varía k1 y b en explorador y analiza tokens.",
-            "evidence": "Ranking calculado."
+            "evidence": "Ranking calculado.",
+            "excerpt": "resp = client.indices.analyze(\n    index=INDEX_NAME,\n    analyzer='spanish',\n    text='Servicios de mantenimiento de las aeronaves'\n)\n\ntokens = pd.DataFrame([\n    {\n        'token': t['token'],\n        'position': t['position'],\n        'start_offset': t['start_offset'],\n        'end_offset': t['end_offset'],\n        'type': t.get('type')\n    }\n    for t in resp['tokens']\n])\n\nprint('Número de tokens devueltos por Elasticsearch:', len(tokens))\ndisplay(tokens)\n\nprint('Lectura:')\nprint('- token = término resultante')\nprint('- position = orden lógico')\nprint('- start_offset / end_offset = ubicación en el texto original')\nprint('- esta tabla viene del motor Elasticsearch, no de una simulación local')\n",
+            "excerptTruncated": false
           },
           {
             "minutes": 30,
@@ -838,7 +908,9 @@
             "cell": 20,
             "concept": "Mapping distingue text analizado y keyword exacto; bulk agrupa escrituras.",
             "task": "Crea índice propio y verifica conteo.",
-            "evidence": "Índice y filas."
+            "evidence": "Índice y filas.",
+            "excerpt": "def acciones_bulk(df):\n    for _, r in df.iterrows():\n        yield {\n            '_index': INDEX_NAME,\n            '_id': str(r['id_proceso']),\n            '_source': {\n                'id_proceso': str(r['id_proceso']),\n                'nombre_proceso': str(r['nombre_proceso']),\n                'descripcion': str(r['descripcion']),\n                'entidad': str(r['entidad']),\n                'tipo_registro': str(r['tipo_registro']),\n                'url_secop': str(r['url_secop'])\n            }\n        }\n\nok, errors = helpers.bulk(client, acciones_bulk(corpus), raise_on_error=False)\nremote_count = client.count(index=INDEX_NAME)['count']\nprint('Acciones OK:', ok)\nprint('Errores bulk:', len(errors))\nprint('Conteo local:', len(corpus))\nprint('Conteo Elasticsearch:', remote_count)\nprint('¿Coinciden?:', len(corpus) == remote_count)",
+            "excerptTruncated": false
           },
           {
             "minutes": 45,
@@ -847,7 +919,9 @@
             "cell": 24,
             "concept": "match analiza; term compara token; filter restringe universo. Precision@k necesita juicios humanos.",
             "task": "Modifica pesos y compara dos rankings reales.",
-            "evidence": "Top-k y relevancia."
+            "evidence": "Top-k y relevancia.",
+            "excerpt": "query_B = {\n    'bool': {\n        'must': [{\n            'multi_match': {\n                'query': consulta,\n                'fields': ['nombre_proceso^3','descripcion']\n            }\n        }],\n        'filter': [{'term': {'tipo_registro': 'historico_adjudicado'}}]\n    }\n}\n\nresp_B = client.search(\n    index=INDEX_NAME,\n    size=5,\n    query=query_B,\n    highlight={'fields': {'nombre_proceso': {}, 'descripcion': {}}}\n)\n\nrows=[]\nfor rank,h in enumerate(resp_B['hits']['hits'], start=1):\n    rows.append({\n        'rank': rank,\n        'id_proceso': h['_id'],\n        'score': h['_score'],\n        'nombre_proceso': h['_source']['nombre_proceso'],\n        'highlight': str(h.get('highlight',{}))[:250]\n    })",
+            "excerptTruncated": true
           },
           {
             "minutes": 25,
@@ -856,11 +930,15 @@
             "cell": 30,
             "concept": "Puntuaciones de motores distintos no tienen escala comparable.",
             "task": "Exporta ranking y conserva fuente.",
-            "evidence": "Buscador V1."
+            "evidence": "Buscador V1.",
+            "excerpt": "salida = {\n    'index': INDEX_NAME,\n    'consulta': consulta,\n    'criterio': criterio,\n    'precision_at_5': p5,\n    'top5': tabla_B.to_dict(orient='records')\n}\n\nPath('s07_config_busqueda.json').write_text(json.dumps(salida, ensure_ascii=False, indent=2), encoding='utf-8')\ntabla_B.to_csv('s07_resultados_busqueda.csv', index=False)\n\nmd = f'''# Hito S07 · Relevancia textual\n\n- Índice: {INDEX_NAME}\n- Consulta: {consulta}\n- Criterio: {criterio}\n- Precision@5: {p5}\n\n## Límite\nLa relevancia textual no demuestra irregularidad, calidad contractual ni riesgo. Solo ordena documentos según la consulta y configuración usadas.\n'''\nPath('hito_s07_relevancia.md').write_text(md, encoding='utf-8')\nprint('Archivos creados: s07_config_busqueda.json, s07_resultados_busqueda.csv, hito_s07_relevancia.md')",
+            "excerptTruncated": false
           }
         ],
         "breakAfter": 2,
-        "breakMinutes": 10
+        "breakMinutes": 10,
+        "notebookCells": 31,
+        "codeCells": 12
       }
     },
     {
@@ -943,7 +1021,9 @@
             "cell": 11,
             "concept": "Un snapshot fija ventana y grano; procesos y contratos son fuentes diferentes.",
             "task": "Comprueba cuentas y consulta de 50 filas.",
-            "evidence": "Preflight."
+            "evidence": "Preflight.",
+            "excerpt": "# E1.1 · EJECUTA · Prueba pequeña antes de descargar: 50 filas reales\nq = PLAN[\"procesos\"]\nmuestra, meta = secop.fetch_page(q[\"endpoint\"], select=q[\"select\"], where=q[\"where\"], order=q[\"order\"], limit=50, offset=0)\nprint(f\"{len(muestra)} filas en {meta['elapsed_s']} s (intento {meta['attempts']})\")\npd.DataFrame(muestra)[[\"id_del_proceso\", \"entidad\", \"fecha_de_publicacion_del\", \"precio_base\"]].head(5)",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -952,7 +1032,9 @@
             "cell": 16,
             "concept": "Mismos offsets y orden deben dar mismo contenido; hash detecta cambios.",
             "task": "Ejecuta ruta del taller y compara descargas.",
-            "evidence": "RAW y manifiesto."
+            "evidence": "RAW y manifiesto.",
+            "excerpt": "# E1.2b · EJECUTA · Descarga secuencial: una página después de otra\ndef descargar_secuencial(descargar_pagina, offsets):\n    paginas = {}\n    for offset in offsets:\n        paginas[offset] = descargar_pagina(offset)      # cada llamada devuelve (filas, metadatos)\n    return paginas\n\ninicio = time.perf_counter()\npaginas_seq = descargar_secuencial(pagina_secuencial, OFFSETS)\nSEG_SEQ = time.perf_counter() - inicio\nprint(f\"Secuencial: {sum(len(f) for f, _ in paginas_seq.values()):,} filas en {SEG_SEQ:.1f} s · {len(paginas_seq)} páginas\")",
+            "excerptTruncated": false
           },
           {
             "minutes": 30,
@@ -961,7 +1043,9 @@
             "cell": 35,
             "concept": "Documento por proceso y agregación mantienen identidad; índice se confirma en motor.",
             "task": "Completa E2/E3 y capturas requeridas.",
-            "evidence": "Consultas y evidencia oficial."
+            "evidence": "Consultas y evidencia oficial.",
+            "excerpt": "#@title E2.2b · ELIGE · la estrategia de carga y ejecuta { display-mode: \"form\" }\nESTRATEGIA = \"— selecciona —\" #@param [\"— selecciona —\", \"insert_many (insertar todo otra vez)\", \"insert_many con índice único en id_proceso\", \"upsert por id_proceso (UpdateOne + upsert=True)\"]\nCARGA = taller.cargar_e2(ESTRATEGIA)",
+            "excerptTruncated": false
           },
           {
             "minutes": 45,
@@ -970,7 +1054,9 @@
             "cell": 63,
             "concept": "Cada motor responde un patrón distinto; no sustituir ejecución con una tabla de ejemplo.",
             "task": "Ejecuta E4/E5 y conserva avance si no termina en clase.",
-            "evidence": "CQL y Cypher."
+            "evidence": "CQL y Cypher.",
+            "excerpt": "#@title E5.2 · EJECUTA · La consulta de la ancla (cópiala en Aura) y tu ancla { display-mode: \"form\" }\nprint(secop.CYPHER_ANCLA, \"\\n\")\nNIT_ANCLA = taller.ancla_e5()",
+            "excerptTruncated": false
           },
           {
             "minutes": 25,
@@ -979,11 +1065,15 @@
             "cell": 77,
             "concept": "El corrector y rúbrica oficiales siguen vigentes.",
             "task": "Valida entrega y registra pendientes, confirma versión portable.",
-            "evidence": "Manifiesto y entrega oficial."
+            "evidence": "Manifiesto y entrega oficial.",
+            "excerpt": "#@title E6.3 · EJECUTA · Mira tu carpeta y valida todo { display-mode: \"form\" }\ntaller.ver_carpeta()\nprint()\nMANIFEST = taller.validar()",
+            "excerptTruncated": false
           }
         ],
         "breakAfter": 2,
-        "breakMinutes": 10
+        "breakMinutes": 10,
+        "notebookCells": 81,
+        "codeCells": 31
       }
     },
     {
@@ -1066,7 +1156,9 @@
             "cell": 3,
             "concept": "BM25 y TF-IDF ponderan palabras; E5 aprende representaciones densas. Cercanía no implica pertinencia.",
             "task": "Busca salud pública y abre fuentes reales; carga corpus del cuaderno.",
-            "evidence": "Corpus e intención."
+            "evidence": "Corpus e intención.",
+            "excerpt": "#@title 1 · Cargar SECOP o CSV propio y validar el contrato de datos\nimport hashlib, json, os, re, time\nimport numpy as np\nimport pandas as pd\nfrom IPython.display import display\nMODO_DEMO = \"SECOP curso · 120\" #@param [\"SECOP curso · 120\",\"SECOP oficial · hasta 6000\",\"CSV propio · URL\",\"CSV propio · subir\",\"Respaldo sintético · 6\"]\nEQUIPO = \"mi-practica\" #@param {type:\"string\"}\nCSV_PROPIO_URL = \"\" #@param {type:\"string\"}\nCOLUMNA_ID = \"id_proceso\" #@param {type:\"string\"}\nCOLUMNA_TITULO = \"nombre_proceso\" #@param {type:\"string\"}\nCOLUMNA_TEXTO = \"descripcion\" #@param {type:\"string\"}\nCOLUMNA_ENTIDAD = \"entidad\" #@param {type:\"string\"}\nCOLUMNA_URL = \"url_secop\" #@param {type:\"string\"}\nMAX_FILAS = 6000 if \"6000\" in MODO_DEMO else 120\nEQUIPO = re.sub(r\"[^a-z0-9_-]\", \"-\", EQUIPO.strip().lower())[:40] or \"docente\"\nMODEL_NAME = \"intfloat/multilingual-e5-small\"\nMAX_TOKENS = 256\nURL_CURSO = \"https://raw.githubusercontent.com/jazaineam1/BigData2026/main/Datos/s06_contexto_relacional.csv\"\nif MODO_DEMO.startswith(\"SECOP curso\"):\n    raw = pd.read_csv(URL_CURSO,dtype=str,keep_default_na=False)\n    ORIGEN = URL_CURSO\nelif MODO_DEMO.startswith(\"SECOP oficial\"):\n    import requests\n    URL_API = \"https://www.datos.gov.co/resource/p6dx-8zbt.json\"\n    resp=requests.get(URL_API,params={\"$select\":\n        \"id_del_proceso,nombre_del_procedimiento,descripci_n_del_procedimiento,entidad\",\n        \"$where\":\"id_del_proceso IS NOT NULL\",\n        \"$order\":\"id_del_proceso ASC\",\"$limit\":9000},timeout=40)",
+            "excerptTruncated": true
           },
           {
             "minutes": 25,
@@ -1075,7 +1167,9 @@
             "cell": 5,
             "concept": "Coseno compara orientación; con vectores unitarios es producto punto. E5 usa passage/query; matriz float32 ocupa N×384×4 bytes.",
             "task": "Cambia ángulo y calcula capacidad; ejecuta E5 y verifica norma/dimensión.",
-            "evidence": "Matriz N×384 y costo."
+            "evidence": "Matriz N×384 y costo.",
+            "excerpt": "#@title 2 · Ejecutar SentenceTransformers E5 y mostrar la matriz de embeddings\nfrom sentence_transformers import SentenceTransformer\nmodelo=SentenceTransformer(MODEL_NAME)\nmodelo.max_seq_length=MAX_TOKENS\ntextos=[\"passage: \"+str(t) for t in corpus[\"texto_busqueda\"]]\ncache=os.path.join(os.getcwd(),\"s09_atlas_\"+LOTE+\".npy\")\nstart=time.perf_counter()\nif os.path.isfile(cache):\n    embeddings=np.load(cache)\n    if embeddings.shape!=(len(corpus),384):\n        raise ValueError(\"Caché incompatible. Borra \"+cache+\" y vuelve a ejecutar.\")\n    print(\"Embeddings cargados desde caché del entorno.\")\nelse:\n    embeddings=modelo.encode(textos,normalize_embeddings=True,\n                            batch_size=32,show_progress_bar=True)\n    np.save(cache,embeddings)\nembeddings=np.asarray(embeddings,dtype=np.float32)\nassert embeddings.shape==(len(corpus),384)\nprint(\"Embeddings reales:\",embeddings.shape,\n      \"· tiempo:\",round(time.perf_counter()-start,1),\"segundos\")\nprint(\"Ejemplo de vector:\",np.round(embeddings[0,:7],3).tolist())\nbytes_float32 = len(corpus)*384*4\nprint(\"Matriz de embeddings float32:\",round(bytes_float32/1024**2,3),\"MiB;\",\n      \"proyección a 1 millón:\",round(1000000*384*4/1024**3,2),\"GiB sin índices\")\nassert np.isfinite(embeddings).all()\nassert np.max(np.abs(np.linalg.norm(embeddings,axis=1)-1))<0.01",
+            "excerptTruncated": false
           },
           {
             "minutes": 30,
@@ -1084,7 +1178,9 @@
             "cell": 9,
             "concept": "Upsert por ID evita duplicación del mismo lote; solicitar índice no equivale a estar disponible.",
             "task": "Conecta Atlas si disponible, carga y verifica queryable. No compartas credenciales.",
-            "evidence": "Ping, conteo y estado índice."
+            "evidence": "Ping, conteo y estado índice.",
+            "excerpt": "#@title 4 · Guardar los embeddings y metadatos en la colección Atlas\natlas_cargado=False\nif atlas_ok:\n    try:\n        registros=[]\n        for i,row in corpus.reset_index(drop=True).iterrows():\n            doc={\n                \"_id\": \"s09:\"+LOTE+\":\"+str(row[\"id_proceso\"]),\n                \"id_proceso\":str(row[\"id_proceso\"]),\n                \"nombre_proceso\":str(row[\"nombre_proceso\"]),\n                \"descripcion\":str(row[\"descripcion\"]),\n                \"entidad\":str(row[\"entidad\"]),\n                \"url_secop\":str(row[\"url_secop\"]),\n                \"lote\":LOTE,\n                \"equipo\":EQUIPO,\n                \"embedding\":embeddings[i].astype(float).tolist(),\n                \"modelo\":MODEL_NAME\n            }\n            registros.append(UpdateOne({\"_id\":doc[\"_id\"]},{\"$set\":doc},upsert=True))\n        for offset in range(0,len(registros),100):\n            col.bulk_write(registros[offset:offset+100],ordered=False)\n        guardados=col.count_documents({\"lote\":LOTE})\n        atlas_cargado=(guardados==len(corpus))\n        muestra_atlas=col.find_one({\"lote\":LOTE},{\"_id\":1,\"id_proceso\":1,\"embedding\":1})\n        if atlas_cargado and (not muestra_atlas or len(muestra_atlas.get(\"embedding\",[]))!=384):\n            atlas_cargado=False\n            print(\"ERROR: dimensión de embedding en documento Atlas inválida.\")\n        print(\"ATLAS REAL · documentos del lote:\",guardados,",
+            "excerptTruncated": true
           },
           {
             "minutes": 45,
@@ -1093,7 +1189,9 @@
             "cell": 14,
             "concept": "ANN aproxima vecinos; ENN calcula exactos. Recall contra exacto mide acuerdo, no relevancia humana. RRF combina posiciones.",
             "task": "Cambia consulta, filtro y k; compara Atlas y NumPy; benchmark opcional.",
-            "evidence": "Rankings y modalidad ejecutada."
+            "evidence": "Rankings y modalidad ejecutada.",
+            "excerpt": "#@title 7 · Consulta, cambia la intención o filtra una entidad observada\nfor requerido in (\"corpus\",\"modelo\",\"embeddings\",\"definition\",\"indice_queryable\"):\n    if requerido not in globals():\n        raise RuntimeError(\"Falta \" + requerido + \". Ejecuta en orden los pasos 1 a 6.\")\nCONSULTA = \"reparación de aviones militares\" #@param {type:\"string\"}\nTOP_K = 5 #@param [3,5,10] {type:\"raw\"}\nNUM_CANDIDATES = 100 #@param [50,100,200] {type:\"raw\"}\nSOLO_ENTIDAD_FRECUENTE = False #@param {type:\"boolean\"}\nCOMPARAR_ENN_ATLAS = False #@param {type:\"boolean\"}\nFILTRO_ENTIDAD = (str(corpus[\"entidad\"].value_counts().index[0])\n    if SOLO_ENTIDAD_FRECUENTE else \"\")\nUSAR_ENTIDAD_DEL_RESULTADO = False #@param {type:\"boolean\"}\nPOSICION_ENTIDAD = 0 #@param {type:\"integer\"}\nif USAR_ENTIDAD_DEL_RESULTADO:\n    anterior=globals().get(\"ultimo_ranking_s09\")\n    if anterior is None or anterior.empty:\n        raise ValueError(\"Ejecuta primero sin filtro para obtener un ranking propio.\")\n    if type(POSICION_ENTIDAD) is not int or not 1 <= POSICION_ENTIDAD <= len(anterior):\n        raise ValueError(\"Elige una posición real de tu ranking anterior (1 a N).\")\n    FILTRO_ENTIDAD=str(anterior.iloc[POSICION_ENTIDAD-1][\"entidad\"])\nTOP_K=int(TOP_K)\nNUM_CANDIDATES_SOLICITADO=int(NUM_CANDIDATES)\nNUM_CANDIDATES=max(NUM_CANDIDATES_SOLICITADO,20*TOP_K)\nprint(\"numCandidates solicitado:\",NUM_CANDIDATES_SOLICITADO,\"· efectivo:\",NUM_CANDIDATES,\n      \"· 20×k es un punto de partida, no garantía de calidad.\")\nif not CONSULTA.strip():raise ValueError(\"Escribe una consulta antes de buscar.\")\nq=modelo.encode([\"query: \"+CONSULTA.strip()],normalize_embeddings=True)[0]\nfiltro={\"lote\":LOTE}",
+            "excerptTruncated": true
           },
           {
             "minutes": 25,
@@ -1102,11 +1200,15 @@
             "cell": 15,
             "concept": "El resultado debe guardar modelo, lote, ID, fuente y consulta. TF-IDF portable no es E5.",
             "task": "Exporta evidencia y compara una consulta alternativa. Revisa al menos cinco candidatos.",
-            "evidence": "Recuperación para multimedia."
+            "evidence": "Recuperación para multimedia.",
+            "excerpt": "#@title 8 · Comparar ANN/ENN Atlas y descargar evidencia sin credenciales\nfrom datetime import datetime, timezone\natlas_real=bool(atlas_query_ejecutada)\nids_local=set(resultados_numpy[\"id_proceso\"].astype(str))\nids_atlas=set(resultados_atlas[\"id_proceso\"].astype(str)) if atlas_real and \"id_proceso\" in resultados_atlas else set()\nids_enn=set(resultados_enn_atlas[\"id_proceso\"].astype(str)) if enn_query_ejecutada and \"id_proceso\" in resultados_enn_atlas else set()\ncoincidencia_local=round(len(ids_local & ids_atlas)/len(ids_local),3) if ids_local and atlas_real else None\ncoincidencia_enn=round(len(ids_atlas & ids_enn)/len(ids_enn),3) if ids_enn and atlas_real else None\nprint(\"MongoDB Atlas ANN ejecutado:\",atlas_real,\"· ENN ejecutado:\",bool(enn_query_ejecutada))\nprint(\"Solapamiento ANN vs ENN Atlas:\",coincidencia_enn,\n      \"· ANN vs NumPy:\",coincidencia_local)\nprint(\"Latencias son ida-vuelta de UNA solicitud, no prueba de rendimiento.\")\nevidencia={\n  \"sesion\":9,\"tipo\":\"s09_vector_db_lab\",\"timestamp_utc\":datetime.now(timezone.utc).isoformat(),\n  \"origen\":ORIGEN,\"equipo\":EQUIPO,\"lote\":LOTE,\n  \"recibidos\":recibidos,\"validos\":validos,\"indexados_en_muestra\":len(corpus),\n  \"modelo\":MODEL_NAME,\"dimensiones\":384,\"max_tokens\":MAX_TOKENS,\n  \"atlas_ping\":bool(atlas_ok),\"atlas_cargado\":bool(atlas_cargado),\n  \"index\":INDEX_NAME if atlas_ok else None,\"index_queryable\":bool(indice_queryable),\n  \"motor_ann_ejecutado\":\"MongoDB Atlas Vector Search\" if atlas_real else \"NO EJECUTADO\",\n  \"motor_enn_ejecutado\":\"MongoDB Atlas ENN\" if enn_query_ejecutada else \"NO EJECUTADO\",\n  \"respaldo\":\"NumPy exacto LOCAL (no Atlas)\",\n  \"consulta\":CONSULTA,\"top_k\":TOP_K,\n  \"numCandidates\":NUM_CANDIDATES if atlas_real else None,\n  \"filtro\":filtro,\"latencia_ann_cliente_ms\":latencia_atlas_ms,\n  \"latencia_enn_cliente_ms\":latencia_enn_ms,\n  \"solapamiento_ann_enn_atlas\":coincidencia_enn,\n  \"solapamiento_ann_numpy\":coincidencia_local,",
+            "excerptTruncated": true
           }
         ],
         "breakAfter": 2,
-        "breakMinutes": 10
+        "breakMinutes": 10,
+        "notebookCells": 21,
+        "codeCells": 11
       }
     },
     {
