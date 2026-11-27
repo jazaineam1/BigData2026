@@ -1319,6 +1319,11 @@ def build_cells():
 
 def main():
     cells = build_cells()
+    try:
+        from .integrar_ruta_notebook import integrar_ruta
+    except ImportError:
+        from integrar_ruta_notebook import integrar_ruta
+    integrar_ruta(cells, "01")
     validate(cells)
     save(cells, OUTPUT)
 

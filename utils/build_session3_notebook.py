@@ -4566,6 +4566,11 @@ def _lineas(texto):
 
 def main():
     cells = insertar_diagramas(ajustar_alcance_para_una_sesion(build_cells()))
+    try:
+        from .integrar_ruta_notebook import integrar_ruta
+    except ImportError:
+        from integrar_ruta_notebook import integrar_ruta
+    integrar_ruta(cells, "03")
     validate(cells)
     save(cells, OUTPUT)
 
