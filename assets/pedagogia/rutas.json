@@ -134,7 +134,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 77,
-        "codeCells": 30
+        "codeCells": 30,
+        "questions": [
+          {
+            "question": "¿Dos fragmentos contienen 30 y 70 filas. ¿Cómo obtienes el total?",
+            "options": [
+              "Sumar 30+70",
+              "Promediar 30 y 70",
+              "Tomar el mayor"
+            ],
+            "answer": 0,
+            "feedback": "La suma de conteos de bloques disjuntos conserva el total."
+          },
+          {
+            "question": "¿HTTP 200 prueba que descargaste todos los procesos?",
+            "options": [
+              "Sí",
+              "No, debes verificar paginación y cobertura",
+              "Solo si el CSV tiene encabezado"
+            ],
+            "answer": 1,
+            "feedback": "El estado HTTP indica éxito de la petición, no el universo."
+          }
+        ]
       }
     },
     {
@@ -265,7 +287,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 41,
-        "codeCells": 9
+        "codeCells": 9,
+        "questions": [
+          {
+            "question": "Una consulta exige respuesta en 5 s; el lote hipotético demora 60 s. ¿Qué hacer?",
+            "options": [
+              "Conservar el lote sin cambios",
+              "Aumentar el presupuesto sin evaluar",
+              "Revisar la arquitectura y requisito"
+            ],
+            "answer": 2,
+            "feedback": "La alternativa no satisface el requisito declarado."
+          },
+          {
+            "question": "¿Un check verde autoriza por sí solo fusionar?",
+            "options": [
+              "No, falta revisión de la propuesta",
+              "Sí, siempre",
+              "Solo si el commit es largo"
+            ],
+            "answer": 0,
+            "feedback": "El check verifica condiciones automatizadas, no toda la decisión."
+          }
+        ]
       }
     },
     {
@@ -400,7 +444,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 130,
-        "codeCells": 54
+        "codeCells": 54,
+        "questions": [
+          {
+            "question": "¿Qué conserva la identidad de un documento?",
+            "options": [
+              "Su posición en una lista",
+              "Su _id estable",
+              "La longitud del JSON"
+            ],
+            "answer": 1,
+            "feedback": "La posición puede cambiar; el ID identifica el documento."
+          },
+          {
+            "question": "¿Qué comparas para saber si un índice reduce el trabajo?",
+            "options": [
+              "Solo cantidad de campos",
+              "El tamaño de pantalla",
+              "Mismo filtro, documentos examinados y resultados"
+            ],
+            "answer": 2,
+            "feedback": "El experimento conserva la consulta y verifica equivalencia."
+          }
+        ]
       }
     },
     {
@@ -533,7 +599,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 39,
-        "codeCells": 21
+        "codeCells": 21,
+        "questions": [
+          {
+            "question": "¿Un ping exitoso prueba tolerancia a fallos?",
+            "options": [
+              "Sí",
+              "No, prueba conectividad en ese momento",
+              "Solo si hay 3 réplicas"
+            ],
+            "answer": 1,
+            "feedback": "Disponibilidad exige observar fallos y recuperación."
+          },
+          {
+            "question": "¿Una vista de Atlas implica copia materializada?",
+            "options": [
+              "No necesariamente",
+              "Sí, siempre",
+              "Depende del color de la consola"
+            ],
+            "answer": 0,
+            "feedback": "Una vista lógica conserva la transformación."
+          }
+        ]
       }
     },
     {
@@ -668,7 +756,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 82,
-        "codeCells": 26
+        "codeCells": 26,
+        "questions": [
+          {
+            "question": "¿Cuál clave ayuda a consultar por corte y departamento?",
+            "options": [
+              "Descripción larga como clave",
+              "Una clave aleatoria sin relación",
+              "Clave compuesta acorde a la consulta"
+            ],
+            "answer": 2,
+            "feedback": "Diseñar desde el patrón de acceso evita búsquedas innecesarias."
+          },
+          {
+            "question": "¿Un dato desconocido debe volverse cero?",
+            "options": [
+              "No, conservar faltante",
+              "Sí, para ordenar",
+              "Sí, si hay un índice"
+            ],
+            "answer": 0,
+            "feedback": "Cero y desconocido tienen semánticas distintas."
+          }
+        ]
       }
     },
     {
@@ -803,7 +913,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 119,
-        "codeCells": 40
+        "codeCells": 40,
+        "questions": [
+          {
+            "question": "Dos proveedores tienen nombre parecido. ¿Los fusionas?",
+            "options": [
+              "Sí",
+              "No, verifica NIT e identidad",
+              "Sí, si están cerca en el grafo"
+            ],
+            "answer": 1,
+            "feedback": "La identidad debe estar respaldada por el dato."
+          },
+          {
+            "question": "¿Muchos enlaces demuestran corrupción?",
+            "options": [
+              "Sí",
+              "Solo en Neo4j",
+              "No, muestran conectividad"
+            ],
+            "answer": 2,
+            "feedback": "Conectividad no es evidencia suficiente de irregularidad."
+          }
+        ]
       }
     },
     {
@@ -938,7 +1070,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 31,
-        "codeCells": 12
+        "codeCells": 12,
+        "questions": [
+          {
+            "question": "¿Qué mide DF?",
+            "options": [
+              "Documentos con el término",
+              "Veces totales del término",
+              "Tamaño del índice"
+            ],
+            "answer": 0,
+            "feedback": "Frecuencia documental cuenta documentos, no ocurrencias."
+          },
+          {
+            "question": "¿Un BM25 alto garantiza pertinencia?",
+            "options": [
+              "Sí",
+              "No, requiere juicio de relevancia",
+              "Solo con b=0.75"
+            ],
+            "answer": 1,
+            "feedback": "La puntuación ordena según el modelo, no comprueba utilidad."
+          }
+        ]
       }
     },
     {
@@ -1073,7 +1227,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 81,
-        "codeCells": 31
+        "codeCells": 31,
+        "questions": [
+          {
+            "question": "¿Procesos y contratos tienen el mismo grano?",
+            "options": [
+              "Sí",
+              "Solo si hay 3000 filas",
+              "No, pueden existir varios contratos por proceso"
+            ],
+            "answer": 2,
+            "feedback": "La relación no debe confundirse con identidad."
+          },
+          {
+            "question": "¿Qué valida mejor una descarga concurrente?",
+            "options": [
+              "Mismos IDs y huellas bajo igual ventana",
+              "Que termine primero",
+              "Que haya más hilos"
+            ],
+            "answer": 0,
+            "feedback": "Comparar contenido evita premiar descargas incompletas."
+          }
+        ]
       }
     },
     {
@@ -1208,7 +1384,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 21,
-        "codeCells": 11
+        "codeCells": 11,
+        "questions": [
+          {
+            "question": "¿TF-IDF es el embedding E5?",
+            "options": [
+              "Sí",
+              "No, son representaciones distintas",
+              "Solo si se normaliza"
+            ],
+            "answer": 1,
+            "feedback": "TF-IDF pondera términos; E5 aprende representaciones densas."
+          },
+          {
+            "question": "¿ANN coincide con 4 de 5 exactos?",
+            "options": [
+              "Recall 100%",
+              "Precision humana 80%",
+              "Recall@5 frente a exacto 80%"
+            ],
+            "answer": 2,
+            "feedback": "4/5 mide recuperación de vecinos exactos, no relevancia humana."
+          }
+        ]
       }
     },
     {
@@ -1343,7 +1541,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 48,
-        "codeCells": 23
+        "codeCells": 23,
+        "questions": [
+          {
+            "question": "¿Reducir resolución conserva necesariamente detalle?",
+            "options": [
+              "No",
+              "Sí, si se usa RGB",
+              "Sí, si es PNG"
+            ],
+            "answer": 0,
+            "feedback": "El remuestreo pierde información espacial."
+          },
+          {
+            "question": "¿RMS contiene palabras transcritas?",
+            "options": [
+              "Sí",
+              "No, mide magnitud de señal",
+              "Solo a 16 kHz"
+            ],
+            "answer": 1,
+            "feedback": "La transcripción requiere ASR."
+          }
+        ]
       }
     },
     {
@@ -1478,7 +1698,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 73,
-        "codeCells": 31
+        "codeCells": 31,
+        "questions": [
+          {
+            "question": "¿Un WER de 120% puede ser válido?",
+            "options": [
+              "No",
+              "Solo para imágenes",
+              "Sí, por inserciones"
+            ],
+            "answer": 2,
+            "feedback": "Las inserciones pueden superar la longitud de referencia."
+          },
+          {
+            "question": "¿Texto de referencia humana cuenta como ASR?",
+            "options": [
+              "No",
+              "Sí",
+              "Solo si el audio coincide"
+            ],
+            "answer": 0,
+            "feedback": "Conservar origen distingue referencia de predicción."
+          }
+        ]
       }
     },
     {
@@ -1613,7 +1855,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 111,
-        "codeCells": 45
+        "codeCells": 45,
+        "questions": [
+          {
+            "question": "¿Se pueden sumar scores BM25 y coseno sin normalización?",
+            "options": [
+              "Siempre",
+              "No es una comparación directa; RRF usa posiciones",
+              "Solo con 10 resultados"
+            ],
+            "answer": 1,
+            "feedback": "Los scores pertenecen a escalas diferentes."
+          },
+          {
+            "question": "¿Repetir ETL y duplicar activos es correcto?",
+            "options": [
+              "Sí",
+              "Solo si cambia fecha",
+              "No, debe verificar identidad e idempotencia"
+            ],
+            "answer": 2,
+            "feedback": "Repetir una entrada idéntica no debe duplicar resultados."
+          }
+        ]
       }
     },
     {
@@ -1748,7 +2012,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 55,
-        "codeCells": 22
+        "codeCells": 22,
+        "questions": [
+          {
+            "question": "¿Cuatro particiones prueban cuatro máquinas?",
+            "options": [
+              "No",
+              "Sí",
+              "Solo con Dask"
+            ],
+            "answer": 0,
+            "feedback": "Partición es división lógica; el clúster determina ejecución."
+          },
+          {
+            "question": "¿Más workers garantizan menor tiempo?",
+            "options": [
+              "Sí",
+              "No, hay parte serial y coordinación",
+              "Solo para K-means"
+            ],
+            "answer": 1,
+            "feedback": "La sobrecarga puede superar el beneficio."
+          }
+        ]
       }
     },
     {
@@ -1883,7 +2169,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 71,
-        "codeCells": 23
+        "codeCells": 23,
+        "questions": [
+          {
+            "question": "¿Qué ocurre con un hecho sin dimensión en left join?",
+            "options": [
+              "Desaparece",
+              "Se duplica siempre",
+              "Permanece con valores nulos"
+            ],
+            "answer": 2,
+            "feedback": "Left join conserva la fila izquierda."
+          },
+          {
+            "question": "¿Broadcast garantiza mayor velocidad?",
+            "options": [
+              "No, observa plan y mediciones",
+              "Sí",
+              "Solo si el join es left"
+            ],
+            "answer": 0,
+            "feedback": "Replicar la dimensión consume recursos y depende del caso."
+          }
+        ]
       }
     },
     {
@@ -2019,7 +2327,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 28,
-        "codeCells": 9
+        "codeCells": 9,
+        "questions": [
+          {
+            "question": "¿19 GiB mínimos estimados prueban que Databricks entrenó?",
+            "options": [
+              "Sí",
+              "No, falta ejecución real",
+              "Sí, si Spark está instalado"
+            ],
+            "answer": 1,
+            "feedback": "Una estimación no prueba entrenamiento."
+          },
+          {
+            "question": "¿Qué conjunto se usa para elegir modelo?",
+            "options": [
+              "Test",
+              "Todos los datos",
+              "Validación"
+            ],
+            "answer": 2,
+            "feedback": "Test queda reservado para evaluación final."
+          }
+        ]
       }
     },
     {
@@ -2154,7 +2484,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 19,
-        "codeCells": 6
+        "codeCells": 6,
+        "questions": [
+          {
+            "question": "¿Repetir lote confirmado debería duplicar filas?",
+            "options": [
+              "No",
+              "Sí",
+              "Solo en SQLite"
+            ],
+            "answer": 0,
+            "feedback": "Idempotencia conserva resultado ante repetición."
+          },
+          {
+            "question": "¿Checkpoint y transacción son lo mismo?",
+            "options": [
+              "Sí",
+              "No, progreso y atomicidad son responsabilidades distintas",
+              "Solo en streaming"
+            ],
+            "answer": 1,
+            "feedback": "El checkpoint registra progreso; la transacción confirma o revierte cambios."
+          }
+        ]
       }
     },
     {
@@ -2289,7 +2641,29 @@
         "breakAfter": 2,
         "breakMinutes": 10,
         "notebookCells": 34,
-        "codeCells": 16
+        "codeCells": 16,
+        "questions": [
+          {
+            "question": "¿Tres entrenamientos independientes equivalen a un modelo distribuido?",
+            "options": [
+              "Sí",
+              "Solo con Dask",
+              "No"
+            ],
+            "answer": 2,
+            "feedback": "Paralelismo entre modelos y dentro de un modelo son distintos."
+          },
+          {
+            "question": "¿Una métrica local acredita Spark?",
+            "options": [
+              "No, requiere procedencia del motor",
+              "Sí",
+              "Solo si F1 coincide"
+            ],
+            "answer": 0,
+            "feedback": "Métricas deben mantener motor, datos y split."
+          }
+        ]
       }
     }
   ]
