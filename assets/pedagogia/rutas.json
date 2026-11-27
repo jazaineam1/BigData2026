@@ -49,7 +49,24 @@
           "Un clúster puede ser útil, pero aún no está justificado."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Adquirir datos",
+        "story": "Laura necesita una primera muestra revisable antes de aumentar el volumen.",
+        "output": "raw",
+        "action": "Seleccionar una cantidad y conservar identidades, fuente y cobertura.",
+        "parameter": "Cantidad de procesos",
+        "options": [
+          "40",
+          "80",
+          "120"
+        ],
+        "transfer": "Elige 80 y cambia a 120: compara la cobertura y el costo, no extrapoles representatividad.",
+        "labVariable": "df_secop",
+        "labKind": "dataframe",
+        "labDescription": "API SECOP real: filas descargadas y columnas. No mezclar automáticamente grano contrato y proceso.",
+        "input": null
+      }
     },
     {
       "id": "02",
@@ -98,7 +115,24 @@
           "Depende de requisitos y carga."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Diseñar la solución",
+        "story": "Ya tenemos registros; Laura necesita decidir cómo servirlos.",
+        "output": "architecture",
+        "action": "Elegir una arquitectura bajo un requisito de latencia.",
+        "parameter": "Latencia máxima (s)",
+        "options": [
+          "5",
+          "120",
+          "600"
+        ],
+        "transfer": "Cambia el límite de 120 a 5 s y descarta la alternativa que ya no cumple.",
+        "labVariable": "",
+        "labKind": "manual",
+        "labDescription": "Repositorio/PR y decisión arquitectónica. La latencia del explorador es hipotética.",
+        "input": "01"
+      }
     },
     {
       "id": "03",
@@ -147,7 +181,24 @@
           "El formato JSON no determina por sí solo la ventaja."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Construir expedientes",
+        "story": "La fuente seleccionada necesita una ficha con información anidada.",
+        "output": "documents",
+        "action": "Transformar el RAW en expedientes y comprobar identidad.",
+        "parameter": "Campo de consulta",
+        "options": [
+          "entidad",
+          "id_proceso",
+          "nombre_proceso"
+        ],
+        "transfer": "Cambia el campo y comprueba cuántos valores distintos tiene.",
+        "labVariable": "bandeja_df",
+        "labKind": "dataframe",
+        "labDescription": "MongoDB: exportar resultado de consulta; explain es una evidencia distinta.",
+        "input": "02"
+      }
     },
     {
       "id": "04",
@@ -196,7 +247,24 @@
           "No cambia el esquema por sí mismo."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Crear bandeja",
+        "story": "Laura quiere volver a abrir los expedientes seleccionados.",
+        "output": "queue",
+        "action": "Guardar la lista de IDs y verificar que se recupera al importar el archivo.",
+        "parameter": "Tamaño de bandeja",
+        "options": [
+          "5",
+          "10",
+          "20"
+        ],
+        "transfer": "Cambia de 5 a 20 y verifica el número de IDs, sin llamar riesgo al orden.",
+        "labVariable": "bandeja",
+        "labKind": "dataframe",
+        "labDescription": "Atlas: exportar la vista o bandeja realmente producida.",
+        "input": "03"
+      }
     },
     {
       "id": "05",
@@ -245,7 +313,24 @@
           "El proveedor no reemplaza el diseño."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Resolver consultas",
+        "story": "La bandeja debe responder por una clave conocida.",
+        "output": "partitions",
+        "action": "Construir grupos por clave y recuperar un grupo sin recorrer todo.",
+        "parameter": "Clave de agrupación",
+        "options": [
+          "entidad",
+          "fuente",
+          "tipo_registro"
+        ],
+        "transfer": "Compara entidad y fuente; observa concentración y consulta que deja de ser adecuada.",
+        "labVariable": "candidatos",
+        "labKind": "dataframe",
+        "labDescription": "Cassandra: guardar resultado de CQL y comparación independiente; candidatos es referencia pandas, no prueba CQL.",
+        "input": "04"
+      }
     },
     {
       "id": "06",
@@ -294,7 +379,24 @@
           "La centralidad tampoco prueba irregularidad."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Explorar conexiones",
+        "story": "Laura necesita navegar entre la entidad y sus procesos.",
+        "output": "graph",
+        "action": "Construir aristas de hechos documentados; no inventar proveedores.",
+        "parameter": "Número de entidades",
+        "options": [
+          "3",
+          "5",
+          "10"
+        ],
+        "transfer": "Cambia el número de entidades y verifica que cada arista apunta a un proceso real.",
+        "labVariable": "export",
+        "labKind": "dataframe",
+        "labDescription": "Neo4j: resultado relacional del cuaderno; validar NIT y procedencia, sin unir por nombre si no corresponde.",
+        "input": "05"
+      }
     },
     {
       "id": "07",
@@ -343,7 +445,24 @@
           "No mide relevancia."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Encontrar por palabras",
+        "story": "Los expedientes ya se pueden navegar, pero Laura quiere buscar texto.",
+        "output": "lexical",
+        "action": "Calcular BM25 y conservar IDs y puntuaciones.",
+        "parameter": "Consulta",
+        "options": [
+          "salud",
+          "educación",
+          "transporte"
+        ],
+        "transfer": "Compara dos consultas y verifica que el ranking solo incluye expedientes del corpus.",
+        "labVariable": "tabla_B",
+        "labKind": "dataframe",
+        "labDescription": "Elasticsearch: exportar tabla_B con ranking real; el navegador calcula BM25 local.",
+        "input": "06"
+      }
     },
     {
       "id": "08",
@@ -392,7 +511,24 @@
           "No detecta sesgo."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Primera entrega",
+        "story": "Laura necesita un expediente que pueda reabrir y comprobar.",
+        "output": "release1",
+        "action": "Validar identidad, integridad referencial y resultados de consulta.",
+        "parameter": "Control de muestra",
+        "options": [
+          "5",
+          "10",
+          "20"
+        ],
+        "transfer": "Cambia la cantidad de expedientes inspeccionados; vuelve a importar el estado y comprueba que coincide.",
+        "labVariable": "MANIFEST",
+        "labKind": "json",
+        "labDescription": "TC1: conservar manifiesto oficial, sin alterar sus controles.",
+        "input": "07"
+      }
     },
     {
       "id": "09",
@@ -441,7 +577,24 @@
           "El motor no convierte similitud en verdad."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Mejorar recuperación",
+        "story": "El buscador literal no basta; Laura quiere comparar rankings.",
+        "output": "retrieval",
+        "action": "Comparar BM25 con coseno TF-IDF y fusionar posiciones; E5 real en cuaderno.",
+        "parameter": "Consulta",
+        "options": [
+          "salud pública",
+          "servicios educativos",
+          "vías transporte"
+        ],
+        "transfer": "Contrasta dos consultas. TF-IDF no es embedding semántico; importa evidencia E5 del cuaderno por separado.",
+        "labVariable": "evidencia",
+        "labKind": "json",
+        "labDescription": "Atlas/E5: s09_atlas_evidencia.json, modo real o local explícito.",
+        "input": "08"
+      }
     },
     {
       "id": "10",
@@ -490,7 +643,24 @@
           "La extensión no define la señal."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Catalogar multimedia",
+        "story": "Aparecen fotografías y otras fuentes, independientes de los contratos.",
+        "output": "media",
+        "action": "Conservar metadatos reales y fuente de imágenes; no inventar relación SECOP.",
+        "parameter": "Imágenes del inventario",
+        "options": [
+          "8",
+          "16",
+          "32"
+        ],
+        "transfer": "Compara 8 y 32; verifica IDs y créditos, y examina una imagen en el cuaderno.",
+        "labVariable": "manifest",
+        "labKind": "json",
+        "labDescription": "S10: manifest_s10.json con transformaciones reales de imagen y audio.",
+        "input": "09"
+      }
     },
     {
       "id": "11",
@@ -539,7 +709,24 @@
           "La confianza no sustituye comparación visual."
         ]
       },
-      "ref": "s11-estudiantes"
+      "ref": "s11-estudiantes",
+      "mission": {
+        "title": "Leer y escuchar",
+        "story": "Laura necesita texto extraído y resultados trazables, no solo nombres de archivo.",
+        "output": "extraction",
+        "action": "Preparar catálogo y asociar el estado de extracción; importar resultados reales del cuaderno.",
+        "parameter": "Modo de consulta",
+        "options": [
+          "imagen",
+          "documento",
+          "audio"
+        ],
+        "transfer": "Cambia modalidad y comprueba si hay evidencia de extracción. No crear texto ni transcripciones ficticias.",
+        "labVariable": "registros_mm",
+        "labKind": "json",
+        "labDescription": "S11: registros_mm o catálogo real; si no hay ASR/OCR ejecutado se mantiene pendiente.",
+        "input": "10"
+      }
     },
     {
       "id": "12",
@@ -588,7 +775,24 @@
           "La referencia no es la predicción."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Segunda entrega",
+        "story": "Laura quiere consultar el inventario y distinguir datos originales de derivados.",
+        "output": "release2",
+        "action": "Comprobar catálogo, cobertura de modalidades y resultados importados.",
+        "parameter": "Muestra de auditoría",
+        "options": [
+          "4",
+          "8",
+          "16"
+        ],
+        "transfer": "Cambia la muestra y detecta fuentes sin texto extraído; entrega oficial sigue en TC2.",
+        "labVariable": "INFORME",
+        "labKind": "json",
+        "labDescription": "TC2: informe del validador oficial; sin modificar rúbrica.",
+        "input": "11"
+      }
     },
     {
       "id": "13",
@@ -637,7 +841,24 @@
           "pandas no garantiza ese efecto."
         ]
       },
-      "ref": "s13-laboratorio"
+      "ref": "s13-laboratorio",
+      "mission": {
+        "title": "Distribuir procesamiento",
+        "story": "El volumen crece y Laura necesita saber si dividir el trabajo conserva resultados.",
+        "output": "aggregation",
+        "action": "Repartir los mismos registros en lotes y reducir conteos; contrastar con Dask real.",
+        "parameter": "Particiones lógicas",
+        "options": [
+          "2",
+          "4",
+          "8"
+        ],
+        "transfer": "Cambia las particiones y conserva conteos. No confundir particiones JS con workers Dask.",
+        "labVariable": "evidencia",
+        "labKind": "json",
+        "labDescription": "S13: decisión_s13.json o evidencia de tiempos, workers y acuerdo de K-means.",
+        "input": "12"
+      }
     },
     {
       "id": "14",
@@ -686,7 +907,24 @@
           "No es sintaxis."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Motor analítico",
+        "story": "Laura necesita una tabla analítica y modelos evaluados.",
+        "output": "analytics",
+        "action": "Construir agregados Gold sobre las particiones; enlazar evidencia MLlib sin inventar predicciones.",
+        "parameter": "Entidades principales",
+        "options": [
+          "3",
+          "5",
+          "10"
+        ],
+        "transfer": "Cambia Top-k y comprueba sumas y orden; importar métricas Spark como evidencia separada.",
+        "labVariable": "f1_macro_demo",
+        "labKind": "scalar",
+        "labDescription": "S14: F1 macro del ejemplo sintético MLlib, no predicciones SECOP.",
+        "input": "13"
+      }
     },
     {
       "id": "14A",
@@ -735,7 +973,25 @@
           "Dimensión no prueba ejecución."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Capacidad opcional",
+        "story": "El equipo quiere comprobar un límite de memoria declarado.",
+        "output": "capacity",
+        "action": "Calcular memoria mínima y contrastar con entrenamiento Databricks real si se ejecuta.",
+        "parameter": "Millones de filas",
+        "options": [
+          "1",
+          "5",
+          "25"
+        ],
+        "transfer": "Cambia escala y compara con presupuesto de 16 GiB. No es requisito de S15.",
+        "labVariable": "expediente",
+        "labKind": "json",
+        "labDescription": "S14A: expediente de telemetría sintética; el cálculo no demuestra ejecución.",
+        "input": "14",
+        "optional": true
+      }
     },
     {
       "id": "15",
@@ -784,7 +1040,24 @@
           "Un fallo dejaría estado incorrecto."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Actualizar sin duplicar",
+        "story": "Llegan nuevos registros de la misma fuente y no queremos perder lo anterior.",
+        "output": "incremental",
+        "action": "Incorporar un lote retenido, provocar un rechazo de versión y repetir sin duplicar.",
+        "parameter": "Registros adicionales",
+        "options": [
+          "5",
+          "10",
+          "20"
+        ],
+        "transfer": "Repite el lote y verifica que no cambia el total. El notebook enseña transacción y checkpoint reales locales.",
+        "labVariable": "manifest",
+        "labKind": "json",
+        "labDescription": "S15: manifiesto_s15.json de SQLite; streaming Spark opcional y separado.",
+        "input": "14"
+      }
     },
     {
       "id": "16",
@@ -833,7 +1106,24 @@
           "La selección requiere train y validación."
         ]
       },
-      "ref": "mejora-pedagogica-integral"
+      "ref": "mejora-pedagogica-integral",
+      "mission": {
+        "title": "Entregar el observatorio",
+        "story": "Laura quiere revisar el producto, sus fuentes y lo que está pendiente.",
+        "output": "release3",
+        "action": "Validar todo el recorrido, exportar estado y presentar resultados propios.",
+        "parameter": "Resultados visibles",
+        "options": [
+          "5",
+          "10",
+          "20"
+        ],
+        "transfer": "Cambia Top-k, exporta el estado, reábrelo y compara el resultado. Demuestra una decisión alternativa.",
+        "labVariable": "manifiesto",
+        "labKind": "json",
+        "labDescription": "Proyecto final: manifest_final.json; las predicciones locales y Spark deben distinguirse.",
+        "input": "15"
+      }
     }
   ]
 }
