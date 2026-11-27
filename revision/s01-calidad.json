@@ -1,7 +1,7 @@
 {
   "session": "S01",
   "state": "NO_APROBADA",
-  "score": 4.06,
+  "score": 4.29,
   "threshold": 4.5,
   "essential_min": 4,
   "mandatory": {
@@ -16,57 +16,59 @@
   "word_count": {
     "reading_gross": 8603,
     "chapters_gross": 17510,
-    "notebook_markdown_gross": 14596,
+    "notebook_markdown_gross": 14795,
     "formative_gross": 2367,
-    "total_gross": 43076,
+    "total_gross": 43275,
     "required_eligible": 40000,
-    "lexical_exact_dedup": 42785,
+    "lexical_exact_dedup": 42978,
     "near_matches": 0,
     "eligible_verified": null,
-    "editorial_review_pending": true
+    "editorial_review_pending": true,
+    "teacher_notes_words": 3218,
+    "teacher_spoken_words": 2615
   },
   "rubric": [
     {
       "dimension": "Profundidad conceptual",
       "weight": 20,
-      "score": 4.3,
-      "evidence": "Portada, dimensionamiento multiescala, JSONL y 25 capítulos conservados. Revisión semántica integral pendiente."
+      "score": 4.5,
+      "evidence": "25 ilustraciones específicas y portada por competencias, 42.978 palabras depuradas, experimentos de tipos y complejidad; falta revisión editorial semántica completa."
     },
     {
       "dimension": "Actividad y autonomía",
       "weight": 20,
-      "score": 4.3,
-      "evidence": "Dos TODO de construcción, cuatro escenarios aislados y 25 min protegidos; no hay observación de estudiantes."
+      "score": 4.4,
+      "evidence": "Dos componentes construidos por estudiante, validadores con 6 casos positivos y 9 negativos de referencia, guion por pantalla y 25 min protegidos; autonomía humana no observada."
     },
     {
       "dimension": "Práctica auténtica y reproducibilidad",
       "weight": 20,
-      "score": 3.7,
-      "evidence": "Nueve ejecuciones locales de la función de referencia hasta un millón, no ejecución integral del ipynb exacto."
+      "score": 4,
+      "evidence": "9 ejecuciones locales de función de benchmark transcrita hasta un millón; tipos y complejidad comprobados con referencias; no ejecución exacta del ipynb completo."
     },
     {
       "dimension": "Alineación y transferencia",
       "weight": 15,
-      "score": 4.3,
-      "evidence": "Controles de paginación y calidad sincronizados y reto alineado; falta prueba E2E Python y puente portable."
+      "score": 4.5,
+      "evidence": "Contraste de plan JSON implementado en A8.3 con identidades y conteos; celdas exactas señaladas; prueba integral del puente y ZIP pendientes."
     },
     {
       "dimension": "Interpretación de resultados",
       "weight": 10,
-      "score": 4.5,
-      "evidence": "Hipótesis, métricas, validación y bitácora separan resultado técnico de comprensión."
+      "score": 4.6,
+      "evidence": "Evidencia de hipótesis, mediciones, errores, interpretación y defensa; diagramas con distinción estimación/medición y límites explícitos."
     },
     {
       "dimension": "Diseño visual y accesibilidad",
       "weight": 10,
-      "score": 3.5,
-      "evidence": "Portada SVG, 11 diagramas temáticos y tres modos (proyección, exploración, lectura); DOM simulado, no inspección de navegador."
+      "score": 4.1,
+      "evidence": "Portada reproducida en Chromium a 1366×768, 1920×1080 y 360×800, corrección de barras, 26 ilustraciones SVG de pantalla y 1 portada; falta render completo real y accesibilidad profunda."
     },
     {
       "dimension": "Viabilidad temporal",
       "weight": 5,
-      "score": 3,
-      "evidence": "150 min planificados, 25 min autonomía y 7 defensa/cierre; falta ensayo humano."
+      "score": 3.2,
+      "evidence": "150 min planificados, libreto por pantalla con 3218 palabras de apoyo (incluye acciones), pausa y autonomía; ensayo humano pendiente."
     }
   ],
   "next_session": "S02",
@@ -155,19 +157,68 @@
       "notebook_execution": false,
       "real_browser": false,
       "student_observation": false
+    },
+    "eleventh_iteration": {
+      "mode": "HTML exacto DOM simulado; portada reproducida localmente en Chromium con marcado/CSS transcritos; funciones Python de referencia transcritas",
+      "screens": 26,
+      "cover_start_back": true,
+      "illustrations": 26,
+      "teacher_scripts": 26,
+      "formative_options": 75,
+      "route_toggles": 26,
+      "control_variations": 89,
+      "html_sync": true,
+      "lexical_pairs": 72010,
+      "benchmark_reference_runs": 9,
+      "benchmark_reference_sums": [
+        499950,
+        4999545,
+        49999950
+      ],
+      "student_validator_positive_reference": 6,
+      "student_validator_negative_reference": 9,
+      "types_reference": [
+        1600132,
+        800132
+      ],
+      "complexity_reference_visits": [
+        500000,
+        10000
+      ],
+      "cover_preview_viewports": [
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          360,
+          800
+        ]
+      ],
+      "notebook_execution": false,
+      "real_full_browser": false,
+      "student_observation": false
     }
   },
   "pedagogical_design": {
     "live_checks": 7,
     "core_code_cells": 16,
-    "optional_code_cells": 15,
+    "optional_code_cells": 16,
     "planned_autonomy_minutes": 25,
     "planned_closure_minutes": 7,
-    "score_unrounded": 4.055000000000001,
+    "score_unrounded": 4.285,
     "actual_student_results": false,
     "report": "docs/evaluacion-pedagogica-s01.md",
     "core_contiguous": true,
     "full_run_order": "núcleo, luego apéndice",
-    "http_not_required_for_core": true
+    "http_not_required_for_core": true,
+    "teacher_notes_words": 3218,
+    "teacher_spoken_words": 2615,
+    "illustrated_teaching_slides": 25,
+    "cover": true
   }
 }
