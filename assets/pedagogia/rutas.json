@@ -71,6 +71,58 @@
         "kind": "json",
         "code": "# Después de la consulta SECOP real del cuaderno.\n# Repite una consulta con el mismo filtro y un límite acotado.\npayload = {\"filas\": len(df_secop), \"columnas\": list(df_secop.columns),\n           \"fuente\": url_secop, \"grano\": \"registro contractual\"}\nassert payload[\"filas\"] > 0\nprint(payload)",
         "expected": "Filas reales y esquema. El grano contractual no se une automáticamente con procesos."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Diagnóstico de las cinco V",
+            "range": "8–23",
+            "cell": 13,
+            "concept": "Volumen es cantidad; velocidad es ritmo de llegada; variedad son estructuras; veracidad es calidad; valor es la decisión. La nube no elimina estas restricciones.",
+            "task": "Identifica cuál V limita una descarga diaria y una consulta urgente.",
+            "evidence": "Una V dominante y una decisión justificada."
+          },
+          {
+            "minutes": 25,
+            "title": "Formatos y grano",
+            "range": "25–34,44–61",
+            "cell": 32,
+            "concept": "CSV organiza filas; JSON permite objetos anidados; XML usa etiquetas. Un agregado cambia el grano de fila individual a grupo.",
+            "task": "Filtra empleados y cambia el umbral; compara JSON y tabla.",
+            "evidence": "Conteos de entrada y salida."
+          },
+          {
+            "minutes": 30,
+            "title": "API SECOP",
+            "range": "62–70",
+            "cell": 63,
+            "concept": "HTTP 200 indica respuesta, no cobertura. Orden, límite e identidad determinan una muestra repetible; un contrato no es un proceso.",
+            "task": "Ejecuta la consulta oficial y compara límites pequeños.",
+            "evidence": "Filas, columnas, fuente y grano."
+          },
+          {
+            "minutes": 45,
+            "title": "Memoria y fragmentación",
+            "range": "35–42",
+            "cell": 38,
+            "concept": "Leer por bloques acota la entrada en memoria. Suma y conteo se combinan; promediar medias sin pesos puede fallar.",
+            "task": "Cambia chunksize, conserva total y compara el cálculo de memoria del explorador.",
+            "evidence": "Conteos equivalentes y costo declarado."
+          },
+          {
+            "minutes": 25,
+            "title": "Entregar RAW",
+            "range": "71–76",
+            "cell": 72,
+            "concept": "Un manifiesto conserva fuente, esquema, identidad y cobertura. La muestra no acredita representatividad.",
+            "task": "Completa reto y confirma una escala de 40/80/120 procesos en el producto.",
+            "evidence": "RAW portable y evidencia real separados."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -142,6 +194,58 @@
         "kind": "json",
         "code": "# Cambia una de las tres restricciones, sin instalar nada.\nLATENCIA_MAX_S = 120\nopciones = [(\"local\",300,1),(\"lotes\",60,2),(\"eventos\",2,4)]\nviables = [x for x in opciones if x[1] <= LATENCIA_MAX_S]\nassert viables\nelegida = min(viables, key=lambda x:x[2])\npayload = {\"limite_s\": LATENCIA_MAX_S, \"elegida\": elegida,\n           \"descartadas\": [x[0] for x in opciones if x != elegida],\n           \"naturaleza\": \"supuestos didacticos\"}\nprint(payload)",
         "expected": "Selección distinta al modificar el requisito; los tiempos son supuestos, no SLA."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Decisión e indicador",
+            "range": "7–8",
+            "cell": 8,
+            "concept": "Un indicador cuantifica una situación; una decisión determina una acción. El requisito debe declarar quién, cuándo y para qué.",
+            "task": "Relaciona una decisión con un indicador y una fuente.",
+            "evidence": "Requisito verificable."
+          },
+          {
+            "minutes": 25,
+            "title": "Proceso AS-IS y TO-BE",
+            "range": "9–15",
+            "cell": 11,
+            "concept": "AS-IS describe situación actual; TO-BE el proceso objetivo. Una compuerta condiciona caminos y el retrabajo tiene costo.",
+            "task": "Cambia una condición del flujo y comprueba qué actividad desaparece.",
+            "evidence": "Proceso antes/después."
+          },
+          {
+            "minutes": 30,
+            "title": "Arquitectura y ciclo",
+            "range": "16–23",
+            "cell": 18,
+            "concept": "Ingesta, almacenamiento, cómputo y servicio son responsabilidades. Lotes favorecen periodicidad; eventos reducen demora con complejidad.",
+            "task": "Compara límite de 5 y 120 segundos en el simulador.",
+            "evidence": "Alternativa descartada; tiempos son supuestos."
+          },
+          {
+            "minutes": 45,
+            "title": "Versionar con Git",
+            "range": "24–35",
+            "cell": -1,
+            "concept": "Commit registra cambios; PR permite revisión antes de integrar. Checks no sustituyen juicio humano.",
+            "task": "Abre rama propia y completa diseño según cuaderno; no fusiones.",
+            "evidence": "PR y revisión."
+          },
+          {
+            "minutes": 25,
+            "title": "Entregar arquitectura",
+            "range": "36–40",
+            "cell": -1,
+            "concept": "Cada componente debe responder a un requisito y contrato de datos.",
+            "task": "Confirma S02 y compara alternativa sin cambiar la decisión elegida.",
+            "evidence": "Arquitectura trazable."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -213,6 +317,58 @@
         "kind": "json",
         "code": "# Tras cargar noticias en MongoDB real: misma consulta, dos planes.\n# No borrar datos ni crear un servicio nuevo.\nif \"mongomock\" in str(type(coleccion)).lower() or \"respaldo\" in str(motor).lower():\n    raise RuntimeError(\"Explain real pendiente: estás en el respaldo\")\nmuestra = coleccion.find_one({\"seccion\":{\"$type\":\"string\"}}, {\"seccion\":1})\nassert muestra and muestra.get(\"seccion\")\nfiltro = {\"seccion\":muestra[\"seccion\"]}\nidx = coleccion.create_index([(\"seccion\",1)], name=\"s03_seccion_lab\")\ndef plan(hint):\n    return db.command(\"explain\", {\"find\":coleccion.name,\"filter\":filtro,\"hint\":hint},\n                      verbosity=\"executionStats\")[\"executionStats\"]\na = plan({\"$natural\":1})\nb = plan(idx)\nassert a[\"nReturned\"] == b[\"nReturned\"]\npayload = {\"motor\":str(motor), \"campo\":\"seccion\",\"filas\":a[\"nReturned\"],\n           \"sin_indice_docs\":a[\"totalDocsExamined\"],\n           \"con_indice_docs\":b[\"totalDocsExamined\"],\n           \"sin_indice_keys\":a[\"totalKeysExamined\"],\n           \"con_indice_keys\":b[\"totalKeysExamined\"]}\nprint(payload)",
         "expected": "Igual número de resultados; comparar documentos/claves examinados. Los hints son controlados, no el plan que el optimizador escogería espontáneamente."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Cuándo una fila no basta",
+            "range": "7–13",
+            "cell": 11,
+            "concept": "Un artículo puede contener listas y campos variables; aplanar puede perder cardinalidad o contexto.",
+            "task": "Compara noticia y fila SECOP.",
+            "evidence": "Grano y estructura."
+          },
+          {
+            "minutes": 25,
+            "title": "JSON, BSON y consistencia",
+            "range": "14–23",
+            "cell": 17,
+            "concept": "JSON representa objetos; BSON añade tipos binarios. Replicar copia datos, fragmentar los reparte. CAP analiza restricciones durante particiones de red.",
+            "task": "Localiza campos anidados e identidad; distingue campo ausente de nulo.",
+            "evidence": "Documento inspeccionado."
+          },
+          {
+            "minutes": 30,
+            "title": "Motor y consultas",
+            "range": "25–49",
+            "cell": 40,
+            "concept": "find filtra, proyección selecciona campos y limit acota resultados. Un cursor no es una lista; $gt compara.",
+            "task": "Carga noticias en motor declarado y cambia operador y umbral.",
+            "evidence": "Filtro y resultados propios."
+          },
+          {
+            "minutes": 45,
+            "title": "Índice, agregación y cruces",
+            "range": "51–123 (esencial 74–76 y 101–114)",
+            "cell": 76,
+            "concept": "Un índice reduce candidatos a cambio de almacenamiento y escrituras; una agregación transforma por etapas. Coincidir por entidad no acredita el mismo contrato.",
+            "task": "Agrupa noticias; ejecuta explain controlado del bloque final si hay MongoDB real; contrasta la bandeja.",
+            "evidence": "Conteos y documentos examinados; motor declarado."
+          },
+          {
+            "minutes": 25,
+            "title": "Expediente documental",
+            "range": "124–129",
+            "cell": 82,
+            "concept": "La ficha conserva identidad, fuente y campos de consulta. Los apéndices son profundización, no prerrequisito.",
+            "task": "Modifica tres consultas y confirma expediente del producto.",
+            "evidence": "Expedientes y evidencia de consultas."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -284,6 +440,58 @@
         "kind": "json",
         "code": "# Después de cargar y construir la bandeja.\n# La comprobación remota se realiza solo si el cuaderno declaró Atlas real.\nes_atlas = \"atlas\" in str(motor).lower() and \"real\" in str(motor).lower()\nif es_atlas:\n    client.admin.command(\"ping\")\npayload = {\"motor\":str(motor), \"ping_atlas\":es_atlas,\n           \"candidatos\":len(bandeja), \"columnas\":list(bandeja.columns)}\nassert payload[\"candidatos\"] > 0\nprint(payload)",
         "expected": "Motor declarado y conteo de bandeja. El ping no demuestra alta disponibilidad ni recuperación física."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Motor, clúster y servicio",
+            "range": "3–7",
+            "cell": 6,
+            "concept": "MongoDB es el motor; Atlas administra infraestructura. Persistencia no equivale a disponibilidad; ping no demuestra recuperación.",
+            "task": "Predice qué sucede al cerrar Colab.",
+            "evidence": "Hipótesis comprobable."
+          },
+          {
+            "minutes": 25,
+            "title": "Conectar de forma segura",
+            "range": "8–14",
+            "cell": -1,
+            "concept": "Autenticación y red son distintas; no compartir URI ni tokens.",
+            "task": "Conecta Atlas propio o declara respaldo; diagnostica el error sin revelar secretos.",
+            "evidence": "Motor y conexión declarados."
+          },
+          {
+            "minutes": 30,
+            "title": "Vistas y consultas",
+            "range": "15–19",
+            "cell": 19,
+            "concept": "Una vista guarda un pipeline lógico; no implica copia materializada.",
+            "task": "Crea vista en Atlas y recupera su resultado.",
+            "evidence": "Conteos y vista."
+          },
+          {
+            "minutes": 45,
+            "title": "Bandeja de Laura",
+            "range": "20–27",
+            "cell": 21,
+            "concept": "Nulo no es cero. Priorizar mediante regla transparente no significa detectar fraude.",
+            "task": "Ejecuta filtros y abre el primer enlace SECOP.",
+            "evidence": "Embudo y candidatos."
+          },
+          {
+            "minutes": 25,
+            "title": "Persistencia y relevo",
+            "range": "28–38",
+            "cell": 31,
+            "concept": "La consulta operacional requiere un patrón estable; Cassandra aparecerá por esa necesidad.",
+            "task": "Guarda CSV y recupera bandeja; compara límite de filas.",
+            "evidence": "Bandeja y pregunta S05."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -355,6 +563,58 @@
         "kind": "json",
         "code": "# Después del contrato de resultado pandas/CQL.\nassert ids_cql == ids_esperados_pd\npayload = {\"consulta\":\"prioridades por corte y departamento\",\n           \"departamento\":str(departamento_elegido),\n           \"cql_ids\":[str(x) for x in ids_cql],\n           \"referencia_ids\":[str(x) for x in ids_esperados_pd],\n           \"coinciden\":bool(coinciden_cql_pd)}\nprint(payload)\n# Cambia departamento_elegido en el bloque original y repite.",
         "expected": "Dos ejecuciones con claves distintas, cada una contrastada con pandas; no declarar distribución física."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Recuperar bandeja",
+            "range": "5–16",
+            "cell": 15,
+            "concept": "Una vista de Atlas puede ser entrada de otro modelo sin volver a descargar el universo.",
+            "task": "Recupera vista o respaldo explícito.",
+            "evidence": "Esquema y fuente."
+          },
+          {
+            "minutes": 25,
+            "title": "Hipótesis y faltantes",
+            "range": "17–28",
+            "cell": 21,
+            "concept": "Una hipótesis puede refutarse; desconocido no es cero.",
+            "task": "Reproduce filtros y observa excluidos.",
+            "evidence": "Embudo y límite."
+          },
+          {
+            "minutes": 30,
+            "title": "Query-first y particiones",
+            "range": "29–41",
+            "cell": 41,
+            "concept": "La clave de partición localiza grupos; clustering ordena filas dentro de ellos. Una clave dominante puede concentrar carga.",
+            "task": "Diseña corte/departamento y compara clave alternativa.",
+            "evidence": "Contrato de consulta."
+          },
+          {
+            "minutes": 45,
+            "title": "CQL y referencia independiente",
+            "range": "42–64",
+            "cell": 60,
+            "concept": "INSERT actualiza por clave completa; UPDATE y DELETE requieren acceso adecuado. Comparar IDs con pandas evita validación circular.",
+            "task": "Ejecuta dos consultas en Astra si hay acceso; contrasta IDs.",
+            "evidence": "Resultados CQL y referencia."
+          },
+          {
+            "minutes": 25,
+            "title": "Ancla para grafos",
+            "range": "65–81",
+            "cell": 71,
+            "concept": "El diseño sirve una pregunta; otra pregunta puede exigir otra tabla.",
+            "task": "Exporta ancla y compara concentración de grupos.",
+            "evidence": "Ancla S06."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -426,6 +686,58 @@
         "kind": "json",
         "code": "# Tras consultar el vecindario en Aura y la referencia pandas.\nnit = str(proveedor_elegido[\"nit_proveedor\"])\nesperado = set(hist.loc[hist[\"nit_proveedor\"].eq(nit),\"id_proceso\"].astype(str))\nobtenido = set(vecindario_df[\"proceso\"].astype(str))\nassert esperado == obtenido\npayload = {\"motor\":\"Neo4j real\" if modo_neo4j else \"pandas respaldo\",\n           \"proveedor_nit\":nit, \"procesos\":len(obtenido),\n           \"ids\":sorted(obtenido)[:20], \"coinciden\":esperado==obtenido}\nprint(payload)\n# Cambia la posición de proveedor_elegido en el bloque original.",
         "expected": "Mismos IDs que la referencia independiente; respaldo pandas no certifica Cypher."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Identidad y procedencia",
+            "range": "1–12",
+            "cell": 8,
+            "concept": "Entidad, proceso y proveedor tienen identidades distintas. No unir por coincidencia de nombre.",
+            "task": "Recupera ancla S05 o muestra autorizada.",
+            "evidence": "Identidad y fuente."
+          },
+          {
+            "minutes": 25,
+            "title": "Grafo pequeño y Cypher",
+            "range": "13–40",
+            "cell": 16,
+            "concept": "Nodo representa entidad; relación un hecho; MATCH busca patrones; DISTINCT evita caminos repetidos; MERGE protege identidad con restricciones adecuadas.",
+            "task": "Construye y consulta patrón mínimo.",
+            "evidence": "Patrón y conteos."
+          },
+          {
+            "minutes": 30,
+            "title": "Cargar hechos reales",
+            "range": "41–55",
+            "cell": 48,
+            "concept": "UNWIND convierte lista a filas; constraints protegen claves. Repetir carga debe preservar nodos y relaciones.",
+            "task": "Carga extracto y comprueba repetición.",
+            "evidence": "Conteos antes/después."
+          },
+          {
+            "minutes": 45,
+            "title": "Explorar conexiones",
+            "range": "56–99",
+            "cell": 94,
+            "concept": "Grado mide conexiones inmediatas; un puente conecta entidades. Conectividad no es irregularidad.",
+            "task": "Cambia proveedor y contrasta Neo4j con pandas.",
+            "evidence": "Vecindario e IDs."
+          },
+          {
+            "minutes": 25,
+            "title": "Entregar contexto",
+            "range": "100–108",
+            "cell": 104,
+            "concept": "Los caminos deben conservar hechos verificables y límites; apéndices A1–A10 son ampliaciones.",
+            "task": "Guarda ficha y selecciona un expediente para búsqueda.",
+            "evidence": "Contexto S07."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -497,6 +809,58 @@
         "kind": "json",
         "code": "# Misma consulta, mismo índice; cambia el peso de nombre.\ndef ranking(peso):\n    q = {\"multi_match\":{\"query\":consulta,\"fields\":[f\"nombre_proceso^{peso}\",\"descripcion\"]}}\n    res = client.search(index=INDEX_NAME, size=5, query=q)\n    return [{\"id\":str(h[\"_id\"]),\"score\":float(h[\"_score\"])} for h in res[\"hits\"][\"hits\"]]\na,b = ranking(1),ranking(3)\npayload = {\"consulta\":str(consulta),\"peso_1\":a,\"peso_3\":b,\n           \"solapamiento\":len({x[\"id\"] for x in a}&{x[\"id\"] for x in b})}\nprint(payload)",
         "expected": "Dos rankings del motor real; solapamiento no mide pertinencia sin juicios humanos."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Limitaciones de contains",
+            "range": "1–12",
+            "cell": 10,
+            "concept": "Un buscador tokeniza y puntúa; contains busca cadenas. Recuperar no es clasificar.",
+            "task": "Cambia la consulta literal.",
+            "evidence": "Candidatos base."
+          },
+          {
+            "minutes": 25,
+            "title": "Índice invertido y BM25",
+            "range": "11–13,18",
+            "cell": 18,
+            "concept": "DF cuenta documentos que contienen término; IDF pondera rareza; BM25 satura frecuencia y normaliza longitud.",
+            "task": "Varía k1 y b en explorador y analiza tokens.",
+            "evidence": "Ranking calculado."
+          },
+          {
+            "minutes": 30,
+            "title": "Indexar en Elasticsearch",
+            "range": "14–20",
+            "cell": 20,
+            "concept": "Mapping distingue text analizado y keyword exacto; bulk agrupa escrituras.",
+            "task": "Crea índice propio y verifica conteo.",
+            "evidence": "Índice y filas."
+          },
+          {
+            "minutes": 45,
+            "title": "Ranking y relevancia",
+            "range": "21–28",
+            "cell": 24,
+            "concept": "match analiza; term compara token; filter restringe universo. Precision@k necesita juicios humanos.",
+            "task": "Modifica pesos y compara dos rankings reales.",
+            "evidence": "Top-k y relevancia."
+          },
+          {
+            "minutes": 25,
+            "title": "Entregar buscador",
+            "range": "29–30",
+            "cell": 30,
+            "concept": "Puntuaciones de motores distintos no tienen escala comparable.",
+            "task": "Exporta ranking y conserva fuente.",
+            "evidence": "Buscador V1."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -568,6 +932,58 @@
         "kind": "json",
         "code": "# No modifica la entrega oficial. Solo registra controles disponibles.\nassert isinstance(MANIFEST, dict)\npayload = {\"tipo\":\"TC1\",\"campos_manifiesto\":sorted(str(k) for k in MANIFEST),\n           \"controles\":len(MANIFEST)}\nprint(payload)",
         "expected": "Manifiesto producido en el taller. La rúbrica original exige evidencia completa, no este resumen."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Preflight TC1",
+            "range": "1–14",
+            "cell": 11,
+            "concept": "Un snapshot fija ventana y grano; procesos y contratos son fuentes diferentes.",
+            "task": "Comprueba cuentas y consulta de 50 filas.",
+            "evidence": "Preflight."
+          },
+          {
+            "minutes": 25,
+            "title": "Adquisición concurrente",
+            "range": "15–28",
+            "cell": 16,
+            "concept": "Mismos offsets y orden deben dar mismo contenido; hash detecta cambios.",
+            "task": "Ejecuta ruta del taller y compara descargas.",
+            "evidence": "RAW y manifiesto."
+          },
+          {
+            "minutes": 30,
+            "title": "MongoDB y producto analítico",
+            "range": "29–50",
+            "cell": 35,
+            "concept": "Documento por proceso y agregación mantienen identidad; índice se confirma en motor.",
+            "task": "Completa E2/E3 y capturas requeridas.",
+            "evidence": "Consultas y evidencia oficial."
+          },
+          {
+            "minutes": 45,
+            "title": "Cassandra y Neo4j",
+            "range": "51–70",
+            "cell": 63,
+            "concept": "Cada motor responde un patrón distinto; no sustituir ejecución con una tabla de ejemplo.",
+            "task": "Ejecuta E4/E5 y conserva avance si no termina en clase.",
+            "evidence": "CQL y Cypher."
+          },
+          {
+            "minutes": 25,
+            "title": "Validación y V1.0",
+            "range": "71–80",
+            "cell": 77,
+            "concept": "El corrector y rúbrica oficiales siguen vigentes.",
+            "task": "Valida entrega y registra pendientes, confirma versión portable.",
+            "evidence": "Manifiesto y entrega oficial."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -639,6 +1055,58 @@
         "kind": "json",
         "code": "# Después de ejecutar dos consultas y guardar s09_atlas_evidencia.json.\npayload = {k:evidencia.get(k) for k in (\n \"verificacion_fin_a_fin\",\"resultados_ann_atlas\",\"resultados_enn_atlas\",\n \"resultados_numpy_local\",\"solapamiento_ann_enn_atlas\",\"solapamiento_ann_numpy\",\n \"seleccion_propia\",\"practica_individual\")}\nprint({k:len(v) if isinstance(v,list) else v for k,v in payload.items()})",
         "expected": "Resultados E5 y declaración explícita de motor; no confundir solapamiento con pertinencia."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "De palabras a significado",
+            "range": "0–3",
+            "cell": 3,
+            "concept": "BM25 y TF-IDF ponderan palabras; E5 aprende representaciones densas. Cercanía no implica pertinencia.",
+            "task": "Busca salud pública y abre fuentes reales; carga corpus del cuaderno.",
+            "evidence": "Corpus e intención."
+          },
+          {
+            "minutes": 25,
+            "title": "Geometría y E5",
+            "range": "4–5,17–18",
+            "cell": 5,
+            "concept": "Coseno compara orientación; con vectores unitarios es producto punto. E5 usa passage/query; matriz float32 ocupa N×384×4 bytes.",
+            "task": "Cambia ángulo y calcula capacidad; ejecuta E5 y verifica norma/dimensión.",
+            "evidence": "Matriz N×384 y costo."
+          },
+          {
+            "minutes": 30,
+            "title": "Persistir e indexar",
+            "range": "6–12",
+            "cell": 9,
+            "concept": "Upsert por ID evita duplicación del mismo lote; solicitar índice no equivale a estar disponible.",
+            "task": "Conecta Atlas si disponible, carga y verifica queryable. No compartas credenciales.",
+            "evidence": "Ping, conteo y estado índice."
+          },
+          {
+            "minutes": 45,
+            "title": "ANN, ENN y calidad",
+            "range": "13–15,19–20",
+            "cell": 14,
+            "concept": "ANN aproxima vecinos; ENN calcula exactos. Recall contra exacto mide acuerdo, no relevancia humana. RRF combina posiciones.",
+            "task": "Cambia consulta, filtro y k; compara Atlas y NumPy; benchmark opcional.",
+            "evidence": "Rankings y modalidad ejecutada."
+          },
+          {
+            "minutes": 25,
+            "title": "Entregar recuperación",
+            "range": "15–16",
+            "cell": 15,
+            "concept": "El resultado debe guardar modelo, lote, ID, fuente y consulta. TF-IDF portable no es E5.",
+            "task": "Exporta evidencia y compara una consulta alternativa. Revisa al menos cinco candidatos.",
+            "evidence": "Recuperación para multimedia."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -710,6 +1178,58 @@
         "kind": "json",
         "code": "# Transformación real sobre una imagen existente. No cambiar RAW.\nfrom PIL import Image\nfrom time import perf_counter\nwith Image.open(imagen_original) as im:\n    w,h=im.size\n    t=perf_counter(); a=im.convert(\"RGB\"); t1=perf_counter()-t\n    t=perf_counter(); b=a.copy(); b.thumbnail((max(1,w//2),max(1,h//2))); t2=perf_counter()-t\n    payload={\"fuente\":imagen_original.name,\"original\":[w,h],\n             \"reducida\":list(b.size),\"bytes_rgb\":w*h*3,\n             \"bytes_rgb_reducida\":b.width*b.height*3,\n             \"conversion_s\":t1,\"reduccion_s\":t2}\nassert payload[\"bytes_rgb_reducida\"]<=payload[\"bytes_rgb\"]\nprint(payload)",
         "expected": "Dimensiones, memoria mínima y tiempos propios de una transformación real; no son throughput OCR/ASR."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Representación de imágenes",
+            "range": "3–11",
+            "cell": 8,
+            "concept": "RGB8 usa tres bytes por píxel sin compresión; reducir resolución pierde detalle espacial.",
+            "task": "Cambia perfil 160/320 y observa histograma.",
+            "evidence": "Dimensiones y bytes."
+          },
+          {
+            "minutes": 25,
+            "title": "Representación de audio",
+            "range": "12–18",
+            "cell": 15,
+            "concept": "Muestreo mide muestras/s; RMS energía, FFT frecuencias, espectrograma evolución temporal.",
+            "task": "Escucha señal y cambia ventana.",
+            "evidence": "Características y límite."
+          },
+          {
+            "minutes": 30,
+            "title": "Voces reales y fuentes",
+            "range": "20–29",
+            "cell": 25,
+            "concept": "ASR extrae texto; señales no son transcripciones. Fuente y crédito se conservan.",
+            "task": "Obtén diez voces según cuaderno y compara dos.",
+            "evidence": "Inventario y características."
+          },
+          {
+            "minutes": 45,
+            "title": "ETL multimodal",
+            "range": "30–38",
+            "cell": 31,
+            "concept": "RAW permanece; derivados conservan identidad y SHA. JSONL permite registros sucesivos; Parquet almacena por columnas.",
+            "task": "Construye catálogo y vuelve a leerlo; compara modalidad.",
+            "evidence": "Catálogo verificable."
+          },
+          {
+            "minutes": 25,
+            "title": "Entregar activos",
+            "range": "39–47",
+            "cell": 43,
+            "concept": "Repetibilidad exige fuente y parámetros; estimación de volumen no es benchmark.",
+            "task": "Exporta manifiesto y elige perfil.",
+            "evidence": "Catálogo S11."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -781,6 +1301,58 @@
         "kind": "json",
         "code": "# Solo las salidas ya ejecutadas; se conserva origen_texto.\npayload = [{\"modalidad\":r.get(\"modalidad\"),\"fuente\":str(r.get(\"fuente\")),\n            \"pagina\":r.get(\"pagina\"),\"origen_texto\":r.get(\"origen_texto\"),\n            \"sha256\":r.get(\"sha256\"),\"texto\":str(r.get(\"texto\",\"\"))[:1200]}\n           for r in registros_mm[:12]]\nassert payload\nprint([(r[\"modalidad\"],r[\"origen_texto\"],len(r[\"texto\"])) for r in payload])",
         "expected": "La vista multimedia muestra texto adjunto con procedencia; una referencia humana no cuenta como Whisper."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "OCR documental",
+            "range": "1–12",
+            "cell": 10,
+            "concept": "OCR convierte píxeles en texto; PSM cambia segmentación. Salida debe contrastarse con imagen.",
+            "task": "Abre acta y compara PSM; encuentra campo y fragmento.",
+            "evidence": "Texto y fuente visual."
+          },
+          {
+            "minutes": 25,
+            "title": "OCR fotográfico",
+            "range": "13–21",
+            "cell": 18,
+            "concept": "Ampliar no crea información ausente; contraste puede mejorar lectura. Confianza interna no es exactitud.",
+            "task": "Prueba VALLE con recorte y ampliación.",
+            "evidence": "Resultado y límite."
+          },
+          {
+            "minutes": 30,
+            "title": "Embeddings y voz real",
+            "range": "22–36",
+            "cell": 32,
+            "concept": "Embedding recupera similitud; ASR transcribe. WER=(S+D+I)/N; puede superar 100%.",
+            "task": "Ejecuta imagen y consulta, transcribe voz y calcula WER.",
+            "evidence": "Vectores, texto y error."
+          },
+          {
+            "minutes": 45,
+            "title": "ETL a escala",
+            "range": "37–62",
+            "cell": 61,
+            "concept": "RAW, JSONL y Parquet deben preservar fuente, modalidades y huellas; comenzar por muestra y ampliar según cuota.",
+            "task": "Ejecuta ETL guiado; amplía 8→62 fotos solo si recursos permiten.",
+            "evidence": "Catálogo y auditoría."
+          },
+          {
+            "minutes": 25,
+            "title": "Recuperación unificada",
+            "range": "63–72",
+            "cell": 70,
+            "concept": "Una consulta devuelve evidencia, no una respuesta inventada. Referencia humana se distingue de ASR.",
+            "task": "Prepara, indexa opt-in y recupera modalidades; adjunta extracción.",
+            "evidence": "Buscador multimedia y procedencia."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -852,6 +1424,58 @@
         "kind": "json",
         "code": "# Resumen formativo, no reemplaza ZIP ni informe del corrector.\nassert isinstance(INFORME, dict)\npayload={\"tipo\":\"TC2\",\"campos_informe\":sorted(str(k) for k in INFORME),\n         \"catalogo_filas\":len(LEIDO_CATALOGO),\n         \"idempotencia\":IDEMPOTENCIA}\nprint(payload)",
         "expected": "Catálogo real y control repetible; evaluación oficial intacta."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Preparar TC2",
+            "range": "0–14",
+            "cell": 11,
+            "concept": "El caso y rúbrica son oficiales; registra predicción antes de ver resultados.",
+            "task": "Inspecciona expedientes de pareja.",
+            "evidence": "Caso y predicción."
+          },
+          {
+            "minutes": 25,
+            "title": "Ranking y vectores",
+            "range": "15–44",
+            "cell": 33,
+            "concept": "BM25, coseno y E5 difieren; cambiar k no equivale a filtrar.",
+            "task": "Ejecuta E1/E2 y cambia una decisión.",
+            "evidence": "Rankings y motor."
+          },
+          {
+            "minutes": 30,
+            "title": "Calidad y fusión",
+            "range": "45–56",
+            "cell": 51,
+            "concept": "Precision y recall requieren juicios; RRF usa posiciones.",
+            "task": "Compara rankings y selecciona criterio.",
+            "evidence": "Métricas y decisión."
+          },
+          {
+            "minutes": 45,
+            "title": "Imágenes, OCR y voz",
+            "range": "57–93",
+            "cell": 68,
+            "concept": "Transformación puede perder legibilidad; ASR real y WER son distintos de RMS/FFT.",
+            "task": "Ejecuta E4/E5 y conserva activos; las diez voces se completan conforme al taller.",
+            "evidence": "OCR, ASR, características."
+          },
+          {
+            "minutes": 25,
+            "title": "Auditar V2.0",
+            "range": "94–110",
+            "cell": 107,
+            "concept": "Idempotencia y falla controlada verifican el ETL; ZIP y manifiesto siguen siendo entrega.",
+            "task": "Ejecuta corrector oficial y revisa los 24 controles.",
+            "evidence": "Producto y entrega oficial."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -923,6 +1547,58 @@
         "kind": "json",
         "code": "# Tras ejecutar el reto de cierre de S13.\nassert evidencia[\"modos_medidos\"][\"texto\"][\"resultados_identicos\"] is True\nassert evidencia[\"modos_medidos\"][\"espera\"][\"resultados_identicos\"] is True\npayload={\"arquitectura\":evidencia[\"arquitectura\"],\n         \"limite\":evidencia[\"limite\"],\"fuente\":evidencia[\"fuente\"],\n         \"modos_medidos\":evidencia[\"modos_medidos\"]}\nprint(payload)",
         "expected": "Resultados del propio Codespace, equivalencia y límites. Cambia workers solo cuando lo permita la cuota."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Bloques y MapReduce",
+            "range": "10–16",
+            "cell": 15,
+            "concept": "HDFS divide y replica; Map emite parciales; Reduce combina. Media requiere suma y cantidad.",
+            "task": "Comprueba promedio ponderado y pérdida de nodo.",
+            "evidence": "Resultado equivalente."
+          },
+          {
+            "minutes": 25,
+            "title": "Pandas como referencia",
+            "range": "17–28",
+            "cell": 25,
+            "concept": "Particionar no implica distribuir físicamente. Dask crea un grafo de tareas y ejecuta al solicitar compute.",
+            "task": "Compara conteos pandas/Dask.",
+            "evidence": "Paridad."
+          },
+          {
+            "minutes": 30,
+            "title": "Trabajadores reales",
+            "range": "29–37",
+            "cell": 32,
+            "concept": "Worker ejecuta tareas; hilo y núcleo no son equivalentes. Coordinación cuesta tiempo.",
+            "task": "Ejecuta ocho lotes y compara modos, preserva resultados.",
+            "evidence": "Tiempos reales y Parquet."
+          },
+          {
+            "minutes": 45,
+            "title": "K-means distribuido",
+            "range": "38–49",
+            "cell": 45,
+            "concept": "Asignación y actualización iteran; un modelo distribuido no equivale a entrenar modelos independientes.",
+            "task": "Ejecuta local y Dask-ML con centros iguales; mide RSS y tiempos.",
+            "evidence": "Acuerdo y recursos."
+          },
+          {
+            "minutes": 25,
+            "title": "Entregar motor",
+            "range": "50–54",
+            "cell": 53,
+            "concept": "Amdahl es límite ideal; tiempos de una máquina no generalizan.",
+            "task": "Cambia workers con cuota disponible y registra decisión.",
+            "evidence": "Evidencia de procesamiento S14."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -994,6 +1670,58 @@
         "kind": "scalar",
         "code": "# El ejemplo MLlib del bloque 16 es sintético.\npayload = float(f1_macro_demo)\nassert 0 <= payload <= 1\nprint(\"F1 macro demo:\",payload)\n# No presentar esta métrica como rendimiento de clasificación SECOP.",
         "expected": "F1 real del ejemplo MLlib; el experimento de joins permanece en el bloque 8."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Spark y ejecución",
+            "range": "1–11",
+            "cell": 10,
+            "concept": "Driver coordina, ejecutores procesan; evaluación diferida arma plan. Particiones no son CPU.",
+            "task": "Verifica SparkSession y distribución.",
+            "evidence": "Motor y particiones."
+          },
+          {
+            "minutes": 25,
+            "title": "Datos y SQL",
+            "range": "12–25",
+            "cell": 24,
+            "concept": "Esquema fija tipos; acción materializa. SQL y DataFrame pueden representar la misma operación.",
+            "task": "Ejecuta agregado ponderado y comprueba equivalencia.",
+            "evidence": "Resultados SQL/PySpark."
+          },
+          {
+            "minutes": 30,
+            "title": "Shuffle y joins",
+            "range": "26–39",
+            "cell": 29,
+            "concept": "Shuffle redistribuye; broadcast replica dimensión pequeña. Left join conserva hechos sin coincidencia.",
+            "task": "Compara planes y paridad; examina Spark UI si existe.",
+            "evidence": "Planes y resultado."
+          },
+          {
+            "minutes": 45,
+            "title": "Medallion y Delta",
+            "range": "40–59",
+            "cell": 51,
+            "concept": "Bronze conserva origen; Silver limpia; Gold agrega. Delta añade transacciones y log, no backup ilimitado.",
+            "task": "Persiste capas y relee conteos; distingue Parquet de Delta.",
+            "evidence": "Tablas y evidencia."
+          },
+          {
+            "minutes": 25,
+            "title": "MLlib y entrega",
+            "range": "60–70",
+            "cell": 65,
+            "concept": "Train aprende, validación elige, test evalúa. F1 macro promedia clases.",
+            "task": "Entrena ejemplo sintético y lee matriz; no llamarlo predicción SECOP.",
+            "evidence": "Métrica del ejemplo."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -1066,6 +1794,58 @@
         "kind": "json",
         "code": "# Después del entrenamiento A5–A7, sin aumentar automáticamente la escala.\npayload = {\"expediente\":expediente, \"filas_train\":int(n_train),\n           \"bytes_minimos\":int(bytes_minimos),\n           \"mejor_modelo\":str(mejor), \"resultado_test\":resultado}\nprint(payload)",
         "expected": "Si la ejecución realmente completó, métricas y escala; no forzar OOM ni afirmar prueba remota por un cálculo."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Presupuesto de capacidad",
+            "range": "0–3",
+            "cell": 2,
+            "concept": "El mínimo float64 es filas×columnas×8, no RSS total. Exceder presupuesto declarado no significa fallo observado.",
+            "task": "Compara 1/5/25 millones, empieza en ruta pequeña.",
+            "evidence": "Presupuesto y escala."
+          },
+          {
+            "minutes": 25,
+            "title": "Bronze y Silver",
+            "range": "4–9",
+            "cell": 8,
+            "concept": "Generación distribuida, duplicados y nulos requieren conciliación. Split estable evita cambios por particionado.",
+            "task": "Ejecuta ruta acotada y revisa conteos.",
+            "evidence": "Rechazos y split."
+          },
+          {
+            "minutes": 30,
+            "title": "Gold y memoria",
+            "range": "10–15",
+            "cell": 14,
+            "concept": "Matriz de 128 variables permanece en Spark; toPandas materializaría en cliente.",
+            "task": "Calcula mínimo y compara control local limitado.",
+            "evidence": "Capacidad estimada."
+          },
+          {
+            "minutes": 45,
+            "title": "Entrenar y evaluar",
+            "range": "16–21",
+            "cell": 17,
+            "concept": "Selección por validación; test solo al final. Métricas y tiempos dependen de ejecución.",
+            "task": "Entrena candidatos si cuota lo permite; no activar 25M automáticamente.",
+            "evidence": "Métricas reales o bloqueo."
+          },
+          {
+            "minutes": 25,
+            "title": "Persistir expediente",
+            "range": "22–27",
+            "cell": 23,
+            "concept": "Telemetría sintética no son contratos; guardar escala y motor.",
+            "task": "Audita tablas y exporta resultados.",
+            "evidence": "Evidencia opcional."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -1137,6 +1917,58 @@
         "kind": "json",
         "code": "# Ejecutar tras el bloque 4 de S15, no usa nube.\npayload = {\"estado\":estado(), \"rollback_verificado\":bool(antes==despues),\n           \"repeticion\":bool(procesar(1,lotes[1])==\"YA CONFIRMADO\")}\nassert payload[\"rollback_verificado\"] and payload[\"repeticion\"]\nprint(payload)",
         "expected": "Rollback y repetición comprobados sobre SQLite real; no equivale a recuperación distribuida."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Lotes, eventos y estado",
+            "range": "1–3",
+            "cell": 2,
+            "concept": "Batch procesa conjunto finito; microbatch agrupa llegadas; streaming gestiona estado continuo. Checkpoint registra progreso, no reemplaza transacción.",
+            "task": "Identifica los tres lotes y las tablas de control.",
+            "evidence": "Contrato y estado inicial."
+          },
+          {
+            "minutes": 25,
+            "title": "Idempotencia",
+            "range": "4–6",
+            "cell": 5,
+            "concept": "Clave estable evita duplicado; huella detecta lote cambiado. Transacción confirma todas las escrituras o ninguna.",
+            "task": "Procesa primer lote y verifica 2 válidos.",
+            "evidence": "Estado y checkpoint."
+          },
+          {
+            "minutes": 30,
+            "title": "Fallo y recuperación",
+            "range": "7–9",
+            "cell": 8,
+            "concept": "Rollback revierte escrituras no confirmadas; reintentar debe recuperar sin duplicar.",
+            "task": "Provoca fallo, compara estado y reintenta.",
+            "evidence": "4 válidos, 1 rechazo esperado."
+          },
+          {
+            "minutes": 45,
+            "title": "Cambios de esquema y replay",
+            "range": "10–15",
+            "cell": 14,
+            "concept": "Campo nuevo compatible no significa cambio de identidad aceptable. Repetir lote confirmado no modifica estado.",
+            "task": "Cambia valor de P1 y distingue conflicto de repetición.",
+            "evidence": "Rechazos y reejecución."
+          },
+          {
+            "minutes": 25,
+            "title": "Operación y streaming",
+            "range": "16–18",
+            "cell": 17,
+            "concept": "Structured Streaming puede usar microbatches y checkpoint; no confundir SQLite con tolerancia distribuida.",
+            "task": "Ejecuta ampliación solo si Spark está disponible; confirma incremento SECOP portable.",
+            "evidence": "Estado y manifiesto S15."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     },
     {
@@ -1208,6 +2040,58 @@
         "kind": "json",
         "code": "# Después del producto E7: resultados del modelo local, no Spark.\npayload = {\"f1_test\":float(manifiesto[\"f1_test\"]),\n           \"modelo\":manifiesto[\"modelo\"],\"estados\":manifiesto[\"estados\"],\n           \"ejemplo_acierto_id\":manifiesto[\"ejemplo_acierto_id\"],\n           \"ejemplo_error_id\":manifiesto[\"ejemplo_error_id\"]}\nassert 0 <= payload[\"f1_test\"] <= 1\nprint(payload)",
         "expected": "Métrica del producto local y estado de archivos, diferenciados de las métricas Spark. No acredita por sí solo ejecución remota."
+      },
+      "lesson": {
+        "minutes": 150,
+        "blocks": [
+          {
+            "minutes": 15,
+            "title": "Reutilizar adquisición",
+            "range": "0–11",
+            "cell": 9,
+            "concept": "Mismo grano y split permiten comparar. OFFSET requiere orden estable; test no elige modelo.",
+            "task": "Recupera salida previa o usa fuente oficial del proyecto; valida split.",
+            "evidence": "Dataset y contrato."
+          },
+          {
+            "minutes": 25,
+            "title": "Procesar y entrenar Dask",
+            "range": "12–19",
+            "cell": 17,
+            "concept": "Coordinar tres modelos independientes es paralelismo de experimentos, no un solo modelo distribuido.",
+            "task": "Ejecuta Dask y elige modelo con validación.",
+            "evidence": "Resultados y decisión."
+          },
+          {
+            "minutes": 30,
+            "title": "Databricks y Delta",
+            "range": "20–23",
+            "cell": 21,
+            "concept": "Una tabla persistente conserva resultados y fuente; Spark SQL consulta la capa Gold.",
+            "task": "Sube datos e inspecciona tabla real en Databricks.",
+            "evidence": "Tabla Gold."
+          },
+          {
+            "minutes": 45,
+            "title": "MLlib y evaluación",
+            "range": "24–27",
+            "cell": 25,
+            "concept": "Mismo split para comparar; HashingTF/IDF se ajusta en train; F1 y matriz se calculan en test.",
+            "task": "Ejecuta MLlib y conserva métricas reales.",
+            "evidence": "Predicciones Spark."
+          },
+          {
+            "minutes": 25,
+            "title": "Producto y defensa",
+            "range": "28–33",
+            "cell": 29,
+            "concept": "El HTML original usa modelo local distinto de Spark; distinguir ambos. Una integración auténtica debe conservar esa procedencia.",
+            "task": "Genera observatorio original y confirma cadena portable, demuestra una modificación.",
+            "evidence": "Producto y evidencia final."
+          }
+        ],
+        "breakAfter": 2,
+        "breakMinutes": 10
       }
     }
   ]
