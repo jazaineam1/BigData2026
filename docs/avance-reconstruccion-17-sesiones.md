@@ -23,3 +23,8 @@
 | S16 | 25 | 4 | 6 | 265 | 40.000 pendiente |
 
 Total de explicación breve nueva: 5227 palabras según secuencias alfanuméricas Unicode. No se computan instrucciones, casos, extractos de cuaderno ni repeticiones para inflar la métrica. QA realizada en generación: estructura 17×25, 68 comparaciones, 102 referencias, 18 comprobaciones numéricas independientes de los controles y 51 verificaciones de valor finito en límites e inicial. Se añade un generador y validador ligero reproducibles. No se ejecutaron notebooks externos, navegador real, ensayo de tiempos ni benchmarks pesados. El objetivo de 150 minutos sigue planificado; no se acredita con estas pantallas. No publicar como curso terminado. Próximos cambios: desarrollo temático profundo y específico, laboratorio de cada sesión adaptado, pruebas auténticas y control de calidad antes de integrar.
+
+## Comprobación posterior del archivo guardado
+- Se releyeron las fuentes y el HTML de la rama: el archivo generado coincide exactamente con la reconstrucción desde sus fuentes; la compilación JavaScript no produjo error.
+- Prueba del JavaScript guardado con DOM simulado: 425 pantallas renderizadas; 148 clics de comparación; 51 cambios de parámetros de calculadora (mínimo, inicial y máximo); 51 respuestas formativas; 17 índices navegados y 34 cambios del modo de lectura. Se comprobaron títulos, explicación, posición y reacción de controles.
+- Las pruebas de interfaz son simuladas, no una validación en Chrome, proyección, móvil ni de cuentas remotas. No se considera cumplida la meta de extensión, ni se modificaron los cuadernos principales. Se mantuvieron todos los accesos originales de la portada y el acceso nuevo es una vista de revisión.
