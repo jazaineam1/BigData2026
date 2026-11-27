@@ -48,7 +48,7 @@ if args.execute or args.core:
             if args.core:
                 stop=next(i for i,c in enumerate(book.cells) if c.id=="s01-apendice")
                 book.cells=book.cells[:stop]
-            book.cells.append(nbformat.v4.new_code_cell('''# Prueba QA añadida solo al cuaderno en memoria, no al archivo docente.\nfor N,l,c in [(41,7,6),(137,29,17),(199,45,40)]:\n    p=(N+l-1)//l; b=(N+c-1)//c\n    h={"paginas":p,"ultima_pagina":N-(p-1)*l,"bloques":b,"ultimo_bloque":N-(b-1)*c}\n    a1,a2,retro,igual=reto_s01(N,l,c,h)\n    assert igual and all(x["coincide"] for x in retro)\n    assert empaquetar_s01(a1,HASH_SNAPSHOT).is_file() and empaquetar_s01(a2,HASH_SNAPSHOT).is_file()\nprint("QA tres variantes autónomas: OK")\n'''))
+            book.cells.append(nbformat.v4.new_code_cell('''# Prueba QA añadida solo al cuaderno en memoria, no al archivo docente.\nfor N,l,c in [(41,7,6),(137,29,17),(199,45,40)]:\n    p=(N+l-1)//l; b=(N+c-1)//c\n    h={"paginas":p,"ultima_pagina":N-(p-1)*l,"bloques":b,"ultimo_bloque":N-(b-1)*c}\n    a1,a2,retro,igual=reto_s01(N,l,c,h)\n    assert igual and all(x["coincide"] for x in retro)\n    assert empaquetar_s01(a1,HASH_SNAPSHOT).is_file() and empaquetar_s01(a2,HASH_SNAPSHOT).is_file()\n    casos=comparar_decisiones(N,l,c)\n    assert len(casos)==4 and len({r["hash_raw"] for r in casos[:3]})==1\n    assert casos[3]["hash_raw"]!=casos[0]["hash_raw"]\nprint("QA tres variantes autónomas y aislamiento: OK")\n'''))
             executed = NotebookClient(book, timeout=90, kernel_name="python3",
                 resources={"metadata": {"path": tmp}}).execute()
             assert all(c.get("execution_count") is not None for c in executed.cells if c.cell_type == "code")
@@ -70,6 +70,9 @@ if args.browser:
             errors=[]
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.goto((REV/"s01.html").as_uri())
+            assert page.locator("#cover").is_visible()
+            page.locator("#startClass").click()
+            assert page.locator("#lesson").is_visible()
             for i,s in enumerate(slides):
                 page.locator("#jump").select_option(str(i))
                 assert page.locator("#heading").inner_text()==s[2]
@@ -88,7 +91,7 @@ if args.browser:
                     assert verify.is_disabled()
                     select.select_option(str(s[10]["correct"]))
                     verify.click()
-                    assert "Comprensión comprobada" in page.locator(".checkpanel .feedback").inner_text()
+                    assert "Respuesta correcta" in page.locator(".checkpanel .feedback").inner_text()
                     page.locator("#checkToggle").click()
             if errors: failures.extend({"viewport":[width,height],"error":e} for e in errors)
             page.close()
