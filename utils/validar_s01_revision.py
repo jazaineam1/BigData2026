@@ -7,7 +7,9 @@ ROOT = Path(__file__).resolve().parents[1]
 REV = ROOT / "revision"
 read = lambda p: json.loads(p.read_text(encoding="utf-8"))
 parser = argparse.ArgumentParser()
-parser.add_argument("--execute", action="store_true", help="Ejecutar todas las celdas con nbclient")
+execution = parser.add_mutually_exclusive_group()
+execution.add_argument("--execute", action="store_true", help="Ejecutar todas las celdas con nbclient")
+execution.add_argument("--core", action="store_true", help="Ejecutar solo el núcleo hasta el apéndice y QA autónoma")
 parser.add_argument("--browser", action="store_true", help="Comprobar Chrome/Chromium con Playwright")
 args = parser.parse_args()
 slides = read(REV / "s01-source.json")
@@ -34,7 +36,7 @@ assert "CONSULTA_VIVA=False" in "".join(cells["s01-http"]["source"])
 assert gate["state"] == "NO_APROBADA" and not gate["next_session_unlocked"]
 print("OK estática: 25 pantallas, 150 min, 25 comprobaciones, corpus exacto, sintaxis Python y puerta cerrada.")
 
-if args.execute:
+if args.execute or args.core:
     import nbformat
     from nbclient import NotebookClient
     with tempfile.TemporaryDirectory(prefix="qa_s01_") as tmp:
@@ -43,12 +45,15 @@ if args.execute:
         try:
             book = nbformat.read(REV / "s01-laboratorio.ipynb", as_version=4)
             nbformat.validate(book)
-            book.cells.append(nbformat.v4.new_code_cell('''# Prueba QA añadida solo al cuaderno en memoria, no al archivo docente.\nfor N,l,c in [(41,7,6),(137,29,17),(199,45,40)]:\n    p=(N+l-1)//l; b=(N+c-1)//c\n    h={"paginas":p,"ultima_pagina":N-(p-1)*l,"bloques":b,"ultimo_bloque":N-(b-1)*c}\n    a1,a2,retro,igual=reto_s01(N,l,c,h)\n    assert igual and all(x["coincide"] for x in retro)\nprint("QA tres variantes autónomas: OK")\n'''))
+            if args.core:
+                stop=next(i for i,c in enumerate(book.cells) if c.id=="s01-apendice")
+                book.cells=book.cells[:stop]
+            book.cells.append(nbformat.v4.new_code_cell('''# Prueba QA añadida solo al cuaderno en memoria, no al archivo docente.\nfor N,l,c in [(41,7,6),(137,29,17),(199,45,40)]:\n    p=(N+l-1)//l; b=(N+c-1)//c\n    h={"paginas":p,"ultima_pagina":N-(p-1)*l,"bloques":b,"ultimo_bloque":N-(b-1)*c}\n    a1,a2,retro,igual=reto_s01(N,l,c,h)\n    assert igual and all(x["coincide"] for x in retro)\n    assert empaquetar_s01(a1,HASH_SNAPSHOT).is_file() and empaquetar_s01(a2,HASH_SNAPSHOT).is_file()\nprint("QA tres variantes autónomas: OK")\n'''))
             executed = NotebookClient(book, timeout=90, kernel_name="python3",
                 resources={"metadata": {"path": tmp}}).execute()
             assert all(c.get("execution_count") is not None for c in executed.cells if c.cell_type == "code")
             assert not any(o.get("output_type") == "error" for c in executed.cells if c.cell_type == "code" for o in c.get("outputs", []))
-            print("OK ejecución completa del notebook guardado, sin consulta viva.")
+            print("OK ejecución de núcleo guardado" if args.core else "OK ejecución completa del notebook guardado, sin consulta viva.")
         finally:
             if previous is None: os.environ.pop("TMPDIR", None)
             else: os.environ["TMPDIR"] = previous

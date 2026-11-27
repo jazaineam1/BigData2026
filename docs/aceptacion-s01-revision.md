@@ -82,3 +82,20 @@ Se releen las fuentes guardadas y se regenera el HTML idéntico; 26 pantallas, 2
 
 ## Novena iteración: recorrido autónomo sin dependencias innecesarias
 Se ordena físicamente el cuaderno en un núcleo continuo seguido de un apéndice. El núcleo no abre sockets, no consulta SECOP y no requiere ejecutar las pruebas avanzadas: la huella incremental está en A0 y se conserva HTTP local como demostración posterior. La medición breve A6 compara tres estrategias con alcance temporal idéntico y referencia matemática. A7 verifica esquema, procedencia y orden explícitos, además de bytes, identidades y conteos; se separa una prueba negativa esencial de seis casos avanzados. A8 crea ZIP verificable de los paquetes, con etiqueta distinta si es solo el ejemplo guiado. Se incluye mapa de estaciones y acceso directo a la ruta de aula en cada diapositiva. Se conserva el contenido previo en apéndice, sin modificar los dos recursos oficiales. Conteo léxico 42202, 52 celdas, 12 de código núcleo y 15 de ampliación. Pendiente QA de la modificación y ejecución exacta; la puerta sigue cerrada.
+
+## Reevaluación después de la novena iteración
+Prueba estática y DOM simulado sobre archivos guardados: HTML regenerado idéntico, 26 pantallas, 25 capítulos, 75 opciones formativas, 52 aperturas/cierres de ruta y 42 extremos de controles. Se confirmó que las 12 celdas núcleo preceden al apéndice (15 de código) y no requieren el servidor docente. Copia de los 200 objetos del snapshot exacta. Conteos reales por prefijo 40/80/120: 26/39/46 nombres de entidad; salud: 6 ocurrencias y 4 procesos. Se incorporaron salidas de referencia y se distingue producto válido de hipótesis acertada.
+ 
+Prueba Python local de referencia con funciones copiadas y fixture sintético de 200 registros: suma 499.950 en tres estrategias sobre 10.000 filas, memoria lógica completa 160.132 bytes, bloques 1.000:16.132, 5.000:80.132. Tiempos de una corrida 1,80 / 7,56 / 2,10 ms respectivamente, no extrapolables. Seis paquetes alterados rechazados (bytes, ausente, orden, conteo, esquema, procedencia); siete ZIP comprobados y tres pares de transferencias equivalentes. No se afirma ejecución integral del ipynb real ni duración de una clase. Se agrega opción manual `python utils/validar_s01_revision.py --core` y se conserva `--execute` para ejecución completa; ambas pendientes en checkout accesible. Sin workflows nuevos. La descarga de raw.githubusercontent.com falló también vía visor web, por lo que no hay render real ni ejecución exacta.
+ 
+| Dimensión | Nota | Peso |
+|---|---:|---:|
+| Profundidad conceptual | 4 | 20% |
+| Actividad y autonomía | 4.5 | 20% |
+| Práctica auténtica y reproducibilidad | 3.5 | 20% |
+| Alineación y transferencia | 4.5 | 15% |
+| Interpretación de resultados | 4.5 | 10% |
+| Diseño visual y accesibilidad | 3 | 10% |
+| Viabilidad temporal | 2.5 | 5% |
+ 
+**Nota provisional 3.95/5; NO APROBADA.** Conteo léxico depurado 42549; 0 pares señalados por cribado, revisión semántica pendiente. Permanecen bloqueadas las puertas de ejecución exacta, navegador real, ensayo de aula y observación de autonomía. No se avanza S02. main 9876871419dca42e6a3d50bf5f2524a94e399a5a.
