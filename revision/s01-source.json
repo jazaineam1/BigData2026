@@ -50,8 +50,8 @@
     ],
     {
       "phase": "Diagnóstico",
-      "facilitation": "Docente: plantea la decisión de Laura y recoge dos respuestas sin corregir inmediatamente. Estudiante: delimita pregunta y unidad. Evidencia: una afirmación permitida y otra que requiere datos adicionales.",
-      "scope": "Sin ejecutar el cuaderno todavía. Usa la primera pregunta como diagnóstico.",
+      "facilitation": "Docente: presenta portada y producto, plantea la pregunta de Laura y recoge dos respuestas. Abre Colab en paralelo.",
+      "scope": "Ocho minutos incluyen portada, diagnóstico y preparación.",
       "liveCheck": true
     }
   ],
@@ -1031,12 +1031,12 @@
     "La escala cambia el costo, no el resultado lógico. Compara lectura completa y por bloques sobre un CSV sintético. Distingue tamaño lógico del DataFrame, tiempo y memoria residente del proceso.",
     "Ejecuta A6 con 10.000 y 100.000 filas; 1.000.000 es extensión manual controlada. Compara la misma operación y alcance.",
     "No comparar tiempos de redes distintas como si fueran un benchmark controlado. memory_usage no es pico RSS.",
-    "code",
-    "mediciones = medir_csv(10_000, [500,1000,5000])\ndisplay(pd.DataFrame(mediciones))\n# ampliación manual:\n# medir_csv(100_000,[500,1000,5000])",
+    "benchmark",
+    null,
     [
       "El experimento de capacidad utiliza dos rutas que resuelven exactamente el mismo problema sobre un archivo sintético: leer todas las filas y sumar una columna, o leer por fragmentos y sumar los parciales. La fuente sintética usa una regla conocida para generar valores, lo que permite repetir pruebas sin descargar archivos grandes. Los tiempos se miden con un reloj monotónico de alta resolución. La medición empieza justo antes de leer el archivo y termina después de calcular conteo y suma. La generación del CSV queda fuera de ambas mediciones. memory_usage de pandas estima bytes correspondientes a la estructura del DataFrame y sus columnas; no mide el pico de RAM de todo Python, ni incluye necesariamente buffers temporales de lectura. Un bloque de mil filas puede tener una estructura mucho menor que una tabla de cien mil, aunque existan otros consumos en el proceso. Un bloque pequeño aumenta el número de iteraciones y puede empeorar el tiempo.",
       "Para cien mil filas con dos columnas enteras de ocho bytes, el tamaño lógico de los valores es 1.600.000 bytes; el índice y la estructura contabilizada pueden añadir bytes. Un bloque de mil contiene unos 16.000 bytes de valores. La proporción ayuda a explicar por qué fragmentar es útil, pero el tiempo debe medirse en cada entorno. La suma esperada se calcula con la misma regla de generación y debe coincidir exactamente entre las dos rutas.",
-      "Ejecuta A6 primero con 10.000 filas y luego con 100.000. Fija 100.000 y compara bloques de 500, 1.000 y 5.000. Registra el tamaño completo, el máximo por bloque y los segundos. No repitas la generación dentro de cada medición. Si los tiempos cambian, explica posibles costos de lectura y coordinación sin declarar que una única medición prueba una ventaja universal.",
+      "Ejecuta A6 y A6.2 para comparar 10.000 y 100.000 filas con bloques de 1.000 y 5.000. La opción manual de un millón se activa solo si hay presupuesto. Registra tamaño, tiempo y equivalencia; el CSV se genera fuera de la medición.",
       "Una medición de memoria lógica del DataFrame suma estimaciones de sus columnas e índice. No mide el máximo de memoria residente del proceso, que incluye intérprete, buffers y otras estructuras. Tiempo de lectura depende de caché, formato, máquina y estado del almacenamiento. A6 mantiene N y datos fijos y cambia únicamente chunksize. No uses una sola corrida para proclamar un ganador universal; reporta tiempos observados y equivalencia de resultados. Para una comparación más rigurosa repite, intercala orden y mide pico RSS con una herramienta apropiada."
     ],
     "A6",
@@ -1070,8 +1070,8 @@
     ],
     {
       "phase": "Práctica de medición",
-      "facilitation": "Docente: ejecuta A6 benchmark de 10.000 filas y explica bytes lógicos. Estudiante: compara dos tamaños y justifica una decisión.",
-      "scope": "La ruta núcleo compara tres estrategias con referencia matemática independiente. Ampliación de 100.000 y benchmark repetido al final.",
+      "facilitation": "Docente: ejecuta A6 y A6.2, compara 10.000 y 100.000 filas. Estudiante: predice memoria y paridad, registra resultados.",
+      "scope": "Un millón manual opcional, no ejecutar por defecto. Distinguir tiempo y tamaño lógico.",
       "liveCheck": false
     }
   ],
@@ -1224,8 +1224,8 @@
     ],
     {
       "phase": "Autonomía",
-      "facilitation": "Estudiante: elige N, limit y chunk, calcula cuatro predicciones sin mostrar la solución, activa A8.1 y verifica dos paquetes. Docente: acompaña solo si hay bloqueo.",
-      "scope": "16 minutos protegidos. Reto A8: completa hipótesis, activa y genera dos ZIP verificados. La transferencia guiada queda en el apéndice si requiere ayuda.",
+      "facilitation": "Estudiante: elige N, límite y bloque; escribe hipótesis; completa acumulador A8.2 y compara cuatro casos A8.3; prepara evidencia A8.4.",
+      "scope": "25 minutos protegidos. El docente orienta sin completar TODO. El modo guiado no acredita autonomía.",
       "liveCheck": false
     }
   ],
@@ -1352,8 +1352,8 @@
     ],
     {
       "phase": "Cierre",
-      "facilitation": "Docente: aplica ticket de salida de tres preguntas y recoge el producto mínimo. Estudiante: declara fuente, grano, universo y una restricción desconocida.",
-      "scope": "Cinco minutos protegidos. Tres preguntas en la última celda Markdown (s01-ticket-salida). No avanzar a S02.",
+      "facilitation": "Docente: recoge las tres respuestas del ticket de salida, iniciadas durante la defensa, y la entrega.",
+      "scope": "Tres minutos de cierre más cuatro de defensa. No avanzar a S02.",
       "liveCheck": true
     }
   ]
