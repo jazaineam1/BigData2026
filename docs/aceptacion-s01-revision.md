@@ -76,3 +76,6 @@ Prueba local de referencia del mismo algoritmo Python, con **200 registros sint�
 
 ## Octava iteración: evaluación pedagógica y secuencia
 Ver [evaluación pedagógica S01](evaluacion-pedagogica-s01.md). Nota provisional 3.68/5; S02 permanece bloqueada. Conteo léxico actualizado 41717. La modificación de diseño aún requiere QA posterior. 
+
+## QA de la intervención pedagógica
+Se releen las fuentes guardadas y se regenera el HTML idéntico; 26 pantallas, 25 capítulos, 75 retroalimentaciones y 50 aperturas/cierres de comprobación rápida pasaron en DOM simulado. Distribución de posiciones correctas 8/8/9, sin ciclo A-B-C. Siete comprobaciones de aula y 13 celdas de código de núcleo, 11 de ampliación. Se corrige el nombre del parámetro del recorrido de pandas a N (celda s01-quality) y se incorpora un ticket de salida de tres preguntas reales, no una indicación vacía. Resultado final: 46 celdas, 24 de código, 41894 palabras en conteo léxico depurado. La revisión semántica y el ensayo en aula no se consideran aprobados. No se pudo ejecutar el ipynb exacto ni abrir HTML en navegador real por acceso directo a GitHub restringido. SHA main 9876871419dca42e6a3d50bf5f2524a94e399a5a. Nota de diseño provisional 3,68/5; no cambia el bloqueo de S02.

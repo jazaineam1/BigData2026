@@ -495,7 +495,7 @@
     "N = 80  # cambia a 40 o 120\nmuestra = df.iloc[:N].copy()\nassert muestra.id_proceso.is_unique\nprint(muestra.shape)\nprint(muestra.groupby(\"entidad\", dropna=False).size())",
     [
       "Pandas es una biblioteca de Python para manipular datos tabulares. Un DataFrame contiene columnas que pueden tener tipos diferentes y un índice de filas. DataFrame recibe una lista de objetos JSON y organiza sus claves en columnas. head muestra una pequeña parte, no valida por sí solo el contenido completo. shape devuelve una pareja con el número de filas y columnas. La propiedad is_unique comprueba si los valores de una serie son distintos. Una serie es una estructura unidimensional, como una columna. groupby separa filas según una clave y size cuenta registros de cada grupo. sort_values ordena los resultados. Estas operaciones permiten construir una consulta reproducible, porque otra persona puede ejecutar la misma selección sobre la misma instantánea. Pandas normalmente trabaja en memoria; más adelante estudiaremos cómo combinar fragmentos y distribuir tareas cuando el problema lo requiera.",
-      "El código de la derecha crea una tabla desde el corpus cargado, selecciona las primeras ochenta filas con iloc, y usa copy para trabajar con una copia. La aserción detiene el programa si existen identificadores repetidos. Después imprime las dimensiones y los grupos con mayor conteo. Si la aserción falla, no debemos ignorarla: hay que revisar el grano y los registros.",
+      "El código de la derecha selecciona las primeras ochenta filas del DataFrame df ya construido en A3, y usa copy para trabajar con una copia. La aserción detiene el programa si existen identificadores repetidos. Después imprime las dimensiones y los grupos. Si la aserción falla, no debemos ignorarla: hay que revisar el grano y los registros.",
       "Abre A3 en el cuaderno. La celda de datos crea CORPUS y la siguiente construye df. Cambia N a 40, 80 y 120 en la celda de selección. Conserva un ID y el conteo de su entidad. Las selecciones de ambas herramientas siguen el orden de la instantánea versionada, no una consulta viva.",
       "Un DataFrame es una estructura tabular con columnas y tipos. Un booleano por fila permite seleccionar observaciones; groupby define particiones lógicas y size cuenta filas, mientras count puede excluir nulos del atributo elegido. En el cuaderno A3 compara esos resultados y observa cómo una copia con entidad ausente requiere una política explícita. No confundas una tabla bonita con una comprobación: los asserts contrastan una expectativa con el resultado y detienen el proceso si no se satisface."
     ],
@@ -530,7 +530,7 @@
     ],
     {
       "phase": "Práctica guiada",
-      "facilitation": "Docente: ejecuta A0/A3 y enseña la expresión groupby. Estudiante: cambia N_TEXTO o un prefijo y comprueba denominador.",
+      "facilitation": "Docente: ejecuta A0/A3 y enseña la expresión groupby. Estudiante: cambia N en la celda s01-quality (40, 80 o 120) y comprueba denominador.",
       "scope": "Ejecutar preparación y fuente del itinerario núcleo; si no carga Colab, usar demostración del navegador y registrar pendiente.",
       "liveCheck": false
     }
@@ -1305,7 +1305,7 @@
     "19 · Relevo",
     "Compras Claras v0.1 queda preparado",
     "El futuro diseño de arquitectura recibirá fuente, identidad, esquema, cobertura y restricciones. S01 termina cuando otra persona puede verificar el paquete, no al abrir otra sesión.",
-    "Reabre el manifiesto de A7/A8, verifica grano, identidad, esquema y restricciones. El relevo queda preparado; S02 está bloqueada hasta aprobar S01.",
+    "Responde el ticket de salida del final del cuaderno: cobertura, invariancia y límite de interpretación. Muestra el resultado del verificador.",
     "El paquete releído de A7/A8 es el producto de aprendizaje; el estado portable de navegador es evidencia complementaria, no sustituto.",
     "flow",
     [
@@ -1352,7 +1352,7 @@
     {
       "phase": "Cierre",
       "facilitation": "Docente: aplica ticket de salida de tres preguntas y recoge el producto mínimo. Estudiante: declara fuente, grano, universo y una restricción desconocida.",
-      "scope": "Cinco minutos protegidos. No avanzar a S02 dentro de esta revisión.",
+      "scope": "Cinco minutos protegidos. Tres preguntas en la última celda Markdown (s01-ticket-salida). No avanzar a S02.",
       "liveCheck": true
     }
   ]

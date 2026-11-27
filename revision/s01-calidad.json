@@ -14,13 +14,13 @@
     "lexical_word_threshold_met": true
   },
   "word_count": {
-    "reading_gross": 8854,
+    "reading_gross": 8849,
     "chapters_gross": 17455,
-    "notebook_markdown_gross": 13279,
+    "notebook_markdown_gross": 13472,
     "formative_gross": 2367,
-    "total_gross": 41955,
+    "total_gross": 42143,
     "required_eligible": 40000,
-    "lexical_exact_dedup": 41717,
+    "lexical_exact_dedup": 41894,
     "near_matches": 0,
     "eligible_verified": null,
     "editorial_review_pending": true
@@ -89,7 +89,25 @@
     "python_package_rejections": 4,
     "python_transfer_pairs": 3,
     "full_notebook": false,
-    "real_browser": false
+    "real_browser": false,
+    "pedagogical_revision": {
+      "simulated_screens": 26,
+      "chapter_render": 25,
+      "formative_options": 75,
+      "quick_check_toggles": 50,
+      "prioritized_checks": 7,
+      "correct_answer_position_distribution": [
+        8,
+        8,
+        9
+      ],
+      "html_sync": true,
+      "core_code_cells": 13,
+      "optional_code_cells": 11,
+      "ticket_exit_questions": 3,
+      "notebook_full": false,
+      "real_browser": false
+    }
   },
   "pedagogical_design": {
     "live_checks": 7,
