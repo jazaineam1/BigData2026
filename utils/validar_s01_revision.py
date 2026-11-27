@@ -16,6 +16,9 @@ corpus = read(ROOT / "Datos/tc2_corpus_2026.json")["documentos"]
 gate = read(REV / "s01-calidad.json")
 teaching = [s for s in slides if s[1] != "Pausa"]
 assert len(slides) == 26 and len(teaching) == 25 and sum(s[0] for s in slides) == 150
+assert all(len(s)>11 and s[11] and all(u["title"] and u["paragraphs"] for u in s[11]) for s in teaching)
+assert len({c["id"] for c in nb["cells"]}) == len(nb["cells"])
+assert len(nb["cells"])>=44 and sum(c["cell_type"]=="code" for c in nb["cells"])>=24
 assert len({s[10]["question"] for s in teaching}) == 25
 assert all(len(s[10]["choices"]) == len(s[10]["feedback"]) == 3 and 0 <= s[10]["correct"] < 3 for s in teaching)
 assert all(any(c.get("id") == "s01-" + s[9].lower() for c in nb["cells"]) for s in teaching)
@@ -40,6 +43,7 @@ if args.execute:
         try:
             book = nbformat.read(REV / "s01-laboratorio.ipynb", as_version=4)
             nbformat.validate(book)
+            book.cells.append(nbformat.v4.new_code_cell('''# Prueba QA añadida solo al cuaderno en memoria, no al archivo docente.\nfor N,l,c in [(41,7,6),(137,29,17),(199,45,40)]:\n    p=(N+l-1)//l; b=(N+c-1)//c\n    h={"paginas":p,"ultima_pagina":N-(p-1)*l,"bloques":b,"ultimo_bloque":N-(b-1)*c}\n    a1,a2,retro,igual=reto_s01(N,l,c,h)\n    assert igual and all(x["coincide"] for x in retro)\nprint("QA tres variantes autónomas: OK")\n'''))
             executed = NotebookClient(book, timeout=90, kernel_name="python3",
                 resources={"metadata": {"path": tmp}}).execute()
             assert all(c.get("execution_count") is not None for c in executed.cells if c.cell_type == "code")

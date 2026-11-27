@@ -1,7 +1,7 @@
 {
   "session": "S01",
   "state": "NO_APROBADA",
-  "score": 3.1499999999999995,
+  "score": 3.35,
   "threshold": 4.5,
   "essential_min": 4,
   "mandatory": {
@@ -10,61 +10,85 @@
     "notebook_full_execution_verified": false,
     "real_browser_verified": false,
     "rehearsal_150_verified": false,
-    "autonomy_observed": false
+    "autonomy_observed": false,
+    "lexical_word_threshold_met": true
   },
   "word_count": {
-    "reading_gross": 8749,
-    "notebook_markdown_gross": 1568,
+    "reading_gross": 8854,
+    "chapters_gross": 17455,
+    "notebook_markdown_gross": 13002,
     "formative_gross": 2367,
-    "total_gross": 12684,
+    "total_gross": 41678,
     "required_eligible": 40000,
-    "eligible_verified": null
+    "lexical_exact_dedup": 41470,
+    "near_matches": 0,
+    "eligible_verified": null,
+    "editorial_review_pending": true
   },
   "rubric": [
     {
       "dimension": "Profundidad conceptual",
       "weight": 20,
-      "score": 3,
-      "evidence": "25 pantallas con explicaciones y ejemplos; solo 12.684 palabras brutas entre lectura, cuaderno y comprobaciones, sin acreditar 40.000 originales."
+      "score": 4,
+      "evidence": "25 capítulos específicos, explicación de código y 41.470 palabras de prosa tras exclusiones y deduplicación exacta; cribado de 65.703 pares sin coincidencias por umbral. Aún falta revisión editorial de redundancia conceptual y pertinencia."
     },
     {
       "dimension": "Actividad y autonomía",
       "weight": 20,
       "score": 3,
-      "evidence": "25 comprobaciones, 75 alternativas probadas, cambios de parámetros y reto A8; falta observar modificación autónoma de un estudiante."
+      "evidence": "25 comprobaciones, 75 opciones verificadas, retos paramétricos, hipótesis obligatoria y verificación del producto; 3 pares de transferencia de referencia probados. Falta observar autonomía de un estudiante."
     },
     {
       "dimension": "Práctica auténtica y reproducibilidad",
       "weight": 20,
       "score": 3,
-      "evidence": "200 registros reales incorporados, referencia Python local con fixture sintético y pruebas de relectura; no se ejecutó el ipynb remoto completo con su corpus real."
+      "evidence": "200 objetos SECOP exactos comparados con snapshot; servidor HTTP local y 8 casos de referencia, 24 casos de frontera, 12 mediciones, 4 rechazos de paquetes y 3 pares de transferencia con fixture sintético. Falta ejecutar íntegro el ipynb guardado con corpus real."
     },
     {
       "dimension": "Alineación y transferencia",
       "weight": 15,
       "score": 4,
-      "evidence": "25 referencias a secciones A0–A8 verificadas, misma selección del snapshot y paquete de relevo; S02 permanece bloqueada."
+      "evidence": "25 anclas A0–A8 y 25 capítulos comprobados; producto verificable, hipótesis y defensa articulados. Falta ensayo integral."
     },
     {
       "dimension": "Interpretación de resultados",
       "weight": 10,
       "score": 4,
-      "evidence": "Límites por pantalla, explicaciones de las 75 alternativas y controles de cobertura, memoria lógica, grano y relectura probados."
+      "evidence": "75 retroalimentaciones probadas y ejemplos de transporte, cobertura, grano, tipos, memoria lógica y fallos de integridad. Comparación con referencia matemática y verificador independiente."
     },
     {
       "dimension": "Diseño visual y accesibilidad",
       "weight": 10,
       "score": 3,
-      "evidence": "25 pantallas y pausa en DOM simulado, navegación y controles comprobados; falta navegador real, contraste medido y proyección."
+      "evidence": "26 pantallas en DOM simulado, 25 capítulos, 42 cambios de extremos de sliders y 96 escenarios HTTP en navegador simulado. Falta renderizado real y proyección."
     },
     {
       "dimension": "Viabilidad temporal",
       "weight": 5,
       "score": 1,
-      "evidence": "Agenda suma 150 min; no se cronometró ensayo docente ni recorrido de estudiante."
+      "evidence": "Agenda suma 150 min. Lecturas extensas y pruebas de profundización no se asignan como lectura oral de clase. Falta ensayo cronometrado y medición de autonomía."
     }
   ],
   "next_session": "S02",
   "next_session_unlocked": false,
-  "main_unchanged": "9876871419dca42e6a3d50bf5f2524a94e399a5a"
+  "main_unchanged": "9876871419dca42e6a3d50bf5f2524a94e399a5a",
+  "qa": {
+    "exact_snapshot_records": 200,
+    "exact_snapshot_ids": 200,
+    "html_sync": true,
+    "simulated_screens": 26,
+    "chapter_render": 25,
+    "formative_options": 75,
+    "slider_extremes": 42,
+    "http_simulations": 96,
+    "reductions_real_snapshot": 30,
+    "python_reference_fixture": "sintético de 200 registros; no ipynb original",
+    "python_http_cases": 8,
+    "python_pagination_cases": 24,
+    "python_benchmark_runs": 12,
+    "python_package_rejections": 4,
+    "python_transfer_pairs": 3,
+    "full_notebook": false,
+    "real_browser": false
+  }
 }
