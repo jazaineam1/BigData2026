@@ -10,3 +10,5 @@
 .deep-unit{border:1px solid #cddce4;border-radius:8px;margin:18px 0;padding:12px 16px;background:#f7fafb}.deep-unit summary{font-weight:750;color:#142153;cursor:pointer;padding:4px 0}.deep-unit summary:focus-visible{outline:3px solid #d68a21;outline-offset:3px}.deep-unit p{margin:1.1em 0}
 
 .quick-check{max-width:960px;margin:12px 0;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 18px}.quick-check[hidden]{display:none!important}.quick-check .checkpanel{margin:0;border:0;padding:0}.quick-check select{font-size:1rem}.quick-check .feedback{overflow-wrap:anywhere}#checkToggle{font-size:.85em}.metric{min-width:0;overflow-wrap:anywhere}.cols>*{min-width:0}.reading .deep-unit:first-child{background:#edf6f5}
+
+#routeToggle{font-size:.85em}.class-route p{margin:.5em 0;max-width:80ch}.route-nav{padding:6px 0}.class-route h3{margin:0 0 6px}.tablewrap td,.tablewrap th{overflow-wrap:anywhere}.output pre{margin:.5em 0}.visual .controls{grid-template-columns:repeat(auto-fit,minmax(min(100%,135px),1fr))}

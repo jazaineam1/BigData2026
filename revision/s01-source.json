@@ -824,7 +824,7 @@
     "12D · Recuperación HTTP",
     "HTTP no es una validación de calidad",
     "Una respuesta exitosa puede ser incompleta. Un fallo transitorio exige reintentar el mismo offset; un error de acceso o de datos impide confirmar la página.",
-    "Predice y demuestra normal, transitorio y presupuesto agotado. En A4.1/A4.2 el docente muestra HTTP local después de dominar offsets.",
+    "Predice tres escenarios en el simulador. El docente puede ejecutar A4.1/A4.2 del apéndice en HTTP local; la ruta principal no depende de abrir un puerto.",
     "La simulación calcula estados; el cuaderno ejecuta HTTP real en loopback. No es una consulta viva al portal ni una prueba de su rendimiento.",
     "http",
     null,
@@ -867,7 +867,7 @@
     {
       "phase": "Demostración técnica",
       "facilitation": "Docente: ejecuta normal y transitorio del cliente HTTP y muestra trazas. Estudiante: predice el efecto de bajar intentos a dos.",
-      "scope": "A4.1–A4.3: el profesor muestra la prueba y su salida; implementación de servidor, matriz completa y cuarentena son ampliación de lectura. No exige escribir el servidor desde cero.",
+      "scope": "Demostración opcional del docente después de dominar offsets; conservar el simulador para clase si el entorno impide loopback. No exige ejecutar la matriz completa.",
       "liveCheck": false
     }
   ],
@@ -1029,7 +1029,7 @@
     "15 · Capacidad real en Python",
     "Medir, no adivinar",
     "Compara lectura completa y por fragmentos del mismo CSV sintético. En la prueba local sobre 100.000 filas, el DataFrame completo ocupó 1.600.132 bytes lógicos; el bloque de 1.000, 16.132. La suma fue 4.999.545 en ambos casos.",
-    "Ejecuta la prueba de 10.000 filas y compara dos tamaños de bloque. La escala de 100.000 y el benchmark repetido son ampliaciones.",
+    "Ejecuta A6 con 10.000 filas y bloques de 1.000 y 5.000. La medición incluye lectura, agregación e instrumentación para todas las rutas.",
     "No comparar tiempos de redes distintas como si fueran un benchmark controlado. memory_usage no es pico RSS.",
     "code",
     "mediciones = medir_csv(10_000, [500,1000,5000])\ndisplay(pd.DataFrame(mediciones))\n# ampliación manual:\n# medir_csv(100_000,[500,1000,5000])",
@@ -1071,7 +1071,7 @@
     {
       "phase": "Práctica de medición",
       "facilitation": "Docente: ejecuta A6 benchmark de 10.000 filas y explica bytes lógicos. Estudiante: compara dos tamaños y justifica una decisión.",
-      "scope": "Usar la prueba pequeña como núcleo; la repetición y 100.000 son ampliación. No comparar como pico RSS.",
+      "scope": "La ruta núcleo compara tres estrategias con referencia matemática independiente. Ampliación de 100.000 y benchmark repetido al final.",
       "liveCheck": false
     }
   ],
@@ -1173,7 +1173,7 @@
     {
       "phase": "Prueba negativa",
       "facilitation": "Docente: modifica una copia del paquete y muestra rechazo. Estudiante: explica qué controla hash y qué controla contenido.",
-      "scope": "A7.1: observar un rechazo; los cuatro casos quedan para ampliación. Comprobación en aula.",
+      "scope": "A7: ejecuta la prueba negativa breve; seis pruebas de corrupción en el apéndice.",
       "liveCheck": true
     }
   ],
@@ -1224,7 +1224,7 @@
     {
       "phase": "Autonomía",
       "facilitation": "Estudiante: elige N, limit y chunk, calcula cuatro predicciones sin mostrar la solución, activa A8.1 y verifica dos paquetes. Docente: acompaña solo si hay bloqueo.",
-      "scope": "16 minutos protegidos. Si hay demora, preservar el reto y retirar demostraciones extra, no resolverlo por el estudiante.",
+      "scope": "16 minutos protegidos. Reto A8: completa hipótesis, activa y genera dos ZIP verificados. La transferencia guiada queda en el apéndice si requiere ayuda.",
       "liveCheck": false
     }
   ],

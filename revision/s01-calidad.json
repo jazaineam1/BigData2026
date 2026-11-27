@@ -16,11 +16,11 @@
   "word_count": {
     "reading_gross": 8849,
     "chapters_gross": 17455,
-    "notebook_markdown_gross": 13472,
+    "notebook_markdown_gross": 13787,
     "formative_gross": 2367,
-    "total_gross": 42143,
+    "total_gross": 42458,
     "required_eligible": 40000,
-    "lexical_exact_dedup": 41894,
+    "lexical_exact_dedup": 42202,
     "near_matches": 0,
     "eligible_verified": null,
     "editorial_review_pending": true
@@ -111,12 +111,15 @@
   },
   "pedagogical_design": {
     "live_checks": 7,
-    "core_code_cells": 13,
-    "optional_code_cells": 11,
+    "core_code_cells": 12,
+    "optional_code_cells": 15,
     "planned_autonomy_minutes": 16,
     "planned_closure_minutes": 12,
     "score_unrounded": 3.675,
     "actual_student_results": false,
-    "report": "docs/evaluacion-pedagogica-s01.md"
+    "report": "docs/evaluacion-pedagogica-s01.md",
+    "core_contiguous": true,
+    "full_run_order": "núcleo, luego apéndice",
+    "http_not_required_for_core": true
   }
 }
