@@ -1,6 +1,6 @@
 [
   [
-    5,
+    8,
     "01 · La misión",
     "Laura tiene que revisar contratación pública sin leer cada expediente",
     "El producto de hoy no es un tablero vacío: será una adquisición reproducible. Recibimos una fuente, comprobamos identidad, exploramos contenido, dividimos lotes y entregamos RAW. En la siguiente sesión diseñaremos la arquitectura que lo recibe.",
@@ -56,11 +56,11 @@
     }
   ],
   [
-    4,
+    5,
     "02 · Escala y decisión",
     "Big Data no es un número mágico",
     "El problema comienza cuando volumen, tasa de llegada, estructuras o necesidades de respuesta exceden el método disponible. Una tabla pequeña puede exigir respuesta rápida; una grande puede procesarse por lotes. Escalar tiene costos de memoria, almacenamiento, red y coordinación.",
-    "Compara un proceso que recibe 3 millones de eventos/min con otro que recibe 1 millón. Decide qué métrica monitorear.",
+    "Compara 3.000 llegadas/s con capacidad de 1.000/s. Predice la cola antes de mover controles.",
     "Distingue capacidad y demanda; el tamaño de archivo por sí solo no decide tecnología.",
     "queue",
     null,
@@ -332,7 +332,7 @@
     }
   ],
   [
-    5,
+    3,
     "06 · Fuente real",
     "Abre el corpus SECOP antes de escribir código",
     "Tenemos una instantánea docente versionada de 200 procesos derivados de Datos/bandeja_revision_2026.json. Incluye ID, objeto, descripción, entidad y URL original. No es una muestra aleatoria; no contiene monto, fecha de adjudicación ni proveedor en este esquema.",
@@ -383,11 +383,11 @@
     }
   ],
   [
-    4,
+    3,
     "07 · Calidad",
     "Veracidad: identidad y valores ausentes",
     "Antes de sumar, comprueba que cada ID sea único y que los campos necesarios existan. La ausencia no equivale a cero. Un duplicado exacto no es un nuevo proceso. La calidad se mide en relación con la tarea.",
-    "Introduce duplicados y faltantes en COPIAS del corpus. Compara filas, identidades y registros incompletos.",
+    "Añade cinco copias y omite una entidad en la copia resultante. Contrasta con A3.",
     "El RAW de origen no cambia. Un registro incompleto puede requerir cuarentena o enriquecimiento.",
     "quality",
     null,
@@ -434,7 +434,7 @@
     }
   ],
   [
-    4,
+    2,
     "08 · Primera transformación",
     "Filtrar no es agrupar",
     "Filtrar selecciona filas, proyectar selecciona campos y agrupar cambia el grano. Contar procesos por entidad responde cuántos registros de la muestra pertenecen a cada entidad; no cuánto gastó ni si existe irregularidad.",
@@ -485,11 +485,11 @@
     }
   ],
   [
-    5,
+    4,
     "09 · Pandas",
     "De la tabla a una pregunta reproducible",
     "El DataFrame organiza filas y columnas. head permite inspección; shape describe dimensiones; nunique controla identidad; groupby().size() agrega sin inventar montos. Usa el cuaderno para ejecutar el mismo ejercicio en Python.",
-    "Abre Colab, ejecuta la preparación y el A3. Cambia el límite de muestra y compara grupos.",
+    "Ejecuta A3 ya preparado. Cambia N a 40, 80 y 120; explica groupby y el denominador.",
     "El resultado depende del mismo corpus y selección ordenada.",
     "code",
     "N = 80  # cambia a 40 o 120\nmuestra = df.iloc[:N].copy()\nassert muestra.id_proceso.is_unique\nprint(muestra.shape)\nprint(muestra.groupby(\"entidad\", dropna=False).size())",
@@ -536,7 +536,7 @@
     }
   ],
   [
-    6,
+    3,
     "10 · Texto",
     "Transformar descripción en una señal cuantificable",
     "Tokenizar divide texto en unidades; contar palabras produce una representación simple. Frecuencia no implica relevancia, causalidad ni riesgo. Títulos y descripciones pueden repetir información, por eso aquí contamos solo descripción.",
@@ -616,7 +616,7 @@
     }
   ],
   [
-    3,
+    4,
     "11 · API",
     "Qué ocurre cuando llamamos una API",
     "Una API define una interfaz; HTTP transporta la solicitud. En Socrata, $select escoge columnas, $where filtra, $limit acota filas y $order fija un orden. HTTP 200 no prueba cobertura; es necesario validar grano e identidad.",
@@ -671,7 +671,7 @@
     "12 · Paginación",
     "LIMIT y OFFSET sin perder registros",
     "Una página es un subconjunto ordenado. OFFSET desplaza el inicio; un último bloque puede ser menor que el límite. Un orden estable reduce inconsistencias, pero no congela una API que cambia mientras se consulta.",
-    "Cambia el límite y el offset en la instantánea real. Verifica primera y última identidad de la página.",
+    "Usa límite 37 y offsets 0, 37, 74; contrasta páginas y última identidad con A5.",
     "Compara cobertura de la secuencia completa: todas las identidades exactamente una vez. Aquí no se está llamando a una API.",
     "pages",
     null,
@@ -820,11 +820,11 @@
     }
   ],
   [
-    8,
+    6,
     "12D · Recuperación HTTP",
     "HTTP no es una validación de calidad",
     "Una respuesta exitosa puede ser incompleta. Un fallo transitorio exige reintentar el mismo offset; un error de acceso o de datos impide confirmar la página.",
-    "Predice tres escenarios en el simulador. El docente puede ejecutar A4.1/A4.2 del apéndice en HTTP local; la ruta principal no depende de abrir un puerto.",
+    "Predice la recuperación en el simulador. HTTP real local es ampliación docente, no requisito.",
     "La simulación calcula estados; el cuaderno ejecuta HTTP real en loopback. No es una consulta viva al portal ni una prueba de su rendimiento.",
     "http",
     null,
@@ -1028,8 +1028,8 @@
     9,
     "15 · Capacidad real en Python",
     "Medir, no adivinar",
-    "Compara lectura completa y por fragmentos del mismo CSV sintético. En la prueba local sobre 100.000 filas, el DataFrame completo ocupó 1.600.132 bytes lógicos; el bloque de 1.000, 16.132. La suma fue 4.999.545 en ambos casos.",
-    "Ejecuta A6 con 10.000 filas y bloques de 1.000 y 5.000. La medición incluye lectura, agregación e instrumentación para todas las rutas.",
+    "La escala cambia el costo, no el resultado lógico. Compara lectura completa y por bloques sobre un CSV sintético. Distingue tamaño lógico del DataFrame, tiempo y memoria residente del proceso.",
+    "Ejecuta A6 con 10.000 y 100.000 filas; 1.000.000 es extensión manual controlada. Compara la misma operación y alcance.",
     "No comparar tiempos de redes distintas como si fueran un benchmark controlado. memory_usage no es pico RSS.",
     "code",
     "mediciones = medir_csv(10_000, [500,1000,5000])\ndisplay(pd.DataFrame(mediciones))\n# ampliación manual:\n# medir_csv(100_000,[500,1000,5000])",
@@ -1076,7 +1076,7 @@
     }
   ],
   [
-    10,
+    11,
     "16 · Reutilizar el resultado",
     "RAW, derivados y trazabilidad",
     "RAW conserva el dato original recibido. Un derivado registra qué transformación lo generó. El manifiesto guarda fuente, cantidad, esquema y huella. Una huella de consistencia detecta cambios pero no certifica autoría.",
@@ -1127,7 +1127,7 @@
     }
   ],
   [
-    6,
+    7,
     "16B · Auditoría del producto",
     "Un hash no reemplaza el control de identidad",
     "El manifiesto fija fuente, grano, esquema y SHA-256. Se debe comprobar que los bytes y las identidades coincidan tras reabrirlos.",
@@ -1178,19 +1178,19 @@
     }
   ],
   [
-    16,
+    25,
     "17 · Construir tu propia adquisición",
     "Reto: cambia la decisión, no copies el resultado",
     "Vuelve al banco de datos y elige una escala diferente de la demostración. Predice número de páginas, ejecuta fragmentación, comprueba igualdad y genera estado. Tu trabajo debe contener resultados que puedas explicar.",
-    "En A8 cambia un tamaño de página o bloque, y después cambia la selección. Comprueba hash RAW, conteo, paridad y manifiesto.",
-    "No borres archivos anteriores; conserva los dos resultados para comparar. No hay nueva calificación oficial.",
+    "Elige N, límite y bloque. Cambia solo límite, luego solo bloque, luego el universo. Completa una reducción y verifica el producto en A8.",
+    "No confundir estado JSON de exploración con ZIP Python. La equivalencia se verifica por IDs, conteos y parámetros, no por formato.",
     "challenge",
     null,
     [
-      "Aprender una herramienta significa poder transferir lo aprendido a una situación que no es exactamente el ejemplo mostrado. En este reto debes cambiar una decisión y observar sus efectos, conservando las demás condiciones necesarias. Si cambias simultáneamente la cantidad de procesos, el tamaño de bloque y el filtro, será difícil atribuir las diferencias a una causa. Primero mantén la selección de ochenta y modifica el tamaño de bloque. La agrupación final debe permanecer idéntica; cambia el número de iteraciones. Después mantén el tamaño de bloque y selecciona cuarenta o ciento veinte procesos. Ahora cambian el universo y potencialmente los conteos por entidad. Estas dos comparaciones enseñan a separar una decisión de ejecución de una decisión sobre los datos. Documentar un resultado inesperado es mejor que ocultarlo: registra el parámetro, la salida y el control que falló.",
-      "Una entrega reproducible podría incluir una primera prueba con 80 procesos y bloques de 20, y otra con los mismos 80 y bloques de 10. La cantidad de bloques pasa de cuatro a ocho, pero el mapa de conteos permanece igual. Una tercera prueba con 120 cambia el universo, por lo que no debes exigir que los conteos por entidad coincidan con la primera. Debes exigir que el conteo directo y fragmentado coincidan dentro de cada universo.",
-      "Construye dos productos propios en A8. La primera comparación conserva el universo de 200 procesos, cambiando límite y bloque; los hashes RAW y conteos deben coincidir. La segunda conserva parámetros pero cambia a un prefijo de 80 (o el valor que elijas). Comprueba el número de IDs, la relectura y el alcance declarado. Conserva las carpetas distintas para comparar.",
-      "En el reto autónomo debes cambiar una entrada y anticipar un invariante: por ejemplo, con el mismo universo y tamaño de página distinto, se conserva el conjunto de IDs y el conteo por entidad. Si cambias escala, el universo cambia y ya no esperas conteos iguales. La decisión profesional es distinguir cambios de ejecución de cambios de datos. No copies las cifras de una ejecución anterior: guarda una nueva evidencia, comprueba sus controles y compara su manifestación con la predicción."
+      "Antes de ejecutar registra N, límite y bloque. Mantén N y bloque fijos al cambiar el límite; luego vuelve al caso base y cambia únicamente bloque. Finalmente cambia N manteniendo los parámetros base. Así puedes atribuir las diferencias a una decisión.",
+      "Ejemplo: N=137, límite=29, bloque=17. Espera cinco páginas y nueve bloques. La última página tiene 21 filas y el último bloque una. Cambia límite a 30: cinco páginas, última de 17, mismo contenido. Cambia solo bloque a 18: ocho bloques, último de 11, mismo contenido.",
+      "Completa el acumulador de A8 sin copiar la solución guiada. Contrasta contra groupby; conserva la hipótesis incluso si falla.",
+      "El simulador muestra la planificación; Python produce archivos y verifica contenido. La recuperación HTTP es una ampliación separada."
     ],
     "A8",
     {
@@ -1217,7 +1217,8 @@
           "Segunda variante: cambia universo a un prefijo de 80 con limit 19 y chunk 13. Hay cinco páginas: cuatro de diecinueve y una de cuatro. Hay siete bloques: seis de trece y uno de dos. Ahora los conteos no tienen obligación de coincidir con la fuente completa. Se exige que el paquete declare prefijo de 80 de 200 y cobertura exacta de ese prefijo. No se usa la ausencia de una entidad en 80 como prueba de que no existe en el snapshot completo. Si se comparan top de entidades de ambas selecciones, registra denominadores y recuerda que el orden de prefijo no constituye muestreo aleatorio. La prueba verifica comportamiento del sistema, no representatividad estadística.",
           "Tercera variante: introduce un fallo transitorio en la segunda página del servicio docente. Configura el presupuesto de intentos en dos y después en tres. Predice que la primera ejecución queda incompleta y la segunda recupera el mismo universo. Conserva dos directorios separados. Examina trazas, archivos de página y presencia o ausencia de manifiesto. No copies el manifiesto de la ejecución correcta al directorio incompleto. Esta práctica comprueba que la recuperación afecta el estado operativo y no debe alterar el producto lógico cuando se logra terminar. Si la política no permite recuperar una página, el consumidor recibe evidencia de bloqueo y no un resultado presentado como completo.",
           "Para evaluar autonomía se necesita una variante que no sea idéntica al ejemplo guiado. Una persona puede elegir N=120, limit=23 y chunk=17. En ese caso debe calcular seis páginas (cinco de 23 y una de 5) y ocho bloques (siete de 17 y uno de 1). Se ofrecen estas cifras como ejemplo de razonamiento, no como sustituto de la ejecución propia. El estudiante deberá seleccionar otros valores, producir evidencias y explicar sus controles. La evaluación formativa no altera las notas oficiales. Una aserción automática puede verificar cobertura y hashes, pero no demuestra por sí sola que el estudiante entiende por qué se cumplen. Se requiere una justificación y una variante independiente.",
-          "La evidencia final consta de una hipótesis escrita, el manifiesto producido, una comprobación de relectura, el resultado de agrupación y una explicación de límites. Guarda los parámetros exactos para que otra persona pueda repetir el recorrido. Si se usó una prueba HTTP local, decláralo; si se ejecutó una consulta viva, conserva su estado separado. El reto no exige usar más recursos, instalar un clúster o descargar datos privados. La dificultad consiste en controlar identidad, semántica y ejecución. Una defensa breve debe poder responder qué cambio afectó solo la forma de procesar, qué cambio afectó el universo y cómo se verificó que no se perdieron registros."
+          "La evidencia final consta de una hipótesis escrita, el manifiesto producido, una comprobación de relectura, el resultado de agrupación y una explicación de límites. Guarda los parámetros exactos para que otra persona pueda repetir el recorrido. Si se usó una prueba HTTP local, decláralo; si se ejecutó una consulta viva, conserva su estado separado. El reto no exige usar más recursos, instalar un clúster o descargar datos privados. La dificultad consiste en controlar identidad, semántica y ejecución. Una defensa breve debe poder responder qué cambio afectó solo la forma de procesar, qué cambio afectó el universo y cómo se verificó que no se perdieron registros.",
+          "En la ruta esencial revisada se comparan cuatro configuraciones aisladas: base, nuevo límite, nuevo bloque y nuevo universo. Las variantes HTTP y los ejemplos con 200 filas pertenecen a profundización. La tarea de construcción utiliza el acumulador del estudiante y su comparación con un resultado independiente; un paquete correcto sin este control no prueba autonomía."
         ]
       }
     ],
@@ -1229,7 +1230,7 @@
     }
   ],
   [
-    7,
+    4,
     "18 · Interpretar y defender",
     "Qué sabemos y qué no sabemos",
     "Sabemos cuántos procesos hay en nuestra selección, cómo están representados, qué campos faltan y que el conteo fragmentado coincide. No sabemos el gasto, la representatividad, ni la causalidad. Un sistema grande requiere decisiones basadas en restricciones medidas.",
@@ -1301,7 +1302,7 @@
     }
   ],
   [
-    5,
+    3,
     "19 · Relevo",
     "Compras Claras v0.1 queda preparado",
     "El futuro diseño de arquitectura recibirá fuente, identidad, esquema, cobertura y restricciones. S01 termina cuando otra persona puede verificar el paquete, no al abrir otra sesión.",
