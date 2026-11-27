@@ -63,7 +63,7 @@
       ],
       "script": {
         "title": "Plantea el caso",
-        "say": "Laura debe explorar contratación pública, no juzgar gasto sin valores contractuales. Hoy construiremos una adquisición verificable. Un proceso es nuestra unidad de observación; no es una factura ni un contrato. Antes de hablar de herramientas, distingamos una pregunta que sí podemos responder de una que requiere otras fuentes. El resultado final contiene datos originales, conteos y un manifiesto. En la portada señalen el recorrido y abran el cuaderno en otra pestaña para evitar interrupciones posteriores.",
+        "say": "Laura debe explorar contratación pública, no juzgar gasto sin valores contractuales. Hoy construiremos una adquisición verificable. Un proceso es nuestra unidad de observación; no es una factura ni un contrato. Antes de hablar de herramientas, distingamos una pregunta que sí podemos responder de una que requiere otras fuentes. El resultado final contiene datos originales, conteos y un manifiesto. En la portada señalen el recorrido y abran el cuaderno en otra pestaña para evitar interrupciones posteriores. Para la decisión de hoy, una afirmación válida es identificar los procesos de la entidad X dentro del conjunto observado. Una afirmación inválida sería inferir cuánto dinero se adjudicó. La primera utiliza identidad y entidad; la segunda exige el valor y una fuente contractual.",
         "do": "Pregunta al grupo qué afirmación podría sustentar con 200 procesos. Espera dos respuestas, separa frecuencia de gasto y muestra el producto previsto. La muestra no es representativa de toda la contratación."
       },
       "cell": "s01-a0"
@@ -127,7 +127,7 @@
       ],
       "script": {
         "title": "Explica la restricción",
-        "say": "Big Data no comienza con un número de filas. Comienza cuando la operación, el ritmo o el volumen desbordan un recurso o un plazo. Si llegan tres mil registros por segundo y solo atendemos mil, se acumulan dos mil por segundo. En un minuto habrá ciento veinte mil pendientes. Cambiemos ahora únicamente la capacidad y anticipemos el resultado antes de mover el control. La capacidad sobrante no genera una cola negativa.",
+        "say": "Big Data no comienza con un número de filas. Comienza cuando la operación, el ritmo o el volumen desbordan un recurso o un plazo. Si llegan tres mil registros por segundo y solo atendemos mil, se acumulan dos mil por segundo. En un minuto habrá ciento veinte mil pendientes. Cambiemos ahora únicamente la capacidad y anticipemos el resultado antes de mover el control. La capacidad sobrante no genera una cola negativa. En un sistema de producción se observa tanto el rendimiento por segundo como la latencia individual. Una cola grande puede indicar que el servicio es insuficiente. Si las tasas fluctúan, debemos actualizar el saldo por intervalo y conservar la cola anterior; un promedio puede ocultar picos.",
         "do": "Verifica llegada, servicio y saldo. Pide identificar si comprar más disco resuelve una cola de CPU. Aclara que el modelo supone tasas constantes y cola inicial vacía."
       },
       "cell": "Presentación; profundización en el bloque indicado"
@@ -214,7 +214,7 @@
       ],
       "script": {
         "title": "Define las cinco V",
-        "say": "Volumen es cuánto tenemos; velocidad es a qué ritmo llega o debe responder el sistema; variedad describe formatos; veracidad exige controles de calidad; valor vincula los datos a una decisión. No son cinco casillas para memorizar, sino preguntas para diagnosticar un caso. Un conjunto pequeño de escaneos ilegibles puede plantear un reto de calidad y variedad sin tener gran volumen.",
+        "say": "Volumen es cuánto tenemos; velocidad es a qué ritmo llega o debe responder el sistema; variedad describe formatos; veracidad exige controles de calidad; valor vincula los datos a una decisión. No son cinco casillas para memorizar, sino preguntas para diagnosticar un caso. Un conjunto pequeño de escaneos ilegibles puede plantear un reto de calidad y variedad sin tener gran volumen. Un ejemplo de volumen es una colección de millones de documentos; uno de velocidad es un flujo de eventos; variedad aparece en imágenes y tablas; veracidad cuando faltan campos; valor cuando definimos una pregunta. No obliguemos a escoger una sola V cuando el caso tiene varias.",
         "do": "Solicita una métrica concreta para cada uno de dos casos del quiz. Distingue bytes de registros por segundo y de porcentaje de datos válidos."
       },
       "cell": "Presentación; profundización en el bloque indicado"
@@ -279,7 +279,7 @@
       ],
       "script": {
         "title": "Recorre la máquina",
-        "say": "El almacenamiento retiene datos; la RAM contiene el estado activo; la CPU ejecuta operaciones; la red mueve datos. Una matriz de un millón por ciento veintiocho valores de ocho bytes necesita 1.024 millones de bytes solo para valores. Si el presupuesto es menor, podemos cambiar representación, fragmentar o distribuir según el algoritmo. Un recurso no reemplaza automáticamente a otro.",
+        "say": "El almacenamiento retiene datos; la RAM contiene el estado activo; la CPU ejecuta operaciones; la red mueve datos. Una matriz de un millón por ciento veintiocho valores de ocho bytes necesita 1.024 millones de bytes solo para valores. Si el presupuesto es menor, podemos cambiar representación, fragmentar o distribuir según el algoritmo. Un recurso no reemplaza automáticamente a otro. En procesamiento distribuido aparecen además costos de coordinación, serialización y movimiento de datos. Eliminar un cuello de botella puede revelar otro. No vamos a desplegar un clúster hoy: primero necesitamos justificar la restricción con medidas y comprender qué operaciones pueden dividirse y combinarse.",
         "do": "Modifica una sola variable del simulador. Pide explicar por qué quepa el mínimo no garantiza que quepa el proceso completo; menciona buffers e índices."
       },
       "cell": "Presentación; profundización en el bloque indicado"
@@ -344,7 +344,7 @@
       ],
       "script": {
         "title": "Compara formatos",
-        "say": "Un dato lógico puede serializarse en CSV, JSON, JSONL o XML. CSV organiza columnas; JSON expresa objetos y listas; JSONL permite leer un objeto por línea; XML emplea etiquetas. El formato no determina por sí mismo la calidad. El identificador debe permanecer como texto si contiene ceros iniciales. Comparemos la misma identidad en dos representaciones y observemos su tamaño.",
+        "say": "Un dato lógico puede serializarse en CSV, JSON, JSONL o XML. CSV organiza columnas; JSON expresa objetos y listas; JSONL permite leer un objeto por línea; XML emplea etiquetas. El formato no determina por sí mismo la calidad. El identificador debe permanecer como texto si contiene ceros iniciales. Comparemos la misma identidad en dos representaciones y observemos su tamaño. Veamos el caso de un campo opcional: una clave ausente no equivale a un texto vacío ni a cero. El esquema debe explicar qué representa cada situación. Cambiar de formato sin conservar esa diferencia puede producir un resultado aparentemente correcto que en realidad pierde información.",
         "do": "Cambia el selector de formato y señala qué se conserva y qué cambia. Elige JSONL para una lectura secuencial de objetos; no declares que siempre es el más pequeño."
       },
       "cell": "Presentación; profundización en el bloque indicado"
@@ -411,7 +411,7 @@
       ],
       "script": {
         "title": "Explica el grano",
-        "say": "El grano indica qué representa una fila. Tres procesos pueden tener tres contratos distribuidos de forma desigual. Una unión izquierda conserva el proceso sin contrato, y un proceso con dos contratos ocupa dos filas. Por tanto, contar filas después de unir no equivale a contar procesos. Las claves y la cardinalidad deben formar parte del contrato de datos.",
+        "say": "El grano indica qué representa una fila. Tres procesos pueden tener tres contratos distribuidos de forma desigual. Una unión izquierda conserva el proceso sin contrato, y un proceso con dos contratos ocupa dos filas. Por tanto, contar filas después de unir no equivale a contar procesos. Las claves y la cardinalidad deben formar parte del contrato de datos. Si el proceso P1 posee dos contratos y P2 uno, la relación conserva tres contratos, no tres procesos adjudicados. En una unión interna P3 desaparece si no tiene relación. En una unión izquierda se conserva. Antes de unir, registren la cardinalidad que esperan encontrar.",
         "do": "Aumenta contratos de P1, pide predecir filas y únicos; contrasta unión izquierda e interna. Señala los nulos."
       },
       "cell": "Presentación; profundización en el bloque indicado"
@@ -477,7 +477,7 @@
       ],
       "script": {
         "title": "Inspecciona la fuente",
-        "say": "Aquí sí vemos registros reales del snapshot SECOP. Lean el identificador, la entidad, el objeto y la descripción; la fuente conserva su procedencia. No hay valor contractual en este conjunto. Una selección de cuarenta observaciones es un prefijo del snapshot, no un muestreo probabilístico. Abran el cuaderno A0 y A3 y ubiquen la fuente incorporada.",
+        "say": "Aquí sí vemos registros reales del snapshot SECOP. Lean el identificador, la entidad, el objeto y la descripción; la fuente conserva su procedencia. No hay valor contractual en este conjunto. Una selección de cuarenta observaciones es un prefijo del snapshot, no un muestreo probabilístico. Abran el cuaderno A0 y A3 y ubiquen la fuente incorporada. Leamos un objeto contractual específico y anotemos su identificador. El identificador nos permitirá reconciliar una selección posterior; la descripción nos permitirá explorar temas. No asumimos que la primera página representa a todo el país. Guardar la procedencia también permite volver a examinar la información.",
         "do": "Pide encontrar un registro concreto y declarar una limitación. Si el enlace externo exige acceso, conserva el registro local y no inventes información."
       },
       "cell": "s01-fixture"
@@ -543,7 +543,7 @@
       ],
       "script": {
         "title": "Provoca errores",
-        "say": "Trabajaremos sobre una copia, no sobre los datos originales. Agregamos cinco copias y luego vaciamos una entidad. Habrá 205 filas, 200 identidades, cinco repeticiones y un faltante. Un registro con campo faltante puede tener identidad válida; son dos controles distintos. La solución depende de la política de calidad, no de borrar a ciegas.",
+        "say": "Trabajaremos sobre una copia, no sobre los datos originales. Agregamos cinco copias y luego vaciamos una entidad. Habrá 205 filas, 200 identidades, cinco repeticiones y un faltante. Un registro con campo faltante puede tener identidad válida; son dos controles distintos. La solución depende de la política de calidad, no de borrar a ciegas. Cuando un control falla, la decisión no siempre es eliminar. Podemos aislar un registro para revisión, conservarlo con una marca o detener el producto. Debemos mantener intacta la fuente y registrar la decisión. Una duplicación exacta y un conflicto entre dos registros con igual ID son casos diferentes.",
         "do": "Contrasta con A3, pide explicar por qué se conserva RAW. Cambia duplicados o faltantes por separado."
       },
       "cell": "s01-quality"
@@ -610,7 +610,7 @@
       ],
       "script": {
         "title": "Transforma",
-        "say": "Filtrar selecciona observaciones; proyectar selecciona columnas; agrupar cambia el grano de la salida. Si pasamos de ochenta a ciento veinte procesos, puede cambiar el número de entidades. La suma de conteos debe coincidir con las filas seleccionadas. No confundamos un ranking de frecuencia con una medida de gasto.",
+        "say": "Filtrar selecciona observaciones; proyectar selecciona columnas; agrupar cambia el grano de la salida. Si pasamos de ochenta a ciento veinte procesos, puede cambiar el número de entidades. La suma de conteos debe coincidir con las filas seleccionadas. No confundamos un ranking de frecuencia con una medida de gasto. El agrupamiento cambia la unidad de observación: ahora cada fila representa una entidad, no un proceso. El denominador sigue siendo el número de procesos seleccionados. Para defender el resultado, debemos declarar ambas unidades y mostrar la igualdad entre la suma de los grupos y el total.",
         "do": "Selecciona dos prefijos y comprueba denominador. Solicita una predicción antes de cambiar N."
       },
       "cell": "s01-quality"
@@ -675,7 +675,7 @@
       ],
       "script": {
         "title": "Lee pandas",
-        "say": "Un DataFrame es una tabla con índice y columnas. iloc toma posiciones, copy permite trabajar con una copia, is_unique comprueba identidad y groupby crea grupos. size cuenta filas de cada grupo. La aserción de la suma nos obliga a verificar el resultado antes de interpretarlo. Cambia N, no la aserción. Si aparece NameError, revisa el orden de ejecución.",
+        "say": "Un DataFrame es una tabla con índice y columnas. iloc toma posiciones, copy permite trabajar con una copia, is_unique comprueba identidad y groupby crea grupos. size cuenta filas de cada grupo. La aserción de la suma nos obliga a verificar el resultado antes de interpretarlo. Cambia N, no la aserción. Si aparece NameError, revisa el orden de ejecución. Primero impriman el tamaño de la tabla, luego una muestra y finalmente el resultado agrupado. Si ejecutamos directamente toda una cadena, es difícil localizar dónde ocurrió un error. Las variables intermedias sirven para investigar, no son código innecesario cuando estamos aprendiendo un procedimiento.",
         "do": "Ejecuta s01-quality con el entorno ya preparado; muestra N=80 y 120. Pide identificar la salida de cada instrucción y contrastar 39 y 46 nombres de entidad."
       },
       "cell": "s01-quality"
@@ -739,7 +739,7 @@
       ],
       "script": {
         "title": "Explica texto",
-        "say": "La descripción es texto, pero podemos derivar variables. Normalizamos mayúsculas y acentos mediante una regla explícita, tokenizamos y contamos. Una palabra que aparece tres veces en un documento cuenta tres ocurrencias y un documento. No es lo mismo frecuencia de términos que documentos que contienen el término.",
+        "say": "La descripción es texto, pero podemos derivar variables. Normalizamos mayúsculas y acentos mediante una regla explícita, tokenizamos y contamos. Una palabra que aparece tres veces en un documento cuenta tres ocurrencias y un documento. No es lo mismo frecuencia de términos que documentos que contienen el término. Al quitar acentos aplicamos una decisión de normalización; no todas las tareas deberían utilizar esa misma regla. En español puede cambiar distinciones importantes. Conservemos la descripción original y registremos la transformación. El resultado cuenta tokens definidos por nuestra regla, no interpreta el significado del texto.",
         "do": "Busca salud y contrasta seis ocurrencias en cuatro procesos. Cambia un término y pide explicar el denominador; no se introduce todavía búsqueda semántica."
       },
       "cell": "s01-quality"
@@ -843,7 +843,7 @@
       ],
       "script": {
         "title": "Descompón HTTP",
-        "say": "Una API es un contrato de comunicación. El cliente envía una petición con parámetros y el servidor devuelve estado y cuerpo. HTTP 200 significa éxito del transporte según el servidor, pero no prueba que el esquema, cobertura ni contenido sean correctos. Un 429 puede indicar límite de peticiones; un 403 obliga a revisar autorización. El laboratorio separa la clasificación de estados de una consulta viva.",
+        "say": "Una API es un contrato de comunicación. El cliente envía una petición con parámetros y el servidor devuelve estado y cuerpo. HTTP 200 significa éxito del transporte según el servidor, pero no prueba que el esquema, cobertura ni contenido sean correctos. Un 429 puede indicar límite de peticiones; un 403 obliga a revisar autorización. El laboratorio separa la clasificación de estados de una consulta viva. Una solicitud HTTP puede tener método, URL, parámetros y encabezados. En una consulta de lectura usamos GET, y esperamos un cuerpo que se pueda interpretar. Debemos distinguir una respuesta válida del transporte de una respuesta válida para nuestra aplicación: un JSON vacío o con campos incorrectos necesita tratamiento propio.",
         "do": "Ejecuta la clasificación en A4. Explica por qué la consulta contractual opcional no se mezcla con el snapshot de procesos."
       },
       "cell": "s01-http"
@@ -907,7 +907,7 @@
       ],
       "script": {
         "title": "Construye páginas",
-        "say": "Limit es el máximo de filas de una página y offset indica cuántas posiciones omitimos. Para doce filas y límite cinco, los offsets son cero, cinco y diez; la última página tiene dos filas. Para doscientas y límite treinta y siete necesitamos seis páginas, con quince al final. Una regla correcta debe contemplar el resto.",
+        "say": "Limit es el máximo de filas de una página y offset indica cuántas posiciones omitimos. Para doce filas y límite cinco, los offsets son cero, cinco y diez; la última página tiene dos filas. Para doscientas y límite treinta y siete necesitamos seis páginas, con quince al final. Una regla correcta debe contemplar el resto. Para reconstruir el universo podemos usar una lista de offsets calculados y comprobar el número esperado de páginas. Si una página viene corta, no asumimos automáticamente que terminó la fuente: contrastamos contra el contrato y el universo conocido. La última página es la única que esperamos corta en este caso.",
         "do": "Cambia el control a 37 y 74. Ejecuta A5 y explica la división con techo; no confundas offset con identificador."
       },
       "cell": "s01-pages"
@@ -971,7 +971,7 @@
       ],
       "script": {
         "title": "Comprueba cobertura",
-        "say": "Si usamos límite cincuenta y desplazamiento cuarenta, cuatro solicitudes recuperan doscientas filas pero solo ciento setenta identidades. Hay treinta repeticiones y treinta ausentes. Por tanto, el total de filas no certifica cobertura. Debemos comparar conjuntos esperados y recibidos, y también multiplicidades.",
+        "say": "Si usamos límite cincuenta y desplazamiento cuarenta, cuatro solicitudes recuperan doscientas filas pero solo ciento setenta identidades. Hay treinta repeticiones y treinta ausentes. Por tanto, el total de filas no certifica cobertura. Debemos comparar conjuntos esperados y recibidos, y también multiplicidades. Hay tres cantidades distintas: filas recibidas, identidades distintas y universo esperado. Las repeticiones cuentan ocurrencias adicionales de IDs; los faltantes son elementos del conjunto esperado que no aparecen. Si además llegan IDs inesperados, debemos registrarlos por separado y no compensarlos con los faltantes.",
         "do": "Pide calcular faltantes antes de mostrar resultados. Cambia desplazamiento a cincuenta y comprueba que recupera las 200 identidades."
       },
       "cell": "s01-pages"
@@ -1040,7 +1040,7 @@
       ],
       "script": {
         "title": "Explica mutabilidad",
-        "say": "Una fuente puede cambiar mientras consultamos. Si se inserta P00 al principio entre páginas, las posiciones se desplazan: P04 puede repetirse y P08 quedar ausente. Ordenar por una clave estable ayuda, pero no congela el universo si cambia la fuente. Hoy trabajamos con una versión congelada para comprobar exactamente qué se recuperó.",
+        "say": "Una fuente puede cambiar mientras consultamos. Si se inserta P00 al principio entre páginas, las posiciones se desplazan: P04 puede repetirse y P08 quedar ausente. Ordenar por una clave estable ayuda, pero no congela el universo si cambia la fuente. Hoy trabajamos con una versión congelada para comprobar exactamente qué se recuperó. El identificador no es una posición. Un offset depende de cómo se ordena la respuesta en un instante determinado. Si el servicio admite cursores o una referencia temporal, habrá otras alternativas de adquisición; nuestro ejemplo no afirma que todos los portales ofrezcan esas garantías.",
         "do": "Activa y desactiva inserción; pregunta qué diferencia hay entre orden y snapshot."
       },
       "cell": "s01-pages"
@@ -1105,7 +1105,7 @@
       ],
       "script": {
         "title": "Recupera sin ocultar errores",
-        "say": "Un error transitorio no debería avanzar el offset. Reintentamos la misma página dentro de un presupuesto y validamos contenido antes de confirmar. Si agotamos intentos, declaramos incompleto; no publicamos un manifiesto de éxito. El simulador diferencia transporte, esquema, contenido y cobertura. La demostración HTTP local del apéndice es opcional.",
+        "say": "Un error transitorio no debería avanzar el offset. Reintentamos la misma página dentro de un presupuesto y validamos contenido antes de confirmar. Si agotamos intentos, declaramos incompleto; no publicamos un manifiesto de éxito. El simulador diferencia transporte, esquema, contenido y cobertura. La demostración HTTP local del apéndice es opcional. Un reintento debe ser limitado para evitar ciclos indefinidos. El servidor puede pedir esperar y debemos respetar su política. No se debe repetir sin razón una respuesta de acceso denegado. Una página que pasó la validación puede registrarse de manera auditable antes de continuar.",
         "do": "Compara escenario transitorio con dos y tres intentos. Pide señalar cuándo se conserva el producto lógico y cuándo queda bloqueado."
       },
       "cell": "s01-http-real (opcional)"
@@ -1169,7 +1169,7 @@
       ],
       "script": {
         "title": "Reduce por bloques",
-        "say": "Leer por bloques es mantener una porción activa y un estado acumulado. Para contar por entidad, el estado es un mapa de clave a cantidad. Al llegar un bloque, sumamos sus conteos a los anteriores. El tamaño del bloque cambia iteraciones y recursos, no el resultado si universo y operación permanecen iguales. No es lo mismo un bloque que un trabajador de cómputo.",
+        "say": "Leer por bloques es mantener una porción activa y un estado acumulado. Para contar por entidad, el estado es un mapa de clave a cantidad. Al llegar un bloque, sumamos sus conteos a los anteriores. El tamaño del bloque cambia iteraciones y recursos, no el resultado si universo y operación permanecen iguales. No es lo mismo un bloque que un trabajador de cómputo. Un acumulador pequeño puede permitir procesar más filas que una lectura completa. Pero si tenemos millones de claves distintas, el diccionario también puede crecer. El tamaño de bloque no limita por sí solo toda la memoria. La operación y su estado determinan si la estrategia resulta útil.",
         "do": "Ejecuta contar_bloques en A6; cambia tamaño y compara con conteo directo. Explica que la lista SECOP ya está en memoria; el CSV posterior sí se lee incrementalmente."
       },
       "cell": "s01-chunks"
@@ -1232,7 +1232,7 @@
       ],
       "script": {
         "title": "Contrasta medias",
-        "say": "Si dos observaciones valen diez y ocho valen cien, la media de las dos medias es cincuenta y cinco, pero la media global es ochenta y dos. El error consiste en dar igual peso a grupos de distinto tamaño. La solución conserva suma y cantidad de observaciones, no solo el promedio parcial.",
+        "say": "Si dos observaciones valen diez y ocho valen cien, la media de las dos medias es cincuenta y cinco, pero la media global es ochenta y dos. El error consiste en dar igual peso a grupos de distinto tamaño. La solución conserva suma y cantidad de observaciones, no solo el promedio parcial. Veamos qué sucede si ambos lotes tienen igual número de observaciones válidas. Ahora dar el mismo peso a cada media es correcto. En lotes desiguales no lo es. Una prueba con grupos del mismo tamaño puede ocultar un error y por eso necesitamos contraejemplos.",
         "do": "Pide resolver antes de mover el control. Cambia tamaños hasta encontrar el caso en que coincidan."
       },
       "cell": "Presentación; profundización en el bloque indicado"
@@ -1297,7 +1297,7 @@
       ],
       "script": {
         "title": "Combina estados",
-        "say": "Para medias con faltantes usamos suma y número de valores válidos. Aporta dos valores de diez y cuatro de cien; la suma global es cuatrocientos veinte y el número válido seis. El resultado es setenta. Un grupo vacío no tiene media definida. La mediana exacta no se puede obtener promediando medianas parciales.",
+        "say": "Para medias con faltantes usamos suma y número de valores válidos. Aporta dos valores de diez y cuatro de cien; la suma global es cuatrocientos veinte y el número válido seis. El resultado es setenta. Un grupo vacío no tiene media definida. La mediana exacta no se puede obtener promediando medianas parciales. El máximo se combina con máximo de máximos; el conteo con suma de conteos; la media necesita suma y cantidad. Una mediana exacta depende del orden global de las observaciones. Antes de repartir un algoritmo debemos identificar qué información parcial conserva su significado.",
         "do": "Ajusta nulos hasta dejar A vacío; explica por qué suma, conteo y máximo son combinables bajo sus contratos."
       },
       "cell": "Presentación; profundización en el bloque indicado"
@@ -1361,7 +1361,7 @@
       ],
       "script": {
         "title": "Mide escala",
-        "say": "Ahora contrastamos dos lecturas del mismo CSV sintético: completa y fragmentada. El archivo se genera antes del reloj, y las rutas cuentan y suman. Ejecutamos diez mil y cien mil filas; si hay presupuesto, un millón como ampliación. El tiempo incluye lectura e instrumentación. Los bytes lógicos de un bloque no son el pico de RAM del proceso. La igualdad de sumas es condición previa a comparar rendimiento.",
+        "say": "Ahora contrastamos dos lecturas del mismo CSV sintético: completa y fragmentada. El archivo se genera antes del reloj, y las rutas cuentan y suman. Ejecutamos diez mil y cien mil filas; si hay presupuesto, un millón como ampliación. El tiempo incluye lectura e instrumentación. Los bytes lógicos de un bloque no son el pico de RAM del proceso. La igualdad de sumas es condición previa a comparar rendimiento. En una prueba de escala cambiamos la cantidad de filas y mantenemos fija la estrategia. En una prueba de fragmentación mantenemos fija la cantidad y cambiamos el bloque. Si cambiamos todo simultáneamente no sabemos qué variable explica el costo observado. Registremos cada configuración.",
         "do": "Ejecuta A6 y A6.2; pide registrar tiempo y tamaño, no proclamar ganador universal. Si cambia el entorno, conserva la medición obtenida."
       },
       "cell": "s01-bench → s01-escala-codigo"
@@ -1426,7 +1426,7 @@
       ],
       "script": {
         "title": "Construye el paquete",
-        "say": "El snapshot es nuestra referencia, RAW conserva observaciones adquiridas, conteos es un derivado y el manifiesto declara esquema, grano, versión, huellas y parámetros. Generar archivos no basta: otro componente debe releer y comparar. El paquete de datos es diferente del estado de exploración de la presentación. Ambos deben coincidir en el universo y los conteos.",
+        "say": "El snapshot es nuestra referencia, RAW conserva observaciones adquiridas, conteos es un derivado y el manifiesto declara esquema, grano, versión, huellas y parámetros. Generar archivos no basta: otro componente debe releer y comparar. El paquete de datos es diferente del estado de exploración de la presentación. Ambos deben coincidir en el universo y los conteos. El manifiesto permite a otra persona interpretar un archivo sin depender de la memoria del autor. La huella de un archivo se compara con una referencia y el conteo se recalcula independientemente. En un flujo profesional, un producto que falla un control obligatorio no se publica como completo.",
         "do": "Ejecuta A7 y abre los cuatro archivos. Pregunta qué ocurriría si se altera un conteo sin tocar RAW. No confundir huella de coherencia del navegador con SHA-256."
       },
       "cell": "s01-export → s01-guide-a7-code"
@@ -1490,7 +1490,7 @@
       ],
       "script": {
         "title": "Audita",
-        "say": "Un hash detecta cambios de bytes; no prueba autoría ni veracidad. Si invertimos filas, cambia la serialización aunque las claves y su contenido puedan conservarse. Si modificamos un campo, puede permanecer el mismo ID pero cambia el contenido. Por eso combinamos huellas, identidad, esquema y recálculo del derivado. El verificador debe rechazar paquetes incompletos.",
+        "say": "Un hash detecta cambios de bytes; no prueba autoría ni veracidad. Si invertimos filas, cambia la serialización aunque las claves y su contenido puedan conservarse. Si modificamos un campo, puede permanecer el mismo ID pero cambia el contenido. Por eso combinamos huellas, identidad, esquema y recálculo del derivado. El verificador debe rechazar paquetes incompletos. El hash es una huella de bytes, no una firma digital. Dos serializaciones distintas del mismo significado pueden producir hashes distintos. La identidad y el recálculo de propiedades lógicas complementan la huella. Almacenar la referencia confiable fuera del producto ayuda a detectar sustituciones coherentes.",
         "do": "Ejecuta la prueba negativa breve en una copia. Señala que reescribir el hash interno no reemplaza una referencia externa de confianza."
       },
       "cell": "s01-verificacion-negativa"
@@ -1556,7 +1556,7 @@
       ],
       "script": {
         "title": "Reto de construcción",
-        "say": "Elijan N, límite y bloque. Escriban cuatro predicciones antes de ejecutar. Completen el offset y el acumulador en A8.2; no modifiquen los validadores. Primero prueben con pocos datos. Activen el reto y comparen los cuatro casos de A8.3: base, solo límite, solo bloque y solo universo. Los primeros tres conservan RAW y conteos; el cuarto cambia la selección. Si falla, identifiquen la primera propiedad incumplida. Escriban la bitácora y exporten A8.4. No basta un ZIP técnicamente correcto: deben explicar el mecanismo.",
+        "say": "Elijan N, límite y bloque. Escriban cuatro predicciones antes de ejecutar. Completen el offset y el acumulador en A8.2; no modifiquen los validadores. Primero prueben con pocos datos. Activen el reto y comparen los cuatro casos de A8.3: base, solo límite, solo bloque y solo universo. Los primeros tres conservan RAW y conteos; el cuarto cambia la selección. Si falla, identifiquen la primera propiedad incumplida. Escriban la bitácora y exporten A8.4. No basta un ZIP técnicamente correcto: deben explicar el mecanismo. Para el primer intento utilicen una lista de cinco observaciones que puedan revisar a mano. Con límite dos deben obtener tres páginas, y con bloque tres deben obtener dos bloques. Después lleven el mismo razonamiento al universo elegido. Si la reducción pierde una clave, revisen cómo inicializan y actualizan el diccionario. Si el offset es incorrecto, impriman las primeras dos ventanas. Al corregir, mantengan las pruebas originales. Registren el intento fallido y expliquen qué aprendieron. El objetivo no es copiar una solución sino construir una función que siga funcionando con parámetros diferentes.",
         "do": "Durante los 25 minutos, reserva 4 para hipótesis, 8 para completar código, 8 para pruebas y 5 para evidencia. Ofrece una pista cada vez. No entregar solución completa antes de observar el intento."
       },
       "cell": "s01-guide-a8-code → s01-construccion-codigo → s01-aislamiento-codigo → s01-evidencia-codigo"
@@ -1641,7 +1641,7 @@
       ],
       "script": {
         "title": "Defiende evidencia",
-        "say": "Una afirmación válida identifica universo, variable y procedimiento. Puedo decir que una entidad tiene más procesos en este prefijo, pero no que contrató más dinero ni que cometió irregularidades. Si dos estrategias conservan RAW, puedo afirmar equivalencia de esa ejecución, no superioridad universal. Toda defensa debe incluir una limitación observada.",
+        "say": "Una afirmación válida identifica universo, variable y procedimiento. Puedo decir que una entidad tiene más procesos en este prefijo, pero no que contrató más dinero ni que cometió irregularidades. Si dos estrategias conservan RAW, puedo afirmar equivalencia de esa ejecución, no superioridad universal. Toda defensa debe incluir una limitación observada. Una defensa técnica debe ser breve pero reproducible: identificamos una hipótesis, el control que aplicamos y el resultado. Si otra persona cambia el entorno, el tiempo puede ser distinto; la suma y el conjunto de IDs deben conservarse si los datos y las reglas son iguales.",
         "do": "Selecciona dos estudiantes para explicar un control y una limitación. Distingue error conceptual de problema técnico."
       },
       "cell": "s01-ticket-salida"
@@ -1710,7 +1710,7 @@
       ],
       "script": {
         "title": "Cierra y enlaza",
-        "say": "Hoy construimos una fuente auditable, no un clúster. Para diseñar una arquitectura en la próxima sesión necesitaremos identidad, volumen, tasa, esquema, restricciones y requisitos de respuesta. Algunos son conocidos y otros deben medirse. Respondan el ticket de salida y adjunten el producto con sus hipótesis y resultados.",
+        "say": "Hoy construimos una fuente auditable, no un clúster. Para diseñar una arquitectura en la próxima sesión necesitaremos identidad, volumen, tasa, esquema, restricciones y requisitos de respuesta. Algunos son conocidos y otros deben medirse. Respondan el ticket de salida y adjunten el producto con sus hipótesis y resultados. El resultado de hoy nos proporciona un contrato de entrada para la siguiente etapa. La arquitectura no se decide por moda: depende del volumen observado, actualización esperada, operaciones, consistencia y restricciones. Aquello que no conocemos queda explícito como requisito por investigar.",
         "do": "Recoge cobertura, invariancia y límite. Registra pendientes; no certifiques aprendizaje por un botón correcto."
       },
       "cell": "s01-ticket-salida"
