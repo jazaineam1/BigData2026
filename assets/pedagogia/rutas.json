@@ -66,6 +66,11 @@
         "labKind": "dataframe",
         "labDescription": "API SECOP real: filas descargadas y columnas. No mezclar automáticamente grano contrato y proceso.",
         "input": null
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Después de la consulta SECOP real del cuaderno.\n# Repite una consulta con el mismo filtro y un límite acotado.\npayload = {\"filas\": len(df_secop), \"columnas\": list(df_secop.columns),\n           \"fuente\": url_secop, \"grano\": \"registro contractual\"}\nassert payload[\"filas\"] > 0\nprint(payload)",
+        "expected": "Filas reales y esquema. El grano contractual no se une automáticamente con procesos."
       }
     },
     {
@@ -132,6 +137,11 @@
         "labKind": "manual",
         "labDescription": "Repositorio/PR y decisión arquitectónica. La latencia del explorador es hipotética.",
         "input": "01"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Cambia una de las tres restricciones, sin instalar nada.\nLATENCIA_MAX_S = 120\nopciones = [(\"local\",300,1),(\"lotes\",60,2),(\"eventos\",2,4)]\nviables = [x for x in opciones if x[1] <= LATENCIA_MAX_S]\nassert viables\nelegida = min(viables, key=lambda x:x[2])\npayload = {\"limite_s\": LATENCIA_MAX_S, \"elegida\": elegida,\n           \"descartadas\": [x[0] for x in opciones if x != elegida],\n           \"naturaleza\": \"supuestos didacticos\"}\nprint(payload)",
+        "expected": "Selección distinta al modificar el requisito; los tiempos son supuestos, no SLA."
       }
     },
     {
@@ -198,6 +208,11 @@
         "labKind": "dataframe",
         "labDescription": "MongoDB: exportar resultado de consulta; explain es una evidencia distinta.",
         "input": "02"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Tras cargar noticias en MongoDB real: misma consulta, dos planes.\n# No borrar datos ni crear un servicio nuevo.\nif \"mongomock\" in str(type(coleccion)).lower() or \"respaldo\" in str(motor).lower():\n    raise RuntimeError(\"Explain real pendiente: estás en el respaldo\")\nmuestra = coleccion.find_one({\"seccion\":{\"$type\":\"string\"}}, {\"seccion\":1})\nassert muestra and muestra.get(\"seccion\")\nfiltro = {\"seccion\":muestra[\"seccion\"]}\nidx = coleccion.create_index([(\"seccion\",1)], name=\"s03_seccion_lab\")\ndef plan(hint):\n    return db.command(\"explain\", {\"find\":coleccion.name,\"filter\":filtro,\"hint\":hint},\n                      verbosity=\"executionStats\")[\"executionStats\"]\na = plan({\"$natural\":1})\nb = plan(idx)\nassert a[\"nReturned\"] == b[\"nReturned\"]\npayload = {\"motor\":str(motor), \"campo\":\"seccion\",\"filas\":a[\"nReturned\"],\n           \"sin_indice_docs\":a[\"totalDocsExamined\"],\n           \"con_indice_docs\":b[\"totalDocsExamined\"],\n           \"sin_indice_keys\":a[\"totalKeysExamined\"],\n           \"con_indice_keys\":b[\"totalKeysExamined\"]}\nprint(payload)",
+        "expected": "Igual número de resultados; comparar documentos/claves examinados. Los hints son controlados, no el plan que el optimizador escogería espontáneamente."
       }
     },
     {
@@ -264,6 +279,11 @@
         "labKind": "dataframe",
         "labDescription": "Atlas: exportar la vista o bandeja realmente producida.",
         "input": "03"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Después de cargar y construir la bandeja.\n# La comprobación remota se realiza solo si el cuaderno declaró Atlas real.\nes_atlas = \"atlas\" in str(motor).lower() and \"real\" in str(motor).lower()\nif es_atlas:\n    client.admin.command(\"ping\")\npayload = {\"motor\":str(motor), \"ping_atlas\":es_atlas,\n           \"candidatos\":len(bandeja), \"columnas\":list(bandeja.columns)}\nassert payload[\"candidatos\"] > 0\nprint(payload)",
+        "expected": "Motor declarado y conteo de bandeja. El ping no demuestra alta disponibilidad ni recuperación física."
       }
     },
     {
@@ -330,6 +350,11 @@
         "labKind": "dataframe",
         "labDescription": "Cassandra: guardar resultado de CQL y comparación independiente; candidatos es referencia pandas, no prueba CQL.",
         "input": "04"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Después del contrato de resultado pandas/CQL.\nassert ids_cql == ids_esperados_pd\npayload = {\"consulta\":\"prioridades por corte y departamento\",\n           \"departamento\":str(departamento_elegido),\n           \"cql_ids\":[str(x) for x in ids_cql],\n           \"referencia_ids\":[str(x) for x in ids_esperados_pd],\n           \"coinciden\":bool(coinciden_cql_pd)}\nprint(payload)\n# Cambia departamento_elegido en el bloque original y repite.",
+        "expected": "Dos ejecuciones con claves distintas, cada una contrastada con pandas; no declarar distribución física."
       }
     },
     {
@@ -396,6 +421,11 @@
         "labKind": "dataframe",
         "labDescription": "Neo4j: resultado relacional del cuaderno; validar NIT y procedencia, sin unir por nombre si no corresponde.",
         "input": "05"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Tras consultar el vecindario en Aura y la referencia pandas.\nnit = str(proveedor_elegido[\"nit_proveedor\"])\nesperado = set(hist.loc[hist[\"nit_proveedor\"].eq(nit),\"id_proceso\"].astype(str))\nobtenido = set(vecindario_df[\"proceso\"].astype(str))\nassert esperado == obtenido\npayload = {\"motor\":\"Neo4j real\" if modo_neo4j else \"pandas respaldo\",\n           \"proveedor_nit\":nit, \"procesos\":len(obtenido),\n           \"ids\":sorted(obtenido)[:20], \"coinciden\":esperado==obtenido}\nprint(payload)\n# Cambia la posición de proveedor_elegido en el bloque original.",
+        "expected": "Mismos IDs que la referencia independiente; respaldo pandas no certifica Cypher."
       }
     },
     {
@@ -462,6 +492,11 @@
         "labKind": "dataframe",
         "labDescription": "Elasticsearch: exportar tabla_B con ranking real; el navegador calcula BM25 local.",
         "input": "06"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Misma consulta, mismo índice; cambia el peso de nombre.\ndef ranking(peso):\n    q = {\"multi_match\":{\"query\":consulta,\"fields\":[f\"nombre_proceso^{peso}\",\"descripcion\"]}}\n    res = client.search(index=INDEX_NAME, size=5, query=q)\n    return [{\"id\":str(h[\"_id\"]),\"score\":float(h[\"_score\"])} for h in res[\"hits\"][\"hits\"]]\na,b = ranking(1),ranking(3)\npayload = {\"consulta\":str(consulta),\"peso_1\":a,\"peso_3\":b,\n           \"solapamiento\":len({x[\"id\"] for x in a}&{x[\"id\"] for x in b})}\nprint(payload)",
+        "expected": "Dos rankings del motor real; solapamiento no mide pertinencia sin juicios humanos."
       }
     },
     {
@@ -528,6 +563,11 @@
         "labKind": "json",
         "labDescription": "TC1: conservar manifiesto oficial, sin alterar sus controles.",
         "input": "07"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# No modifica la entrega oficial. Solo registra controles disponibles.\nassert isinstance(MANIFEST, dict)\npayload = {\"tipo\":\"TC1\",\"campos_manifiesto\":sorted(str(k) for k in MANIFEST),\n           \"controles\":len(MANIFEST)}\nprint(payload)",
+        "expected": "Manifiesto producido en el taller. La rúbrica original exige evidencia completa, no este resumen."
       }
     },
     {
@@ -594,6 +634,11 @@
         "labKind": "json",
         "labDescription": "Atlas/E5: s09_atlas_evidencia.json, modo real o local explícito.",
         "input": "08"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Después de ejecutar dos consultas y guardar s09_atlas_evidencia.json.\npayload = {k:evidencia.get(k) for k in (\n \"verificacion_fin_a_fin\",\"resultados_ann_atlas\",\"resultados_enn_atlas\",\n \"resultados_numpy_local\",\"solapamiento_ann_enn_atlas\",\"solapamiento_ann_numpy\",\n \"seleccion_propia\",\"practica_individual\")}\nprint({k:len(v) if isinstance(v,list) else v for k,v in payload.items()})",
+        "expected": "Resultados E5 y declaración explícita de motor; no confundir solapamiento con pertinencia."
       }
     },
     {
@@ -660,6 +705,11 @@
         "labKind": "json",
         "labDescription": "S10: manifest_s10.json con transformaciones reales de imagen y audio.",
         "input": "09"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Transformación real sobre una imagen existente. No cambiar RAW.\nfrom PIL import Image\nfrom time import perf_counter\nwith Image.open(imagen_original) as im:\n    w,h=im.size\n    t=perf_counter(); a=im.convert(\"RGB\"); t1=perf_counter()-t\n    t=perf_counter(); b=a.copy(); b.thumbnail((max(1,w//2),max(1,h//2))); t2=perf_counter()-t\n    payload={\"fuente\":imagen_original.name,\"original\":[w,h],\n             \"reducida\":list(b.size),\"bytes_rgb\":w*h*3,\n             \"bytes_rgb_reducida\":b.width*b.height*3,\n             \"conversion_s\":t1,\"reduccion_s\":t2}\nassert payload[\"bytes_rgb_reducida\"]<=payload[\"bytes_rgb\"]\nprint(payload)",
+        "expected": "Dimensiones, memoria mínima y tiempos propios de una transformación real; no son throughput OCR/ASR."
       }
     },
     {
@@ -726,6 +776,11 @@
         "labKind": "json",
         "labDescription": "S11: registros_mm o catálogo real; si no hay ASR/OCR ejecutado se mantiene pendiente.",
         "input": "10"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Solo las salidas ya ejecutadas; se conserva origen_texto.\npayload = [{\"modalidad\":r.get(\"modalidad\"),\"fuente\":str(r.get(\"fuente\")),\n            \"pagina\":r.get(\"pagina\"),\"origen_texto\":r.get(\"origen_texto\"),\n            \"sha256\":r.get(\"sha256\"),\"texto\":str(r.get(\"texto\",\"\"))[:1200]}\n           for r in registros_mm[:12]]\nassert payload\nprint([(r[\"modalidad\"],r[\"origen_texto\"],len(r[\"texto\"])) for r in payload])",
+        "expected": "La vista multimedia muestra texto adjunto con procedencia; una referencia humana no cuenta como Whisper."
       }
     },
     {
@@ -792,6 +847,11 @@
         "labKind": "json",
         "labDescription": "TC2: informe del validador oficial; sin modificar rúbrica.",
         "input": "11"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Resumen formativo, no reemplaza ZIP ni informe del corrector.\nassert isinstance(INFORME, dict)\npayload={\"tipo\":\"TC2\",\"campos_informe\":sorted(str(k) for k in INFORME),\n         \"catalogo_filas\":len(LEIDO_CATALOGO),\n         \"idempotencia\":IDEMPOTENCIA}\nprint(payload)",
+        "expected": "Catálogo real y control repetible; evaluación oficial intacta."
       }
     },
     {
@@ -858,6 +918,11 @@
         "labKind": "json",
         "labDescription": "S13: decisión_s13.json o evidencia de tiempos, workers y acuerdo de K-means.",
         "input": "12"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Tras ejecutar el reto de cierre de S13.\nassert evidencia[\"modos_medidos\"][\"texto\"][\"resultados_identicos\"] is True\nassert evidencia[\"modos_medidos\"][\"espera\"][\"resultados_identicos\"] is True\npayload={\"arquitectura\":evidencia[\"arquitectura\"],\n         \"limite\":evidencia[\"limite\"],\"fuente\":evidencia[\"fuente\"],\n         \"modos_medidos\":evidencia[\"modos_medidos\"]}\nprint(payload)",
+        "expected": "Resultados del propio Codespace, equivalencia y límites. Cambia workers solo cuando lo permita la cuota."
       }
     },
     {
@@ -924,6 +989,11 @@
         "labKind": "scalar",
         "labDescription": "S14: F1 macro del ejemplo sintético MLlib, no predicciones SECOP.",
         "input": "13"
+      },
+      "authentic": {
+        "kind": "scalar",
+        "code": "# El ejemplo MLlib del bloque 16 es sintético.\npayload = float(f1_macro_demo)\nassert 0 <= payload <= 1\nprint(\"F1 macro demo:\",payload)\n# No presentar esta métrica como rendimiento de clasificación SECOP.",
+        "expected": "F1 real del ejemplo MLlib; el experimento de joins permanece en el bloque 8."
       }
     },
     {
@@ -991,6 +1061,11 @@
         "labDescription": "S14A: expediente de telemetría sintética; el cálculo no demuestra ejecución.",
         "input": "14",
         "optional": true
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Después del entrenamiento A5–A7, sin aumentar automáticamente la escala.\npayload = {\"expediente\":expediente, \"filas_train\":int(n_train),\n           \"bytes_minimos\":int(bytes_minimos),\n           \"mejor_modelo\":str(mejor), \"resultado_test\":resultado}\nprint(payload)",
+        "expected": "Si la ejecución realmente completó, métricas y escala; no forzar OOM ni afirmar prueba remota por un cálculo."
       }
     },
     {
@@ -1057,6 +1132,11 @@
         "labKind": "json",
         "labDescription": "S15: manifiesto_s15.json de SQLite; streaming Spark opcional y separado.",
         "input": "14"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Ejecutar tras el bloque 4 de S15, no usa nube.\npayload = {\"estado\":estado(), \"rollback_verificado\":bool(antes==despues),\n           \"repeticion\":bool(procesar(1,lotes[1])==\"YA CONFIRMADO\")}\nassert payload[\"rollback_verificado\"] and payload[\"repeticion\"]\nprint(payload)",
+        "expected": "Rollback y repetición comprobados sobre SQLite real; no equivale a recuperación distribuida."
       }
     },
     {
@@ -1123,6 +1203,11 @@
         "labKind": "json",
         "labDescription": "Proyecto final: manifest_final.json; las predicciones locales y Spark deben distinguirse.",
         "input": "15"
+      },
+      "authentic": {
+        "kind": "json",
+        "code": "# Después del producto E7: resultados del modelo local, no Spark.\npayload = {\"f1_test\":float(manifiesto[\"f1_test\"]),\n           \"modelo\":manifiesto[\"modelo\"],\"estados\":manifiesto[\"estados\"],\n           \"ejemplo_acierto_id\":manifiesto[\"ejemplo_acierto_id\"],\n           \"ejemplo_error_id\":manifiesto[\"ejemplo_error_id\"]}\nassert 0 <= payload[\"f1_test\"] <= 1\nprint(payload)",
+        "expected": "Métrica del producto local y estado de archivos, diferenciados de las métricas Spark. No acredita por sí solo ejecución remota."
       }
     }
   ]
