@@ -76,17 +76,15 @@ if args.browser:
                     if page.evaluate("document.documentElement.scrollWidth > innerWidth+2"):
                         failures.append({"viewport":[width,height],"slide":i+1,"horizontal_overflow":True})
                 if s[10] if len(s)>10 else False:
-                    if width>760:
-                        page.locator("#readingToggle").click()
-                    select=page.locator(".checkpanel select")
+                    page.locator("#checkToggle").click()
+                    select=page.locator("#quickCheck .checkpanel select")
                     assert select.input_value()==""
                     verify=page.locator(".checkpanel button")
                     assert verify.is_disabled()
                     select.select_option(str(s[10]["correct"]))
                     verify.click()
                     assert "Comprensión comprobada" in page.locator(".checkpanel .feedback").inner_text()
-                    if width>760:
-                        page.locator("#readingToggle").click()
+                    page.locator("#checkToggle").click()
             if errors: failures.extend({"viewport":[width,height],"error":e} for e in errors)
             page.close()
         browser.close()

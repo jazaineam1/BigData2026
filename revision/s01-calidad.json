@@ -1,7 +1,7 @@
 {
   "session": "S01",
   "state": "NO_APROBADA",
-  "score": 3.35,
+  "score": 3.68,
   "threshold": 4.5,
   "essential_min": 4,
   "mandatory": {
@@ -16,11 +16,11 @@
   "word_count": {
     "reading_gross": 8854,
     "chapters_gross": 17455,
-    "notebook_markdown_gross": 13002,
+    "notebook_markdown_gross": 13279,
     "formative_gross": 2367,
-    "total_gross": 41678,
+    "total_gross": 41955,
     "required_eligible": 40000,
-    "lexical_exact_dedup": 41470,
+    "lexical_exact_dedup": 41717,
     "near_matches": 0,
     "eligible_verified": null,
     "editorial_review_pending": true
@@ -35,8 +35,8 @@
     {
       "dimension": "Actividad y autonomía",
       "weight": 20,
-      "score": 3,
-      "evidence": "25 comprobaciones, 75 opciones verificadas, retos paramétricos, hipótesis obligatoria y verificación del producto; 3 pares de transferencia de referencia probados. Falta observar autonomía de un estudiante."
+      "score": 4,
+      "evidence": "Ruta núcleo/ampliación, 16 minutos protegidos de autonomía, puente con pista gradual, siete comprobaciones prioritarias, patrón de respuestas corregido. Aún no se observó a estudiantes."
     },
     {
       "dimension": "Práctica auténtica y reproducibilidad",
@@ -47,8 +47,8 @@
     {
       "dimension": "Alineación y transferencia",
       "weight": 15,
-      "score": 4,
-      "evidence": "25 anclas A0–A8 y 25 capítulos comprobados; producto verificable, hipótesis y defensa articulados. Falta ensayo integral."
+      "score": 4.5,
+      "evidence": "Matriz de cinco objetivos observables, actividades y evidencias; secuencia API→paginación→cobertura→mutabilidad→recuperación, producto y defensa."
     },
     {
       "dimension": "Interpretación de resultados",
@@ -65,8 +65,8 @@
     {
       "dimension": "Viabilidad temporal",
       "weight": 5,
-      "score": 1,
-      "evidence": "Agenda suma 150 min. Lecturas extensas y pruebas de profundización no se asignan como lectura oral de clase. Falta ensayo cronometrado y medición de autonomía."
+      "score": 2,
+      "evidence": "Itinerario priorizado de 150 minutos, pausa, autonomía y cierre protegidos, ampliaciones explícitas; no cronometrado."
     }
   ],
   "next_session": "S02",
@@ -90,5 +90,15 @@
     "python_transfer_pairs": 3,
     "full_notebook": false,
     "real_browser": false
+  },
+  "pedagogical_design": {
+    "live_checks": 7,
+    "core_code_cells": 13,
+    "optional_code_cells": 11,
+    "planned_autonomy_minutes": 16,
+    "planned_closure_minutes": 12,
+    "score_unrounded": 3.675,
+    "actual_student_results": false,
+    "report": "docs/evaluacion-pedagogica-s01.md"
   }
 }

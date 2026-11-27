@@ -1,6 +1,6 @@
 [
   [
-    4,
+    5,
     "01 · La misión",
     "Laura tiene que revisar contratación pública sin leer cada expediente",
     "El producto de hoy no es un tablero vacío: será una adquisición reproducible. Recibimos una fuente, comprobamos identidad, exploramos contenido, dividimos lotes y entregamos RAW. En la siguiente sesión diseñaremos la arquitectura que lo recibe.",
@@ -23,14 +23,14 @@
     {
       "question": "Laura tiene 200 procesos con entidad y objeto, sin valor contractual. ¿Qué resultado puede justificar con esa información?",
       "choices": [
-        "Ordenar entidades por cantidad de procesos observados.",
         "Estimar el gasto total de las entidades.",
+        "Ordenar entidades por cantidad de procesos observados.",
         "Identificar automáticamente qué entidad incurrió en fraude."
       ],
-      "correct": 0,
+      "correct": 1,
       "feedback": [
-        "Sí. El universo, grano y variable permiten un conteo descriptivo. Conserva el denominador y declara que se trata de la muestra.",
         "No. El corpus no tiene valores contractuales. Obtener esa variable exige otra fuente, otra identidad y otra validación.",
+        "Sí. El universo, grano y variable permiten un conteo descriptivo. Conserva el denominador y declara que se trata de la muestra.",
         "No. La frecuencia de registros no constituye evidencia de una conducta irregular; se requerirían criterios y datos adicionales."
       ],
       "transfer": "Plantea una pregunta descriptiva que sí puedas contestar con el corpus. Identifica una pregunta que necesite otra fuente."
@@ -47,10 +47,16 @@
           "En tu bitácora conserva cuatro piezas: descripción del usuario y su tarea, unidad de observación, evidencia esperada y una limitación. El éxito de la clase no será haber utilizado un servicio de nube, sino ser capaz de justificar una entrega. Una comprobación externa deberá poder reconstruir la selección a partir de la fuente y comprobar que sus agregados son correctos. Si un resultado numérico se contradice con el manifiesto, se detiene la entrega y se investiga. Es preferible un resultado parcial explícitamente identificado que un tablero completo en apariencia y sin fuente verificable."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Diagnóstico",
+      "facilitation": "Docente: plantea la decisión de Laura y recoge dos respuestas sin corregir inmediatamente. Estudiante: delimita pregunta y unidad. Evidencia: una afirmación permitida y otra que requiere datos adicionales.",
+      "scope": "Sin ejecutar el cuaderno todavía. Usa la primera pregunta como diagnóstico.",
+      "liveCheck": true
+    }
   ],
   [
-    5,
+    4,
     "02 · Escala y decisión",
     "Big Data no es un número mágico",
     "El problema comienza cuando volumen, tasa de llegada, estructuras o necesidades de respuesta exceden el método disponible. Una tabla pequeña puede exigir respuesta rápida; una grande puede procesarse por lotes. Escalar tiene costos de memoria, almacenamiento, red y coordinación.",
@@ -69,14 +75,14 @@
       "question": "La entrada es 120 registros/min y el servicio 80/min durante 5 min, inicialmente sin cola. ¿Qué ocurrió?",
       "choices": [
         "Se procesaron 600 y quedaron cero.",
-        "Se procesaron 400 y quedaron 200.",
-        "Se procesaron 200 y quedaron 400."
+        "Se procesaron 200 y quedaron 400.",
+        "Se procesaron 400 y quedaron 200."
       ],
-      "correct": 1,
+      "correct": 2,
       "feedback": [
         "Confundiste entrada con capacidad. Llegaron 600, pero el servicio no podía completar más de 400.",
-        "Correcto. La diferencia de 40 registros/min se acumula cinco minutos. Las unidades deben coincidir.",
-        "El servicio completa 80×5=400, no 200. La diferencia se interpreta como pendientes."
+        "El servicio completa 80×5=400, no 200. La diferencia se interpreta como pendientes.",
+        "Correcto. La diferencia de 40 registros/min se acumula cinco minutos. Las unidades deben coincidir."
       ],
       "transfer": "Cambia capacidad a 150/min: anticipa cola y procesados sin permitir cola negativa."
     },
@@ -92,10 +98,16 @@
           "Prueba de comprensión aplicada: construye tres intervalos con una llegada de 200, 20 y 100, y capacidad de 100 en cada uno. Con cola inicial cero, calcula cola y salidas en cada intervalo. Después reduce a la mitad la llegada del tercer intervalo y compara la cola final. Explica si el cambio altera volumen histórico, velocidad instantánea o ambos. Contrasta tus cálculos con el control de tasas constantes y señala por qué no basta cambiar el tiempo total. Una solución es Q=100,20,20 en el primer escenario: en el segundo minuto se procesan cien de los ciento veinte disponibles; en el tercero se procesan cien de los ciento veinte. Si el tercer intervalo recibe cincuenta, quedan cero y se procesan setenta. Esta comprobación anticipa el análisis de capacidad de los pipelines."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Modelo",
+      "facilitation": "Docente: fija llegada y capacidad, predice primero. Estudiante: calcula cola antes de mover el control. Evidencia: saldo y unidad.",
+      "scope": "La simulación de tasas variables A1.1 queda como ampliación; no leer el código completo en vivo.",
+      "liveCheck": false
+    }
   ],
   [
-    5,
+    4,
     "03 · Diagnóstico",
     "Las cinco V se pueden medir",
     "Volumen: bytes y filas. Velocidad: registros por segundo y latencia. Variedad: tipos y estructuras. Veracidad: duplicados, faltantes y procedencia. Valor: utilidad para una decisión. Las cinco V interactúan: más datos duplicados pueden añadir volumen sin valor.",
@@ -135,14 +147,14 @@
       "question": "Una plataforma recibe pocos PDF, pero muchos son escaneados con texto ilegible. ¿Cuál es el diagnóstico inicial más pertinente?",
       "choices": [
         "Volumen, porque PDF siempre es Big Data.",
-        "Velocidad, aunque no se conoce la tasa de llegada.",
-        "Variedad y veracidad; verificar estructura y calidad de extracción."
+        "Variedad y veracidad; verificar estructura y calidad de extracción.",
+        "Velocidad, aunque no se conoce la tasa de llegada."
       ],
-      "correct": 2,
+      "correct": 1,
       "feedback": [
         "Un formato no determina volumen. Es necesario medir cantidad, tamaño y recursos disponibles.",
-        "No hay evidencia de cuello de botella por ritmo. Primero identifica el síntoma observado.",
-        "Sí. La heterogeneidad de representación y la legibilidad afectan la transformación y calidad. Mide cuántos activos requieren OCR y su error."
+        "Sí. La heterogeneidad de representación y la legibilidad afectan la transformación y calidad. Mide cuántos activos requieren OCR y su error.",
+        "No hay evidencia de cuello de botella por ritmo. Primero identifica el síntoma observado."
       ],
       "transfer": "Elige una métrica para cada V de un caso diferente: eventos homogéneos que llegan más rápido de lo que se procesan."
     },
@@ -158,10 +170,16 @@
           "Haz una tabla de decisiones para tres escenarios: una consulta de un archivo de 20 GB que solo necesita suma; una recepción de cien eventos por segundo con capacidad de sesenta; y cien documentos escaneados sin texto seleccionable. Para cada uno, escribe la V dominante, otra V relevante, una métrica y el primer experimento. Una respuesta razonable para el primero es volumen, veracidad, memoria lógica de lectura y suma por bloques. Para el segundo, velocidad, valor temporal, cola por intervalo y medición de servicio. Para el tercero, variedad, veracidad, porcentaje de texto extraído y revisión de OCR sobre una muestra. La prioridad no es única si cambian las necesidades; justificar la decisión importa más que memorizar una clasificación."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Diagnóstico",
+      "facilitation": "Docente: pide justificar una V mediante una métrica, no recitar definiciones. Estudiante: discute un caso y propone primera medición.",
+      "scope": "Resuelve un caso del quiz visual; los otros son práctica de recuperación posterior.",
+      "liveCheck": false
+    }
   ],
   [
-    6,
+    5,
     "04 · Infraestructura",
     "Local, nube y distribución son decisiones diferentes",
     "Local indica dónde se ejecuta; nube indica acceso a servicios administrados o recursos remotos. Distribución divide cómputo entre unidades coordinadas. Escalamiento vertical aumenta recursos de una máquina, horizontal agrega unidades. La nube no garantiza paralelismo ni menor costo.",
@@ -203,10 +221,16 @@
           "Ejercicio de dimensionamiento. Un conjunto de dos millones de filas tiene ocho columnas float64 y requiere construir un resultado de cuatro columnas adicionales. Calcula mínimo de valores de entrada y salida si ambas representaciones coexisten, y compáralo con 512 MiB. La entrada requiere 128.000.000 bytes y la salida adicional 64.000.000, para 192.000.000 bytes de valores si se mantienen las ocho y se añaden cuatro sin otras copias. El resultado cabe como límite inferior, no prueba memoria suficiente. Si en lugar de ocho columnas hubiera 128, los valores de entrada ocuparían 2.048.000.000 bytes; considera leer las columnas que requiere la operación. Escribe qué medirías antes de proponer una VM mayor y por qué no basta contar filas."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Modelo",
+      "facilitation": "Docente: explica RAM, disco, CPU y red; calcula el mínimo de una matriz. Estudiante: elige una estrategia bajo presupuesto.",
+      "scope": "No discutir marcas de nube ni instalar herramientas. La profundización de Amdahl queda para consulta.",
+      "liveCheck": false
+    }
   ],
   [
-    5,
+    4,
     "05 · Estructuras",
     "Una fila no representa siempre la misma cosa",
     "Un CSV modela registros con columnas; JSON representa campos anidados y listas; XML usa etiquetas y jerarquías. El texto libre conserva significado pero requiere transformación para consultas. Un mismo proceso puede tener varios documentos, y una unión puede multiplicar filas.",
@@ -225,14 +249,14 @@
       "question": "Un proceso tiene una lista de dos activos. Si se expande a dos filas, ¿qué debe conservarse?",
       "choices": [
         "Solo el nombre del activo, porque el objeto padre ya se repite.",
-        "Identidad del proceso y una identidad del activo o una relación inequívoca.",
-        "Un único valor de texto con la lista, sin esquema."
+        "Un único valor de texto con la lista, sin esquema.",
+        "Identidad del proceso y una identidad del activo o una relación inequívoca."
       ],
-      "correct": 1,
+      "correct": 2,
       "feedback": [
         "Se pierde el vínculo con el expediente; los nombres tampoco garantizan identidad.",
-        "Correcto. La fila expandida cambia de grano. Identidades y claves permiten reconstruir el vínculo y controlar multiplicidad.",
-        "Puede servir como representación textual, pero no define por sí sola un contrato de identidad ni permite validar el vínculo."
+        "Puede servir como representación textual, pero no define por sí sola un contrato de identidad ni permite validar el vínculo.",
+        "Correcto. La fila expandida cambia de grano. Identidades y claves permiten reconstruir el vínculo y controlar multiplicidad."
       ],
       "transfer": "En A2 serializa la misma información como CSV y JSON; verifica qué tipo recupera el lector."
     },
@@ -248,7 +272,13 @@
           "Para un trabajo autónomo, construye tres registros ficticios: uno con descripción que incluye coma y comillas; otro con ID de ceros iniciales; otro con campo opcional ausente. Escribe CSV y JSON usando bibliotecas, no concatenación manual. Reabre ambos y describe qué necesita un esquema para recuperar la diferencia entre campo ausente y vacío, y por qué en CSV las columnas normalmente existen para todas las filas. Usa una copia, no modifiques el snapshot. Si agregas una columna a una versión de datos, define si es obligatoria, opcional o derivada. En la próxima extracción se podría recibir el nuevo campo; registrar versión de esquema permite elegir una política de compatibilidad sin romper silenciosamente análisis anteriores."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Ejemplo",
+      "facilitation": "Docente: muestra los mismos dos registros en CSV y JSON, y pregunta qué cambia. Estudiante: identifica campos y tipos.",
+      "scope": "XML y pruebas de coerción de ID quedan en ampliación A2.1; mostrar solo una diferencia esencial.",
+      "liveCheck": false
+    }
   ],
   [
     4,
@@ -269,15 +299,15 @@
     {
       "question": "P1 tiene tres contratos, P2 uno y P3 ninguno. ¿Cuántas filas y procesos únicos produce un left join?",
       "choices": [
+        "Cinco filas y tres procesos.",
         "Cuatro filas y cuatro procesos.",
-        "Tres filas y tres procesos.",
-        "Cinco filas y tres procesos."
+        "Tres filas y tres procesos."
       ],
-      "correct": 2,
+      "correct": 0,
       "feedback": [
+        "Sí. Tres de P1, una de P2 y una sin contrato de P3. Hay cuatro contratos observados, cinco filas y tres procesos.",
         "Cuatro contratos no incluyen la fila preservada de P3; las filas tampoco son necesariamente procesos únicos.",
-        "Solo sería una fila por proceso antes de unir o tras una agregación. El join expande P1.",
-        "Sí. Tres de P1, una de P2 y una sin contrato de P3. Hay cuatro contratos observados, cinco filas y tres procesos."
+        "Solo sería una fila por proceso antes de unir o tras una agregación. El join expande P1."
       ],
       "transfer": "Cambia a inner join: verifica que desaparece P3 y explica qué conteo usar para contratos."
     },
@@ -293,7 +323,13 @@
           "Reto resuelto parcialmente: imagina cinco procesos. P1 tiene cuatro contratos, P2 dos, P3 ninguno, P4 uno y P5 ninguno. La unión izquierda produce 4+2+1+1+1=9 filas y conserva cinco procesos. La interna produce siete filas y tres procesos. Si todos los contratos tienen identificador único y la tabla de contratos no contiene huérfanos, el número de contratos observados es siete. Añade un contrato duplicado de P2 en la tabla derecha y predice cómo cambian filas, IDs contractuales únicos y suma. Después explica qué aserción debería fallar antes del join. No basta afirmar que la izquierda tiene cinco filas: la multiplicidad surge del lado que tiene hijos."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Ejemplo",
+      "facilitation": "Docente: dibuja P1–P3 y sus contratos; estudiante predice filas y únicos, luego verifica con control.",
+      "scope": "Pregunta de comprobación en aula. No ejecutar varios joins ni sumar montos reales.",
+      "liveCheck": true
+    }
   ],
   [
     5,
@@ -338,10 +374,16 @@
           "Actividad de auditoría. Selecciona diez filas en el visor, anota los nombres de sus campos y un identificador de ejemplo; después cambia el filtro de texto. Distingue el universo de doscientos procesos de las coincidencias de tu búsqueda y de la página visible. En el cuaderno selecciona N=40 y N=80; registra cuántas entidades distintas aparecen en cada prefijo y cuántos procesos hay en la entidad que elijas. Explica qué compararías si la entidad no aparece en el primer prefijo. No concluyas que no existe en SECOP: solo no fue observada en esa selección. Para defender reproducibilidad, guarda N, orden, referencia y regla de agrupación."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Exploración",
+      "facilitation": "Docente: abre la fuente congelada y señala ID, entidad, descripción y procedencia. Estudiante: encuentra un ID y formula límite.",
+      "scope": "Abre Colab en paralelo si aún no está listo; el acceso externo a SECOP es opcional.",
+      "liveCheck": false
+    }
   ],
   [
-    5,
+    4,
     "07 · Calidad",
     "Veracidad: identidad y valores ausentes",
     "Antes de sumar, comprueba que cada ID sea único y que los campos necesarios existan. La ausencia no equivale a cero. Un duplicado exacto no es un nuevo proceso. La calidad se mide en relación con la tarea.",
@@ -360,14 +402,14 @@
       "question": "Se añaden cinco copias exactas a 200 IDs únicos. ¿Qué se debe reportar?",
       "choices": [
         "205 procesos distintos.",
-        "205 filas, 200 identidades, cinco repeticiones adicionales.",
-        "200 filas: el sistema elimina copias al leer."
+        "200 filas: el sistema elimina copias al leer.",
+        "205 filas, 200 identidades, cinco repeticiones adicionales."
       ],
-      "correct": 1,
+      "correct": 2,
       "feedback": [
         "Una copia no crea identidad de proceso. Contar filas puede ocultar reintentos.",
-        "Sí. Conserva RAW y mide el efecto sobre una copia. Si el mismo ID trae información distinta, registra conflicto en lugar de borrar arbitrariamente.",
-        "No hay eliminación automática sin una regla explícita. Leer datos no garantiza deduplicación."
+        "No hay eliminación automática sin una regla explícita. Leer datos no garantiza deduplicación.",
+        "Sí. Conserva RAW y mide el efecto sobre una copia. Si el mismo ID trae información distinta, registra conflicto en lugar de borrar arbitrariamente."
       ],
       "transfer": "Introduce faltantes y copias en el explorador; explica por qué ambos controles pueden solaparse."
     },
@@ -383,10 +425,16 @@
           "Diseña un control de calidad para el dato que realmente quieres usar. En la copia de A3 introduce cinco repeticiones y borra la entidad de dos filas; comprueba que el hash de CORPUS permanezca igual. Después cambia el criterio de conteo: filas con entidad no vacía frente a IDs únicos con alguna versión no vacía. Explica por qué ambos indicadores no son intercambiables. Una aserción adecuada podría exigir que el universo aceptado conserve todos los IDs esperados exactamente una vez y que ninguna fila aceptada carezca de entidad. Para un producto que tolera faltantes, la regla debe modificarse explícitamente y el manifiesto registrar el número de pendientes. No ajustes la aserción únicamente para que una ejecución pase."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Exploración",
+      "facilitation": "Docente: introduce cinco copias y muestra el conteo. Estudiante: explica por qué cambian filas, no IDs.",
+      "scope": "La matriz completa de calidad se consulta después; mantener el original intacto.",
+      "liveCheck": false
+    }
   ],
   [
-    5,
+    4,
     "08 · Primera transformación",
     "Filtrar no es agrupar",
     "Filtrar selecciona filas, proyectar selecciona campos y agrupar cambia el grano. Contar procesos por entidad responde cuántos registros de la muestra pertenecen a cada entidad; no cuánto gastó ni si existe irregularidad.",
@@ -405,14 +453,14 @@
       "question": "La agrupación por entidad produce 51 filas y la suma de size es 200. ¿Cuál es el grano de la salida?",
       "choices": [
         "Proceso, porque el universo tenía 200.",
-        "Contrato, porque SECOP contiene compras.",
-        "Entidad; cada fila es un grupo de procesos de la selección."
+        "Entidad; cada fila es un grupo de procesos de la selección.",
+        "Contrato, porque SECOP contiene compras."
       ],
-      "correct": 2,
+      "correct": 1,
       "feedback": [
         "La agrupación cambió la unidad: una fila representa una clave, no una observación original.",
-        "La fuente no se convierte en contractual al agrupar. No contiene valores contractuales.",
-        "Correcto. El número de grupos y la suma de tamaños son medidas distintas; ambas ayudan a reconciliar."
+        "Correcto. El número de grupos y la suma de tamaños son medidas distintas; ambas ayudan a reconciliar.",
+        "La fuente no se convierte en contractual al agrupar. No contiene valores contractuales."
       ],
       "transfer": "Compara 40, 80 y 120 registros. Registra cantidad de grupos y suma de conteos sin extrapolar."
     },
@@ -428,7 +476,13 @@
           "Reto de transferencia. En el prefijo de N=80, calcula tres resultados: conteo total por entidad, conteo por entidad después de filtrar una palabra, y proporción de coincidencias dentro de cada entidad. Para la tercera operación se necesita un denominador por entidad; si una entidad no tiene coincidencias, debe conservarse con numerador cero si pertenece al universo, no desaparecer por un inner join accidental. Verifica que la suma de numeradores sea el total de procesos que cumplen el filtro y que cada numerador sea menor o igual que su denominador. Explica por qué una entidad con dos coincidencias de dos procesos puede tener una proporción mayor que otra con veinte de cien, pero no necesariamente más casos para revisar. La elección entre cantidad y proporción depende de la decisión de Laura."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Ejemplo",
+      "facilitation": "Docente: diferencia selección y agrupación. Estudiante: compara dos prefijos y predice la suma de conteos.",
+      "scope": "No leer el ranking como gasto. Conserva dos resultados para contrastar.",
+      "liveCheck": false
+    }
   ],
   [
     5,
@@ -449,14 +503,14 @@
     {
       "question": "En pandas, ¿qué prueba verifica que la agrupación conservó todas las filas del universo elegido?",
       "choices": [
-        "muestra.groupby('entidad', dropna=False).size().sum() == len(muestra)",
         "muestra.head().shape[0] == 5",
+        "muestra.groupby('entidad', dropna=False).size().sum() == len(muestra)",
         "len(muestra.columns) == 7"
       ],
-      "correct": 0,
+      "correct": 1,
       "feedback": [
-        "Correcto. size cuenta filas y dropna=False conserva grupos de clave faltante. Además comprueba identidad y esquema por separado.",
         "head solo muestra primeras filas; no prueba agrupación completa ni ausencia de pérdidas.",
+        "Correcto. size cuenta filas y dropna=False conserva grupos de clave faltante. Además comprueba identidad y esquema por separado.",
         "El número de columnas es parte del esquema, no una comprobación de cobertura de filas."
       ],
       "transfer": "Modifica N en A3 y verifica paridad; describe cuándo count y size pueden diferir."
@@ -473,7 +527,13 @@
           "Ejercicio de código con tres niveles. Primero ejecuta la selección con N=80 y copia en tu bitácora cantidad de filas, entidades y suma de conteos. Segundo cambia solo N a 120 y predice qué invariantes se conservan: IDs únicos y suma de conteos igual a N; no necesariamente las mismas entidades o el mismo ranking. Tercero escribe un filtro por un término y calcula número de IDs únicos por entidad, manteniendo a la vista el denominador total. Antes de comparar con el resultado de otro estudiante, registra N, regla de normalización y texto buscado. Una solución no necesita una función compleja: comienza con expresiones intermedias simples y prueba cada una. El resultado se considera aprendido cuando puedes explicar por qué cada línea existe y cambiar una condición sin romper el contrato."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Práctica guiada",
+      "facilitation": "Docente: ejecuta A0/A3 y enseña la expresión groupby. Estudiante: cambia N_TEXTO o un prefijo y comprueba denominador.",
+      "scope": "Ejecutar preparación y fuente del itinerario núcleo; si no carga Colab, usar demostración del navegador y registrar pendiente.",
+      "liveCheck": false
+    }
   ],
   [
     6,
@@ -494,14 +554,14 @@
     {
       "question": "Una palabra aparece tres veces en P1 y una en P2. ¿Cuáles son sus frecuencias?",
       "choices": [
-        "Ocurrencias 2, documentos 4.",
         "Ocurrencias 4, documentos 2.",
+        "Ocurrencias 2, documentos 4.",
         "Ocurrencias y documentos siempre 4."
       ],
-      "correct": 1,
+      "correct": 0,
       "feedback": [
-        "Invertiste las unidades: repetición del término cuenta ocurrencias; el documento se cuenta una sola vez.",
         "Sí. Frecuencia total y frecuencia documental responden preguntas diferentes. Un ranking lexical posterior puede usar ambas.",
+        "Invertiste las unidades: repetición del término cuenta ocurrencias; el documento se cuenta una sola vez.",
         "Solo coincidirían si cada documento contuviera el término exactamente una vez."
       ],
       "transfer": "Cambia el término del explorador y compara conteos; explica cómo afecta la normalización."
@@ -518,7 +578,13 @@
           "Práctica: busca salud en el visor y registra ocurrencias, documentos e IDs de dos coincidencias. Luego prueba una expresión con dos palabras. El control actual compara un token individual, por lo que una frase completa no debe interpretarse como búsqueda semántica ni como una secuencia de tokens. Diseña una variante de coincidencia de frase que recorra ventanas consecutivas del tamaño de la consulta. Para una consulta con dos tokens, compara cada par adyacente. Contrasta con una variante OR que acepte cualquiera de ellos y predice cuál recuperará un conjunto más amplio. Anota qué documentos añadirías a una evaluación futura de relevancia y por qué."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Práctica guiada",
+      "facilitation": "Docente: usa dos frases pequeñas y predice frecuencia. Estudiante: prueba un término real y explica diferencia.",
+      "scope": "Comprobación en aula; comparación frase/OR es ampliación. No introducir embeddings ni BM25 en detalle.",
+      "liveCheck": true
+    }
   ],
   [
     10,
@@ -539,10 +605,18 @@
       "",
       ""
     ],
-    null
+    null,
+    null,
+    null,
+    {
+      "phase": "Pausa",
+      "facilitation": "Descanso de diez minutos. No asignar lectura, tareas ni instalación.",
+      "scope": "Mantener el entorno abierto si es posible.",
+      "liveCheck": false
+    }
   ],
   [
-    5,
+    3,
     "11 · API",
     "Qué ocurre cuando llamamos una API",
     "Una API define una interfaz; HTTP transporta la solicitud. En Socrata, $select escoge columnas, $where filtra, $limit acota filas y $order fija un orden. HTTP 200 no prueba cobertura; es necesario validar grano e identidad.",
@@ -584,53 +658,13 @@
           "Ejercicio: describe una petición que solicite cinco registros, tres campos y un filtro. Indica qué parte es URL, qué parte es parámetro del servicio y qué observarías en la respuesta. Después predice tres resultados distintos: HTTP 200 con lista vacía, HTTP 403 y timeout. Para la primera respuesta se revisa el contrato y filtro; para la segunda se revisa autorización; para la tercera se registra desconocimiento de respuesta y se aplica la política acotada si corresponde. Activa la consulta viva únicamente como contraste voluntario. Si falla, registra su tipo de error y conserva la ruta docente, sin construir una respuesta ficticia."
         ]
       }
-    ]
-  ],
-  [
-    5,
-    "11B · Estado de adquisición",
-    "HTTP no es una validación de calidad",
-    "Una respuesta exitosa puede ser incompleta. Un fallo transitorio exige reintentar el mismo offset; un error de acceso o de datos impide confirmar la página.",
-    "Simula ocho situaciones. Después ejecuta A4.1/A4.2: peticiones HTTP reales a un servidor local con los 200 procesos del snapshot.",
-    "La simulación calcula estados; el cuaderno ejecuta HTTP real en loopback. No es una consulta viva al portal ni una prueba de su rendimiento.",
-    "http",
-    null,
-    [
-      "HTTP (protocolo de transferencia de hipertexto) permite que un cliente solicite recursos a un servidor. En una API de consulta, la URL identifica un recurso y los parámetros delimitan campos, filtros, orden y tamaño. El código de estado describe el resultado del intercambio, no la veracidad ni la cobertura semántica del contenido. Una respuesta 200 puede incluir una lista vacía, una página parcial, campos ausentes o valores inesperados. Por ello la adquisición tiene dos controles separados: transporte y contrato del dato. Si una consulta falla no se debe sustituir automáticamente el resultado por una lista vacía y avanzar el offset, porque los datos omitidos serían invisibles. Un timeout indica que la operación no respondió dentro del tiempo permitido y tampoco permite afirmar que el universo estaba vacío.",
-      "Una petición con estado 429 indica que se alcanzó alguna limitación de solicitudes; si el servidor proporciona Retry-After se debe respetar su política. Un 503 puede ser transitorio; un 401/403 indica un problema de autenticación o autorización y no se corrige repitiendo indefinidamente la misma petición. Un cliente responsable fija un tiempo de espera, número máximo de reintentos y registro de errores. Imagina que la página cero devuelve 50 registros, la página uno devuelve 429 y la dos devuelve 50. Sumar 100 filas y afirmar que el lote quedó completo omite la página que falló. La salida válida debe declarar pendiente esa página y conservar lo ya recibido. No se deben imprimir tokens ni credenciales.",
-      "Práctica: selecciona 200 con lista vacía, 200 con datos, 429, 403 y timeout. Decide cuándo finalizar y cuándo reintentar. En el cuaderno A4 se prueba una máquina de estados de peticiones con respuestas controladas; A5 trabaja con datos congelados. La consulta viva opcional tiene límite pequeño y registra la fuente. Compara sus campos con el corpus, pero no declares cobertura del universo SECOP. En un trabajo profesional, conserva los parámetros y la fecha de extracción para explicar qué se pidió.",
-      "Clasifica cada fallo antes de recuperar. Una petición que no llegó a responder se registra como desconocida, no como lista vacía. Si un estado permanente impide el acceso, cambiar offset no resuelve autorización. Un reintento acotado sobre la misma petición puede repetir filas si ya había persistido el resultado; se verifica identidad. La política de reintentos depende del servicio y se mantiene dentro de su cuota.",
-      "En A4.1 implementamos el servidor y el cliente: primero preservamos los bytes de cada respuesta, después validamos el contrato de cada página y escribimos JSONL por filas. El manifiesto solo se crea después de verificar la cobertura y releer el producto. El escenario de reintento cambia la traza, no los bytes de RAW. En A4.2 modifica el máximo de intentos de dos a tres y contrasta los resultados. Si el servidor responde 403, no avances; si hay un registro repetido, identifica la fila que causa el rechazo en cuarentena. La prueba de navegador solo modela la transición; las peticiones se realizan en Python."
     ],
-    "A4",
     {
-      "question": "La página 2 falla con 429. ¿Qué conducta conserva trazabilidad?",
-      "choices": [
-        "Registrar página pendiente y reintentar de manera acotada según política.",
-        "Avanzar offset y contar la página como vacía.",
-        "Repetir indefinidamente sin demora."
-      ],
-      "correct": 0,
-      "feedback": [
-        "Sí. Mantiene el error visible y evita omitir una ventana. Si agotas reintentos, marca adquisición incompleta.",
-        "Una página fallida no equivale a lista vacía; avanzar podría perder datos.",
-        "Eso puede aumentar carga y violar límites. Reintentos requieren límite y política explícita."
-      ],
-      "transfer": "Compara 429, 403 y 200 sin filas; explica cuándo se puede terminar una extracción."
-    },
-    [
-      {
-        "title": "Adquisición resistente a fallos y publicación verificable",
-        "paragraphs": [
-          "Un fallo transitorio puede desaparecer sin cambiar la solicitud. Una indisponibilidad breve o una limitación momentánea de tasa son ejemplos. Un fallo permanente exige cambiar permisos, recurso o datos. Repetir toda excepción indefinidamente aumenta carga y puede consumir cuota. Una estrategia responsable clasifica condiciones, limita intentos, conserva trazas y respeta la política del servicio. El servidor HTTP docente produce un 429 y un 503 en los dos primeros intentos de la segunda página del escenario transitorio; después entrega la página. Se trata de respuestas HTTP reales emitidas en loopback con fallos controlados, no de un benchmark del portal.",
-          "Si falla la solicitud de offset 50 y limit 50, avanzar a offset 100 omite la ventana pendiente. Reintentar significa repetir esa operación, no avanzar el cursor. En una API externa, Retry-After puede indicar una espera en segundos o una fecha HTTP. El servicio docente usa segundos y el cliente se detiene si la espera excede su presupuesto. Un servicio real puede necesitar retroceso exponencial con variación aleatoria, control de concurrencia y límites de cuota. No se propone usar el intervalo cero del laboratorio fuera de sus pruebas. El contador de solicitudes y el número de páginas confirmadas se mantienen separados.",
-          "Con universo 200 y limit 50, una extracción normal solicita offsets 0,50,100 y 150. La transitoria recorre 0/200, 50/429, 50/503, 50/200, 100/200, 150/200. Son seis peticiones, cuatro páginas válidas y 200 identidades. Con máximo de dos intentos, la segunda página no se confirma y quedan cincuenta registros. Una función que multiplica cantidad de solicitudes por limit podría informar 300 filas en el primer caso o 150 en el segundo. Esas cantidades no corresponden al producto. A4.1 permite contrastar el estado calculado en navegador con la traza HTTP del servidor y los archivos efectivamente escritos.",
-          "Los fallos de datos también pueden acompañar HTTP 200. Un cuerpo no interpretable como JSON se preserva para investigación. Un campo ausente o una identidad repetida se registra en cuarentena. Una modificación de contenido respecto del snapshot produce rechazo porque la referencia es congelada y conocida; en una fuente viva podría ser una actualización válida y se necesitaría otra política. Una página corta no cumple el contrato docente si se conoce su tamaño esperado. La validación de toda la página antes de escribir evita aceptar cuarenta y nueve filas y descubrir después que la quincuagésima invalida el lote. Esta decisión cuesta memoria proporcional al tamaño de página.",
-          "El archivo RAW provisional se escribe con extensión .part y se relee antes de finalizar el manifiesto. El marcador de finalización no es una transacción de todo el directorio: un fallo de disco, interrupción o apagado podría dejar archivos parciales. El consumidor debe aceptar solamente paquetes con manifiesto completo y huellas comprobadas. El ejemplo reintenta solicitudes dentro de una ejecución; no implementa recuperación duradera entre procesos. Tampoco demuestra memoria constante: mantiene un mapa de contenido esperado y un conjunto de identidades observadas. La explicación de límites es parte de la ingeniería, no una falla que deba esconderse.",
-          "Reto: configura limit 37 y tres intentos. Hay seis páginas válidas (cinco de 37 y una de 15), ocho solicitudes si se recupera el fallo transitorio. Cambia a dos intentos: deben aceptarse 37 filas y registrarse tres solicitudes, sin manifiesto completo. Examina el cuerpo de la página en el escenario JSON inválido y la cuarentena en el escenario alterado. Compara los hashes de RAW normal y transitorio; deben coincidir para el mismo universo y orden, aunque la traza sea diferente. Si no coinciden, revisa si se alteró algún campo o se escribió una página más de una vez. No edites la prueba simplemente para hacerla pasar."
-        ]
-      }
-    ]
+      "phase": "Modelo",
+      "facilitation": "Docente: dibuja cliente → petición → respuesta → validación. Estudiante: distingue HTTP 200 de contenido correcto.",
+      "scope": "A4 clasificación básica, no activar consulta externa. La implementación HTTP vendrá tras paginación.",
+      "liveCheck": false
+    }
   ],
   [
     5,
@@ -652,14 +686,14 @@
       "question": "En una lista congelada de 12 filas, limit=5 y salto=5. ¿Qué offsets cubren toda la lista?",
       "choices": [
         "0 y 5.",
-        "0, 5 y 10.",
-        "5, 10 y 15."
+        "5, 10 y 15.",
+        "0, 5 y 10."
       ],
-      "correct": 1,
+      "correct": 2,
       "feedback": [
         "Solo recuperas las primeras diez; faltan dos registros.",
-        "Correcto. El último lote contiene dos filas. techo(12/5)=3.",
-        "Empiezas omitiendo las cinco primeras filas. Offset expresa posiciones omitidas."
+        "Empiezas omitiendo las cinco primeras filas. Offset expresa posiciones omitidas.",
+        "Correcto. El último lote contiene dos filas. techo(12/5)=3."
       ],
       "transfer": "En A5 modifica limit a 37 y compara traza y último bloque."
     },
@@ -675,7 +709,13 @@
           "Ejercicio de transferencia: en un universo de 103 procesos, calcula ventanas y filas finales con límites 20, 25 y 50. Las soluciones son seis páginas y tres filas, cinco y tres, tres y tres. Dibuja las primeras tres ventanas usando limit 20 y salto 21; ubica los huecos. Repite con salto 19 y ubica repeticiones. Comprueba después en A5 con un tamaño de página distinto a 37. Explica qué propiedades deben permanecer invariantes. El criterio de éxito no es obtener el mismo número de solicitudes, sino preservar las identidades del universo y su contenido."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Ejemplo resuelto",
+      "facilitation": "Docente: enseña 12 filas con limit=5 y offsets 0,5,10. Estudiante: predice página final y contrasta.",
+      "scope": "Usar A5 solo después de comprender el ejemplo. No leer todos los casos de frontera en clase.",
+      "liveCheck": false
+    }
   ],
   [
     5,
@@ -697,14 +737,14 @@
       "question": "Cuatro páginas de 50 con salto 40 producen 200 filas y 170 IDs del universo de 200. ¿Qué pasó?",
       "choices": [
         "Nada; el total coincide.",
-        "Hay 30 procesos nuevos fuera del universo.",
-        "Hay 30 repeticiones adicionales y 30 IDs originales ausentes."
+        "Hay 30 repeticiones adicionales y 30 IDs originales ausentes.",
+        "Hay 30 procesos nuevos fuera del universo."
       ],
-      "correct": 2,
+      "correct": 1,
       "feedback": [
         "El conteo bruto oculta pérdidas y solapamientos. Debes conciliar identidades.",
-        "No se han observado extras: los IDs pertenecen al mismo universo congelado.",
-        "Sí. Los 30 registros repetidos compensan 30 faltantes en el conteo bruto. Corrige salto y verifica el conjunto."
+        "Sí. Los 30 registros repetidos compensan 30 faltantes en el conteo bruto. Corrige salto y verifica el conjunto.",
+        "No se han observado extras: los IDs pertenecen al mismo universo congelado."
       ],
       "transfer": "Compara salto 50 y un salto superior; identifica cuál genera huecos sin duplicados."
     },
@@ -720,10 +760,16 @@
           "Actividad: construye una tabla de pruebas con caso normal, salto menor, salto mayor, ID inesperado y contenido modificado. Para cada uno predice filas, únicos, ausentes, extras y cuál propiedad falla. En la última variante puedes mantener todos los IDs y cambiar el nombre de una entidad: el control de identidades no detectará la diferencia, pero la comparación de contenido sí. Explica qué resultado debe impedir publicar el manifiesto. Realiza la actividad sobre copias, nunca sobre RAW. El objetivo no es solamente obtener una cifra correcta, sino conocer qué errores la podrían producir y qué evidencia permite distinguirlos."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Práctica con ayuda decreciente",
+      "facilitation": "Docente: muestra 200 filas con salto 40 y deja que el estudiante calcule únicos/ausentes. Estudiante: corrige el salto y explica.",
+      "scope": "Comprobación en aula. A5: ejecutar celda principal; matriz de 24 casos en ampliación.",
+      "liveCheck": true
+    }
   ],
   [
-    5,
+    3,
     "12C · Orden y cambios",
     "Una paginación por posiciones necesita un universo estable",
     "Ordenar por una clave única hace reproducible una lista congelada. Insertar un registro entre solicitudes puede desplazar posiciones.",
@@ -765,7 +811,65 @@
           "Reto: modifica el ejemplo de fuente mutable para simular una eliminación en lugar de inserción. Predice exactamente qué ID se pierde en la segunda página. Después propone una política para una fuente que actualiza registros durante el día: qué campo usarías como clave temporal, cómo resolverías empates, qué registrarías y cómo tratarías cambios tardíos. Si desconoces si el recurso ofrece cursor o snapshot, deja esa propiedad pendiente en la especificación. No confundas una propuesta de diseño con una garantía del proveedor."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Contraejemplo",
+      "facilitation": "Docente: inserta P00 entre páginas. Estudiante: identifica repetido y ausente.",
+      "scope": "No confundir orden estable con snapshot. Explicar una limitación, sin diseñar todavía un sistema de cursores.",
+      "liveCheck": false
+    }
+  ],
+  [
+    8,
+    "12D · Recuperación HTTP",
+    "HTTP no es una validación de calidad",
+    "Una respuesta exitosa puede ser incompleta. Un fallo transitorio exige reintentar el mismo offset; un error de acceso o de datos impide confirmar la página.",
+    "Predice y demuestra normal, transitorio y presupuesto agotado. En A4.1/A4.2 el docente muestra HTTP local después de dominar offsets.",
+    "La simulación calcula estados; el cuaderno ejecuta HTTP real en loopback. No es una consulta viva al portal ni una prueba de su rendimiento.",
+    "http",
+    null,
+    [
+      "HTTP (protocolo de transferencia de hipertexto) permite que un cliente solicite recursos a un servidor. En una API de consulta, la URL identifica un recurso y los parámetros delimitan campos, filtros, orden y tamaño. El código de estado describe el resultado del intercambio, no la veracidad ni la cobertura semántica del contenido. Una respuesta 200 puede incluir una lista vacía, una página parcial, campos ausentes o valores inesperados. Por ello la adquisición tiene dos controles separados: transporte y contrato del dato. Si una consulta falla no se debe sustituir automáticamente el resultado por una lista vacía y avanzar el offset, porque los datos omitidos serían invisibles. Un timeout indica que la operación no respondió dentro del tiempo permitido y tampoco permite afirmar que el universo estaba vacío.",
+      "Una petición con estado 429 indica que se alcanzó alguna limitación de solicitudes; si el servidor proporciona Retry-After se debe respetar su política. Un 503 puede ser transitorio; un 401/403 indica un problema de autenticación o autorización y no se corrige repitiendo indefinidamente la misma petición. Un cliente responsable fija un tiempo de espera, número máximo de reintentos y registro de errores. Imagina que la página cero devuelve 50 registros, la página uno devuelve 429 y la dos devuelve 50. Sumar 100 filas y afirmar que el lote quedó completo omite la página que falló. La salida válida debe declarar pendiente esa página y conservar lo ya recibido. No se deben imprimir tokens ni credenciales.",
+      "Práctica: selecciona 200 con lista vacía, 200 con datos, 429, 403 y timeout. Decide cuándo finalizar y cuándo reintentar. En el cuaderno A4 se prueba una máquina de estados de peticiones con respuestas controladas; A5 trabaja con datos congelados. La consulta viva opcional tiene límite pequeño y registra la fuente. Compara sus campos con el corpus, pero no declares cobertura del universo SECOP. En un trabajo profesional, conserva los parámetros y la fecha de extracción para explicar qué se pidió.",
+      "Clasifica cada fallo antes de recuperar. Una petición que no llegó a responder se registra como desconocida, no como lista vacía. Si un estado permanente impide el acceso, cambiar offset no resuelve autorización. Un reintento acotado sobre la misma petición puede repetir filas si ya había persistido el resultado; se verifica identidad. La política de reintentos depende del servicio y se mantiene dentro de su cuota.",
+      "En A4.1 implementamos el servidor y el cliente: primero preservamos los bytes de cada respuesta, después validamos el contrato de cada página y escribimos JSONL por filas. El manifiesto solo se crea después de verificar la cobertura y releer el producto. El escenario de reintento cambia la traza, no los bytes de RAW. En A4.2 modifica el máximo de intentos de dos a tres y contrasta los resultados. Si el servidor responde 403, no avances; si hay un registro repetido, identifica la fila que causa el rechazo en cuarentena. La prueba de navegador solo modela la transición; las peticiones se realizan en Python."
+    ],
+    "A4",
+    {
+      "question": "La página 2 falla con 429. ¿Qué conducta conserva trazabilidad?",
+      "choices": [
+        "Avanzar offset y contar la página como vacía.",
+        "Registrar página pendiente y reintentar de manera acotada según política.",
+        "Repetir indefinidamente sin demora."
+      ],
+      "correct": 1,
+      "feedback": [
+        "Una página fallida no equivale a lista vacía; avanzar podría perder datos.",
+        "Sí. Mantiene el error visible y evita omitir una ventana. Si agotas reintentos, marca adquisición incompleta.",
+        "Eso puede aumentar carga y violar límites. Reintentos requieren límite y política explícita."
+      ],
+      "transfer": "Compara 429, 403 y 200 sin filas; explica cuándo se puede terminar una extracción."
+    },
+    [
+      {
+        "title": "Adquisición resistente a fallos y publicación verificable",
+        "paragraphs": [
+          "Un fallo transitorio puede desaparecer sin cambiar la solicitud. Una indisponibilidad breve o una limitación momentánea de tasa son ejemplos. Un fallo permanente exige cambiar permisos, recurso o datos. Repetir toda excepción indefinidamente aumenta carga y puede consumir cuota. Una estrategia responsable clasifica condiciones, limita intentos, conserva trazas y respeta la política del servicio. El servidor HTTP docente produce un 429 y un 503 en los dos primeros intentos de la segunda página del escenario transitorio; después entrega la página. Se trata de respuestas HTTP reales emitidas en loopback con fallos controlados, no de un benchmark del portal.",
+          "Si falla la solicitud de offset 50 y limit 50, avanzar a offset 100 omite la ventana pendiente. Reintentar significa repetir esa operación, no avanzar el cursor. En una API externa, Retry-After puede indicar una espera en segundos o una fecha HTTP. El servicio docente usa segundos y el cliente se detiene si la espera excede su presupuesto. Un servicio real puede necesitar retroceso exponencial con variación aleatoria, control de concurrencia y límites de cuota. No se propone usar el intervalo cero del laboratorio fuera de sus pruebas. El contador de solicitudes y el número de páginas confirmadas se mantienen separados.",
+          "Con universo 200 y limit 50, una extracción normal solicita offsets 0,50,100 y 150. La transitoria recorre 0/200, 50/429, 50/503, 50/200, 100/200, 150/200. Son seis peticiones, cuatro páginas válidas y 200 identidades. Con máximo de dos intentos, la segunda página no se confirma y quedan cincuenta registros. Una función que multiplica cantidad de solicitudes por limit podría informar 300 filas en el primer caso o 150 en el segundo. Esas cantidades no corresponden al producto. A4.1 permite contrastar el estado calculado en navegador con la traza HTTP del servidor y los archivos efectivamente escritos.",
+          "Los fallos de datos también pueden acompañar HTTP 200. Un cuerpo no interpretable como JSON se preserva para investigación. Un campo ausente o una identidad repetida se registra en cuarentena. Una modificación de contenido respecto del snapshot produce rechazo porque la referencia es congelada y conocida; en una fuente viva podría ser una actualización válida y se necesitaría otra política. Una página corta no cumple el contrato docente si se conoce su tamaño esperado. La validación de toda la página antes de escribir evita aceptar cuarenta y nueve filas y descubrir después que la quincuagésima invalida el lote. Esta decisión cuesta memoria proporcional al tamaño de página.",
+          "El archivo RAW provisional se escribe con extensión .part y se relee antes de finalizar el manifiesto. El marcador de finalización no es una transacción de todo el directorio: un fallo de disco, interrupción o apagado podría dejar archivos parciales. El consumidor debe aceptar solamente paquetes con manifiesto completo y huellas comprobadas. El ejemplo reintenta solicitudes dentro de una ejecución; no implementa recuperación duradera entre procesos. Tampoco demuestra memoria constante: mantiene un mapa de contenido esperado y un conjunto de identidades observadas. La explicación de límites es parte de la ingeniería, no una falla que deba esconderse.",
+          "Reto: configura limit 37 y tres intentos. Hay seis páginas válidas (cinco de 37 y una de 15), ocho solicitudes si se recupera el fallo transitorio. Cambia a dos intentos: deben aceptarse 37 filas y registrarse tres solicitudes, sin manifiesto completo. Examina el cuerpo de la página en el escenario JSON inválido y la cuarentena en el escenario alterado. Compara los hashes de RAW normal y transitorio; deben coincidir para el mismo universo y orden, aunque la traza sea diferente. Si no coinciden, revisa si se alteró algún campo o se escribió una página más de una vez. No edites la prueba simplemente para hacerla pasar."
+        ]
+      }
+    ],
+    {
+      "phase": "Demostración técnica",
+      "facilitation": "Docente: ejecuta normal y transitorio del cliente HTTP y muestra trazas. Estudiante: predice el efecto de bajar intentos a dos.",
+      "scope": "A4.1–A4.3: el profesor muestra la prueba y su salida; implementación de servidor, matriz completa y cuarentena son ampliación de lectura. No exige escribir el servidor desde cero.",
+      "liveCheck": false
+    }
   ],
   [
     5,
@@ -787,14 +891,14 @@
       "question": "Para contar procesos por entidad en bloques, ¿qué estado parcial se necesita?",
       "choices": [
         "Guardar cada tabla completa hasta el final.",
-        "Un mapa entidad→conteo, combinado por suma.",
-        "La media de los conteos de cada bloque."
+        "La media de los conteos de cada bloque.",
+        "Un mapa entidad→conteo, combinado por suma."
       ],
-      "correct": 1,
+      "correct": 2,
       "feedback": [
         "No es necesario para un conteo combinable. Guardar cada tabla puede anular el ahorro de memoria.",
-        "Correcto. Cada bloque produce conteos y se suman por clave. El estado puede crecer con las claves distintas.",
-        "La media cambia la magnitud y no preserva el total de filas."
+        "La media cambia la magnitud y no preserva el total de filas.",
+        "Correcto. Cada bloque produce conteos y se suman por clave. El estado puede crecer con las claves distintas."
       ],
       "transfer": "En A6 cambia tamaño a 7,25,50 y explica por qué el último bloque puede ser menor."
     },
@@ -810,10 +914,16 @@
           "Práctica autónoma: predice cuántos bloques habrá para N=80 con tamaños 7, 25 y 80. Verifica los tamaños efectivos y la equivalencia de conteos. Son doce bloques con último de tres, cuatro bloques con último de cinco y uno completo, respectivamente. Compara la suma de los parciales de una entidad con su conteo directo. Introduce luego un error que omita el último bloque en una copia de la función y verifica que la suma de tamaños y la cobertura no cumplan. No uses esa variante para producir el paquete final. Explica qué ocurriría si una entidad tuviera registros en muchos bloques y por qué los parciales deben combinarse por clave."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Práctica guiada",
+      "facilitation": "Docente: muestra parciales A=2,B=1 y B=1,C=3. Estudiante: combina por clave y cambia chunk.",
+      "scope": "A6: ejecuta contar_bloques; verificar suma y paridad. No confundir número de bloques y workers.",
+      "liveCheck": false
+    }
   ],
   [
-    6,
+    4,
     "14 · Experimento manual",
     "Por qué una media de medias puede ser incorrecta",
     "Lote A: 2 observaciones de valor 10. Lote B: 8 observaciones de valor 100. Media simple de medias: 55. Media ponderada: (20+800)/10=82. El denominador importa al combinar resultados.",
@@ -855,10 +965,16 @@
           "Ejercicio: construye bloques con valores [2,4], [10,20,30] y [null]. Predice estados parciales (6,2),(60,3),(0,0) y media global 66/5=13,2. La media de los dos grupos válidos es (3+20)/2=11,5. Divide después el grupo de tres en uno de un valor y otro de dos. Verifica que la media global permanezca y que el promedio simple de medias pueda cambiar. Explica cómo modificarías la función para producir un conteo de válidos por entidad. Si los resultados de una herramienta y otra difieren, comprueba antes de atribuirlo a paralelismo si usan la misma política de nulos y el mismo grano."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Ejemplo resuelto",
+      "facilitation": "Docente: plantea dos valores diez y ocho valores cien. Estudiante: calcula media global y compara.",
+      "scope": "Comprobación rápida con el control de medias; la fórmula se conserva a la vista.",
+      "liveCheck": true
+    }
   ],
   [
-    6,
+    4,
     "14B · Estado combinable",
     "Una reducción correcta conserva información suficiente",
     "Para calcular la media necesitamos suma y conteo de valores válidos. Los nulos no son ceros. Para un máximo basta un máximo parcial.",
@@ -900,14 +1016,20 @@
           "Reto de diseño. Para cada operación indica estado, combinación y finalización: conteo de registros, suma, máximo, media y número de IDs únicos. Identifica cuál puede crecer con el universo y qué dato necesitas si se quiere listar ausentes. Después modifica el ejemplo del cuaderno para que A no tenga valores válidos y B tenga dos. Predice suma, conteo y media final; explica por qué la media de A no debe entrar como cero. Si todos los valores son nulos, devuelve un estado sin observaciones válidas en lugar de inventar una medición. Registra la convención en el manifiesto de un producto que use agregaciones numéricas."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Práctica con ayuda decreciente",
+      "facilitation": "Docente: proporciona estados parciales; estudiante calcula la combinación cuando hay nulos.",
+      "scope": "Caso A sin valores: declarar media indefinida, no cero. Mediana y varianza quedan en ampliación.",
+      "liveCheck": false
+    }
   ],
   [
-    8,
+    9,
     "15 · Capacidad real en Python",
     "Medir, no adivinar",
     "Compara lectura completa y por fragmentos del mismo CSV sintético. En la prueba local sobre 100.000 filas, el DataFrame completo ocupó 1.600.132 bytes lógicos; el bloque de 1.000, 16.132. La suma fue 4.999.545 en ambos casos.",
-    "En A6 ejecuta 10.000 filas; amplía a 100.000 y compara bloques 500, 1.000 y 5.000. Conserva conteo, suma, memoria lógica y tiempo.",
+    "Ejecuta la prueba de 10.000 filas y compara dos tamaños de bloque. La escala de 100.000 y el benchmark repetido son ampliaciones.",
     "No comparar tiempos de redes distintas como si fueran un benchmark controlado. memory_usage no es pico RSS.",
     "code",
     "mediciones = medir_csv(10_000, [500,1000,5000])\ndisplay(pd.DataFrame(mediciones))\n# ampliación manual:\n# medir_csv(100_000,[500,1000,5000])",
@@ -945,10 +1067,16 @@
           "Antes de ejecutar A6, crea una tabla de predicciones para N=10.000 y bloques de 500,1.000 y 5.000. Espera 20,10 y 2 bloques, respectivamente. La suma y conteo deben coincidir; memoria lógica máxima del bloque debería aumentar con su tamaño en este ejemplo homogéneo. El tiempo puede aumentar o disminuir según costos de lectura y sobrecarga. Después registra medidas reales y compara con las predicciones. Si quieres ampliar a 100.000, hazlo explícitamente como segunda escala y conserva ambos resultados. Explica por qué no es necesario provocar un error de memoria para demostrar el mecanismo. Una defensa correcta separa costo estimado, medición observada y propiedad de equivalencia comprobada."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Práctica de medición",
+      "facilitation": "Docente: ejecuta A6 benchmark de 10.000 filas y explica bytes lógicos. Estudiante: compara dos tamaños y justifica una decisión.",
+      "scope": "Usar la prueba pequeña como núcleo; la repetición y 100.000 son ampliación. No comparar como pico RSS.",
+      "liveCheck": false
+    }
   ],
   [
-    7,
+    10,
     "16 · Reutilizar el resultado",
     "RAW, derivados y trazabilidad",
     "RAW conserva el dato original recibido. Un derivado registra qué transformación lo generó. El manifiesto guarda fuente, cantidad, esquema y huella. Una huella de consistencia detecta cambios pero no certifica autoría.",
@@ -966,15 +1094,15 @@
     {
       "question": "¿Qué archivo debe contener los registros adquiridos sin alterar y cuál el conteo por entidad?",
       "choices": [
+        "raw.jsonl contiene registros; conteos.json es derivado.",
         "Ambos son RAW porque están en JSON.",
-        "Solo el manifiesto es RAW.",
-        "raw.jsonl contiene registros; conteos.json es derivado."
+        "Solo el manifiesto es RAW."
       ],
-      "correct": 2,
+      "correct": 0,
       "feedback": [
+        "Correcto. El producto distingue entrada, transformación y metadatos. Los conteos pueden regenerarse desde RAW.",
         "El formato no define responsabilidad. Los derivados cambian información o grano.",
-        "El manifiesto documenta origen y controles; no sustituye las observaciones.",
-        "Correcto. El producto distingue entrada, transformación y metadatos. Los conteos pueden regenerarse desde RAW."
+        "El manifiesto documenta origen y controles; no sustituye las observaciones."
       ],
       "transfer": "Abre el paquete generado en A7; cuenta líneas, comprueba grano y verifica relectura."
     },
@@ -990,10 +1118,16 @@
           "Práctica: identifica en la carpeta creada por A7 qué archivo conserva la fuente, cuál la selección, cuál el resultado de negocio y cuál la evidencia de proceso. Abre manifest.json y ubica fuente, grano y controles. Relee RAW en una copia y verifica conteo por entidad. Cambia limit y chunk en A8, conserva el universo y contrasta huellas de RAW y conteos. Después selecciona otro prefijo y predice qué cambia. Si el paquete se mueve a otra ubicación, las rutas relativas y archivos deben continuar siendo verificables. Explica cómo entregarías la evidencia a alguien que no tiene acceso al cuaderno ni a su memoria activa. El paquete es la unidad de transferencia; una captura de pantalla es únicamente un complemento."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Producto guiado",
+      "facilitation": "Docente: ejecuta producir y señala los archivos. Estudiante: genera un paquete propio con universo fijo.",
+      "scope": "A7: verificar snapshot, RAW y conteos. Si el notebook falla, no sustituirlo por exportación JS ni acreditar ejecución.",
+      "liveCheck": false
+    }
   ],
   [
-    7,
+    6,
     "16B · Auditoría del producto",
     "Un hash no reemplaza el control de identidad",
     "El manifiesto fija fuente, grano, esquema y SHA-256. Se debe comprobar que los bytes y las identidades coincidan tras reabrirlos.",
@@ -1011,15 +1145,15 @@
     {
       "question": "Un archivo se reordena sin cambiar campos. ¿Cuál afirmación es correcta?",
       "choices": [
-        "Pueden cambiar bytes y hash, pero conservarse contenido por ID.",
         "Si cambia el hash, necesariamente hay fraude.",
-        "Si los IDs coinciden, los bytes son idénticos."
+        "Si los IDs coinciden, los bytes son idénticos.",
+        "Pueden cambiar bytes y hash, pero conservarse contenido por ID."
       ],
-      "correct": 0,
+      "correct": 2,
       "feedback": [
-        "Correcto. El hash opera sobre bytes; la equivalencia semántica necesita una definición adicional.",
         "Un cambio de serialización legítimo modifica bytes; no prueba autoría ni intención.",
-        "Un mismo ID puede tener campos modificados; incluso orden distinto cambia la serialización."
+        "Un mismo ID puede tener campos modificados; incluso orden distinto cambia la serialización.",
+        "Correcto. El hash opera sobre bytes; la equivalencia semántica necesita una definición adicional."
       ],
       "transfer": "Compara las tres opciones del experimento. Explica cuál control detecta modificar entidad."
     },
@@ -1035,10 +1169,16 @@
           "Reto: sobre una copia del paquete, modifica un carácter de conteos.json y verifica que la huella no coincida. Luego restaura los bytes exactos y comprueba que el control vuelva a pasar. En otra copia, reordena las líneas de RAW sin modificar sus objetos y calcula el nuevo hash; verifica además el mapa ID→contenido. No alteres el paquete original. Explica por qué cambiar una huella en el manifiesto no es una reparación válida sin investigar el origen. Si el cambio se desea como transformación autorizada, produce otro paquete con su nueva referencia, conserva el anterior y documenta la operación."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Prueba negativa",
+      "facilitation": "Docente: modifica una copia del paquete y muestra rechazo. Estudiante: explica qué controla hash y qué controla contenido.",
+      "scope": "A7.1: observar un rechazo; los cuatro casos quedan para ampliación. Comprobación en aula.",
+      "liveCheck": true
+    }
   ],
   [
-    7,
+    16,
     "17 · Construir tu propia adquisición",
     "Reto: cambia la decisión, no copies el resultado",
     "Vuelve al banco de datos y elige una escala diferente de la demostración. Predice número de páginas, ejecuta fragmentación, comprueba igualdad y genera estado. Tu trabajo debe contener resultados que puedas explicar.",
@@ -1080,10 +1220,16 @@
           "La evidencia final consta de una hipótesis escrita, el manifiesto producido, una comprobación de relectura, el resultado de agrupación y una explicación de límites. Guarda los parámetros exactos para que otra persona pueda repetir el recorrido. Si se usó una prueba HTTP local, decláralo; si se ejecutó una consulta viva, conserva su estado separado. El reto no exige usar más recursos, instalar un clúster o descargar datos privados. La dificultad consiste en controlar identidad, semántica y ejecución. Una defensa breve debe poder responder qué cambio afectó solo la forma de procesar, qué cambio afectó el universo y cómo se verificó que no se perdieron registros."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Autonomía",
+      "facilitation": "Estudiante: elige N, limit y chunk, calcula cuatro predicciones sin mostrar la solución, activa A8.1 y verifica dos paquetes. Docente: acompaña solo si hay bloqueo.",
+      "scope": "16 minutos protegidos. Si hay demora, preservar el reto y retirar demostraciones extra, no resolverlo por el estudiante.",
+      "liveCheck": false
+    }
   ],
   [
-    6,
+    7,
     "18 · Interpretar y defender",
     "Qué sabemos y qué no sabemos",
     "Sabemos cuántos procesos hay en nuestra selección, cómo están representados, qué campos faltan y que el conteo fragmentado coincide. No sabemos el gasto, la representatividad, ni la causalidad. Un sistema grande requiere decisiones basadas en restricciones medidas.",
@@ -1146,15 +1292,21 @@
           "Cierra con una explicación de un minuto: pregunta que se responde, unidad de observación, origen, operación, resultado y límite. Muestra el manifiesto y una prueba negativa que falló correctamente. Si falta una ejecución real, declárala como pendiente. Si la persona que escucha puede identificar qué evidencia debe abrir para contrastar tu afirmación, la defensa está bien delimitada. Si solo puede confiar en tu captura, falta trazabilidad. Escribe una pregunta que no puedas responder hoy y qué nueva fuente o medida necesitarías. Esta pregunta se convierte en insumo para la arquitectura futura, sin alterar las condiciones de aprobación de S01."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Evaluación de transferencia",
+      "facilitation": "Estudiante: explica una evidencia, un error detectado y un límite. Docente: contrasta con criterios formativos.",
+      "scope": "Seleccionar dos defensas breves; no convertir en nueva evaluación sumativa. Registrar quién completó de forma autónoma, sin inventar resultados.",
+      "liveCheck": false
+    }
   ],
   [
-    8,
+    5,
     "19 · Relevo",
     "Compras Claras v0.1 queda preparado",
     "El futuro diseño de arquitectura recibirá fuente, identidad, esquema, cobertura y restricciones. S01 termina cuando otra persona puede verificar el paquete, no al abrir otra sesión.",
     "Reabre el manifiesto de A7/A8, verifica grano, identidad, esquema y restricciones. El relevo queda preparado; S02 está bloqueada hasta aprobar S01.",
-    "Solo el estado portable confirma esta etapa. La ejecución Python se adjunta como evidencia separada.",
+    "El paquete releído de A7/A8 es el producto de aprendizaje; el estado portable de navegador es evidencia complementaria, no sustituto.",
     "flow",
     [
       "RAW S01",
@@ -1196,6 +1348,12 @@
           "La última actividad consiste en completar una ficha de relevo con fuente, versión, grano, esquema, cantidad, identidad, orden, transformación, evidencia y desconocidos. Incluye un ejemplo de consulta que el esquema soporta y otro que necesita datos adicionales. Registra si ejecutaste HTTP local, consulta viva o solo snapshot, y no confundas esas rutas. Explica cómo un consumidor comprobaría que dos configuraciones de bloques producen el mismo producto. La sesión estará preparada cuando una persona pueda realizar esa comprobación y defender la limitación; el criterio de calidad del material docente se evalúa aparte. S02 permanece bloqueada hasta que S01 cumpla las puertas de profundidad, práctica, visualización, autonomía y duración, sin alterar los recursos ya publicados."
         ]
       }
-    ]
+    ],
+    {
+      "phase": "Cierre",
+      "facilitation": "Docente: aplica ticket de salida de tres preguntas y recoge el producto mínimo. Estudiante: declara fuente, grano, universo y una restricción desconocida.",
+      "scope": "Cinco minutos protegidos. No avanzar a S02 dentro de esta revisión.",
+      "liveCheck": true
+    }
   ]
 ]

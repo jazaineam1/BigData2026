@@ -73,3 +73,6 @@ Prueba local de referencia del mismo algoritmo Python, con **200 registros sint�
 | Viabilidad temporal | 5% | 1 | Agenda suma 150 min. Lecturas extensas y pruebas de profundización no se asignan como lectura oral de clase. Falta ensayo cronometrado y medición de autonomía. |
  
 **Nota 3.35/5. S01 NO APROBADA. S02 BLOQUEADA.** Aumenta profundidad de 3 a 4 por capítulos completos y extensión léxica verificada; las demás notas no se inflan por pruebas de referencia o por autoevaluación del autor. Falta revisión semántica editorial, ejecución íntegra del cuaderno real, navegador real, ensayo de 150 minutos y observación de autonomía. Ninguna sesión posterior se intervino. No se fusiona ni despliega. SHA de main comprobado: 9876871419dca42e6a3d50bf5f2524a94e399a5a.
+
+## Octava iteración: evaluación pedagógica y secuencia
+Ver [evaluación pedagógica S01](evaluacion-pedagogica-s01.md). Nota provisional 3.68/5; S02 permanece bloqueada. Conteo léxico actualizado 41717. La modificación de diseño aún requiere QA posterior. 
