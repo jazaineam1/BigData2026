@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "status": "primera implementación parcial; no certificada",
+  "version": 2,
+  "status": "implementación parcial con laboratorios y cuadernos ampliados; 40.000 palabras por sesión y aceptación integral pendientes",
   "sessions": [
     {
       "id": "01",
@@ -11,7 +11,7 @@
       "notebook": {
         "path": "sesion1_introducci_n.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 85,
+        "cells": 87,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/sesion1_introducci_n.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/sesion1_introducci_n.ipynb"
       },
@@ -325,8 +325,12 @@
           "lab": {
             "index": 62,
             "heading": "Bloque 8 — Caso aplicado: consultar SECOP mediante la API Socrata",
-            "status": "sección temática identificada",
-            "gap": null
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Control de identidad sobre snapshot disponible; la descarga API en vivo sigue sin verificarse.",
+            "extension": {
+              "index": 85,
+              "heading": "Laboratorio ampliado · Paginación, cobertura y RAW releíble"
+            }
           }
         },
         {
@@ -342,8 +346,12 @@
           "lab": {
             "index": 62,
             "heading": "Bloque 8 — Caso aplicado: consultar SECOP mediante la API Socrata",
-            "status": "ampliación pendiente",
-            "gap": "La sección contiene el acceso API; falta certificar una práctica separada de offset, orden y cobertura."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Paginación y cobertura de snapshot con prueba local; falta confirmar consulta viva.",
+            "extension": {
+              "index": 85,
+              "heading": "Laboratorio ampliado · Paginación, cobertura y RAW releíble"
+            }
           }
         },
         {
@@ -376,8 +384,12 @@
           "lab": {
             "index": 84,
             "heading": "Relevo S02",
-            "status": "ampliación pendiente",
-            "gap": "El relevo describe el contrato; falta comprobar exportación y relectura."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Relectura de proyección de identidad y hash probada localmente; exportación RAW completa sigue por certificar.",
+            "extension": {
+              "index": 85,
+              "heading": "Laboratorio ampliado · Paginación, cobertura y RAW releíble"
+            }
           }
         },
         {
@@ -546,6 +558,12 @@
         "interpret": "Lee cada ventana y su posición inicial. Conciliamos filas, únicos, duplicados y ausentes: el conteo bruto no garantiza cobertura. Una respuesta vacía no es lo mismo que un error HTTP.",
         "challenge": "Recupera exactamente 12 IDs con limit=5 y el menor número de peticiones. Traslada el control al cuaderno SECOP y registra fuente y orden.",
         "limit": "Modelo local congelado, no descarga ni medición SECOP."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · Paginación, cobertura y RAW releíble",
+        "index": 85,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -557,7 +575,7 @@
       "notebook": {
         "path": "Cuadernos/2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 41,
+        "cells": 43,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb"
       },
@@ -859,8 +877,12 @@
           "lab": {
             "index": 30,
             "heading": "Paso 5 — Completar caso, arquitectura y ciclo",
-            "status": "ampliación pendiente",
-            "gap": "Falta una celda que valide el contrato de manera ejecutable."
+            "status": "ampliación local probada",
+            "gap": null,
+            "extension": {
+              "index": 41,
+              "heading": "Laboratorio ampliado · Contrato de datos y restricciones ejecutables"
+            }
           }
         },
         {
@@ -876,8 +898,12 @@
           "lab": {
             "index": 30,
             "heading": "Paso 5 — Completar caso, arquitectura y ciclo",
-            "status": "ampliación pendiente",
-            "gap": "Falta la simulación ejecutable de carga."
+            "status": "ampliación local probada",
+            "gap": null,
+            "extension": {
+              "index": 41,
+              "heading": "Laboratorio ampliado · Contrato de datos y restricciones ejecutables"
+            }
           }
         },
         {
@@ -893,8 +919,12 @@
           "lab": {
             "index": 16,
             "heading": "4. Arquitectura empresarial: conectar el propósito con la solución",
-            "status": "ampliación pendiente",
-            "gap": "Falta matriz ejecutable de decisión."
+            "status": "ampliación local probada",
+            "gap": null,
+            "extension": {
+              "index": 41,
+              "heading": "Laboratorio ampliado · Contrato de datos y restricciones ejecutables"
+            }
           }
         },
         {
@@ -1102,6 +1132,12 @@
         "interpret": "El presupuesto didáctico es 50 GB y frescura de 10 minutos, dos copias y dos minutos de cálculo. Evalúa restricciones primero, luego preferencias. El resultado no es precio.",
         "challenge": "Encuentra dos diseños factibles y uno que falle solo en frescura. Explica qué componente cambiarías.",
         "limit": "Estimación con supuestos, no costo de nube."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · Contrato de datos y restricciones ejecutables",
+        "index": 41,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -1113,7 +1149,7 @@
       "notebook": {
         "path": "Cuadernos/3_MongoDB_Documental.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 130,
+        "cells": 132,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/3_MongoDB_Documental.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/3_MongoDB_Documental.ipynb"
       },
@@ -1456,8 +1492,12 @@
           "lab": {
             "index": 81,
             "heading": "Paso 3 · Tres consultas tuyas",
-            "status": "ampliación pendiente",
-            "gap": "Falta un experimento controlado de explain antes/después del índice."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Código explain real disponible con ejecución opt-in; motor remoto/local MongoDB no ejecutado aquí.",
+            "extension": {
+              "index": 130,
+              "heading": "Laboratorio ampliado · Índices y explain controlado"
+            }
           }
         },
         {
@@ -1636,6 +1676,12 @@
         "interpret": "Separa coincidencia independiente de coincidencia conjunta. La diferencia es un falso positivo respecto de la intención definida; no una medida de rendimiento.",
         "challenge": "Cambia tipo y estado, anticipa los IDs y escribe la expresión equivalente de MongoDB en el cuaderno.",
         "limit": "Evaluación local de documentos ficticios, no ejecución MongoDB."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · Índices y explain controlado",
+        "index": 130,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -1647,7 +1693,7 @@
       "notebook": {
         "path": "Cuadernos/4_Atlas_Cassandra_Laura.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 39,
+        "cells": 41,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/4_Atlas_Cassandra_Laura.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/4_Atlas_Cassandra_Laura.ipynb"
       },
@@ -1990,8 +2036,12 @@
           "lab": {
             "index": 13,
             "heading": "Crea la base en Atlas, y carga los dos archivos con Python",
-            "status": "ampliación pendiente",
-            "gap": "No se encontró una sección independiente de reconexión y relectura."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Reconexión SQLite probada localmente; Atlas solo lectura opt-in aún no ejecutada.",
+            "extension": {
+              "index": 39,
+              "heading": "Laboratorio ampliado · Persistencia, reconexión y bandeja"
+            }
           }
         },
         {
@@ -2007,8 +2057,12 @@
           "lab": {
             "index": 18,
             "heading": "Segunda mitad · De la vista de Atlas a la bandeja de Laura",
-            "status": "ampliación pendiente",
-            "gap": "Falta certificar exportación/relectura de bandeja."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Exportación/relectura de bandeja disponible si existe DataFrame de la sesión; ruta de datos reales pendiente.",
+            "extension": {
+              "index": 39,
+              "heading": "Laboratorio ampliado · Persistencia, reconexión y bandeja"
+            }
           }
         },
         {
@@ -2169,6 +2223,12 @@
         "interpret": "La tabla conserva el estado original y la regla aplicada. Compara identidades seleccionadas, no solo cantidad.",
         "challenge": "Busca dos configuraciones con igual número de resultados pero IDs distintos. Luego comprueba una consulta equivalente en Atlas.",
         "limit": "Selección local; no demuestra reconexión ni replicación."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · Persistencia, reconexión y bandeja",
+        "index": 39,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -2180,7 +2240,7 @@
       "notebook": {
         "path": "Cuadernos/5_Atlas_Cassandra_Query_First.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 82,
+        "cells": 84,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/5_Atlas_Cassandra_Query_First.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/5_Atlas_Cassandra_Query_First.ipynb"
       },
@@ -2489,8 +2549,12 @@
           "lab": {
             "index": 49,
             "heading": "9. PRODUCTO 3 · Tramo B — la misma tabla, ahora desde Python",
-            "status": "ampliación pendiente",
-            "gap": "Es la misma tabla; falta implementar una segunda consulta física con otra clave."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Dos tablas CQL aisladas implementadas con ruta opt-in; Cassandra/Astra no ejecutado aquí.",
+            "extension": {
+              "index": 82,
+              "heading": "Laboratorio ampliado · Dos patrones de consulta CQL"
+            }
           }
         },
         {
@@ -2506,8 +2570,12 @@
           "lab": {
             "index": 32,
             "heading": "Microejemplo — piensa en cajones antes de mirar la PRIMARY KEY",
-            "status": "ampliación pendiente",
-            "gap": "Falta medir concentración en el conjunto real."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Perfil de concentración sintético probado localmente; falta medición de datos reales.",
+            "extension": {
+              "index": 82,
+              "heading": "Laboratorio ampliado · Dos patrones de consulta CQL"
+            }
           }
         },
         {
@@ -2710,6 +2778,12 @@
         "interpret": "La tabla muestra clave, intervalo, conteo y si toca el rango. Los buckets al final del año pueden ser más pequeños. Un rango se limita al año disponible.",
         "challenge": "Escoge bucket para dos meses y máximo 40 filas por grupo. Escribe una clave primaria CQL apropiada.",
         "limit": "Distribución lógica sintética, no hashing, nodos o latencia Cassandra."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · Dos patrones de consulta CQL",
+        "index": 82,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -2721,7 +2795,7 @@
       "notebook": {
         "path": "Cuadernos/6_Neo4j_Contexto_Relacional.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 119,
+        "cells": 121,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/6_Neo4j_Contexto_Relacional.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/6_Neo4j_Contexto_Relacional.ipynb"
       },
@@ -3070,7 +3144,11 @@
             "index": 79,
             "heading": "8. Verificación — ¿Neo4j y pandas cuentan lo mismo?",
             "status": "sección temática identificada",
-            "gap": null
+            "gap": null,
+            "extension": {
+              "index": 119,
+              "heading": "Laboratorio ampliado · Integridad y exportación de un subgrafo"
+            }
           }
         },
         {
@@ -3086,8 +3164,12 @@
           "lab": {
             "index": 105,
             "heading": "Comprueba tu entrega",
-            "status": "ampliación pendiente",
-            "gap": "Verificar exportación de nodos y aristas con procedencia."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Exportación y relectura de subgrafo sintético probadas; producto de Aura real pendiente.",
+            "extension": {
+              "index": 119,
+              "heading": "Laboratorio ampliado · Integridad y exportación de un subgrafo"
+            }
           }
         },
         {
@@ -3256,6 +3338,12 @@
         "interpret": "Lee las trayectorias dirigidas; filtrar X no borra aristas. En Cypher compara proyección con y sin DISTINCT.",
         "challenge": "Formula una consulta de dos saltos desde B. Contrasta sus resultados con una tabla de aristas.",
         "limit": "Recorrido real de grafo sintético en JS, no Neo4j ni inferencia de fraude."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · Integridad y exportación de un subgrafo",
+        "index": 119,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -3267,7 +3355,7 @@
       "notebook": {
         "path": "Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 31,
+        "cells": 33,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb"
       },
@@ -3569,8 +3657,12 @@
           "lab": {
             "index": 13,
             "heading": "D · Console antes de Python",
-            "status": "ampliación pendiente",
-            "gap": "Falta una sección independiente de _analyze con verificación de términos."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Código _analyze real opt-in; ejecución externa pendiente.",
+            "extension": {
+              "index": 31,
+              "heading": "Laboratorio ampliado · BM25, análisis y explicación del resultado"
+            }
           }
         },
         {
@@ -3603,8 +3695,12 @@
           "lab": {
             "index": 23,
             "heading": "G2. multi_match, filter y highlight",
-            "status": "ampliación pendiente",
-            "gap": "Falta una práctica explícita de _explain por término."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Código _explain real opt-in; ejecución externa pendiente.",
+            "extension": {
+              "index": 31,
+              "heading": "Laboratorio ampliado · BM25, análisis y explicación del resultado"
+            }
           }
         },
         {
@@ -3807,6 +3903,12 @@
         "interpret": "Observa frecuencia, longitud, normalización, IDF y score por documento; las estadísticas pertenecen al corpus fijo. Un empate se resuelve por ID.",
         "challenge": "Busca una configuración donde D1 gane con menor frecuencia; explica con factores intermedios. Compara luego con explain real.",
         "limit": "Cálculo de BM25 de un término; no consulta Elasticsearch."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · BM25, análisis y explicación del resultado",
+        "index": 31,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -4348,6 +4450,11 @@
         "interpret": "Las páginas omitidas permanecen visibles. El tiempo ideal usa rondas de peticiones efectivamente ejecutadas, sin red ni coordinación.",
         "challenge": "Compara un escenario rápido incompleto y otro completo. Explica el riesgo sin resolver TC1.",
         "limit": "Ejemplo de biblioteca no evaluativo."
+      },
+      "extension": {
+        "kind": "assessment",
+        "title": "Repaso no evaluativo integrado",
+        "description": "Se conserva el cuaderno y la rúbrica oficial. El laboratorio interactivo es un caso independiente, no añade requisitos ni revela respuestas evaluadas."
       }
     },
     {
@@ -4359,7 +4466,7 @@
       "notebook": {
         "path": "Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 21,
+        "cells": 23,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb"
       },
@@ -4712,8 +4819,12 @@
           "lab": {
             "index": 19,
             "heading": "Ampliación 2 · Benchmark responsable",
-            "status": "ampliación pendiente",
-            "gap": "No se certifica una fusión RRF completa ni juicios independientes."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "RRF y métricas sintéticas probadas; fusión sobre corpus real opt-in pendiente y juicios independientes por recoger.",
+            "extension": {
+              "index": 21,
+              "heading": "Laboratorio ampliado · RRF y relevancia sobre el mismo universo"
+            }
           }
         },
         {
@@ -4899,6 +5010,12 @@
         "interpret": "La tabla expone ambos rangos y contribuciones; juicios fijos B y C. Compara P/R de lexical, vectorial e híbrida. No confundir relevancia con recall de vecinos ANN.",
         "challenge": "Encuentra un caso en el que la fusión no sea mejor que una lista individual y justifica mediante IDs.",
         "limit": "Rankings ficticios; no genera embeddings ni ejecuta Atlas."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · RRF y relevancia sobre el mismo universo",
+        "index": 21,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -4910,7 +5027,7 @@
       "notebook": {
         "path": "Cuadernos/10_Imagenes_Audio.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 48,
+        "cells": 50,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/10_Imagenes_Audio.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/10_Imagenes_Audio.ipynb"
       },
@@ -5254,7 +5371,11 @@
             "index": 37,
             "heading": "10 · ¿Dónde aparece Big Data?",
             "status": "sección temática identificada",
-            "gap": null
+            "gap": null,
+            "extension": {
+              "index": 48,
+              "heading": "Laboratorio ampliado · Threads, mismo corpus y verificación de bytes"
+            }
           }
         },
         {
@@ -5440,6 +5561,12 @@
         "interpret": "Se generan muestras y se calcula RMS y el pico de la transformada discreta de Fourier mediante proyecciones. Compara frecuencia real y observada.",
         "challenge": "Encuentra dos frecuencias que produzcan el mismo alias; comprueba después metadatos y espectro de audio real.",
         "limit": "Senoide sintética; DFT directa, no FFT ni ASR."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · Threads, mismo corpus y verificación de bytes",
+        "index": 48,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -5782,8 +5909,11 @@
           "lab": {
             "index": 28,
             "heading": "5 · Transcribir voz REAL con Faster-Whisper (35–44 min)",
-            "status": "ampliación pendiente",
-            "gap": "Verificar audio largo y cobertura global; el encabezado no lo garantiza."
+            "status": "ampliación disponible como código en presentación",
+            "gap": "Segmentación de referencia probada; ASR real y cobertura sobre corpus autorizado pendientes.",
+            "extension": {
+              "heading": "Ampliación de código · audio largo con cobertura y offsets"
+            }
           }
         },
         {
@@ -5986,6 +6116,12 @@
         "interpret": "Se calcula cobertura por segundo y duplicación adicional. El último intervalo se recorta al final real. Solapes requieren consolidar texto y tiempos, no eliminar arbitrariamente.",
         "challenge": "Cubre todo el audio con ventanas de máximo 30 s; verifica el caso real largo conservando offsets y fuente.",
         "limit": "Simulación temporal; no ejecución Whisper ni CER/WER."
+      },
+      "extension": {
+        "kind": "inline",
+        "title": "Ampliación de código · audio largo con cobertura y offsets",
+        "code": "import hashlib, subprocess, wave, json\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\nRUTA_AUDIO = \"\"  # ruta explícita de un activo autorizado; vacío = señal sintética\nVENTANA_S = 20\nEJECUTAR_ASR_LARGO = False\n\ndef hash_archivo_s11(ruta):\n    h=hashlib.sha256()\n    with open(ruta,\"rb\") as f:\n        for bloque in iter(lambda:f.read(1024*1024),b\"\"): h.update(bloque)\n    return h.hexdigest()\n\nwith TemporaryDirectory(prefix=\"s11_revision_\") as tmp:\n    tmp=Path(tmp); pcm=tmp/\"pcm.wav\"\n    if RUTA_AUDIO:\n        original=Path(RUTA_AUDIO)\n        assert original.is_file()\n        hash_original=hash_archivo_s11(original)\n        subprocess.run([\"ffmpeg\",\"-nostdin\",\"-v\",\"error\",\"-y\",\"-i\",str(original),\n                        \"-ac\",\"1\",\"-ar\",\"16000\",\"-c:a\",\"pcm_s16le\",str(pcm)],check=True,timeout=180)\n        origen=\"archivo autorizado\"\n    else:\n        with wave.open(str(pcm),\"wb\") as f:\n            f.setnchannels(1); f.setsampwidth(2); f.setframerate(16000)\n            f.writeframes(b\"\\x00\\x00\"*(73*16000))\n        hash_original=hash_archivo_s11(pcm)\n        origen=\"señal sintética silenciosa; no es voz\"\n    inventario=[]; predicciones=[]\n    with wave.open(str(pcm),\"rb\") as f:\n        tasa=f.getframerate(); n=f.getnframes(); assert tasa==16000 and n>0\n        ancho=VENTANA_S*tasa; assert ancho>0\n        for inicio in range(0,n,ancho):\n            cantidad=min(ancho,n-inicio); f.setpos(inicio); datos=f.readframes(cantidad)\n            assert len(datos)==cantidad*2\n            trozo=tmp/f\"seg_{inicio}.wav\"\n            with wave.open(str(trozo),\"wb\") as w:\n                w.setnchannels(1); w.setsampwidth(2); w.setframerate(tasa); w.writeframes(datos)\n            inventario.append({\"inicio_muestra\":inicio,\"fin_muestra\":inicio+cantidad,\n                               \"inicio_s\":inicio/tasa,\"fin_s\":(inicio+cantidad)/tasa,\n                               \"sha256\":hash_archivo_s11(trozo)})\n            if EJECUTAR_ASR_LARGO:\n                if not RUTA_AUDIO: raise ValueError(\"Usa voz real autorizada para inferencia\")\n                modelo=globals().get(\"modelo_voz\") or globals().get(\"whisper\")\n                if modelo is None: raise RuntimeError(\"Carga primero el modelo de la sesión\")\n                segmentos,_=modelo.transcribe(str(trozo),language=\"es\",beam_size=2)\n                for s in segmentos:\n                    predicciones.append({\"inicio_s\":inicio/tasa+s.start,\"fin_s\":inicio/tasa+s.end,\n                                         \"texto\":s.text,\"ventana_inicio_s\":inicio/tasa})\n    assert inventario[0][\"inicio_muestra\"]==0 and inventario[-1][\"fin_muestra\"]==n\n    assert all(a[\"fin_muestra\"]==b[\"inicio_muestra\"] for a,b in zip(inventario,inventario[1:]))\n    if RUTA_AUDIO: assert hash_archivo_s11(original)==hash_original\n    evidencia_s11={\"origen\":origen,\"sha_fuente\":hash_original,\"muestras\":n,\"tasa\":tasa,\n                   \"ventanas\":inventario,\"asr_ejecutado\":EJECUTAR_ASR_LARGO,\"segmentos\":predicciones}\n    print(json.dumps(evidencia_s11,ensure_ascii=False,indent=2))\n    if not RUTA_AUDIO: assert inventario[-1][\"fin_s\"]==73",
+        "description": "Ejecuta esta celda adicional en el Codespace canónico, después de preparar el entorno y antes de ASR. El control local crea un WAV sintético de 73 s; con RUTA_AUDIO explícita convierte una copia a PCM16 de 16 kHz mediante ffmpeg, preserva hash del original y segmenta por muestras sin truncar. EJECUTAR_ASR_LARGO es opt-in: requiere modelo de la sesión ya cargado y voz autorizada. Los segmentos de Whisper se convierten a tiempos globales; se registra cobertura de entrada, no exactitud de texto. El inventario está en evidencia_s11; los archivos de ventana son temporales. El caso sintético se ejecutó localmente: 4 ventanas, 73 s; no se ejecutó Whisper ni el audio real largo. La rama de estudiantes permanece intacta."
       }
     },
     {
@@ -6534,6 +6670,11 @@
         "interpret": "Se asignan estados hasta agotar entradas. El duplicado conserva identidad. Contrasta filas e IDs y explica qué estados faltan.",
         "challenge": "Construye una conciliación limpia y otra con duplicación; no uses este ejercicio como respuesta de TC2.",
         "limit": "Caso ficticio no evaluativo; no cambia rúbrica."
+      },
+      "extension": {
+        "kind": "assessment",
+        "title": "Repaso no evaluativo integrado",
+        "description": "Se conserva el cuaderno y la rúbrica oficial. El laboratorio interactivo es un caso independiente, no añade requisitos ni revela respuestas evaluadas."
       }
     },
     {
@@ -6893,8 +7034,11 @@
           "lab": {
             "index": 43,
             "heading": "11 · K-means local y distribuido: una comparación justa",
-            "status": "ampliación pendiente",
-            "gap": "No sustituye entrenamiento supervisado por particiones; añadirlo."
+            "status": "ampliación disponible como código en presentación",
+            "gap": "Regresión logística por lotes de referencia probada; Dask Distributed pendiente.",
+            "extension": {
+              "heading": "Ampliación de código · una regresión logística con gradientes por lote"
+            }
           }
         },
         {
@@ -7080,6 +7224,12 @@
         "interpret": "Tabla de estados parciales: tamaño, suma, media y worker conceptual. Compara media exacta, combinada e incorrecta. La carga máxima es un proxy, no tiempo medido.",
         "challenge": "Busca tamaños iguales; luego prueba la misma reducción en Dask frente a pandas y mide configuraciones sin cambiar universo.",
         "limit": "Cálculo real local, no clúster ni benchmark Dask."
+      },
+      "extension": {
+        "kind": "inline",
+        "title": "Ampliación de código · una regresión logística con gradientes por lote",
+        "code": "import numpy as np, time\nN_POR_LOTE=1000; LOTES=8; EPOCAS=20; TASA=.4\nEJECUTAR_DASK_SUPERVISADO=False\n\ndef lote_s13(seed,n):\n    rng=np.random.default_rng(seed)\n    x=rng.normal(size=(n,2)); ruido=rng.normal(scale=.4,size=n)\n    y=(x[:,0]-.7*x[:,1]+ruido>0).astype(float)\n    return np.column_stack((np.ones(n),x)),y\n\ndef grad_s13(seed,n,w):\n    x,y=lote_s13(seed,n); z=x@w; p=1/(1+np.exp(-np.clip(z,-40,40)))\n    return x.T@(p-y),float(np.sum(np.logaddexp(0,z)-y*z)),n\n\ndef fit_s13(cliente=None):\n    w=np.zeros(3); historial=[]\n    for _ in range(EPOCAS):\n        if cliente is None:\n            parciales=[grad_s13(i,N_POR_LOTE,w) for i in range(LOTES)]\n        else:\n            futuros=[cliente.submit(grad_s13,i,N_POR_LOTE,w,pure=False) for i in range(LOTES)]\n            parciales=cliente.gather(futuros)  # solo gradiente, pérdida y conteo por lote\n        n=sum(p[2] for p in parciales); assert n==LOTES*N_POR_LOTE\n        grad=np.sum([p[0] for p in parciales],axis=0)/n\n        historial.append(sum(p[1] for p in parciales)/n)\n        w-=TASA*grad\n    return w,historial\n\ninicio=time.perf_counter(); referencia,perdidas=fit_s13(); t_local=time.perf_counter()-inicio\nassert perdidas[-1]<perdidas[0]\nxt,yt=lote_s13(100_000,N_POR_LOTE)  # semilla de test disjunta\nacc=float(np.mean((xt@referencia>=0)==yt))\nprint({\"modo\":\"referencia secuencial\",\"train\":LOTES*N_POR_LOTE,\"pesos\":referencia.tolist(),\n       \"loss_inicial\":perdidas[0],\"loss_final\":perdidas[-1],\"accuracy_test\":acc,\"segundos\":t_local})\nif EJECUTAR_DASK_SUPERVISADO:\n    from distributed import Client, LocalCluster\n    with LocalCluster(n_workers=2,threads_per_worker=1,processes=True,dashboard_address=None) as cluster:\n        with Client(cluster) as cliente:\n            cliente.wait_for_workers(2)\n            inicio=time.perf_counter(); pesos,hist=fit_s13(cliente); t=time.perf_counter()-inicio\n            assert np.allclose(pesos,referencia,rtol=1e-9,atol=1e-9)\n            print({\"modo\":\"Dask Distributed\",\"workers\":len(cliente.scheduler_info()[\"workers\"]),\n                   \"train\":LOTES*N_POR_LOTE,\"loss_final\":hist[-1],\n                   \"accuracy_test\":float(np.mean((xt@pesos>=0)==yt)),\"segundos_fit\":t})\nelse:\n    print(\"Ejecución distribuida pendiente; no se atribuye el fit de referencia a Dask.\")",
+        "description": "Ejecuta esta celda adicional después de la comparación Dask–pandas y antes del cierre ML. No modifica el K-means original. Cada worker genera su lote sintético determinista, calcula z=Xw, p=sigmoide(z), gradiente Xᵀ(p−y) y pérdida logística. El coordinador combina gradientes y conteos y actualiza tres pesos comunes: se entrena un modelo global, no ocho modelos independientes. Se regeneran los lotes por semilla para evitar recopilar toda la matriz; esto añade costo de cómputo. El test usa una semilla disjunta. La referencia secuencial sí se ejecutó sobre 8.000 filas: pérdida 0,693147→0,352416 y accuracy test 0,907. Activa EJECUTAR_DASK_SUPERVISADO solo en el Codespace con distributed instalado; compara pesos, workers y tiempo. Dask no estaba instalado en el entorno de prueba y no se certifica el fit distribuido ni escala fuera de pandas. No aumentar N automáticamente."
       }
     },
     {
@@ -7091,7 +7241,7 @@
       "notebook": {
         "path": "Cuadernos/14_PySpark_Compras_Claras.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 71,
+        "cells": 73,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/14_PySpark_Compras_Claras.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/14_PySpark_Compras_Claras.ipynb"
       },
@@ -7401,7 +7551,11 @@
             "index": 28,
             "heading": "8B · Cruzar datos con una dimensión pequeña",
             "status": "sección temática identificada",
-            "gap": null
+            "gap": null,
+            "extension": {
+              "index": 71,
+              "heading": "Laboratorio ampliado · Cardinalidad de join y equivalencia de estrategias"
+            }
           }
         },
         {
@@ -7621,6 +7775,12 @@
         "interpret": "Lee todas las parejas y los faltantes; un resultado puede ser lógicamente correcto y no cumplir la intención de negocio. Distinct ocultaría multiplicación; en Spark usa exceptAll bidireccional.",
         "challenge": "Obtén seis filas y cuatro procesos; verifica unicidad de dimensión y compara planes reales en el cuaderno.",
         "limit": "Join local, no Spark ni medición shuffle."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · Cardinalidad de join y equivalencia de estrategias",
+        "index": 71,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -7632,7 +7792,7 @@
       "notebook": {
         "path": "Cuadernos/14A_Databricks_E2E_Escala.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 28,
+        "cells": 30,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/14A_Databricks_E2E_Escala.ipynb",
         "launch": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/14A_Databricks_E2E_Escala.ipynb"
       },
@@ -7918,7 +8078,11 @@
             "index": 1,
             "heading": "A0 · Configuración y seguridad de escala",
             "status": "sección temática identificada",
-            "gap": null
+            "gap": null,
+            "extension": {
+              "index": 28,
+              "heading": "Laboratorio ampliado · Preflight de entrenamiento y evidencia de capacidad"
+            }
           }
         },
         {
@@ -7986,7 +8150,11 @@
             "index": 16,
             "heading": "A5 · Entrenar modelos Spark MLlib sobre todo train",
             "status": "sección temática identificada",
-            "gap": null
+            "gap": null,
+            "extension": {
+              "index": 28,
+              "heading": "Laboratorio ampliado · Preflight de entrenamiento y evidencia de capacidad"
+            }
           }
         },
         {
@@ -8158,6 +8326,12 @@
         "interpret": "La tabla muestra etiqueta, puntuación, decisión y tipo de error. Denominador cero se reporta con convención de cero. Precision no necesariamente es monótona.",
         "challenge": "Compara dos umbrales y enumera las evidencias que probarían fit remoto a escala.",
         "limit": "Puntuaciones ficticias fijas; no entrenamiento ni métricas Databricks."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · Preflight de entrenamiento y evidencia de capacidad",
+        "index": 28,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -8169,7 +8343,7 @@
       "notebook": {
         "path": "Cuadernos/15_Pipeline_Confiable.ipynb",
         "ref": "mejora-pedagogica-integral",
-        "cells": 19,
+        "cells": 21,
         "url": "https://github.com/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/15_Pipeline_Confiable.ipynb",
         "launch": "https://colab.research.google.com/github/jazaineam1/BigData2026/blob/mejora-pedagogica-integral/Cuadernos/15_Pipeline_Confiable.ipynb"
       },
@@ -8479,7 +8653,11 @@
             "index": 7,
             "heading": "3 · Fallo controlado y recuperación",
             "status": "sección temática identificada",
-            "gap": null
+            "gap": null,
+            "extension": {
+              "index": 19,
+              "heading": "Laboratorio ampliado · Fallo inyectado, replay y equivalencia de estados"
+            }
           }
         },
         {
@@ -8513,7 +8691,11 @@
             "index": 13,
             "heading": "5 · Reto de transferencia (formativo)",
             "status": "sección temática identificada",
-            "gap": null
+            "gap": null,
+            "extension": {
+              "index": 19,
+              "heading": "Laboratorio ampliado · Fallo inyectado, replay y equivalencia de estados"
+            }
           }
         },
         {
@@ -8529,8 +8711,12 @@
           "lab": {
             "index": 10,
             "heading": "4 · Repetición, cambio de esquema y evidencia",
-            "status": "ampliación pendiente",
-            "gap": "Falta una exportación explícita de observabilidad."
+            "status": "ampliación incorporada; prueba real pendiente según alcance",
+            "gap": "Control de recuperación con traza local probado; exportación operativa de observabilidad aún pendiente.",
+            "extension": {
+              "index": 19,
+              "heading": "Laboratorio ampliado · Fallo inyectado, replay y equivalencia de estados"
+            }
           }
         },
         {
@@ -8699,6 +8885,12 @@
         "interpret": "Lee trazas y estados canónicos. El fallo posterior a escritura genera reintento; el previo pierde evento. El control compara multiconjunto o estado por versión según regla.",
         "challenge": "Encuentra recuperación equivalente y pérdida irreversible; explica por qué idempotencia no corrige checkpoint adelantado.",
         "limit": "Máquina de estados local; no prueba Kafka, Delta ni exactly-once."
+      },
+      "extension": {
+        "title": "Laboratorio ampliado · Fallo inyectado, replay y equivalencia de estados",
+        "index": 19,
+        "kind": "notebook",
+        "status": "Práctica nueva; referencia local probada, servicios externos pendientes cuando corresponda."
       }
     },
     {
@@ -9240,6 +9432,11 @@
         "interpret": "La tabla enumera combinaciones; dos libros siguen siendo dos aunque aumenten filas. El grano cambia de edición×revisión a edición.",
         "challenge": "Identifica una consulta que requiera historia y otra que requiera última revisión; aplica el criterio según rúbrica vigente.",
         "limit": "Caso no evaluativo ajeno al proyecto."
+      },
+      "extension": {
+        "kind": "assessment",
+        "title": "Repaso no evaluativo integrado",
+        "description": "Se conserva el cuaderno y la rúbrica oficial. El laboratorio interactivo es un caso independiente, no añade requisitos ni revela respuestas evaluadas."
       }
     }
   ]
