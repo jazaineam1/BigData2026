@@ -1,0 +1,839 @@
+{
+  "version": 1,
+  "branch": "mejora-pedagogica-integral",
+  "routes": [
+    {
+      "id": "01",
+      "title": "¿Cuándo necesitamos Big Data?",
+      "problem": "Laura necesita leer una fuente creciente sin agotar memoria.",
+      "concept": "Las cinco V describen restricciones. La lectura por fragmentos conserva agregados asociativos sin cargar toda la fuente.",
+      "nb": "sesion1_introducci_n.ipynb",
+      "original": null,
+      "kind": "memory",
+      "steps": [
+        {
+          "title": "Preparar",
+          "action": "Abre Colab y confirma versiones.",
+          "evidence": "Versiones de Python y pandas."
+        },
+        {
+          "title": "Explorar",
+          "action": "Recorre los bloques 1–3: diagnostica las cinco V y compara formatos.",
+          "evidence": "Selecciona una V dominante y una limitación."
+        },
+        {
+          "title": "Ejecutar",
+          "action": "Realiza bloques 4–8; compara lectura por fragmentos y consulta SECOP.",
+          "evidence": "Conteos y agregados; muestra de API."
+        },
+        {
+          "title": "Transferir",
+          "action": "Cambia la escala en el experimento complementario.",
+          "evidence": "Misma suma, mismo conteo, tiempos y tamaño del archivo."
+        }
+      ],
+      "code": "import csv, tempfile, time\nfrom pathlib import Path\nimport pandas as pd\nN = 10000  # cambia a 100000; 1000000 solo voluntariamente\nwith tempfile.TemporaryDirectory() as d:\n    p = Path(d) / \"datos.csv\"\n    with p.open(\"w\", newline=\"\") as f:\n        w = csv.writer(f); w.writerow([\"id\", \"valor\"])\n        w.writerows((i, i % 101) for i in range(N))\n    t = time.perf_counter()\n    df = pd.read_csv(p)\n    a = (len(df), int(df.valor.sum()))\n    t1 = time.perf_counter() - t\n    mem = int(df.memory_usage(deep=True).sum())\n    del df\n    t = time.perf_counter()\n    n = s = 0\n    for bloque in pd.read_csv(p, chunksize=1000):\n        n += len(bloque); s += int(bloque.valor.sum())\n    t2 = time.perf_counter() - t\n    assert a == (n, s)\n    print({\"filas\": n, \"suma\": s, \"bytes_csv\": p.stat().st_size,\n           \"bytes_df\": mem, \"segundos_completo\": t1, \"segundos_bloques\": t2})",
+      "interpret": "Los dos resultados deben coincidir; los tiempos dependen de caché y entorno. Los bytes del DataFrame no son el pico de RAM.",
+      "challenge": "Modifica el tamaño de bloque a 500 y 5000; conserva N. Compara tres resultados.",
+      "limit": "La muestra sintética no demuestra velocidad de una API ni que se necesite un clúster.",
+      "quiz": {
+        "question": "Si el CSV no cabe en memoria pero solo necesitamos una suma, ¿qué probamos primero?",
+        "options": [
+          "Lectura por fragmentos",
+          "Cargar todo dos veces",
+          "Un clúster obligatorio"
+        ],
+        "feedback": [
+          "Correcto: el agregado se combina.",
+          "Duplicaría memoria sin resolver la restricción.",
+          "Un clúster puede ser útil, pero aún no está justificado."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "02",
+      "title": "¿Cómo diseñar una arquitectura?",
+      "problem": "Compras Claras debe convertir registros públicos en una decisión.",
+      "concept": "AS-IS describe el proceso vigente; TO-BE la solución objetivo. Requisitos de volumen, latencia y costo guían las decisiones.",
+      "nb": "Cuadernos/2_Sesion_Arquitectura_BPM_Ciclo_Analitico.ipynb",
+      "original": null,
+      "kind": "architecture",
+      "steps": [
+        {
+          "title": "Definir",
+          "action": "Lee la necesidad, proceso AS-IS y ciclo analítico.",
+          "evidence": "Decisión y fuente identificadas."
+        },
+        {
+          "title": "Diseñar",
+          "action": "Compara local, lotes y eventos antes de elegir herramientas.",
+          "evidence": "Diagrama TO-BE y alternativa descartada."
+        },
+        {
+          "title": "Versionar",
+          "action": "Sigue los pasos de rama, commit y PR del cuaderno.",
+          "evidence": "Enlace al PR de trabajo."
+        },
+        {
+          "title": "Transferir",
+          "action": "Modifica el requisito de latencia en el simulador.",
+          "evidence": "Arquitectura seleccionada con evidencia."
+        }
+      ],
+      "code": "# Presupuesto ilustrativo de latencia: mide requisitos, no proveedores.\nalternativas = {\"local\": (300, 1), \"lotes\": (60, 2), \"eventos\": (2, 4)}\nlatencia_max_s = 120\nviables = {k:v for k,v in alternativas.items() if v[0] <= latencia_max_s}\nassert viables\nseleccion = min(viables, key=lambda k: viables[k][1])\nprint(seleccion, viables)",
+      "interpret": "El ejemplo usa latencias y costos relativos ficticios; filtra por requisito y luego compara costo.",
+      "challenge": "Cambia latencia_max_s de 120 a 5 y observa la nueva decisión.",
+      "limit": "No sustituye el diseño de seguridad, disponibilidad o un presupuesto real.",
+      "quiz": {
+        "question": "¿Qué se define primero?",
+        "options": [
+          "La marca del motor",
+          "La decisión y sus requisitos",
+          "La cantidad de servidores"
+        ],
+        "feedback": [
+          "La herramienta viene después.",
+          "Correcto: determina la solución.",
+          "Depende de requisitos y carga."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "03",
+      "title": "¿Cuándo una fila no representa el dato?",
+      "problem": "Las noticias y procesos tienen estructuras heterogéneas.",
+      "concept": "Un documento puede contener listas y objetos. Un índice reduce candidatos para ciertas consultas; escribirlo y conservarlo también cuesta.",
+      "nb": "Cuadernos/3_MongoDB_Documental.ipynb",
+      "original": null,
+      "kind": "index",
+      "steps": [
+        {
+          "title": "Observar",
+          "action": "Lee bloques 0–3: compara tabla, JSON y BSON.",
+          "evidence": "Documento anidado identificado."
+        },
+        {
+          "title": "Consultar",
+          "action": "En bloques 6–7 ejecuta find, proyección y agregación.",
+          "evidence": "Tres consultas y su resultado."
+        },
+        {
+          "title": "Medir",
+          "action": "En MongoDB real usa explain de una consulta selectiva antes y después de un índice de práctica.",
+          "evidence": "Plan y totalDocsExamined si el motor lo ofrece."
+        },
+        {
+          "title": "Profundizar",
+          "action": "Lee replicación, CAP y sharding después de la ruta esencial.",
+          "evidence": "Diferencia entre distribuir y copiar."
+        }
+      ],
+      "code": "# Modelo mental: índice en memoria, no MongoDB.\nfrom collections import defaultdict\ndocs = [{\"id\": i, \"entidad\": i % 100} for i in range(10000)]\nindice = defaultdict(list)\nfor d in docs:\n    indice[d[\"entidad\"]].append(d[\"id\"])\nclave = 23\na = [d[\"id\"] for d in docs if d[\"entidad\"] == clave]\nb = indice[clave]\nassert a == b\nprint(\"Filas recorridas sin índice:\", len(docs), \"Coincidencias:\", len(b))",
+      "interpret": "El índice preconstruido recupera coincidencias sin recorrer los documentos; su construcción tiene costo.",
+      "challenge": "En una colección de práctica ejecuta find con el mismo filtro y explain; crea índice del campo y repite sin cambiar la consulta.",
+      "limit": "El ejemplo no mide B-tree ni MongoDB; el plan real puede elegir COLLSCAN según selectividad.",
+      "quiz": {
+        "question": "¿Un índice siempre acelera una consulta?",
+        "options": [
+          "Sí",
+          "Depende del filtro, selectividad y plan",
+          "Solo si hay JSON"
+        ],
+        "feedback": [
+          "No: tiene costo y el optimizador puede descartarlo.",
+          "Correcto: examina el plan real.",
+          "El formato JSON no determina por sí solo la ventaja."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "04",
+      "title": "¿Qué cambia con almacenamiento administrado?",
+      "problem": "Laura necesita persistir los documentos sin depender de una sesión Colab.",
+      "concept": "Motor, servicio administrado y clúster son conceptos distintos. Una réplica no es una partición.",
+      "nb": "Cuadernos/4_Atlas_Cassandra_Laura.ipynb",
+      "original": null,
+      "kind": "replica",
+      "steps": [
+        {
+          "title": "Conectar",
+          "action": "Sigue primera mitad: Atlas y conectividad sin compartir credenciales.",
+          "evidence": "Conexión confirmada, sin token visible."
+        },
+        {
+          "title": "Persistir",
+          "action": "Carga las dos fuentes y ejecuta consultas/agregaciones.",
+          "evidence": "Conteos y vistas de Atlas."
+        },
+        {
+          "title": "Decidir",
+          "action": "Recorre la regla de priorización y su límite.",
+          "evidence": "Bandeja, faltantes no convertidos en cero."
+        },
+        {
+          "title": "Preparar",
+          "action": "Lee Cassandra como introducción a S05.",
+          "evidence": "Pregunta operacional concreta."
+        }
+      ],
+      "code": "votantes = 3\ncaidos = 1\nmayoria = votantes // 2 + 1\ndisponibles = votantes - caidos\nprint({\"vivos\": disponibles, \"mayoria\": mayoria, \"puede_elegir\": disponibles >= mayoria})\nassert (disponibles >= mayoria) == (caidos <= 1)",
+      "interpret": "Una mayoría de votantes disponibles permite una elección si se cumplen las condiciones del protocolo; no garantiza disponibilidad instantánea.",
+      "challenge": "Modifica caidos a 0, 1 y 2. En Atlas verifica el resultado de una consulta, no provoques fallos.",
+      "limit": "Es un modelo de tres votantes, no una inspección de la infraestructura Atlas Free.",
+      "quiz": {
+        "question": "¿Qué significa replicar?",
+        "options": [
+          "Dividir filas en fragmentos",
+          "Mantener copias de datos",
+          "Aumentar columnas"
+        ],
+        "feedback": [
+          "Eso describe fragmentación.",
+          "Correcto: se conservan copias.",
+          "No cambia el esquema por sí mismo."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "05",
+      "title": "¿Cómo diseñar desde la consulta?",
+      "problem": "La bandeja operacional exige recuperar casos por claves conocidas.",
+      "concept": "La clave de partición localiza los datos; las claves de ordenamiento organizan registros dentro de ella.",
+      "nb": "Cuadernos/5_Atlas_Cassandra_Query_First.ipynb",
+      "original": null,
+      "kind": "partition",
+      "steps": [
+        {
+          "title": "Recuperar",
+          "action": "Reutiliza la vista y regla de S04, sin recargar si ya existe.",
+          "evidence": "Bandeja con procedencia."
+        },
+        {
+          "title": "Diseñar",
+          "action": "En bloques 7–8 traduce dos consultas a dos claves de tabla.",
+          "evidence": "PRIMARY KEY de cada consulta."
+        },
+        {
+          "title": "Ejecutar",
+          "action": "Usa Astra/CQL y luego Python según bloques 8–9.",
+          "evidence": "Consulta, conteo y upsert repetible."
+        },
+        {
+          "title": "Transferir",
+          "action": "Calcula distribución de claves y selecciona ancla S06.",
+          "evidence": "JSON de ancla y límite de la regla."
+        }
+      ],
+      "code": "from collections import Counter\n# 80 registros de una entidad dominante, repartidos en cuatro meses\ndatos = [(\"A\" if i < 80 else \"B\", i % 4) for i in range(100)]\na = Counter(e for e,m in datos)\nb = Counter((e,m) for e,m in datos)\nassert sum(a.values()) == sum(b.values()) == 100\nprint(a, b, \"máximos:\", max(a.values()), max(b.values()))",
+      "interpret": "Particionar por entidad y mes limita el tamaño de cada grupo en esta muestra; una consulta debe aportar la clave apropiada.",
+      "challenge": "Conserva las filas y cambia la pregunta a proveedor. Diseña otra tabla y comprueba sus resultados en Astra.",
+      "limit": "Grupos lógicos no equivalen a nodos físicos ni miden throughput.",
+      "quiz": {
+        "question": "¿Qué condiciona la clave de partición?",
+        "options": [
+          "La consulta que queremos atender",
+          "El orden alfabético de columnas",
+          "El nombre del servicio"
+        ],
+        "feedback": [
+          "Correcto: localiza la partición.",
+          "No define el patrón de acceso.",
+          "El proveedor no reemplaza el diseño."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "06",
+      "title": "¿Qué revelan las relaciones?",
+      "problem": "Laura quiere identificar proveedores históricos compartidos sin inventar adjudicaciones.",
+      "concept": "Los grafos expresan caminos de nodos y relaciones. El resultado debe distinguir hechos de inferencias.",
+      "nb": "Cuadernos/6_Neo4j_Contexto_Relacional.ipynb",
+      "original": null,
+      "kind": "graph",
+      "steps": [
+        {
+          "title": "Construir",
+          "action": "Abre ejemplo mínimo y crea nodos/relaciones en Aura Query.",
+          "evidence": "Patrón Entidad–Proceso–Proveedor."
+        },
+        {
+          "title": "Consultar",
+          "action": "Practica MATCH, WHERE, RETURN, DISTINCT y conteos.",
+          "evidence": "Tabla y grafo de juguete."
+        },
+        {
+          "title": "Aplicar",
+          "action": "Carga el extracto y consulta proveedores compartidos.",
+          "evidence": "Resultado contrastado con pandas."
+        },
+        {
+          "title": "Transferir",
+          "action": "Elige otra entidad y verifica un camino; deja apéndices A1–A10 para consulta.",
+          "evidence": "ID y evidencia de la relación."
+        }
+      ],
+      "code": "historial = [(\"A\",\"P1\"),(\"A\",\"P2\"),(\"B\",\"P1\"),(\"C\",\"P2\"),(\"C\",\"P3\")]\nancla = \"A\"\npropios = {p for e,p in historial if e == ancla}\ncompartidos = sorted({(e,p) for e,p in historial if e != ancla and p in propios})\nassert compartidos == [(\"B\",\"P1\"),(\"C\",\"P2\")]\nprint(compartidos)",
+      "interpret": "Cada par muestra una relación observada en el historial, no una irregularidad.",
+      "challenge": "Cambia el ancla por B, predice la salida y contrasta con Cypher en el laboratorio.",
+      "limit": "El extracto no prueba riesgo ni causalidad; compara periodos y cobertura.",
+      "quiz": {
+        "question": "¿Un proveedor compartido demuestra fraude?",
+        "options": [
+          "Sí",
+          "No, solo relación observada",
+          "Sí si tiene alto grado"
+        ],
+        "feedback": [
+          "La relación no basta.",
+          "Correcto: se necesita evidencia adicional.",
+          "La centralidad tampoco prueba irregularidad."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "07",
+      "title": "¿Cómo encuentra información un buscador?",
+      "problem": "Una búsqueda literal no siempre devuelve los documentos pertinentes.",
+      "concept": "BM25 combina frecuencia de términos, rareza y normalización de longitud. El índice invertido localiza candidatos.",
+      "nb": "Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb",
+      "original": "s07-del-vecindario-al-texto.html",
+      "kind": "bm25",
+      "steps": [
+        {
+          "title": "Observar",
+          "action": "Recorre A–C: corpus, pandas y búsqueda literal.",
+          "evidence": "Coincidencias de la línea base."
+        },
+        {
+          "title": "Indexar",
+          "action": "En D–F ejecuta analyzer, mapping y carga bulk.",
+          "evidence": "Índice y conteo."
+        },
+        {
+          "title": "Consultar",
+          "action": "Ejecuta G: match, term, filtro y highlight.",
+          "evidence": "Ranking con consulta declarada."
+        },
+        {
+          "title": "Evaluar",
+          "action": "En H–J mide Precision@5 y cambia una consulta.",
+          "evidence": "Ranking y expediente exportado."
+        }
+      ],
+      "code": "import math\ncorpus = [\"salud salud hospital\", \"equipos transporte\", \"hospital salud equipos\", \"salud\"]\nq = \"salud\"\nk1,b = 1.2,0.75\ntokens = [d.split() for d in corpus]\navg = sum(map(len,tokens))/len(tokens)\ndf = sum(q in t for t in tokens)\nidf = math.log(1+(len(tokens)-df+.5)/(df+.5))\nscore = lambda t: idf*t.count(q)*(k1+1)/(t.count(q)+k1*(1-b+b*len(t)/avg))\nranking = sorted(enumerate(tokens,1), key=lambda p: -score(p[1]))\nprint([(i, round(score(t),3)) for i,t in ranking])",
+      "interpret": "El modelo BM25 simplificado ajusta la frecuencia por longitud. Elasticsearch usa su analizador y configuración reales.",
+      "challenge": "Cambia k1 o b uno a la vez; compara el orden y no asumas que el mayor score es verdad.",
+      "limit": "El corpus miniatura no mide latencia de Elasticsearch ni relevancia de SECOP.",
+      "quiz": {
+        "question": "¿Qué mide Precision@5?",
+        "options": [
+          "Documentos pertinentes entre los cinco primeros",
+          "Tiempo de consulta",
+          "Tamaño del índice"
+        ],
+        "feedback": [
+          "Correcto: requiere juzgar pertinencia.",
+          "Es latencia.",
+          "No mide relevancia."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "08",
+      "title": "TC1 · Una fuente, tres modelos",
+      "problem": "Construir un sistema verificable para Laura con tres modelos de datos.",
+      "concept": "Snapshot, concurrencia, idempotencia y consulta apropiada a cada motor. No se alteran puntos ni entregas históricas.",
+      "nb": "Cuadernos/Taller_Control_1.ipynb",
+      "original": "../assets/tutoriales/s08-secoppipeline.html",
+      "kind": "pages",
+      "steps": [
+        {
+          "title": "Preflight",
+          "action": "Antes de descargar, verifica Colab, Atlas, Astra y Aura; no compartas credenciales.",
+          "evidence": "Accesos o error auténtico."
+        },
+        {
+          "title": "E1",
+          "action": "Descarga procesos y contratos según la ventana asignada, compara páginas.",
+          "evidence": "RAW, hashes y conteos."
+        },
+        {
+          "title": "E2–E3",
+          "action": "Implementa MongoDB y producto analítico.",
+          "evidence": "Índice, consultas, evidencias."
+        },
+        {
+          "title": "E4–E6",
+          "action": "Implementa Cassandra y Neo4j, valida y entrega según el cuaderno original.",
+          "evidence": "ZIP y evidencia de cada control."
+        }
+      ],
+      "code": "from hashlib import sha256\nfrom concurrent.futures import ThreadPoolExecutor\ndef pagina(offset):\n    return list(range(offset, offset+5))\noffsets = [0,5,10]\na = [pagina(x) for x in offsets]\nwith ThreadPoolExecutor(max_workers=2) as ex:\n    b = list(ex.map(pagina, offsets))\nassert a == b\nprint(sha256(str(a).encode()).hexdigest(), sum(map(len,a)))",
+      "interpret": "El miniensayo ilustra equivalencia de páginas y huella; la API real puede cambiar entre consultas.",
+      "challenge": "En el TC1 cambia solo el número de trabajadores si el docente lo permite y compara hashes.",
+      "limit": "No reemplaza ninguna evidencia evaluable ni simula una descarga SECOP auténtica.",
+      "quiz": {
+        "question": "¿Qué demuestra una huella igual?",
+        "options": [
+          "Igualdad de bytes con altísima confianza",
+          "Representatividad estadística",
+          "Ausencia de sesgo"
+        ],
+        "feedback": [
+          "Correcto: bajo la misma serialización.",
+          "No mide cobertura.",
+          "No detecta sesgo."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "09",
+      "title": "¿Cómo recuperar por significado?",
+      "problem": "La consulta y el documento pueden expresar la misma idea con palabras diferentes.",
+      "concept": "Embeddings representan entradas como vectores; coseno compara orientación; RRF combina rankings por posición.",
+      "nb": "Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb",
+      "original": "s09-de-palabras-a-significado.html",
+      "kind": "cosine",
+      "steps": [
+        {
+          "title": "Representar",
+          "action": "Recorre ingesta y vectorización E5.",
+          "evidence": "Dimensión y contrato de datos."
+        },
+        {
+          "title": "Indexar",
+          "action": "Crea Atlas e índice de búsqueda vectorial.",
+          "evidence": "Estado queryable y número de documentos."
+        },
+        {
+          "title": "Recuperar",
+          "action": "Ejecuta Top-k y contrasta con búsqueda local según el cuaderno.",
+          "evidence": "Ranking y modalidad de ejecución declarada."
+        },
+        {
+          "title": "Transferir",
+          "action": "Compara exacto y conjunto de candidatos reducido.",
+          "evidence": "Recall respecto al ranking exacto."
+        }
+      ],
+      "code": "import math\nq=(1,0)\nv=[(1,0),(.8,.2),(0,1),(-1,0)]\ndef cos(a,b):\n    return sum(x*y for x,y in zip(a,b))/(math.hypot(*a)*math.hypot(*b))\nexacto=sorted(range(len(v)),key=lambda i:-cos(q,v[i]))[:2]\ncandidatos=[1,2,3]\naprox=sorted(candidatos,key=lambda i:-cos(q,v[i]))[:2]\nprint(exacto, aprox, \"recall\",len(set(exacto)&set(aprox))/len(exacto))",
+      "interpret": "Limitar candidatos puede perder vecinos exactos. Es una simulación, no HNSW.",
+      "challenge": "Cambia candidatos para recuperar ambos vecinos. En Atlas consulta con diferentes numCandidates cuando la API lo permita.",
+      "limit": "Recall contra ranking exacto no equivale a relevancia humana.",
+      "quiz": {
+        "question": "¿Coseno 0.9 significa 90% de verdad?",
+        "options": [
+          "Sí",
+          "No, mide orientación vectorial",
+          "Solo en Atlas"
+        ],
+        "feedback": [
+          "No es probabilidad calibrada.",
+          "Correcto: es una medida geométrica.",
+          "El motor no convierte similitud en verdad."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "10",
+      "title": "¿Cómo representar imágenes y voz?",
+      "problem": "Compras Claras necesita un catálogo de medios sin perder la fuente original.",
+      "concept": "Píxeles y muestras son números; resolución, frecuencia de muestreo, códec y contenedor son propiedades distintas.",
+      "nb": "Cuadernos/10_Imagenes_Audio.ipynb",
+      "original": "s10-imagenes-audio.html",
+      "kind": "media",
+      "steps": [
+        {
+          "title": "Observar",
+          "action": "Recorre secciones 1–3 y cambia resolución en laboratorio de imagen.",
+          "evidence": "Dimensiones e histograma."
+        },
+        {
+          "title": "Escuchar",
+          "action": "Secciones 4–7: forma de onda, RMS, FFT, voces reales.",
+          "evidence": "Métricas de señal y archivos."
+        },
+        {
+          "title": "Catalogar",
+          "action": "Secciones 8–13: integra inventarios, Parquet y JSONL.",
+          "evidence": "Catálogo y evidencias guardadas."
+        },
+        {
+          "title": "Transferir",
+          "action": "Compara concurrencia sobre transformaciones sin inferencia pesada.",
+          "evidence": "Igualdad de hashes o salidas y tiempos."
+        }
+      ],
+      "code": "from concurrent.futures import ThreadPoolExecutor\nfrom hashlib import sha256\nimport time\n# Lotes sintéticos pequeños; reemplaza por rutas del inventario en la práctica.\nlotes=[bytes([i])*100000 for i in range(20)]\ndef transformar(b): return sha256(b).hexdigest()\nt=time.perf_counter(); a=list(map(transformar,lotes)); sec=time.perf_counter()-t\nt=time.perf_counter()\nwith ThreadPoolExecutor(max_workers=4) as e:\n    b=list(e.map(transformar,lotes))\npar=time.perf_counter()-t\nassert a==b\nprint({\"archivos\":len(a),\"bytes\":sum(map(len,lotes)),\"secuencial_s\":sec,\"hilos_s\":par})",
+      "interpret": "Se compara la misma operación sobre los mismos bytes. Los hilos pueden ser más lentos por coordinación.",
+      "challenge": "Cambia el tamaño de los lotes y después repite con archivos del inventario, sin alterar los originales.",
+      "limit": "Hash no equivale a OCR; no extrapoles este tiempo a Whisper.",
+      "quiz": {
+        "question": "¿Reducir resolución conserva siempre toda la información?",
+        "options": [
+          "Sí",
+          "No, puede eliminar detalles",
+          "Solo depende del nombre del archivo"
+        ],
+        "feedback": [
+          "No: se pierden muestras.",
+          "Correcto: verifica el detalle necesario.",
+          "La extensión no define la señal."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "11",
+      "title": "¿Cómo recuperar evidencia multimedia?",
+      "problem": "Contratos, fotos y voces deben ser consultables sin confundir extracción con verdad.",
+      "concept": "OCR reconoce texto, ASR transcribe voz y embeddings permiten recuperar candidatos por similitud.",
+      "nb": "01_laboratorio.ipynb",
+      "original": "s11-videoclase-ocr-asr-embeddings.html",
+      "kind": "wer",
+      "steps": [
+        {
+          "title": "Entorno",
+          "action": "Usa la rama s11-estudiantes y verifica kernel, Ollama y Tesseract según README.",
+          "evidence": "Comprobación de entorno y visor privado."
+        },
+        {
+          "title": "Aprender",
+          "action": "FASE 1: un acta, cuatro fotos y una voz; compara OCR, embedding y ASR.",
+          "evidence": "Texto, vector, transcripción y WER."
+        },
+        {
+          "title": "Integrar",
+          "action": "FASE 1: escribe el ETL y conserva hashes y fuente.",
+          "evidence": "JSONL/Parquet consultable."
+        },
+        {
+          "title": "Ampliar",
+          "action": "FASE 2: 122 fuentes solo con cuota y decisión explícita.",
+          "evidence": "Catálogo por modalidad y estado de fallos."
+        }
+      ],
+      "code": "def distancia(a,b):\n    fila=list(range(len(b)+1))\n    for i,x in enumerate(a,1):\n        nueva=[i]\n        for j,y in enumerate(b,1):\n            nueva.append(min(fila[j]+1,nueva[-1]+1,fila[j-1]+(x!=y)))\n        fila=nueva\n    return fila[-1]\nreferencia=\"el contrato tiene seis meses\".split()\nprediccion=\"el contrato tiene meses\".split()\ne=distancia(referencia,prediccion)\nassert e==1\nprint(\"WER\", e/len(referencia))",
+      "interpret": "WER normaliza las ediciones por palabras de referencia; puede superar 1 con muchas inserciones.",
+      "challenge": "Cambia una palabra y luego agrega dos; compara con la transcripción real del cuaderno.",
+      "limit": "WER no mide por sí solo exactitud de campos contractuales ni significado.",
+      "quiz": {
+        "question": "¿Qué debes conservar para comprobar un OCR?",
+        "options": [
+          "Solo texto predicho",
+          "Original, texto y configuración",
+          "Solo confianza interna"
+        ],
+        "feedback": [
+          "No permite cotejar el dato.",
+          "Correcto: preserva evidencia.",
+          "La confianza no sustituye comparación visual."
+        ]
+      },
+      "ref": "s11-estudiantes"
+    },
+    {
+      "id": "12",
+      "title": "TC2 · Investigador multimodal",
+      "problem": "Integrar búsquedas y medios en un expediente verificable.",
+      "concept": "Evaluar relevancia, texto predicho, integridad y recuperación de fallos. Los 24 controles oficiales no cambian.",
+      "nb": "Cuadernos/Taller_Control_2.ipynb",
+      "original": "../assets/tutoriales/tc2-paso-a-paso.html",
+      "kind": "metrics",
+      "steps": [
+        {
+          "title": "E1–E2",
+          "action": "Construye BM25 y E5; declara si Atlas es real o local.",
+          "evidence": "Rankings, vectores y evidencia de motor."
+        },
+        {
+          "title": "E3",
+          "action": "Calcula métricas y RRF.",
+          "evidence": "Precision@5, Recall@5 y decisión."
+        },
+        {
+          "title": "E4–E5",
+          "action": "OCR real y diez audios humanos reales.",
+          "evidence": "Predicciones, WER y archivos."
+        },
+        {
+          "title": "E6",
+          "action": "Reabre catálogo, comprueba idempotencia y fallo controlado.",
+          "evidence": "Explorador, ZIP y manifiesto según rúbrica original."
+        }
+      ],
+      "code": "relevantes={1,3,7}\nranking=[1,2,3,4,5]\nk=5\ntop=ranking[:k]\nassert len(top)==len(set(top))\naciertos=len(set(top)&relevantes)\nprint(\"P@k\",aciertos/k,\"R@k\",aciertos/len(relevantes))",
+      "interpret": "Precision mide proporción de aciertos recuperados y recall mide cobertura de los relevantes conocidos.",
+      "challenge": "Modifica el ranking sin cambiar relevantes y compara las dos métricas.",
+      "limit": "Este ensayo no sustituye el corrector ni la ejecución real de OCR/ASR.",
+      "quiz": {
+        "question": "¿Un OCR con error puede ser evidencia válida?",
+        "options": [
+          "No, siempre debe ser perfecto",
+          "Sí, si se ejecuta, conserva y mide el error",
+          "Sí, si copiamos la referencia"
+        ],
+        "feedback": [
+          "Una métrica alta no es la única evidencia.",
+          "Correcto: verifica la salida auténtica.",
+          "La referencia no es la predicción."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "13",
+      "title": "¿Cuándo conviene distribuir?",
+      "problem": "Laura necesita procesar lotes SECOP y entrenar un modelo con varios trabajadores.",
+      "concept": "Particiones, workers e hilos son distintos. El scheduler coordina tareas; K-means puede combinar contribuciones de particiones.",
+      "nb": "Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb",
+      "original": "s13-de-una-maquina-a-un-cluster.html",
+      "kind": "amdahl",
+      "steps": [
+        {
+          "title": "Preparar",
+          "action": "Abre Codespace s13-laboratorio, ejecuta verificar_entorno.py.",
+          "evidence": "LISTO PARA S13."
+        },
+        {
+          "title": "Contrastar",
+          "action": "Bloques 2–6A: MapReduce, pandas, Dask y mediciones.",
+          "evidence": "Conteos equivalentes."
+        },
+        {
+          "title": "Distribuir",
+          "action": "6B: procesa ocho lotes SECOP y observa workers reales.",
+          "evidence": "Identidades de trabajadores, resultados y tiempos."
+        },
+        {
+          "title": "Entrenar",
+          "action": "Bloques 8–15: K-means local/distribuido, memoria y transferencia.",
+          "evidence": "Métricas y decisión; detén Codespace."
+        }
+      ],
+      "code": "# Predicción teórica de escalamiento fuerte\nT1 = 120.0\nserial = .15\nfor p in (1,2,4,8):\n    ideal = T1*(serial+(1-serial)/p)\n    print(p, round(ideal,2), round(T1/ideal,2))\nassert T1*(serial+(1-serial)) == T1",
+      "interpret": "El límite serial impide aceleración lineal incluso sin coordinación; mide el resultado real por separado.",
+      "challenge": "En 6B repite con 1, 2 y hasta 4 workers si la cuota/CPU lo permiten; misma entrada, mismo resultado y medición.",
+      "limit": "Una VM con varios workers no demuestra varios computadores; no comparar K-means con otro algoritmo.",
+      "quiz": {
+        "question": "¿Cuatro workers garantizan cuatro veces más velocidad?",
+        "options": [
+          "Sí",
+          "No, depende de paralelismo y sobrecostos",
+          "Solo con pandas"
+        ],
+        "feedback": [
+          "No: coordinación y recursos compartidos.",
+          "Correcto: hay que medir.",
+          "pandas no garantiza ese efecto."
+        ]
+      },
+      "ref": "s13-laboratorio"
+    },
+    {
+      "id": "14",
+      "title": "¿Cómo procesa Spark los datos?",
+      "problem": "Laura necesita transformar, consultar y persistir datos y modelos.",
+      "concept": "Spark construye planes; shuffle mueve datos entre particiones. Databricks administra la plataforma y Delta añade semántica de tablas.",
+      "nb": "Cuadernos/14_PySpark_Compras_Claras.ipynb",
+      "original": "s14-de-dask-a-spark.html",
+      "kind": "shuffle",
+      "steps": [
+        {
+          "title": "Preparar",
+          "action": "Bloques 1–4: abre Databricks o ruta Colab y carga SECOP.",
+          "evidence": "Spark.version y esquema."
+        },
+        {
+          "title": "Observar",
+          "action": "Bloques 5–10: transforma, ejecuta, compara SQL y joins.",
+          "evidence": "Plan, conteos y equivalencia con referencia."
+        },
+        {
+          "title": "Persistir",
+          "action": "Bloques 11–15: construye Bronze/Silver/Gold y tablas.",
+          "evidence": "Tablas Delta o Parquet según entorno."
+        },
+        {
+          "title": "Entrenar",
+          "action": "Bloque 16: MLlib, pipeline y F1.",
+          "evidence": "Predicciones, matriz y limitación."
+        }
+      ],
+      "code": "# Ejecutar después de preparar Spark en S14; sin descargas.\nfrom pyspark.sql import functions as F\nhechos=spark.range(1000).withColumn(\"k\",F.col(\"id\")%5)\ndim=spark.range(4).select(F.col(\"id\").alias(\"k\"))\na=hechos.join(F.broadcast(dim),\"k\",\"left\")\nb=hechos.join(dim.hint(\"merge\"),\"k\",\"left\")\na.explain(); b.explain()\nassert a.count()==b.count()==1000\nassert not a.exceptAll(b).limit(1).count()\nassert not b.exceptAll(a).limit(1).count()",
+      "interpret": "Se comparan resultados y planes; el optimizador puede adaptar la estrategia sugerida.",
+      "challenge": "Repite variando solo dimensión o particiones; registra BroadcastHashJoin/SortMergeJoin si aparecen.",
+      "limit": "Un hint no garantiza el plan; muestra pequeña no prueba ventaja de velocidad.",
+      "quiz": {
+        "question": "¿Qué representa shuffle?",
+        "options": [
+          "Movimiento de datos entre particiones",
+          "Una tabla Delta",
+          "Un nuevo lenguaje"
+        ],
+        "feedback": [
+          "Correcto: puede ser costoso.",
+          "Delta es formato de tabla.",
+          "No es sintaxis."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "14A",
+      "title": "¿Cómo entrenar fuera de un presupuesto local?",
+      "problem": "Una matriz densa puede superar la memoria disponible para entrenar.",
+      "concept": "Escala, dimensionalidad y tipo numérico determinan un mínimo de memoria; Spark MLlib puede trabajar sobre particiones.",
+      "nb": "Cuadernos/14A_Databricks_E2E_Escala.ipynb",
+      "original": "s14a-databricks-escala.html",
+      "kind": "training",
+      "steps": [
+        {
+          "title": "A0–A2",
+          "action": "Elige 50.000 inicialmente y prepara Bronze/Silver y split.",
+          "evidence": "Conteos conciliados."
+        },
+        {
+          "title": "A3–A4",
+          "action": "Crea 128 variables y calcula capacidad; no uses toPandas completo.",
+          "evidence": "Bytes mínimos y muestra acotada."
+        },
+        {
+          "title": "A5–A7",
+          "action": "Entrena candidatos, selecciona en validación y evalúa test.",
+          "evidence": "Métricas, modelo y predicciones persistentes."
+        },
+        {
+          "title": "Escalar",
+          "action": "Solo si la cuota lo permite y con confirmación explícita.",
+          "evidence": "Evidencia de éxito o fallo auténtico, nunca estimación como corrida."
+        }
+      ],
+      "code": "filas=25000000\nvariables=128\ntrain=.8\nbytes_minimos=int(filas*train)*variables*8\npresupuesto=16*1024**3\nprint(bytes_minimos/1024**3, \"GiB\", \"excede:\",bytes_minimos>presupuesto)",
+      "interpret": "El cálculo es un límite inferior de la matriz float64; no es el pico de memoria ni una prueba Spark.",
+      "challenge": "Cambia filas o presupuesto; ejecuta A0–A7 en Databricks a una escala viable.",
+      "limit": "No garantiza cuota Free Edition ni incapacidad universal de métodos locales incrementales.",
+      "quiz": {
+        "question": "¿Una matriz mínima de 19 GiB prueba que Spark entrenó?",
+        "options": [
+          "Sí",
+          "No, solo que supera un presupuesto de 16 GiB",
+          "Sí si tiene 128 variables"
+        ],
+        "feedback": [
+          "Se necesita evidencia de ejecución.",
+          "Correcto: capacidad estimada no es benchmark.",
+          "Dimensión no prueba ejecución."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "15",
+      "title": "¿Cómo recuperar un pipeline tras un fallo?",
+      "problem": "Laura recibe nuevos registros SECOP y no puede empezar de cero cada día.",
+      "concept": "Procesamiento incremental, claves idempotentes, contratos y checkpoints permiten reanudar lotes; una cola crece si la entrada supera capacidad.",
+      "nb": "Cuadernos/15_Pipeline_Confiable.ipynb",
+      "original": null,
+      "kind": "queue",
+      "steps": [
+        {
+          "title": "Preparar",
+          "action": "Ejecuta bloque 1: crea datos controlados y almacén SQLite temporal.",
+          "evidence": "Tabla RAW y lotes."
+        },
+        {
+          "title": "Procesar",
+          "action": "Ejecuta bloque 2: primer lote con duplicados y rechazos.",
+          "evidence": "Filas válidas, rechazos y checkpoint."
+        },
+        {
+          "title": "Recuperar",
+          "action": "Ejecuta bloque 3: fallo controlado, rollback y reintento.",
+          "evidence": "Checkpoint inalterado tras el fallo, luego avance."
+        },
+        {
+          "title": "Transferir",
+          "action": "Ejecuta bloque 4: repetición y cambios de esquema; cambia un lote.",
+          "evidence": "Resultados idempotentes y manifiesto JSON."
+        }
+      ],
+      "code": "llegada=1000\ncapacidad=700\nsegundos=600\npendientes=max(0,llegada-capacidad)*segundos\nprint(\"Pendientes\",pendientes)\nassert pendientes==180000",
+      "interpret": "Una cola inicial vacía acumula registros cuando la llegada supera la capacidad.",
+      "challenge": "Modifica llegada y capacidad; luego cambia un lote en el cuaderno y verifica el checkpoint.",
+      "limit": "Modelo de tasas constantes; SQLite enseña atomicidad local, no tolerancia distribuida de Spark.",
+      "quiz": {
+        "question": "¿Cuándo debe avanzar el checkpoint?",
+        "options": [
+          "Antes de escribir",
+          "Tras confirmar la escritura",
+          "Al iniciar el proceso"
+        ],
+        "feedback": [
+          "Podría perder registros.",
+          "Correcto: el avance debe reflejar datos confirmados.",
+          "Un fallo dejaría estado incorrecto."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    },
+    {
+      "id": "16",
+      "title": "¿Cómo entregar un producto de datos?",
+      "problem": "El observatorio de Compras Claras debe funcionar fuera del entorno de desarrollo.",
+      "concept": "Un producto combina fuente trazable, procesamiento, modelos, interfaz y pruebas. Entrenar varios modelos independientes no equivale a distribuir un único entrenamiento.",
+      "nb": "Cuadernos/Proyecto_Final_Compras_Claras.ipynb",
+      "original": "proyecto-final-explorer.html",
+      "kind": "split",
+      "steps": [
+        {
+          "title": "E0–E2",
+          "action": "Prepara entorno, descarga OFFSET y conserva el split.",
+          "evidence": "Manifiestos de fuente y CSV."
+        },
+        {
+          "title": "E3–E4",
+          "action": "Compara Dask con referencia y selecciona modelo sin mirar test.",
+          "evidence": "Conteos y evidencia de selección."
+        },
+        {
+          "title": "E5–E6",
+          "action": "Traslada CSV a Databricks, crea Delta y entrena MLlib.",
+          "evidence": "Evidencia Spark real o bloqueo declarado."
+        },
+        {
+          "title": "E7",
+          "action": "Genera observatorio, verifica predicciones y entrega según rúbrica vigente.",
+          "evidence": "HTML autónomo, CSV y manifiesto."
+        }
+      ],
+      "code": "from hashlib import sha256\nids=[f\"P{i:04d}\" for i in range(1000)]\nsplit=lambda x: int(sha256(x.encode()).hexdigest(),16)%10\ntrain={x for x in ids if split(x)<8}\nval={x for x in ids if split(x)==8}\ntest=set(ids)-train-val\nassert not (train&val or train&test or val&test)\nprint(len(train),len(val),len(test))",
+      "interpret": "La separación por ID evita que una misma identidad aparezca en varios conjuntos. No sustituye un corte temporal cuando es necesario.",
+      "challenge": "En una futura cohorte, construye una ampliación de búsqueda, grafos o multimedia; para la actual conserva el proyecto vigente.",
+      "limit": "El split sintético no reemplaza el split oficial ni modifica la rúbrica.",
+      "quiz": {
+        "question": "¿Cuándo se usa test para elegir hiperparámetros?",
+        "options": [
+          "Nunca durante la selección",
+          "En cada iteración",
+          "Antes de train"
+        ],
+        "feedback": [
+          "Correcto: se reserva para evaluación final.",
+          "Contamina la evaluación.",
+          "La selección requiere train y validación."
+        ]
+      },
+      "ref": "mejora-pedagogica-integral"
+    }
+  ]
+}
