@@ -17,6 +17,7 @@ for(const id of C.required){const r=cfg.routes.find(x=>x.id===id);s=C.run(s,id,r
 assert.equal(C.next(s),null);assert.equal(s.steps.length,16);
 const html=fs.readFileSync(path.join(root,"Presentaciones/compras-claras.html"),"utf8");
 const embedded=JSON.parse(html.match(/<script type="application\/json" id="source">([\s\S]*?)<\/script>/)[1]);assert.deepEqual(embedded,src);
+assert.equal(C.sha256('{"n":2,"texto":"educación pública"}'),"f35f885a307184e9d745f00fbdfad186156141135ad56ce078122b0b2ca87a23");
 assert.equal(C.sha256("abc"),"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
 let p={texto:"educación",n:2},ser=JSON.stringify(p);const lab={schema:"compras-claras-lab-v1",session:"11",kind:"json",source:"fixture QA",payload:p,payload_json:ser,sha256:C.sha256(ser)};
 let a=C.attach(s,"11",lab);assert.deepEqual(C.validate(a,src,cfg),a);assert.throws(()=>C.attach(s,"11",{...lab,payload:{n:3}}));

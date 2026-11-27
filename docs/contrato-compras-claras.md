@@ -44,3 +44,6 @@ La ruta común es explorador + cuaderno principal; el panel de producto está in
 
 ## Experimentos auténticos y evidencia
 Cada sesión incorpora un bloque final específico, basado en variables ya utilizadas por el cuaderno. S03 compara explain real con hints controlados, S05 contrasta CQL con pandas, S06 contrasta el vecindario con su referencia y S07 compara pesos de consulta en Elasticsearch. No ejecutarlos si falta el motor real. Los adjuntos se verifican con SHA-256 sobre el JSON serializado y se comprueba que coincida con el payload. Esto detecta corrupción o cambios, no certifica autoría ni procedencia por sí solo. S09/S11/S14/S16 muestran evidencia adjunta en vistas diferenciadas. Los ejemplos de exportación requieren comprobación en cada entorno; no se afirma que todos se hayan ejecutado remotamente.
+
+## Un único punto de entrada
+La portada y el aula enlazan directamente a `Presentaciones/compras-claras.html?s=NN`. El explorador conceptual previo permanece como consulta dentro del producto; no es un tercer recurso obligatorio. Para regenerar el HTML autónomo a partir del código y los datos canónicos: `node utils/build_compras_claras.js`. Para verificar sincronización: `node utils/build_compras_claras.js --check`. No editar a mano el HTML generado.

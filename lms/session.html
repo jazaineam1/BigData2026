@@ -24,7 +24,7 @@
 <a class="navlink optional" href="portal.html">Inicio</a>
 <a class="navlink optional" href="progress.html">Mi progreso</a>
 <a class="navlink optional" href="account.html">Mi cuenta</a>
-<a id="rutaPedagogica" class="navlink optional" href="../Presentaciones/ruta-aprendizaje.html">Ruta formativa</a>
+<a id="rutaPedagogica" class="navlink optional" href="../Presentaciones/compras-claras.html">Ruta formativa</a>
 <a id="wallLink" class="navlink hidden" href="#">WALL docente</a>
 <button data-logout>Salir</button>
 </div></header>
@@ -70,8 +70,8 @@
 const L=window.BIGDATA_LMS,K=window.LMS;L.wireLogout();const status=L.$('status');
 const params=new URLSearchParams(location.search),sessionNumber=Math.trunc(Number(params.get('s')||0));
 if(!Number.isInteger(sessionNumber)||sessionNumber<1){location.replace('portal.html');return}
-const rutaPedagogica=document.getElementById('rutaPedagogica');rutaPedagogica.href='../Presentaciones/ruta-aprendizaje.html?s='+String(sessionNumber).padStart(2,'0');if(![1,2,3,4,5,6,7,8,9,10,11,12,13,14,16].includes(sessionNumber))rutaPedagogica.hidden=true;
-if(sessionNumber===14){const opc=document.createElement('a');opc.className='navlink optional';opc.textContent='S14A opcional';opc.href='../Presentaciones/ruta-aprendizaje.html?s=14A';rutaPedagogica.after(opc);}
+const rutaPedagogica=document.getElementById('rutaPedagogica');rutaPedagogica.href='../Presentaciones/compras-claras.html?s='+String(sessionNumber).padStart(2,'0');if(![1,2,3,4,5,6,7,8,9,10,11,12,13,14,16].includes(sessionNumber))rutaPedagogica.hidden=true;
+if(sessionNumber===14){const opc=document.createElement('a');opc.className='navlink optional';opc.textContent='S14A opcional';opc.href='../Presentaciones/compras-claras.html?s=14A';rutaPedagogica.after(opc);}
 let data=null,entry=null;
 const ENTRY=window.LMS_ENTRY;
 // Si la sesión declara su material en course.json, el botón aparece antes de que responda la API.
