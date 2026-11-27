@@ -81,7 +81,7 @@
           "evidence": "Arquitectura seleccionada con evidencia."
         }
       ],
-      "code": "# Presupuesto ilustrativo de latencia: mide requisitos, no proveedores.\nalternativas = {\"local\": (300, 1), \"lotes\": (60, 2), \"eventos\": (2, 4)}\nlatencia_max_s = 120\nviables = {k:v for k,v in alternativas.items() if v[0] <= latencia_max_s}\nassert viables\nseleccion = min(viables, key=lambda k: viables[k][1])\nprint(seleccion, viables)",
+      "code": "# Presupuesto ilustrativo de latencia: mide requisitos, no proveedores.\nalternativas = {\"local\": (300, 1), \"lotes\": (60, 2), \"eventos\": (2, 4)}\nlatencia_max_s = 120\nviables = {k:v for k,v in alternativas.items() if v[0] <= latencia_max_s}\nseleccion = min(viables, key=lambda k: viables[k][1]) if viables else 'NINGUNA'\nprint(seleccion, viables)",
       "interpret": "El ejemplo usa latencias y costos relativos ficticios; filtra por requisito y luego compara costo.",
       "challenge": "Cambia latencia_max_s de 120 a 5 y observa la nueva decisión.",
       "limit": "No sustituye el diseño de seguridad, disponibilidad o un presupuesto real.",
@@ -277,7 +277,7 @@
           "evidence": "ID y evidencia de la relación."
         }
       ],
-      "code": "historial = [(\"A\",\"P1\"),(\"A\",\"P2\"),(\"B\",\"P1\"),(\"C\",\"P2\"),(\"C\",\"P3\")]\nancla = \"A\"\npropios = {p for e,p in historial if e == ancla}\ncompartidos = sorted({(e,p) for e,p in historial if e != ancla and p in propios})\nassert compartidos == [(\"B\",\"P1\"),(\"C\",\"P2\")]\nprint(compartidos)",
+      "code": "historial = [(\"A\",\"P1\"),(\"A\",\"P2\"),(\"B\",\"P1\"),(\"C\",\"P2\"),(\"C\",\"P3\")]\nancla = \"A\"\npropios = {p for e,p in historial if e == ancla}\ncompartidos = sorted({(e,p) for e,p in historial if e != ancla and p in propios})\nassert all(e != ancla and p in propios for e,p in compartidos)\nprint(compartidos)",
       "interpret": "Cada par muestra una relación observada en el historial, no una irregularidad.",
       "challenge": "Cambia el ancla por B, predice la salida y contrasta con Cypher en el laboratorio.",
       "limit": "El extracto no prueba riesgo ni causalidad; compara periodos y cobertura.",
@@ -522,7 +522,7 @@
           "evidence": "Catálogo por modalidad y estado de fallos."
         }
       ],
-      "code": "def distancia(a,b):\n    fila=list(range(len(b)+1))\n    for i,x in enumerate(a,1):\n        nueva=[i]\n        for j,y in enumerate(b,1):\n            nueva.append(min(fila[j]+1,nueva[-1]+1,fila[j-1]+(x!=y)))\n        fila=nueva\n    return fila[-1]\nreferencia=\"el contrato tiene seis meses\".split()\nprediccion=\"el contrato tiene meses\".split()\ne=distancia(referencia,prediccion)\nassert e==1\nprint(\"WER\", e/len(referencia))",
+      "code": "def distancia(a,b):\n    fila=list(range(len(b)+1))\n    for i,x in enumerate(a,1):\n        nueva=[i]\n        for j,y in enumerate(b,1):\n            nueva.append(min(fila[j]+1,nueva[-1]+1,fila[j-1]+(x!=y)))\n        fila=nueva\n    return fila[-1]\nreferencia=\"el contrato tiene seis meses\".split()\nprediccion=\"el contrato tiene meses\".split()\ne=distancia(referencia,prediccion)\nassert distancia(referencia,referencia)==0\nassert e>=abs(len(referencia)-len(prediccion))\nprint(\"WER\", e/len(referencia))",
       "interpret": "WER normaliza las ediciones por palabras de referencia; puede superar 1 con muchas inserciones.",
       "challenge": "Cambia una palabra y luego agrega dos; compara con la transcripción real del cuaderno.",
       "limit": "WER no mide por sí solo exactitud de campos contractuales ni significado.",
@@ -767,7 +767,7 @@
           "evidence": "Resultados idempotentes y manifiesto JSON."
         }
       ],
-      "code": "llegada=1000\ncapacidad=700\nsegundos=600\npendientes=max(0,llegada-capacidad)*segundos\nprint(\"Pendientes\",pendientes)\nassert pendientes==180000",
+      "code": "llegada=1000\ncapacidad=700\nsegundos=600\npendientes=max(0,llegada-capacidad)*segundos\nprint(\"Pendientes\",pendientes)\nassert pendientes>=0\nassert (pendientes==0)==(llegada<=capacidad or segundos==0)",
       "interpret": "Una cola inicial vacía acumula registros cuando la llegada supera la capacidad.",
       "challenge": "Modifica llegada y capacidad; luego cambia un lote en el cuaderno y verifica el checkpoint.",
       "limit": "Modelo de tasas constantes; SQLite enseña atomicidad local, no tolerancia distribuida de Spark.",

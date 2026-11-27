@@ -12,7 +12,7 @@ for(const r of cfg.routes){
  for(const p of [0,4,1,2]){
    const v=spec.controls.map(c=>c[p===0?1:p===4?4:p===1?2:4]);
    const output=P.compute(r.kind,v);
-   assert.equal(output.length,2);assert.ok(output.every(x=>typeof x==="string"&&x.length&&!/NaN|Infinity/.test(x)));
+   assert.equal(output.length,2); const vis=P.visual(r.kind,v);assert.ok(vis.rows.length);assert.ok(vis.rows.every(x=>Number.isFinite(x.value)));assert.ok(output.every(x=>typeof x==="string"&&x.length&&!/NaN|Infinity/.test(x)));
  }
  if(r.ref===cfg.branch)assert.ok(fs.existsSync(path.join(root,r.nb)),r.nb);
  if(r.original)assert.ok(fs.existsSync(path.join(root,"Presentaciones",r.original)),r.original);

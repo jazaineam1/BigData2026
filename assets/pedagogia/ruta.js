@@ -22,7 +22,12 @@ function render(id){
  $("feedback").textContent="Elige una opción para ver la explicación.";
  r.quiz.options.forEach((v,i)=>{let lab=el("label"),radio=el("input");radio.type="radio";radio.name="autocomprobacion";radio.value=String(i);radio.addEventListener("change",()=>{$("feedback").textContent=r.quiz.feedback[i];});lab.append(radio,el("span",v));question.append(lab);});
  const spec=Pedagogia.specs[r.kind],values=spec.controls.map(x=>x[4]),ctrl=$("controles");ctrl.replaceChildren();
- const refresh=()=>{const [a,b]=Pedagogia.compute(r.kind,values);$("resultado").textContent=a;$("lectura").textContent=b;};
+ const refresh=()=>{const [a,b]=Pedagogia.compute(r.kind,values);$("resultado").textContent=a;$("lectura").textContent=b;
+ const visual=Pedagogia.visual(r.kind,values),chart=$("grafico");chart.replaceChildren(el("p",visual.unit));
+ const max=Math.max(1e-9,...visual.rows.map(x=>Math.abs(x.value)));
+ visual.rows.forEach(x=>{const line=el("div"),label=el("div"),track=el("div"),bar=el("div");
+ line.className="chart-row";label.className="chart-label";label.append(el("span",x.label),el("strong",x.value.toLocaleString("es-CO",{maximumFractionDigits:3})));
+ track.className="chart-track";bar.className="chart-bar"+(x.value<0?" negative":"");bar.style.width=(Math.abs(x.value)/max*100)+"%";track.setAttribute("aria-hidden","true");track.append(bar);line.append(label,track);chart.append(line);});};
  spec.controls.forEach(([name,min,max,step,initial],i)=>{let box=el("div"),label=el("label"),out=el("output",String(initial)),input=el("input");box.className="control";input.type="range";input.id="control-"+i;label.htmlFor=input.id;label.append(el("span",name),out);input.min=min;input.max=max;input.step=step;input.value=initial;input.addEventListener("input",()=>{values[i]=Number(input.value);out.textContent=input.value;refresh();});box.append(label,input);ctrl.append(box);});refresh();
  checks=localRead(key());if(!Array.isArray(checks)||checks.length!==r.steps.length)checks=r.steps.map(()=>false);checks=checks.map(Boolean);
  const stages=$("estaciones");stages.replaceChildren();

@@ -21,5 +21,30 @@ queue:{controls:[["Llegada registros/s",0,2000,100,1000],["Capacidad registros/s
 split:{controls:[["Filas",100,10000,100,1000],["Train (%)",50,90,5,80],["Validación (%)",5,40,5,10]],run:([n,t,v])=>t+v>=100?["Sin test disponible","Reserva una fracción para evaluar al final."]:[Math.floor(n*t/100)+" train · "+Math.floor(n*v/100)+" valid · "+(n-Math.floor(n*t/100)-Math.floor(n*v/100))+" test","Distribución aritmética aproximada; el split real depende de grupos, identidad y tiempo."]}
 };
 function compute(kind,values){if(!specs[kind])throw Error("Explorador desconocido");return specs[kind].run(values);}
-const api={specs,compute};if(typeof module!=="undefined"&&module.exports)module.exports=api;else root.Pedagogia=api;
+
+function visual(kind,v){
+ const [a,b,c,d]=v, row=(label,value)=>({label,value});
+ switch(kind){
+ case "memory":return {unit:"MiB",rows:[row("Matriz mínima",a*b*8/1048576),row("Presupuesto",c)]};
+ case "architecture":return {unit:"segundos (supuesto)",rows:[row("Local",300),row("Lotes",60),row("Eventos",2),row("Límite",a)]};
+ case "index":return {unit:"registros",rows:[row("Recorrido completo",a),row("Coincidencias",Math.round(a*b/100))]};
+ case "replica":return {unit:"votantes",rows:[row("Disponibles",3-a),row("Caídos",a),row("Mayoría",2)]};
+ case "partition":return {unit:"registros por grupo máximo",rows:[row("Entidad",a),row("Entidad + periodo",Math.ceil(a/b))]};
+ case "graph":{const e=["A","B","C"][a-1],pairs=[["A","P1"],["A","P2"],["B","P1"],["C","P2"],["C","P3"]],mine=new Set(pairs.filter(x=>x[0]===e).map(x=>x[1]));return {unit:"proveedores compartidos con "+e,rows:["A","B","C"].filter(x=>x!==e).map(x=>row(x,pairs.filter(p=>p[0]===x&&mine.has(p[1])).length))};}
+ case "bm25":return {unit:"puntuación BM25",rows:compute(kind,v)[0].split(" | ").map(x=>{const [l,z]=x.split(": ");return row(l,Number(z));})};
+ case "pages":return {unit:"registros",rows:[row("Total",a),row("Página completa",Math.min(a,b)),row("Última página",a%b||Math.min(a,b))]};
+ case "cosine":return {unit:"valor (coseno puede ser negativo)",rows:[row("Coseno",Math.cos(a*Math.PI/180)),row("Recall@2 exacto",Math.max(0,b-2)/2)]};
+ case "media":return {unit:"MiB sin compresión",rows:[row("Imagen RGB8",a*b*3/1048576),row("Audio PCM16",c*d*1000*2/1048576)]};
+ case "wer":return {unit:"palabras / ediciones",rows:[row("Referencia",a),row("Ediciones",b)]};
+ case "metrics":return {unit:"registros",rows:[row("Relevantes",a),row("Top-k",b),row("Aciertos",c)]};
+ case "amdahl":return {unit:"segundos ideales",rows:[...new Set([1,2,4,8,c])].sort((x,y)=>x-y).map(p=>row(p+" worker(s)",a*(b/100+(1-b/100)/p)))};
+ case "shuffle":return {unit:"MiB estimados",rows:[row("Hechos",a*1000*b/1048576),row("Copias dimensión",c*d/1024)]};
+ case "training":return {unit:"GiB mínimos",rows:[row("Matriz de train",a*1e6*.8*b*8/1073741824),row("Presupuesto",c)]};
+ case "queue":return {unit:"registros por segundo",rows:[row("Llegada",a),row("Capacidad",b),row("Exceso",Math.max(0,a-b))]};
+ case "split":return {unit:"registros (aprox.)",rows:[row("Train",Math.floor(a*b/100)),row("Validación",Math.floor(a*c/100)),row("Test",Math.max(0,a-Math.floor(a*b/100)-Math.floor(a*c/100)))]};
+ default:throw Error("Visual desconocido");
+ }
+}
+
+const api={specs,compute,visual};if(typeof module!=="undefined"&&module.exports)module.exports=api;else root.Pedagogia=api;
 })(typeof globalThis!=="undefined"?globalThis:this);
