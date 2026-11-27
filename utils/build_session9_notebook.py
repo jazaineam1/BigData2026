@@ -103,7 +103,11 @@ def build_cells():
     for i in (9,11,14):
         cells[i]["metadata"].pop("cellView",None)
         cells[i]["metadata"].pop("jupyter",None)
-    return cells
+    try:
+        from .integrar_ruta_notebook import integrar_ruta
+    except ImportError:
+        from integrar_ruta_notebook import integrar_ruta
+    return integrar_ruta(cells, "09")
 
 def build_notebook():
     return {

@@ -27,7 +27,11 @@ def build_novice_cells():
     cells = finalize_cells(build_cells())
     cells = apply_zero_to_hero(cells)
     cells = reorder_zero_to_hero(cells)
-    return append_advanced_ecosystem(cells)
+    try:
+        from .integrar_ruta_notebook import integrar_ruta
+    except ImportError:
+        from integrar_ruta_notebook import integrar_ruta
+    return integrar_ruta(append_advanced_ecosystem(cells), "06")
 
 
 def main() -> None:

@@ -234,6 +234,11 @@ El PDA pide CRUD con Python. **No es un cuarto producto ni otro motor.** Una apl
 El hito y el ancla S6 que siguen **documentan** este trabajo. No agregan un cuarto o quinto objetivo.
 ''')])
 
+    try:
+        from .integrar_ruta_notebook import integrar_ruta
+    except ImportError:
+        from integrar_ruta_notebook import integrar_ruta
+    integrar_ruta(cells, "05")
     NB.write_text(json.dumps(nb, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     json.loads(NB.read_text(encoding="utf-8"))
 

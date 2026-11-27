@@ -365,6 +365,11 @@ except Exception:
     )
 
     # Reescritura segura del notebook: esta es la protección contra Bad escaped character.
+    try:
+        from .integrar_ruta_notebook import integrar_ruta
+    except ImportError:
+        from integrar_ruta_notebook import integrar_ruta
+    integrar_ruta(cells, "05")
     NB.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     json.loads(NB.read_text(encoding="utf-8"))
     print(f"[OK] Sesión 5 construida: {len(cells)} celdas. JSON válido.")

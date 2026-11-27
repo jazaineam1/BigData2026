@@ -11,7 +11,7 @@
 Con el repositorio en esta rama, desde su raíz: `python -m http.server 8000`. Abrir `http://localhost:8000/Presentaciones/ruta-aprendizaje.html?s=01`. El selector recorre todas las sesiones. GitHub Pages sigue publicando main; no activar despliegue de esta rama.
 
 ## Criterios de aceptación y deuda
-Esta intervención añade una capa de navegación, experimentos y práctica; no reestructura internamente los 16 cuadernos históricos, no reemplaza sus presentaciones, ni verifica cuentas externas. Los fragmentos son complementarios; no deben confundirse con resultados reales de bases, clústeres ni fuentes. Para la siguiente iteración, integrar cada experimento en el generador original de su cuaderno, verificar en Colab/Codespaces/Databricks y realizar QA visual. No cambiar evaluaciones históricas ni exigir servicios pagos.
+Esta intervención añade una capa de navegación, experimentos y práctica. Integra un bloque formativo plegable en 11 cuadernos de aprendizaje (12 archivos por copia histórica de S02), preservando orden, celdas de código y evaluaciones. Los generadores identificados invocan un helper idempotente. No reestructura todos los contenidos históricos, no reemplaza sus presentaciones, ni verifica cuentas externas. Los fragmentos son complementarios; no deben confundirse con resultados reales de bases, clústeres ni fuentes. Para la siguiente iteración, profundizar en el orden interno de cada sesión, verificar en Colab/Codespaces/Databricks, confirmar regeneración de todos los cuadernos y realizar QA visual. No cambiar evaluaciones históricas ni exigir servicios pagos.
 
 ## Verificación
 `node utils/validate_pedagogia.js` (sin dependencias, sin descargas ni benchmarks).

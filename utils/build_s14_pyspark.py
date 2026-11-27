@@ -298,6 +298,11 @@ DESTINO = Path(__file__).resolve().parents[1] / "Cuadernos/14_PySpark_Compras_Cl
 
 def main():
     cells = [md(t) if kind == "markdown" else code(t) for kind,t in BLOQUES]
+    try:
+        from .integrar_ruta_notebook import integrar_ruta
+    except ImportError:
+        from integrar_ruta_notebook import integrar_ruta
+    integrar_ruta(cells, "14")
     validate(cells)
     if "--check" in sys.argv:
         assert json.loads(DESTINO.read_text(encoding="utf-8")) == build(cells), "Cuaderno desincronizado con generador"
