@@ -19,7 +19,22 @@
       "Abre el visor de datos en la pantalla 6. Selecciona una entidad y escribe dos preguntas: cuántos procesos aparecen en la muestra y cuánto dinero contrató esa entidad. Identifica cuál podemos contestar con los campos presentes y cuál necesita otra fuente. Al final de la sesión volveremos a comprobar la respuesta.",
       "Explica la diferencia entre una pregunta descriptiva y una decisión. Para una entidad que recibe muchas consultas, recuperar sus procesos permite identificar temas y distribuir trabajo de lectura; no permite deducir automáticamente el gasto si falta valor contractual. Antes de procesar, anota qué salida utilizaría Laura, en qué momento y qué dato faltaría para una decisión distinta. Un objetivo verificable es que otra persona pueda recuperar las mismas identidades del corpus y comprobar el conteo. Este criterio no depende de una marca de almacenamiento."
     ],
-    "A0"
+    "A0",
+    {
+      "question": "Laura tiene 200 procesos con entidad y objeto, sin valor contractual. ¿Qué resultado puede justificar con esa información?",
+      "choices": [
+        "Ordenar entidades por cantidad de procesos observados.",
+        "Estimar el gasto total de las entidades.",
+        "Identificar automáticamente qué entidad incurrió en fraude."
+      ],
+      "correct": 0,
+      "feedback": [
+        "Sí. El universo, grano y variable permiten un conteo descriptivo. Conserva el denominador y declara que se trata de la muestra.",
+        "No. El corpus no tiene valores contractuales. Obtener esa variable exige otra fuente, otra identidad y otra validación.",
+        "No. La frecuencia de registros no constituye evidencia de una conducta irregular; se requerirían criterios y datos adicionales."
+      ],
+      "transfer": "Plantea una pregunta descriptiva que sí puedas contestar con el corpus. Identifica una pregunta que necesite otra fuente."
+    }
   ],
   [
     5,
@@ -36,7 +51,22 @@
       "En el simulador conserva el tiempo en 60 segundos. Prueba llegadas de 3.000 y capacidades de 1.000, 3.000 y 4.000. Antes de cada cambio predice el atraso. Identifica el escenario en que la capacidad supera la llegada y explica por qué aquí no aparece una cola negativa.",
       "El tiempo tiene dos sentidos diferentes: cuánto tarda una tarea individual y cuántas tareas se terminan por unidad de tiempo. Un sistema puede procesar muchas filas por minuto y tardar demasiado en responder una consulta particular. La cola del modelo supone llegadas y capacidad constantes y estado inicial vacío; si ambos varían, el cálculo por intervalo debe acumular llegadas y servicio, sin permitir pendientes negativos. Un pico temporal puede requerir capacidad de reserva aunque el promedio diario sea bajo. Describe cuál métrica necesitas para una extracción nocturna y para una búsqueda interactiva."
     ],
-    "A1"
+    "A1",
+    {
+      "question": "La entrada es 120 registros/min y el servicio 80/min durante 5 min, inicialmente sin cola. ¿Qué ocurrió?",
+      "choices": [
+        "Se procesaron 600 y quedaron cero.",
+        "Se procesaron 400 y quedaron 200.",
+        "Se procesaron 200 y quedaron 400."
+      ],
+      "correct": 1,
+      "feedback": [
+        "Confundiste entrada con capacidad. Llegaron 600, pero el servicio no podía completar más de 400.",
+        "Correcto. La diferencia de 40 registros/min se acumula cinco minutos. Las unidades deben coincidir.",
+        "El servicio completa 80×5=400, no 200. La diferencia se interpreta como pendientes."
+      ],
+      "transfer": "Cambia capacidad a 150/min: anticipa cola y procesados sin permitir cola negativa."
+    }
   ],
   [
     5,
@@ -74,7 +104,22 @@
       "Resuelve los cinco diagnósticos de la derecha. Después cambia cada caso proponiendo una medición concreta: cantidad de bytes, registros por segundo, modalidades, proporción de duplicados o una decisión. Compara tu respuesta con otra persona; una situación puede tener más de una V, pero debes justificar la dominante.",
       "Las cinco V no son cinco requisitos que deban ser grandes simultáneamente. Un corpus pequeño de documentos escaneados puede ser difícil por variedad y veracidad; un flujo de eventos homogéneos puede ser difícil por velocidad. Distingue el síntoma, la métrica y la decisión. Por ejemplo: tasa de entrada supera servicio, diferencia en eventos por segundo, necesidad de aumentar servicio o desacoplar. El valor depende de una pregunta concreta, no del número de registros. Identifica qué observación invalidaría el diagnóstico inicial; evita seleccionar una V por el nombre del software."
     ],
-    "A1"
+    "A1",
+    {
+      "question": "Una plataforma recibe pocos PDF, pero muchos son escaneados con texto ilegible. ¿Cuál es el diagnóstico inicial más pertinente?",
+      "choices": [
+        "Volumen, porque PDF siempre es Big Data.",
+        "Velocidad, aunque no se conoce la tasa de llegada.",
+        "Variedad y veracidad; verificar estructura y calidad de extracción."
+      ],
+      "correct": 2,
+      "feedback": [
+        "Un formato no determina volumen. Es necesario medir cantidad, tamaño y recursos disponibles.",
+        "No hay evidencia de cuello de botella por ritmo. Primero identifica el síntoma observado.",
+        "Sí. La heterogeneidad de representación y la legibilidad afectan la transformación y calidad. Mide cuántos activos requieren OCR y su error."
+      ],
+      "transfer": "Elige una métrica para cada V de un caso diferente: eventos homogéneos que llegan más rápido de lo que se procesan."
+    }
   ],
   [
     6,
@@ -91,7 +136,22 @@
       "Prueba un millón y diez millones de filas, con 128 columnas. Compara presupuestos de 1, 4 y 16 GiB. Anota cuándo la matriz mínima supera el presupuesto y cuándo, aun cabiendo, sería prudente medir el máximo real. Decide si probar primero fragmentación o distribución para una suma.",
       "Memoria, disco y CPU tienen funciones diferentes. El SSD conserva archivos, la RAM permite acceder a estados activos y la CPU ejecuta instrucciones. La red añade transferencia y latencia. Una matriz de cien millones de valores float64 necesita al menos ochocientos millones de bytes para representar números; pandas puede añadir índices, objetos y copias temporales. El límite inferior no es una medición del proceso. Distribuir datos puede reducir el estado por máquina, pero una operación global puede exigir intercambio. Antes de elegir arquitectura, determina qué operación requiere realmente todo el estado simultáneo."
     ],
-    "A1"
+    "A1",
+    {
+      "question": "Una matriz densa de 1 millón de filas y 128 columnas float64 ocupa como mínimo 1.024.000.000 bytes. ¿Qué significa?",
+      "choices": [
+        "Es el tamaño mínimo de los valores, no necesariamente el pico de RAM.",
+        "Es el tamaño exacto del archivo CSV y del proceso Python.",
+        "Necesariamente hay que usar un clúster."
+      ],
+      "correct": 0,
+      "feedback": [
+        "Sí. Hay ocho bytes por valor. Índice, estructuras de objetos, buffers y copias pueden agregar consumo; el archivo puede comprimir.",
+        "El CSV tiene texto y delimitadores; su tamaño no coincide necesariamente con la representación densa. Tampoco mide todo el proceso.",
+        "No se sigue esa decisión de un cálculo mínimo. Primero compara presupuesto, algoritmo, fragmentación y latencia."
+      ],
+      "transfer": "Recalcula el mínimo para 10 millones de filas y explica una estrategia que no cargue toda la matriz."
+    }
   ],
   [
     5,
@@ -108,7 +168,22 @@
       "Selecciona CSV, JSON, XML y texto en el convertidor. Identifica el campo ID en cada representación, las etiquetas, los separadores y las comillas. Compara los bytes UTF-8 mostrados. Explica qué campos se pierden en la representación de solo texto y cuál conservarías como dato de origen para nuestro ejercicio.",
       "CSV es una serialización tabular; JSON representa listas y objetos; XML representa elementos y atributos; ninguno garantiza calidad del dato. Un objeto con una lista de dos activos tiene una entidad padre y dos hijos; llevarlo a una tabla plana puede duplicar campos del padre. Para preservar significado, define una clave del padre y otra del hijo o mantiene el objeto anidado. La representación se elige según consultas, intercambio y validación. Un texto libre no carece de estructura en sentido lingüístico: simplemente no tiene columnas explícitas como una tabla."
     ],
-    "A2"
+    "A2",
+    {
+      "question": "Un proceso tiene una lista de dos activos. Si se expande a dos filas, ¿qué debe conservarse?",
+      "choices": [
+        "Solo el nombre del activo, porque el objeto padre ya se repite.",
+        "Identidad del proceso y una identidad del activo o una relación inequívoca.",
+        "Un único valor de texto con la lista, sin esquema."
+      ],
+      "correct": 1,
+      "feedback": [
+        "Se pierde el vínculo con el expediente; los nombres tampoco garantizan identidad.",
+        "Correcto. La fila expandida cambia de grano. Identidades y claves permiten reconstruir el vínculo y controlar multiplicidad.",
+        "Puede servir como representación textual, pero no define por sí sola un contrato de identidad ni permite validar el vínculo."
+      ],
+      "transfer": "En A2 serializa la misma información como CSV y JSON; verifica qué tipo recupera el lector."
+    }
   ],
   [
     4,
@@ -125,7 +200,22 @@
       "Práctica: ajusta el número de contratos y la estrategia de unión. Identifica qué procesos permanecen en el resultado y cuáles desaparecen al seleccionar inner. En el cuaderno A2 reproduce los conteos, modifica una condición y explica qué evidencia permitiría sumar valores. Escribe en el manifiesto grano=proceso y comprueba que el identificador sea único. Si el objetivo exige contratos, crea otra fuente con otra identidad y otro manifiesto; no transformes silenciosamente un corpus de procesos en una tabla contractual.",
       "El objetivo no es memorizar los tres nombres de tablas, sino predecir la multiplicidad. Una unión izquierda mantiene un proceso sin contrato en una fila con null. Una unión interna lo elimina. Una agregación por identidad de proceso después de la unión puede restablecer una fila por proceso, pero no deshace automáticamente una suma contractual duplicada. Si una clave que debería ser única se repite en la dimensión, primero audita la calidad de la dimensión."
     ],
-    "A2"
+    "A2",
+    {
+      "question": "P1 tiene tres contratos, P2 uno y P3 ninguno. ¿Cuántas filas y procesos únicos produce un left join?",
+      "choices": [
+        "Cuatro filas y cuatro procesos.",
+        "Tres filas y tres procesos.",
+        "Cinco filas y tres procesos."
+      ],
+      "correct": 2,
+      "feedback": [
+        "Cuatro contratos no incluyen la fila preservada de P3; las filas tampoco son necesariamente procesos únicos.",
+        "Solo sería una fila por proceso antes de unir o tras una agregación. El join expande P1.",
+        "Sí. Tres de P1, una de P2 y una sin contrato de P3. Hay cuatro contratos observados, cinco filas y tres procesos."
+      ],
+      "transfer": "Cambia a inner join: verifica que desaparece P3 y explica qué conteo usar para contratos."
+    }
   ],
   [
     5,
@@ -142,7 +232,22 @@
       "Busca el identificador en el visor y abre su enlace de fuente. Después busca Barranquilla y compara el número de coincidencias con el universo de 200. Cambia de página. Registra el filtro, las coincidencias y un ID encontrado. Usa esos datos para explicar a otra persona qué parte de la consulta puede reproducir.",
       "Inspecciona tres registros y busca el mismo identificador en el enlace de procedencia cuando exista. La descripción puede ser más larga que el objeto y la entidad puede usar nombres variables. El snapshot se conserva como evidencia de lo que había en el repositorio, no como certificación de todo el portal. Registra su referencia de versión. Un conteo de doscientas filas no autoriza estimar porcentajes nacionales sin diseño muestral. Si encuentras descripciones duplicadas con IDs diferentes, conserva ambas mientras la identidad de proceso sea distinta."
     ],
-    "A3"
+    "A3",
+    {
+      "question": "El snapshot docente contiene 200 IDs únicos y 51 entidades. ¿Cuál afirmación es válida?",
+      "choices": [
+        "En ese snapshot hay 200 procesos observados.",
+        "Todo SECOP contiene 200 procesos.",
+        "Las 51 entidades son una muestra estadísticamente representativa de Colombia."
+      ],
+      "correct": 0,
+      "feedback": [
+        "Correcto. El conteo es una propiedad del conjunto congelado y de su grano, no del universo externo.",
+        "El repositorio es una selección. Para afirmar el total del portal se necesita una fuente y una extracción exhaustiva.",
+        "No se ha establecido un diseño de muestreo representativo ni probabilidades de inclusión."
+      ],
+      "transfer": "Abre un registro del explorador, identifica fuente y campos; explica qué dato faltaría para estudiar gasto."
+    }
   ],
   [
     5,
@@ -159,7 +264,22 @@
       "Introduce cinco duplicados y tres entidades faltantes; observa los cuatro indicadores. Luego cambia a cero duplicados sin modificar los faltantes. Comprueba que los datos originales no cambiaron. Decide cuál usarías para controlar identidad y cuál para decidir si un registro puede entrar en el resumen por entidad.",
       "Calidad incluye integridad de esquema, unicidad, completitud, validez y coherencia. Una fila ausente en entidad no debe rellenarse con un nombre imaginado. Los duplicados exactos pueden ser resultado de reintentos; un ID repetido con campos distintos requiere resolver versión o conflicto. Reporta cantidad de registros afectados por cada condición; las condiciones pueden solaparse. Por ejemplo, una copia duplicada con entidad vacía cuenta en ambos controles. No sumes porcentajes como si las categorías fueran excluyentes."
     ],
-    "A3"
+    "A3",
+    {
+      "question": "Se añaden cinco copias exactas a 200 IDs únicos. ¿Qué se debe reportar?",
+      "choices": [
+        "205 procesos distintos.",
+        "205 filas, 200 identidades, cinco repeticiones adicionales.",
+        "200 filas: el sistema elimina copias al leer."
+      ],
+      "correct": 1,
+      "feedback": [
+        "Una copia no crea identidad de proceso. Contar filas puede ocultar reintentos.",
+        "Sí. Conserva RAW y mide el efecto sobre una copia. Si el mismo ID trae información distinta, registra conflicto en lugar de borrar arbitrariamente.",
+        "No hay eliminación automática sin una regla explícita. Leer datos no garantiza deduplicación."
+      ],
+      "transfer": "Introduce faltantes y copias en el explorador; explica por qué ambos controles pueden solaparse."
+    }
   ],
   [
     5,
@@ -176,7 +296,22 @@
       "Selecciona 40, 80, 120 y 200 en el explorador. Para cada selección registra el total y el número de entidades distintas. Identifica si la entidad más frecuente cambia de posición. En el cuaderno A3 reproduce el conteo por entidad; verifica que la suma de todos los conteos coincide con la cantidad de procesos seleccionados.",
       "Filtrar reduce filas según una condición; seleccionar columnas reduce atributos, y agrupar cambia el grano a una fila por clave. Las operaciones no son intercambiables. Si primero agrupas por entidad y después filtras un conteo, seleccionas entidades; si filtras procesos antes de agrupar, alteras el universo de cada entidad. Comprueba la suma de conteos de todos los grupos y los nulos antes de interpretar un top. Un ranking por cantidad no equivale a ranking por valor o riesgo."
     ],
-    "A3"
+    "A3",
+    {
+      "question": "La agrupación por entidad produce 51 filas y la suma de size es 200. ¿Cuál es el grano de la salida?",
+      "choices": [
+        "Proceso, porque el universo tenía 200.",
+        "Contrato, porque SECOP contiene compras.",
+        "Entidad; cada fila es un grupo de procesos de la selección."
+      ],
+      "correct": 2,
+      "feedback": [
+        "La agrupación cambió la unidad: una fila representa una clave, no una observación original.",
+        "La fuente no se convierte en contractual al agrupar. No contiene valores contractuales.",
+        "Correcto. El número de grupos y la suma de tamaños son medidas distintas; ambas ayudan a reconciliar."
+      ],
+      "transfer": "Compara 40, 80 y 120 registros. Registra cantidad de grupos y suma de conteos sin extrapolar."
+    }
   ],
   [
     5,
@@ -193,7 +328,22 @@
       "Abre A3 en el cuaderno. La celda de datos crea CORPUS y la siguiente construye df. Cambia N a 40, 80 y 120 en la celda de selección. Conserva un ID y el conteo de su entidad. Las selecciones de ambas herramientas siguen el orden de la instantánea versionada, no una consulta viva.",
       "Un DataFrame es una estructura tabular con columnas y tipos. Un booleano por fila permite seleccionar observaciones; groupby define particiones lógicas y size cuenta filas, mientras count puede excluir nulos del atributo elegido. En el cuaderno A3 compara esos resultados y observa cómo una copia con entidad ausente requiere una política explícita. No confundas una tabla bonita con una comprobación: los asserts contrastan una expectativa con el resultado y detienen el proceso si no se satisface."
     ],
-    "A3"
+    "A3",
+    {
+      "question": "En pandas, ¿qué prueba verifica que la agrupación conservó todas las filas del universo elegido?",
+      "choices": [
+        "muestra.groupby('entidad', dropna=False).size().sum() == len(muestra)",
+        "muestra.head().shape[0] == 5",
+        "len(muestra.columns) == 7"
+      ],
+      "correct": 0,
+      "feedback": [
+        "Correcto. size cuenta filas y dropna=False conserva grupos de clave faltante. Además comprueba identidad y esquema por separado.",
+        "head solo muestra primeras filas; no prueba agrupación completa ni ausencia de pérdidas.",
+        "El número de columnas es parte del esquema, no una comprobación de cobertura de filas."
+      ],
+      "transfer": "Modifica N en A3 y verifica paridad; describe cuándo count y size pueden diferir."
+    }
   ],
   [
     6,
@@ -210,7 +360,22 @@
       "Escribe salud, contrato y una palabra que no aparezca. Predice cuál tendrá más documentos antes de ejecutar cada búsqueda. Compara ocurrencias frente a frecuencia documental. Si el resultado es cero, no concluyas automáticamente que no existe un proceso relacionado: puede utilizar otros términos. Esta limitación motiva las sesiones de recuperación de información.",
       "Tokenizar divide una cadena en unidades según reglas. Normalizar mayúsculas y acentos ayuda a comparar variantes, pero puede eliminar distinciones. Un término repetido tres veces en un documento y una vez en otro tiene frecuencia total cuatro y frecuencia documental dos. Ambas cantidades responden preguntas diferentes. Una búsqueda literal puede omitir paráfrasis y encontrar negaciones; no es todavía búsqueda semántica. En A3 conserva el texto original junto con el conteo de tokens y describe la regla aplicada."
     ],
-    "A3"
+    "A3",
+    {
+      "question": "Una palabra aparece tres veces en P1 y una en P2. ¿Cuáles son sus frecuencias?",
+      "choices": [
+        "Ocurrencias 2, documentos 4.",
+        "Ocurrencias 4, documentos 2.",
+        "Ocurrencias y documentos siempre 4."
+      ],
+      "correct": 1,
+      "feedback": [
+        "Invertiste las unidades: repetición del término cuenta ocurrencias; el documento se cuenta una sola vez.",
+        "Sí. Frecuencia total y frecuencia documental responden preguntas diferentes. Un ranking lexical posterior puede usar ambas.",
+        "Solo coincidirían si cada documento contuviera el término exactamente una vez."
+      ],
+      "transfer": "Cambia el término del explorador y compara conteos; explica cómo afecta la normalización."
+    }
   ],
   [
     10,
@@ -248,7 +413,22 @@
       "Ejecuta A4 con la configuración inicial. Clasifica 200, 429, 403 y timeout. Si deseas contrastar una consulta viva, activa la opción explícita de cinco registros. Observa estado, esquema y grano. Si falla, registra el bloqueo y continúa. No compares tiempos de una API cambiante como benchmark controlado.",
       "Una API separa interfaz y almacenamiento. El cliente conoce un contrato de respuesta, no necesariamente el motor interno. El parámetro select reduce campos devueltos; where restringe filas; limit acota resultado. Especificar estos parámetros reduce transferencia y ayuda a formular una muestra, pero una respuesta exitosa no certifica cobertura. En A4 la ruta principal no requiere red. La consulta viva es una actividad optativa de contraste con un recurso contractual de grano distinto y no se mezcla con el snapshot."
     ],
-    "A4"
+    "A4",
+    {
+      "question": "Una API devuelve HTTP 200 y cinco filas con limit=5. ¿Qué se probó?",
+      "choices": [
+        "Se descargó todo el portal.",
+        "Se obtuvieron cinco contratos válidos y únicos sin revisar campos.",
+        "Se recibió una respuesta; aún hay que validar cuerpo, esquema, identidad y alcance."
+      ],
+      "correct": 2,
+      "feedback": [
+        "No. limit acota una página, no define todo el universo.",
+        "El estado no valida semántica, tipos ni claves.",
+        "Correcto. La adquisición separa transporte y validación del dato; la cobertura requiere otro control."
+      ],
+      "transfer": "Clasifica un timeout y un 403 antes de activar una consulta remota."
+    }
   ],
   [
     5,
@@ -265,7 +445,22 @@
       "Práctica: selecciona 200 con lista vacía, 200 con datos, 429, 403 y timeout. Decide cuándo finalizar y cuándo reintentar. En el cuaderno A4 se prueba una máquina de estados de peticiones con respuestas controladas; A5 trabaja con datos congelados. La consulta viva opcional tiene límite pequeño y registra la fuente. Compara sus campos con el corpus, pero no declares cobertura del universo SECOP. En un trabajo profesional, conserva los parámetros y la fecha de extracción para explicar qué se pidió.",
       "Clasifica cada fallo antes de recuperar. Una petición que no llegó a responder se registra como desconocida, no como lista vacía. Si un estado permanente impide el acceso, cambiar offset no resuelve autorización. Un reintento acotado sobre la misma petición puede repetir filas si ya había persistido el resultado; se verifica identidad. La política de reintentos depende del servicio y se mantiene dentro de su cuota."
     ],
-    "A4"
+    "A4",
+    {
+      "question": "La página 2 falla con 429. ¿Qué conducta conserva trazabilidad?",
+      "choices": [
+        "Registrar página pendiente y reintentar de manera acotada según política.",
+        "Avanzar offset y contar la página como vacía.",
+        "Repetir indefinidamente sin demora."
+      ],
+      "correct": 0,
+      "feedback": [
+        "Sí. Mantiene el error visible y evita omitir una ventana. Si agotas reintentos, marca adquisición incompleta.",
+        "Una página fallida no equivale a lista vacía; avanzar podría perder datos.",
+        "Eso puede aumentar carga y violar límites. Reintentos requieren límite y política explícita."
+      ],
+      "transfer": "Compara 429, 403 y 200 sin filas; explica cuándo se puede terminar una extracción."
+    }
   ],
   [
     5,
@@ -282,7 +477,22 @@
       "En el simulador fija límite 30 y observa la primera página. Salta al offset 180 para verificar el último bloque. Después prueba límite 50 y calcula el número de páginas antes de mirar el indicador. Explica por qué un offset 200 devuelve cero filas y por qué este ejercicio no garantiza cobertura de una API en vivo.",
       "Para una lista de N elementos, con limit L y salto igual a L, el número de páginas es techo(N/L). La última puede ser parcial. Si N=12 y L=5, offsets 0,5,10 devuelven 5,5,2. Un bucle que se detiene antes de leer la última ventana pierde dos registros. Si no se conoce N, una respuesta menor que limit puede servir como criterio de parada solo bajo las garantías documentadas por la fuente; no generalices ese comportamiento a todos los servicios."
     ],
-    "A5"
+    "A5",
+    {
+      "question": "En una lista congelada de 12 filas, limit=5 y salto=5. ¿Qué offsets cubren toda la lista?",
+      "choices": [
+        "0 y 5.",
+        "0, 5 y 10.",
+        "5, 10 y 15."
+      ],
+      "correct": 1,
+      "feedback": [
+        "Solo recuperas las primeras diez; faltan dos registros.",
+        "Correcto. El último lote contiene dos filas. techo(12/5)=3.",
+        "Empiezas omitiendo las cinco primeras filas. Offset expresa posiciones omitidas."
+      ],
+      "transfer": "En A5 modifica limit a 37 y compara traza y último bloque."
+    }
   ],
   [
     5,
@@ -299,7 +509,22 @@
       "Compara saltos de 40 y 50 con límite fijo de 50. Revisa las cuatro páginas y observa los indicadores antes de ver los identificadores ausentes. Cambia a 60 y explica por qué aparecen huecos. Escribe la regla de validación en términos de conjuntos: no basta afirmar que filas recibidas igualan filas esperadas.",
       "La conciliación debe usar identidades. Si llegan 200 filas pero existen 170 IDs, hay 30 repeticiones adicionales. Si el universo congelado tiene 200 IDs y todas las filas pertenecen a ese universo, faltan 30. Es posible recibir un ID inesperado; por eso el control debe informar también extras. En A5 el conjunto esperado está disponible y permite verificar exactamente faltantes y extras. En un universo desconocido se necesita otra evidencia."
     ],
-    "A5"
+    "A5",
+    {
+      "question": "Cuatro páginas de 50 con salto 40 producen 200 filas y 170 IDs del universo de 200. ¿Qué pasó?",
+      "choices": [
+        "Nada; el total coincide.",
+        "Hay 30 procesos nuevos fuera del universo.",
+        "Hay 30 repeticiones adicionales y 30 IDs originales ausentes."
+      ],
+      "correct": 2,
+      "feedback": [
+        "El conteo bruto oculta pérdidas y solapamientos. Debes conciliar identidades.",
+        "No se han observado extras: los IDs pertenecen al mismo universo congelado.",
+        "Sí. Los 30 registros repetidos compensan 30 faltantes en el conteo bruto. Corrige salto y verifica el conjunto."
+      ],
+      "transfer": "Compara salto 50 y un salto superior; identifica cuál genera huecos sin duplicados."
+    }
   ],
   [
     5,
@@ -316,7 +541,22 @@
       "Práctica: alterna la inserción, predice las dos ventanas y compara los conjuntos. Después plantea una política para una fuente que publica actualizaciones periódicas: captura hora, filtros y orden; si existe un cursor estable, úsalo según la documentación; si no existe, reconcilia IDs y registra que la cobertura es una estimación del momento de extracción. A5 compara el corpus congelado. El reto no consiste en memorizar offset, sino en reconocer los supuestos que lo hacen correcto.",
       "Una lista mutable exige explicitar qué significa completo: completo respecto de qué versión, fecha o filtro. Un orden estable evita empates arbitrarios, no inserciones. Un mecanismo incremental por cursor o marca temporal puede mejorar continuidad si el servicio lo soporta y se define un desempate para eventos con la misma marca. No inventes una garantía de snapshot. La práctica de aula conserva un universo fijo y por eso la igualdad de conjuntos es comprobable."
     ],
-    "A5"
+    "A5",
+    {
+      "question": "Se inserta un registro al inicio entre página 1 y 2. Ambas peticiones usan limit=4, salto=4. ¿Qué puede ocurrir?",
+      "choices": [
+        "Un registro anterior se repite y otro del universo inicial queda fuera.",
+        "El orden elimina cualquier cambio en datos.",
+        "HTTP 200 garantiza que la inserción se incorporó correctamente."
+      ],
+      "correct": 0,
+      "feedback": [
+        "Correcto. Las posiciones cambian. Un orden total no congela una fuente mutable.",
+        "Ordenar garantiza una secuencia dentro de un estado, no estabilidad temporal.",
+        "HTTP no describe la cobertura entre solicitudes ni la versión de datos."
+      ],
+      "transfer": "En A5 identifica P04 repetido y P08 ausente; propone una estrategia de versión si el servicio la soporta."
+    }
   ],
   [
     5,
@@ -333,7 +573,22 @@
       "Prueba bloques de 25, 40 y 100 filas. Revisa el número de bloques, la suma de sus tamaños y la igualdad de los conteos. Usa A3 del cuaderno para repetir con un tamaño de bloque que no divida exactamente N. Explica por qué la última parte es menor y por qué el resultado final se conserva.",
       "Procesar por fragmentos evita materializar toda la entrada a la vez. Un acumulador mantiene el estado necesario y puede crecer si hay muchísimas claves distintas. Para contar por entidad, la memoria de la tabla parcial depende del tamaño del bloque y la del acumulador del número de entidades. Si se requieren orden global o join entre todas las claves, el algoritmo puede necesitar más estado o almacenamiento temporal. El valor de chunksize controla entrada, no todos los costos."
     ],
-    "A6"
+    "A6",
+    {
+      "question": "Para contar procesos por entidad en bloques, ¿qué estado parcial se necesita?",
+      "choices": [
+        "Guardar cada tabla completa hasta el final.",
+        "Un mapa entidad→conteo, combinado por suma.",
+        "La media de los conteos de cada bloque."
+      ],
+      "correct": 1,
+      "feedback": [
+        "No es necesario para un conteo combinable. Guardar cada tabla puede anular el ahorro de memoria.",
+        "Correcto. Cada bloque produce conteos y se suman por clave. El estado puede crecer con las claves distintas.",
+        "La media cambia la magnitud y no preserva el total de filas."
+      ],
+      "transfer": "En A6 cambia tamaño a 7,25,50 y explica por qué el último bloque puede ser menor."
+    }
   ],
   [
     6,
@@ -350,7 +605,22 @@
       "Mueve la cantidad del lote A a ocho, dejando B en ocho; predice la media antes de mirar. Luego prueba A=20 y B=1. En cada caso calcula a mano la suma y el conteo. Indica qué dos variables llevarías de un bloque a otro en pandas para evitar el error.",
       "Una media de medias solo coincide con la media global cuando los grupos tienen igual número de observaciones válidas, o por coincidencia particular de valores. Con tamaños diferentes, el peso de cada media debe ser su conteo. Si el objetivo es comparar departamentos como unidades, promediar sus medias puede ser una pregunta válida distinta; si se quiere el promedio de todos los contratos, el peso corresponde al contrato. Declara el grano de la métrica antes de elegir fórmula."
     ],
-    "A6"
+    "A6",
+    {
+      "question": "Dos valores de 10 y ocho valores de 100. ¿Cuál es la media global?",
+      "choices": [
+        "55",
+        "100",
+        "82"
+      ],
+      "correct": 2,
+      "feedback": [
+        "Es el promedio de las dos medias, que da igual peso a tamaños distintos.",
+        "Ignora el primer lote; la media global debe incorporar ambas poblaciones.",
+        "Sí. (20+800)/10=82. El estado suficiente es suma y conteo."
+      ],
+      "transfer": "Encuentra un caso en que ambas medias coincidan y explica si eso demuestra una regla general."
+    }
   ],
   [
     6,
@@ -367,7 +637,22 @@
       "Práctica: cambia la cantidad de nulos y valores de B. Compara media de medias, media combinada y conteo válido; busca un caso en que coincidan por casualidad. En A6 trabaja con CSV generado, verifica que los agregados no cambien con chunksize y mide memoria lógica. Si cambias el algoritmo, el filtro o los tipos, ya no estás haciendo una comparación justa. En una sesión posterior Dask y Spark generalizarán la idea de estados parciales, aunque no convierten automáticamente todas las funciones de pandas en reducciones combinables.",
       "Cuando todos los valores son faltantes, una suma cero y conteo cero no implican media cero. El estado combinado permite distinguir ausencia de observaciones de observaciones cuyo valor suma cero. Para una varianza puede combinarse un estado apropiado, pero una implementación ingenua con diferencias de cuadrados puede sufrir cancelación numérica. Esta sesión se limita a conteos, sumas y medias, porque son suficientes para el producto de adquisición."
     ],
-    "A6"
+    "A6",
+    {
+      "question": "A tiene 10,10,null y B cuatro valores de 100. Si se ignoran nulos, ¿qué media global resulta?",
+      "choices": [
+        "70",
+        "60",
+        "55"
+      ],
+      "correct": 0,
+      "feedback": [
+        "Correcto. Suma 420, seis válidos; el nulo no participa.",
+        "Dividiste por siete como si el nulo fuera cero. Esa sería otra política de calidad.",
+        "Promediaste medias sin considerar los tamaños válidos."
+      ],
+      "transfer": "Aumenta nulos hasta que A no tenga válidos; identifica cómo tratar una media indefinida."
+    }
   ],
   [
     8,
@@ -384,7 +669,22 @@
       "Ejecuta A6 primero con 10.000 filas y luego con 100.000. Fija 100.000 y compara bloques de 500, 1.000 y 5.000. Registra el tamaño completo, el máximo por bloque y los segundos. No repitas la generación dentro de cada medición. Si los tiempos cambian, explica posibles costos de lectura y coordinación sin declarar que una única medición prueba una ventaja universal.",
       "Una medición de memoria lógica del DataFrame suma estimaciones de sus columnas e índice. No mide el máximo de memoria residente del proceso, que incluye intérprete, buffers y otras estructuras. Tiempo de lectura depende de caché, formato, máquina y estado del almacenamiento. A6 mantiene N y datos fijos y cambia únicamente chunksize. No uses una sola corrida para proclamar un ganador universal; reporta tiempos observados y equivalencia de resultados. Para una comparación más rigurosa repite, intercala orden y mide pico RSS con una herramienta apropiada."
     ],
-    "A6"
+    "A6",
+    {
+      "question": "La tabla completa de 100.000 filas ocupa 1.600.132 bytes lógicos y el mayor bloque de 1.000 ocupa 16.132. ¿Qué prueba?",
+      "choices": [
+        "El proceso Python nunca supera 16.132 bytes de RAM.",
+        "La estructura lógica del bloque es menor y ambos resultados se pueden contrastar.",
+        "El procesamiento por bloques es siempre más rápido."
+      ],
+      "correct": 1,
+      "feedback": [
+        "memory_usage no incluye todo el intérprete, buffers ni pico RSS.",
+        "Sí. La comparación describe los tamaños lógicos y, con paridad de suma/conteo, enseña el mecanismo. El tiempo depende de condiciones.",
+        "La lectura en más iteraciones puede costar más. Debe medirse y reportarse sin generalizar."
+      ],
+      "transfer": "Usa la tabla de A6: calcula proporción de bytes y compara los tiempos de una misma N."
+    }
   ],
   [
     7,
@@ -401,7 +701,22 @@
       "Usa el control de la presentación para comparar una selección de 40, 80 o 120 procesos; el estado descargable es una representación del explorador, no el paquete RAW del cuaderno. A7 genera el paquete completo de 200; A8 permite seleccionar un prefijo del mismo orden. Conserva ambos tipos de salida separados. No necesitas importar nada al observatorio oficial durante la revisión.",
       "Un producto de datos empieza con una identidad y una versión. El RAW conserva el contenido de las observaciones adquiridas; el manifiesto describe qué filtros y límite se utilizaron. Un conteo por entidad es un derivado y debe poder regenerarse desde RAW. El archivo de evidencia del observatorio no sustituye los datos originales. El cuaderno A7 genera un directorio exclusivo con los archivos, los abre de nuevo, calcula huellas y compara los conteos. Así otro usuario puede revisar sin confiar solo en una captura."
     ],
-    "A7"
+    "A7",
+    {
+      "question": "¿Qué archivo debe contener los registros adquiridos sin alterar y cuál el conteo por entidad?",
+      "choices": [
+        "Ambos son RAW porque están en JSON.",
+        "Solo el manifiesto es RAW.",
+        "raw.jsonl contiene registros; conteos.json es derivado."
+      ],
+      "correct": 2,
+      "feedback": [
+        "El formato no define responsabilidad. Los derivados cambian información o grano.",
+        "El manifiesto documenta origen y controles; no sustituye las observaciones.",
+        "Correcto. El producto distingue entrada, transformación y metadatos. Los conteos pueden regenerarse desde RAW."
+      ],
+      "transfer": "Abre el paquete generado en A7; cuenta líneas, comprueba grano y verifica relectura."
+    }
   ],
   [
     7,
@@ -418,7 +733,22 @@
       "Práctica: ejecuta las tres alternativas y explica cuál preserva bytes, cuál identidad y cuál contenido por identidad. En A7 crea un paquete real que contiene fuente congelada, RAW adquirido, conteo por entidad y manifiesto; relee cada uno y comprueba huellas. Conserva archivos en un directorio exclusivo, no sobrescribas el RAW de una ejecución anterior. En A8 modifica límite, tamaño de bloque y escala, produce un nuevo paquete y verifica que las diferencias sean atribuibles a decisiones explícitas. S02 recibirá los requisitos y la identidad del producto, pero no se modifica S02 hasta aprobar esta sesión.",
       "Para probar integridad, una comparación debe indicar exactamente qué propiedad se conserva. SHA-256 comprueba bytes; conjuntos de IDs comprueban identidad; un mapa ID→contenido comprueba equivalencia de registros bajo esa representación. Cambiar orden puede preservar contenido y alterar bytes. Cambiar un campo preserva ID y altera contenido. Un manifiesto puede conservar todas estas perspectivas, siempre que se precise el método. La prueba no acredita autenticidad criptográfica sin una fuente confiable de la huella."
     ],
-    "A7"
+    "A7",
+    {
+      "question": "Un archivo se reordena sin cambiar campos. ¿Cuál afirmación es correcta?",
+      "choices": [
+        "Pueden cambiar bytes y hash, pero conservarse contenido por ID.",
+        "Si cambia el hash, necesariamente hay fraude.",
+        "Si los IDs coinciden, los bytes son idénticos."
+      ],
+      "correct": 0,
+      "feedback": [
+        "Correcto. El hash opera sobre bytes; la equivalencia semántica necesita una definición adicional.",
+        "Un cambio de serialización legítimo modifica bytes; no prueba autoría ni intención.",
+        "Un mismo ID puede tener campos modificados; incluso orden distinto cambia la serialización."
+      ],
+      "transfer": "Compara las tres opciones del experimento. Explica cuál control detecta modificar entidad."
+    }
   ],
   [
     7,
@@ -435,7 +765,22 @@
       "Construye dos productos propios en A8. La primera comparación conserva el universo de 200 procesos, cambiando límite y bloque; los hashes RAW y conteos deben coincidir. La segunda conserva parámetros pero cambia a un prefijo de 80 (o el valor que elijas). Comprueba el número de IDs, la relectura y el alcance declarado. Conserva las carpetas distintas para comparar.",
       "En el reto autónomo debes cambiar una entrada y anticipar un invariante: por ejemplo, con el mismo universo y tamaño de página distinto, se conserva el conjunto de IDs y el conteo por entidad. Si cambias escala, el universo cambia y ya no esperas conteos iguales. La decisión profesional es distinguir cambios de ejecución de cambios de datos. No copies las cifras de una ejecución anterior: guarda una nueva evidencia, comprueba sus controles y compara su manifestación con la predicción."
     ],
-    "A8"
+    "A8",
+    {
+      "question": "Se cambia chunk de 25 a 13, manteniendo universo y orden. ¿Qué debería conservarse?",
+      "choices": [
+        "El número de bloques.",
+        "Contenido RAW y conteo por entidad.",
+        "La duración exacta de la ejecución."
+      ],
+      "correct": 1,
+      "feedback": [
+        "El número de bloques depende de chunk. Es un cambio de ejecución.",
+        "Sí. La operación y universo no cambian; hashes de RAW y conteos deben permanecer iguales.",
+        "Los tiempos varían por coordinación, caché y máquina. No son un invariante lógico."
+      ],
+      "transfer": "Ejecuta A8 con otro límite y bloque; después cambia N y compara el alcance."
+    }
   ],
   [
     6,
@@ -473,7 +818,22 @@
       "Resuelve los cinco controles de la derecha. Luego elige uno de tus resultados y explica cómo se lee, qué nos dice, qué no permite concluir y qué error común podría llevar a una interpretación incorrecta. Si una consulta remota falló, declara el bloqueo. Una respuesta correcta en el cuestionario no sustituye la evidencia de ejecución.",
       "Una defensa técnica debe incluir pregunta, fuente, unidad de observación, transformación, resultado y límite. Si se afirma que una extracción es reproducible, muestra los parámetros y la identidad de versión; si se afirma que el algoritmo funciona por bloques, muestra igualdad con el cálculo de referencia. Si los datos no representan todo SECOP, evita inferencias nacionales. Identifica un fallo que detectaría cada control y otro que no detectaría; por ejemplo, un hash no detecta una descripción incorrecta proveniente de la fuente."
     ],
-    "A8"
+    "A8",
+    {
+      "question": "La entidad A tiene más procesos que B en esta selección. ¿Cuál defensa es válida?",
+      "choices": [
+        "A gastó más.",
+        "A es menos eficiente.",
+        "A aparece más veces en este conjunto; no se deduce gasto ni eficiencia."
+      ],
+      "correct": 2,
+      "feedback": [
+        "Falta valor contractual y una unión válida para estudiar gasto.",
+        "El conteo no mide desempeño, recursos ni causalidad.",
+        "Correcto. Expresa universo, método y limitaciones. Una conclusión más fuerte requiere datos y diseño adecuados."
+      ],
+      "transfer": "Elige un resultado de A6/A7 y redacta verbalmente qué mide, qué no mide y un error común."
+    }
   ],
   [
     8,
@@ -495,6 +855,21 @@
       "Abre los manifiestos de tus dos paquetes y comprueba qué propiedades permanecieron iguales y cuáles cambiaron. Conserva los resultados y explica por qué la lectura por bloques conserva un conteo, cuándo la nube podría ser útil y por qué no puedes calcular gasto contractual desde el corpus actual. El relevo se deja documentado; no se avanza a S02 mientras la sesión no pase la puerta de calidad.",
       "El relevo de S01 no obliga a instalar un clúster. S02 necesita saber qué datos existen, cuántos, con qué esquema, frecuencia de actualización, identidad, operaciones previstas y restricciones. Un manifiesto con información incompleta debe declarar desconocidos en lugar de inventar requisitos. El producto de esta sesión es una extracción verificable y una capacidad demostrada de procesar por bloques. La arquitectura futura se diseña a partir de esas evidencias y de necesidades nuevas, no a partir de la popularidad de una tecnología."
     ],
-    "A8"
+    "A8",
+    {
+      "question": "¿Qué se necesita para entregar S01 y preparar S02 sin avanzar todavía?",
+      "choices": [
+        "Paquete releído, identidad, fuente, grano, esquema y restricciones conocidas/desconocidas.",
+        "Instalar Spark antes de comprobar datos.",
+        "Una captura de un gráfico, sin parámetros."
+      ],
+      "correct": 0,
+      "feedback": [
+        "Sí. El siguiente diseño se apoya en un producto verificable y requisitos, no una lista de herramientas. S02 sigue bloqueada hasta aprobar S01.",
+        "Spark no soluciona automáticamente una adquisición incompleta ni sustituye requisitos.",
+        "Una captura no permite reconstruir la fuente, las transformaciones ni sus parámetros."
+      ],
+      "transfer": "Comprueba manifest.json y declara qué frecuencia de actualización o SLA todavía no se ha medido."
+    }
   ]
 ]
