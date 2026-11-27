@@ -129,3 +129,21 @@ HTML guardado reconstruido byte a byte a partir de fuentes. DOM simulado: portad
 | Viabilidad temporal | 5% | 3 |
 
 **4.06/5: NO APROBADA.** Frente a la auditoría independiente anterior (3,78), mejora provisional de 0.28. No se abre S02. No se modifican materiales oficiales ni se agregan ejecuciones automáticas. Pendientes adicionales: mejorar variedad de diagramas y revisar cada pantalla proyectada, ampliar ejemplos de representación y complejidad, sincronizar referencias del apéndice, incorporar libreto docente integral y probar entrega autónoma con estudiante.
+
+
+## Undécima intervención: presentación visual completa, libreto y experimentos adicionales
+Se amplía la portada con competencias, una ilustración SVG original y propósito. Se desarrollan 25 ilustraciones didácticas específicas más una pausa ilustrada (27 pantallas ilustradas con la portada). No son fotografías externas. Se incluye libreto por pantalla: «Di esto», «Haz esto» y ruta/celda exacta; 3218 palabras contando títulos, explicación y acciones, 2615 palabras en texto para decir. No se suma este material al umbral léxico original. Se corrige gráfica de escala con barras proporcionales y se incorpora control para ocultar ilustraciones al proyectar. En el cuaderno, A8.3 añade contraste del JSON exportado por el simulador, verificando configuraciones, identidad, orden, conteos y tamaños; A6.3 agrega representación int64/int32 y complejidad de conteo, como ampliaciones sin incrementar carga obligatoria. Se extiende el validador manual. 
+
+**Pruebas efectivamente realizadas:** HTML exacto recompuesto, DOM simulado: portada/inicio/regreso, 26 pantallas y SVG, 26 guiones y rutas, 75 opciones, 89 variaciones, cero errores de la prueba. En Chromium se reprodujo localmente la portada a partir de su marcado y reglas CSS copiadas, detectando superposición de navegación a 1366×768; después de corregir, la portada cabe a 1366×768 y 1920×1080 y no desborda horizontalmente a 360×800. Esta es una muestra local, no render del HTML completo ni validación del visor externo. En Python pandas 2.2.3, 9 ejecuciones de referencia de medir_csv transcrita, sumas 499950/4999545/49999950 para 10k/100k/1M. En un millón tiempos de referencia 0,110895/0,519068/0,150491 s (completo/1000/5000); memoria lógica 16000132/16132/80132 bytes. Validadores de construcción y paginación transcritos: 6 aceptaciones correctas, 9 rechazos en fixture sintético. Representación 100k filas: 1600132/800132 bytes int64/int32 y misma suma 4999545. Complejidad: 500000 comparaciones/10000 visitas modeladas, paridad comprobada y tres mediciones por estrategia. No equivale a ejecución del notebook exacto. El puente de plan JSON y el ZIP requieren ejecución integral; navegador completo, revisión semántica y ensayo humano pendientes. Conteo depurado 42978 palabras (43275 bruto); cribado de 72010 pares, cero coincidencias por umbral, no acredita ausencia de redundancia semántica.
+
+| Dimensión | Peso | Nota |
+|---|---:|---:|
+| Profundidad conceptual | 20% | 4.5 |
+| Actividad y autonomía | 20% | 4.4 |
+| Práctica auténtica y reproducibilidad | 20% | 4 |
+| Alineación y transferencia | 15% | 4.5 |
+| Interpretación de resultados | 10% | 4.6 |
+| Diseño visual y accesibilidad | 10% | 4.1 |
+| Viabilidad temporal | 5% | 3.2 |
+
+**4.29/5: NO APROBADA.** Se mantiene S02 bloqueada. Se conserva la rama alternativa y no se modifica el sitio oficial. Pendiente: ejecución exacta con núcleo y apéndice; validación del ZIP autónomo y del puente de plan; inspección real de las 27 pantallas; revisión editorial semántica; ensayo de 150 minutos y observación de autonomía.
