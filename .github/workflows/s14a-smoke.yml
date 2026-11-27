@@ -17,13 +17,16 @@ jobs:
         with:
           python-version: '3.12'
       - uses: actions/setup-java@v5
+        if: github.event_name == 'workflow_dispatch'
         with:
           distribution: temurin
           java-version: '17'
       - run: python utils/validate_s14a.py
       - name: Instalar dependencias solo para prueba docente pequeña
+        if: github.event_name == 'workflow_dispatch'
         run: pip install --quiet pyspark==4.0.1 pandas==2.2.3 scikit-learn==1.6.1 pyarrow==19.0.1
       - name: Ejecutar 5000 filas y ambos modelos, sin benchmark
+        if: github.event_name == 'workflow_dispatch'
         env:
           SPARK_LOCAL_IP: 127.0.0.1
           OPENBLAS_NUM_THREADS: '1'

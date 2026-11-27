@@ -18,3 +18,6 @@ Esta intervención añade una capa de navegación, experimentos y práctica. Int
 `python utils/validate_s15_pipeline.py` (solo biblioteca estándar y datos pequeños, no servicios externos).
 `python utils/validate_pedagogia_notebooks.py` (sintaxis, bloques idempotentes y experimentos pequeños; no necesita nube).
 Los experimentos de S14A grandes se ejecutan manualmente solo con cuota disponible; registrar escala, versiones, duración y resultado real, no inferir ejecución por estimaciones.
+
+## Limpieza posterior
+La portada ahora expone exactamente dos acciones principales por sesión; el material original, visores y guías se conservan bajo Materiales de consulta y apoyo. Los enlaces de Colab en preview local apuntan a la rama de revisión, mientras que en Pages apuntan a main tras una futura integración. La prueba Spark local S14A se limita a ejecución manual. Ver [limpieza](limpieza-repositorio.md).

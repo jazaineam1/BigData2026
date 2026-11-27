@@ -26,4 +26,5 @@ assert.match(P.compute("cosine",[0,4])[1],/1\.00/);
 const index=fs.readFileSync(path.join(root,"index.html"),"utf8");
 for(const r of cfg.routes)assert.ok(index.includes("ruta-aprendizaje.html?s="+r.id),r.id);
 assert.ok(index.includes("24 controles evaluables"));
+for(const m of index.matchAll(/<article\b[^>]*data-n="[^"]+"[^>]*>[\s\S]*?<\/article>/g)){const primary=m[0].match(/<div class="session-actions">([\s\S]*?)<\/div>/);assert.ok(primary);assert.equal((primary[1].match(/<a\b/g)||[]).length,2);}
 console.log("OK: 17 rutas, 68 estaciones, controles, enlaces locales y casos límite.");

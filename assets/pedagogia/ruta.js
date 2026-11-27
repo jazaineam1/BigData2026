@@ -11,13 +11,18 @@ function updateProgress(){const n=checks.filter(Boolean).length;$("avance").max=
 function render(id){
  const r=config.routes.find(x=>x.id===id)||config.routes[0];actual=r;
  $("sesion").value=r.id;$("titulo").textContent="S"+r.id+" · "+r.title;$("problema").textContent=r.problem;$("concepto").textContent=r.concept;
- const nb="https://github.com/"+repo+"/blob/"+r.ref+"/"+r.nb;
- const colab="https://colab.research.google.com/github/"+repo+"/blob/"+r.ref+"/"+r.nb;
+ const preview=["localhost","127.0.0.1"].includes(location.hostname)||new URLSearchParams(location.search).has("preview");
+ const branch=r.ref===config.branch&&!preview?"main":r.ref;
+ const nb="https://github.com/"+repo+"/blob/"+branch+"/"+r.nb;
+ const colab="https://colab.research.google.com/github/"+repo+"/blob/"+branch+"/"+r.nb;
  const links=$("links");links.replaceChildren();
- if(r.id==="11"||r.id==="13"){links.append(link("Abrir entorno Codespaces","https://codespaces.new/"+repo+"/tree/"+r.ref),link("Ver cuaderno",nb,true));}
- else if(r.id==="14A"){links.append(link("Cuaderno para importar en Databricks",nb));}
- else{links.append(link("Abrir cuaderno en Colab",colab),link("Ver cuaderno",nb,true));}
- if(r.original)links.append(link("Material conceptual original",r.original,true));
+ if(r.id==="11"||r.id==="13"){links.append(link("Abrir laboratorio Codespaces","https://codespaces.new/"+repo+"/tree/"+r.ref));}
+ else if(r.id==="14A"){links.append(link("Abrir cuaderno para Databricks",nb));}
+ else{links.append(link("Abrir cuaderno en Colab",colab));}
+ const support=$("apoyos");support.replaceChildren(link("Ver código del cuaderno",nb,true));
+ if(r.original)support.append(link("Presentación / guía completa",r.original,true));
+ if(r.id==="09")support.append(link("Muro de clase","s09-muro-publico.html",true));
+ if(r.id==="11"||r.id==="13")support.append(link("Instrucciones del entorno","https://github.com/"+repo+"/tree/"+r.ref,true));
  const question=$("pregunta");question.replaceChildren(el("legend",r.quiz.question));
  $("feedback").textContent="Elige una opción para ver la explicación.";
  r.quiz.options.forEach((v,i)=>{let lab=el("label"),radio=el("input");radio.type="radio";radio.name="autocomprobacion";radio.value=String(i);radio.addEventListener("change",()=>{$("feedback").textContent=r.quiz.feedback[i];});lab.append(radio,el("span",v));question.append(lab);});
