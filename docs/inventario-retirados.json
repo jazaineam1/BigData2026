@@ -1,0 +1,903 @@
+{
+  "version": 1,
+  "base_commit": "1645b2003b1afaac416646a0a977fc9ac0521e25",
+  "history_rewritten": false,
+  "total_before": 998,
+  "bytes_before": 697771061,
+  "removed": [
+    {
+      "path": ".databricks/bundle/dev/vscode.bundlevars.json",
+      "bytes": 2,
+      "sha": "9e26dfeeb6e641a33dae4961196235bdb965b21b",
+      "reason": "artefacto generado o marcador vacío"
+    },
+    {
+      "path": ".databricks/bundle/dev/vscode.overrides.json",
+      "bytes": 2,
+      "sha": "9e26dfeeb6e641a33dae4961196235bdb965b21b",
+      "reason": "artefacto generado o marcador vacío"
+    },
+    {
+      "path": ".vscode/launch.json",
+      "bytes": 338,
+      "sha": "cbe4f1771f60ee69a6560b01628e0d7dc8357ea6",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": ".vscode/settings.json",
+      "bytes": 414,
+      "sha": "19ec3dbd1c5f4897793c502bb3025a95a0669d17",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "2_BigData.ipynb",
+      "bytes": 80663,
+      "sha": "c3ca995a22738eb3f22dfb91c5b9a07fd6253a3c",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "2_BigData_v2.ipynb",
+      "bytes": 344271,
+      "sha": "69a8b7c228c1ec9cbaed4a4d8c6b904e5d3c305f",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "Airflow/.devcontainer/devcontainer.json",
+      "bytes": 156,
+      "sha": "620426c57049332ef44cbb3d4441533b9efc3ae7",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/.env.example",
+      "bytes": 243,
+      "sha": "23a9cb84b5bbd5ed5e79a3d3d2d9051cfb59bbe5",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/dags/elt_duckdb_pipeline.py",
+      "bytes": 3584,
+      "sha": "efae978a374a3d31bdc2f4b3acad47206b892852",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/docker-compose.yaml",
+      "bytes": 11297,
+      "sha": "d9bd4c67f1099ed7e3300700b06ac2ca1a5a285a",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/dw.duckdb",
+      "bytes": 52178944,
+      "sha": "3ee32a6520a18eeb9bace61d1196e1fbf1ac7baf",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/requirements.txt",
+      "bytes": 13,
+      "sha": "c68c211a1f8c02021950dd7b4eb259632d5f0e7d",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/staging/finanzas_mes_1.csv",
+      "bytes": 5908396,
+      "sha": "58c605f10cfb2a25fb06c8771804a128bbdd636c",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/staging/finanzas_mes_2.csv",
+      "bytes": 5908684,
+      "sha": "91f3b19670d7a4cdb4b7bfec7023b0441b5d4e18",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/staging/finanzas_mes_3.csv",
+      "bytes": 5908046,
+      "sha": "02941be3e49d5300a2af06d713583aeb4bde3e2c",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/staging/finanzas_mes_4.csv",
+      "bytes": 5908065,
+      "sha": "1f678f02bb9bc48bee92c305c0458f58e28d05fc",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/staging/finanzas_mes_5.csv",
+      "bytes": 5907933,
+      "sha": "bfefa7a577e9201141fb8ec467a6f567b3ecc029",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/staging/finanzas_mes_6.csv",
+      "bytes": 5907780,
+      "sha": "f17cf5a72775cab7e27fa5e68cab08aad889db42",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Airflow/staging/finanzas_mes_7.csv",
+      "bytes": 5908305,
+      "sha": "8a6008f2a677588446864bf5192fc144dcc09595",
+      "reason": "laboratorio Airflow de edición anterior; no pertenece al grupo 2 vigente"
+    },
+    {
+      "path": "Cuadernos/11_Spark_SECOP_Solucion_Taller.ipynb",
+      "bytes": 96742,
+      "sha": "3b8e27f3f3233dadd861bbf0c4327f371b897f85",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/11_Spark_SECOP_Solucion_Taller_VSCode_Connect.ipynb",
+      "bytes": 98942,
+      "sha": "fae23fe7060deab8185bd897b119e561229c294a",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/12_MongoDB_Atlas_NoSQL_Moderno.ipynb",
+      "bytes": 125217,
+      "sha": "15a8e3d7a661bcb30d30cddea9f9513fede1a6a1",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/13_NoSQL_Grafos_Columnar_Colab.ipynb",
+      "bytes": 70786,
+      "sha": "f96584f2e372b8acd3142b20783baaa5d619d5ab",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/13_Taller_Final_MongoDB_SECOP_Tiempo_Real.ipynb",
+      "bytes": 43713,
+      "sha": "23052751642abba0a3d0b76a30c6ab2be67676cf",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/14_Elasticsearch_Busqueda_Analitica_Colab.ipynb",
+      "bytes": 55341,
+      "sha": "1eb541963dca3d6f7951dbcfcf4c0b14c38862e0",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/14_Solucion_Taller_Final_MongoDB_SECOP.ipynb",
+      "bytes": 70081,
+      "sha": "03b1f9f23f8e7124987e71b4b346628c8fa68d2b",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/2_BigData.ipynb",
+      "bytes": 79937,
+      "sha": "1eb80c55d08db0871ff9b2328f1ef5853c0a2a66",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/2_multiprocessing.ipynb",
+      "bytes": 1050326,
+      "sha": "c869617a8f93b8dc683c87c73bbce2fbef4b3089",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/3_Arquitectura Big Data End-to-End.ipynb",
+      "bytes": 69240,
+      "sha": "d557e3f44fe8e57b9fab4c0465d4c53d54d69cb7",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/3_Definiciones_GCP.ipynb",
+      "bytes": 141858,
+      "sha": "3f2501437a08fc5a6e589cb9bd59a6fa77ae1278",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/4_5_Práctica_1.ipynb",
+      "bytes": 343232,
+      "sha": "455aea74a4a05bb2f1a9bb887a3e719fca8097cd",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/4_BIgquery_y_Sql.ipynb",
+      "bytes": 62434,
+      "sha": "239a941f6c881d8d4e7810946b71f1790fce964d",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/4_ETL_ELT_.ipynb",
+      "bytes": 76251,
+      "sha": "69dd4ff8c82e40f6637bedd55f2aa522e7876848",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/4_etl_elt_.ipynb",
+      "bytes": 76251,
+      "sha": "69dd4ff8c82e40f6637bedd55f2aa522e7876848",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/5_Computacion_distribuida_Hadoop_Spark_intro.ipynb",
+      "bytes": 934211,
+      "sha": "0aece28442ff4ce30ef929576ead09108044c83d",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/5_MediumData_Polars_y_Python2.ipynb",
+      "bytes": 4979254,
+      "sha": "b33b797147f5f901938f71192177df61937ff889",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/5_Vertexai_Workbench.ipynb",
+      "bytes": 21665,
+      "sha": "00003dccca35b5a10a092c2a4dcc7d305440e7e5",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/6_Computacion_distribuida_Hadoop_Spark_intro.ipynb",
+      "bytes": 928349,
+      "sha": "eab93354337174a72a03e209d522fa881cb6d878",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/6_Neo4j_Contexto_Relacional_AprenderHaciendo.ipynb",
+      "bytes": 95509,
+      "sha": "c9397818fd1cf6608558c75d229e20ff0ee50460",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/7_Hadoop_YARN_Spark_Databricks.ipynb",
+      "bytes": 70726,
+      "sha": "0f8d52ac8b868e7231666d929d1b8ca3cf4710cf",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/7_Pyspark_y_ML.ipynb",
+      "bytes": 152246,
+      "sha": "3c3c4f5e33f9c54888477c7d71e7b8c300b614ff",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/7_distribuido.ipynb",
+      "bytes": 69077,
+      "sha": "6d5ec60f86c2da6acadebf431a50b8b7c804a568",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/7_distribuido_1.ipynb",
+      "bytes": 71383,
+      "sha": "b50e8d854808daf57ed2b2dd0f16beb77fcf251b",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/8_NoSQL_Mongo.ipynb",
+      "bytes": 8184549,
+      "sha": "5f1c9c09f0f7c12532eb248377051f988542c321",
+      "reason": "retirado por riesgo de credenciales históricas; requiere rotación"
+    },
+    {
+      "path": "Cuadernos/9_Databricks_Serverless_Completo copy.ipynb",
+      "bytes": 72461,
+      "sha": "1b8a46073756bf7f241a19c65e38df94bd24287b",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/9_Databricks_Serverless_Completo.ipynb",
+      "bytes": 117666,
+      "sha": "536e61a78c87cd1f62440200173c121faacfcf5e",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/Bayes_2_(F_a_priori_y_a_posteriori).ipynb",
+      "bytes": 51889,
+      "sha": "d9e629d05d1177520637c14000fcf9ceb62718e5",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/Dask.ipynb",
+      "bytes": 148377,
+      "sha": "7687697465d79d3fcd68a9fa9d21e3b56e50297c",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/Pyspark_y_ML.ipynb",
+      "bytes": 480680,
+      "sha": "bf306c8654d30b880aa0817aea3545e9eb83c930",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/Quiz_Neo4j_Fundamentos.ipynb",
+      "bytes": 15408,
+      "sha": "476c15aa336fa516c7f4577e2c512ac5ff6dcd96",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/Sesion1_Introducción.ipynb",
+      "bytes": 171267,
+      "sha": "08a454ea9876990b272e34a7954b3688fab34bb7",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/Taller_2_Dask_SECOP.ipynb",
+      "bytes": 211703,
+      "sha": "c5d9853db0a5dd9c8b3daba73f7b420b86b328eb",
+      "reason": "cuaderno histórico fuera del itinerario vigente"
+    },
+    {
+      "path": "Cuadernos/dask-worker-space/global.lock",
+      "bytes": 0,
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "reason": "artefacto generado o marcador vacío"
+    },
+    {
+      "path": "Cuadernos/dask-worker-space/purge.lock",
+      "bytes": 0,
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "reason": "artefacto generado o marcador vacío"
+    },
+    {
+      "path": "Cuadernos/dask-worker-space/worker-196pau01.dirlock",
+      "bytes": 0,
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "reason": "artefacto generado o marcador vacío"
+    },
+    {
+      "path": "Cuadernos/dask-worker-space/worker-5httngep.dirlock",
+      "bytes": 0,
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "reason": "artefacto generado o marcador vacío"
+    },
+    {
+      "path": "Datos/a",
+      "bytes": 1,
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "reason": "artefacto generado o marcador vacío"
+    },
+    {
+      "path": "Images/Cluster/a",
+      "bytes": 1,
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "reason": "artefacto generado o marcador vacío"
+    },
+    {
+      "path": "Images/a",
+      "bytes": 1,
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "reason": "artefacto generado o marcador vacío"
+    },
+    {
+      "path": "Practica Python-20230216.zip",
+      "bytes": 91954,
+      "sha": "861751d019112b888fe01980a866cf36a7b6da8f",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "databricks.env.example",
+      "bytes": 388,
+      "sha": "9a98e6ad306d04a8536b70a890b28244346dbceb",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "databricks.yml",
+      "bytes": 595,
+      "sha": "f03098120bf2d06a082f54cf17f5d9f4df9c0ca1",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "docs/PDA_2024-01_BIGDATA (1).pdf",
+      "bytes": 212323,
+      "sha": "eee95a9ce8eb43c4b89db9614aa7f63095b0b27a",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "docs/PLAN_SESIONES_10_15_2026-2.md",
+      "bytes": 15267,
+      "sha": "8d6f3af10b090eb9c6525e4dd6ea6af542263099",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "docs/borradores/proyecto-final-explorer.html",
+      "bytes": 21194,
+      "sha": "1aeb4512b08d75a07b59d5595219878b93b1334e",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "docs/databricks_vscode_free.md",
+      "bytes": 2683,
+      "sha": "2b2a8b1cb621c0d8c8863767209bc1ee8813b58d",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "infraestructura/.env.example",
+      "bytes": 158,
+      "sha": "fe6a77b9fd40784ad0481397bac1f0cd85be0be4",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/.gitignore",
+      "bytes": 142,
+      "sha": "fad4b46426da1ad7bcfb3b98ec6ff75e0058f19e",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/INSTALACION_DESDE_CERO.md",
+      "bytes": 3164,
+      "sha": "48c3a6f779a1e7fd48bb67d1799623d3d540c599",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/TUTORIAL_PASO_A_PASO.md",
+      "bytes": 753,
+      "sha": "f45aaf0879244fccae356a4e17a6d0e782446c63",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/airflow/dags/healthcheck_pipeline.py",
+      "bytes": 574,
+      "sha": "290e302180073a93830dd6c6a0b258e038510fa2",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/dask/jobs/benchmark_dask_vs_pandas.py",
+      "bytes": 5902,
+      "sha": "25b746a7225be7975d84982ff4f6083faad93952",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/dask/jobs/benchmark_data/part_04.csv",
+      "bytes": 67766485,
+      "sha": "4cfcc9854799261850c1453ec10c59de83c898bb",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/dask/jobs/dask_4nodos_6partes.py",
+      "bytes": 4102,
+      "sha": "a5f930867435bbe19f2a1afd9b45c7fb48d23823",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/dask/jobs/dask_demo.py",
+      "bytes": 375,
+      "sha": "74d4717b1809343290bb91c775705519285e6457",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/dask/jobs/distributed_sales_6parts/sales_part_00.csv",
+      "bytes": 7764407,
+      "sha": "564c6c3172dfb6a2f32b596c754715992ebfcbdf",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/dask/jobs/distributed_sales_6parts/sales_part_01.csv",
+      "bytes": 7874357,
+      "sha": "8f3d89325df061571787fa774e9db4a9f297d35f",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/dask/jobs/distributed_sales_6parts/sales_part_02.csv",
+      "bytes": 7878625,
+      "sha": "55082696654ff5d1e66e584d27cabbb57859be45",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/dask/jobs/distributed_sales_6parts/sales_part_03.csv",
+      "bytes": 7877961,
+      "sha": "e25b85d09f8259cacd98203bc4a13165f4adc9df",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/dask/jobs/distributed_sales_6parts/sales_part_04.csv",
+      "bytes": 7876633,
+      "sha": "bc3f0ac5c694e9c07e4932899d12e21c49d34c4c",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/dask/jobs/distributed_sales_6parts/sales_part_05.csv",
+      "bytes": 7874405,
+      "sha": "0da7505ea044e928279f70eef0abf77f5ebef522",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/docker-compose.yml",
+      "bytes": 5917,
+      "sha": "60d8e1a4258480ba06bbbe3010fd08ac459cd613",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/docker/README.md",
+      "bytes": 1006,
+      "sha": "003fe21bf50f97e678740825b0291f8ad09912f0",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/docker/airflow/Dockerfile",
+      "bytes": 294,
+      "sha": "38817f951478402e0b4210c6af49b54e067749a0",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/docker/docker-compose.yml",
+      "bytes": 1063,
+      "sha": "1e4b1f2771c727cb371d0f87708ff22bede5c095",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/docker/jupyter/Dockerfile",
+      "bytes": 140,
+      "sha": "0114a832097e617315554203c9e9fc57f6338e9e",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/README.md",
+      "bytes": 7381,
+      "sha": "10645ac16241991ef1878aa293046536f00eaf29",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-0-onboarding/README.md",
+      "bytes": 3720,
+      "sha": "a40c8ee71f307e3c269de76cb327e3919ad570bd",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-0-onboarding/ejercicio.md",
+      "bytes": 1484,
+      "sha": "9febec5d6f342beda4f0c84d36876dd2330309f1",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-0-onboarding/solucion.md",
+      "bytes": 808,
+      "sha": "aeef7da2533e162f08883440d9c22d016461efa3",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-1-basico/README.md",
+      "bytes": 2620,
+      "sha": "07920e8455012815b84b3056a763d0fb515930fb",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-1-basico/ejercicio.md",
+      "bytes": 849,
+      "sha": "31f309a20151672cd0df8ee4ccd5c8b3d53d1451",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-1-basico/solucion.md",
+      "bytes": 479,
+      "sha": "0171738bdb04aca2f9ded297ec6c31941cf22f33",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-2-commits/README.md",
+      "bytes": 1682,
+      "sha": "3630a38d62c29d4e72a324026928ebd43ce64980",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-2-commits/ejercicio.md",
+      "bytes": 606,
+      "sha": "064ac75bd38b7cfe2105b6c930117f52b41d82a5",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-2-commits/solucion.md",
+      "bytes": 653,
+      "sha": "da89125787f37741def4e247ce1ace11b93e74f6",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-3-ramas/README.md",
+      "bytes": 1559,
+      "sha": "682c7225d9f68461abed04e51b9acf24353e9aff",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-3-ramas/ejercicio.md",
+      "bytes": 634,
+      "sha": "d4706e020d75ffc473832ca024441a38e7d368df",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-3-ramas/solucion.md",
+      "bytes": 584,
+      "sha": "e424ac5554d9e4cbdf5b04fe804d86e2af8490d8",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-4-pr/README.md",
+      "bytes": 1801,
+      "sha": "5a54bfa1421bc0df29aa985d13104e7b2e658321",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-4-pr/ejercicio.md",
+      "bytes": 774,
+      "sha": "a26c5cf9dd9cc2deb529bfb0ccc93142bc14cd18",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-4-pr/plantilla_pr.md",
+      "bytes": 487,
+      "sha": "e120aeecd78e2225525a11ab38a3cadf0a6d5ac5",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-4-pr/solucion.md",
+      "bytes": 873,
+      "sha": "fa733008de0593be4ecdc264ef2f26e7e9efccda",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-5-colaboracion/README.md",
+      "bytes": 7982,
+      "sha": "6eb581f8f715dbbc911315b6b950a7c2632a5d07",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-5-colaboracion/ejercicio.md",
+      "bytes": 2353,
+      "sha": "16a7cc7bbbdfcb99e6d6b59da10ce7499cf6e607",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-5-colaboracion/solucion.md",
+      "bytes": 1372,
+      "sha": "ec142b1f6ec0017c0cfb9bffdeca09a9b8c76016",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-6-conflictos/README.md",
+      "bytes": 1590,
+      "sha": "9c7794907ca5237fd2beebde339058035083c111",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-6-conflictos/ejercicio.md",
+      "bytes": 592,
+      "sha": "7c89801e00b9f6447de6b7df3b51a551d3279612",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/modulo-6-conflictos/solucion.md",
+      "bytes": 699,
+      "sha": "48e3c6c58d0b436e18ef685becfad756b75f3986",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/proyecto-final/README.md",
+      "bytes": 1050,
+      "sha": "fc1206f1bcd66c37c908222f807484f56d13e030",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/git-ejemplo/proyecto-final/solucion.md",
+      "bytes": 781,
+      "sha": "d676ef32bf8b3cc65cb0a931462634dccc7bba7b",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/modules/01-storage/README.md",
+      "bytes": 662,
+      "sha": "27d3b10c5f3c6fe918beacc66c3c8e1f895952f6",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/modules/02-processing/README.md",
+      "bytes": 597,
+      "sha": "d7b964085b91d05df63a3041295c6941d8a55378",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/modules/03-mapreduce/README.md",
+      "bytes": 615,
+      "sha": "3e68758d810f9b686b6ed559bcfca59bdc0e83fa",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/modules/04-nosql/README.md",
+      "bytes": 1079,
+      "sha": "01bdea07be51ff8b411bc7e44b5cdf8673527083",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/modules/05-elasticsearch/README.md",
+      "bytes": 5287,
+      "sha": "d3fdf920c7170d6f6d691314335bceea7aa6f8f4",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/modules/05-elasticsearch/s07-live-nueva-ronda.sql",
+      "bytes": 2013,
+      "sha": "6e39dfb5b1715f534528a895ce8663a080e6d762",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/modules/05-elasticsearch/s07-live-supabase.sql",
+      "bytes": 15759,
+      "sha": "190262dc0b65729d30513a79dccd0af7fb3fcf76",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/modules/05b-vector-search/README.md",
+      "bytes": 6122,
+      "sha": "00308f9c67de1a4cc121cea63ab55aecc01baa4c",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/modules/06-pyspark/README.md",
+      "bytes": 615,
+      "sha": "8bd5824e23b845659fa2a77877e07f137d1055fe",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/modules/07-dask/README.md",
+      "bytes": 610,
+      "sha": "251d0d561246d4320d416c80a493d64c14f74259",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/notebooks/dask_vs_pandas_benchmark.ipynb",
+      "bytes": 8253,
+      "sha": "43cf2099d26ed8ca9b5f82be7e5fe0c261f97b2d",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/projects/final-project/README.md",
+      "bytes": 1077,
+      "sha": "4420ce926a26cdf1d59a801ed44140d40aeafbdf",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/scripts/seed_mongo.py",
+      "bytes": 7496,
+      "sha": "0188f7b10da05657a6e06f4e9cb41b156147d26e",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/setup/docker.md",
+      "bytes": 500,
+      "sha": "f80db61035a39258b9221d87e6d62817ebbd8532",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/setup/git.md",
+      "bytes": 480,
+      "sha": "fa672e4432a1612d9dba2e9aae1a902c4672bb49",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/setup/windows.md",
+      "bytes": 528,
+      "sha": "92715e71357aabb308f4f5308f2996680e2586b5",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/spark/jobs/wordcount.py",
+      "bytes": 490,
+      "sha": "28f86b88782cef502868c1a8e24363277f081c8a",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/tutoriales/README.md",
+      "bytes": 186,
+      "sha": "53dc95f643be0e9cf4bcbd91a96ab134b3c7cdb5",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/tutoriales/dask/TUTORIAL_DETALLADO.md",
+      "bytes": 1007,
+      "sha": "b9fa589d68123d9c104b00ca3e0242abddf691d1",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "infraestructura/tutoriales/spark/TUTORIAL_DETALLADO.md",
+      "bytes": 1039,
+      "sha": "1deef2c62442a7e0f2aa149bb16a2f33a4e5a91e",
+      "reason": "infraestructura didáctica histórica; LMS y tutorial Git canónico se conservan"
+    },
+    {
+      "path": "scripts/databricks_vscode_smoke_test.py",
+      "bytes": 1960,
+      "sha": "3e84ef166bdff01abe4581c3306e4d8ebfc838ae",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "utils/build_quiz_neo4j_fundamentos.py",
+      "bytes": 12529,
+      "sha": "365c86f5fd6e1b113c8d30cc00a5debe48e6c521",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "utils/build_session6_notebook_aprender_haciendo.py",
+      "bytes": 57675,
+      "sha": "d8fcf3205a3a0f359cd0b72f3713b3ac72f21843",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "utils/build_session7_notebook.py",
+      "bytes": 55862,
+      "sha": "c989427dd77bb579053a1df68d787f6e212d4d05",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "utils/fix_unwind.py",
+      "bytes": 939,
+      "sha": "694fbe7d95426ea93c5c5ed731c99d3a8071d562",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "utils/make_11_spark_secop_solution.py",
+      "bytes": 74673,
+      "sha": "3b8dc8c5509a6ff41fc3f151bb659761331d5300",
+      "reason": "generador de cuaderno histórico retirado"
+    },
+    {
+      "path": "utils/make_12_mongodb_atlas_nosql.py",
+      "bytes": 69184,
+      "sha": "6c3bfb8f67b19469b2f57b889aca4d6d1e9acb8c",
+      "reason": "generador de cuaderno histórico retirado"
+    },
+    {
+      "path": "utils/make_13_nosql_grafos_columnar_colab.py",
+      "bytes": 57496,
+      "sha": "873ff7fc7230d9c20c7e11d5f8b8af0d7e1fd24d",
+      "reason": "generador de cuaderno histórico retirado"
+    },
+    {
+      "path": "utils/make_13_taller_final_mongodb_secop_tiempo_real.py",
+      "bytes": 18362,
+      "sha": "27771620d82c44509050a17c182a5f4a0da9dc17",
+      "reason": "generador de cuaderno histórico retirado"
+    },
+    {
+      "path": "utils/make_14_elasticsearch_busqueda_analitica_colab.py",
+      "bytes": 45195,
+      "sha": "fffe95cfe6a3ee624ae6ff410ad6306e54ae4bdf",
+      "reason": "generador de cuaderno histórico retirado"
+    },
+    {
+      "path": "utils/make_14_solucion_taller_final.py",
+      "bytes": 57816,
+      "sha": "2d8f5f30d5f80918b7ca35d89131df46ac3e1abb",
+      "reason": "generador de cuaderno histórico retirado"
+    },
+    {
+      "path": "utils/make_9_databricks_serverless.py",
+      "bytes": 67216,
+      "sha": "5adbc904e5c0320eed35eb2d528272fb5f9b7d14",
+      "reason": "generador de cuaderno histórico retirado"
+    },
+    {
+      "path": "utils/patch_12_seccion14.py",
+      "bytes": 29865,
+      "sha": "8578315fc7fc066b668276c1b31600418e6ec970",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "utils/patch_12_tabla_funciones.py",
+      "bytes": 4228,
+      "sha": "37be027b2d9098a15b08df8288793f753829c95c",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "utils/patch_13_actividad1.py",
+      "bytes": 5646,
+      "sha": "eec41ade7483bed02d0e72bf140741f9a3da02b3",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "utils/patch_13_actividad1_v2.py",
+      "bytes": 0,
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "utils/patch_13_rubrica.py",
+      "bytes": 1799,
+      "sha": "b7b7d8d3e38a3b1117f8e55681818130540f0c74",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    },
+    {
+      "path": "utils/validate_session6_aprender_haciendo.py",
+      "bytes": 6710,
+      "sha": "6d7e86a5453c56cb4831d26d5828e536d26f4cd1",
+      "reason": "material auxiliar histórico o configuración de entorno retirado"
+    }
+  ]
+}

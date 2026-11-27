@@ -72,7 +72,7 @@ El cuaderno incorpora **siete microejercicios** de una expresión Python, E1.1 a
 ## 4. Recorrido del estudiante — pasos guiados, sin tema a escoger
 
 ### Paso 0 · abrir material y comprobar entorno
-1. Abrir el tutorial interactivo `docs/borradores/proyecto-final-explorer.html` desde la rama de revisión o sitio tras publicación.
+1. Abrir el tutorial interactivo `versión histórica de la guía (commit 1645b2003b1afaac416646a0a977fc9ac0521e25)` desde la rama de revisión o sitio tras publicación.
 2. Abrir `Cuadernos/Proyecto_Final_Compras_Claras.ipynb` en **Codespaces S13**. No usar el perfil raíz Airflow.
 3. Ejecutar `python Laboratorios/S13_Codespaces/verificar_entorno.py`. Observar `nproc`, `free -h`, versiones y ubicación de datos; si no hay entorno, usar dependencias del perfil S13. No confundir CPU físicas con workers.
 4. Establecer la identidad de la pareja en el manifiesto, sin escribir datos personales en un repositorio público. **Evidencia:** comprobación de los archivos reales.

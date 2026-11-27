@@ -40,3 +40,11 @@ blob-report/
 
 # SDK Realtime generado por QA/Pages desde npm fijado
 lms/assets/vendor/supabase.js
+
+# Artefactos locales de ejecución y datasets de benchmark regenerables
+.dask-worker-space/
+dask-worker-space/
+*.dirlock
+.databricks/
+infraestructura/dask/jobs/benchmark_data/
+infraestructura/dask/jobs/distributed_sales_6parts/

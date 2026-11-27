@@ -8,14 +8,14 @@ Lo ya hecho (PR #104–#109, todos fusionados y cerrados): portada alineada con 
 
 El frontend y el backend V54 quedaron alineados el 28-09-2026: se desplegaron `bigdata-lms-core`, `bigdata-session`, `bigdata-lms-assess` y `bigdata-lms-interop`, y se aplicaron las migraciones V54-A, V54-B y V55. Quedan estos bloqueantes operativos:
 
-- [ ] **Rotar las credenciales de Atlas expuestas.** `Cuadernos/8_NoSQL_Mongo.ipynb` contiene dos URIs con contraseña de aspecto real, versionadas desde 2023-11-02 en `main` y en todas las ramas. En Atlas: eliminar o rotar esos usuarios de base de datos y revisar la lista de IPs permitidas. Después sustituirlas por un marcador en el cuaderno y **borrar la excepción `KNOWN` correspondiente** en `utils/scan_secrets_pii.py` (el escáner la muestra como aviso urgente en cada CI). Quitarlas del árbol no las borra del historial.
+- [ ] **Rotar las credenciales de Atlas históricamente expuestas.** Se retiró el cuaderno antiguo del árbol de revisión y su excepción del escáner; eliminar/rotar usuarios en Atlas y revisar acceso de red sigue pendiente. El historial de Git no se reescribió.
 - [ ] **Decisión sobre el TC1:** el rol de contribución individual solo se registra en `collaboration.html`, que ni el portal ni `session-08.html` enlazan. Decidir si esos roles cuentan para repartir nota (entonces enlazarlos desde la sesión 8 o mover el selector allí) o si se descartan.
 - [ ] **Canal de dudas durante el taller:** el estudiante ya no puede escribir en la plataforma. Decir por dónde pregunta y ponerlo en «Comunicados del docente».
 - [ ] Probar con una cuenta de **docente** lo que solo se probó con backend simulado: publicar comunicado y responder en `teacher-collaboration.html`.
 
 ## 2. Antes de la clase del 8 de octubre (S09)
 
-- [ ] **El PDA vigente de 2026.** El PDF que hay en el repo es el PDA **2023-I**; el archivo `PDA_2026-02_BIGDATA.pdf` recibido después es idéntico byte a byte. Subir el PDA vigente y actualizar `docs/PDA_guia.md` (porcentajes de evaluación, temas y las diferencias con `course.json`).
+- [ ] **PDA del grupo 2:** el PDF 2026-2 actualmente disponible identifica al grupo 1. Confirmar versión institucional y adaptaciones del grupo 2 con coordinación; consultar `docs/PDA_guia.md`.
 - [ ] **Profundización S09, solo si añade valor neto:** quedaron como ideas históricas cinco ampliaciones (Laboratorio integrado, Vector por dentro, Distancia y similitud, Persistencia en MongoDB, Recall vs Precision). No hay PR pendiente asociado. Evaluar únicamente «Vector por dentro» y «Recall vs Precision» contra la dosis de `AGENTS.md` §2 y descartarlas si duplican lo ya publicado.
 
 ## 3. Wall de competencia (funcionalidad nueva)
@@ -29,10 +29,10 @@ Tablero **estructurado** de progreso de clase, no un foro: alias «Jugador NN» 
 
 ## 4. Peso del repositorio y datos
 
-Hoy hay ~413 MB en 5 archivos que la guardia `check_repo_hygiene.py` lista con su razón y que **solo pueden disminuir**.
+La guardia conserva únicamente las tres excepciones de CSV SECOP utilizadas por los laboratorios.
 
-- [ ] **`Airflow/dw.duckdb` (50 MB):** no basta quitarlo. DuckDB **rechaza un archivo vacío** y el compose lo monta como archivo (si falta, Docker crea un directorio). Solución: montar un directorio, cambiar `DB_PATH` del DAG y **probarlo con Docker**.
-- [ ] **CSV de SECOP (3 × ~100 MB) y `part_04.csv` (65 MB):** varios cuadernos los descargan desde `main`. Publicar como GitHub Release, dejar en Git un `manifest.json` (URL, SHA256, tamaño, fuente, fecha, script generador) y muestras pequeñas; **actualizar los enlaces de los cuadernos y comprobar cada URL con una petición real** (`AGENTS.md` §11). Ejecutar cada cuaderno completo después.
+- [x] Airflow histórico retirado de la rama de revisión (no se utiliza en las sesiones vigentes).
+- [ ] **CSV de SECOP (3 × ~100 MB) :** varios cuadernos los descargan desde `main`. Publicar como GitHub Release, dejar en Git un `manifest.json` (URL, SHA256, tamaño, fuente, fecha, script generador) y muestras pequeñas; **actualizar los enlaces de los cuadernos y comprobar cada URL con una petición real** (`AGENTS.md` §11). Ejecutar cada cuaderno completo después.
 - [ ] **Reescribir el historial** (`git filter-repo`) para bajar el peso real de los clones. Operación aparte: copia de respaldo (`git bundle`), congelar, force push coordinado y recrear ramas. No hacerlo cerca de una clase.
 - [ ] Ajustar `GRANDFATHERED` en `check_repo_hygiene.py` a medida que salgan archivos.
 

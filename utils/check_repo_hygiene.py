@@ -23,7 +23,9 @@ MAX_MB = 25
 FORBIDDEN = [
     (re.compile(r"(^|/)__pycache__/"), "caché de Python"),
     (re.compile(r"\.py[cod]$"), "bytecode de Python"),
-    (re.compile(r"^Airflow/logs/"), "logs generados por Airflow"),
+    (re.compile(r"(^|/)dask-worker-space/|\.dirlock$"), "archivos de bloqueo de Dask"),
+    (re.compile(r"^\.databricks/"), "estado generado de Databricks"),
+    (re.compile(r"^infraestructura/dask/jobs/(benchmark_data|distributed_sales_6parts)/"), "datasets sintéticos regenerables de benchmarks"),
     (re.compile(r"\.duckdb\.wal$"), "WAL de DuckDB"),
     (re.compile(r"(^|/)\.env$"), "archivo .env (usa .env.example)"),
     (re.compile(r"(^|/)node_modules/"), "dependencias de Node (usa package-lock.json)"),
@@ -37,10 +39,6 @@ GRANDFATHERED = {
         "datos SECOP que descargan varios cuadernos desde main; moverlos exige actualizar sus enlaces y comprobar cada URL",
     "Cuadernos/datos/secop_chunks/secop_chunk_0100000.csv": "ídem",
     "Cuadernos/datos/secop_chunks/secop_chunk_0200000.csv": "ídem",
-    "infraestructura/dask/jobs/benchmark_data/part_04.csv":
-        "dato de benchmark que se puede regenerar con el script del job; retirar cuando se confirme cuál lo genera",
-    "Airflow/dw.duckdb":
-        "el compose lo monta como archivo y DuckDB rechaza un archivo vacío; cambiar el montaje a un directorio requiere probar con Docker",
 }
 
 

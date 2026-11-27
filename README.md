@@ -19,6 +19,13 @@ Cuatro cosas conviven en este repositorio:
 | **Backend** | Edge Functions y migraciones de Supabase | `infraestructura/lms/` |
 | **Ingeniería** | Validadores, pruebas de navegador y CI | `utils/`, `tests/`, `.github/workflows/` |
 
+## Entrada para estudiantes y mantenimiento
+
+- [Ruta de aprendizaje](Presentaciones/ruta-aprendizaje.html) y cuaderno principal de cada sesión: dos recursos de estudio; las guías especializadas quedan accesibles desde ellos.
+- [Inventario y limpieza](docs/limpieza-repositorio.md): recursos vigentes, retirados y criterios de conservación.
+- [Inventario legible por máquina](docs/inventario-retirados.json): archivos retirados con su ruta y commit histórico; no se reescribió el historial.
+- `s11-estudiantes` y `s13-laboratorio` son entornos específicos y se conservan. MatchLab es un proyecto independiente y no se modifica.
+
 ## Una sola fuente de verdad para el calendario
 
 `lms/data/course.json` define la estructura, la visibilidad y las fechas de las sesiones. Supabase define actividades, laboratorios, evaluadores y progreso oficial. Las superficies canónicas del LMS son `lms/session.html?s=N`, `lms/progress.html?s=N` y `lms/wall.html?s=N`.
@@ -32,9 +39,9 @@ index.html            puerta de entrada del estudiante
 lms/                  frontend del LMS (HTML estático + lms/data/course.json)
 Presentaciones/       presentaciones interactivas de las sesiones
 Cuadernos/            cuadernos de Colab
-Datos/  Airflow/      datos y pipeline de ejemplo
+Datos/                fuentes y muestras verificables del curso
 assets/               imágenes, diagramas y guías de laboratorio
-infraestructura/      Docker, tutoriales y el backend del LMS
+infraestructura/      backend del LMS y tutorial Git de consulta
   └─ lms/               Edge Functions (functions/) y migraciones SQL
 utils/                generadores de cuadernos y validadores (validate_*.py)
 tests/                pruebas de navegador (Playwright + axe)
@@ -83,7 +90,7 @@ Antes de producir o cambiar material, lee [`AGENTS.md`](AGENTS.md).
 
 ## Datos pesados
 
-Algunos conjuntos de datos (SECOP, benchmarks, una base DuckDB de ejemplo) superan los 50 MB y hoy están versionados. `utils/check_repo_hygiene.py` **impide que entren archivos nuevos de más de 25 MB** y lista los existentes con la razón por la que aún no se han movido. La meta es dejar en Git un manifiesto (URL, SHA256, tamaño, fuente y script que lo genera) y el dato completo fuera del repositorio.
+Los tres lotes grandes de SECOP permanecen versionados porque los laboratorios los utilizan. Los ejemplos antiguos de Airflow y los benchmarks generados se retiraron del árbol de trabajo. `utils/check_repo_hygiene.py` **impide que entren archivos nuevos de más de 25 MB** y lista los existentes con la razón por la que aún no se han movido. Para futuras migraciones, la meta es dejar en Git un manifiesto (URL, SHA256, tamaño, fuente y script que lo genera) y el dato completo fuera del repositorio.
 
 ## Contribuir
 

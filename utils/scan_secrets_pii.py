@@ -35,7 +35,7 @@ FORBIDDEN_NAMES = [
     "*respuestas*.xlsx", "Encuesta*.xlsx", "*roster*", "*.secret", "secure-connect-*.zip",
     "token.json", "databricks.env", ".env", "*/.env",
 ]
-FORBIDDEN_ALLOW = {".env.example", "databricks.env.example", "Airflow/.env.example"}
+FORBIDDEN_ALLOW = {".env.example", "databricks.env.example"}
 
 SECRET_PATTERNS = {
     "clave privada": re.compile(r"-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----"),
@@ -99,13 +99,6 @@ def allowed(path, kind):
 # Hallazgos CONOCIDOS: no bloquean el CI, pero se muestran SIEMPRE como aviso con su razón, para
 # que no se olviden. Una excepción sin razón, o que deja de coincidir con algo, es un error.
 KNOWN = [
-    ("Cuadernos/8_NoSQL_Mongo.ipynb", "URI con contraseña",
-     "URGENTE: URIs de MongoDB Atlas con contraseña de aspecto real, versionadas desde 2023-11-02. "
-     "Rotar/eliminar esos usuarios en Atlas y sustituir por un marcador; después retirar esta excepción."),
-    ("infraestructura/scripts/seed_mongo.py", "URI con contraseña", "credencial de práctica del docker-compose local; no expone un servicio remoto"),
-    ("infraestructura/modules/04-nosql/README.md", "URI con contraseña", "credencial de práctica del docker-compose local; no expone un servicio remoto"),
-    ("Cuadernos/12_MongoDB_Atlas_NoSQL_Moderno.ipynb", "URI con contraseña", "credencial de práctica del docker-compose local; no expone un servicio remoto"),
-    ("utils/make_12_mongodb_atlas_nosql.py", "URI con contraseña", "generador del cuaderno anterior: misma credencial local de práctica"),
     ("Cuadernos/4_Atlas_Cassandra_Laura.ipynb", "URI con contraseña", "plantilla con variables (f-string), no una credencial"),
     ("tests/*.js", "correo (posible dato personal)", "correos ficticios de prueba (fixtures de Playwright)"),
     ("utils/build_session3_notebook.py", "correo (posible dato personal)",
@@ -130,7 +123,6 @@ KNOWN = [
      "credencial ficticia que la prueba inyecta para comprobar que el validador bloquea la entrega"),
     ("utils/build_session4_notebook.py", "URI con contraseña", "plantilla con variables (f-string), no una credencial"),
     ("Datos/noticias_*.json", "correo (posible dato personal)", "datos periodísticos públicos: correos que aparecen en el texto de los artículos"),
-    ("Cuadernos/2_multiprocessing.ipynb", "correo (posible dato personal)", "ejemplos didácticos de validación de correos"),
 ]
 _known_used = set()
 
