@@ -514,7 +514,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 13,
+        "title": "Paginación: cobertura por identidad",
+        "concept": "Una fuente congelada contiene P01 a P12. Offset indica cuántas posiciones se omiten, limit cuántas se devuelven como máximo. Si el salto es inferior al límite las ventanas se solapan; si es superior aparecen huecos. Contar filas sin revisar identidades puede ocultar ambas cosas. En una API cambiante el orden determinista ayuda, pero no congela la fuente.",
+        "pred": "Predice IDs repetidos y ausentes al pedir tres páginas de cuatro filas con salto tres.",
+        "fields": [
+          {
+            "label": "Limit",
+            "min": 1,
+            "max": 8,
+            "step": 1,
+            "value": 4
+          },
+          {
+            "label": "Salto de offset",
+            "min": 1,
+            "max": 8,
+            "step": 1,
+            "value": 3
+          },
+          {
+            "label": "Peticiones",
+            "min": 1,
+            "max": 6,
+            "step": 1,
+            "value": 3
+          }
+        ],
+        "interpret": "Lee cada ventana y su posición inicial. Conciliamos filas, únicos, duplicados y ausentes: el conteo bruto no garantiza cobertura. Una respuesta vacía no es lo mismo que un error HTTP.",
+        "challenge": "Recupera exactamente 12 IDs con limit=5 y el menor número de peticiones. Traslada el control al cuaderno SECOP y registra fuente y orden.",
+        "limit": "Modelo local congelado, no descarga ni medición SECOP."
+      }
     },
     {
       "id": "02",
@@ -1031,7 +1063,46 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 10,
+        "title": "Dimensionar requisitos de arquitectura",
+        "concept": "Una fuente de eventos llega a tasa constante. Volumen diario = tasa × 1440 × ancho. Retención y copias multiplican almacenamiento bruto. Un lote introduce espera casi igual a su intervalo, más el cálculo. Una restricción obligatoria incumplida no se compensa por una ventaja en otro criterio.",
+        "pred": "Predice si un lote cada 15 minutos cumple frescura de 10 minutos cuando tarda dos minutos en calcular.",
+        "fields": [
+          {
+            "label": "Eventos/min",
+            "min": 100,
+            "max": 5000,
+            "step": 100,
+            "value": 1000
+          },
+          {
+            "label": "Bytes/evento",
+            "min": 100,
+            "max": 2000,
+            "step": 100,
+            "value": 500
+          },
+          {
+            "label": "Intervalo (min)",
+            "min": 1,
+            "max": 30,
+            "step": 1,
+            "value": 15
+          },
+          {
+            "label": "Retención (días)",
+            "min": 1,
+            "max": 30,
+            "step": 1,
+            "value": 7
+          }
+        ],
+        "interpret": "El presupuesto didáctico es 50 GB y frescura de 10 minutos, dos copias y dos minutos de cálculo. Evalúa restricciones primero, luego preferencias. El resultado no es precio.",
+        "challenge": "Encuentra dos diseños factibles y uno que falle solo en frescura. Explica qué componente cambiarías.",
+        "limit": "Estimación con supuestos, no costo de nube."
+      }
     },
     {
       "id": "03",
@@ -1540,7 +1611,32 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 9,
+        "title": "Predicados sobre arrays",
+        "concept": "P1 tiene activo A inválido y B válido; P2, A válido y B inválido; P3, B válido. Dos predicados independientes pueden cumplirse en elementos distintos. $elemMatch exige que un mismo elemento cumpla ambos. Una consulta veloz con semántica incorrecta sigue siendo incorrecta.",
+        "pred": "¿P1 satisface la intención de encontrar un A válido?",
+        "fields": [
+          {
+            "label": "Tipo (0=A,1=B)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 0
+          },
+          {
+            "label": "Estado (0=no,1=sí)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 1
+          }
+        ],
+        "interpret": "Separa coincidencia independiente de coincidencia conjunta. La diferencia es un falso positivo respecto de la intención definida; no una medida de rendimiento.",
+        "challenge": "Cambia tipo y estado, anticipa los IDs y escribe la expresión equivalente de MongoDB en el cuaderno.",
+        "limit": "Evaluación local de documentos ficticios, no ejecución MongoDB."
+      }
     },
     {
       "id": "04",
@@ -2048,7 +2144,32 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 11,
+        "title": "Faltantes y bandeja",
+        "concept": "Cero afirma una cantidad conocida. Null indica valor no asignado y ausencia indica que el atributo no existe. Una regla puede seleccionar faltantes de manera explícita sin convertirlos en cero. Persistir significa poder recuperar el estado después de reconectar, no simplemente conservar una variable.",
+        "pred": "¿Debe entrar un faltante por la regla cantidad menor o igual a cero?",
+        "fields": [
+          {
+            "label": "Umbral",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "value": 0
+          },
+          {
+            "label": "Incluir faltantes (0=no,1=sí)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 1
+          }
+        ],
+        "interpret": "La tabla conserva el estado original y la regla aplicada. Compara identidades seleccionadas, no solo cantidad.",
+        "challenge": "Busca dos configuraciones con igual número de resultados pero IDs distintos. Luego comprueba una consulta equivalente en Atlas.",
+        "limit": "Selección local; no demuestra reconexión ni replicación."
+      }
     },
     {
       "id": "05",
@@ -2557,7 +2678,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 4,
+        "title": "Query-first: diseñar buckets",
+        "concept": "E1 tiene diez filas por mes; E2 dos. Clave de partición agrupa registros; clustering ordena dentro del grupo. Añadir período reduce tamaño de grupo y aumenta la cantidad de grupos que toca una consulta larga. El tamaño lógico no mide tráfico ni cantidad de nodos.",
+        "pred": "Predice cuántos grupos toca una consulta de seis meses con buckets de tres.",
+        "fields": [
+          {
+            "label": "Meses por bucket",
+            "min": 1,
+            "max": 12,
+            "step": 1,
+            "value": 3
+          },
+          {
+            "label": "Mes inicial",
+            "min": 1,
+            "max": 12,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "label": "Meses consultados",
+            "min": 1,
+            "max": 12,
+            "step": 1,
+            "value": 6
+          }
+        ],
+        "interpret": "La tabla muestra clave, intervalo, conteo y si toca el rango. Los buckets al final del año pueden ser más pequeños. Un rango se limita al año disponible.",
+        "challenge": "Escoge bucket para dos meses y máximo 40 filas por grupo. Escribe una clave primaria CQL apropiada.",
+        "limit": "Distribución lógica sintética, no hashing, nodos o latencia Cassandra."
+      }
     },
     {
       "id": "06",
@@ -3071,7 +3224,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 10,
+        "title": "Caminos y nodos únicos",
+        "concept": "A publica P1/P2 y ambos se vinculan a X; P2 también a Y. B publica P3 vinculado a X. Un camino enumera aristas; un destino es la identidad final. Dos caminos pueden llegar al mismo destino. DISTINCT cambia la cardinalidad de la proyección, no la red.",
+        "pred": "Predice caminos de dos saltos y destinos distintos desde A.",
+        "fields": [
+          {
+            "label": "Origen (0=A,1=B)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 0
+          },
+          {
+            "label": "Saltos exactos",
+            "min": 1,
+            "max": 2,
+            "step": 1,
+            "value": 2
+          },
+          {
+            "label": "Excluir X (0=no,1=sí)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 0
+          }
+        ],
+        "interpret": "Lee las trayectorias dirigidas; filtrar X no borra aristas. En Cypher compara proyección con y sin DISTINCT.",
+        "challenge": "Formula una consulta de dos saltos desde B. Contrasta sus resultados con una tabla de aristas.",
+        "limit": "Recorrido real de grafo sintético en JS, no Neo4j ni inferencia de fraude."
+      }
     },
     {
       "id": "07",
@@ -3590,7 +3775,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 7,
+        "title": "BM25: frecuencia, rareza y longitud",
+        "concept": "Para un término, IDF=ln(1+(N−df+0,5)/(df+0,5)). BM25 multiplica IDF por f(k1+1)/(f+k1(1−b+b·L/avgL)). k1 controla saturación y b normaliza longitud. Si f=0 la contribución es cero; df cambia al cambiar presencia del término. El score no es probabilidad.",
+        "pred": "¿Puede un documento corto con dos apariciones ganar a uno largo con cuatro?",
+        "fields": [
+          {
+            "label": "k1",
+            "min": 0.2,
+            "max": 3,
+            "step": 0.1,
+            "value": 1.2
+          },
+          {
+            "label": "b",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "value": 0.75
+          },
+          {
+            "label": "Frecuencia D2",
+            "min": 0,
+            "max": 12,
+            "step": 1,
+            "value": 4
+          }
+        ],
+        "interpret": "Observa frecuencia, longitud, normalización, IDF y score por documento; las estadísticas pertenecen al corpus fijo. Un empate se resuelve por ID.",
+        "challenge": "Busca una configuración donde D1 gane con menor frecuencia; explica con factores intermedios. Compara luego con explain real.",
+        "limit": "Cálculo de BM25 de un término; no consulta Elasticsearch."
+      }
     },
     {
       "id": "08",
@@ -4099,7 +4316,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 7,
+        "title": "Repaso de cobertura y concurrencia en biblioteca",
+        "concept": "Una biblioteca ficticia recupera 18 fichas con páginas que duran dos segundos. La concurrencia reduce rondas ideales, no corrige omisiones. Primero se comprueba identidad y cobertura; después se interpreta tiempo. No se emplean datos ni respuestas del taller.",
+        "pred": "Con seis páginas y tres tareas simultáneas, predice las rondas.",
+        "fields": [
+          {
+            "label": "Fichas/página",
+            "min": 1,
+            "max": 9,
+            "step": 1,
+            "value": 3
+          },
+          {
+            "label": "Tareas simultáneas",
+            "min": 1,
+            "max": 6,
+            "step": 1,
+            "value": 3
+          },
+          {
+            "label": "Omitir página (0=ninguna)",
+            "min": 0,
+            "max": 6,
+            "step": 1,
+            "value": 0
+          }
+        ],
+        "interpret": "Las páginas omitidas permanecen visibles. El tiempo ideal usa rondas de peticiones efectivamente ejecutadas, sin red ni coordinación.",
+        "challenge": "Compara un escenario rápido incompleto y otro completo. Explica el riesgo sin resolver TC1.",
+        "limit": "Ejemplo de biblioteca no evaluativo."
+      }
     },
     {
       "id": "09",
@@ -4618,7 +4867,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 13,
+        "title": "Fusión RRF y relevancia",
+        "concept": "RRF suma 1/(c+r) por lista, con r desde uno. Un documento ausente aporta cero; no se mezclan escalas de BM25 y coseno. Dos listas cortas pueden excluir candidatos útiles. Precision divide aciertos por resultados devueltos y recall por relevantes conocidos; aquí se informa k efectivo.",
+        "pred": "¿Un segundo lugar en ambas listas puede superar al primero en una sola?",
+        "fields": [
+          {
+            "label": "Constante c",
+            "min": 1,
+            "max": 60,
+            "step": 1,
+            "value": 10
+          },
+          {
+            "label": "Profundidad por lista",
+            "min": 1,
+            "max": 5,
+            "step": 1,
+            "value": 3
+          },
+          {
+            "label": "Top-k",
+            "min": 1,
+            "max": 5,
+            "step": 1,
+            "value": 3
+          }
+        ],
+        "interpret": "La tabla expone ambos rangos y contribuciones; juicios fijos B y C. Compara P/R de lexical, vectorial e híbrida. No confundir relevancia con recall de vecinos ANN.",
+        "challenge": "Encuentra un caso en el que la fusión no sea mejor que una lista individual y justifica mediante IDs.",
+        "limit": "Rankings ficticios; no genera embeddings ni ejecuta Atlas."
+      }
     },
     {
       "id": "10",
@@ -5127,7 +5408,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 9,
+        "title": "Onda, RMS y frecuencia observada",
+        "concept": "Generamos un segundo de senoide. RMS es raíz de media de cuadrados; para ciclos completos y muestreo suficiente se aproxima a A/√2. El muestreo fija Nyquist en fs/2; por encima aparece aliasing. En Nyquist una senoide de fase cero puede muestrearse como cero. Un espectro describe señal, no palabras.",
+        "pred": "Predice el RMS de amplitud uno y qué frecuencia se observará si f=90 y fs=120.",
+        "fields": [
+          {
+            "label": "Amplitud ×100",
+            "min": 10,
+            "max": 100,
+            "step": 10,
+            "value": 100
+          },
+          {
+            "label": "Tono (Hz)",
+            "min": 10,
+            "max": 100,
+            "step": 10,
+            "value": 40
+          },
+          {
+            "label": "Muestreo (Hz)",
+            "min": 80,
+            "max": 320,
+            "step": 40,
+            "value": 160
+          }
+        ],
+        "interpret": "Se generan muestras y se calcula RMS y el pico de la transformada discreta de Fourier mediante proyecciones. Compara frecuencia real y observada.",
+        "challenge": "Encuentra dos frecuencias que produzcan el mismo alias; comprueba después metadatos y espectro de audio real.",
+        "limit": "Senoide sintética; DFT directa, no FFT ni ASR."
+      }
     },
     {
       "id": "11",
@@ -5641,7 +5954,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 10,
+        "title": "Segmentación temporal sin pérdida",
+        "concept": "Procesar un audio por ventanas exige conservar inicio y fin global. Si una ventana comienza en t, un tiempo local u se convierte en t+u. Salto menor que ventana genera solape; mayor genera huecos. Cobertura es unión de intervalos, no suma de duraciones repetidas. No truncar a 60 s y afirmar audio completo.",
+        "pred": "Predice qué pasa con ventanas de 20 s y saltos de 15 y 25 s.",
+        "fields": [
+          {
+            "label": "Ventana (s)",
+            "min": 5,
+            "max": 40,
+            "step": 5,
+            "value": 20
+          },
+          {
+            "label": "Salto (s)",
+            "min": 5,
+            "max": 40,
+            "step": 5,
+            "value": 15
+          },
+          {
+            "label": "Audio (s)",
+            "min": 30,
+            "max": 150,
+            "step": 1,
+            "value": 73
+          }
+        ],
+        "interpret": "Se calcula cobertura por segundo y duplicación adicional. El último intervalo se recorta al final real. Solapes requieren consolidar texto y tiempos, no eliminar arbitrariamente.",
+        "challenge": "Cubre todo el audio con ventanas de máximo 30 s; verifica el caso real largo conservando offsets y fuente.",
+        "limit": "Simulación temporal; no ejecución Whisper ni CER/WER."
+      }
     },
     {
       "id": "12",
@@ -6150,7 +6495,46 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 11,
+        "title": "Repaso: reconciliación de inventario de museo",
+        "concept": "Un museo ficticio asigna a cada activo éxito, rechazo o pendiente. Reintentar no crea una nueva identidad. Contar intentos puede ocultar duplicación y falta de cobertura. Rechazos conservan causa, pendientes no se cuentan como éxito.",
+        "pred": "Si duplicas un éxito, ¿cambia el número de activos únicos?",
+        "fields": [
+          {
+            "label": "Activos",
+            "min": 6,
+            "max": 24,
+            "step": 1,
+            "value": 15
+          },
+          {
+            "label": "Rechazos",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "value": 3
+          },
+          {
+            "label": "Pendientes",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "value": 2
+          },
+          {
+            "label": "Duplicar éxito (0=no,1=sí)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 1
+          }
+        ],
+        "interpret": "Se asignan estados hasta agotar entradas. El duplicado conserva identidad. Contrasta filas e IDs y explica qué estados faltan.",
+        "challenge": "Construye una conciliación limpia y otra con duplicación; no uses este ejercicio como respuesta de TC2.",
+        "limit": "Caso ficticio no evaluativo; no cambia rúbrica."
+      }
     },
     {
       "id": "13",
@@ -6664,7 +7048,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 10,
+        "title": "MapReduce: estados parciales y carga",
+        "concept": "Repartimos valores 1 a 20 en tamaños desiguales. Map calcula suma y conteo; reduce combina ambos. Media global = suma total/conteo total, no promedio de medias de grupos desiguales. Un worker ejecuta tareas; una partición es datos lógicos. El reparto ideal por turno no es el scheduler real.",
+        "pred": "Predice si la media de medias coincide cuando la primera partición tiene 12 valores.",
+        "fields": [
+          {
+            "label": "Particiones",
+            "min": 2,
+            "max": 6,
+            "step": 1,
+            "value": 4
+          },
+          {
+            "label": "Filas primera partición",
+            "min": 4,
+            "max": 14,
+            "step": 1,
+            "value": 12
+          },
+          {
+            "label": "Workers ideales",
+            "min": 1,
+            "max": 6,
+            "step": 1,
+            "value": 2
+          }
+        ],
+        "interpret": "Tabla de estados parciales: tamaño, suma, media y worker conceptual. Compara media exacta, combinada e incorrecta. La carga máxima es un proxy, no tiempo medido.",
+        "challenge": "Busca tamaños iguales; luego prueba la misma reducción en Dask frente a pandas y mide configuraciones sin cambiar universo.",
+        "limit": "Cálculo real local, no clúster ni benchmark Dask."
+      }
     },
     {
       "id": "14",
@@ -7173,7 +7589,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 9,
+        "title": "Join y cardinalidad",
+        "concept": "P1/P2 código 0, P3 código 1, P4 código 2. Dimensión conoce 0/1. Left conserva fila izquierda sin coincidencia; inner la elimina. Duplicados a derecha multiplican filas. Broadcast y sort-merge pueden producir el mismo multiconjunto con costos distintos; los hints no garantizan operador.",
+        "pred": "¿Qué pasa con P4 y qué pasa con P1 si duplicamos código 0?",
+        "fields": [
+          {
+            "label": "Join (0=left,1=inner)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 0
+          },
+          {
+            "label": "Copias código 0",
+            "min": 1,
+            "max": 4,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "label": "Añadir código 2 (0=no,1=sí)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 0
+          }
+        ],
+        "interpret": "Lee todas las parejas y los faltantes; un resultado puede ser lógicamente correcto y no cumplir la intención de negocio. Distinct ocultaría multiplicación; en Spark usa exceptAll bidireccional.",
+        "challenge": "Obtén seis filas y cuatro procesos; verifica unicidad de dimensión y compara planes reales en el cuaderno.",
+        "limit": "Join local, no Spark ni medición shuffle."
+      }
     },
     {
       "id": "14A",
@@ -7692,7 +8140,25 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 12,
+        "title": "Matriz de confusión y umbral",
+        "concept": "Ocho puntuaciones sintéticas y etiquetas fijas. Umbral convierte puntuación en etiqueta. TP, FP, FN, TN definen precisión, recall y F1; no prueban capacidad de entrenamiento. El umbral se elige sobre validación, no test final. Capacidad requiere N efectivo, dimensión, fit y persistencia.",
+        "pred": "¿Al bajar el umbral cómo cambian FP y FN?",
+        "fields": [
+          {
+            "label": "Umbral ×100",
+            "min": 10,
+            "max": 100,
+            "step": 5,
+            "value": 50
+          }
+        ],
+        "interpret": "La tabla muestra etiqueta, puntuación, decisión y tipo de error. Denominador cero se reporta con convención de cero. Precision no necesariamente es monótona.",
+        "challenge": "Compara dos umbrales y enumera las evidencias que probarían fit remoto a escala.",
+        "limit": "Puntuaciones ficticias fijas; no entrenamiento ni métricas Databricks."
+      }
     },
     {
       "id": "15",
@@ -8201,7 +8667,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 7,
+        "title": "Recuperación: checkpoint y escritura",
+        "concept": "Eventos A v1, B v1, A v2, C v1. Si se escribe antes de checkpoint y ocurre fallo, el evento se repite. Upsert por ID/versión puede hacer repetición inocua; append duplica. Si checkpoint se confirma antes de escritura y falla, se puede perder el evento. Compara estado final contra ejecución limpia.",
+        "pred": "Predice qué ocurre al fallar en segunda posición con checkpoint posterior.",
+        "fields": [
+          {
+            "label": "Fallo en posición (0=ninguno)",
+            "min": 0,
+            "max": 4,
+            "step": 1,
+            "value": 2
+          },
+          {
+            "label": "Escritura (0=append,1=upsert)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "label": "Checkpoint (0=después,1=antes)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 0
+          }
+        ],
+        "interpret": "Lee trazas y estados canónicos. El fallo posterior a escritura genera reintento; el previo pierde evento. El control compara multiconjunto o estado por versión según regla.",
+        "challenge": "Encuentra recuperación equivalente y pérdida irreversible; explica por qué idempotencia no corrige checkpoint adelantado.",
+        "limit": "Máquina de estados local; no prueba Kafka, Delta ni exactly-once."
+      }
     },
     {
       "id": "16",
@@ -8710,7 +9208,39 @@
           "label": "Cierre",
           "minutes": 10
         }
-      ]
+      ],
+      "workbench": {
+        "at": 4,
+        "title": "Repaso: grano de integración",
+        "concept": "Biblioteca ficticia: libro L1 tiene ediciones y revisiones históricas; L2 una de cada. Cruzar por libro puede multiplicar ediciones por revisiones. Para última revisión se selecciona una por ID antes de unir; para historial la multiplicación puede ser intencional. Declara grano.",
+        "pred": "¿Cuántas filas produce L1 con tres ediciones y cuatro revisiones?",
+        "fields": [
+          {
+            "label": "Ediciones L1",
+            "min": 1,
+            "max": 5,
+            "step": 1,
+            "value": 3
+          },
+          {
+            "label": "Revisiones L1",
+            "min": 1,
+            "max": 5,
+            "step": 1,
+            "value": 4
+          },
+          {
+            "label": "Solo última (0=no,1=sí)",
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "value": 1
+          }
+        ],
+        "interpret": "La tabla enumera combinaciones; dos libros siguen siendo dos aunque aumenten filas. El grano cambia de edición×revisión a edición.",
+        "challenge": "Identifica una consulta que requiera historia y otra que requiera última revisión; aplica el criterio según rúbrica vigente.",
+        "limit": "Caso no evaluativo ajeno al proyecto."
+      }
     }
   ]
 }
