@@ -21,3 +21,10 @@ Corpus comprobado: 200 filas, 200 IDs, 51 entidades distintas. Cuatro páginas d
 | Tiempo | 5% | 150 planificados, no medidos |
  
 No se otorga 4,5/5 sin comprobaciones; no se autoriza iniciar S02. La política de revisión secuencial se aplica a todas las sesiones, incluida S14A opcional. Los borradores anteriores se conservan como referencia, no como sesiones aceptadas.
+
+## Segunda iteración: corrección de alineación y pruebas locales
+Se corrigieron las referencias heredadas S01-A/S01-B y código de API, se incorporó selección por prefijo en A3, ejemplo ejecutable CSV/JSON/XML en A2 y caso de fuente mutable en A5. El orden del cuaderno coincide con la posición del snapshot que usa la presentación y se documenta en el manifiesto; no se exige importar estado al observatorio oficial ni avanzar a S02. Se leyó el notebook guardado y se comparó la lista de 200 objetos incorporados con el corpus fuente: identidad exacta por serialización JSON. Se verificó agrupación por bloques en 20 configuraciones sobre el corpus real (4 escalas × 5 bloques).
+
+Prueba local reproducida de las funciones Python con fixture SINTÉTICO de 200 registros (no ejecución íntegra del notebook remoto): Python 3.13.5, pandas 2.2.3. Ocho tamaños de página, seis tamaños de bloque, tres paquetes reabiertos, detección de modificación de bytes, ocho mediciones sintéticas CSV. Para N=100.000, suma 4.999.545 en las cuatro rutas; memoria lógica del DataFrame completo 1.600.132 bytes, bloques 500/1000/5000: 8.132/16.132/80.132 bytes. Tiempo observado 0,01244 s completo; 0,10076/0,05500/0,01756 s por bloques, una sola corrida y sin medición RSS. No se trasladó el ipynb remoto al entorno por DNS y acceso externo restringido; la prueba usa una transcripción local de las funciones y no acredita ejecución integral Colab ni consulta viva.
+
+Conteo bruto actualizado: 8749 palabras de lectura de la presentación y 1568 de Markdown del cuaderno; total 10317. El total no alcanza 40.000 ni acredita deduplicación. S01 sigue sin aprobar, S02 bloqueada.
