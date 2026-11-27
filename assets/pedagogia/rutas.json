@@ -8,7 +8,7 @@
       "problem": "Laura necesita leer una fuente creciente sin agotar memoria.",
       "concept": "Las cinco V describen restricciones. La lectura por fragmentos conserva agregados asociativos sin cargar toda la fuente.",
       "nb": "sesion1_introducci_n.ipynb",
-      "original": null,
+      "original": "s01-fundamentos-adquisicion.html",
       "kind": "memory",
       "steps": [
         {
@@ -133,8 +133,8 @@
         ],
         "breakAfter": 2,
         "breakMinutes": 10,
-        "notebookCells": 77,
-        "codeCells": 30,
+        "notebookCells": 85,
+        "codeCells": 33,
         "questions": [
           {
             "question": "¿Dos fragmentos contienen 30 y 70 filas. ¿Cómo obtienes el total?",

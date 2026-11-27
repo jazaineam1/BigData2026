@@ -1324,6 +1324,8 @@ def main():
     except ImportError:
         from integrar_ruta_notebook import integrar_ruta
     integrar_ruta(cells, "01")
+    from utils.s01_puente import integrate
+    integrate(cells)
     validate(cells)
     save(cells, OUTPUT)
 
