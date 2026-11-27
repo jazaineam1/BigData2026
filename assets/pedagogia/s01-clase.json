@@ -211,7 +211,7 @@
     ]
   ],
   [
-    8,
+    5,
     "12 · Paginación",
     "LIMIT y OFFSET sin perder registros",
     "Una página es un subconjunto ordenado. OFFSET desplaza el inicio; un último bloque puede ser menor que el límite. Un orden estable reduce inconsistencias, pero no congela una API que cambia mientras se consulta.",
@@ -226,7 +226,22 @@
     ]
   ],
   [
-    8,
+    6,
+    "12B · Control de cobertura",
+    "¿Cómo detectamos una adquisición incompleta?",
+    "La cantidad recibida puede ser correcta y aun así contener duplicados y omisiones. Compara IDs, no solamente filas.",
+    "Cambia el desplazamiento entre páginas. Observa el solapamiento y los registros ausentes.",
+    "Prueba sobre instantánea estática, no sobre API viva.",
+    "coverage",
+    null,
+    [
+      "La paginación es un procedimiento de adquisición, no una prueba de completitud. En una fuente estática conocemos un universo de identificadores y podemos verificar si todos fueron recuperados. En una fuente remota que cambia, ese universo debe fijarse mediante un contrato, por ejemplo una ventana de tiempo, y un mecanismo de consulta que permita reproducirla. Si la API no ofrece una instantánea coherente, debemos declarar la limitación. La primera comprobación es contar filas recibidas; la segunda es contar identificadores únicos; la tercera compara el conjunto recibido con el conjunto de referencia cuando este se conoce. Los tres resultados responden preguntas diferentes. Si un ID se repite, la cantidad de filas aumenta sin ampliar cobertura. Si una página se omite, una simple deduplicación no recupera los registros faltantes. La corrección debe actuar sobre la adquisición y no solamente limpiar el resultado.",
+      "En el ejemplo de 200 procesos, solicitamos cuatro páginas de 50. Con desplazamientos 0, 40, 80 y 120 recuperamos 200 filas, pero solo 170 identidades: faltan 30 y existen 30 repeticiones. Con desplazamientos 0, 50, 100 y 150 recuperamos 200 filas e identidades. El número de páginas y de filas es idéntico; la cobertura es distinta. Este es un ejemplo controlado con datos reales de la instantánea, no un fallo observado en SECOP.",
+      "Compara saltos de 40 y 50 con límite fijo de 50. Revisa las cuatro páginas y observa los indicadores antes de ver los identificadores ausentes. Cambia a 60 y explica por qué aparecen huecos. Escribe la regla de validación en términos de conjuntos: no basta afirmar que filas recibidas igualan filas esperadas."
+    ]
+  ],
+  [
+    5,
     "13 · Fragmentar",
     "Leer por fragmentos y reducir resultados",
     "Si el archivo no cabe en memoria, podemos procesar lotes y conservar parciales. Para conteos basta sumar; para medias se combinan suma y cantidad. El promedio de promedios solo coincide si los tamaños son iguales, salvo coincidencias especiales.",
