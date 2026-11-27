@@ -384,3 +384,7 @@ Antes de cada cambio al sitio, presentación, cuaderno o LMS: desarrollar en una
 - Si un usuario solicita pruebas exhaustivas, realizarlas de manera puntual y documentada, evitando que queden configuradas para repetirse en la integración continua.
 
 **Criterio de aceptación:** cambiar una diapositiva, un cuaderno o documentación no debe descargar un modelo ni reentrenar sobre miles de registros; la evidencia de tests costosos ya medidos debe reutilizarse. Consulta `.github/workflows/` antes de introducir nuevas automatizaciones.
+
+## Separación permanente de reconstrucciones experimentales y curso publicado
+
+Por instrucción docente, los recursos nuevos de reconstrucción integral se mantienen exclusivamente en `mejora-pedagogica-integral`, con acceso independiente en `revision/index.html`. No fusionar a `main`, ni editar recursos publicados, cambiar el origen de GitHub Pages, disparar su despliegue manual o sustituir enlaces del curso oficial para mostrar esta revisión. Una futura integración requiere autorización expresa y separada del docente. Los cambios posteriores se realizan en los recursos de revisión y conservan el material y las rúbricas oficiales. Mantener un único acceso alternativo, sin nuevas ramas ni ejecuciones costosas por defecto. El sitio de revisión no debe solicitar credenciales ni acceder al LMS oficial; los enlaces al curso oficial son navegación independiente.

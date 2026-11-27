@@ -7,7 +7,7 @@
       "title": "¿Cuándo necesitamos Big Data?",
       "problem": "Laura necesita leer una fuente creciente sin agotar memoria.",
       "mission": "Adquirir datos",
-      "original": "s01-fundamentos-adquisicion.html",
+      "original": "https://jazaineam1.github.io/BigData2026/Presentaciones/s01-fundamentos-adquisicion.html",
       "notebook": {
         "path": "sesion1_introducci_n.ipynb",
         "ref": "mejora-pedagogica-integral",
@@ -3351,7 +3351,7 @@
       "title": "¿Cómo encuentra información un buscador?",
       "problem": "Una búsqueda literal no siempre devuelve los documentos pertinentes.",
       "mission": "Encontrar por palabras",
-      "original": "s07-del-vecindario-al-texto.html",
+      "original": "https://jazaineam1.github.io/BigData2026/Presentaciones/s07-del-vecindario-al-texto.html",
       "notebook": {
         "path": "Cuadernos/7_Elasticsearch_BM25_Compras_Claras.ipynb",
         "ref": "mejora-pedagogica-integral",
@@ -3916,7 +3916,7 @@
       "title": "TC1 · Una fuente, tres modelos",
       "problem": "Construir un sistema verificable para Laura con tres modelos de datos.",
       "mission": "Primera entrega",
-      "original": "../assets/tutoriales/s08-secoppipeline.html",
+      "original": "https://jazaineam1.github.io/BigData2026/assets/tutoriales/s08-secoppipeline.html",
       "notebook": {
         "path": "Cuadernos/Taller_Control_1.ipynb",
         "ref": "mejora-pedagogica-integral",
@@ -4462,7 +4462,7 @@
       "title": "¿Cómo recuperar por significado?",
       "problem": "La consulta y el documento pueden expresar la misma idea con palabras diferentes.",
       "mission": "Mejorar recuperación",
-      "original": "s09-de-palabras-a-significado.html",
+      "original": "https://jazaineam1.github.io/BigData2026/Presentaciones/s09-de-palabras-a-significado.html",
       "notebook": {
         "path": "Cuadernos/9_Bases_Vectoriales_Busqueda_Semantica.ipynb",
         "ref": "mejora-pedagogica-integral",
@@ -5023,7 +5023,7 @@
       "title": "¿Cómo representar imágenes y voz?",
       "problem": "Compras Claras necesita un catálogo de medios sin perder la fuente original.",
       "mission": "Catalogar multimedia",
-      "original": "s10-imagenes-audio.html",
+      "original": "https://jazaineam1.github.io/BigData2026/Presentaciones/s10-imagenes-audio.html",
       "notebook": {
         "path": "Cuadernos/10_Imagenes_Audio.ipynb",
         "ref": "mejora-pedagogica-integral",
@@ -5574,7 +5574,7 @@
       "title": "¿Cómo recuperar evidencia multimedia?",
       "problem": "Contratos, fotos y voces deben ser consultables sin confundir extracción con verdad.",
       "mission": "Leer y escuchar",
-      "original": "s11-videoclase-ocr-asr-embeddings.html",
+      "original": "https://jazaineam1.github.io/BigData2026/Presentaciones/s11-videoclase-ocr-asr-embeddings.html",
       "notebook": {
         "path": "01_laboratorio.ipynb",
         "ref": "s11-estudiantes",
@@ -6129,7 +6129,7 @@
       "title": "TC2 · Investigador multimodal",
       "problem": "Integrar búsquedas y medios en un expediente verificable.",
       "mission": "Segunda entrega",
-      "original": "../assets/tutoriales/tc2-paso-a-paso.html",
+      "original": "https://jazaineam1.github.io/BigData2026/assets/tutoriales/tc2-paso-a-paso.html",
       "notebook": {
         "path": "Cuadernos/Taller_Control_2.ipynb",
         "ref": "mejora-pedagogica-integral",
@@ -6682,7 +6682,7 @@
       "title": "¿Cuándo conviene distribuir?",
       "problem": "Laura necesita procesar lotes SECOP y entrenar un modelo con varios trabajadores.",
       "mission": "Distribuir procesamiento",
-      "original": "s13-de-una-maquina-a-un-cluster.html",
+      "original": "https://jazaineam1.github.io/BigData2026/Presentaciones/s13-de-una-maquina-a-un-cluster.html",
       "notebook": {
         "path": "Cuadernos/13_Dask_MapReduce_Compras_Claras.ipynb",
         "ref": "s13-laboratorio",
@@ -7237,7 +7237,7 @@
       "title": "¿Cómo procesa Spark los datos?",
       "problem": "Laura necesita transformar, consultar y persistir datos y modelos.",
       "mission": "Motor analítico",
-      "original": "s14-de-dask-a-spark.html",
+      "original": "https://jazaineam1.github.io/BigData2026/Presentaciones/s14-de-dask-a-spark.html",
       "notebook": {
         "path": "Cuadernos/14_PySpark_Compras_Claras.ipynb",
         "ref": "mejora-pedagogica-integral",
@@ -7788,7 +7788,7 @@
       "title": "¿Cómo entrenar fuera de un presupuesto local?",
       "problem": "Una matriz densa puede superar la memoria disponible para entrenar.",
       "mission": "Capacidad opcional",
-      "original": "s14a-databricks-escala.html",
+      "original": "https://jazaineam1.github.io/BigData2026/Presentaciones/s14a-databricks-escala.html",
       "notebook": {
         "path": "Cuadernos/14A_Databricks_E2E_Escala.ipynb",
         "ref": "mejora-pedagogica-integral",
@@ -8898,7 +8898,7 @@
       "title": "¿Cómo entregar un producto de datos?",
       "problem": "El observatorio de Compras Claras debe funcionar fuera del entorno de desarrollo.",
       "mission": "Entregar el observatorio",
-      "original": "proyecto-final-explorer.html",
+      "original": "https://jazaineam1.github.io/BigData2026/Presentaciones/proyecto-final-explorer.html",
       "notebook": {
         "path": "Cuadernos/Proyecto_Final_Compras_Claras.ipynb",
         "ref": "mejora-pedagogica-integral",
