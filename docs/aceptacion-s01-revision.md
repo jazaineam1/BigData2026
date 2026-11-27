@@ -31,3 +31,20 @@ Conteo bruto actualizado: 8749 palabras de lectura de la presentación y 1568 de
 
 ## Tercera iteración — evaluación formativa
 25 comprobaciones de comprensión nuevas, una por pantalla sustantiva. Cada comprobación plantea una decisión, tres opciones no preseleccionadas, retroalimentación diferenciada para las tres alternativas y una transferencia al experimento o cuaderno. Se registra en memoria solo el primer intento, sin datos personales, sin enviar respuestas y sin calificar a estudiantes. La lectura ampliada incluye estas comprobaciones sin saturar la proyección. Prosa bruta adicional de preguntas, opciones, explicaciones y transferencias: 2367 palabras (no certificadas como elegibles ni deduplicadas). Se conserva la puntuación conceptual de la clase como pendiente de validación con estudiantes. 
+
+## Evaluación provisional posterior a las tres iteraciones
+El dictamen corresponde al nuevo recurso específico de S01, no a una nota del estudiante ni a una recalificación de todas las sesiones anteriores. Escala: 0 ausente, 1 declarado, 2 presente sin verificación suficiente, 3 parcial comprobado, 4 evidencia sólida, 5 verificación independiente con transferencia. Se aplica estrictamente la ponderación del plan.
+
+| Dimensión | Peso | Nota / 5 | Evidencia y brecha |
+|---|---:|---:|---|
+| Profundidad conceptual | 20% | 3 | 25 pantallas con explicaciones y ejemplos; solo 12.684 palabras brutas entre lectura, cuaderno y comprobaciones, sin acreditar 40.000 originales. |
+| Actividad y autonomía | 20% | 3 | 25 comprobaciones, 75 alternativas probadas, cambios de parámetros y reto A8; falta observar modificación autónoma de un estudiante. |
+| Práctica auténtica y reproducibilidad | 20% | 3 | 200 registros reales incorporados, referencia Python local con fixture sintético y pruebas de relectura; no se ejecutó el ipynb remoto completo con su corpus real. |
+| Alineación y transferencia | 15% | 4 | 25 referencias a secciones A0–A8 verificadas, misma selección del snapshot y paquete de relevo; S02 permanece bloqueada. |
+| Interpretación de resultados | 10% | 4 | Límites por pantalla, explicaciones de las 75 alternativas y controles de cobertura, memoria lógica, grano y relectura probados. |
+| Diseño visual y accesibilidad | 10% | 3 | 25 pantallas y pausa en DOM simulado, navegación y controles comprobados; falta navegador real, contraste medido y proyección. |
+| Viabilidad temporal | 5% | 1 | Agenda suma 150 min; no se cronometró ensayo docente ni recorrido de estudiante. |
+
+**Resultado provisional: 3.15/5. NO APROBADA.** La puerta de 4,5/5 no se supera; el mínimo individual y las puertas de extensión, ejecución integral, navegador, autonomía y ensayo siguen pendientes. S02 NO se modifica. El conteo bruto (8.749 lectura, 1.568 Markdown, 2.367 preguntas/retroalimentación) suma 12.684; faltan al menos 27.316 palabras brutas, y el déficit elegible puede ser mayor. No se rellena con repeticiones.
+
+QA final del contenido guardado: regeneración HTML idéntica, 26 pantallas (25 de enseñanza), 73 cambios de parámetros y 35 respuestas de cuestionario anterior, 52 alternancias de lectura, 25 referencias al cuaderno, 20 reducciones con el corpus real. Las 25 comprobaciones nuevas arrancan sin opción seleccionada y botón deshabilitado: 75 respuestas probadas, 25 correctas y 50 incorrectas con retroalimentación y transferencia correctas; el primer intento no cambia por reintento. Son pruebas automatizadas de UI con DOM simulado, no resultados de estudiantes. La rama main conservó el SHA 9876871419dca42e6a3d50bf5f2524a94e399a5a. No se ejecutó despliegue ni se modificó S02 o posterior. El validador manual utils/validar_s01_revision.py permite verificar el cuaderno completo y navegador en un checkout; no se ejecutó ese archivo sobre checkout porque no fue posible descargar el repo al contenedor. No activar workflows pesados ni publicar como final.

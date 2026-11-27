@@ -1,0 +1,70 @@
+{
+  "session": "S01",
+  "state": "NO_APROBADA",
+  "score": 3.1499999999999995,
+  "threshold": 4.5,
+  "essential_min": 4,
+  "mandatory": {
+    "words_original_verified": false,
+    "teaching_slides_25": true,
+    "notebook_full_execution_verified": false,
+    "real_browser_verified": false,
+    "rehearsal_150_verified": false,
+    "autonomy_observed": false
+  },
+  "word_count": {
+    "reading_gross": 8749,
+    "notebook_markdown_gross": 1568,
+    "formative_gross": 2367,
+    "total_gross": 12684,
+    "required_eligible": 40000,
+    "eligible_verified": null
+  },
+  "rubric": [
+    {
+      "dimension": "Profundidad conceptual",
+      "weight": 20,
+      "score": 3,
+      "evidence": "25 pantallas con explicaciones y ejemplos; solo 12.684 palabras brutas entre lectura, cuaderno y comprobaciones, sin acreditar 40.000 originales."
+    },
+    {
+      "dimension": "Actividad y autonomía",
+      "weight": 20,
+      "score": 3,
+      "evidence": "25 comprobaciones, 75 alternativas probadas, cambios de parámetros y reto A8; falta observar modificación autónoma de un estudiante."
+    },
+    {
+      "dimension": "Práctica auténtica y reproducibilidad",
+      "weight": 20,
+      "score": 3,
+      "evidence": "200 registros reales incorporados, referencia Python local con fixture sintético y pruebas de relectura; no se ejecutó el ipynb remoto completo con su corpus real."
+    },
+    {
+      "dimension": "Alineación y transferencia",
+      "weight": 15,
+      "score": 4,
+      "evidence": "25 referencias a secciones A0–A8 verificadas, misma selección del snapshot y paquete de relevo; S02 permanece bloqueada."
+    },
+    {
+      "dimension": "Interpretación de resultados",
+      "weight": 10,
+      "score": 4,
+      "evidence": "Límites por pantalla, explicaciones de las 75 alternativas y controles de cobertura, memoria lógica, grano y relectura probados."
+    },
+    {
+      "dimension": "Diseño visual y accesibilidad",
+      "weight": 10,
+      "score": 3,
+      "evidence": "25 pantallas y pausa en DOM simulado, navegación y controles comprobados; falta navegador real, contraste medido y proyección."
+    },
+    {
+      "dimension": "Viabilidad temporal",
+      "weight": 5,
+      "score": 1,
+      "evidence": "Agenda suma 150 min; no se cronometró ensayo docente ni recorrido de estudiante."
+    }
+  ],
+  "next_session": "S02",
+  "next_session_unlocked": false,
+  "main_unchanged": "9876871419dca42e6a3d50bf5f2524a94e399a5a"
+}
