@@ -35,3 +35,9 @@ En la última celda del cuaderno, usar el fragmento de exportación que aparece 
 La ruta común es explorador + cuaderno principal; el panel de producto está integrado en el explorador. El progreso local no es nota. Las rutas de recuperación pueden reconstruirse a partir de la misma fuente con decisiones por defecto. No usar el respaldo como prueba de trabajo propio; cambiar una decisión y verificar un resultado propio antes de entregarlo. Los cuatro rótulos de interpretación se mantienen. Sin instalar motores ni paquetes en la ruta portable. Los laboratorios auténticos permanecen en sus entornos previstos.
 
 **Publicación:** rama de revisión únicamente. El calendario y las rúbricas vigentes permanecen intactos. S15 propuesta, S14A voluntaria.
+
+## Ver la aplicación sin publicar
+- Abrir [observatorio autónomo](../Presentaciones/compras-claras.html) desde un servidor estático o guardar el HTML y abrirlo directamente. Incluye código, estilos y datos; no requiere red para los cálculos portables.
+- En GitHub: [Codespaces de revisión](https://codespaces.new/jazaineam1/BigData2026/tree/mejora-pedagogica-integral); el perfil base sirve el puerto 8000. Abrir `/Presentaciones/compras-claras.html`. No usar los perfiles especializados ni levantar infraestructura para la vista. Codespaces consume cuota.
+- El proxy externo de HTML puede fallar; no es despliegue propio. La página oficial de main no cambia.
+- Cada misión permite comparar una decisión alternativa y exportar los dos resultados sin invalidar la versión confirmada. Los adjuntos de S09, S11, S14 y S16 aparecen en vistas correspondientes, diferenciando fuentes y motores.
