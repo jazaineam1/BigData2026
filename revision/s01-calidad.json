@@ -1,7 +1,7 @@
 {
   "session": "S01",
   "state": "NO_APROBADA",
-  "score": 3.95,
+  "score": 4.06,
   "threshold": 4.5,
   "essential_min": 4,
   "mandatory": {
@@ -14,13 +14,13 @@
     "lexical_word_threshold_met": true
   },
   "word_count": {
-    "reading_gross": 8849,
-    "chapters_gross": 17455,
-    "notebook_markdown_gross": 14144,
+    "reading_gross": 8603,
+    "chapters_gross": 17510,
+    "notebook_markdown_gross": 14596,
     "formative_gross": 2367,
-    "total_gross": 42815,
+    "total_gross": 43076,
     "required_eligible": 40000,
-    "lexical_exact_dedup": 42549,
+    "lexical_exact_dedup": 42785,
     "near_matches": 0,
     "eligible_verified": null,
     "editorial_review_pending": true
@@ -29,44 +29,44 @@
     {
       "dimension": "Profundidad conceptual",
       "weight": 20,
-      "score": 4,
-      "evidence": "25 capítulos específicos y 42549 palabras depuradas; expectativas concretas de salidas y corrección del alcance temporal. Cribado léxico no sustituye revisión editorial semántica."
+      "score": 4.3,
+      "evidence": "Portada, dimensionamiento multiescala, JSONL y 25 capítulos conservados. Revisión semántica integral pendiente."
     },
     {
       "dimension": "Actividad y autonomía",
       "weight": 20,
-      "score": 4.5,
-      "evidence": "12 celdas núcleo consecutivas, mapa de cinco estaciones, ruta accesible en cada pantalla, reto con hipótesis y retroalimentación por propiedad, ZIP de evidencia. No se observó a estudiantes."
+      "score": 4.3,
+      "evidence": "Dos TODO de construcción, cuatro escenarios aislados y 25 min protegidos; no hay observación de estudiantes."
     },
     {
       "dimension": "Práctica auténtica y reproducibilidad",
       "weight": 20,
-      "score": 3.5,
-      "evidence": "Se desacopla HTTP local del núcleo; benchmark con referencia independiente y alcance igual; verificador exige esquema, procedencia y orden; seis rechazos, siete ZIP y tres pares equivalentes probados localmente con fixture sintético. No ejecución del ipynb exacto."
+      "score": 3.7,
+      "evidence": "Nueve ejecuciones locales de la función de referencia hasta un millón, no ejecución integral del ipynb exacto."
     },
     {
       "dimension": "Alineación y transferencia",
       "weight": 15,
-      "score": 4.5,
-      "evidence": "Matriz de cinco objetivos observables, actividades y evidencias; secuencia API→paginación→cobertura→mutabilidad→recuperación, producto y defensa."
+      "score": 4.3,
+      "evidence": "Controles de paginación y calidad sincronizados y reto alineado; falta prueba E2E Python y puente portable."
     },
     {
       "dimension": "Interpretación de resultados",
       "weight": 10,
       "score": 4.5,
-      "evidence": "Salidas de referencia calculadas con el corpus real, controles de contenido y procedencia independientes, diferenciación explícita de producto válido y comprensión, comparación de memoria y tiempo con alcance uniforme."
+      "evidence": "Hipótesis, métricas, validación y bitácora separan resultado técnico de comprensión."
     },
     {
       "dimension": "Diseño visual y accesibilidad",
       "weight": 10,
-      "score": 3,
-      "evidence": "52 aperturas/cierres de ruta, 26 pantallas, 25 capítulos, 75 respuestas y 42 extremos de controles en DOM simulado; mejoras de desbordamiento. Navegador real no comprobado."
+      "score": 3.5,
+      "evidence": "Portada SVG, 11 diagramas temáticos y tres modos (proyección, exploración, lectura); DOM simulado, no inspección de navegador."
     },
     {
       "dimension": "Viabilidad temporal",
       "weight": 5,
-      "score": 2.5,
-      "evidence": "Núcleo consecutivo sin servidor, 12 celdas y 16 minutos protegidos de autonomía; opcionales al final. Pruebas de cómputo local breves, no equivalen a ensayo humano cronometrado."
+      "score": 3,
+      "evidence": "150 min planificados, 25 min autonomía y 7 defensa/cierre; falta ensayo humano."
     }
   ],
   "next_session": "S02",
@@ -131,15 +131,39 @@
       "package_rejections": 6,
       "verified_zips": 7,
       "transfer_pairs": 3
+    },
+    "tenth_iteration": {
+      "mode": "JS HTML exacto en DOM simulado; Python función de benchmark copiada, no notebook exacto",
+      "cover_start_back": true,
+      "screens": 26,
+      "formative_options": 75,
+      "route_toggles": 26,
+      "control_variations": 89,
+      "html_sync": true,
+      "word_pairs": 70876,
+      "benchmark_reference_rows": [
+        10000,
+        100000,
+        1000000
+      ],
+      "benchmark_reference_runs": 9,
+      "benchmark_sums": [
+        499950,
+        4999545,
+        49999950
+      ],
+      "notebook_execution": false,
+      "real_browser": false,
+      "student_observation": false
     }
   },
   "pedagogical_design": {
     "live_checks": 7,
-    "core_code_cells": 12,
+    "core_code_cells": 16,
     "optional_code_cells": 15,
-    "planned_autonomy_minutes": 16,
-    "planned_closure_minutes": 12,
-    "score_unrounded": 3.95,
+    "planned_autonomy_minutes": 25,
+    "planned_closure_minutes": 7,
+    "score_unrounded": 4.055000000000001,
     "actual_student_results": false,
     "report": "docs/evaluacion-pedagogica-s01.md",
     "core_contiguous": true,
