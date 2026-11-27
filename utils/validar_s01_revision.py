@@ -48,7 +48,7 @@ if args.execute or args.core:
             if args.core:
                 stop=next(i for i,c in enumerate(book.cells) if c.id=="s01-apendice")
                 book.cells=book.cells[:stop]
-            book.cells.append(nbformat.v4.new_code_cell('''# Prueba QA añadida solo al cuaderno en memoria, no al archivo docente.\nfor N,l,c in [(41,7,6),(137,29,17),(199,45,40)]:\n    p=(N+l-1)//l; b=(N+c-1)//c\n    h={"paginas":p,"ultima_pagina":N-(p-1)*l,"bloques":b,"ultimo_bloque":N-(b-1)*c}\n    a1,a2,retro,igual=reto_s01(N,l,c,h)\n    assert igual and all(x["coincide"] for x in retro)\n    assert empaquetar_s01(a1,HASH_SNAPSHOT).is_file() and empaquetar_s01(a2,HASH_SNAPSHOT).is_file()\n    casos=comparar_decisiones(N,l,c)\n    assert len(casos)==4 and len({r["hash_raw"] for r in casos[:3]})==1\n    assert casos[3]["hash_raw"]!=casos[0]["hash_raw"]\nprint("QA tres variantes autónomas y aislamiento: OK")\n'''))
+            book.cells.append(nbformat.v4.new_code_cell('''# Prueba QA añadida solo al cuaderno en memoria, no al archivo docente.\nfor N,l,c in [(41,7,6),(137,29,17),(199,45,40)]:\n    p=(N+l-1)//l; b=(N+c-1)//c\n    h={"paginas":p,"ultima_pagina":N-(p-1)*l,"bloques":b,"ultimo_bloque":N-(b-1)*c}\n    a1,a2,retro,igual=reto_s01(N,l,c,h)\n    assert igual and all(x["coincide"] for x in retro)\n    assert empaquetar_s01(a1,HASH_SNAPSHOT).is_file() and empaquetar_s01(a2,HASH_SNAPSHOT).is_file()\n    casos=comparar_decisiones(N,l,c)\n    assert len(casos)==4 and len({r["hash_raw"] for r in casos[:3]})==1\n    assert casos[3]["hash_raw"]!=casos[0]["hash_raw"]\n    plan={"schema":"s01-plan-v1","cases":[]}\n    for r in casos:\n        a=CORPUS[:r["N"]]\n        plan["cases"].append({"N":r["N"],"L":r["L"],"C":r["C"],"pages":r["paginas"],"lastPage":r["ultima_pagina"],"blocks":r["bloques"],"lastBlock":r["ultimo_bloque"],"ids":[x["id_proceso"] for x in a],"counts":[list(x) for x in Counter(x["entidad"] for x in a).items()]})\n    assert contrastar_plan_s01(plan)["casos"]==4\n    plan["cases"][0]["ids"].reverse()\n    try: contrastar_plan_s01(plan)\n    except ValueError: pass\n    else: raise AssertionError("Plan alterado aceptado")\n    assert validar_construccion(CORPUS[:N],c,lambda filas,tam:dict(Counter(x["entidad"] for x in filas)))["filas"]==N\n    assert validar_paginacion_estudiante(CORPUS[:N],l,lambda filas,limite:[filas[i:i+limite] for i in range(0,len(filas),limite)])["filas"]==N\nprint("QA tres variantes, aislamiento y contrato de plan: OK")\n'''))
             executed = NotebookClient(book, timeout=90, kernel_name="python3",
                 resources={"metadata": {"path": tmp}}).execute()
             assert all(c.get("execution_count") is not None for c in executed.cells if c.cell_type == "code")
@@ -71,11 +71,16 @@ if args.browser:
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.goto((REV/"s01.html").as_uri())
             assert page.locator("#cover").is_visible()
+            assert page.locator("#cover svg[role=img]").count()==1
+            if width>760:
+                assert page.locator("#startClass").bounding_box()["y"]+page.locator("#startClass").bounding_box()["height"] <= page.locator("footer").bounding_box()["y"]
             page.locator("#startClass").click()
             assert page.locator("#lesson").is_visible()
             for i,s in enumerate(slides):
                 page.locator("#jump").select_option(str(i))
                 assert page.locator("#heading").inner_text()==s[2]
+                assert page.locator("#experiment .diagram svg[role=img]").count()==1
+                assert page.locator("#experiment .diagram figcaption").inner_text()==s[12]["visual"][1]
                 if width>760:
                     dims=page.evaluate("({h:document.documentElement.scrollHeight,v:innerHeight,visual:document.querySelector('.visual').scrollHeight,client:document.querySelector('.visual').clientHeight})")
                     if dims["h"]>dims["v"]+2 or dims["visual"]>dims["client"]+2:
