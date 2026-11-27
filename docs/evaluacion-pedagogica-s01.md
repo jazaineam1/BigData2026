@@ -79,3 +79,53 @@ Prueba Python local de referencia con funciones copiadas y fixture sintético de
 | Viabilidad temporal | 2.5 | 5% |
  
 **Nota provisional 3.95/5; NO APROBADA.** Conteo léxico depurado 42549; 0 pares señalados por cribado, revisión semántica pendiente. Permanecen bloqueadas las puertas de ejecución exacta, navegador real, ensayo de aula y observación de autonomía. No se avanza S02. main 9876871419dca42e6a3d50bf5f2524a94e399a5a.
+
+
+## Décima intervención: portada, visualización, escala y construcción
+La nueva portada, incluida en los ocho minutos de apertura, tiene ilustración vectorial propia. Se conservan 25 pantallas docentes, pausa y portada adicional; se mantienen los enlaces #sN. Se añadieron diagramas de procesos y modos de proyección, exploración y lectura. No son fotografías externas. La simulación de calidad usa duplicados antes de faltantes, con valores iniciales iguales en JS/Python. La paginación admite límite 37. Se introduce JSONL, dimensionamiento interactivo, exportación de plan A8 con cuatro configuraciones aisladas, y retroalimentación «Respuesta correcta» sin certificar comprensión. El cuaderno conserva la ruta guiada e incorpora A6.2 (100.000 filas y millón manual), A8.2 (TODO de conteo y offset), A8.3 (aislamiento de límite, bloque, universo) y A8.4 (ZIP de evidencias con métricas, bitácora, validación y datos). Se mantienen los paquetes de datos originales separados y compatibles. Falta validar un puente de importación con el estado portable de otras sesiones.
+
+### QA y límites
+HTML guardado reconstruido byte a byte a partir de fuentes. DOM simulado: portada/inicio/regreso, 26 pantallas, 75 respuestas, 26 pares de apertura/cierre y 89 cambios de controles sin errores. No equivale a navegador real. En el entorno local, copia de la función de medición con pandas 2.2.3: 9 ejecuciones, 10.000/100.000/1.000.000 filas y lectura completa/bloques de 1.000/5.000; sumas respectivas 499950/4999545/49999950 en todas las rutas. Para un millón: memoria lógica 16000132/16132/80132 bytes y tiempos de una corrida 0,073/0,541/0,147 s; no RAM máxima, ni comparación universal. No se ejecutó el ipynb guardado íntegro; DNS de GitHub inaccesible desde el contenedor. El conector sí permite leer y escribir. Prueba real de navegador, revisión semántica integral, ensayo de 150 minutos y observación de autonomía siguen pendientes. Conteo léxico depurado 42785, bruto 43076; 0 coincidencias del cribado, no certificación editorial.
+
+### Nueva ruta (150 min planificados)
+| Pantalla | Minutos |
+|---|---:|
+| 01 · La misión | 8 |
+| 02 · Escala y decisión | 5 |
+| 03 · Diagnóstico | 4 |
+| 04 · Infraestructura | 5 |
+| 05 · Estructuras | 4 |
+| 05B · Identidad y grano | 4 |
+| 06 · Fuente real | 3 |
+| 07 · Calidad | 3 |
+| 08 · Primera transformación | 2 |
+| 09 · Pandas | 4 |
+| 10 · Texto | 3 |
+| Pausa | 10 |
+| 11 · API | 4 |
+| 12 · Paginación | 5 |
+| 12B · Control de cobertura | 5 |
+| 12C · Orden y cambios | 3 |
+| 12D · Recuperación HTTP | 6 |
+| 13 · Fragmentar | 5 |
+| 14 · Experimento manual | 4 |
+| 14B · Estado combinable | 4 |
+| 15 · Capacidad real en Python | 9 |
+| 16 · Reutilizar el resultado | 11 |
+| 16B · Auditoría del producto | 7 |
+| 17 · Construir tu propia adquisición | 25 |
+| 18 · Interpretar y defender | 4 |
+| 19 · Relevo | 3 |
+
+### Reevaluación de diseño provisional
+| Dimensión | Peso | Nota |
+|---|---:|---:|
+| Profundidad conceptual | 20% | 4.3 |
+| Actividad y autonomía | 20% | 4.3 |
+| Práctica auténtica y reproducibilidad | 20% | 3.7 |
+| Alineación y transferencia | 15% | 4.3 |
+| Interpretación de resultados | 10% | 4.5 |
+| Diseño visual y accesibilidad | 10% | 3.5 |
+| Viabilidad temporal | 5% | 3 |
+
+**4.06/5: NO APROBADA.** Frente a la auditoría independiente anterior (3,78), mejora provisional de 0.28. No se abre S02. No se modifican materiales oficiales ni se agregan ejecuciones automáticas. Pendientes adicionales: mejorar variedad de diagramas y revisar cada pantalla proyectada, ampliar ejemplos de representación y complejidad, sincronizar referencias del apéndice, incorporar libreto docente integral y probar entrega autónoma con estudiante.
