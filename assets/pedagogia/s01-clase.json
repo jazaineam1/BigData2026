@@ -12,6 +12,11 @@
       "Validar y adquirir",
       "RAW versionado",
       "S02: arquitectura"
+    ],
+    [
+      "Antes de utilizar una herramienta, definimos qué problema queremos resolver. SECOP publica información sobre compras públicas. Una persona que analiza contrataciones puede comenzar por localizar procesos de una entidad y leer sus objetos, pero necesita distinguir esa exploración de una investigación sobre recursos adjudicados. En nuestro corpus de procesos aparecen identificadores, entidades, nombres y descripciones; todavía no tenemos los valores de los contratos. La unidad de observación, también llamada grano, es aquello que representa cada registro. En este caso es un proceso, no un proveedor, un pago ni una factura. Si contamos registros únicos, contamos procesos de nuestra muestra. Si después descargamos una tabla de contratos, un proceso podría tener más de un contrato. Esta diferencia determina cómo podremos combinar ambas fuentes. Big Data empieza con esta pregunta y no con la instalación de un clúster.",
+      "Ejemplo resuelto: una entidad tiene tres procesos, uno de ellos con dos contratos. En la tabla de procesos hay tres filas; en una tabla que registra los contratos puede haber cuatro si cada uno de los otros procesos tiene uno. Contar las cuatro filas como procesos sería incorrecto. Hoy conservaremos el identificador y la procedencia para poder reconocer esa diferencia.",
+      "Abre el visor de datos en la pantalla 6. Selecciona una entidad y escribe dos preguntas: cuántos procesos aparecen en la muestra y cuánto dinero contrató esa entidad. Identifica cuál podemos contestar con los campos presentes y cuál necesita otra fuente. Al final de la sesión volveremos a comprobar la respuesta."
     ]
   ],
   [
@@ -21,7 +26,13 @@
     "El problema comienza cuando volumen, tasa de llegada, estructuras o necesidades de respuesta exceden el método disponible. Una tabla pequeña puede exigir respuesta rápida; una grande puede procesarse por lotes. Escalar tiene costos de memoria, almacenamiento, red y coordinación.",
     "Compara un proceso que recibe 3 millones de eventos/min con otro que recibe 1 millón. Decide qué métrica monitorear.",
     "Distingue capacidad y demanda; el tamaño de archivo por sí solo no decide tecnología.",
-    "queue"
+    "queue",
+    null,
+    [
+      "La expresión Big Data se refiere a situaciones en las que la escala, complejidad o ritmo de los datos requiere métodos adecuados para procesarlos y obtener información útil. No existe un límite universal de filas que obligue a distribuir el cálculo. Un millón de registros de dos columnas numéricas no ocupa lo mismo que un millón de grabaciones. Tampoco tarda lo mismo contar registros que entrenar un modelo sobre cada uno. Conviene separar almacenamiento, memoria de trabajo, capacidad de procesamiento y tiempo máximo de respuesta. El almacenamiento permite conservar datos; la memoria mantiene los datos y estados que el programa utiliza durante su ejecución; el procesador realiza operaciones; la red mueve información entre componentes. Si uno de estos recursos es insuficiente, debemos identificar el cuello de botella. Aumentar un recurso que no limita el sistema puede no producir ninguna mejora.",
+      "Supongamos que llegan 3.000 registros por segundo y solo se procesan 1.000. En sesenta segundos llegan 180.000, se procesan 60.000 y quedan 120.000 pendientes, suponiendo cola inicial vacía y tasas constantes. Aunque tengamos almacenamiento suficiente, la diferencia de tasas hace que la cola siga creciendo. Un tablero nuevo no aumenta la capacidad de procesamiento.",
+      "En el simulador conserva el tiempo en 60 segundos. Prueba llegadas de 3.000 y capacidades de 1.000, 3.000 y 4.000. Antes de cada cambio predice el atraso. Identifica el escenario en que la capacidad supera la llegada y explica por qué aquí no aparece una cola negativa."
+    ]
   ],
   [
     7,
@@ -52,6 +63,11 @@
         "El indicador no cambia ninguna decisión",
         "Valor"
       ]
+    ],
+    [
+      "Las cinco V son una forma de diagnosticar las exigencias de un sistema. Volumen responde cuánto contenido debe conservarse y procesarse; por ejemplo, filas, imágenes o bytes. Velocidad describe la tasa con que llegan datos y el tiempo en que necesitamos una respuesta. Variedad describe diferencias de estructura y formato: una tabla, un documento o una señal sonora requieren tratamientos distintos. Veracidad se refiere a calidad, origen y confiabilidad para el uso previsto: identificadores duplicados, valores faltantes o mediciones inconsistentes. Valor significa que el resultado permite una decisión relevante. Una V puede dominar y las demás seguir presentes. La dimensión que identificamos no determina automáticamente una tecnología, sino que orienta las pruebas necesarias. Si faltan identificadores fiables, repartir esos registros entre veinte máquinas no corrige su significado.",
+      "En una fuente de compras públicas recibimos archivos diariamente. Si el archivo tarda demasiado en descargarse, observamos tamaño y rendimiento de red; si llegan cambios más rápido de lo que podemos procesarlos, observamos atraso; si se mezclan actas PDF y registros CSV, observamos variedad; si se repiten identificadores, verificamos veracidad. Finalmente preguntamos si el análisis ayuda a localizar expedientes que merecen revisión.",
+      "Resuelve los cinco diagnósticos de la derecha. Después cambia cada caso proponiendo una medición concreta: cantidad de bytes, registros por segundo, modalidades, proporción de duplicados o una decisión. Compara tu respuesta con otra persona; una situación puede tener más de una V, pero debes justificar la dominante."
     ]
   ],
   [
@@ -61,7 +77,13 @@
     "Local indica dónde se ejecuta; nube indica acceso a servicios administrados o recursos remotos. Distribución divide cómputo entre unidades coordinadas. Escalamiento vertical aumenta recursos de una máquina, horizontal agrega unidades. La nube no garantiza paralelismo ni menor costo.",
     "Modifica presupuesto y capacidad para una matriz float64. Si no cabe, ¿fragmentación, otra representación o distribución?",
     "El resultado es memoria mínima de la matriz, no RSS de Python.",
-    "memory"
+    "memory",
+    null,
+    [
+      "Una máquina local tiene recursos finitos: memoria RAM, almacenamiento, CPU y capacidad de red. La nube permite utilizar infraestructura remota o servicios gestionados por un proveedor, pero sigue teniendo límites, cuotas y costos. Escalar verticalmente consiste en aumentar recursos de una máquina, por ejemplo añadir RAM. Escalar horizontalmente significa añadir unidades de cómputo y repartir el trabajo. Esto introduce coordinación, comunicación, posibles fallos y redistribución de datos. Un servicio en la nube puede ejecutar todo en una única máquina, y un conjunto local de máquinas puede formar un sistema distribuido. Por tanto, nube y distribución no son sinónimos. Para escoger, primero calculamos el tamaño mínimo de los datos, luego observamos las operaciones y recursos disponibles y finalmente medimos. Una matriz de números float64 almacena ocho bytes por número; su tamaño mínimo es filas multiplicadas por columnas y por ocho. Python y pandas añaden estructuras internas y algunas operaciones producen copias.",
+      "Una matriz de un millón de filas y 128 columnas requiere 1.024.000.000 bytes de valores, aproximadamente 0,954 GiB. GiB usa potencias de 1024, mientras GB decimal usa mil millones de bytes. Si duplicamos filas, duplicamos ese mínimo. Una representación float32 reduce a cuatro bytes por número, pero puede cambiar precisión y debe validarse.",
+      "Prueba un millón y diez millones de filas, con 128 columnas. Compara presupuestos de 1, 4 y 16 GiB. Anota cuándo la matriz mínima supera el presupuesto y cuándo, aun cabiendo, sería prudente medir el máximo real. Decide si probar primero fragmentación o distribución para una suma."
+    ]
   ],
   [
     6,
@@ -70,7 +92,13 @@
     "Un CSV modela registros con columnas; JSON representa campos anidados y listas; XML usa etiquetas y jerarquías. El texto libre conserva significado pero requiere transformación para consultas. Un mismo proceso puede tener varios documentos, y una unión puede multiplicar filas.",
     "Cambia representación de dos registros reales y examina la identidad, tipos y longitud de serialización.",
     "Conserva el grano proceso al convertir. XML de ejemplo se escapa correctamente.",
-    "formats"
+    "formats",
+    null,
+    [
+      "Un dato estructurado sigue un esquema tabular con columnas y tipos conocidos. Un dato semiestructurado tiene organización explícita, pero admite jerarquías, listas o campos variables. JSON y XML son ejemplos de formatos que pueden representar estructuras anidadas. Los datos no estructurados, como una fotografía o una descripción libre, también tienen una representación digital, pero su contenido de interés no aparece necesariamente en columnas listas para consultar. CSV es un formato textual para valores separados por delimitadores: necesita reglas de comillas y escape para que una coma dentro de un nombre no cree una columna nueva. JSON distingue objetos, listas, números y cadenas; XML organiza elementos mediante etiquetas y atributos. El formato no garantiza calidad, ni determina por sí solo la base de datos que debemos utilizar. Podemos convertir un JSON sencillo en una tabla; si contiene una lista de documentos por proceso debemos decidir si conservar la lista o crear una tabla relacionada.",
+      "Ejemplo: un proceso P1 tiene dos actas y P2 tiene una. Una tabla de procesos tiene dos filas; una tabla de actas tiene tres. Si expandimos la lista de actas de JSON sin conservar el identificador P1, perdemos la relación. Si contamos las tres filas como procesos, cambiamos el grano. La serialización textual XML puede usar más bytes por sus etiquetas; eso no demuestra que su procesamiento sea necesariamente más lento.",
+      "Selecciona CSV, JSON, XML y texto en el convertidor. Identifica el campo ID en cada representación, las etiquetas, los separadores y las comillas. Compara los bytes UTF-8 mostrados. Explica qué campos se pierden en la representación de solo texto y cuál conservarías como dato de origen para nuestro ejercicio."
+    ]
   ],
   [
     6,
@@ -79,7 +107,13 @@
     "Tenemos una instantánea docente versionada de 200 procesos derivados de Datos/bandeja_revision_2026.json. Incluye ID, objeto, descripción, entidad y URL original. No es una muestra aleatoria; no contiene monto, fecha de adjudicación ni proveedor en este esquema.",
     "Filtra por texto o entidad, abre un expediente original y cambia de página.",
     "Distingue evidencia disponible de campos que tendrías que adquirir.",
-    "browse"
+    "browse",
+    null,
+    [
+      "Una instantánea es una copia de datos conservada para reproducir análisis sin depender de cambios posteriores del servicio original. El curso dispone de 200 procesos en un JSON docente derivado de la bandeja de revisión. Cada objeto contiene el identificador id_proceso, el nombre del proceso, su descripción, la entidad que publica, una URL de SECOP y metadatos de procedencia. La URL permite consultar la fuente, pero el contenido del portal podría haber cambiado desde que se construyó la copia. Un corpus es una colección de documentos utilizada para analizar o recuperar información. Este corpus se seleccionó con fines docentes, no como una muestra estadística aleatoria. Por eso una entidad muy frecuente podría deber su posición al criterio de selección. Podemos describir qué hay en el archivo, pero no afirmar que su distribución coincide con todo SECOP.",
+      "El identificador CO1.REQ.10017413 corresponde en la instantánea a un proceso de fortalecimiento de atención primaria en salud del Distrito de Barranquilla. El objeto y la descripción permiten localizar el tema. No contienen necesariamente el valor adjudicado, el contratista definitivo ni la ejecución presupuestal. Una consulta responsable debe separar lo observado de aquello que requiere verificación adicional.",
+      "Busca el identificador en el visor y abre su enlace de fuente. Después busca Barranquilla y compara el número de coincidencias con el universo de 200. Cambia de página. Registra el filtro, las coincidencias y un ID encontrado. Usa esos datos para explicar a otra persona qué parte de la consulta puede reproducir."
+    ]
   ],
   [
     7,
@@ -88,7 +122,13 @@
     "Antes de sumar, comprueba que cada ID sea único y que los campos necesarios existan. La ausencia no equivale a cero. Un duplicado exacto no es un nuevo proceso. La calidad se mide en relación con la tarea.",
     "Introduce duplicados y faltantes en COPIAS del corpus. Compara filas, identidades y registros incompletos.",
     "El RAW de origen no cambia. Un registro incompleto puede requerir cuarentena o enriquecimiento.",
-    "quality"
+    "quality",
+    null,
+    [
+      "La veracidad se traduce en controles. Un identificador único permite reconocer si dos filas representan la misma entidad del modelo; su repetición puede ser correcta en una tabla de eventos, pero en una tabla definida como un registro por proceso debemos investigarla. Un dato faltante indica que no conocemos un valor o que no se registró. No debe convertirse en cero o en una categoría real sin una regla explícita. La calidad depende de la finalidad: un proceso sin entidad puede servir para buscar por texto, pero no para un conteo fiable por entidad. El RAW debe mantenerse intacto para que podamos revisar las decisiones. Podemos construir una copia con errores controlados y comparar antes y después. En un sistema de producción, un registro inválido puede enviarse a cuarentena, acompañarlo de un motivo y recuperarlo después; borrarlo silenciosamente impide reconciliar cantidades.",
+      "Si tenemos 200 identificadores y duplicamos cinco filas, obtenemos 205 filas pero solo 200 identificadores únicos. Si tres registros originales pierden su entidad antes de ser copiados, algunas copias también pueden quedar sin entidad. Por eso el número de filas con campos ausentes no necesariamente coincide con la cantidad de identidades afectadas. Ambas métricas responden preguntas distintas.",
+      "Introduce cinco duplicados y tres entidades faltantes; observa los cuatro indicadores. Luego cambia a cero duplicados sin modificar los faltantes. Comprueba que los datos originales no cambiaron. Decide cuál usarías para controlar identidad y cuál para decidir si un registro puede entrar en el resumen por entidad."
+    ]
   ],
   [
     7,
@@ -97,7 +137,13 @@
     "Filtrar selecciona filas, proyectar selecciona campos y agrupar cambia el grano. Contar procesos por entidad responde cuántos registros de la muestra pertenecen a cada entidad; no cuánto gastó ni si existe irregularidad.",
     "Elige una entidad y calcula su número de procesos. Cambia el universo 40/80/120/200 y observa los conteos.",
     "Conserva denominador y muestra. No extrapoles concentración al universo SECOP.",
-    "groups"
+    "groups",
+    null,
+    [
+      "Una consulta tabular tiene operaciones con efectos diferentes. Filtrar es seleccionar filas que cumplen una condición; proyectar es elegir un subconjunto de columnas; agrupar reúne observaciones con una clave común; agregar calcula una medida para cada grupo. Si agrupamos por entidad y contamos, cada fila del resultado representa una entidad, no un proceso individual. El conteo de cada grupo depende del universo elegido y de cómo tratamos campos faltantes. Ordenar por conteo ayuda a identificar qué entidades aparecen más en la muestra; no introduce por sí mismo una interpretación de riesgo. Al combinar resultados de diferentes tamaños debemos usar el mismo filtro o declarar que los universos cambian. En particular, contar los primeros 40 procesos y los primeros 120 no es un experimento de representatividad, sino un análisis de sensibilidad a la cantidad seleccionada.",
+      "Supón que P1 y P2 pertenecen a A y P3 a B. Si agrupamos por entidad, A tiene dos y B tiene uno. El resultado tiene dos filas y la suma de los conteos es tres. Si filtramos A primero, el universo se reduce a dos. Contar filas del resultado agrupado devuelve dos entidades, no tres procesos.",
+      "Selecciona 40, 80, 120 y 200 en el explorador. Para cada selección registra el total y el número de entidades distintas. Identifica si la entidad más frecuente cambia de posición. En el cuaderno S01-A reproduce el conteo por entidad; verifica que la suma de todos los conteos coincide con la cantidad de procesos seleccionados."
+    ]
   ],
   [
     7,
@@ -107,7 +153,12 @@
     "Abre Colab, ejecuta la preparación y el bloque puente S01-A. Cambia el límite de muestra y compara grupos.",
     "El resultado depende del mismo corpus y selección ordenada.",
     "code",
-    "import pandas as pd\n# corpus es el JSON versionado cargado en el puente S01-A\ndf = pd.DataFrame(corpus[\"documentos\"])\nmuestra = df.iloc[:80].copy()\nassert muestra.id_proceso.is_unique\nprint(muestra.shape)\nprint(muestra.groupby(\"entidad\").size().sort_values(ascending=False).head())"
+    "import pandas as pd\n# corpus es el JSON versionado cargado en el puente S01-A\ndf = pd.DataFrame(corpus[\"documentos\"])\nmuestra = df.iloc[:80].copy()\nassert muestra.id_proceso.is_unique\nprint(muestra.shape)\nprint(muestra.groupby(\"entidad\").size().sort_values(ascending=False).head())",
+    [
+      "Pandas es una biblioteca de Python para manipular datos tabulares. Un DataFrame contiene columnas que pueden tener tipos diferentes y un índice de filas. DataFrame recibe una lista de objetos JSON y organiza sus claves en columnas. head muestra una pequeña parte, no valida por sí solo el contenido completo. shape devuelve una pareja con el número de filas y columnas. La propiedad is_unique comprueba si los valores de una serie son distintos. Una serie es una estructura unidimensional, como una columna. groupby separa filas según una clave y size cuenta registros de cada grupo. sort_values ordena los resultados. Estas operaciones permiten construir una consulta reproducible, porque otra persona puede ejecutar la misma selección sobre la misma instantánea. Pandas normalmente trabaja en memoria; más adelante estudiaremos cómo combinar fragmentos y distribuir tareas cuando el problema lo requiera.",
+      "El código de la derecha crea una tabla desde el corpus cargado, selecciona las primeras ochenta filas con iloc, y usa copy para trabajar con una copia. La aserción detiene el programa si existen identificadores repetidos. Después imprime las dimensiones y los grupos con mayor conteo. Si la aserción falla, no debemos ignorarla: hay que revisar el grano y los registros.",
+      "Abre Colab y ejecuta el bloque S01-A. Si no conoces una celda, sitúa el cursor en ella y usa el botón de ejecución; lee la salida debajo. Cambia N a 40 y después a 120, ejecuta de nuevo el bloque y compara con la pantalla anterior. Conserva un ID y el conteo de su entidad."
+    ]
   ],
   [
     8,
@@ -116,7 +167,13 @@
     "Tokenizar divide texto en unidades; contar palabras produce una representación simple. Frecuencia no implica relevancia, causalidad ni riesgo. Títulos y descripciones pueden repetir información, por eso aquí contamos solo descripción.",
     "Escribe un término, observa cuántos documentos lo contienen y examina las palabras frecuentes.",
     "Se distinguen ocurrencias totales de frecuencia documental; anticipa BM25 de S07.",
-    "words"
+    "words",
+    null,
+    [
+      "El texto libre no se convierte en conocimiento simplemente por almacenarlo. Para analizarlo podemos aplicar una representación elemental: separar palabras, normalizar mayúsculas y acentos cuando el objetivo lo permita, y contar unidades. Un token es una unidad resultante de esa separación. La frecuencia de ocurrencias indica cuántas veces aparece una unidad en todo el corpus. La frecuencia documental indica cuántos documentos contienen esa unidad al menos una vez. Si la palabra salud aparece tres veces en un documento y una vez en otro, tenemos cuatro ocurrencias pero solo dos documentos. Esta diferencia será fundamental para construir índices invertidos y calcular BM25 más adelante. Eliminar palabras frecuentes sin significado discriminante puede ser útil, pero debe justificarse: algunos términos tienen significado en una consulta específica. La tokenización aquí es sencilla y no comprende sinónimos ni relaciones semánticas.",
+      "En las descripciones de nuestro corpus, las palabras para y servicios aparecen con frecuencia. Eso no significa que sean las más útiles para distinguir objetos contractuales. Un término específico puede aparecer en pocos procesos y aun así ser relevante para una investigación. El explorador cuenta descripciones, no títulos, para no contar dos veces una misma frase por incluir ambos campos.",
+      "Escribe salud, contrato y una palabra que no aparezca. Predice cuál tendrá más documentos antes de ejecutar cada búsqueda. Compara ocurrencias frente a frecuencia documental. Si el resultado es cero, no concluyas automáticamente que no existe un proceso relacionado: puede utilizar otros términos. Esta limitación motiva las sesiones de recuperación de información."
+    ]
   ],
   [
     10,
@@ -131,6 +188,11 @@
       "Pausa",
       "Adquisición",
       "Entrega"
+    ],
+    [
+      "",
+      "",
+      ""
     ]
   ],
   [
@@ -141,7 +203,12 @@
     "Ejecuta las celdas de API SECOP del cuaderno. Cambia 500 a 50, observa esquema y respuesta. Este servicio devuelve registros contractuales: no unir por ID de proceso sin contrato de datos.",
     "Conserva fecha, parámetros y conteo real. Si falla la red, registra el bloqueo y usa la instantánea de procesos para el resto.",
     "code",
-    "import requests\nurl = \"https://www.datos.gov.co/resource/rpmr-utcd.json\"\nparams = {\"$limit\":50,\"$select\":\"nombre_de_la_entidad,departamento_entidad,valor_contrato\"}\nr = requests.get(url, params=params, timeout=30)\nr.raise_for_status()\nprint(r.status_code, len(r.json()))"
+    "import requests\nurl = \"https://www.datos.gov.co/resource/rpmr-utcd.json\"\nparams = {\"$limit\":50,\"$select\":\"nombre_de_la_entidad,departamento_entidad,valor_contrato\"}\nr = requests.get(url, params=params, timeout=30)\nr.raise_for_status()\nprint(r.status_code, len(r.json()))",
+    [
+      "Una API es una interfaz de programación que establece cómo pedir datos o servicios. HTTP es el protocolo utilizado para transmitir la solicitud y recibir una respuesta. Un cliente envía una URL, parámetros y, cuando se requiere, credenciales; el servidor devuelve un estado, encabezados y contenido. Un estado 200 indica que la solicitud se atendió correctamente; un 429 suele indicar un límite de solicitudes y un 4xx o 5xx requiere diagnóstico. El método GET pide información. La API Socrata admite parámetros de consulta como select, where, limit y order, escritos en la URL con el prefijo de dólar. Una consulta debe acotar las columnas y filas para no transferir información innecesaria. El cuaderno usa el recurso SECOP Integrado de Datos Abiertos Colombia para registros contractuales. Es una fuente diferente de nuestro corpus de procesos; el identificador, la cobertura y el grano deben validarse antes de cualquier unión.",
+      "Una consulta con límite 50 solicita hasta cincuenta registros. Si devuelve cincuenta y responde 200, solo sabemos que recibimos esa página; no sabemos cuántos registros hay en el universo ni si es una muestra representativa. Si recibimos menos, debemos considerar los filtros, el final de la fuente o posibles cambios. La función raise_for_status evita continuar como si una respuesta de error fuera una lista válida.",
+      "Ejecuta el ejemplo del cuaderno con 50 y 500 como límites, de manera secuencial, sin repetir llamadas innecesarias. Observa el estado, la forma de la tabla y los campos. Si no funciona la conexión, registra el error sin inventar filas y continúa con la instantánea. No compares tiempos de una API cambiante como un benchmark controlado."
+    ]
   ],
   [
     8,
@@ -150,7 +217,13 @@
     "Una página es un subconjunto ordenado. OFFSET desplaza el inicio; un último bloque puede ser menor que el límite. Un orden estable reduce inconsistencias, pero no congela una API que cambia mientras se consulta.",
     "Cambia el límite y el offset en la instantánea real. Verifica primera y última identidad de la página.",
     "Compara cobertura de la secuencia completa: todas las identidades exactamente una vez. Aquí no se está llamando a una API.",
-    "pages"
+    "pages",
+    null,
+    [
+      "La paginación permite recuperar un conjunto grande a través de solicitudes pequeñas. LIMIT indica el máximo de filas de una página y OFFSET cuántas filas omitir antes de comenzar. Para un conjunto estático de 200 registros con límite 30, las páginas comienzan en 0, 30, 60, 90, 120, 150 y 180. La última contiene veinte filas. El orden debe ser estable y, cuando sea posible, utilizar una clave única; si dos filas empatan, un segundo criterio de ordenación evita ambigüedad. En una API viva, insertar o eliminar registros antes de nuestro offset puede desplazar páginas y provocar duplicados u omisiones. Un orden estable ayuda, pero no congela los datos. En una adquisición más exigente necesitamos una ventana temporal fija, una instantánea del proveedor o una estrategia de paginación por clave, según las garantías de la fuente.",
+      "Si descargamos con límite 50 y offsets 0, 50, 100 y 150, el corpus estático debe devolver cuatro páginas. Si por error usamos offsets 0, 40, 80 y 120, algunas páginas se solapan y faltan filas del final. Contar cuatro páginas de cincuenta no detectaría el problema; comparar IDs únicos sí lo revela. Por eso debemos comprobar cobertura e identidad, no solo suma de tamaños.",
+      "En el simulador fija límite 30 y observa la primera página. Salta al offset 180 para verificar el último bloque. Después prueba límite 50 y calcula el número de páginas antes de mirar el indicador. Explica por qué un offset 200 devuelve cero filas y por qué este ejercicio no garantiza cobertura de una API en vivo."
+    ]
   ],
   [
     8,
@@ -159,7 +232,13 @@
     "Si el archivo no cabe en memoria, podemos procesar lotes y conservar parciales. Para conteos basta sumar; para medias se combinan suma y cantidad. El promedio de promedios solo coincide si los tamaños son iguales, salvo coincidencias especiales.",
     "Cambia el tamaño del bloque. Calcula conteos de entidad por fragmento y compara contra una pasada completa.",
     "El motor local ejecuta ambas rutas y comprueba igualdad; no mide RAM de pandas.",
-    "chunks"
+    "chunks",
+    null,
+    [
+      "Procesar por fragmentos consiste en leer una cantidad limitada de filas, realizar una operación y descartar o persistir el resultado parcial antes de continuar. Esto permite reducir la cantidad de datos de entrada mantenidos simultáneamente en memoria. No todas las operaciones admiten la misma estrategia. Un conteo, una suma, un mínimo o un máximo pueden combinarse de forma sencilla; una mediana exacta global no se obtiene promediando medianas de bloques. Para agrupar por entidad, cada fragmento produce un mapa de entidad a cantidad. La reducción suma los parciales de cada clave. Al final, comparamos ese mapa con un conteo directo calculado sobre las mismas filas. Esta separación entre procesamiento parcial y combinación anticipa MapReduce, que veremos más adelante. Procesar secuencialmente bloques en una sola máquina no constituye ejecución distribuida; los datos se dividen lógicamente, pero el programa puede ejecutarlos uno tras otro.",
+      "Con dos bloques, el primero contiene A, A y B; el segundo contiene A y C. Los parciales son A:2, B:1 y A:1, C:1. La reducción obtiene A:3, B:1 y C:1, igual que una agrupación directa. Si un bloque contiene un ID que ya apareció en otro bloque, sumar conteos de filas todavía funciona, pero no equivale a contar identificadores únicos; se requiere otro estado.",
+      "Prueba bloques de 25, 40 y 100 filas. Revisa el número de bloques, la suma de sus tamaños y la igualdad de los conteos. Usa S01-A del cuaderno para repetir con un tamaño de bloque que no divida exactamente N. Explica por qué la última parte es menor y por qué el resultado final se conserva."
+    ]
   ],
   [
     10,
@@ -168,7 +247,13 @@
     "Lote A: 2 observaciones de valor 10. Lote B: 8 observaciones de valor 100. Media simple de medias: 55. Media ponderada: (20+800)/10=82. El denominador importa al combinar resultados.",
     "Cambia tamaños de los lotes y compara las dos medias. Predice cuándo serán iguales.",
     "No confundir una media por grupo con una media de todas las filas.",
-    "mean"
+    "mean",
+    null,
+    [
+      "Una media aritmética se define como la suma de los valores dividida entre la cantidad de observaciones válidas. Si procesamos bloques de tamaños diferentes, calcular la media de cada bloque y después promediar esas medias asigna el mismo peso a todos los bloques, independientemente de cuántas observaciones contengan. Para conservar la media global necesitamos mantener dos estados parciales: la suma de valores y el número de observaciones válidas. Al terminar sumamos todas las sumas, sumamos todos los conteos y dividimos. Si existen faltantes, debemos excluirlos del numerador y denominador según una regla consistente. El número de filas del fragmento no siempre es el número de observaciones válidas. Este ejemplo muestra que el diseño del estado parcial es una decisión matemática, no una característica automática de la herramienta de almacenamiento.",
+      "El lote A contiene dos valores de diez; su suma es veinte y su media diez. El lote B contiene ocho valores de cien; su suma es ochocientos y su media cien. Promediar las dos medias produce 55. La suma total es 820 y el conteo total es diez, así que la media correcta es 82. Con dos lotes de igual tamaño, la media simple de medias coincide con la media global, siempre que ambos tengan el mismo número de valores válidos.",
+      "Mueve la cantidad del lote A a ocho, dejando B en ocho; predice la media antes de mirar. Luego prueba A=20 y B=1. En cada caso calcula a mano la suma y el conteo. Indica qué dos variables llevarías de un bloque a otro en pandas para evitar el error."
+    ]
   ],
   [
     9,
@@ -178,7 +263,12 @@
     "Ejecuta S01-B con 10.000 y 100.000 filas; cambia chunksize a 500 y 5.000. Conserva suma, conteo, bytes y tiempos.",
     "No comparar tiempos de redes distintas como si fueran un benchmark controlado. memory_usage no es pico RSS.",
     "code",
-    "for fragmento in pd.read_csv(ruta_csv, chunksize=1000):\n    n += len(fragmento)\n    s += int(fragmento[\"valor\"].sum())\nassert (n, s) == referencia\n# el bloque S01-B incluye generación y medición completas"
+    "for fragmento in pd.read_csv(ruta_csv, chunksize=1000):\n    n += len(fragmento)\n    s += int(fragmento[\"valor\"].sum())\nassert (n, s) == referencia\n# el bloque S01-B incluye generación y medición completas",
+    [
+      "El experimento de capacidad utiliza dos rutas que resuelven exactamente el mismo problema sobre un archivo sintético: leer todas las filas y sumar una columna, o leer por fragmentos y sumar los parciales. La fuente sintética usa una regla conocida para generar valores, lo que permite repetir pruebas sin descargar archivos grandes. Los tiempos se miden con un reloj monotónico de alta resolución. La medición empieza justo antes de leer el archivo y termina después de calcular conteo y suma. La generación del CSV queda fuera de ambas mediciones. memory_usage de pandas estima bytes correspondientes a la estructura del DataFrame y sus columnas; no mide el pico de RAM de todo Python, ni incluye necesariamente buffers temporales de lectura. Un bloque de mil filas puede tener una estructura mucho menor que una tabla de cien mil, aunque existan otros consumos en el proceso. Un bloque pequeño aumenta el número de iteraciones y puede empeorar el tiempo.",
+      "Para cien mil filas con dos columnas enteras de ocho bytes, el tamaño lógico de los valores es 1.600.000 bytes; el índice y la estructura contabilizada pueden añadir bytes. Un bloque de mil contiene unos 16.000 bytes de valores. La proporción ayuda a explicar por qué fragmentar es útil, pero el tiempo debe medirse en cada entorno. La suma esperada se calcula con la misma regla de generación y debe coincidir exactamente entre las dos rutas.",
+      "Ejecuta S01-B primero con 10.000 filas y luego con 100.000. Fija 100.000 y compara bloques de 500, 1.000 y 5.000. Registra el tamaño completo, el máximo por bloque y los segundos. No repitas la generación dentro de cada medición. Si los tiempos cambian, explica posibles costos de lectura y coordinación sin declarar que una única medición prueba una ventaja universal."
+    ]
   ],
   [
     8,
@@ -187,7 +277,13 @@
     "RAW conserva el dato original recibido. Un derivado registra qué transformación lo generó. El manifiesto guarda fuente, cantidad, esquema y huella. Una huella de consistencia detecta cambios pero no certifica autoría.",
     "Selecciona 40, 80 o 120 procesos y ejecuta el producto S01. Comprueba IDs y procedencia; descarga estado compatible con S02.",
     "La selección es un prefijo del corpus. La API contractual sigue siendo una fuente diferente.",
-    "export"
+    "export",
+    null,
+    [
+      "Un sistema reproducible conserva los datos de entrada y los parámetros necesarios para repetir el cálculo. RAW significa dato recibido en su forma original dentro del alcance de la adquisición. En nuestro ejemplo el RAW portable contiene una selección sin cambios de los objetos del corpus docente, con sus identificadores y metadatos; no es una copia completa de SECOP. Los derivados son resultados como conteos, tablas y catálogos. Un manifiesto describe fuente, esquema, número de registros, selección y transformaciones. Una huella de contenido o de estado permite detectar cambios de coherencia, pero debe distinguirse de una firma digital de identidad. El observatorio utiliza una huella de coherencia para enlazar etapas; el cuaderno exporta evidencia con SHA-256 para comprobar integridad de la serialización. Ninguna prueba de hash certifica por sí sola quién ejecutó un programa ni si los datos proceden efectivamente de un servicio remoto.",
+      "Seleccionar ochenta procesos de la instantánea produce una cobertura de 80/200, es decir, cuarenta por ciento del corpus docente. No significa cuarenta por ciento del universo SECOP. El estado exportado contiene los registros seleccionados y su huella; al importarlo, la aplicación recalcula la etapa y rechaza modificaciones que no coinciden con la fuente versionada.",
+      "Selecciona la misma cantidad N que utilizaste en Python. Ejecuta la adquisición, revisa el conteo y descarga el JSON de estado y la prueba de fragmentación. En el observatorio importa el estado; verifica que S01 aparece confirmada. Conserva aparte evidencia_s01.json del cuaderno. El JSON de prueba no reemplaza el estado ni el archivo de evidencia."
+    ]
   ],
   [
     8,
@@ -196,7 +292,13 @@
     "Vuelve al banco de datos y elige una escala diferente de la demostración. Predice número de páginas, ejecuta fragmentación, comprueba igualdad y genera estado. Tu trabajo debe contener resultados que puedas explicar.",
     "Entrega dos pruebas con escala o bloque distintos, un conteo equivalente y el estado S01. El cuaderno exporta también una evidencia SHA-256.",
     "No borres archivos anteriores; conserva los dos resultados para comparar. No hay nueva calificación oficial.",
-    "challenge"
+    "challenge",
+    null,
+    [
+      "Aprender una herramienta significa poder transferir lo aprendido a una situación que no es exactamente el ejemplo mostrado. En este reto debes cambiar una decisión y observar sus efectos, conservando las demás condiciones necesarias. Si cambias simultáneamente la cantidad de procesos, el tamaño de bloque y el filtro, será difícil atribuir las diferencias a una causa. Primero mantén la selección de ochenta y modifica el tamaño de bloque. La agrupación final debe permanecer idéntica; cambia el número de iteraciones. Después mantén el tamaño de bloque y selecciona cuarenta o ciento veinte procesos. Ahora cambian el universo y potencialmente los conteos por entidad. Estas dos comparaciones enseñan a separar una decisión de ejecución de una decisión sobre los datos. Documentar un resultado inesperado es mejor que ocultarlo: registra el parámetro, la salida y el control que falló.",
+      "Una entrega reproducible podría incluir una primera prueba con 80 procesos y bloques de 20, y otra con los mismos 80 y bloques de 10. La cantidad de bloques pasa de cuatro a ocho, pero el mapa de conteos permanece igual. Una tercera prueba con 120 cambia el universo, por lo que no debes exigir que los conteos por entidad coincidan con la primera. Debes exigir que el conteo directo y fragmentado coincidan dentro de cada universo.",
+      "Construye dos pruebas propias y descárgalas con nombres distintos. Ejecuta el puente Python con la misma selección. Comprueba el total, el número de IDs únicos y el resultado de paridad. Si hay un error, corrige el parámetro o la operación y vuelve a ejecutar. Guarda el estado que entregarás a S02."
+    ]
   ],
   [
     8,
@@ -227,6 +329,11 @@
         "Un RAW versionado facilita reproducibilidad",
         "Sí"
       ]
+    ],
+    [
+      "La interpretación es parte del procesamiento. Un resultado debe indicar qué se midió, sobre qué universo, con qué método y qué decisión permite tomar. La diferencia entre un dato observado y una conclusión causal es especialmente importante en contratación pública. Que una entidad aparezca más veces en nuestra muestra no demuestra que contrate más dinero, que sea más eficiente ni que exista una irregularidad. Tampoco se debe interpretar un resultado de una fuente sintética como una medición del mundo real. En la práctica de Big Data conviven controles de corrección, estimaciones de capacidad y mediciones de desempeño; cada uno tiene un alcance diferente. Un control de igualdad prueba la operación sobre los casos ensayados. Una estimación anticipa recursos bajo supuestos. Una medición describe una ejecución en un entorno y condiciones concretos.",
+      "Si el conteo por bloques de 80 procesos coincide con el conteo directo, podemos afirmar que esta implementación preservó ese agregado para esa selección. No podemos concluir que cualquier operación sea fragmentable de igual manera. Si el mayor DataFrame de bloque ocupa menos memoria lógica que el DataFrame completo, podemos describir esa diferencia; no afirmamos haber medido el pico total de RAM.",
+      "Resuelve los cinco controles de la derecha. Luego elige uno de tus resultados y explica cómo se lee, qué nos dice, qué no permite concluir y qué error común podría llevar a una interpretación incorrecta. Si una consulta remota falló, declara el bloqueo. Una respuesta correcta en el cuestionario no sustituye la evidencia de ejecución."
     ]
   ],
   [
@@ -242,6 +349,11 @@
       "Importar estado",
       "S02 arquitectura",
       "S03 documentos"
+    ],
+    [
+      "La sesión termina cuando el siguiente componente puede recuperar el resultado sin depender de instrucciones informales. El contrato de entrada de S02 incluye identificador, fuente, grano y selección de procesos. A partir de esos datos definiremos requisitos de almacenamiento, procesamiento y consulta. Por ejemplo, si Laura necesita actualizar expedientes una vez al día, puede considerar una adquisición por lotes; si requiere alertas con demoras muy pequeñas, deberá analizar una arquitectura diferente. Aún no seleccionamos MongoDB, Cassandra ni Spark automáticamente. Primero preguntaremos cómo se utilizará el dato y qué restricciones debe cumplir el sistema. El producto acumulativo conserva cada etapa y permite recalcularla; si la selección de S01 cambia, el diseño posterior debe revisarse porque cambia su entrada. La evidencia de Python acompaña el resultado portable, pero no sustituye una integración automática ni una prueba de servicios externos.",
+      "Una persona abre el estado S01 y observa ochenta registros, todos con ID único. Puede recalcular los conteos desde la instantánea. Si modifica una entidad dentro del JSON sin pasar por una transformación válida, la comprobación detecta que el estado ya no coincide. Esta trazabilidad constituye una base para la arquitectura, no una garantía de que las decisiones de negocio posteriores sean correctas.",
+      "Importa tu estado en Compras Claras y verifica la etapa S01. Abre S02 y revisa qué entrada recibirá. Conserva las dos pruebas de fragmentación y la evidencia Python. Antes de avanzar, asegúrate de poder explicar por qué la lectura por bloques conserva un conteo, cuándo la nube sería útil y por qué no puedes calcular gasto contractual desde el corpus actual."
     ]
   ]
 ]
