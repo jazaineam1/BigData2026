@@ -30,3 +30,6 @@ Consultar [inventario-retirados.json](inventario-retirados.json). Los archivos r
 
 ## Límites de esta revisión
 Se revisó el árbol completo y se buscaron referencias por nombre/ruta en los materiales actuales y el índice de código; no se ejecutaron todas las plataformas externas. Conservar recursos históricos explícitamente referenciados por páginas publicadas, validadores o evaluaciones hasta disponer de una migración validada.
+
+## Comprobaciones posteriores
+17 páginas y 113 referencias locales literales: sin referencias rotas detectadas. 191 archivos de datos con SHA idéntico al árbol anterior; se quitó únicamente un marcador de un byte. Validación ligera adicional: `python utils/validate_course_inventory.py`. [Segunda auditoría pedagógica](auditoria-pedagogica-poslimpieza.md) y [mapa canónico](mapa-sesiones.md). La publicación GitHub Pages está restringida explícitamente a main, incluso si se usa workflow_dispatch.

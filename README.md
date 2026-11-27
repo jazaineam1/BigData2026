@@ -22,6 +22,7 @@ Cuatro cosas conviven en este repositorio:
 ## Entrada para estudiantes y mantenimiento
 
 - [Ruta de aprendizaje](Presentaciones/ruta-aprendizaje.html) y cuaderno principal de cada sesión: dos recursos de estudio; las guías especializadas quedan accesibles desde ellos.
+- [Mapa de las 17 sesiones](docs/mapa-sesiones.md) y [segunda auditoría pedagógica](docs/auditoria-pedagogica-poslimpieza.md).
 - [Inventario y limpieza](docs/limpieza-repositorio.md): recursos vigentes, retirados y criterios de conservación.
 - [Inventario legible por máquina](docs/inventario-retirados.json): archivos retirados con su ruta y commit histórico; no se reescribió el historial.
 - `s11-estudiantes` y `s13-laboratorio` son entornos específicos y se conservan. MatchLab es un proyecto independiente y no se modifica.
