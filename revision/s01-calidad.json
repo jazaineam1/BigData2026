@@ -1,7 +1,7 @@
 {
   "session": "S01",
   "state": "NO_APROBADA",
-  "score": 4.29,
+  "score": 4.34,
   "threshold": 4.5,
   "essential_min": 4,
   "mandatory": {
@@ -14,61 +14,61 @@
     "lexical_word_threshold_met": true
   },
   "word_count": {
-    "reading_gross": 8603,
+    "reading_gross": 8606,
     "chapters_gross": 17510,
-    "notebook_markdown_gross": 14795,
+    "notebook_markdown_gross": 14957,
     "formative_gross": 2367,
-    "total_gross": 43275,
+    "total_gross": 43440,
     "required_eligible": 40000,
-    "lexical_exact_dedup": 42978,
+    "lexical_exact_dedup": 43137,
     "near_matches": 0,
     "eligible_verified": null,
     "editorial_review_pending": true,
-    "teacher_notes_words": 3218,
-    "teacher_spoken_words": 2615
+    "teacher_notes_words": 3702,
+    "teacher_spoken_words": 3101
   },
   "rubric": [
     {
       "dimension": "Profundidad conceptual",
       "weight": 20,
       "score": 4.5,
-      "evidence": "25 ilustraciones específicas y portada por competencias, 42.978 palabras depuradas, experimentos de tipos y complejidad; falta revisión editorial semántica completa."
+      "evidence": "Seis herramientas reestructuradas, explicaciones de tipo, escala, API y pandas; contenido semántico aún pendiente de auditoría completa."
     },
     {
       "dimension": "Actividad y autonomía",
       "weight": 20,
-      "score": 4.4,
-      "evidence": "Dos componentes construidos por estudiante, validadores con 6 casos positivos y 9 negativos de referencia, guion por pantalla y 25 min protegidos; autonomía humana no observada."
+      "score": 4.6,
+      "evidence": "21 herramientas con diagnóstico situado, seis con predicción previa, fallos reversibles, recomendaciones y 25 min de autonomía; observación humana pendiente."
     },
     {
       "dimension": "Práctica auténtica y reproducibilidad",
       "weight": 20,
       "score": 4,
-      "evidence": "9 ejecuciones locales de función de benchmark transcrita hasta un millón; tipos y complejidad comprobados con referencias; no ejecución exacta del ipynb completo."
+      "evidence": "Pruebas JavaScript sobre HTML exacto y referencias Python previas; nuevos diagnósticos Python no ejecutados en el notebook exacto."
     },
     {
       "dimension": "Alineación y transferencia",
       "weight": 15,
       "score": 4.5,
-      "evidence": "Contraste de plan JSON implementado en A8.3 con identidades y conteos; celdas exactas señaladas; prueba integral del puente y ZIP pendientes."
+      "evidence": "Se corrigen referencias de dos/cuatro casos y se sincronizan diagnóstico de tabla, API y reducción con notebook; puente y ZIP exactos pendientes."
     },
     {
       "dimension": "Interpretación de resultados",
       "weight": 10,
-      "score": 4.6,
-      "evidence": "Evidencia de hipótesis, mediciones, errores, interpretación y defensa; diagramas con distinción estimación/medición y límites explícitos."
+      "score": 4.7,
+      "evidence": "Distingue hipótesis incorrecta de fallo de ejecución, da causa, corrección y siguiente ensayo; 17 escenarios dirigidos."
     },
     {
       "dimension": "Diseño visual y accesibilidad",
       "weight": 10,
-      "score": 4.1,
-      "evidence": "Portada reproducida en Chromium a 1366×768, 1920×1080 y 360×800, corrección de barras, 26 ilustraciones SVG de pantalla y 1 portada; falta render completo real y accesibilidad profunda."
+      "score": 4,
+      "evidence": "Se incorporan paneles de feedback accesibles por texto y aria-live; sin render completo real, puede aumentar desplazamiento vertical. No se añadieron fotos externas."
     },
     {
       "dimension": "Viabilidad temporal",
       "weight": 5,
-      "score": 3.2,
-      "evidence": "150 min planificados, libreto por pantalla con 3218 palabras de apoyo (incluye acciones), pausa y autonomía; ensayo humano pendiente."
+      "score": 3.5,
+      "evidence": "150 min planificados, más tiempo para pandas/API/reducción, 3101 palabras orales y 25 min autónomos. Falta ensayo humano."
     }
   ],
   "next_session": "S02",
@@ -202,23 +202,65 @@
       "notebook_execution": false,
       "real_full_browser": false,
       "student_observation": false
+    },
+    "twelfth_iteration": {
+      "screens": 26,
+      "diagnosed": 21,
+      "variations": 150,
+      "diagnostics": 171,
+      "counts": {
+        "didactic-result warn": 45,
+        "didactic-result good": 60,
+        "didactic-result info": 28,
+        "didactic-result bad": 38
+      },
+      "predictions": 130,
+      "hiddenChecks": 58,
+      "bypass": 6,
+      "quiz": 75,
+      "conceptQuiz": 35,
+      "conservation": 72,
+      "directedScenarios": 17,
+      "errors": [],
+      "htmlExact": true,
+      "minutes": 150,
+      "spoken": 3101,
+      "notes": 3702,
+      "cells": 64,
+      "core": 17,
+      "countsWords": {
+        "reading": 8606,
+        "chapters": 17510,
+        "formative": 2367,
+        "notebook": 14957
+      },
+      "gross": 43440,
+      "lexical": 43137,
+      "pairs": 72390,
+      "near": 0,
+      "mode": "HTML exacto en DOM simulado, no navegador real; pruebas nuevas de Python sin ejecución integral",
+      "notebook_execution": false,
+      "real_browser": false,
+      "student_observation": false
     }
   },
   "pedagogical_design": {
     "live_checks": 7,
-    "core_code_cells": 16,
+    "core_code_cells": 17,
     "optional_code_cells": 16,
     "planned_autonomy_minutes": 25,
-    "planned_closure_minutes": 7,
-    "score_unrounded": 4.285,
+    "planned_closure_minutes": 10,
+    "score_unrounded": 4.34,
     "actual_student_results": false,
     "report": "docs/evaluacion-pedagogica-s01.md",
     "core_contiguous": true,
     "full_run_order": "núcleo, luego apéndice",
     "http_not_required_for_core": true,
-    "teacher_notes_words": 3218,
-    "teacher_spoken_words": 2615,
+    "teacher_notes_words": 3702,
+    "teacher_spoken_words": 3101,
     "illustrated_teaching_slides": 25,
-    "cover": true
+    "cover": true,
+    "diagnostic_tools": 21,
+    "prediction_tools": 6
   }
 }
