@@ -959,7 +959,7 @@
     ],
     {
       "phase": "Práctica con ayuda decreciente",
-      "facilitation": "Docente: muestra 200 filas con salto 40 y deja que el estudiante calcule únicos/ausentes. Estudiante: corrige el salto y explica.",
+      "facilitation": "Primero elige el salto y registra si esperas cobertura exacta; comprueba el diagnóstico, corrige a 50 y explica por qué deduplicar no recupera ausentes.",
       "scope": "Comprobación en aula. A5: ejecutar celda principal; matriz de 24 casos en ampliación.",
       "liveCheck": true,
       "visual": [
@@ -1093,7 +1093,7 @@
     ],
     {
       "phase": "Demostración técnica",
-      "facilitation": "Docente: ejecuta normal y transitorio del cliente HTTP y muestra trazas. Estudiante: predice el efecto de bajar intentos a dos.",
+      "facilitation": "Predice si completa la adquisición; usa transitorio con dos y tres intentos y un HTTP 200 inválido. Distingue reintentar y detener.",
       "scope": "Demostración opcional del docente después de dominar offsets; conservar el simulador para clase si el entorno impide loopback. No exige ejecutar la matriz completa.",
       "liveCheck": false,
       "visual": [
@@ -1221,7 +1221,7 @@
     ],
     {
       "phase": "Ejemplo resuelto",
-      "facilitation": "Docente: plantea dos valores diez y ocho valores cien. Estudiante: calcula media global y compara.",
+      "facilitation": "Predice si la media de medias coincide antes de revelar el resultado; iguala los tamaños y vuelve a desequilibrarlos.",
       "scope": "Comprobación rápida con el control de medias; la fórmula se conserva a la vista.",
       "liveCheck": true,
       "visual": [
