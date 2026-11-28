@@ -1,6 +1,6 @@
 [
   [
-    8,
+    7,
     "01 · La misión",
     "Laura tiene que revisar contratación pública sin leer cada expediente",
     "El producto de hoy no es un tablero vacío: será una adquisición reproducible. Recibimos una fuente, comprobamos identidad, exploramos contenido, dividimos lotes y entregamos RAW. En la siguiente sesión diseñaremos la arquitectura que lo recibe.",
@@ -70,11 +70,11 @@
     }
   ],
   [
-    5,
+    6,
     "02 · Escala y decisión",
     "Big Data no es un número mágico",
     "El problema comienza cuando volumen, tasa de llegada, estructuras o necesidades de respuesta exceden el método disponible. Una tabla pequeña puede exigir respuesta rápida; una grande puede procesarse por lotes. Escalar tiene costos de memoria, almacenamiento, red y coordinación.",
-    "Compara 3.000 llegadas/s con capacidad de 1.000/s. Predice la cola antes de mover controles.",
+    "Compara tasas constantes, picos y caídas; interpreta el saldo y la evolución de la cola.",
     "Distingue capacidad y demanda; el tamaño de archivo por sí solo no decide tecnología.",
     "queue",
     null,
@@ -127,14 +127,14 @@
       ],
       "script": {
         "title": "Explica la restricción",
-        "say": "Big Data no comienza con un número de filas. Comienza cuando la operación, el ritmo o el volumen desbordan un recurso o un plazo. Si llegan tres mil registros por segundo y solo atendemos mil, se acumulan dos mil por segundo. En un minuto habrá ciento veinte mil pendientes. Cambiemos ahora únicamente la capacidad y anticipemos el resultado antes de mover el control. La capacidad sobrante no genera una cola negativa. En un sistema de producción se observa tanto el rendimiento por segundo como la latencia individual. Una cola grande puede indicar que el servicio es insuficiente. Si las tasas fluctúan, debemos actualizar el saldo por intervalo y conservar la cola anterior; un promedio puede ocultar picos.",
+        "say": "Big Data no comienza con un número de filas. Comienza cuando la operación, el ritmo o el volumen desbordan un recurso o un plazo. Si llegan tres mil registros por segundo y solo atendemos mil, se acumulan dos mil por segundo. En un minuto habrá ciento veinte mil pendientes. Cambiemos ahora únicamente la capacidad y anticipemos el resultado antes de mover el control. La capacidad sobrante no genera una cola negativa. En un sistema de producción se observa tanto el rendimiento por segundo como la latencia individual. Una cola grande puede indicar que el servicio es insuficiente. Si las tasas fluctúan, debemos actualizar el saldo por intervalo y conservar la cola anterior; un promedio puede ocultar picos. Si el servicio se interrumpe en el tercio central, los registros siguen llegando y la cola crece. Cuando vuelve, no desaparece mágicamente: debe existir capacidad sobrante. Comparen el pico con el saldo final, porque una cola que termina vacía pudo haber causado retrasos. Expliquen el modelo y qué medirían en producción.",
         "do": "Verifica llegada, servicio y saldo. Pide identificar si comprar más disco resuelve una cola de CPU. Aclara que el modelo supone tasas constantes y cola inicial vacía."
       },
       "cell": "Presentación; profundización en el bloque indicado"
     }
   ],
   [
-    4,
+    3,
     "03 · Diagnóstico",
     "Las cinco V se pueden medir",
     "Volumen: bytes y filas. Velocidad: registros por segundo y latencia. Variedad: tipos y estructuras. Veracidad: duplicados, faltantes y procedencia. Valor: utilidad para una decisión. Las cinco V interactúan: más datos duplicados pueden añadir volumen sin valor.",
@@ -225,7 +225,7 @@
     "04 · Infraestructura",
     "Local, nube y distribución son decisiones diferentes",
     "Local indica dónde se ejecuta; nube indica acceso a servicios administrados o recursos remotos. Distribución divide cómputo entre unidades coordinadas. Escalamiento vertical aumenta recursos de una máquina, horizontal agrega unidades. La nube no garantiza paralelismo ni menor costo.",
-    "Modifica presupuesto y capacidad para una matriz float64. Si no cabe, ¿fragmentación, otra representación o distribución?",
+    "Compara presupuesto, tipo y tamaño de bloque; explica cuándo el modelo no permite lectura completa.",
     "El resultado es memoria mínima de la matriz, no RSS de Python.",
     "memory",
     null,
@@ -279,7 +279,7 @@
       ],
       "script": {
         "title": "Recorre la máquina",
-        "say": "El almacenamiento retiene datos; la RAM contiene el estado activo; la CPU ejecuta operaciones; la red mueve datos. Una matriz de un millón por ciento veintiocho valores de ocho bytes necesita 1.024 millones de bytes solo para valores. Si el presupuesto es menor, podemos cambiar representación, fragmentar o distribuir según el algoritmo. Un recurso no reemplaza automáticamente a otro. En procesamiento distribuido aparecen además costos de coordinación, serialización y movimiento de datos. Eliminar un cuello de botella puede revelar otro. No vamos a desplegar un clúster hoy: primero necesitamos justificar la restricción con medidas y comprender qué operaciones pueden dividirse y combinarse.",
+        "say": "El almacenamiento retiene datos; la RAM contiene el estado activo; la CPU ejecuta operaciones; la red mueve datos. Una matriz de un millón por ciento veintiocho valores de ocho bytes necesita 1.024 millones de bytes solo para valores. Si el presupuesto es menor, podemos cambiar representación, fragmentar o distribuir según el algoritmo. Un recurso no reemplaza automáticamente a otro. En procesamiento distribuido aparecen además costos de coordinación, serialización y movimiento de datos. Eliminar un cuello de botella puede revelar otro. No vamos a desplegar un clúster hoy: primero necesitamos justificar la restricción con medidas y comprender qué operaciones pueden dividirse y combinarse. Ahora modifiquen los bytes por valor. No es una reducción gratuita: un entero más pequeño tiene menor rango y un flotante puede perder precisión. Si el bloque entra en presupuesto todavía falta considerar el estado acumulado y la memoria del intérprete. La recomendación es una hipótesis de diseño que requiere medición.",
         "do": "Modifica una sola variable del simulador. Pide explicar por qué quepa el mínimo no garantiza que quepa el proceso completo; menciona buffers e índices."
       },
       "cell": "Presentación; profundización en el bloque indicado"
@@ -351,7 +351,7 @@
     }
   ],
   [
-    4,
+    3,
     "05B · Identidad y grano",
     "Una relación uno a muchos cambia la cantidad de filas",
     "El identificador de proceso agrupa contratos. Cada fila contractual es una observación diferente. Contar filas tras una unión no cuenta procesos.",
@@ -550,11 +550,11 @@
     }
   ],
   [
-    2,
+    4,
     "08 · Primera transformación",
     "Filtrar no es agrupar",
     "Filtrar selecciona filas, proyectar selecciona campos y agrupar cambia el grano. Contar procesos por entidad responde cuántos registros de la muestra pertenecen a cada entidad; no cuánto gastó ni si existe irregularidad.",
-    "Elige una entidad y calcula su número de procesos. Cambia el universo 40/80/120/200 y observa los conteos.",
+    "Alterna filtro, proyección y agrupación; identifica qué cambia y conserva el denominador.",
     "Conserva denominador y muestra. No extrapoles concentración al universo SECOP.",
     "groups",
     null,
@@ -610,20 +610,20 @@
       ],
       "script": {
         "title": "Transforma",
-        "say": "Filtrar selecciona observaciones; proyectar selecciona columnas; agrupar cambia el grano de la salida. Si pasamos de ochenta a ciento veinte procesos, puede cambiar el número de entidades. La suma de conteos debe coincidir con las filas seleccionadas. No confundamos un ranking de frecuencia con una medida de gasto. El agrupamiento cambia la unidad de observación: ahora cada fila representa una entidad, no un proceso. El denominador sigue siendo el número de procesos seleccionados. Para defender el resultado, debemos declarar ambas unidades y mostrar la igualdad entre la suma de los grupos y el total.",
+        "say": "Filtrar selecciona observaciones; proyectar selecciona columnas; agrupar cambia el grano de la salida. Si pasamos de ochenta a ciento veinte procesos, puede cambiar el número de entidades. La suma de conteos debe coincidir con las filas seleccionadas. No confundamos un ranking de frecuencia con una medida de gasto. El agrupamiento cambia la unidad de observación: ahora cada fila representa una entidad, no un proceso. El denominador sigue siendo el número de procesos seleccionados. Para defender el resultado, debemos declarar ambas unidades y mostrar la igualdad entre la suma de los grupos y el total. Elijan una entidad y filtren antes de agrupar. Observen que el denominador ya no son los doscientos procesos, sino los seleccionados. Proyectar solo cambia las columnas; agrupar cambia el grano. Una selección vacía puede ser correcta, y no debemos convertirla en un registro inventado. Escriban una afirmación que incluya el filtro.",
         "do": "Selecciona dos prefijos y comprueba denominador. Solicita una predicción antes de cambiar N."
       },
       "cell": "s01-quality"
     }
   ],
   [
-    4,
+    7,
     "09 · Pandas",
     "De la tabla a una pregunta reproducible",
     "El DataFrame organiza filas y columnas. head permite inspección; shape describe dimensiones; nunique controla identidad; groupby().size() agrega sin inventar montos. Usa el cuaderno para ejecutar el mismo ejercicio en Python.",
-    "Ejecuta A3 ya preparado. Cambia N a 40, 80 y 120; explica groupby y el denominador.",
+    "Recorre las cinco instrucciones, predice el resultado y activa ambos fallos; ejecuta s01-quality en Python para contrastar.",
     "El resultado depende del mismo corpus y selección ordenada.",
-    "code",
+    "pandas",
     "N = 80  # cambia a 40 o 120\nmuestra = df.iloc[:N].copy()\nassert muestra.id_proceso.is_unique\nprint(muestra.shape)\nprint(muestra.groupby(\"entidad\", dropna=False).size())",
     [
       "Pandas es una biblioteca de Python para manipular datos tabulares. Un DataFrame contiene columnas que pueden tener tipos diferentes y un índice de filas. DataFrame recibe una lista de objetos JSON y organiza sus claves en columnas. head muestra una pequeña parte, no valida por sí solo el contenido completo. shape devuelve una pareja con el número de filas y columnas. La propiedad is_unique comprueba si los valores de una serie son distintos. Una serie es una estructura unidimensional, como una columna. groupby separa filas según una clave y size cuenta registros de cada grupo. sort_values ordena los resultados. Estas operaciones permiten construir una consulta reproducible, porque otra persona puede ejecutar la misma selección sobre la misma instantánea. Pandas normalmente trabaja en memoria; más adelante estudiaremos cómo combinar fragmentos y distribuir tareas cuando el problema lo requiera.",
@@ -662,7 +662,7 @@
     ],
     {
       "phase": "Práctica guiada",
-      "facilitation": "Docente: ejecuta A0/A3 y enseña la expresión groupby. Estudiante: cambia N en la celda s01-quality (40, 80 o 120) y comprueba denominador.",
+      "facilitation": "Recorre las cinco instrucciones y dos fallos en la herramienta. Ejecuta s01-quality y contrasta controles.",
       "scope": "Ejecutar preparación y fuente del itinerario núcleo; si no carga Colab, usar demostración del navegador y registrar pendiente.",
       "liveCheck": false,
       "visual": [
@@ -675,7 +675,7 @@
       ],
       "script": {
         "title": "Lee pandas",
-        "say": "Un DataFrame es una tabla con índice y columnas. iloc toma posiciones, copy permite trabajar con una copia, is_unique comprueba identidad y groupby crea grupos. size cuenta filas de cada grupo. La aserción de la suma nos obliga a verificar el resultado antes de interpretarlo. Cambia N, no la aserción. Si aparece NameError, revisa el orden de ejecución. Primero impriman el tamaño de la tabla, luego una muestra y finalmente el resultado agrupado. Si ejecutamos directamente toda una cadena, es difícil localizar dónde ocurrió un error. Las variables intermedias sirven para investigar, no son código innecesario cuando estamos aprendiendo un procedimiento.",
+        "say": "Un DataFrame es una tabla con índice y columnas. iloc toma posiciones, copy permite trabajar con una copia, is_unique comprueba identidad y groupby crea grupos. size cuenta filas de cada grupo. La aserción de la suma nos obliga a verificar el resultado antes de interpretarlo. Cambia N, no la aserción. Si aparece NameError, revisa el orden de ejecución. Primero impriman el tamaño de la tabla, luego una muestra y finalmente el resultado agrupado. Si ejecutamos directamente toda una cadena, es difícil localizar dónde ocurrió un error. Las variables intermedias sirven para investigar, no son código innecesario cuando estamos aprendiendo un procedimiento. Recorramos la herramienta una instrucción a la vez. Primero construimos la tabla, después seleccionamos posiciones y luego agrupamos. El método size devuelve la cantidad de filas por clave. Ahora dupliquen un identificador y vean por qué is_unique falla. Después omitan un grupo: el total ya no coincide con N. La aserción es una barrera de calidad, no una instrucción que debamos quitar para que el código termine. La herramienta representa resultados; pandas se ejecuta realmente en el cuaderno.",
         "do": "Ejecuta s01-quality con el entorno ya preparado; muestra N=80 y 120. Pide identificar la salida de cada instrucción y contrastar 39 y 46 nombres de entidad."
       },
       "cell": "s01-quality"
@@ -785,13 +785,13 @@
     }
   ],
   [
-    4,
+    6,
     "11 · API",
     "Qué ocurre cuando llamamos una API",
     "Una API define una interfaz; HTTP transporta la solicitud. En Socrata, $select escoge columnas, $where filtra, $limit acota filas y $order fija un orden. HTTP 200 no prueba cobertura; es necesario validar grano e identidad.",
-    "Ejecuta A4 sin red: clasifica estados. La consulta viva es optativa y está limitada a cinco registros contractuales.",
+    "Cambia límite, offset y estado HTTP; identifica si debes confirmar, corregir o reintentar. Ejecuta A4 sin red.",
     "Conserva fecha, parámetros y conteo real. Si falla la red, registra el bloqueo y usa la instantánea de procesos para el resto.",
-    "code",
+    "api",
     "CONSULTA_VIVA = False  # activa solo si deseas contraste remoto\n# A4 clasifica estados antes de consultar.\n# La llamada optativa usa timeout=15 y $limit=5.\n# El snapshot de procesos sigue disponible sin red.",
     [
       "Una API es una interfaz de programación que establece cómo pedir datos o servicios. HTTP es el protocolo utilizado para transmitir la solicitud y recibir una respuesta. Un cliente envía una URL, parámetros y, cuando se requiere, credenciales; el servidor devuelve un estado, encabezados y contenido. Un estado 200 indica que la solicitud se atendió correctamente; un 429 suele indicar un límite de solicitudes y un 4xx o 5xx requiere diagnóstico. El método GET pide información. La API Socrata admite parámetros de consulta como select, where, limit y order, escritos en la URL con el prefijo de dólar. Una consulta debe acotar las columnas y filas para no transferir información innecesaria. El cuaderno usa el recurso SECOP Integrado de Datos Abiertos Colombia para registros contractuales. Es una fuente diferente de nuestro corpus de procesos; el identificador, la cobertura y el grano deben validarse antes de cualquier unión.",
@@ -830,7 +830,7 @@
     ],
     {
       "phase": "Modelo",
-      "facilitation": "Docente: dibuja cliente → petición → respuesta → validación. Estudiante: distingue HTTP 200 de contenido correcto.",
+      "facilitation": "Inspecciona petición y cuerpo simulados. Clasifica 200 válido, 200 inválido, 429 y 403. Contrasta A4.",
       "scope": "A4 clasificación básica, no activar consulta externa. La implementación HTTP vendrá tras paginación.",
       "liveCheck": false,
       "visual": [
@@ -843,7 +843,7 @@
       ],
       "script": {
         "title": "Descompón HTTP",
-        "say": "Una API es un contrato de comunicación. El cliente envía una petición con parámetros y el servidor devuelve estado y cuerpo. HTTP 200 significa éxito del transporte según el servidor, pero no prueba que el esquema, cobertura ni contenido sean correctos. Un 429 puede indicar límite de peticiones; un 403 obliga a revisar autorización. El laboratorio separa la clasificación de estados de una consulta viva. Una solicitud HTTP puede tener método, URL, parámetros y encabezados. En una consulta de lectura usamos GET, y esperamos un cuerpo que se pueda interpretar. Debemos distinguir una respuesta válida del transporte de una respuesta válida para nuestra aplicación: un JSON vacío o con campos incorrectos necesita tratamiento propio.",
+        "say": "Una API es un contrato de comunicación. El cliente envía una petición con parámetros y el servidor devuelve estado y cuerpo. HTTP 200 significa éxito del transporte según el servidor, pero no prueba que el esquema, cobertura ni contenido sean correctos. Un 429 puede indicar límite de peticiones; un 403 obliga a revisar autorización. El laboratorio separa la clasificación de estados de una consulta viva. Una solicitud HTTP puede tener método, URL, parámetros y encabezados. En una consulta de lectura usamos GET, y esperamos un cuerpo que se pueda interpretar. Debemos distinguir una respuesta válida del transporte de una respuesta válida para nuestra aplicación: un JSON vacío o con campos incorrectos necesita tratamiento propio. Observemos el método GET y los parámetros de la URL simulada. El límite acota el tamaño de la respuesta; el offset elige una posición. Un cuerpo de respuesta puede ser HTML en lugar de JSON aunque el estado sea 200. Un 429 exige revisar espera y presupuesto de reintentos. Un 403 no se soluciona repitiendo indefinidamente la petición. En el ejemplo no hacemos una llamada externa: separamos la lógica de la disponibilidad de la red.",
         "do": "Ejecuta la clasificación en A4. Explica por qué la consulta contractual opcional no se mezcla con el snapshot de procesos."
       },
       "cell": "s01-http"
@@ -914,7 +914,7 @@
     }
   ],
   [
-    5,
+    4,
     "12B · Control de cobertura",
     "¿Cómo detectamos una adquisición incompleta?",
     "La cantidad recibida puede ser correcta y aun así contener duplicados y omisiones. Compara IDs, no solamente filas.",
@@ -1047,7 +1047,7 @@
     }
   ],
   [
-    6,
+    5,
     "12D · Recuperación HTTP",
     "HTTP no es una validación de calidad",
     "Una respuesta exitosa puede ser incompleta. Un fallo transitorio exige reintentar el mismo offset; un error de acceso o de datos impide confirmar la página.",
@@ -1112,11 +1112,11 @@
     }
   ],
   [
-    5,
+    7,
     "13 · Fragmentar",
     "Leer por fragmentos y reducir resultados",
     "Si el archivo no cabe en memoria, podemos procesar lotes y conservar parciales. Para conteos basta sumar; para medias se combinan suma y cantidad. El promedio de promedios solo coincide si los tamaños son iguales, salvo coincidencias especiales.",
-    "Cambia el tamaño del bloque. Calcula conteos de entidad por fragmento y compara contra una pasada completa.",
+    "Avanza iteración por iteración, introduce un fallo y explica cómo recuperar la paridad.",
     "El motor local ejecuta ambas rutas y comprueba igualdad; no mide RAM de pandas.",
     "chunks",
     null,
@@ -1157,7 +1157,7 @@
     ],
     {
       "phase": "Práctica guiada",
-      "facilitation": "Docente: muestra parciales A=2,B=1 y B=1,C=3. Estudiante: combina por clave y cambia chunk.",
+      "facilitation": "Avanza iteraciones y muestra un fallo de acumulador; contrasta con s01-chunks.",
       "scope": "A6: ejecuta contar_bloques; verificar suma y paridad. No confundir número de bloques y workers.",
       "liveCheck": false,
       "visual": [
@@ -1169,14 +1169,14 @@
       ],
       "script": {
         "title": "Reduce por bloques",
-        "say": "Leer por bloques es mantener una porción activa y un estado acumulado. Para contar por entidad, el estado es un mapa de clave a cantidad. Al llegar un bloque, sumamos sus conteos a los anteriores. El tamaño del bloque cambia iteraciones y recursos, no el resultado si universo y operación permanecen iguales. No es lo mismo un bloque que un trabajador de cómputo. Un acumulador pequeño puede permitir procesar más filas que una lectura completa. Pero si tenemos millones de claves distintas, el diccionario también puede crecer. El tamaño de bloque no limita por sí solo toda la memoria. La operación y su estado determinan si la estrategia resulta útil.",
+        "say": "Leer por bloques es mantener una porción activa y un estado acumulado. Para contar por entidad, el estado es un mapa de clave a cantidad. Al llegar un bloque, sumamos sus conteos a los anteriores. El tamaño del bloque cambia iteraciones y recursos, no el resultado si universo y operación permanecen iguales. No es lo mismo un bloque que un trabajador de cómputo. Un acumulador pequeño puede permitir procesar más filas que una lectura completa. Pero si tenemos millones de claves distintas, el diccionario también puede crecer. El tamaño de bloque no limita por sí solo toda la memoria. La operación y su estado determinan si la estrategia resulta útil. Avancen hasta la segunda iteración y observen el conteo acumulado por entidad. Si reiniciamos el estado se pierde el resultado de los bloques anteriores; si duplicamos un bloque se infla el conteo; si omitimos el último aparece una diferencia de cobertura. La corrección consiste en respetar las ventanas y conservar el estado. El control independiente permite detectar los tres errores sin conocer previamente todos los conteos.",
         "do": "Ejecuta contar_bloques en A6; cambia tamaño y compara con conteo directo. Explica que la lista SECOP ya está en memoria; el CSV posterior sí se lee incrementalmente."
       },
       "cell": "s01-chunks"
     }
   ],
   [
-    4,
+    3,
     "14 · Experimento manual",
     "Por qué una media de medias puede ser incorrecta",
     "Lote A: 2 observaciones de valor 10. Lote B: 8 observaciones de valor 100. Media simple de medias: 55. Media ponderada: (20+800)/10=82. El denominador importa al combinar resultados.",
@@ -1239,7 +1239,7 @@
     }
   ],
   [
-    4,
+    3,
     "14B · Estado combinable",
     "Una reducción correcta conserva información suficiente",
     "Para calcular la media necesitamos suma y conteo de valores válidos. Los nulos no son ceros. Para un máximo basta un máximo parcial.",
@@ -1304,7 +1304,7 @@
     }
   ],
   [
-    9,
+    8,
     "15 · Capacidad real en Python",
     "Medir, no adivinar",
     "La escala cambia el costo, no el resultado lógico. Compara lectura completa y por bloques sobre un CSV sintético. Distingue tamaño lógico del DataFrame, tiempo y memoria residente del proceso.",
@@ -1368,7 +1368,7 @@
     }
   ],
   [
-    11,
+    8,
     "16 · Reutilizar el resultado",
     "RAW, derivados y trazabilidad",
     "RAW conserva el dato original recibido. Un derivado registra qué transformación lo generó. El manifiesto guarda fuente, cantidad, esquema y huella. Una huella de consistencia detecta cambios pero no certifica autoría.",
@@ -1433,7 +1433,7 @@
     }
   ],
   [
-    7,
+    5,
     "16B · Auditoría del producto",
     "Un hash no reemplaza el control de identidad",
     "El manifiesto fija fuente, grano, esquema y SHA-256. Se debe comprobar que los bytes y las identidades coincidan tras reabrirlos.",
@@ -1544,7 +1544,7 @@
     {
       "phase": "Autonomía",
       "facilitation": "Estudiante: elige N, límite y bloque; escribe hipótesis; completa acumulador A8.2 y compara cuatro casos A8.3; prepara evidencia A8.4.",
-      "scope": "25 minutos protegidos. El docente orienta sin completar TODO. El modo guiado no acredita autonomía.",
+      "scope": "25 minutos: 4 hipótesis, 8 construcción, 8 pruebas, 5 entrega. Cuatro casos aislados; los dos paquetes A8.1 son referencia guiada.",
       "liveCheck": false,
       "visual": [
         "challenge",
@@ -1556,14 +1556,14 @@
       ],
       "script": {
         "title": "Reto de construcción",
-        "say": "Elijan N, límite y bloque. Escriban cuatro predicciones antes de ejecutar. Completen el offset y el acumulador en A8.2; no modifiquen los validadores. Primero prueben con pocos datos. Activen el reto y comparen los cuatro casos de A8.3: base, solo límite, solo bloque y solo universo. Los primeros tres conservan RAW y conteos; el cuarto cambia la selección. Si falla, identifiquen la primera propiedad incumplida. Escriban la bitácora y exporten A8.4. No basta un ZIP técnicamente correcto: deben explicar el mecanismo. Para el primer intento utilicen una lista de cinco observaciones que puedan revisar a mano. Con límite dos deben obtener tres páginas, y con bloque tres deben obtener dos bloques. Después lleven el mismo razonamiento al universo elegido. Si la reducción pierde una clave, revisen cómo inicializan y actualizan el diccionario. Si el offset es incorrecto, impriman las primeras dos ventanas. Al corregir, mantengan las pruebas originales. Registren el intento fallido y expliquen qué aprendieron. El objetivo no es copiar una solución sino construir una función que siga funcionando con parámetros diferentes.",
+        "say": "Elijan N, límite y bloque. Escriban cuatro predicciones antes de ejecutar. Completen el offset y el acumulador en A8.2; no modifiquen los validadores. Primero prueben con pocos datos. Activen el reto y comparen los cuatro casos de A8.3: base, solo límite, solo bloque y solo universo. Los primeros tres conservan RAW y conteos; el cuarto cambia la selección. Si falla, identifiquen la primera propiedad incumplida. Escriban la bitácora y exporten A8.4. No basta un ZIP técnicamente correcto: deben explicar el mecanismo. Para el primer intento utilicen una lista de cinco observaciones que puedan revisar a mano. Con límite dos deben obtener tres páginas, y con bloque tres deben obtener dos bloques. Después lleven el mismo razonamiento al universo elegido. Si la reducción pierde una clave, revisen cómo inicializan y actualizan el diccionario. Si el offset es incorrecto, impriman las primeras dos ventanas. Al corregir, mantengan las pruebas originales. Registren el intento fallido y expliquen qué aprendieron. El objetivo no es copiar una solución sino construir una función que siga funcionando con parámetros diferentes. No confundan la pantalla con una ejecución de Python. La exportación contiene un plan con cuatro variantes que luego deben contrastar. La predicción puede resultar incorrecta sin que el algoritmo esté defectuoso. Registren la diferencia y expliquen por qué ocurrió. Antes de entregar, comprueben que sus dos funciones superan las pruebas y que la bitácora declara los límites del resultado.",
         "do": "Durante los 25 minutos, reserva 4 para hipótesis, 8 para completar código, 8 para pruebas y 5 para evidencia. Ofrece una pista cada vez. No entregar solución completa antes de observar el intento."
       },
       "cell": "s01-guide-a8-code → s01-construccion-codigo → s01-aislamiento-codigo → s01-evidencia-codigo"
     }
   ],
   [
-    4,
+    5,
     "18 · Interpretar y defender",
     "Qué sabemos y qué no sabemos",
     "Sabemos cuántos procesos hay en nuestra selección, cómo están representados, qué campos faltan y que el conteo fragmentado coincide. No sabemos el gasto, la representatividad, ni la causalidad. Un sistema grande requiere decisiones basadas en restricciones medidas.",
@@ -1648,7 +1648,7 @@
     }
   ],
   [
-    3,
+    5,
     "19 · Relevo",
     "Compras Claras v0.1 queda preparado",
     "El futuro diseño de arquitectura recibirá fuente, identidad, esquema, cobertura y restricciones. S01 termina cuando otra persona puede verificar el paquete, no al abrir otra sesión.",
@@ -1710,7 +1710,7 @@
       ],
       "script": {
         "title": "Cierra y enlaza",
-        "say": "Hoy construimos una fuente auditable, no un clúster. Para diseñar una arquitectura en la próxima sesión necesitaremos identidad, volumen, tasa, esquema, restricciones y requisitos de respuesta. Algunos son conocidos y otros deben medirse. Respondan el ticket de salida y adjunten el producto con sus hipótesis y resultados. El resultado de hoy nos proporciona un contrato de entrada para la siguiente etapa. La arquitectura no se decide por moda: depende del volumen observado, actualización esperada, operaciones, consistencia y restricciones. Aquello que no conocemos queda explícito como requisito por investigar.",
+        "say": "Hoy construimos una fuente auditable, no un clúster. Para diseñar una arquitectura en la próxima sesión necesitaremos identidad, volumen, tasa, esquema, restricciones y requisitos de respuesta. Algunos son conocidos y otros deben medirse. Respondan el ticket de salida y adjunten el producto con sus hipótesis y resultados. El resultado de hoy nos proporciona un contrato de entrada para la siguiente etapa. La arquitectura no se decide por moda: depende del volumen observado, actualización esperada, operaciones, consistencia y restricciones. Aquello que no conocemos queda explícito como requisito por investigar. Para cerrar, cada persona explica una decisión técnica y una prueba que la respalda. Si un paquete no pasó el control, se registra incompleto y se identifica la primera causa. El siguiente diseño recibirá únicamente hechos comprobados y requisitos pendientes. No usaremos el número de archivos como evidencia de que aprendimos a procesar datos.",
         "do": "Recoge cobertura, invariancia y límite. Registra pendientes; no certifiques aprendizaje por un botón correcto."
       },
       "cell": "s01-ticket-salida"
