@@ -51,7 +51,7 @@
     {
       "phase": "Diagnóstico",
       "facilitation": "Docente: presenta portada y producto, plantea la pregunta de Laura y recoge dos respuestas. Abre Colab en paralelo.",
-      "scope": "Ocho minutos incluyen portada, diagnóstico y preparación.",
+      "scope": "Siete minutos incluyen portada, diagnóstico y preparación.",
       "liveCheck": true,
       "visual": [
         "mission",
@@ -116,7 +116,7 @@
     {
       "phase": "Modelo",
       "facilitation": "Docente: fija llegada y capacidad, predice primero. Estudiante: calcula cola antes de mover el control. Evidencia: saldo y unidad.",
-      "scope": "La simulación de tasas variables A1.1 queda como ampliación; no leer el código completo en vivo.",
+      "scope": "Compara un pico o caída con el escenario constante; A1.1 en Python queda como ampliación.",
       "liveCheck": false,
       "visual": [
         "queue",
@@ -1172,7 +1172,7 @@
         "say": "Leer por bloques es mantener una porción activa y un estado acumulado. Para contar por entidad, el estado es un mapa de clave a cantidad. Al llegar un bloque, sumamos sus conteos a los anteriores. El tamaño del bloque cambia iteraciones y recursos, no el resultado si universo y operación permanecen iguales. No es lo mismo un bloque que un trabajador de cómputo. Un acumulador pequeño puede permitir procesar más filas que una lectura completa. Pero si tenemos millones de claves distintas, el diccionario también puede crecer. El tamaño de bloque no limita por sí solo toda la memoria. La operación y su estado determinan si la estrategia resulta útil. Avancen hasta la segunda iteración y observen el conteo acumulado por entidad. Si reiniciamos el estado se pierde el resultado de los bloques anteriores; si duplicamos un bloque se infla el conteo; si omitimos el último aparece una diferencia de cobertura. La corrección consiste en respetar las ventanas y conservar el estado. El control independiente permite detectar los tres errores sin conocer previamente todos los conteos.",
         "do": "Ejecuta contar_bloques en A6; cambia tamaño y compara con conteo directo. Explica que la lista SECOP ya está en memoria; el CSV posterior sí se lee incrementalmente."
       },
-      "cell": "s01-chunks"
+      "cell": "s01-chunks → s01-diagnostico-codigo"
     }
   ],
   [
@@ -1557,7 +1557,7 @@
       "script": {
         "title": "Reto de construcción",
         "say": "Elijan N, límite y bloque. Escriban cuatro predicciones antes de ejecutar. Completen el offset y el acumulador en A8.2; no modifiquen los validadores. Primero prueben con pocos datos. Activen el reto y comparen los cuatro casos de A8.3: base, solo límite, solo bloque y solo universo. Los primeros tres conservan RAW y conteos; el cuarto cambia la selección. Si falla, identifiquen la primera propiedad incumplida. Escriban la bitácora y exporten A8.4. No basta un ZIP técnicamente correcto: deben explicar el mecanismo. Para el primer intento utilicen una lista de cinco observaciones que puedan revisar a mano. Con límite dos deben obtener tres páginas, y con bloque tres deben obtener dos bloques. Después lleven el mismo razonamiento al universo elegido. Si la reducción pierde una clave, revisen cómo inicializan y actualizan el diccionario. Si el offset es incorrecto, impriman las primeras dos ventanas. Al corregir, mantengan las pruebas originales. Registren el intento fallido y expliquen qué aprendieron. El objetivo no es copiar una solución sino construir una función que siga funcionando con parámetros diferentes. No confundan la pantalla con una ejecución de Python. La exportación contiene un plan con cuatro variantes que luego deben contrastar. La predicción puede resultar incorrecta sin que el algoritmo esté defectuoso. Registren la diferencia y expliquen por qué ocurrió. Antes de entregar, comprueben que sus dos funciones superan las pruebas y que la bitácora declara los límites del resultado.",
-        "do": "Durante los 25 minutos, reserva 4 para hipótesis, 8 para completar código, 8 para pruebas y 5 para evidencia. Ofrece una pista cada vez. No entregar solución completa antes de observar el intento."
+        "do": "Reserva 4 min para hipótesis, 8 para construcción, 8 para pruebas y 5 para evidencia. A8.1 son dos casos de referencia; A8.3 son cuatro aislados. No entregar solución antes del intento."
       },
       "cell": "s01-guide-a8-code → s01-construccion-codigo → s01-aislamiento-codigo → s01-evidencia-codigo"
     }
@@ -1664,7 +1664,7 @@
     [
       "La sesión termina cuando el siguiente componente puede recuperar el resultado sin depender de instrucciones informales. El contrato de entrada de S02 incluye identificador, fuente, grano y selección de procesos. A partir de esos datos definiremos requisitos de almacenamiento, procesamiento y consulta. Por ejemplo, si Laura necesita actualizar expedientes una vez al día, puede considerar una adquisición por lotes; si requiere alertas con demoras muy pequeñas, deberá analizar una arquitectura diferente. Aún no seleccionamos MongoDB, Cassandra ni Spark automáticamente. Primero preguntaremos cómo se utilizará el dato y qué restricciones debe cumplir el sistema. El producto acumulativo conserva cada etapa y permite recalcularla; si la selección de S01 cambia, el diseño posterior debe revisarse porque cambia su entrada. La evidencia de Python acompaña el resultado portable, pero no sustituye una integración automática ni una prueba de servicios externos.",
       "Una persona abre el estado S01 y observa ochenta registros, todos con ID único. Puede recalcular los conteos desde la instantánea. Si modifica una entidad dentro del JSON sin pasar por una transformación válida, la comprobación detecta que el estado ya no coincide. Esta trazabilidad constituye una base para la arquitectura, no una garantía de que las decisiones de negocio posteriores sean correctas.",
-      "Abre los manifiestos de tus dos paquetes y comprueba qué propiedades permanecieron iguales y cuáles cambiaron. Conserva los resultados y explica por qué la lectura por bloques conserva un conteo, cuándo la nube podría ser útil y por qué no puedes calcular gasto contractual desde el corpus actual. El relevo se deja documentado; no se avanza a S02 mientras la sesión no pase la puerta de calidad.",
+      "Abre los manifiestos de tus cuatro paquetes de A8.3 y comprueba qué propiedades permanecieron iguales y cuáles cambiaron. Conserva los resultados y explica por qué la lectura por bloques conserva un conteo, cuándo la nube podría ser útil y por qué no puedes calcular gasto contractual desde el corpus actual. El relevo se deja documentado; no se avanza a S02 mientras la sesión no pase la puerta de calidad.",
       "El relevo de S01 no obliga a instalar un clúster. S02 necesita saber qué datos existen, cuántos, con qué esquema, frecuencia de actualización, identidad, operaciones previstas y restricciones. Un manifiesto con información incompleta debe declarar desconocidos en lugar de inventar requisitos. El producto de esta sesión es una extracción verificable y una capacidad demostrada de procesar por bloques. La arquitectura futura se diseña a partir de esas evidencias y de necesidades nuevas, no a partir de la popularidad de una tecnología."
     ],
     "A8",
@@ -1699,7 +1699,7 @@
     {
       "phase": "Cierre",
       "facilitation": "Docente: recoge las tres respuestas del ticket de salida, iniciadas durante la defensa, y la entrega.",
-      "scope": "Tres minutos de cierre más cuatro de defensa. No avanzar a S02.",
+      "scope": "Cinco minutos de cierre más cinco de defensa. No avanzar a S02.",
       "liveCheck": true,
       "visual": [
         "handoff",
