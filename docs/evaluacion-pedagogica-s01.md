@@ -147,3 +147,21 @@ Se amplía la portada con competencias, una ilustración SVG original y propósi
 | Viabilidad temporal | 5% | 3.2 |
 
 **4.29/5: NO APROBADA.** Se mantiene S02 bloqueada. Se conserva la rama alternativa y no se modifica el sitio oficial. Pendiente: ejecución exacta con núcleo y apéndice; validación del ZIP autónomo y del puente de plan; inspección real de las 27 pantallas; revisión editorial semántica; ensayo de 150 minutos y observación de autonomía.
+
+
+## Duodécima intervención: herramientas interpretables, diagnóstico y recuperación
+Se rediseñan cola (tasas constantes, pico, pausa, caída y saldo inicial), memoria (tipo, presupuesto y bloque), transformaciones (filtro, proyección, agrupación), pandas (cinco instrucciones, dos fallos), API (petición y cuerpo ficticios, estados), reducción (iteraciones y tres fallos). Las otras herramientas con controles añaden mensajes situados con interpretación, acción recomendada y prueba siguiente. Se incorporan seis predicciones con resultados inicialmente ocultos, opción de observar sin responder, comprobaciones con explicación, y texto de diagnóstico para diferenciar un escenario adverso de una hipótesis incorrecta. Se amplía la tokenización, se agrega conflicto de identidad simulado y se muestran tiempos de referencia solo para configuraciones previamente medidas. El cuaderno incorpora diagnóstico de tabla, respuesta HTTP y reducción; corrige referencias A8.1 (dos paquetes de referencia) vs A8.3 (cuatro casos aislados) y A8.4 (entrega). No se añade un recurso pedagógico. Itinerario: 150 min, 25 min autónomos, 3101 palabras orales, 3702 palabras de libreto. 
+
+QA del HTML guardado en DOM simulado: 26 pantallas, 21 herramientas con diagnóstico, 150 variaciones de control, 171 diagnósticos, 130 respuestas a hipótesis, 58 comprobaciones de ocultamiento y 6 rutas de observación sin respuesta, 75 comprobaciones formativas, 35 opciones de los cuestionarios conceptuales, 72 pruebas de conservación de cola y 17 casos dirigidos de fallo/recuperación. Cero errores en estas pruebas; HTML reconstruido exacto. No se ejecutó el cuaderno exacto ni se renderizaron todas las pantallas en navegador real. Los paneles adicionales pueden aumentar desplazamiento; falta inspección. No se añadieron fotos externas; siguen pendientes revisión editorial semántica, ensayo y autonomía observada. Conteo léxico depurado 43137, no equivale a certificación editorial. 
+
+| Dimensión | Peso | Nota |
+|---|---:|---:|
+| Profundidad conceptual | 20% | 4.5 |
+| Actividad y autonomía | 20% | 4.6 |
+| Práctica auténtica y reproducibilidad | 20% | 4 |
+| Alineación y transferencia | 15% | 4.5 |
+| Interpretación de resultados | 10% | 4.7 |
+| Diseño visual y accesibilidad | 10% | 4 |
+| Viabilidad temporal | 5% | 3.5 |
+
+**4.34/5 provisional, NO APROBADA.** Comparación con auditoría independiente 4,19; S02 continúa bloqueada. No fusionar ni tocar main.
